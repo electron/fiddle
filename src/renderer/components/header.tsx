@@ -1,12 +1,18 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
 
-import { Runner } from './runner';
 import { EditorTitle } from './editor-title';
+import { Commands } from './commands';
+import { AppState } from '../app';
 
-export class Header extends React.Component {
+export interface HeaderProps {
+  appState: AppState;
+}
+@observer
+export class Header extends React.Component<HeaderProps, {}> {
   public render() {
     return [
-      <Runner />,
+      <Commands  appState={this.props.appState} />,
       <EditorTitle />
     ];
   }

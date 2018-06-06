@@ -1,10 +1,28 @@
 import * as React from "react";
 import { render } from "react-dom";
 import * as loader from 'monaco-loader';
+import { observable } from 'mobx';
 
 import { mainTheme } from './themes';
 import { getContent } from './content';
 import { Header } from './components/header';
+import { BinaryManager } from './binary';
+import { ElectronVersion, StringMap } from '../interfaces';
+import { arrayToStringMap } from '../utils/array-to-stringmap';
+import { getKnownVersions } from './versions';
+import { normalizeVersion } from '../utils/normalize-version';
+
+const knownVersions = getKnownVersions();
+const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
+
+export class AppState {
+  @observable version: string = defaultVersion;
+  @observable binaryManager: BinaryManager = new BinaryManager(defaultVersion);
+  @observable versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable output: Array<string> = [];
+}
+
+const appState = new AppState();
 
 class App {
   public editors: any = {
@@ -29,7 +47,7 @@ class App {
     this.editors.main = this.createEditor('main');
     this.editors.renderer = this.createEditor('renderer');
 
-    render(<Header />, document.getElementById('header'));
+    render(<Header appState={appState} />, document.getElementById('header'));
   }
 
   createThemes() {

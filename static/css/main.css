@@ -1,6 +1,14 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(../fonts/roboto/Roboto-Regular.ttf) format('woff2');
+}
+
 :root {
   --electron-bright: #9feaf9;
   --electron-tuned: #6798a2;
+  --electron-background-2: #39424e;
   --electron-background: #2f3241;
   --electron-dark: #1e2527;
 }
@@ -20,21 +28,8 @@ header {
   min-height: 40px;
   border-bottom: 1px solid var(--electron-dark);
   margin-bottom: 10px;
+  background-color: var(--electron-background-2);
   -webkit-app-region: drag;
-}
-
-header button {
-  margin-left: 80px;
-  margin-top: 10px;
-  background-color: #9feaf9;
-  border: none;
-  color: #1e2527;
-  padding: 5px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  border-radius: 4px;
-  -webkit-app-region: no-drag;
 }
 
 #editors {
@@ -57,4 +52,44 @@ header button {
 
 #runner:not(:empty) {
   height: 200px;
+}
+
+.editorTitle span {
+  width: 33%;
+  display: inline-block;
+  text-align: center;
+  font-size: 12px;
+}
+
+.commands {
+  display: flex;
+  height: 40px;
+  padding-top: 12px;
+}
+
+.commands button {
+  margin-left: 80px;
+  background-color: #9feaf9;
+  border: none;
+  color: #1e2527;
+  padding: 0px 30px;
+  text-align: center;
+  text-decoration: none;
+  border-radius: 4px;
+  -webkit-app-region: no-drag;
+  height: 28px;
+  line-height: 4px;
+}
+
+.commands button:hover {
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.4);
+}
+
+.commands select {
+  width: 100px;
+  font-size: 12px;
+  height: 28px;
+  background-color: white;
+  margin-left: 5px;
+  line-height: 15px;
 }

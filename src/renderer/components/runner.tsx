@@ -1,32 +1,55 @@
 import * as React  from 'react';
-import { binary } from '../binary';
 import * as tmp from 'tmp';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { observer } from 'mobx-react';
 import { spawn, ChildProcess } from 'child_process';
+
+import { normalizeVersion } from '../../utils/normalize-version';
+import { AppState } from '../app';
 
 export interface RunnerState {
   isRunning: boolean
 }
 
-export class Runner extends React.Component<{}, RunnerState> {
+export interface RunnerProps {
+  appState: AppState;
+}
+
+@observer
+export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
 
   constructor(props) {
     super(props);
 
     this.run = this.run.bind(this);
+    this.stop = this.stop.bind(this);
     this.state = {
       isRunning: false
     };
   }
 
   public render() {
-    const btn = this.state.isRunning
-      ? <button id="run" onClick={() => this.stop()}>Stop</button>
-      : <button id="run" onClick={() => this.run()}>Run</button>
+    const { versions, version } = this.props.appState;
+    const { isRunning } = this.state;
+    if (!versions || !version) return null;
 
-    return btn;
+    const state = versions[normalizeVersion(version)].state;
+
+    let text = 'Run';
+    let action = this.run;
+
+    if (state === 'downloading') {
+      text = 'Downloading'
+    }
+
+    if (isRunning) {
+      text = 'Stop'
+      action = this.stop;
+    }
+
+    return <button className='button' id="run" onClick={() => action()}>{text}</button>;
   }
 
   public async stop() {
@@ -41,6 +64,7 @@ export class Runner extends React.Component<{}, RunnerState> {
   public async run() {
     const values = (window as any).electronFiddle.getValues();
     const tmpdir = (tmp as any).dirSync();
+    const { binaryManager, version } = this.props.appState;
 
     try {
       await fs.writeFile(path.join(tmpdir.name, 'index.html'), values.html);
@@ -51,11 +75,12 @@ export class Runner extends React.Component<{}, RunnerState> {
       console.error('Could not write files', error);
     }
 
-    if (binary.state !== 'ready') {
-      console.warn('Binary not ready');
+    if (!binaryManager.getIsDownloaded(version)) {
+      console.warn(`Binary ${version} not ready`);
+      return;
     }
 
-    const binaryPath = binary.getElectronBinary();
+    const binaryPath = this.props.appState.binaryManager.getElectronBinary(version);
     console.log(`Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ tmpdir.name ]);
