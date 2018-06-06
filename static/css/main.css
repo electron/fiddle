@@ -1,0 +1,60 @@
+:root {
+  --electron-bright: #9feaf9;
+  --electron-tuned: #6798a2;
+  --electron-background: #2f3241;
+  --electron-dark: #1e2527;
+}
+
+html, body {
+  padding: 0;
+  margin: 0;
+  background: var(--electron-background);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+}
+
+header {
+  min-height: 40px;
+  border-bottom: 1px solid var(--electron-dark);
+  margin-bottom: 10px;
+  -webkit-app-region: drag;
+}
+
+header button {
+  margin-left: 80px;
+  margin-top: 10px;
+  background-color: #9feaf9;
+  border: none;
+  color: #1e2527;
+  padding: 5px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  border-radius: 4px;
+  -webkit-app-region: no-drag;
+}
+
+#editors {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  align-content: stretch;
+  flex-grow: 1;
+}
+
+.editor {
+  flex-grow: 1;
+  width: 33%;
+}
+
+#runner {
+  height: 0;
+}
+
+#runner:not(:empty) {
+  height: 200px;
+}

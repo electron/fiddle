@@ -1,0 +1,49 @@
+{
+  "name": "electron-fiddle",
+  "productName": "electron-fiddle",
+  "version": "1.0.0",
+  "description": "My Electron application description",
+  "main": "./dist/main",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "npm run build && electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
+  },
+  "keywords": [],
+  "author": "felixr",
+  "license": "MIT",
+  "config": {
+    "forge": "./forge.config.js"
+  },
+  "dependencies": {
+    "electron-download": "^4.1.0",
+    "electron-squirrel-startup": "^1.0.0",
+    "extract-zip": "^1.6.7",
+    "fs-extra": "^6.0.1",
+    "loader-utils": "^1.1.0",
+    "milligram": "^1.3.0",
+    "monaco-loader": "^0.8.2",
+    "react": "^16.4.0",
+    "react-dom": "^16.4.0",
+    "tmp": "0.0.33"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^6.0.0-beta.17",
+    "@electron-forge/maker-deb": "^6.0.0-beta.17",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.17",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.17",
+    "@electron-forge/maker-zip": "^6.0.0-beta.17",
+    "@types/node": "^10.3.1",
+    "@types/react": "^16.3.16",
+    "@types/react-dom": "^16.0.6",
+    "@types/tmp": "0.0.33",
+    "css-loader": "^0.28.11",
+    "electron": "2.0.2",
+    "monaco-editor": "^0.13.1",
+    "style-loader": "^0.21.0",
+    "typescript": "^2.9.1"
+  }
+}
