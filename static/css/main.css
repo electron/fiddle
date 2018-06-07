@@ -119,6 +119,10 @@ header {
   box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.4);
 }
 
+.commands button:focus {
+  background-color: #9feaf9;
+}
+
 .commands > div:first-of-type > button {
   margin-left: 80px;
 }
