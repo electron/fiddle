@@ -21,7 +21,7 @@ export class Output extends React.Component<CommandsProps, {}> {
 
 
     return lines.map((text) => (
-      <p>{timestamp}{text}</p>
+      <p key={ts}>{timestamp}{text}</p>
     ));
   }
 
