@@ -18,13 +18,16 @@ const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
 
 export class AppState {
   @observable public version: string = defaultVersion;
+  @observable public githubToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
+  @observable public isTokenDialogShowing: boolean = false;
 }
 
 const appState = new AppState();
+appState.githubToken = localStorage.getItem('githubToken');
 
 class App {
   public editors: any = {

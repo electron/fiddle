@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import * as Icon from '@fortawesome/react-fontawesome';
-import { faTerminal } from '@fortawesome/fontawesome-free-solid';
+import { faTerminal, faUser } from '@fortawesome/fontawesome-free-solid';
 
 import { Runner } from './runner';
 import { VersionChooser } from './version-chooser';
@@ -17,13 +17,24 @@ export class Commands extends React.Component<CommandsProps, {}> {
     super(props);
 
     this.toggleConsole = this.toggleConsole.bind(this);
+    this.showAuthDialog = this.showAuthDialog.bind(this);
   }
 
   public toggleConsole() {
     this.props.appState.isConsoleShowing = !this.props.appState.isConsoleShowing;
   }
 
+  public showAuthDialog() {
+    this.props.appState.isTokenDialogShowing = true;
+  }
+
   public render() {
+    const authButton = !this.props.appState.githubToken ? (
+      <button className='button' onClick={this.showAuthDialog}>
+        <Icon icon={faUser} />
+      </button>
+    ) : null;
+
     return (
       <div className='commands'>
         <div>
@@ -34,6 +45,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
           <button className='button' onClick={this.toggleConsole}>
             <Icon icon={faTerminal} />
           </button>
+          {authButton}
         </div>
       </div>
     );
