@@ -1,3 +1,5 @@
+/* tslint:disable */
+
 module.exports = {
   packagerConfig: {},
   makers: [
@@ -20,7 +22,7 @@ module.exports = {
       name: "@electron-forge/maker-rpm",
       platforms: ["linux"]
     }
-  ]
+  ],
   publishers: [
     {
       name: '@electron-forge/publisher-github',
@@ -33,4 +35,4 @@ module.exports = {
       }
     }
   ]
-}
+};
