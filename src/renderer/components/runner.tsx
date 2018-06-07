@@ -66,9 +66,12 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
   }
 
   public pushData(data: string | Buffer) {
+    const strData = data.toString();
+    if (strData.startsWith('Debugger listening on ws://')) return;
+
     this.props.appState.output.push({
       timestamp: Date.now(),
-      text: data.toString()
+      text: strData
     });
   }
 
@@ -111,7 +114,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const binaryPath = this.props.appState.binaryManager.getElectronBinary(version);
     console.log(`Binary ${binaryPath} ready, launching`);
 
-    this.child = spawn(binaryPath, [ tmpdir.name ]);
+    this.child = spawn(binaryPath, [ tmpdir.name, '--inspect' ]);
     this.setState({ isRunning: true });
     this.pushData('Electron started.');
     this.child.stdout.on('data', this.pushData);
