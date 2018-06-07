@@ -22,4 +22,16 @@ module.exports = {
       config: {}
     }
   ]
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      config: {
+        repository: {
+          owner: 'electron',
+          name: 'fiddle'
+        },
+        prerelease: true
+      }
+    }
+  ]
 }
