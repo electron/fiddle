@@ -7,6 +7,7 @@ import { spawn, ChildProcess } from 'child_process';
 
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../app';
+import { findModules, installModules } from '../npm';
 
 export interface RunnerState {
   isRunning: boolean;
@@ -71,16 +72,33 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     });
   }
 
+  public async installModules(values: any, dir: string) {
+    const files = [ values.main, values.renderer ];
+    const modules: Array<string> = [];
+
+    files.forEach((file) => {
+      modules.push(...findModules(file));
+    });
+
+    if (modules.length === 0) return;
+
+    this.pushData(`Installing npm modules: ${modules.join(', ')}...`);
+    this.pushData(await installModules({ dir }, ...modules));
+  }
+
   public async run() {
     const values = (window as any).electronFiddle.getValues();
     const tmpdir = (tmp as any).dirSync();
     const { binaryManager, version } = this.props.appState;
+
+    this.props.appState.isConsoleShowing = true;
 
     try {
       await fs.writeFile(path.join(tmpdir.name, 'index.html'), values.html);
       await fs.writeFile(path.join(tmpdir.name, 'main.js'), values.main);
       await fs.writeFile(path.join(tmpdir.name, 'renderer.js'), values.renderer);
       await fs.writeFile(path.join(tmpdir.name, 'package.json'), values.package);
+      await this.installModules(values, tmpdir.name);
     } catch (error) {
       console.error('Could not write files', error);
     }
@@ -95,13 +113,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     this.child = spawn(binaryPath, [ tmpdir.name ]);
     this.setState({ isRunning: true });
-    this.props.appState.isConsoleShowing = true;
     this.pushData('Electron started.');
     this.child.stdout.on('data', this.pushData);
     this.child.stderr.on('data', this.pushData);
     this.child.on('close', (code) => {
       this.pushData(`Electron exited with code ${code.toString()}.`);
       this.setState({ isRunning: false });
+      tmpdir.removeCallback();
     });
   }
 }
