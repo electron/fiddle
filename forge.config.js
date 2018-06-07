@@ -3,23 +3,22 @@ module.exports = {
   makers: [
     {
       name: "@electron-forge/maker-squirrel",
+      platforms: ["win32"],
       config: {
         name: "electron_fiddle"
       }
     },
     {
       name: "@electron-forge/maker-zip",
-      platforms: [
-        "darwin"
-      ]
+      platforms: ["darwin"]
     },
     {
       name: "@electron-forge/maker-deb",
-      config: {}
+      platforms: ["linux"]
     },
     {
       name: "@electron-forge/maker-rpm",
-      config: {}
+      platforms: ["linux"]
     }
   ]
 }
