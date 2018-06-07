@@ -4,7 +4,10 @@ module.exports = {
   hooks: {
     generateAssets: require('./tools/tsc')
   },
-  packagerConfig: {},
+  packagerConfig: {
+    name: 'Electron Fiddle',
+    executableName: 'electron-fiddle'
+  },
   makers: [
     {
       name: "@electron-forge/maker-squirrel",

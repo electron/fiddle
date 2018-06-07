@@ -45,10 +45,11 @@ class App {
     this.setup();
   }
 
-  private async setup() {
+  public async setup() {
     this.monaco = await loader();
 
     this.createThemes();
+    this.setupDrag();
     this.editors.html = this.createEditor('html');
     this.editors.main = this.createEditor('main');
     this.editors.renderer = this.createEditor('renderer');
@@ -56,13 +57,52 @@ class App {
     render(<Header appState={appState} />, document.getElementById('header'));
   }
 
-  private createThemes() {
+  public setupDrag() {
+    const resizers = Array.from(document.getElementsByClassName('resize'));
+    const elements = [
+      document.getElementById(`editor-main`),
+      document.getElementById(`editor-renderer`),
+      document.getElementById(`editor-html`),
+    ];
+
+    resizers.forEach((resizer, i) => {
+      resizer.addEventListener('mousedown', (event: MouseEvent) => {
+        const increaseElement = elements[i]!;
+        const decreaseElement = elements[i + 1]!;
+        const computedStyleIncrease = document.defaultView.getComputedStyle(increaseElement);
+        const computedStyleDecrease = document.defaultView.getComputedStyle(increaseElement);
+
+        const startX = event.clientX;
+        const startWidthIncrease = parseInt(computedStyleIncrease.width!, 10);
+        const startWidthDecrease = parseInt(computedStyleDecrease.width!, 10);
+
+        function doDrag(e: MouseEvent) {
+          e.preventDefault();
+
+          const deltaWidth = e.clientX - startX;
+          increaseElement.style.width = (startWidthIncrease + deltaWidth) + 'px';
+          decreaseElement.style.width = (startWidthDecrease + -1 * deltaWidth) + 'px';
+        }
+
+        function stopDrag(e: MouseEvent) {
+          e.preventDefault();
+          document.onmousemove = null;
+          document.onmouseup = null;
+        }
+
+        document.onmousemove = doDrag;
+        document.onmouseup = stopDrag;
+      });
+    });
+  }
+
+  public createThemes() {
     if (!this.monaco) return;
 
     this.monaco.editor.defineTheme('main', mainTheme as any);
   }
 
-  private createEditor(id: string) {
+  public createEditor(id: string) {
     if (!this.monaco) throw new Error('Monaco not ready');
 
     const element = document.getElementById(`editor-${id}`);
@@ -82,7 +122,7 @@ class App {
     return this.monaco.editor.create(element!, options);
   }
 
-  private getValues() {
+  public getValues() {
     if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
       throw new Error('Editors not ready');
     }
