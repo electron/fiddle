@@ -17,6 +17,7 @@ const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
 
 export class AppState {
   @observable public version: string = defaultVersion;
+  @observable public accessToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];

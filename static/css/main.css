@@ -123,6 +123,10 @@ header {
   margin-left: 80px;
 }
 
+.commands > div:last-of-type > button {
+  margin-left: 5px;
+}
+
 .commands > div:last-of-type {
   margin-right: 10px;
 }
