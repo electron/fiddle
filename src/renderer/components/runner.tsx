@@ -24,10 +24,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     super(props);
 
     this.run = this.run.bind(this);
+    this.pushData = this.pushData.bind(this);
     this.stop = this.stop.bind(this);
     this.state = {
       isRunning: false
     };
+
+    this.pushData('Console ready 🔬');
   }
 
   public render() {
@@ -61,6 +64,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
   }
 
+  public pushData(data: string | Buffer) {
+    this.props.appState.output.push({
+      timestamp: Date.now(),
+      text: data.toString()
+    });
+  }
+
   public async run() {
     const values = (window as any).electronFiddle.getValues();
     const tmpdir = (tmp as any).dirSync();
@@ -85,17 +95,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     this.child = spawn(binaryPath, [ tmpdir.name ]);
     this.setState({ isRunning: true });
-
-    this.child.stdout.on('data', (data) => {
-      console.log(`stdout: ${data}`);
-    });
-
-    this.child.stderr.on('data', (data) => {
-      console.log(`stderr: ${data}`);
-    });
-
+    this.props.appState.isConsoleShowing = true;
+    this.pushData('Electron started.');
+    this.child.stdout.on('data', this.pushData);
+    this.child.stderr.on('data', this.pushData);
     this.child.on('close', (code) => {
-      console.log(code);
+      this.pushData(`Electron exited with code ${code.toString()}.`);
+      this.setState({ isRunning: false });
     });
   }
 }

@@ -54,6 +54,40 @@ header {
   height: 200px;
 }
 
+.output {
+  font-size: 12px;
+  font-family: -apple-system,BlinkMacSystemFont,Segoe WPC,Segoe UI,HelveticaNeue-Light,Ubuntu,Droid Sans,sans-serif;
+  font-weight: 600;
+  color: #f3f3f3;
+  background: rgba(0,0,0, .4);
+  top: 10vh;
+  padding: 0;
+  padding-left: 10px;
+  margin-top: 0;
+  height: 0;
+  overflow: scroll;
+  transition: height .2s;
+  transition: padding .2s;
+  -webkit-app-region: no-drag;
+}
+
+.output.showing {
+  margin-top: 10px;
+  padding-top: 10px;
+  height: 200px;
+}
+
+.output p {
+  margin-bottom: 0;
+  white-space: pre;
+}
+
+.output .timestamp {
+  margin-right: 5px;
+  color: rgba(255, 255, 255, 0.5);
+  user-select: none;
+}
+
 .editorTitle span {
   width: 33%;
   display: inline-block;
@@ -63,12 +97,12 @@ header {
 
 .commands {
   display: flex;
+  justify-content: space-between;
   height: 40px;
   padding-top: 12px;
 }
 
 .commands button {
-  margin-left: 80px;
   background-color: #9feaf9;
   border: none;
   color: #1e2527;
@@ -83,6 +117,14 @@ header {
 
 .commands button:hover {
   box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.4);
+}
+
+.commands > div:first-of-type > button {
+  margin-left: 80px;
+}
+
+.commands > div:last-of-type {
+  margin-right: 10px;
 }
 
 .commands select {

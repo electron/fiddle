@@ -19,6 +19,9 @@
     "forge": "./forge.config.js"
   },
   "dependencies": {
+    "@fortawesome/fontawesome": "^1.1.8",
+    "@fortawesome/fontawesome-free-solid": "^5.0.13",
+    "@fortawesome/react-fontawesome": "0.0.20",
     "electron-download": "^4.1.0",
     "electron-squirrel-startup": "^1.0.0",
     "extract-zip": "^1.6.7",

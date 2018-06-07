@@ -20,3 +20,8 @@ export interface GitHubVersion {
 export interface ElectronVersion extends GitHubVersion {
   state: ElectronVersionState
 }
+
+export interface OutputEntry {
+  text: string;
+  timestamp: number;
+}

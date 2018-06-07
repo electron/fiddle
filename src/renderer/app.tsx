@@ -7,7 +7,7 @@ import { mainTheme } from './themes';
 import { getContent } from './content';
 import { Header } from './components/header';
 import { BinaryManager } from './binary';
-import { ElectronVersion, StringMap } from '../interfaces';
+import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -19,7 +19,8 @@ export class AppState {
   @observable version: string = defaultVersion;
   @observable binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
-  @observable output: Array<string> = [];
+  @observable output: Array<OutputEntry> = [];
+  @observable isConsoleShowing: boolean = false;
 }
 
 const appState = new AppState();
