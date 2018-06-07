@@ -22,6 +22,7 @@
     "@fortawesome/fontawesome": "^1.1.8",
     "@fortawesome/fontawesome-free-solid": "^5.0.13",
     "@fortawesome/react-fontawesome": "0.0.20",
+    "@octokit/rest": "^15.8.1",
     "builtin-modules": "^3.0.0",
     "electron-default-menu": "^1.0.1",
     "electron-download": "^4.1.0",
