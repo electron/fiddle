@@ -1,0 +1,78 @@
+{
+  "extends": ["tslint:latest", "tslint-react", "tslint:recommended"],
+  "rules": {
+    "curly": false,
+    "eofline": false,
+    "align": [true, "parameters"],
+    "array-type": [true, "generic"],
+    "arrow-parens": true,
+    "class-name": true,
+    "comment-format": [false],
+    "indent": [true, "spaces"],
+    "max-line-length": [true, 150],
+    "no-angle-bracket-type-assertion": true,
+    "no-consecutive-blank-lines": [true, 2],
+    "no-trailing-whitespace": true,
+    "no-default-export": true,
+    "no-duplicate-variable": true,
+    "no-bitwise": false,
+    "no-var-keyword": true,
+    "no-var-requires": false,
+    "no-empty": true,
+    "no-console": false,
+    "no-empty-interface": false,
+    "no-unused-expression": false,
+    "no-reference": true,
+    "no-use-before-declare": true,
+    "no-implicit-dependencies": false,
+    "interface-name": [
+      false
+    ],
+    "jsx-no-lambda": false,
+    "object-literal-sort-keys": false,
+    "object-literal-key-quotes": [true, "as-needed"],
+    "only-arrow-functions": [false],
+    "ordered-imports": [false],
+    "one-variable-per-declaration": [false],
+    "one-line": [false,
+      "check-else",
+      "check-whitespace",
+      "check-open-brace"
+    ],
+    "prefer-const": true,
+    "quotemark": [true,
+      "single",
+      "avoid-escape"
+    ],
+    "max-classes-per-file": [false],
+    "semicolon": [true, "always"],
+    "switch-default": false,
+    "trailing-comma": [false],
+    "typedef": [
+      true,
+      "parameter",
+      "property-declaration"
+    ],
+    "typedef-whitespace": [true, {
+      "call-signature": "nospace",
+      "index-signature": "nospace",
+      "parameter": "nospace",
+      "property-declaration": "nospace",
+      "variable-declaration": "nospace"
+    }],
+    "variable-name": [true,
+      "allow-leading-underscore",
+      "ban-keywords"
+    ],
+    "whitespace": [true,
+      "check-branch",
+      "check-decl",
+      "check-operator",
+      "check-separator",
+      "check-type"
+    ]
+  },
+  "rulesDirectory": [
+     "node_modules/tslint-microsoft-contrib"
+  ]
+}

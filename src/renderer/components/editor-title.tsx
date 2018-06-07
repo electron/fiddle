@@ -8,6 +8,6 @@ export class EditorTitle extends React.Component {
         <span>Renderer Process</span>
         <span>HTML</span>
       </div>
-    )
+    );
   }
 }

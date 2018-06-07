@@ -95,7 +95,7 @@ export class BinaryManager extends EventEmitter {
     return path.join(userData, 'electron-bin', version);
   }
 
-  private unzip(zipPath, extractPath) {
+  private unzip(zipPath: string, extractPath: string) {
     return new Promise((resolve, reject) => {
       process.noAsar = true;
 

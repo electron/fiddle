@@ -6,4 +6,4 @@ export const mainTheme = {
     //'editor.foreground': '#9feaf9',
     'editor.background': '#2f3241'
   }
-}
+};

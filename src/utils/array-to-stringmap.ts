@@ -1,5 +1,5 @@
-import { normalizeVersion } from "./normalize-version";
-import { GitHubVersion, StringMap, ElectronVersion } from "../interfaces";
+import { normalizeVersion } from './normalize-version';
+import { GitHubVersion, StringMap, ElectronVersion } from '../interfaces';
 
 export function arrayToStringMap(input: Array<GitHubVersion>): StringMap<ElectronVersion> {
   const output = {};

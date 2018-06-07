@@ -10,13 +10,13 @@ export interface CommandsProps {
 
 @observer
 export class Output extends React.Component<CommandsProps, {}> {
-  constructor(props) {
+  constructor(props: CommandsProps) {
     super(props);
   }
 
   public renderEntry(entry: OutputEntry) {
     const ts = new Date(entry.timestamp).toLocaleTimeString();
-    const timestamp = <span className='timestamp'>{ts}</span>
+    const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 
 
@@ -35,6 +35,6 @@ export class Output extends React.Component<CommandsProps, {}> {
       <div className={className}>
         {lines}
       </div>
-    )
+    );
   }
 }

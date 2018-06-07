@@ -1,4 +1,4 @@
-import { GitHubVersion } from "../interfaces";
+import { GitHubVersion } from '../interfaces';
 
 export function getKnownVersions(): Array<GitHubVersion> {
   const fromLs = window.localStorage.getItem('known-electron-versions');
@@ -25,7 +25,7 @@ export function fetchVersions(): Promise<Array<GitHubVersion>> {
     .then((data: Array<GitHubVersion>) => {
       let cleaned: Array<GitHubVersion> = [];
 
-      if (data && data.length > 0 && data[0]['tag_name']) {
+      if (data && data.length > 0 && data[0].tag_name) {
         cleaned = data.map((release) => {
           const updated = {
             url: release.url,
@@ -38,7 +38,7 @@ export function fetchVersions(): Promise<Array<GitHubVersion>> {
             created_at: release.created_at,
             published_at: release.published_at,
             body: release.body
-          }
+          };
 
           return updated as GitHubVersion;
         });

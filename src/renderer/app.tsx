@@ -1,5 +1,5 @@
-import * as React from "react";
-import { render } from "react-dom";
+import * as React from 'react';
+import { render } from 'react-dom';
 import * as loader from 'monaco-loader';
 import { observable } from 'mobx';
 
@@ -16,11 +16,11 @@ const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
 
 export class AppState {
-  @observable version: string = defaultVersion;
-  @observable binaryManager: BinaryManager = new BinaryManager(defaultVersion);
-  @observable versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
-  @observable output: Array<OutputEntry> = [];
-  @observable isConsoleShowing: boolean = false;
+  @observable public version: string = defaultVersion;
+  @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
+  @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public output: Array<OutputEntry> = [];
+  @observable public isConsoleShowing: boolean = false;
 }
 
 const appState = new AppState();
@@ -40,7 +40,7 @@ class App {
     this.setup();
   }
 
-  async setup() {
+  private async setup() {
     this.monaco = await loader();
 
     this.createThemes();
@@ -51,11 +51,11 @@ class App {
     render(<Header appState={appState} />, document.getElementById('header'));
   }
 
-  createThemes() {
+  private createThemes() {
     this.monaco.editor.defineTheme('main', mainTheme);
   }
 
-  createEditor(id) {
+  private createEditor(id: string) {
     if (!this.monaco) throw new Error('Monaco not ready');
 
     const element = document.getElementById(`editor-${id}`);
@@ -75,7 +75,7 @@ class App {
     return this.monaco.editor.create(element, options);
   }
 
-  getValues() {
+  private getValues() {
     if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
       throw new Error('Editors not ready');
     }
@@ -89,7 +89,7 @@ class App {
         main: './main.js',
         version: '1.0.0'
       })
-    }
+    };
   }
 }
 

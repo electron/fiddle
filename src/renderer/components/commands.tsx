@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import * as Icon from '@fortawesome/react-fontawesome'
-import { faTerminal } from '@fortawesome/fontawesome-free-solid'
+import * as Icon from '@fortawesome/react-fontawesome';
+import { faTerminal } from '@fortawesome/fontawesome-free-solid';
 
 import { Runner } from './runner';
 import { VersionChooser } from './version-chooser';
@@ -13,7 +13,7 @@ export interface CommandsProps {
 
 @observer
 export class Commands extends React.Component<CommandsProps, {}> {
-  constructor(props) {
+  constructor(props: CommandsProps) {
     super(props);
 
     this.toggleConsole = this.toggleConsole.bind(this);
@@ -36,6 +36,6 @@ export class Commands extends React.Component<CommandsProps, {}> {
           </button>
         </div>
       </div>
-    )
+    );
   }
 }

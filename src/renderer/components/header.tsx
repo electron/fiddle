@@ -13,9 +13,9 @@ export interface HeaderProps {
 export class Header extends React.Component<HeaderProps, {}> {
   public render() {
     return [
-      <Commands  appState={this.props.appState} />,
-      <Output appState={this.props.appState} />,
-      <EditorTitle />
+      <Commands key='commands' appState={this.props.appState} />,
+      <Output key='output' appState={this.props.appState} />,
+      <EditorTitle key='titles' />
     ];
   }
 }

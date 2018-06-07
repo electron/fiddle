@@ -18,7 +18,7 @@ export interface GitHubVersion {
 }
 
 export interface ElectronVersion extends GitHubVersion {
-  state: ElectronVersionState
+  state: ElectronVersionState;
 }
 
 export interface OutputEntry {

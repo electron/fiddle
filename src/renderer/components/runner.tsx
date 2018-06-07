@@ -1,4 +1,4 @@
-import * as React  from 'react';
+import * as React from 'react';
 import * as tmp from 'tmp';
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -9,7 +9,7 @@ import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../app';
 
 export interface RunnerState {
-  isRunning: boolean
+  isRunning: boolean;
 }
 
 export interface RunnerProps {
@@ -20,7 +20,7 @@ export interface RunnerProps {
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
 
-  constructor(props) {
+  constructor(props: RunnerProps) {
     super(props);
 
     this.run = this.run.bind(this);
@@ -44,15 +44,15 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     let action = this.run;
 
     if (state === 'downloading') {
-      text = 'Downloading'
+      text = 'Downloading';
     }
 
     if (isRunning) {
-      text = 'Stop'
+      text = 'Stop';
       action = this.stop;
     }
 
-    return <button className='button' id="run" onClick={() => action()}>{text}</button>;
+    return <button className='button' onClick={() => action()}>{text}</button>;
   }
 
   public async stop() {

@@ -15,8 +15,7 @@ export interface VersionChooserProps {
 
 @observer
 export class VersionChooser extends React.Component<VersionChooserProps, VersionChooserState> {
-
-  constructor(props) {
+  constructor(props: VersionChooserProps) {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
@@ -38,7 +37,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
     this.props.appState.versions = updatedVersions;
   }
 
-  public handleChange(event) {
+  public handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const version = normalizeVersion(event.target.value);
     console.log(`Version Chooser: Switching to v${version}`);
 
@@ -72,7 +71,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
           <option value={version} key={version}>
             {icon} {version}
           </option>
-        )
+        );
       });
   }
 
@@ -81,6 +80,6 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
       <select value={`v${this.props.appState.version}`} onChange={this.handleChange}>
         {this.renderOptions()}
       </select>
-    )
+    );
   }
 }

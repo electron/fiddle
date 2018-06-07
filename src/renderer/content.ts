@@ -3,7 +3,7 @@ import * as path from 'path';
 
 const simpleCache = {};
 
-export function getContent(name) {
+export function getContent(name: string) {
   if (simpleCache[name]) return simpleCache[name];
 
   const filePath = path.join(__dirname, '../../static/content', name);
