@@ -3,6 +3,7 @@
   "productName": "electron-fiddle",
   "version": "1.0.0",
   "description": "My Electron application description",
+  "repository": "https://github.com/electron/fiddle",
   "main": "./dist/main",
   "scripts": {
     "build": "tsc -p tsconfig.json",
@@ -36,7 +37,8 @@
     "react-dom": "^16.4.0",
     "semver": "^5.5.0",
     "tmp": "0.0.33",
-    "tslib": "^1.9.2"
+    "tslib": "^1.9.2",
+    "update-electron-app": "^1.2.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "^6.0.0-beta.17",
