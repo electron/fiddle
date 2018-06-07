@@ -43,7 +43,17 @@ header {
 
 .editor {
   flex-grow: 1;
-  width: 33%;
+  width: 30%;
+}
+
+.resize {
+  width: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  margin-left: 9px;
+  margin-right: 0;
+  cursor: col-resize;
+  flex-grow: 0;
+  flex-shrink: 0;
 }
 
 #runner {
@@ -121,6 +131,7 @@ header {
 
 .commands button:focus {
   background-color: #9feaf9;
+  color: initial;
 }
 
 .commands > div:first-of-type > button {
