@@ -17,20 +17,20 @@ export class Commands extends React.Component<CommandsProps, {}> {
     super(props);
 
     this.toggleConsole = this.toggleConsole.bind(this);
-    this.showTokenDialog = this.showTokenDialog.bind(this);
+    this.showAuthDialog = this.showAuthDialog.bind(this);
   }
 
   public toggleConsole() {
     this.props.appState.isConsoleShowing = !this.props.appState.isConsoleShowing;
   }
 
-  public showTokenDialog() {
-    this.props.appState.accessToken = 'fake-access-token';
+  public showAuthDialog() {
+    this.props.appState.isTokenDialogShowing = true;
   }
 
   public render() {
-    const authButton = !this.props.appState.accessToken ? (
-      <button className='button' onClick={this.showTokenDialog}>
+    const authButton = !this.props.appState.githubToken ? (
+      <button className='button' onClick={this.showAuthDialog}>
         <Icon icon={faUser} />
       </button>
     ) : null;
