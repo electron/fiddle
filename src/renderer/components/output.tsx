@@ -19,7 +19,6 @@ export class Output extends React.Component<CommandsProps, {}> {
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 
-
     return lines.map((text) => (
       <p>{timestamp}{text}</p>
     ));
