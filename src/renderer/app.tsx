@@ -2,6 +2,7 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import * as loader from 'monaco-loader';
 import { observable } from 'mobx';
+import * as MonacoType from 'monaco-editor';
 
 import { mainTheme } from './themes';
 import { getContent } from './content';
@@ -31,8 +32,9 @@ class App {
     renderer: null,
     html: null
   };
-  public monaco: any = null;
+  public monaco: typeof MonacoType | null = null;
   public name = 'test';
+  public typeDefDisposable = null;
 
   constructor() {
     this.getValues = this.getValues.bind(this);
@@ -52,7 +54,9 @@ class App {
   }
 
   private createThemes() {
-    this.monaco.editor.defineTheme('main', mainTheme);
+    if (!this.monaco) return;
+
+    this.monaco.editor.defineTheme('main', mainTheme as any);
   }
 
   private createEditor(id: string) {
@@ -72,7 +76,7 @@ class App {
       value
     };
 
-    return this.monaco.editor.create(element, options);
+    return this.monaco.editor.create(element!, options);
   }
 
   private getValues() {
@@ -93,4 +97,5 @@ class App {
   }
 }
 
-(window as any).electronFiddle = new App();
+// tslint:disable-next-line:no-string-literal
+window['electronFiddle'] = new App();

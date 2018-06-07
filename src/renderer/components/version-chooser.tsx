@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../app';
+import { updateEditorTypeDefinitions } from '../fetch-types';
 
 export interface VersionChooserState {
   value: string;
@@ -19,7 +20,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
-    this.updateDownloadedVersionState();
+    this.handleVersionChange(this.props.appState.version);
   }
 
   public async updateDownloadedVersionState() {
@@ -39,9 +40,16 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
 
   public handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     const version = normalizeVersion(event.target.value);
+    this.handleVersionChange(version);
+  }
+
+  public handleVersionChange(version: string) {
     console.log(`Version Chooser: Switching to v${version}`);
 
     this.props.appState.version = version;
+
+    // Update TypeScript definitions
+    updateEditorTypeDefinitions(version);
 
     // Fetch new binaries, maybe?
     if ((this.props.appState.versions[version] || { state: '' }).state === 'ready') return;
