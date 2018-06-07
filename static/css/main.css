@@ -139,3 +139,38 @@ header {
   margin-left: 5px;
   line-height: 15px;
 }
+
+.tokenDialog {
+  position: absolute;
+  top: 100px;
+  width: 300px;
+  height: 170px;
+  left: calc(50% - (300px / 2));
+  padding: 10px 20px;
+  z-index: 1000;
+  background-color: var(--electron-background-2);
+  border: 1px solid var(--electron-dark);
+  color: #f3f3f3;
+}
+
+.generateTokenText svg {
+  margin-right: 4px;
+}
+
+.tokenDialog button {
+  color: #1e2527;
+}
+
+.tokenDialog a {
+  cursor: pointer;
+}
+
+.tokenDialog input {
+  width: 250px;
+  color: rgba(159, 234, 249, 0.5);
+  height: 28px;
+  margin-top: 10px;
+  background-color: var(--electron-background);
+  border: 1px solid var(--electron-dark);
+  outline: 0 solid transparent;
+}
