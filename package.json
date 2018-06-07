@@ -6,8 +6,7 @@
   "repository": "https://github.com/electron/fiddle",
   "main": "./dist/main",
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "start": "npm run build && electron-forge start",
+    "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",

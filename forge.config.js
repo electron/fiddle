@@ -1,6 +1,9 @@
 /* tslint:disable */
 
 module.exports = {
+  hooks: {
+    generateAssets: require('./tools/tsc')
+  },
   packagerConfig: {},
   makers: [
     {
