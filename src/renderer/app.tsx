@@ -21,8 +21,7 @@ window.ElectronFiddle = {
   editors: {
     main: null,
     renderer: null,
-    html: null,
-    new: null
+    html: null
   },
   app: null
 };

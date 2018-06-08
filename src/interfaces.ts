@@ -28,7 +28,7 @@ export interface OutputEntry {
   timestamp: number;
 }
 
-export type EditorId = 'main' | 'renderer' | 'html' | 'new';
+export type EditorId = 'main' | 'renderer' | 'html';
 
 declare global {
   interface Window {

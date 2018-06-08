@@ -23,8 +23,7 @@ const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>();
 const TITLE_MAP: Record<EditorId, string> = {
   main: 'Main Process',
   renderer: 'Renderer Process',
-  html: 'HTML',
-  new: 'New Window',
+  html: 'HTML'
 };
 
 export interface EditorsProps {
@@ -37,7 +36,7 @@ export const editors = (props: EditorsProps) => (
     onChange={updateEditorLayout}
     // tslint:disable-next-line:jsx-no-multiline-js
     renderTile={(id, path) => (
-      <ViewIdMosaicWindow path={path} title={TITLE_MAP[id]}>
+      <ViewIdMosaicWindow path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
         <Editor id={id} monaco={props.monaco} appState={props.appState} />
       </ViewIdMosaicWindow>
     )}
