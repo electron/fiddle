@@ -13,18 +13,11 @@ export interface HeaderProps {
 @observer
 export class Header extends React.Component<HeaderProps, {}> {
   public render() {
-    const { isTokenDialogShowing } = this.props.appState;
-
-    const elements = [
+    return [
       <Commands key='commands' appState={this.props.appState} />,
       <Output key='output' appState={this.props.appState} />,
-      <EditorTitle key='titles' />
-    ];
-
-    if (isTokenDialogShowing) elements.push(
+      <EditorTitle key='titles' />,
       <TokenDialog key='tokenDialog' appState={this.props.appState} />
-    );
-
-    return elements;
+    ];
   }
 }

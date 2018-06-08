@@ -155,25 +155,67 @@ header {
   line-height: 15px;
 }
 
+.dialogDrop {
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #fff;
+  transition: opacity 0.4s ease-in-out;
+}
+
+.dialogDrop.dialogDropVisible {
+  pointer-events: all;
+  opacity: 0.5;
+}
+
 .tokenDialog {
   position: absolute;
-  top: 100px;
+  z-index: 2;
+  top: 60px;
   width: 300px;
-  height: 170px;
-  left: calc(50% - (300px / 2));
+  min-height: 170px;
   padding: 10px 20px;
   z-index: 1000;
   background-color: var(--electron-background-2);
   border: 1px solid var(--electron-dark);
   color: #f3f3f3;
+  border-radius: 6px;
+  left: -10000px;
+  opacity: 0;
+  transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
+}
+
+.tokenDialog.tokenDialogVisible {
+  left: calc(50% - (300px / 2));
+  opacity: 1;
+  top: 100px;
 }
 
 .generateTokenText svg {
   margin-right: 4px;
 }
 
+.tokenDialog .tokenSpinner {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .tokenDialog button {
   color: #1e2527;
+  float: right;
 }
 
 .tokenDialog a {
@@ -188,4 +230,12 @@ header {
   background-color: var(--electron-background);
   border: 1px solid var(--electron-dark);
   outline: 0 solid transparent;
+}
+
+.tokenDialog input:focus {
+  border-color: var(--electron-bright);
+}
+
+.tokenDialog input.hasError {
+  border-color: #df3434;
 }

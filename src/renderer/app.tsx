@@ -45,6 +45,37 @@ class App {
     this.setup();
   }
 
+  public setValues(values: {
+    html: string;
+    main: string;
+    renderer: string;
+  }) {
+    if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
+      throw new Error('Editors not ready');
+    }
+
+    this.editors.html.setValue(values.html);
+    this.editors.main.setValue(values.main);
+    this.editors.renderer.setValue(values.renderer);
+  }
+
+  public getValues() {
+    if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
+      throw new Error('Editors not ready');
+    }
+
+    return {
+      html: this.editors.html!.getValue(),
+      main: this.editors.main!.getValue(),
+      renderer: this.editors.renderer!.getValue(),
+      package: JSON.stringify({
+        name: this.name,
+        main: './main.js',
+        version: '1.0.0'
+      })
+    };
+  }
+
   public async setup() {
     this.monaco = await loader();
 
@@ -120,23 +151,6 @@ class App {
     };
 
     return this.monaco.editor.create(element!, options);
-  }
-
-  public getValues() {
-    if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
-      throw new Error('Editors not ready');
-    }
-
-    return {
-      html: this.editors.html!.getValue(),
-      main: this.editors.main!.getValue(),
-      renderer: this.editors.renderer!.getValue(),
-      package: JSON.stringify({
-        name: this.name,
-        main: './main.js',
-        version: '1.0.0'
-      })
-    };
   }
 }
 
