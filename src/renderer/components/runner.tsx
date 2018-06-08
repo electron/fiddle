@@ -90,7 +90,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
   }
 
   public async run() {
-    const values = (window as any).electronFiddle.getValues();
+    const values = window.ElectronFiddle.app.getValues();
     const tmpdir = (tmp as any).dirSync();
     const { binaryManager, version } = this.props.appState;
 

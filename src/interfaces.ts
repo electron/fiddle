@@ -1,3 +1,5 @@
+import * as MonacoType from 'monaco-editor';
+
 export interface StringMap<T> {
   [x: string]: T;
 }
@@ -24,4 +26,15 @@ export interface ElectronVersion extends GitHubVersion {
 export interface OutputEntry {
   text: string;
   timestamp: number;
+}
+
+export type EditorId = 'main' | 'renderer' | 'html' | 'new';
+
+declare global {
+  interface Window {
+    ElectronFiddle: {
+      app: any;
+      editors: Record<EditorId, MonacoType.editor.IStandaloneCodeEditor | null>;
+    };
+  }
 }

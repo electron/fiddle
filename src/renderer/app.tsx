@@ -5,16 +5,27 @@ import { observable } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { mainTheme } from './themes';
-import { getContent } from './content';
 import { Header } from './components/header';
 import { BinaryManager } from './binary';
 import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
+import { editors } from './components/editors';
+import { updateEditorLayout } from '../utils/editor-layout';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
+
+window.ElectronFiddle = {
+  editors: {
+    main: null,
+    renderer: null,
+    html: null,
+    new: null
+  },
+  app: null
+};
 
 export class AppState {
   @observable public gistId: string = '';
@@ -58,24 +69,28 @@ class App {
     main: string;
     renderer: string;
   }) {
-    if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
+    const { ElectronFiddle: fiddle } = window;
+
+    if (!fiddle.editors.html || !fiddle.editors.main || !fiddle.editors.renderer) {
       throw new Error('Editors not ready');
     }
 
-    this.editors.html.setValue(values.html);
-    this.editors.main.setValue(values.main);
-    this.editors.renderer.setValue(values.renderer);
+    fiddle.editors.html.setValue(values.html);
+    fiddle.editors.main.setValue(values.main);
+    fiddle.editors.renderer.setValue(values.renderer);
   }
 
   public getValues() {
-    if (!this.editors.html || !this.editors.main || !this.editors.renderer) {
+    const { ElectronFiddle: fiddle } = window;
+
+    if (!fiddle.editors.html || !fiddle.editors.main || !fiddle.editors.renderer) {
       throw new Error('Editors not ready');
     }
 
     return {
-      html: this.editors.html!.getValue(),
-      main: this.editors.main!.getValue(),
-      renderer: this.editors.renderer!.getValue(),
+      html: fiddle.editors.html.getValue(),
+      main: fiddle.editors.main.getValue(),
+      renderer: fiddle.editors.renderer.getValue(),
       package: JSON.stringify({
         name: this.name,
         main: './main.js',
@@ -86,100 +101,29 @@ class App {
 
   public async setup() {
     this.monaco = await loader();
-
     this.createThemes();
-    this.setupDrag();
-    this.editors.html = this.createEditor('html');
-    this.editors.main = this.createEditor('main');
-    this.editors.renderer = this.createEditor('renderer');
 
-    render(<Header appState={appState} />, document.getElementById('header'));
+    const app = (
+      <div>
+        <Header appState={appState} />
+        {editors({ monaco: this.monaco!, appState })}å
+      </div>
+    );
+
+    render(app, document.getElementById('app'));
+
+    this.setupResizeListener();
   }
 
-  public toggleScrollbars() {
-    this.isScrollbarHidden = !this.isScrollbarHidden;
-
-    Object.keys(this.editors).forEach((key) => {
-      if (this.editors[key]) {
-        const editor: MonacoType.editor.IStandaloneCodeEditor = this.editors[key];
-        editor.updateOptions({
-          scrollbar: {
-            vertical: this.isScrollbarHidden ? 'hidden' : 'auto',
-            horizontal: this.isScrollbarHidden ? 'hidden' : 'auto'
-          }
-        });
-      }
-    });
-  }
-
-  public setupDrag() {
-    const resizers = Array.from(document.getElementsByClassName('resize'));
-    const elements = [
-      document.getElementById(`editor-main`),
-      document.getElementById(`editor-renderer`),
-      document.getElementById(`editor-html`),
-    ];
-
-    resizers.forEach((resizer, i) => {
-      resizer.addEventListener('mousedown', (event: MouseEvent) => {
-        const increaseElement = elements[i]!;
-        const decreaseElement = elements[i + 1]!;
-        const computedStyleIncrease = document.defaultView.getComputedStyle(increaseElement);
-        const computedStyleDecrease = document.defaultView.getComputedStyle(increaseElement);
-
-        const startX = event.clientX;
-        const startWidthIncrease = parseInt(computedStyleIncrease.width!, 10);
-        const startWidthDecrease = parseInt(computedStyleDecrease.width!, 10);
-
-        this.toggleScrollbars();
-
-        const doDrag = (e: MouseEvent) => {
-          e.preventDefault();
-
-          const deltaWidth = e.clientX - startX;
-          increaseElement.style.width = (startWidthIncrease + deltaWidth) + 'px';
-          decreaseElement.style.width = (startWidthDecrease + -1 * deltaWidth) + 'px';
-        };
-
-        const stopDrag = (e: MouseEvent) => {
-          e.preventDefault();
-          document.onmousemove = null;
-          document.onmouseup = null;
-          this.toggleScrollbars();
-        };
-
-        document.onmousemove = doDrag;
-        document.onmouseup = stopDrag;
-      });
-    });
+  public setupResizeListener() {
+    window.addEventListener('resize', updateEditorLayout);
   }
 
   public createThemes() {
     if (!this.monaco) return;
-
     this.monaco.editor.defineTheme('main', mainTheme as any);
-  }
-
-  public createEditor(id: string) {
-    if (!this.monaco) throw new Error('Monaco not ready');
-
-    const element = document.getElementById(`editor-${id}`);
-    const language = id === 'html' ? 'html' : 'javascript';
-    const value = getContent(id);
-
-    const options = {
-      language,
-      theme: 'main',
-      automaticLayout: true,
-      minimap: {
-        enabled: false
-      },
-      value
-    };
-
-    return this.monaco.editor.create(element!, options);
   }
 }
 
 // tslint:disable-next-line:no-string-literal
-window['electronFiddle'] = new App();
+window.ElectronFiddle.app = new App();

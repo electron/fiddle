@@ -3,6 +3,7 @@
   justify-content: space-between;
   height: 40px;
   padding-top: 12px;
+  font-family: var(--default-fonts);
 }
 
 .commands button,

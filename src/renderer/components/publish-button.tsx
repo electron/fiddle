@@ -34,7 +34,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
       token: this.props.appState.githubToken!
     });
 
-    const values = (window as any).electronFiddle.getValues();
+    const values = window.ElectronFiddle.app.getValues();
 
     const gist = await octo.gists.create({
       public: true,

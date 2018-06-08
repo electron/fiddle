@@ -11,24 +11,24 @@
   --electron-background-2: #39424e;
   --electron-background: #2f3241;
   --electron-dark: #1e2527;
+  --default-fonts: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
 }
 
 html, body {
   padding: 0;
   margin: 0;
-  background: var(--electron-background);
+  background: var(--electron-background-2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+  font-family: var(--default-fonts);
 }
 
 header {
-  min-height: 70px;
+  min-height: 50px;
   border-bottom: 1px solid var(--electron-dark);
-  margin-bottom: 10px;
-  background-color: var(--electron-background-2);
+  background-color: var(--electron-background);
   -webkit-app-region: drag;
 }
 
@@ -188,4 +188,8 @@ header {
 
 .tokenDialog input.hasError {
   border-color: #df3434;
+}
+
+.mosaic {
+  height: 100vh;
 }

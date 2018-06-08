@@ -86,11 +86,11 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  * @param {string} version
  */
 export async function updateEditorTypeDefinitions(version: string) {
-  const monaco: typeof MonacoType = (window as any).electronFiddle.monaco;
+  const monaco: typeof MonacoType = window.ElectronFiddle.app.monaco;
   const typeDefs = await getTypeDefinitions(version);
 
-  if ((window as any).electronFiddle.typeDefDisposable) {
-    (window as any).electronFiddle.typeDefDisposable.dispose();
+  if (window.ElectronFiddle.app.typeDefDisposable) {
+    window.ElectronFiddle.app.typeDefDisposable.dispose();
   }
 
   if (typeDefs) {

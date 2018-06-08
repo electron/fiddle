@@ -2,6 +2,10 @@ a {
   color: #9feaf9;
 }
 
+.button[disabled]:focus, .button[disabled]:hover, button[disabled]:focus, button[disabled]:hover {
+  background-color: unset;
+}
+
 .button, button, input[type='button'], input[type='reset'], input[type='submit'] {
   background-color: #9feaf9;
   border: .1rem solid #9feaf9;
