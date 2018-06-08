@@ -2,9 +2,9 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as MonacoType from 'monaco-editor';
 
-import { userData } from './constants';
+import { USER_DATA_PATH } from './constants';
 
-const definitionPath = path.join(userData, 'electron-typedef');
+const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 
 
 /**

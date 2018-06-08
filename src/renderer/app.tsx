@@ -17,6 +17,7 @@ const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
 
 export class AppState {
+  @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
   @observable public githubToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
@@ -24,13 +25,19 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
+  @observable public isUnsaved: boolean = true;
+  @observable public isMyGist: boolean = false;
 }
 
 const appState = new AppState();
 appState.githubToken = localStorage.getItem('githubToken');
 
 class App {
-  public editors: any = {
+  public editors: {
+    main: MonacoType.editor.IStandaloneCodeEditor | null,
+    renderer: MonacoType.editor.IStandaloneCodeEditor | null,
+    html: MonacoType.editor.IStandaloneCodeEditor | null,
+  } = {
     main: null,
     renderer: null,
     html: null
@@ -38,6 +45,7 @@ class App {
   public monaco: typeof MonacoType | null = null;
   public name = 'test';
   public typeDefDisposable = null;
+  public isScrollbarHidden = false;
 
   constructor() {
     this.getValues = this.getValues.bind(this);
@@ -88,6 +96,22 @@ class App {
     render(<Header appState={appState} />, document.getElementById('header'));
   }
 
+  public toggleScrollbars() {
+    this.isScrollbarHidden = !this.isScrollbarHidden;
+
+    Object.keys(this.editors).forEach((key) => {
+      if (this.editors[key]) {
+        const editor: MonacoType.editor.IStandaloneCodeEditor = this.editors[key];
+        editor.updateOptions({
+          scrollbar: {
+            vertical: this.isScrollbarHidden ? 'hidden' : 'auto',
+            horizontal: this.isScrollbarHidden ? 'hidden' : 'auto'
+          }
+        });
+      }
+    });
+  }
+
   public setupDrag() {
     const resizers = Array.from(document.getElementsByClassName('resize'));
     const elements = [
@@ -107,19 +131,22 @@ class App {
         const startWidthIncrease = parseInt(computedStyleIncrease.width!, 10);
         const startWidthDecrease = parseInt(computedStyleDecrease.width!, 10);
 
-        function doDrag(e: MouseEvent) {
+        this.toggleScrollbars();
+
+        const doDrag = (e: MouseEvent) => {
           e.preventDefault();
 
           const deltaWidth = e.clientX - startX;
           increaseElement.style.width = (startWidthIncrease + deltaWidth) + 'px';
           decreaseElement.style.width = (startWidthDecrease + -1 * deltaWidth) + 'px';
-        }
+        };
 
-        function stopDrag(e: MouseEvent) {
+        const stopDrag = (e: MouseEvent) => {
           e.preventDefault();
           document.onmousemove = null;
           document.onmouseup = null;
-        }
+          this.toggleScrollbars();
+        };
 
         document.onmousemove = doDrag;
         document.onmouseup = stopDrag;

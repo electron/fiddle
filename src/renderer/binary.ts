@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as extract from 'extract-zip';
 import { EventEmitter } from 'events';
 
-import { userData } from './constants';
+import { USER_DATA_PATH } from './constants';
 import { normalizeVersion } from '../utils/normalize-version';
 import { StringMap } from '../interfaces';
 
@@ -13,7 +13,6 @@ const eDownload = promisify(require('electron-download'));
 
 export class BinaryManager extends EventEmitter {
   public state: StringMap<'ready' | 'downloading'> = {};
-  public version: string = '2.0.2';
 
   constructor(version: string) {
     super();
@@ -66,7 +65,7 @@ export class BinaryManager extends EventEmitter {
   }
 
   public async getDownloadedVersions(): Promise<Array<string>> {
-    const downloadPath = path.join(userData, 'electron-bin');
+    const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
     console.log(`BinaryManager: Checking for downloaded versions`);
 
     try {
@@ -92,7 +91,7 @@ export class BinaryManager extends EventEmitter {
   }
 
   private getDownloadPath(version: string) {
-    return path.join(userData, 'electron-bin', version);
+    return path.join(USER_DATA_PATH, 'electron-bin', version);
   }
 
   private unzip(zipPath: string, extractPath: string) {
