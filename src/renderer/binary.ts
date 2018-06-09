@@ -3,7 +3,6 @@ import * as os from 'os';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as extract from 'extract-zip';
-import { EventEmitter } from 'events';
 
 import { USER_DATA_PATH } from './constants';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -11,16 +10,27 @@ import { StringMap } from '../interfaces';
 
 const eDownload = promisify(require('electron-download'));
 
-export class BinaryManager extends EventEmitter {
+/**
+ * The binary manager takes care of downloading Electron versions
+ *
+ * @export
+ * @class BinaryManager
+ */
+export class BinaryManager {
   public state: StringMap<'ready' | 'downloading'> = {};
 
   constructor(version: string) {
-    super();
-
     this.setup(version);
   }
 
-  public async setup(iVersion: string) {
+  /**
+   * General setup, called with a version. Is called during construction
+   * to ensure that we always have or download at least one version.
+   *
+   * @param {string} iVersion
+   * @returns {Promise<void>}
+   */
+  public async setup(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
     await fs.mkdirp(this.getDownloadPath(version));
 
@@ -47,7 +57,13 @@ export class BinaryManager extends EventEmitter {
     this.state[version] = 'ready';
   }
 
-  public getElectronBinary(version: string) {
+  /**
+   * Gets the expected path for the binary of a given Electron version
+   *
+   * @param {string} version
+   * @returns {string}
+   */
+  public getElectronBinaryPath(version: string): string {
     const platform = os.platform();
     const dir = this.getDownloadPath(version);
 
@@ -64,6 +80,11 @@ export class BinaryManager extends EventEmitter {
     }
   }
 
+  /**
+   * Returns an array of all versions downloaded to disk
+   *
+   * @returns {Promise<Array<string>>}
+   */
   public async getDownloadedVersions(): Promise<Array<string>> {
     const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
     console.log(`BinaryManager: Checking for downloaded versions`);
@@ -85,16 +106,35 @@ export class BinaryManager extends EventEmitter {
     }
   }
 
-  public getIsDownloaded(version: string) {
-    const expectedPath = this.getElectronBinary(version);
+  /**
+   * Did we already download a given version?
+   *
+   * @param {string} version
+   * @returns {boolean}
+   */
+  public getIsDownloaded(version: string): boolean {
+    const expectedPath = this.getElectronBinaryPath(version);
     return fs.existsSync(expectedPath);
   }
 
-  private getDownloadPath(version: string) {
+  /**
+   * Gets the expected path for a given Electron version
+   *
+   * @param {string} version
+   * @returns {string}
+   */
+  private getDownloadPath(version: string): string {
     return path.join(USER_DATA_PATH, 'electron-bin', version);
   }
 
-  private unzip(zipPath: string, extractPath: string) {
+  /**
+   * Unzips an electron package so that we can actaully use it.
+   *
+   * @param {string} zipPath
+   * @param {string} extractPath
+   * @returns {Promise<void>}
+   */
+  private unzip(zipPath: string, extractPath: string): Promise<void> {
     return new Promise((resolve, reject) => {
       process.noAsar = true;
 

@@ -1,5 +1,11 @@
 import { GitHubVersion } from '../interfaces';
 
+/**
+ * Retrieves our best guess regarding the latest Electron versions. Tries to
+ * fetch them from localStorage, then from a static releases.json file.
+ *
+ * @returns {Array<GitHubVersion>}
+ */
 export function getKnownVersions(): Array<GitHubVersion> {
   const fromLs = window.localStorage.getItem('known-electron-versions');
 
@@ -14,11 +20,21 @@ export function getKnownVersions(): Array<GitHubVersion> {
   return require('../../static/releases.json');
 }
 
+/**
+ * Saves known versions to localStorage.
+ *
+ * @param {Array<GitHubVersion>} versions
+ */
 export function saveKnownVersions(versions: Array<GitHubVersion>) {
   const stringified = JSON.stringify(versions);
   window.localStorage.setItem('known-electron-versions', stringified);
 }
 
+/**
+ * Fetch the latest known versions directly from GitHub.
+ *
+ * @returns {Promise<Array<GitHubVersion>>}
+ */
 export function fetchVersions(): Promise<Array<GitHubVersion>> {
   return window.fetch('https://api.github.com/repos/electron/electron/releases')
     .then((response) => response.json())

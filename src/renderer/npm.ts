@@ -5,6 +5,14 @@ export interface InstallModulesOptions {
   dir: string;
 }
 
+/**
+ * Uses a simple regex to find `require()` statements in a string.
+ * Tries to exclude electron and Node built-ins as well as file-path
+ * references.
+ *
+ * @param {string} input
+ * @returns {Array<string>}
+ */
 export function findModules(input: string): Array<string> {
   const matchRequire = /require\(['"]{1}([\w\d\/\-\_]*)['"]{1}\)/;
   const matched = input.match(matchRequire);
@@ -23,6 +31,13 @@ export function findModules(input: string): Array<string> {
   return result;
 }
 
+/**
+ * Installs given modules to a given folder.
+ *
+ * @param {InstallModulesOptions} { dir }
+ * @param {...Array<string>} names
+ * @returns {Promise<string>}
+ */
 export function installModules({ dir }: InstallModulesOptions, ...names: Array<string>): Promise<string> {
   return new Promise((resolve, reject) => {
     const args = ['-S'];

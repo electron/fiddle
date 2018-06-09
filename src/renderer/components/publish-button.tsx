@@ -5,7 +5,7 @@ import * as Icon from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as classNames from 'classnames';
 
-import { AppState } from '../app';
+import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
 
 export interface PublishButtonProps {
@@ -16,6 +16,13 @@ export interface PublishButtonState {
   isPublishing: boolean;
 }
 
+/**
+ * The "publish" button takes care of logging you in.
+ *
+ * @export
+ * @class PublishButton
+ * @extends {React.Component<PublishButtonProps, PublishButtonState>}
+ */
 @observer
 export class PublishButton extends React.Component<PublishButtonProps, PublishButtonState> {
   constructor(props: PublishButtonProps) {
@@ -25,7 +32,11 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     this.publishFiddle = this.publishFiddle.bind(this);
   }
 
-  public async publishFiddle() {
+  /**
+   * Connect with GitHub, publish the current fiddle as a gist,
+   * and update all related properties in the app state.
+   */
+  public async publishFiddle(): Promise<void> {
     this.setState({ isPublishing: true });
 
     const octo = new Octokit();

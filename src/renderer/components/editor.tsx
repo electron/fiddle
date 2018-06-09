@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
-import { AppState } from '../app';
+import { AppState } from '../state';
 import { getContent } from '../content';
 
 export interface EditorProps {

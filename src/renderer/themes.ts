@@ -1,3 +1,6 @@
+/**
+ * The Monaco editor theme used by Electron Fiddle.
+ */
 export const mainTheme = {
   base: 'vs-dark',
   inherit: true,
