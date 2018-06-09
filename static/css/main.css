@@ -11,24 +11,24 @@
   --electron-background-2: #39424e;
   --electron-background: #2f3241;
   --electron-dark: #1e2527;
+  --default-fonts: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
 }
 
 html, body {
   padding: 0;
   margin: 0;
-  background: var(--electron-background);
+  background: var(--electron-background-2);
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+  font-family: var(--default-fonts);
 }
 
 header {
-  min-height: 70px;
+  min-height: 50px;
   border-bottom: 1px solid var(--electron-dark);
-  margin-bottom: 10px;
-  background-color: var(--electron-background-2);
+  background-color: var(--electron-background);
   -webkit-app-region: drag;
 }
 
@@ -75,7 +75,7 @@ header {
   padding-left: 10px;
   margin-top: 0;
   height: 0;
-  overflow: scroll;
+  overflow-y: scroll;
   transition: height .2s;
   transition: padding .2s;
   -webkit-app-region: no-drag;
@@ -90,6 +90,18 @@ header {
 .output p {
   margin-bottom: 0;
   white-space: pre;
+}
+
+.output::-webkit-scrollbar {
+  width: 14px;
+}
+
+.output::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, .2);
+}
+
+.output::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .4);
 }
 
 .output .timestamp {
@@ -188,4 +200,8 @@ header {
 
 .tokenDialog input.hasError {
   border-color: #df3434;
+}
+
+.mosaic {
+  height: 100vh;
 }

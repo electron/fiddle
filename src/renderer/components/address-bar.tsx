@@ -41,7 +41,7 @@ export class AddressBar extends React.Component<AddressBarProps, {}> {
       id: gistId,
     });
 
-    (window as any).electronFiddle.setValues({
+    window.ElectronFiddle.app.setValues({
       html: gist.data.files[INDEX_HTML_NAME].content,
       main: gist.data.files[MAIN_JS_NAME].content,
       renderer: gist.data.files[RENDERER_JS_NAME].content,
