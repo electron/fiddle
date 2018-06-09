@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as MonacoType from 'monaco-editor';
+import { get } from 'lodash';
 
 import { USER_DATA_PATH } from './constants';
 
@@ -85,19 +86,28 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  *
  * @param {string} version
  */
-export async function updateEditorTypeDefinitions(version: string) {
-  const monaco: typeof MonacoType = window.ElectronFiddle.app.monaco;
+export async function updateEditorTypeDefinitions(version: string, i: number = 0) {
+  const monaco: typeof MonacoType = get(window, 'ElectronFiddle.app.monaco', null);
+  const typeDefDisposable: MonacoType.IDisposable | null = get(window, 'ElectronFiddle.app.typeDefDisposable', null);
+
+  // If this method is called before we're ready, we'll delay this work a bit
+  if (i < 10 && !monaco) {
+    console.warn(`Fetch Types: updateEditorTypeDefinitions() called too soon, deferring`);
+    setTimeout(() => updateEditorTypeDefinitions(version, i + 1), 200);
+    return;
+  }
+
   const typeDefs = await getTypeDefinitions(version);
 
-  if (window.ElectronFiddle.app.typeDefDisposable) {
-    window.ElectronFiddle.app.typeDefDisposable.dispose();
+  if (typeDefDisposable) {
+    typeDefDisposable.dispose();
   }
 
   if (typeDefs) {
     console.log(`Fetch Types: Updating Monaco types with electron.d.ts@${version}`);
     const disposable = monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs);
-    (window as any).electronFiddle.typeDefDisposable = disposable;
+    window.ElectronFiddle.app.typeDefDisposable = disposable;
   } else {
-    console.log(`Fetch Types: No type definitons for ${version} 😢`);
+    console.log(`Fetch Types: No type definitions for ${version} 😢`);
   }
 }

@@ -2,9 +2,7 @@ import * as React from 'react';
 import * as semver from 'semver';
 import { observer } from 'mobx-react';
 
-import { normalizeVersion } from '../../utils/normalize-version';
-import { AppState } from '../app';
-import { updateEditorTypeDefinitions } from '../fetch-types';
+import { AppState } from '../state';
 
 export interface VersionChooserState {
   value: string;
@@ -14,56 +12,37 @@ export interface VersionChooserProps {
   appState: AppState;
 }
 
+/**
+ * A dropdown allowing the selection of Electron versions. The actual
+ * download is managed in the state.
+ *
+ * @class VersionChooser
+ * @extends {React.Component<VersionChooserProps, VersionChooserState>}
+ */
 @observer
 export class VersionChooser extends React.Component<VersionChooserProps, VersionChooserState> {
   constructor(props: VersionChooserProps) {
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
-    this.handleVersionChange(this.props.appState.version);
   }
 
-  public async updateDownloadedVersionState() {
-    const { binaryManager } = this.props.appState;
-    const downloadedVersions = await binaryManager.getDownloadedVersions();
-    const updatedVersions = { ...this.props.appState.versions };
-
-    console.log(`Version Chooser: Updating version state`);
-    downloadedVersions.forEach((version) => {
-      if (updatedVersions[version]) {
-        updatedVersions[version].state = 'ready';
-      }
-    });
-
-    this.props.appState.versions = updatedVersions;
-  }
-
+  /**
+   * Handle change, which usually means that we'd like update
+   * the selection version.
+   *
+   * @param {React.ChangeEvent<HTMLSelectElement>} event
+   */
   public handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    const version = normalizeVersion(event.target.value);
-    this.handleVersionChange(version);
+    this.props.appState.setVersion(event.target.value);
   }
 
-  public handleVersionChange(version: string) {
-    console.log(`Version Chooser: Switching to v${version}`);
-
-    this.props.appState.version = version;
-
-    // Update TypeScript definitions
-    updateEditorTypeDefinitions(version);
-
-    // Fetch new binaries, maybe?
-    if ((this.props.appState.versions[version] || { state: '' }).state === 'ready') return;
-
-    console.log(`Version Chooser: Instructing BinaryManager to fetch v${version}`);
-    const updatedVersions = { ...this.props.appState.versions };
-    updatedVersions[normalizeVersion(version)].state = 'downloading';
-    this.props.appState.versions = updatedVersions;
-
-    this.props.appState.binaryManager.setup(version)
-      .then(() => this.updateDownloadedVersionState());
-  }
-
-  public renderOptions() {
+  /**
+   * Renders the individual options (Electron versions)
+   *
+   * @returns {Array<JSX.Element>}
+   */
+  public renderOptions(): Array<JSX.Element> {
     const { versions } = this.props.appState;
 
     return Object.keys(versions)

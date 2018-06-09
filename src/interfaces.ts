@@ -19,6 +19,13 @@ export interface GitHubVersion {
   body: string;
 }
 
+export interface EditorValues {
+  main: string;
+  renderer: string;
+  html: string;
+  package?: string;
+}
+
 export interface ElectronVersion extends GitHubVersion {
   state: ElectronVersionState;
 }

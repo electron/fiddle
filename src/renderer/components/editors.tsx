@@ -2,7 +2,7 @@ import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
 
-import { AppState } from '../app';
+import { AppState } from '../state';
 import { Editor } from './editor';
 import { EditorId } from '../../interfaces';
 import { updateEditorLayout } from '../../utils/editor-layout';
@@ -31,6 +31,11 @@ export interface EditorsProps {
   monaco: typeof MonacoType;
 }
 
+/**
+ * This function returns the editors embedded in a window manager.
+ *
+ * @param {EditorsProps} props
+ */
 export const editors = (props: EditorsProps) => (
   <ViewIdMosaic
     onChange={updateEditorLayout}

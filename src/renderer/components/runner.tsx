@@ -1,13 +1,13 @@
 import * as React from 'react';
-import * as tmp from 'tmp';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { observer } from 'mobx-react';
 import { spawn, ChildProcess } from 'child_process';
 
 import { normalizeVersion } from '../../utils/normalize-version';
-import { AppState } from '../app';
+import { AppState } from '../state';
 import { findModules, installModules } from '../npm';
+import { EditorValues } from '../../interfaces';
 
 export interface RunnerState {
   isRunning: boolean;
@@ -17,6 +17,13 @@ export interface RunnerProps {
   appState: AppState;
 }
 
+/**
+ * The runner component is responsible for actually launching the fiddle
+ * with Electron. It also renders the button that does so.
+ *
+ * @class Runner
+ * @extends {React.Component<RunnerProps, RunnerState>}
+ */
 @observer
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
@@ -56,6 +63,9 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     return <button className='button' onClick={() => action()}>{text}</button>;
   }
 
+  /**
+   * Stop a currently running Electron fiddle.
+   */
   public async stop() {
     if (this.child) {
       this.child.kill();
@@ -65,6 +75,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
   }
 
+  /**
+   * Push output to the application's state. Accepts a buffer or a string as input,
+   * attaches a timestamp, and pushes into the store.
+   *
+   * @param {(string | Buffer)} data
+   * @returns
+   */
   public pushData(data: string | Buffer) {
     const strData = data.toString();
     if (strData.startsWith('Debugger listening on ws://')) return;
@@ -75,7 +92,15 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     });
   }
 
-  public async installModules(values: any, dir: string) {
+  /**
+   * Analyzes the editor's JavaScript contents for modules
+   * and installs them.
+   *
+   * @param {EditorValues} values
+   * @param {string} dir
+   * @returns {Promise<void>}
+   */
+  public async installModules(values: EditorValues, dir: string): Promise<void> {
     const files = [ values.main, values.renderer ];
     const modules: Array<string> = [];
 
@@ -89,40 +114,45 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     this.pushData(await installModules({ dir }, ...modules));
   }
 
-  public async run() {
+  /**
+   * Actually run the fiddle.
+   *
+   * @returns
+   * @memberof Runner
+   */
+  public async run(): Promise<void> {
     const values = window.ElectronFiddle.app.getValues();
-    const tmpdir = (tmp as any).dirSync();
-    const { binaryManager, version } = this.props.appState;
+    const { binaryManager, version, tmpDir } = this.props.appState;
 
     this.props.appState.isConsoleShowing = true;
 
     try {
-      await fs.writeFile(path.join(tmpdir.name, 'index.html'), values.html);
-      await fs.writeFile(path.join(tmpdir.name, 'main.js'), values.main);
-      await fs.writeFile(path.join(tmpdir.name, 'renderer.js'), values.renderer);
-      await fs.writeFile(path.join(tmpdir.name, 'package.json'), values.package);
-      await this.installModules(values, tmpdir.name);
+      await fs.writeFile(path.join(tmpDir.name, 'index.html'), values.html);
+      await fs.writeFile(path.join(tmpDir.name, 'main.js'), values.main);
+      await fs.writeFile(path.join(tmpDir.name, 'renderer.js'), values.renderer);
+      await fs.writeFile(path.join(tmpDir.name, 'package.json'), values.package);
+      await this.installModules(values, tmpDir.name);
     } catch (error) {
-      console.error('Could not write files', error);
+      console.error('Runner: Could not write files', error);
     }
 
     if (!binaryManager.getIsDownloaded(version)) {
-      console.warn(`Binary ${version} not ready`);
+      console.warn(`Runner: Binary ${version} not ready`);
       return;
     }
 
-    const binaryPath = this.props.appState.binaryManager.getElectronBinary(version);
-    console.log(`Binary ${binaryPath} ready, launching`);
+    const binaryPath = this.props.appState.binaryManager.getElectronBinaryPath(version);
+    console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
-    this.child = spawn(binaryPath, [ tmpdir.name, '--inspect' ]);
+    this.child = spawn(binaryPath, [ tmpDir.name, '--inspect' ]);
     this.setState({ isRunning: true });
-    this.pushData('Electron started.');
+    this.pushData(`Electron v${version} started.`);
     this.child.stdout.on('data', this.pushData);
     this.child.stderr.on('data', this.pushData);
     this.child.on('close', (code) => {
       this.pushData(`Electron exited with code ${code.toString()}.`);
       this.setState({ isRunning: false });
-      tmpdir.removeCallback();
+      this.child = null;
     });
   }
 }

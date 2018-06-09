@@ -2,14 +2,13 @@ import { app, BrowserWindow } from 'electron';
 
 import { setupMenu } from './menu';
 
-require('update-electron-app')();
-
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
   app.quit();
 }
 
 app.setName('Electron Fiddle');
+
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.

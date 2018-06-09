@@ -5,7 +5,7 @@ import { faTerminal, faUser } from '@fortawesome/fontawesome-free-solid';
 
 import { Runner } from './runner';
 import { VersionChooser } from './version-chooser';
-import { AppState } from '../app';
+import { AppState } from '../state';
 import { AddressBar } from './address-bar';
 import { PublishButton } from './publish-button';
 
@@ -13,27 +13,23 @@ export interface CommandsProps {
   appState: AppState;
 }
 
+/**
+ * The command bar, containing all the buttons doing
+ * all the things
+ *
+ * @class Commands
+ * @extends {React.Component<CommandsProps, {}>}
+ */
 @observer
 export class Commands extends React.Component<CommandsProps, {}> {
   constructor(props: CommandsProps) {
     super(props);
-
-    this.toggleConsole = this.toggleConsole.bind(this);
-    this.showAuthDialog = this.showAuthDialog.bind(this);
-  }
-
-  public toggleConsole() {
-    this.props.appState.isConsoleShowing = !this.props.appState.isConsoleShowing;
-  }
-
-  public showAuthDialog() {
-    this.props.appState.isTokenDialogShowing = true;
   }
 
   public render() {
     const { appState } = this.props;
     const authButton = !appState.githubToken ? (
-      <button className='button' onClick={this.showAuthDialog}>
+      <button className='button' onClick={appState.toggleAuthDialog}>
         <Icon icon={faUser} />
       </button>
     ) : null;
@@ -48,7 +44,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
           <AddressBar appState={appState} />
           {authButton}
           <PublishButton appState={appState} />
-          <button className='button' onClick={this.toggleConsole}>
+          <button className='button' onClick={appState.toggleConsole}>
             <Icon icon={faTerminal} />
           </button>
         </div>

@@ -1,104 +1,81 @@
 import * as React from 'react';
 import { render } from 'react-dom';
 import * as loader from 'monaco-loader';
-import { observable } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { mainTheme } from './themes';
 import { Header } from './components/header';
-import { BinaryManager } from './binary';
-import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
-import { arrayToStringMap } from '../utils/array-to-stringmap';
-import { getKnownVersions } from './versions';
-import { normalizeVersion } from '../utils/normalize-version';
+import { EditorValues } from '../interfaces';
 import { editors } from './components/editors';
 import { updateEditorLayout } from '../utils/editor-layout';
+import { appState } from './state';
 
-const knownVersions = getKnownVersions();
-const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
-
-window.ElectronFiddle = {
-  editors: {
-    main: null,
-    renderer: null,
-    html: null
-  },
-  app: null
-};
-
-export class AppState {
-  @observable public gistId: string = '';
-  @observable public version: string = defaultVersion;
-  @observable public githubToken: string | null = null;
-  @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
-  @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
-  @observable public output: Array<OutputEntry> = [];
-  @observable public isConsoleShowing: boolean = false;
-  @observable public isTokenDialogShowing: boolean = false;
-  @observable public isUnsaved: boolean = true;
-  @observable public isMyGist: boolean = false;
-}
-
-const appState = new AppState();
-appState.githubToken = localStorage.getItem('githubToken');
-
+/**
+ * The top-level class controlling the whole app. This is *not* a React component,
+ * but it does eventually render all components.
+ *
+ * @class App
+ */
 class App {
-  public editors: {
-    main: MonacoType.editor.IStandaloneCodeEditor | null,
-    renderer: MonacoType.editor.IStandaloneCodeEditor | null,
-    html: MonacoType.editor.IStandaloneCodeEditor | null,
-  } = {
-    main: null,
-    renderer: null,
-    html: null
-  };
   public monaco: typeof MonacoType | null = null;
   public name = 'test';
   public typeDefDisposable = null;
-  public isScrollbarHidden = false;
 
   constructor() {
     this.getValues = this.getValues.bind(this);
-
     this.setup();
   }
 
-  public setValues(values: {
-    html: string;
-    main: string;
-    renderer: string;
-  }) {
+  /**
+   * Sets the values on all three editors.
+   *
+   * @param {EditorValues} values
+   */
+  public setValues(values: EditorValues): void {
     const { ElectronFiddle: fiddle } = window;
 
-    if (!fiddle.editors.html || !fiddle.editors.main || !fiddle.editors.renderer) {
-      throw new Error('Editors not ready');
+    if (!fiddle) {
+      throw new Error('Fiddle not ready');
     }
 
-    fiddle.editors.html.setValue(values.html);
-    fiddle.editors.main.setValue(values.main);
-    fiddle.editors.renderer.setValue(values.renderer);
+    const { main, html, renderer } = fiddle.editors;
+
+    if (html && html.setValue) html.setValue(values.html);
+    if (main && main.setValue) main.setValue(values.main);
+    if (renderer && renderer.setValue) renderer.setValue(values.renderer);
   }
 
-  public getValues() {
+  /**
+   * Gets the values on all three editors.
+   *
+   * @returns {EditorValues}
+   */
+  public getValues(): EditorValues {
     const { ElectronFiddle: fiddle } = window;
 
-    if (!fiddle.editors.html || !fiddle.editors.main || !fiddle.editors.renderer) {
-      throw new Error('Editors not ready');
+    if (!fiddle) {
+      throw new Error('Fiddle not ready');
     }
 
+    const { main, html, renderer } = fiddle.editors;
+
     return {
-      html: fiddle.editors.html.getValue(),
-      main: fiddle.editors.main.getValue(),
-      renderer: fiddle.editors.renderer.getValue(),
+      html: html && html.getValue() ? html.getValue() : '',
+      main: main && main.getValue() ? main.getValue() : '',
+      renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
       package: JSON.stringify({
         name: this.name,
         main: './main.js',
-        version: '1.0.0'
+        version: '1.0.0',
       })
     };
   }
 
-  public async setup() {
+  /**
+   * Initial setup call, loading Monaco and kicking off the React
+   * render process.
+   */
+  public async setup(): Promise<void> {
     this.monaco = await loader();
     this.createThemes();
 
@@ -114,11 +91,18 @@ class App {
     this.setupResizeListener();
   }
 
-  public setupResizeListener() {
+  /**
+   * We need to possibly recalculate the layout whenever the window
+   * is resized. This method sets up the listener.
+   */
+  public setupResizeListener(): void {
     window.addEventListener('resize', updateEditorLayout);
   }
 
-  public createThemes() {
+  /**
+   * We have a custom theme for the Monaco editor. This sets that up.
+   */
+  public createThemes(): void {
     if (!this.monaco) return;
     this.monaco.editor.defineTheme('main', mainTheme as any);
   }

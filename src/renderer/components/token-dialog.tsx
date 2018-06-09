@@ -5,7 +5,7 @@ import * as Icon from '@fortawesome/react-fontawesome';
 import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as Octokit from '@octokit/rest';
 
-import { AppState } from '../app';
+import { AppState } from '../state';
 
 export interface TokenDialogProps {
   appState: AppState;
