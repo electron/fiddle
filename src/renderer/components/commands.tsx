@@ -29,7 +29,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
   public render() {
     const { appState } = this.props;
     const authButton = !appState.githubToken ? (
-      <button className='button' onClick={appState.toggleAuthDialog}>
+      <button className='button' onClick={() => appState.toggleAuthDialog()}>
         <Icon icon={faUser} />
       </button>
     ) : null;
@@ -44,7 +44,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
           <AddressBar appState={appState} />
           {authButton}
           <PublishButton appState={appState} />
-          <button className='button' onClick={appState.toggleConsole}>
+          <button className='button' onClick={() => appState.toggleConsole()}>
             <Icon icon={faTerminal} />
           </button>
         </div>
