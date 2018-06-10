@@ -1,6 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 
 import { setupMenu } from './menu';
+import { getMainWindowOptions } from './windows';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -9,22 +10,18 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 app.setName('Electron Fiddle');
 
-
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow;
+let mainWindow: BrowserWindow | null = null;
 
 const createWindow = () => {
   // Create the browser window.
-  mainWindow = new BrowserWindow({
-    width: 1200,
-    height: 900,
-    titleBarStyle: 'hiddenInset',
-    acceptFirstMouse: true
-  });
+  mainWindow = new BrowserWindow(getMainWindowOptions());
 
   // and load the index.html of the app.
   mainWindow.loadFile('./static/index.html');
+
+  mainWindow.webContents.on('dom-ready', mainWindow.show);
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools();
@@ -61,6 +58,3 @@ app.on('activate', () => {
     createWindow();
   }
 });
-
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and import them here.
