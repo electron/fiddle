@@ -54,7 +54,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
 
     try {
       const { data } = await octo.users.get({});
-      localStorage.setItem('avatarUrl', data.avatar_url);
+      this.props.appState.avatarUrl = data.avatar_url;
     } catch (err) {
       this.setState({
         verifying: false,
@@ -63,7 +63,6 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       return;
     }
 
-    localStorage.setItem('githubToken', this.state.tokenInput);
     this.props.appState.githubToken = this.state.tokenInput;
     this.props.appState.isTokenDialogShowing = false;
 
@@ -112,6 +111,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
 
   public render() {
     const canSubmit = !!this.state.tokenInput;
+
     return [
       (
         <div

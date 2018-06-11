@@ -1,4 +1,4 @@
-import { observable, action } from 'mobx';
+import { observable, action, autorun } from 'mobx';
 import * as tmp from 'tmp';
 
 import { BinaryManager } from './binary';
@@ -35,6 +35,7 @@ export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
   @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
+  @observable public avatarUrl: string | null = null;
   @observable public githubToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
@@ -43,6 +44,13 @@ export class AppState {
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isUnsaved: boolean = true;
   @observable public isMyGist: boolean = false;
+
+  constructor() {
+    // Bind all actions
+    this.toggleConsole = this.toggleConsole.bind(this);
+    this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
+    this.setVersion = this.setVersion.bind(this);
+  }
 
   @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
@@ -71,6 +79,9 @@ export class AppState {
       await this.binaryManager.setup(version);
       this.updateDownloadedVersionState();
     }
+
+    autorun(() => localStorage.setItem('githubToken', this.githubToken || ''));
+    autorun(() => localStorage.setItem('avatarUrl', this.avatarUrl || ''));
   }
 
  /*

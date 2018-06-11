@@ -29,7 +29,24 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     super(props);
 
     this.state = { isPublishing: false };
-    this.publishFiddle = this.publishFiddle.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  /**
+   * When the user clicks the publish button, we either show the
+   * authentication dialog or publish right away.
+   *
+   * @returns {Promise<void>}
+   * @memberof PublishButton
+   */
+  public async handleClick(): Promise<void> {
+    const { githubToken, toggleAuthDialog } = this.props.appState;
+
+    if (!!githubToken) {
+      return this.publishFiddle();
+    } else {
+      return toggleAuthDialog();
+    }
   }
 
   /**
@@ -73,12 +90,12 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     const icon = isPublishing ? faSpinner : faUpload;
     const text = isPublishing ? 'Publishing...' : 'Publish';
 
-    return this.props.appState.githubToken ? (
-      <button className={className} onClick={this.publishFiddle} disabled={isPublishing}>
+    return (
+      <button className={className} onClick={this.handleClick} disabled={isPublishing}>
         <Icon icon={icon} spin={isPublishing} />
         <span style={{ marginLeft: 8 }} />
         {text}
       </button>
-    ) : null;
+    );
   }
 }
