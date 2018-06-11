@@ -1,4 +1,4 @@
-import { clipboard, shell, dialog } from 'electron';
+import { clipboard, shell } from 'electron';
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import * as Icon from '@fortawesome/react-fontawesome';

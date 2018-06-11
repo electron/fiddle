@@ -6,6 +6,7 @@ import * as classNames from 'classnames';
 import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
 import { idFromUrl } from '../../utils/gist';
+import { reaction } from 'mobx';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -43,6 +44,16 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     if (this.state.value) {
       this.loadFiddle();
     }
+  }
+
+  /**
+   * Once the component mounts, we'll subscribe to gistId changes
+   */
+  public componentDidMount() {
+    reaction(
+      () => this.props.appState.gistId,
+      (gistId: string) => this.setState({ value: gistId })
+    );
   }
 
   /**

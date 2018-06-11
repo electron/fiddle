@@ -7,6 +7,7 @@ import * as classNames from 'classnames';
 
 import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
+import { when } from 'mobx';
 
 export interface PublishButtonProps {
   appState: AppState;
@@ -30,22 +31,32 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
     this.state = { isPublishing: false };
     this.handleClick = this.handleClick.bind(this);
+    this.publishFiddle = this.publishFiddle.bind(this);
   }
 
   /**
    * When the user clicks the publish button, we either show the
    * authentication dialog or publish right away.
    *
+   * If we're showing the authentication dialog, we wait for it
+   * to be closed again (or a GitHub token to show up) before
+   * we publish
+   *
    * @returns {Promise<void>}
    * @memberof PublishButton
    */
   public async handleClick(): Promise<void> {
-    const { githubToken, toggleAuthDialog } = this.props.appState;
+    const { appState } = this.props;
 
-    if (!!githubToken) {
+    if (!appState.githubToken) {
+      appState.toggleAuthDialog();
+    }
+
+    // Wait for the dialog to be closed again
+    await when(() => !!appState.githubToken || !appState.isTokenDialogShowing);
+
+    if (appState.githubToken) {
       return this.publishFiddle();
-    } else {
-      return toggleAuthDialog();
     }
   }
 
@@ -82,6 +93,8 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
     this.setState({ isPublishing: false });
     this.props.appState.gistId = gist.data.id;
+
+    console.log(`Publish Button: Publishing done`, { gist });
   }
 
   public render() {
