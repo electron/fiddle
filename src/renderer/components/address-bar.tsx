@@ -51,7 +51,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @param {React.ChangeEvent<HTMLInputElement>} event
    * @memberof AddressBar
    */
-  public async handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ value: idFromUrl(event.target.value) || event.target.value });
   }
 
