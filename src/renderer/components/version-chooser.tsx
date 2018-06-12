@@ -1,8 +1,8 @@
 import * as React from 'react';
-import * as semver from 'semver';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
+import { sortedElectronMap } from '../../utils/sorted-electron-map';
 
 export interface VersionChooserState {
   value: string;
@@ -45,21 +45,19 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
   public renderOptions(): Array<JSX.Element> {
     const { versions } = this.props.appState;
 
-    return Object.keys(versions)
-      .sort((a, b) => semver.gt(a, b, true) ? -1 : 1)
-      .map((key) => {
-        const { tag_name, state } = versions[key];
-        const version = tag_name;
-        const icon = state === 'ready'
-          ? '✅'
-          : state === 'downloading' ? '⏬' : '⏹';
+    return sortedElectronMap<JSX.Element>(versions, (_key, item) => {
+      const { tag_name, state } = item;
+      const version = tag_name;
+      const icon = state === 'ready'
+        ? '✅'
+        : state === 'downloading' ? '⏬' : '⏹';
 
-        return (
-          <option value={version} key={version}>
-            {icon} {version}
-          </option>
-        );
-      });
+      return (
+        <option value={version} key={version}>
+          {icon} {version}
+        </option>
+      );
+    });
   }
 
   public render() {

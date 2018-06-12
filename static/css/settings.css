@@ -7,8 +7,24 @@
   display: flex;
 }
 
+.settings h1,
+.settings h2,
+.settings h3,
+.settings h4,
+.settings h5 {
+  color: white;
+}
+
+.settings label {
+  font-weight: 200;
+}
+
 .settings-content {
   height: 100%;
+  width: 100%;
+  padding: 20px;
+  overflow: scroll;
+  color: rgb(230, 230, 230);
 }
 
 .settings-menu {
@@ -38,4 +54,22 @@
   border-bottom: solid 1px rgba(255, 255, 255, 0.2);
   color: rgb(255, 255, 255);
   cursor: pointer;
+}
+
+.settings-section {
+  margin-bottom: 20px;
+}
+
+.settings-section:last-of-type {
+  margin: 0 0 0 0;
+}
+
+.settings .electron-versions-table button {
+  margin: 0;
+  min-width: 250px;
+}
+
+.settings .electron-versions-table .action {
+  text-align: center;
+  width: 250px;
 }

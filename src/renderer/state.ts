@@ -46,7 +46,7 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
-  @observable public isSettingsShowing: boolean = true;
+  @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = true;
   @observable public isMyGist: boolean = false;
 

@@ -1,8 +1,9 @@
 import * as React from 'react';
 import * as classNames from 'classnames';
+import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
-import { observer } from 'mobx-react';
+import { ElectronSettings } from './settings-electron';
 
 enum SettingsSections {
   GitHub = 'GitHub',
@@ -41,10 +42,26 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
   }
 
   /**
+   * Renders the content of the settings, usually by simply
+   * return the appropriate component.
+   *
+   * @returns {(JSX.Element | null)}
+   */
+  public renderContent(): JSX.Element | null {
+    const { section } = this.state;
+    const { appState } = this.props;
+
+    if (section === SettingsSections.Electron) {
+      return <ElectronSettings appState={appState} />;
+    }
+
+    return null;
+  }
+
+  /**
    * Renders the individual menu items
    *
    * @returns {Array<JSX.Element>}
-   * @memberof Settings
    */
   public renderOptions(): Array<JSX.Element> {
     const { section } = this.state;
@@ -52,7 +69,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     return settingsSections.map((name) => {
       const isSelected = section === name;
       const className = classNames({ selected: isSelected });
-      const onClick = () => this.setState({ section: name });
+      const onClick = ()   => this.setState({ section: name });
 
       return (
         <li onClick={onClick} key={name} className={className}>{name}</li>
@@ -71,7 +88,9 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         <div className='settings-menu'>
           <ul>{this.renderOptions()}</ul>
         </div>
-        <div className='settings-content' />
+        <div className='settings-content'>
+          {this.renderContent()}
+        </div>
       </div>
     );
   }

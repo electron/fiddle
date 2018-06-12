@@ -5,6 +5,13 @@
   src: local('Roboto'), local('Roboto-Regular'), url(../fonts/roboto/Roboto-Regular.ttf) format('woff2');
 }
 
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 200;
+  src: local('Roboto'), local('Roboto-Light'), url(../fonts/roboto/Roboto-Light.ttf) format('woff2');
+}
+
 :root {
   --electron-bright: #9feaf9;
   --electron-tuned: #6798a2;
@@ -135,7 +142,7 @@ header {
 }
 
 .fiddle button:hover {
-  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
 }
 
 .fiddle button:focus {
@@ -145,4 +152,15 @@ header {
 
 .fiddle .shadow {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.fiddle .button-outline {
+  border: 1px solid var(--electron-bright);
+}
+
+.button.button-clear:focus,
+.button.button-clear:hover,
+button.button-clear:focus,
+button.button-clear:hover {
+  color: white;
 }
