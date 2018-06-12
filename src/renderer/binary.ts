@@ -24,6 +24,23 @@ export class BinaryManager {
   }
 
   /**
+   * Remove a version from disk. Does not update state.
+   *
+   * @param {string} iVersion
+   */
+  public async remove(iVersion: string) {
+    const version = normalizeVersion(iVersion);
+
+    try {
+      if (this.getIsDownloaded(version)) {
+        await fs.remove(this.getDownloadPath(version));
+      }
+    } catch (error) {
+      console.warn(`Binary Manager: Tried to remove ${version}, but failed`, error);
+    }
+  }
+
+  /**
    * General setup, called with a version. Is called during construction
    * to ensure that we always have or download at least one version.
    *
