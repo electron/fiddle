@@ -6,6 +6,7 @@ import * as classNames from 'classnames';
 import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
 import { idFromUrl } from '../../utils/gist';
+import { reaction } from 'mobx';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -46,12 +47,22 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   }
 
   /**
+   * Once the component mounts, we'll subscribe to gistId changes
+   */
+  public componentDidMount() {
+    reaction(
+      () => this.props.appState.gistId,
+      (gistId: string) => this.setState({ value: gistId })
+    );
+  }
+
+  /**
    * Handle the change event, which usually just updates the address bar's value
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    * @memberof AddressBar
    */
-  public async handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ value: idFromUrl(event.target.value) || event.target.value });
   }
 

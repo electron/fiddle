@@ -5,6 +5,7 @@ import * as MonacoType from 'monaco-editor';
 
 import { mainTheme } from './themes';
 import { Header } from './components/header';
+import { Dialogs } from './components/dialogs';
 import { EditorValues } from '../interfaces';
 import { editors } from './components/editors';
 import { updateEditorLayout } from '../utils/editor-layout';
@@ -82,6 +83,7 @@ class App {
     const app = (
       <div>
         <Header appState={appState} />
+        <Dialogs appState={appState} />
         {editors({ monaco: this.monaco!, appState })}å
       </div>
     );

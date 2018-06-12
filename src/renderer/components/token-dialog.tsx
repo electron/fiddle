@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 import * as Icon from '@fortawesome/react-fontawesome';
 import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as Octokit from '@octokit/rest';
+import * as classNames from 'classnames';
 
 import { AppState } from '../state';
 
@@ -36,7 +37,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     this.onSubmitToken = this.onSubmitToken.bind(this);
     this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
     this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
-    this.onTokenKeyDown = this.onTokenKeyDown.bind(this);
+    this.handleChange = this.handleChange.bind(this);
     this.close = this.close.bind(this);
   }
 
@@ -54,7 +55,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
 
     try {
       const { data } = await octo.users.get({});
-      localStorage.setItem('avatarUrl', data.avatar_url);
+      this.props.appState.avatarUrl = data.avatar_url;
     } catch (err) {
       this.setState({
         verifying: false,
@@ -63,7 +64,6 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       return;
     }
 
-    localStorage.setItem('githubToken', this.state.tokenInput);
     this.props.appState.githubToken = this.state.tokenInput;
     this.props.appState.isTokenDialogShowing = false;
 
@@ -92,12 +92,14 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     });
   }
 
-  public onTokenKeyDown(event: React.KeyboardEvent<any>) {
-    if (event.which !== 27) return;
-
-    this.setState({
-      tokenInput: '',
-    });
+  /**
+   * Handle the change event, which usually just updates the address bar's value
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @memberof AddressBar
+   */
+  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ tokenInput: event.target.value });
   }
 
   get spinner() {
@@ -111,28 +113,30 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
   }
 
   public render() {
+    const { isTokenDialogShowing } = this.props.appState;
     const canSubmit = !!this.state.tokenInput;
+    const dialogClassNames = classNames({ tokenDialogVisible: isTokenDialogShowing }, 'tokenDialog');
+
     return [
       (
         <div
           key='drop'
-          className={`dialogDrop ${this.props.appState.isTokenDialogShowing ? 'dialogDropVisible' : ''}`}
+          className={`dialogDrop ${isTokenDialogShowing ? 'dialogDropVisible' : ''}`}
           onClick={this.close}
         />
       ),
       (
-        <div key='tokenDialog' className={`tokenDialog ${this.props.appState.isTokenDialogShowing ? 'tokenDialogVisible' : ''}`}>
+        <div key='tokenDialog' className={dialogClassNames}>
           {this.spinner}
           <span className='generateTokenText'>
             <Icon icon={faKey} />
-            Generate an access token from <a onClick={this.openGenerateTokenExternal}> GitHub </a> and paste it here:
+            Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
           </span>
           <input
-            readOnly={true}
             ref={this.tokenInputRef}
             value={this.state.tokenInput || ''}
             onFocus={this.onTokenInputFocused}
-            onKeyDown={this.onTokenKeyDown}
+            onChange={this.handleChange}
             className={this.state.error ? 'hasError' : ''}
           />
           <button
@@ -142,6 +146,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
           >
             Done
           </button>
+          <button className='cancel' onClick={this.close}>Cancel</button>
         </div>
       )
     ];
