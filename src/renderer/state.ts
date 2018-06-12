@@ -54,8 +54,12 @@ export class AppState {
     // Bind all actions
     this.toggleConsole = this.toggleConsole.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
-    this.setVersion = this.setVersion.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
+
+    this.setVersion = this.setVersion.bind(this);
+    this.removeVersion = this.removeVersion.bind(this);
+
+    this.signOutGitHub = this.signOutGitHub.bind(this);
 
     // When the settings should be opened, we'll close
     // everything else
@@ -138,6 +142,18 @@ export class AppState {
     });
 
     this.versions = updatedVersions;
+  }
+
+  /**
+   * The equivalent of signing out.
+   *
+   * @returns {void}
+   */
+  @action public signOutGitHub(): void {
+    this.gitHubAvatarUrl = null;
+    this.gitHubLogin = null;
+    this.gitHubToken = null;
+    this.gitHubName = null;
   }
 }
 

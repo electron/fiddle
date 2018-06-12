@@ -12,7 +12,7 @@ export interface ElectronSettingsProps {
 }
 
 /**
- * Everything above the editors, so buttons and the address bar.
+ * Settings content to manage Electron-related preferences.
  *
  * @class ElectronSettings
  * @extends {React.Component<ElectronSettingsProps, {}>}

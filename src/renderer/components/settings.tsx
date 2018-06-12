@@ -4,6 +4,7 @@ import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
 import { ElectronSettings } from './settings-electron';
+import { GitHubSettings } from './settings-github';
 
 enum SettingsSections {
   GitHub = 'GitHub',
@@ -55,6 +56,10 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
       return <ElectronSettings appState={appState} />;
     }
 
+    if (section === SettingsSections.GitHub) {
+      return <GitHubSettings appState={appState} />;
+    }
+
     return null;
   }
 
@@ -69,7 +74,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     return settingsSections.map((name) => {
       const isSelected = section === name;
       const className = classNames({ selected: isSelected });
-      const onClick = ()   => this.setState({ section: name });
+      const onClick = () => this.setState({ section: name });
 
       return (
         <li onClick={onClick} key={name} className={className}>{name}</li>
