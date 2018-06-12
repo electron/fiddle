@@ -12,6 +12,7 @@
   --electron-background: #2f3241;
   --electron-dark: #1e2527;
   --default-fonts: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+  --header-height: 50px;
 }
 
 html, body {
@@ -26,7 +27,7 @@ html, body {
 }
 
 header {
-  min-height: 50px;
+  min-height: var(--header-height);
   border-bottom: 1px solid var(--electron-dark);
   background-color: var(--electron-background);
   -webkit-app-region: drag;

@@ -1,0 +1,41 @@
+.settings {
+  background: var(--electron-background-2);
+  z-index: 10;
+  position: absolute;
+  height: 100%;
+  width: 100vw;
+  display: flex;
+}
+
+.settings-content {
+  height: 100%;
+}
+
+.settings-menu {
+  height: 100%;
+  width: 250px;
+  background-color: rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+
+.settings-menu ul {
+  list-style: none;
+  padding: 20px;
+}
+
+.settings-menu li {
+  padding-bottom: 5px;
+  border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, .8);
+}
+
+.settings-menu li.selected {
+  color: var(--electron-bright);
+}
+
+.settings-menu li:hover {
+  padding-bottom: 5px;
+  border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+  color: rgb(255, 255, 255);
+  cursor: pointer;
+}

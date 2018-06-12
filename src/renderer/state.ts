@@ -7,6 +7,8 @@ import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
 import { updateEditorTypeDefinitions } from './fetch-types';
+import { ipcRendererManager } from './ipc';
+import { IpcEvents } from '../ipc-events';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
@@ -44,6 +46,7 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
+  @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = true;
   @observable public isMyGist: boolean = false;
 
@@ -52,6 +55,11 @@ export class AppState {
     this.toggleConsole = this.toggleConsole.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.setVersion = this.setVersion.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
+
+    // When the settings should be opened, we'll close
+    // everything else
+    ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
   }
 
   @action public toggleConsole() {
@@ -60,6 +68,10 @@ export class AppState {
 
   @action public toggleAuthDialog() {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
+  }
+
+  @action public toggleSettings() {
+    this.isSettingsShowing = !this.isSettingsShowing;
   }
 
   @action public async setVersion(input: string) {
