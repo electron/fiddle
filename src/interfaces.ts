@@ -6,6 +6,8 @@ export interface StringMap<T> {
 
 export type ElectronVersionState = 'downloading' | 'ready' | 'unknown';
 
+export type WindowNames = 'main';
+
 export interface GitHubVersion {
   url: string;
   assets_url: string;

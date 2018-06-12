@@ -4,7 +4,7 @@ const path = require('path');
 
 module.exports = async () => {
   await new Promise((resolve, reject) => {
-    console.info('√ Compiling Typescript');
+    console.info('✔ Compiling Typescript');
 
     const cmd = process.platform === 'win32' ? 'tsc.cmd' : 'tsc';
     const child = childProcess.spawn(
