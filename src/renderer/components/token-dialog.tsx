@@ -117,7 +117,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     const canSubmit = !!this.state.tokenInput;
     const dialogClassNames = classNames({ tokenDialogVisible: isTokenDialogShowing }, 'tokenDialog');
 
-    return [
+    return isTokenDialogShowing ? [
       (
         <div
           key='drop'
@@ -149,6 +149,6 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
           <button className='cancel' onClick={this.close}>Cancel</button>
         </div>
       )
-    ];
+    ] : null;
   }
 }
