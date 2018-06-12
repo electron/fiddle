@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "repository": "https://github.com/electron/fiddle",
-  "main": "./dist/main",
+  "main": "./dist/main/main",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",

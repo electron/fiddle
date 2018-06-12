@@ -10,6 +10,8 @@ import { EditorValues } from '../interfaces';
 import { editors } from './components/editors';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { appState } from './state';
+import { ipcRendererManager } from './ipc';
+import { IpcEvents } from '../ipc-events';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -88,6 +90,7 @@ class App {
       </div>
     );
 
+    ipcRendererManager.send(IpcEvents.MAIN_WINDOW_READY_TO_SHOW);
     render(app, document.getElementById('app'));
 
     this.setupResizeListener();
