@@ -46,7 +46,7 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
-  @observable public isSettingsShowing: boolean = false;
+  @observable public isSettingsShowing: boolean = true;
   @observable public isUnsaved: boolean = true;
   @observable public isMyGist: boolean = false;
 
@@ -74,9 +74,30 @@ export class AppState {
     this.isSettingsShowing = !this.isSettingsShowing;
   }
 
+  @action public async removeVersion(input: string) {
+    const version = normalizeVersion(input);
+    console.log(`State: Removing Electron ${version}`);
+
+    // Already not present?
+    if ((this.versions[version] || { state: '' }).state !== 'ready') {
+      console.log(`State: Version already removed, doing nothing`);
+      return;
+    }
+
+    // Actually remove
+    await this.binaryManager.remove(version);
+
+    // Update state
+    const updatedVersions = { ...this.versions };
+    updatedVersions[version].state = 'unknown';
+
+    this.versions = updatedVersions;
+    this.updateDownloadedVersionState();
+  }
+
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
-    console.log(`State: Switching to ${version}`);
+    console.log(`State: Switching to Electron ${version}`);
 
     this.version = version;
 
@@ -87,7 +108,7 @@ export class AppState {
     if ((this.versions[version] || { state: '' }).state !== 'ready') {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
-      updatedVersions[normalizeVersion(version)].state = 'downloading';
+      updatedVersions[version].state = 'downloading';
       this.versions = updatedVersions;
 
       await this.binaryManager.setup(version);
