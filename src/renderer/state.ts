@@ -35,8 +35,10 @@ export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
   @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
-  @observable public avatarUrl: string | null = null;
-  @observable public githubToken: string | null = null;
+  @observable public gitHubAvatarUrl: string | null = null;
+  @observable public gitHubName: string | null = null;
+  @observable public gitHubLogin: string | null = null;
+  @observable public gitHubToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
@@ -80,8 +82,10 @@ export class AppState {
       this.updateDownloadedVersionState();
     }
 
-    autorun(() => localStorage.setItem('githubToken', this.githubToken || ''));
-    autorun(() => localStorage.setItem('avatarUrl', this.avatarUrl || ''));
+    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
+    autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
+    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
+    autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
   }
 
  /*
@@ -105,7 +109,7 @@ export class AppState {
 }
 
 export const appState = new AppState();
-appState.githubToken = localStorage.getItem('githubToken');
+appState.gitHubToken = localStorage.getItem('gitHubToken');
 appState.setVersion(appState.version);
 
 tmp.setGracefulCleanup();
