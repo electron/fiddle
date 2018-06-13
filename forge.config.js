@@ -2,7 +2,7 @@
 
 module.exports = {
   hooks: {
-    generateAssets: require('./tools/tsc')
+    generateAssets: require('./tools/generateAssets')
   },
   packagerConfig: {
     name: 'Electron Fiddle',

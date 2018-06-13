@@ -5,13 +5,21 @@
   src: local('Roboto'), local('Roboto-Regular'), url(../fonts/roboto/Roboto-Regular.ttf) format('woff2');
 }
 
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 200;
+  src: local('Roboto'), local('Roboto-Light'), url(../fonts/roboto/Roboto-Light.ttf) format('woff2');
+}
+
 :root {
   --electron-bright: #9feaf9;
   --electron-tuned: #6798a2;
   --electron-background-2: #39424e;
   --electron-background: #2f3241;
   --electron-dark: #1e2527;
-  --default-fonts: Roboto, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", sans-serif;
+  --default-fonts: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  --header-height: 50px;
 }
 
 html, body {
@@ -26,7 +34,7 @@ html, body {
 }
 
 header {
-  min-height: 50px;
+  min-height: var(--header-height);
   border-bottom: 1px solid var(--electron-dark);
   background-color: var(--electron-background);
   -webkit-app-region: drag;
@@ -92,19 +100,23 @@ header {
   white-space: pre;
 }
 
-.output::-webkit-scrollbar {
+.fiddle *::-webkit-scrollbar {
   width: 14px;
 }
 
-.output::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, .2);
+.fiddle *::-webkit-scrollbar-track {
+  background: unset;
 }
 
-.output::-webkit-scrollbar-thumb {
+.fiddle *::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, .4);
 }
 
-.output .timestamp {
+.fiddle *::-webkit-scrollbar-corner {
+  background: unset;
+}
+
+.fiddle * .timestamp {
   margin-right: 5px;
   color: rgba(255, 255, 255, 0.5);
   user-select: none;
@@ -134,7 +146,7 @@ header {
 }
 
 .fiddle button:hover {
-  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.4);
+  box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
 }
 
 .fiddle button:focus {
@@ -144,4 +156,15 @@ header {
 
 .fiddle .shadow {
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.fiddle .button-outline {
+  border: 1px solid var(--electron-bright);
+}
+
+.button.button-clear:focus,
+.button.button-clear:hover,
+button.button-clear:focus,
+button.button-clear:hover {
+  color: white;
 }

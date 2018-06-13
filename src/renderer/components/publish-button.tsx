@@ -48,14 +48,14 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
   public async handleClick(): Promise<void> {
     const { appState } = this.props;
 
-    if (!appState.githubToken) {
+    if (!appState.gitHubToken) {
       appState.toggleAuthDialog();
     }
 
     // Wait for the dialog to be closed again
-    await when(() => !!appState.githubToken || !appState.isTokenDialogShowing);
+    await when(() => !!appState.gitHubToken || !appState.isTokenDialogShowing);
 
-    if (appState.githubToken) {
+    if (appState.gitHubToken) {
       return this.publishFiddle();
     }
   }
@@ -70,7 +70,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     const octo = new Octokit();
     octo.authenticate({
       type: 'token',
-      token: this.props.appState.githubToken!
+      token: this.props.appState.gitHubToken!
     });
 
     const values = window.ElectronFiddle.app.getValues();

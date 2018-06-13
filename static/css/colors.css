@@ -18,6 +18,7 @@ a {
 .button[disabled]:focus, .button[disabled]:hover, button[disabled]:focus, button[disabled]:hover {
   border-color: var(--electron-tuned);
   background: unset;
+  color: unset;
 }
 
 pre.prettyprint .lit {

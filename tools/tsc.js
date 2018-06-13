@@ -1,10 +1,12 @@
 /* tslint:disable */
+
 const childProcess = require('child_process');
 const path = require('path');
+const logSymbols = require('log-symbols');
 
-module.exports = async () => {
+async function generateTypeScript() {
   await new Promise((resolve, reject) => {
-    console.info('✔ Compiling Typescript');
+    console.info(logSymbols.info, 'Compiling Typescript');
 
     const cmd = process.platform === 'win32' ? 'tsc.cmd' : 'tsc';
     const child = childProcess.spawn(
@@ -22,3 +24,7 @@ module.exports = async () => {
     });
   });
 };
+
+module.exports = {
+  generateTypeScript
+}

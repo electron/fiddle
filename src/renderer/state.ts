@@ -7,6 +7,8 @@ import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
 import { updateEditorTypeDefinitions } from './fetch-types';
+import { ipcRendererManager } from './ipc';
+import { IpcEvents } from '../ipc-events';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
@@ -35,13 +37,16 @@ export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
   @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
-  @observable public avatarUrl: string | null = null;
-  @observable public githubToken: string | null = null;
+  @observable public gitHubAvatarUrl: string | null = null;
+  @observable public gitHubName: string | null = null;
+  @observable public gitHubLogin: string | null = null;
+  @observable public gitHubToken: string | null = null;
   @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
+  @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = true;
   @observable public isMyGist: boolean = false;
 
@@ -49,7 +54,23 @@ export class AppState {
     // Bind all actions
     this.toggleConsole = this.toggleConsole.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
+
     this.setVersion = this.setVersion.bind(this);
+    this.downloadVersion = this.downloadVersion.bind(this);
+    this.removeVersion = this.removeVersion.bind(this);
+
+    this.signOutGitHub = this.signOutGitHub.bind(this);
+
+    // When the settings should be opened, we'll close
+    // everything else
+    ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
+
+    // Setup autoruns
+    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
+    autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
+    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
+    autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
   }
 
   @action public toggleConsole() {
@@ -60,9 +81,70 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
+  @action public toggleSettings() {
+    this.isSettingsShowing = !this.isSettingsShowing;
+  }
+
+ /*
+  * Remove a version of Electron
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
+  @action public async removeVersion(input: string) {
+    const version = normalizeVersion(input);
+    console.log(`State: Removing Electron ${version}`);
+
+    // Already not present?
+    if ((this.versions[version] || { state: '' }).state !== 'ready') {
+      console.log(`State: Version already removed, doing nothing`);
+      return;
+    }
+
+    // Actually remove
+    await this.binaryManager.remove(version);
+
+    // Update state
+    const updatedVersions = { ...this.versions };
+    updatedVersions[version].state = 'unknown';
+
+    this.versions = updatedVersions;
+    this.updateDownloadedVersionState();
+  }
+
+ /*
+  * Download a version of Electron.
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
+  @action public async downloadVersion(input: string) {
+    const version = normalizeVersion(input);
+    console.log(`State: Downloading Electron ${version}`);
+
+    // Fetch new binaries, maybe?
+    if ((this.versions[version] || { state: '' }).state !== 'ready') {
+      console.log(`State: Instructing BinaryManager to fetch v${version}`);
+      const updatedVersions = { ...this.versions };
+      updatedVersions[version].state = 'downloading';
+      this.versions = updatedVersions;
+
+      await this.binaryManager.setup(version);
+      this.updateDownloadedVersionState();
+    } else {
+      console.log(`State: Version ${version} already downloaded, doing nothing.`);
+    }
+  }
+
+ /*
+  * Select a version of Electron (and download it if necessary).
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
-    console.log(`State: Switching to ${version}`);
+    console.log(`State: Switching to Electron ${version}`);
 
     this.version = version;
 
@@ -70,18 +152,7 @@ export class AppState {
     updateEditorTypeDefinitions(version);
 
     // Fetch new binaries, maybe?
-    if ((this.versions[version] || { state: '' }).state !== 'ready') {
-      console.log(`State: Instructing BinaryManager to fetch v${version}`);
-      const updatedVersions = { ...this.versions };
-      updatedVersions[normalizeVersion(version)].state = 'downloading';
-      this.versions = updatedVersions;
-
-      await this.binaryManager.setup(version);
-      this.updateDownloadedVersionState();
-    }
-
-    autorun(() => localStorage.setItem('githubToken', this.githubToken || ''));
-    autorun(() => localStorage.setItem('avatarUrl', this.avatarUrl || ''));
+    await this.downloadVersion(version);
   }
 
  /*
@@ -102,10 +173,22 @@ export class AppState {
 
     this.versions = updatedVersions;
   }
+
+  /**
+   * The equivalent of signing out.
+   *
+   * @returns {void}
+   */
+  @action public signOutGitHub(): void {
+    this.gitHubAvatarUrl = null;
+    this.gitHubLogin = null;
+    this.gitHubToken = null;
+    this.gitHubName = null;
+  }
 }
 
 export const appState = new AppState();
-appState.githubToken = localStorage.getItem('githubToken');
+appState.gitHubToken = localStorage.getItem('gitHubToken');
 appState.setVersion(appState.version);
 
 tmp.setGracefulCleanup();

@@ -1,6 +1,9 @@
 import { app, shell, Menu, BrowserWindow } from 'electron';
 import * as defaultMenu from 'electron-default-menu';
 
+import { IpcEvents } from '../ipc-events';
+import { ipcMainManager } from './ipc';
+
 /**
  * Is the passed object a constructor for an Electron Menu?
  *
@@ -66,6 +69,21 @@ export function setupMenu() {
   const menu = defaultMenu(app, shell)
     .map((item) => {
       const { label } = item;
+
+      // Append the "Settings" item
+      if (label === app.getName() && isSubmenu(item.submenu)) {
+        item.submenu.splice(1, 0, {
+          type: 'separator'
+        }, {
+          label: 'Preferences',
+          accelerator: 'CmdOrCtrl+,',
+          click() {
+            ipcMainManager.send(IpcEvents.OPEN_SETTINGS);
+          }
+        }, {
+          type: 'separator'
+        });
+      }
 
       // Remove "Toggle Developer Tools"
       if (label === 'View' && isSubmenu(item.submenu)) {

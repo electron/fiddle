@@ -24,6 +24,38 @@ export class BinaryManager {
   }
 
   /**
+   * Remove a version from disk. Does not update state. We'll try up to
+   * three times before giving up if an error occurs.
+   *
+   * @param {string} iVersion
+   * @param {number} iteration
+   * @returns {Promise<void>}
+   */
+  public async remove(iVersion: string, i: number = 0): Promise<void> {
+    const version = normalizeVersion(iVersion);
+
+    try {
+      if (this.getIsDownloaded(version)) {
+        // This is necessary since we're messing with .asar files inside
+        // the Electron binaries. Electron, powering Fiddle, will try to
+        // "correct" our calls, but we don't want that right here.
+        process.noAsar = true;
+
+        await fs.remove(this.getDownloadPath(version));
+
+        process.noAsar = false;
+      }
+    } catch (error) {
+      console.warn(`Binary Manager: Tried to remove ${version}, but failed`, error);
+
+      if (i < 3) {
+        console.log(`Binary Manager: Trying again`);
+        return this.remove(version, i + 1);
+      }
+    }
+  }
+
+  /**
    * General setup, called with a version. Is called during construction
    * to ensure that we always have or download at least one version.
    *
