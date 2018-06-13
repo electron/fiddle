@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import { AppState } from '../state';
 import { ElectronSettings } from './settings-electron';
 import { GitHubSettings } from './settings-github';
+import { CreditsSettings } from './settings-credits';
 
 enum SettingsSections {
   GitHub = 'GitHub',
@@ -60,6 +61,10 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
       return <GitHubSettings appState={appState} />;
     }
 
+    if (section === SettingsSections.Credits) {
+      return <CreditsSettings appState={appState} />;
+    }
+
     return null;
   }
 
@@ -83,6 +88,8 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
   }
 
   public render() {
+    console.log(this.state.section);
+
     const { appState } = this.props;
     const { isSettingsShowing } = appState;
 

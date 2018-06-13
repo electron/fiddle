@@ -5,6 +5,8 @@
   height: 100%;
   width: 100vw;
   display: flex;
+  user-select: none;
+  cursor: initial;
 }
 
 .settings h1,
@@ -13,6 +15,7 @@
 .settings h4,
 .settings h5 {
   color: white;
+  cursor: initial;
 }
 
 .settings label {
@@ -72,4 +75,40 @@
 .settings .electron-versions-table .action {
   text-align: center;
   width: 250px;
+}
+
+.settings .contributors {
+  display: flex;
+}
+
+.settings .contributor {
+  width: 320px;
+  height: 120px;
+  background: rgba(255, 255, 255, .1);
+  padding: 10px;
+  margin: 0 10px 10px 0;
+  display: flex;
+  justify-content: flex-start;
+  cursor: pointer;
+}
+
+.settings .contributor:hover {
+  background: rgba(255, 255, 255, .15);
+}
+
+.settings .contributor .avatar {
+  height: 100px;
+  width: 100px;
+  background-size: contain;
+  margin-right: 10px;
+}
+
+.settings .contributor h5,
+.settings .contributor p {
+  margin-bottom: 0;
+}
+
+.settings .contributor .details {
+  max-width: 190px;
+  overflow: scroll;
 }

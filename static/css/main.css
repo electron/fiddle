@@ -100,19 +100,23 @@ header {
   white-space: pre;
 }
 
-.output::-webkit-scrollbar {
+.fiddle *::-webkit-scrollbar {
   width: 14px;
 }
 
-.output::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, .2);
+.fiddle *::-webkit-scrollbar-track {
+  background: unset;
 }
 
-.output::-webkit-scrollbar-thumb {
+.fiddle *::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, .4);
 }
 
-.output .timestamp {
+.fiddle *::-webkit-scrollbar-corner {
+  background: unset;
+}
+
+.fiddle * .timestamp {
   margin-right: 5px;
   color: rgba(255, 255, 255, 0.5);
   user-select: none;
