@@ -57,6 +57,7 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
 
     this.setVersion = this.setVersion.bind(this);
+    this.downloadVersion = this.downloadVersion.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
 
     this.signOutGitHub = this.signOutGitHub.bind(this);
@@ -64,6 +65,12 @@ export class AppState {
     // When the settings should be opened, we'll close
     // everything else
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
+
+    // Setup autoruns
+    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
+    autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
+    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
+    autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
   }
 
   @action public toggleConsole() {
@@ -78,6 +85,12 @@ export class AppState {
     this.isSettingsShowing = !this.isSettingsShowing;
   }
 
+ /*
+  * Remove a version of Electron
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
   @action public async removeVersion(input: string) {
     const version = normalizeVersion(input);
     console.log(`State: Removing Electron ${version}`);
@@ -99,14 +112,15 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
-  @action public async setVersion(input: string) {
+ /*
+  * Download a version of Electron.
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
+  @action public async downloadVersion(input: string) {
     const version = normalizeVersion(input);
-    console.log(`State: Switching to Electron ${version}`);
-
-    this.version = version;
-
-    // Update TypeScript definitions
-    updateEditorTypeDefinitions(version);
+    console.log(`State: Downloading Electron ${version}`);
 
     // Fetch new binaries, maybe?
     if ((this.versions[version] || { state: '' }).state !== 'ready') {
@@ -117,12 +131,28 @@ export class AppState {
 
       await this.binaryManager.setup(version);
       this.updateDownloadedVersionState();
+    } else {
+      console.log(`State: Version ${version} already downloaded, doing nothing.`);
     }
+  }
 
-    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
-    autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
-    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
-    autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
+ /*
+  * Select a version of Electron (and download it if necessary).
+  *
+  * @param {string} input
+  * @returns {Promise<void>}
+  */
+  @action public async setVersion(input: string) {
+    const version = normalizeVersion(input);
+    console.log(`State: Switching to Electron ${version}`);
+
+    this.version = version;
+
+    // Update TypeScript definitions
+    updateEditorTypeDefinitions(version);
+
+    // Fetch new binaries, maybe?
+    await this.downloadVersion(version);
   }
 
  /*

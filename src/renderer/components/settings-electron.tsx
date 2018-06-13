@@ -1,14 +1,20 @@
 import * as React from 'react';
 import * as Icon from '@fortawesome/react-fontawesome';
-import { faTrash, faCloudDownloadAlt } from '@fortawesome/fontawesome-free-solid';
+import { faTrash, faCloudDownloadAlt, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { ElectronVersion } from '../../interfaces';
+import { normalizeVersion } from '../../utils/normalize-version';
 
 export interface ElectronSettingsProps {
   appState: AppState;
+}
+
+export interface ElectronSettingsState {
+  isDownloadingAll: boolean;
+  isDeletingAll: boolean;
 }
 
 /**
@@ -18,19 +24,77 @@ export interface ElectronSettingsProps {
  * @extends {React.Component<ElectronSettingsProps, {}>}
  */
 @observer
-export class ElectronSettings extends React.Component<ElectronSettingsProps, {}> {
+export class ElectronSettings extends React.Component<ElectronSettingsProps, ElectronSettingsState> {
+  constructor(props: ElectronSettingsProps) {
+    super(props);
+
+    this.handleDownloadAll = this.handleDownloadAll.bind(this);
+    this.handleDeleteAll = this.handleDeleteAll.bind(this);
+
+    this.state = {
+      isDownloadingAll: false,
+      isDeletingAll: false
+    };
+  }
+
+  /**
+   * Download all versions of Electron.
+   *
+   * @returns {Promise<void>}
+   */
+  public async handleDownloadAll(): Promise<void> {
+    this.setState({ isDownloadingAll: true });
+
+    const { versions, downloadVersion } = this.props.appState;
+
+    for (const key of Object.keys(versions)) {
+      await downloadVersion(key);
+    }
+
+    this.setState({ isDownloadingAll: false });
+  }
+
+  /**
+   * Delete all downloaded versions of Electron.
+   *
+   * @returns {Promise<void>}
+   */
+  public async handleDeleteAll(): Promise<void> {
+    this.setState({ isDeletingAll: true });
+
+    const { versions, removeVersion, version } = this.props.appState;
+
+    for (const key in versions) {
+      // If this isn't the currently selected version, remove it
+      if (normalizeVersion(key) !== normalizeVersion(version)) {
+        await removeVersion(key);
+      }
+    }
+
+    this.setState({ isDeletingAll: false });
+  }
+
   public render() {
+    const { isDownloadingAll, isDeletingAll } = this.state;
+    const isWorking = isDownloadingAll || isDeletingAll;
+    const downloadIcon = isDownloadingAll
+      ? <Icon icon={faSpinner} spin={true} />
+      : <Icon icon={faCloudDownloadAlt} />;
+    const deleteIcon = isDeletingAll
+      ? <Icon icon={faSpinner} spin={true} />
+      : <Icon icon={faCloudDownloadAlt} />;
+
     return (
       <div className='settings-electron'>
         <h2>Electron Settings</h2>
         <div className='advanced-options settings-section'>
           <label>Download all versions of Electron.</label>
-          <button className='button'>
-            <Icon icon={faCloudDownloadAlt} /> Download All Versions
+          <button className='button' disabled={isWorking} onClick={this.handleDownloadAll}>
+            {downloadIcon} Download All Versions
           </button>
           <label>Remove all downloaded versions of Electron.</label>
-          <button className='button'>
-            <Icon icon={faTrash} /> Delete All Versions
+          <button className='button' disabled={isWorking} onClick={this.handleDeleteAll}>
+            {deleteIcon} Delete All Versions
           </button>
         </div>
         <div>
@@ -116,7 +180,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, {}>
     if (state === 'downloading') {
       return (
         <button className='button button-clear' disabled={true}>
-          <Icon icon={faCloudDownloadAlt} spin={true}/> Downloading
+          <Icon icon={faSpinner} spin={true}/> Downloading
         </button>
       );
     }
