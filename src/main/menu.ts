@@ -73,12 +73,16 @@ export function setupMenu() {
       // Append the "Settings" item
       if (label === app.getName() && isSubmenu(item.submenu)) {
         item.submenu.splice(1, 0, {
+          type: 'separator'
+        }, {
           label: 'Preferences',
           accelerator: 'CmdOrCtrl+,',
           click() {
             ipcMainManager.send(IpcEvents.OPEN_SETTINGS);
           }
-        }, { type: 'separator'});
+        }, {
+          type: 'separator'
+        });
       }
 
       // Remove "Toggle Developer Tools"

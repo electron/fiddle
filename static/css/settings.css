@@ -113,3 +113,23 @@
   max-width: 190px;
   overflow: scroll;
 }
+
+.settings .settings-close {
+  position: fixed;
+  right: 30px;
+  height: 25px;
+  width: 25px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 15px;
+  color: rgb(230, 230, 230);
+}
+
+.settings .settings-close:hover {
+  color: white;
+}
+
+.settings .settings-close svg {
+  background: var(--electron-background-2);
+  box-shadow: 0 0 12px 6px var(--electron-background-2);
+}

@@ -1,7 +1,5 @@
 import * as React from 'react';
 import { shell } from 'electron';
-// import * as Icon from '@fortawesome/react-fontawesome';
-// import { faSignInAlt, faSignOutAlt } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
 
