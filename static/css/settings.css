@@ -79,6 +79,7 @@
 
 .settings .contributors {
   display: flex;
+  flex-wrap: wrap;
 }
 
 .settings .contributor {
