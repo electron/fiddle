@@ -29,13 +29,13 @@ export class Output extends React.Component<CommandsProps, {}> {
    * @returns {Array<JSX.Element>}
    * @memberof Output
    */
-  public renderEntry(entry: OutputEntry): Array<JSX.Element> {
+  public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
     const ts = new Date(entry.timestamp).toLocaleTimeString();
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 
-    return lines.map((text) => (
-      <p key={ts}>{timestamp}{text}</p>
+    return lines.map((text, lineIndex) => (
+      <p key={`${entry.timestamp}--${index}--${lineIndex}`}>{timestamp}{text}</p>
     ));
   }
 
