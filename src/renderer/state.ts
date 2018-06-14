@@ -41,7 +41,7 @@ export class AppState {
   @observable public gitHubName: string | null = null;
   @observable public gitHubLogin: string | null = null;
   @observable public gitHubToken: string | null = null;
-  @observable public binaryManager: BinaryManager = new BinaryManager(defaultVersion);
+  @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public isConsoleShowing: boolean = false;
