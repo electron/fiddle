@@ -7,8 +7,19 @@ const logSymbols = require('log-symbols');
 const CONTRIBUTORS_FILE_PATH = path.join(__dirname, '../static/contributors.json');
 const CONTRIBUTORS_URL = 'https://api.github.com/repos/electron/fiddle/contributors'
 
-// Add bots you don't want to get credit here
-const CONTRIBUTORS_BLACKLIST = [];
+// 💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖
+// 💖                                                     💖
+// 💖  If you're a contributor, we'd love to say          💖
+// 💖  "thanks" on the app's credits page! Add            💖
+// 💖  your GitHub username here to have it included.     💖
+// 💖  We'll pull your details automatically from there.  💖
+// 💖                                                     💖
+// 💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖
+const CONTRIBUTORS_WHITELIST = [
+  'zeke',
+  'charliehess',
+  'marshallofsound'
+];
 
 async function maybeFetchContributors() {
   try {
@@ -88,7 +99,7 @@ function fetchContributors() {
     .then(async (data) => {
       if (data && data.forEach) {
         data.forEach(({ html_url, url, login, avatar_url }) => {
-          if (CONTRIBUTORS_BLACKLIST.find((name) => name === login)) {
+          if (CONTRIBUTORS_WHITELIST.find((name) => name !== login)) {
             return;
           }
 
