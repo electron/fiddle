@@ -2,6 +2,7 @@ import { app } from 'electron';
 
 import { getOrCreateMainWindow } from './windows';
 import { setupMenu } from './menu';
+import { setupProtocolHandler, listenForProtocolHandler } from './protocol';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -10,9 +11,12 @@ if (require('electron-squirrel-startup')) { // eslint-disable-line global-requir
 
 app.setName('Electron Fiddle');
 
+listenForProtocolHandler();
+
 app.on('ready', () => {
   getOrCreateMainWindow();
   setupMenu();
+  setupProtocolHandler();
 });
 
 // Quit when all windows are closed.
