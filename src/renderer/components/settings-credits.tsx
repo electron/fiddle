@@ -56,9 +56,9 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
       <div>
         <h2>Credits</h2>
         <p>
-          Electron Fiddle is, just like Electron, a free open source project brought
-          to you by dedicated engineers of all genders, cultures, and backgrounds. We
-          would like to thank those who contributed to Electron Fiddle:
+          Electron Fiddle is, just like Electron, a free open source project
+          welcoming contributors of all genders, cultures, and backgrounds. We
+          would like to thank those who helped to make Electron Fiddle:
         </p>
         <div className='contributors'>
           {this.renderContributors()}
