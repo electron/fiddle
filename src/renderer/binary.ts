@@ -19,10 +19,6 @@ const eDownload = promisify(require('electron-download'));
 export class BinaryManager {
   public state: StringMap<'ready' | 'downloading'> = {};
 
-  constructor(version: string) {
-    this.setup(version);
-  }
-
   /**
    * Remove a version from disk. Does not update state. We'll try up to
    * three times before giving up if an error occurs.
