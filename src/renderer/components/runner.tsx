@@ -75,6 +75,8 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
   }
 
+  private outputBuffer: string = '';
+
   /**
    * Push output to the application's state. Accepts a buffer or a string as input,
    * attaches a timestamp, and pushes into the store.
@@ -82,9 +84,25 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @param {(string | Buffer)} data
    * @returns
    */
-  public pushData(data: string | Buffer) {
-    const strData = data.toString();
+  public pushData(data: string | Buffer, bypassBuffer: boolean = true) {
+    let strData = data.toString();
+    if (process.platform === 'win32' && !bypassBuffer) {
+      this.outputBuffer += strData;
+      strData = this.outputBuffer;
+      const parts = strData.split('\r\n');
+      for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+        const part = parts[partIndex];
+        if (partIndex === parts.length - 1) {
+          this.outputBuffer = part;
+          continue;
+        }
+        this.pushData(part);
+      }
+      return;
+    }
+
     if (strData.startsWith('Debugger listening on ws://')) return;
+    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
 
     this.props.appState.output.push({
       timestamp: Date.now(),
@@ -147,8 +165,8 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     this.child = spawn(binaryPath, [ tmpDir.name, '--inspect' ]);
     this.setState({ isRunning: true });
     this.pushData(`Electron v${version} started.`);
-    this.child.stdout.on('data', this.pushData);
-    this.child.stderr.on('data', this.pushData);
+    this.child.stdout.on('data', (data) => this.pushData(data, false));
+    this.child.stderr.on('data', (data) => this.pushData(data, false));
     this.child.on('close', (code) => {
       this.pushData(`Electron exited with code ${code.toString()}.`);
       this.setState({ isRunning: false });

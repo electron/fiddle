@@ -1,8 +1,8 @@
 {
   "name": "electron-fiddle",
-  "productName": "electron-fiddle",
+  "productName": "Electron Fiddle",
   "version": "1.0.0",
-  "description": "My Electron application description",
+  "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "main": "./dist/main/main",
   "scripts": {
