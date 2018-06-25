@@ -6,8 +6,10 @@ import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { when } from 'mobx';
+import { ipcRendererManager } from '../ipc';
+import { IpcEvents } from '../../ipc-events';
 
 export interface PublishButtonProps {
   appState: AppState;
@@ -32,6 +34,10 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     this.state = { isPublishing: false };
     this.handleClick = this.handleClick.bind(this);
     this.publishFiddle = this.publishFiddle.bind(this);
+  }
+
+  public componentDidMount() {
+    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
   }
 
   /**

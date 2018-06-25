@@ -4,7 +4,7 @@ import * as Octokit from '@octokit/rest';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { idFromUrl } from '../../utils/gist';
 import { reaction } from 'mobx';
 
@@ -73,15 +73,15 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @memberof AddressBar
    */
   public async loadFiddle() {
-    const { gistId } = this.props.appState;
+    const { appState } = this.props;
 
     if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) return;
 
     try {
       const octo = new Octokit();
       const gist = await octo.gists.get({
-        gist_id: gistId,
-        id: gistId,
+        gist_id: appState.gistId,
+        id: appState.gistId,
       });
 
       window.ElectronFiddle.app.setValues({
@@ -89,6 +89,9 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         main: gist.data.files[MAIN_JS_NAME].content,
         renderer: gist.data.files[RENDERER_JS_NAME].content,
       });
+
+      document.title = `Electron Fiddle - gist.github.com/${appState.gistId}`;
+      appState.localPath = null;
     } catch (error) {
       console.warn(`Loading fiddle failed`, error);
     }

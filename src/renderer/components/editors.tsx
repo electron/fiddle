@@ -36,15 +36,17 @@ export interface EditorsProps {
  *
  * @param {EditorsProps} props
  */
-export const editors = (props: EditorsProps) => (
-  <ViewIdMosaic
-    onChange={updateEditorLayout}
-    // tslint:disable-next-line:jsx-no-multiline-js
-    renderTile={(id, path) => (
-      <ViewIdMosaicWindow path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
-        <Editor id={id} monaco={props.monaco} appState={props.appState} />
-      </ViewIdMosaicWindow>
-    )}
-    initialValue={options}
-  />
-);
+export const editors = (props: EditorsProps) => {
+  return (
+    <ViewIdMosaic
+      onChange={updateEditorLayout}
+      // tslint:disable-next-line:jsx-no-multiline-js
+      renderTile={(id, path) => (
+        <ViewIdMosaicWindow path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
+          <Editor id={id} monaco={props.monaco} appState={props.appState} />
+        </ViewIdMosaicWindow>
+      )}
+      initialValue={options}
+    />
+  );
+};

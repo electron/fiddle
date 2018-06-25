@@ -12,6 +12,7 @@ import { updateEditorLayout } from '../utils/editor-layout';
 import { appState } from './state';
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
+import { FileManager } from './file-manager';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -19,10 +20,13 @@ import { IpcEvents } from '../ipc-events';
  *
  * @class App
  */
-class App {
+export class App {
   public monaco: typeof MonacoType | null = null;
   public name = 'test';
-  public typeDefDisposable = null;
+  public typeDefDisposable: MonacoType.IDisposable | null = null;
+
+  //@ts-ignore: We're not using this, but we do want to create it
+  private fileManager = new FileManager();
 
   constructor() {
     this.getValues = this.getValues.bind(this);

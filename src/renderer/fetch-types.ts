@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as MonacoType from 'monaco-editor';
 import { get } from 'lodash';
 
-import { USER_DATA_PATH } from './constants';
+import { USER_DATA_PATH } from '../constants';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 

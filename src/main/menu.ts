@@ -3,6 +3,7 @@ import * as defaultMenu from 'electron-default-menu';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
+import { showOpenDialog, showSaveDialog } from './files';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
@@ -107,12 +108,39 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
  */
 function getFileMenu(): MenuItemConstructorOptions {
   const fileMenu: Array<MenuItemConstructorOptions> = [
-
+    {
+      label: 'New Fiddle',
+      click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE)
+    }, {
+      type: 'separator'
+    },
+    {
+      label: 'Open',
+      click: showOpenDialog,
+      accelerator: 'CmdOrCtrl+O'
+    },
+    {
+      type: 'separator'
+    },
+    {
+      label: 'Save',
+      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE),
+      accelerator: 'CmdOrCtrl+S'
+    },
+    {
+      label: 'Save as',
+      click: showSaveDialog,
+      accelerator: 'CmdOrCtrl+Shift+S'
+    },
+    {
+      label: 'Save to Gist',
+      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST),
+    },
   ];
 
+  // macOS has these items in the "Fiddle" menu
   if (process.platform !== 'darwin') {
-    fileMenu.splice(0, 0, ...getPreferencesItems());
-    fileMenu.splice(fileMenu.length, 0, ...getQuitItems());
+    fileMenu.splice(fileMenu.length, 0, ...getPreferencesItems(), ...getQuitItems());
   }
 
   return {
@@ -136,7 +164,7 @@ export function setupMenu() {
         && label === app.getName()
         && isSubmenu(item.submenu)
       ) {
-        item.submenu.splice(1, 0, ...getPreferencesItems());
+        item.submenu.splice(0, 0, ...getPreferencesItems());
       }
 
       // Remove "Toggle Developer Tools"
