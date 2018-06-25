@@ -10,6 +10,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
+    "style": "lessc --source-map-inline ./src/less/root.less ./static/css/root.css",
     "lint": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\""
   },
   "keywords": [],
@@ -63,6 +64,7 @@
     "@types/tmp": "0.0.33",
     "css-loader": "^0.28.11",
     "electron": "2.0.2",
+    "less": "^3.0.4",
     "log-symbols": "^2.2.0",
     "monaco-editor": "^0.13.1",
     "node-fetch": "^2.1.2",
