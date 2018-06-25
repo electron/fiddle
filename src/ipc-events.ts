@@ -1,7 +1,12 @@
 export enum IpcEvents {
   MAIN_WINDOW_READY_TO_SHOW = 'MAIN_WINDOW_READY_TO_SHOW',
   OPEN_SETTINGS = 'OPEN_SETTINGS',
-  LOAD_GIST_REQUEST = 'LOAD_GIST_REQUEST'
+  LOAD_GIST_REQUEST = 'LOAD_GIST_REQUEST',
+  FS_NEW_FIDDLE = 'FS_NEW_FIDDLE',
+  FS_OPEN_FIDDLE = 'FS_OPEN_FIDDLE',
+  FS_SAVE_FIDDLE = 'FS_SAVE_FIDDLE',
+  FS_SAVE_FIDDLE_AS = 'FS_SAVE_FIDDLE_AS',
+  FS_SAVE_FIDDLE_GIST = 'FS_SAVE_FIDDLE_GIST'
 }
 
 export const ipcMainEvents = [
@@ -10,5 +15,10 @@ export const ipcMainEvents = [
 
 export const ipcRendererEvents = [
   IpcEvents.OPEN_SETTINGS,
-  IpcEvents.LOAD_GIST_REQUEST
+  IpcEvents.LOAD_GIST_REQUEST,
+  IpcEvents.FS_NEW_FIDDLE,
+  IpcEvents.FS_OPEN_FIDDLE,
+  IpcEvents.FS_SAVE_FIDDLE,
+  IpcEvents.FS_SAVE_FIDDLE_AS,
+  IpcEvents.FS_SAVE_FIDDLE_GIST,
 ];
