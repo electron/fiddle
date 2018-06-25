@@ -20,23 +20,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
- .mosaic {
+.mosaic {
   height: 100%;
   width: 100%;
 }
+
 .mosaic,
 .mosaic > * {
   box-sizing: border-box;
 }
+
 .mosaic .mosaic-zero-state {
   width: auto;
   height: auto;
   max-width: none;
   z-index: 1;
 }
+
 .mosaic .mosaic-zero-state .pt-non-ideal-state-icon .pt-icon {
   font-size: 120px;
 }
+
 .mosaic-root {
   position: absolute;
   top: 3px;
@@ -44,64 +48,80 @@
   bottom: 3px;
   left: 3px;
 }
+
 .mosaic-split {
   position: absolute;
   z-index: 1;
 }
+
 .mosaic-split:hover {
   background: black;
 }
+
 .mosaic-split .mosaic-split-line {
   position: absolute;
 }
+
 .mosaic-split.-row {
   margin-left: -3px;
   width: 6px;
   cursor: ew-resize;
 }
+
 .mosaic-split.-row .mosaic-split-line {
   top: 0;
   bottom: 0;
   left: 3px;
   right: 3px;
 }
+
 .mosaic-split.-column {
   margin-top: -3px;
   height: 6px;
   cursor: ns-resize;
 }
+
 .mosaic-split.-column .mosaic-split-line {
   top: 3px;
   bottom: 3px;
   left: 0;
   right: 0;
 }
+
 .mosaic-tile {
   position: absolute;
   margin: 3px;
 }
+
 .mosaic-tile > * {
   height: 100%;
   width: 100%;
 }
+
 .mosaic-drop-target {
   position: relative;
 }
+
 .mosaic-drop-target.drop-target-hover .drop-target-container {
   display: block;
 }
+
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.left {
   right: calc(100% -  10px );
 }
+
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.right {
   left: calc(100% -  10px );
 }
+
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.bottom {
   top: calc(100% -  10px );
 }
+
 .mosaic-drop-target.mosaic > .drop-target-container .drop-target.top {
   bottom: calc(100% -  10px );
 }
+
 .mosaic-drop-target .drop-target-container {
   position: absolute;
   top: 0;
@@ -110,9 +130,11 @@
   left: 0;
   display: none;
 }
+
 .mosaic-drop-target .drop-target-container.-dragging {
   display: block;
 }
+
 .mosaic-drop-target .drop-target-container .drop-target {
   position: absolute;
   top: 0;
@@ -124,30 +146,39 @@
   opacity: 0;
   z-index: 5;
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.left {
   right: calc(100% -  30% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.right {
   left: calc(100% -  30% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.bottom {
   top: calc(100% -  30% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.top {
   bottom: calc(100% -  30% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover {
   opacity: 1;
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.left {
   right: calc(100% -  50% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.right {
   left: calc(100% -  50% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.bottom {
   top: calc(100% -  50% );
 }
+
 .mosaic-drop-target .drop-target-container .drop-target.drop-target-hover.top {
   bottom: calc(100% -  50% );
 }
@@ -160,6 +191,7 @@
   overflow: hidden;
   box-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
 }
+
 .mosaic-window .mosaic-window-toolbar,
 .mosaic-preview .mosaic-window-toolbar {
   z-index: 4;
@@ -171,10 +203,12 @@
   background: white;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
 }
+
 .mosaic-window .mosaic-window-toolbar.draggable,
 .mosaic-preview .mosaic-window-toolbar.draggable {
   cursor: move;
 }
+
 .mosaic-window .mosaic-window-title,
 .mosaic-preview .mosaic-window-title {
   padding-left: 15px;
@@ -184,17 +218,20 @@
   overflow: hidden;
   min-height: 18px;
 }
+
 .mosaic-window .mosaic-window-controls,
 .mosaic-preview .mosaic-window-controls {
   display: flex;
   height: 100%;
 }
+
 .mosaic-window .mosaic-window-controls .separator,
 .mosaic-preview .mosaic-window-controls .separator {
   height: 20px;
   border-left: 1px solid black;
   margin: 5px 4px;
 }
+
 .mosaic-window .mosaic-window-body,
 .mosaic-preview .mosaic-window-body {
   position: relative;
@@ -204,6 +241,7 @@
   z-index: 1;
   overflow: hidden;
 }
+
 .mosaic-window .mosaic-window-additional-actions-bar,
 .mosaic-preview .mosaic-window-additional-actions-bar {
   position: absolute;
@@ -218,14 +256,17 @@
   display: flex;
   z-index: 3;
 }
+
 .mosaic-window .mosaic-window-additional-actions-bar .pt-button,
 .mosaic-preview .mosaic-window-additional-actions-bar .pt-button {
   margin: 0;
 }
-.mosaic-window .mosaic-window-additional-actions-bar .pt-button:after,
-.mosaic-preview .mosaic-window-additional-actions-bar .pt-button:after {
+
+.mosaic-window .mosaic-window-additional-actions-bar .pt-button::after,
+.mosaic-preview .mosaic-window-additional-actions-bar .pt-button::after {
   display: none;
 }
+
 .mosaic-window .mosaic-window-body-overlay,
 .mosaic-preview .mosaic-window-body-overlay {
   position: absolute;
@@ -238,14 +279,17 @@
   display: none;
   z-index: 2;
 }
+
 .mosaic-window.additional-controls-open .mosaic-window-additional-actions-bar,
 .mosaic-preview.additional-controls-open .mosaic-window-additional-actions-bar {
   height: 30px;
 }
+
 .mosaic-window.additional-controls-open .mosaic-window-body-overlay,
 .mosaic-preview.additional-controls-open .mosaic-window-body-overlay {
   display: block;
 }
+
 .mosaic-window .mosaic-preview,
 .mosaic-preview .mosaic-preview {
   height: 100%;
@@ -255,6 +299,7 @@
   border: 1px solid black;
   max-height: 400px;
 }
+
 .mosaic-window .mosaic-preview .mosaic-window-body,
 .mosaic-preview .mosaic-preview .mosaic-window-body {
   display: flex;
@@ -262,23 +307,29 @@
   align-items: center;
   justify-content: center;
 }
+
 .mosaic-window .mosaic-preview h4,
 .mosaic-preview .mosaic-preview h4 {
   margin-bottom: 10px;
 }
+
 .mosaic-window .mosaic-preview .pt-icon,
 .mosaic-preview .mosaic-preview .pt-icon {
   font-size: 72px;
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-cross:before {
+
+.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-cross::before {
   content: 'Close';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-add-column-right:before {
+
+.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-add-column-right::before {
   content: 'Split';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-exchange:before {
+
+.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-exchange::before {
   content: 'Replace';
 }
-.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-maximize:before {
+
+.mosaic:not(.mosaic-blueprint-theme) .mosaic-default-control.pt-icon-maximize::before {
   content: 'Expand';
 }

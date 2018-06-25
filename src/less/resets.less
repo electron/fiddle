@@ -4,20 +4,32 @@ a {
   color: @electron-bright;
 }
 
-.button, button, input[type='button'], input[type='reset'], input[type='submit'] {
+.button,
+button,
+input[type='button'],
+input[type='reset'],
+input[type='submit'] {
   background-color: @electron-bright;
-  border: .1rem solid @electron-bright;
+  border: 0.1rem solid @electron-bright;
 }
 
-.button.button-outline, button.button-outline, input[type='button'].button-outline, input[type='reset'].button-outline, input[type='submit'].button-outline {
+.button.button-outline,
+button.button-outline,
+input[type='button'].button-outline,
+input[type='reset'].button-outline,
+input[type='submit'].button-outline,
+.button.button-clear,
+button.button-clear,
+input[type='button'].button-clear,
+input[type='reset'].button-clear,
+input[type='submit'].button-clear {
   color: @electron-bright;
 }
 
-.button.button-clear, button.button-clear, input[type='button'].button-clear, input[type='reset'].button-clear, input[type='submit'].button-clear {
-  color: @electron-bright;
-}
-
-.button[disabled]:focus, .button[disabled]:hover, button[disabled]:focus, button[disabled]:hover {
+.button[disabled]:focus,
+.button[disabled]:hover,
+button[disabled]:focus,
+button[disabled]:hover {
   border-color: @electron-tuned;
   background: unset;
   color: unset;
@@ -34,10 +46,10 @@ pre.prettyprint .lit {
 
 pre {
   background: #f4f5f6;
-  border-left: .3rem solid @electron-bright;
+  border-left: 0.3rem solid @electron-bright;
 
   &.prettyprint {
-    border-left: .3rem solid @electron-bright !important;
+    border-left: 0.3rem solid @electron-bright !important;
     color: #655d5d;
 
     .tag {
@@ -59,7 +71,7 @@ input[type='text']:focus,
 input[type='url']:focus,
 textarea:focus,
 select:focus {
-  border: .1rem solid @electron-bright;
+  border: 0.1rem solid @electron-bright;
 }
 
 select:focus {
