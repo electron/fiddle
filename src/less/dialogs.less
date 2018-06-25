@@ -1,0 +1,99 @@
+@import "variables.less";
+
+.dialogs {
+  z-index: 10;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  pointer-events: none;
+
+  * {
+    pointer-events: all;
+  }
+
+  .generateTokenText svg {
+    margin-right: 4px;
+  }
+}
+
+.tokenDialog {
+  position: absolute;
+  z-index: 2;
+  top: 60px;
+  width: 300px;
+  padding: 10px;
+  z-index: 1000;
+  background-color: var(--electron-background-2);
+  border: 1px solid var(--electron-dark);
+  color: #f3f3f3;
+  border-radius: 6px;
+  left: -10000px;
+  opacity: 0;
+  transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
+
+  &.tokenDialogVisible {
+    left: calc(50% - (300px / 2));
+    opacity: 1;
+    top: 100px;
+  }
+
+  button {
+    color: #1e2527;
+    float: right;
+    margin-left: 5px;
+    margin-bottom: 0;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  input {
+    width: 100%;
+    color: rgba(159, 234, 249, 0.5);
+    height: 28px;
+    margin-top: 10px;
+    background-color: @electron-background;
+    border: 1px solid @electron-dark;
+    outline: 0 solid transparent;
+
+    &:focus {
+      border-color: @electron-bright;
+    }
+
+    &.hasError {
+      border-color: #df3434;
+    }
+  }
+
+  .tokenSpinner {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.dialogDrop {
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  transition: opacity 0.4s ease-in-out;
+
+  &.dialogDropVisible {
+    pointer-events: all;
+    opacity: 0.5;
+  }
+}

@@ -1,0 +1,110 @@
+@import "variables.less";
+
+.commands {
+  display: flex;
+  justify-content: space-between;
+  height: 40px;
+  padding-top: 12px;
+  font-family: var(--default-fonts);
+
+  button, input, select {
+    -webkit-app-region: no-drag;
+  }
+
+  select {
+    width: 100px;
+    font-size: 12px;
+    height: 28px;
+    background-color: white;
+    margin-left: 5px;
+    line-height: 15px;
+  }
+
+  &>div {
+    display: flex;
+
+    &:first-of-type {
+      button {
+        margin-left: 80px;
+      }
+    }
+
+    &::last-of-type {
+      margin-right: 10px;
+
+      button {
+        margin-left: 5px;
+      }
+    }
+  }
+
+  .address-bar {
+    height: 28px;
+    width: 360px;
+    transition: width .4s;
+    display: flex;
+
+    &.empty {
+      width: 200px;
+    }
+
+    &::focus-within {
+      span, input {
+        border-color: @electron-bright;
+      }
+    }
+
+    input {
+      flex-grow: 1;
+      background: white;
+      border-left: 0;
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding-left: 0;
+      height: 28px;
+
+      &:focus {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        border-left: 0;
+      }
+    }
+
+    span {
+      background: white;
+      color: #1d1d1d;
+      border-bottom-color: rgb(209, 209, 209);
+      border-bottom-style: solid;
+      border-bottom-left-radius: 4px;
+      border-bottom-width: 1px;
+      border-image-outset: 0px;
+      border-image-repeat: stretch;
+      border-image-slice: 100%;
+      border-image-source: none;
+      border-image-width: 1;
+      border-left-color: rgb(209, 209, 209);
+      border-left-style: solid;
+      border-left-width: 1px;
+      border-top-color: rgb(209, 209, 209);
+      border-top-left-radius: 4px;
+      border-top-style: solid;
+      border-top-width: 1px;
+      color: rgb(0, 0, 0);
+      cursor: auto;
+      display: inline-block;
+      font-family: system-ui;
+      font-size: 11px;
+      height: 28px;
+      letter-spacing: normal;
+      line-height: 16px;
+      margin: 0 6px 0 0;
+      padding: 6px 6px 10px 10px;
+      user-select: text;
+      width: 132px;
+      -webkit-app-region: no-drag;
+      text-rendering: auto;
+      text-shadow: none;
+      text-transform: none;
+    }
+  }
+}

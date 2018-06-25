@@ -83,7 +83,7 @@ class App {
     this.createThemes();
 
     const app = (
-      <div>
+      <div className={process.platform}>
         <Header appState={appState} />
         <Dialogs appState={appState} />
         {editors({ monaco: this.monaco!, appState })}å
