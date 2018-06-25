@@ -38,6 +38,7 @@ export class FileManager {
 
     appState.localPath = filePath;
     window.ElectronFiddle.app.setValues(values);
+    document.title = `Electron Fiddle - ${filePath}`;
   }
 
   /**
