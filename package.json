@@ -12,6 +12,7 @@
     "publish": "electron-forge publish",
     "tsc": "node ./tools/tsc.js",
     "less": "node ./tools/lessc.js",
+    "watch": "node ./tools/watch.js",
     "contributors": "node ./tools/contributors.js",
     "lint-ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
     "lint-style": "stylelint ./src/less/*.less"
@@ -65,6 +66,7 @@
     "@types/react-dom": "^16.0.6",
     "@types/semver": "^5.5.0",
     "@types/tmp": "0.0.33",
+    "chokidar": "^2.0.4",
     "css-loader": "^0.28.11",
     "electron": "2.0.2",
     "less": "^3.0.4",
