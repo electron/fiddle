@@ -48,7 +48,7 @@ export class AppState {
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
-  @observable public isUnsaved: boolean = true;
+  @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
 
   constructor() {

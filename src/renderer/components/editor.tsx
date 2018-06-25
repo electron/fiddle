@@ -36,6 +36,10 @@ export class Editor extends React.Component<EditorProps> {
     };
   }
 
+  public shouldComponentUpdate() {
+    return false;
+  }
+
   public componentDidMount() {
     this.initMonaco();
   }
@@ -47,11 +51,11 @@ export class Editor extends React.Component<EditorProps> {
   public editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorDidMount } = this.props;
 
+    window.ElectronFiddle.editors[this.props.id] = editor;
+
     if (editorDidMount) {
       editorDidMount(editor);
     }
-
-    window.ElectronFiddle.editors[this.props.id] = editor;
   }
 
   public initMonaco() {
