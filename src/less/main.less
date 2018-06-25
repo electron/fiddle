@@ -1,0 +1,131 @@
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Roboto'), local('Roboto-Regular'), url(../fonts/roboto/Roboto-Regular.ttf) format('woff2');
+}
+
+@font-face {
+  font-family: 'Roboto';
+  font-style: normal;
+  font-weight: 200;
+  src: local('Roboto'), local('Roboto-Light'), url(../fonts/roboto/Roboto-Light.ttf) format('woff2');
+}
+
+html,
+body {
+  padding: 0;
+  margin: 0;
+  background: @electron-background-2;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  font-family: @default-fonts;
+}
+
+.fiddle {
+  *::-webkit-scrollbar {
+    width: 14px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: unset;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+  }
+
+  *::-webkit-scrollbar-corner {
+    background: unset;
+  }
+
+  header {
+    min-height: @header-height;
+    border-bottom: 1px solid @electron-dark;
+    background-color: @electron-background;
+    -webkit-app-region: drag;
+  }
+
+  button {
+    background-color: #9feaf9;
+    border: none;
+    color: #1e2527;
+    padding: 0 30px;
+    text-align: center;
+    text-decoration: none;
+    border-radius: 4px;
+    height: 28px;
+    line-height: 4px;
+
+    &:hover {
+      box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
+    }
+
+    &:focus {
+      background-color: #9feaf9;
+      color: initial;
+    }
+
+    &.button-outline {
+      border: 1px solid var(--electron-bright);
+    }
+
+    &.button-clear:focus,
+    &.button-clear:hover,
+    button.button-clear:focus,
+    button.button-clear:hover {
+      color: white;
+    }
+  }
+
+  .shadow {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+
+  .timestamp {
+    margin-right: 5px;
+    color: rgba(255, 255, 255, 0.5);
+    user-select: none;
+  }
+}
+
+#editors {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  align-content: stretch;
+  height: 100%;
+}
+
+.editor {
+  flex-grow: 1;
+  width: 30%;
+}
+
+.resize {
+  width: 6px;
+  background: rgba(0, 0, 0, 0.2);
+  margin-left: 9px;
+  margin-right: 0;
+  cursor: col-resize;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+
+#runner {
+  height: 0;
+}
+
+#runner:not(:empty) {
+  height: 200px;
+}
+
+.editorTitle span {
+  width: 33%;
+  display: inline-block;
+  text-align: center;
+  font-size: 12px;
+}

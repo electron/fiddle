@@ -1,0 +1,55 @@
+@import "variables.less";
+
+.fiddle {
+  .mosaic-window-toolbar.draggable {
+    background: #252b33;
+    box-shadow: none;
+  }
+
+  .mosaic-window-toolbar.draggable:hover {
+    box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.1);
+  }
+
+  .mosaic-window-title {
+    color: #dcdcdc;
+  }
+
+  button.mosaic-default-control {
+    padding: 0;
+    height: 20px;
+    width: 20px;
+    margin: 5px;
+    background-color: #314246;
+    border: 0.1rem solid #222b35;
+  }
+
+  button.mosaic-default-control:hover {
+    background-color: #131d1f;
+  }
+
+  .mosaic-window-body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    align-content: stretch;
+  }
+
+  .mosaic {
+    height: 100vh;
+
+    &.mosaic-blueprint-theme {
+      background: @electron-background-2;
+    }
+  }
+
+  .editorContainer,
+  .monaco-editor {
+    width: 100%;
+    height: 100%;
+  }
+
+  .editorContainer {
+    background: @electron-background;
+  }
+}

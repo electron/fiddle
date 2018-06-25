@@ -1,0 +1,7 @@
+{
+  "extends": "stylelint-config-standard",
+  "ignoreFiles": [
+    "./src/less/*-vendor.less"
+  ],
+  "rules": { }
+}

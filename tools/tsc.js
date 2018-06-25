@@ -1,30 +1,13 @@
 /* tslint:disable */
 
-const childProcess = require('child_process');
-const path = require('path');
-const logSymbols = require('log-symbols');
+const { run } = require('./run-bin');
 
-async function generateTypeScript() {
-  await new Promise((resolve, reject) => {
-    console.info(logSymbols.info, 'Compiling Typescript');
-
-    const cmd = process.platform === 'win32' ? 'tsc.cmd' : 'tsc';
-    const child = childProcess.spawn(
-      path.resolve(__dirname, '..', 'node_modules', '.bin', cmd),
-      ['-p', 'tsconfig.json'],
-      {
-        cwd: path.resolve(__dirname, '..'),
-        stdio: 'inherit'
-      }
-    );
-
-    child.on('exit', (code) => {
-      if (code === 0) return resolve();
-      reject(new Error('Typescript compilation failed'));
-    });
-  });
+async function compileTypeScript() {
+  await run('TypeScript', 'tsc', ['-p', 'tsconfig.json']);
 };
 
 module.exports = {
-  generateTypeScript
+  compileTypeScript
 }
+
+if (require.main === module) compileTypeScript();

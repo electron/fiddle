@@ -140,3 +140,5 @@ async function fetchAndWriteContributorsFile() {
 module.exports = {
   maybeFetchContributors
 }
+
+if (require.main === module) maybeFetchContributors();

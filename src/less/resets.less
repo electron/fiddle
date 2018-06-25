@@ -1,0 +1,84 @@
+@import "variables.less";
+
+a {
+  color: @electron-bright;
+}
+
+.button,
+button,
+input[type='button'],
+input[type='reset'],
+input[type='submit'] {
+  background-color: @electron-bright;
+  border: 0.1rem solid @electron-bright;
+}
+
+.button.button-outline,
+button.button-outline,
+input[type='button'].button-outline,
+input[type='reset'].button-outline,
+input[type='submit'].button-outline,
+.button.button-clear,
+button.button-clear,
+input[type='button'].button-clear,
+input[type='reset'].button-clear,
+input[type='submit'].button-clear {
+  color: @electron-bright;
+}
+
+.button[disabled]:focus,
+.button[disabled]:hover,
+button[disabled]:focus,
+button[disabled]:hover {
+  border-color: @electron-tuned;
+  background: unset;
+  color: unset;
+}
+
+pre.prettyprint .lit {
+  color: @electron-bright;
+}
+
+.share-icon {
+  background-color: @electron-bright;
+  color: white;
+}
+
+pre {
+  background: #f4f5f6;
+  border-left: 0.3rem solid @electron-bright;
+
+  &.prettyprint {
+    border-left: 0.3rem solid @electron-bright !important;
+    color: #655d5d;
+
+    .tag {
+      color: @electron-bright;
+    }
+
+    .atn {
+      color: #0065ce;
+    }
+  }
+}
+
+input[type='email']:focus,
+input[type='number']:focus,
+input[type='password']:focus,
+input[type='search']:focus,
+input[type='tel']:focus,
+input[type='text']:focus,
+input[type='url']:focus,
+textarea:focus,
+select:focus {
+  border: 0.1rem solid @electron-bright;
+}
+
+select:focus {
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" height="14" viewBox="0 0 29 14" width="29"><path fill="@electron-bright)" d="M9.37727 3.625l5.08154 6.93523L19.54036 3.625"/></svg>');
+}
+
+.github-corner {
+  color: #f4f5f6;
+  fill: @electron-bright;
+}

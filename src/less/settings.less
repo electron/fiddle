@@ -1,0 +1,139 @@
+@import "variables.less";
+
+.settings {
+  background: @electron-background-2;
+  z-index: 10;
+  position: absolute;
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  user-select: none;
+  cursor: initial;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    color: white;
+    cursor: initial;
+  }
+
+  label {
+    font-weight: 200;
+  }
+
+  .settings-content {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    overflow: scroll;
+    color: rgb(230, 230, 230);
+  }
+
+  .electron-versions-table {
+    button {
+      margin: 0;
+      min-width: 250px;
+    }
+
+    .action {
+      text-align: center;
+      width: 250px;
+    }
+  }
+
+  .settings-section {
+    margin-bottom: 20px;
+
+    &:last-of-type {
+      margin: 0;
+    }
+  }
+
+  .settings-close {
+    position: fixed;
+    right: 30px;
+    height: 25px;
+    width: 25px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 15px;
+    color: rgb(230, 230, 230);
+
+    &:hover {
+      color: white;
+    }
+
+    svg {
+      background: @electron-background-2;
+      box-shadow: 0 0 12px 6px @electron-background-2;
+    }
+  }
+
+  .contributors {
+    display: flex;
+    flex-wrap: wrap;
+
+    .contributor {
+      width: 320px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      margin: 0 10px 10px 0;
+      display: flex;
+      justify-content: flex-start;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      h5,
+      p {
+        margin-bottom: 0;
+      }
+
+      .avatar {
+        height: 100px;
+        width: 100px;
+        background-size: contain;
+        margin-right: 10px;
+      }
+
+      .details {
+        max-width: 190px;
+        overflow: scroll;
+      }
+    }
+  }
+
+  .settings-menu {
+    height: 100%;
+    width: 250px;
+    background-color: rgba(0, 0, 0, 0.25);
+    user-select: none;
+
+    ul {
+      list-style: none;
+      padding: 20px;
+    }
+
+    li {
+      padding-bottom: 5px;
+      border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+      color: rgba(255, 255, 255, 0.8);
+
+      &:hover {
+        padding-bottom: 5px;
+        border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+        color: rgb(255, 255, 255);
+        cursor: pointer;
+      }
+
+      &.selected {
+        color: @electron-bright;
+      }
+    }
+  }
+}

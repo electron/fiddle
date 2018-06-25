@@ -1,9 +1,9 @@
 /* tslint:disable */
 
-const { maybeFetchContributors } = require('./fetch-contributors');
-const { generateTypeScript } = require('./tsc');
+const { maybeFetchContributors } = require('./contributors');
+const { compileTypeScript } = require('./tsc');
+const { compileLess } = require('./lessc');
 
 module.exports = async () => {
-  await maybeFetchContributors();
-  await generateTypeScript();
+  await Promise.all([maybeFetchContributors(), compileTypeScript(), compileLess()]);
 }

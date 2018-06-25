@@ -1,4 +1,2 @@
-declare module 'electron-default-menu' {
-  const defaultMenu: (app: Electron.App, shell: Electron.Shell) => Electron.MenuItemConstructorOptions[];
-  export = defaultMenu;
-}
+declare module 'monaco-loader';
+declare module 'electron-default-menu';

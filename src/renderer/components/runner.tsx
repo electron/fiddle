@@ -28,6 +28,8 @@ export interface RunnerProps {
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
 
+  private outputBuffer: string = '';
+
   constructor(props: RunnerProps) {
     super(props);
 
@@ -75,7 +77,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
   }
 
-  private outputBuffer: string = '';
 
   /**
    * Push output to the application's state. Accepts a buffer or a string as input,
