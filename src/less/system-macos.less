@@ -1,0 +1,15 @@
+.darwin {
+  .commands {
+    & > div {
+      display: flex;
+
+      // On macOS, we need a bit of space on the left
+      // for the traffic lights
+      &:first-of-type {
+        button {
+          margin-left: 80px;
+        }
+      }
+    }
+  }
+}

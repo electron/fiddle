@@ -1,4 +1,4 @@
-import { app, shell, Menu, BrowserWindow } from 'electron';
+import { app, shell, Menu, BrowserWindow, MenuItemConstructorOptions } from 'electron';
 import * as defaultMenu from 'electron-default-menu';
 
 import { IpcEvents } from '../ipc-events';
@@ -11,8 +11,8 @@ import { ipcMainManager } from './ipc';
  * @returns {submenu is Array<Electron.MenuItemConstructorOptions>}
  */
 function isSubmenu(
-  submenu?: Array<Electron.MenuItemConstructorOptions> | Electron.Menu
-): submenu is Array<Electron.MenuItemConstructorOptions> {
+  submenu?: Array<MenuItemConstructorOptions> | Menu
+): submenu is Array<MenuItemConstructorOptions> {
   return !!submenu && Array.isArray(submenu);
 }
 
@@ -21,7 +21,7 @@ function isSubmenu(
  *
  * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
-function getHelpItems(): Array<Electron.MenuItemConstructorOptions> {
+function getHelpItems(): Array<MenuItemConstructorOptions> {
   return [
     {
       type: 'separator'
@@ -62,27 +62,81 @@ function getHelpItems(): Array<Electron.MenuItemConstructorOptions> {
 }
 
 /**
+ * Depending on the OS, the `Preferences` either go into the `Fiddle`
+ * menu (macOS) or under `File` (Linux, Windows)
+ *
+ * @returns {Array<Electron.MenuItemConstructorOptions>}
+ */
+function getPreferencesItems(): Array<MenuItemConstructorOptions> {
+  return [
+    {
+      type: 'separator'
+    }, {
+      label: 'Preferences',
+      accelerator: 'CmdOrCtrl+,',
+      click() {
+        ipcMainManager.send(IpcEvents.OPEN_SETTINGS);
+      }
+    }, {
+      type: 'separator'
+    }
+  ];
+}
+
+/**
+ * Returns the Exit items
+ *
+ * @returns {Array<Electron.MenuItemConstructorOptions>}
+ */
+function getQuitItems(): Array<MenuItemConstructorOptions> {
+  return [
+    {
+      type: 'separator'
+    }, {
+      label: 'Exit',
+      accelerator: 'Ctrl+Q,',
+      click: app.quit
+    }
+  ];
+}
+
+/**
+ * Returns the top-level "File" menu
+ *
+ * @returns {Array<Electron.MenuItemConstructorOptions>}
+ */
+function getFileMenu(): MenuItemConstructorOptions {
+  const fileMenu: Array<MenuItemConstructorOptions> = [
+
+  ];
+
+  if (process.platform !== 'darwin') {
+    fileMenu.splice(0, 0, ...getPreferencesItems());
+    fileMenu.splice(fileMenu.length, 0, ...getQuitItems());
+  }
+
+  return {
+    label: 'File',
+    submenu: fileMenu
+  };
+}
+
+/**
  * Creates the app's window menu.
  */
 export function setupMenu() {
   // Get template for default menu
-  const menu = defaultMenu(app, shell)
+  const menu = (defaultMenu(app, shell) as Array<MenuItemConstructorOptions>)
     .map((item) => {
       const { label } = item;
 
       // Append the "Settings" item
-      if (label === app.getName() && isSubmenu(item.submenu)) {
-        item.submenu.splice(1, 0, {
-          type: 'separator'
-        }, {
-          label: 'Preferences',
-          accelerator: 'CmdOrCtrl+,',
-          click() {
-            ipcMainManager.send(IpcEvents.OPEN_SETTINGS);
-          }
-        }, {
-          type: 'separator'
-        });
+      if (
+        process.platform === 'darwin'
+        && label === app.getName()
+        && isSubmenu(item.submenu)
+      ) {
+        item.submenu.splice(1, 0, ...getPreferencesItems());
       }
 
       // Remove "Toggle Developer Tools"
@@ -97,6 +151,12 @@ export function setupMenu() {
 
       return item;
     });
+
+  menu.splice(
+    process.platform === 'darwin' ? 1 : 0,
+    0,
+    getFileMenu()
+  );
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
