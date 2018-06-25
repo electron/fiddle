@@ -31,3 +31,4 @@ compile_commands.json
 
 # Electron Fiddle-Specific
 /static/contributors.json
+/static/css/root.css
