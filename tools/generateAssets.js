@@ -4,4 +4,6 @@ const { maybeFetchContributors } = require('./contributors');
 const { compileTypeScript } = require('./tsc');
 const { compileLess } = require('./lessc');
 
-await Promise.all([maybeFetchContributors(), compileTypescript(), compileLess()]);
+module.exports = async () => {
+  await Promise.all([maybeFetchContributors(), compileTypeScript(), compileLess()]);
+}
