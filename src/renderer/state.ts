@@ -25,7 +25,7 @@ window.ElectronFiddle = {
     html: null
   },
   app: null
-};
+} as any;
 
 /**
  * The application's state. Exported as a singleton below.
@@ -44,6 +44,7 @@ export class AppState {
   @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
+  @observable public localPath: string | null = null;
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;

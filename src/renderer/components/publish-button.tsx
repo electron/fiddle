@@ -6,7 +6,7 @@ import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { when } from 'mobx';
 
 export interface PublishButtonProps {

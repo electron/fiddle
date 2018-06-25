@@ -4,7 +4,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as extract from 'extract-zip';
 
-import { USER_DATA_PATH } from './constants';
+import { USER_DATA_PATH } from '../constants';
 import { normalizeVersion } from '../utils/normalize-version';
 import { StringMap } from '../interfaces';
 

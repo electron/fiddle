@@ -4,7 +4,7 @@ import * as Octokit from '@octokit/rest';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { idFromUrl } from '../../utils/gist';
 import { reaction } from 'mobx';
 
