@@ -4,24 +4,30 @@ const { debounce } = require('lodash');
 const { compileTypeScript } = require('./tsc')
 const { compileLess } = require('./lessc')
 
-// This is the simplest of all file-watchers, but it works!
-async function _compile(event, path) {
-  console.log(`${path} changed, rebuilding`, event);
+const DEBOUNCE_TIMEOUT = 250;
 
+const tsc = debounce(async () => {
   try {
     await compileTypeScript();
   } catch (error) {
     console.log(`Compiling TypeScript failed`);
   }
+}, DEBOUNCE_TIMEOUT);
 
+const less = debounce(async () => {
   try {
     await compileLess();
   } catch (error) {
     console.log(`Compiling Less failed`);
   }
-}
+}, DEBOUNCE_TIMEOUT);
 
-const compile = debounce(_compile, 500);
+const compile = (event = {}, path = '') => {
+  console.log(`${new Date().toLocaleTimeString()}: ${path} changed`);
+  if (path.endsWith('less')) less();
+  if (path.endsWith('ts')) tsc();
+  console.log(``);
+}
 
 chokidar.watch('./src', {
   persistent: true,
