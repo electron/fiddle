@@ -15,7 +15,8 @@
     "watch": "node ./tools/watch.js",
     "contributors": "node ./tools/contributors.js",
     "lint-ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
-    "lint-style": "stylelint ./src/less/*.less"
+    "lint-style": "stylelint ./src/less/*.less",
+    "lint": "npm-run-all lint-*"
   },
   "keywords": [],
   "author": "felixr",
@@ -73,6 +74,7 @@
     "log-symbols": "^2.2.0",
     "monaco-editor": "^0.13.1",
     "node-fetch": "^2.1.2",
+    "npm-run-all": "^4.1.3",
     "style-loader": "^0.21.0",
     "stylelint": "^9.3.0",
     "stylelint-config-standard": "^18.2.0",
