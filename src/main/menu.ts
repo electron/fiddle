@@ -3,7 +3,7 @@ import * as defaultMenu from 'electron-default-menu';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
-import { showOpenDialog } from './files';
+import { showOpenDialog, showSaveDialog } from './files';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
@@ -129,7 +129,7 @@ function getFileMenu(): MenuItemConstructorOptions {
     },
     {
       label: 'Save as',
-      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_AS),
+      click: showSaveDialog,
       accelerator: 'CmdOrCtrl+Shift+S'
     },
     {
