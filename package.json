@@ -11,7 +11,8 @@
     "make": "electron-forge make",
     "publish": "electron-forge publish",
     "style": "lessc --source-map-inline ./src/less/root.less ./static/css/root.css",
-    "lint": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\""
+    "lint-ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
+    "lint-style": "stylelint ./src/less/*.less"
   },
   "keywords": [],
   "author": "felixr",
@@ -69,6 +70,8 @@
     "monaco-editor": "^0.13.1",
     "node-fetch": "^2.1.2",
     "style-loader": "^0.21.0",
+    "stylelint": "^9.3.0",
+    "stylelint-config-standard": "^18.2.0",
     "tslint": "^5.10.0",
     "tslint-microsoft-contrib": "^5.0.3",
     "tslint-react": "^3.6.0",
