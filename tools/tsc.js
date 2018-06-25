@@ -10,4 +10,4 @@ module.exports = {
   compileTypeScript
 }
 
-if (require.main === module) compileLess();
+if (require.main === module) compileTypeScript();
