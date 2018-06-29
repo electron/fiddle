@@ -86,11 +86,12 @@ export class App {
     this.monaco = await loader();
     this.createThemes();
 
+    const className = `${process.platform} container`;
     const app = (
-      <div className={process.platform}>
+      <div className={className}>
         <Header appState={appState} />
         <Dialogs appState={appState} />
-        {editors({ monaco: this.monaco!, appState })}å
+        {editors({ monaco: this.monaco!, appState })}
       </div>
     );
 

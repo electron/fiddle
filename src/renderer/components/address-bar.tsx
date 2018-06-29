@@ -7,6 +7,7 @@ import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { idFromUrl } from '../../utils/gist';
 import { reaction } from 'mobx';
+import { getTitle } from '../../utils/get-title';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -90,7 +91,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         renderer: gist.data.files[RENDERER_JS_NAME].content,
       });
 
-      document.title = `Electron Fiddle - gist.github.com/${appState.gistId}`;
+      document.title = getTitle(appState);
       appState.localPath = null;
     } catch (error) {
       console.warn(`Loading fiddle failed`, error);

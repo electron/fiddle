@@ -41,9 +41,13 @@ body {
     background: unset;
   }
 
+  .drag {
+    -webkit-app-region: drag;
+  }
+
   header {
     min-height: @header-height;
-    border-bottom: 1px solid @electron-dark;
+    border-bottom: @default-border;
     background-color: @electron-background;
     -webkit-app-region: drag;
   }

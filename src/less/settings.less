@@ -1,7 +1,7 @@
 @import "variables.less";
 
 .settings {
-  background: @electron-background-2;
+  background: @electron-background-3;
   z-index: 10;
   position: absolute;
   height: 100%;
@@ -66,8 +66,8 @@
     }
 
     svg {
-      background: @electron-background-2;
-      box-shadow: 0 0 12px 6px @electron-background-2;
+      background: @electron-background-3;
+      box-shadow: 0 0 12px 6px @electron-background-3;
     }
   }
 
@@ -111,7 +111,7 @@
   .settings-menu {
     height: 100%;
     width: 250px;
-    background-color: rgba(0, 0, 0, 0.25);
+    background-color: @electron-background;
     user-select: none;
 
     ul {
@@ -121,12 +121,12 @@
 
     li {
       padding-bottom: 5px;
-      border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+      border-bottom: @default-border;
       color: rgba(255, 255, 255, 0.8);
 
       &:hover {
         padding-bottom: 5px;
-        border-bottom: solid 1px rgba(255, 255, 255, 0.2);
+        border-bottom: @default-border;
         color: rgb(255, 255, 255);
         cursor: pointer;
       }

@@ -6,6 +6,7 @@ import { IpcEvents } from '../ipc-events';
 import { EditorValues } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
 import { appState } from './state';
+import { getTitle } from '../utils/get-title';
 
 export class FileManager {
   constructor() {
@@ -38,7 +39,7 @@ export class FileManager {
 
     appState.localPath = filePath;
     window.ElectronFiddle.app.setValues(values);
-    document.title = `Electron Fiddle - ${filePath}`;
+    document.title = getTitle(appState);
   }
 
   /**
