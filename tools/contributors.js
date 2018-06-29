@@ -18,7 +18,8 @@ const CONTRIBUTORS_URL = 'https://api.github.com/repos/electron/fiddle/contribut
 const CONTRIBUTORS_WHITELIST = [
   'zeke',
   'charliehess',
-  'marshallofsound'
+  'marshallofsound',
+  'felixrieseberg'
 ];
 
 async function maybeFetchContributors() {
@@ -100,15 +101,13 @@ function fetchContributors() {
       if (data && data.forEach) {
         data.forEach(({ html_url, url, login, avatar_url }) => {
           if (CONTRIBUTORS_WHITELIST.find((name) => name.toLowerCase() === login.toLowerCase())) {
-            return;
+            contributors.push({
+              url: html_url,
+              api: url,
+              login: login,
+              avatar: avatar_url
+            });
           }
-
-          contributors.push({
-            url: html_url,
-            api: url,
-            login: login,
-            avatar: avatar_url
-          });
         });
       }
 
