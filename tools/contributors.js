@@ -99,7 +99,7 @@ function fetchContributors() {
     .then(async (data) => {
       if (data && data.forEach) {
         data.forEach(({ html_url, url, login, avatar_url }) => {
-          if (CONTRIBUTORS_WHITELIST.find((name) => name !== login)) {
+          if (CONTRIBUTORS_WHITELIST.find((name) => name.toLowerCase() === login.toLowerCase())) {
             return;
           }
 
