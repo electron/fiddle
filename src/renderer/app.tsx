@@ -1,13 +1,11 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import * as loader from 'monaco-loader';
 import * as MonacoType from 'monaco-editor';
 
-import { mainTheme } from './themes';
 import { Header } from './components/header';
 import { Dialogs } from './components/dialogs';
 import { EditorValues } from '../interfaces';
-import { editors } from './components/editors';
+import { Editors } from './components/editors';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { appState } from './state';
 import { ipcRendererManager } from './ipc';
@@ -22,16 +20,16 @@ import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
  * @class App
  */
 export class App {
-  public monaco: typeof MonacoType | null = null;
   public name = 'test';
   public typeDefDisposable: MonacoType.IDisposable | null = null;
+  public monaco: typeof MonacoType | null = null;
 
   //@ts-ignore: We're not using this, but we do want to create it
   private fileManager = new FileManager();
 
   constructor() {
     this.getValues = this.getValues.bind(this);
-    this.setup();
+    this.setValues = this.setValues.bind(this);
   }
 
   /**
@@ -82,15 +80,12 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void> {
-    this.monaco = await loader();
-    this.createThemes();
-
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
         <Header appState={appState} />
         <Dialogs appState={appState} />
-        {editors({ monaco: this.monaco!, appState })}
+        <Editors appState={appState} />
       </div>
     );
 
@@ -107,15 +102,8 @@ export class App {
   public setupResizeListener(): void {
     window.addEventListener('resize', updateEditorLayout);
   }
-
-  /**
-   * We have a custom theme for the Monaco editor. This sets that up.
-   */
-  public createThemes(): void {
-    if (!this.monaco) return;
-    this.monaco.editor.defineTheme('main', mainTheme as any);
-  }
 }
 
 // tslint:disable-next-line:no-string-literal
 window.ElectronFiddle.app = new App();
+window.ElectronFiddle.app.setup();
