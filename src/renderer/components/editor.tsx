@@ -32,6 +32,7 @@ export class Editor extends React.Component<EditorProps> {
       minimap: {
         enabled: false
       },
+      contextmenu: false,
       value: getContent(props.id)
     };
   }
