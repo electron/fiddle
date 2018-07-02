@@ -44,7 +44,7 @@ export class FileManager {
 
   /**
    * Saves the current Fiddle to disk. If we never saved before,
-   * we'll first open the "Save" dialog
+   * we'll first open the "Save" dialog.
    *
    * @param {Electron.event} _event
    * @param {string} filePath
@@ -54,12 +54,14 @@ export class FileManager {
     const { localPath } = appState;
     const pathToSave = filePath || localPath;
 
-    console.log(`FileManager: Asked to save to ${filePath}`);
+    console.log(`FileManager: Asked to save to ${pathToSave}`);
 
     if (!pathToSave) {
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     } else {
-      const { html, main, package: packageJson, renderer } = window.ElectronFiddle.app.getValues();
+      const options = { includeDependencies: true, includeElectron: true };
+      const values = window.ElectronFiddle.app.getValues(options);
+      const { html, main, package: packageJson, renderer } = values;
 
       if (renderer) {
         await this.saveFile(path.join(pathToSave, RENDERER_JS_NAME), renderer);

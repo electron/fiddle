@@ -6,7 +6,7 @@ import { spawn, ChildProcess } from 'child_process';
 
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
-import { findModules, installModules } from '../npm';
+import { installModules, findModulesInEditors } from '../npm';
 import { EditorValues } from '../../interfaces';
 
 export interface RunnerState {
@@ -120,17 +120,12 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @returns {Promise<void>}
    */
   public async installModules(values: EditorValues, dir: string): Promise<void> {
-    const files = [ values.main, values.renderer ];
-    const modules: Array<string> = [];
+    const modules = findModulesInEditors(values);
 
-    files.forEach((file) => {
-      modules.push(...findModules(file));
-    });
-
-    if (modules.length === 0) return;
-
-    this.pushData(`Installing npm modules: ${modules.join(', ')}...`);
-    this.pushData(await installModules({ dir }, ...modules));
+    if (modules && modules.length > 0) {
+      this.pushData(`Installing npm modules: ${modules.join(', ')}...`);
+      this.pushData(await installModules({ dir }, ...modules));
+    }
   }
 
   /**
@@ -140,7 +135,8 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @memberof Runner
    */
   public async run(): Promise<void> {
-    const values = window.ElectronFiddle.app.getValues();
+    const options = { includeDependencies: false, includeElectron: false };
+    const values = window.ElectronFiddle.app.getValues(options);
     const { binaryManager, version, tmpDir } = this.props.appState;
 
     this.props.appState.isConsoleShowing = true;

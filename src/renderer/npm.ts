@@ -1,8 +1,26 @@
 import * as builtinModules from 'builtin-modules';
 import { exec } from 'child_process';
+import { EditorValues } from '../interfaces';
 
 export interface InstallModulesOptions {
   dir: string;
+}
+
+/**
+ * Finds npm modules in editor values, returning an array of modules.
+ *
+ * @param {EditorValues} values
+ * @returns {Array<string>}
+ */
+export function findModulesInEditors(values: EditorValues): Array<string> {
+  const files = [ values.main, values.renderer ];
+  const modules: Array<string> = [];
+
+  files.forEach((file) => {
+    modules.push(...findModules(file));
+  });
+
+  return modules;
 }
 
 /**

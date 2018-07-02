@@ -13,6 +13,7 @@ import { appState } from './state';
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { FileManager } from './file-manager';
+import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -57,7 +58,7 @@ export class App {
    *
    * @returns {EditorValues}
    */
-  public getValues(): EditorValues {
+  public getValues(options: PackageJsonOptions): EditorValues {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -65,17 +66,15 @@ export class App {
     }
 
     const { main, html, renderer } = fiddle.editors;
-
-    return {
+    const values: EditorValues = {
       html: html && html.getValue() ? html.getValue() : '',
       main: main && main.getValue() ? main.getValue() : '',
       renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
-      package: JSON.stringify({
-        name: this.name,
-        main: './main.js',
-        version: '1.0.0',
-      })
     };
+
+    values.package = getPackageJson(appState, values, options);
+
+    return values;
   }
 
   /**

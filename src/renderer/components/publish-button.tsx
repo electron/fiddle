@@ -79,7 +79,8 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
       token: this.props.appState.gitHubToken!
     });
 
-    const values = window.ElectronFiddle.app.getValues();
+    const options = { includeDependencies: true, includeElectron: true };
+    const values = window.ElectronFiddle.app.getValues(options);
 
     const gist = await octo.gists.create({
       public: true,
