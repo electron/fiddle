@@ -37,6 +37,8 @@ export class FileManager {
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
     };
 
+    appState.gistId = '';
+    appState.isMyGist = false;
     appState.localPath = filePath;
     window.ElectronFiddle.app.setValues(values);
     document.title = getTitle(appState);

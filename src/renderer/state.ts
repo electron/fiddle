@@ -37,10 +37,10 @@ export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
   @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
-  @observable public gitHubAvatarUrl: string | null = null;
-  @observable public gitHubName: string | null = null;
-  @observable public gitHubLogin: string | null = null;
-  @observable public gitHubToken: string | null = null;
+  @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
+  @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
+  @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
+  @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
   @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
@@ -189,7 +189,6 @@ export class AppState {
 }
 
 export const appState = new AppState();
-appState.gitHubToken = localStorage.getItem('gitHubToken');
 appState.setVersion(appState.version);
 
 tmp.setGracefulCleanup();
