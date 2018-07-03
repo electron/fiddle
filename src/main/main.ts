@@ -15,6 +15,12 @@ app.setName('Electron Fiddle');
 listenForProtocolHandler();
 
 app.on('ready', () => {
+  // If we're packaged, we want to run
+  // React in production mode.
+  if (!process.defaultApp) {
+    process.env.NODE_ENV = 'production';
+  }
+
   getOrCreateMainWindow();
   setupMenu();
   setupProtocolHandler();
