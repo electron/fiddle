@@ -89,8 +89,9 @@ export class App {
       </div>
     );
 
-    ipcRendererManager.send(IpcEvents.MAIN_WINDOW_READY_TO_SHOW);
-    render(app, document.getElementById('app'));
+    render(app, document.getElementById('app'), () => {
+      ipcRendererManager.send(IpcEvents.MAIN_WINDOW_READY_TO_SHOW);
+    });
 
     this.setupResizeListener();
   }

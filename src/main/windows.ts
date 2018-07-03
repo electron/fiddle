@@ -22,7 +22,8 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     minWidth: 600,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
-    show: false
+    show: false,
+    backgroundColor: '#1d2427'
   };
 }
 
