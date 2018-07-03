@@ -3,8 +3,6 @@ import { shell } from 'electron';
 
 import { AppState } from '../state';
 
-const contributors = require('../../../static/contributors.json');
-
 export interface CreditsSettingsProps {
   appState: AppState;
 }
@@ -16,17 +14,21 @@ export interface CreditsSettingsProps {
  * @extends {React.Component<CreditsSettingsProps, {}>}
  */
 export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
+  private contributors: Array<any> | null = null;
+
   /**
    * Renders a list of contributors of Electron Fiddle.
    *
    * @returns {Array<JSX.Element>}
    */
   public renderContributors(): Array<JSX.Element> {
-    if (!contributors || !Array.isArray(contributors)) {
+    this.contributors = this.contributors || require('../../../static/contributors.json');
+
+    if (!this.contributors || !Array.isArray(this.contributors)) {
       return [];
     }
 
-    return contributors.map(({ name, avatar, url, login, location, bio }) => {
+    return this.contributors.map(({ name, avatar, url, login, location, bio }) => {
       const maybeLocation = location
         ? <p className='location'>📍 {location}</p>
         : null;

@@ -1,11 +1,6 @@
-import * as React from 'react';
-import { render } from 'react-dom';
 import * as MonacoType from 'monaco-editor';
 
-import { Header } from './components/header';
-import { Dialogs } from './components/dialogs';
 import { EditorValues } from '../interfaces';
-import { Editors } from './components/editors';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { appState } from './state';
 import { ipcRendererManager } from './ipc';
@@ -56,7 +51,7 @@ export class App {
    *
    * @returns {EditorValues}
    */
-  public getValues(options: PackageJsonOptions): EditorValues {
+  public async getValues(options: PackageJsonOptions): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -70,7 +65,7 @@ export class App {
       renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
     };
 
-    values.package = getPackageJson(appState, values, options);
+    values.package = await getPackageJson(appState, values, options);
 
     return values;
   }
@@ -80,6 +75,12 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void> {
+    const React = await import('react');
+    const { render } = await import('react-dom');
+    const { Header } = await import('./components/header');
+    const { Dialogs } = await import('./components/dialogs');
+    const { Editors } = await import('./components/editors');
+
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>

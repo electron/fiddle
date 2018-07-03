@@ -20,21 +20,11 @@ export class Editor extends React.Component<EditorProps> {
   public editor: MonacoType.editor.IStandaloneCodeEditor;
   public language: string = 'javascript';
   public value: string = '';
-  public options: Partial<MonacoType.editor.IEditorConstructionOptions>;
 
   constructor(props: EditorProps) {
     super(props);
 
     this.language = props.id === 'html' ? 'html' : 'javascript';
-    this.options = {
-      language: this.language,
-      theme: 'main',
-      minimap: {
-        enabled: false
-      },
-      contextmenu: false,
-      value: getContent(props.id)
-    };
   }
 
   public shouldComponentUpdate() {
@@ -59,13 +49,19 @@ export class Editor extends React.Component<EditorProps> {
     }
   }
 
-  public initMonaco() {
-    const { options, monaco } = this.props;
+  public async initMonaco() {
+    const { options, monaco, id } = this.props;
 
     if (this.containerElement) {
       this.editor = monaco.editor.create(this.containerElement, {
-        ...this.options,
-        ... options
+        language: this.language,
+        theme: 'main',
+        minimap: {
+          enabled: false
+        },
+        contextmenu: false,
+        value: await getContent(id),
+        ...options
       });
       this.editorDidMount(this.editor);
     }

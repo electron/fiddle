@@ -1,14 +1,9 @@
-import { promisify } from 'util';
-import * as os from 'os';
-import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as extract from 'extract-zip';
 
 import { USER_DATA_PATH } from '../constants';
 import { normalizeVersion } from '../utils/normalize-version';
 import { StringMap } from '../interfaces';
-
-const eDownload = promisify(require('electron-download'));
+import { getFs } from '../utils/fs';
 
 /**
  * The binary manager takes care of downloading Electron versions
@@ -29,9 +24,10 @@ export class BinaryManager {
    */
   public async remove(iVersion: string, i: number = 0): Promise<void> {
     const version = normalizeVersion(iVersion);
+    const fs = await getFs();
 
     try {
-      if (this.getIsDownloaded(version)) {
+      if (await this.getIsDownloaded(version)) {
         // This is necessary since we're messing with .asar files inside
         // the Electron binaries. Electron, powering Fiddle, will try to
         // "correct" our calls, but we don't want that right here.
@@ -60,6 +56,10 @@ export class BinaryManager {
    */
   public async setup(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
+    const fs = await getFs();
+    const { promisify } = await import('util');
+    const eDownload = promisify(require('electron-download'));
+
     await fs.mkdirp(this.getDownloadPath(version));
 
     if (this.state[version] === 'downloading') {
@@ -67,7 +67,7 @@ export class BinaryManager {
       return;
     }
 
-    if (this.getIsDownloaded(version)) {
+    if (await this.getIsDownloaded(version)) {
       console.log(`BinaryManager: Electron ${version} already downloaded.`);
       this.state[version] = 'ready';
       return;
@@ -91,7 +91,8 @@ export class BinaryManager {
    * @param {string} version
    * @returns {string}
    */
-  public getElectronBinaryPath(version: string): string {
+  public async getElectronBinaryPath(version: string): Promise<string> {
+    const os = await import('os');
     const platform = os.platform();
     const dir = this.getDownloadPath(version);
 
@@ -114,6 +115,7 @@ export class BinaryManager {
    * @returns {Promise<Array<string>>}
    */
   public async getDownloadedVersions(): Promise<Array<string>> {
+    const fs = await getFs();
     const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
     console.log(`BinaryManager: Checking for downloaded versions`);
 
@@ -122,7 +124,7 @@ export class BinaryManager {
       const knownVersions: Array<string> = [];
 
       for (const directory of directories) {
-        if (this.getIsDownloaded(directory)) {
+        if (await this.getIsDownloaded(directory)) {
           knownVersions.push(directory);
         }
       }
@@ -140,8 +142,9 @@ export class BinaryManager {
    * @param {string} version
    * @returns {boolean}
    */
-  public getIsDownloaded(version: string): boolean {
-    const expectedPath = this.getElectronBinaryPath(version);
+  public async getIsDownloaded(version: string): Promise<boolean> {
+    const expectedPath = await this.getElectronBinaryPath(version);
+    const fs = await getFs();
     return fs.existsSync(expectedPath);
   }
 
@@ -163,8 +166,10 @@ export class BinaryManager {
    * @returns {Promise<void>}
    */
   private unzip(zipPath: string, extractPath: string): Promise<void> {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       process.noAsar = true;
+
+      const extract = await import('extract-zip');
 
       extract(zipPath, { dir: extractPath }, (error) => {
         if (error) {

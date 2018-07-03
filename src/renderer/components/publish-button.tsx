@@ -1,6 +1,5 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import * as Octokit from '@octokit/rest';
 import * as Icon from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import * as classNames from 'classnames';
@@ -10,6 +9,7 @@ import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants
 import { when } from 'mobx';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
+import { getOctokit } from '../../utils/octokit';
 
 export interface PublishButtonProps {
   appState: AppState;
@@ -73,14 +73,14 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
   public async publishFiddle(): Promise<void> {
     this.setState({ isPublishing: true });
 
-    const octo = new Octokit();
+    const octo = await getOctokit();
     octo.authenticate({
       type: 'token',
       token: this.props.appState.gitHubToken!
     });
 
     const options = { includeDependencies: true, includeElectron: true };
-    const values = window.ElectronFiddle.app.getValues(options);
+    const values = await window.ElectronFiddle.app.getValues(options);
 
     const gist = await octo.gists.create({
       public: true,

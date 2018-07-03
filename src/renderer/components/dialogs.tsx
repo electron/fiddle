@@ -1,9 +1,9 @@
 import * as React from 'react';
+import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
 import { TokenDialog } from './token-dialog';
 import { Settings } from './settings';
-import { observer } from 'mobx-react';
 
 export interface DialogsProps {
   appState: AppState;

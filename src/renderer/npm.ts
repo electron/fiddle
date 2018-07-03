@@ -1,5 +1,3 @@
-import * as builtinModules from 'builtin-modules';
-import { exec } from 'child_process';
 import { EditorValues } from '../interfaces';
 
 export interface InstallModulesOptions {
@@ -12,13 +10,14 @@ export interface InstallModulesOptions {
  * @param {EditorValues} values
  * @returns {Array<string>}
  */
-export function findModulesInEditors(values: EditorValues): Array<string> {
+export async function findModulesInEditors(values: EditorValues): Promise<Array<string>> {
   const files = [ values.main, values.renderer ];
   const modules: Array<string> = [];
 
-  files.forEach((file) => {
-    modules.push(...findModules(file));
-  });
+  for (const file of files) {
+    const fileModules = await findModules(file);
+    modules.push(...fileModules);
+  }
 
   return modules;
 }
@@ -31,10 +30,11 @@ export function findModulesInEditors(values: EditorValues): Array<string> {
  * @param {string} input
  * @returns {Array<string>}
  */
-export function findModules(input: string): Array<string> {
+export async function findModules(input: string): Promise<Array<string>> {
   const matchRequire = /require\(['"]{1}([\w\d\/\-\_]*)['"]{1}\)/;
   const matched = input.match(matchRequire);
   const result: Array<string> = [];
+  const builtinModules = await import('builtin-modules');
 
   if (matched && matched.length > 0) {
     const candidates = matched.slice(1);
@@ -57,7 +57,8 @@ export function findModules(input: string): Array<string> {
  * @returns {Promise<string>}
  */
 export function installModules({ dir }: InstallModulesOptions, ...names: Array<string>): Promise<string> {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const { exec } = await import('child_process');
     const args = ['-S'];
     const cliArgs = ['npm i'].concat(args, names).join(' ');
 

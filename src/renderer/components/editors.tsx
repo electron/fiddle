@@ -1,6 +1,5 @@
 import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 import * as React from 'react';
-import * as loader from 'monaco-loader';
 import * as MonacoType from 'monaco-editor';
 
 import { mainTheme } from '../themes';
@@ -73,6 +72,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    */
   private async loadMonaco(): Promise<void> {
     const { app } = window.ElectronFiddle;
+    const loader = await import('monaco-loader');
     const monaco = app.monaco || await loader();
 
     monaco.editor.defineTheme('main', mainTheme as any);

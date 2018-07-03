@@ -1,5 +1,5 @@
-import * as fs from 'fs';
 import * as path from 'path';
+import { getFs } from '../utils/fs';
 
 const simpleCache = {};
 
@@ -10,12 +10,13 @@ const simpleCache = {};
  * @param {string} name
  * @returns {string}
  */
-export function getContent(name: string): string {
+export async function getContent(name: string): Promise<string> {
   if (simpleCache[name]) return simpleCache[name];
 
   let content = '';
 
   try {
+    const fs = await getFs();
     const filePath = path.join(__dirname, '../../static/content', name);
     content = fs.readFileSync(filePath, 'utf-8');
     simpleCache[name] = content;

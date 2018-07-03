@@ -1,9 +1,9 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as MonacoType from 'monaco-editor';
-import { get } from 'lodash';
 
 import { USER_DATA_PATH } from '../constants';
+import { getFs } from '../utils/fs';
+import { getLodash } from '../utils/lodash';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 
@@ -41,7 +41,8 @@ export function getOfflineTypeDefinitionPath(version: string): string {
  * @param {string} version
  * @returns {boolean}
  */
-export function getOfflineTypeDefinitions(version: string): boolean {
+export async function getOfflineTypeDefinitions(version: string): Promise<boolean> {
+  const fs = await getFs();
   return fs.existsSync(getOfflineTypeDefinitionPath(version));
 }
 
@@ -53,11 +54,12 @@ export function getOfflineTypeDefinitions(version: string): boolean {
  * @returns {void}
  */
 export async function getTypeDefinitions(version: string): Promise<string | null> {
+  const fs = await getFs();
   await fs.mkdirp(definitionPath);
 
   const offlinePath = getOfflineTypeDefinitionPath(version);
 
-  if (getOfflineTypeDefinitions(version)) {
+  if (await getOfflineTypeDefinitions(version)) {
     try {
       return fs.readFile(offlinePath, 'utf-8');
     } catch (error) {
@@ -87,8 +89,9 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  * @param {string} version
  */
 export async function updateEditorTypeDefinitions(version: string, i: number = 0) {
-  const monaco: typeof MonacoType = get(window, 'ElectronFiddle.app.monaco', null);
-  const typeDefDisposable: MonacoType.IDisposable | null = get(window, 'ElectronFiddle.app.typeDefDisposable', null);
+  const _ = await getLodash();
+  const monaco: typeof MonacoType = _.get(window, 'ElectronFiddle.app.monaco', null);
+  const typeDefDisposable: MonacoType.IDisposable | null = _.get(window, 'ElectronFiddle.app.typeDefDisposable', null);
 
   // If this method is called before we're ready, we'll delay this work a bit
   if (i < 10 && !monaco) {

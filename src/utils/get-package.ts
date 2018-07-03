@@ -18,9 +18,9 @@ export interface PackageJsonOptions {
  * @param {PackageJsonOptions} [options]
  * @returns {string}
  */
-export function getPackageJson(
+export async function getPackageJson(
   appState: AppState, values?: EditorValues, options?: PackageJsonOptions
-): string {
+): Promise<string> {
   const { includeElectron, includeDependencies } = options || {
     includeElectron: false,
     includeDependencies: false
@@ -38,7 +38,8 @@ export function getPackageJson(
   }
 
   if (includeDependencies && values) {
-    findModulesInEditors(values).forEach((module) => {
+    const modules = await findModulesInEditors(values);
+    modules.forEach((module) => {
       dependencies[module] = '*';
     });
   }

@@ -3,10 +3,10 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import * as Icon from '@fortawesome/react-fontawesome';
 import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
-import * as Octokit from '@octokit/rest';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
+import { getOctokit } from '../../utils/octokit';
 
 export interface TokenDialogProps {
   appState: AppState;
@@ -61,7 +61,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       verifying: true,
     });
 
-    const octo = new Octokit();
+    const octo = await getOctokit();
     octo.authenticate({
       type: 'token',
       token: this.state.tokenInput || '',

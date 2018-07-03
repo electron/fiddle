@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { ipcRendererManager } from './ipc';
@@ -7,6 +6,7 @@ import { EditorValues } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
 import { appState } from './state';
 import { getTitle } from '../utils/get-title';
+import { getFs } from '../utils/fs';
 
 export class FileManager {
   constructor() {
@@ -62,7 +62,7 @@ export class FileManager {
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     } else {
       const options = { includeDependencies: true, includeElectron: true };
-      const values = window.ElectronFiddle.app.getValues(options);
+      const values = await window.ElectronFiddle.app.getValues(options);
       const { html, main, package: packageJson, renderer } = values;
 
       if (renderer) {
@@ -97,6 +97,7 @@ export class FileManager {
    */
   private async readFile(filePath: string): Promise<string> {
     try {
+      const fs = await getFs();
       return await fs.readFile(filePath, 'utf-8');
     } catch (error) {
       console.log(`FileManager: Could not read ${filePath}`, error);
@@ -114,6 +115,7 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
+      const fs = await getFs();
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);

@@ -120,7 +120,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @returns {Promise<void>}
    */
   public async installModules(values: EditorValues, dir: string): Promise<void> {
-    const modules = findModulesInEditors(values);
+    const modules = await findModulesInEditors(values);
 
     if (modules && modules.length > 0) {
       this.pushData(`Installing npm modules: ${modules.join(', ')}...`);
@@ -135,11 +135,13 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @memberof Runner
    */
   public async run(): Promise<void> {
+    const { appState } = this.props;
     const options = { includeDependencies: false, includeElectron: false };
-    const values = window.ElectronFiddle.app.getValues(options);
-    const { binaryManager, version, tmpDir } = this.props.appState;
+    const values = await window.ElectronFiddle.app.getValues(options);
+    const { binaryManager, version, tmpDir } = appState;
+    const isDownloaded = await binaryManager.getIsDownloaded(version);
 
-    this.props.appState.isConsoleShowing = true;
+    appState.isConsoleShowing = true;
 
     try {
       await fs.writeFile(path.join(tmpDir.name, 'index.html'), values.html);
@@ -151,12 +153,12 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       console.error('Runner: Could not write files', error);
     }
 
-    if (!binaryManager.getIsDownloaded(version)) {
+    if (!isDownloaded) {
       console.warn(`Runner: Binary ${version} not ready`);
       return;
     }
 
-    const binaryPath = this.props.appState.binaryManager.getElectronBinaryPath(version);
+    const binaryPath = await appState.binaryManager.getElectronBinaryPath(version);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ tmpDir.name, '--inspect' ]);

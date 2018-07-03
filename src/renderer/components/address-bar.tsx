@@ -1,13 +1,13 @@
 import * as React from 'react';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
-import * as Octokit from '@octokit/rest';
 import * as classNames from 'classnames';
 
 import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { idFromUrl } from '../../utils/gist';
-import { reaction } from 'mobx';
 import { getTitle } from '../../utils/get-title';
+import { getOctokit } from '../../utils/octokit';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -79,7 +79,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) return;
 
     try {
-      const octo = new Octokit();
+      const octo = await getOctokit();
       const gist = await octo.gists.get({
         gist_id: appState.gistId,
         id: appState.gistId,
