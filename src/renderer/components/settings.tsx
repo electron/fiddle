@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import Icon from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
@@ -104,7 +104,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className='settings-content'>
           <div className='settings-close' onClick={appState.toggleSettings}>
-            <Icon icon={faTimesCircle} />
+            <FontAwesomeIcon icon={faTimesCircle} />
           </div>
           {this.renderContent()}
         </div>

@@ -1,7 +1,7 @@
 import { clipboard, shell } from 'electron';
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import Icon from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
@@ -148,7 +148,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
 
     return (
       <div className='tokenSpinner'>
-        <Icon icon={faSpinner} spin={true} />
+        <FontAwesomeIcon icon={faSpinner} spin={true} />
       </div>
     );
   }
@@ -170,7 +170,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
         <div key='tokenDialog' className={dialogClassNames}>
           {this.spinner}
           <span className='generateTokenText'>
-            <Icon icon={faKey} />
+            <FontAwesomeIcon icon={faKey} />
             Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
           </span>
           <input

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import Icon from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
@@ -112,7 +112,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
     return (
       <button className={className} onClick={this.handleClick} disabled={isPublishing}>
-        <Icon icon={icon} spin={isPublishing} />
+        <FontAwesomeIcon icon={icon} spin={isPublishing} />
         <span style={{ marginLeft: 8 }} />
         {text}
       </button>

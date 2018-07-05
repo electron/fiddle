@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Icon from '@fortawesome/react-fontawesome';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faTrash, faCloudDownloadAlt, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import { observer } from 'mobx-react';
 
@@ -77,12 +77,12 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
   public render() {
     const { isDownloadingAll, isDeletingAll } = this.state;
     const isWorking = isDownloadingAll || isDeletingAll;
-    const downloadIcon = isDownloadingAll
-      ? <Icon icon={faSpinner} spin={true} />
-      : <Icon icon={faCloudDownloadAlt} />;
-    const deleteIcon = isDeletingAll
-      ? <Icon icon={faSpinner} spin={true} />
-      : <Icon icon={faCloudDownloadAlt} />;
+    const downloadFontAwesomeIcon = isDownloadingAll
+      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
+      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
+    const deleteFontAwesomeIcon = isDeletingAll
+      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
+      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
 
     return (
       <div className='settings-electron'>
@@ -90,11 +90,11 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
         <div className='advanced-options settings-section'>
           <label>Download all versions of Electron.</label>
           <button className='button' disabled={isWorking} onClick={this.handleDownloadAll}>
-            {downloadIcon} Download All Versions
+            {downloadFontAwesomeIcon} Download All Versions
           </button>
           <label>Remove all downloaded versions of Electron.</label>
           <button className='button' disabled={isWorking} onClick={this.handleDeleteAll}>
-            {deleteIcon} Delete All Versions
+            {deleteFontAwesomeIcon} Delete All Versions
           </button>
         </div>
         <div>
@@ -171,7 +171,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
       return (
         <button className='button button-clear' onClick={remove}>
-          <Icon icon={faTrash} /> Delete
+          <FontAwesomeIcon icon={faTrash} /> Delete
         </button>
       );
     }
@@ -180,7 +180,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     if (state === 'downloading') {
       return (
         <button className='button button-clear' disabled={true}>
-          <Icon icon={faSpinner} spin={true}/> Downloading
+          <FontAwesomeIcon icon={faSpinner} spin={true}/> Downloading
         </button>
       );
     }
@@ -190,7 +190,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
     return (
       <button className='button button-clear' onClick={download}>
-        <Icon icon={faCloudDownloadAlt} /> Download
+        <FontAwesomeIcon icon={faCloudDownloadAlt} /> Download
       </button>
     );
   }
