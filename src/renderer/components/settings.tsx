@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import * as Icon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
