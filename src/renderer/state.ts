@@ -4,7 +4,7 @@ import * as tmp from 'tmp';
 import { BinaryManager } from './binary';
 import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
-import { getKnownVersions } from './versions';
+import { getKnownVersions, getUpdatedKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
@@ -72,6 +72,11 @@ export class AppState {
     autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
     autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
     autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
+
+    // Update our known versions
+    getUpdatedKnownVersions().then((versions) => {
+      this.versions = arrayToStringMap(versions);
+    });
   }
 
   @action public toggleConsole() {

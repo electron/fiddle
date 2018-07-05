@@ -31,6 +31,23 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
 }
 
 /**
+ * Tries to refresh our known versions and returns whatever we have
+ * saved after.
+ *
+ * @export
+ * @returns {Promise<Array<GitHubVersion>>}
+ */
+export async function getUpdatedKnownVersions(): Promise<Array<GitHubVersion>> {
+  try {
+    await fetchVersions();
+  } catch (error) {
+    console.warn(`Versions: Failed to fetch versions`, { error });
+  }
+
+  return getKnownVersions();
+}
+
+/**
  * Fetch the latest known versions directly from GitHub.
  *
  * @returns {Promise<Array<GitHubVersion>>}
