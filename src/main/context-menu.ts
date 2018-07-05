@@ -31,17 +31,52 @@ function getMonacoItems(
     {
       id: 'go_to_definition',
       label: 'Go to Definition',
-      click: () => ipcMainManager.send(IpcEvents.MONACO_GO_TO_DEFINITION)
+      click() {
+        const cmd = [ 'editor.action.goToDeclaration' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
     },
     {
       id: 'peek_definition',
       label: 'Peek Definition',
-      click: () => ipcMainManager.send(IpcEvents.MONACO_PEEK_DEFINITION)
+      click() {
+        const cmd = [ 'editor.action.previewDeclaration' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
     },
     {
       id: 'references',
       label: 'Find References',
-      click: () => ipcMainManager.send(IpcEvents.MONACO_FIND_REFERENCES)
+      click() {
+        const cmd = [ 'editor.action.referenceSearch.trigger' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
+    },
+    { type: 'separator' },
+    {
+      id: 'palette',
+      label: 'Command Palette',
+      click() {
+        const cmd = [ 'editor.action.quickCommand' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
+    },
+    { type: 'separator' },
+    {
+      id: 'format_document',
+      label: 'Format Document',
+      click() {
+        const cmd = [ 'editor.action.formatDocument' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
+    },
+    {
+      id: 'format_selection',
+      label: 'Format Selection',
+      click() {
+        const cmd = [ 'editor.action.formatSelection' ];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      }
     }
   ];
 }

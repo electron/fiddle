@@ -7,6 +7,9 @@ import { AppState } from '../state';
 import { Editor } from './editor';
 import { EditorId } from '../../interfaces';
 import { updateEditorLayout } from '../../utils/editor-layout';
+import { ipcRendererManager } from '../ipc';
+import { IpcEvents } from '../../ipc-events';
+import { getFocusedEditor } from '../../utils/focused-editor';
 
 const options: any = {
   direction: 'row',
@@ -41,6 +44,29 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     this.state = {};
     this.loadMonaco();
+  }
+
+  public componentDidMount() {
+    ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
+      this.executeCommand(cmd);
+    });
+  }
+
+  /**
+   * Attempt to execute a given commandId on the currently focused editor
+   *
+   * @param {string} commandId
+   * @memberof Editors
+   */
+  public executeCommand(commandId: string) {
+    const editor = getFocusedEditor();
+
+    if (editor) {
+      const command = editor.getAction(commandId);
+      if (command && command.isSupported()) {
+        command.run();
+      }
+    }
   }
 
   public render() {

@@ -12,4 +12,4 @@ function _updateEditorLayout() {
   if (html) html.layout();
 }
 
-export const updateEditorLayout = throttle(_updateEditorLayout, 1000);
+export const updateEditorLayout = throttle(_updateEditorLayout, 400);
