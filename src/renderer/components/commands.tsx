@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import * as Icon from '@fortawesome/react-fontawesome';
+import Icon from '@fortawesome/react-fontawesome';
 import { faTerminal } from '@fortawesome/fontawesome-free-solid';
 
 import { Runner } from './runner';
@@ -37,7 +37,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
         </div>
         <div>
           <AddressBar appState={appState} />
-          <PublishButton appState={appState} /> */}
+          <PublishButton appState={appState} />
           <button className='button' onClick={() => appState.toggleConsole()}>
             <Icon icon={faTerminal} />
           </button>

@@ -3,7 +3,6 @@
 const { run } = require('./run-bin');
 
 const commonOptions = [
-  '--no-minify',
   '--no-cache',
   '--target',
   'electron'
