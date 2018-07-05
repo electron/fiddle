@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash, faCloudDownloadAlt, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import { observer } from 'mobx-react';
 
