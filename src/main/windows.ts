@@ -2,6 +2,7 @@ import { WindowNames } from '../interfaces';
 import { BrowserWindow } from 'electron';
 import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
+import { createContextMenu } from './context-menu';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -43,7 +44,10 @@ export function getOrCreateMainWindow(): Electron.BrowserWindow {
   });
 
   ipcMainManager.once(IpcEvents.MAIN_WINDOW_READY_TO_SHOW, () => {
-    if (browserWindows.main) browserWindows.main.show();
+    if (browserWindows.main) {
+      browserWindows.main.show();
+      createContextMenu(browserWindows.main);
+    }
   });
 
   return browserWindows.main;

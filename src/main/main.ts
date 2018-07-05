@@ -3,6 +3,7 @@ import { app } from 'electron';
 import { getOrCreateMainWindow } from './windows';
 import { setupProtocolHandler, listenForProtocolHandler } from './protocol';
 import { setupUpdates } from './update';
+import { isDevMode } from '../utils/devmode';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -16,7 +17,7 @@ listenForProtocolHandler();
 app.on('ready', async () => {
   // If we're packaged, we want to run
   // React in production mode.
-  if (!process.defaultApp) {
+  if (!isDevMode()) {
     process.env.NODE_ENV = 'production';
   }
 
