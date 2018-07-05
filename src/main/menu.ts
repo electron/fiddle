@@ -1,5 +1,4 @@
 import { app, shell, Menu, BrowserWindow, MenuItemConstructorOptions } from 'electron';
-import * as defaultMenu from 'electron-default-menu';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
@@ -152,8 +151,9 @@ function getFileMenu(): MenuItemConstructorOptions {
 /**
  * Creates the app's window menu.
  */
-export function setupMenu() {
+export async function setupMenu() {
   // Get template for default menu
+  const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(app, shell) as Array<MenuItemConstructorOptions>)
     .map((item) => {
       const { label } = item;

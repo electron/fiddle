@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+export const html = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
@@ -16,4 +16,5 @@
       require('./renderer.js')
     </script>
   </body>
-</html>
+</html>`;
+

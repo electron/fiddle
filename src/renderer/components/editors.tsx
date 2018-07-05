@@ -72,7 +72,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    */
   private async loadMonaco(): Promise<void> {
     const { app } = window.ElectronFiddle;
-    const loader = await import('monaco-loader');
+    const loader = require('monaco-loader');
     const monaco = app.monaco || await loader();
 
     monaco.editor.defineTheme('main', mainTheme as any);

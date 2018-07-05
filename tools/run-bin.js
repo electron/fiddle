@@ -19,6 +19,7 @@ async function run(name, bin, args = []) {
     );
 
     child.on('exit', (code) => {
+      console.log('');
       if (code === 0) return resolve();
       reject(new Error(`${name} failed`));
     });

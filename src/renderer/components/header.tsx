@@ -18,13 +18,13 @@ export interface HeaderProps {
 export class Header extends React.Component<HeaderProps, {}> {
   public render() {
     return (
-      <>
+      <React.Fragment>
         <ChromeMac appState={this.props.appState} />
         <header id='header'>
           <Commands key='commands' appState={this.props.appState} />
           <Output key='output' appState={this.props.appState} />
         </header>
-      </>
+      </React.Fragment>
     );
   }
 }

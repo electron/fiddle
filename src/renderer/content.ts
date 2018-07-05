@@ -1,7 +1,8 @@
-import * as path from 'path';
-import { getFs } from '../utils/fs';
-
-const simpleCache = {};
+export const enum ContentNames {
+  HTML = 'html',
+  RENDERER = 'renderer',
+  MAIN = 'main'
+}
 
 /**
  * Returns expected content for a given name. Currently synchronous,
@@ -10,19 +11,18 @@ const simpleCache = {};
  * @param {string} name
  * @returns {string}
  */
-export async function getContent(name: string): Promise<string> {
-  if (simpleCache[name]) return simpleCache[name];
-
-  let content = '';
-
-  try {
-    const fs = await getFs();
-    const filePath = path.join(__dirname, '../../static/content', name);
-    content = fs.readFileSync(filePath, 'utf-8');
-    simpleCache[name] = content;
-  } catch (error) {
-    console.error(`Content: Could not read file content for ${name}`, error);
+export async function getContent(name: ContentNames): Promise<string> {
+  if (name === ContentNames.HTML) {
+    return (await import('../content/html')).html;
   }
 
-  return content;
+  if (name === ContentNames.RENDERER) {
+    return (await import('../content/renderer')).renderer;
+  }
+
+  if (name === ContentNames.MAIN) {
+    return (await import('../content/main')).main;
+  }
+
+  return '';
 }

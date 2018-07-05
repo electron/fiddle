@@ -11,3 +11,4 @@ let _fs: typeof fsType | null = null;
 export async function getFs(): Promise<typeof fsType> {
   return _fs = _fs || await import('fs-extra');
 }
+

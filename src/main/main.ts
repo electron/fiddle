@@ -1,9 +1,8 @@
 import { app } from 'electron';
 
 import { getOrCreateMainWindow } from './windows';
-import { setupMenu } from './menu';
 import { setupProtocolHandler, listenForProtocolHandler } from './protocol';
-import { setupFileListeners } from './files';
+
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
@@ -14,7 +13,7 @@ app.setName('Electron Fiddle');
 
 listenForProtocolHandler();
 
-app.on('ready', () => {
+app.on('ready', async () => {
   // If we're packaged, we want to run
   // React in production mode.
   if (!process.defaultApp) {
@@ -22,6 +21,10 @@ app.on('ready', () => {
   }
 
   getOrCreateMainWindow();
+
+  const { setupMenu } = await import('./menu');
+  const { setupFileListeners } = await import('./files');
+
   setupMenu();
   setupProtocolHandler();
   setupFileListeners();

@@ -1,9 +1,8 @@
 /* tslint:disable */
 
 const { maybeFetchContributors } = require('./contributors');
-const { compileTypeScript } = require('./tsc');
-const { compileLess } = require('./lessc');
+const { compileParcel } = require('./parcel-build');
 
 module.exports = async () => {
-  await Promise.all([maybeFetchContributors(), compileTypeScript(), compileLess()]);
+  await Promise.all([maybeFetchContributors(), compileParcel()]);
 }

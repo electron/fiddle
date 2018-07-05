@@ -22,7 +22,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     minWidth: 600,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
-    show: false,
+    show: true,
     backgroundColor: '#1d2427'
   };
 }
@@ -36,7 +36,7 @@ export function getOrCreateMainWindow(): Electron.BrowserWindow {
   if (browserWindows.main) return browserWindows.main;
 
   browserWindows.main = new BrowserWindow(getMainWindowOptions());
-  browserWindows.main.loadFile('./static/index.html');
+  browserWindows.main.loadFile('./dist/index.html');
 
   browserWindows.main.on('closed', () => {
     browserWindows.main = null;

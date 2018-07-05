@@ -4,7 +4,7 @@
 import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
 import { AppState } from '../state';
-import { getContent } from '../content';
+import { getContent, ContentNames } from '../content';
 
 export interface EditorProps {
   appState: AppState;
@@ -60,7 +60,7 @@ export class Editor extends React.Component<EditorProps> {
           enabled: false
         },
         contextmenu: false,
-        value: await getContent(id),
+        value: await getContent(id as ContentNames),
         ...options
       });
       this.editorDidMount(this.editor);

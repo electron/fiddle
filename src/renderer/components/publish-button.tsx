@@ -2,7 +2,6 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import * as Icon from '@fortawesome/react-fontawesome';
 import { faUpload, faSpinner } from '@fortawesome/fontawesome-free-solid';
-import * as classNames from 'classnames';
 
 import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
@@ -10,6 +9,7 @@ import { when } from 'mobx';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
+import { classNames } from '../../utils/classnames';
 
 export interface PublishButtonProps {
   appState: AppState;
