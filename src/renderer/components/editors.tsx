@@ -118,5 +118,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   private createThemes(): void {
     if (!this.state.monaco) return;
     this.state.monaco.editor.defineTheme('main', mainTheme as any);
+    this.state.monaco.editor.setTheme('main');
   }
 }

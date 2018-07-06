@@ -46,7 +46,7 @@
     "lodash": "^4.17.10",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
-    "monaco-loader": "^0.8.2",
+    "monaco-loader": "^0.13.0",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-mosaic-component": "^1.1.1",
