@@ -1,4 +1,3 @@
-html,
 body {
   padding: 0;
   margin: 0;
@@ -8,6 +7,11 @@ body {
   flex-direction: column;
   height: 100vh;
   font-family: @default-fonts;
+  color: @default-text-color;
+  font-size: 1.6em;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  line-height: 1.6;
 }
 
 .fiddle {
@@ -32,42 +36,9 @@ body {
   }
 
   header {
-    min-height: @header-height;
     border-bottom: @default-border;
     background-color: @electron-background;
     -webkit-app-region: drag;
-  }
-
-  button {
-    background-color: #9feaf9;
-    border: none;
-    color: #1e2527;
-    padding: 0 30px;
-    text-align: center;
-    text-decoration: none;
-    border-radius: 4px;
-    height: 28px;
-    line-height: 4px;
-
-    &:hover {
-      box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
-    }
-
-    &:focus {
-      background-color: #9feaf9;
-      color: initial;
-    }
-
-    &.button-outline {
-      border: 1px solid var(--electron-bright);
-    }
-
-    &.button-clear:focus,
-    &.button-clear:hover,
-    button.button-clear:focus,
-    button.button-clear:hover {
-      color: white;
-    }
   }
 
   .shadow {

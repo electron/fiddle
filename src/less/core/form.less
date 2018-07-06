@@ -1,0 +1,58 @@
+@import "../variables.less";
+
+input[type='email'],
+input[type='number'],
+input[type='password'],
+input[type='search'],
+input[type='tel'],
+input[type='text'],
+input[type='url'],
+input[type='color'],
+input:not([type]),
+textarea,
+select {
+	background-color: transparent;
+	border: .1rem solid rgb(209, 209, 209);;
+	border-radius: .4rem;
+	box-shadow: none;
+	box-sizing: inherit; // Forced to replace inherit values of the normalize.css
+	height: 3.8rem;
+	width: 100%;
+
+	&:focus {
+		border-color: @electron-bright;
+    outline: 0;
+  }
+}
+
+select {
+	padding-right: 3.0rem;
+}
+
+textarea {
+  min-height: 6.5rem;
+}
+
+label,
+legend {
+	display: block;
+	font-size: 1.6rem;
+	font-weight: 700;
+  margin-bottom: .5rem;
+}
+
+fieldset {
+	border-width: 0;
+  padding: 0;
+}
+
+input[type='checkbox'],
+input[type='radio'] {
+  display: inline;
+}
+
+.label-inline {
+	display: inline-block;
+	font-weight: normal;
+  margin-left: .5rem;
+}

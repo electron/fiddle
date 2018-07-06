@@ -1,0 +1,20 @@
+@import "../variables.less";
+
+table {
+	border-spacing: 0;
+  width: 100%;
+}
+
+td, th {
+	border-bottom: @default-border;
+	padding: 1.2rem 1.5rem;
+	text-align: left;
+
+	&:first-child {
+    padding-left: 0
+  }
+
+	&:last-child {
+    padding-right: 0
+  }
+}

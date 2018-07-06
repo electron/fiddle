@@ -9,7 +9,6 @@
   top: 10vh;
   padding: 0;
   padding-left: 10px;
-  margin-top: 0;
   height: 0;
   overflow-y: scroll;
   transition: height 0.2s;
@@ -17,9 +16,9 @@
   -webkit-app-region: no-drag;
 
   &.showing {
-    margin-top: 10px;
+    border-top: @default-border;
     padding-top: 10px;
-    height: 200px;
+    height: 150px;
   }
 
   p {
