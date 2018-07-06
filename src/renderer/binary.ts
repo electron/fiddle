@@ -167,9 +167,9 @@ export class BinaryManager {
    */
   private unzip(zipPath: string, extractPath: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      process.noAsar = true;
-
       const extract = (await import('extract-zip')).default;
+
+      process.noAsar = true;
 
       extract(zipPath, { dir: extractPath }, (error) => {
         if (error) {
