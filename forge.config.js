@@ -11,10 +11,11 @@ module.exports = {
     executableName: 'electron-fiddle',
     asar: true,
     icon: path.resolve(__dirname, 'static', 'icons', 'electron'),
-    ignore: [
-      /^\/\.vscode\//,
-      /^\/tools\//
-    ],
+    // TODO: FIXME?
+    // ignore: [
+    //   /^\/\.vscode\//,
+    //   /^\/tools\//
+    // ],
     appBundleId: 'com.electron.fiddle',
     appCategoryType: 'public.app-category.developer-tools',
     protocols: [{
@@ -26,7 +27,7 @@ module.exports = {
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
-      identity: 'LT94ZKYDCJ'
+      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)'
     },
   },
   makers: [
