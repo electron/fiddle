@@ -164,7 +164,7 @@ export async function setupMenu() {
         && label === app.getName()
         && isSubmenu(item.submenu)
       ) {
-        item.submenu.splice(0, 0, ...getPreferencesItems());
+        item.submenu.splice(2, 0, ...getPreferencesItems());
       }
 
       // Remove "Toggle Developer Tools"
