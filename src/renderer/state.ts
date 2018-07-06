@@ -76,6 +76,7 @@ export class AppState {
     // Update our known versions
     getUpdatedKnownVersions().then((versions) => {
       this.versions = arrayToStringMap(versions);
+      this.updateDownloadedVersionState();
     });
   }
 
