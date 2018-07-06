@@ -82,26 +82,38 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getValues(options);
 
-    const gist = await octo.gists.create({
-      public: true,
-      description: 'Electron Fiddle Gist',
-      files: {
-        [INDEX_HTML_NAME]: {
-          content: values.html || '<!-- Empty -->',
+    try {
+      const gist = await octo.gists.create({
+        public: true,
+        description: 'Electron Fiddle Gist',
+        files: {
+          [INDEX_HTML_NAME]: {
+            content: values.html || '<!-- Empty -->',
+          },
+          [MAIN_JS_NAME]: {
+            content: values.main || '// Empty',
+          },
+          [RENDERER_JS_NAME]: {
+            content: values.renderer || '// Empty',
+          },
         },
-        [MAIN_JS_NAME]: {
-          content: values.main || '// Empty',
-        },
-        [RENDERER_JS_NAME]: {
-          content: values.renderer || '// Empty',
-        },
-      },
-    });
+      });
+
+      this.props.appState.gistId = gist.data.id;
+
+      console.log(`Publish Button: Publishing done`, { gist });
+    } catch (error) {
+      console.warn(`Could not publish gist`, { error });
+
+      const messageBoxOptions: Electron.MessageBoxOptions = {
+        message: 'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
+        detail: `GitHub encountered the following error: ${error.message}`
+      };
+
+      ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+    }
 
     this.setState({ isPublishing: false });
-    this.props.appState.gistId = gist.data.id;
-
-    console.log(`Publish Button: Publishing done`, { gist });
   }
 
   public render() {

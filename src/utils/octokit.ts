@@ -10,6 +10,6 @@ let _octo: GitHubType;
  * @returns {Promise<typeof GitHubType>}
  */
 export async function getOctokit(): Promise<GitHubType> {
-  _Octokit = _Octokit || await import('@octokit/rest');
+  _Octokit = _Octokit || (await import('@octokit/rest') as any).default;
   return _octo = _octo || new _Octokit();
 }

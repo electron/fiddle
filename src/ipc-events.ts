@@ -11,12 +11,14 @@ export enum IpcEvents {
   FS_SAVE_FIDDLE_GIST = 'FS_SAVE_FIDDLE_GIST',
   FS_SAVE_FIDDLE_DIALOG = 'FS_SAVE_FIDDLE_DIALOG',
   FS_SAVE_FIDDLE_ERROR = 'FS_SAVE_FIDDLE_ERROR',
+  SHOW_WARNING_DIALOG = 'SHOW_WARNING_DIALOG'
 }
 
 export const ipcMainEvents = [
   IpcEvents.MAIN_WINDOW_READY_TO_SHOW,
   IpcEvents.FS_SAVE_FIDDLE_DIALOG,
-  IpcEvents.FS_SAVE_FIDDLE
+  IpcEvents.FS_SAVE_FIDDLE,
+  IpcEvents.SHOW_WARNING_DIALOG
 ];
 
 export const ipcRendererEvents = [
