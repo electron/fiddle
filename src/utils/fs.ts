@@ -3,7 +3,7 @@ import * as fsType from 'fs-extra';
 let _fs: typeof fsType | null = null;
 
 /**
- * Returns a loaded Octokit.
+ * Returns a loaded fs-extra.
  *
  * @export
  * @returns {Promise<typeof fsType>}

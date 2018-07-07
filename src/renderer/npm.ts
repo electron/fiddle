@@ -34,7 +34,7 @@ export async function findModules(input: string): Promise<Array<string>> {
   const matchRequire = /require\(['"]{1}([\w\d\/\-\_]*)['"]{1}\)/;
   const matched = input.match(matchRequire);
   const result: Array<string> = [];
-  const builtinModules = await import('builtin-modules');
+  const builtinModules = (await import('builtin-modules') as any).default;
 
   if (matched && matched.length > 0) {
     const candidates = matched.slice(1);
@@ -45,6 +45,8 @@ export async function findModules(input: string): Promise<Array<string>> {
       result.push(candidate);
     });
   }
+
+  console.log(`findModules: Result`, result);
 
   return result;
 }
