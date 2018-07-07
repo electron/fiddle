@@ -87,7 +87,7 @@ export function installModules({ dir }: InstallModulesOptions, ...names: Array<s
  */
 async function maybeFixPath(): Promise<void> {
   if (!_fixPathCalled && process.platform === 'darwin') {
-    const fixPaths = await import('fix-path');
+    const fixPaths = (await import('fix-path')).default;
     fixPaths();
   }
 
