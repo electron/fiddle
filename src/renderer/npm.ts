@@ -1,5 +1,8 @@
 import { EditorValues } from '../interfaces';
 
+// Singleton: We don't want to do this more than once
+let _fixPathCalled = false;
+
 export interface InstallModulesOptions {
   dir: string;
 }
@@ -11,7 +14,7 @@ export interface InstallModulesOptions {
  * @returns {Array<string>}
  */
 export async function findModulesInEditors(values: EditorValues): Promise<Array<string>> {
-  const files = [ values.main, values.renderer ];
+  const files = [values.main, values.renderer];
   const modules: Array<string> = [];
 
   for (const file of files) {
@@ -60,6 +63,8 @@ export async function findModules(input: string): Promise<Array<string>> {
  */
 export function installModules({ dir }: InstallModulesOptions, ...names: Array<string>): Promise<string> {
   return new Promise(async (resolve, reject) => {
+    await maybeFixPath();
+
     const { exec } = await import('child_process');
     const args = ['-S'];
     const cliArgs = ['npm i'].concat(args, names).join(' ');
@@ -72,4 +77,19 @@ export function installModules({ dir }: InstallModulesOptions, ...names: Array<s
       resolve(result.toString());
     });
   });
+}
+
+/**
+ * On macOS, we need to fix the $PATH environment variable
+ * so that we can call `npm`.
+ *
+ * @returns {Promise<void>}
+ */
+async function maybeFixPath(): Promise<void> {
+  if (!_fixPathCalled && process.platform === 'darwin') {
+    const fixPaths = await import('fix-path');
+    fixPaths();
+  }
+
+  _fixPathCalled = true;
 }
