@@ -11,6 +11,10 @@ export type ElectronVersionState = 'downloading' | 'ready' | 'unknown';
 
 export type WindowNames = 'main';
 
+export type Files = Map<string, string>;
+
+export type FileTransform = (files: Files) => Promise<Files>;
+
 export interface GitHubVersion {
   url: string;
   assets_url: string;

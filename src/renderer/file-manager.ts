@@ -2,7 +2,7 @@ import * as path from 'path';
 
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
-import { EditorValues } from '../interfaces';
+import { EditorValues, Files, FileTransform } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
 import { appState } from './state';
 import { getTitle } from '../utils/get-title';
@@ -13,18 +13,22 @@ export class FileManager {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
-    ipcRendererManager.on(IpcEvents.FS_OPEN_FIDDLE, this.openFiddle);
-    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE, this.saveFiddle);
+    ipcRendererManager.on(IpcEvents.FS_OPEN_FIDDLE, (_event, filePath) => {
+      this.openFiddle(filePath);
+    });
+
+    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
+      this.saveFiddle(filePath);
+    });
   }
 
   /**
    * Tries to open a fiddle
    *
-   * @param {Electron.event} _event
    * @param {string} filePath
    * @memberof FileManager
    */
-  public async openFiddle(_event: Electron.Event, filePath: string) {
+  public async openFiddle(filePath: string) {
     if (!filePath || typeof filePath !== 'string') return;
 
     console.log(`FileManager: Asked to open`, filePath);
@@ -48,11 +52,10 @@ export class FileManager {
    * Saves the current Fiddle to disk. If we never saved before,
    * we'll first open the "Save" dialog.
    *
-   * @param {Electron.event} _event
    * @param {string} filePath
    * @memberof FileManager
    */
-  public async saveFiddle(_event: Electron.Event, filePath: string) {
+  public async saveFiddle(filePath: string, ...transforms: Array<FileTransform>) {
     const { localPath } = appState;
     const pathToSave = filePath || localPath;
 
@@ -61,30 +64,48 @@ export class FileManager {
     if (!pathToSave) {
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     } else {
-      const options = { includeDependencies: true, includeElectron: true };
-      const values = await window.ElectronFiddle.app.getValues(options);
-      const { html, main, package: packageJson, renderer } = values;
+      const files = await this.getFiles(...transforms);
 
-      if (renderer) {
-        await this.saveFile(path.join(pathToSave, RENDERER_JS_NAME), renderer);
-      }
-
-      if (main) {
-        await this.saveFile(path.join(pathToSave, MAIN_JS_NAME), main);
-      }
-
-      if (html) {
-        await this.saveFile(path.join(pathToSave, INDEX_HTML_NAME), html);
-      }
-
-      if (packageJson) {
-        await this.saveFile(path.join(pathToSave, PACKAGE_NAME), packageJson);
+      for (const [ fileName, content ] of files) {
+        try {
+          await this.saveFile(path.join(pathToSave, fileName), content);
+        } catch (error) {
+          console.warn(`FileManager: Failed to save file`, { fileName, error });
+        }
       }
 
       if (pathToSave !== localPath) {
         appState.localPath = pathToSave;
       }
     }
+  }
+
+  /**
+   * Get files to save, but with a transform applied
+   *
+   * @param {...Array<FileTransform>} transforms
+   * @returns {Promise<Files>}
+   * @memberof FileManager
+   */
+  public async getFiles(...transforms: Array<FileTransform>): Promise<Files> {
+    const options = { includeDependencies: true, includeElectron: true };
+    const values = await window.ElectronFiddle.app.getValues(options);
+    let output: Files = new Map();
+
+    output.set(RENDERER_JS_NAME, values.renderer);
+    output.set(MAIN_JS_NAME, values.main);
+    output.set(INDEX_HTML_NAME, values.html);
+    output.set(PACKAGE_NAME, values.package!);
+
+    for (const transform of transforms) {
+      try {
+        output = await transform(output);
+      } catch (error) {
+        console.warn(`getFiles: Failed to apply transform`, { transform, error });
+      }
+    }
+
+    return output;
   }
 
   /**
