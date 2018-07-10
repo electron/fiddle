@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { shell } from 'electron';
 
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
@@ -79,6 +80,9 @@ export class FileManager {
           console.warn(`FileManager: Failed to save file`, { fileName, error });
         }
       }
+
+      // Show in folder
+      shell.showItemInFolder(pathToSave);
 
       if (pathToSave !== localPath) {
         appState.localPath = pathToSave;
