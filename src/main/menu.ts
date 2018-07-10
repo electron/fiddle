@@ -132,9 +132,16 @@ function getFileMenu(): MenuItemConstructorOptions {
       accelerator: 'CmdOrCtrl+Shift+S'
     },
     {
+      type: 'separator'
+    },
+    {
       label: 'Save to Gist',
       click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST),
     },
+    {
+      label: 'Save as Forge Project',
+      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Gist')
+    }
   ];
 
   // macOS has these items in the "Fiddle" menu

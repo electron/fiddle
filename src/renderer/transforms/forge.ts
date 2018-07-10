@@ -6,12 +6,20 @@ import { PACKAGE_NAME } from '../../constants';
  * project.
  *
  * @param {Files} files
- * @returns {Files}
+ * @returns {Promise<Files>}
  */
-export function forgeTransform(files: Files): Files {
-  if (files[PACKAGE_NAME]) {
+export async function forgeTransform(files: Files): Promise<Files> {
+  if (files.get(PACKAGE_NAME)) {
     try {
-      const parsed = JSON.parse(files[PACKAGE_NAME]);
+      const parsed = JSON.parse(files.get(PACKAGE_NAME)!);
+
+      // devDependencies
+      parsed.devDependencies = parsed.devDependencies || {};
+      parsed.devDependencies['@electron-forge/cli'] = 'latest';
+      parsed.devDependencies['@electron-forge/maker-deb'] = 'latest';
+      parsed.devDependencies['@electron-forge/maker-rpm'] = 'latest';
+      parsed.devDependencies['@electron-forge/maker-squirrel'] = 'latest';
+      parsed.devDependencies['@electron-forge/maker-zip'] = 'latest';
 
       // Scripts
       parsed.scripts = parsed.scripts || {};
@@ -49,6 +57,8 @@ export function forgeTransform(files: Files): Files {
           config: {}
         }
       ];
+
+      files.set(PACKAGE_NAME, JSON.stringify(parsed, undefined, 2));
     } catch (error) {
       console.warn(`Forge Transform: Failed to parse package.json`, { error });
     }

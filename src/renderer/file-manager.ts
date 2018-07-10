@@ -7,6 +7,8 @@ import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '.
 import { appState } from './state';
 import { getTitle } from '../utils/get-title';
 import { getFs } from '../utils/fs';
+import { dotfilesTransform } from './transforms/dotfiles';
+import { forgeTransform } from './transforms/forge';
 
 export class FileManager {
   constructor() {
@@ -18,7 +20,11 @@ export class FileManager {
     });
 
     ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
-      this.saveFiddle(filePath);
+      this.saveFiddle(filePath, dotfilesTransform);
+    });
+
+    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_FORGE, (_event, filePath) => {
+      this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
     });
   }
 
@@ -99,6 +105,7 @@ export class FileManager {
 
     for (const transform of transforms) {
       try {
+        console.log(`getFiles: Applying ${transform.name}`);
         output = await transform(output);
       } catch (error) {
         console.warn(`getFiles: Failed to apply transform`, { transform, error });
