@@ -1,5 +1,4 @@
 import { observable, action, autorun } from 'mobx';
-import * as tmp from 'tmp';
 
 import { BinaryManager } from './binary';
 import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
@@ -9,6 +8,8 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
+import { getName } from '../utils/get-title';
+import { throws } from 'assert';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
@@ -36,7 +37,6 @@ window.ElectronFiddle = {
 export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
-  @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
@@ -50,6 +50,8 @@ export class AppState {
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
+
+  private name: string;
 
   constructor() {
     // Bind all actions
@@ -78,6 +80,14 @@ export class AppState {
       this.versions = arrayToStringMap(versions);
       this.updateDownloadedVersionState();
     });
+  }
+
+  @action public async getName() {
+    if (!this.name) {
+      this.name = await getName(this);
+    }
+
+    return this.name;
   }
 
   @action public toggleConsole() {
@@ -196,5 +206,3 @@ export class AppState {
 
 export const appState = new AppState();
 appState.setVersion(appState.version);
-
-tmp.setGracefulCleanup();

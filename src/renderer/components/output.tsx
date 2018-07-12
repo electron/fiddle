@@ -17,12 +17,16 @@ export interface CommandsProps {
  */
 @observer
 export class Output extends React.Component<CommandsProps, {}> {
-  constructor(props: CommandsProps) {
-    super(props);
+  private outputRef = React.createRef<HTMLDivElement>();
+
+  public componentDidUpdate() {
+    if (this.outputRef.current) {
+      this.outputRef.current.scrollTop = this.outputRef.current.scrollHeight;
+    }
   }
 
   /**
-   * An individial entry might span multiple lines. To ensure that
+   * An individual entry might span multiple lines. To ensure that
    * each line has a timestamp, this method might split up entries.
    *
    * @param {OutputEntry} entry
@@ -46,7 +50,7 @@ export class Output extends React.Component<CommandsProps, {}> {
     const lines = this.props.appState.output.map(this.renderEntry);
 
     return (
-      <div className={className}>
+      <div className={className} ref={this.outputRef}>
         {lines}
       </div>
     );

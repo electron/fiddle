@@ -15,12 +15,11 @@ import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
  * @class App
  */
 export class App {
-  public name = 'test';
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
 
   //@ts-ignore: We're not using this, but we do want to create it
-  private fileManager = new FileManager();
+  public fileManager = new FileManager();
 
   constructor() {
     this.getValues = this.getValues.bind(this);

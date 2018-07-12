@@ -1,9 +1,7 @@
 import { EditorValues } from '../interfaces';
+import { exec } from '../utils/exec';
 
-// Singleton: We don't want to do this more than once
-let _fixPathCalled = false;
-
-export interface InstallModulesOptions {
+export interface NpmOperationOptions {
   dir: string;
 }
 
@@ -57,39 +55,21 @@ export async function findModules(input: string): Promise<Array<string>> {
 /**
  * Installs given modules to a given folder.
  *
- * @param {InstallModulesOptions} { dir }
+ * @param {NpmOperationOptions} { dir }
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export function installModules({ dir }: InstallModulesOptions, ...names: Array<string>): Promise<string> {
-  return new Promise(async (resolve, reject) => {
-    await maybeFixPath();
-
-    const { exec } = await import('child_process');
-    const args = ['-S'];
-    const cliArgs = ['npm i'].concat(args, names).join(' ');
-
-    exec(cliArgs, { cwd: dir }, (error, result) => {
-      if (error) {
-        reject(error);
-      }
-
-      resolve(result.toString());
-    });
-  });
+export function installModules({ dir }: NpmOperationOptions, ...names: Array<string>): Promise<string> {
+  return exec(dir, [ 'npm i' ].concat([ '-S' ], names).join(' '));
 }
 
 /**
- * On macOS, we need to fix the $PATH environment variable
- * so that we can call `npm`.
+ * Execute an "npm run" command
  *
- * @returns {Promise<void>}
+ * @param {NpmOperationOptions} { dir }
+ * @param {string} command
+ * @returns {Promise<string>}
  */
-async function maybeFixPath(): Promise<void> {
-  if (!_fixPathCalled && process.platform === 'darwin') {
-    const fixPaths = (await import('fix-path')).default;
-    fixPaths();
-  }
-
-  _fixPathCalled = true;
+export function npmRun({ dir }: NpmOperationOptions, command: string): Promise<string> {
+  return exec(dir, `npm run ${command}`);
 }
