@@ -34,10 +34,10 @@ export function showOpenDialog() {
  * Shows the "Save Fiddle" dialog and forwards
  * the path to the renderer
  */
-export function showSaveDialog() {
+export function showSaveDialog(event?: IpcEvents, as?: string) {
   // We want to save to a folder, so we'll use an open dialog here
   dialog.showOpenDialog({
-    title: 'Save Fiddle',
+    title: `Save Fiddle${as ? ` as ${as}` : ''}`,
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory']
   }, async (filePaths) => {
@@ -47,7 +47,7 @@ export function showSaveDialog() {
 
     // Let's confirm real quick if we want this
     if (await ensureSaveTargetEmpty(filePaths[0])) {
-      ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
+      ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
     }
   });
 }

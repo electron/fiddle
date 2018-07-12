@@ -4,6 +4,7 @@ import { AppState } from '../renderer/state';
 import { UNTITLED_NAME } from '../constants';
 import { EditorValues } from '../interfaces';
 import { findModulesInEditors } from '../renderer/npm';
+import { getUsername } from './get-username';
 
 export interface PackageJsonOptions {
   includeElectron?: boolean;
@@ -46,8 +47,15 @@ export async function getPackageJson(
 
   return JSON.stringify({
     name,
+    productName: name,
+    description: 'My Electron application description',
+    keywords: [],
     main: './main.js',
     version: '1.0.0',
+    author: getUsername(),
+    scripts: {
+      start: 'electron .'
+    },
     dependencies,
     devDependencies
   }, undefined, 2);
