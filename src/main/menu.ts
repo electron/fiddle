@@ -105,6 +105,29 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
  *
  * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
+function getTasksMenu(): MenuItemConstructorOptions {
+  const tasksMenu: Array<MenuItemConstructorOptions> = [
+    {
+      label: 'Run Fiddle...',
+      click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
+    },
+    {
+      label: 'Package Fiddle...',
+      click: () => ipcMainManager.send(IpcEvents.FIDDLE_PACKAGE)
+    }
+  ];
+
+  return {
+    label: 'Tasks',
+    submenu: tasksMenu
+  };
+}
+
+/**
+ * Returns the top-level "File" menu
+ *
+ * @returns {Array<Electron.MenuItemConstructorOptions>}
+ */
 function getFileMenu(): MenuItemConstructorOptions {
   const fileMenu: Array<MenuItemConstructorOptions> = [
     {
@@ -190,8 +213,10 @@ export async function setupMenu() {
   menu.splice(
     process.platform === 'darwin' ? 1 : 0,
     0,
-    getFileMenu()
+    getFileMenu(),
   );
+
+  menu.splice(menu.length, 0, getTasksMenu());
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }

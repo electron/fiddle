@@ -8,7 +8,7 @@ const runItems: Array<MenuItemConstructorOptions> = [
   {
     id: 'run',
     label: 'Run Fiddle',
-    click: () => ipcMainManager.send(IpcEvents.RUN_FIDDLE)
+    click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
   }
 ];
 

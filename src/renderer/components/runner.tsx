@@ -1,13 +1,13 @@
 import * as React from 'react';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 import { observer } from 'mobx-react';
 import { spawn, ChildProcess } from 'child_process';
 
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
-import { installModules, findModulesInEditors } from '../npm';
-import { EditorValues, Files } from '../../interfaces';
+import { installModules, findModulesInEditors, npmRun } from '../npm';
+import { EditorValues } from '../../interfaces';
+import { ipcRendererManager } from '../ipc';
+import { IpcEvents } from '../../ipc-events';
 
 export interface RunnerState {
   isRunning: boolean;
@@ -27,20 +27,23 @@ export interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
-
   private outputBuffer: string = '';
 
   constructor(props: RunnerProps) {
     super(props);
 
     this.run = this.run.bind(this);
+    this.package = this.package.bind(this);
     this.pushData = this.pushData.bind(this);
     this.stop = this.stop.bind(this);
-    this.state = {
-      isRunning: false
-    };
+    this.state = { isRunning: false };
 
     this.pushData('Console ready 🔬');
+  }
+
+  public componentDidMount() {
+    ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
+    ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, this.package);
   }
 
   public render() {
@@ -154,6 +157,50 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       this.setState({ isRunning: false });
       this.child = null;
     });
+  }
+
+  /**
+   * Package the application via electron-forge
+   *
+   * @returns: {Promise<void>}
+   * @memberof Runner
+   */
+  public async package(): Promise<void> {
+    const { fileManager } = window.ElectronFiddle.app;
+    const options = { includeDependencies: true, includeElectron: true };
+    const { dotfilesTransform } = await import('../transforms/dotfiles');
+    const { forgeTransform } = await import('../transforms/forge');
+    let dir: string;
+
+    // Save files to temp
+    try {
+      console.log(`Runner: Package saving files to temp directory`);
+      dir = await fileManager.saveToTemp(options, dotfilesTransform, forgeTransform);
+      console.log(`Runner: Package saved files to ${dir}`);
+    } catch (error) {
+      console.warn(`Runner: Package failed to save files`, { error });
+      return;
+    }
+
+    // Files are now saved to temp, let's install Forge and dependencies
+    try {
+      console.log(`Runner: Now installing modules`);
+      await installModules({ dir });
+      console.log(`Runner: Package successfully installed modules`);
+    } catch (error) {
+      console.warn(`Runner: Package failed to install modules`, { error });
+      return;
+    }
+
+    // Cool, let's run "package"
+    try {
+      console.log(`Runner: Now running "npm run package"`);
+      await npmRun({ dir }, 'package');
+      console.log(`Runner: Package succeeded`);
+    } catch (error) {
+      console.warn(`Runner: Package failed package`, { error });
+      return;
+    }
   }
 
   /**
