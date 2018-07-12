@@ -1,4 +1,5 @@
 import * as React from 'react';
+import * as path from 'path';
 import { observer } from 'mobx-react';
 import { spawn, ChildProcess } from 'child_process';
 
@@ -110,7 +111,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     this.props.appState.output.push({
       timestamp: Date.now(),
-      text: strData
+      text: strData.trim()
     });
   }
 
@@ -172,35 +173,46 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const { forgeTransform } = await import('../transforms/forge');
     let dir: string;
 
+    this.props.appState.isConsoleShowing = true;
+    this.pushData('📦  Packaging current Fiddle...');
+
     // Save files to temp
     try {
-      console.log(`Runner: Package saving files to temp directory`);
+      this.pushData(`Saving files to temp directory...`);
       dir = await fileManager.saveToTemp(options, dotfilesTransform, forgeTransform);
-      console.log(`Runner: Package saved files to ${dir}`);
+      this.pushData(`Saved files to ${dir}`);
     } catch (error) {
-      console.warn(`Runner: Package failed to save files`, { error });
+      console.warn(`⚠️  Failed to save files`, { error });
+      this.pushData(`⚠️  Failed to save files. Error encountered:`);
+      this.pushData(error);
       return;
     }
 
     // Files are now saved to temp, let's install Forge and dependencies
     try {
-      console.log(`Runner: Now installing modules`);
-      await installModules({ dir });
-      console.log(`Runner: Package successfully installed modules`);
+      this.pushData(`Now running "npm install..."`);
+      this.pushData(await installModules({ dir }));
     } catch (error) {
-      console.warn(`Runner: Package failed to install modules`, { error });
+      console.warn(`⚠️  Failed to run "npm install"`, { error });
+      this.pushData(`⚠️  Failed to run "npm install". Error encountered:`);
+      this.pushData(error);
       return;
     }
 
     // Cool, let's run "package"
     try {
-      console.log(`Runner: Now running "npm run package"`);
-      await npmRun({ dir }, 'package');
-      console.log(`Runner: Package succeeded`);
+      console.log(`Now creating binary...`);
+      this.pushData(await npmRun({ dir }, 'package'));
+      this.pushData('Binary successfully created');
     } catch (error) {
-      console.warn(`Runner: Package failed package`, { error });
+      console.warn(`⚠️  Failed to create binary`, { error });
+      this.pushData(`⚠️  Failed to create binary. Error encountered:`);
+      this.pushData(error);
       return;
     }
+
+    const { shell } = await import('electron');
+    shell.showItemInFolder(path.join(dir, 'out'));
   }
 
   /**
