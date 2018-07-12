@@ -5,11 +5,12 @@ import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
-import { appState } from './state';
+import { appState, AppState } from './state';
 import { getTitle } from '../utils/get-title';
 import { getFs } from '../utils/fs';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
+import { PackageJsonOptions, DEFAULT_OPTIONS } from '../utils/get-package';
 
 export class FileManager {
   constructor() {
@@ -71,7 +72,7 @@ export class FileManager {
     if (!pathToSave) {
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     } else {
-      const files = await this.getFiles(...transforms);
+      const files = await this.getFiles(undefined, ...transforms);
 
       for (const [ fileName, content ] of files) {
         try {
@@ -90,16 +91,18 @@ export class FileManager {
     }
   }
 
+
   /**
    * Get files to save, but with a transform applied
    *
+   * @param {PackageJsonOptions} [options]
    * @param {...Array<FileTransform>} transforms
    * @returns {Promise<Files>}
    * @memberof FileManager
    */
-  public async getFiles(...transforms: Array<FileTransform>): Promise<Files> {
-    const options = { includeDependencies: true, includeElectron: true };
-    const values = await window.ElectronFiddle.app.getValues(options);
+  public async getFiles(options?: PackageJsonOptions, ...transforms: Array<FileTransform>): Promise<Files> {
+    const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
+    const values = await window.ElectronFiddle.app.getValues(pOptions);
     let output: Files = new Map();
 
     output.set(RENDERER_JS_NAME, values.renderer);
@@ -117,6 +120,31 @@ export class FileManager {
     }
 
     return output;
+  }
+
+  /**
+   * Save the current project to a temporary directory. Returns the
+   * path to the temp directory.
+   *
+   * @param {AppState} appState
+   * @param {...Array<FileTransform>} transforms
+   * @returns {Promise<string>}
+   */
+  public async saveToTemp(
+    options: PackageJsonOptions, ...transforms: Array<FileTransform>
+  ): Promise<string> {
+    const fs = await getFs();
+    const tmp = await import('tmp');
+    const files = await this.getFiles(options, ...transforms);
+    const dir = tmp.dirSync();
+
+    tmp.setGracefulCleanup();
+
+    for (const [ name, content ] of files) {
+      await fs.writeFile(path.join(dir.name, name), content);
+    }
+
+    return dir.name;
   }
 
   /**

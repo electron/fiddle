@@ -11,6 +11,11 @@ export interface PackageJsonOptions {
   includeDependencies?: boolean;
 }
 
+export const DEFAULT_OPTIONS = {
+  includeElectron: true,
+  includeDependencies: true
+};
+
 /**
  * Returns the package.json for the current Fiddle
  *
@@ -22,11 +27,7 @@ export interface PackageJsonOptions {
 export async function getPackageJson(
   appState: AppState, values?: EditorValues, options?: PackageJsonOptions
 ): Promise<string> {
-  const { includeElectron, includeDependencies } = options || {
-    includeElectron: false,
-    includeDependencies: false
-  };
-
+  const { includeElectron, includeDependencies } = options || DEFAULT_OPTIONS;
   const name = appState.localPath
     ? path.basename(appState.localPath)
     : UNTITLED_NAME;

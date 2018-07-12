@@ -1,5 +1,4 @@
 import { observable, action, autorun } from 'mobx';
-import * as tmp from 'tmp';
 
 import { BinaryManager } from './binary';
 import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
@@ -36,7 +35,6 @@ window.ElectronFiddle = {
 export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
-  @observable public tmpDir: tmp.SynchrounousResult = tmp.dirSync();
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
@@ -196,5 +194,3 @@ export class AppState {
 
 export const appState = new AppState();
 appState.setVersion(appState.version);
-
-tmp.setGracefulCleanup();
