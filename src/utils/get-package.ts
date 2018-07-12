@@ -1,10 +1,8 @@
-import * as path from 'path';
-
 import { AppState } from '../renderer/state';
-import { UNTITLED_NAME } from '../constants';
 import { EditorValues } from '../interfaces';
 import { findModulesInEditors } from '../renderer/npm';
 import { getUsername } from './get-username';
+import { getName } from './get-title';
 
 export interface PackageJsonOptions {
   includeElectron?: boolean;
@@ -28,9 +26,7 @@ export async function getPackageJson(
   appState: AppState, values?: EditorValues, options?: PackageJsonOptions
 ): Promise<string> {
   const { includeElectron, includeDependencies } = options || DEFAULT_OPTIONS;
-  const name = appState.localPath
-    ? path.basename(appState.localPath)
-    : UNTITLED_NAME;
+  const name = await appState.getName();
 
   const devDependencies: Record<string, string> = {};
   const dependencies: Record<string, string> = {};

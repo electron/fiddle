@@ -38,9 +38,6 @@ export async function forgeTransform(files: Files): Promise<Files> {
       parsed.config.forge.makers = [
         {
           name: '@electron-forge/maker-squirrel',
-          config: {
-            name: 'test'
-          }
         },
         {
           name: '@electron-forge/maker-zip',

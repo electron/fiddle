@@ -15,7 +15,6 @@ import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
  * @class App
  */
 export class App {
-  public name = 'test';
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
 

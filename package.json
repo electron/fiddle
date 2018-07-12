@@ -48,6 +48,7 @@
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
     "monaco-loader": "^0.13.0",
+    "namor": "^1.0.1",
     "react": "^16.4.1",
     "react-dom": "^16.4.1",
     "react-mosaic-component": "^1.1.1",

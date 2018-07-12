@@ -8,6 +8,8 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
+import { getName } from '../utils/get-title';
+import { throws } from 'assert';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
@@ -49,6 +51,8 @@ export class AppState {
   @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
 
+  private name: string;
+
   constructor() {
     // Bind all actions
     this.toggleConsole = this.toggleConsole.bind(this);
@@ -76,6 +80,14 @@ export class AppState {
       this.versions = arrayToStringMap(versions);
       this.updateDownloadedVersionState();
     });
+  }
+
+  @action public async getName() {
+    if (!this.name) {
+      this.name = await getName(this);
+    }
+
+    return this.name;
   }
 
   @action public toggleConsole() {
