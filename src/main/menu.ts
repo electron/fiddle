@@ -197,9 +197,10 @@ export async function setupMenu() {
         item.submenu.splice(2, 0, ...getPreferencesItems());
       }
 
-      // Remove "Toggle Developer Tools"
+      // Tweak "View" menu
       if (label === 'View' && isSubmenu(item.submenu)) {
-        item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools');
+        item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools'); // Remove "Toggle Developer Tools"
+        item.submenu.push({ type: 'separator' }, { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' }); // Add zooming actions
       }
 
       // Append items to "Help"
@@ -213,10 +214,8 @@ export async function setupMenu() {
   menu.splice(
     process.platform === 'darwin' ? 1 : 0,
     0,
-    getFileMenu(),
+    getFileMenu()
   );
-
-  menu.splice(menu.length, 0, getTasksMenu());
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
