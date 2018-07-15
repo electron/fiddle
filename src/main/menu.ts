@@ -114,6 +114,10 @@ function getTasksMenu(): MenuItemConstructorOptions {
     {
       label: 'Package Fiddle...',
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_PACKAGE)
+    },
+    {
+      label: 'Make installers for Fiddle...',
+      click: () => ipcMainManager.send(IpcEvents.FIDDLE_MAKE)
     }
   ];
 
