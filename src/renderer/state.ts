@@ -51,6 +51,7 @@ export class AppState {
   @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
 
+  private outputBuffer: string = '';
   private name: string;
 
   constructor() {
@@ -64,6 +65,9 @@ export class AppState {
     this.removeVersion = this.removeVersion.bind(this);
 
     this.signOutGitHub = this.signOutGitHub.bind(this);
+
+    this.pushError = this.pushError.bind(this);
+    this.pushOutput = this.pushOutput.bind(this);
 
     // When the settings should be opened, we'll close
     // everything else
@@ -202,6 +206,53 @@ export class AppState {
     this.gitHubToken = null;
     this.gitHubName = null;
   }
+
+  /**
+   * Push output to the application's state. Accepts a buffer or a string as input,
+   * attaches a timestamp, and pushes into the store.
+   *
+   * @param {(string | Buffer)} data
+   */
+  @action public pushOutput(data: string | Buffer, bypassBuffer: boolean = true) {
+    let strData = data.toString();
+
+    if (process.platform === 'win32' && !bypassBuffer) {
+      this.outputBuffer += strData;
+      strData = this.outputBuffer;
+      const parts = strData.split('\r\n');
+
+      for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+        const part = parts[partIndex];
+        if (partIndex === parts.length - 1) {
+          this.outputBuffer = part;
+          continue;
+        }
+
+        this.pushOutput(part);
+      }
+      return;
+    }
+
+    if (strData.startsWith('Debugger listening on ws://')) return;
+    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
+
+    this.output.push({
+      timestamp: Date.now(),
+      text: strData.trim()
+    });
+  }
+
+ /**
+  * Little convenience method that pushes message and error.
+  *
+  * @param {string} message
+  * @param {Error} error
+  */
+ @action public pushError(message: string, error: Error) {
+   this.pushOutput(`⚠️ ${message} Error encountered:`);
+   this.pushOutput(error.toString());
+   console.warn(error);
+ }
 }
 
 export const appState = new AppState();

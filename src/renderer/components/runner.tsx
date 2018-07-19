@@ -6,9 +6,10 @@ import { spawn, ChildProcess } from 'child_process';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
 import { installModules, findModulesInEditors, npmRun } from '../npm';
-import { EditorValues } from '../../interfaces';
+import { EditorValues, FileTransform } from '../../interfaces';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
+import { PackageJsonOptions } from '../../utils/get-package';
 
 export interface RunnerState {
   isRunning: boolean;
@@ -16,6 +17,11 @@ export interface RunnerState {
 
 export interface RunnerProps {
   appState: AppState;
+}
+
+export enum ForgeCommands {
+  PACKAGE = 'package',
+  MAKE = 'make'
 }
 
 /**
@@ -28,23 +34,27 @@ export interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public child: ChildProcess | null = null;
-  private outputBuffer: string = '';
 
   constructor(props: RunnerProps) {
     super(props);
 
     this.run = this.run.bind(this);
-    this.package = this.package.bind(this);
-    this.pushData = this.pushData.bind(this);
+    this.performForgeOperation = this.performForgeOperation.bind(this);
+    this.props.appState.pushOutput = this.props.appState.pushOutput.bind(this);
     this.stop = this.stop.bind(this);
     this.state = { isRunning: false };
 
-    this.pushData('Console ready 🔬');
+    this.props.appState.pushOutput('Console ready 🔬');
   }
 
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
-    ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, this.package);
+    ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, () => {
+      this.performForgeOperation(ForgeCommands.PACKAGE);
+    });
+    ipcRendererManager.on(IpcEvents.FIDDLE_MAKE, () => {
+      this.performForgeOperation(ForgeCommands.MAKE);
+    });
   }
 
   public render() {
@@ -81,40 +91,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
   }
 
-
-  /**
-   * Push output to the application's state. Accepts a buffer or a string as input,
-   * attaches a timestamp, and pushes into the store.
-   *
-   * @param {(string | Buffer)} data
-   * @returns
-   */
-  public pushData(data: string | Buffer, bypassBuffer: boolean = true) {
-    let strData = data.toString();
-    if (process.platform === 'win32' && !bypassBuffer) {
-      this.outputBuffer += strData;
-      strData = this.outputBuffer;
-      const parts = strData.split('\r\n');
-      for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
-        const part = parts[partIndex];
-        if (partIndex === parts.length - 1) {
-          this.outputBuffer = part;
-          continue;
-        }
-        this.pushData(part);
-      }
-      return;
-    }
-
-    if (strData.startsWith('Debugger listening on ws://')) return;
-    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
-
-    this.props.appState.output.push({
-      timestamp: Date.now(),
-      text: strData.trim()
-    });
-  }
-
   /**
    * Analyzes the editor's JavaScript contents for modules
    * and installs them.
@@ -123,12 +99,12 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * @param {string} dir
    * @returns {Promise<void>}
    */
-  public async installModules(values: EditorValues, dir: string): Promise<void> {
+  public async installModulesForEditor(values: EditorValues, dir: string): Promise<void> {
     const modules = await findModulesInEditors(values);
 
     if (modules && modules.length > 0) {
-      this.pushData(`Installing npm modules: ${modules.join(', ')}...`);
-      this.pushData(await installModules({ dir }, ...modules));
+      this.props.appState.pushOutput(`Installing npm modules: ${modules.join(', ')}...`);
+      this.props.appState.pushOutput(await installModules({ dir }, ...modules));
     }
   }
 
@@ -142,72 +118,105 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    */
   public async execute(dir: string): Promise<void> {
     const { appState } = this.props;
-    const { version } = appState;
+    const { version, pushOutput } = appState;
 
     const binaryPath = await appState.binaryManager.getElectronBinaryPath(version);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ dir, '--inspect' ]);
     this.setState({ isRunning: true });
-    this.pushData(`Electron v${version} started.`);
+    pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout.on('data', (data) => this.pushData(data, false));
-    this.child.stderr.on('data', (data) => this.pushData(data, false));
+    this.child.stdout.on('data', (data) => pushOutput(data, false));
+    this.child.stderr.on('data', (data) => pushOutput(data, false));
     this.child.on('close', (code) => {
-      this.pushData(`Electron exited with code ${code.toString()}.`);
+      pushOutput(`Electron exited with code ${code.toString()}.`);
       this.setState({ isRunning: false });
       this.child = null;
     });
   }
 
   /**
-   * Package the application via electron-forge
+   * Save files to temp, logging to the Fiddle terminal while doing so
    *
-   * @returns: {Promise<void>}
+   * @param {PackageJsonOptions} options
+   * @param {...Array<FileTransform>} transforms
+   * @returns {(Promise<string | null>)}
    * @memberof Runner
    */
-  public async package(): Promise<void> {
+  public async saveToTemp(
+    options: PackageJsonOptions, ...transforms: Array<FileTransform>
+  ): Promise<string | null> {
     const { fileManager } = window.ElectronFiddle.app;
+    const { pushOutput, pushError } = this.props.appState;
+
+    try {
+      pushOutput(`Saving files to temp directory...`);
+      const dir = await fileManager.saveToTemp(options, ...transforms);
+      pushOutput(`Saved files to ${dir}`);
+      return dir;
+    } catch (error) {
+      pushError('Failed to save files.', error);
+    }
+
+    return null;
+  }
+
+  /**
+   * Installs modules in a given directory (we're basically
+   * just running "npm install")
+   *
+   * @param {string} dir
+   * @returns
+   * @memberof Runner
+   */
+  public async npmInstall(dir: string): Promise<boolean> {
+    try {
+      this.props.appState.pushOutput(`Now running "npm install..."`);
+      this.props.appState.pushOutput(await installModules({ dir }));
+      return true;
+    } catch (error) {
+      this.props.appState.pushError('Failed to run "npm install".', error);
+    }
+
+    return false;
+  }
+
+  /**
+   * Uses electron-forge to either package or make the current fiddle
+   *
+   * @param {ForgeCommands} operation
+   * @returns
+   * @memberof Runner
+   */
+  public async performForgeOperation(operation: ForgeCommands) {
     const options = { includeDependencies: true, includeElectron: true };
     const { dotfilesTransform } = await import('../transforms/dotfiles');
     const { forgeTransform } = await import('../transforms/forge');
-    let dir: string;
+    const { appState } = this.props;
+    const { pushError, pushOutput } = appState;
 
-    this.props.appState.isConsoleShowing = true;
-    this.pushData('📦  Packaging current Fiddle...');
+    const strings = operation === ForgeCommands.MAKE
+      ? [ 'Creating installers for', 'Binary' ]
+      : [ 'Packaging', 'Installers' ];
+
+    appState.isConsoleShowing = true;
+    pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     // Save files to temp
-    try {
-      this.pushData(`Saving files to temp directory...`);
-      dir = await fileManager.saveToTemp(options, dotfilesTransform, forgeTransform);
-      this.pushData(`Saved files to ${dir}`);
-    } catch (error) {
-      console.warn(`⚠️  Failed to save files`, { error });
-      this.pushData(`⚠️  Failed to save files. Error encountered:`);
-      this.pushData(error);
-      return;
-    }
+    const dir = await this.saveToTemp(options, dotfilesTransform, forgeTransform);
+    if (!dir) return;
 
     // Files are now saved to temp, let's install Forge and dependencies
-    try {
-      this.pushData(`Now running "npm install..."`);
-      this.pushData(await installModules({ dir }));
-    } catch (error) {
-      console.warn(`⚠️  Failed to run "npm install"`, { error });
-      this.pushData(`⚠️  Failed to run "npm install". Error encountered:`);
-      this.pushData(error);
-      return;
-    }
+    if (!(await this.npmInstall(dir))) return;
 
     // Cool, let's run "package"
     try {
-      console.log(`Now creating binary...`);
-      this.pushData(await npmRun({ dir }, 'package'));
-      this.pushData('Binary successfully created');
+      console.log(`Now creating ${strings[1].toLowerCase()}...`);
+      pushOutput(await npmRun({ dir }, operation));
+      pushOutput(`✅ ${strings[1]} successfully created.`);
     } catch (error) {
-      console.warn(`⚠️  Failed to create binary`, { error });
-      this.pushData(`⚠️  Failed to create binary. Error encountered:`);
-      this.pushData(error);
+      pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
       return;
     }
 
@@ -235,7 +244,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     try {
       dir = await fileManager.saveToTemp(options);
-      await this.installModules(values, dir);
+      await this.installModulesForEditor(values, dir);
     } catch (error) {
       console.error('Runner: Could not write files', error);
       return;
