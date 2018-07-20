@@ -13,12 +13,47 @@ export interface WelcomeTourState {
   isTourStarted: boolean;
 }
 
-const welcomeTour: Set<TourScriptStep> = new Set([
-  {
-    selector: 'div.mosaic-window.main',
-    text: 'Main editor'
-  }
-]);
+function getWelcomeTour(): Set<TourScriptStep> {
+  return new Set([
+    {
+      selector: 'div.mosaic-root',
+      content: (
+        <div>
+          <h4>Fiddle Editors</h4>
+          <p>
+            Electron Fiddle allows you to build little experiments and mini-apps with
+            Electron. Each Fiddle has three files: A main script, a renderer script,
+            and an HTML file.
+          </p>
+        </div>
+      )
+    },
+    {
+      selector: 'div.mosaic-window.main',
+      content: (
+        <div>
+          <h4>Main Script</h4>
+          <p>
+            Every Electron app starts with a main script, very similar to how
+            a Node.js application is started. That main script runs in the "main
+            process". To display a user interface, the main process creates renderer
+            processes – usually in the form of windows.
+          </p>
+          <p>
+            To get started, pretend that the main process is just like a Node.js
+            process. All APIs and features found in Electron are accessible through
+            the <code>electron</code> module, which can be required like any other
+            Node.js module.
+          </p>
+          <p>
+            The default fiddle creates a new <code>BrowserWindow</code> and loads
+            an HTML file.
+          </p>
+        </div>
+      )
+    }
+  ]);
+}
 
 @observer
 export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourState> {
@@ -62,7 +97,7 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
       );
     } else {
       return (
-        <Tour tour={welcomeTour} />
+        <Tour tour={getWelcomeTour()} onStop={this.stopTour} />
       );
     }
   }

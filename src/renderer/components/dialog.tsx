@@ -1,11 +1,16 @@
 import * as React from 'react';
+
 import { classNames } from '../../utils/classnames';
+import { ArrowPosition } from '../../interfaces';
+
 export interface DialogProps {
   buttons?: Array<JSX.Element> | null;
+  style?: React.CSSProperties;
   isCentered?: boolean;
   className?: string;
-  isShowing: boolean;
-  isShowingBackdrop: boolean;
+  isShowing?: boolean;
+  isShowingBackdrop?: boolean;
+  arrow?: ArrowPosition;
   onClose?: () => void;
   onConfirm?: () => void;
 }
@@ -17,6 +22,12 @@ export interface DialogProps {
  * @extends {React.Component<DialogProps, {}>}
  */
 export class Dialog extends React.Component<DialogProps, {}> {
+  public static defaultProps: Partial<DialogProps> = {
+    isCentered: false,
+    isShowing: true,
+    isShowingBackdrop: false
+  };
+
   constructor(props: DialogProps) {
     super(props);
 
@@ -48,17 +59,25 @@ export class Dialog extends React.Component<DialogProps, {}> {
     const { buttons, onClose } = this.props;
 
     // Buttons were passed? Great!
-    if (buttons) return buttons;
+    if (buttons) return (
+      <div className='dialog-buttons'>
+        {buttons}
+      </div>
+    );
 
     // No? Let's make some default ones.
     const closeButton = onClose
       ? <button key='btn-close' onClick={this.onClose}>Cancel</button>
       : null;
 
-    return [
-      closeButton,
-      <button key='btn-ok' onClick={this.onConfirm}>Ok</button>,
-    ];
+    return (
+      <div className='dialog-buttons'>
+        {closeButton}
+        <button key='btn-ok' onClick={this.onConfirm}>
+          Ok
+        </button>
+      </div>
+    );
   }
 
   /**
@@ -78,13 +97,19 @@ export class Dialog extends React.Component<DialogProps, {}> {
   }
 
   public render() {
-    const { isShowing, isCentered, children, className } = this.props;
-    const parsedClassName = classNames('dialog', { centered: isCentered }, className);
+    const { isShowing, isCentered, style, children, className, arrow } = this.props;
+    const arrowClass = arrow ? `arrow arrow-${arrow}` : '';
+    const parsedClassName = classNames(
+      'dialog',
+      arrowClass,
+      { centered: isCentered },
+      className
+    );
 
     return isShowing ? (
       <>
         {this.renderBackdrop()}
-        <div className={parsedClassName}>
+        <div style={style} className={parsedClassName}>
           {children}
           {this.renderButtons()}
         </div>

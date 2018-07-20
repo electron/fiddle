@@ -27,28 +27,131 @@
   border: @default-border;
   color: #f3f3f3;
   border-radius: 6px;
-  opacity: 0;
-  transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
+  padding: 10px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: slide-up 0.4s ease;
+
+  code {
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px;
+    line-height: 12px;
+  }
+
+  &-buttons {
+    margin-top: 10px;
+  }
 
   &.centered {
     position: absolute;
     width: 300px;
-    padding: 10px;
-    z-index: 100;
     left: calc(50% - (300px / 2));
-    opacity: 1;
     top: 100px;
+  }
+
+  &.arrow:after, &.arrow:before {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &.arrow:after {
+    border-color: rgba(136, 183, 213, 0);
+    border-width: 9px;
+  }
+
+  &.arrow:before {
+    border-color: rgba(194, 225, 245, 0);
+    border-width: 10px;
+  }
+
+  &.arrow-top:after, &.arrow-top:before {
+    bottom: 100%;
+	  left: 50%;
+  }
+
+  &.arrow-top:after {
+    border-bottom-color: @electron-background-3;
+    margin-left: -9px;
+  }
+
+  &.arrow-top:before {
+    border-bottom-color: @default-border-color;
+  	margin-left: -10px;
+  }
+
+  &.arrow-bottom:after, &.arrow-bottom:before {
+    top: 100%;
+	  left: 50%;
+  }
+
+  &.arrow-bottom:after {
+    border-top-color: @electron-background-3;
+    margin-left: -9px;
+  }
+
+  &.arrow-bottom:before {
+    border-top-color: @default-border-color;
+  	margin-left: -10px;
+  }
+
+  &.arrow-left:after, &.arrow-left:before {
+    right: 100%;
+	  top: 50%;
+  }
+
+  &.arrow-left:after {
+    border-right-color: @electron-background-3;
+    margin-top: -9px;
+  }
+
+  &.arrow-left:before {
+    border-right-color: @default-border-color;
+  	margin-top: -10px;
+  }
+
+  &.arrow-right:after, &.arrow-right:before {
+    left: 100%;
+	  top: 50%;
+  }
+
+  &.arrow-right:after {
+    border-left-color: @electron-background-3;
+    margin-top: -9px;
+  }
+
+  &.arrow-right:before {
+    border-left-color: @default-border-color;
+  	margin-top: -10px;
   }
 
   button {
     color: #1e2527;
     float: right;
-    margin-left: 5px;
+    margin-left: 9px;
     margin-bottom: 0;
   }
 
   a {
     cursor: pointer;
+  }
+
+  h4 {
+    margin-bottom: 0;
+  }
+
+  p {
+    font-size: 1.2rem;
+  }
+
+  p:last-of-type {
+    margin-bottom: 0;
   }
 
   input {
@@ -96,4 +199,15 @@
   transition: opacity 0.4s ease-in-out;
   pointer-events: all;
   opacity: 0.5;
+}
+
+@keyframes slide-up {
+  0% {
+      opacity: 0;
+      transform: translateY(20px);
+  }
+  100% {
+      opacity: 1;
+      transform: translateY(0);
+  }
 }
