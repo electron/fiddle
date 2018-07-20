@@ -80,7 +80,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         onChange={updateEditorLayout}
         // tslint:disable-next-line:jsx-no-multiline-js
         renderTile={(id, path) => (
-          <ViewIdMosaicWindow path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
+          <ViewIdMosaicWindow className={id} path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
             <Editor id={id} monaco={monaco} appState={appState} />
           </ViewIdMosaicWindow>
         )}

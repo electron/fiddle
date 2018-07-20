@@ -50,6 +50,7 @@ export class AppState {
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
+  @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   private outputBuffer: string = '';
   private name: string;
@@ -104,6 +105,14 @@ export class AppState {
 
   @action public toggleSettings() {
     this.isSettingsShowing = !this.isSettingsShowing;
+  }
+
+  @action public disableTour() {
+    if (this.isTourShowing) {
+      localStorage.setItem('hasShownTour', 'true');
+    } else {
+      localStorage.removeItem('hasShownTour');
+    }
   }
 
  /*
