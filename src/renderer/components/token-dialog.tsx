@@ -180,7 +180,9 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
         isShowingBackdrop={true}
         buttons={this.buttons}
         onClose={this.onClose}
+        isCentered={true}
         className='tokenDialog'
+        key='tokenDialog'
       >
         {this.spinner}
         <span className='generateTokenText'>

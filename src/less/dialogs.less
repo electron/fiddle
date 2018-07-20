@@ -30,6 +30,16 @@
   opacity: 0;
   transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
 
+  &.centered {
+    position: absolute;
+    width: 300px;
+    padding: 10px;
+    z-index: 100;
+    left: calc(50% - (300px / 2));
+    opacity: 1;
+    top: 100px;
+  }
+
   button {
     color: #1e2527;
     float: right;
@@ -61,14 +71,6 @@
 }
 
 .tokenDialog {
-  position: absolute;
-  width: 300px;
-  padding: 10px;
-  z-index: 100;
-  left: calc(50% - (300px / 2));
-  opacity: 1;
-  top: 100px;
-
   .tokenSpinner {
     position: absolute;
     z-index: 3;

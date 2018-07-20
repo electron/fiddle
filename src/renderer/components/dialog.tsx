@@ -1,12 +1,13 @@
 import * as React from 'react';
-
+import { classNames } from '../../utils/classnames';
 export interface DialogProps {
-  buttons: Array<JSX.Element> | null;
-  key?: string;
+  buttons?: Array<JSX.Element> | null;
+  isCentered?: boolean;
   className?: string;
   isShowing: boolean;
   isShowingBackdrop: boolean;
   onClose?: () => void;
+  onConfirm?: () => void;
 }
 
 /**
@@ -19,14 +20,22 @@ export class Dialog extends React.Component<DialogProps, {}> {
   constructor(props: DialogProps) {
     super(props);
 
-    this.close = this.close.bind(this);
+    this.onClose = this.onClose.bind(this);
+    this.onConfirm = this.onConfirm.bind(this);
   }
 
   /**
    * Closes the dialog
    */
-  public close() {
+  public onClose() {
     if (this.props.onClose) this.props.onClose();
+  }
+
+  /**
+   * Confirms the dialog
+   */
+  public onConfirm() {
+    if (this.props.onConfirm) this.props.onConfirm();
   }
 
   /**
@@ -35,15 +44,21 @@ export class Dialog extends React.Component<DialogProps, {}> {
    *
    * @returns {Array<JSX.Element> | JSX.Element}
    */
-  public renderButtons(): Array<JSX.Element> | JSX.Element {
-    const { buttons } = this.props;
+  public renderButtons(): Array<JSX.Element | null> | JSX.Element {
+    const { buttons, onClose } = this.props;
 
     // Buttons were passed? Great!
     if (buttons) return buttons;
 
-    return (
-      <button className='ok' onClick={this.close}>Ok</button>
-    );
+    // No? Let's make some default ones.
+    const closeButton = onClose
+      ? <button key='btn-close' onClick={this.onClose}>Cancel</button>
+      : null;
+
+    return [
+      closeButton,
+      <button key='btn-ok' onClick={this.onConfirm}>Ok</button>,
+    ];
   }
 
   /**
@@ -58,17 +73,18 @@ export class Dialog extends React.Component<DialogProps, {}> {
     if (!isShowingBackdrop) return null;
 
     return (
-      <div key='drop' className='dialogDrop' onClick={this.close} />
+      <div key='drop' className='dialogDrop' onClick={this.onClose} />
     );
   }
 
   public render() {
-    const { isShowing, key, children, className } = this.props;
+    const { isShowing, isCentered, children, className } = this.props;
+    const parsedClassName = classNames('dialog', { centered: isCentered }, className);
 
     return isShowing ? (
       <>
         {this.renderBackdrop()}
-        <div key={key} className={`dialog ${className || ''}`}>
+        <div className={parsedClassName}>
           {children}
           {this.renderButtons()}
         </div>
