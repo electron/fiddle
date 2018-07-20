@@ -118,7 +118,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
   public render() {
     const { isPublishing } = this.state;
-    const className = classNames('button', isPublishing);
+    const className = classNames('button', 'button-publish', isPublishing);
     const icon = isPublishing ? faSpinner : faUpload;
     const text = isPublishing ? 'Publishing...' : 'Publish';
 

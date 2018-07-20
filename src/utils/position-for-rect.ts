@@ -38,24 +38,8 @@ export function positionForRect(
   const result: PositionResult = { left: 0, top: 0, type: 'top' };
   const middle = target.left + (target.width / 2) - (size.width / 2);
 
-  // Default to top middle
-  result.left = middle;
-  result.top = target.top - size.height - margin;
-
-  if (isResultOkay(result, size)) {
-    return { ...result, type: 'top' };
-  }
-
-  // Okay, let's try bottom middle
-  result.left = middle;
-  result.top = target.top + target.height + margin;
-
-  if (isResultOkay(result, size)) {
-    return { ...result, type: 'bottom' };
-  }
-
   // Okay, let's try top right
-  result.left = target.width + margin;
+  result.left = target.left + target.width + margin;
   result.top = target.top;
 
   if (isResultOkay(result, size)) {
@@ -69,6 +53,23 @@ export function positionForRect(
   if (isResultOkay(result, size)) {
     return { ...result, type: 'left' };
   }
+
+  // Okay, let's try bottom middle
+  result.left = middle;
+  result.top = target.top + target.height + margin;
+
+  if (isResultOkay(result, size)) {
+    return { ...result, type: 'bottom' };
+  }
+
+  // Top middle would require us to measure the
+  // text height, which is a bit gross.
+  // result.left = middle;
+  // result.top = target.top - size.height - margin;
+
+  // if (isResultOkay(result, size)) {
+  //   return { ...result, type: 'top' };
+  // }
 
   // Alright, smack in the middle it is
   result.left = middle;

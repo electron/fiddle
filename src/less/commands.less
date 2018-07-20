@@ -3,14 +3,16 @@
 .commands {
   display: flex;
   justify-content: space-between;
-  height: 40px;
-  padding-top: 12px;
+  height: 50px;
+  padding: 10px;
+  box-sizing: border-box;
   font-family: @default-fonts;
 
   button,
   input,
   select {
     -webkit-app-region: no-drag;
+    margin-bottom: 0;
   }
 
   select {
@@ -24,12 +26,6 @@
 
   & > div {
     display: flex;
-
-    &:first-of-type {
-      button {
-        margin-left: 10px;
-      }
-    }
 
     &:last-of-type {
       margin-right: 10px;

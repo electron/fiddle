@@ -15,6 +15,7 @@ export interface TourProps {
 export interface TourState {
   tour: IterableIterator<Array<TourScriptStep>>;
   step: TourScriptStep | null;
+  i: number;
 }
 
 export class Tour extends React.Component<TourProps, TourState> {
@@ -30,6 +31,7 @@ export class Tour extends React.Component<TourProps, TourState> {
     this.state = {
       tour: props.tour.entries(),
       step: null,
+      i: 0
     };
   }
 
@@ -66,7 +68,7 @@ export class Tour extends React.Component<TourProps, TourState> {
     const { done, value } = this.state.tour.next();
     const step = done ? null : value[0];
 
-    this.setState({ step });
+    this.setState({ step, i: this.state.i + 1 });
   }
 
   /**
@@ -89,18 +91,24 @@ export class Tour extends React.Component<TourProps, TourState> {
   }
 
   private getDialogForStep({ content }: TourScriptStep, rect: ClientRect) {
-    const buttons = [
-      <button key='btn-stop' onClick={this.stop}>Stop Tour</button>,
-      <button key='btn-adv' onClick={this.advance}>Continue</button>
-    ];
+    const buttons = this.props.tour.size === this.state.i
+      ? [
+        <button key='btn-stop' onClick={this.stop}>Finish Tour</button>
+      ]
+      : [
+        <button key='btn-stop' onClick={this.stop}>Stop Tour</button>,
+        <button key='btn-adv' onClick={this.advance}>Continue</button>
+      ];
 
     const size = { width: 300, height: 300 };
+    const margin = 10;
     const position = positionForRect(rect, size);
     const style: React.CSSProperties = {
       position: 'absolute',
       top: position.top,
       left: position.left,
-      width: size.width
+      width: size.width - margin,
+      margin: `${margin}px`
     };
     const arrow = invertPosition(position.type);
 
@@ -129,7 +137,7 @@ export class Tour extends React.Component<TourProps, TourState> {
       <>
         {this.getDialogForStep(step, rect)}
         <svg height='100%' width='100%'>
-          <rect fill='rgba(0, 0, 0, 0.5)' x='0' y='0' mask='url(#mask)' height='100%' width='100%'/>
+          <rect fill='rgba(0, 0, 0, 0.65)' x='0' y='0' mask='url(#mask)' height='100%' width='100%'/>
           <mask id='mask' maskUnits='userSpaceOnUse' maskContentUnits='userSpaceOnUse'>
             <rect className='bg' x='0' y='0' fill='white' height='100%' width='100%' />
             <rect x={left} y={top} width={width} height={height} fill='black' rx='5' ry='5' />

@@ -19,7 +19,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       selector: 'div.mosaic-root',
       content: (
         <div>
-          <h4>Fiddle Editors</h4>
+          <h4>📝 Fiddle Editors</h4>
           <p>
             Electron Fiddle allows you to build little experiments and mini-apps with
             Electron. Each Fiddle has three files: A main script, a renderer script,
@@ -29,10 +29,49 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      selector: 'select.select-versions',
+      content: (
+        <div>
+          <h4>📇 Choose an Electron Version</h4>
+          <p>
+            If you're so inclined, choose an Electron version. Electron Fiddle will
+            automatically download versions in the background.
+          </p>
+          <p>
+            Open the preferences to see available versions and delete those already
+            downloaded.
+          </p>
+        </div>
+      )
+    },
+    {
+      selector: 'button.button-run',
+      content: (
+        <div>
+          <h4>🚀 Run Your Fiddle</h4>
+          <p>
+            Hit this button to give your Fiddle a try and start it.
+          </p>
+        </div>
+      )
+    },
+    {
+      selector: 'button.button-publish',
+      content: (
+        <div>
+          <h4>🗺 Share Your Fiddle</h4>
+          <p>
+            Like what you've built? You can save your Fiddle as a public GitHub Gist,
+            allowing other users to load it by pasting the URL into the address bar.
+          </p>
+        </div>
+      )
+    },
+    {
       selector: 'div.mosaic-window.main',
       content: (
         <div>
-          <h4>Main Script</h4>
+          <h4>📝 Main Script</h4>
           <p>
             Every Electron app starts with a main script, very similar to how
             a Node.js application is started. That main script runs in the "main
@@ -48,6 +87,40 @@ function getWelcomeTour(): Set<TourScriptStep> {
           <p>
             The default fiddle creates a new <code>BrowserWindow</code> and loads
             an HTML file.
+          </p>
+        </div>
+      )
+    },
+    {
+      selector: 'div.mosaic-window.html',
+      content: (
+        <div>
+          <h4>📝 HTML</h4>
+          <p>
+            In the default Fiddle, this HTML file is loaded in the
+            <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
+            in a browser will work here, too. In addition, Electron allows you
+            to execute Node.js code. Take a close look at the
+             <code>&lt;script /&gt;</code> tag and notice how we can call <code>
+            require</code> like we would in Node.js.
+          </p>
+        </div>
+      )
+    },
+    {
+      selector: 'div.mosaic-window.renderer',
+      content: (
+        <div>
+          <h4>📝 Renderer Script</h4>
+          <p>
+            This is the script we just <code>required</code> from the HTML file.
+            In here, you can do anything that works in Node.js <i>and</i> anything
+            that works in a browser.
+          </p>
+          <p>
+            By the way: If you want to use an <code>npm</code> module here, just
+            <code>require</code> it. Electron Fiddle will automatically detect that you
+            requested a module and install it as soon as you run your Fiddle.
           </p>
         </div>
       )
