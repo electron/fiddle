@@ -6,7 +6,7 @@ import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
 
 import { AppState } from '../state';
 import { getOctokit } from '../../utils/octokit';
-import { classNames } from '../../utils/classnames';
+import { Dialog } from './dialog';
 
 export interface TokenDialogProps {
   appState: AppState;
@@ -46,7 +46,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
     this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.close = this.close.bind(this);
+    this.onClose = this.onClose.bind(this);
   }
 
   /**
@@ -87,7 +87,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
   /**
    * Closes the dialog
    */
-  public close() {
+  public onClose() {
     this.props.appState.isTokenDialogShowing = false;
     this.reset();
   }
@@ -153,43 +153,48 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     );
   }
 
+  get buttons() {
+    const canSubmit = !!this.state.tokenInput;
+
+    return [
+      (
+        <button
+          className='button'
+          disabled={!canSubmit}
+          onClick={this.onSubmitToken}
+        >
+          Done
+        </button>
+      ), (
+        <button className='cancel' onClick={this.onClose}>Cancel</button>
+      )
+    ];
+  }
+
   public render() {
     const { isTokenDialogShowing } = this.props.appState;
-    const canSubmit = !!this.state.tokenInput;
-    const dialogClassNames = classNames({ tokenDialogVisible: isTokenDialogShowing }, 'tokenDialog');
 
-    return isTokenDialogShowing ? [
-      (
-        <div
-          key='drop'
-          className={`dialogDrop ${isTokenDialogShowing ? 'dialogDropVisible' : ''}`}
-          onClick={this.close}
+    return (
+      <Dialog
+        isShowing={isTokenDialogShowing}
+        isShowingBackdrop={true}
+        buttons={this.buttons}
+        onClose={this.onClose}
+        className='tokenDialog'
+      >
+        {this.spinner}
+        <span className='generateTokenText'>
+          <FontAwesomeIcon icon={faKey} />
+          Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
+        </span>
+        <input
+          ref={this.tokenInputRef}
+          value={this.state.tokenInput || ''}
+          onFocus={this.onTokenInputFocused}
+          onChange={this.handleChange}
+          className={this.state.error ? 'hasError' : ''}
         />
-      ),
-      (
-        <div key='tokenDialog' className={dialogClassNames}>
-          {this.spinner}
-          <span className='generateTokenText'>
-            <FontAwesomeIcon icon={faKey} />
-            Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
-          </span>
-          <input
-            ref={this.tokenInputRef}
-            value={this.state.tokenInput || ''}
-            onFocus={this.onTokenInputFocused}
-            onChange={this.handleChange}
-            className={this.state.error ? 'hasError' : ''}
-          />
-          <button
-            className='button'
-            disabled={!canSubmit}
-            onClick={this.onSubmitToken}
-          >
-            Done
-          </button>
-          <button className='cancel' onClick={this.close}>Cancel</button>
-        </div>
-      )
-    ] : null;
+      </Dialog>
+    );
   }
 }

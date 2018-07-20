@@ -22,25 +22,13 @@
   }
 }
 
-.tokenDialog {
-  position: absolute;
-  top: 60px;
-  width: 300px;
-  padding: 10px;
-  z-index: 100;
+.dialog {
   background-color: @electron-background-3;
   border: @default-border;
   color: #f3f3f3;
   border-radius: 6px;
-  left: -10000px;
   opacity: 0;
   transition: top 0.4s ease-in-out, opacity 0.4s ease-in-out;
-
-  &.tokenDialogVisible {
-    left: calc(50% - (300px / 2));
-    opacity: 1;
-    top: 100px;
-  }
 
   button {
     color: #1e2527;
@@ -70,6 +58,17 @@
       border-color: #df3434;
     }
   }
+}
+
+.tokenDialog {
+  position: absolute;
+  top: 60px;
+  width: 300px;
+  padding: 10px;
+  z-index: 100;
+  left: calc(50% - (300px / 2));
+  opacity: 1;
+  top: 100px;
 
   .tokenSpinner {
     position: absolute;
@@ -96,9 +95,6 @@
   height: 100vh;
   background: black;
   transition: opacity 0.4s ease-in-out;
-
-  &.dialogDropVisible {
-    pointer-events: all;
-    opacity: 0.5;
-  }
+  pointer-events: all;
+  opacity: 0.5;
 }
