@@ -72,6 +72,25 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'first-time-electron',
+      selector: 'div.mosaic-root',
+      content: (
+        <div>
+          <h4>👋 Getting Started With Electron?</h4>
+          <p>
+            We've finished our tour of Electron Fiddle, but if this is your
+            first time using Electron, we could introduce you to its basics.
+          </p>
+        </div>
+      ),
+      getButtons: ({ stop, advance }) => {
+        return [
+          <button key='btn-adv' onClick={advance}>Electron Basics</button>,
+          <button key='btn-stop' onClick={stop}>I'm good!</button>,
+        ];
+      }
+    },
+    {
       name: 'main-editor',
       selector: 'div.mosaic-window.main',
       content: (

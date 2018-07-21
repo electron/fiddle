@@ -6,6 +6,7 @@ export interface TourScriptStep {
   name: string;
   selector: string;
   content: JSX.Element;
+  getButtons?: (handlers: TourStepGetButtonParams) => Array<JSX.Element>;
 }
 
 export interface TourProps {
@@ -17,6 +18,11 @@ export interface TourState {
   tour: IterableIterator<Array<TourScriptStep>>;
   step: TourScriptStep | null;
   i: number;
+}
+
+export interface TourStepGetButtonParams {
+  stop: () => void;
+  advance: () => void;
 }
 
 export class Tour extends React.Component<TourProps, TourState> {
@@ -92,16 +98,24 @@ export class Tour extends React.Component<TourProps, TourState> {
   }
 
   /**
-   * Renders the dialog for the current step of the tour.
+   * Return buttons for the dialog for the current step
+   * of the tour. By default, we just return a continue/stop
+   * combo
    *
-   * @param {TourScriptStep} { content }
-   * @param {ClientRect} rect
-   * @returns {JSX.Element}
+   * @param {TourScriptStep} { getButtons }
+   * @returns {Array<JSX.Element>}
    */
-  private getDialogForStep(
-    { content, name }: TourScriptStep, rect: ClientRect
-  ): JSX.Element {
-    const buttons = this.props.tour.size === this.state.i
+  private getButtons({ getButtons }: TourScriptStep): Array<JSX.Element> {
+    // Did the step bring its own buttons?
+    if (getButtons) {
+      return getButtons({
+        stop: this.stop,
+        advance: this.advance
+      });
+    }
+
+    // No? Fine! Are we at the end of the tour?
+    return this.props.tour.size === this.state.i
       ? [
         <button key='btn-stop' onClick={this.stop}>Finish Tour</button>
       ]
@@ -109,8 +123,18 @@ export class Tour extends React.Component<TourProps, TourState> {
         <button key='btn-stop' onClick={this.stop}>Stop Tour</button>,
         <button key='btn-adv' onClick={this.advance}>Continue</button>
       ];
+  }
 
-    const size = { width: 300, height: 300 };
+  /**
+   * Renders the dialog for the current step of the tour.
+   *
+   * @param {TourScriptStep} { content }
+   * @param {ClientRect} rect
+   * @returns {JSX.Element}
+   */
+  private getDialogForStep(step: TourScriptStep, rect: ClientRect): JSX.Element {
+    const buttons = this.getButtons(step);
+    const size = { width: 400, height: 300 };
     const margin = 10;
     const position = positionForRect(rect, size);
     const style: React.CSSProperties = {
@@ -124,7 +148,7 @@ export class Tour extends React.Component<TourProps, TourState> {
 
     return (
       <Dialog key={name} buttons={buttons} style={style} arrow={arrow}>
-        {content}
+        {step.content}
       </Dialog>
     );
   }
