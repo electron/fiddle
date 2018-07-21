@@ -2,6 +2,7 @@ import {
   getMainWindowOptions, getOrCreateMainWindow, browserWindows
 } from '../../src/main/windows';
 import { createContextMenu } from '../../src/main/context-menu';
+import { resetPlatform, overridePlatform } from '../utils';
 
 
 jest.mock('electron', () => require('../mocks/electron'));
@@ -18,39 +19,22 @@ describe('windows', () => {
       backgroundColor: '#1d2427'
     };
 
-    const platform = process.platform;
-
     afterEach(() => {
-      Object.defineProperty(process, 'platform', {
-        value: platform,
-        writable: true
-      });
+      resetPlatform();
     });
 
     it('returns the expected output on Windows', () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-        writable: true
-      });
-
+      overridePlatform('win32');
       expect(getMainWindowOptions()).toEqual(expectedBase);
     });
 
     it('returns the expected output on Linux', () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'linux',
-        writable: true
-      });
-
+      overridePlatform('linux');
       expect(getMainWindowOptions()).toEqual(expectedBase);
     });
 
     it('returns the expected output on macOS', () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'darwin',
-        writable: true
-      });
-
+      overridePlatform('darwin');
       expect(getMainWindowOptions()).toEqual({ ...expectedBase, titleBarStyle: 'hidden' });
     });
   });

@@ -1,37 +1,27 @@
 import { sortButtons } from '../../src/utils/sort-buttons';
+import { overridePlatform, resetPlatform } from '../utils';
 
 describe('sort-buttons', () => {
-  const platform = process.platform;
-
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: platform,
-      writable: true
-    });
+    resetPlatform();
   });
 
   it('sorts an array on Windows', () => {
-    Object.defineProperty(process, 'platform', {
-      value: 'win32'
-    });
+    overridePlatform('win32');
 
     const result = sortButtons([ { type: 'close' }, { type: 'confirm' } ] as any);
     expect(result[0]).toEqual({ type: 'close' });
   });
 
   it('sorts an array on Linux', () => {
-    Object.defineProperty(process, 'platform', {
-      value: 'linux'
-    });
+    overridePlatform('linux');
 
     const result = sortButtons([ { type: 'close' }, { type: 'confirm' } ] as any);
     expect(result[0]).toEqual({ type: 'close' });
   });
 
   it('sorts an array on macOS', () => {
-    Object.defineProperty(process, 'platform', {
-      value: 'darwin'
-    });
+    overridePlatform('darwin');
 
     const result = sortButtons([ { type: 'close' }, { type: 'confirm' } ] as any);
     expect(result[0]).toEqual({ type: 'confirm' });

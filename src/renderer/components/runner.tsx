@@ -127,7 +127,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const { appState } = this.props;
     const { version, pushOutput } = appState;
 
-    const binaryPath = await appState.binaryManager.getElectronBinaryPath(version);
+    const binaryPath = appState.binaryManager.getElectronBinaryPath(version);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ dir, '--inspect' ]);
