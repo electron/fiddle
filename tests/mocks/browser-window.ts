@@ -58,6 +58,7 @@ export class MockBrowserWindow extends EventEmitter {
   public isVisibleOnAllWorkspaces = jest.fn();
   public isWindowMessageHooked = jest.fn();
   public loadURL = jest.fn();
+  public loadFile = jest.fn();
   public loadURl = jest.fn();
   public maximize = jest.fn();
   public minimize = jest.fn();
