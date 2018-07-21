@@ -1,6 +1,5 @@
 import * as MonacoType from 'monaco-editor';
 
-
 /**
  * Returns the currently focused editor.
  *
