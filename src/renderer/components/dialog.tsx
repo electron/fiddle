@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { classNames } from '../../utils/classnames';
 import { ArrowPosition } from '../../interfaces';
+import { sortButtons } from '../../utils/sort-buttons';
 
 export interface DialogProps {
   buttons?: Array<JSX.Element> | null;
@@ -57,25 +58,14 @@ export class Dialog extends React.Component<DialogProps, {}> {
    */
   public renderButtons(): Array<JSX.Element | null> | JSX.Element {
     const { buttons, onClose } = this.props;
-
-    // Buttons were passed? Great!
-    if (buttons) return (
-      <div className='dialog-buttons'>
-        {buttons}
-      </div>
-    );
-
-    // No? Let's make some default ones.
     const closeButton = onClose
       ? <button key='btn-close' onClick={this.onClose}>Cancel</button>
       : null;
+    const okButton = <button key='btn-ok' onClick={this.onConfirm}>Ok</button>;
 
     return (
       <div className='dialog-buttons'>
-        {closeButton}
-        <button key='btn-ok' onClick={this.onConfirm}>
-          Ok
-        </button>
+        {sortButtons(buttons! || [ closeButton, okButton ])}
       </div>
     );
   }

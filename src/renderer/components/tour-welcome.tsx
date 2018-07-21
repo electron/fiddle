@@ -13,6 +13,12 @@ export interface WelcomeTourState {
   isTourStarted: boolean;
 }
 
+/**
+ * This is our "Welcome to Electron Fiddle" Tour. It includes both an intro to
+ * the app and a short intro to Electron.
+ *
+ * @returns {Set<TourScriptStep>}
+ */
 function getWelcomeTour(): Set<TourScriptStep> {
   return new Set([
     {
@@ -26,6 +32,11 @@ function getWelcomeTour(): Set<TourScriptStep> {
             Electron. Each Fiddle has three files: A main script, a renderer script,
             and an HTML file.
           </p>
+          <p>
+            If you <code>require()</code> a module, Fiddle will install
+            it automatically. It will also automatically provide you with autocomplete
+            information for the <code>electron</code> module.
+          </p>
         </div>
       )
     },
@@ -36,11 +47,11 @@ function getWelcomeTour(): Set<TourScriptStep> {
         <div>
           <h4>📇 Choose an Electron Version</h4>
           <p>
-            If you're so inclined, choose an Electron version. Electron Fiddle will
-            automatically download versions in the background.
+            Electron Fiddle knows about all released Electron versions, downloading
+            your versions automatically in the background.
           </p>
           <p>
-            Open the preferences to see available versions and delete those already
+            Open the preferences to see all available versions and delete those previously
             downloaded.
           </p>
         </div>
@@ -67,6 +78,12 @@ function getWelcomeTour(): Set<TourScriptStep> {
           <p>
             Like what you've built? You can save your Fiddle as a public GitHub Gist,
             allowing other users to load it by pasting the URL into the address bar.
+            If they don't have Electron Fiddle, they can see and download your code
+            directly from GitHub.
+          </p>
+          <p>
+            You can also package your Fiddle as a standalone binary or as an installer
+            from the "Tasks" menu.
           </p>
         </div>
       )
@@ -80,13 +97,14 @@ function getWelcomeTour(): Set<TourScriptStep> {
           <p>
             We've finished our tour of Electron Fiddle, but if this is your
             first time using Electron, we could introduce you to its basics.
+            Interested?
           </p>
         </div>
       ),
       getButtons: ({ stop, advance }) => {
         return [
-          <button key='btn-adv' onClick={advance}>Electron Basics</button>,
           <button key='btn-stop' onClick={stop}>I'm good!</button>,
+          <button key='btn-adv' onClick={advance}>Electron Basics</button>
         ];
       }
     },
@@ -98,9 +116,10 @@ function getWelcomeTour(): Set<TourScriptStep> {
           <h4>📝 Main Script</h4>
           <p>
             Every Electron app starts with a main script, very similar to how
-            a Node.js application is started. That main script runs in the "main
+            a Node.js application is started. The main script runs in the "main
             process". To display a user interface, the main process creates renderer
-            processes – usually in the form of windows.
+            processes – usually in the form of windows, which Electron calls
+            <code>BrowserWindows</code>.
           </p>
           <p>
             To get started, pretend that the main process is just like a Node.js
@@ -122,12 +141,12 @@ function getWelcomeTour(): Set<TourScriptStep> {
         <div>
           <h4>📝 HTML</h4>
           <p>
-            In the default Fiddle, this HTML file is loaded in the
+            In the default fiddle, this HTML file is loaded in the
             <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
             in a browser will work here, too. In addition, Electron allows you
             to execute Node.js code. Take a close look at the
              <code>&lt;script /&gt;</code> tag and notice how we can call <code>
-            require</code> like we would in Node.js.
+            require()</code> like we would in Node.js.
           </p>
         </div>
       )
@@ -137,16 +156,15 @@ function getWelcomeTour(): Set<TourScriptStep> {
       selector: 'div.mosaic-window.renderer',
       content: (
         <div>
-          <h4>📝 Renderer Script</h4>
+          <h4>📝  Renderer Script</h4>
           <p>
-            This is the script we just <code>required</code> from the HTML file.
-            In here, you can do anything that works in Node.js <i>and</i> anything
-            that works in a browser.
+            This is the script we just required from the HTML file. In here, you can
+            do anything that works in Node.js <i>and</i> anything that works in a browser.
           </p>
           <p>
             By the way: If you want to use an <code>npm</code> module here, just
             <code>require</code> it. Electron Fiddle will automatically detect that you
-            requested a module and install it as soon as you run your Fiddle.
+            requested a module and install it as soon as you run your fiddle.
           </p>
         </div>
       )
@@ -154,6 +172,13 @@ function getWelcomeTour(): Set<TourScriptStep> {
   ]);
 }
 
+/**
+ * The "Welcome to Electron Fiddle" Tour.
+ *
+ * @export
+ * @class WelcomeTour
+ * @extends {React.Component<WelcomeTourProps, WelcomeTourState>}
+ */
 @observer
 export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourState> {
   constructor(props: WelcomeTourProps) {
@@ -167,10 +192,16 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
     };
   }
 
+  /**
+   * Stops the tour, closing it.
+   */
   public stopTour() {
     this.props.appState.isTourShowing = false;
   }
 
+  /**
+   * Starts the tour.
+   */
   public startTour() {
     this.setState({ isTourStarted: true });
   }
@@ -191,7 +222,15 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
           onConfirm={this.startTour}
           onClose={this.stopTour}
         >
-          <span>Would you like to start the tour?</span>
+          <h4>🙋‍ Hey There!</h4>
+          <p>
+            Welcome to Electron Fiddle! If you're new to the app,
+            we'd like to give you a brief tour of its features.
+          </p>
+          <p>
+            We won't show this dialog again, but you can always
+            find the tour in the Help menu.
+          </p>
         </Dialog>
       );
     } else {
