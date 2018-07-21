@@ -27,6 +27,15 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
       type: 'separator'
     },
     {
+      label: 'Show Welcome Tour',
+      click() {
+        ipcMainManager.send(IpcEvents.SHOW_WELCOME_TOUR);
+      }
+    },
+    {
+      type: 'separator'
+    },
+    {
       label: 'Toggle Developer Tools',
       accelerator: 'CmdOrCtrl+Option+i',
       click() {

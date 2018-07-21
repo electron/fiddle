@@ -196,7 +196,7 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
    * Stops the tour, closing it.
    */
   public stopTour() {
-    this.props.appState.isTourShowing = false;
+    this.props.appState.disableTour();
   }
 
   /**

@@ -34,7 +34,7 @@
   justify-content: space-between;
   animation: slide-up 0.4s ease;
 
-  blockquote, dl, figure, form, ol, p, pre, table, ul {
+  p {
     margin-bottom: 1.25rem;
     font-size: 1.25rem;
   }
@@ -47,7 +47,7 @@
   }
 
   &-buttons {
-    margin-top: 1.25rem;;
+    margin-top: 1.25rem;
   }
 
   &.centered {
@@ -57,7 +57,8 @@
     top: 100px;
   }
 
-  &.arrow:after, &.arrow:before {
+  &.arrow::after,
+  &.arrow::before {
     border: solid transparent;
     content: " ";
     height: 0;
@@ -66,74 +67,78 @@
     pointer-events: none;
   }
 
-  &.arrow:after {
+  &.arrow::after {
     border-color: rgba(136, 183, 213, 0);
     border-width: 9px;
   }
 
-  &.arrow:before {
+  &.arrow::before {
     border-color: rgba(194, 225, 245, 0);
     border-width: 10px;
   }
 
-  &.arrow-top:after, &.arrow-top:before {
+  &.arrow-top::after,
+  &.arrow-top::before {
     bottom: 100%;
-	  left: 50%;
+    left: 50%;
   }
 
-  &.arrow-top:after {
+  &.arrow-top::after {
     border-bottom-color: @electron-background-3;
     margin-left: -9px;
   }
 
-  &.arrow-top:before {
+  &.arrow-top::before {
     border-bottom-color: @default-border-color;
-  	margin-left: -10px;
+    margin-left: -10px;
   }
 
-  &.arrow-bottom:after, &.arrow-bottom:before {
+  &.arrow-bottom::after,
+  &.arrow-bottom::before {
     top: 100%;
-	  left: 50%;
+    left: 50%;
   }
 
-  &.arrow-bottom:after {
+  &.arrow-bottom::after {
     border-top-color: @electron-background-3;
     margin-left: -9px;
   }
 
-  &.arrow-bottom:before {
+  &.arrow-bottom::before {
     border-top-color: @default-border-color;
-  	margin-left: -10px;
+    margin-left: -10px;
   }
 
-  &.arrow-left:after, &.arrow-left:before {
+  &.arrow-left::after,
+  &.arrow-left::before {
     right: 100%;
-	  top: 20px;
+    top: 20px;
   }
 
-  &.arrow-left:after {
+  &.arrow-left::after {
     border-right-color: @electron-background-3;
     margin-top: -9px;
   }
 
-  &.arrow-left:before {
+  &.arrow-left::before {
     border-right-color: @default-border-color;
-  	margin-top: -10px;
+    margin-top: -10px;
   }
 
-  &.arrow-right:after, &.arrow-right:before {
+  &.arrow-right::after,
+  &.arrow-right::before {
     left: 100%;
-	  top: 20px;
+    top: 20px;
   }
 
-  &.arrow-right:after {
+  &.arrow-right::after {
     border-left-color: @electron-background-3;
     margin-top: -9px;
   }
 
-  &.arrow-right:before {
+  &.arrow-right::before {
     border-left-color: @default-border-color;
-  	margin-top: -10px;
+    margin-top: -10px;
   }
 
   button {
@@ -204,11 +209,12 @@
 
 @keyframes slide-up {
   0% {
-      opacity: 0;
-      transform: translateY(20px);
+    opacity: 0;
+    transform: translateY(20px);
   }
+
   100% {
-      opacity: 1;
-      transform: translateY(0);
+    opacity: 1;
+    transform: translateY(0);
   }
 }

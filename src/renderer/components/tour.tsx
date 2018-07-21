@@ -147,7 +147,7 @@ export class Tour extends React.Component<TourProps, TourState> {
     const arrow = invertPosition(position.type);
 
     return (
-      <Dialog key={name} buttons={buttons} style={style} arrow={arrow}>
+      <Dialog key={step.name} buttons={buttons} style={style} arrow={arrow}>
         {step.content}
       </Dialog>
     );
