@@ -37,10 +37,11 @@ export function positionForRect(
 ): PositionResult {
   const result: PositionResult = { left: 0, top: 0, type: 'top' };
   const middle = target.left + (target.width / 2) - (size.width / 2);
+  const topPlusMargin = target.top - (margin * 1.5);
 
   // Okay, let's try top right
   result.left = target.left + target.width + margin;
-  result.top = target.top;
+  result.top = topPlusMargin;
 
   if (isResultOkay(result, size)) {
     return { ...result, type: 'right' };
@@ -48,7 +49,7 @@ export function positionForRect(
 
   // Okay, let's try top left
   result.left = target.left - margin - size.width;
-  result.top = target.top;
+  result.top = topPlusMargin;
 
   if (isResultOkay(result, size)) {
     return { ...result, type: 'left' };

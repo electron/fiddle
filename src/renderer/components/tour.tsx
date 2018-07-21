@@ -150,7 +150,17 @@ export class Tour extends React.Component<TourProps, TourState> {
           <rect fill='rgba(0, 0, 0, 0.65)' x='0' y='0' mask='url(#mask)' height='100%' width='100%'/>
           <mask id='mask' maskUnits='userSpaceOnUse' maskContentUnits='userSpaceOnUse'>
             <rect className='bg' x='0' y='0' fill='white' height='100%' width='100%' />
-            <rect x={left} y={top} width={width} height={height} fill='black' rx='5' ry='5' />
+            <rect
+              x={left}
+              y={top}
+              width={width}
+              height={height}
+              fill='black'
+              rx='5'
+              ry='5'
+              strokeWidth='5'
+              stroke='black'
+            />
           </mask>
         </svg>
       </>
