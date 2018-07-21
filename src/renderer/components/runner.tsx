@@ -76,7 +76,14 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       action = this.stop;
     }
 
-    return <button className='button' onClick={() => action()}>{text}</button>;
+    return (
+      <button
+        className='button button-run'
+        onClick={() => action()}
+      >
+          {text}
+      </button>
+    );
   }
 
   /**

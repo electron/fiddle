@@ -62,7 +62,11 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
 
   public render() {
     return (
-      <select value={`v${this.props.appState.version}`} onChange={this.handleChange}>
+      <select
+        className='select-versions'
+        value={`v${this.props.appState.version}`}
+        onChange={this.handleChange}
+      >
         {this.renderOptions()}
       </select>
     );

@@ -9,7 +9,6 @@ import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-title';
-import { throws } from 'assert';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
@@ -50,34 +49,32 @@ export class AppState {
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isMyGist: boolean = false;
+  @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   private outputBuffer: string = '';
   private name: string;
 
   constructor() {
     // Bind all actions
-    this.toggleConsole = this.toggleConsole.bind(this);
-    this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
-    this.toggleSettings = this.toggleSettings.bind(this);
-
-    this.setVersion = this.setVersion.bind(this);
     this.downloadVersion = this.downloadVersion.bind(this);
-    this.removeVersion = this.removeVersion.bind(this);
-
-    this.signOutGitHub = this.signOutGitHub.bind(this);
-
     this.pushError = this.pushError.bind(this);
     this.pushOutput = this.pushOutput.bind(this);
+    this.removeVersion = this.removeVersion.bind(this);
+    this.setVersion = this.setVersion.bind(this);
+    this.showTour = this.showTour.bind(this);
+    this.signOutGitHub = this.signOutGitHub.bind(this);
+    this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
+    this.toggleConsole = this.toggleConsole.bind(this);
+    this.toggleSettings = this.toggleSettings.bind(this);
 
-    // When the settings should be opened, we'll close
-    // everything else
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
+    ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
 
     // Setup autoruns
-    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
     autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
-    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
     autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
+    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
+    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
 
     // Update our known versions
     getUpdatedKnownVersions().then((versions) => {
@@ -103,7 +100,18 @@ export class AppState {
   }
 
   @action public toggleSettings() {
+    this.resetView();
     this.isSettingsShowing = !this.isSettingsShowing;
+  }
+
+  @action public disableTour() {
+    this.isTourShowing = false;
+    localStorage.setItem('hasShownTour', 'true');
+  }
+
+  @action public showTour() {
+    this.resetView();
+    this.isTourShowing = true;
   }
 
  /*
@@ -242,17 +250,24 @@ export class AppState {
     });
   }
 
- /**
-  * Little convenience method that pushes message and error.
-  *
-  * @param {string} message
-  * @param {Error} error
-  */
- @action public pushError(message: string, error: Error) {
-   this.pushOutput(`⚠️ ${message} Error encountered:`);
-   this.pushOutput(error.toString());
-   console.warn(error);
- }
+  /**
+   * Little convenience method that pushes message and error.
+   *
+   * @param {string} message
+   * @param {Error} error
+   */
+  @action public pushError(message: string, error: Error) {
+    this.pushOutput(`⚠️ ${message} Error encountered:`);
+    this.pushOutput(error.toString());
+    console.warn(error);
+  }
+
+  @action private resetView() {
+    this.isTokenDialogShowing = false;
+    this.isSettingsShowing = false;
+    this.isTourShowing = false;
+    this.isConsoleShowing = false;
+  }
 }
 
 export const appState = new AppState();

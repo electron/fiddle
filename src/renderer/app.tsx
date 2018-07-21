@@ -17,6 +17,7 @@ import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
+  public state = appState;
 
   //@ts-ignore: We're not using this, but we do want to create it
   public fileManager = new FileManager();

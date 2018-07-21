@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 import { Commands } from './commands';
-import { AppState } from '../state';
+import { AppState, appState } from '../state';
 import { Output } from './output';
 import { ChromeMac } from './chrome-mac';
+import { WelcomeTour } from './tour-welcome';
 
 export interface HeaderProps {
   appState: AppState;
@@ -13,7 +14,7 @@ export interface HeaderProps {
  * Everything above the editors, so buttons and the address bar.
  *
  * @class Header
- * @extends {React.Component<HeaderProps, {}>}
+ * @extends {React.Component<HeaderProps, HeaderState>}
  */
 export class Header extends React.Component<HeaderProps, {}> {
   public render() {
@@ -24,6 +25,7 @@ export class Header extends React.Component<HeaderProps, {}> {
           <Commands key='commands' appState={this.props.appState} />
           <Output key='output' appState={this.props.appState} />
         </header>
+        <WelcomeTour appState={appState} />
       </React.Fragment>
     );
   }

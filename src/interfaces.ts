@@ -46,6 +46,8 @@ export interface OutputEntry {
 
 export type EditorId = 'main' | 'renderer' | 'html';
 
+export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
+
 declare global {
   interface Window {
     ElectronFiddle: {
