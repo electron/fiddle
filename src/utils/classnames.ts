@@ -1,4 +1,11 @@
-export function classNames(...args: Array<any>) {
+/**
+ * Sort of like the `classnames` module, but a bit simpler
+ * (and therefore lighter).
+ *
+ * @param {...Array<any>} args
+ * @returns {string}
+ */
+export function classNames(...args: Array<any>): string {
   const classes: Array<string> = [];
 
   for (const arg of args) {
