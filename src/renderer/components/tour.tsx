@@ -3,6 +3,7 @@ import { Dialog } from './dialog';
 import { positionForRect, invertPosition } from '../../utils/position-for-rect';
 
 export interface TourScriptStep {
+  name: string;
   selector: string;
   content: JSX.Element;
 }
@@ -90,7 +91,16 @@ export class Tour extends React.Component<TourProps, TourState> {
     );
   }
 
-  private getDialogForStep({ content }: TourScriptStep, rect: ClientRect) {
+  /**
+   * Renders the dialog for the current step of the tour.
+   *
+   * @param {TourScriptStep} { content }
+   * @param {ClientRect} rect
+   * @returns {JSX.Element}
+   */
+  private getDialogForStep(
+    { content, name }: TourScriptStep, rect: ClientRect
+  ): JSX.Element {
     const buttons = this.props.tour.size === this.state.i
       ? [
         <button key='btn-stop' onClick={this.stop}>Finish Tour</button>
@@ -113,7 +123,7 @@ export class Tour extends React.Component<TourProps, TourState> {
     const arrow = invertPosition(position.type);
 
     return (
-      <Dialog buttons={buttons} style={style} arrow={arrow}>
+      <Dialog key={name} buttons={buttons} style={style} arrow={arrow}>
         {content}
       </Dialog>
     );

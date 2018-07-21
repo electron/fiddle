@@ -63,13 +63,17 @@ export function positionForRect(
   }
 
   // Top middle would require us to measure the
-  // text height, which is a bit gross.
+  // text height, which is a bit gross. I'll leave
+  // this commented out for now, but if you need it
+  // you can enable it.
+  // -----------------------------------------------
   // result.left = middle;
   // result.top = target.top - size.height - margin;
 
   // if (isResultOkay(result, size)) {
   //   return { ...result, type: 'top' };
   // }
+  // -----------------------------------------------
 
   // Alright, smack in the middle it is
   result.left = middle;

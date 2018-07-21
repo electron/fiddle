@@ -16,6 +16,7 @@ export interface WelcomeTourState {
 function getWelcomeTour(): Set<TourScriptStep> {
   return new Set([
     {
+      name: 'fiddle-editors',
       selector: 'div.mosaic-root',
       content: (
         <div>
@@ -29,6 +30,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'select-versions',
       selector: 'select.select-versions',
       content: (
         <div>
@@ -45,6 +47,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'button-run',
       selector: 'button.button-run',
       content: (
         <div>
@@ -56,6 +59,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'button-publish',
       selector: 'button.button-publish',
       content: (
         <div>
@@ -68,6 +72,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'main-editor',
       selector: 'div.mosaic-window.main',
       content: (
         <div>
@@ -92,6 +97,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'html-editor',
       selector: 'div.mosaic-window.html',
       content: (
         <div>
@@ -108,6 +114,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       )
     },
     {
+      name: 'renderer-editor',
       selector: 'div.mosaic-window.renderer',
       content: (
         <div>
