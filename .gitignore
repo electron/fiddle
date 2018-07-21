@@ -26,6 +26,9 @@ compile_commands.json
 .envrc
 .cache
 
+# Coverage
+coverage
+
 # npm package
 /npm/dist
 /npm/path.txt

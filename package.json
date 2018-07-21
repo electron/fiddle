@@ -17,7 +17,7 @@
     "parcel:watch": "node ./tools/parcel-watch.js",
     "publish": "electron-forge publish",
     "start": "rimraf ./dist && electron-forge start",
-    "test": "jest",
+    "test": "jest --config=jest.json --coverage",
     "tsc": "node ./tools/tsc.js"
   },
   "keywords": [
@@ -93,23 +93,5 @@
     "tslint-microsoft-contrib": "^5.0.3",
     "tslint-react": "^3.6.0",
     "typescript": "^2.9.2"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "ts",
-      "tsx",
-      "js"
-    ],
-    "transform": {
-      "^.+\\.(ts|tsx)$": "ts-jest"
-    },
-    "globals": {
-      "ts-jest": {
-        "tsConfigFile": "tsconfig.json"
-      }
-    },
-    "testMatch": [
-      "**/tests/**/*spec.+(ts|tsx|js)"
-    ]
   }
 }
