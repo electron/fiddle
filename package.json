@@ -6,18 +6,19 @@
   "repository": "https://github.com/electron/fiddle",
   "main": "./dist/main/main",
   "scripts": {
-    "start": "rimraf ./dist && electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
+    "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
-    "tsc": "node ./tools/tsc.js",
+    "lint:style": "stylelint ./src/less/*.less --fix",
+    "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
+    "lint": "npm-run-all lint:*",
+    "make": "electron-forge make",
+    "package": "electron-forge package",
     "parcel:build": "node ./tools/parcel-build.js",
     "parcel:watch": "node ./tools/parcel-watch.js",
-    "contributors": "node ./tools/contributors.js",
-    "lint-ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
-    "lint-style": "stylelint ./src/less/*.less --fix",
-    "lint": "npm-run-all lint-*"
+    "publish": "electron-forge publish",
+    "start": "rimraf ./dist && electron-forge start",
+    "test": "jest",
+    "tsc": "node ./tools/tsc.js"
   },
   "keywords": [
     "Electron",
@@ -66,6 +67,7 @@
     "@types/builtin-modules": "^2.0.0",
     "@types/classnames": "^2.2.4",
     "@types/fs-extra": "^5.0.3",
+    "@types/jest": "^23.3.0",
     "@types/lodash": "^4.14.110",
     "@types/log-symbols": "^2.0.0",
     "@types/node": "^10.5.1",
@@ -76,6 +78,7 @@
     "@types/tmp": "0.0.33",
     "chokidar": "^2.0.4",
     "electron": "2.0.4",
+    "jest": "^23.4.1",
     "less": "^3.5.0",
     "log-symbols": "^2.2.0",
     "monaco-editor": "^0.13.1",
@@ -85,9 +88,28 @@
     "rimraf": "^2.6.2",
     "stylelint": "^9.3.0",
     "stylelint-config-standard": "^18.2.0",
+    "ts-jest": "^23.0.1",
     "tslint": "^5.10.0",
     "tslint-microsoft-contrib": "^5.0.3",
     "tslint-react": "^3.6.0",
     "typescript": "^2.9.2"
+  },
+  "jest": {
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js"
+    ],
+    "transform": {
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "tsconfig.json"
+      }
+    },
+    "testMatch": [
+      "**/tests/**/*spec.+(ts|tsx|js)"
+    ]
   }
 }
