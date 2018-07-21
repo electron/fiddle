@@ -3,14 +3,20 @@ import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 
-// Items related to running the current Fiddle
-const runItems: Array<MenuItemConstructorOptions> = [
-  {
-    id: 'run',
-    label: 'Run Fiddle',
-    click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
-  }
-];
+/**
+ * Returns items related to running the current fiddle.
+ *
+ * @returns {Array<MenuItemConstructorOptions>}
+ */
+export function getRunItems(): Array<MenuItemConstructorOptions> {
+  return [
+    {
+      id: 'run',
+      label: 'Run Fiddle',
+      click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
+    }
+  ];
+}
 
 /**
  * Possibly returns items interacting with the Monaco editor.
@@ -21,7 +27,7 @@ const runItems: Array<MenuItemConstructorOptions> = [
  * @param {ContextMenuParams} { x, y }
  * @returns {Array<MenuItemConstructorOptions>}
  */
-function getMonacoItems(
+export function getMonacoItems(
   { editFlags }: ContextMenuParams
 ): Array<MenuItemConstructorOptions> {
   if (!editFlags.canPaste) return [];
@@ -88,10 +94,10 @@ function getMonacoItems(
  * @param {ContextMenuParams} { x, y }
  * @returns {Array<MenuItemConstructorOptions>}
  */
-function getInspectItems(
+export function getInspectItems(
   browserWindow: BrowserWindow, { x, y }: ContextMenuParams
 ): Array<MenuItemConstructorOptions> {
-  if (!isDevMode) return [];
+  if (!isDevMode()) return [];
 
   return [{
     id: 'inspect',
@@ -120,7 +126,7 @@ export function createContextMenu(browserWindow: BrowserWindow) {
     const { editFlags, selectionText, isEditable } = props;
     const hasText = (selectionText || '').toString().trim().length > 0;
     const template: Array<MenuItemConstructorOptions> = [
-      ...runItems,
+      ...getRunItems(),
       ...getMonacoItems(props),
       { type: 'separator' },
       {
