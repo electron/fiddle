@@ -2,7 +2,6 @@ import { AppState } from '../renderer/state';
 import { EditorValues } from '../interfaces';
 import { findModulesInEditors } from '../renderer/npm';
 import { getUsername } from './get-username';
-import { getName } from './get-title';
 
 export interface PackageJsonOptions {
   includeElectron?: boolean;
@@ -37,8 +36,8 @@ export async function getPackageJson(
 
   if (includeDependencies && values) {
     const modules = await findModulesInEditors(values);
-    modules.forEach((module) => {
-      dependencies[module] = '*';
+    modules.forEach((mod) => {
+      dependencies[mod] = '*';
     });
   }
 
