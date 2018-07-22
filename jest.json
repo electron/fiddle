@@ -6,6 +6,7 @@
   "bail": true,
   "resetMocks": true,
   "resetModules": true,
+  "setupTestFrameworkScriptFile": "<rootDir>/tests/setup.ts",
   "moduleFileExtensions": [
     "js",
     "jsx",
@@ -21,7 +22,7 @@
     "html"
   ],
   "collectCoverageFrom": [
-    "src/**/*.{ts, tsx}",
+    "src/**/*.{ts,tsx}",
     "!**/*.d.ts"
   ],
   "coveragePathIgnorePatterns": [
