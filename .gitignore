@@ -25,6 +25,10 @@ SHASUMS256.txt
 compile_commands.json
 .envrc
 .cache
+yarn-error.log
+
+# Coverage
+coverage
 
 # npm package
 /npm/dist

@@ -23,7 +23,6 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     minWidth: 600,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
-    show: true,
     backgroundColor: '#1d2427'
   };
 }
@@ -39,15 +38,14 @@ export function getOrCreateMainWindow(): Electron.BrowserWindow {
   browserWindows.main = new BrowserWindow(getMainWindowOptions());
   browserWindows.main.loadFile('./dist/index.html');
 
-  browserWindows.main.on('closed', () => {
-    browserWindows.main = null;
-  });
-
-  ipcMainManager.once(IpcEvents.MAIN_WINDOW_READY_TO_SHOW, () => {
+  browserWindows.main.webContents.once('dom-ready', () => {
     if (browserWindows.main) {
-      browserWindows.main.show();
       createContextMenu(browserWindows.main);
     }
+  });
+
+  browserWindows.main.on('closed', () => {
+    browserWindows.main = null;
   });
 
   return browserWindows.main;

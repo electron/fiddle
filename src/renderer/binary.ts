@@ -16,7 +16,7 @@ export class BinaryManager {
 
   /**
    * Remove a version from disk. Does not update state. We'll try up to
-   * three times before giving up if an error occurs.
+   * four times before giving up if an error occurs.
    *
    * @param {string} iVersion
    * @param {number} iteration
@@ -91,12 +91,10 @@ export class BinaryManager {
    * @param {string} version
    * @returns {string}
    */
-  public async getElectronBinaryPath(version: string): Promise<string> {
-    const os = await import('os');
-    const platform = os.platform();
+  public getElectronBinaryPath(version: string): string {
     const dir = this.getDownloadPath(version);
 
-    switch (platform) {
+    switch (process.platform) {
       case 'darwin':
         return path.join(dir, 'Electron.app/Contents/MacOS/Electron');
       case 'freebsd':
@@ -143,7 +141,7 @@ export class BinaryManager {
    * @returns {boolean}
    */
   public async getIsDownloaded(version: string): Promise<boolean> {
-    const expectedPath = await this.getElectronBinaryPath(version);
+    const expectedPath = this.getElectronBinaryPath(version);
     const fs = await getFs();
     return fs.existsSync(expectedPath);
   }

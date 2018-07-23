@@ -1,8 +1,3 @@
-import * as MonacoType from 'monaco-editor';
-
-// Type-only-import
-import { App as AppType } from './renderer/app';
-
 export interface StringMap<T> {
   [x: string]: T;
 }
@@ -47,12 +42,3 @@ export interface OutputEntry {
 export type EditorId = 'main' | 'renderer' | 'html';
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
-
-declare global {
-  interface Window {
-    ElectronFiddle: {
-      app: AppType;
-      editors: Record<EditorId, MonacoType.editor.IStandaloneCodeEditor | null>;
-    };
-  }
-}

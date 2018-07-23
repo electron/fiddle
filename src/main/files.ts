@@ -37,9 +37,9 @@ export function showOpenDialog() {
 export function showSaveDialog(event?: IpcEvents, as?: string) {
   // We want to save to a folder, so we'll use an open dialog here
   dialog.showOpenDialog({
-    title: `Save Fiddle${as ? ` as ${as}` : ''}`,
     buttonLabel: 'Save here',
-    properties: ['openDirectory', 'createDirectory']
+    properties: ['openDirectory', 'createDirectory'],
+    title: `Save Fiddle${as ? ` as ${as}` : ''}`
   }, async (filePaths) => {
     if (!filePaths || filePaths.length < 1) {
       return;

@@ -1,0 +1,32 @@
+{
+  "transform": {
+    ".(js|jsx|ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+  },
+  "testRegex": "(-spec)\\.(ts|tsx)$",
+  "bail": true,
+  "resetMocks": true,
+  "resetModules": true,
+  "setupTestFrameworkScriptFile": "<rootDir>/tests/setup.ts",
+  "moduleFileExtensions": [
+    "js",
+    "jsx",
+    "json",
+    "ts",
+    "tsx"
+  ],
+  "testPathIgnorePatterns": [
+    "/.tmp/"
+  ],
+  "coverageReporters": [
+    "json",
+    "html"
+  ],
+  "collectCoverageFrom": [
+    "src/**/*.{ts,tsx}",
+    "!**/*.d.ts"
+  ],
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "/tests/.*\\.(ts|js)$"
+  ]
+}

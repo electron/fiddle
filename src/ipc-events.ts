@@ -1,5 +1,4 @@
 export enum IpcEvents {
-  MAIN_WINDOW_READY_TO_SHOW = 'MAIN_WINDOW_READY_TO_SHOW',
   OPEN_SETTINGS = 'OPEN_SETTINGS',
   LOAD_GIST_REQUEST = 'LOAD_GIST_REQUEST',
   FIDDLE_RUN = 'FIDDLE_RUN',
@@ -19,7 +18,6 @@ export enum IpcEvents {
 }
 
 export const ipcMainEvents = [
-  IpcEvents.MAIN_WINDOW_READY_TO_SHOW,
   IpcEvents.FS_SAVE_FIDDLE_DIALOG,
   IpcEvents.FS_SAVE_FIDDLE,
   IpcEvents.SHOW_WARNING_DIALOG
