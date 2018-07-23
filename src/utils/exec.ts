@@ -19,7 +19,7 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
         reject(error);
       }
 
-      resolve(result.toString());
+      resolve(typeof result === 'string' ? result : `${result}`);
     });
   });
 }
