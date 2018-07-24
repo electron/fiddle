@@ -104,7 +104,7 @@ export class BinaryManager {
       case 'win32':
         return path.join(dir, 'electron.exe');
       default:
-        throw new Error('Electron builds are not available on platform: ' + platform);
+        throw new Error(`Electron builds are not available for ${process.platform}`);
     }
   }
 
