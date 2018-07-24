@@ -40,7 +40,7 @@ module.exports = (wallaby) => ({
     const jestConfig = {
       resetMocks: true,
       resetModules: true,
-      //setupTestFrameworkScriptFile: path.join(wallaby.projectCacheDir, 'tests/setup.js'),
+      setupTestFrameworkScriptFile: path.join(wallaby.projectCacheDir, 'tests/setup.js'),
       globals: { __JEST_DEV__: true }
     };
 

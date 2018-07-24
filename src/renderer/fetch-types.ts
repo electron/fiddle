@@ -4,6 +4,7 @@ import * as fsType from 'fs-extra';
 
 import { USER_DATA_PATH } from '../constants';
 import { fancyImport } from '../utils/import';
+import { callIn } from '../utils/call-in';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 
@@ -32,7 +33,7 @@ export function fetchTypeDefinitions(version: string): Promise<string> {
  * @returns {string}
  */
 export function getOfflineTypeDefinitionPath(version: string): string {
-  return path.join(definitionPath, 'electron-typedef', version, 'electron.d.ts');
+  return path.join(definitionPath, version, 'electron.d.ts');
 }
 
 /**
@@ -61,7 +62,7 @@ export async function getTypeDefinitions(version: string): Promise<string | null
 
   if (await getOfflineTypeDefinitions(version)) {
     try {
-      return fs.readFile(offlinePath, 'utf-8');
+      return await fs.readFile(offlinePath, 'utf-8');
     } catch (error) {
       return null;
     }
@@ -75,7 +76,7 @@ export async function getTypeDefinitions(version: string): Promise<string | null
         return typeDefs;
       } catch (error) {
         console.warn(`Fetch Types: Could not write to disk`, error);
-        return null;
+        return typeDefs;
       }
     }
 
@@ -89,21 +90,19 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  * @param {string} version
  */
 export async function updateEditorTypeDefinitions(version: string, i: number = 0) {
-  const defer = () => {
+  const defer = async () => {
     if (i > 10) {
       console.warn(`Fetch Types: Failed, dependencies do not exist`);
       return;
     }
 
     console.warn(`Fetch Types: Called too soon, deferring`);
-    setTimeout(() => updateEditorTypeDefinitions(version, i + 1), 200);
-    return;
+    return callIn(i * 100 + 200, () => updateEditorTypeDefinitions(version, i + 1));
   };
 
   // If this method is called before we're ready, we'll delay this work a bit
   if (!window.ElectronFiddle) return defer();
   if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco) return defer();
-  if (!window.ElectronFiddle.app.typeDefDisposable) return defer();
 
   const { app } = window.ElectronFiddle;
   const monaco: typeof MonacoType = app.monaco!;
