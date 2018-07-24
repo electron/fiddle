@@ -28,9 +28,11 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
  * @returns {Array<MenuItemConstructorOptions>}
  */
 export function getMonacoItems(
-  { editFlags }: ContextMenuParams
+  { pageURL, editFlags }: ContextMenuParams
 ): Array<MenuItemConstructorOptions> {
-  if (!editFlags.canPaste) return [];
+  if (!editFlags.canPaste || !/.*index\.html(#?)$/.test(pageURL)) {
+    return [];
+  }
 
   return [
     { type: 'separator' },
@@ -83,7 +85,8 @@ export function getMonacoItems(
         const cmd = [ 'editor.action.formatSelection' ];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
-    }
+    },
+    { type: 'separator' },
   ];
 }
 
@@ -122,13 +125,12 @@ export function getInspectItems(
  * @param {BrowserWindow} browserWindow
  */
 export function createContextMenu(browserWindow: BrowserWindow) {
-  browserWindow.webContents.on('context-menu', (event, props) => {
+  browserWindow.webContents.on('context-menu', (_event, props) => {
     const { editFlags, selectionText, isEditable } = props;
     const hasText = (selectionText || '').toString().trim().length > 0;
     const template: Array<MenuItemConstructorOptions> = [
       ...getRunItems(),
       ...getMonacoItems(props),
-      { type: 'separator' },
       {
         id: 'cut',
         label: 'Cut',
