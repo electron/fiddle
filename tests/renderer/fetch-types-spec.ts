@@ -155,7 +155,7 @@ describe('fetch-types', () => {
 
   describe('updateEditorTypeDefinitions()', () => {
     beforeEach(() => {
-      (window as any) = window || {};
+      (global as any).window = window || {};
       (window as any).ElectronFiddle = {
         app: appMock
       };
