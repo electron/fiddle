@@ -1,13 +1,14 @@
 import * as path from 'path';
 import { shell } from 'electron';
+import * as fsType from 'fs-extra';
 
 import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
-import { appState, AppState } from './state';
+import { appState } from './state';
 import { getTitle } from '../utils/get-title';
-import { getFs } from '../utils/fs';
+import { fancyImport } from '../utils/import';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 import { PackageJsonOptions, DEFAULT_OPTIONS } from '../utils/get-package';
@@ -133,7 +134,7 @@ export class FileManager {
   public async saveToTemp(
     options: PackageJsonOptions, ...transforms: Array<FileTransform>
   ): Promise<string> {
-    const fs = await getFs();
+    const fs = await fancyImport<typeof fsType>('fs-extra');
     const tmp = await import('tmp');
     const files = await this.getFiles(options, ...transforms);
     const dir = tmp.dirSync();
@@ -157,7 +158,7 @@ export class FileManager {
    */
   private async readFile(filePath: string): Promise<string> {
     try {
-      const fs = await getFs();
+      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.readFile(filePath, 'utf-8');
     } catch (error) {
       console.log(`FileManager: Could not read ${filePath}`, error);
@@ -175,7 +176,7 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
-      const fs = await getFs();
+      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);

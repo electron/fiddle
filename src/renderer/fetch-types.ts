@@ -1,9 +1,9 @@
 import * as path from 'path';
 import * as MonacoType from 'monaco-editor';
+import * as fsType from 'fs-extra';
 
 import { USER_DATA_PATH } from '../constants';
-import { getFs } from '../utils/fs';
-import { getLodash } from '../utils/lodash';
+import { fancyImport } from '../utils/import';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 
@@ -42,7 +42,7 @@ export function getOfflineTypeDefinitionPath(version: string): string {
  * @returns {boolean}
  */
 export async function getOfflineTypeDefinitions(version: string): Promise<boolean> {
-  const fs = await getFs();
+  const fs = await fancyImport<typeof fsType>('fs-extra');
   return fs.existsSync(getOfflineTypeDefinitionPath(version));
 }
 
@@ -54,7 +54,7 @@ export async function getOfflineTypeDefinitions(version: string): Promise<boolea
  * @returns {void}
  */
 export async function getTypeDefinitions(version: string): Promise<string | null> {
-  const fs = await getFs();
+  const fs = await fancyImport<typeof fsType>('fs-extra');
   await fs.mkdirp(definitionPath);
 
   const offlinePath = getOfflineTypeDefinitionPath(version);
@@ -89,17 +89,25 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  * @param {string} version
  */
 export async function updateEditorTypeDefinitions(version: string, i: number = 0) {
-  const _ = await getLodash();
-  const monaco: typeof MonacoType = _.get(window, 'ElectronFiddle.app.monaco', null);
-  const typeDefDisposable: MonacoType.IDisposable | null = _.get(window, 'ElectronFiddle.app.typeDefDisposable', null);
+  const defer = () => {
+    if (i > 10) {
+      console.warn(`Fetch Types: Failed, dependencies do not exist`);
+      return;
+    }
 
-  // If this method is called before we're ready, we'll delay this work a bit
-  if (i < 10 && !monaco) {
-    console.warn(`Fetch Types: updateEditorTypeDefinitions() called too soon, deferring`);
+    console.warn(`Fetch Types: Called too soon, deferring`);
     setTimeout(() => updateEditorTypeDefinitions(version, i + 1), 200);
     return;
-  }
+  };
 
+  // If this method is called before we're ready, we'll delay this work a bit
+  if (!window.ElectronFiddle) return defer();
+  if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco) return defer();
+  if (!window.ElectronFiddle.app.typeDefDisposable) return defer();
+
+  const { app } = window.ElectronFiddle;
+  const monaco: typeof MonacoType = app.monaco!;
+  const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
   const typeDefs = await getTypeDefinitions(version);
 
   if (typeDefDisposable) {
