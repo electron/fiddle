@@ -230,5 +230,7 @@ export async function setupMenu() {
     getFileMenu()
   );
 
+  menu.push(getTasksMenu());
+
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }

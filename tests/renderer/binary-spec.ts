@@ -4,12 +4,25 @@ import { resetPlatform, overridePlatform } from '../utils';
 import * as path from 'path';
 
 jest.mock('fs-extra');
+jest.mock('extract-zip', () => {
+  return jest.fn((_a, _b, c) => c());
+});
 jest.mock('../../src/constants', () => ({
   USER_DATA_PATH: 'user/data/'
 }));
-jest.mock('../../src/utils/fs', () => ({
-  getFs: () => require('fs-extra')
+jest.mock('../../src/utils/import', () => ({
+  fancyImport: async (p: string) => {
+    if (p === 'fs-extra') {
+      return require('fs-extra');
+    }
+    if (p === 'extract-zip') {
+      return { default: require('extract-zip') };
+    }
+  }
 }));
+jest.mock('electron-download', () => {
+  return jest.fn();
+});
 
 describe('binary', () => {
   let binaryManager = new BinaryManager();
@@ -104,6 +117,39 @@ describe('binary', () => {
 
       expect(() => binaryManager.getElectronBinaryPath('v3.0.0'))
         .toThrow();
+    });
+  });
+
+  describe('setup()', () => {
+    it(`downloads a version it hasn't seen before`, async () => {
+      const eDownload = require('electron-download');
+      eDownload.mockImplementationOnce((p, c) => c(undefined, '/fake/path'));
+
+      await binaryManager.setup('v3.0.0');
+
+      expect(eDownload).toHaveBeenCalled();
+      expect(binaryManager.state['3.0.0']).toBe('ready');
+    });
+
+    it(`does not download a version again`, async () => {
+      binaryManager.getIsDownloaded = jest.fn(() => true);
+
+      await binaryManager.setup('v3.0.0');
+
+      expect(binaryManager.getIsDownloaded).toHaveBeenCalled();
+      expect(require('electron-download')).toHaveBeenCalledTimes(0);
+      expect(binaryManager.state['3.0.0']).toBe('ready');
+    });
+
+    it(`does not download a version while already downloading`, async () => {
+      binaryManager.getIsDownloaded = jest.fn(() => true);
+      binaryManager.state['3.0.0'] = 'downloading';
+
+      await binaryManager.setup('v3.0.0');
+
+      expect(binaryManager.getIsDownloaded).toHaveBeenCalledTimes(0);
+      expect(require('electron-download')).toHaveBeenCalledTimes(0);
+      expect(binaryManager.state['3.0.0']).toBe('downloading');
     });
   });
 });

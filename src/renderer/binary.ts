@@ -1,9 +1,10 @@
 import * as path from 'path';
+import * as fsType from 'fs-extra';
 
 import { USER_DATA_PATH } from '../constants';
 import { normalizeVersion } from '../utils/normalize-version';
 import { StringMap } from '../interfaces';
-import { getFs } from '../utils/fs';
+import { fancyImport } from '../utils/import';
 
 /**
  * The binary manager takes care of downloading Electron versions
@@ -24,7 +25,7 @@ export class BinaryManager {
    */
   public async remove(iVersion: string, i: number = 0): Promise<void> {
     const version = normalizeVersion(iVersion);
-    const fs = await getFs();
+    const fs = await fancyImport<typeof fsType>('fs-extra');
 
     try {
       if (await this.getIsDownloaded(version)) {
@@ -56,7 +57,7 @@ export class BinaryManager {
    */
   public async setup(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
-    const fs = await getFs();
+    const fs = await fancyImport<typeof fsType>('fs-extra');
     const { promisify } = await import('util');
     const eDownload = promisify(require('electron-download'));
 
@@ -103,7 +104,7 @@ export class BinaryManager {
       case 'win32':
         return path.join(dir, 'electron.exe');
       default:
-        throw new Error('Electron builds are not available on platform: ' + platform);
+        throw new Error(`Electron builds are not available for ${process.platform}`);
     }
   }
 
@@ -113,7 +114,7 @@ export class BinaryManager {
    * @returns {Promise<Array<string>>}
    */
   public async getDownloadedVersions(): Promise<Array<string>> {
-    const fs = await getFs();
+    const fs = await fancyImport<typeof fsType>('fs-extra');
     const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
     console.log(`BinaryManager: Checking for downloaded versions`);
 
@@ -142,7 +143,7 @@ export class BinaryManager {
    */
   public async getIsDownloaded(version: string): Promise<boolean> {
     const expectedPath = this.getElectronBinaryPath(version);
-    const fs = await getFs();
+    const fs = await fancyImport<typeof fsType>('fs-extra');
     return fs.existsSync(expectedPath);
   }
 
@@ -165,7 +166,7 @@ export class BinaryManager {
    */
   private unzip(zipPath: string, extractPath: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const extract = (await import('extract-zip')).default;
+      const extract = (await fancyImport<any>('extract-zip')).default;
 
       process.noAsar = true;
 
