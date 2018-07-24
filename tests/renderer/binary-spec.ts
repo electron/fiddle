@@ -127,7 +127,29 @@ describe('binary', () => {
 
       await binaryManager.setup('v3.0.0');
 
+      expect(eDownload).toHaveBeenCalled();
       expect(binaryManager.state['3.0.0']).toBe('ready');
+    });
+
+    it(`does not download a version again`, async () => {
+      binaryManager.getIsDownloaded = jest.fn(() => true);
+
+      await binaryManager.setup('v3.0.0');
+
+      expect(binaryManager.getIsDownloaded).toHaveBeenCalled();
+      expect(require('electron-download')).toHaveBeenCalledTimes(0);
+      expect(binaryManager.state['3.0.0']).toBe('ready');
+    });
+
+    it(`does not download a version while already downloading`, async () => {
+      binaryManager.getIsDownloaded = jest.fn(() => true);
+      binaryManager.state['3.0.0'] = 'downloading';
+
+      await binaryManager.setup('v3.0.0');
+
+      expect(binaryManager.getIsDownloaded).toHaveBeenCalledTimes(0);
+      expect(require('electron-download')).toHaveBeenCalledTimes(0);
+      expect(binaryManager.state['3.0.0']).toBe('downloading');
     });
   });
 });
