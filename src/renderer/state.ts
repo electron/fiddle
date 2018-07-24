@@ -100,8 +100,16 @@ export class AppState {
   }
 
   @action public toggleSettings() {
+    const newSetting = !this.isSettingsShowing;
+
+    // We usually don't lose editor focus,
+    // so you can still type. Let's force-blur.
+    if (document.activeElement && document.activeElement.blur) {
+      (document as any).activeElement.blur();
+    }
+
     this.resetView();
-    this.isSettingsShowing = !this.isSettingsShowing;
+    this.isSettingsShowing = newSetting;
   }
 
   @action public disableTour() {
