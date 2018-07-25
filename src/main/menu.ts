@@ -164,7 +164,7 @@ function getFileMenu(): MenuItemConstructorOptions {
     },
     {
       label: 'Save as',
-      click: showSaveDialog,
+      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE),
       accelerator: 'CmdOrCtrl+Shift+S'
     },
     {
@@ -176,7 +176,7 @@ function getFileMenu(): MenuItemConstructorOptions {
     },
     {
       label: 'Save as Forge Project',
-      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Gist')
+      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Forge Project')
     }
   ];
 
