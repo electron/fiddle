@@ -1,0 +1,68 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dialog component renders initially without visible dialogs 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Dialogs
+    appState={
+      Object {
+        "isSettingsShowing": false,
+        "isTokenDialogShowing": false,
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": "dialogs",
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        null,
+        null,
+      ],
+      "className": "dialogs",
+    },
+    "ref": null,
+    "rendered": Array [
+      null,
+      null,
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": "dialogs",
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          null,
+          null,
+        ],
+        "className": "dialogs",
+      },
+      "ref": null,
+      "rendered": Array [
+        null,
+        null,
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;

@@ -1,0 +1,40 @@
+import * as React from 'react';
+import { shallow } from 'enzyme';
+
+import { Dialogs } from '../../../src/renderer/components/dialogs';
+import { overridePlatform, resetPlatform } from '../../utils';
+
+describe('Dialog component', () => {
+  beforeAll(() => {
+    // We render the buttons different depending on the
+    // platform, so let' have a uniform platform for unit tests
+    overridePlatform('darwin');
+
+    this.store = {
+      isTokenDialogShowing: false,
+      isSettingsShowing: false
+    };
+  });
+
+  afterAll(() => {
+    resetPlatform();
+  });
+
+  it('renders initially without visible dialogs', () => {
+    const wrapper = shallow(<Dialogs appState={this.store} />);
+    expect(wrapper).toMatchSnapshot();
+    expect(wrapper.find('.dialogs').html()).toBe('<div class="dialogs"></div>');
+  });
+
+  it('renders the token dialog', () => {
+    this.store.isTokenDialogShowing = true;
+    const wrapper = shallow(<Dialogs appState={this.store} />);
+    expect(wrapper.text()).toBe('<TokenDialog />');
+  });
+
+  it('renders the settings dialog', () => {
+    this.store.isSettingsShowing = true;
+    const wrapper = shallow(<Dialogs appState={this.store} />);
+    expect(wrapper.text()).toBe('<Settings />');
+  });
+});
