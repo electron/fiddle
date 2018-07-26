@@ -14,6 +14,9 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
       id: 'run',
       label: 'Run Fiddle',
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
+    },
+    {
+      type: 'separator'
     }
   ];
 }
@@ -30,12 +33,11 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
 export function getMonacoItems(
   { pageURL, editFlags }: ContextMenuParams
 ): Array<MenuItemConstructorOptions> {
-  if (!editFlags.canPaste || !/.*index\.html(#?)$/.test(pageURL)) {
+  if (!editFlags.canPaste || !/.*index\.html(#?)$/.test(pageURL || '')) {
     return [];
   }
 
   return [
-    { type: 'separator' },
     {
       id: 'go_to_definition',
       label: 'Go to Definition',
