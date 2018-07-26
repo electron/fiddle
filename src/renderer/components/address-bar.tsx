@@ -76,7 +76,9 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public async loadFiddle(): Promise<boolean> {
     const { appState } = this.props;
 
-    if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) return;
+    if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) {
+      return false;
+    }
 
     try {
       const octo = await getOctokit();
