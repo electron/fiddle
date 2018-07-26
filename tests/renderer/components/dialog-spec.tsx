@@ -2,8 +2,19 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { Dialog } from '../../../src/renderer/components/dialog';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Dialog component', () => {
+  beforeAll(() => {
+    // We render the buttons different depending on the
+    // platform, so let' have a uniform platform for unit tests
+    overridePlatform('darwin');
+  });
+
+  afterAll(() => {
+    resetPlatform();
+  });
+
   it('renders if showing', () => {
     const wrapper = shallow(<Dialog isShowing={true} />);
     expect(wrapper).toMatchSnapshot();
