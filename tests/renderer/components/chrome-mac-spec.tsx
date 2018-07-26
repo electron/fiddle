@@ -4,7 +4,7 @@ import { shallow } from 'enzyme';
 import { ChromeMac } from '../../../src/renderer/components/chrome-mac';
 import { resetPlatform, overridePlatform } from '../../utils';
 
-describe('Dialog component', () => {
+describe('Chrome-Mac component', () => {
   beforeEach(() => {
     this.store = {};
   });

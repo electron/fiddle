@@ -4,12 +4,14 @@ import { shallow } from 'enzyme';
 import { Dialogs } from '../../../src/renderer/components/dialogs';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-describe('Dialog component', () => {
+describe('Dialogs component', () => {
   beforeAll(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
     overridePlatform('darwin');
+  });
 
+  beforeEach(() => {
     this.store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false
