@@ -59,9 +59,11 @@ export class Dialog extends React.Component<DialogProps, {}> {
   public renderButtons(): Array<JSX.Element | null> | JSX.Element {
     const { buttons, onClose } = this.props;
     const closeButton = onClose
-      ? <button key='btn-close' onClick={this.onClose}>Cancel</button>
+      ? <button key='cancel' className='btn-close' onClick={this.onClose}>Cancel</button>
       : null;
-    const okButton = <button key='btn-ok' onClick={this.onConfirm}>Ok</button>;
+    const okButton = (
+      <button key='ok' className='btn-ok' onClick={this.onConfirm}>Ok</button>
+    );
 
     return (
       <div className='dialog-buttons'>

@@ -1,0 +1,449 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Dialog component renders a backdrop 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Dialog
+    isCentered={false}
+    isShowing={true}
+    isShowingBackdrop={true}
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "function",
+    "props": Object {
+      "children": Array [
+        <div
+          className="dialogDrop"
+          onClick={[Function]}
+        />,
+        <div
+          className="dialog"
+        >
+          <div
+            className="dialog-buttons"
+          >
+            <button
+              className="btn-ok"
+              onClick={[Function]}
+            >
+              Ok
+            </button>
+          </div>
+        </div>,
+      ],
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": "drop",
+        "nodeType": "host",
+        "props": Object {
+          "className": "dialogDrop",
+          "onClick": [Function],
+        },
+        "ref": null,
+        "rendered": null,
+        "type": "div",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            undefined,
+            <div
+              className="dialog-buttons"
+            >
+              <button
+                className="btn-ok"
+                onClick={[Function]}
+              >
+                Ok
+              </button>
+            </div>,
+          ],
+          "className": "dialog",
+          "style": undefined,
+        },
+        "ref": null,
+        "rendered": Array [
+          undefined,
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <button
+                  className="btn-ok"
+                  onClick={[Function]}
+                >
+                  Ok
+                </button>,
+                null,
+              ],
+              "className": "dialog-buttons",
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": "ok",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Ok",
+                  "className": "btn-ok",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "Ok",
+                "type": "button",
+              },
+              null,
+            ],
+            "type": "div",
+          },
+        ],
+        "type": "div",
+      },
+    ],
+    "type": Symbol(react.fragment),
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "function",
+      "props": Object {
+        "children": Array [
+          <div
+            className="dialogDrop"
+            onClick={[Function]}
+          />,
+          <div
+            className="dialog"
+          >
+            <div
+              className="dialog-buttons"
+            >
+              <button
+                className="btn-ok"
+                onClick={[Function]}
+              >
+                Ok
+              </button>
+            </div>
+          </div>,
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": "drop",
+          "nodeType": "host",
+          "props": Object {
+            "className": "dialogDrop",
+            "onClick": [Function],
+          },
+          "ref": null,
+          "rendered": null,
+          "type": "div",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              undefined,
+              <div
+                className="dialog-buttons"
+              >
+                <button
+                  className="btn-ok"
+                  onClick={[Function]}
+                >
+                  Ok
+                </button>
+              </div>,
+            ],
+            "className": "dialog",
+            "style": undefined,
+          },
+          "ref": null,
+          "rendered": Array [
+            undefined,
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <button
+                    className="btn-ok"
+                    onClick={[Function]}
+                  >
+                    Ok
+                  </button>,
+                  null,
+                ],
+                "className": "dialog-buttons",
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": "ok",
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Ok",
+                    "className": "btn-ok",
+                    "onClick": [Function],
+                  },
+                  "ref": null,
+                  "rendered": "Ok",
+                  "type": "button",
+                },
+                null,
+              ],
+              "type": "div",
+            },
+          ],
+          "type": "div",
+        },
+      ],
+      "type": Symbol(react.fragment),
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
+
+exports[`Dialog component renders if showing 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Dialog
+    isCentered={false}
+    isShowing={true}
+    isShowingBackdrop={false}
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "function",
+    "props": Object {
+      "children": Array [
+        null,
+        <div
+          className="dialog"
+        >
+          <div
+            className="dialog-buttons"
+          >
+            <button
+              className="btn-ok"
+              onClick={[Function]}
+            >
+              Ok
+            </button>
+          </div>
+        </div>,
+      ],
+    },
+    "ref": null,
+    "rendered": Array [
+      null,
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            undefined,
+            <div
+              className="dialog-buttons"
+            >
+              <button
+                className="btn-ok"
+                onClick={[Function]}
+              >
+                Ok
+              </button>
+            </div>,
+          ],
+          "className": "dialog",
+          "style": undefined,
+        },
+        "ref": null,
+        "rendered": Array [
+          undefined,
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <button
+                  className="btn-ok"
+                  onClick={[Function]}
+                >
+                  Ok
+                </button>,
+                null,
+              ],
+              "className": "dialog-buttons",
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": "ok",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Ok",
+                  "className": "btn-ok",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "Ok",
+                "type": "button",
+              },
+              null,
+            ],
+            "type": "div",
+          },
+        ],
+        "type": "div",
+      },
+    ],
+    "type": Symbol(react.fragment),
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "function",
+      "props": Object {
+        "children": Array [
+          null,
+          <div
+            className="dialog"
+          >
+            <div
+              className="dialog-buttons"
+            >
+              <button
+                className="btn-ok"
+                onClick={[Function]}
+              >
+                Ok
+              </button>
+            </div>
+          </div>,
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        null,
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              undefined,
+              <div
+                className="dialog-buttons"
+              >
+                <button
+                  className="btn-ok"
+                  onClick={[Function]}
+                >
+                  Ok
+                </button>
+              </div>,
+            ],
+            "className": "dialog",
+            "style": undefined,
+          },
+          "ref": null,
+          "rendered": Array [
+            undefined,
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <button
+                    className="btn-ok"
+                    onClick={[Function]}
+                  >
+                    Ok
+                  </button>,
+                  null,
+                ],
+                "className": "dialog-buttons",
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": "ok",
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Ok",
+                    "className": "btn-ok",
+                    "onClick": [Function],
+                  },
+                  "ref": null,
+                  "rendered": "Ok",
+                  "type": "button",
+                },
+                null,
+              ],
+              "type": "div",
+            },
+          ],
+          "type": "div",
+        },
+      ],
+      "type": Symbol(react.fragment),
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
