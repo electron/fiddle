@@ -86,19 +86,18 @@ ShallowWrapper {
             "nodeType": "host",
             "props": Object {
               "children": Array [
-                null,
                 <button
                   className="btn-ok"
                   onClick={[Function]}
                 >
                   Ok
                 </button>,
+                null,
               ],
               "className": "dialog-buttons",
             },
             "ref": null,
             "rendered": Array [
-              null,
               Object {
                 "instance": null,
                 "key": "ok",
@@ -112,6 +111,7 @@ ShallowWrapper {
                 "rendered": "Ok",
                 "type": "button",
               },
+              null,
             ],
             "type": "div",
           },
@@ -192,19 +192,18 @@ ShallowWrapper {
               "nodeType": "host",
               "props": Object {
                 "children": Array [
-                  null,
                   <button
                     className="btn-ok"
                     onClick={[Function]}
                   >
                     Ok
                   </button>,
+                  null,
                 ],
                 "className": "dialog-buttons",
               },
               "ref": null,
               "rendered": Array [
-                null,
                 Object {
                   "instance": null,
                   "key": "ok",
@@ -218,6 +217,7 @@ ShallowWrapper {
                   "rendered": "Ok",
                   "type": "button",
                 },
+                null,
               ],
               "type": "div",
             },
@@ -310,19 +310,18 @@ ShallowWrapper {
             "nodeType": "host",
             "props": Object {
               "children": Array [
-                null,
                 <button
                   className="btn-ok"
                   onClick={[Function]}
                 >
                   Ok
                 </button>,
+                null,
               ],
               "className": "dialog-buttons",
             },
             "ref": null,
             "rendered": Array [
-              null,
               Object {
                 "instance": null,
                 "key": "ok",
@@ -336,6 +335,7 @@ ShallowWrapper {
                 "rendered": "Ok",
                 "type": "button",
               },
+              null,
             ],
             "type": "div",
           },
@@ -402,19 +402,18 @@ ShallowWrapper {
               "nodeType": "host",
               "props": Object {
                 "children": Array [
-                  null,
                   <button
                     className="btn-ok"
                     onClick={[Function]}
                   >
                     Ok
                   </button>,
+                  null,
                 ],
                 "className": "dialog-buttons",
               },
               "ref": null,
               "rendered": Array [
-                null,
                 Object {
                   "instance": null,
                   "key": "ok",
@@ -428,6 +427,7 @@ ShallowWrapper {
                   "rendered": "Ok",
                   "type": "button",
                 },
+                null,
               ],
               "type": "div",
             },
