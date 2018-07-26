@@ -100,12 +100,12 @@ describe('context-menu', () => {
 
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
 
-      expect(template[11].id).toBe('cut');
-      expect(template[11].enabled).toBe(true);
-      expect(template[12].id).toBe('copy');
-      expect(template[12].enabled).toBe(true);
-      expect(template[13].id).toBe('paste');
-      expect(template[13].enabled).toBe(true);
+      expect(template[2].id).toBe('cut');
+      expect(template[2].enabled).toBe(true);
+      expect(template[3].id).toBe('copy');
+      expect(template[3].enabled).toBe(true);
+      expect(template[4].id).toBe('paste');
+      expect(template[4].enabled).toBe(true);
     });
   });
 
@@ -161,14 +161,19 @@ describe('context-menu', () => {
       expect(result).toHaveLength(0);
     });
 
-    it('returns an array if canPaste is true', () => {
-      const result = getMonacoItems({ editFlags: { canPaste: true }} as any);
+    it('returns an array if the page url suggest the editor is up', () => {
+      const result = getMonacoItems({
+        editFlags: { canPaste: true },
+        pageURL: 'index.html'} as any
+      );
       expect(result).toHaveLength(9);
     });
 
     it('executes an IPC send() for each element', () => {
-      const result = getMonacoItems({ editFlags: { canPaste: true }} as any);
-      let i = 0;
+      const result = getMonacoItems({
+        editFlags: { canPaste: true },
+        pageURL: 'index.html'} as any
+      );      let i = 0;
 
       result.forEach((item) => {
         if (item.click) {

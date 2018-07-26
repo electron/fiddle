@@ -90,8 +90,6 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
   }
 
   public render() {
-    console.log(this.state.section);
-
     const { appState } = this.props;
     const { isSettingsShowing } = appState;
 

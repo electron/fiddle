@@ -100,18 +100,22 @@ export class AppState {
   }
 
   @action public toggleSettings() {
-    this.resetView();
-    this.isSettingsShowing = !this.isSettingsShowing;
+    // We usually don't lose editor focus,
+    // so you can still type. Let's force-blur.
+    if ((document.activeElement as HTMLInputElement).blur) {
+      (document.activeElement as HTMLInputElement).blur();
+    }
+
+    this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
 
   @action public disableTour() {
-    this.isTourShowing = false;
+    this.resetView({ isTourShowing: false });
     localStorage.setItem('hasShownTour', 'true');
   }
 
   @action public showTour() {
-    this.resetView();
-    this.isTourShowing = true;
+    this.resetView({ isTourShowing: true });
   }
 
  /*
@@ -262,11 +266,44 @@ export class AppState {
     console.warn(error);
   }
 
-  @action private resetView() {
+  /**
+   * Resets the view, optionally with certain view flags enabled.
+   *
+   * @param {Record<string, boolean>} [additionalOptions]
+   * @memberof AppState
+   */
+  @action private resetView(additionalOptions?: Record<string, boolean>) {
     this.isTokenDialogShowing = false;
     this.isSettingsShowing = false;
     this.isTourShowing = false;
     this.isConsoleShowing = false;
+
+    if (additionalOptions) {
+      for (const key in additionalOptions) {
+        if (additionalOptions.hasOwnProperty(key)) {
+          this[key] = additionalOptions[key];
+        }
+      }
+    }
+
+    this.setPageHash();
+  }
+
+  /**
+   * Updates the pages url with a hash element that allows the main
+   * process to quickly determine if there's a view open.
+   *
+   * @private
+   * @memberof AppState
+   */
+  @action private setPageHash() {
+    let hash = '';
+
+    if (this.isSettingsShowing) {
+      hash = 'settings';
+    }
+
+    window.location.hash = hash;
   }
 }
 
