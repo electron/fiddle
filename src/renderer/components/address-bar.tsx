@@ -70,10 +70,10 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   /**
    * Load a fiddle
    *
-   * @returns
+   * @returns {Promise<boolean>}
    * @memberof AddressBar
    */
-  public async loadFiddle() {
+  public async loadFiddle(): Promise<boolean> {
     const { appState } = this.props;
 
     if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) return;
@@ -95,7 +95,10 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       appState.localPath = null;
     } catch (error) {
       console.warn(`Loading fiddle failed`, error);
+      return false;
     }
+
+    return true;
   }
 
   public render() {

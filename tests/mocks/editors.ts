@@ -1,10 +1,9 @@
 export class EditorMock {
   public layout = jest.fn();
   public isFocused = jest.fn();
+  public setValue = jest.fn();
 
-  constructor(public readonly name: string) {
-
-  }
+  constructor(public readonly name: string) {}
 }
 
 export class EditorsMock {
