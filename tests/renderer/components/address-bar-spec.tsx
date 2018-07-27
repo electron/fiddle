@@ -75,7 +75,7 @@ describe('AddressBar component', () => {
       target: { value: 'abcdtestid' }
     });
 
-    await wrapper.instance().loadFiddle();
+    await (wrapper.instance() as AddressBar).loadFiddle();
 
     expect(wrapper.state('value')).toBe('abcdtestid');
     expect(document.title).toBe('Electron Fiddle - gist.github.com/abcdtestid');
