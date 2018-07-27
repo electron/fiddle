@@ -5,6 +5,7 @@ import { AppState } from '../state';
 
 export interface CreditsSettingsProps {
   appState: AppState;
+  contributors?: Array<any>;
 }
 
 /**
@@ -22,7 +23,9 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
    * @returns {Array<JSX.Element>}
    */
   public renderContributors(): Array<JSX.Element> {
-    this.contributors = this.contributors || require('../../../static/contributors.json');
+    this.contributors = this.contributors
+      || this.props.contributors
+      || require('../../../static/contributors.json');
 
     if (!this.contributors || !Array.isArray(this.contributors)) {
       return [];

@@ -1,0 +1,548 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreditsSettings component renders 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <CreditsSettings
+    appState={Object {}}
+    contributors={
+      Array [
+        Object {
+          "api": "https://api.github.com/users/felixrieseberg",
+          "avatar": "https://avatars3.githubusercontent.com/u/1426799?v=4",
+          "bio": "🙇 ✨🌳 ",
+          "location": "San Francisco",
+          "login": "felixrieseberg",
+          "name": "Felix Rieseberg",
+          "url": "https://github.com/felixrieseberg",
+        },
+      ]
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <h2>
+          Credits
+        </h2>,
+        <p>
+          Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
+        </p>,
+        <div
+          className="contributors"
+        >
+          <div
+            className="contributor"
+            onClick={[Function]}
+          >
+            <div
+              className="avatar"
+              style={
+                Object {
+                  "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                }
+              }
+            />
+            <div
+              className="details"
+            >
+              <h5
+                className="name"
+              >
+                Felix Rieseberg
+              </h5>
+              <p
+                className="location"
+              >
+                📍 
+                San Francisco
+              </p>
+              <small
+                className="bio"
+              >
+                🙇 ✨🌳 
+              </small>
+            </div>
+          </div>
+        </div>,
+      ],
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "Credits",
+        },
+        "ref": null,
+        "rendered": "Credits",
+        "type": "h2",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:",
+        },
+        "ref": null,
+        "rendered": "Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:",
+        "type": "p",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <div
+              className="contributor"
+              onClick={[Function]}
+            >
+              <div
+                className="avatar"
+                style={
+                  Object {
+                    "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                  }
+                }
+              />
+              <div
+                className="details"
+              >
+                <h5
+                  className="name"
+                >
+                  Felix Rieseberg
+                </h5>
+                <p
+                  className="location"
+                >
+                  📍 
+                  San Francisco
+                </p>
+                <small
+                  className="bio"
+                >
+                  🙇 ✨🌳 
+                </small>
+              </div>
+            </div>,
+          ],
+          "className": "contributors",
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": "felixrieseberg",
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <div
+                  className="avatar"
+                  style={
+                    Object {
+                      "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                    }
+                  }
+                />,
+                <div
+                  className="details"
+                >
+                  <h5
+                    className="name"
+                  >
+                    Felix Rieseberg
+                  </h5>
+                  <p
+                    className="location"
+                  >
+                    📍 
+                    San Francisco
+                  </p>
+                  <small
+                    className="bio"
+                  >
+                    🙇 ✨🌳 
+                  </small>
+                </div>,
+              ],
+              "className": "contributor",
+              "onClick": [Function],
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "className": "avatar",
+                  "style": Object {
+                    "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                  },
+                },
+                "ref": null,
+                "rendered": null,
+                "type": "div",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <h5
+                      className="name"
+                    >
+                      Felix Rieseberg
+                    </h5>,
+                    <p
+                      className="location"
+                    >
+                      📍 
+                      San Francisco
+                    </p>,
+                    <small
+                      className="bio"
+                    >
+                      🙇 ✨🌳 
+                    </small>,
+                  ],
+                  "className": "details",
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "Felix Rieseberg",
+                      "className": "name",
+                    },
+                    "ref": null,
+                    "rendered": "Felix Rieseberg",
+                    "type": "h5",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": Array [
+                        "📍 ",
+                        "San Francisco",
+                      ],
+                      "className": "location",
+                    },
+                    "ref": null,
+                    "rendered": Array [
+                      "📍 ",
+                      "San Francisco",
+                    ],
+                    "type": "p",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "🙇 ✨🌳 ",
+                      "className": "bio",
+                    },
+                    "ref": null,
+                    "rendered": "🙇 ✨🌳 ",
+                    "type": "small",
+                  },
+                ],
+                "type": "div",
+              },
+            ],
+            "type": "div",
+          },
+        ],
+        "type": "div",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <h2>
+            Credits
+          </h2>,
+          <p>
+            Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
+          </p>,
+          <div
+            className="contributors"
+          >
+            <div
+              className="contributor"
+              onClick={[Function]}
+            >
+              <div
+                className="avatar"
+                style={
+                  Object {
+                    "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                  }
+                }
+              />
+              <div
+                className="details"
+              >
+                <h5
+                  className="name"
+                >
+                  Felix Rieseberg
+                </h5>
+                <p
+                  className="location"
+                >
+                  📍 
+                  San Francisco
+                </p>
+                <small
+                  className="bio"
+                >
+                  🙇 ✨🌳 
+                </small>
+              </div>
+            </div>
+          </div>,
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "Credits",
+          },
+          "ref": null,
+          "rendered": "Credits",
+          "type": "h2",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:",
+          },
+          "ref": null,
+          "rendered": "Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:",
+          "type": "p",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <div
+                className="contributor"
+                onClick={[Function]}
+              >
+                <div
+                  className="avatar"
+                  style={
+                    Object {
+                      "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                    }
+                  }
+                />
+                <div
+                  className="details"
+                >
+                  <h5
+                    className="name"
+                  >
+                    Felix Rieseberg
+                  </h5>
+                  <p
+                    className="location"
+                  >
+                    📍 
+                    San Francisco
+                  </p>
+                  <small
+                    className="bio"
+                  >
+                    🙇 ✨🌳 
+                  </small>
+                </div>
+              </div>,
+            ],
+            "className": "contributors",
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": "felixrieseberg",
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <div
+                    className="avatar"
+                    style={
+                      Object {
+                        "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                      }
+                    }
+                  />,
+                  <div
+                    className="details"
+                  >
+                    <h5
+                      className="name"
+                    >
+                      Felix Rieseberg
+                    </h5>
+                    <p
+                      className="location"
+                    >
+                      📍 
+                      San Francisco
+                    </p>
+                    <small
+                      className="bio"
+                    >
+                      🙇 ✨🌳 
+                    </small>
+                  </div>,
+                ],
+                "className": "contributor",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "className": "avatar",
+                    "style": Object {
+                      "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
+                    },
+                  },
+                  "ref": null,
+                  "rendered": null,
+                  "type": "div",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <h5
+                        className="name"
+                      >
+                        Felix Rieseberg
+                      </h5>,
+                      <p
+                        className="location"
+                      >
+                        📍 
+                        San Francisco
+                      </p>,
+                      <small
+                        className="bio"
+                      >
+                        🙇 ✨🌳 
+                      </small>,
+                    ],
+                    "className": "details",
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "Felix Rieseberg",
+                        "className": "name",
+                      },
+                      "ref": null,
+                      "rendered": "Felix Rieseberg",
+                      "type": "h5",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": Array [
+                          "📍 ",
+                          "San Francisco",
+                        ],
+                        "className": "location",
+                      },
+                      "ref": null,
+                      "rendered": Array [
+                        "📍 ",
+                        "San Francisco",
+                      ],
+                      "type": "p",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "🙇 ✨🌳 ",
+                        "className": "bio",
+                      },
+                      "ref": null,
+                      "rendered": "🙇 ✨🌳 ",
+                      "type": "small",
+                    },
+                  ],
+                  "type": "div",
+                },
+              ],
+              "type": "div",
+            },
+          ],
+          "type": "div",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
