@@ -11,11 +11,11 @@ ShallowWrapper {
         "output": Array [
           Object {
             "text": "Hello!",
-            "timestamp": 2018-04-29T00:00:00.000Z,
+            "timestamp": 1532704072127,
           },
           Object {
             "text": "Hi!",
-            "timestamp": 2018-04-29T00:00:00.000Z,
+            "timestamp": 1532704073130,
           },
         ],
       }
@@ -39,7 +39,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              17:00:00
+              08:07:52
             </span>
             Hello!
           </p>,
@@ -49,7 +49,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              17:00:00
+              08:07:53
             </span>
             Hi!
           </p>,
@@ -63,14 +63,14 @@ ShallowWrapper {
     "rendered": Array [
       Object {
         "instance": null,
-        "key": "Sat Apr 28 2018 17:00:00 GMT-0700 (Pacific Daylight Time)--0--0",
+        "key": "1532704072127--0--0",
         "nodeType": "host",
         "props": Object {
           "children": Array [
             <span
               className="timestamp"
             >
-              17:00:00
+              08:07:52
             </span>,
             "Hello!",
           ],
@@ -82,11 +82,11 @@ ShallowWrapper {
             "key": undefined,
             "nodeType": "host",
             "props": Object {
-              "children": "17:00:00",
+              "children": "08:07:52",
               "className": "timestamp",
             },
             "ref": null,
-            "rendered": "17:00:00",
+            "rendered": "08:07:52",
             "type": "span",
           },
           "Hello!",
@@ -95,14 +95,14 @@ ShallowWrapper {
       },
       Object {
         "instance": null,
-        "key": "Sat Apr 28 2018 17:00:00 GMT-0700 (Pacific Daylight Time)--1--0",
+        "key": "1532704073130--1--0",
         "nodeType": "host",
         "props": Object {
           "children": Array [
             <span
               className="timestamp"
             >
-              17:00:00
+              08:07:53
             </span>,
             "Hi!",
           ],
@@ -114,11 +114,11 @@ ShallowWrapper {
             "key": undefined,
             "nodeType": "host",
             "props": Object {
-              "children": "17:00:00",
+              "children": "08:07:53",
               "className": "timestamp",
             },
             "ref": null,
-            "rendered": "17:00:00",
+            "rendered": "08:07:53",
             "type": "span",
           },
           "Hi!",
@@ -140,7 +140,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                17:00:00
+                08:07:52
               </span>
               Hello!
             </p>,
@@ -150,7 +150,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                17:00:00
+                08:07:53
               </span>
               Hi!
             </p>,
@@ -164,14 +164,14 @@ ShallowWrapper {
       "rendered": Array [
         Object {
           "instance": null,
-          "key": "Sat Apr 28 2018 17:00:00 GMT-0700 (Pacific Daylight Time)--0--0",
+          "key": "1532704072127--0--0",
           "nodeType": "host",
           "props": Object {
             "children": Array [
               <span
                 className="timestamp"
               >
-                17:00:00
+                08:07:52
               </span>,
               "Hello!",
             ],
@@ -183,11 +183,11 @@ ShallowWrapper {
               "key": undefined,
               "nodeType": "host",
               "props": Object {
-                "children": "17:00:00",
+                "children": "08:07:52",
                 "className": "timestamp",
               },
               "ref": null,
-              "rendered": "17:00:00",
+              "rendered": "08:07:52",
               "type": "span",
             },
             "Hello!",
@@ -196,14 +196,14 @@ ShallowWrapper {
         },
         Object {
           "instance": null,
-          "key": "Sat Apr 28 2018 17:00:00 GMT-0700 (Pacific Daylight Time)--1--0",
+          "key": "1532704073130--1--0",
           "nodeType": "host",
           "props": Object {
             "children": Array [
               <span
                 className="timestamp"
               >
-                17:00:00
+                08:07:53
               </span>,
               "Hi!",
             ],
@@ -215,11 +215,11 @@ ShallowWrapper {
               "key": undefined,
               "nodeType": "host",
               "props": Object {
-                "children": "17:00:00",
+                "children": "08:07:53",
                 "className": "timestamp",
               },
               "ref": null,
-              "rendered": "17:00:00",
+              "rendered": "08:07:53",
               "type": "span",
             },
             "Hi!",

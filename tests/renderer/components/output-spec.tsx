@@ -19,11 +19,11 @@ describe('Outout component', () => {
   it('renders with output', () => {
     this.store.output = [
       {
-        timestamp: new Date('2018-04-29'),
+        timestamp: 1532704072127,
         text: 'Hello!'
       },
       {
-        timestamp: new Date('2018-04-29'),
+        timestamp: 1532704073130,
         text: 'Hi!'
       }
     ];
