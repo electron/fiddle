@@ -6,7 +6,7 @@ import { OutputEntry } from '../../interfaces';
 
 export interface CommandsProps {
   appState: AppState;
-  renderDate?: (ts: number) => string;
+  renderTimestamp?: (ts: number) => string;
 }
 
 /**
@@ -32,11 +32,11 @@ export class Output extends React.Component<CommandsProps, {}> {
    * @param {number} ts
    * @returns {string}
    */
-  public renderDate(ts: number): string {
-    const { renderDate } = this.props;
+  public renderTimestamp(ts: number): string {
+    const { renderTimestamp } = this.props;
 
-    if (renderDate) {
-      return renderDate(ts);
+    if (renderTimestamp) {
+      return renderTimestamp(ts);
     } else {
       return new Date(ts).toLocaleTimeString();
     }
@@ -51,7 +51,7 @@ export class Output extends React.Component<CommandsProps, {}> {
    * @memberof Output
    */
   public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
-    const ts = this.renderDate(entry.timestamp);
+    const ts = this.renderTimestamp(entry.timestamp);
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 
