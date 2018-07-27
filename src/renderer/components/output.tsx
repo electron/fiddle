@@ -6,6 +6,7 @@ import { OutputEntry } from '../../interfaces';
 
 export interface CommandsProps {
   appState: AppState;
+  renderDate?: (ts: number) => string;
 }
 
 /**
@@ -26,6 +27,22 @@ export class Output extends React.Component<CommandsProps, {}> {
   }
 
   /**
+   * Render the timestamp
+   *
+   * @param {number} ts
+   * @returns {string}
+   */
+  public renderDate(ts: number): string {
+    const { renderDate } = this.props;
+
+    if (renderDate) {
+      return renderDate(ts);
+    } else {
+      return new Date(ts).toLocaleTimeString();
+    }
+  }
+
+  /**
    * An individual entry might span multiple lines. To ensure that
    * each line has a timestamp, this method might split up entries.
    *
@@ -34,7 +51,7 @@ export class Output extends React.Component<CommandsProps, {}> {
    * @memberof Output
    */
   public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
-    const ts = new Date(entry.timestamp).toLocaleTimeString();
+    const ts = this.renderDate(entry.timestamp);
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 

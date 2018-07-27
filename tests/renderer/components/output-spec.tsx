@@ -27,7 +27,11 @@ describe('Outout component', () => {
         text: 'Hi!'
       }
     ];
-    const wrapper = shallow(<Output appState={this.store} />);
+
+    const renderTimestamp = (i: number) => i.toString();
+    const wrapper = shallow(
+      <Output appState={this.store} renderTimestamp={renderTimestamp} />
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
