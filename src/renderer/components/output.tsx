@@ -20,6 +20,13 @@ export interface CommandsProps {
 export class Output extends React.Component<CommandsProps, {}> {
   private outputRef = React.createRef<HTMLDivElement>();
 
+  constructor(props: CommandsProps) {
+    super(props);
+
+    this.renderTimestamp = this.renderTimestamp.bind(this);
+    this.renderEntry = this.renderEntry.bind(this);
+  }
+
   public componentDidUpdate() {
     if (this.outputRef.current) {
       this.outputRef.current.scrollTop = this.outputRef.current.scrollHeight;

@@ -20,6 +20,7 @@ ShallowWrapper {
         ],
       }
     }
+    renderTimestamp={[Function]}
   />,
   Symbol(enzyme.__renderer__): Object {
     "batchedUpdates": [Function],
@@ -39,7 +40,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              08:07:52
+              1532704072127
             </span>
             Hello!
           </p>,
@@ -49,7 +50,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              08:07:53
+              1532704073130
             </span>
             Hi!
           </p>,
@@ -70,7 +71,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              08:07:52
+              1532704072127
             </span>,
             "Hello!",
           ],
@@ -82,11 +83,11 @@ ShallowWrapper {
             "key": undefined,
             "nodeType": "host",
             "props": Object {
-              "children": "08:07:52",
+              "children": "1532704072127",
               "className": "timestamp",
             },
             "ref": null,
-            "rendered": "08:07:52",
+            "rendered": "1532704072127",
             "type": "span",
           },
           "Hello!",
@@ -102,7 +103,7 @@ ShallowWrapper {
             <span
               className="timestamp"
             >
-              08:07:53
+              1532704073130
             </span>,
             "Hi!",
           ],
@@ -114,11 +115,11 @@ ShallowWrapper {
             "key": undefined,
             "nodeType": "host",
             "props": Object {
-              "children": "08:07:53",
+              "children": "1532704073130",
               "className": "timestamp",
             },
             "ref": null,
-            "rendered": "08:07:53",
+            "rendered": "1532704073130",
             "type": "span",
           },
           "Hi!",
@@ -140,7 +141,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                08:07:52
+                1532704072127
               </span>
               Hello!
             </p>,
@@ -150,7 +151,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                08:07:53
+                1532704073130
               </span>
               Hi!
             </p>,
@@ -171,7 +172,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                08:07:52
+                1532704072127
               </span>,
               "Hello!",
             ],
@@ -183,11 +184,11 @@ ShallowWrapper {
               "key": undefined,
               "nodeType": "host",
               "props": Object {
-                "children": "08:07:52",
+                "children": "1532704072127",
                 "className": "timestamp",
               },
               "ref": null,
-              "rendered": "08:07:52",
+              "rendered": "1532704072127",
               "type": "span",
             },
             "Hello!",
@@ -203,7 +204,7 @@ ShallowWrapper {
               <span
                 className="timestamp"
               >
-                08:07:53
+                1532704073130
               </span>,
               "Hi!",
             ],
@@ -215,11 +216,11 @@ ShallowWrapper {
               "key": undefined,
               "nodeType": "host",
               "props": Object {
-                "children": "08:07:53",
+                "children": "1532704073130",
                 "className": "timestamp",
               },
               "ref": null,
-              "rendered": "08:07:53",
+              "rendered": "1532704073130",
               "type": "span",
             },
             "Hi!",
