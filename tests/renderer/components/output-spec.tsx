@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 
 import { Output } from '../../../src/renderer/components/output';
 
-describe('Outout component', () => {
+describe('Output component', () => {
   beforeEach(() => {
     this.store = {
       isConsoleShowing: true,
