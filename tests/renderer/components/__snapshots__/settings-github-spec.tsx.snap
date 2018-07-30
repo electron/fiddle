@@ -1,0 +1,719 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GitHubSettings component renders when not signed in 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <GitHubSettings
+    appState={
+      Object {
+        "signOutGitHub": [MockFunction],
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <h2>
+          GitHub Settings
+        </h2>,
+        Array [
+          <label>
+            We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!
+          </label>,
+          <button
+            className="button"
+            onClick={[Function]}
+          >
+            <FontAwesomeIcon
+              border={false}
+              className=""
+              fixedWidth={false}
+              flip={null}
+              icon={
+                Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f6",
+                    "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                  ],
+                  "iconName": "sign-in-alt",
+                  "prefix": "fas",
+                }
+              }
+              inverse={false}
+              listItem={false}
+              mask={null}
+              pull={null}
+              pulse={false}
+              rotation={null}
+              size={null}
+              spin={false}
+              symbol={false}
+              transform={null}
+            />
+             Sign In
+          </button>,
+        ],
+      ],
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "GitHub Settings",
+        },
+        "ref": null,
+        "rendered": "GitHub Settings",
+        "type": "h2",
+      },
+      Object {
+        "instance": null,
+        "key": "signed-out-label",
+        "nodeType": "host",
+        "props": Object {
+          "children": "We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!",
+        },
+        "ref": null,
+        "rendered": "We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!",
+        "type": "label",
+      },
+      Object {
+        "instance": null,
+        "key": "sign-in-button",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <FontAwesomeIcon
+              border={false}
+              className=""
+              fixedWidth={false}
+              flip={null}
+              icon={
+                Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f6",
+                    "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                  ],
+                  "iconName": "sign-in-alt",
+                  "prefix": "fas",
+                }
+              }
+              inverse={false}
+              listItem={false}
+              mask={null}
+              pull={null}
+              pulse={false}
+              rotation={null}
+              size={null}
+              spin={false}
+              symbol={false}
+              transform={null}
+            />,
+            " Sign In",
+          ],
+          "className": "button",
+          "onClick": [Function],
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "function",
+            "props": Object {
+              "border": false,
+              "className": "",
+              "fixedWidth": false,
+              "flip": null,
+              "icon": Object {
+                "icon": Array [
+                  512,
+                  512,
+                  Array [],
+                  "f2f6",
+                  "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                ],
+                "iconName": "sign-in-alt",
+                "prefix": "fas",
+              },
+              "inverse": false,
+              "listItem": false,
+              "mask": null,
+              "pull": null,
+              "pulse": false,
+              "rotation": null,
+              "size": null,
+              "spin": false,
+              "symbol": false,
+              "transform": null,
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          " Sign In",
+        ],
+        "type": "button",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <h2>
+            GitHub Settings
+          </h2>,
+          Array [
+            <label>
+              We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!
+            </label>,
+            <button
+              className="button"
+              onClick={[Function]}
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f2f6",
+                      "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                    ],
+                    "iconName": "sign-in-alt",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+               Sign In
+            </button>,
+          ],
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "GitHub Settings",
+          },
+          "ref": null,
+          "rendered": "GitHub Settings",
+          "type": "h2",
+        },
+        Object {
+          "instance": null,
+          "key": "signed-out-label",
+          "nodeType": "host",
+          "props": Object {
+            "children": "We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!",
+          },
+          "ref": null,
+          "rendered": "We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!",
+          "type": "label",
+        },
+        Object {
+          "instance": null,
+          "key": "sign-in-button",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f2f6",
+                      "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                    ],
+                    "iconName": "sign-in-alt",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />,
+              " Sign In",
+            ],
+            "className": "button",
+            "onClick": [Function],
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "function",
+              "props": Object {
+                "border": false,
+                "className": "",
+                "fixedWidth": false,
+                "flip": null,
+                "icon": Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f6",
+                    "M416 448h-84c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h84c17.7 0 32-14.3 32-32V160c0-17.7-14.3-32-32-32h-84c-6.6 0-12-5.4-12-12V76c0-6.6 5.4-12 12-12h84c53 0 96 43 96 96v192c0 53-43 96-96 96zm-47-201L201 79c-15-15-41-4.5-41 17v96H24c-13.3 0-24 10.7-24 24v96c0 13.3 10.7 24 24 24h136v96c0 21.5 26 32 41 17l168-168c9.3-9.4 9.3-24.6 0-34z",
+                  ],
+                  "iconName": "sign-in-alt",
+                  "prefix": "fas",
+                },
+                "inverse": false,
+                "listItem": false,
+                "mask": null,
+                "pull": null,
+                "pulse": false,
+                "rotation": null,
+                "size": null,
+                "spin": false,
+                "symbol": false,
+                "transform": null,
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            " Sign In",
+          ],
+          "type": "button",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
+
+exports[`GitHubSettings component renders when signed in 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <GitHubSettings
+    appState={
+      Object {
+        "gitHubLogin": "Test User",
+        "gitHubToken": "123",
+        "signOutGitHub": [MockFunction],
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <h2>
+          GitHub Settings
+        </h2>,
+        Array [
+          <label>
+            Using the personal access token you gave us, we logged you into GitHub as 
+            Test User
+            .
+          </label>,
+          <button
+            className="button"
+            onClick={[MockFunction]}
+          >
+            <FontAwesomeIcon
+              border={false}
+              className=""
+              fixedWidth={false}
+              flip={null}
+              icon={
+                Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f5",
+                    "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                  ],
+                  "iconName": "sign-out-alt",
+                  "prefix": "fas",
+                }
+              }
+              inverse={false}
+              listItem={false}
+              mask={null}
+              pull={null}
+              pulse={false}
+              rotation={null}
+              size={null}
+              spin={false}
+              symbol={false}
+              transform={null}
+            />
+             Remove Token & Sign Out
+          </button>,
+        ],
+      ],
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "GitHub Settings",
+        },
+        "ref": null,
+        "rendered": "GitHub Settings",
+        "type": "h2",
+      },
+      Object {
+        "instance": null,
+        "key": "signed-in-label",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            "Using the personal access token you gave us, we logged you into GitHub as ",
+            "Test User",
+            ".",
+          ],
+        },
+        "ref": null,
+        "rendered": Array [
+          "Using the personal access token you gave us, we logged you into GitHub as ",
+          "Test User",
+          ".",
+        ],
+        "type": "label",
+      },
+      Object {
+        "instance": null,
+        "key": "sign-out-button",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <FontAwesomeIcon
+              border={false}
+              className=""
+              fixedWidth={false}
+              flip={null}
+              icon={
+                Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f5",
+                    "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                  ],
+                  "iconName": "sign-out-alt",
+                  "prefix": "fas",
+                }
+              }
+              inverse={false}
+              listItem={false}
+              mask={null}
+              pull={null}
+              pulse={false}
+              rotation={null}
+              size={null}
+              spin={false}
+              symbol={false}
+              transform={null}
+            />,
+            " Remove Token & Sign Out",
+          ],
+          "className": "button",
+          "onClick": [MockFunction],
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "function",
+            "props": Object {
+              "border": false,
+              "className": "",
+              "fixedWidth": false,
+              "flip": null,
+              "icon": Object {
+                "icon": Array [
+                  512,
+                  512,
+                  Array [],
+                  "f2f5",
+                  "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                ],
+                "iconName": "sign-out-alt",
+                "prefix": "fas",
+              },
+              "inverse": false,
+              "listItem": false,
+              "mask": null,
+              "pull": null,
+              "pulse": false,
+              "rotation": null,
+              "size": null,
+              "spin": false,
+              "symbol": false,
+              "transform": null,
+            },
+            "ref": null,
+            "rendered": null,
+            "type": [Function],
+          },
+          " Remove Token & Sign Out",
+        ],
+        "type": "button",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <h2>
+            GitHub Settings
+          </h2>,
+          Array [
+            <label>
+              Using the personal access token you gave us, we logged you into GitHub as 
+              Test User
+              .
+            </label>,
+            <button
+              className="button"
+              onClick={[MockFunction]}
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f2f5",
+                      "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                    ],
+                    "iconName": "sign-out-alt",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+               Remove Token & Sign Out
+            </button>,
+          ],
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "GitHub Settings",
+          },
+          "ref": null,
+          "rendered": "GitHub Settings",
+          "type": "h2",
+        },
+        Object {
+          "instance": null,
+          "key": "signed-in-label",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              "Using the personal access token you gave us, we logged you into GitHub as ",
+              "Test User",
+              ".",
+            ],
+          },
+          "ref": null,
+          "rendered": Array [
+            "Using the personal access token you gave us, we logged you into GitHub as ",
+            "Test User",
+            ".",
+          ],
+          "type": "label",
+        },
+        Object {
+          "instance": null,
+          "key": "sign-out-button",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f2f5",
+                      "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                    ],
+                    "iconName": "sign-out-alt",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />,
+              " Remove Token & Sign Out",
+            ],
+            "className": "button",
+            "onClick": [MockFunction],
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "function",
+              "props": Object {
+                "border": false,
+                "className": "",
+                "fixedWidth": false,
+                "flip": null,
+                "icon": Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f2f5",
+                    "M497 273L329 441c-15 15-41 4.5-41-17v-96H152c-13.3 0-24-10.7-24-24v-96c0-13.3 10.7-24 24-24h136V88c0-21.4 25.9-32 41-17l168 168c9.3 9.4 9.3 24.6 0 34zM192 436v-40c0-6.6-5.4-12-12-12H96c-17.7 0-32-14.3-32-32V160c0-17.7 14.3-32 32-32h84c6.6 0 12-5.4 12-12V76c0-6.6-5.4-12-12-12H96c-53 0-96 43-96 96v192c0 53 43 96 96 96h84c6.6 0 12-5.4 12-12z",
+                  ],
+                  "iconName": "sign-out-alt",
+                  "prefix": "fas",
+                },
+                "inverse": false,
+                "listItem": false,
+                "mask": null,
+                "pull": null,
+                "pulse": false,
+                "rotation": null,
+                "size": null,
+                "spin": false,
+                "symbol": false,
+                "transform": null,
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            " Remove Token & Sign Out",
+          ],
+          "type": "button",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
