@@ -1,0 +1,242 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Output component renders with output 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Output
+    appState={
+      Object {
+        "isConsoleShowing": true,
+        "output": Array [
+          Object {
+            "text": "Hello!",
+            "timestamp": 1532704072127,
+          },
+          Object {
+            "text": "Hi!",
+            "timestamp": 1532704073130,
+          },
+        ],
+      }
+    }
+    renderTimestamp={[Function]}
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        Array [
+          <p>
+            <span
+              className="timestamp"
+            >
+              1532704072127
+            </span>
+            Hello!
+          </p>,
+        ],
+        Array [
+          <p>
+            <span
+              className="timestamp"
+            >
+              1532704073130
+            </span>
+            Hi!
+          </p>,
+        ],
+      ],
+      "className": "output showing",
+    },
+    "ref": Object {
+      "current": null,
+    },
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": "1532704072127--0--0",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <span
+              className="timestamp"
+            >
+              1532704072127
+            </span>,
+            "Hello!",
+          ],
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": "1532704072127",
+              "className": "timestamp",
+            },
+            "ref": null,
+            "rendered": "1532704072127",
+            "type": "span",
+          },
+          "Hello!",
+        ],
+        "type": "p",
+      },
+      Object {
+        "instance": null,
+        "key": "1532704073130--1--0",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <span
+              className="timestamp"
+            >
+              1532704073130
+            </span>,
+            "Hi!",
+          ],
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": "1532704073130",
+              "className": "timestamp",
+            },
+            "ref": null,
+            "rendered": "1532704073130",
+            "type": "span",
+          },
+          "Hi!",
+        ],
+        "type": "p",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          Array [
+            <p>
+              <span
+                className="timestamp"
+              >
+                1532704072127
+              </span>
+              Hello!
+            </p>,
+          ],
+          Array [
+            <p>
+              <span
+                className="timestamp"
+              >
+                1532704073130
+              </span>
+              Hi!
+            </p>,
+          ],
+        ],
+        "className": "output showing",
+      },
+      "ref": Object {
+        "current": null,
+      },
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": "1532704072127--0--0",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <span
+                className="timestamp"
+              >
+                1532704072127
+              </span>,
+              "Hello!",
+            ],
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": "1532704072127",
+                "className": "timestamp",
+              },
+              "ref": null,
+              "rendered": "1532704072127",
+              "type": "span",
+            },
+            "Hello!",
+          ],
+          "type": "p",
+        },
+        Object {
+          "instance": null,
+          "key": "1532704073130--1--0",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <span
+                className="timestamp"
+              >
+                1532704073130
+              </span>,
+              "Hi!",
+            ],
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": "1532704073130",
+                "className": "timestamp",
+              },
+              "ref": null,
+              "rendered": "1532704073130",
+              "type": "span",
+            },
+            "Hi!",
+          ],
+          "type": "p",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;

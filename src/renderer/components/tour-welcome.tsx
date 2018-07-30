@@ -2,7 +2,7 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
-import { TourScriptStep, Tour } from './tour';
+import { TourScriptStep, Tour, TourStepGetButtonParams } from './tour';
 import { Dialog } from './dialog';
 
 export interface WelcomeTourProps {
@@ -101,7 +101,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
           </p>
         </div>
       ),
-      getButtons: ({ stop, advance }) => {
+      getButtons: ({ stop, advance }: TourStepGetButtonParams): Array<JSX.Element> => {
         return [
           <button key='btn-stop' onClick={stop}>I'm good!</button>,
           <button key='btn-adv' onClick={advance}>Electron Basics</button>

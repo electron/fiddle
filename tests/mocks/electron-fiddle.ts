@@ -1,9 +1,7 @@
 import { EditorsMock } from './editors';
+import {  AppMock } from './app';
 
 export class ElectronFiddleMock {
-  public app = {
-    setValues: jest.fn()
-  };
-
+  public app = new AppMock();
   public editors = new EditorsMock();
 }

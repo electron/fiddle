@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Commands } from './commands';
-import { AppState, appState } from '../state';
+import { AppState } from '../state';
 import { Output } from './output';
 import { ChromeMac } from './chrome-mac';
 import { WelcomeTour } from './tour-welcome';
@@ -19,14 +19,14 @@ export interface HeaderProps {
 export class Header extends React.Component<HeaderProps, {}> {
   public render() {
     return (
-      <React.Fragment>
+      <>
         <ChromeMac appState={this.props.appState} />
         <header id='header'>
           <Commands key='commands' appState={this.props.appState} />
           <Output key='output' appState={this.props.appState} />
         </header>
-        <WelcomeTour appState={appState} />
-      </React.Fragment>
+        <WelcomeTour appState={this.props.appState} />
+      </>
     );
   }
 }

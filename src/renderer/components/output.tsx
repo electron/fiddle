@@ -6,6 +6,7 @@ import { OutputEntry } from '../../interfaces';
 
 export interface CommandsProps {
   appState: AppState;
+  renderTimestamp?: (ts: number) => string;
 }
 
 /**
@@ -19,9 +20,32 @@ export interface CommandsProps {
 export class Output extends React.Component<CommandsProps, {}> {
   private outputRef = React.createRef<HTMLDivElement>();
 
+  constructor(props: CommandsProps) {
+    super(props);
+
+    this.renderTimestamp = this.renderTimestamp.bind(this);
+    this.renderEntry = this.renderEntry.bind(this);
+  }
+
   public componentDidUpdate() {
     if (this.outputRef.current) {
       this.outputRef.current.scrollTop = this.outputRef.current.scrollHeight;
+    }
+  }
+
+  /**
+   * Render the timestamp
+   *
+   * @param {number} ts
+   * @returns {string}
+   */
+  public renderTimestamp(ts: number): string {
+    const { renderTimestamp } = this.props;
+
+    if (renderTimestamp) {
+      return renderTimestamp(ts);
+    } else {
+      return new Date(ts).toLocaleTimeString();
     }
   }
 
@@ -34,7 +58,7 @@ export class Output extends React.Component<CommandsProps, {}> {
    * @memberof Output
    */
   public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
-    const ts = new Date(entry.timestamp).toLocaleTimeString();
+    const ts = this.renderTimestamp(entry.timestamp);
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
 

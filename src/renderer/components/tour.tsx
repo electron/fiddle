@@ -117,11 +117,11 @@ export class Tour extends React.Component<TourProps, TourState> {
     // No? Fine! Are we at the end of the tour?
     return this.props.tour.size === this.state.i
       ? [
-        <button key='btn-stop' onClick={this.stop}>Finish Tour</button>
+        <button key='btn-stop' className='btn-stop' onClick={this.stop}>Finish Tour</button>
       ]
       : [
-        <button key='btn-stop' onClick={this.stop}>Stop Tour</button>,
-        <button key='btn-adv' onClick={this.advance}>Continue</button>
+        <button key='btn-stop' className='btn-stop' onClick={this.stop}>Stop Tour</button>,
+        <button key='btn-adv' className='btn-adv' onClick={this.advance}>Continue</button>
       ];
   }
 

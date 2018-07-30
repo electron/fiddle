@@ -1,17 +1,17 @@
 import * as semver from 'semver';
 
-import { ElectronVersion, StringMap } from '../interfaces';
+import { ElectronVersion } from '../interfaces';
 
 /**
  * Sorts Electron versions and returns the result of a
  * map function.
  *
- * @param {StringMap<ElectronVersion>} versions
+ * @param {Record<string, ElectronVersion>} versions
  * @param {(key: string, version: ElectronVersion) => void} mapFn
  * @returns {Array<T>}
  */
 export function sortedElectronMap<T>(
-  versions: StringMap<ElectronVersion>,
+  versions: Record<string, ElectronVersion>,
   mapFn: (key: string, version: ElectronVersion) => T
 ) {
   return Object.keys(versions)

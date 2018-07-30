@@ -3,7 +3,6 @@ import { shallow } from 'enzyme';
 
 import { getOctokit } from '../../../src/utils/octokit';
 import { AddressBar } from '../../../src/renderer/components/address-bar';
-import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
 
 jest.mock('../../../src/utils/octokit');
 jest.mock('electron', () => require('../../mocks/electron'));
@@ -13,8 +12,6 @@ describe('AddressBar component', () => {
     this.store = {
       gistId: null
     };
-
-    window.ElectronFiddle = new ElectronFiddleMock() as any;
   });
 
   it('renders', () => {
@@ -78,7 +75,7 @@ describe('AddressBar component', () => {
       target: { value: 'abcdtestid' }
     });
 
-    await wrapper.instance().loadFiddle();
+    await (wrapper.instance() as AddressBar).loadFiddle();
 
     expect(wrapper.state('value')).toBe('abcdtestid');
     expect(document.title).toBe('Electron Fiddle - gist.github.com/abcdtestid');

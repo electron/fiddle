@@ -16,10 +16,11 @@ export interface EditorProps {
 }
 
 export class Editor extends React.Component<EditorProps> {
-  public containerElement: HTMLElement | null = null;
   public editor: MonacoType.editor.IStandaloneCodeEditor;
   public language: string = 'javascript';
   public value: string = '';
+
+  private containerRef = React.createRef<HTMLDivElement>();
 
   constructor(props: EditorProps) {
     super(props);
@@ -51,9 +52,10 @@ export class Editor extends React.Component<EditorProps> {
 
   public async initMonaco() {
     const { options, monaco, id } = this.props;
+    const ref = this.containerRef.current;
 
-    if (this.containerElement) {
-      this.editor = monaco.editor.create(this.containerElement, {
+    if (ref) {
+      this.editor = monaco.editor.create(ref, {
         language: this.language,
         theme: 'main',
         minimap: {
@@ -73,11 +75,7 @@ export class Editor extends React.Component<EditorProps> {
     }
   }
 
-  public assignRef = (component) => {
-    this.containerElement = component;
-  }
-
   public render() {
-    return <div className='editorContainer' ref={this.assignRef} />;
+    return <div className='editorContainer' ref={this.containerRef} />;
   }
 }

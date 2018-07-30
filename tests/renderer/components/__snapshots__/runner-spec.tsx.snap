@@ -1,0 +1,126 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Runner component renders 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Runner
+    appState={
+      Object {
+        "binaryManager": Object {
+          "getElectronBinaryPath": [MockFunction],
+          "getIsDownloaded": [MockFunction],
+        },
+        "downloadVersion": [MockFunction],
+        "pushError": [MockFunction],
+        "pushOutput": [MockFunction] {
+          "calls": Array [
+            Array [
+              "Console ready 🔬",
+            ],
+          ],
+          "results": Array [
+            Object {
+              "isThrow": false,
+              "value": undefined,
+            },
+          ],
+        },
+        "removeVersion": [MockFunction],
+        "version": "2.0.2",
+        "versions": Object {
+          "1.8.7": Object {
+            "assets_url": "https://api.github.com/repos/electron/electron/releases/11032343/assets",
+            "body": "## Bug Fixes
+
+* Fixed context menu for sandbox devtools. #12734
+
+*...",
+            "created_at": "2018-05-16T18:15:18Z",
+            "html_url": "https://github.com/electron/electron/releases/tag/v1.8.7",
+            "name": "electron v1.8.7",
+            "prerelease": false,
+            "published_at": "2018-05-16T18:21:33Z",
+            "state": "ready",
+            "tag_name": "v1.8.7",
+            "target_commitish": "1-8-x",
+            "url": "https://api.github.com/repos/electron/electron/releases/11032343",
+          },
+          "2.0.1": Object {
+            "assets_url": "https://api.github.com/repos/electron/electron/releases/11032425/assets",
+            "body": "## Bug Fixes
+
+* Fixed flaky security-warnings test. #12776,...",
+            "created_at": "2018-05-16T17:30:26Z",
+            "html_url": "https://github.com/electron/electron/releases/tag/v2.0.1",
+            "name": "electron v2.0.1",
+            "prerelease": false,
+            "published_at": "2018-05-16T18:40:54Z",
+            "state": "unknown",
+            "tag_name": "v2.0.1",
+            "target_commitish": "2-0-x",
+            "url": "https://api.github.com/repos/electron/electron/releases/11032425",
+          },
+          "2.0.2": Object {
+            "assets_url": "https://api.github.com/repos/electron/electron/releases/11120972/assets",
+            "body": "## Bug Fixes
+
+* Fixed long jitter buffer delays...",
+            "created_at": "2018-05-22T18:52:16Z",
+            "html_url": "https://github.com/electron/electron/releases/tag/v2.0.2",
+            "name": "electron v2.0.2",
+            "prerelease": false,
+            "published_at": "2018-05-22T20:14:35Z",
+            "state": "ready",
+            "tag_name": "v2.0.2",
+            "target_commitish": "2-0-x",
+            "url": "https://api.github.com/repos/electron/electron/releases/11120972",
+          },
+        },
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": "Run",
+      "className": "button button-run",
+      "onClick": [Function],
+    },
+    "ref": null,
+    "rendered": "Run",
+    "type": "button",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": "Run",
+        "className": "button button-run",
+        "onClick": [Function],
+      },
+      "ref": null,
+      "rendered": "Run",
+      "type": "button",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;

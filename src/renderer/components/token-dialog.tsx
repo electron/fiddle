@@ -120,10 +120,10 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
    * @memberof TokenDialog
    */
   public onTokenInputFocused() {
-    const text = clipboard.readText();
+    const text = (clipboard.readText() || '').trim();
 
     if (text.length !== 40) return;
-    if (!/[a-z0-9]+/.test(text)) return;
+    if (!/^[a-z0-9]+$/.test(text)) return;
 
     this.setState({ tokenInput: text });
   }

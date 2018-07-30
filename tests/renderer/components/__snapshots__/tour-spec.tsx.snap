@@ -1,0 +1,751 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`VersionChooser component renders 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Tour
+    onStop={[MockFunction]}
+    tour={
+      Set {
+        Object {
+          "content": <span>
+            mock-step-1
+          </span>,
+          "name": "mock-step-1",
+          "selector": "div.mock-1",
+        },
+        Object {
+          "content": <span>
+            mock-step-2
+          </span>,
+          "name": "mock-step-2",
+          "selector": "div.mock-2",
+        },
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": <React.Fragment>
+        <Dialog
+          arrow="left"
+          buttons={
+            Array [
+              <button
+                className="btn-stop"
+                onClick={[Function]}
+              >
+                Stop Tour
+              </button>,
+              <button
+                className="btn-adv"
+                onClick={[Function]}
+              >
+                Continue
+              </button>,
+            ]
+          }
+          isCentered={false}
+          isShowing={true}
+          isShowingBackdrop={false}
+          style={
+            Object {
+              "left": 165,
+              "margin": "10px",
+              "position": "absolute",
+              "top": 5,
+              "width": 390,
+            }
+          }
+        >
+          <span>
+            mock-step-1
+          </span>
+        </Dialog>
+        <svg
+          height="100%"
+          width="100%"
+        >
+          <rect
+            fill="rgba(0, 0, 0, 0.65)"
+            height="100%"
+            mask="url(#mask)"
+            width="100%"
+            x="0"
+            y="0"
+          />
+          <mask
+            id="mask"
+            maskContentUnits="userSpaceOnUse"
+            maskUnits="userSpaceOnUse"
+          >
+            <rect
+              className="bg"
+              fill="white"
+              height="100%"
+              width="100%"
+              x="0"
+              y="0"
+            />
+            <rect
+              fill="black"
+              height={120}
+              rx="5"
+              ry="5"
+              stroke="black"
+              strokeWidth="5"
+              width={130}
+              x={25}
+              y={20}
+            />
+          </mask>
+        </svg>
+      </React.Fragment>,
+      "className": "tour",
+    },
+    "ref": null,
+    "rendered": Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "function",
+      "props": Object {
+        "children": Array [
+          <Dialog
+            arrow="left"
+            buttons={
+              Array [
+                <button
+                  className="btn-stop"
+                  onClick={[Function]}
+                >
+                  Stop Tour
+                </button>,
+                <button
+                  className="btn-adv"
+                  onClick={[Function]}
+                >
+                  Continue
+                </button>,
+              ]
+            }
+            isCentered={false}
+            isShowing={true}
+            isShowingBackdrop={false}
+            style={
+              Object {
+                "left": 165,
+                "margin": "10px",
+                "position": "absolute",
+                "top": 5,
+                "width": 390,
+              }
+            }
+          >
+            <span>
+              mock-step-1
+            </span>
+          </Dialog>,
+          <svg
+            height="100%"
+            width="100%"
+          >
+            <rect
+              fill="rgba(0, 0, 0, 0.65)"
+              height="100%"
+              mask="url(#mask)"
+              width="100%"
+              x="0"
+              y="0"
+            />
+            <mask
+              id="mask"
+              maskContentUnits="userSpaceOnUse"
+              maskUnits="userSpaceOnUse"
+            >
+              <rect
+                className="bg"
+                fill="white"
+                height="100%"
+                width="100%"
+                x="0"
+                y="0"
+              />
+              <rect
+                fill="black"
+                height={120}
+                rx="5"
+                ry="5"
+                stroke="black"
+                strokeWidth="5"
+                width={130}
+                x={25}
+                y={20}
+              />
+            </mask>
+          </svg>,
+        ],
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": "mock-step-1",
+          "nodeType": "class",
+          "props": Object {
+            "arrow": "left",
+            "buttons": Array [
+              <button
+                className="btn-stop"
+                onClick={[Function]}
+              >
+                Stop Tour
+              </button>,
+              <button
+                className="btn-adv"
+                onClick={[Function]}
+              >
+                Continue
+              </button>,
+            ],
+            "children": <span>
+              mock-step-1
+            </span>,
+            "isCentered": false,
+            "isShowing": true,
+            "isShowingBackdrop": false,
+            "style": Object {
+              "left": 165,
+              "margin": "10px",
+              "position": "absolute",
+              "top": 5,
+              "width": 390,
+            },
+          },
+          "ref": null,
+          "rendered": Object {
+            "instance": null,
+            "key": "1",
+            "nodeType": "host",
+            "props": Object {
+              "children": "mock-step-1",
+            },
+            "ref": null,
+            "rendered": "mock-step-1",
+            "type": "span",
+          },
+          "type": [Function],
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <rect
+                fill="rgba(0, 0, 0, 0.65)"
+                height="100%"
+                mask="url(#mask)"
+                width="100%"
+                x="0"
+                y="0"
+              />,
+              <mask
+                id="mask"
+                maskContentUnits="userSpaceOnUse"
+                maskUnits="userSpaceOnUse"
+              >
+                <rect
+                  className="bg"
+                  fill="white"
+                  height="100%"
+                  width="100%"
+                  x="0"
+                  y="0"
+                />
+                <rect
+                  fill="black"
+                  height={120}
+                  rx="5"
+                  ry="5"
+                  stroke="black"
+                  strokeWidth="5"
+                  width={130}
+                  x={25}
+                  y={20}
+                />
+              </mask>,
+            ],
+            "height": "100%",
+            "width": "100%",
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "fill": "rgba(0, 0, 0, 0.65)",
+                "height": "100%",
+                "mask": "url(#mask)",
+                "width": "100%",
+                "x": "0",
+                "y": "0",
+              },
+              "ref": null,
+              "rendered": null,
+              "type": "rect",
+            },
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <rect
+                    className="bg"
+                    fill="white"
+                    height="100%"
+                    width="100%"
+                    x="0"
+                    y="0"
+                  />,
+                  <rect
+                    fill="black"
+                    height={120}
+                    rx="5"
+                    ry="5"
+                    stroke="black"
+                    strokeWidth="5"
+                    width={130}
+                    x={25}
+                    y={20}
+                  />,
+                ],
+                "id": "mask",
+                "maskContentUnits": "userSpaceOnUse",
+                "maskUnits": "userSpaceOnUse",
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "className": "bg",
+                    "fill": "white",
+                    "height": "100%",
+                    "width": "100%",
+                    "x": "0",
+                    "y": "0",
+                  },
+                  "ref": null,
+                  "rendered": null,
+                  "type": "rect",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "fill": "black",
+                    "height": 120,
+                    "rx": "5",
+                    "ry": "5",
+                    "stroke": "black",
+                    "strokeWidth": "5",
+                    "width": 130,
+                    "x": 25,
+                    "y": 20,
+                  },
+                  "ref": null,
+                  "rendered": null,
+                  "type": "rect",
+                },
+              ],
+              "type": "mask",
+            },
+          ],
+          "type": "svg",
+        },
+      ],
+      "type": Symbol(react.fragment),
+    },
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": <React.Fragment>
+          <Dialog
+            arrow="left"
+            buttons={
+              Array [
+                <button
+                  className="btn-stop"
+                  onClick={[Function]}
+                >
+                  Stop Tour
+                </button>,
+                <button
+                  className="btn-adv"
+                  onClick={[Function]}
+                >
+                  Continue
+                </button>,
+              ]
+            }
+            isCentered={false}
+            isShowing={true}
+            isShowingBackdrop={false}
+            style={
+              Object {
+                "left": 165,
+                "margin": "10px",
+                "position": "absolute",
+                "top": 5,
+                "width": 390,
+              }
+            }
+          >
+            <span>
+              mock-step-1
+            </span>
+          </Dialog>
+          <svg
+            height="100%"
+            width="100%"
+          >
+            <rect
+              fill="rgba(0, 0, 0, 0.65)"
+              height="100%"
+              mask="url(#mask)"
+              width="100%"
+              x="0"
+              y="0"
+            />
+            <mask
+              id="mask"
+              maskContentUnits="userSpaceOnUse"
+              maskUnits="userSpaceOnUse"
+            >
+              <rect
+                className="bg"
+                fill="white"
+                height="100%"
+                width="100%"
+                x="0"
+                y="0"
+              />
+              <rect
+                fill="black"
+                height={120}
+                rx="5"
+                ry="5"
+                stroke="black"
+                strokeWidth="5"
+                width={130}
+                x={25}
+                y={20}
+              />
+            </mask>
+          </svg>
+        </React.Fragment>,
+        "className": "tour",
+      },
+      "ref": null,
+      "rendered": Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "function",
+        "props": Object {
+          "children": Array [
+            <Dialog
+              arrow="left"
+              buttons={
+                Array [
+                  <button
+                    className="btn-stop"
+                    onClick={[Function]}
+                  >
+                    Stop Tour
+                  </button>,
+                  <button
+                    className="btn-adv"
+                    onClick={[Function]}
+                  >
+                    Continue
+                  </button>,
+                ]
+              }
+              isCentered={false}
+              isShowing={true}
+              isShowingBackdrop={false}
+              style={
+                Object {
+                  "left": 165,
+                  "margin": "10px",
+                  "position": "absolute",
+                  "top": 5,
+                  "width": 390,
+                }
+              }
+            >
+              <span>
+                mock-step-1
+              </span>
+            </Dialog>,
+            <svg
+              height="100%"
+              width="100%"
+            >
+              <rect
+                fill="rgba(0, 0, 0, 0.65)"
+                height="100%"
+                mask="url(#mask)"
+                width="100%"
+                x="0"
+                y="0"
+              />
+              <mask
+                id="mask"
+                maskContentUnits="userSpaceOnUse"
+                maskUnits="userSpaceOnUse"
+              >
+                <rect
+                  className="bg"
+                  fill="white"
+                  height="100%"
+                  width="100%"
+                  x="0"
+                  y="0"
+                />
+                <rect
+                  fill="black"
+                  height={120}
+                  rx="5"
+                  ry="5"
+                  stroke="black"
+                  strokeWidth="5"
+                  width={130}
+                  x={25}
+                  y={20}
+                />
+              </mask>
+            </svg>,
+          ],
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": "mock-step-1",
+            "nodeType": "class",
+            "props": Object {
+              "arrow": "left",
+              "buttons": Array [
+                <button
+                  className="btn-stop"
+                  onClick={[Function]}
+                >
+                  Stop Tour
+                </button>,
+                <button
+                  className="btn-adv"
+                  onClick={[Function]}
+                >
+                  Continue
+                </button>,
+              ],
+              "children": <span>
+                mock-step-1
+              </span>,
+              "isCentered": false,
+              "isShowing": true,
+              "isShowingBackdrop": false,
+              "style": Object {
+                "left": 165,
+                "margin": "10px",
+                "position": "absolute",
+                "top": 5,
+                "width": 390,
+              },
+            },
+            "ref": null,
+            "rendered": Object {
+              "instance": null,
+              "key": "1",
+              "nodeType": "host",
+              "props": Object {
+                "children": "mock-step-1",
+              },
+              "ref": null,
+              "rendered": "mock-step-1",
+              "type": "span",
+            },
+            "type": [Function],
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <rect
+                  fill="rgba(0, 0, 0, 0.65)"
+                  height="100%"
+                  mask="url(#mask)"
+                  width="100%"
+                  x="0"
+                  y="0"
+                />,
+                <mask
+                  id="mask"
+                  maskContentUnits="userSpaceOnUse"
+                  maskUnits="userSpaceOnUse"
+                >
+                  <rect
+                    className="bg"
+                    fill="white"
+                    height="100%"
+                    width="100%"
+                    x="0"
+                    y="0"
+                  />
+                  <rect
+                    fill="black"
+                    height={120}
+                    rx="5"
+                    ry="5"
+                    stroke="black"
+                    strokeWidth="5"
+                    width={130}
+                    x={25}
+                    y={20}
+                  />
+                </mask>,
+              ],
+              "height": "100%",
+              "width": "100%",
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "fill": "rgba(0, 0, 0, 0.65)",
+                  "height": "100%",
+                  "mask": "url(#mask)",
+                  "width": "100%",
+                  "x": "0",
+                  "y": "0",
+                },
+                "ref": null,
+                "rendered": null,
+                "type": "rect",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <rect
+                      className="bg"
+                      fill="white"
+                      height="100%"
+                      width="100%"
+                      x="0"
+                      y="0"
+                    />,
+                    <rect
+                      fill="black"
+                      height={120}
+                      rx="5"
+                      ry="5"
+                      stroke="black"
+                      strokeWidth="5"
+                      width={130}
+                      x={25}
+                      y={20}
+                    />,
+                  ],
+                  "id": "mask",
+                  "maskContentUnits": "userSpaceOnUse",
+                  "maskUnits": "userSpaceOnUse",
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "className": "bg",
+                      "fill": "white",
+                      "height": "100%",
+                      "width": "100%",
+                      "x": "0",
+                      "y": "0",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "rect",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "fill": "black",
+                      "height": 120,
+                      "rx": "5",
+                      "ry": "5",
+                      "stroke": "black",
+                      "strokeWidth": "5",
+                      "width": 130,
+                      "x": 25,
+                      "y": 20,
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "rect",
+                  },
+                ],
+                "type": "mask",
+              },
+            ],
+            "type": "svg",
+          },
+        ],
+        "type": Symbol(react.fragment),
+      },
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;

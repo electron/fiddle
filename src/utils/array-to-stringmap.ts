@@ -1,14 +1,16 @@
 import { normalizeVersion } from './normalize-version';
-import { GitHubVersion, StringMap, ElectronVersion } from '../interfaces';
+import { GitHubVersion, ElectronVersion } from '../interfaces';
 
 /**
  * Takes an array of GitHub releases and returns a StringMap of
  * Electron releases.
  *
  * @param {Array<GitHubVersion>} input
- * @returns {StringMap<ElectronVersion>}
+ * @returns {Record<string, ElectronVersion>}
  */
-export function arrayToStringMap(input: Array<GitHubVersion>): StringMap<ElectronVersion> {
+export function arrayToStringMap(
+  input: Array<GitHubVersion>
+): Record<string, ElectronVersion> {
   const output = {};
 
   input.forEach((version) => {

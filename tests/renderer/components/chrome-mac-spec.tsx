@@ -4,7 +4,7 @@ import { shallow } from 'enzyme';
 import { ChromeMac } from '../../../src/renderer/components/chrome-mac';
 import { resetPlatform, overridePlatform } from '../../utils';
 
-describe('Dialog component', () => {
+describe('Chrome-Mac component', () => {
   beforeEach(() => {
     this.store = {};
   });
@@ -16,5 +16,12 @@ describe('Dialog component', () => {
 
     const wrapper = shallow(<ChromeMac appState={this.store} />);
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders nothing on win32', () => {
+    overridePlatform('win32');
+
+    const wrapper = shallow(<ChromeMac appState={this.store} />);
+    expect(wrapper.html()).toBe(null);
   });
 });
