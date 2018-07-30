@@ -21,7 +21,7 @@
     "no-empty": true,
     "no-console": false,
     "no-empty-interface": false,
-    "no-unused-expression": false,
+    "no-unused-expression": true,
     "no-reference": true,
     "no-use-before-declare": true,
     "no-implicit-dependencies": false,
