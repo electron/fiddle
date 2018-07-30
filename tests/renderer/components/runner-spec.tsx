@@ -2,10 +2,10 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 import { spawn } from 'child_process';
 
-import { Runner } from '../../../src/renderer/components/runner';
+import { Runner, ForgeCommands } from '../../../src/renderer/components/runner';
 import { mockVersions } from '../../mocks/electron-versions';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
-import { findModulesInEditors, installModules } from '../../../src/renderer/npm';
+import { findModulesInEditors, installModules, npmRun } from '../../../src/renderer/npm';
 import { MockChildProcess } from '../../mocks/child-process';
 
 jest.mock('../../../src/renderer/npm');
@@ -139,10 +139,45 @@ describe('Runner component', () => {
     expect(installModules).toHaveBeenCalled();
   });
 
-  it('performs a forge operation in performForgeOperation', async () => {
+  it('performs a package operation in performForgeOperation()', async () => {
     const wrapper = shallow(<Runner appState={this.store} />);
     const instance: Runner = wrapper.instance() as any;
 
-    expect(await instance.performForgeOperation('package')).toBe(true);
+    expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(true);
+  });
+
+  it('performs a make operation in performForgeOperation()', async () => {
+    const wrapper = shallow(<Runner appState={this.store} />);
+    const instance: Runner = wrapper.instance() as any;
+
+    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(true);
+  });
+
+  it('handles an error in saveToTemp() in performForgeOperation()', async () => {
+    const wrapper = shallow(<Runner appState={this.store} />);
+    const instance: Runner = wrapper.instance() as any;
+    (instance as any).saveToTemp = jest.fn();
+
+    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+  });
+
+  it('handles an error in npmInstall() in performForgeOperation()', async () => {
+    const wrapper = shallow(<Runner appState={this.store} />);
+    const instance: Runner = wrapper.instance() as any;
+    (installModules as any).mockImplementationOnce(() => {
+      throw new Error('bwap bwap');
+    });
+
+    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+  });
+
+  it('handles an error in npmRun() in performForgeOperation()', async () => {
+    const wrapper = shallow(<Runner appState={this.store} />);
+    const instance: Runner = wrapper.instance() as any;
+    (npmRun as any).mockImplementationOnce(() => {
+      throw new Error('bwap bwap');
+    });
+
+    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
   });
 });
