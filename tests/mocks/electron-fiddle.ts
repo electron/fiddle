@@ -1,19 +1,7 @@
 import { EditorsMock } from './editors';
+import {  AppMock } from './app';
 
 export class ElectronFiddleMock {
-  public app = {
-    setValues: jest.fn(),
-    getValues: jest.fn(() => ({
-      main: 'main-content',
-      renderer: 'renderer-content',
-      html: 'html-content'
-    })),
-    monaco: {
-      editor: {
-        defineTheme: jest.fn()
-      }
-    }
-  };
-
+  public app = new AppMock();
   public editors = new EditorsMock();
 }

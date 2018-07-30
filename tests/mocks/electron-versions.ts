@@ -1,7 +1,7 @@
 import { ElectronVersion } from '../../src/interfaces';
 
 export const mockVersions: Record<string, ElectronVersion> = {
-  'v2.0.2': {
+  '2.0.2': {
     state: 'ready',
     url: 'https://api.github.com/repos/electron/electron/releases/11120972',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11120972/assets',
@@ -14,7 +14,7 @@ export const mockVersions: Record<string, ElectronVersion> = {
     published_at: '2018-05-22T20:14:35Z',
     body: '## Bug Fixes\r\n\r\n* Fixed long jitter buffer delays...'
   },
-  'v2.0.1': {
+  '2.0.1': {
     state: 'unknown',
     url: 'https://api.github.com/repos/electron/electron/releases/11032425',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032425/assets',
@@ -27,7 +27,7 @@ export const mockVersions: Record<string, ElectronVersion> = {
     published_at: '2018-05-16T18:40:54Z',
     body: '## Bug Fixes\r\n\r\n* Fixed flaky security-warnings test. #12776,...'
   },
-  'v1.8.7': {
+  '1.8.7': {
     state: 'ready',
     url: 'https://api.github.com/repos/electron/electron/releases/11032343',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032343/assets',

@@ -40,7 +40,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     this.run = this.run.bind(this);
     this.performForgeOperation = this.performForgeOperation.bind(this);
-    this.props.appState.pushOutput = this.props.appState.pushOutput.bind(this);
     this.stop = this.stop.bind(this);
     this.state = { isRunning: false };
 
@@ -65,7 +64,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const state = versions[normalizeVersion(version)].state;
 
     let text = 'Run';
-    let action = this.run;
+    let action: () => any = this.run;
 
     if (state === 'downloading') {
       text = 'Downloading';
@@ -100,7 +99,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
   /**
    * Analyzes the editor's JavaScript contents for modules
-   * and installs them.
+   * and installs them.pushOutput
    *
    * @param {EditorValues} values
    * @param {string} dir
@@ -193,10 +192,10 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * Uses electron-forge to either package or make the current fiddle
    *
    * @param {ForgeCommands} operation
-   * @returns
+   * @returns {Promise<boolean>}
    * @memberof Runner
    */
-  public async performForgeOperation(operation: ForgeCommands) {
+  public async performForgeOperation(operation: ForgeCommands): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
     const { dotfilesTransform } = await import('../transforms/dotfiles');
     const { forgeTransform } = await import('../transforms/forge');
@@ -212,10 +211,10 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     // Save files to temp
     const dir = await this.saveToTemp(options, dotfilesTransform, forgeTransform);
-    if (!dir) return;
+    if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
-    if (!(await this.npmInstall(dir))) return;
+    if (!(await this.npmInstall(dir))) return false;
 
     // Cool, let's run "package"
     try {
@@ -224,44 +223,48 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       pushOutput(`✅ ${strings[1]} successfully created.`);
     } catch (error) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
-      return;
+      return false;
     }
 
     const { shell } = await import('electron');
     shell.showItemInFolder(path.join(dir, 'out'));
+    return true;
   }
 
   /**
    * Actually run the fiddle.
    *
-   * @returns {Promise<void>}
+   * @returns {Promise<boolean>}
    * @memberof Runner
    */
-  public async run(): Promise<void> {
+  public async run(): Promise<boolean> {
     const { appState } = this.props;
     const { fileManager, getValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { binaryManager, version } = appState;
 
-    const isDownloaded = await binaryManager.getIsDownloaded(version);
-    const values = await getValues(options);
-    let dir: string;
-
     appState.isConsoleShowing = true;
 
+    const isDownloaded = await binaryManager.getIsDownloaded(version);
+    const values = await getValues(options);
+    const dir = await this.saveToTemp(options);
+
+    if (!dir) return false;
+
     try {
-      dir = await fileManager.saveToTemp(options);
       await this.installModulesForEditor(values, dir);
     } catch (error) {
-      console.error('Runner: Could not write files', error);
-      return;
+      console.error('Runner: Could not install modules', error);
+      return false;
     }
 
     if (!isDownloaded) {
       console.warn(`Runner: Binary ${version} not ready`);
-      return;
+      return false;
     }
 
     this.execute(dir);
+
+    return true;
   }
 }

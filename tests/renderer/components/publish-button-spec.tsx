@@ -3,7 +3,6 @@ import { shallow } from 'enzyme';
 
 import { PublishButton } from '../../../src/renderer/components/publish-button';
 import { getOctokit } from '../../../src/utils/octokit';
-import { AddressBar } from '../../../src/renderer/components/address-bar';
 
 jest.mock('../../../src/utils/octokit');
 jest.mock('electron', () => require('../../mocks/electron'));

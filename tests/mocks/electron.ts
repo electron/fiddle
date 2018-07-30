@@ -111,7 +111,8 @@ const session = {
 };
 
 const shell = {
-  openExternal: jest.fn()
+  openExternal: jest.fn(),
+  showItemInFolder: jest.fn()
 };
 
 const electronMock = {
