@@ -80,7 +80,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     return settingsSections.map((name) => {
       const isSelected = section === name;
-      const className = classNames({ selected: isSelected });
+      const className = classNames({ selected: isSelected }, name);
       const onClick = () => this.setState({ section: name });
 
       return (
