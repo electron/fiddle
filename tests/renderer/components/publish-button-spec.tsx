@@ -62,5 +62,26 @@ describe('Publish button component', () => {
       public: true
     });
   });
+
+  it('handles an error in Gist publishing', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        create: jest.fn(() => {
+          throw new Error('bwap bwap');
+        })
+      }
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const instance: PublishButton = wrapper.instance() as any;
+
+    await instance.publishFiddle();
+
+    expect(mockOctokit.authenticate).toHaveBeenCalled();
+    expect(wrapper.state('isPublishing')).toBe(false);
+  });
 });
 

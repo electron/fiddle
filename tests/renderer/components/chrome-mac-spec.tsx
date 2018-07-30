@@ -17,4 +17,11 @@ describe('Chrome-Mac component', () => {
     const wrapper = shallow(<ChromeMac appState={this.store} />);
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('renders nothing on win32', () => {
+    overridePlatform('win32');
+
+    const wrapper = shallow(<ChromeMac appState={this.store} />);
+    expect(wrapper.html()).toBe(null);
+  });
 });

@@ -35,4 +35,23 @@ describe('Output component', () => {
 
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('hides the console via class', () => {
+    this.store.isConsoleShowing = false;
+
+    const wrapper = shallow(
+      <Output appState={this.store} />
+    );
+
+    expect(wrapper.html().includes('showing')).toBe(false);
+  });
+
+  it('handles componentDidUpdate', () => {
+    const wrapper = shallow(<Output appState={this.store} />);
+    const instance: any = wrapper.instance() as any;
+
+    instance.outputRef = { current: { scrollTop: 0, scrollHeight: 200 } };
+    instance.componentDidUpdate();
+    expect(instance.outputRef.current.scrollTop).toBe(200);
+  });
 });
