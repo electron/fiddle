@@ -7,7 +7,7 @@ import {
 } from '../../src/renderer/fetch-types';
 
 import * as path from 'path';
-import { appMock } from '../mocks/app';
+import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('fs-extra');
 jest.mock('extract-zip', () => {
@@ -156,9 +156,7 @@ describe('fetch-types', () => {
   describe('updateEditorTypeDefinitions()', () => {
     beforeEach(() => {
       (global as any).window = window || {};
-      (window as any).ElectronFiddle = {
-        app: appMock
-      };
+      (window as any).ElectronFiddle = new ElectronFiddleMock();
     });
 
     it('tries to update the editor type definitions', async () => {

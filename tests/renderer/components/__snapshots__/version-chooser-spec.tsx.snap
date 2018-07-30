@@ -9,7 +9,7 @@ ShallowWrapper {
       Object {
         "setVersion": [MockFunction],
         "versions": Object {
-          "v1.8.7": Object {
+          "1.8.7": Object {
             "assets_url": "https://api.github.com/repos/electron/electron/releases/11032343/assets",
             "body": "## Bug Fixes
 
@@ -26,7 +26,7 @@ ShallowWrapper {
             "target_commitish": "1-8-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11032343",
           },
-          "v2.0.1": Object {
+          "2.0.1": Object {
             "assets_url": "https://api.github.com/repos/electron/electron/releases/11032425/assets",
             "body": "## Bug Fixes
 
@@ -41,7 +41,7 @@ ShallowWrapper {
             "target_commitish": "2-0-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11032425",
           },
-          "v2.0.2": Object {
+          "2.0.2": Object {
             "assets_url": "https://api.github.com/repos/electron/electron/releases/11120972/assets",
             "body": "## Bug Fixes
 

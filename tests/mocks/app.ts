@@ -16,6 +16,7 @@ export class AppMock {
 
   public monaco = {
     editor: {
+      setTheme: jest.fn(),
       defineTheme: jest.fn()
     },
     languages: {

@@ -235,7 +235,7 @@ ShallowWrapper {
           "ref": null,
           "rendered": Object {
             "instance": null,
-            "key": undefined,
+            "key": "1",
             "nodeType": "host",
             "props": Object {
               "children": "mock-step-1",
@@ -589,7 +589,7 @@ ShallowWrapper {
             "ref": null,
             "rendered": Object {
               "instance": null,
-              "key": undefined,
+              "key": "1",
               "nodeType": "host",
               "props": Object {
                 "children": "mock-step-1",

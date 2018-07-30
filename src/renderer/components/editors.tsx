@@ -36,6 +36,7 @@ export interface EditorsProps {
 
 export interface EditorsState {
   monaco?: typeof MonacoType;
+  isMounted?: boolean;
 }
 
 export class Editors extends React.Component<EditorsProps, EditorsState> {
@@ -50,6 +51,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
       this.executeCommand(cmd);
     });
+
+    this.setState({ isMounted: true });
   }
 
   /**
@@ -103,12 +106,16 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     monaco.editor.defineTheme('main', mainTheme as any);
 
-
     if (!app.monaco) {
       app.monaco = monaco;
     }
 
-    this.setState({ monaco });
+    if (!this.state || !this.state.isMounted) {
+      this.state = { monaco };
+    } else {
+      this.setState({ monaco });
+    }
+
     this.createThemes();
   }
 

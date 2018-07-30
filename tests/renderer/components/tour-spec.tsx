@@ -10,14 +10,14 @@ describe('VersionChooser component', () => {
       name: 'mock-step-1',
       selector: 'div.mock-1',
       content: (
-        <span>mock-step-1</span>
+        <span key='1'>mock-step-1</span>
       )
     },
     {
       name: 'mock-step-2',
       selector: 'div.mock-2',
       content: (
-        <span>mock-step-2</span>
+        <span key='2'>mock-step-2</span>
       )
     }
   ]);
@@ -50,7 +50,7 @@ describe('VersionChooser component', () => {
         content: (
           <span>mock-step-1</span>
         ),
-        getButtons: () => [ (<span>hi</span>) ]
+        getButtons: () => [ (<span key='1'>hi</span>) ]
       }
     ]);
 
