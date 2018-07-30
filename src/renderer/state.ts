@@ -1,7 +1,7 @@
 import { observable, action, autorun } from 'mobx';
 
 import { BinaryManager } from './binary';
-import { ElectronVersion, StringMap, OutputEntry } from '../interfaces';
+import { ElectronVersion, OutputEntry } from '../interfaces';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getKnownVersions, getUpdatedKnownVersions } from './versions';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -41,7 +41,7 @@ export class AppState {
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
   @observable public binaryManager: BinaryManager = new BinaryManager();
-  @observable public versions: StringMap<ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | null = null;
   @observable public isConsoleShowing: boolean = false;

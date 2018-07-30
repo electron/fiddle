@@ -89,11 +89,19 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
         <h2>Electron Settings</h2>
         <div className='advanced-options settings-section'>
           <label>Download all versions of Electron.</label>
-          <button className='button' disabled={isWorking} onClick={this.handleDownloadAll}>
+          <button
+            className='button btn-download-all'
+            disabled={isWorking}
+            onClick={this.handleDownloadAll}
+          >
             {downloadFontAwesomeIcon} Download All Versions
           </button>
           <label>Remove all downloaded versions of Electron.</label>
-          <button className='button' disabled={isWorking} onClick={this.handleDeleteAll}>
+          <button
+            className='button btn-delete-all'
+            disabled={isWorking}
+            onClick={this.handleDeleteAll}
+          >
             {deleteFontAwesomeIcon} Delete All Versions
           </button>
         </div>
