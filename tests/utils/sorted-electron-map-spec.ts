@@ -1,7 +1,7 @@
 import { sortedElectronMap } from '../../src/utils/sorted-electron-map';
 
 describe('sorted-eletron-map', () => {
-  it('sorts a stringmap of electron versions', () => {
+  it('sorts a record of electron versions', () => {
     const map: any = {
       '1.0.0': {
         tag_name: 'v1.0.0'

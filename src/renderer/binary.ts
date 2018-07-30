@@ -3,7 +3,6 @@ import * as fsType from 'fs-extra';
 
 import { USER_DATA_PATH } from '../constants';
 import { normalizeVersion } from '../utils/normalize-version';
-import { StringMap } from '../interfaces';
 import { fancyImport } from '../utils/import';
 
 /**
@@ -13,7 +12,7 @@ import { fancyImport } from '../utils/import';
  * @class BinaryManager
  */
 export class BinaryManager {
-  public state: StringMap<'ready' | 'downloading'> = {};
+  public state: Record<string, 'ready' | 'downloading'> = {};
 
   /**
    * Remove a version from disk. Does not update state. We'll try up to
@@ -170,7 +169,7 @@ export class BinaryManager {
 
       process.noAsar = true;
 
-      extract(zipPath, { dir: extractPath }, (error) => {
+      extract(zipPath, { dir: extractPath }, (error: Error) => {
         if (error) {
           reject(error);
           return;

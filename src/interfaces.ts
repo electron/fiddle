@@ -1,7 +1,3 @@
-export interface StringMap<T> {
-  [x: string]: T;
-}
-
 export type ElectronVersionState = 'downloading' | 'ready' | 'unknown';
 
 export type WindowNames = 'main';
