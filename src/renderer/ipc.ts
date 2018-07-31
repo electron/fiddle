@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events';
 import { ipcRenderer } from 'electron';
-import { ipcRendererEvents, IpcEvents } from '../ipc-events';
+import { EventEmitter } from 'events';
+import { IpcEvents, ipcRendererEvents } from '../ipc-events';
 
 /**
  * The main purpose of this class is to be the central

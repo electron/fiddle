@@ -1,12 +1,12 @@
 import * as MonacoType from 'monaco-editor';
 
 import { EditorValues } from '../interfaces';
-import { updateEditorLayout } from '../utils/editor-layout';
-import { appState } from './state';
-import { ipcRendererManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
-import { FileManager } from './file-manager';
+import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
+import { FileManager } from './file-manager';
+import { ipcRendererManager } from './ipc';
+import { appState } from './state';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -19,7 +19,7 @@ export class App {
   public monaco: typeof MonacoType | null = null;
   public state = appState;
 
-  //@ts-ignore: We're not using this, but we do want to create it
+  // @ts-ignore: We're not using this, but we do want to create it
   public fileManager = new FileManager();
 
   constructor() {
@@ -106,4 +106,5 @@ export class App {
 
 // tslint:disable-next-line:no-string-literal
 window.ElectronFiddle.app = new App();
-window.ElectronFiddle.app.setup();
+window.ElectronFiddle.app.setup()
+  .catch((error) => console.error(error));

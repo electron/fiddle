@@ -1,10 +1,10 @@
 import { dialog } from 'electron';
-import * as path from 'path';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../constants';
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
-import { INDEX_HTML_NAME, RENDERER_JS_NAME, MAIN_JS_NAME, PACKAGE_NAME } from '../constants';
 
 /**
  * Ensures that we're listening to file events

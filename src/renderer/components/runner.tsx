@@ -1,15 +1,15 @@
-import * as React from 'react';
-import * as path from 'path';
+import { ChildProcess, spawn } from 'child_process';
 import { observer } from 'mobx-react';
-import { spawn, ChildProcess } from 'child_process';
+import * as path from 'path';
+import * as React from 'react';
 
-import { normalizeVersion } from '../../utils/normalize-version';
-import { AppState } from '../state';
-import { installModules, findModulesInEditors, npmRun } from '../npm';
 import { EditorValues, FileTransform } from '../../interfaces';
-import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
 import { PackageJsonOptions } from '../../utils/get-package';
+import { normalizeVersion } from '../../utils/normalize-version';
+import { ipcRendererManager } from '../ipc';
+import { findModulesInEditors, installModules, npmRun } from '../npm';
+import { AppState } from '../state';
 
 export interface RunnerState {
   isRunning: boolean;

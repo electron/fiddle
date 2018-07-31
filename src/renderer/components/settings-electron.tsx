@@ -1,12 +1,12 @@
-import * as React from 'react';
+import { faCloudDownloadAlt, faSpinner, faTrash } from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faCloudDownloadAlt, faSpinner } from '@fortawesome/fontawesome-free-solid';
 import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { AppState } from '../state';
-import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { ElectronVersion } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
+import { sortedElectronMap } from '../../utils/sorted-electron-map';
+import { AppState } from '../state';
 
 export interface ElectronSettingsProps {
   appState: AppState;

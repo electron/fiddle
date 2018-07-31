@@ -1,13 +1,13 @@
 import { app } from 'electron';
 
-import { getOrCreateMainWindow } from './windows';
-import { setupProtocolHandler, listenForProtocolHandler } from './protocol';
-import { setupUpdates } from './update';
 import { isDevMode } from '../utils/devmode';
 import { setupDialogs } from './dialogs';
+import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
+import { setupUpdates } from './update';
+import { getOrCreateMainWindow } from './windows';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (require('electron-squirrel-startup')) { // eslint-disable-line global-require
+if (require('electron-squirrel-startup')) {
   app.quit();
 }
 

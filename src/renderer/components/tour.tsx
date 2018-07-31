@@ -1,6 +1,6 @@
 import * as React from 'react';
+import { invertPosition, positionForRect } from '../../utils/position-for-rect';
 import { Dialog } from './dialog';
-import { positionForRect, invertPosition } from '../../utils/position-for-rect';
 
 export interface TourScriptStep {
   name: string;

@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { Commands } from './commands';
 import { AppState } from '../state';
-import { Output } from './output';
 import { ChromeMac } from './chrome-mac';
+import { Commands } from './commands';
+import { Output } from './output';
 import { WelcomeTour } from './tour-welcome';
 
 export interface HeaderProps {

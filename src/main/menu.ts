@@ -1,8 +1,8 @@
-import { app, shell, Menu, BrowserWindow, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
-import { ipcMainManager } from './ipc';
 import { showOpenDialog, showSaveDialog } from './files';
+import { ipcMainManager } from './ipc';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
@@ -194,7 +194,7 @@ function getFileMenu(): MenuItemConstructorOptions {
 /**
  * Creates the app's window menu.
  */
-export async function setupMenu() {
+export function setupMenu() {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(app, shell) as Array<MenuItemConstructorOptions>)

@@ -1,17 +1,17 @@
-import * as path from 'path';
 import { shell } from 'electron';
 import * as fsType from 'fs-extra';
+import * as path from 'path';
 
-import { ipcRendererManager } from './ipc';
-import { IpcEvents } from '../ipc-events';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../constants';
 import { EditorValues, Files, FileTransform } from '../interfaces';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PACKAGE_NAME } from '../constants';
-import { appState } from './state';
+import { IpcEvents } from '../ipc-events';
+import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
+import { ipcRendererManager } from './ipc';
+import { appState } from './state';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
-import { PackageJsonOptions, DEFAULT_OPTIONS } from '../utils/get-package';
 
 export class FileManager {
   constructor() {

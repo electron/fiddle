@@ -1,10 +1,10 @@
 // Credit goes in large part to https://github.com/superRaytin/react-monaco-editor,
 // this component is a changed version of it.
 
-import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
+import * as React from 'react';
+import { ContentNames, getContent } from '../content';
 import { AppState } from '../state';
-import { getContent, ContentNames } from '../content';
 
 export interface EditorProps {
   appState: AppState;

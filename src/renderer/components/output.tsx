@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { AppState } from '../state';
 import { OutputEntry } from '../../interfaces';
+import { AppState } from '../state';
 
 export interface CommandsProps {
   appState: AppState;

@@ -1,9 +1,9 @@
-import * as React from 'react';
 import { observer } from 'mobx-react';
+import * as React from 'react';
 
 import { AppState } from '../state';
-import { TourScriptStep, Tour, TourStepGetButtonParams } from './tour';
 import { Dialog } from './dialog';
+import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
 
 export interface WelcomeTourProps {
   appState: AppState;

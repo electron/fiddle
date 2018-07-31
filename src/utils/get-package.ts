@@ -1,6 +1,6 @@
-import { AppState } from '../renderer/state';
 import { EditorValues } from '../interfaces';
 import { findModulesInEditors } from '../renderer/npm';
+import { AppState } from '../renderer/state';
 import { getUsername } from './get-username';
 
 export interface PackageJsonOptions {

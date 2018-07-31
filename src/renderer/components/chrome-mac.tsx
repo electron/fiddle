@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { AppState } from '../state';
 import { getTitle } from '../../utils/get-title';
+import { AppState } from '../state';
 
 export interface ChromeMacProps {
   appState: AppState;
