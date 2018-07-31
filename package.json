@@ -9,7 +9,7 @@
     "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
     "lint:style": "stylelint ./src/less/*.less --fix",
-    "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\"",
+    "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\" --fix",
     "lint": "npm-run-all lint:*",
     "make": "electron-forge make",
     "package": "electron-forge package",
