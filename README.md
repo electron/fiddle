@@ -2,6 +2,13 @@
 
 > :warning: Still a work in progress, please stay tuned.
 
+<center>
+
+[![Build status](https://ci.appveyor.com/api/projects/status/ngeqlis14337ke3q/branch/master?svg=true)](https://ci.appveyor.com/project/felixrieseberg/fiddle/branch/master)
+[![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle)
+
+</center>
+
 Electron Fiddle let's you create and play with small Electron experiments. It
 greets you with a quick-start template after opening – change a few things,
 choose the version of Electron you want to run it with, and play around. Then,

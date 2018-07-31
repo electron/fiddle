@@ -1,0 +1,20 @@
+environment:
+  matrix:
+    - nodejs_version: "8"
+
+init:
+  - git config --global core.symlinks true
+
+install:
+  - ps: Install-Product node $env:nodejs_version x64
+  - node --version
+  - npm ci
+
+cache:
+  - '%APPDATA%\npm-cache -> appveyor.yml'
+
+test_script:
+  - npm run lint
+  - npm run test
+
+build: off
