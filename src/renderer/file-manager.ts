@@ -9,12 +9,12 @@ import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
-import { appState } from './state';
+import { AppState } from './state';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 
 export class FileManager {
-  constructor() {
+  constructor(private readonly appState: AppState) {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
@@ -50,11 +50,11 @@ export class FileManager {
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
     };
 
-    appState.gistId = '';
-    appState.isMyGist = false;
-    appState.localPath = filePath;
+    this.appState.gistId = '';
+    this.appState.isMyGist = false;
+    this.appState.localPath = filePath;
     window.ElectronFiddle.app.setValues(values);
-    document.title = getTitle(appState);
+    document.title = getTitle(this.appState);
   }
 
   /**
@@ -65,7 +65,7 @@ export class FileManager {
    * @memberof FileManager
    */
   public async saveFiddle(filePath: string, ...transforms: Array<FileTransform>) {
-    const { localPath } = appState;
+    const { localPath } = this.appState;
     const pathToSave = filePath || localPath;
 
     console.log(`FileManager: Asked to save to ${pathToSave}`);
@@ -75,7 +75,7 @@ export class FileManager {
     } else {
       const files = await this.getFiles(undefined, ...transforms);
 
-      for (const [ fileName, content ] of files) {
+      for (const [fileName, content] of files) {
         try {
           await this.saveFile(path.join(pathToSave, fileName), content);
         } catch (error) {
@@ -87,7 +87,7 @@ export class FileManager {
       shell.showItemInFolder(pathToSave);
 
       if (pathToSave !== localPath) {
-        appState.localPath = pathToSave;
+        this.appState.localPath = pathToSave;
       }
     }
   }
@@ -123,11 +123,12 @@ export class FileManager {
     return output;
   }
 
+
   /**
    * Save the current project to a temporary directory. Returns the
    * path to the temp directory.
    *
-   * @param {AppState} appState
+   * @param {PackageJsonOptions} options
    * @param {...Array<FileTransform>} transforms
    * @returns {Promise<string>}
    */
@@ -141,8 +142,12 @@ export class FileManager {
 
     tmp.setGracefulCleanup();
 
-    for (const [ name, content ] of files) {
-      await fs.writeFile(path.join(dir.name, name), content);
+    for (const [name, content] of files) {
+      try {
+        await fs.outputFile(path.join(dir.name, name), content);
+      } catch (error) {
+        throw error;
+      }
     }
 
     return dir.name;
@@ -180,7 +185,7 @@ export class FileManager {
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
-      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [ filePath ]);
+      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
 }

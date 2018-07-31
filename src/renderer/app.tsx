@@ -1,11 +1,9 @@
 import * as MonacoType from 'monaco-editor';
 
 import { EditorValues } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
-import { ipcRendererManager } from './ipc';
 import { appState } from './state';
 
 /**
@@ -18,9 +16,7 @@ export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
   public state = appState;
-
-  // @ts-ignore: We're not using this, but we do want to create it
-  public fileManager = new FileManager();
+  public fileManager = new FileManager(appState);
 
   constructor() {
     this.getValues = this.getValues.bind(this);
