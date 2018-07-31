@@ -1,13 +1,13 @@
-import * as React from 'react';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { AppState } from '../state';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
-import { idFromUrl } from '../../utils/gist';
-import { getTitle } from '../../utils/get-title';
-import { getOctokit } from '../../utils/octokit';
 import { classNames } from '../../utils/classnames';
+import { getTitle } from '../../utils/get-title';
+import { idFromUrl } from '../../utils/gist';
+import { getOctokit } from '../../utils/octokit';
+import { AppState } from '../state';
 
 export interface AddressBarProps {
   appState: AppState;

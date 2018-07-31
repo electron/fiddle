@@ -1,10 +1,10 @@
-import * as path from 'path';
-import * as MonacoType from 'monaco-editor';
 import * as fsType from 'fs-extra';
+import * as MonacoType from 'monaco-editor';
+import * as path from 'path';
 
 import { USER_DATA_PATH } from '../constants';
-import { fancyImport } from '../utils/import';
 import { callIn } from '../utils/call-in';
+import { fancyImport } from '../utils/import';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 

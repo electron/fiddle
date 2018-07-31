@@ -1,11 +1,11 @@
-import { clipboard, shell } from 'electron';
-import * as React from 'react';
-import { observer } from 'mobx-react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { clipboard, shell } from 'electron';
+import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { AppState } from '../state';
 import { getOctokit } from '../../utils/octokit';
+import { AppState } from '../state';
 import { Dialog } from './dialog';
 
 export interface TokenDialogProps {

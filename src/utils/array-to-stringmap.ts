@@ -1,5 +1,5 @@
+import { ElectronVersion, GitHubVersion } from '../interfaces';
 import { normalizeVersion } from './normalize-version';
-import { GitHubVersion, ElectronVersion } from '../interfaces';
 
 /**
  * Takes an array of GitHub releases and returns a StringMap of

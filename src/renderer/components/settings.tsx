@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { observer } from 'mobx-react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimesCircle } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { observer } from 'mobx-react';
+import * as React from 'react';
 
+import { classNames } from '../../utils/classnames';
 import { AppState } from '../state';
+import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
 import { GitHubSettings } from './settings-github';
-import { CreditsSettings } from './settings-credits';
-import { classNames } from '../../utils/classnames';
 
 enum SettingsSections {
   GitHub = 'GitHub',

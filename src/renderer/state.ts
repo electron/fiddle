@@ -1,14 +1,14 @@
-import { observable, action, autorun } from 'mobx';
+import { action, autorun, observable } from 'mobx';
 
-import { BinaryManager } from './binary';
 import { ElectronVersion, OutputEntry } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
-import { getKnownVersions, getUpdatedKnownVersions } from './versions';
+import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
+import { BinaryManager } from './binary';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
-import { IpcEvents } from '../ipc-events';
-import { getName } from '../utils/get-title';
+import { getKnownVersions, getUpdatedKnownVersions } from './versions';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = normalizeVersion(knownVersions[0].tag_name);

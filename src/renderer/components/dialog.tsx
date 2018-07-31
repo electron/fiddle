@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { classNames } from '../../utils/classnames';
 import { ArrowPosition } from '../../interfaces';
+import { classNames } from '../../utils/classnames';
 import { sortButtons } from '../../utils/sort-buttons';
 
 export interface DialogProps {

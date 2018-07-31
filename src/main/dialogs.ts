@@ -1,6 +1,6 @@
 import { dialog } from 'electron';
-import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
+import { ipcMainManager } from './ipc';
 import { getOrCreateMainWindow } from './windows';
 
 /**

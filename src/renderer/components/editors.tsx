@@ -1,15 +1,15 @@
-import { Mosaic, MosaicWindow } from 'react-mosaic-component';
-import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
+import * as React from 'react';
+import { Mosaic, MosaicWindow } from 'react-mosaic-component';
 
-import { mainTheme } from '../themes';
-import { AppState } from '../state';
-import { Editor } from './editor';
 import { EditorId } from '../../interfaces';
-import { updateEditorLayout } from '../../utils/editor-layout';
-import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
+import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
+import { ipcRendererManager } from '../ipc';
+import { AppState } from '../state';
+import { mainTheme } from '../themes';
+import { Editor } from './editor';
 
 const options: any = {
   direction: 'row',

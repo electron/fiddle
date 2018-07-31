@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { shell } from 'electron';
+import * as React from 'react';
 
 import { AppState } from '../state';
 

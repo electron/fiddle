@@ -1,13 +1,13 @@
-import * as React from 'react';
-import { observer } from 'mobx-react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTerminal } from '@fortawesome/fontawesome-free-solid';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { observer } from 'mobx-react';
+import * as React from 'react';
 
-import { Runner } from './runner';
-import { VersionChooser } from './version-chooser';
 import { AppState } from '../state';
 import { AddressBar } from './address-bar';
 import { PublishButton } from './publish-button';
+import { Runner } from './runner';
+import { VersionChooser } from './version-chooser';
 
 export interface CommandsProps {
   appState: AppState;

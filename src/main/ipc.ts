@@ -1,6 +1,6 @@
-import { EventEmitter } from 'events';
 import { ipcMain } from 'electron';
-import { ipcMainEvents, IpcEvents } from '../ipc-events';
+import { EventEmitter } from 'events';
+import { IpcEvents, ipcMainEvents } from '../ipc-events';
 import { getOrCreateMainWindow } from './windows';
 
 /**

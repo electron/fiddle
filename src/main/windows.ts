@@ -1,8 +1,8 @@
-import { WindowNames } from '../interfaces';
 import { BrowserWindow } from 'electron';
-import { ipcMainManager } from './ipc';
+import { WindowNames } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
+import { ipcMainManager } from './ipc';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
