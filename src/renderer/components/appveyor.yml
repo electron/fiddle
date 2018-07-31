@@ -8,7 +8,7 @@ init:
 install:
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
-  - npm i
+  - npm ci
 
 cache:
   - '%APPDATA%\npm-cache -> appveyor.yml'
