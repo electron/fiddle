@@ -18,6 +18,7 @@ window.localStorage.getItem = jest.fn();
 beforeEach(() => {
   global.ElectronFiddle = new ElectronFiddleMock();
   process.env.JEST = true;
+  process.env.TEST = true;
 
   window.localStorage.setItem.mockReset();
   window.localStorage.getItem.mockReset();

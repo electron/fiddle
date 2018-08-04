@@ -101,6 +101,8 @@ export class App {
 }
 
 // tslint:disable-next-line:no-string-literal
-window.ElectronFiddle.app = new App();
-window.ElectronFiddle.app.setup()
-  .catch((error) => console.error(error));
+if (!process.env.TEST && !process.env.JEST_WORKER_ID) {
+  window.ElectronFiddle.app = new App();
+  window.ElectronFiddle.app.setup()
+    .catch((error) => console.error(error));
+}
