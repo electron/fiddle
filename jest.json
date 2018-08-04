@@ -28,5 +28,8 @@
   "coveragePathIgnorePatterns": [
     "/node_modules/",
     "/tests/.*\\.(ts|js)$"
-  ]
+  ],
+  "moduleNameMapper": {
+    ".*releases.json$": "<rootDir>/static/releases.json"
+  }
 }
