@@ -1,5 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
+import { fancyImport } from '../utils/import';
 
 export interface NpmOperationOptions {
   dir: string;
@@ -35,7 +36,7 @@ export async function findModules(input: string): Promise<Array<string>> {
   const matchRequire = /require\(['"]{1}([\w\d\/\-\_]*)['"]{1}\)/;
   const matched = input.match(matchRequire);
   const result: Array<string> = [];
-  const builtinModules = (await import('builtin-modules') as any).default;
+  const builtinModules = (await fancyImport('builtin-modules') as any).default;
 
   if (matched && matched.length > 0) {
     const candidates = matched.slice(1);
