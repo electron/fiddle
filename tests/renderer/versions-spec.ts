@@ -1,12 +1,6 @@
 import { fetchVersions, getKnownVersions, getUpdatedKnownVersions } from '../../src/renderer/versions';
 
 describe('versions', () => {
-  beforeEach(() => {
-    (window as any).localStorage = {};
-    (window as any).localStorage.setItem = jest.fn();
-    (window as any).localStorage.getItem = jest.fn();
-  });
-
   describe('fetchVersions()', () => {
     const mockResponse = `[{
         "url": "https://api.github.com/repos/electron/electron/releases/11120972",

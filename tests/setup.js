@@ -10,9 +10,15 @@ global.fetch = require('jest-fetch-mock');
 jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
 jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
 
-require('jest-localstorage-mock');
+// We'll do this twice.
+window.localStorage = {};
+window.localStorage.setItem = jest.fn();
+window.localStorage.getItem = jest.fn();
 
 beforeEach(() => {
   global.ElectronFiddle = new ElectronFiddleMock();
   process.env.JEST = true;
+
+  window.localStorage.setItem.mockReset();
+  window.localStorage.getItem.mockReset();
 });
