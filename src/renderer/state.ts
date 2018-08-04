@@ -159,6 +159,7 @@ export class AppState {
     if ((this.versions[version] || { state: '' }).state !== 'ready') {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
+      updatedVersions[version] = updatedVersions[version] || {};
       updatedVersions[version].state = 'downloading';
       this.versions = updatedVersions;
 
@@ -242,6 +243,7 @@ export class AppState {
 
         this.pushOutput(part);
       }
+
       return;
     }
 
