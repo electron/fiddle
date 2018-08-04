@@ -2,6 +2,7 @@
   "transform": {
     ".(js|jsx|ts|tsx)": "ts-jest"
   },
+  "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
   "bail": true,
   "resetMocks": true,
