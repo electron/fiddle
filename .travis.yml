@@ -25,7 +25,6 @@ branches:
 
 install:
 - npm install
-- npm update
 
 script:
 - npm run lint
