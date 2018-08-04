@@ -1,3 +1,4 @@
+import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -19,6 +20,7 @@ describe('AppState', () => {
 
   beforeEach(() => {
     appState = new AppState();
+    ipcRendererManager.removeAllListeners();
   });
 
   it('exists', () => {

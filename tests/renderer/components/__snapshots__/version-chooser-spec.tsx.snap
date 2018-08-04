@@ -21,7 +21,7 @@ ShallowWrapper {
             "name": "electron v1.8.7",
             "prerelease": false,
             "published_at": "2018-05-16T18:21:33Z",
-            "state": "ready",
+            "state": "unknown",
             "tag_name": "v1.8.7",
             "target_commitish": "1-8-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11032343",
@@ -51,7 +51,7 @@ ShallowWrapper {
             "name": "electron v2.0.2",
             "prerelease": false,
             "published_at": "2018-05-22T20:14:35Z",
-            "state": "ready",
+            "state": "unknown",
             "tag_name": "v2.0.2",
             "target_commitish": "2-0-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11120972",
@@ -76,7 +76,7 @@ ShallowWrapper {
         <option
           value="v2.0.2"
         >
-          ✅
+          ⏹
            
           v2.0.2
         </option>,
@@ -90,7 +90,7 @@ ShallowWrapper {
         <option
           value="v1.8.7"
         >
-          ✅
+          ⏹
            
           v1.8.7
         </option>,
@@ -107,7 +107,7 @@ ShallowWrapper {
         "nodeType": "host",
         "props": Object {
           "children": Array [
-            "✅",
+            "⏹",
             " ",
             "v2.0.2",
           ],
@@ -115,7 +115,7 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": Array [
-          "✅",
+          "⏹",
           " ",
           "v2.0.2",
         ],
@@ -147,7 +147,7 @@ ShallowWrapper {
         "nodeType": "host",
         "props": Object {
           "children": Array [
-            "✅",
+            "⏹",
             " ",
             "v1.8.7",
           ],
@@ -155,7 +155,7 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": Array [
-          "✅",
+          "⏹",
           " ",
           "v1.8.7",
         ],
@@ -174,7 +174,7 @@ ShallowWrapper {
           <option
             value="v2.0.2"
           >
-            ✅
+            ⏹
              
             v2.0.2
           </option>,
@@ -188,7 +188,7 @@ ShallowWrapper {
           <option
             value="v1.8.7"
           >
-            ✅
+            ⏹
              
             v1.8.7
           </option>,
@@ -205,7 +205,7 @@ ShallowWrapper {
           "nodeType": "host",
           "props": Object {
             "children": Array [
-              "✅",
+              "⏹",
               " ",
               "v2.0.2",
             ],
@@ -213,7 +213,7 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": Array [
-            "✅",
+            "⏹",
             " ",
             "v2.0.2",
           ],
@@ -245,7 +245,7 @@ ShallowWrapper {
           "nodeType": "host",
           "props": Object {
             "children": Array [
-              "✅",
+              "⏹",
               " ",
               "v1.8.7",
             ],
@@ -253,7 +253,7 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": Array [
-            "✅",
+            "⏹",
             " ",
             "v1.8.7",
           ],

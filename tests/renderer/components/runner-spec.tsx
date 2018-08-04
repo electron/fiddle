@@ -1,12 +1,12 @@
-import * as React from 'react';
-import { shallow } from 'enzyme';
 import { spawn } from 'child_process';
+import { shallow } from 'enzyme';
+import * as React from 'react';
 
-import { Runner, ForgeCommands } from '../../../src/renderer/components/runner';
-import { mockVersions } from '../../mocks/electron-versions';
-import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
+import { ForgeCommands, Runner } from '../../../src/renderer/components/runner';
 import { findModulesInEditors, installModules, npmRun } from '../../../src/renderer/npm';
 import { MockChildProcess } from '../../mocks/child-process';
+import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
+import { mockVersions } from '../../mocks/electron-versions';
 
 jest.mock('../../../src/renderer/npm');
 jest.mock('electron', () => require('../../mocks/electron'));

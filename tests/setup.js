@@ -14,4 +14,5 @@ require('jest-localstorage-mock');
 
 beforeEach(() => {
   global.ElectronFiddle = new ElectronFiddleMock();
-})
+  process.env.JEST = true;
+});

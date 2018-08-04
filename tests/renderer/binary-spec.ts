@@ -1,9 +1,10 @@
 import { BinaryManager } from '../../src/renderer/binary';
-import { resetPlatform, overridePlatform } from '../utils';
+import { overridePlatform, resetPlatform } from '../utils';
 
 import * as path from 'path';
 
 jest.mock('fs-extra');
+jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
 });

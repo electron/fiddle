@@ -1,4 +1,4 @@
-import { getTitle, getName } from '../../src/utils/get-title';
+import { getName, getTitle } from '../../src/utils/get-title';
 
 describe('get-title', () => {
   const old = process.defaultApp;

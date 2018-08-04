@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 import { Dialogs } from '../../../src/renderer/components/dialogs';
 import { overridePlatform, resetPlatform } from '../../utils';
