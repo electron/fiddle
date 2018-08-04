@@ -86,6 +86,8 @@ function CreateWindowStub() {
 const app = {
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
+  isDefaultProtocolClient: jest.fn().mockReturnValue(true),
+  setAsDefaultProtocolClient: jest.fn(),
   isReady: jest.fn().mockReturnValue(true),
   getAppMetrics: jest.fn(),
   getGPUFeatureStatus: jest.fn(),

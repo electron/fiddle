@@ -22,7 +22,7 @@ const handlePotentialProtocolLaunch = (url: string) => {
   ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [parsed.pathname]);
 };
 
-const scanArgv = (argv: Array<string>) => {
+export const scanArgv = (argv: Array<string>) => {
   const protocolArg = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
   if (protocolArg) {
     handlePotentialProtocolLaunch(protocolArg);
