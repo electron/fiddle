@@ -1,4 +1,5 @@
 import { shell } from 'electron';
+import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
@@ -34,6 +35,10 @@ describe('FileManager', () => {
     fm = new FileManager(this.store);
   });
 
+  afterEach(() => {
+    ipcRendererManager.removeAllListeners();
+  });
+
   describe('openFiddle()', () => {
     it('opens a local fiddle', async () => {
       await fm.openFiddle('/fake/path');
@@ -53,6 +58,12 @@ describe('FileManager', () => {
         renderer: '',
         main: ''
       });
+    });
+
+    it('runs it on IPC event', () => {
+      fm.openFiddle = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FS_OPEN_FIDDLE);
+      expect(fm.openFiddle).toHaveBeenCalled();
     });
   });
 
@@ -77,6 +88,18 @@ describe('FileManager', () => {
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
       expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+    });
+
+    it('runs saveFiddle (normal) on IPC event', () => {
+      fm.saveFiddle = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE);
+      expect(fm.saveFiddle).toHaveBeenCalled();
+    });
+
+    it('runs saveFiddle (forge) on IPC event', () => {
+      fm.saveFiddle = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+      expect(fm.saveFiddle).toHaveBeenCalled();
     });
   });
 
