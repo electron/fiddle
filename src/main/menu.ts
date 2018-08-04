@@ -230,7 +230,7 @@ export function setupMenu() {
     getFileMenu()
   );
 
-  menu.push(getTasksMenu());
+  menu.splice(menu.length - 1, 0, getTasksMenu());
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }

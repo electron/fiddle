@@ -78,11 +78,13 @@ function CreateWindowStub() {
     setAutoHideMenuBar: jest.fn(),
     setIgnoreMouseEvents: jest.fn(),
     setTitle: jest.fn(),
-    reload: jest.fn()
+    reload: jest.fn(),
+    isDestroyed: jest.fn(() => false)
   };
 }
 
 const app = {
+  getName: jest.fn(() => 'Electron Fiddle'),
   exit: jest.fn(),
   getAppMetrics: jest.fn(),
   getGPUFeatureStatus: jest.fn(),
