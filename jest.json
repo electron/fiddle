@@ -1,7 +1,8 @@
 {
   "transform": {
-    ".(js|jsx|ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    ".(js|jsx|ts|tsx)": "ts-jest"
   },
+  "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
   "bail": true,
   "resetMocks": true,
@@ -28,5 +29,8 @@
   "coveragePathIgnorePatterns": [
     "/node_modules/",
     "/tests/.*\\.(ts|js)$"
-  ]
+  ],
+  "moduleNameMapper": {
+    ".*releases.json$": "<rootDir>/static/releases.json"
+  }
 }

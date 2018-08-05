@@ -10,7 +10,7 @@ import { ipcMainManager } from './ipc';
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, showSaveDialog);
+  ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => showSaveDialog());
 }
 
 /**
@@ -44,6 +44,8 @@ export function showSaveDialog(event?: IpcEvents, as?: string) {
     if (!filePaths || filePaths.length < 1) {
       return;
     }
+
+    console.log(`Asked to save to ${filePaths[0]}`);
 
     // Let's confirm real quick if we want this
     if (await ensureSaveTargetEmpty(filePaths[0])) {

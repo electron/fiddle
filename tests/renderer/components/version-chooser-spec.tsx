@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 import { VersionChooser } from '../../../src/renderer/components/version-chooser';
 import { mockVersions } from '../../mocks/electron-versions';

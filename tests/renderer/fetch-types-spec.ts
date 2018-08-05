@@ -174,7 +174,6 @@ describe('fetch-types', () => {
     it('it waits for Monaco to show up', async () => {
       (fetch as any).mockResponse(`it's me, the type definition`);
 
-
       const { app } = (window as any).ElectronFiddle;
       const { monaco } = app;
 
@@ -182,7 +181,7 @@ describe('fetch-types', () => {
 
       setTimeout(() => {
         window.ElectronFiddle.app = app;
-      }, 300);
+      }, 200);
 
       await updateEditorTypeDefinitions('3.0.0');
 
@@ -193,7 +192,7 @@ describe('fetch-types', () => {
     it('it does not wait forever', async () => {
       (window as any).ElectronFiddle = {};
 
-      await updateEditorTypeDefinitions('3.0.0', 10);
+      await updateEditorTypeDefinitions('3.0.0', 11);
     });
   });
 });

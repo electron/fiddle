@@ -1,7 +1,8 @@
 import { ElectronVersion } from '../../src/interfaces';
+import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 
-export const mockVersions: Record<string, ElectronVersion> = {
-  '2.0.2': {
+export const mockVersionsArray = [
+  {
     state: 'ready',
     url: 'https://api.github.com/repos/electron/electron/releases/11120972',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11120972/assets',
@@ -13,8 +14,7 @@ export const mockVersions: Record<string, ElectronVersion> = {
     created_at: '2018-05-22T18:52:16Z',
     published_at: '2018-05-22T20:14:35Z',
     body: '## Bug Fixes\r\n\r\n* Fixed long jitter buffer delays...'
-  },
-  '2.0.1': {
+  }, {
     state: 'unknown',
     url: 'https://api.github.com/repos/electron/electron/releases/11032425',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032425/assets',
@@ -26,8 +26,7 @@ export const mockVersions: Record<string, ElectronVersion> = {
     created_at: '2018-05-16T17:30:26Z',
     published_at: '2018-05-16T18:40:54Z',
     body: '## Bug Fixes\r\n\r\n* Fixed flaky security-warnings test. #12776,...'
-  },
-  '1.8.7': {
+  }, {
     state: 'ready',
     url: 'https://api.github.com/repos/electron/electron/releases/11032343',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032343/assets',
@@ -40,4 +39,6 @@ export const mockVersions: Record<string, ElectronVersion> = {
     published_at: '2018-05-16T18:21:33Z',
     body: '## Bug Fixes\r\n\r\n* Fixed context menu for sandbox devtools. #12734\r\n\r\n*...'
   }
-};
+];
+
+export const mockVersions: Record<string, ElectronVersion> = arrayToStringMap(mockVersionsArray);

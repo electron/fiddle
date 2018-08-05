@@ -1,11 +1,9 @@
-import {
-  getMainWindowOptions, getOrCreateMainWindow, browserWindows
-} from '../../src/main/windows';
 import { createContextMenu } from '../../src/main/context-menu';
-import { resetPlatform, overridePlatform } from '../utils';
+import {
+  browserWindows, getMainWindowOptions, getOrCreateMainWindow
+} from '../../src/main/windows';
+import { overridePlatform, resetPlatform } from '../utils';
 
-
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/context-menu');
 
 describe('windows', () => {

@@ -1,14 +1,13 @@
 import { createContextMenu, getInspectItems, getMonacoItems, getRunItems } from '../../src/main/context-menu';
-import { MockBrowserWindow } from '../mocks/browser-window';
-import { isDevMode } from '../../src/utils/devmode';
 import { ipcMainManager } from '../../src/main/ipc';
+import { isDevMode } from '../../src/utils/devmode';
+import { MockBrowserWindow } from '../mocks/browser-window';
 
 import { Menu } from 'electron';
 import { MockWebContents } from '../mocks/web-contents';
 
 jest.mock('../../src/utils/devmode');
 jest.mock('../../src/main/ipc');
-jest.mock('electron', () => require('../mocks/electron'));
 
 describe('context-menu', () => {
   let mockWindow;
@@ -23,6 +22,7 @@ describe('context-menu', () => {
   };
 
   beforeEach(() => {
+    ipcMainManager.removeAllListeners();
     mockWindow = new MockBrowserWindow();
     createContextMenu(mockWindow as any);
   });

@@ -1,11 +1,10 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
-import { getOctokit } from '../../../src/utils/octokit';
 import { AddressBar } from '../../../src/renderer/components/address-bar';
+import { getOctokit } from '../../../src/utils/octokit';
 
 jest.mock('../../../src/utils/octokit');
-jest.mock('electron', () => require('../../mocks/electron'));
 
 describe('AddressBar component', () => {
   beforeEach(() => {

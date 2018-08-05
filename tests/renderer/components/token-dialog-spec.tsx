@@ -1,13 +1,12 @@
-import * as React from 'react';
 import * as electron from 'electron';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 import { TokenDialog } from '../../../src/renderer/components/token-dialog';
 import { getOctokit } from '../../../src/utils/octokit';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/utils/octokit');
-jest.mock('electron', () => require('../../mocks/electron'));
 
 describe('TokenDialog component', () => {
   const mockValidToken = 'testtoken1234567890123456789012345678901';

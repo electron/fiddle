@@ -1,5 +1,5 @@
-import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 import { GitHubVersion } from '../../src/interfaces';
+import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 
 describe('array-to-stringmap', () => {
   it('correctly turns an array of versions into a stringmap', () => {

@@ -1,8 +1,8 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
 import { ChromeMac } from '../../../src/renderer/components/chrome-mac';
-import { resetPlatform, overridePlatform } from '../../utils';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Chrome-Mac component', () => {
   beforeEach(() => {

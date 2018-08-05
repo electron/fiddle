@@ -1,11 +1,9 @@
 import * as MonacoType from 'monaco-editor';
 
 import { EditorValues } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
-import { ipcRendererManager } from './ipc';
 import { appState } from './state';
 
 /**
@@ -18,9 +16,7 @@ export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
   public state = appState;
-
-  // @ts-ignore: We're not using this, but we do want to create it
-  public fileManager = new FileManager();
+  public fileManager = new FileManager(appState);
 
   constructor() {
     this.getValues = this.getValues.bind(this);
@@ -105,6 +101,8 @@ export class App {
 }
 
 // tslint:disable-next-line:no-string-literal
-window.ElectronFiddle.app = new App();
-window.ElectronFiddle.app.setup()
-  .catch((error) => console.error(error));
+if (!process.env.TEST && !process.env.JEST_WORKER_ID) {
+  window.ElectronFiddle.app = new App();
+  window.ElectronFiddle.app.setup()
+    .catch((error) => console.error(error));
+}

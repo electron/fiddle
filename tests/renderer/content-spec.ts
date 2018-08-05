@@ -1,4 +1,4 @@
-import { getContent, ContentNames } from '../../src/renderer/content';
+import { ContentNames, getContent } from '../../src/renderer/content';
 
 describe('content', () => {
   describe('getContent()', () => {

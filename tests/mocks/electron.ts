@@ -78,12 +78,17 @@ function CreateWindowStub() {
     setAutoHideMenuBar: jest.fn(),
     setIgnoreMouseEvents: jest.fn(),
     setTitle: jest.fn(),
-    reload: jest.fn()
+    reload: jest.fn(),
+    isDestroyed: jest.fn(() => false)
   };
 }
 
 const app = {
+  getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
+  isDefaultProtocolClient: jest.fn().mockReturnValue(true),
+  setAsDefaultProtocolClient: jest.fn(),
+  isReady: jest.fn().mockReturnValue(true),
   getAppMetrics: jest.fn(),
   getGPUFeatureStatus: jest.fn(),
   getJumpListSettings: jest.fn(() => ({
@@ -93,7 +98,10 @@ const app = {
   getPath: jest.fn(),
   quit: jest.fn(),
   relaunch: jest.fn(),
-  setJumpList: jest.fn()
+  setJumpList: jest.fn(),
+  makeSingleInstance: jest.fn(),
+  on: jest.fn(),
+  once: jest.fn()
 };
 
 const mainWindowStub = CreateWindowStub();

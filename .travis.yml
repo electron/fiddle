@@ -25,10 +25,9 @@ branches:
 
 install:
 - npm install
-- npm update
 
 script:
 - npm run lint
-- npm run test
+- npm run test -- --runInBand
 - if test -z "$TRAVIS_TAG"; then npm run make; fi
 after_success: if test -n "$TRAVIS_TAG"; then npm run publish; fi

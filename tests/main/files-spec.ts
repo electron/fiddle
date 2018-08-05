@@ -1,16 +1,15 @@
+import { IpcEvents } from '../../src/ipc-events';
 import {
   setupFileListeners,
   showOpenDialog,
   showSaveDialog
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
-import { IpcEvents } from '../../src/ipc-events';
 
+import { BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs-extra';
-import { dialog, BrowserWindow } from 'electron';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/windows');
 jest.mock('fs-extra', () => ({
   existsSync: jest.fn()

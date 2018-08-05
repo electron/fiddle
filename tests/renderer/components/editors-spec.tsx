@@ -1,14 +1,12 @@
-import * as React from 'react';
 import { shallow } from 'enzyme';
+import * as React from 'react';
 
-import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { Editors } from '../../../src/renderer/components/editors';
+import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
 jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: 'Editor'
 }));
-
-jest.mock('electron', () => require('../../mocks/electron'));
 
 jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn()

@@ -40,6 +40,16 @@ module.exports = (wallaby) => ({
     const jestConfig = {
       resetMocks: true,
       resetModules: true,
+      moduleFileExtensions: [
+        'js',
+        'jsx',
+        'json',
+        'ts',
+        'tsx'
+      ],
+      moduleNameMapper: {
+        ".*releases.json$": path.join(wallaby.localProjectDir, 'static/releases.json'),
+      },
       setupTestFrameworkScriptFile: path.join(wallaby.projectCacheDir, 'tests/setup.js'),
       globals: { __JEST_DEV__: true }
     };

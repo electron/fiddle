@@ -1,10 +1,9 @@
+import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
-import { IpcEvents } from '../../src/ipc-events';
 
 import { dialog } from 'electron';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/windows');
 
 describe('dialogs', () => {

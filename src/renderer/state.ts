@@ -159,6 +159,7 @@ export class AppState {
     if ((this.versions[version] || { state: '' }).state !== 'ready') {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
+      updatedVersions[version] = updatedVersions[version] || {};
       updatedVersions[version].state = 'downloading';
       this.versions = updatedVersions;
 
@@ -198,7 +199,7 @@ export class AppState {
     const updatedVersions = { ...this.versions };
 
     console.log(`State: Updating version state`);
-    downloadedVersions.forEach((version) => {
+    (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = 'ready';
       }
@@ -228,6 +229,7 @@ export class AppState {
   @action public pushOutput(data: string | Buffer, bypassBuffer: boolean = true) {
     let strData = data.toString();
 
+    // Todo: This drops the first part of the buffer... is that fully expected?
     if (process.platform === 'win32' && !bypassBuffer) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
@@ -242,6 +244,7 @@ export class AppState {
 
         this.pushOutput(part);
       }
+
       return;
     }
 
@@ -261,7 +264,7 @@ export class AppState {
    * @param {Error} error
    */
   @action public pushError(message: string, error: Error) {
-    this.pushOutput(`⚠️ ${message} Error encountered:`);
+    this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
   }
