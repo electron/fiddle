@@ -4,8 +4,6 @@ import * as React from 'react';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 
-jest.mock('electron', () => require('../../mocks/electron'));
-
 describe('CreditsSettings component', () => {
   const mockContributors = [
     {

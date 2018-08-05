@@ -2,6 +2,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { WelcomeTour } from '../../../src/renderer/components/tour-welcome';
+import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 describe('Header component', () => {
   beforeEach(() => {
@@ -9,6 +10,8 @@ describe('Header component', () => {
       isTourShowing: true,
       disableTour: jest.fn()
     };
+
+    ipcRendererManager.removeAllListeners();
   });
 
   it('renders', () => {

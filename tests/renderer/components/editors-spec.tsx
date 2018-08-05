@@ -8,8 +8,6 @@ jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: 'Editor'
 }));
 
-jest.mock('electron', () => require('../../mocks/electron'));
-
 jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn()
 }));

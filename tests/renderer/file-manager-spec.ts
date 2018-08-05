@@ -12,7 +12,6 @@ jest.mock('tmp', () => ({
   }))
 }));
 jest.mock('../../src/renderer/state');
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => {
     if (p === 'fs-extra') {

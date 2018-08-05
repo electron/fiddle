@@ -6,7 +6,6 @@ import { ipcMainManager } from '../../src/main/ipc';
 import { listenForProtocolHandler, scanArgv, setupProtocolHandler } from '../../src/main/protocol';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('fs');
 
 describe('protocol', () => {

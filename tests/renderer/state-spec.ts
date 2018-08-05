@@ -2,7 +2,6 @@ import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/renderer/binary', () => ({
   BinaryManager: require('../mocks/binary').MockBinaryManager
 }));

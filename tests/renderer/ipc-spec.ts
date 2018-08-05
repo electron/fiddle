@@ -2,8 +2,6 @@ import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 
-jest.mock('electron', () => require('../mocks/electron'));
-
 describe('ipcRendererManager', () => {
   afterEach(() => {
     ipcRendererManager.removeAllListeners();

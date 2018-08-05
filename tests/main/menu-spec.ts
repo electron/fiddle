@@ -5,8 +5,6 @@ import { ipcMainManager } from '../../src/main/ipc';
 import { setupMenu } from '../../src/main/menu';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('electron', () => require('../mocks/electron'));
-
 describe('menu', () => {
   beforeEach(() => {
     (electron.app.getName as any).mockReturnValue('Electron Fiddle');

@@ -2,7 +2,6 @@
 import { App } from '../../src/renderer/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
-jest.mock('electron', () => require('../../mocks/electron'));
 jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
 jest.mock('../../src/renderer/state', () => ({
   appState: {

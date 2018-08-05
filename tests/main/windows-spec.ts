@@ -4,8 +4,6 @@ import {
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/context-menu');
 
 describe('windows', () => {

@@ -4,7 +4,6 @@ import { ipcMainManager } from '../../src/main/ipc';
 
 import { dialog } from 'electron';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/windows');
 
 describe('dialogs', () => {

@@ -10,7 +10,6 @@ import { BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
-jest.mock('electron', () => require('../mocks/electron'));
 jest.mock('../../src/main/windows');
 jest.mock('fs-extra', () => ({
   existsSync: jest.fn()
