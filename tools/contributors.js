@@ -127,9 +127,18 @@ async function fetchAndWriteContributorsFile() {
       }
 
       console.log(logSymbols.info, 'Fetching contributors');
+      let data;
 
-      const data = await fetchContributors()
+      try {
+        data = await fetchContributors()
+      } catch (error) {
+        console.warn(`Fetching contributors failed!`, error);
+        console.log(`We'll continue without.`);
+        data = [];
+      }
+
       await fs.outputFile(CONTRIBUTORS_FILE_PATH, JSON.stringify(data));
+
       console.log(logSymbols.success, 'Contributors fetched');
       resolve();
     });

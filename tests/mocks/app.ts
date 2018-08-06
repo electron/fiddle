@@ -1,3 +1,5 @@
+import { FileManager } from './file-manager';
+
 export class AppMock {
   public setValues = jest.fn();
   public getValues = jest.fn(() => ({
@@ -10,9 +12,7 @@ export class AppMock {
     dispose: jest.fn()
   };
 
-  public fileManager = {
-    saveToTemp: jest.fn(() => '/mock/temp/dir')
-  };
+  public fileManager = new FileManager();
 
   public monaco = {
     editor: {

@@ -235,7 +235,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    * Actually run the fiddle.
    *
    * @returns {Promise<boolean>}
-   * @memberof Runner
    */
   public async run(): Promise<boolean> {
     const { appState } = this.props;
@@ -255,11 +254,20 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       await this.installModulesForEditor(values, dir);
     } catch (error) {
       console.error('Runner: Could not install modules', error);
+      fileManager.cleanup(dir);
       return false;
     }
 
     if (!isDownloaded) {
       console.warn(`Runner: Binary ${version} not ready`);
+
+      let message = `Could not start fiddle: `;
+      message += `Electron ${version} not downloaded yet. `;
+      message += `Please wait for it to finish downloading `;
+      message += `before running the fiddle.`;
+
+      appState.pushOutput(message);
+      fileManager.cleanup(dir);
       return false;
     }
 

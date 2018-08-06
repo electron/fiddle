@@ -125,6 +125,29 @@ export class FileManager {
 
 
   /**
+   * Attempts to clean a given directory. Used to manually
+   * clean temp directories.
+   *
+   * @param {string} dir
+   */
+  public async cleanup(dir?: string): Promise<boolean> {
+    if (dir) {
+      const fs = await fancyImport<typeof fsType>('fs-extra');
+
+      if (fs.existsSync(dir)) {
+        try {
+          await fs.remove(dir);
+          return true;
+        } catch (error) {
+          console.warn(`cleanup: Failed to clean directory`, error);
+        }
+      }
+    }
+
+    return false;
+  }
+
+  /**
    * Save the current project to a temporary directory. Returns the
    * path to the temp directory.
    *
