@@ -3,7 +3,13 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { ForgeCommands, Runner } from '../../../src/renderer/components/runner';
-import { findModulesInEditors, installModules, npmRun } from '../../../src/renderer/npm';
+import { ipcRendererManager } from '../../../src/renderer/ipc';
+import {
+  findModulesInEditors,
+  getIsNpmInstalled,
+  installModules,
+  npmRun
+} from '../../../src/renderer/npm';
 import { MockChildProcess } from '../../mocks/child-process';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
 import { mockVersions } from '../../mocks/electron-versions';
@@ -17,6 +23,9 @@ describe('Runner component', () => {
 
   beforeEach(() => {
     mockChild = new MockChildProcess();
+    ipcRendererManager.removeAllListeners();
+
+    (getIsNpmInstalled as jest.Mock).mockReturnValue(true);
 
     this.store = {
       version: '2.0.2',
@@ -130,7 +139,7 @@ describe('Runner component', () => {
   it('handles an error in installModules()', async () => {
     const wrapper = shallow(<Runner appState={this.store} />);
     const instance: Runner = wrapper.instance() as any;
-    (installModules as any).mockImplementationOnce(() => {
+    (installModules as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
     });
 
@@ -163,7 +172,7 @@ describe('Runner component', () => {
   it('handles an error in npmInstall() in performForgeOperation()', async () => {
     const wrapper = shallow(<Runner appState={this.store} />);
     const instance: Runner = wrapper.instance() as any;
-    (installModules as any).mockImplementationOnce(() => {
+    (installModules as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
     });
 
@@ -173,10 +182,43 @@ describe('Runner component', () => {
   it('handles an error in npmRun() in performForgeOperation()', async () => {
     const wrapper = shallow(<Runner appState={this.store} />);
     const instance: Runner = wrapper.instance() as any;
-    (npmRun as any).mockImplementationOnce(() => {
+    (npmRun as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
     });
 
     expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+  });
+
+  describe('installModulesForEditor()', () => {
+    it('does not attempt installation if npm is not installed', async () => {
+      const wrapper = shallow(<Runner appState={this.store} />);
+      const instance: Runner = wrapper.instance() as any;
+
+      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+
+      await instance.installModulesForEditor({
+        html: '',
+        main: `const a = require('say')`,
+        renderer: ''
+      }, '/fake/path');
+
+      expect(installModules).toHaveBeenCalledTimes(0);
+    });
+
+    it('does attempt installation if npm is installed', async () => {
+      const wrapper = shallow(<Runner appState={this.store} />);
+      const instance: Runner = wrapper.instance() as any;
+
+      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
+
+      await instance.installModulesForEditor({
+        html: '',
+        main: `const a = require('say')`,
+        renderer: ''
+      }, '/fake/path');
+
+      expect(installModules).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -16,7 +16,6 @@ window.localStorage = {};
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 
-
 beforeEach(() => {
   global.ElectronFiddle = new ElectronFiddleMock();
   process.env.JEST = true;

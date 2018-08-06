@@ -8,7 +8,7 @@ import { IpcEvents } from '../../ipc-events';
 import { PackageJsonOptions } from '../../utils/get-package';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { ipcRendererManager } from '../ipc';
-import { findModulesInEditors, installModules, npmRun } from '../npm';
+import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun } from '../npm';
 import { AppState } from '../state';
 
 export interface RunnerState {
@@ -99,7 +99,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
   /**
    * Analyzes the editor's JavaScript contents for modules
-   * and installs them.pushOutput
+   * and installs them.
    *
    * @param {EditorValues} values
    * @param {string} dir
@@ -109,6 +109,17 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const modules = await findModulesInEditors(values);
 
     if (modules && modules.length > 0) {
+      if (!(await getIsNpmInstalled())) {
+        let message = `The modules ${modules.join(', ')} need to be installed, `;
+        message += `but we could not find npm. Fiddle requires Node.js and npm `;
+        message += `only to support the installation of modules not included in `;
+        message += `Electron. Please visit https://nodejs.org to install Node.js `;
+        message += `and npm.`;
+
+        this.props.appState.pushOutput(message);
+        return;
+      }
+
       this.props.appState.pushOutput(`Installing npm modules: ${modules.join(', ')}...`);
       this.props.appState.pushOutput(await installModules({ dir }, ...modules));
     }
