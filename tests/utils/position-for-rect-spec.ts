@@ -1,4 +1,5 @@
 import { invertPosition, positionForRect } from '../../src/utils/position-for-rect';
+import { overridePlatform } from '../utils';
 
 describe('position-for-rect', () => {
   describe('invertPosition()', () => {
@@ -23,7 +24,7 @@ describe('position-for-rect', () => {
     });
   });
 
-  describe('positionForRect()', () => {
+  describe('positionForRect() (macOS)', () => {
     const { innerWidth, innerHeight } = window;
 
     beforeEach(() => {
@@ -33,22 +34,52 @@ describe('position-for-rect', () => {
       });
     });
 
-    it('returns a position on the top right if doable', () => {
-      const target = { left: 50, top: 100, width: 175, height: 50 };
-      const size = { width: 200, height: 150 };
-      const result = positionForRect(target as any, size);
+    describe('positionForRect() (Windows, Linux)', () => {
+      beforeEach(() => {
+        overridePlatform('win32');
+      });
 
-      expect(result).toEqual({ left: 235, top: 85, type: 'right' });
+      it('returns a position on the top right if doable', () => {
+        const target = { left: 50, top: 100, width: 175, height: 50 };
+        const size = { width: 200, height: 150 };
+        const result = positionForRect(target as any, size);
+
+        expect(result).toEqual({ left: 235, top: 100, type: 'right' });
+      });
+
+      it('returns a position on the top left if doable', () => {
+        Object.defineProperty(window, 'innerWidth', { value: 575 });
+
+        const target = { left: 400, top: 100, width: 175, height: 50 };
+        const size = { width: 200, height: 150 };
+        const result = positionForRect(target as any, size);
+
+        expect(result).toEqual({ left: 190, top: 100, type: 'left' });
+      });
     });
 
-    it('returns a position on the top left if doable', () => {
-      Object.defineProperty(window, 'innerWidth', { value: 575 });
+    describe('positionForRect() (Windows, Linux)', () => {
+      beforeEach(() => {
+        overridePlatform('darwin');
+      });
 
-      const target = { left: 400, top: 100, width: 175, height: 50 };
-      const size = { width: 200, height: 150 };
-      const result = positionForRect(target as any, size);
+      it('returns a position on the top right if doable', () => {
+        const target = { left: 50, top: 100, width: 175, height: 50 };
+        const size = { width: 200, height: 150 };
+        const result = positionForRect(target as any, size);
 
-      expect(result).toEqual({ left: 190, top: 85, type: 'left' });
+        expect(result).toEqual({ left: 235, top: 85, type: 'right' });
+      });
+
+      it('returns a position on the top left if doable', () => {
+        Object.defineProperty(window, 'innerWidth', { value: 575 });
+
+        const target = { left: 400, top: 100, width: 175, height: 50 };
+        const size = { width: 200, height: 150 };
+        const result = positionForRect(target as any, size);
+
+        expect(result).toEqual({ left: 190, top: 85, type: 'left' });
+      });
     });
 
     it('returns a position on the bottom middle if doable', () => {
