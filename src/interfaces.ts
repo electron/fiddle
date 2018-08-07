@@ -33,6 +33,12 @@ export interface ElectronVersion extends GitHubVersion {
 export interface OutputEntry {
   text: string;
   timestamp: number;
+  isNotPre?: boolean;
+}
+
+export interface OutputOptions {
+  bypassBuffer?: boolean;
+  isNotPre?: boolean;
 }
 
 export type EditorId = 'main' | 'renderer' | 'html';

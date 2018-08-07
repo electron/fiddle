@@ -6,6 +6,28 @@ export interface NpmOperationOptions {
   dir: string;
 }
 
+export let isInstalled: boolean | null = null;
+
+/**
+ * Checks if npm is installed by checking if a binary
+ * with that name can be found.
+ */
+export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean> {
+  if (isInstalled !== null && !ignoreCache) return isInstalled;
+
+  const command = process.platform === 'win32'
+    ? 'where.exe npm'
+    : 'which npm';
+
+  try {
+    await exec(process.cwd(), command);
+    return isInstalled = true;
+  } catch (error) {
+    console.warn(`getIsNpmInstalled: "${command}" failed.`, error);
+    return isInstalled = false;
+  }
+}
+
 /**
  * Finds npm modules in editor values, returning an array of modules.
  *

@@ -36,17 +36,9 @@ ShallowWrapper {
     "props": Object {
       "children": Array [
         Array [
-          <p>
-            <span
-              className="timestamp"
-            >
-              1532704072127
-            </span>
-            Hello!
-          </p>,
-        ],
-        Array [
-          <p>
+          <p
+            style={Object {}}
+          >
             <span
               className="timestamp"
             >
@@ -64,39 +56,7 @@ ShallowWrapper {
     "rendered": Array [
       Object {
         "instance": null,
-        "key": "1532704072127--0--0",
-        "nodeType": "host",
-        "props": Object {
-          "children": Array [
-            <span
-              className="timestamp"
-            >
-              1532704072127
-            </span>,
-            "Hello!",
-          ],
-        },
-        "ref": null,
-        "rendered": Array [
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "children": "1532704072127",
-              "className": "timestamp",
-            },
-            "ref": null,
-            "rendered": "1532704072127",
-            "type": "span",
-          },
-          "Hello!",
-        ],
-        "type": "p",
-      },
-      Object {
-        "instance": null,
-        "key": "1532704073130--1--0",
+        "key": "1532704073130--0--0",
         "nodeType": "host",
         "props": Object {
           "children": Array [
@@ -107,6 +67,7 @@ ShallowWrapper {
             </span>,
             "Hi!",
           ],
+          "style": Object {},
         },
         "ref": null,
         "rendered": Array [
@@ -137,17 +98,9 @@ ShallowWrapper {
       "props": Object {
         "children": Array [
           Array [
-            <p>
-              <span
-                className="timestamp"
-              >
-                1532704072127
-              </span>
-              Hello!
-            </p>,
-          ],
-          Array [
-            <p>
+            <p
+              style={Object {}}
+            >
               <span
                 className="timestamp"
               >
@@ -165,39 +118,7 @@ ShallowWrapper {
       "rendered": Array [
         Object {
           "instance": null,
-          "key": "1532704072127--0--0",
-          "nodeType": "host",
-          "props": Object {
-            "children": Array [
-              <span
-                className="timestamp"
-              >
-                1532704072127
-              </span>,
-              "Hello!",
-            ],
-          },
-          "ref": null,
-          "rendered": Array [
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "host",
-              "props": Object {
-                "children": "1532704072127",
-                "className": "timestamp",
-              },
-              "ref": null,
-              "rendered": "1532704072127",
-              "type": "span",
-            },
-            "Hello!",
-          ],
-          "type": "p",
-        },
-        Object {
-          "instance": null,
-          "key": "1532704073130--1--0",
+          "key": "1532704073130--0--0",
           "nodeType": "host",
           "props": Object {
             "children": Array [
@@ -208,6 +129,7 @@ ShallowWrapper {
               </span>,
               "Hi!",
             ],
+            "style": Object {},
           },
           "ref": null,
           "rendered": Array [

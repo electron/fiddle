@@ -61,17 +61,23 @@ export class Output extends React.Component<CommandsProps, {}> {
     const ts = this.renderTimestamp(entry.timestamp);
     const timestamp = <span className='timestamp'>{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
+    const style: React.CSSProperties = entry.isNotPre ? { whiteSpace: 'initial' } : {};
 
     return lines.map((text, lineIndex) => (
-      <p key={`${entry.timestamp}--${index}--${lineIndex}`}>{timestamp}{text}</p>
+      <p style={style} key={`${entry.timestamp}--${index}--${lineIndex}`}>
+        {timestamp}{text}
+      </p>
     ));
   }
 
   public render() {
-    const { isConsoleShowing } = this.props.appState;
+    const { isConsoleShowing, output } = this.props.appState;
     const className = isConsoleShowing ? 'output showing' : 'output';
 
-    const lines = this.props.appState.output.map(this.renderEntry);
+    // The last 1000 lines
+    const lines = output
+      .slice(Math.max(output.length - 1000, 1))
+      .map(this.renderEntry);
 
     return (
       <div className={className} ref={this.outputRef}>

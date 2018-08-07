@@ -170,7 +170,7 @@ describe('AppState', () => {
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
-      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), false);
+      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), { bypassBuffer: false });
       expect(appState.output[0].text).toBe('Buffer');
 
       resetPlatform();
