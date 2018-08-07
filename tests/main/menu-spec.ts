@@ -21,7 +21,7 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      expect(result.length).toBe(7);
+      expect(result.length).toBe(8);
 
       result.forEach((submenu) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
@@ -35,7 +35,7 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      expect(result.length).toBe(6);
+      expect(result.length).toBe(7);
 
       result.forEach((submenu) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
@@ -49,7 +49,7 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      expect(result.length).toBe(6);
+      expect(result.length).toBe(7);
 
       result.forEach((submenu) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
@@ -140,13 +140,29 @@ describe('menu', () => {
       });
     });
 
+    describe('getShowMeMenu()', () => {
+      let showMe;
+
+      beforeEach(() => {
+        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const menu = mock.calls[0][0];
+        showMe = menu[menu.length - 2];
+      });
+
+      it('attempts to open a template on click', () => {
+        showMe.submenu[0].submenu[0].click();
+        expect(ipcMainManager.send)
+          .toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, [ 'accelerator' ]);
+      });
+    });
+
     describe('getTasksMenu()', () => {
       let tasks;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
         const menu = mock.calls[0][0];
-        tasks = menu[menu.length - 2];
+        tasks = menu[menu.length - 3];
       });
 
       it('runs the fiddle', () => {

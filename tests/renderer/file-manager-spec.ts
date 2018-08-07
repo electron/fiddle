@@ -11,16 +11,16 @@ jest.mock('tmp', () => ({
     name: '/fake/temp'
   }))
 }));
+jest.mock('../../src/renderer/templates', () => ({
+  getTemplateValues: () => ({
+    html: '',
+    main: '',
+    renderer: ''
+  })
+}));
 jest.mock('../../src/renderer/state');
 jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => {
-    if (p === 'fs-extra') {
-      return require('fs-extra');
-    }
-    if (p === 'extract-zip') {
-      return { default: require('extract-zip') };
-    }
-  }
+  fancyImport: async (p: string) => require(p)
 }));
 
 describe('FileManager', () => {
@@ -124,6 +124,18 @@ describe('FileManager', () => {
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
       expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+    });
+  });
+
+  describe('openTemplate()', () => {
+    it('attempts to open a template', async () => {
+      fm.setFiddle = jest.fn();
+      await fm.openTemplate('test');
+      expect(fm.setFiddle).toHaveBeenCalledWith({
+        html: '',
+        main: '',
+        renderer: ''
+      });
     });
   });
 
