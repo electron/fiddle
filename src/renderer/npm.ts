@@ -20,7 +20,7 @@ export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean>
     : 'which npm';
 
   try {
-    const result = await exec(process.cwd(), command);
+    await exec(process.cwd(), command);
     return isInstalled = true;
   } catch (error) {
     console.warn(`getIsNpmInstalled: "${command}" failed.`, error);

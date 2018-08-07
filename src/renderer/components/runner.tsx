@@ -10,6 +10,7 @@ import { normalizeVersion } from '../../utils/normalize-version';
 import { ipcRendererManager } from '../ipc';
 import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun } from '../npm';
 import { AppState } from '../state';
+import { maybePlural } from '../../utils/plural-maybe';
 
 export interface RunnerState {
   isRunning: boolean;
@@ -107,21 +108,22 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    */
   public async installModulesForEditor(values: EditorValues, dir: string): Promise<void> {
     const modules = await findModulesInEditors(values);
+    const { appState } = this.props;
 
     if (modules && modules.length > 0) {
       if (!(await getIsNpmInstalled())) {
-        let message = `The modules ${modules.join(', ')} need to be installed, `;
+        let message = `The ${maybePlural(`module`, modules)} ${modules.join(', ')} need to be installed, `;
         message += `but we could not find npm. Fiddle requires Node.js and npm `;
         message += `only to support the installation of modules not included in `;
         message += `Electron. Please visit https://nodejs.org to install Node.js `;
         message += `and npm.`;
 
-        this.props.appState.pushOutput(message);
+        appState.pushOutput(message, { isNotPre: true });
         return;
       }
 
-      this.props.appState.pushOutput(`Installing npm modules: ${modules.join(', ')}...`);
-      this.props.appState.pushOutput(await installModules({ dir }, ...modules));
+      appState.pushOutput(`Installing npm modules: ${modules.join(', ')}...`, { isNotPre: true });
+      appState.pushOutput(await installModules({ dir }, ...modules));
     }
   }
 
@@ -144,10 +146,14 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     this.setState({ isRunning: true });
     pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout.on('data', (data) => pushOutput(data, false));
-    this.child.stderr.on('data', (data) => pushOutput(data, false));
+    this.child.stdout.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
+    this.child.stderr.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
     this.child.on('close', (code) => {
-      pushOutput(`Electron exited with code ${code.toString()}.`);
+      const withCode = typeof code === 'number'
+        ? ` with code ${code.toString()}.`
+        : `.`;
+
+      pushOutput(`Electron exited${withCode}`);
       this.setState({ isRunning: false });
       this.child = null;
     });
@@ -231,7 +237,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     try {
       console.log(`Now creating ${strings[1].toLowerCase()}...`);
       pushOutput(await npmRun({ dir }, operation));
-      pushOutput(`✅ ${strings[1]} successfully created.`);
+      pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
     } catch (error) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
       return false;
@@ -270,7 +276,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
 
     if (!isDownloaded) {
-      console.warn(`Runner: Binary ${version} not ready`);
+      console.warn(`Runner: Binary ${version} not ready`, { isNotPre: true });
       return false;
     }
 

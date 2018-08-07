@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, OutputEntry } from '../interfaces';
+import { ElectronVersion, OutputEntry, OutputOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -226,11 +226,14 @@ export class AppState {
    *
    * @param {(string | Buffer)} data
    */
-  @action public pushOutput(data: string | Buffer, bypassBuffer: boolean = true) {
+  @action public pushOutput(
+    data: string | Buffer, options: OutputOptions = { isNotPre: false, bypassBuffer: true }
+  ) {
     let strData = data.toString();
+    const { isNotPre, bypassBuffer } = options;
 
     // Todo: This drops the first part of the buffer... is that fully expected?
-    if (process.platform === 'win32' && !bypassBuffer) {
+    if (process.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split('\r\n');
@@ -242,7 +245,7 @@ export class AppState {
           continue;
         }
 
-        this.pushOutput(part);
+        this.pushOutput(part, { isNotPre, bypassBuffer: true });
       }
 
       return;
@@ -253,7 +256,8 @@ export class AppState {
 
     this.output.push({
       timestamp: Date.now(),
-      text: strData.trim()
+      text: strData.trim(),
+      isNotPre
     });
   }
 
