@@ -7,10 +7,10 @@ import { EditorValues, FileTransform } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { PackageJsonOptions } from '../../utils/get-package';
 import { normalizeVersion } from '../../utils/normalize-version';
+import { maybePlural } from '../../utils/plural-maybe';
 import { ipcRendererManager } from '../ipc';
 import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun } from '../npm';
 import { AppState } from '../state';
-import { maybePlural } from '../../utils/plural-maybe';
 
 export interface RunnerState {
   isRunning: boolean;

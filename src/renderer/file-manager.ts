@@ -10,6 +10,7 @@ import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
+import { getTemplateValues } from './templates';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 
@@ -22,6 +23,10 @@ export class FileManager {
       this.openFiddle(filePath);
     });
 
+    ipcRendererManager.on(IpcEvents.FS_OPEN_TEMPLATE, (_event, name) => {
+      this.openTemplate(name);
+    });
+
     ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
       this.saveFiddle(filePath, dotfilesTransform);
     });
@@ -29,6 +34,11 @@ export class FileManager {
     ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_FORGE, (_event, filePath) => {
       this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
     });
+  }
+
+  public async openTemplate(name: string) {
+    const values = await getTemplateValues(name);
+    this.setFiddle(values);
   }
 
   /**
@@ -50,9 +60,19 @@ export class FileManager {
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
     };
 
+    this.setFiddle(values);
+  }
+
+  /**
+   * Got values? This method will load them.
+   *
+   * @param {EditorValues} values
+   * @memberof FileManager
+   */
+  public async setFiddle(values: EditorValues, filePath?: string) {
     this.appState.gistId = '';
     this.appState.isMyGist = false;
-    this.appState.localPath = filePath;
+    this.appState.localPath = filePath || null;
     window.ElectronFiddle.app.setValues(values);
     document.title = getTitle(this.appState);
   }

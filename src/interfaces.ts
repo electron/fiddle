@@ -41,6 +41,11 @@ export interface OutputOptions {
   isNotPre?: boolean;
 }
 
+
+export interface Templates {
+  [index: string]: string | Templates;
+}
+
 export type EditorId = 'main' | 'renderer' | 'html';
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
