@@ -11,7 +11,8 @@ import { ipcRendererManager } from './ipc';
 import { getKnownVersions, getUpdatedKnownVersions } from './versions';
 
 const knownVersions = getKnownVersions();
-const defaultVersion = normalizeVersion(knownVersions[0].tag_name);
+const defaultVersion = localStorage.getItem('version')
+  || normalizeVersion(knownVersions[0].tag_name);
 
 /**
  * Editors exist outside of React's world. To make things *a lot*
@@ -75,6 +76,7 @@ export class AppState {
     autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
     autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
     autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
+    autorun(() => localStorage.setItem('version', this.version || ''));
 
     // Update our known versions
     getUpdatedKnownVersions().then((versions) => {
