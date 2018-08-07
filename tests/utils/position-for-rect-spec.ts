@@ -24,7 +24,7 @@ describe('position-for-rect', () => {
     });
   });
 
-  describe('positionForRect() (macOS)', () => {
+  describe('positionForRect()', () => {
     const { innerWidth, innerHeight } = window;
 
     beforeEach(() => {
@@ -58,7 +58,7 @@ describe('position-for-rect', () => {
       });
     });
 
-    describe('positionForRect() (Windows, Linux)', () => {
+    describe('positionForRect() (macOS)', () => {
       beforeEach(() => {
         overridePlatform('darwin');
       });
