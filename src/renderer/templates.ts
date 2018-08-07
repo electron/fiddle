@@ -25,7 +25,6 @@ export async function getTemplateValues(name: string): Promise<EditorValues> {
 
       return content;
     } catch (error) {
-      console.error(`Content: Could not read file content for ${name}`, error);
       return '';
     }
   };
