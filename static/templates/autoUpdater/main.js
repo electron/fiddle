@@ -1,7 +1,7 @@
 // The "autoUpdater" module enables apps to automatically update themselves.
 //
 // For more info, see:
-// https://github.com/electron/electron/blob/master/docs/api/auto-updater.md
+// https://electronjs.org/docs/api/auto-updater
 
 const { app, autoUpdater } = require('electron')
 

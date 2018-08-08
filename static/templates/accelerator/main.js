@@ -3,7 +3,7 @@
 // throughout your application.
 //
 // For more info, see:
-// https://github.com/electron/electron/blob/master/docs/api/accelerator.md
+// https://electronjs.org/docs/api/accelerator
 
 const { app, globalShortcut } = require('electron')
 

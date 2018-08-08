@@ -3,7 +3,7 @@
 // system.
 //
 // For more info, see:
-// https://github.com/electron/electron/blob/master/docs/api/app.md
+// https://electronjs.org/docs/api/app
 
 const { app } = require('electron')
 
