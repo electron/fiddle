@@ -11,7 +11,7 @@ desktopCapturer.getSources({
   for (let i = 0; i < sources.length; ++i) {
     console.log(sources[i])
 
-    if (sources[i].name.startsWith('Screen')) {
+    if (sources[i].id.startsWith('screen')) {
       navigator.mediaDevices.getUserMedia({
         audio: false,
         video: {
