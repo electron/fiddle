@@ -2,7 +2,6 @@ import { Templates } from './interfaces';
 
 export const SHOW_ME_TEMPLATES: Templates = {
   'Electron APIs': {
-    accelerator: 'Accelerator',
     app: 'App',
     autoUpdater: 'AutoUpdater',
     BrowserView: 'BrowserView',
@@ -13,6 +12,8 @@ export const SHOW_ME_TEMPLATES: Templates = {
     crashReporter: 'CrashReporter',
     Debugger: 'Debugger',
     DesktopCapturer: 'DesktopCapturer',
-    dialog: 'Dialog'
+    dialog: 'Dialog',
+    globalShortcut: 'GlobalShortcut',
+    ipc: 'IPC',
   }
 };
