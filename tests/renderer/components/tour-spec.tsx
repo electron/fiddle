@@ -2,6 +2,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Tour } from '../../../src/renderer/components/tour';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
@@ -21,6 +22,14 @@ describe('VersionChooser component', () => {
       )
     }
   ]);
+
+  beforeAll(() => {
+    overridePlatform('darwin');
+  });
+
+  afterAll(() => {
+    resetPlatform();
+  });
 
   beforeEach(() => {
     document.querySelector = jest.fn(() => ({
