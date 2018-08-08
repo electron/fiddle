@@ -12,7 +12,11 @@ app.on('ready', () => {
   // The following code won't work unless the app has been packaged.
   // You should only use the autoUpdater with packaged and code-signed
   // versions of your application.
-  // autoUpdater.setFeedURL(feed)
+  try {
+    autoUpdater.setFeedURL(feed)
+  } catch (error) {
+    console.log(error)
+  }
 
   // Once you've done that, you can go ahead and ask for updates:
   // autoUpdater.checkForUpdates()

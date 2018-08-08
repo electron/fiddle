@@ -21,17 +21,17 @@ app.on('ready', () => {
     console.log('Debugger attach failed: ', err)
   }
 
-  win.webContents.debugger.on('detach', (event, reason) => {
+  mainWindow.webContents.debugger.on('detach', (event, reason) => {
     console.log('Debugger detached due to: ', reason)
   })
 
-  win.webContents.debugger.on('message', (event, method, params) => {
+  mainWindow.webContents.debugger.on('message', (event, method, params) => {
     if (method === 'Network.requestWillBeSent') {
       if (params.request.url === 'https://www.github.com') {
-        win.webContents.debugger.detach()
+        mainWindow.webContents.debugger.detach()
       }
     }
   })
 
-  win.webContents.debugger.sendCommand('Network.enable')
+  mainWindow.webContents.debugger.sendCommand('Network.enable')
 })

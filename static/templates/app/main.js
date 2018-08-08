@@ -7,10 +7,10 @@
 
 const { app } = require('electron')
 
-app.on('ready', () => console.log('The app is now ready for action'));
+app.on('ready', () => console.log('The app is now ready for action'))
 
-app.on('browser-window-created', () => console.log('A window was created!'));
-app.on('browser-window-focus', () => console.log('...and focused!'));
+app.on('browser-window-created', () => console.log('A window was created!'))
+app.on('browser-window-focus', () => console.log('...and focused!'))
 
 console.log(`The app lives at: ${app.getAppPath()}`)
 console.log(`It's named: ${app.getName()}`)

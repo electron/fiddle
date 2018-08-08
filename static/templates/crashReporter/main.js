@@ -3,18 +3,15 @@
 // For more info, see:
 // https://electronjs.org/docs/api/crash-reporter
 
-const { app, crashReporter } = require('electron')
+const { app, BrowserWindow } = require('electron')
 
 let mainWindow = null
 
 app.on('ready', () => {
   mainWindow = new BrowserWindow({ height: 600, width: 600 })
   mainWindow.loadFile('index.html')
-})
 
-crashReporter.start({
-  productName: 'YourName',
-  companyName: 'YourCompany',
-  submitURL: 'https://your-domain.com/url-to-submit',
-  uploadToServer: true
+  mainWindow.webContents.on('crashed', () => {
+    console.log(`Window crashed!`)
+  })
 })
