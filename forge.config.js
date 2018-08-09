@@ -1,6 +1,7 @@
 /* tslint:disable */
 
 const path = require('path');
+const package = require('./package.json');
 
 module.exports = {
   hooks: {
@@ -23,7 +24,7 @@ module.exports = {
       schemes: ['electron-fiddle']
     }],
     win32metadata: {
-      CompanyName: 'Electron',
+      CompanyName: 'Electron Community',
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
@@ -35,15 +36,14 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
       config: {
-        name: 'electron_fiddle',
+        name: 'electron-fiddle',
         authors: 'Electron Community',
         exe: 'electron-fiddle.exe',
         iconUrl: 'https://raw.githubusercontent.com/electron/fiddle/b5bf652df0ba159ec40a62001dbb298649c3b985/assets/icons/fiddle.ico',
         loadingGif: './assets/loading.gif',
         noMsi: true,
-        // Enable when we have our first release
-        // remoteReleases: ''
-        setupExe: 'Electron Fiddle Setup.exe',
+        remoteReleases: '',
+        setupExe: `electron-fiddle-${package.version}-setup-${process.arch}.exe`,
         setupIcon: path.resolve(__dirname, 'assets', 'icons', 'fiddle.ico'),
       }
     },

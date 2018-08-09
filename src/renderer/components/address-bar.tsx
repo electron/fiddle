@@ -96,7 +96,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       document.title = getTitle(appState);
       appState.localPath = null;
     } catch (error) {
-      console.warn(`Loading fiddle failed`, error);
+      console.warn(`Loading Fiddle failed`, error);
       return false;
     }
 

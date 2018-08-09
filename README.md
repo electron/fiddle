@@ -5,8 +5,8 @@
 Electron Fiddle let's you create and play with small Electron experiments. It
 greets you with a quick-start template after opening – change a few things,
 choose the version of Electron you want to run it with, and play around. Then,
-save your fiddle either as a GitHub Gist or to a local folder. Once pushed to
-GitHub, anyone can quickly try your fiddle out by just entering it in the
+save your Fiddle either as a GitHub Gist or to a local folder. Once pushed to
+GitHub, anyone can quickly try your Fiddle out by just entering it in the
 address bar.
 
 ![Screenshot](https://user-images.githubusercontent.com/1426799/43873471-8893e3a8-9b3b-11e8-975b-e357f8039b5c.png)

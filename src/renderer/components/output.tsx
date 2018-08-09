@@ -11,7 +11,7 @@ export interface CommandsProps {
 
 /**
  * This component represents the "console" that is shown
- * whenever a fiddle is launched in Electron.
+ * whenever a Fiddle is launched in Electron.
  *
  * @class Output
  * @extends {React.Component<CommandsProps, {}>}

@@ -80,7 +80,7 @@ export class AppState {
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
-          return !confirm('The current fiddle is unsaved. Do you want to exit anyway?');
+          return !confirm('The current Fiddle is unsaved. Do you want to exit anyway?');
         };
       } else {
         window.onbeforeunload = null;

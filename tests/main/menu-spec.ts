@@ -204,27 +204,27 @@ describe('menu', () => {
         expect(createMainWindow).toHaveBeenCalledTimes(2);
       });
 
-      it('opens a fiddle', () => {
+      it('opens a Fiddle', () => {
         file.submenu[3].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
 
-      it('saves a fiddle', () => {
+      it('saves a Fiddle', () => {
         file.submenu[5].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE);
       });
 
-      it('saves a fiddle as', () => {
+      it('saves a Fiddle as', () => {
         file.submenu[6].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
 
-      it('saves a fiddle as a gist', () => {
+      it('saves a Fiddle as a gist', () => {
         file.submenu[8].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE_GIST);
       });
 
-      it('saves a fiddle as a forge project', () => {
+      it('saves a Fiddle as a forge project', () => {
         file.submenu[9].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });

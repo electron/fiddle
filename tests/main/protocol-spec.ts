@@ -33,7 +33,7 @@ describe('protocol', () => {
   });
 
   describe('listenForProtocolHandler()', () => {
-    it('handles a fiddle url (open-url)', () => {
+    it('handles a Fiddle url (open-url)', () => {
       overridePlatform('darwin');
       (app.isReady as any).mockReturnValue(true);
 
@@ -58,7 +58,7 @@ describe('protocol', () => {
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
     });
 
-    it('handles a fiddle url (argv)', () => {
+    it('handles a Fiddle url (argv)', () => {
       overridePlatform('win32');
 
       process.argv = ['electron-fiddle://hello/hi'];

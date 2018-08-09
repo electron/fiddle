@@ -67,7 +67,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
   }
 
   /**
-   * Connect with GitHub, publish the current fiddle as a gist,
+   * Connect with GitHub, publish the current Fiddle as a gist,
    * and update all related properties in the app state.
    */
   public async publishFiddle(): Promise<void> {
