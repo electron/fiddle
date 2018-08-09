@@ -1,4 +1,4 @@
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, shell } from 'electron';
 import { createContextMenu } from './context-menu';
 
 // Keep a global reference of the window objects, if we don't, the window will
@@ -18,7 +18,10 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     minWidth: 600,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
-    backgroundColor: '#1d2427'
+    backgroundColor: '#1d2427',
+    webPreferences: {
+      webviewTag: false
+    }
   };
 }
 
@@ -42,6 +45,16 @@ export function createMainWindow(): Electron.BrowserWindow {
   browserWindow.on('closed', () => {
     browserWindows = browserWindows
       .filter((bw) => browserWindow !== bw);
+  });
+
+  browserWindow.webContents.on('new-window', (event, url) => {
+    event.preventDefault();
+    shell.openExternal(url);
+  });
+
+  browserWindow.webContents.on('will-navigate', (event, url) => {
+    event.preventDefault();
+    shell.openExternal(url);
   });
 
   browserWindows.push(browserWindow);
