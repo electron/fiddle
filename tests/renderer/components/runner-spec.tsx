@@ -190,12 +190,22 @@ describe('Runner component', () => {
     expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
   });
 
+  it('does attempt a forge operation if npm is not installed', async () => {
+    const wrapper = shallow(<Runner appState={this.store} />);
+    const instance: Runner = wrapper.instance() as any;
+
+    (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+
+    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+  });
+
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
       const wrapper = shallow(<Runner appState={this.store} />);
       const instance: Runner = wrapper.instance() as any;
 
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
 
       await instance.installModulesForEditor({
         html: '',

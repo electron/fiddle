@@ -114,7 +114,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       if (!(await getIsNpmInstalled())) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(', ')} need to be installed, `;
         message += `but we could not find npm. Fiddle requires Node.js and npm `;
-        message += `only to support the installation of modules not included in `;
+        message += `to support the installation of modules not included in `;
         message += `Electron. Please visit https://nodejs.org to install Node.js `;
         message += `and npm.`;
 
@@ -226,6 +226,15 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     appState.isConsoleShowing = true;
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
+
+    if (!(await getIsNpmInstalled())) {
+      let message = `Error: Could not find npm. Fiddle requires Node.js and npm `;
+      message += `to compile packages. Please visit https://nodejs.org to install `;
+      message += `Node.js and npm.`;
+
+      appState.pushOutput(message, { isNotPre: true });
+      return false;
+    }
 
     // Save files to temp
     const dir = await this.saveToTemp(options, dotfilesTransform, forgeTransform);
