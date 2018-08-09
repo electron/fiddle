@@ -20,7 +20,8 @@
     "publish": "electron-forge publish",
     "start": "rimraf ./dist && electron-forge start",
     "test": "jest --config=jest.json --coverage",
-    "tsc": "node ./tools/tsc.js"
+    "tsc": "node ./tools/tsc.js",
+    "electron-releases": "node ./tools/fetch-releases.js"
   },
   "keywords": [
     "Electron",
