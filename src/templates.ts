@@ -16,6 +16,8 @@ export const SHOW_ME_TEMPLATES: Templates = {
     globalShortcut: 'GlobalShortcut',
     ipc: 'IPC',
     Menu: 'Menu',
-    nativeImage: 'NativeImage'
+    nativeImage: 'NativeImage',
+    net: 'Net',
+    Notification: 'Notification'
   }
 };
