@@ -1,14 +1,9 @@
 import { BrowserWindow } from 'electron';
-import { WindowNames } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
-import { ipcMainManager } from './ipc';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-export const browserWindows: Record<WindowNames, Electron.BrowserWindow | null> = {
-  main: null
-};
+export let browserWindows: Array<BrowserWindow> = [];
 
 /**
  * Gets default options for the main window
@@ -27,26 +22,38 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
   };
 }
 
+
+/**
+ * Creates a new main window.
+ *
+ * @export
+ * @returns {Electron.BrowserWindow}
+ */
+export function createMainWindow(): Electron.BrowserWindow {
+  const browserWindow = new BrowserWindow(getMainWindowOptions());
+  browserWindow.loadFile('./dist/index.html');
+
+  browserWindow.webContents.once('dom-ready', () => {
+    if (browserWindow) {
+      createContextMenu(browserWindow);
+    }
+  });
+
+  browserWindow.on('closed', () => {
+    browserWindows = browserWindows
+      .filter((bw) => browserWindow !== bw);
+  });
+
+  browserWindows.push(browserWindow);
+
+  return browserWindow;
+}
+
 /**
  * Gets or creates the main window, returning it in both cases.
  *
  * @returns {Electron.BrowserWindow}
  */
 export function getOrCreateMainWindow(): Electron.BrowserWindow {
-  if (browserWindows.main) return browserWindows.main;
-
-  browserWindows.main = new BrowserWindow(getMainWindowOptions());
-  browserWindows.main.loadFile('./dist/index.html');
-
-  browserWindows.main.webContents.once('dom-ready', () => {
-    if (browserWindows.main) {
-      createContextMenu(browserWindows.main);
-    }
-  });
-
-  browserWindows.main.on('closed', () => {
-    browserWindows.main = null;
-  });
-
-  return browserWindows.main;
+  return BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow();
 }

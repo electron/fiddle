@@ -5,6 +5,7 @@ import { IpcEvents } from '../ipc-events';
 import { SHOW_ME_TEMPLATES } from '../templates';
 import { showOpenDialog, showSaveDialog } from './files';
 import { ipcMainManager } from './ipc';
+import { createMainWindow } from './windows';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
@@ -173,7 +174,12 @@ function getFileMenu(): MenuItemConstructorOptions {
   const fileMenu: Array<MenuItemConstructorOptions> = [
     {
       label: 'New Fiddle',
-      click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE)
+      click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE),
+      accelerator: 'CommandOrCtrl+N'
+    }, {
+      label: 'New Window',
+      click: () => createMainWindow(),
+      accelerator: 'CommandOrCtrl+Shift+N'
     }, {
       type: 'separator'
     },

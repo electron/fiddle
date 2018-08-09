@@ -3,7 +3,10 @@ import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
 import { setupMenu } from '../../src/main/menu';
+import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
+
+jest.mock('../../src/main/windows');
 
 describe('menu', () => {
   beforeEach(() => {
@@ -195,28 +198,34 @@ describe('menu', () => {
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_NEW_FIDDLE);
       });
 
+      it('creates a new window', () => {
+        file.submenu[1].click();
+        file.submenu[1].click();
+        expect(createMainWindow).toHaveBeenCalledTimes(2);
+      });
+
       it('opens a fiddle', () => {
-        file.submenu[2].click();
+        file.submenu[3].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
 
       it('saves a fiddle', () => {
-        file.submenu[4].click();
+        file.submenu[5].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE);
       });
 
       it('saves a fiddle as', () => {
-        file.submenu[5].click();
+        file.submenu[6].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
 
       it('saves a fiddle as a gist', () => {
-        file.submenu[7].click();
+        file.submenu[8].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE_GIST);
       });
 
       it('saves a fiddle as a forge project', () => {
-        file.submenu[8].click();
+        file.submenu[9].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
     });

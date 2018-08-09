@@ -16,7 +16,7 @@ export class IpcMainManager extends EventEmitter {
     super();
 
     ipcMainEvents.forEach((name) => {
-      ipcMain.on(name, (...args) => this.emit(name, ...args));
+      ipcMain.on(name, (...args: Array<any>) => this.emit(name, ...args));
     });
   }
 

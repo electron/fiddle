@@ -39,21 +39,21 @@ describe('windows', () => {
 
   describe('getOrCreateMainWindow()', () => {
     it('creates a window on first call', () => {
-      expect(browserWindows.main).toBe(null);
+      expect(browserWindows.length).toBe(0);
       getOrCreateMainWindow();
-      expect(browserWindows.main).toBeTruthy();
+      expect(browserWindows[0]).toBeTruthy();
     });
 
     it('updates "browserWindows" on "close"', () => {
       getOrCreateMainWindow();
-      expect(browserWindows.main).toBeTruthy();
+      expect(browserWindows[0]).toBeTruthy();
       getOrCreateMainWindow().emit('closed');
-      expect(browserWindows.main).toBe(null);
+      expect(browserWindows.length).toBe(0);
     });
 
     it('creates the context menu on "dom-ready"', () => {
       getOrCreateMainWindow();
-      expect(browserWindows.main).toBeTruthy();
+      expect(browserWindows[0]).toBeTruthy();
       getOrCreateMainWindow().webContents.emit('dom-ready');
       expect(createContextMenu).toHaveBeenCalled();
     });
