@@ -15,5 +15,7 @@ export const SHOW_ME_TEMPLATES: Templates = {
     dialog: 'Dialog',
     globalShortcut: 'GlobalShortcut',
     ipc: 'IPC',
+    Menu: 'Menu',
+    nativeImage: 'NativeImage'
   }
 };
