@@ -55,5 +55,5 @@ export function createMainWindow(): Electron.BrowserWindow {
  * @returns {Electron.BrowserWindow}
  */
 export function getOrCreateMainWindow(): Electron.BrowserWindow {
-  return browserWindows[0] || createMainWindow();
+  return BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow();
 }
