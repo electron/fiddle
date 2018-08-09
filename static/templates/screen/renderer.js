@@ -1,6 +1,6 @@
 const { screen } = require('electron')
 
 const screens = screen.getAllDisplays()
-const div = document.querySelector('div')
+const pre = document.querySelector('pre')
 
-div.innerText = JSON.stringify(screens);
+pre.innerText = JSON.stringify(screens, undefined, 2)
