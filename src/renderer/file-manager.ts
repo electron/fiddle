@@ -73,7 +73,7 @@ export class FileManager {
     this.appState.gistId = '';
     this.appState.isMyGist = false;
     this.appState.localPath = filePath || null;
-    window.ElectronFiddle.app.setValues(values);
+    await window.ElectronFiddle.app.setValues(values);
     document.title = getTitle(this.appState);
   }
 
@@ -109,6 +109,9 @@ export class FileManager {
       if (pathToSave !== localPath) {
         this.appState.localPath = pathToSave;
       }
+
+      this.appState.isUnsaved = false;
+      window.ElectronFiddle.app.setupUnsavedOnChangeListener();
     }
   }
 

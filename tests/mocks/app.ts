@@ -1,6 +1,7 @@
 import { FileManager } from './file-manager';
 
 export class AppMock {
+  public setupUnsavedOnChangeListener = jest.fn();
   public setValues = jest.fn();
   public getValues = jest.fn(() => ({
     main: 'main-content',

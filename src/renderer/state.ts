@@ -77,6 +77,15 @@ export class AppState {
     autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
     autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
     autorun(() => localStorage.setItem('version', this.version || ''));
+    autorun(() => {
+      if (this.isUnsaved) {
+        window.onbeforeunload = () => {
+          return !confirm('The current fiddle is unsaved. Do you want to exit anyway?');
+        };
+      } else {
+        window.onbeforeunload = null;
+      }
+    });
 
     // Update our known versions
     getUpdatedKnownVersions().then((versions) => {

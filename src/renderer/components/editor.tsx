@@ -40,6 +40,12 @@ export class Editor extends React.Component<EditorProps> {
     this.destroyMonaco();
   }
 
+  /**
+   * Handle the editor having been mounted. This refers to Monaco's
+   * mount, not React's.
+   *
+   * @param {MonacoType.editor.IStandaloneCodeEditor} editor
+   */
   public editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorDidMount } = this.props;
 
@@ -50,6 +56,9 @@ export class Editor extends React.Component<EditorProps> {
     }
   }
 
+  /**
+   * Initialize Monaco.
+   */
   public async initMonaco() {
     const { options, monaco, id } = this.props;
     const ref = this.containerRef.current;
@@ -69,6 +78,9 @@ export class Editor extends React.Component<EditorProps> {
     }
   }
 
+  /**
+   * Destroy Monaco.
+   */
   public destroyMonaco() {
     if (typeof this.editor !== 'undefined') {
       this.editor.dispose();
