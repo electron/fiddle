@@ -156,6 +156,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       pushOutput(`Electron exited${withCode}`);
       this.setState({ isRunning: false });
       this.child = null;
+      window.ElectronFiddle.app.fileManager.cleanup(dir);
     });
   }
 
