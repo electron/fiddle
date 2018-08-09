@@ -39,12 +39,12 @@ module.exports = {
         authors: 'Electron Community',
         exe: 'electron-fiddle.exe',
         iconUrl: 'https://github.com/electron/electron/blob/fe0f203/atom/browser/resources/win/atom.ico?raw=true',
-        loadingGif: path.resolve(__dirname, 'assets', 'loading.gif'),
+        loadingGif: './assets/loading.gif',
         noMsi: true,
         // Enable when we have our first release
         // remoteReleases: ''
         setupExe: 'Electron Fiddle Setup.exe',
-        setupIcon: path.resolve(__dirname, 'static', 'icons', 'electron.ico'),
+        setupIcon: path.resolve(__dirname, 'assets', 'icons', 'fiddle.ico'),
       }
     },
     {
