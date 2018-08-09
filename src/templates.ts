@@ -27,6 +27,7 @@ export const SHOW_ME_TEMPLATES: Templates = {
     Shell: 'Shell',
     SystemPreferences: 'systemPreferences',
     TouchBar: 'TouchBar',
+    Tray: 'Tray',
     WebContents: 'webContents',
     WebFrame: 'webFrame'
   }
