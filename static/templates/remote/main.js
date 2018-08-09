@@ -9,6 +9,5 @@ let mainWindow = null
 
 app.on('ready', () => {
   mainWindow = new BrowserWindow({ height: 600, width: 600 })
-
   mainWindow.loadFile('index.html')
 })

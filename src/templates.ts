@@ -25,6 +25,7 @@ export const SHOW_ME_TEMPLATES: Templates = {
     Screen: 'Screen',
     Session: 'Session',
     Shell: 'Shell',
+    SystemPreferences: 'systemPreferences',
     TouchBar: 'TouchBar',
     WebContents: 'webContents',
     WebFrame: 'webFrame'
