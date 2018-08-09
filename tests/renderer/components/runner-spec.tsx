@@ -15,6 +15,7 @@ import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
 import { mockVersions } from '../../mocks/electron-versions';
 
 jest.mock('../../../src/renderer/npm');
+jest.mock('../../../src/renderer/file-manager');
 jest.mock('fs-extra');
 jest.mock('child_process');
 

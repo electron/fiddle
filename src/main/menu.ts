@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from 'electron';
 
+import { Templates } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { SHOW_ME_TEMPLATES } from '../templates';
 import { showOpenDialog, showSaveDialog } from './files';
 import { ipcMainManager } from './ipc';
 
@@ -136,6 +138,32 @@ function getTasksMenu(): MenuItemConstructorOptions {
   };
 }
 
+function getShowMeMenuItem(key: string, item: string | Templates): MenuItemConstructorOptions {
+  if (typeof item === 'string') {
+    return {
+      label: key,
+      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [ key ])
+    };
+  }
+
+  return {
+    label: key,
+    submenu: Object.keys(item).map((subkey) => {
+      return getShowMeMenuItem(subkey, item[subkey]);
+    })
+  };
+}
+
+function getShowMeMenu(): MenuItemConstructorOptions {
+  const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(SHOW_ME_TEMPLATES)
+    .map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
+
+    return {
+      label: 'Show Me',
+      submenu: showMeMenu
+    };
+}
+
 /**
  * Returns the top-level "File" menu
  *
@@ -230,7 +258,7 @@ export function setupMenu() {
     getFileMenu()
   );
 
-  menu.splice(menu.length - 1, 0, getTasksMenu());
+  menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu());
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
