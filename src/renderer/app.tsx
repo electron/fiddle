@@ -28,11 +28,16 @@ export class App {
    *
    * @param {EditorValues} values
    */
-  public setValues(values: EditorValues): void {
+  public async setValues(values: EditorValues): Promise<boolean> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
       throw new Error('Fiddle not ready');
+    }
+
+    if (appState.isUnsaved) {
+      const isUserSure = confirm('Your current fiddle is unsaved. Are you sure you want to overwrite it?');
+      if (!isUserSure) return false;
     }
 
     const { main, html, renderer } = fiddle.editors;
@@ -40,6 +45,11 @@ export class App {
     if (html && html.setValue) html.setValue(values.html);
     if (main && main.setValue) main.setValue(values.main);
     if (renderer && renderer.setValue) renderer.setValue(values.renderer);
+
+    appState.isUnsaved = false;
+    this.setupUnsavedOnChangeListener();
+
+    return true;
   }
 
   /**
@@ -89,6 +99,27 @@ export class App {
     render(app, document.getElementById('app'));
 
     this.setupResizeListener();
+
+    // Todo: A timer here is terrible. Let's fix this
+    // and ensure we actually do it once Editors have mounted.
+    setTimeout(() => {
+      this.setupUnsavedOnChangeListener();
+    }, 1500);
+  }
+
+  /**
+   * If the editor is changed for the first time, we'll
+   * set `isUnsaved` to true. That way, the app can warn you
+   * if you're about to throw things away.
+   */
+  public setupUnsavedOnChangeListener() {
+    Object.keys(window.ElectronFiddle.editors).forEach((key) => {
+      const editor = window.ElectronFiddle.editors[key];
+      const disposable = editor.onDidChangeModelContent(() => {
+        appState.isUnsaved = true;
+        disposable.dispose();
+      });
+    });
   }
 
   /**
@@ -102,6 +133,7 @@ export class App {
 
 // tslint:disable-next-line:no-string-literal
 if (!process.env.TEST && !process.env.JEST_WORKER_ID) {
+  window.ElectronFiddle.contentChangeListeners = [];
   window.ElectronFiddle.app = new App();
   window.ElectronFiddle.app.setup()
     .catch((error) => console.error(error));

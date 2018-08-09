@@ -87,7 +87,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         id: appState.gistId,
       });
 
-      window.ElectronFiddle.app.setValues({
+      await window.ElectronFiddle.app.setValues({
         html: gist.data.files[INDEX_HTML_NAME].content,
         main: gist.data.files[MAIN_JS_NAME].content,
         renderer: gist.data.files[RENDERER_JS_NAME].content,
