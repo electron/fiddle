@@ -14,7 +14,10 @@ describe('windows', () => {
       minHeight: 600,
       minWidth: 600,
       acceptFirstMouse: true,
-      backgroundColor: '#1d2427'
+      backgroundColor: '#1d2427',
+      webPreferences: {
+        webviewTag: false
+      }
     };
 
     afterEach(() => {
