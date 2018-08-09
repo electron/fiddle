@@ -10,7 +10,7 @@ module.exports = {
     name: 'Electron Fiddle',
     executableName: 'electron-fiddle',
     asar: true,
-    icon: path.resolve(__dirname, 'static', 'icons', 'electron'),
+    icon: path.resolve(__dirname, 'assets', 'icons', 'fiddle'),
     // TODO: FIXME?
     // ignore: [
     //   /^\/\.vscode\//,
@@ -39,7 +39,7 @@ module.exports = {
         authors: 'Electron Community',
         exe: 'electron-fiddle.exe',
         iconUrl: 'https://github.com/electron/electron/blob/fe0f203/atom/browser/resources/win/atom.ico?raw=true',
-        // loadingGif: '// TODO',
+        loadingGif: path.resolve(__dirname, 'assets', 'loading.gif'),
         noMsi: true,
         // Enable when we have our first release
         // remoteReleases: ''
