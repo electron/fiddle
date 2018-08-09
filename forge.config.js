@@ -38,7 +38,7 @@ module.exports = {
         name: 'electron_fiddle',
         authors: 'Electron Community',
         exe: 'electron-fiddle.exe',
-        iconUrl: 'https://github.com/electron/electron/blob/fe0f203/atom/browser/resources/win/atom.ico?raw=true',
+        iconUrl: 'https://raw.githubusercontent.com/electron/fiddle/b5bf652df0ba159ec40a62001dbb298649c3b985/assets/icons/fiddle.ico',
         loadingGif: './assets/loading.gif',
         noMsi: true,
         // Enable when we have our first release
