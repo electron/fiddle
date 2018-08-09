@@ -2,19 +2,19 @@ import { Templates } from './interfaces';
 
 export const SHOW_ME_TEMPLATES: Templates = {
   'Electron APIs': {
-    App: 'app',
-    AutoUpdater: 'autoUpdater',
+    App: 'App',
+    AutoUpdater: 'AutoUpdater',
     BrowserView: 'BrowserView',
     BrowserWindow: 'BrowserWindow',
     Clipboard: 'clipboard',
-    ContentTracing: 'contentTracing',
-    Cookies: 'cookies',
-    CrashReporter: 'crashReporter',
-    Debugger: 'debugger',
-    DesktopCapturer: 'desktopCapturer',
-    Dialog: 'dialog',
-    GlobalShortcut: 'globalShortcut',
-    IPC: 'ipc',
+    ContentTracing: 'ContentTracing',
+    Cookies: 'Cookies',
+    CrashReporter: 'CrashReporter',
+    Debugger: 'Debugger',
+    DesktopCapturer: 'DesktopCapturer',
+    Dialog: 'Dialog',
+    GlobalShortcut: 'GlobalShortcut',
+    IPC: 'IPC',
     Menu: 'Menu',
     NativeImage: 'NativeImage',
     Net: 'Net',
@@ -28,7 +28,7 @@ export const SHOW_ME_TEMPLATES: Templates = {
     SystemPreferences: 'systemPreferences',
     TouchBar: 'TouchBar',
     Tray: 'Tray',
-    WebContents: 'webContents',
-    WebFrame: 'webFrame'
+    WebContents: 'WebContents',
+    WebFrame: 'WebFrame'
   }
 };
