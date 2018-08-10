@@ -6,6 +6,7 @@ import { EditorId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
+import { ContentNames, getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { mainTheme } from '../themes';
@@ -50,6 +51,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
       this.executeCommand(cmd);
+    });
+
+    ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event, cmd: string) => {
+      window.ElectronFiddle.app.setValues({
+        html: await getContent(ContentNames.HTML),
+        renderer: await getContent(ContentNames.RENDERER),
+        main: await getContent(ContentNames.MAIN)
+      });
     });
 
     this.setState({ isMounted: true });
