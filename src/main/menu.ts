@@ -175,11 +175,11 @@ function getFileMenu(): MenuItemConstructorOptions {
     {
       label: 'New Fiddle',
       click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE),
-      accelerator: 'CommandOrCtrl+N'
+      accelerator: 'CmdOrCtrl+N'
     }, {
       label: 'New Window',
       click: () => createMainWindow(),
-      accelerator: 'CommandOrCtrl+Shift+N'
+      accelerator: 'CmdOrCtrl+Shift+N'
     }, {
       type: 'separator'
     },
