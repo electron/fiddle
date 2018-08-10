@@ -82,8 +82,12 @@ export async function findModules(input: string): Promise<Array<string>> {
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export function installModules({ dir }: NpmOperationOptions, ...names: Array<string>): Promise<string> {
-  return exec(dir, [ 'npm i' ].concat([ '-S' ], names).join(' '));
+export async function installModules({ dir }: NpmOperationOptions, ...names: Array<string>): Promise<string> {
+  const nameArgs = names.length > 0
+    ? [ '-S', ...names ]
+    : ['--dev --prod'];
+
+  return exec(dir, [ `npm install` ].concat(nameArgs).join(' '));
 }
 
 /**

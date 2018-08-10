@@ -14,7 +14,10 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
 
     const { exec: cpExec } = await import('child_process');
 
-    cpExec(cliArgs, { cwd: dir }, (error, result) => {
+    cpExec(cliArgs, {
+      cwd: dir,
+      maxBuffer: 200 * 1024 * 100 // 100 times the default
+    }, (error, result) => {
       if (error) {
         reject(error);
       }

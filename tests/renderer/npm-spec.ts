@@ -86,7 +86,7 @@ describe('npm', () => {
     it('attempts to install a single module', async () => {
       installModules({ dir: '/my/directory' }, 'say', 'thing');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm i -S say thing');
+      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
     });
   });
 

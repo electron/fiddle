@@ -18,7 +18,7 @@ describe('exec', () => {
     const call = cpExec.mock.calls[0];
 
     expect(call[0]).toBe('echo hi');
-    expect(call[1]).toEqual({ cwd: 'a/dir' });
+    expect(call[1]).toEqual({ cwd: 'a/dir', maxBuffer: 20480000 });
     expect(result).toBe('hi');
   });
 
