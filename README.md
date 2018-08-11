@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle)
 
-Electron Fiddle let's you create and play with small Electron experiments. It
+Electron Fiddle lets you create and play with small Electron experiments. It
 greets you with a quick-start template after opening – change a few things,
 choose the version of Electron you want to run it with, and play around. Then,
 save your Fiddle either as a GitHub Gist or to a local folder. Once pushed to
