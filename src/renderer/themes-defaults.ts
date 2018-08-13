@@ -3,10 +3,8 @@ import * as MonacoType from 'monaco-editor';
 export interface FiddleTheme {
   name?: string;
   editor: Partial<MonacoType.editor.IStandaloneThemeData>;
-  fonts: {
-    common: string;
-  };
-  colors: {
+  common: {
+    fonts: string;
     'foreground-1': string;
     'foreground-2': string;
     'foreground-3': string;

@@ -24,9 +24,9 @@ ShallowWrapper {
     "nodeType": "host",
     "props": Object {
       "children": Array [
-        <h2>
+        <h4>
           GitHub Settings
-        </h2>,
+        </h4>,
         Array [
           <label>
             We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!
@@ -80,7 +80,7 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": "GitHub Settings",
-        "type": "h2",
+        "type": "h4",
       },
       Object {
         "instance": null,
@@ -184,9 +184,9 @@ ShallowWrapper {
       "nodeType": "host",
       "props": Object {
         "children": Array [
-          <h2>
+          <h4>
             GitHub Settings
-          </h2>,
+          </h4>,
           Array [
             <label>
               We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!
@@ -240,7 +240,7 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": "GitHub Settings",
-          "type": "h2",
+          "type": "h4",
         },
         Object {
           "instance": null,
@@ -374,9 +374,9 @@ ShallowWrapper {
     "nodeType": "host",
     "props": Object {
       "children": Array [
-        <h2>
+        <h4>
           GitHub Settings
-        </h2>,
+        </h4>,
         Array [
           <label>
             Using the personal access token you gave us, we logged you into GitHub as 
@@ -432,7 +432,7 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": "GitHub Settings",
-        "type": "h2",
+        "type": "h4",
       },
       Object {
         "instance": null,
@@ -544,9 +544,9 @@ ShallowWrapper {
       "nodeType": "host",
       "props": Object {
         "children": Array [
-          <h2>
+          <h4>
             GitHub Settings
-          </h2>,
+          </h4>,
           Array [
             <label>
               Using the personal access token you gave us, we logged you into GitHub as 
@@ -602,7 +602,7 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": "GitHub Settings",
-          "type": "h2",
+          "type": "h4",
         },
         Object {
           "instance": null,

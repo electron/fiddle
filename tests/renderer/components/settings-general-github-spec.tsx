@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { GitHubSettings } from '../../../src/renderer/components/settings-github';
+import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
 
 describe('GitHubSettings component', () => {
   beforeEach(() => {

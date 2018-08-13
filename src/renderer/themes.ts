@@ -29,6 +29,31 @@ export async function activateTheme(
 
 
 /**
+ * Read in a theme file.
+ *
+ * @export
+ * @param {string} [name]
+ * @returns {Promise<FiddleTheme>}
+ */
+export async function readThemeFile(name?: string): Promise<FiddleTheme | null> {
+  if (!name || name === DefaultThemes.DARK) return defaultDark as any;
+  if (name === DefaultThemes.LIGHT) return defaultLight as any;
+
+  const fs = await fancyImport<typeof fsType>('fs-extra');
+  const themePath = name.endsWith('.json')
+    ? path.join(THEMES_PATH, name)
+    : path.join(THEMES_PATH, `${name}.json`);
+
+  try {
+    return await fs.readJSON(themePath);
+  } catch (error) {
+    console.warn(`Themes: Loading theme ${name} failed`, error);
+    return null;
+  }
+}
+
+
+/**
  * Reads and then returns all available themes.
  *
  * @returns {Promise<Array<FiddleTheme>>}
@@ -48,17 +73,14 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
     const themeFiles = await fs.readdir(THEMES_PATH);
 
     for (const file of themeFiles) {
-      try {
-        const themeFilePath = path.join(THEMES_PATH, file);
-        const theme = await fs.readJSON(themeFilePath);
+      const theme = await readThemeFile(name);
 
+      if (theme) {
         themes.push({
           ...theme,
           name: theme.name || file.replace('.json', ''),
           file
         });
-      } catch (error) {
-        console.warn(`Themes: getAvailableThemes(): Could not read theme ${file}`, error);
       }
     }
   } catch (error) {
@@ -77,23 +99,10 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
  * @returns {Promise<FiddleTheme>}
  */
 export async function getTheme(name?: string | null): Promise<FiddleTheme> {
-  let theme = !name || name === DefaultThemes.DARK
-    ? defaultDark
-    : defaultLight;
   let cssContent = '';
 
   console.log(`Themes: getTheme() loading ${name || 'default'}`);
-
-  if (name && name !== DefaultThemes.DARK && name !== DefaultThemes.LIGHT) {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    const themePath = path.join(THEMES_PATH, `${name}.json`);
-
-    try {
-      theme = await fs.readJSON(themePath);
-    } catch (error) {
-      console.warn(`Themes: Loading theme ${name} failed`, error);
-    }
-  }
+  const theme = await readThemeFile(name || undefined) || defaultDark;
 
   Object.keys(theme.common).forEach((key) => {
     cssContent += `  --${key}: ${theme.common[key]};\n`;

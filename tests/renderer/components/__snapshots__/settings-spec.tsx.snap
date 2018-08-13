@@ -29,16 +29,16 @@ ShallowWrapper {
         >
           <ul>
             <li
+              className="General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
               className="Electron"
               onClick={[Function]}
             >
               Electron
-            </li>
-            <li
-              className="GitHub"
-              onClick={[Function]}
-            >
-              GitHub
             </li>
             <li
               className="Credits"
@@ -97,16 +97,16 @@ ShallowWrapper {
         "props": Object {
           "children": <ul>
             <li
+              className="General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
               className="Electron"
               onClick={[Function]}
             >
               Electron
-            </li>
-            <li
-              className="GitHub"
-              onClick={[Function]}
-            >
-              GitHub
             </li>
             <li
               className="Credits"
@@ -125,16 +125,16 @@ ShallowWrapper {
           "props": Object {
             "children": Array [
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>,
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>,
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>,
               <li
                 className="Credits"
@@ -148,6 +148,19 @@ ShallowWrapper {
           "rendered": Array [
             Object {
               "instance": null,
+              "key": "General",
+              "nodeType": "host",
+              "props": Object {
+                "children": "General",
+                "className": "General",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "General",
+              "type": "li",
+            },
+            Object {
+              "instance": null,
               "key": "Electron",
               "nodeType": "host",
               "props": Object {
@@ -157,19 +170,6 @@ ShallowWrapper {
               },
               "ref": null,
               "rendered": "Electron",
-              "type": "li",
-            },
-            Object {
-              "instance": null,
-              "key": "GitHub",
-              "nodeType": "host",
-              "props": Object {
-                "children": "GitHub",
-                "className": "GitHub",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "GitHub",
               "type": "li",
             },
             Object {
@@ -329,16 +329,16 @@ ShallowWrapper {
           >
             <ul>
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="Credits"
@@ -397,16 +397,16 @@ ShallowWrapper {
           "props": Object {
             "children": <ul>
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="Credits"
@@ -425,16 +425,16 @@ ShallowWrapper {
             "props": Object {
               "children": Array [
                 <li
+                  className="General"
+                  onClick={[Function]}
+                >
+                  General
+                </li>,
+                <li
                   className="Electron"
                   onClick={[Function]}
                 >
                   Electron
-                </li>,
-                <li
-                  className="GitHub"
-                  onClick={[Function]}
-                >
-                  GitHub
                 </li>,
                 <li
                   className="Credits"
@@ -448,6 +448,19 @@ ShallowWrapper {
             "rendered": Array [
               Object {
                 "instance": null,
+                "key": "General",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "General",
+                  "className": "General",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "General",
+                "type": "li",
+              },
+              Object {
+                "instance": null,
                 "key": "Electron",
                 "nodeType": "host",
                 "props": Object {
@@ -457,19 +470,6 @@ ShallowWrapper {
                 },
                 "ref": null,
                 "rendered": "Electron",
-                "type": "li",
-              },
-              Object {
-                "instance": null,
-                "key": "GitHub",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "GitHub",
-                  "className": "GitHub",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "GitHub",
                 "type": "li",
               },
               Object {
@@ -657,16 +657,16 @@ ShallowWrapper {
         >
           <ul>
             <li
-              className="selected Electron"
+              className="selected General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
+              className="Electron"
               onClick={[Function]}
             >
               Electron
-            </li>
-            <li
-              className="GitHub"
-              onClick={[Function]}
-            >
-              GitHub
             </li>
             <li
               className="Credits"
@@ -712,7 +712,7 @@ ShallowWrapper {
               transform={null}
             />
           </div>
-          <settings-electron
+          <settings-general
             appState={
               Object {
                 "isSettingsShowing": true,
@@ -732,16 +732,16 @@ ShallowWrapper {
         "props": Object {
           "children": <ul>
             <li
-              className="selected Electron"
+              className="selected General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
+              className="Electron"
               onClick={[Function]}
             >
               Electron
-            </li>
-            <li
-              className="GitHub"
-              onClick={[Function]}
-            >
-              GitHub
             </li>
             <li
               className="Credits"
@@ -760,683 +760,11 @@ ShallowWrapper {
           "props": Object {
             "children": Array [
               <li
-                className="selected Electron"
+                className="selected General"
                 onClick={[Function]}
               >
-                Electron
+                General
               </li>,
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
-              </li>,
-              <li
-                className="Credits"
-                onClick={[Function]}
-              >
-                Credits
-              </li>,
-            ],
-          },
-          "ref": null,
-          "rendered": Array [
-            Object {
-              "instance": null,
-              "key": "Electron",
-              "nodeType": "host",
-              "props": Object {
-                "children": "Electron",
-                "className": "selected Electron",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "Electron",
-              "type": "li",
-            },
-            Object {
-              "instance": null,
-              "key": "GitHub",
-              "nodeType": "host",
-              "props": Object {
-                "children": "GitHub",
-                "className": "GitHub",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "GitHub",
-              "type": "li",
-            },
-            Object {
-              "instance": null,
-              "key": "Credits",
-              "nodeType": "host",
-              "props": Object {
-                "children": "Credits",
-                "className": "Credits",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "Credits",
-              "type": "li",
-            },
-          ],
-          "type": "ul",
-        },
-        "type": "div",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": Array [
-            <div
-              className="settings-close"
-            >
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon={
-                  Object {
-                    "icon": Array [
-                      512,
-                      512,
-                      Array [],
-                      "f057",
-                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                    ],
-                    "iconName": "times-circle",
-                    "prefix": "fas",
-                  }
-                }
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                transform={null}
-              />
-            </div>,
-            <settings-electron
-              appState={
-                Object {
-                  "isSettingsShowing": true,
-                }
-              }
-            />,
-          ],
-          "className": "settings-content",
-        },
-        "ref": null,
-        "rendered": Array [
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "children": <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon={
-                  Object {
-                    "icon": Array [
-                      512,
-                      512,
-                      Array [],
-                      "f057",
-                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                    ],
-                    "iconName": "times-circle",
-                    "prefix": "fas",
-                  }
-                }
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                transform={null}
-              />,
-              "className": "settings-close",
-              "onClick": undefined,
-            },
-            "ref": null,
-            "rendered": Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "function",
-              "props": Object {
-                "border": false,
-                "className": "",
-                "fixedWidth": false,
-                "flip": null,
-                "icon": Object {
-                  "icon": Array [
-                    512,
-                    512,
-                    Array [],
-                    "f057",
-                    "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                  ],
-                  "iconName": "times-circle",
-                  "prefix": "fas",
-                },
-                "inverse": false,
-                "listItem": false,
-                "mask": null,
-                "pull": null,
-                "pulse": false,
-                "rotation": null,
-                "size": null,
-                "spin": false,
-                "symbol": false,
-                "transform": null,
-              },
-              "ref": null,
-              "rendered": null,
-              "type": [Function],
-            },
-            "type": "div",
-          },
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "appState": Object {
-                "isSettingsShowing": true,
-              },
-            },
-            "ref": null,
-            "rendered": null,
-            "type": "settings-electron",
-          },
-        ],
-        "type": "div",
-      },
-    ],
-    "type": "div",
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": undefined,
-      "nodeType": "host",
-      "props": Object {
-        "children": Array [
-          <div
-            className="settings-menu"
-          >
-            <ul>
-              <li
-                className="selected Electron"
-                onClick={[Function]}
-              >
-                Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
-              </li>
-              <li
-                className="Credits"
-                onClick={[Function]}
-              >
-                Credits
-              </li>
-            </ul>
-          </div>,
-          <div
-            className="settings-content"
-          >
-            <div
-              className="settings-close"
-            >
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon={
-                  Object {
-                    "icon": Array [
-                      512,
-                      512,
-                      Array [],
-                      "f057",
-                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                    ],
-                    "iconName": "times-circle",
-                    "prefix": "fas",
-                  }
-                }
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                transform={null}
-              />
-            </div>
-            <settings-electron
-              appState={
-                Object {
-                  "isSettingsShowing": true,
-                }
-              }
-            />
-          </div>,
-        ],
-        "className": "settings",
-      },
-      "ref": null,
-      "rendered": Array [
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": <ul>
-              <li
-                className="selected Electron"
-                onClick={[Function]}
-              >
-                Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
-              </li>
-              <li
-                className="Credits"
-                onClick={[Function]}
-              >
-                Credits
-              </li>
-            </ul>,
-            "className": "settings-menu",
-          },
-          "ref": null,
-          "rendered": Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "children": Array [
-                <li
-                  className="selected Electron"
-                  onClick={[Function]}
-                >
-                  Electron
-                </li>,
-                <li
-                  className="GitHub"
-                  onClick={[Function]}
-                >
-                  GitHub
-                </li>,
-                <li
-                  className="Credits"
-                  onClick={[Function]}
-                >
-                  Credits
-                </li>,
-              ],
-            },
-            "ref": null,
-            "rendered": Array [
-              Object {
-                "instance": null,
-                "key": "Electron",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "Electron",
-                  "className": "selected Electron",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "Electron",
-                "type": "li",
-              },
-              Object {
-                "instance": null,
-                "key": "GitHub",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "GitHub",
-                  "className": "GitHub",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "GitHub",
-                "type": "li",
-              },
-              Object {
-                "instance": null,
-                "key": "Credits",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "Credits",
-                  "className": "Credits",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "Credits",
-                "type": "li",
-              },
-            ],
-            "type": "ul",
-          },
-          "type": "div",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": Array [
-              <div
-                className="settings-close"
-              >
-                <FontAwesomeIcon
-                  border={false}
-                  className=""
-                  fixedWidth={false}
-                  flip={null}
-                  icon={
-                    Object {
-                      "icon": Array [
-                        512,
-                        512,
-                        Array [],
-                        "f057",
-                        "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                      ],
-                      "iconName": "times-circle",
-                      "prefix": "fas",
-                    }
-                  }
-                  inverse={false}
-                  listItem={false}
-                  mask={null}
-                  pull={null}
-                  pulse={false}
-                  rotation={null}
-                  size={null}
-                  spin={false}
-                  symbol={false}
-                  transform={null}
-                />
-              </div>,
-              <settings-electron
-                appState={
-                  Object {
-                    "isSettingsShowing": true,
-                  }
-                }
-              />,
-            ],
-            "className": "settings-content",
-          },
-          "ref": null,
-          "rendered": Array [
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "host",
-              "props": Object {
-                "children": <FontAwesomeIcon
-                  border={false}
-                  className=""
-                  fixedWidth={false}
-                  flip={null}
-                  icon={
-                    Object {
-                      "icon": Array [
-                        512,
-                        512,
-                        Array [],
-                        "f057",
-                        "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                      ],
-                      "iconName": "times-circle",
-                      "prefix": "fas",
-                    }
-                  }
-                  inverse={false}
-                  listItem={false}
-                  mask={null}
-                  pull={null}
-                  pulse={false}
-                  rotation={null}
-                  size={null}
-                  spin={false}
-                  symbol={false}
-                  transform={null}
-                />,
-                "className": "settings-close",
-                "onClick": undefined,
-              },
-              "ref": null,
-              "rendered": Object {
-                "instance": null,
-                "key": undefined,
-                "nodeType": "function",
-                "props": Object {
-                  "border": false,
-                  "className": "",
-                  "fixedWidth": false,
-                  "flip": null,
-                  "icon": Object {
-                    "icon": Array [
-                      512,
-                      512,
-                      Array [],
-                      "f057",
-                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                    ],
-                    "iconName": "times-circle",
-                    "prefix": "fas",
-                  },
-                  "inverse": false,
-                  "listItem": false,
-                  "mask": null,
-                  "pull": null,
-                  "pulse": false,
-                  "rotation": null,
-                  "size": null,
-                  "spin": false,
-                  "symbol": false,
-                  "transform": null,
-                },
-                "ref": null,
-                "rendered": null,
-                "type": [Function],
-              },
-              "type": "div",
-            },
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "host",
-              "props": Object {
-                "appState": Object {
-                  "isSettingsShowing": true,
-                },
-              },
-              "ref": null,
-              "rendered": null,
-              "type": "settings-electron",
-            },
-          ],
-          "type": "div",
-        },
-      ],
-      "type": "div",
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
-`;
-
-exports[`CreditsSettings component renders the GitHub page after a click 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <Settings
-    appState={
-      Object {
-        "isSettingsShowing": true,
-      }
-    }
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": undefined,
-    "nodeType": "host",
-    "props": Object {
-      "children": Array [
-        <div
-          className="settings-menu"
-        >
-          <ul>
-            <li
-              className="Electron"
-              onClick={[Function]}
-            >
-              Electron
-            </li>
-            <li
-              className="selected GitHub"
-              onClick={[Function]}
-            >
-              GitHub
-            </li>
-            <li
-              className="Credits"
-              onClick={[Function]}
-            >
-              Credits
-            </li>
-          </ul>
-        </div>,
-        <div
-          className="settings-content"
-        >
-          <div
-            className="settings-close"
-          >
-            <FontAwesomeIcon
-              border={false}
-              className=""
-              fixedWidth={false}
-              flip={null}
-              icon={
-                Object {
-                  "icon": Array [
-                    512,
-                    512,
-                    Array [],
-                    "f057",
-                    "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
-                  ],
-                  "iconName": "times-circle",
-                  "prefix": "fas",
-                }
-              }
-              inverse={false}
-              listItem={false}
-              mask={null}
-              pull={null}
-              pulse={false}
-              rotation={null}
-              size={null}
-              spin={false}
-              symbol={false}
-              transform={null}
-            />
-          </div>
-          <settings-github
-            appState={
-              Object {
-                "isSettingsShowing": true,
-              }
-            }
-          />
-        </div>,
-      ],
-      "className": "settings",
-    },
-    "ref": null,
-    "rendered": Array [
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": <ul>
-            <li
-              className="Electron"
-              onClick={[Function]}
-            >
-              Electron
-            </li>
-            <li
-              className="selected GitHub"
-              onClick={[Function]}
-            >
-              GitHub
-            </li>
-            <li
-              className="Credits"
-              onClick={[Function]}
-            >
-              Credits
-            </li>
-          </ul>,
-          "className": "settings-menu",
-        },
-        "ref": null,
-        "rendered": Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": Array [
               <li
                 className="Electron"
                 onClick={[Function]}
@@ -1444,12 +772,6 @@ ShallowWrapper {
                 Electron
               </li>,
               <li
-                className="selected GitHub"
-                onClick={[Function]}
-              >
-                GitHub
-              </li>,
-              <li
                 className="Credits"
                 onClick={[Function]}
               >
@@ -1459,6 +781,19 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": Array [
+            Object {
+              "instance": null,
+              "key": "General",
+              "nodeType": "host",
+              "props": Object {
+                "children": "General",
+                "className": "selected General",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "General",
+              "type": "li",
+            },
             Object {
               "instance": null,
               "key": "Electron",
@@ -1474,19 +809,6 @@ ShallowWrapper {
             },
             Object {
               "instance": null,
-              "key": "GitHub",
-              "nodeType": "host",
-              "props": Object {
-                "children": "GitHub",
-                "className": "selected GitHub",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "GitHub",
-              "type": "li",
-            },
-            Object {
-              "instance": null,
               "key": "Credits",
               "nodeType": "host",
               "props": Object {
@@ -1542,7 +864,7 @@ ShallowWrapper {
                 transform={null}
               />
             </div>,
-            <settings-github
+            <settings-general
               appState={
                 Object {
                   "isSettingsShowing": true,
@@ -1640,7 +962,7 @@ ShallowWrapper {
             },
             "ref": null,
             "rendered": null,
-            "type": "settings-github",
+            "type": "settings-general",
           },
         ],
         "type": "div",
@@ -1660,16 +982,16 @@ ShallowWrapper {
           >
             <ul>
               <li
+                className="selected General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="selected GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="Credits"
@@ -1715,7 +1037,7 @@ ShallowWrapper {
                 transform={null}
               />
             </div>
-            <settings-github
+            <settings-general
               appState={
                 Object {
                   "isSettingsShowing": true,
@@ -1735,16 +1057,16 @@ ShallowWrapper {
           "props": Object {
             "children": <ul>
               <li
+                className="selected General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="selected GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="Credits"
@@ -1763,16 +1085,16 @@ ShallowWrapper {
             "props": Object {
               "children": Array [
                 <li
+                  className="selected General"
+                  onClick={[Function]}
+                >
+                  General
+                </li>,
+                <li
                   className="Electron"
                   onClick={[Function]}
                 >
                   Electron
-                </li>,
-                <li
-                  className="selected GitHub"
-                  onClick={[Function]}
-                >
-                  GitHub
                 </li>,
                 <li
                   className="Credits"
@@ -1786,6 +1108,19 @@ ShallowWrapper {
             "rendered": Array [
               Object {
                 "instance": null,
+                "key": "General",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "General",
+                  "className": "selected General",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "General",
+                "type": "li",
+              },
+              Object {
+                "instance": null,
                 "key": "Electron",
                 "nodeType": "host",
                 "props": Object {
@@ -1795,19 +1130,6 @@ ShallowWrapper {
                 },
                 "ref": null,
                 "rendered": "Electron",
-                "type": "li",
-              },
-              Object {
-                "instance": null,
-                "key": "GitHub",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "GitHub",
-                  "className": "selected GitHub",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "GitHub",
                 "type": "li",
               },
               Object {
@@ -1867,7 +1189,7 @@ ShallowWrapper {
                   transform={null}
                 />
               </div>,
-              <settings-github
+              <settings-general
                 appState={
                   Object {
                     "isSettingsShowing": true,
@@ -1965,7 +1287,7 @@ ShallowWrapper {
               },
               "ref": null,
               "rendered": null,
-              "type": "settings-github",
+              "type": "settings-general",
             },
           ],
           "type": "div",
@@ -1984,7 +1306,7 @@ ShallowWrapper {
 }
 `;
 
-exports[`CreditsSettings component renders the GitHub page after a click 2`] = `
+exports[`CreditsSettings component renders the General page after a click 1`] = `
 ShallowWrapper {
   "length": 1,
   Symbol(enzyme.__root__): [Circular],
@@ -2013,16 +1335,694 @@ ShallowWrapper {
         >
           <ul>
             <li
+              className="selected General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
               className="Electron"
               onClick={[Function]}
             >
               Electron
             </li>
             <li
-              className="GitHub"
+              className="Credits"
               onClick={[Function]}
             >
-              GitHub
+              Credits
+            </li>
+          </ul>
+        </div>,
+        <div
+          className="settings-content"
+        >
+          <div
+            className="settings-close"
+          >
+            <FontAwesomeIcon
+              border={false}
+              className=""
+              fixedWidth={false}
+              flip={null}
+              icon={
+                Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f057",
+                    "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                  ],
+                  "iconName": "times-circle",
+                  "prefix": "fas",
+                }
+              }
+              inverse={false}
+              listItem={false}
+              mask={null}
+              pull={null}
+              pulse={false}
+              rotation={null}
+              size={null}
+              spin={false}
+              symbol={false}
+              transform={null}
+            />
+          </div>
+          <settings-general
+            appState={
+              Object {
+                "isSettingsShowing": true,
+              }
+            }
+          />
+        </div>,
+      ],
+      "className": "settings",
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": <ul>
+            <li
+              className="selected General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
+              className="Electron"
+              onClick={[Function]}
+            >
+              Electron
+            </li>
+            <li
+              className="Credits"
+              onClick={[Function]}
+            >
+              Credits
+            </li>
+          </ul>,
+          "className": "settings-menu",
+        },
+        "ref": null,
+        "rendered": Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <li
+                className="selected General"
+                onClick={[Function]}
+              >
+                General
+              </li>,
+              <li
+                className="Electron"
+                onClick={[Function]}
+              >
+                Electron
+              </li>,
+              <li
+                className="Credits"
+                onClick={[Function]}
+              >
+                Credits
+              </li>,
+            ],
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": "General",
+              "nodeType": "host",
+              "props": Object {
+                "children": "General",
+                "className": "selected General",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "General",
+              "type": "li",
+            },
+            Object {
+              "instance": null,
+              "key": "Electron",
+              "nodeType": "host",
+              "props": Object {
+                "children": "Electron",
+                "className": "Electron",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "Electron",
+              "type": "li",
+            },
+            Object {
+              "instance": null,
+              "key": "Credits",
+              "nodeType": "host",
+              "props": Object {
+                "children": "Credits",
+                "className": "Credits",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "Credits",
+              "type": "li",
+            },
+          ],
+          "type": "ul",
+        },
+        "type": "div",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            <div
+              className="settings-close"
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f057",
+                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                    ],
+                    "iconName": "times-circle",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+            </div>,
+            <settings-general
+              appState={
+                Object {
+                  "isSettingsShowing": true,
+                }
+              }
+            />,
+          ],
+          "className": "settings-content",
+        },
+        "ref": null,
+        "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f057",
+                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                    ],
+                    "iconName": "times-circle",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />,
+              "className": "settings-close",
+              "onClick": undefined,
+            },
+            "ref": null,
+            "rendered": Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "function",
+              "props": Object {
+                "border": false,
+                "className": "",
+                "fixedWidth": false,
+                "flip": null,
+                "icon": Object {
+                  "icon": Array [
+                    512,
+                    512,
+                    Array [],
+                    "f057",
+                    "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                  ],
+                  "iconName": "times-circle",
+                  "prefix": "fas",
+                },
+                "inverse": false,
+                "listItem": false,
+                "mask": null,
+                "pull": null,
+                "pulse": false,
+                "rotation": null,
+                "size": null,
+                "spin": false,
+                "symbol": false,
+                "transform": null,
+              },
+              "ref": null,
+              "rendered": null,
+              "type": [Function],
+            },
+            "type": "div",
+          },
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "appState": Object {
+                "isSettingsShowing": true,
+              },
+            },
+            "ref": null,
+            "rendered": null,
+            "type": "settings-general",
+          },
+        ],
+        "type": "div",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <div
+            className="settings-menu"
+          >
+            <ul>
+              <li
+                className="selected General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
+                className="Electron"
+                onClick={[Function]}
+              >
+                Electron
+              </li>
+              <li
+                className="Credits"
+                onClick={[Function]}
+              >
+                Credits
+              </li>
+            </ul>
+          </div>,
+          <div
+            className="settings-content"
+          >
+            <div
+              className="settings-close"
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f057",
+                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                    ],
+                    "iconName": "times-circle",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+            </div>
+            <settings-general
+              appState={
+                Object {
+                  "isSettingsShowing": true,
+                }
+              }
+            />
+          </div>,
+        ],
+        "className": "settings",
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": <ul>
+              <li
+                className="selected General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
+                className="Electron"
+                onClick={[Function]}
+              >
+                Electron
+              </li>
+              <li
+                className="Credits"
+                onClick={[Function]}
+              >
+                Credits
+              </li>
+            </ul>,
+            "className": "settings-menu",
+          },
+          "ref": null,
+          "rendered": Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <li
+                  className="selected General"
+                  onClick={[Function]}
+                >
+                  General
+                </li>,
+                <li
+                  className="Electron"
+                  onClick={[Function]}
+                >
+                  Electron
+                </li>,
+                <li
+                  className="Credits"
+                  onClick={[Function]}
+                >
+                  Credits
+                </li>,
+              ],
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": "General",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "General",
+                  "className": "selected General",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "General",
+                "type": "li",
+              },
+              Object {
+                "instance": null,
+                "key": "Electron",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Electron",
+                  "className": "Electron",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "Electron",
+                "type": "li",
+              },
+              Object {
+                "instance": null,
+                "key": "Credits",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Credits",
+                  "className": "Credits",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "Credits",
+                "type": "li",
+              },
+            ],
+            "type": "ul",
+          },
+          "type": "div",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              <div
+                className="settings-close"
+              >
+                <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        512,
+                        512,
+                        Array [],
+                        "f057",
+                        "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                      ],
+                      "iconName": "times-circle",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />
+              </div>,
+              <settings-general
+                appState={
+                  Object {
+                    "isSettingsShowing": true,
+                  }
+                }
+              />,
+            ],
+            "className": "settings-content",
+          },
+          "ref": null,
+          "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        512,
+                        512,
+                        Array [],
+                        "f057",
+                        "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                      ],
+                      "iconName": "times-circle",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />,
+                "className": "settings-close",
+                "onClick": undefined,
+              },
+              "ref": null,
+              "rendered": Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "function",
+                "props": Object {
+                  "border": false,
+                  "className": "",
+                  "fixedWidth": false,
+                  "flip": null,
+                  "icon": Object {
+                    "icon": Array [
+                      512,
+                      512,
+                      Array [],
+                      "f057",
+                      "M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm121.6 313.1c4.7 4.7 4.7 12.3 0 17L338 377.6c-4.7 4.7-12.3 4.7-17 0L256 312l-65.1 65.6c-4.7 4.7-12.3 4.7-17 0L134.4 338c-4.7-4.7-4.7-12.3 0-17l65.6-65-65.6-65.1c-4.7-4.7-4.7-12.3 0-17l39.6-39.6c4.7-4.7 12.3-4.7 17 0l65 65.7 65.1-65.6c4.7-4.7 12.3-4.7 17 0l39.6 39.6c4.7 4.7 4.7 12.3 0 17L312 256l65.6 65.1z",
+                    ],
+                    "iconName": "times-circle",
+                    "prefix": "fas",
+                  },
+                  "inverse": false,
+                  "listItem": false,
+                  "mask": null,
+                  "pull": null,
+                  "pulse": false,
+                  "rotation": null,
+                  "size": null,
+                  "spin": false,
+                  "symbol": false,
+                  "transform": null,
+                },
+                "ref": null,
+                "rendered": null,
+                "type": [Function],
+              },
+              "type": "div",
+            },
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "appState": Object {
+                  "isSettingsShowing": true,
+                },
+              },
+              "ref": null,
+              "rendered": null,
+              "type": "settings-general",
+            },
+          ],
+          "type": "div",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;
+
+exports[`CreditsSettings component renders the General page after a click 2`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <Settings
+    appState={
+      Object {
+        "isSettingsShowing": true,
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <div
+          className="settings-menu"
+        >
+          <ul>
+            <li
+              className="General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
+              className="Electron"
+              onClick={[Function]}
+            >
+              Electron
             </li>
             <li
               className="selected Credits"
@@ -2088,16 +2088,16 @@ ShallowWrapper {
         "props": Object {
           "children": <ul>
             <li
+              className="General"
+              onClick={[Function]}
+            >
+              General
+            </li>
+            <li
               className="Electron"
               onClick={[Function]}
             >
               Electron
-            </li>
-            <li
-              className="GitHub"
-              onClick={[Function]}
-            >
-              GitHub
             </li>
             <li
               className="selected Credits"
@@ -2116,16 +2116,16 @@ ShallowWrapper {
           "props": Object {
             "children": Array [
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>,
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>,
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>,
               <li
                 className="selected Credits"
@@ -2139,6 +2139,19 @@ ShallowWrapper {
           "rendered": Array [
             Object {
               "instance": null,
+              "key": "General",
+              "nodeType": "host",
+              "props": Object {
+                "children": "General",
+                "className": "General",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": "General",
+              "type": "li",
+            },
+            Object {
+              "instance": null,
               "key": "Electron",
               "nodeType": "host",
               "props": Object {
@@ -2148,19 +2161,6 @@ ShallowWrapper {
               },
               "ref": null,
               "rendered": "Electron",
-              "type": "li",
-            },
-            Object {
-              "instance": null,
-              "key": "GitHub",
-              "nodeType": "host",
-              "props": Object {
-                "children": "GitHub",
-                "className": "GitHub",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "GitHub",
               "type": "li",
             },
             Object {
@@ -2338,16 +2338,16 @@ ShallowWrapper {
           >
             <ul>
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="selected Credits"
@@ -2413,16 +2413,16 @@ ShallowWrapper {
           "props": Object {
             "children": <ul>
               <li
+                className="General"
+                onClick={[Function]}
+              >
+                General
+              </li>
+              <li
                 className="Electron"
                 onClick={[Function]}
               >
                 Electron
-              </li>
-              <li
-                className="GitHub"
-                onClick={[Function]}
-              >
-                GitHub
               </li>
               <li
                 className="selected Credits"
@@ -2441,16 +2441,16 @@ ShallowWrapper {
             "props": Object {
               "children": Array [
                 <li
+                  className="General"
+                  onClick={[Function]}
+                >
+                  General
+                </li>,
+                <li
                   className="Electron"
                   onClick={[Function]}
                 >
                   Electron
-                </li>,
-                <li
-                  className="GitHub"
-                  onClick={[Function]}
-                >
-                  GitHub
                 </li>,
                 <li
                   className="selected Credits"
@@ -2464,6 +2464,19 @@ ShallowWrapper {
             "rendered": Array [
               Object {
                 "instance": null,
+                "key": "General",
+                "nodeType": "host",
+                "props": Object {
+                  "children": "General",
+                  "className": "General",
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": "General",
+                "type": "li",
+              },
+              Object {
+                "instance": null,
                 "key": "Electron",
                 "nodeType": "host",
                 "props": Object {
@@ -2473,19 +2486,6 @@ ShallowWrapper {
                 },
                 "ref": null,
                 "rendered": "Electron",
-                "type": "li",
-              },
-              Object {
-                "instance": null,
-                "key": "GitHub",
-                "nodeType": "host",
-                "props": Object {
-                  "children": "GitHub",
-                  "className": "GitHub",
-                  "onClick": [Function],
-                },
-                "ref": null,
-                "rendered": "GitHub",
                 "type": "li",
               },
               Object {
