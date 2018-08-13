@@ -25,7 +25,7 @@
 .dialog {
   background-color: @background-3;
   border: @border;
-  color: var(--text-color-1);
+  color: @text-color-1;
   border-radius: 6px;
   padding: 10px;
   z-index: 100;
@@ -68,12 +68,12 @@
   }
 
   &.arrow::after {
-    border-color-1: rgba(136, 183, 213, 0);
+    border-color: rgba(136, 183, 213, 0);
     border-width: 9px;
   }
 
   &.arrow::before {
-    border-color-1: rgba(194, 225, 245, 0);
+    border-color: rgba(194, 225, 245, 0);
     border-width: 10px;
   }
 
@@ -170,11 +170,11 @@
     outline: 0 solid transparent;
 
     &:focus {
-      border-color-1: @foreground-2;
+      border-color: @foreground-2;
     }
 
     &.hasError {
-      border-color-1: #df3434;
+      border-color: #df3434;
     }
   }
 }

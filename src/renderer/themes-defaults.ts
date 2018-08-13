@@ -19,12 +19,12 @@ export interface FiddleTheme {
     'text-color-3': string;
     'error-color': string;
   };
-  css: string;
 }
 
 export interface LoadedFiddleTheme extends FiddleTheme {
   name: string;
   file: string;
+  css: string;
 }
 
 /**
