@@ -15,12 +15,20 @@
   h3,
   h4,
   h5 {
-    color: white;
+    color: @text-color-1;
     cursor: initial;
+  }
+
+  h4 {
+    margin-bottom: 5px;
   }
 
   label {
     font-weight: 200;
+  }
+
+  select {
+    width: 250px;
   }
 
   .settings-content {
@@ -28,7 +36,7 @@
     width: 100%;
     padding: 20px;
     overflow: scroll;
-    color: rgb(230, 230, 230);
+    color: @text-color-3;
     box-sizing: border-box;
   }
 
@@ -63,7 +71,7 @@
     color: rgb(230, 230, 230);
 
     &:hover {
-      color: white;
+      color: @text-color-1;
     }
 
     svg {
@@ -123,17 +131,16 @@
     li {
       padding-bottom: 5px;
       border-bottom: @border;
-      color: rgba(255, 255, 255, 0.8);
+      color: var(--text-color-1);
+      opacity: 0.8;
 
       &:hover {
-        padding-bottom: 5px;
-        border-bottom: @border;
-        color: rgb(255, 255, 255);
         cursor: pointer;
+        opacity: 1;
       }
 
       &.selected {
-        color: @foreground-bright;
+        color: @foreground-2;
       }
     }
   }

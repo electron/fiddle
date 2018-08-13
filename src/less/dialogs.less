@@ -25,7 +25,7 @@
 .dialog {
   background-color: @background-3;
   border: @border;
-  color: #f3f3f3;
+  color: var(--text-color-1);
   border-radius: 6px;
   padding: 10px;
   z-index: 100;
@@ -68,12 +68,12 @@
   }
 
   &.arrow::after {
-    border-color: rgba(136, 183, 213, 0);
+    border-color-1: rgba(136, 183, 213, 0);
     border-width: 9px;
   }
 
   &.arrow::before {
-    border-color: rgba(194, 225, 245, 0);
+    border-color-1: rgba(194, 225, 245, 0);
     border-width: 10px;
   }
 
@@ -89,7 +89,7 @@
   }
 
   &.arrow-top::before {
-    border-bottom-color: @border-color;
+    border-bottom-color: @border-color-1;
     margin-left: -10px;
   }
 
@@ -105,7 +105,7 @@
   }
 
   &.arrow-bottom::before {
-    border-top-color: @border-color;
+    border-top-color: @border-color-1;
     margin-left: -10px;
   }
 
@@ -121,7 +121,7 @@
   }
 
   &.arrow-left::before {
-    border-right-color: @border-color;
+    border-right-color: @border-color-1;
     margin-top: -10px;
   }
 
@@ -137,7 +137,7 @@
   }
 
   &.arrow-right::before {
-    border-left-color: @border-color;
+    border-left-color: @border-color-1;
     margin-top: -10px;
   }
 
@@ -166,15 +166,15 @@
     height: 28px;
     margin-top: 10px;
     background-color: @background-1;
-    border: 1px solid @border-color-dark;
+    border: 1px solid @border-color-2;
     outline: 0 solid transparent;
 
     &:focus {
-      border-color: @foreground-bright;
+      border-color-1: @foreground-2;
     }
 
     &.hasError {
-      border-color: #df3434;
+      border-color-1: #df3434;
     }
   }
 }
@@ -205,6 +205,13 @@
   transition: opacity 0.4s ease-in-out;
   pointer-events: all;
   opacity: 0.5;
+}
+
+select {
+  font-size: 12px;
+  height: 28px;
+  background-color: white;
+  line-height: 15px;
 }
 
 @keyframes slide-up {
