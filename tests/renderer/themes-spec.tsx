@@ -127,7 +127,7 @@ describe('themes', () => {
 
       const theme = await readThemeFile('myfile.json');
       expect(theme).toBeTruthy();
-      expect(fs.readJSON).toHaveBeenCalledWith(`~/fake-user/.electron-fiddle/themes/myfile.json`);
+      expect(fs.readJSON).toHaveBeenCalledWith(`~/.electron-fiddle/themes/myfile.json`);
     });
 
     it('reads the right file if does not end with .json', async () => {
@@ -136,7 +136,7 @@ describe('themes', () => {
 
       const theme = await readThemeFile('myfile');
       expect(theme).toBeTruthy();
-      expect(fs.readJSON).toHaveBeenCalledWith(`~/fake-user/.electron-fiddle/themes/myfile.json`);
+      expect(fs.readJSON).toHaveBeenCalledWith(`~/.electron-fiddle/themes/myfile.json`);
     });
   });
 });

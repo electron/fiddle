@@ -120,6 +120,7 @@ const session = {
 
 const shell = {
   openExternal: jest.fn(),
+  openItem: jest.fn(),
   showItemInFolder: jest.fn()
 };
 

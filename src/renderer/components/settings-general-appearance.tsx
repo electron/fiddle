@@ -63,7 +63,6 @@ export class AppearanceSettings extends React.Component<
     const fs = await fancyImport<typeof fsType>('fs-extra');
     const theme = await getTheme(this.props.appState.theme);
 
-
     try {
       const namor = await fancyImport<any>('namor');
       const name = namor.generate({ words: 2, numbers: 0 });
@@ -126,7 +125,7 @@ export class AppearanceSettings extends React.Component<
     const themePath = path.join(CONFIG_PATH, 'themes');
 
     return (
-      <div>
+      <div className='settings-appearance'>
         <h4>Appearance</h4>
         <label key='theme-label'>
           To add themes, add JSON theme files to <a
@@ -134,12 +133,7 @@ export class AppearanceSettings extends React.Component<
             onClick={() => this.openThemeFolder()}
           >
             <code>{themePath}</code>
-          </a>.<br />Want to create your own?
-          <a
-            id='create-new-theme'
-            onClick={() => this.createNewThemeFromCurrent()}
-          > Create a new theme using the currently selected as template
-          </a>.
+          </a>.<br />
         </label>
         <select
           className='select-themes'
@@ -148,6 +142,12 @@ export class AppearanceSettings extends React.Component<
         >
           {this.renderOptions()}
         </select>
+        <button
+          id='create-new-theme'
+          onClick={() => this.createNewThemeFromCurrent()}
+        >
+          Create theme from current selection
+        </button>
       </div>
     );
   }

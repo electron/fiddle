@@ -5,7 +5,11 @@ ShallowWrapper {
   "length": 1,
   Symbol(enzyme.__root__): [Circular],
   Symbol(enzyme.__unrendered__): <AppearanceSettings
-    appState={Object {}}
+    appState={
+      Object {
+        "setTheme": [MockFunction],
+      }
+    }
   />,
   Symbol(enzyme.__renderer__): Object {
     "batchedUpdates": [Function],
@@ -30,26 +34,25 @@ ShallowWrapper {
             onClick={[Function]}
           >
             <code>
-              ~/fake-user/.electron-fiddle/themes
+              ~/.electron-fiddle/themes
             </code>
           </a>
           .
           <br />
-          Want to create your own?
-          <a
-            id="create-new-theme"
-            onClick={[Function]}
-          >
-             Create a new theme using the currently selected as template
-          </a>
-          .
         </label>,
         <select
           className="select-themes"
           onChange={[Function]}
           value="undefined"
         />,
+        <button
+          id="create-new-theme"
+          onClick={[Function]}
+        >
+          Create theme from current selection
+        </button>,
       ],
+      "className": "settings-appearance",
     },
     "ref": null,
     "rendered": Array [
@@ -76,19 +79,11 @@ ShallowWrapper {
               onClick={[Function]}
             >
               <code>
-                ~/fake-user/.electron-fiddle/themes
+                ~/.electron-fiddle/themes
               </code>
             </a>,
             ".",
             <br />,
-            "Want to create your own?",
-            <a
-              id="create-new-theme"
-              onClick={[Function]}
-            >
-               Create a new theme using the currently selected as template
-            </a>,
-            ".",
           ],
         },
         "ref": null,
@@ -100,7 +95,7 @@ ShallowWrapper {
             "nodeType": "host",
             "props": Object {
               "children": <code>
-                ~/fake-user/.electron-fiddle/themes
+                ~/.electron-fiddle/themes
               </code>,
               "id": "open-theme-folder",
               "onClick": [Function],
@@ -111,10 +106,10 @@ ShallowWrapper {
               "key": undefined,
               "nodeType": "host",
               "props": Object {
-                "children": "~/fake-user/.electron-fiddle/themes",
+                "children": "~/.electron-fiddle/themes",
               },
               "ref": null,
-              "rendered": "~/fake-user/.electron-fiddle/themes",
+              "rendered": "~/.electron-fiddle/themes",
               "type": "code",
             },
             "type": "a",
@@ -129,21 +124,6 @@ ShallowWrapper {
             "rendered": null,
             "type": "br",
           },
-          "Want to create your own?",
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "children": " Create a new theme using the currently selected as template",
-              "id": "create-new-theme",
-              "onClick": [Function],
-            },
-            "ref": null,
-            "rendered": " Create a new theme using the currently selected as template",
-            "type": "a",
-          },
-          ".",
         ],
         "type": "label",
       },
@@ -160,6 +140,19 @@ ShallowWrapper {
         "ref": null,
         "rendered": Array [],
         "type": "select",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "Create theme from current selection",
+          "id": "create-new-theme",
+          "onClick": [Function],
+        },
+        "ref": null,
+        "rendered": "Create theme from current selection",
+        "type": "button",
       },
     ],
     "type": "div",
@@ -181,26 +174,25 @@ ShallowWrapper {
               onClick={[Function]}
             >
               <code>
-                ~/fake-user/.electron-fiddle/themes
+                ~/.electron-fiddle/themes
               </code>
             </a>
             .
             <br />
-            Want to create your own?
-            <a
-              id="create-new-theme"
-              onClick={[Function]}
-            >
-               Create a new theme using the currently selected as template
-            </a>
-            .
           </label>,
           <select
             className="select-themes"
             onChange={[Function]}
             value="undefined"
           />,
+          <button
+            id="create-new-theme"
+            onClick={[Function]}
+          >
+            Create theme from current selection
+          </button>,
         ],
+        "className": "settings-appearance",
       },
       "ref": null,
       "rendered": Array [
@@ -227,19 +219,11 @@ ShallowWrapper {
                 onClick={[Function]}
               >
                 <code>
-                  ~/fake-user/.electron-fiddle/themes
+                  ~/.electron-fiddle/themes
                 </code>
               </a>,
               ".",
               <br />,
-              "Want to create your own?",
-              <a
-                id="create-new-theme"
-                onClick={[Function]}
-              >
-                 Create a new theme using the currently selected as template
-              </a>,
-              ".",
             ],
           },
           "ref": null,
@@ -251,7 +235,7 @@ ShallowWrapper {
               "nodeType": "host",
               "props": Object {
                 "children": <code>
-                  ~/fake-user/.electron-fiddle/themes
+                  ~/.electron-fiddle/themes
                 </code>,
                 "id": "open-theme-folder",
                 "onClick": [Function],
@@ -262,10 +246,10 @@ ShallowWrapper {
                 "key": undefined,
                 "nodeType": "host",
                 "props": Object {
-                  "children": "~/fake-user/.electron-fiddle/themes",
+                  "children": "~/.electron-fiddle/themes",
                 },
                 "ref": null,
-                "rendered": "~/fake-user/.electron-fiddle/themes",
+                "rendered": "~/.electron-fiddle/themes",
                 "type": "code",
               },
               "type": "a",
@@ -280,21 +264,6 @@ ShallowWrapper {
               "rendered": null,
               "type": "br",
             },
-            "Want to create your own?",
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "host",
-              "props": Object {
-                "children": " Create a new theme using the currently selected as template",
-                "id": "create-new-theme",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": " Create a new theme using the currently selected as template",
-              "type": "a",
-            },
-            ".",
           ],
           "type": "label",
         },
@@ -311,6 +280,19 @@ ShallowWrapper {
           "ref": null,
           "rendered": Array [],
           "type": "select",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "Create theme from current selection",
+            "id": "create-new-theme",
+            "onClick": [Function],
+          },
+          "ref": null,
+          "rendered": "Create theme from current selection",
+          "type": "button",
         },
       ],
       "type": "div",
