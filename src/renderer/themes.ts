@@ -8,7 +8,6 @@ import { defaultDark, defaultLight, DefaultThemes, FiddleTheme, LoadedFiddleThem
 
 export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
 
-
 /**
  * Activate a given theme (or the default)
  *
@@ -115,8 +114,8 @@ export function getCssStringForTheme(theme: FiddleTheme): string {
   let cssContent = '';
 
   Object.keys(theme.common).forEach((key) => {
-    cssContent += `  --${key}: ${theme.common[key]};\n`;
+    cssContent += `    --${key}: ${theme.common[key]};\n`;
   });
 
-  return `html, body {\n${cssContent}\n}`;
+  return `\n  html, body {\n${cssContent}  }\n`;
 }

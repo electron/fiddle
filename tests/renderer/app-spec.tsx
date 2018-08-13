@@ -5,6 +5,7 @@ import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
 jest.mock('../../src/renderer/state', () => ({
   appState: {
+    theme: 'defaultDark',
     getName: () => 'Test'
   }
 }));
@@ -110,6 +111,37 @@ describe('Editrors component', () => {
         .toHaveBeenCalled();
       expect((window.addEventListener as jest.Mock).mock.calls[0][0])
         .toBe('resize');
+    });
+  });
+
+  describe('setupTheme()', () => {
+    it(`adds the current theme's css to the document`, async () => {
+      document.head.innerHTML = '<style id="fiddle-theme"></style>';
+
+      const app = new App();
+      await app.setupTheme();
+
+      expect(document.head.innerHTML).toEqual(
+        // tslint:disable:max-line-length
+        `<style id="fiddle-theme">
+          html, body {
+            --foreground-1: #9feafa;
+            --foreground-2: #8ac7d6;
+            --foreground-3: #608291;
+            --background-3: #2c2e3b;
+            --background-2: #1d2427;
+            --background-1: #2f3241;
+            --border-color-2: #1e2527;
+            --border-color-1: #5c5f71;
+            --border: 1px solid var(--border-color-1);
+            --text-color-1: #ffffff;
+            --text-color-2: #1e2527;
+            --text-color-3: #dcdcdc;
+            --error-color: #df3434;
+            --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";;
+          }
+        </style>`.replace(/        /gm, ''));
+        // tslint:enable:max-line-length
     });
   });
 

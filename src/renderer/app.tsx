@@ -134,7 +134,9 @@ export class App {
     const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
     const theme = await getTheme(appState.theme);
 
-    if (tag) tag.innerHTML = theme.css;
+    if (tag && theme.css) {
+      tag.innerHTML = theme.css;
+    }
   }
 
   /**
