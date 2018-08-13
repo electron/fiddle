@@ -32,6 +32,7 @@ export class AppearanceSettings extends React.Component<
     super(props);
 
     this.handleChange = this.handleChange.bind(this);
+    this.openThemeFolder = this.openThemeFolder.bind(this);
 
     this.state = {
       themes: []
@@ -52,14 +53,16 @@ export class AppearanceSettings extends React.Component<
     this.props.appState.setTheme(event.target.value);
   }
 
-  public async openThemeFolder() {
+  public async openThemeFolder(): Promise<boolean> {
     const fs = await fancyImport<typeof fsType>('fs-extra');
 
     try {
       await fs.ensureDir(THEMES_PATH);
-      await shell.openExternal(THEMES_PATH);
+      await shell.showItemInFolder(THEMES_PATH);
+      return true;
     } catch (error) {
       console.warn(`Appearance Settings: Could not open themes folder`);
+      return false;
     }
   }
 
@@ -87,7 +90,12 @@ export class AppearanceSettings extends React.Component<
       <div>
         <h4>Appearance</h4>
         <label key='theme-label'>
-          To add themes, add JSON theme files to <code>{themePath}</code>.
+          To add themes, add JSON theme files to <a
+            id='open-theme-folder'
+            onClick={() => this.openThemeFolder()}
+          >
+            <code>{themePath}</code>
+          </a>.
         </label>
         <select
           className='select-themes'

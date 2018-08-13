@@ -1,7 +1,7 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { AppState, appState } from '../state';
+import { AppState } from '../state';
 import { AppearanceSettings } from './settings-general-appearance';
 import { GitHubSettings } from './settings-general-github';
 
@@ -21,9 +21,9 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps, {}> {
     return (
       <div>
         <h2>General Settings</h2>
-        <AppearanceSettings appState={appState} />
+        <AppearanceSettings appState={this.props.appState} />
         <hr />
-        <GitHubSettings appState={appState} />
+        <GitHubSettings appState={this.props.appState} />
       </div>
     );
   }

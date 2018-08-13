@@ -84,7 +84,7 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
       }
     }
   } catch (error) {
-    console.error(`Themes: Could not read available themes`, error);
+    console.warn(`Themes: Could not read available themes`, error);
   }
 
   return themes;
