@@ -4,7 +4,7 @@ export interface FiddleTheme {
   name?: string;
   editor: Partial<MonacoType.editor.IStandaloneThemeData>;
   common: {
-    fonts: string;
+    'fonts-common': string;
     'foreground-1': string;
     'foreground-2': string;
     'foreground-3': string;
@@ -24,13 +24,13 @@ export interface FiddleTheme {
 export interface LoadedFiddleTheme extends FiddleTheme {
   name: string;
   file: string;
-  css: string;
+  css?: string;
 }
 
 /**
  * Fiddle's default dark theme.
  */
-export const defaultDark = {
+export const defaultDark: LoadedFiddleTheme = {
   name: 'Fiddle (Dark)',
   file: 'defaultDark',
   common: {
@@ -53,14 +53,14 @@ export const defaultDark = {
   editor: {
     base: 'vs-dark',
     inherit: true,
-    rules: [{ background: '2f3241' }],
+    rules: [],
     colors: {
       'editor.background': '#2f3241'
     }
   }
 };
 
-export const defaultLight = {
+export const defaultLight: LoadedFiddleTheme = {
   name: 'Fiddle (Light)',
   file: 'defaultLight',
   common: {

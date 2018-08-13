@@ -35,17 +35,21 @@ export async function activateTheme(
  * @param {string} [name]
  * @returns {Promise<FiddleTheme>}
  */
-export async function readThemeFile(name?: string): Promise<FiddleTheme | null> {
+export async function readThemeFile(name?: string): Promise<LoadedFiddleTheme | null> {
   if (!name || name === DefaultThemes.DARK) return defaultDark as any;
   if (name === DefaultThemes.LIGHT) return defaultLight as any;
 
   const fs = await fancyImport<typeof fsType>('fs-extra');
-  const themePath = name.endsWith('.json')
-    ? path.join(THEMES_PATH, name)
-    : path.join(THEMES_PATH, `${name}.json`);
+  const file = name.endsWith('.json') ? name : `${name}.json`;
+  const themePath = path.join(THEMES_PATH, file);
 
   try {
-    return await fs.readJSON(themePath);
+    const theme = await fs.readJSON(themePath);
+    return {
+      ...theme,
+      name: theme.name || name.replace('.json', ''),
+      file
+    };
   } catch (error) {
     console.warn(`Themes: Loading theme ${name} failed`, error);
     return null;
@@ -73,14 +77,10 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
     const themeFiles = await fs.readdir(THEMES_PATH);
 
     for (const file of themeFiles) {
-      const theme = await readThemeFile(name);
+      const theme = await readThemeFile(file);
 
       if (theme) {
-        themes.push({
-          ...theme,
-          name: theme.name || file.replace('.json', ''),
-          file
-        });
+        themes.push(theme);
       }
     }
   } catch (error) {
@@ -98,18 +98,25 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
  * @param {string} [name]
  * @returns {Promise<FiddleTheme>}
  */
-export async function getTheme(name?: string | null): Promise<FiddleTheme> {
-  let cssContent = '';
-
+export async function getTheme(name?: string | null): Promise<LoadedFiddleTheme> {
   console.log(`Themes: getTheme() loading ${name || 'default'}`);
   const theme = await readThemeFile(name || undefined) || defaultDark;
+
+  return { ...theme, css: getCssStringForTheme(theme) };
+}
+
+/**
+ * Get the CSS string for a theme.
+ *
+ * @param {FiddleTheme} theme
+ * @returns {string}
+ */
+export function getCssStringForTheme(theme: FiddleTheme): string {
+  let cssContent = '';
 
   Object.keys(theme.common).forEach((key) => {
     cssContent += `  --${key}: ${theme.common[key]};\n`;
   });
 
-  return {
-    ...theme,
-    css: `html, body {\n${cssContent}\n}`
-  } as any;
+  return `html, body {\n${cssContent}\n}`;
 }

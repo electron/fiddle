@@ -46,9 +46,9 @@ describe('themes', () => {
 
       expect(themes).toHaveLength(4);
       expect(themes[2]).toEqual({
-        file: 'test-theme1.json',
+        test: true,
         name: 'test-theme1',
-        test: true
+        file: 'test-theme1.json'
       });
       expect(themes[3]).toEqual({
         file: 'test-theme2.json',
