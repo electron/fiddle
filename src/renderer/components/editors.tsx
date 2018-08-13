@@ -9,7 +9,7 @@ import { getFocusedEditor } from '../../utils/focused-editor';
 import { ContentNames, getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { mainTheme } from '../themes';
+import { activateTheme } from '../themes';
 import { Editor } from './editor';
 
 const options: any = {
@@ -113,8 +113,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     const loader = require('monaco-loader');
     const monaco = app.monaco || await loader();
 
-    monaco.editor.defineTheme('main', mainTheme as any);
-
     if (!app.monaco) {
       app.monaco = monaco;
     }
@@ -125,15 +123,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       this.setState({ monaco });
     }
 
-    this.createThemes();
-  }
-
-  /**
-   * We have a custom theme for the Monaco editor. This sets that up.
-   */
-  private createThemes(): void {
-    if (!this.state.monaco) return;
-    this.state.monaco.editor.defineTheme('main', mainTheme as any);
-    this.state.monaco.editor.setTheme('main');
+    activateTheme(monaco, undefined, this.props.appState.theme);
   }
 }

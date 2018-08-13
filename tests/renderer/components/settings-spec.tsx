@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { Settings } from '../../../src/renderer/components/settings';
 
-jest.mock('../../../src/renderer/components/settings-github', () => ({
-  GitHubSettings: 'settings-github'
+jest.mock('../../../src/renderer/components/settings-general', () => ({
+  GeneralSettings: 'settings-general'
 }));
 
 jest.mock('../../../src/renderer/components/settings-electron', () => ({
@@ -49,16 +49,16 @@ describe('CreditsSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the GitHub page after a click', () => {
+  it('renders the General page after a click', () => {
     const wrapper = shallow(
       <Settings appState={this.store} />
     );
 
-    wrapper.find('.GitHub').simulate('click');
+    wrapper.find('.General').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the GitHub page after a click', () => {
+  it('renders the General page after a click', () => {
     const wrapper = shallow(
       <Settings appState={this.store} />
     );

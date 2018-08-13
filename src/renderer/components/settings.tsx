@@ -7,17 +7,17 @@ import { classNames } from '../../utils/classnames';
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
-import { GitHubSettings } from './settings-github';
+import { GeneralSettings } from './settings-general';
 
 enum SettingsSections {
-  GitHub = 'GitHub',
+  General = 'General',
   Electron = 'Electron',
   Credits = 'Credits'
 }
 
 const settingsSections = [
+  SettingsSections.General,
   SettingsSections.Electron,
-  SettingsSections.GitHub,
   SettingsSections.Credits
 ];
 
@@ -41,7 +41,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     super(props);
 
     this.state = {
-      section: SettingsSections.Electron
+      section: SettingsSections.General
     };
   }
 
@@ -55,12 +55,12 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     const { section } = this.state;
     const { appState } = this.props;
 
-    if (section === SettingsSections.Electron) {
-      return <ElectronSettings appState={appState} />;
+    if (section === SettingsSections.General) {
+      return <GeneralSettings appState={appState} />;
     }
 
-    if (section === SettingsSections.GitHub) {
-      return <GitHubSettings appState={appState} />;
+    if (section === SettingsSections.Electron) {
+      return <ElectronSettings appState={appState} />;
     }
 
     if (section === SettingsSections.Credits) {

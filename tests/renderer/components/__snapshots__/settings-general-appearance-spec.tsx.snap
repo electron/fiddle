@@ -1,0 +1,309 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AppearanceSettings component renders 1`] = `
+ShallowWrapper {
+  "length": 1,
+  Symbol(enzyme.__root__): [Circular],
+  Symbol(enzyme.__unrendered__): <AppearanceSettings
+    appState={
+      Object {
+        "setTheme": [MockFunction],
+      }
+    }
+  />,
+  Symbol(enzyme.__renderer__): Object {
+    "batchedUpdates": [Function],
+    "getNode": [Function],
+    "render": [Function],
+    "simulateEvent": [Function],
+    "unmount": [Function],
+  },
+  Symbol(enzyme.__node__): Object {
+    "instance": null,
+    "key": undefined,
+    "nodeType": "host",
+    "props": Object {
+      "children": Array [
+        <h4>
+          Appearance
+        </h4>,
+        <label>
+          To add themes, add JSON theme files to 
+          <a
+            id="open-theme-folder"
+            onClick={[Function]}
+          >
+            <code>
+              ~/.electron-fiddle/themes
+            </code>
+          </a>
+          .
+          <br />
+        </label>,
+        <select
+          className="select-themes"
+          onChange={[Function]}
+          value="undefined"
+        />,
+        <button
+          id="create-new-theme"
+          onClick={[Function]}
+        >
+          Create theme from current selection
+        </button>,
+      ],
+      "className": "settings-appearance",
+    },
+    "ref": null,
+    "rendered": Array [
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "Appearance",
+        },
+        "ref": null,
+        "rendered": "Appearance",
+        "type": "h4",
+      },
+      Object {
+        "instance": null,
+        "key": "theme-label",
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [
+            "To add themes, add JSON theme files to ",
+            <a
+              id="open-theme-folder"
+              onClick={[Function]}
+            >
+              <code>
+                ~/.electron-fiddle/themes
+              </code>
+            </a>,
+            ".",
+            <br />,
+          ],
+        },
+        "ref": null,
+        "rendered": Array [
+          "To add themes, add JSON theme files to ",
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": <code>
+                ~/.electron-fiddle/themes
+              </code>,
+              "id": "open-theme-folder",
+              "onClick": [Function],
+            },
+            "ref": null,
+            "rendered": Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": "~/.electron-fiddle/themes",
+              },
+              "ref": null,
+              "rendered": "~/.electron-fiddle/themes",
+              "type": "code",
+            },
+            "type": "a",
+          },
+          ".",
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {},
+            "ref": null,
+            "rendered": null,
+            "type": "br",
+          },
+        ],
+        "type": "label",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": Array [],
+          "className": "select-themes",
+          "onChange": [Function],
+          "value": "undefined",
+        },
+        "ref": null,
+        "rendered": Array [],
+        "type": "select",
+      },
+      Object {
+        "instance": null,
+        "key": undefined,
+        "nodeType": "host",
+        "props": Object {
+          "children": "Create theme from current selection",
+          "id": "create-new-theme",
+          "onClick": [Function],
+        },
+        "ref": null,
+        "rendered": "Create theme from current selection",
+        "type": "button",
+      },
+    ],
+    "type": "div",
+  },
+  Symbol(enzyme.__nodes__): Array [
+    Object {
+      "instance": null,
+      "key": undefined,
+      "nodeType": "host",
+      "props": Object {
+        "children": Array [
+          <h4>
+            Appearance
+          </h4>,
+          <label>
+            To add themes, add JSON theme files to 
+            <a
+              id="open-theme-folder"
+              onClick={[Function]}
+            >
+              <code>
+                ~/.electron-fiddle/themes
+              </code>
+            </a>
+            .
+            <br />
+          </label>,
+          <select
+            className="select-themes"
+            onChange={[Function]}
+            value="undefined"
+          />,
+          <button
+            id="create-new-theme"
+            onClick={[Function]}
+          >
+            Create theme from current selection
+          </button>,
+        ],
+        "className": "settings-appearance",
+      },
+      "ref": null,
+      "rendered": Array [
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "Appearance",
+          },
+          "ref": null,
+          "rendered": "Appearance",
+          "type": "h4",
+        },
+        Object {
+          "instance": null,
+          "key": "theme-label",
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [
+              "To add themes, add JSON theme files to ",
+              <a
+                id="open-theme-folder"
+                onClick={[Function]}
+              >
+                <code>
+                  ~/.electron-fiddle/themes
+                </code>
+              </a>,
+              ".",
+              <br />,
+            ],
+          },
+          "ref": null,
+          "rendered": Array [
+            "To add themes, add JSON theme files to ",
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": <code>
+                  ~/.electron-fiddle/themes
+                </code>,
+                "id": "open-theme-folder",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": "~/.electron-fiddle/themes",
+                },
+                "ref": null,
+                "rendered": "~/.electron-fiddle/themes",
+                "type": "code",
+              },
+              "type": "a",
+            },
+            ".",
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {},
+              "ref": null,
+              "rendered": null,
+              "type": "br",
+            },
+          ],
+          "type": "label",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": Array [],
+            "className": "select-themes",
+            "onChange": [Function],
+            "value": "undefined",
+          },
+          "ref": null,
+          "rendered": Array [],
+          "type": "select",
+        },
+        Object {
+          "instance": null,
+          "key": undefined,
+          "nodeType": "host",
+          "props": Object {
+            "children": "Create theme from current selection",
+            "id": "create-new-theme",
+            "onClick": [Function],
+          },
+          "ref": null,
+          "rendered": "Create theme from current selection",
+          "type": "button",
+        },
+      ],
+      "type": "div",
+    },
+  ],
+  Symbol(enzyme.__options__): Object {
+    "adapter": ReactSixteenAdapter {
+      "options": Object {
+        "enableComponentDidUpdateOnSetState": true,
+      },
+    },
+  },
+}
+`;

@@ -8,6 +8,7 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { BinaryManager } from './binary';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
+import { activateTheme } from './themes';
 import { getKnownVersions, getUpdatedKnownVersions } from './versions';
 
 const knownVersions = getKnownVersions();
@@ -37,6 +38,7 @@ window.ElectronFiddle = {
 export class AppState {
   @observable public gistId: string = '';
   @observable public version: string = defaultVersion;
+  @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
@@ -72,6 +74,7 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
 
     // Setup autoruns
+    autorun(() => localStorage.setItem('theme', this.theme || ''));
     autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
     autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
     autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
@@ -127,6 +130,12 @@ export class AppState {
 
   @action public showTour() {
     this.resetView({ isTourShowing: true });
+  }
+
+  @action public setTheme(name?: string) {
+    this.theme = name || '';
+    activateTheme(undefined, undefined, name);
+    window.ElectronFiddle.app.setupTheme();
   }
 
  /*

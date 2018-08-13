@@ -10,6 +10,14 @@ global.fetch = require('jest-fetch-mock');
 jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
 jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
 jest.mock('electron', () => require('./mocks/electron'));
+jest.mock('../src/constants', () => ({
+  USER_DATA_PATH: '/Users/fake-user',
+  INDEX_HTML_NAME: 'index.html',
+  MAIN_JS_NAME: 'main.js',
+  RENDERER_JS_NAME: 'renderer.js',
+  PACKAGE_NAME: 'package.json',
+  CONFIG_PATH: '~/.electron-fiddle'
+}))
 
 // We'll do this twice.
 window.localStorage = {};

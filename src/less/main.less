@@ -1,13 +1,13 @@
 body {
   padding: 0;
   margin: 0;
-  background: @electron-background-2;
+  background: @background-2;
   overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100vh;
-  font-family: @default-fonts;
-  color: @default-text-color;
+  font-family: @fonts-common;
+  color: @text-color-1;
   font-size: 1.6em;
   font-weight: 300;
   letter-spacing: 0.01em;
@@ -36,8 +36,8 @@ body {
   }
 
   header {
-    border-bottom: @default-border;
-    background-color: @electron-background;
+    border-bottom: @border;
+    background-color: @background-1;
     -webkit-app-region: drag;
   }
 
@@ -47,7 +47,8 @@ body {
 
   .timestamp {
     margin-right: 5px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-color-1);
+    opacity: 0.7;
     user-select: none;
   }
 }

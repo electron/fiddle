@@ -75,7 +75,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
 
     return (
       <div>
-        <h2>GitHub Settings</h2>
+        <h4>GitHub</h4>
         {maybeSignedIn}
       </div>
     );
