@@ -178,7 +178,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       const remove = () => appState.removeVersion(key);
 
       return (
-        <button className='button button-clear' onClick={remove}>
+        <button className='button' onClick={remove}>
           <FontAwesomeIcon icon={faTrash} /> Delete
         </button>
       );
@@ -187,7 +187,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     // Downloading
     if (state === 'downloading') {
       return (
-        <button className='button button-clear' disabled={true}>
+        <button className='button' disabled={true}>
           <FontAwesomeIcon icon={faSpinner} spin={true}/> Downloading
         </button>
       );
@@ -197,7 +197,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     const download = () => appState.setVersion(key);
 
     return (
-      <button className='button button-clear' onClick={download}>
+      <button className='button' onClick={download}>
         <FontAwesomeIcon icon={faCloudDownloadAlt} /> Download
       </button>
     );
