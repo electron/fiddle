@@ -25,7 +25,7 @@ ShallowWrapper {
     "props": Object {
       "children": Array [
         <h4>
-          GitHub Settings
+          GitHub
         </h4>,
         Array [
           <label>
@@ -76,10 +76,10 @@ ShallowWrapper {
         "key": undefined,
         "nodeType": "host",
         "props": Object {
-          "children": "GitHub Settings",
+          "children": "GitHub",
         },
         "ref": null,
-        "rendered": "GitHub Settings",
+        "rendered": "GitHub",
         "type": "h4",
       },
       Object {
@@ -185,7 +185,7 @@ ShallowWrapper {
       "props": Object {
         "children": Array [
           <h4>
-            GitHub Settings
+            GitHub
           </h4>,
           Array [
             <label>
@@ -236,10 +236,10 @@ ShallowWrapper {
           "key": undefined,
           "nodeType": "host",
           "props": Object {
-            "children": "GitHub Settings",
+            "children": "GitHub",
           },
           "ref": null,
-          "rendered": "GitHub Settings",
+          "rendered": "GitHub",
           "type": "h4",
         },
         Object {
@@ -375,7 +375,7 @@ ShallowWrapper {
     "props": Object {
       "children": Array [
         <h4>
-          GitHub Settings
+          GitHub
         </h4>,
         Array [
           <label>
@@ -428,10 +428,10 @@ ShallowWrapper {
         "key": undefined,
         "nodeType": "host",
         "props": Object {
-          "children": "GitHub Settings",
+          "children": "GitHub",
         },
         "ref": null,
-        "rendered": "GitHub Settings",
+        "rendered": "GitHub",
         "type": "h4",
       },
       Object {
@@ -545,7 +545,7 @@ ShallowWrapper {
       "props": Object {
         "children": Array [
           <h4>
-            GitHub Settings
+            GitHub
           </h4>,
           Array [
             <label>
@@ -598,10 +598,10 @@ ShallowWrapper {
           "key": undefined,
           "nodeType": "host",
           "props": Object {
-            "children": "GitHub Settings",
+            "children": "GitHub",
           },
           "ref": null,
-          "rendered": "GitHub Settings",
+          "rendered": "GitHub",
           "type": "h4",
         },
         Object {
