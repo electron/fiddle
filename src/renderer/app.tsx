@@ -125,9 +125,14 @@ export class App {
     });
   }
 
+  /**
+   * Loads theme CSS into the HTML document.
+   *
+   * @returns {Promise<void>}
+   */
   public async setupTheme(): Promise<void> {
     const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
-    const theme = await getTheme();
+    const theme = await getTheme(appState.theme);
 
     if (tag) tag.innerHTML = theme.css;
   }
