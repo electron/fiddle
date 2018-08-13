@@ -6,7 +6,7 @@ input[type='submit'] {
 	border: @border;
 	border-radius: .4rem;
 	cursor: pointer;
-	color: @text-color-2;
+	color: @button-text-color;
 	display: inline-block;
 	font-size: 1.1rem;
 	font-weight: 700;
@@ -21,7 +21,7 @@ input[type='submit'] {
 	&:hover {
 		box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
 		background-color: @foreground-1;
-		border-color-1: @foreground-1;
+		border-color: @foreground-1;
 		outline: 0;
 		color: initial;
 	}
@@ -29,11 +29,11 @@ input[type='submit'] {
 	&[disabled] {
 		cursor: default;
 		opacity: .5;
-		border-color-1: @foreground-3;
+		border-color: @foreground-3;
 
 		&:focus,
 		&:hover {
-			border-color-1: @foreground-3;
+			border-color: @foreground-3;
 			background: unset;
 			color: unset;
 		}
@@ -47,20 +47,20 @@ input[type='submit'] {
 		&:focus,
 		&:hover {
 			background-color: transparent;
-			border-color-1: @foreground-1;
+			border-color: @foreground-1;
 			color: @foreground-1;
 		}
 	}
 
 	&.button-clear {
 		background-color: transparent;
-		border-color-1: transparent;
+		border-color: transparent;
 		color: @foreground-2;
 
 		&:focus,
 		&:hover {
 			background-color: transparent;
-			border-color-1: transparent;
+			border-color: transparent;
 			color: @foreground-1;;
 		}
 

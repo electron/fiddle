@@ -101,7 +101,7 @@ export async function getTheme(name?: string | null): Promise<LoadedFiddleTheme>
   console.log(`Themes: getTheme() loading ${name || 'default'}`);
   const theme = await readThemeFile(name || undefined) || defaultDark;
 
-  return { ...theme, css: getCssStringForTheme(theme) };
+  return { ...theme, css: await getCssStringForTheme(theme) };
 }
 
 /**
@@ -110,7 +110,7 @@ export async function getTheme(name?: string | null): Promise<LoadedFiddleTheme>
  * @param {FiddleTheme} theme
  * @returns {string}
  */
-export function getCssStringForTheme(theme: FiddleTheme): string {
+export async function getCssStringForTheme(theme: FiddleTheme): Promise<string> {
   let cssContent = '';
 
   Object.keys(theme.common).forEach((key) => {

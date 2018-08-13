@@ -7,7 +7,7 @@ import * as React from 'react';
 import { CONFIG_PATH } from '../../constants';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
-import { getAvailableThemes, THEMES_PATH } from '../themes';
+import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 
 export interface AppearanceSettingsProps {
@@ -53,6 +53,45 @@ export class AppearanceSettings extends React.Component<
     this.props.appState.setTheme(event.target.value);
   }
 
+  /**
+   * Creates a new theme from the current template.
+   *
+   * @returns {Promise<boolean>}
+   * @memberof AppearanceSettings
+   */
+  public async createNewThemeFromCurrent(): Promise<boolean> {
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    const theme = await getTheme(this.props.appState.theme);
+
+
+    try {
+      const namor = await fancyImport<any>('namor');
+      const name = namor.generate({ words: 2, numbers: 0 });
+      const themePath = path.join(THEMES_PATH, `${name}.json`);
+
+      await fs.outputJSON(themePath, {
+        ...theme,
+        name,
+        file: undefined,
+        css: undefined
+      }, { spaces: 2 });
+
+      shell.openItem(themePath);
+
+      return true;
+    } catch (error) {
+      console.warn(`Themes: Failed to create new theme from current`, error);
+
+      return false;
+    }
+  }
+
+  /**
+   * Creates the themes folder in .electron-fiddle if one does not
+   * exist yet, then shows that folder in the Finder/Explorer.
+   *
+   * @returns {Promise<boolean>}
+   */
   public async openThemeFolder(): Promise<boolean> {
     const fs = await fancyImport<typeof fsType>('fs-extra');
 
@@ -95,6 +134,11 @@ export class AppearanceSettings extends React.Component<
             onClick={() => this.openThemeFolder()}
           >
             <code>{themePath}</code>
+          </a>.<br />Want to create your own?
+          <a
+            id='create-new-theme'
+            onClick={() => this.createNewThemeFromCurrent()}
+          > Create a new theme using the currently selected as template
           </a>.
         </label>
         <select

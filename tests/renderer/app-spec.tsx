@@ -134,11 +134,12 @@ describe('Editrors component', () => {
             --border-color-2: #1e2527;
             --border-color-1: #5c5f71;
             --border: 1px solid var(--border-color-1);
+            --button-text-color: #000;
             --text-color-1: #ffffff;
             --text-color-2: #1e2527;
             --text-color-3: #dcdcdc;
             --error-color: #df3434;
-            --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";;
+            --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           }
         </style>`.replace(/        /gm, ''));
         // tslint:enable:max-line-length

@@ -34,6 +34,15 @@ ShallowWrapper {
             </code>
           </a>
           .
+          <br />
+          Want to create your own?
+          <a
+            id="create-new-theme"
+            onClick={[Function]}
+          >
+             Create a new theme using the currently selected as template
+          </a>
+          .
         </label>,
         <select
           className="select-themes"
@@ -71,6 +80,15 @@ ShallowWrapper {
               </code>
             </a>,
             ".",
+            <br />,
+            "Want to create your own?",
+            <a
+              id="create-new-theme"
+              onClick={[Function]}
+            >
+               Create a new theme using the currently selected as template
+            </a>,
+            ".",
           ],
         },
         "ref": null,
@@ -99,6 +117,30 @@ ShallowWrapper {
               "rendered": "~/fake-user/.electron-fiddle/themes",
               "type": "code",
             },
+            "type": "a",
+          },
+          ".",
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {},
+            "ref": null,
+            "rendered": null,
+            "type": "br",
+          },
+          "Want to create your own?",
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": " Create a new theme using the currently selected as template",
+              "id": "create-new-theme",
+              "onClick": [Function],
+            },
+            "ref": null,
+            "rendered": " Create a new theme using the currently selected as template",
             "type": "a",
           },
           ".",
@@ -143,6 +185,15 @@ ShallowWrapper {
               </code>
             </a>
             .
+            <br />
+            Want to create your own?
+            <a
+              id="create-new-theme"
+              onClick={[Function]}
+            >
+               Create a new theme using the currently selected as template
+            </a>
+            .
           </label>,
           <select
             className="select-themes"
@@ -180,6 +231,15 @@ ShallowWrapper {
                 </code>
               </a>,
               ".",
+              <br />,
+              "Want to create your own?",
+              <a
+                id="create-new-theme"
+                onClick={[Function]}
+              >
+                 Create a new theme using the currently selected as template
+              </a>,
+              ".",
             ],
           },
           "ref": null,
@@ -208,6 +268,30 @@ ShallowWrapper {
                 "rendered": "~/fake-user/.electron-fiddle/themes",
                 "type": "code",
               },
+              "type": "a",
+            },
+            ".",
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {},
+              "ref": null,
+              "rendered": null,
+              "type": "br",
+            },
+            "Want to create your own?",
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": " Create a new theme using the currently selected as template",
+                "id": "create-new-theme",
+                "onClick": [Function],
+              },
+              "ref": null,
+              "rendered": " Create a new theme using the currently selected as template",
               "type": "a",
             },
             ".",
