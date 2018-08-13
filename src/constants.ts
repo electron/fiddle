@@ -1,4 +1,5 @@
 import * as electronModule from 'electron';
+import * as path from 'path';
 
 const electron = electronModule.remote
   ? electronModule.remote
@@ -10,3 +11,4 @@ export const MAIN_JS_NAME = 'main.js';
 export const RENDERER_JS_NAME = 'renderer.js';
 export const PACKAGE_NAME = 'package.json';
 
+export const CONFIG_PATH = path.join(electron.app.getPath('home'), '.electron-fiddle');
