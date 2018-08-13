@@ -1,10 +1,13 @@
+import { shell } from 'electron';
+import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
 import { CONFIG_PATH } from '../../constants';
+import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
-import { getAvailableThemes } from '../themes';
+import { getAvailableThemes, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 
 export interface AppearanceSettingsProps {
@@ -47,6 +50,17 @@ export class AppearanceSettings extends React.Component<
    */
   public handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
     this.props.appState.setTheme(event.target.value);
+  }
+
+  public async openThemeFolder() {
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+
+    try {
+      await fs.ensureDir(THEMES_PATH);
+      await shell.openExternal(THEMES_PATH);
+    } catch (error) {
+      console.warn(`Appearance Settings: Could not open themes folder`);
+    }
   }
 
   /**
