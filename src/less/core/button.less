@@ -2,11 +2,11 @@ button,
 input[type='button'],
 input[type='reset'],
 input[type='submit'] {
-	background-color: @electron-bright;
-	border: @default-border;
+	background-color: @foreground-bright;
+	border: @border;
 	border-radius: .4rem;
 	cursor: pointer;
-	color: @default-text-color-dark;
+	color: @text-color-dark;
 	display: inline-block;
 	font-size: 1.1rem;
 	font-weight: 700;
@@ -20,8 +20,8 @@ input[type='submit'] {
 
 	&:hover {
 		box-shadow: inset 0 0 100px 100px rgba(255, 255, 255, 0.15);
-		background-color: @electron-brighter;
-		border-color: @electron-brighter;
+		background-color: @foreground-brighter;
+		border-color: @foreground-brighter;
 		outline: 0;
 		color: initial;
 	}
@@ -29,11 +29,11 @@ input[type='submit'] {
 	&[disabled] {
 		cursor: default;
 		opacity: .5;
-		border-color: @electron-tuned;
+		border-color: @foreground-tuned;
 
 		&:focus,
 		&:hover {
-			border-color: @electron-tuned;
+			border-color: @foreground-tuned;
 			background: unset;
 			color: unset;
 		}
@@ -41,33 +41,33 @@ input[type='submit'] {
 
 	&.button-outline {
 		background-color: transparent;
-		color: @electron-bright;
-		border: @default-border;
+		color: @foreground-bright;
+		border: @border;
 
 		&:focus,
 		&:hover {
 			background-color: transparent;
-			border-color: @electron-brighter;
-			color: @electron-brighter;
+			border-color: @foreground-brighter;
+			color: @foreground-brighter;
 		}
 	}
 
 	&.button-clear {
 		background-color: transparent;
 		border-color: transparent;
-		color: @electron-bright;
+		color: @foreground-bright;
 
 		&:focus,
 		&:hover {
 			background-color: transparent;
 			border-color: transparent;
-			color: @electron-brighter;;
+			color: @foreground-brighter;;
 		}
 
 		&[disabled] {
 			&:focus,
 			&:hover {
-				color: @electron-bright;
+				color: @foreground-bright;
 			}
 		}
 	}

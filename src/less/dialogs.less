@@ -23,8 +23,8 @@
 }
 
 .dialog {
-  background-color: @electron-background-3;
-  border: @default-border;
+  background-color: @background-3;
+  border: @border;
   color: #f3f3f3;
   border-radius: 6px;
   padding: 10px;
@@ -84,12 +84,12 @@
   }
 
   &.arrow-top::after {
-    border-bottom-color: @electron-background-3;
+    border-bottom-color: @background-3;
     margin-left: -9px;
   }
 
   &.arrow-top::before {
-    border-bottom-color: @default-border-color;
+    border-bottom-color: @border-color;
     margin-left: -10px;
   }
 
@@ -100,12 +100,12 @@
   }
 
   &.arrow-bottom::after {
-    border-top-color: @electron-background-3;
+    border-top-color: @background-3;
     margin-left: -9px;
   }
 
   &.arrow-bottom::before {
-    border-top-color: @default-border-color;
+    border-top-color: @border-color;
     margin-left: -10px;
   }
 
@@ -116,12 +116,12 @@
   }
 
   &.arrow-left::after {
-    border-right-color: @electron-background-3;
+    border-right-color: @background-3;
     margin-top: -9px;
   }
 
   &.arrow-left::before {
-    border-right-color: @default-border-color;
+    border-right-color: @border-color;
     margin-top: -10px;
   }
 
@@ -132,12 +132,12 @@
   }
 
   &.arrow-right::after {
-    border-left-color: @electron-background-3;
+    border-left-color: @background-3;
     margin-top: -9px;
   }
 
   &.arrow-right::before {
-    border-left-color: @default-border-color;
+    border-left-color: @border-color;
     margin-top: -10px;
   }
 
@@ -165,12 +165,12 @@
     color: rgba(159, 234, 249, 0.5);
     height: 28px;
     margin-top: 10px;
-    background-color: @electron-background;
-    border: 1px solid @electron-dark;
+    background-color: @background-1;
+    border: 1px solid @border-color-dark;
     outline: 0 solid transparent;
 
     &:focus {
-      border-color: @electron-bright;
+      border-color: @foreground-bright;
     }
 
     &.hasError {

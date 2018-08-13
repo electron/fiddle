@@ -5,6 +5,7 @@ import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { appState } from './state';
+import { getTheme } from './themes';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -81,6 +82,8 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void> {
+    this.setupTheme();
+
     const React = await import('react');
     const { render } = await import('react-dom');
     const { Header } = await import('./components/header');
@@ -120,6 +123,13 @@ export class App {
         disposable.dispose();
       });
     });
+  }
+
+  public async setupTheme(): Promise<void> {
+    const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
+    const theme = await getTheme();
+
+    if (tag) tag.innerHTML = theme.css;
   }
 
   /**
