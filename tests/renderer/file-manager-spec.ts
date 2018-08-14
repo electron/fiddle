@@ -73,7 +73,6 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(shell.showItemInFolder).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
@@ -85,7 +84,6 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
     });
 
@@ -122,7 +120,6 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
     });
   });

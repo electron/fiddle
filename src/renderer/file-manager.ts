@@ -103,9 +103,6 @@ export class FileManager {
         }
       }
 
-      // Show in folder
-      shell.showItemInFolder(pathToSave);
-
       if (pathToSave !== localPath) {
         this.appState.localPath = pathToSave;
       }
