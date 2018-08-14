@@ -58,7 +58,7 @@ the world!
 
 ## License
 
-[MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE).
+[MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE.md).
 
 When using the Electron or other GitHub logos, be sure to follow the [GitHub
 logo guidelines](https://github.com/logos).
