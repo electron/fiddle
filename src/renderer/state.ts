@@ -43,6 +43,9 @@ export class AppState {
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
+  @observable public versionPagesToFetch: number = parseInt(
+    localStorage.getItem('versionPagesToFetch') || '2', 10
+  );
   @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
@@ -89,9 +92,12 @@ export class AppState {
         window.onbeforeunload = null;
       }
     });
+    autorun(() => {
+      localStorage.setItem('versionPagesToFetch', this.versionPagesToFetch.toString() || '');
+    });
 
     // Update our known versions
-    getUpdatedKnownVersions().then((versions) => {
+    getUpdatedKnownVersions(this.versionPagesToFetch).then((versions) => {
       this.versions = arrayToStringMap(versions);
       this.updateDownloadedVersionState();
     });
