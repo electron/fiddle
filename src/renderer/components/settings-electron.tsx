@@ -1,4 +1,9 @@
-import { faCloudDownloadAlt, faSpinner, faTrash } from '@fortawesome/fontawesome-free-solid';
+import {
+  faClipboardList,
+  faCloudDownloadAlt,
+  faSpinner,
+  faTrash
+} from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -7,6 +12,7 @@ import { ElectronVersion } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
+import { ElectronReleaseChannel, getReleaseChannel } from '../versions';
 
 export interface ElectronSettingsProps {
   appState: AppState;
@@ -30,11 +36,48 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
     this.handleDownloadAll = this.handleDownloadAll.bind(this);
     this.handleDeleteAll = this.handleDeleteAll.bind(this);
+    this.handleChannelChange = this.handleChannelChange.bind(this);
+    this.handlePagesChange = this.handlePagesChange.bind(this);
+    this.handleDownloadClick = this.handleDownloadClick.bind(this);
 
     this.state = {
       isDownloadingAll: false,
       isDeletingAll: false
     };
+  }
+
+  public handleDownloadClick() {
+    this.props.appState.updateElectronVersions();
+  }
+
+  /**
+   * Handles a change in how many pages should be displayed.
+   *
+   * @param {React.ChangeEvent<HTMLSelectElement>} event
+   */
+  public handlePagesChange(
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) {
+    const { value } = event.currentTarget;
+    this.props.appState.versionPagesToFetch = parseInt(value, 10);
+  }
+
+  /**
+   * Handles a change in which channels should be displayed.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleChannelChange(
+    event: React.ChangeEvent<HTMLInputElement>
+  ) {
+    const { id, checked } = event.currentTarget;
+    const { appState } = this.props;
+
+    if (!checked) {
+      appState.versionsToShow = appState.versionsToShow.filter((c) => c !== id);
+    } else {
+      appState.versionsToShow.push(id as ElectronReleaseChannel);
+    }
   }
 
   /**
@@ -88,6 +131,8 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       <div className='settings-electron'>
         <h2>Electron Settings</h2>
         <div className='advanced-options settings-section'>
+          {this.renderVersionOptions()}
+
           <label>Download all versions of Electron.</label>
           <button
             className='button btn-download-all'
@@ -110,6 +155,88 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
           {this.renderTable()}
         </div>
       </div>
+    );
+  }
+
+  private renderVersionOptions(): JSX.Element {
+    const { appState } = this.props;
+    const getIsChecked = (channel: ElectronReleaseChannel) => {
+      return appState.versionsToShow.includes(channel);
+    };
+
+    return (
+      <div className='versions-to-show'>
+        <p>Include Electron versions from these release channels:</p>
+        <label>
+          <input
+            checked={getIsChecked(ElectronReleaseChannel.stable)}
+            id={ElectronReleaseChannel.stable}
+            type='checkbox'
+            onChange={this.handleChannelChange}
+          />
+          Stable
+        </label>
+        <label>
+          <input
+            checked={getIsChecked(ElectronReleaseChannel.beta)}
+            id={ElectronReleaseChannel.beta}
+            type='checkbox'
+            onChange={this.handleChannelChange}
+          />
+          Beta
+        </label>
+        <label>
+          <input
+            checked={getIsChecked(ElectronReleaseChannel.nightly)}
+            id={ElectronReleaseChannel.nightly}
+            type='checkbox'
+            onChange={this.handleChannelChange}
+          />
+          Nightly
+        </label>
+        <label>
+          <input
+            checked={getIsChecked(ElectronReleaseChannel.unsupported)}
+            id={ElectronReleaseChannel.unsupported}
+            type='checkbox'
+            onChange={this.handleChannelChange}
+          />
+          Unsupported
+        </label>
+        <p>Number of recent Electron releases to include:</p>
+        <select onChange={this.handlePagesChange}>
+          <option value='1'>30</option>
+          <option value='2'>60</option>
+          <option value='3'>90</option>
+          <option value='4'>120</option>
+          <option value='5'>150</option>
+          <option value='6'>180</option>
+          <option value='7'>210</option>
+          <option value='8'>240</option>
+          <option value='9'>270</option>
+          <option value='10'>300</option>
+        </select>
+        <br />
+        {this.renderUpdateVersionsButton()}
+      </div>
+    );
+  }
+
+  private renderUpdateVersionsButton(): JSX.Element {
+    const { appState } = this.props;
+    const { isUpdatingElectronVersions } = appState;
+    const icon = isUpdatingElectronVersions
+      ? <FontAwesomeIcon icon={faSpinner} spin={true}/>
+      : <FontAwesomeIcon icon={faClipboardList} />;
+
+    return (
+      <button
+        className='button'
+        disabled={isUpdatingElectronVersions}
+        onClick={this.handleDownloadClick}
+      >
+        {icon} Update Electron Release List
+      </button>
     );
   }
 
@@ -142,10 +269,15 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @private
    * @returns {Array<JSX.Element>}
    */
-  private renderTableRows(): Array<JSX.Element> {
-    const { versions } = this.props.appState;
+  private renderTableRows(): Array<JSX.Element | null> {
+    const { versions, versionsToShow } = this.props.appState;
 
-    return sortedElectronMap<JSX.Element>(versions, (key, item) => {
+    return sortedElectronMap<JSX.Element | null>(versions, (key, item) => {
+      // Check if we want to show the version
+      if (!versionsToShow.includes(getReleaseChannel(item))) {
+        return null;
+      }
+
       const { tag_name, state } = item;
       const humanState = state === 'ready'
         ? '✅ Downloaded'

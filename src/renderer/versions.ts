@@ -1,5 +1,40 @@
 import { GitHubVersion } from '../interfaces';
 
+export const enum ElectronReleaseChannel {
+  stable = 'Stable',
+  beta = 'Beta',
+  nightly = 'Nightly',
+  unsupported = 'Unsupported'
+}
+
+/**
+ * Return the release channel for a given input
+ * version.
+ *
+ * @param {GitHubVersion} input
+ * @returns {ElectronReleaseChannel}
+ */
+export function getReleaseChannel(
+  input: GitHubVersion
+): ElectronReleaseChannel {
+  const { tag_name } = input;
+
+  if (tag_name.includes('beta')) {
+    return ElectronReleaseChannel.beta;
+  }
+
+  if (tag_name.includes('nightly')) {
+    return ElectronReleaseChannel.nightly;
+  }
+
+  if (tag_name.includes('unsupported')) {
+    return ElectronReleaseChannel.unsupported;
+  }
+
+  // Must be a stable version, right?
+  return ElectronReleaseChannel.stable;
+}
+
 /**
  * Retrieves our best guess regarding the latest Electron versions. Tries to
  * fetch them from localStorage, then from a static releases.json file.
@@ -38,7 +73,7 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
  * @returns {Promise<Array<GitHubVersion>>}
  */
 export async function getUpdatedKnownVersions(
-  pages: number
+  pages: number,
 ): Promise<Array<GitHubVersion>> {
   try {
     await fetchVersions(pages);

@@ -1,6 +1,38 @@
-import { fetchVersions, getKnownVersions, getUpdatedKnownVersions } from '../../src/renderer/versions';
+import {
+  ElectronReleaseChannel,
+  fetchVersions,
+  getKnownVersions,
+  getReleaseChannel,
+  getUpdatedKnownVersions
+} from '../../src/renderer/versions';
 
 describe('versions', () => {
+  describe('getReleaseChannel()', () => {
+    it('identifies a nightly release', () => {
+      expect(getReleaseChannel({
+        tag_name: 'v4.0.0-nightly.20180817'
+      } as any)).toBe(ElectronReleaseChannel.nightly);
+    });
+
+    it('identifies a beta release', () => {
+      expect(getReleaseChannel({
+        tag_name: 'v3.0.0-beta.4'
+      } as any)).toBe(ElectronReleaseChannel.beta);
+    });
+
+    it('identifies an unsupported release', () => {
+      expect(getReleaseChannel({
+        tag_name: 'v2.1.0-unsupported.20180809'
+      } as any)).toBe(ElectronReleaseChannel.unsupported);
+    });
+
+    it('identifies a stable release', () => {
+      expect(getReleaseChannel({
+        tag_name: 'v3.0.0'
+      } as any)).toBe(ElectronReleaseChannel.stable);
+    });
+  });
+
   describe('fetchVersions()', () => {
     const mockResponse = `[{
         "url": "https://api.github.com/repos/electron/electron/releases/11120972",

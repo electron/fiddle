@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
+import { getReleaseChannel } from '../versions';
 
 export interface VersionChooserState {
   value: string;
@@ -42,10 +43,15 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
    *
    * @returns {Array<JSX.Element>}
    */
-  public renderOptions(): Array<JSX.Element> {
-    const { versions } = this.props.appState;
+  public renderOptions(): Array<JSX.Element | null> {
+    const { versions, versionsToShow } = this.props.appState;
 
-    return sortedElectronMap<JSX.Element>(versions, (_key, item) => {
+    return sortedElectronMap<JSX.Element | null>(versions, (_key, item) => {
+      // Check if we want to show the version
+      if (!versionsToShow.includes(getReleaseChannel(item))) {
+        return null;
+      }
+
       const { tag_name, state } = item;
       const version = tag_name;
       const icon = state === 'ready'
