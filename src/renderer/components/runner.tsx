@@ -60,7 +60,10 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
   public render() {
     const { versions, version } = this.props.appState;
     const { isRunning } = this.state;
-    if (!versions || !version) return null;
+
+    if (!versions || !version || !versions[normalizeVersion(version)]) {
+      return null;
+    }
 
     const state = versions[normalizeVersion(version)].state;
 

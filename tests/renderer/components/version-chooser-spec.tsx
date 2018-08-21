@@ -2,8 +2,8 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { VersionChooser } from '../../../src/renderer/components/version-chooser';
-import { mockVersions } from '../../mocks/electron-versions';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
+import { mockVersions } from '../../mocks/electron-versions';
 
 describe('VersionChooser component', () => {
   beforeEach(() => {
