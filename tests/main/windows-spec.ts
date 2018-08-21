@@ -60,5 +60,27 @@ describe('windows', () => {
       getOrCreateMainWindow().webContents.emit('dom-ready');
       expect(createContextMenu).toHaveBeenCalled();
     });
+
+    it('prevents new-window"', () => {
+      const e = {
+        preventDefault: jest.fn()
+      };
+
+      getOrCreateMainWindow();
+      expect(browserWindows[0]).toBeTruthy();
+      getOrCreateMainWindow().webContents.emit('new-window', e);
+      expect(e.preventDefault).toHaveBeenCalled();
+    });
+
+    it('prevents will-navigate"', () => {
+      const e = {
+        preventDefault: jest.fn()
+      };
+
+      getOrCreateMainWindow();
+      expect(browserWindows[0]).toBeTruthy();
+      getOrCreateMainWindow().webContents.emit('will-navigate', e);
+      expect(e.preventDefault).toHaveBeenCalled();
+    });
   });
 });

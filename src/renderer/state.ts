@@ -9,7 +9,7 @@ import { BinaryManager } from './binary';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { getKnownVersions, getUpdatedKnownVersions } from './versions';
+import { ElectronReleaseChannel, getKnownVersions, getUpdatedKnownVersions } from './versions';
 
 const knownVersions = getKnownVersions();
 const defaultVersion = localStorage.getItem('version')
@@ -36,22 +36,35 @@ window.ElectronFiddle = {
  * @class AppState
  */
 export class AppState {
-  @observable public gistId: string = '';
+  // Persisted settings
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
+  @observable public versionPagesToFetch: number = parseInt(
+    localStorage.getItem('versionPagesToFetch') || '2', 10
+  );
+  @observable public versionsToShow: Array<ElectronReleaseChannel> =
+    this.retrieve('versionsToShow', true) as Array<ElectronReleaseChannel>
+      || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
+
   @observable public binaryManager: BinaryManager = new BinaryManager();
+
+  // Various session-only state
+  @observable public gistId: string = '';
+  @observable public isMyGist: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | null = null;
+  @observable public isUpdatingElectronVersions = false;
+
+  // Various "isShowing" settings
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
-  @observable public isMyGist: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   private outputBuffer: string = '';
@@ -69,17 +82,21 @@ export class AppState {
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.toggleConsole = this.toggleConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
+    this.updateElectronVersions = this.updateElectronVersions.bind(this);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
 
     // Setup autoruns
-    autorun(() => localStorage.setItem('theme', this.theme || ''));
-    autorun(() => localStorage.setItem('gitHubAvatarUrl', this.gitHubAvatarUrl || ''));
-    autorun(() => localStorage.setItem('gitHubLogin', this.gitHubLogin || ''));
-    autorun(() => localStorage.setItem('gitHubName', this.gitHubName || ''));
-    autorun(() => localStorage.setItem('gitHubToken', this.gitHubToken || ''));
-    autorun(() => localStorage.setItem('version', this.version || ''));
+    autorun(() => this.save('theme', this.theme));
+    autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
+    autorun(() => this.save('gitHubLogin', this.gitHubLogin));
+    autorun(() => this.save('gitHubName', this.gitHubName));
+    autorun(() => this.save('gitHubToken', this.gitHubToken));
+    autorun(() => this.save('version', this.version));
+    autorun(() => this.save('versionPagesToFetch', this.versionPagesToFetch));
+    autorun(() => this.save('versionsToShow', this.versionsToShow));
+
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
@@ -91,10 +108,25 @@ export class AppState {
     });
 
     // Update our known versions
-    getUpdatedKnownVersions().then((versions) => {
+    this.updateElectronVersions();
+  }
+
+  /**
+   * Update the Electron versions: First, fetch them from GitHub,
+   * then update their respective downloaded state.
+   */
+  @action public async updateElectronVersions() {
+    this.isUpdatingElectronVersions = true;
+
+    try {
+      const versions = await getUpdatedKnownVersions(this.versionPagesToFetch);
       this.versions = arrayToStringMap(versions);
-      this.updateDownloadedVersionState();
-    });
+      await this.updateDownloadedVersionState();
+    } catch (error) {
+      console.warn(`State: Could not update Electron versions`);
+    }
+
+    this.isUpdatingElectronVersions = false;
   }
 
   @action public async getName() {
@@ -331,6 +363,42 @@ export class AppState {
     }
 
     window.location.hash = hash;
+  }
+
+  /**
+   * Save a key/value to localStorage.
+   *
+   * @param {string} key
+   * @param {(string | number | object)} [value]
+   */
+  private save(key: string, value?: string | number | object | null) {
+    if (value) {
+      const _value = typeof value === 'object'
+        ? JSON.stringify(value)
+        : value.toString();
+
+      localStorage.setItem(key, _value);
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+
+  /**
+   * Fetch data from localStorage.
+   *
+   * @template T
+   * @param {string} key
+   * @param {boolean} parse
+   * @returns {(T | string | null)}
+   */
+  private retrieve<T>(key: string, parse: boolean): T | string | null {
+    const value = localStorage.getItem(key);
+
+    if (parse) {
+      return JSON.parse(value || 'null') as T;
+    }
+
+    return value;
   }
 }
 

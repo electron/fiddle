@@ -10,7 +10,11 @@ jest.mock('../../src/renderer/fetch-types', () => ({
 }));
 jest.mock('../../src/renderer/versions', () => ({
   getUpdatedKnownVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
-  getKnownVersions: () => require('../mocks/electron-versions').mockVersionsArray
+  getKnownVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+  ElectronReleaseChannel: {
+    stable: 'Stable',
+    beta: 'Beta'
+  }
 }));
 jest.mock('../../src/utils/get-title', () => ({}));
 

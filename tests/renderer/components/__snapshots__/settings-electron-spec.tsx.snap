@@ -9,7 +9,9 @@ ShallowWrapper {
       Object {
         "downloadVersion": [MockFunction],
         "removeVersion": [MockFunction],
+        "updateElectronVersions": [MockFunction],
         "version": "2.0.1",
+        "versionPagesToFetch": 2,
         "versions": Object {
           "1.8.7": Object {
             "assets_url": "https://api.github.com/repos/electron/electron/releases/11032343/assets",
@@ -38,7 +40,7 @@ ShallowWrapper {
             "name": "electron v2.0.1",
             "prerelease": false,
             "published_at": "2018-05-16T18:40:54Z",
-            "state": "unknown",
+            "state": "ready",
             "tag_name": "v2.0.1",
             "target_commitish": "2-0-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11032425",
@@ -53,12 +55,16 @@ ShallowWrapper {
             "name": "electron v2.0.2",
             "prerelease": false,
             "published_at": "2018-05-22T20:14:35Z",
-            "state": "unknown",
+            "state": "downloading",
             "tag_name": "v2.0.2",
             "target_commitish": "2-0-x",
             "url": "https://api.github.com/repos/electron/electron/releases/11120972",
           },
         },
+        "versionsToShow": Array [
+          "Stable",
+          "Beta",
+        ],
       }
     }
   />,
@@ -81,6 +87,142 @@ ShallowWrapper {
         <div
           className="advanced-options settings-section"
         >
+          <div
+            className="versions-to-show"
+          >
+            <p>
+              Include Electron versions from these release channels:
+            </p>
+            <label>
+              <input
+                checked={true}
+                id="Stable"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Stable
+            </label>
+            <label>
+              <input
+                checked={true}
+                id="Beta"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Beta
+            </label>
+            <label>
+              <input
+                checked={false}
+                id="Nightly"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Nightly
+            </label>
+            <label>
+              <input
+                checked={false}
+                id="Unsupported"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Unsupported
+            </label>
+            <p>
+              Number of recent Electron releases to include:
+            </p>
+            <select
+              onChange={[Function]}
+            >
+              <option
+                value="1"
+              >
+                30
+              </option>
+              <option
+                value="2"
+              >
+                60
+              </option>
+              <option
+                value="3"
+              >
+                90
+              </option>
+              <option
+                value="4"
+              >
+                120
+              </option>
+              <option
+                value="5"
+              >
+                150
+              </option>
+              <option
+                value="6"
+              >
+                180
+              </option>
+              <option
+                value="7"
+              >
+                210
+              </option>
+              <option
+                value="8"
+              >
+                240
+              </option>
+              <option
+                value="9"
+              >
+                270
+              </option>
+              <option
+                value="10"
+              >
+                300
+              </option>
+            </select>
+            <br />
+            <button
+              className="button"
+              onClick={[Function]}
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      384,
+                      512,
+                      Array [],
+                      "f46d",
+                      "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                    ],
+                    "iconName": "clipboard-list",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+               Update Electron Release List
+            </button>
+          </div>
           <label>
             Download all versions of Electron.
           </label>
@@ -188,12 +330,12 @@ ShallowWrapper {
                   v2.0.2
                 </td>
                 <td>
-                  ⏹ Not downloaded
+                  ⏬ Downloading
                 </td>
                 <td>
                   <button
                     className="button"
-                    onClick={[Function]}
+                    disabled={true}
                   >
                     <FontAwesomeIcon
                       border={false}
@@ -203,13 +345,13 @@ ShallowWrapper {
                       icon={
                         Object {
                           "icon": Array [
-                            640,
+                            512,
                             512,
                             Array [],
-                            "f381",
-                            "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                            "f110",
+                            "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                           ],
-                          "iconName": "cloud-download-alt",
+                          "iconName": "spinner",
                           "prefix": "fas",
                         }
                       }
@@ -220,11 +362,11 @@ ShallowWrapper {
                       pulse={false}
                       rotation={null}
                       size={null}
-                      spin={false}
+                      spin={true}
                       symbol={false}
                       transform={null}
                     />
-                     Download
+                     Downloading
                   </button>
                 </td>
               </tr>
@@ -233,7 +375,7 @@ ShallowWrapper {
                   v2.0.1
                 </td>
                 <td>
-                  ⏹ Not downloaded
+                  ✅ Downloaded
                 </td>
                 <td>
                   <button
@@ -248,13 +390,13 @@ ShallowWrapper {
                       icon={
                         Object {
                           "icon": Array [
-                            640,
+                            448,
                             512,
                             Array [],
-                            "f381",
-                            "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                            "f1f8",
+                            "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                           ],
-                          "iconName": "cloud-download-alt",
+                          "iconName": "trash",
                           "prefix": "fas",
                         }
                       }
@@ -269,7 +411,7 @@ ShallowWrapper {
                       symbol={false}
                       transform={null}
                     />
-                     Download
+                     Delete
                   </button>
                 </td>
               </tr>
@@ -343,6 +485,142 @@ ShallowWrapper {
         "nodeType": "host",
         "props": Object {
           "children": Array [
+            <div
+              className="versions-to-show"
+            >
+              <p>
+                Include Electron versions from these release channels:
+              </p>
+              <label>
+                <input
+                  checked={true}
+                  id="Stable"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Stable
+              </label>
+              <label>
+                <input
+                  checked={true}
+                  id="Beta"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Beta
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Nightly"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Nightly
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Unsupported"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Unsupported
+              </label>
+              <p>
+                Number of recent Electron releases to include:
+              </p>
+              <select
+                onChange={[Function]}
+              >
+                <option
+                  value="1"
+                >
+                  30
+                </option>
+                <option
+                  value="2"
+                >
+                  60
+                </option>
+                <option
+                  value="3"
+                >
+                  90
+                </option>
+                <option
+                  value="4"
+                >
+                  120
+                </option>
+                <option
+                  value="5"
+                >
+                  150
+                </option>
+                <option
+                  value="6"
+                >
+                  180
+                </option>
+                <option
+                  value="7"
+                >
+                  210
+                </option>
+                <option
+                  value="8"
+                >
+                  240
+                </option>
+                <option
+                  value="9"
+                >
+                  270
+                </option>
+                <option
+                  value="10"
+                >
+                  300
+                </option>
+              </select>
+              <br />
+              <button
+                className="button"
+                onClick={[Function]}
+              >
+                <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        384,
+                        512,
+                        Array [],
+                        "f46d",
+                        "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                      ],
+                      "iconName": "clipboard-list",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />
+                 Update Electron Release List
+              </button>
+            </div>,
             <label>
               Download all versions of Electron.
             </label>,
@@ -426,6 +704,589 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <p>
+                  Include Electron versions from these release channels:
+                </p>,
+                <label>
+                  <input
+                    checked={true}
+                    id="Stable"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Stable
+                </label>,
+                <label>
+                  <input
+                    checked={true}
+                    id="Beta"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Beta
+                </label>,
+                <label>
+                  <input
+                    checked={false}
+                    id="Nightly"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Nightly
+                </label>,
+                <label>
+                  <input
+                    checked={false}
+                    id="Unsupported"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Unsupported
+                </label>,
+                <p>
+                  Number of recent Electron releases to include:
+                </p>,
+                <select
+                  onChange={[Function]}
+                >
+                  <option
+                    value="1"
+                  >
+                    30
+                  </option>
+                  <option
+                    value="2"
+                  >
+                    60
+                  </option>
+                  <option
+                    value="3"
+                  >
+                    90
+                  </option>
+                  <option
+                    value="4"
+                  >
+                    120
+                  </option>
+                  <option
+                    value="5"
+                  >
+                    150
+                  </option>
+                  <option
+                    value="6"
+                  >
+                    180
+                  </option>
+                  <option
+                    value="7"
+                  >
+                    210
+                  </option>
+                  <option
+                    value="8"
+                  >
+                    240
+                  </option>
+                  <option
+                    value="9"
+                  >
+                    270
+                  </option>
+                  <option
+                    value="10"
+                  >
+                    300
+                  </option>
+                </select>,
+                <br />,
+                <button
+                  className="button"
+                  onClick={[Function]}
+                >
+                  <FontAwesomeIcon
+                    border={false}
+                    className=""
+                    fixedWidth={false}
+                    flip={null}
+                    icon={
+                      Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      }
+                    }
+                    inverse={false}
+                    listItem={false}
+                    mask={null}
+                    pull={null}
+                    pulse={false}
+                    rotation={null}
+                    size={null}
+                    spin={false}
+                    symbol={false}
+                    transform={null}
+                  />
+                   Update Electron Release List
+                </button>,
+              ],
+              "className": "versions-to-show",
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Include Electron versions from these release channels:",
+                },
+                "ref": null,
+                "rendered": "Include Electron versions from these release channels:",
+                "type": "p",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={true}
+                      id="Stable"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Stable",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": true,
+                      "id": "Stable",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Stable",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={true}
+                      id="Beta"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Beta",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": true,
+                      "id": "Beta",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Beta",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={false}
+                      id="Nightly"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Nightly",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": false,
+                      "id": "Nightly",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Nightly",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={false}
+                      id="Unsupported"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Unsupported",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": false,
+                      "id": "Unsupported",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Unsupported",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Number of recent Electron releases to include:",
+                },
+                "ref": null,
+                "rendered": "Number of recent Electron releases to include:",
+                "type": "p",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <option
+                      value="1"
+                    >
+                      30
+                    </option>,
+                    <option
+                      value="2"
+                    >
+                      60
+                    </option>,
+                    <option
+                      value="3"
+                    >
+                      90
+                    </option>,
+                    <option
+                      value="4"
+                    >
+                      120
+                    </option>,
+                    <option
+                      value="5"
+                    >
+                      150
+                    </option>,
+                    <option
+                      value="6"
+                    >
+                      180
+                    </option>,
+                    <option
+                      value="7"
+                    >
+                      210
+                    </option>,
+                    <option
+                      value="8"
+                    >
+                      240
+                    </option>,
+                    <option
+                      value="9"
+                    >
+                      270
+                    </option>,
+                    <option
+                      value="10"
+                    >
+                      300
+                    </option>,
+                  ],
+                  "onChange": [Function],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "30",
+                      "value": "1",
+                    },
+                    "ref": null,
+                    "rendered": "30",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "60",
+                      "value": "2",
+                    },
+                    "ref": null,
+                    "rendered": "60",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "90",
+                      "value": "3",
+                    },
+                    "ref": null,
+                    "rendered": "90",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "120",
+                      "value": "4",
+                    },
+                    "ref": null,
+                    "rendered": "120",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "150",
+                      "value": "5",
+                    },
+                    "ref": null,
+                    "rendered": "150",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "180",
+                      "value": "6",
+                    },
+                    "ref": null,
+                    "rendered": "180",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "210",
+                      "value": "7",
+                    },
+                    "ref": null,
+                    "rendered": "210",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "240",
+                      "value": "8",
+                    },
+                    "ref": null,
+                    "rendered": "240",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "270",
+                      "value": "9",
+                    },
+                    "ref": null,
+                    "rendered": "270",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "300",
+                      "value": "10",
+                    },
+                    "ref": null,
+                    "rendered": "300",
+                    "type": "option",
+                  },
+                ],
+                "type": "select",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {},
+                "ref": null,
+                "rendered": null,
+                "type": "br",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <FontAwesomeIcon
+                      border={false}
+                      className=""
+                      fixedWidth={false}
+                      flip={null}
+                      icon={
+                        Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        }
+                      }
+                      inverse={false}
+                      listItem={false}
+                      mask={null}
+                      pull={null}
+                      pulse={false}
+                      rotation={null}
+                      size={null}
+                      spin={false}
+                      symbol={false}
+                      transform={null}
+                    />,
+                    " Update Electron Release List",
+                  ],
+                  "className": "button",
+                  "disabled": undefined,
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "function",
+                    "props": Object {
+                      "border": false,
+                      "className": "",
+                      "fixedWidth": false,
+                      "flip": null,
+                      "icon": Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      },
+                      "inverse": false,
+                      "listItem": false,
+                      "mask": null,
+                      "pull": null,
+                      "pulse": false,
+                      "rotation": null,
+                      "size": null,
+                      "spin": false,
+                      "symbol": false,
+                      "transform": null,
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": [Function],
+                  },
+                  " Update Electron Release List",
+                ],
+                "type": "button",
+              },
+            ],
+            "type": "div",
+          },
           Object {
             "instance": null,
             "key": undefined,
@@ -648,12 +1509,12 @@ ShallowWrapper {
                     v2.0.2
                   </td>
                   <td>
-                    ⏹ Not downloaded
+                    ⏬ Downloading
                   </td>
                   <td>
                     <button
                       className="button"
-                      onClick={[Function]}
+                      disabled={true}
                     >
                       <FontAwesomeIcon
                         border={false}
@@ -663,13 +1524,13 @@ ShallowWrapper {
                         icon={
                           Object {
                             "icon": Array [
-                              640,
+                              512,
                               512,
                               Array [],
-                              "f381",
-                              "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                              "f110",
+                              "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                             ],
-                            "iconName": "cloud-download-alt",
+                            "iconName": "spinner",
                             "prefix": "fas",
                           }
                         }
@@ -680,11 +1541,11 @@ ShallowWrapper {
                         pulse={false}
                         rotation={null}
                         size={null}
-                        spin={false}
+                        spin={true}
                         symbol={false}
                         transform={null}
                       />
-                       Download
+                       Downloading
                     </button>
                   </td>
                 </tr>
@@ -693,7 +1554,7 @@ ShallowWrapper {
                     v2.0.1
                   </td>
                   <td>
-                    ⏹ Not downloaded
+                    ✅ Downloaded
                   </td>
                   <td>
                     <button
@@ -708,13 +1569,13 @@ ShallowWrapper {
                         icon={
                           Object {
                             "icon": Array [
-                              640,
+                              448,
                               512,
                               Array [],
-                              "f381",
-                              "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                              "f1f8",
+                              "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                             ],
-                            "iconName": "cloud-download-alt",
+                            "iconName": "trash",
                             "prefix": "fas",
                           }
                         }
@@ -729,7 +1590,7 @@ ShallowWrapper {
                         symbol={false}
                         transform={null}
                       />
-                       Download
+                       Delete
                     </button>
                   </td>
                 </tr>
@@ -822,12 +1683,12 @@ ShallowWrapper {
                       v2.0.2
                     </td>
                     <td>
-                      ⏹ Not downloaded
+                      ⏬ Downloading
                     </td>
                     <td>
                       <button
                         className="button"
-                        onClick={[Function]}
+                        disabled={true}
                       >
                         <FontAwesomeIcon
                           border={false}
@@ -837,13 +1698,13 @@ ShallowWrapper {
                           icon={
                             Object {
                               "icon": Array [
-                                640,
+                                512,
                                 512,
                                 Array [],
-                                "f381",
-                                "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                "f110",
+                                "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                               ],
-                              "iconName": "cloud-download-alt",
+                              "iconName": "spinner",
                               "prefix": "fas",
                             }
                           }
@@ -854,11 +1715,11 @@ ShallowWrapper {
                           pulse={false}
                           rotation={null}
                           size={null}
-                          spin={false}
+                          spin={true}
                           symbol={false}
                           transform={null}
                         />
-                         Download
+                         Downloading
                       </button>
                     </td>
                   </tr>
@@ -867,7 +1728,7 @@ ShallowWrapper {
                       v2.0.1
                     </td>
                     <td>
-                      ⏹ Not downloaded
+                      ✅ Downloaded
                     </td>
                     <td>
                       <button
@@ -882,13 +1743,13 @@ ShallowWrapper {
                           icon={
                             Object {
                               "icon": Array [
-                                640,
+                                448,
                                 512,
                                 Array [],
-                                "f381",
-                                "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                "f1f8",
+                                "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                               ],
-                              "iconName": "cloud-download-alt",
+                              "iconName": "trash",
                               "prefix": "fas",
                             }
                           }
@@ -903,7 +1764,7 @@ ShallowWrapper {
                           symbol={false}
                           transform={null}
                         />
-                         Download
+                         Delete
                       </button>
                     </td>
                   </tr>
@@ -1049,12 +1910,12 @@ ShallowWrapper {
                         v2.0.2
                       </td>
                       <td>
-                        ⏹ Not downloaded
+                        ⏬ Downloading
                       </td>
                       <td>
                         <button
                           className="button"
-                          onClick={[Function]}
+                          disabled={true}
                         >
                           <FontAwesomeIcon
                             border={false}
@@ -1064,13 +1925,13 @@ ShallowWrapper {
                             icon={
                               Object {
                                 "icon": Array [
-                                  640,
+                                  512,
                                   512,
                                   Array [],
-                                  "f381",
-                                  "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                  "f110",
+                                  "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                 ],
-                                "iconName": "cloud-download-alt",
+                                "iconName": "spinner",
                                 "prefix": "fas",
                               }
                             }
@@ -1081,11 +1942,11 @@ ShallowWrapper {
                             pulse={false}
                             rotation={null}
                             size={null}
-                            spin={false}
+                            spin={true}
                             symbol={false}
                             transform={null}
                           />
-                           Download
+                           Downloading
                         </button>
                       </td>
                     </tr>,
@@ -1094,7 +1955,7 @@ ShallowWrapper {
                         v2.0.1
                       </td>
                       <td>
-                        ⏹ Not downloaded
+                        ✅ Downloaded
                       </td>
                       <td>
                         <button
@@ -1109,13 +1970,13 @@ ShallowWrapper {
                             icon={
                               Object {
                                 "icon": Array [
-                                  640,
+                                  448,
                                   512,
                                   Array [],
-                                  "f381",
-                                  "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                  "f1f8",
+                                  "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                 ],
-                                "iconName": "cloud-download-alt",
+                                "iconName": "trash",
                                 "prefix": "fas",
                               }
                             }
@@ -1130,7 +1991,7 @@ ShallowWrapper {
                             symbol={false}
                             transform={null}
                           />
-                           Download
+                           Delete
                         </button>
                       </td>
                     </tr>,
@@ -1193,12 +2054,12 @@ ShallowWrapper {
                           v2.0.2
                         </td>,
                         <td>
-                          ⏹ Not downloaded
+                          ⏬ Downloading
                         </td>,
                         <td>
                           <button
                             className="button"
-                            onClick={[Function]}
+                            disabled={true}
                           >
                             <FontAwesomeIcon
                               border={false}
@@ -1208,13 +2069,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    512,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f110",
+                                    "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "spinner",
                                   "prefix": "fas",
                                 }
                               }
@@ -1225,11 +2086,11 @@ ShallowWrapper {
                               pulse={false}
                               rotation={null}
                               size={null}
-                              spin={false}
+                              spin={true}
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Downloading
                           </button>
                         </td>,
                       ],
@@ -1252,10 +2113,10 @@ ShallowWrapper {
                         "key": undefined,
                         "nodeType": "host",
                         "props": Object {
-                          "children": "⏹ Not downloaded",
+                          "children": "⏬ Downloading",
                         },
                         "ref": null,
-                        "rendered": "⏹ Not downloaded",
+                        "rendered": "⏬ Downloading",
                         "type": "td",
                       },
                       Object {
@@ -1265,7 +2126,7 @@ ShallowWrapper {
                         "props": Object {
                           "children": <button
                             className="button"
-                            onClick={[Function]}
+                            disabled={true}
                           >
                             <FontAwesomeIcon
                               border={false}
@@ -1275,13 +2136,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    512,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f110",
+                                    "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "spinner",
                                   "prefix": "fas",
                                 }
                               }
@@ -1292,11 +2153,11 @@ ShallowWrapper {
                               pulse={false}
                               rotation={null}
                               size={null}
-                              spin={false}
+                              spin={true}
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Downloading
                           </button>,
                         },
                         "ref": null,
@@ -1314,13 +2175,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      512,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f110",
+                                      "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "spinner",
                                     "prefix": "fas",
                                   }
                                 }
@@ -1331,14 +2192,14 @@ ShallowWrapper {
                                 pulse={false}
                                 rotation={null}
                                 size={null}
-                                spin={false}
+                                spin={true}
                                 symbol={false}
                                 transform={null}
                               />,
-                              " Download",
+                              " Downloading",
                             ],
                             "className": "button",
-                            "onClick": [Function],
+                            "disabled": true,
                           },
                           "ref": null,
                           "rendered": Array [
@@ -1353,13 +2214,13 @@ ShallowWrapper {
                                 "flip": null,
                                 "icon": Object {
                                   "icon": Array [
-                                    640,
+                                    512,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f110",
+                                    "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "spinner",
                                   "prefix": "fas",
                                 },
                                 "inverse": false,
@@ -1369,7 +2230,7 @@ ShallowWrapper {
                                 "pulse": false,
                                 "rotation": null,
                                 "size": null,
-                                "spin": false,
+                                "spin": true,
                                 "symbol": false,
                                 "transform": null,
                               },
@@ -1377,7 +2238,7 @@ ShallowWrapper {
                               "rendered": null,
                               "type": [Function],
                             },
-                            " Download",
+                            " Downloading",
                           ],
                           "type": "button",
                         },
@@ -1396,7 +2257,7 @@ ShallowWrapper {
                           v2.0.1
                         </td>,
                         <td>
-                          ⏹ Not downloaded
+                          ✅ Downloaded
                         </td>,
                         <td>
                           <button
@@ -1411,13 +2272,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    448,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f1f8",
+                                    "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "trash",
                                   "prefix": "fas",
                                 }
                               }
@@ -1432,7 +2293,7 @@ ShallowWrapper {
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Delete
                           </button>
                         </td>,
                       ],
@@ -1455,10 +2316,10 @@ ShallowWrapper {
                         "key": undefined,
                         "nodeType": "host",
                         "props": Object {
-                          "children": "⏹ Not downloaded",
+                          "children": "✅ Downloaded",
                         },
                         "ref": null,
-                        "rendered": "⏹ Not downloaded",
+                        "rendered": "✅ Downloaded",
                         "type": "td",
                       },
                       Object {
@@ -1478,13 +2339,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    448,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f1f8",
+                                    "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "trash",
                                   "prefix": "fas",
                                 }
                               }
@@ -1499,7 +2360,7 @@ ShallowWrapper {
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Delete
                           </button>,
                         },
                         "ref": null,
@@ -1517,13 +2378,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      448,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f1f8",
+                                      "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "trash",
                                     "prefix": "fas",
                                   }
                                 }
@@ -1538,7 +2399,7 @@ ShallowWrapper {
                                 symbol={false}
                                 transform={null}
                               />,
-                              " Download",
+                              " Delete",
                             ],
                             "className": "button",
                             "onClick": [Function],
@@ -1556,13 +2417,13 @@ ShallowWrapper {
                                 "flip": null,
                                 "icon": Object {
                                   "icon": Array [
-                                    640,
+                                    448,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f1f8",
+                                    "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "trash",
                                   "prefix": "fas",
                                 },
                                 "inverse": false,
@@ -1580,7 +2441,7 @@ ShallowWrapper {
                               "rendered": null,
                               "type": [Function],
                             },
-                            " Download",
+                            " Delete",
                           ],
                           "type": "button",
                         },
@@ -1817,6 +2678,142 @@ ShallowWrapper {
           <div
             className="advanced-options settings-section"
           >
+            <div
+              className="versions-to-show"
+            >
+              <p>
+                Include Electron versions from these release channels:
+              </p>
+              <label>
+                <input
+                  checked={true}
+                  id="Stable"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Stable
+              </label>
+              <label>
+                <input
+                  checked={true}
+                  id="Beta"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Beta
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Nightly"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Nightly
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Unsupported"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Unsupported
+              </label>
+              <p>
+                Number of recent Electron releases to include:
+              </p>
+              <select
+                onChange={[Function]}
+              >
+                <option
+                  value="1"
+                >
+                  30
+                </option>
+                <option
+                  value="2"
+                >
+                  60
+                </option>
+                <option
+                  value="3"
+                >
+                  90
+                </option>
+                <option
+                  value="4"
+                >
+                  120
+                </option>
+                <option
+                  value="5"
+                >
+                  150
+                </option>
+                <option
+                  value="6"
+                >
+                  180
+                </option>
+                <option
+                  value="7"
+                >
+                  210
+                </option>
+                <option
+                  value="8"
+                >
+                  240
+                </option>
+                <option
+                  value="9"
+                >
+                  270
+                </option>
+                <option
+                  value="10"
+                >
+                  300
+                </option>
+              </select>
+              <br />
+              <button
+                className="button"
+                onClick={[Function]}
+              >
+                <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        384,
+                        512,
+                        Array [],
+                        "f46d",
+                        "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                      ],
+                      "iconName": "clipboard-list",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />
+                 Update Electron Release List
+              </button>
+            </div>
             <label>
               Download all versions of Electron.
             </label>
@@ -1924,12 +2921,12 @@ ShallowWrapper {
                     v2.0.2
                   </td>
                   <td>
-                    ⏹ Not downloaded
+                    ⏬ Downloading
                   </td>
                   <td>
                     <button
                       className="button"
-                      onClick={[Function]}
+                      disabled={true}
                     >
                       <FontAwesomeIcon
                         border={false}
@@ -1939,13 +2936,13 @@ ShallowWrapper {
                         icon={
                           Object {
                             "icon": Array [
-                              640,
+                              512,
                               512,
                               Array [],
-                              "f381",
-                              "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                              "f110",
+                              "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                             ],
-                            "iconName": "cloud-download-alt",
+                            "iconName": "spinner",
                             "prefix": "fas",
                           }
                         }
@@ -1956,11 +2953,11 @@ ShallowWrapper {
                         pulse={false}
                         rotation={null}
                         size={null}
-                        spin={false}
+                        spin={true}
                         symbol={false}
                         transform={null}
                       />
-                       Download
+                       Downloading
                     </button>
                   </td>
                 </tr>
@@ -1969,7 +2966,7 @@ ShallowWrapper {
                     v2.0.1
                   </td>
                   <td>
-                    ⏹ Not downloaded
+                    ✅ Downloaded
                   </td>
                   <td>
                     <button
@@ -1984,13 +2981,13 @@ ShallowWrapper {
                         icon={
                           Object {
                             "icon": Array [
-                              640,
+                              448,
                               512,
                               Array [],
-                              "f381",
-                              "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                              "f1f8",
+                              "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                             ],
-                            "iconName": "cloud-download-alt",
+                            "iconName": "trash",
                             "prefix": "fas",
                           }
                         }
@@ -2005,7 +3002,7 @@ ShallowWrapper {
                         symbol={false}
                         transform={null}
                       />
-                       Download
+                       Delete
                     </button>
                   </td>
                 </tr>
@@ -2079,6 +3076,142 @@ ShallowWrapper {
           "nodeType": "host",
           "props": Object {
             "children": Array [
+              <div
+                className="versions-to-show"
+              >
+                <p>
+                  Include Electron versions from these release channels:
+                </p>
+                <label>
+                  <input
+                    checked={true}
+                    id="Stable"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Stable
+                </label>
+                <label>
+                  <input
+                    checked={true}
+                    id="Beta"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Beta
+                </label>
+                <label>
+                  <input
+                    checked={false}
+                    id="Nightly"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Nightly
+                </label>
+                <label>
+                  <input
+                    checked={false}
+                    id="Unsupported"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Unsupported
+                </label>
+                <p>
+                  Number of recent Electron releases to include:
+                </p>
+                <select
+                  onChange={[Function]}
+                >
+                  <option
+                    value="1"
+                  >
+                    30
+                  </option>
+                  <option
+                    value="2"
+                  >
+                    60
+                  </option>
+                  <option
+                    value="3"
+                  >
+                    90
+                  </option>
+                  <option
+                    value="4"
+                  >
+                    120
+                  </option>
+                  <option
+                    value="5"
+                  >
+                    150
+                  </option>
+                  <option
+                    value="6"
+                  >
+                    180
+                  </option>
+                  <option
+                    value="7"
+                  >
+                    210
+                  </option>
+                  <option
+                    value="8"
+                  >
+                    240
+                  </option>
+                  <option
+                    value="9"
+                  >
+                    270
+                  </option>
+                  <option
+                    value="10"
+                  >
+                    300
+                  </option>
+                </select>
+                <br />
+                <button
+                  className="button"
+                  onClick={[Function]}
+                >
+                  <FontAwesomeIcon
+                    border={false}
+                    className=""
+                    fixedWidth={false}
+                    flip={null}
+                    icon={
+                      Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      }
+                    }
+                    inverse={false}
+                    listItem={false}
+                    mask={null}
+                    pull={null}
+                    pulse={false}
+                    rotation={null}
+                    size={null}
+                    spin={false}
+                    symbol={false}
+                    transform={null}
+                  />
+                   Update Electron Release List
+                </button>
+              </div>,
               <label>
                 Download all versions of Electron.
               </label>,
@@ -2162,6 +3295,589 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <p>
+                    Include Electron versions from these release channels:
+                  </p>,
+                  <label>
+                    <input
+                      checked={true}
+                      id="Stable"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Stable
+                  </label>,
+                  <label>
+                    <input
+                      checked={true}
+                      id="Beta"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Beta
+                  </label>,
+                  <label>
+                    <input
+                      checked={false}
+                      id="Nightly"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Nightly
+                  </label>,
+                  <label>
+                    <input
+                      checked={false}
+                      id="Unsupported"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Unsupported
+                  </label>,
+                  <p>
+                    Number of recent Electron releases to include:
+                  </p>,
+                  <select
+                    onChange={[Function]}
+                  >
+                    <option
+                      value="1"
+                    >
+                      30
+                    </option>
+                    <option
+                      value="2"
+                    >
+                      60
+                    </option>
+                    <option
+                      value="3"
+                    >
+                      90
+                    </option>
+                    <option
+                      value="4"
+                    >
+                      120
+                    </option>
+                    <option
+                      value="5"
+                    >
+                      150
+                    </option>
+                    <option
+                      value="6"
+                    >
+                      180
+                    </option>
+                    <option
+                      value="7"
+                    >
+                      210
+                    </option>
+                    <option
+                      value="8"
+                    >
+                      240
+                    </option>
+                    <option
+                      value="9"
+                    >
+                      270
+                    </option>
+                    <option
+                      value="10"
+                    >
+                      300
+                    </option>
+                  </select>,
+                  <br />,
+                  <button
+                    className="button"
+                    onClick={[Function]}
+                  >
+                    <FontAwesomeIcon
+                      border={false}
+                      className=""
+                      fixedWidth={false}
+                      flip={null}
+                      icon={
+                        Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        }
+                      }
+                      inverse={false}
+                      listItem={false}
+                      mask={null}
+                      pull={null}
+                      pulse={false}
+                      rotation={null}
+                      size={null}
+                      spin={false}
+                      symbol={false}
+                      transform={null}
+                    />
+                     Update Electron Release List
+                  </button>,
+                ],
+                "className": "versions-to-show",
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Include Electron versions from these release channels:",
+                  },
+                  "ref": null,
+                  "rendered": "Include Electron versions from these release channels:",
+                  "type": "p",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={true}
+                        id="Stable"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Stable",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": true,
+                        "id": "Stable",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Stable",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={true}
+                        id="Beta"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Beta",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": true,
+                        "id": "Beta",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Beta",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={false}
+                        id="Nightly"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Nightly",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": false,
+                        "id": "Nightly",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Nightly",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={false}
+                        id="Unsupported"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Unsupported",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": false,
+                        "id": "Unsupported",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Unsupported",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Number of recent Electron releases to include:",
+                  },
+                  "ref": null,
+                  "rendered": "Number of recent Electron releases to include:",
+                  "type": "p",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <option
+                        value="1"
+                      >
+                        30
+                      </option>,
+                      <option
+                        value="2"
+                      >
+                        60
+                      </option>,
+                      <option
+                        value="3"
+                      >
+                        90
+                      </option>,
+                      <option
+                        value="4"
+                      >
+                        120
+                      </option>,
+                      <option
+                        value="5"
+                      >
+                        150
+                      </option>,
+                      <option
+                        value="6"
+                      >
+                        180
+                      </option>,
+                      <option
+                        value="7"
+                      >
+                        210
+                      </option>,
+                      <option
+                        value="8"
+                      >
+                        240
+                      </option>,
+                      <option
+                        value="9"
+                      >
+                        270
+                      </option>,
+                      <option
+                        value="10"
+                      >
+                        300
+                      </option>,
+                    ],
+                    "onChange": [Function],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "30",
+                        "value": "1",
+                      },
+                      "ref": null,
+                      "rendered": "30",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "60",
+                        "value": "2",
+                      },
+                      "ref": null,
+                      "rendered": "60",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "90",
+                        "value": "3",
+                      },
+                      "ref": null,
+                      "rendered": "90",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "120",
+                        "value": "4",
+                      },
+                      "ref": null,
+                      "rendered": "120",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "150",
+                        "value": "5",
+                      },
+                      "ref": null,
+                      "rendered": "150",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "180",
+                        "value": "6",
+                      },
+                      "ref": null,
+                      "rendered": "180",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "210",
+                        "value": "7",
+                      },
+                      "ref": null,
+                      "rendered": "210",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "240",
+                        "value": "8",
+                      },
+                      "ref": null,
+                      "rendered": "240",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "270",
+                        "value": "9",
+                      },
+                      "ref": null,
+                      "rendered": "270",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "300",
+                        "value": "10",
+                      },
+                      "ref": null,
+                      "rendered": "300",
+                      "type": "option",
+                    },
+                  ],
+                  "type": "select",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {},
+                  "ref": null,
+                  "rendered": null,
+                  "type": "br",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <FontAwesomeIcon
+                        border={false}
+                        className=""
+                        fixedWidth={false}
+                        flip={null}
+                        icon={
+                          Object {
+                            "icon": Array [
+                              384,
+                              512,
+                              Array [],
+                              "f46d",
+                              "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                            ],
+                            "iconName": "clipboard-list",
+                            "prefix": "fas",
+                          }
+                        }
+                        inverse={false}
+                        listItem={false}
+                        mask={null}
+                        pull={null}
+                        pulse={false}
+                        rotation={null}
+                        size={null}
+                        spin={false}
+                        symbol={false}
+                        transform={null}
+                      />,
+                      " Update Electron Release List",
+                    ],
+                    "className": "button",
+                    "disabled": undefined,
+                    "onClick": [Function],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "function",
+                      "props": Object {
+                        "border": false,
+                        "className": "",
+                        "fixedWidth": false,
+                        "flip": null,
+                        "icon": Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        },
+                        "inverse": false,
+                        "listItem": false,
+                        "mask": null,
+                        "pull": null,
+                        "pulse": false,
+                        "rotation": null,
+                        "size": null,
+                        "spin": false,
+                        "symbol": false,
+                        "transform": null,
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": [Function],
+                    },
+                    " Update Electron Release List",
+                  ],
+                  "type": "button",
+                },
+              ],
+              "type": "div",
+            },
             Object {
               "instance": null,
               "key": undefined,
@@ -2384,12 +4100,12 @@ ShallowWrapper {
                       v2.0.2
                     </td>
                     <td>
-                      ⏹ Not downloaded
+                      ⏬ Downloading
                     </td>
                     <td>
                       <button
                         className="button"
-                        onClick={[Function]}
+                        disabled={true}
                       >
                         <FontAwesomeIcon
                           border={false}
@@ -2399,13 +4115,13 @@ ShallowWrapper {
                           icon={
                             Object {
                               "icon": Array [
-                                640,
+                                512,
                                 512,
                                 Array [],
-                                "f381",
-                                "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                "f110",
+                                "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                               ],
-                              "iconName": "cloud-download-alt",
+                              "iconName": "spinner",
                               "prefix": "fas",
                             }
                           }
@@ -2416,11 +4132,11 @@ ShallowWrapper {
                           pulse={false}
                           rotation={null}
                           size={null}
-                          spin={false}
+                          spin={true}
                           symbol={false}
                           transform={null}
                         />
-                         Download
+                         Downloading
                       </button>
                     </td>
                   </tr>
@@ -2429,7 +4145,7 @@ ShallowWrapper {
                       v2.0.1
                     </td>
                     <td>
-                      ⏹ Not downloaded
+                      ✅ Downloaded
                     </td>
                     <td>
                       <button
@@ -2444,13 +4160,13 @@ ShallowWrapper {
                           icon={
                             Object {
                               "icon": Array [
-                                640,
+                                448,
                                 512,
                                 Array [],
-                                "f381",
-                                "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                "f1f8",
+                                "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                               ],
-                              "iconName": "cloud-download-alt",
+                              "iconName": "trash",
                               "prefix": "fas",
                             }
                           }
@@ -2465,7 +4181,7 @@ ShallowWrapper {
                           symbol={false}
                           transform={null}
                         />
-                         Download
+                         Delete
                       </button>
                     </td>
                   </tr>
@@ -2558,12 +4274,12 @@ ShallowWrapper {
                         v2.0.2
                       </td>
                       <td>
-                        ⏹ Not downloaded
+                        ⏬ Downloading
                       </td>
                       <td>
                         <button
                           className="button"
-                          onClick={[Function]}
+                          disabled={true}
                         >
                           <FontAwesomeIcon
                             border={false}
@@ -2573,13 +4289,13 @@ ShallowWrapper {
                             icon={
                               Object {
                                 "icon": Array [
-                                  640,
+                                  512,
                                   512,
                                   Array [],
-                                  "f381",
-                                  "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                  "f110",
+                                  "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                 ],
-                                "iconName": "cloud-download-alt",
+                                "iconName": "spinner",
                                 "prefix": "fas",
                               }
                             }
@@ -2590,11 +4306,11 @@ ShallowWrapper {
                             pulse={false}
                             rotation={null}
                             size={null}
-                            spin={false}
+                            spin={true}
                             symbol={false}
                             transform={null}
                           />
-                           Download
+                           Downloading
                         </button>
                       </td>
                     </tr>
@@ -2603,7 +4319,7 @@ ShallowWrapper {
                         v2.0.1
                       </td>
                       <td>
-                        ⏹ Not downloaded
+                        ✅ Downloaded
                       </td>
                       <td>
                         <button
@@ -2618,13 +4334,13 @@ ShallowWrapper {
                             icon={
                               Object {
                                 "icon": Array [
-                                  640,
+                                  448,
                                   512,
                                   Array [],
-                                  "f381",
-                                  "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                  "f1f8",
+                                  "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                 ],
-                                "iconName": "cloud-download-alt",
+                                "iconName": "trash",
                                 "prefix": "fas",
                               }
                             }
@@ -2639,7 +4355,7 @@ ShallowWrapper {
                             symbol={false}
                             transform={null}
                           />
-                           Download
+                           Delete
                         </button>
                       </td>
                     </tr>
@@ -2785,12 +4501,12 @@ ShallowWrapper {
                           v2.0.2
                         </td>
                         <td>
-                          ⏹ Not downloaded
+                          ⏬ Downloading
                         </td>
                         <td>
                           <button
                             className="button"
-                            onClick={[Function]}
+                            disabled={true}
                           >
                             <FontAwesomeIcon
                               border={false}
@@ -2800,13 +4516,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    512,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f110",
+                                    "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "spinner",
                                   "prefix": "fas",
                                 }
                               }
@@ -2817,11 +4533,11 @@ ShallowWrapper {
                               pulse={false}
                               rotation={null}
                               size={null}
-                              spin={false}
+                              spin={true}
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Downloading
                           </button>
                         </td>
                       </tr>,
@@ -2830,7 +4546,7 @@ ShallowWrapper {
                           v2.0.1
                         </td>
                         <td>
-                          ⏹ Not downloaded
+                          ✅ Downloaded
                         </td>
                         <td>
                           <button
@@ -2845,13 +4561,13 @@ ShallowWrapper {
                               icon={
                                 Object {
                                   "icon": Array [
-                                    640,
+                                    448,
                                     512,
                                     Array [],
-                                    "f381",
-                                    "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                    "f1f8",
+                                    "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                   ],
-                                  "iconName": "cloud-download-alt",
+                                  "iconName": "trash",
                                   "prefix": "fas",
                                 }
                               }
@@ -2866,7 +4582,7 @@ ShallowWrapper {
                               symbol={false}
                               transform={null}
                             />
-                             Download
+                             Delete
                           </button>
                         </td>
                       </tr>,
@@ -2929,12 +4645,12 @@ ShallowWrapper {
                             v2.0.2
                           </td>,
                           <td>
-                            ⏹ Not downloaded
+                            ⏬ Downloading
                           </td>,
                           <td>
                             <button
                               className="button"
-                              onClick={[Function]}
+                              disabled={true}
                             >
                               <FontAwesomeIcon
                                 border={false}
@@ -2944,13 +4660,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      512,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f110",
+                                      "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "spinner",
                                     "prefix": "fas",
                                   }
                                 }
@@ -2961,11 +4677,11 @@ ShallowWrapper {
                                 pulse={false}
                                 rotation={null}
                                 size={null}
-                                spin={false}
+                                spin={true}
                                 symbol={false}
                                 transform={null}
                               />
-                               Download
+                               Downloading
                             </button>
                           </td>,
                         ],
@@ -2988,10 +4704,10 @@ ShallowWrapper {
                           "key": undefined,
                           "nodeType": "host",
                           "props": Object {
-                            "children": "⏹ Not downloaded",
+                            "children": "⏬ Downloading",
                           },
                           "ref": null,
-                          "rendered": "⏹ Not downloaded",
+                          "rendered": "⏬ Downloading",
                           "type": "td",
                         },
                         Object {
@@ -3001,7 +4717,7 @@ ShallowWrapper {
                           "props": Object {
                             "children": <button
                               className="button"
-                              onClick={[Function]}
+                              disabled={true}
                             >
                               <FontAwesomeIcon
                                 border={false}
@@ -3011,13 +4727,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      512,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f110",
+                                      "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "spinner",
                                     "prefix": "fas",
                                   }
                                 }
@@ -3028,11 +4744,11 @@ ShallowWrapper {
                                 pulse={false}
                                 rotation={null}
                                 size={null}
-                                spin={false}
+                                spin={true}
                                 symbol={false}
                                 transform={null}
                               />
-                               Download
+                               Downloading
                             </button>,
                           },
                           "ref": null,
@@ -3050,13 +4766,13 @@ ShallowWrapper {
                                   icon={
                                     Object {
                                       "icon": Array [
-                                        640,
+                                        512,
                                         512,
                                         Array [],
-                                        "f381",
-                                        "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                        "f110",
+                                        "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                       ],
-                                      "iconName": "cloud-download-alt",
+                                      "iconName": "spinner",
                                       "prefix": "fas",
                                     }
                                   }
@@ -3067,14 +4783,14 @@ ShallowWrapper {
                                   pulse={false}
                                   rotation={null}
                                   size={null}
-                                  spin={false}
+                                  spin={true}
                                   symbol={false}
                                   transform={null}
                                 />,
-                                " Download",
+                                " Downloading",
                               ],
                               "className": "button",
-                              "onClick": [Function],
+                              "disabled": true,
                             },
                             "ref": null,
                             "rendered": Array [
@@ -3089,13 +4805,13 @@ ShallowWrapper {
                                   "flip": null,
                                   "icon": Object {
                                     "icon": Array [
-                                      640,
+                                      512,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f110",
+                                      "M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "spinner",
                                     "prefix": "fas",
                                   },
                                   "inverse": false,
@@ -3105,7 +4821,7 @@ ShallowWrapper {
                                   "pulse": false,
                                   "rotation": null,
                                   "size": null,
-                                  "spin": false,
+                                  "spin": true,
                                   "symbol": false,
                                   "transform": null,
                                 },
@@ -3113,7 +4829,7 @@ ShallowWrapper {
                                 "rendered": null,
                                 "type": [Function],
                               },
-                              " Download",
+                              " Downloading",
                             ],
                             "type": "button",
                           },
@@ -3132,7 +4848,7 @@ ShallowWrapper {
                             v2.0.1
                           </td>,
                           <td>
-                            ⏹ Not downloaded
+                            ✅ Downloaded
                           </td>,
                           <td>
                             <button
@@ -3147,13 +4863,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      448,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f1f8",
+                                      "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "trash",
                                     "prefix": "fas",
                                   }
                                 }
@@ -3168,7 +4884,7 @@ ShallowWrapper {
                                 symbol={false}
                                 transform={null}
                               />
-                               Download
+                               Delete
                             </button>
                           </td>,
                         ],
@@ -3191,10 +4907,10 @@ ShallowWrapper {
                           "key": undefined,
                           "nodeType": "host",
                           "props": Object {
-                            "children": "⏹ Not downloaded",
+                            "children": "✅ Downloaded",
                           },
                           "ref": null,
-                          "rendered": "⏹ Not downloaded",
+                          "rendered": "✅ Downloaded",
                           "type": "td",
                         },
                         Object {
@@ -3214,13 +4930,13 @@ ShallowWrapper {
                                 icon={
                                   Object {
                                     "icon": Array [
-                                      640,
+                                      448,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f1f8",
+                                      "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "trash",
                                     "prefix": "fas",
                                   }
                                 }
@@ -3235,7 +4951,7 @@ ShallowWrapper {
                                 symbol={false}
                                 transform={null}
                               />
-                               Download
+                               Delete
                             </button>,
                           },
                           "ref": null,
@@ -3253,13 +4969,13 @@ ShallowWrapper {
                                   icon={
                                     Object {
                                       "icon": Array [
-                                        640,
+                                        448,
                                         512,
                                         Array [],
-                                        "f381",
-                                        "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                        "f1f8",
+                                        "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                       ],
-                                      "iconName": "cloud-download-alt",
+                                      "iconName": "trash",
                                       "prefix": "fas",
                                     }
                                   }
@@ -3274,7 +4990,7 @@ ShallowWrapper {
                                   symbol={false}
                                   transform={null}
                                 />,
-                                " Download",
+                                " Delete",
                               ],
                               "className": "button",
                               "onClick": [Function],
@@ -3292,13 +5008,13 @@ ShallowWrapper {
                                   "flip": null,
                                   "icon": Object {
                                     "icon": Array [
-                                      640,
+                                      448,
                                       512,
                                       Array [],
-                                      "f381",
-                                      "M537.6 226.6c4.1-10.7 6.4-22.4 6.4-34.6 0-53-43-96-96-96-19.7 0-38.1 6-53.3 16.2C367 64.2 315.3 32 256 32c-88.4 0-160 71.6-160 160 0 2.7.1 5.4.2 8.1C40.2 219.8 0 273.2 0 336c0 79.5 64.5 144 144 144h368c70.7 0 128-57.3 128-128 0-61.9-44-113.6-102.4-125.4zm-132.9 88.7L299.3 420.7c-6.2 6.2-16.4 6.2-22.6 0L171.3 315.3c-10.1-10.1-2.9-27.3 11.3-27.3H248V176c0-8.8 7.2-16 16-16h48c8.8 0 16 7.2 16 16v112h65.4c14.2 0 21.4 17.2 11.3 27.3z",
+                                      "f1f8",
+                                      "M0 84V56c0-13.3 10.7-24 24-24h112l9.4-18.7c4-8.2 12.3-13.3 21.4-13.3h114.3c9.1 0 17.4 5.1 21.5 13.3L312 32h112c13.3 0 24 10.7 24 24v28c0 6.6-5.4 12-12 12H12C5.4 96 0 90.6 0 84zm415.2 56.7L394.8 467c-1.6 25.3-22.6 45-47.9 45H101.1c-25.3 0-46.3-19.7-47.9-45L32.8 140.7c-.4-6.9 5.1-12.7 12-12.7h358.5c6.8 0 12.3 5.8 11.9 12.7z",
                                     ],
-                                    "iconName": "cloud-download-alt",
+                                    "iconName": "trash",
                                     "prefix": "fas",
                                   },
                                   "inverse": false,
@@ -3316,7 +5032,7 @@ ShallowWrapper {
                                 "rendered": null,
                                 "type": [Function],
                               },
-                              " Download",
+                              " Delete",
                             ],
                             "type": "button",
                           },

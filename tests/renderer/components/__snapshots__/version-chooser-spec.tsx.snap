@@ -57,6 +57,10 @@ ShallowWrapper {
             "url": "https://api.github.com/repos/electron/electron/releases/11120972",
           },
         },
+        "versionsToShow": Array [
+          "Stable",
+          "Beta",
+        ],
       }
     }
   />,

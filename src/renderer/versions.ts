@@ -1,5 +1,40 @@
 import { GitHubVersion } from '../interfaces';
 
+export const enum ElectronReleaseChannel {
+  stable = 'Stable',
+  beta = 'Beta',
+  nightly = 'Nightly',
+  unsupported = 'Unsupported'
+}
+
+/**
+ * Return the release channel for a given input
+ * version.
+ *
+ * @param {GitHubVersion} input
+ * @returns {ElectronReleaseChannel}
+ */
+export function getReleaseChannel(
+  input: GitHubVersion
+): ElectronReleaseChannel {
+  const { tag_name } = input;
+
+  if (tag_name.includes('beta')) {
+    return ElectronReleaseChannel.beta;
+  }
+
+  if (tag_name.includes('nightly')) {
+    return ElectronReleaseChannel.nightly;
+  }
+
+  if (tag_name.includes('unsupported')) {
+    return ElectronReleaseChannel.unsupported;
+  }
+
+  // Must be a stable version, right?
+  return ElectronReleaseChannel.stable;
+}
+
 /**
  * Retrieves our best guess regarding the latest Electron versions. Tries to
  * fetch them from localStorage, then from a static releases.json file.
@@ -37,9 +72,11 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
  * @export
  * @returns {Promise<Array<GitHubVersion>>}
  */
-export async function getUpdatedKnownVersions(): Promise<Array<GitHubVersion>> {
+export async function getUpdatedKnownVersions(
+  pages: number,
+): Promise<Array<GitHubVersion>> {
   try {
-    await fetchVersions();
+    await fetchVersions(pages);
   } catch (error) {
     console.warn(`Versions: Failed to fetch versions`, { error });
   }
@@ -52,33 +89,46 @@ export async function getUpdatedKnownVersions(): Promise<Array<GitHubVersion>> {
  *
  * @returns {Promise<Array<GitHubVersion>>}
  */
-export function fetchVersions(): Promise<Array<GitHubVersion>> {
-  return window.fetch('https://api.github.com/repos/electron/electron/releases')
-    .then((response) => response.json())
-    .then((data: Array<GitHubVersion>) => {
-      let cleaned: Array<GitHubVersion> = [];
+export async function fetchVersions(pages: number) {
+  const output: Array<GitHubVersion> = [];
 
-      if (data && data.length > 0 && data[0].tag_name) {
-        cleaned = data.map((release) => {
-          const updated = {
-            url: release.url,
-            assets_url: release.assets_url,
-            html_url: release.html_url,
-            tag_name: release.tag_name,
-            target_commitish: release.target_commitish,
-            name: release.name,
-            prerelease: release.prerelease,
-            created_at: release.created_at,
-            published_at: release.published_at,
-            body: release.body
-          };
+  for (let i = 0; i < pages; i++) {
+    const page = await fetchVersionPage(i + 1);
 
-          return updated as GitHubVersion;
-        });
+    if (page && page.length > 0 && page[0].tag_name) {
+      page.forEach((release) => {
+        const updated = {
+          url: release.url,
+          assets_url: release.assets_url,
+          html_url: release.html_url,
+          tag_name: release.tag_name,
+          target_commitish: release.target_commitish,
+          name: release.name,
+          prerelease: release.prerelease,
+          created_at: release.created_at,
+          published_at: release.published_at,
+          body: release.body
+        };
 
-        saveKnownVersions(cleaned);
-      }
+        output.push(updated as GitHubVersion);
+      });
+    }
+  }
 
-      return cleaned;
-    });
+  saveKnownVersions(output);
+
+  return output;
+}
+
+/**
+ * Fetch a single releases page from GitHub.
+ *
+ * @returns {Promise<Array<GitHubVersion>>}
+ */
+export function fetchVersionPage(page?: number): Promise<Array<GitHubVersion>> {
+  const url = `https://api.github.com/repos/electron/electron/releases`
+    + ((page && page > 1) ? `?page=${page}` : '');
+
+  return window.fetch(url)
+    .then((response) => response.json());
 }

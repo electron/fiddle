@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
-import { CONFIG_PATH } from '../../constants';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
@@ -122,8 +121,6 @@ export class AppearanceSettings extends React.Component<
   }
 
   public render() {
-    const themePath = path.join(CONFIG_PATH, 'themes');
-
     return (
       <div className='settings-appearance'>
         <h4>Appearance</h4>
@@ -132,7 +129,7 @@ export class AppearanceSettings extends React.Component<
             id='open-theme-folder'
             onClick={() => this.openThemeFolder()}
           >
-            <code>{themePath}</code>
+            <code>{THEMES_PATH}</code>
           </a>.<br />
         </label>
         <select
