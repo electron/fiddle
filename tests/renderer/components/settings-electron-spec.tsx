@@ -2,6 +2,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
+import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
@@ -9,6 +10,7 @@ describe('ElectronSettings component', () => {
     this.store = {
       version: '2.0.1',
       versions: mockVersions,
+      versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn()
     };

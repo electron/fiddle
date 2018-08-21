@@ -59,6 +59,10 @@ ShallowWrapper {
             "url": "https://api.github.com/repos/electron/electron/releases/11120972",
           },
         },
+        "versionsToShow": Array [
+          "Stable",
+          "Beta",
+        ],
       }
     }
   />,
@@ -81,6 +85,142 @@ ShallowWrapper {
         <div
           className="advanced-options settings-section"
         >
+          <div
+            className="versions-to-show"
+          >
+            <p>
+              Include Electron versions from these release channels:
+            </p>
+            <label>
+              <input
+                checked={true}
+                id="Stable"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Stable
+            </label>
+            <label>
+              <input
+                checked={true}
+                id="Beta"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Beta
+            </label>
+            <label>
+              <input
+                checked={false}
+                id="Nightly"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Nightly
+            </label>
+            <label>
+              <input
+                checked={false}
+                id="Unsupported"
+                onChange={[Function]}
+                type="checkbox"
+              />
+              Unsupported
+            </label>
+            <p>
+              Number of recent Electron releases to include:
+            </p>
+            <select
+              onChange={[Function]}
+            >
+              <option
+                value="1"
+              >
+                30
+              </option>
+              <option
+                value="2"
+              >
+                60
+              </option>
+              <option
+                value="3"
+              >
+                90
+              </option>
+              <option
+                value="4"
+              >
+                120
+              </option>
+              <option
+                value="5"
+              >
+                150
+              </option>
+              <option
+                value="6"
+              >
+                180
+              </option>
+              <option
+                value="7"
+              >
+                210
+              </option>
+              <option
+                value="8"
+              >
+                240
+              </option>
+              <option
+                value="9"
+              >
+                270
+              </option>
+              <option
+                value="10"
+              >
+                300
+              </option>
+            </select>
+            <br />
+            <button
+              className="button"
+              onClick={[Function]}
+            >
+              <FontAwesomeIcon
+                border={false}
+                className=""
+                fixedWidth={false}
+                flip={null}
+                icon={
+                  Object {
+                    "icon": Array [
+                      384,
+                      512,
+                      Array [],
+                      "f46d",
+                      "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                    ],
+                    "iconName": "clipboard-list",
+                    "prefix": "fas",
+                  }
+                }
+                inverse={false}
+                listItem={false}
+                mask={null}
+                pull={null}
+                pulse={false}
+                rotation={null}
+                size={null}
+                spin={false}
+                symbol={false}
+                transform={null}
+              />
+               Update Electron Release List
+            </button>
+          </div>
           <label>
             Download all versions of Electron.
           </label>
@@ -343,6 +483,142 @@ ShallowWrapper {
         "nodeType": "host",
         "props": Object {
           "children": Array [
+            <div
+              className="versions-to-show"
+            >
+              <p>
+                Include Electron versions from these release channels:
+              </p>
+              <label>
+                <input
+                  checked={true}
+                  id="Stable"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Stable
+              </label>
+              <label>
+                <input
+                  checked={true}
+                  id="Beta"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Beta
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Nightly"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Nightly
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Unsupported"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Unsupported
+              </label>
+              <p>
+                Number of recent Electron releases to include:
+              </p>
+              <select
+                onChange={[Function]}
+              >
+                <option
+                  value="1"
+                >
+                  30
+                </option>
+                <option
+                  value="2"
+                >
+                  60
+                </option>
+                <option
+                  value="3"
+                >
+                  90
+                </option>
+                <option
+                  value="4"
+                >
+                  120
+                </option>
+                <option
+                  value="5"
+                >
+                  150
+                </option>
+                <option
+                  value="6"
+                >
+                  180
+                </option>
+                <option
+                  value="7"
+                >
+                  210
+                </option>
+                <option
+                  value="8"
+                >
+                  240
+                </option>
+                <option
+                  value="9"
+                >
+                  270
+                </option>
+                <option
+                  value="10"
+                >
+                  300
+                </option>
+              </select>
+              <br />
+              <button
+                className="button"
+                onClick={[Function]}
+              >
+                <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        384,
+                        512,
+                        Array [],
+                        "f46d",
+                        "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                      ],
+                      "iconName": "clipboard-list",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />
+                 Update Electron Release List
+              </button>
+            </div>,
             <label>
               Download all versions of Electron.
             </label>,
@@ -426,6 +702,589 @@ ShallowWrapper {
         },
         "ref": null,
         "rendered": Array [
+          Object {
+            "instance": null,
+            "key": undefined,
+            "nodeType": "host",
+            "props": Object {
+              "children": Array [
+                <p>
+                  Include Electron versions from these release channels:
+                </p>,
+                <label>
+                  <input
+                    checked={true}
+                    id="Stable"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Stable
+                </label>,
+                <label>
+                  <input
+                    checked={true}
+                    id="Beta"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Beta
+                </label>,
+                <label>
+                  <input
+                    checked={false}
+                    id="Nightly"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Nightly
+                </label>,
+                <label>
+                  <input
+                    checked={false}
+                    id="Unsupported"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Unsupported
+                </label>,
+                <p>
+                  Number of recent Electron releases to include:
+                </p>,
+                <select
+                  onChange={[Function]}
+                >
+                  <option
+                    value="1"
+                  >
+                    30
+                  </option>
+                  <option
+                    value="2"
+                  >
+                    60
+                  </option>
+                  <option
+                    value="3"
+                  >
+                    90
+                  </option>
+                  <option
+                    value="4"
+                  >
+                    120
+                  </option>
+                  <option
+                    value="5"
+                  >
+                    150
+                  </option>
+                  <option
+                    value="6"
+                  >
+                    180
+                  </option>
+                  <option
+                    value="7"
+                  >
+                    210
+                  </option>
+                  <option
+                    value="8"
+                  >
+                    240
+                  </option>
+                  <option
+                    value="9"
+                  >
+                    270
+                  </option>
+                  <option
+                    value="10"
+                  >
+                    300
+                  </option>
+                </select>,
+                <br />,
+                <button
+                  className="button"
+                  onClick={[Function]}
+                >
+                  <FontAwesomeIcon
+                    border={false}
+                    className=""
+                    fixedWidth={false}
+                    flip={null}
+                    icon={
+                      Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      }
+                    }
+                    inverse={false}
+                    listItem={false}
+                    mask={null}
+                    pull={null}
+                    pulse={false}
+                    rotation={null}
+                    size={null}
+                    spin={false}
+                    symbol={false}
+                    transform={null}
+                  />
+                   Update Electron Release List
+                </button>,
+              ],
+              "className": "versions-to-show",
+            },
+            "ref": null,
+            "rendered": Array [
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Include Electron versions from these release channels:",
+                },
+                "ref": null,
+                "rendered": "Include Electron versions from these release channels:",
+                "type": "p",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={true}
+                      id="Stable"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Stable",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": true,
+                      "id": "Stable",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Stable",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={true}
+                      id="Beta"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Beta",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": true,
+                      "id": "Beta",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Beta",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={false}
+                      id="Nightly"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Nightly",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": false,
+                      "id": "Nightly",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Nightly",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <input
+                      checked={false}
+                      id="Unsupported"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />,
+                    "Unsupported",
+                  ],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "checked": false,
+                      "id": "Unsupported",
+                      "onChange": [Function],
+                      "type": "checkbox",
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": "input",
+                  },
+                  "Unsupported",
+                ],
+                "type": "label",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": "Number of recent Electron releases to include:",
+                },
+                "ref": null,
+                "rendered": "Number of recent Electron releases to include:",
+                "type": "p",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <option
+                      value="1"
+                    >
+                      30
+                    </option>,
+                    <option
+                      value="2"
+                    >
+                      60
+                    </option>,
+                    <option
+                      value="3"
+                    >
+                      90
+                    </option>,
+                    <option
+                      value="4"
+                    >
+                      120
+                    </option>,
+                    <option
+                      value="5"
+                    >
+                      150
+                    </option>,
+                    <option
+                      value="6"
+                    >
+                      180
+                    </option>,
+                    <option
+                      value="7"
+                    >
+                      210
+                    </option>,
+                    <option
+                      value="8"
+                    >
+                      240
+                    </option>,
+                    <option
+                      value="9"
+                    >
+                      270
+                    </option>,
+                    <option
+                      value="10"
+                    >
+                      300
+                    </option>,
+                  ],
+                  "onChange": [Function],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "30",
+                      "value": "1",
+                    },
+                    "ref": null,
+                    "rendered": "30",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "60",
+                      "value": "2",
+                    },
+                    "ref": null,
+                    "rendered": "60",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "90",
+                      "value": "3",
+                    },
+                    "ref": null,
+                    "rendered": "90",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "120",
+                      "value": "4",
+                    },
+                    "ref": null,
+                    "rendered": "120",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "150",
+                      "value": "5",
+                    },
+                    "ref": null,
+                    "rendered": "150",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "180",
+                      "value": "6",
+                    },
+                    "ref": null,
+                    "rendered": "180",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "210",
+                      "value": "7",
+                    },
+                    "ref": null,
+                    "rendered": "210",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "240",
+                      "value": "8",
+                    },
+                    "ref": null,
+                    "rendered": "240",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "270",
+                      "value": "9",
+                    },
+                    "ref": null,
+                    "rendered": "270",
+                    "type": "option",
+                  },
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "host",
+                    "props": Object {
+                      "children": "300",
+                      "value": "10",
+                    },
+                    "ref": null,
+                    "rendered": "300",
+                    "type": "option",
+                  },
+                ],
+                "type": "select",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {},
+                "ref": null,
+                "rendered": null,
+                "type": "br",
+              },
+              Object {
+                "instance": null,
+                "key": undefined,
+                "nodeType": "host",
+                "props": Object {
+                  "children": Array [
+                    <FontAwesomeIcon
+                      border={false}
+                      className=""
+                      fixedWidth={false}
+                      flip={null}
+                      icon={
+                        Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        }
+                      }
+                      inverse={false}
+                      listItem={false}
+                      mask={null}
+                      pull={null}
+                      pulse={false}
+                      rotation={null}
+                      size={null}
+                      spin={false}
+                      symbol={false}
+                      transform={null}
+                    />,
+                    " Update Electron Release List",
+                  ],
+                  "className": "button",
+                  "disabled": undefined,
+                  "onClick": [Function],
+                },
+                "ref": null,
+                "rendered": Array [
+                  Object {
+                    "instance": null,
+                    "key": undefined,
+                    "nodeType": "function",
+                    "props": Object {
+                      "border": false,
+                      "className": "",
+                      "fixedWidth": false,
+                      "flip": null,
+                      "icon": Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      },
+                      "inverse": false,
+                      "listItem": false,
+                      "mask": null,
+                      "pull": null,
+                      "pulse": false,
+                      "rotation": null,
+                      "size": null,
+                      "spin": false,
+                      "symbol": false,
+                      "transform": null,
+                    },
+                    "ref": null,
+                    "rendered": null,
+                    "type": [Function],
+                  },
+                  " Update Electron Release List",
+                ],
+                "type": "button",
+              },
+            ],
+            "type": "div",
+          },
           Object {
             "instance": null,
             "key": undefined,
@@ -1817,6 +2676,142 @@ ShallowWrapper {
           <div
             className="advanced-options settings-section"
           >
+            <div
+              className="versions-to-show"
+            >
+              <p>
+                Include Electron versions from these release channels:
+              </p>
+              <label>
+                <input
+                  checked={true}
+                  id="Stable"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Stable
+              </label>
+              <label>
+                <input
+                  checked={true}
+                  id="Beta"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Beta
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Nightly"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Nightly
+              </label>
+              <label>
+                <input
+                  checked={false}
+                  id="Unsupported"
+                  onChange={[Function]}
+                  type="checkbox"
+                />
+                Unsupported
+              </label>
+              <p>
+                Number of recent Electron releases to include:
+              </p>
+              <select
+                onChange={[Function]}
+              >
+                <option
+                  value="1"
+                >
+                  30
+                </option>
+                <option
+                  value="2"
+                >
+                  60
+                </option>
+                <option
+                  value="3"
+                >
+                  90
+                </option>
+                <option
+                  value="4"
+                >
+                  120
+                </option>
+                <option
+                  value="5"
+                >
+                  150
+                </option>
+                <option
+                  value="6"
+                >
+                  180
+                </option>
+                <option
+                  value="7"
+                >
+                  210
+                </option>
+                <option
+                  value="8"
+                >
+                  240
+                </option>
+                <option
+                  value="9"
+                >
+                  270
+                </option>
+                <option
+                  value="10"
+                >
+                  300
+                </option>
+              </select>
+              <br />
+              <button
+                className="button"
+                onClick={[Function]}
+              >
+                <FontAwesomeIcon
+                  border={false}
+                  className=""
+                  fixedWidth={false}
+                  flip={null}
+                  icon={
+                    Object {
+                      "icon": Array [
+                        384,
+                        512,
+                        Array [],
+                        "f46d",
+                        "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                      ],
+                      "iconName": "clipboard-list",
+                      "prefix": "fas",
+                    }
+                  }
+                  inverse={false}
+                  listItem={false}
+                  mask={null}
+                  pull={null}
+                  pulse={false}
+                  rotation={null}
+                  size={null}
+                  spin={false}
+                  symbol={false}
+                  transform={null}
+                />
+                 Update Electron Release List
+              </button>
+            </div>
             <label>
               Download all versions of Electron.
             </label>
@@ -2079,6 +3074,142 @@ ShallowWrapper {
           "nodeType": "host",
           "props": Object {
             "children": Array [
+              <div
+                className="versions-to-show"
+              >
+                <p>
+                  Include Electron versions from these release channels:
+                </p>
+                <label>
+                  <input
+                    checked={true}
+                    id="Stable"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Stable
+                </label>
+                <label>
+                  <input
+                    checked={true}
+                    id="Beta"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Beta
+                </label>
+                <label>
+                  <input
+                    checked={false}
+                    id="Nightly"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Nightly
+                </label>
+                <label>
+                  <input
+                    checked={false}
+                    id="Unsupported"
+                    onChange={[Function]}
+                    type="checkbox"
+                  />
+                  Unsupported
+                </label>
+                <p>
+                  Number of recent Electron releases to include:
+                </p>
+                <select
+                  onChange={[Function]}
+                >
+                  <option
+                    value="1"
+                  >
+                    30
+                  </option>
+                  <option
+                    value="2"
+                  >
+                    60
+                  </option>
+                  <option
+                    value="3"
+                  >
+                    90
+                  </option>
+                  <option
+                    value="4"
+                  >
+                    120
+                  </option>
+                  <option
+                    value="5"
+                  >
+                    150
+                  </option>
+                  <option
+                    value="6"
+                  >
+                    180
+                  </option>
+                  <option
+                    value="7"
+                  >
+                    210
+                  </option>
+                  <option
+                    value="8"
+                  >
+                    240
+                  </option>
+                  <option
+                    value="9"
+                  >
+                    270
+                  </option>
+                  <option
+                    value="10"
+                  >
+                    300
+                  </option>
+                </select>
+                <br />
+                <button
+                  className="button"
+                  onClick={[Function]}
+                >
+                  <FontAwesomeIcon
+                    border={false}
+                    className=""
+                    fixedWidth={false}
+                    flip={null}
+                    icon={
+                      Object {
+                        "icon": Array [
+                          384,
+                          512,
+                          Array [],
+                          "f46d",
+                          "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                        ],
+                        "iconName": "clipboard-list",
+                        "prefix": "fas",
+                      }
+                    }
+                    inverse={false}
+                    listItem={false}
+                    mask={null}
+                    pull={null}
+                    pulse={false}
+                    rotation={null}
+                    size={null}
+                    spin={false}
+                    symbol={false}
+                    transform={null}
+                  />
+                   Update Electron Release List
+                </button>
+              </div>,
               <label>
                 Download all versions of Electron.
               </label>,
@@ -2162,6 +3293,589 @@ ShallowWrapper {
           },
           "ref": null,
           "rendered": Array [
+            Object {
+              "instance": null,
+              "key": undefined,
+              "nodeType": "host",
+              "props": Object {
+                "children": Array [
+                  <p>
+                    Include Electron versions from these release channels:
+                  </p>,
+                  <label>
+                    <input
+                      checked={true}
+                      id="Stable"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Stable
+                  </label>,
+                  <label>
+                    <input
+                      checked={true}
+                      id="Beta"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Beta
+                  </label>,
+                  <label>
+                    <input
+                      checked={false}
+                      id="Nightly"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Nightly
+                  </label>,
+                  <label>
+                    <input
+                      checked={false}
+                      id="Unsupported"
+                      onChange={[Function]}
+                      type="checkbox"
+                    />
+                    Unsupported
+                  </label>,
+                  <p>
+                    Number of recent Electron releases to include:
+                  </p>,
+                  <select
+                    onChange={[Function]}
+                  >
+                    <option
+                      value="1"
+                    >
+                      30
+                    </option>
+                    <option
+                      value="2"
+                    >
+                      60
+                    </option>
+                    <option
+                      value="3"
+                    >
+                      90
+                    </option>
+                    <option
+                      value="4"
+                    >
+                      120
+                    </option>
+                    <option
+                      value="5"
+                    >
+                      150
+                    </option>
+                    <option
+                      value="6"
+                    >
+                      180
+                    </option>
+                    <option
+                      value="7"
+                    >
+                      210
+                    </option>
+                    <option
+                      value="8"
+                    >
+                      240
+                    </option>
+                    <option
+                      value="9"
+                    >
+                      270
+                    </option>
+                    <option
+                      value="10"
+                    >
+                      300
+                    </option>
+                  </select>,
+                  <br />,
+                  <button
+                    className="button"
+                    onClick={[Function]}
+                  >
+                    <FontAwesomeIcon
+                      border={false}
+                      className=""
+                      fixedWidth={false}
+                      flip={null}
+                      icon={
+                        Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        }
+                      }
+                      inverse={false}
+                      listItem={false}
+                      mask={null}
+                      pull={null}
+                      pulse={false}
+                      rotation={null}
+                      size={null}
+                      spin={false}
+                      symbol={false}
+                      transform={null}
+                    />
+                     Update Electron Release List
+                  </button>,
+                ],
+                "className": "versions-to-show",
+              },
+              "ref": null,
+              "rendered": Array [
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Include Electron versions from these release channels:",
+                  },
+                  "ref": null,
+                  "rendered": "Include Electron versions from these release channels:",
+                  "type": "p",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={true}
+                        id="Stable"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Stable",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": true,
+                        "id": "Stable",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Stable",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={true}
+                        id="Beta"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Beta",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": true,
+                        "id": "Beta",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Beta",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={false}
+                        id="Nightly"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Nightly",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": false,
+                        "id": "Nightly",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Nightly",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <input
+                        checked={false}
+                        id="Unsupported"
+                        onChange={[Function]}
+                        type="checkbox"
+                      />,
+                      "Unsupported",
+                    ],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "checked": false,
+                        "id": "Unsupported",
+                        "onChange": [Function],
+                        "type": "checkbox",
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": "input",
+                    },
+                    "Unsupported",
+                  ],
+                  "type": "label",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": "Number of recent Electron releases to include:",
+                  },
+                  "ref": null,
+                  "rendered": "Number of recent Electron releases to include:",
+                  "type": "p",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <option
+                        value="1"
+                      >
+                        30
+                      </option>,
+                      <option
+                        value="2"
+                      >
+                        60
+                      </option>,
+                      <option
+                        value="3"
+                      >
+                        90
+                      </option>,
+                      <option
+                        value="4"
+                      >
+                        120
+                      </option>,
+                      <option
+                        value="5"
+                      >
+                        150
+                      </option>,
+                      <option
+                        value="6"
+                      >
+                        180
+                      </option>,
+                      <option
+                        value="7"
+                      >
+                        210
+                      </option>,
+                      <option
+                        value="8"
+                      >
+                        240
+                      </option>,
+                      <option
+                        value="9"
+                      >
+                        270
+                      </option>,
+                      <option
+                        value="10"
+                      >
+                        300
+                      </option>,
+                    ],
+                    "onChange": [Function],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "30",
+                        "value": "1",
+                      },
+                      "ref": null,
+                      "rendered": "30",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "60",
+                        "value": "2",
+                      },
+                      "ref": null,
+                      "rendered": "60",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "90",
+                        "value": "3",
+                      },
+                      "ref": null,
+                      "rendered": "90",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "120",
+                        "value": "4",
+                      },
+                      "ref": null,
+                      "rendered": "120",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "150",
+                        "value": "5",
+                      },
+                      "ref": null,
+                      "rendered": "150",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "180",
+                        "value": "6",
+                      },
+                      "ref": null,
+                      "rendered": "180",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "210",
+                        "value": "7",
+                      },
+                      "ref": null,
+                      "rendered": "210",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "240",
+                        "value": "8",
+                      },
+                      "ref": null,
+                      "rendered": "240",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "270",
+                        "value": "9",
+                      },
+                      "ref": null,
+                      "rendered": "270",
+                      "type": "option",
+                    },
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "host",
+                      "props": Object {
+                        "children": "300",
+                        "value": "10",
+                      },
+                      "ref": null,
+                      "rendered": "300",
+                      "type": "option",
+                    },
+                  ],
+                  "type": "select",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {},
+                  "ref": null,
+                  "rendered": null,
+                  "type": "br",
+                },
+                Object {
+                  "instance": null,
+                  "key": undefined,
+                  "nodeType": "host",
+                  "props": Object {
+                    "children": Array [
+                      <FontAwesomeIcon
+                        border={false}
+                        className=""
+                        fixedWidth={false}
+                        flip={null}
+                        icon={
+                          Object {
+                            "icon": Array [
+                              384,
+                              512,
+                              Array [],
+                              "f46d",
+                              "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                            ],
+                            "iconName": "clipboard-list",
+                            "prefix": "fas",
+                          }
+                        }
+                        inverse={false}
+                        listItem={false}
+                        mask={null}
+                        pull={null}
+                        pulse={false}
+                        rotation={null}
+                        size={null}
+                        spin={false}
+                        symbol={false}
+                        transform={null}
+                      />,
+                      " Update Electron Release List",
+                    ],
+                    "className": "button",
+                    "disabled": undefined,
+                    "onClick": [Function],
+                  },
+                  "ref": null,
+                  "rendered": Array [
+                    Object {
+                      "instance": null,
+                      "key": undefined,
+                      "nodeType": "function",
+                      "props": Object {
+                        "border": false,
+                        "className": "",
+                        "fixedWidth": false,
+                        "flip": null,
+                        "icon": Object {
+                          "icon": Array [
+                            384,
+                            512,
+                            Array [],
+                            "f46d",
+                            "M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM96 424c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm0-96c-13.3 0-24-10.7-24-24s10.7-24 24-24 24 10.7 24 24-10.7 24-24 24zm96-192c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm128 368c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16zm0-96c0 4.4-3.6 8-8 8H168c-4.4 0-8-3.6-8-8v-16c0-4.4 3.6-8 8-8h144c4.4 0 8 3.6 8 8v16z",
+                          ],
+                          "iconName": "clipboard-list",
+                          "prefix": "fas",
+                        },
+                        "inverse": false,
+                        "listItem": false,
+                        "mask": null,
+                        "pull": null,
+                        "pulse": false,
+                        "rotation": null,
+                        "size": null,
+                        "spin": false,
+                        "symbol": false,
+                        "transform": null,
+                      },
+                      "ref": null,
+                      "rendered": null,
+                      "type": [Function],
+                    },
+                    " Update Electron Release List",
+                  ],
+                  "type": "button",
+                },
+              ],
+              "type": "div",
+            },
             Object {
               "instance": null,
               "key": undefined,

@@ -3,11 +3,13 @@ import * as React from 'react';
 
 import { VersionChooser } from '../../../src/renderer/components/version-chooser';
 import { mockVersions } from '../../mocks/electron-versions';
+import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 
 describe('VersionChooser component', () => {
   beforeEach(() => {
     this.store = {
       versions: mockVersions,
+      versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       setVersion: jest.fn()
     };
   });

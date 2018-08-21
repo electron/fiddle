@@ -1,3 +1,5 @@
+import * as path from 'path';
+
 import { activateTheme, getAvailableThemes, getTheme, readThemeFile } from '../../src/renderer/themes';
 import { DefaultThemes } from '../../src/renderer/themes-defaults';
 
@@ -126,8 +128,10 @@ describe('themes', () => {
       fs.readJSON.mockReturnValueOnce({});
 
       const theme = await readThemeFile('myfile.json');
+      const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);
+
       expect(theme).toBeTruthy();
-      expect(fs.readJSON).toHaveBeenCalledWith(`~/.electron-fiddle/themes/myfile.json`);
+      expect(fs.readJSON).toHaveBeenCalledWith(expected);
     });
 
     it('reads the right file if does not end with .json', async () => {
@@ -135,8 +139,10 @@ describe('themes', () => {
       fs.readJSON.mockReturnValueOnce({});
 
       const theme = await readThemeFile('myfile');
+      const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);
+
       expect(theme).toBeTruthy();
-      expect(fs.readJSON).toHaveBeenCalledWith(`~/.electron-fiddle/themes/myfile.json`);
+      expect(fs.readJSON).toHaveBeenCalledWith(expected);
     });
   });
 });

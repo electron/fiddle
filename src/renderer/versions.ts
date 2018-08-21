@@ -116,6 +116,8 @@ export async function fetchVersions(pages: number) {
   }
 
   saveKnownVersions(output);
+
+  return output;
 }
 
 /**
