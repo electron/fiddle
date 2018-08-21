@@ -59,7 +59,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     event: React.ChangeEvent<HTMLSelectElement>
   ) {
     const { value } = event.currentTarget;
-    this.props.appState.versionPagesToFetch = parseInt(value, 10);
+    this.props.appState.versionPagesToFetch = parseInt(value, 10) / 30;
   }
 
   /**
