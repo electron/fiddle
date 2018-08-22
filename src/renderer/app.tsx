@@ -29,7 +29,7 @@ export class App {
    *
    * @param {EditorValues} values
    */
-  public async setValues(values: EditorValues): Promise<boolean> {
+  public async setValues(values: Partial<EditorValues>): Promise<boolean> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -43,9 +43,17 @@ export class App {
 
     const { main, html, renderer } = fiddle.editors;
 
-    if (html && html.setValue) html.setValue(values.html);
-    if (main && main.setValue) main.setValue(values.main);
-    if (renderer && renderer.setValue) renderer.setValue(values.renderer);
+    if (html && html.setValue && values.html) {
+      html.setValue(values.html);
+    }
+
+    if (main && main.setValue && values.main) {
+      main.setValue(values.main);
+    }
+
+    if (renderer && renderer.setValue && values.renderer) {
+      renderer.setValue(values.renderer);
+    }
 
     appState.isUnsaved = false;
     this.setupUnsavedOnChangeListener();
@@ -58,7 +66,7 @@ export class App {
    *
    * @returns {EditorValues}
    */
-  public async getValues(options: PackageJsonOptions): Promise<EditorValues> {
+  public async getValues(options?: PackageJsonOptions): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -72,7 +80,9 @@ export class App {
       renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
     };
 
-    values.package = await getPackageJson(appState, values, options);
+    if (options && options.include !==  false) {
+      values.package = await getPackageJson(appState, values, options);
+    }
 
     return values;
   }
