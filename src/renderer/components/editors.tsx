@@ -53,11 +53,13 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       this.executeCommand(cmd);
     });
 
-    ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event, cmd: string) => {
+    ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
+      const { version } = this.props.appState;
+
       window.ElectronFiddle.app.setValues({
-        html: await getContent(ContentNames.HTML),
-        renderer: await getContent(ContentNames.RENDERER),
-        main: await getContent(ContentNames.MAIN)
+        html: await getContent(ContentNames.HTML, version),
+        renderer: await getContent(ContentNames.RENDERER, version),
+        main: await getContent(ContentNames.MAIN, version)
       });
     });
 

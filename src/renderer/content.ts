@@ -4,14 +4,19 @@ export const enum ContentNames {
   MAIN = 'main'
 }
 
+
 /**
- * Returns expected content for a given name. Currently synchronous,
- * but probably shouldn't be.
+ * Returns expected content for a given name.
  *
- * @param {string} name
- * @returns {string}
+ * @export
+ * @param {ContentNames} name
+ * @param {string} [version]
+ * @returns {Promise<string>}
  */
-export async function getContent(name: ContentNames): Promise<string> {
+export async function getContent(
+  name: ContentNames,
+  version?: string
+): Promise<string> {
   if (name === ContentNames.HTML) {
     return (await import('../content/html')).html;
   }
@@ -21,8 +26,34 @@ export async function getContent(name: ContentNames): Promise<string> {
   }
 
   if (name === ContentNames.MAIN) {
+    // We currently only distinguish between loadFile
+    // and loadURL. Todo: Properly version the quick-start.
+    if (version && version.startsWith('1.')) {
+      return (await import('../content/main-1-x-x')).main;
+    }
+
     return (await import('../content/main')).main;
   }
 
   return '';
+}
+
+/**
+ * Did the content change?
+ *
+ * @param {ContentNames} name
+ * @returns {Promise<boolean>}
+ */
+export async function isContentUnchanged(name: ContentNames): Promise<boolean> {
+  const values = await window.ElectronFiddle.app.getValues({ include: false });
+
+  // Handle main case, which needs to check both possible versions
+  if (name === ContentNames.MAIN) {
+    const isChanged1x = await getContent(ContentNames.MAIN, '1.0') === values.main;
+    const isChangedOther = await getContent(ContentNames.MAIN) === values.main;
+
+    return isChanged1x || isChangedOther;
+  } else {
+    return values[name] === await getContent(name);
+  }
 }

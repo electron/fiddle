@@ -60,7 +60,8 @@ export class Editor extends React.Component<EditorProps> {
    * Initialize Monaco.
    */
   public async initMonaco() {
-    const { options, monaco, id } = this.props;
+    const { options, monaco, id, appState } = this.props;
+    const { version } = appState;
     const ref = this.containerRef.current;
 
     if (ref) {
@@ -71,7 +72,7 @@ export class Editor extends React.Component<EditorProps> {
           enabled: false
         },
         contextmenu: false,
-        value: await getContent(id as ContentNames),
+        value: await getContent(id as ContentNames, version),
         ...options
       });
       this.editorDidMount(this.editor);

@@ -6,6 +6,7 @@ import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
 import { BinaryManager } from './binary';
+import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
@@ -233,6 +234,12 @@ export class AppState {
     console.log(`State: Switching to Electron ${version}`);
 
     this.version = version;
+
+    // Should we update the editor?
+    if (await isContentUnchanged(ContentNames.MAIN)) {
+      const main = await getContent(ContentNames.MAIN, version);
+      window.ElectronFiddle.app.setValues({ main });
+    }
 
     // Update TypeScript definitions
     updateEditorTypeDefinitions(version);
