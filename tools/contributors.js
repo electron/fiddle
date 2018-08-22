@@ -20,6 +20,7 @@ const CONTRIBUTORS_WHITELIST = [
   'charliehess',
   'marshallofsound',
   'felixrieseberg',
+  'nctl144',
   'benicheni'
 ];
 
