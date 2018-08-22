@@ -10,7 +10,7 @@ jest.mock('../../src/renderer/state', () => ({
   }
 }));
 
-describe('Editrors component', () => {
+describe('Editors component', () => {
   beforeEach(() => {
     this.store = {
       isTokenDialogShowing: false,
