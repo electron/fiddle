@@ -20,7 +20,8 @@ const CONTRIBUTORS_WHITELIST = [
   'charliehess',
   'marshallofsound',
   'felixrieseberg',
-  'nctl144'
+  'nctl144',
+  'benicheni'
 ];
 
 async function maybeFetchContributors() {
