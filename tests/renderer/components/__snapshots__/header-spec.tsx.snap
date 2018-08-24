@@ -1,213 +1,24 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header component renders 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <Header
+<React.Fragment>
+  <chrome-mac
     appState={Object {}}
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": undefined,
-    "nodeType": "function",
-    "props": Object {
-      "children": Array [
-        <chrome-mac
-          appState={Object {}}
-        />,
-        <header
-          id="header"
-        >
-          <commands
-            appState={Object {}}
-          />
-          <output
-            appState={Object {}}
-          />
-        </header>,
-        <welcome-tour
-          appState={Object {}}
-        />,
-      ],
-    },
-    "ref": null,
-    "rendered": Array [
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "appState": Object {},
-        },
-        "ref": null,
-        "rendered": null,
-        "type": "chrome-mac",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": Array [
-            <commands
-              appState={Object {}}
-            />,
-            <output
-              appState={Object {}}
-            />,
-          ],
-          "id": "header",
-        },
-        "ref": null,
-        "rendered": Array [
-          Object {
-            "instance": null,
-            "key": "commands",
-            "nodeType": "host",
-            "props": Object {
-              "appState": Object {},
-            },
-            "ref": null,
-            "rendered": null,
-            "type": "commands",
-          },
-          Object {
-            "instance": null,
-            "key": "output",
-            "nodeType": "host",
-            "props": Object {
-              "appState": Object {},
-            },
-            "ref": null,
-            "rendered": null,
-            "type": "output",
-          },
-        ],
-        "type": "header",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "appState": Object {},
-        },
-        "ref": null,
-        "rendered": null,
-        "type": "welcome-tour",
-      },
-    ],
-    "type": Symbol(react.fragment),
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": undefined,
-      "nodeType": "function",
-      "props": Object {
-        "children": Array [
-          <chrome-mac
-            appState={Object {}}
-          />,
-          <header
-            id="header"
-          >
-            <commands
-              appState={Object {}}
-            />
-            <output
-              appState={Object {}}
-            />
-          </header>,
-          <welcome-tour
-            appState={Object {}}
-          />,
-        ],
-      },
-      "ref": null,
-      "rendered": Array [
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "appState": Object {},
-          },
-          "ref": null,
-          "rendered": null,
-          "type": "chrome-mac",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": Array [
-              <commands
-                appState={Object {}}
-              />,
-              <output
-                appState={Object {}}
-              />,
-            ],
-            "id": "header",
-          },
-          "ref": null,
-          "rendered": Array [
-            Object {
-              "instance": null,
-              "key": "commands",
-              "nodeType": "host",
-              "props": Object {
-                "appState": Object {},
-              },
-              "ref": null,
-              "rendered": null,
-              "type": "commands",
-            },
-            Object {
-              "instance": null,
-              "key": "output",
-              "nodeType": "host",
-              "props": Object {
-                "appState": Object {},
-              },
-              "ref": null,
-              "rendered": null,
-              "type": "output",
-            },
-          ],
-          "type": "header",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "appState": Object {},
-          },
-          "ref": null,
-          "rendered": null,
-          "type": "welcome-tour",
-        },
-      ],
-      "type": Symbol(react.fragment),
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
+  />
+  <header
+    id="header"
+  >
+    <commands
+      appState={Object {}}
+      key="commands"
+    />
+    <output
+      appState={Object {}}
+      key="output"
+    />
+  </header>
+  <welcome-tour
+    appState={Object {}}
+  />
+</React.Fragment>
 `;

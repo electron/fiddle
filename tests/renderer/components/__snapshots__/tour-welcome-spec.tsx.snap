@@ -1,303 +1,43 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header component renders 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <WelcomeTour
-    appState={
-      Object {
-        "disableTour": [MockFunction],
-        "isTourShowing": true,
-      }
-    }
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": "welcome-tour-dialog",
-    "nodeType": "class",
-    "props": Object {
-      "children": Array [
-        <h4>
-          🙋‍ Hey There!
-        </h4>,
-        <p>
-          Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
-        </p>,
-        <p>
-          We won't show this dialog again, but you can always find the tour in the Help menu.
-        </p>,
-      ],
-      "isCentered": true,
-      "isShowing": true,
-      "isShowingBackdrop": true,
-      "onClose": [Function],
-      "onConfirm": [Function],
-    },
-    "ref": null,
-    "rendered": Array [
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "🙋‍ Hey There!",
-        },
-        "ref": null,
-        "rendered": "🙋‍ Hey There!",
-        "type": "h4",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-        },
-        "ref": null,
-        "rendered": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-        "type": "p",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-        },
-        "ref": null,
-        "rendered": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-        "type": "p",
-      },
-    ],
-    "type": [Function],
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": "welcome-tour-dialog",
-      "nodeType": "class",
-      "props": Object {
-        "children": Array [
-          <h4>
-            🙋‍ Hey There!
-          </h4>,
-          <p>
-            Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
-          </p>,
-          <p>
-            We won't show this dialog again, but you can always find the tour in the Help menu.
-          </p>,
-        ],
-        "isCentered": true,
-        "isShowing": true,
-        "isShowingBackdrop": true,
-        "onClose": [Function],
-        "onConfirm": [Function],
-      },
-      "ref": null,
-      "rendered": Array [
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "🙋‍ Hey There!",
-          },
-          "ref": null,
-          "rendered": "🙋‍ Hey There!",
-          "type": "h4",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-          },
-          "ref": null,
-          "rendered": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-          "type": "p",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-          },
-          "ref": null,
-          "rendered": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-          "type": "p",
-        },
-      ],
-      "type": [Function],
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
+<Dialog
+  isCentered={true}
+  isShowing={true}
+  isShowingBackdrop={true}
+  key="welcome-tour-dialog"
+  onClose={[Function]}
+  onConfirm={[Function]}
+>
+  <h4>
+    🙋‍ Hey There!
+  </h4>
+  <p>
+    Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
+  </p>
+  <p>
+    We won't show this dialog again, but you can always find the tour in the Help menu.
+  </p>
+</Dialog>
 `;
 
 exports[`Header component renders the tour once started 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <WelcomeTour
-    appState={
-      Object {
-        "disableTour": [MockFunction],
-        "isTourShowing": true,
-      }
-    }
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": "welcome-tour-dialog",
-    "nodeType": "class",
-    "props": Object {
-      "children": Array [
-        <h4>
-          🙋‍ Hey There!
-        </h4>,
-        <p>
-          Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
-        </p>,
-        <p>
-          We won't show this dialog again, but you can always find the tour in the Help menu.
-        </p>,
-      ],
-      "isCentered": true,
-      "isShowing": true,
-      "isShowingBackdrop": true,
-      "onClose": [Function],
-      "onConfirm": [Function],
-    },
-    "ref": null,
-    "rendered": Array [
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "🙋‍ Hey There!",
-        },
-        "ref": null,
-        "rendered": "🙋‍ Hey There!",
-        "type": "h4",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-        },
-        "ref": null,
-        "rendered": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-        "type": "p",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-        },
-        "ref": null,
-        "rendered": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-        "type": "p",
-      },
-    ],
-    "type": [Function],
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": "welcome-tour-dialog",
-      "nodeType": "class",
-      "props": Object {
-        "children": Array [
-          <h4>
-            🙋‍ Hey There!
-          </h4>,
-          <p>
-            Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
-          </p>,
-          <p>
-            We won't show this dialog again, but you can always find the tour in the Help menu.
-          </p>,
-        ],
-        "isCentered": true,
-        "isShowing": true,
-        "isShowingBackdrop": true,
-        "onClose": [Function],
-        "onConfirm": [Function],
-      },
-      "ref": null,
-      "rendered": Array [
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "🙋‍ Hey There!",
-          },
-          "ref": null,
-          "rendered": "🙋‍ Hey There!",
-          "type": "h4",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-          },
-          "ref": null,
-          "rendered": "Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.",
-          "type": "p",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-          },
-          "ref": null,
-          "rendered": "We won't show this dialog again, but you can always find the tour in the Help menu.",
-          "type": "p",
-        },
-      ],
-      "type": [Function],
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
+<Dialog
+  isCentered={true}
+  isShowing={true}
+  isShowingBackdrop={true}
+  key="welcome-tour-dialog"
+  onClose={[Function]}
+  onConfirm={[Function]}
+>
+  <h4>
+    🙋‍ Hey There!
+  </h4>
+  <p>
+    Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
+  </p>
+  <p>
+    We won't show this dialog again, but you can always find the tour in the Help menu.
+  </p>
+</Dialog>
 `;

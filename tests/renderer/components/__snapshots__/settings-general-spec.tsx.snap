@@ -1,157 +1,16 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GeneralSettings component renders 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <GeneralSettings
+<div>
+  <h2>
+    General Settings
+  </h2>
+  <settings-appearance
     appState={Object {}}
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": undefined,
-    "nodeType": "host",
-    "props": Object {
-      "children": Array [
-        <h2>
-          General Settings
-        </h2>,
-        <settings-appearance
-          appState={Object {}}
-        />,
-        <hr />,
-        <settings-github
-          appState={Object {}}
-        />,
-      ],
-    },
-    "ref": null,
-    "rendered": Array [
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": "General Settings",
-        },
-        "ref": null,
-        "rendered": "General Settings",
-        "type": "h2",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "appState": Object {},
-        },
-        "ref": null,
-        "rendered": null,
-        "type": "settings-appearance",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {},
-        "ref": null,
-        "rendered": null,
-        "type": "hr",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "appState": Object {},
-        },
-        "ref": null,
-        "rendered": null,
-        "type": "settings-github",
-      },
-    ],
-    "type": "div",
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": undefined,
-      "nodeType": "host",
-      "props": Object {
-        "children": Array [
-          <h2>
-            General Settings
-          </h2>,
-          <settings-appearance
-            appState={Object {}}
-          />,
-          <hr />,
-          <settings-github
-            appState={Object {}}
-          />,
-        ],
-      },
-      "ref": null,
-      "rendered": Array [
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": "General Settings",
-          },
-          "ref": null,
-          "rendered": "General Settings",
-          "type": "h2",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "appState": Object {},
-          },
-          "ref": null,
-          "rendered": null,
-          "type": "settings-appearance",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {},
-          "ref": null,
-          "rendered": null,
-          "type": "hr",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "appState": Object {},
-          },
-          "ref": null,
-          "rendered": null,
-          "type": "settings-github",
-        },
-      ],
-      "type": "div",
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
+  />
+  <hr />
+  <settings-github
+    appState={Object {}}
+  />
+</div>
 `;
