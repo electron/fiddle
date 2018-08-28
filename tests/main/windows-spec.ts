@@ -5,6 +5,7 @@ import {
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/context-menu');
+jest.mock('electron', () => require('../mocks/electron'));
 
 describe('windows', () => {
   describe('getMainWindowOptions()', () => {

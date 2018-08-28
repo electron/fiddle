@@ -5,6 +5,7 @@ const { shell } = require('electron');
 import { AppearanceSettings } from '../../../src/renderer/components/settings-general-appearance';
 
 jest.mock('fs-extra');
+jest.mock('electron', () => require('../../../tests/mocks/electron'));
 jest.mock('../../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p)
 }));

@@ -8,6 +8,7 @@ import { MockWebContents } from '../mocks/web-contents';
 
 jest.mock('../../src/utils/devmode');
 jest.mock('../../src/main/ipc');
+jest.mock('electron', () => require('../mocks/electron'));
 
 describe('context-menu', () => {
   let mockWindow;

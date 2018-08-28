@@ -7,6 +7,7 @@ import { listenForProtocolHandler, scanArgv, setupProtocolHandler } from '../../
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('fs');
+jest.mock('electron', () => require('../mocks/electron'));
 
 describe('protocol', () => {
   const oldArgv = [ ...process.argv ];

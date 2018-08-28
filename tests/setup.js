@@ -1,3 +1,6 @@
+// Disable prompt to download react devtools in atom tests
+window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {isDisabled: true};
+
 const { configure } = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
 const { ElectronFiddleMock } = require('./mocks/electron-fiddle');
@@ -11,7 +14,7 @@ global.fetch = require('jest-fetch-mock');
 
 jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
 jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
-jest.mock('electron', () => require('./mocks/electron'));
+
 jest.mock('../src/constants', () => ({
   USER_DATA_PATH: '/Users/fake-user',
   INDEX_HTML_NAME: 'index.html',

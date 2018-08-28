@@ -7,6 +7,7 @@ import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/windows');
+jest.mock('electron', () => require('../mocks/electron'));
 
 describe('menu', () => {
   beforeEach(() => {

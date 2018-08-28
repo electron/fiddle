@@ -32,5 +32,7 @@
   ],
   "moduleNameMapper": {
     ".*releases.json$": "<rootDir>/static/releases.json"
-  }
+  },
+  "runner": "@jest-runner/electron",
+  "testEnvironment": "@jest-runner/electron/environment"
 }
