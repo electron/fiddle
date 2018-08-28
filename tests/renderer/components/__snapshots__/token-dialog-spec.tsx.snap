@@ -1,423 +1,76 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TokenDialog component renders 1`] = `
-ShallowWrapper {
-  "length": 1,
-  Symbol(enzyme.__root__): [Circular],
-  Symbol(enzyme.__unrendered__): <TokenDialog
-    appState={
-      Object {
-        "isTokenDialogShowing": true,
+<Dialog
+  buttons={
+    Array [
+      <button
+        className="button"
+        disabled={true}
+        onClick={[Function]}
+      >
+        Done
+      </button>,
+      <button
+        className="cancel"
+        onClick={[Function]}
+      >
+        Cancel
+      </button>,
+    ]
+  }
+  className="tokenDialog"
+  isCentered={true}
+  isShowing={true}
+  isShowingBackdrop={true}
+  key="tokenDialog"
+  onClose={[Function]}
+>
+  <span
+    className="generateTokenText"
+  >
+    <FontAwesomeIcon
+      border={false}
+      className=""
+      fixedWidth={false}
+      flip={null}
+      icon={
+        Object {
+          "icon": Array [
+            512,
+            512,
+            Array [],
+            "f084",
+            "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
+          ],
+          "iconName": "key",
+          "prefix": "fas",
+        }
       }
-    }
-  />,
-  Symbol(enzyme.__renderer__): Object {
-    "batchedUpdates": [Function],
-    "getNode": [Function],
-    "render": [Function],
-    "simulateEvent": [Function],
-    "unmount": [Function],
-  },
-  Symbol(enzyme.__node__): Object {
-    "instance": null,
-    "key": "tokenDialog",
-    "nodeType": "class",
-    "props": Object {
-      "buttons": Array [
-        <button
-          className="button"
-          disabled={true}
-          onClick={[Function]}
-        >
-          Done
-        </button>,
-        <button
-          className="cancel"
-          onClick={[Function]}
-        >
-          Cancel
-        </button>,
-      ],
-      "children": Array [
-        null,
-        <span
-          className="generateTokenText"
-        >
-          <FontAwesomeIcon
-            border={false}
-            className=""
-            fixedWidth={false}
-            flip={null}
-            icon={
-              Object {
-                "icon": Array [
-                  512,
-                  512,
-                  Array [],
-                  "f084",
-                  "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                ],
-                "iconName": "key",
-                "prefix": "fas",
-              }
-            }
-            inverse={false}
-            listItem={false}
-            mask={null}
-            pull={null}
-            pulse={false}
-            rotation={null}
-            size={null}
-            spin={false}
-            symbol={false}
-            transform={null}
-          />
-          Generate a 
-          <a
-            onClick={[Function]}
-          >
-            GitHub Personal Access Token
-          </a>
-           and paste it here:
-        </span>,
-        <input
-          className=""
-          onChange={[Function]}
-          onFocus={[Function]}
-          value=""
-        />,
-      ],
-      "className": "tokenDialog",
-      "isCentered": true,
-      "isShowing": true,
-      "isShowingBackdrop": true,
-      "onClose": [Function],
-    },
-    "ref": null,
-    "rendered": Array [
-      null,
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "children": Array [
-            <FontAwesomeIcon
-              border={false}
-              className=""
-              fixedWidth={false}
-              flip={null}
-              icon={
-                Object {
-                  "icon": Array [
-                    512,
-                    512,
-                    Array [],
-                    "f084",
-                    "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                  ],
-                  "iconName": "key",
-                  "prefix": "fas",
-                }
-              }
-              inverse={false}
-              listItem={false}
-              mask={null}
-              pull={null}
-              pulse={false}
-              rotation={null}
-              size={null}
-              spin={false}
-              symbol={false}
-              transform={null}
-            />,
-            "Generate a ",
-            <a
-              onClick={[Function]}
-            >
-              GitHub Personal Access Token
-            </a>,
-            " and paste it here:",
-          ],
-          "className": "generateTokenText",
-        },
-        "ref": null,
-        "rendered": Array [
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "function",
-            "props": Object {
-              "border": false,
-              "className": "",
-              "fixedWidth": false,
-              "flip": null,
-              "icon": Object {
-                "icon": Array [
-                  512,
-                  512,
-                  Array [],
-                  "f084",
-                  "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                ],
-                "iconName": "key",
-                "prefix": "fas",
-              },
-              "inverse": false,
-              "listItem": false,
-              "mask": null,
-              "pull": null,
-              "pulse": false,
-              "rotation": null,
-              "size": null,
-              "spin": false,
-              "symbol": false,
-              "transform": null,
-            },
-            "ref": null,
-            "rendered": null,
-            "type": [Function],
-          },
-          "Generate a ",
-          Object {
-            "instance": null,
-            "key": undefined,
-            "nodeType": "host",
-            "props": Object {
-              "children": "GitHub Personal Access Token",
-              "onClick": [Function],
-            },
-            "ref": null,
-            "rendered": "GitHub Personal Access Token",
-            "type": "a",
-          },
-          " and paste it here:",
-        ],
-        "type": "span",
-      },
-      Object {
-        "instance": null,
-        "key": undefined,
-        "nodeType": "host",
-        "props": Object {
-          "className": "",
-          "onChange": [Function],
-          "onFocus": [Function],
-          "value": "",
-        },
-        "ref": Object {
-          "current": null,
-        },
-        "rendered": null,
-        "type": "input",
-      },
-    ],
-    "type": [Function],
-  },
-  Symbol(enzyme.__nodes__): Array [
-    Object {
-      "instance": null,
-      "key": "tokenDialog",
-      "nodeType": "class",
-      "props": Object {
-        "buttons": Array [
-          <button
-            className="button"
-            disabled={true}
-            onClick={[Function]}
-          >
-            Done
-          </button>,
-          <button
-            className="cancel"
-            onClick={[Function]}
-          >
-            Cancel
-          </button>,
-        ],
-        "children": Array [
-          null,
-          <span
-            className="generateTokenText"
-          >
-            <FontAwesomeIcon
-              border={false}
-              className=""
-              fixedWidth={false}
-              flip={null}
-              icon={
-                Object {
-                  "icon": Array [
-                    512,
-                    512,
-                    Array [],
-                    "f084",
-                    "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                  ],
-                  "iconName": "key",
-                  "prefix": "fas",
-                }
-              }
-              inverse={false}
-              listItem={false}
-              mask={null}
-              pull={null}
-              pulse={false}
-              rotation={null}
-              size={null}
-              spin={false}
-              symbol={false}
-              transform={null}
-            />
-            Generate a 
-            <a
-              onClick={[Function]}
-            >
-              GitHub Personal Access Token
-            </a>
-             and paste it here:
-          </span>,
-          <input
-            className=""
-            onChange={[Function]}
-            onFocus={[Function]}
-            value=""
-          />,
-        ],
-        "className": "tokenDialog",
-        "isCentered": true,
-        "isShowing": true,
-        "isShowingBackdrop": true,
-        "onClose": [Function],
-      },
-      "ref": null,
-      "rendered": Array [
-        null,
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "children": Array [
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon={
-                  Object {
-                    "icon": Array [
-                      512,
-                      512,
-                      Array [],
-                      "f084",
-                      "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                    ],
-                    "iconName": "key",
-                    "prefix": "fas",
-                  }
-                }
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                transform={null}
-              />,
-              "Generate a ",
-              <a
-                onClick={[Function]}
-              >
-                GitHub Personal Access Token
-              </a>,
-              " and paste it here:",
-            ],
-            "className": "generateTokenText",
-          },
-          "ref": null,
-          "rendered": Array [
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "function",
-              "props": Object {
-                "border": false,
-                "className": "",
-                "fixedWidth": false,
-                "flip": null,
-                "icon": Object {
-                  "icon": Array [
-                    512,
-                    512,
-                    Array [],
-                    "f084",
-                    "M512 176.001C512 273.203 433.202 352 336 352c-11.22 0-22.19-1.062-32.827-3.069l-24.012 27.014A23.999 23.999 0 0 1 261.223 384H224v40c0 13.255-10.745 24-24 24h-40v40c0 13.255-10.745 24-24 24H24c-13.255 0-24-10.745-24-24v-78.059c0-6.365 2.529-12.47 7.029-16.971l161.802-161.802C163.108 213.814 160 195.271 160 176 160 78.798 238.797.001 335.999 0 433.488-.001 512 78.511 512 176.001zM336 128c0 26.51 21.49 48 48 48s48-21.49 48-48-21.49-48-48-48-48 21.49-48 48z",
-                  ],
-                  "iconName": "key",
-                  "prefix": "fas",
-                },
-                "inverse": false,
-                "listItem": false,
-                "mask": null,
-                "pull": null,
-                "pulse": false,
-                "rotation": null,
-                "size": null,
-                "spin": false,
-                "symbol": false,
-                "transform": null,
-              },
-              "ref": null,
-              "rendered": null,
-              "type": [Function],
-            },
-            "Generate a ",
-            Object {
-              "instance": null,
-              "key": undefined,
-              "nodeType": "host",
-              "props": Object {
-                "children": "GitHub Personal Access Token",
-                "onClick": [Function],
-              },
-              "ref": null,
-              "rendered": "GitHub Personal Access Token",
-              "type": "a",
-            },
-            " and paste it here:",
-          ],
-          "type": "span",
-        },
-        Object {
-          "instance": null,
-          "key": undefined,
-          "nodeType": "host",
-          "props": Object {
-            "className": "",
-            "onChange": [Function],
-            "onFocus": [Function],
-            "value": "",
-          },
-          "ref": Object {
-            "current": null,
-          },
-          "rendered": null,
-          "type": "input",
-        },
-      ],
-      "type": [Function],
-    },
-  ],
-  Symbol(enzyme.__options__): Object {
-    "adapter": ReactSixteenAdapter {
-      "options": Object {
-        "enableComponentDidUpdateOnSetState": true,
-      },
-    },
-  },
-}
+      inverse={false}
+      listItem={false}
+      mask={null}
+      pull={null}
+      pulse={false}
+      rotation={null}
+      size={null}
+      spin={false}
+      symbol={false}
+      transform={null}
+    />
+    Generate a 
+    <a
+      onClick={[Function]}
+    >
+      GitHub Personal Access Token
+    </a>
+     and paste it here:
+  </span>
+  <input
+    className=""
+    onChange={[Function]}
+    onFocus={[Function]}
+    value=""
+  />
+</Dialog>
 `;
