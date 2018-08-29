@@ -45,6 +45,8 @@ module.exports = {
         remoteReleases: '',
         setupExe: `electron-fiddle-${package.version}-setup-${process.arch}.exe`,
         setupIcon: path.resolve(__dirname, 'assets', 'icons', 'fiddle.ico'),
+        certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
+        certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
       }
     },
     {
