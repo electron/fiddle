@@ -20,6 +20,13 @@ describe('content', () => {
   });
 
   describe('isContentUnchanged()', () => {
+    it('returns false if app is not available', async () => {
+      window.ElectronFiddle.app = null;
+
+      const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
+      expect(isUnchanged).toBe(false);
+    });
+
     describe('main', () => {
       it('returns false if it changed', async () => {
         window.ElectronFiddle.app.getValues.mockReturnValueOnce({

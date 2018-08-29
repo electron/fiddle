@@ -45,6 +45,8 @@ export async function getContent(
  * @returns {Promise<boolean>}
  */
 export async function isContentUnchanged(name: ContentNames): Promise<boolean> {
+  if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
+
   const values = await window.ElectronFiddle.app.getValues({ include: false });
 
   // Handle main case, which needs to check both possible versions
