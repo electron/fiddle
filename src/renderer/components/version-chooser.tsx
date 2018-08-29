@@ -48,7 +48,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
 
     return sortedElectronMap<JSX.Element | null>(versions, (_key, item) => {
       // Check if we want to show the version
-      if (!versionsToShow.includes(getReleaseChannel(item))) {
+      if (!item || !versionsToShow.includes(getReleaseChannel(item))) {
         return null;
       }
 
