@@ -75,8 +75,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   public executeCommand(commandId: string) {
     const editor = getFocusedEditor();
 
-    console.log('hi')
-
     if (editor) {
       const command = editor.getAction(commandId);
 
