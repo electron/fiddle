@@ -48,7 +48,7 @@
     "fix-path": "^2.1.0",
     "fs-extra": "^7.0.0",
     "loader-utils": "^1.1.0",
-    "mobx": "^5.0.4",
+    "mobx": "^5.1.0",
     "mobx-react": "^5.2.5",
     "monaco-loader": "^0.14.0",
     "namor": "^1.0.1",
