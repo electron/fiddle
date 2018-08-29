@@ -101,7 +101,11 @@ export class AppState {
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
-          return !confirm('The current Fiddle is unsaved. Do you want to exit anyway?');
+          const result = !confirm('The current Fiddle is unsaved. Do you want to exit anyway?');
+
+          if (result) {
+            window.close();
+          }
         };
       } else {
         window.onbeforeunload = null;
