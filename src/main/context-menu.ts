@@ -128,8 +128,8 @@ export function getInspectItems(
  */
 export function createContextMenu(browserWindow: BrowserWindow) {
   browserWindow.webContents.on('context-menu', (_event, props) => {
-    const { editFlags, selectionText, isEditable } = props;
-    const hasText = (selectionText || '').toString().trim().length > 0;
+    const { editFlags } = props;
+
     const template: Array<MenuItemConstructorOptions> = [
       ...getRunItems(),
       ...getMonacoItems(props),
@@ -137,20 +137,17 @@ export function createContextMenu(browserWindow: BrowserWindow) {
         id: 'cut',
         label: 'Cut',
         role: editFlags.canCut ? 'cut' : '',
-        enabled: editFlags.canCut,
-        visible: isEditable
+        enabled: editFlags.canCut
       }, {
         id: 'copy',
         label: 'Copy',
         role: editFlags.canCopy ? 'copy' : '',
-        enabled: editFlags.canCopy,
-        visible: isEditable || hasText
+        enabled: editFlags.canCopy
       }, {
         id: 'paste',
         label: 'Paste',
         role: editFlags.canPaste ? 'paste' : '',
-        enabled: editFlags.canPaste,
-        visible: isEditable
+        enabled: editFlags.canPaste
       }, {
         type: 'separator'
       },
