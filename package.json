@@ -94,10 +94,10 @@
     "standard": "^11.0.1",
     "stylelint": "^9.3.0",
     "stylelint-config-standard": "^18.2.0",
-    "ts-jest": "^23.1.2",
-    "tslint": "^5.10.0",
-    "tslint-microsoft-contrib": "^5.0.3",
+    "ts-jest": "^23.1.4",
+    "tslint": "^5.11.0",
+    "tslint-microsoft-contrib": "^5.2.1",
     "tslint-react": "^3.6.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.0.1"
   }
 }
