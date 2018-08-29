@@ -4,83 +4,81 @@ exports[`VersionChooser component renders 1`] = `
 <div
   className="tour"
 >
-  <React.Fragment>
-    <Dialog
-      arrow="left"
-      buttons={
-        Array [
-          <button
-            className="btn-stop"
-            onClick={[Function]}
-          >
-            Stop Tour
-          </button>,
-          <button
-            className="btn-adv"
-            onClick={[Function]}
-          >
-            Continue
-          </button>,
-        ]
+  <Dialog
+    arrow="left"
+    buttons={
+      Array [
+        <button
+          className="btn-stop"
+          onClick={[Function]}
+        >
+          Stop Tour
+        </button>,
+        <button
+          className="btn-adv"
+          onClick={[Function]}
+        >
+          Continue
+        </button>,
+      ]
+    }
+    isCentered={false}
+    isShowing={true}
+    isShowingBackdrop={false}
+    key="mock-step-1"
+    style={
+      Object {
+        "left": 165,
+        "margin": "10px",
+        "position": "absolute",
+        "top": 5,
+        "width": 390,
       }
-      isCentered={false}
-      isShowing={true}
-      isShowingBackdrop={false}
-      key="mock-step-1"
-      style={
-        Object {
-          "left": 165,
-          "margin": "10px",
-          "position": "absolute",
-          "top": 5,
-          "width": 390,
-        }
-      }
+    }
+  >
+    <span
+      key="1"
     >
-      <span
-        key="1"
-      >
-        mock-step-1
-      </span>
-    </Dialog>
-    <svg
+      mock-step-1
+    </span>
+  </Dialog>
+  <svg
+    height="100%"
+    width="100%"
+  >
+    <rect
+      fill="rgba(0, 0, 0, 0.65)"
       height="100%"
+      mask="url(#mask)"
       width="100%"
+      x="0"
+      y="0"
+    />
+    <mask
+      id="mask"
+      maskContentUnits="userSpaceOnUse"
+      maskUnits="userSpaceOnUse"
     >
       <rect
-        fill="rgba(0, 0, 0, 0.65)"
+        className="bg"
+        fill="white"
         height="100%"
-        mask="url(#mask)"
         width="100%"
         x="0"
         y="0"
       />
-      <mask
-        id="mask"
-        maskContentUnits="userSpaceOnUse"
-        maskUnits="userSpaceOnUse"
-      >
-        <rect
-          className="bg"
-          fill="white"
-          height="100%"
-          width="100%"
-          x="0"
-          y="0"
-        />
-        <rect
-          fill="black"
-          height={120}
-          rx="5"
-          ry="5"
-          stroke="black"
-          strokeWidth="5"
-          width={130}
-          x={25}
-          y={20}
-        />
-      </mask>
-    </svg>
-  </React.Fragment>
+      <rect
+        fill="black"
+        height={120}
+        rx="5"
+        ry="5"
+        stroke="black"
+        strokeWidth="5"
+        width={130}
+        x={25}
+        y={20}
+      />
+    </mask>
+  </svg>
 </div>
 `;

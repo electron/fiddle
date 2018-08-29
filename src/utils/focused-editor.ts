@@ -10,7 +10,7 @@ export function getFocusedEditor(
   const focusedKey = Object.keys(window.ElectronFiddle.editors).find((key) => {
     const editor: MonacoType.editor.IStandaloneCodeEditor
       = window.ElectronFiddle.editors[key];
-    return editor && editor.isFocused && editor.isFocused();
+    return editor && editor.hasTextFocus && editor.hasTextFocus();
   });
 
   return focusedKey

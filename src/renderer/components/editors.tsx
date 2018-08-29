@@ -77,6 +77,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     if (editor) {
       const command = editor.getAction(commandId);
+
+      console.log(`Editors: Trying to run ${command.id}. Supported: ${command.isSupported}`);
+
       if (command && command.isSupported()) {
         command.run();
       }

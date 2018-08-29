@@ -17,17 +17,17 @@ export const enum ElectronReleaseChannel {
 export function getReleaseChannel(
   input: GitHubVersion
 ): ElectronReleaseChannel {
-  const { tag_name } = input;
+  const tag = input.tag_name || '';
 
-  if (tag_name.includes('beta')) {
+  if (tag.includes('beta')) {
     return ElectronReleaseChannel.beta;
   }
 
-  if (tag_name.includes('nightly')) {
+  if (tag.includes('nightly')) {
     return ElectronReleaseChannel.nightly;
   }
 
-  if (tag_name.includes('unsupported')) {
+  if (tag.includes('unsupported')) {
     return ElectronReleaseChannel.unsupported;
   }
 
@@ -115,7 +115,9 @@ export async function fetchVersions(pages: number) {
     }
   }
 
-  saveKnownVersions(output);
+  if (output && output.length > 0) {
+    saveKnownVersions(output);
+  }
 
   return output;
 }

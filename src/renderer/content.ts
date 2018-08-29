@@ -4,7 +4,6 @@ export const enum ContentNames {
   MAIN = 'main'
 }
 
-
 /**
  * Returns expected content for a given name.
  *
