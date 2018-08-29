@@ -115,7 +115,9 @@ export async function fetchVersions(pages: number) {
     }
   }
 
-  saveKnownVersions(output);
+  if (output && output.length > 0) {
+    saveKnownVersions(output);
+  }
 
   return output;
 }
