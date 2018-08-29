@@ -7,12 +7,12 @@ describe('focused-editor', () => {
   });
 
   it('getFocusedEditor() returns the focused editor', () => {
-    window.ElectronFiddle.editors.main.isFocused.mockReturnValue(true);
+    window.ElectronFiddle.editors.main.hasTextFocus.mockReturnValue(true);
     expect((getFocusedEditor() as any).name).toBe('main');
   });
 
   it('getFocusedEditor() returns the focused editor', () => {
-    window.ElectronFiddle.editors.renderer.isFocused.mockReturnValue(true);
+    window.ElectronFiddle.editors.renderer.hasTextFocus.mockReturnValue(true);
     expect((getFocusedEditor() as any).name).toBe('renderer');
   });
 

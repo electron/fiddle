@@ -1,6 +1,6 @@
 export class EditorMock {
   public layout = jest.fn();
-  public isFocused = jest.fn();
+  public hasTextFocus = jest.fn();
   public setValue = jest.fn();
   public getValue = jest.fn().mockReturnValue('editor-value');
 

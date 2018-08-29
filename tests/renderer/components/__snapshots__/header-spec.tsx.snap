@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header component renders 1`] = `
-<React.Fragment>
+<Fragment>
   <chrome-mac
     appState={Object {}}
   />
@@ -20,5 +20,5 @@ exports[`Header component renders 1`] = `
   <welcome-tour
     appState={Object {}}
   />
-</React.Fragment>
+</Fragment>
 `;
