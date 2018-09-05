@@ -113,7 +113,6 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         <input
           key='addressbar'
           type='url'
-          placeholder='...'
           value={`https://gist.github.com/${value}`}
           onChange={this.handleChange}
         />
