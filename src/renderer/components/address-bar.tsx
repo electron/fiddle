@@ -110,12 +110,11 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
-        <span>https://gist.github.com/</span>
         <input
           key='addressbar'
-          type='text'
+          type='url'
           placeholder='...'
-          value={value}
+          value={`https://gist.github.com/${value}`}
           onChange={this.handleChange}
         />
       </form>
