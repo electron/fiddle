@@ -8,7 +8,6 @@ exports[`AddressBar component renders 1`] = `
   <input
     key="addressbar"
     onChange={[Function]}
-    placeholder="..."
     type="url"
     value="https://gist.github.com/null"
   />
