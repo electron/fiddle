@@ -248,6 +248,10 @@ export function setupMenu() {
       if (label === 'View' && isSubmenu(item.submenu)) {
         item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools'); // Remove "Toggle Developer Tools"
         item.submenu.push({ type: 'separator' }, { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' }); // Add zooming actions
+        item.submenu.push({ type: 'separator' }, {
+          label: 'Toggle Soft Wrap',
+          click () { require('electron').shell.openExternal('https://electronjs.org') }
+        });
       }
 
       // Append items to "Help"

@@ -73,6 +73,7 @@ export class Editor extends React.Component<EditorProps> {
         },
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
+        wordWrap: "on",
         ...options
       });
       this.editorDidMount(this.editor);
