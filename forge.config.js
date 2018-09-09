@@ -5,7 +5,8 @@ const package = require('./package.json');
 
 module.exports = {
   hooks: {
-    generateAssets: require('./tools/generateAssets')
+    generateAssets: require('./tools/generateAssets'),
+    postStart: async ({}, child) => {child.on('exit', () => process.exit(0))}
   },
   packagerConfig: {
     name: 'Electron Fiddle',
