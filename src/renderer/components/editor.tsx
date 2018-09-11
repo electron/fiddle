@@ -6,6 +6,15 @@ import * as React from 'react';
 import { ContentNames, getContent } from '../content';
 import { AppState } from '../state';
 
+declare module "*.json"
+{
+  const value: any;
+  export default value;
+}
+
+import * as graph from './editor-options.json';
+
+
 export interface EditorProps {
   appState: AppState;
   monaco: typeof MonacoType;
@@ -73,7 +82,7 @@ export class Editor extends React.Component<EditorProps> {
         },
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
-        wordWrap: "on",
+        wordWrap: graph.monacoEditor.softWrap,
         ...options
       });
       this.editorDidMount(this.editor);
