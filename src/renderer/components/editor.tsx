@@ -5,6 +5,8 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import { ContentNames, getContent } from '../content';
 import { AppState } from '../state';
+import { IpcEvents } from '../../ipc-events';
+import { ipcRendererManager } from '../ipc';
 
 declare module "*.json"
 {
@@ -12,7 +14,7 @@ declare module "*.json"
   export default value;
 }
 
-import * as graph from './editor-options.json';
+import * as editorOptions from './editor-options.json';
 
 
 export interface EditorProps {
@@ -73,6 +75,15 @@ export class Editor extends React.Component<EditorProps> {
     const { version } = appState;
     const ref = this.containerRef.current;
 
+    var softWrap = editorOptions.monacoEditor.softWrap;
+    // ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
+    //   if (editorOptions.monacoEditor.softWrap == "on") {
+    //     softWrap = "off";
+    //   } else {
+    //     softWrap = "on";
+    //   }
+    // });
+
     if (ref) {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
@@ -82,7 +93,7 @@ export class Editor extends React.Component<EditorProps> {
         },
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
-        wordWrap: graph.monacoEditor.softWrap,
+        wordWrap: softWrap,
         ...options
       });
       this.editorDidMount(this.editor);
