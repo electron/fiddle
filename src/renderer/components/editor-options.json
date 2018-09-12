@@ -1,5 +1,5 @@
 {
   "monacoEditor": {
-    "softWrap": "false"
+    "softWrap": "on"
   }
 }
