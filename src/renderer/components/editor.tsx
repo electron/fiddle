@@ -8,14 +8,6 @@ import { AppState } from '../state';
 import { IpcEvents } from '../../ipc-events';
 import { ipcRendererManager } from '../ipc';
 
-declare module "*.json"
-{
-  const value: any;
-  export default value;
-}
-
-import * as editorOptions from './editor-options.json';
-
 
 export interface EditorProps {
   appState: AppState;
@@ -39,7 +31,8 @@ export class Editor extends React.Component<EditorProps> {
     this.language = props.id === 'html' ? 'html' : 'javascript';
     this.state = {
       'options': {
-        'wordWrap': 'on'
+        // it is default to off
+        'wordWrap': 'off'
       }
     }
   }
@@ -50,14 +43,24 @@ export class Editor extends React.Component<EditorProps> {
 
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
-      this.setState({
-        'options': {
+      var oldState = this.state;
+      if (this.state['options'].wordWrap == "off") {
+        console.log('it is here 2');
+        oldState['options'].wordWrap = "on";
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          'wordWrap': 'on'
+        });
+      } else if (this.state['options'].wordWrap == "on") {
+        console.log('it goes 3');
+        oldState['options'].wordWrap = "off";
+
+        this.setState(oldState);
+        this.editor.updateOptions({
           'wordWrap': 'off'
-        }
-      });
-      console.log('and after is this', this.state);
-      this.destroyMonaco();
-      this.initMonaco();
+        });
+      }
     });
     this.initMonaco();
   }
@@ -91,15 +94,6 @@ export class Editor extends React.Component<EditorProps> {
     const { version } = appState;
     const ref = this.containerRef.current;
 
-    var softWrap = editorOptions.monacoEditor.softWrap;
-    // ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
-    //   if (editorOptions.monacoEditor.softWrap == "on") {
-    //     softWrap = "off";
-    //   } else {
-    //     softWrap = "on";
-    //   }
-    // });
-
     if (ref) {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
@@ -109,7 +103,6 @@ export class Editor extends React.Component<EditorProps> {
         },
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
-        wordWrap: softWrap,
         ...options
       });
       this.editorDidMount(this.editor);
