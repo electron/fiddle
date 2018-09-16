@@ -37,6 +37,11 @@ export class Editor extends React.Component<EditorProps> {
     super(props);
 
     this.language = props.id === 'html' ? 'html' : 'javascript';
+    this.state = {
+      'options': {
+        'wordWrap': 'on'
+      }
+    }
   }
 
   public shouldComponentUpdate() {
@@ -44,6 +49,16 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   public componentDidMount() {
+    ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
+      this.setState({
+        'options': {
+          'wordWrap': 'off'
+        }
+      });
+      console.log('and after is this', this.state);
+      this.destroyMonaco();
+      this.initMonaco();
+    });
     this.initMonaco();
   }
 
@@ -71,7 +86,8 @@ export class Editor extends React.Component<EditorProps> {
    * Initialize Monaco.
    */
   public async initMonaco() {
-    const { options, monaco, id, appState } = this.props;
+    const { monaco, id, appState } = this.props;
+    const { options } = this.state;
     const { version } = appState;
     const ref = this.containerRef.current;
 
