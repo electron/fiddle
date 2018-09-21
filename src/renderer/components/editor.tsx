@@ -45,7 +45,6 @@ export class Editor extends React.Component<EditorProps> {
     ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
       var oldState = this.state;
       if (this.state['options'].wordWrap == "off") {
-        console.log('it is here 2');
         oldState['options'].wordWrap = "on";
 
         this.setState(oldState);
