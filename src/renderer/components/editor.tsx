@@ -89,7 +89,7 @@ export class Editor extends React.Component<EditorProps> {
    */
   public async initMonaco() {
     const { monaco, id, appState } = this.props;
-    const { options } = this.state;
+    const { options } = this.state['options'];
     const { version } = appState;
     const ref = this.containerRef.current;
 
