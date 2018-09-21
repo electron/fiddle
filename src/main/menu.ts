@@ -252,6 +252,10 @@ export function setupMenu() {
           label: 'Toggle Soft Wrap',
           click: () => ipcMainManager.send(IpcEvents.TOGGLE_SOFT_WRAP),
         });
+        item.submenu.push({ type: 'separator' }, {
+          label: 'Toggle Mini Map',
+          click: () => ipcMainManager.send(IpcEvents.TOGGLE_MINI_MAP),
+        });
       }
 
       // Append items to "Help"

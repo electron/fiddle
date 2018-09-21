@@ -31,8 +31,10 @@ export class Editor extends React.Component<EditorProps> {
     this.language = props.id === 'html' ? 'html' : 'javascript';
     this.state = {
       'options': {
-        // it is default to off
-        'wordWrap': 'off'
+        'wordWrap': 'off',
+      },
+      'minimap': {
+        'enabled': false
       }
     }
   }
@@ -52,12 +54,34 @@ export class Editor extends React.Component<EditorProps> {
           'wordWrap': 'on'
         });
       } else if (this.state['options'].wordWrap == "on") {
-        console.log('it goes 3');
         oldState['options'].wordWrap = "off";
 
         this.setState(oldState);
         this.editor.updateOptions({
           'wordWrap': 'off'
+        });
+      }
+    });
+
+    ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
+      var oldState = this.state;
+      if (!this.state['minimap']['enabled']) {
+        oldState['minimap']['enabled'] = true;
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          minimap: {
+            enabled: true,
+          }
+        });
+      } else if (this.state['minimap']['enabled']) {
+        oldState['minimap']['enabled'] = false;
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          minimap: {
+            enabled: false,
+          }
         });
       }
     });
@@ -89,7 +113,7 @@ export class Editor extends React.Component<EditorProps> {
    */
   public async initMonaco() {
     const { monaco, id, appState } = this.props;
-    const { options } = this.state['options'];
+    const { options, minimap } = this.state;
     const { version } = appState;
     const ref = this.containerRef.current;
 
@@ -97,9 +121,7 @@ export class Editor extends React.Component<EditorProps> {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
         theme: 'main',
-        minimap: {
-          enabled: false
-        },
+        minimap: minimap,
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
         ...options
