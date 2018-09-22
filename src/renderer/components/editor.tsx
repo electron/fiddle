@@ -45,7 +45,7 @@ export class Editor extends React.Component<EditorProps> {
 
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
-      var oldState = this.state;
+      const oldState = this.state;
       if (this.state['options'].wordWrap == "off") {
         oldState['options'].wordWrap = "on";
 
@@ -64,7 +64,7 @@ export class Editor extends React.Component<EditorProps> {
     });
 
     ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
-      var oldState = this.state;
+      const oldState = this.state;
       if (!this.state['minimap']['enabled']) {
         oldState['minimap']['enabled'] = true;
 
