@@ -8,8 +8,10 @@ exports[`AddressBar component renders 1`] = `
   <input
     key="addressbar"
     onChange={[Function]}
+    pattern="/https:\\\\/\\\\/gist\\\\.github\\\\.com\\\\/([^\\\\/]+)$/"
+    placeholder="..."
     type="url"
-    value="https://gist.github.com/null"
+    value={null}
   />
 </form>
 `;

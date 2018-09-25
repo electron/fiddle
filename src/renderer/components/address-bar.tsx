@@ -113,7 +113,9 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         <input
           key='addressbar'
           type='url'
-          value={`https://gist.github.com/${value}`}
+          pattern='/https:\/\/gist\.github\.com\/([^\/]+)$/'
+          placeholder='...'
+          value={value}
           onChange={this.handleChange}
         />
       </form>
