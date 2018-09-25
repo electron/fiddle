@@ -5,6 +5,9 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import { ContentNames, getContent } from '../content';
 import { AppState } from '../state';
+import { IpcEvents } from '../../ipc-events';
+import { ipcRendererManager } from '../ipc';
+
 
 export interface EditorProps {
   appState: AppState;
@@ -26,6 +29,14 @@ export class Editor extends React.Component<EditorProps> {
     super(props);
 
     this.language = props.id === 'html' ? 'html' : 'javascript';
+    this.state = {
+      'options': {
+        'wordWrap': 'off',
+      },
+      'minimap': {
+        'enabled': false
+      }
+    }
   }
 
   public shouldComponentUpdate() {
@@ -33,6 +44,47 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   public componentDidMount() {
+    ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
+      const oldState = this.state;
+      if (this.state['options'].wordWrap === "off") {
+        oldState['options'].wordWrap = "on";
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          'wordWrap': 'on'
+        });
+      } else if (this.state['options'].wordWrap === "on") {
+        oldState['options'].wordWrap = "off";
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          'wordWrap': 'off'
+        });
+      }
+    });
+
+    ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
+      const oldState = this.state;
+      if (!this.state['minimap']['enabled']) {
+        oldState['minimap']['enabled'] = true;
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          minimap: {
+            enabled: true,
+          }
+        });
+      } else if (this.state['minimap']['enabled']) {
+        oldState['minimap']['enabled'] = false;
+
+        this.setState(oldState);
+        this.editor.updateOptions({
+          minimap: {
+            enabled: false,
+          }
+        });
+      }
+    });
     this.initMonaco();
   }
 
@@ -60,7 +112,8 @@ export class Editor extends React.Component<EditorProps> {
    * Initialize Monaco.
    */
   public async initMonaco() {
-    const { options, monaco, id, appState } = this.props;
+    const { monaco, id, appState } = this.props;
+    const { options, minimap } = this.state;
     const { version } = appState;
     const ref = this.containerRef.current;
 
@@ -68,9 +121,7 @@ export class Editor extends React.Component<EditorProps> {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
         theme: 'main',
-        minimap: {
-          enabled: false
-        },
+        minimap: minimap,
         contextmenu: false,
         value: await getContent(id as ContentNames, version),
         ...options
