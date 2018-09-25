@@ -25,9 +25,8 @@ describe('AddressBar component', () => {
     expect(wrapper.state('value')).toBe('hi');
     expect(wrapper.find('input').html())
       .toBe('<input ' +
-        'type="url" ' +
-        'pattern="/https:\\/\\/gist\\.github\\.com\\/([^\\/]+)$/" ' +
-        'placeholder="..." ' +
+        'pattern="https:\\/\\/gist\\.github\\.com\\/(.+)$" ' +
+        'placeholder="https://gist.github.com/..." ' +
         'value="hi"/>');
   });
 
