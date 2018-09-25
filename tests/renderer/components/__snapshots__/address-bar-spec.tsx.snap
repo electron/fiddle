@@ -5,14 +5,12 @@ exports[`AddressBar component renders 1`] = `
   className="address-bar empty"
   onSubmit={[Function]}
 >
-  <span>
-    https://gist.github.com/
-  </span>
   <input
     key="addressbar"
     onChange={[Function]}
+    pattern="/https:\\\\/\\\\/gist\\\\.github\\\\.com\\\\/([^\\\\/]+)$/"
     placeholder="..."
-    type="text"
+    type="url"
     value={null}
   />
 </form>
