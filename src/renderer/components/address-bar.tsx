@@ -64,7 +64,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @memberof AddressBar
    */
   public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ value: idFromUrl(event.target.value) || event.target.value });
+    this.setState({ value: event.target.value });
   }
 
   /**
@@ -106,7 +106,8 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public render() {
     const { isUnsaved } = this.props.appState;
     const { value } = this.state;
-    const className = classNames('address-bar', isUnsaved, { empty: !value });
+    const isEmpty = /https:\/\/gist\.github\.com\/([^\/]+)$/.test(value);
+    const className = classNames('address-bar', isUnsaved, { empty: !isEmpty });
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
@@ -114,7 +115,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
           key='addressbar'
           type='url'
           pattern='/https:\/\/gist\.github\.com\/([^\/]+)$/'
-          placeholder='...'
+          placeholder='https://gist.github.com/...'
           value={value}
           onChange={this.handleChange}
         />
