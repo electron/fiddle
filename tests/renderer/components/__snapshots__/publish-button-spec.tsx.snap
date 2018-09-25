@@ -33,7 +33,6 @@ exports[`Publish button component renders 1`] = `
     size={null}
     spin={false}
     symbol={false}
-    title=""
     transform={null}
   />
   <span

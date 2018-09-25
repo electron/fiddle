@@ -141,7 +141,6 @@ exports[`ElectronSettings component renders 1`] = `
           size={null}
           spin={false}
           symbol={false}
-          title=""
           transform={null}
         />
          Update Electron Release List
@@ -182,7 +181,6 @@ exports[`ElectronSettings component renders 1`] = `
         size={null}
         spin={false}
         symbol={false}
-        title=""
         transform={null}
       />
        Download All Versions
@@ -222,7 +220,6 @@ exports[`ElectronSettings component renders 1`] = `
         size={null}
         spin={false}
         symbol={false}
-        title=""
         transform={null}
       />
        Delete All Versions
@@ -292,7 +289,6 @@ exports[`ElectronSettings component renders 1`] = `
                 size={null}
                 spin={true}
                 symbol={false}
-                title=""
                 transform={null}
               />
                Downloading
@@ -340,7 +336,6 @@ exports[`ElectronSettings component renders 1`] = `
                 size={null}
                 spin={false}
                 symbol={false}
-                title=""
                 transform={null}
               />
                Delete
@@ -388,7 +383,6 @@ exports[`ElectronSettings component renders 1`] = `
                 size={null}
                 spin={false}
                 symbol={false}
-                title=""
                 transform={null}
               />
                Download

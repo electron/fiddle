@@ -58,7 +58,7 @@ exports[`TokenDialog component renders 1`] = `
       symbol={false}
       transform={null}
     />
-    Generate a
+    Generate a 
     <a
       onClick={[Function]}
     >
