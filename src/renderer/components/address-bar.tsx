@@ -36,12 +36,14 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * URL was entered.
    *
    * @param {React.SyntheticEvent<HTMLFormElement>} event
-   * @memberof AddressBar
    */
   public async handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
 
     this.props.appState.gistId = idFromUrl(this.state.value) || this.state.value;
+
+    console.log('Loading');
+
     if (this.state.value) {
       this.loadFiddle();
     }
@@ -61,10 +63,18 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * Handle the change event, which usually just updates the address bar's value
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
-   * @memberof AddressBar
    */
   public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    this.setState({ value: idFromUrl(event.target.value) || event.target.value });
+    this.setState({ value: event.target.value });
+  }
+
+  /**
+   * Handles invalid input to the address bar
+   *
+   * @param {React.InvalidEvent<HTMLInputElement>} event
+   */
+  public handleInvalid(event: React.InvalidEvent<HTMLInputElement>) {
+    event.target.setCustomValidity('URL should begin with https://gist.github.com');
   }
 
   /**
@@ -106,17 +116,18 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public render() {
     const { isUnsaved } = this.props.appState;
     const { value } = this.state;
-    const className = classNames('address-bar', isUnsaved, { empty: !value });
+    const isEmpty = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
+    const className = classNames('address-bar', isUnsaved, { empty: !isEmpty });
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
-        <span>https://gist.github.com/</span>
         <input
           key='addressbar'
-          type='text'
-          placeholder='...'
+          pattern='https:\/\/gist\.github\.com\/(.+)$'
+          placeholder='https://gist.github.com/...'
           value={value}
           onChange={this.handleChange}
+          onInvalid={this.handleInvalid}
         />
       </form>
     );
