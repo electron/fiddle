@@ -10,7 +10,7 @@ GitHub, anyone can quickly try your Fiddle out by just entering it in the
 address bar.
 
 <h3 align="center">
-  <a href="https://github.com/electron/fiddle/releases/">
+  <a href="https://github.com/electron/fiddle/releases/latest">
   Download Electron Fiddle for macOS, Windows, and Linux
   </a>
 </h3>
