@@ -30,8 +30,8 @@ export const scanArgv = (argv: Array<string>) => {
 };
 
 export const listenForProtocolHandler = () => {
-  const shouldQuit = app.makeSingleInstance(scanArgv);
-  if (shouldQuit) return app.quit();
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) app.quit();
 
   app.on('open-url', (_, url) => {
     if (url.startsWith(`${PROTOCOL}://`)) {

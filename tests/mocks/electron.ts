@@ -99,7 +99,7 @@ const app = {
   quit: jest.fn(),
   relaunch: jest.fn(),
   setJumpList: jest.fn(),
-  makeSingleInstance: jest.fn(),
+  requestSingleInstanceLock: jest.fn(),
   on: jest.fn(),
   once: jest.fn()
 };
