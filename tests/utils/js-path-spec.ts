@@ -20,7 +20,7 @@ describe('js-path', () => {
   describe('setAtPath()', () => {
     it('works with an object', () => {
       const input = { a: { b: { c: true } } };
-      const output = setAtPath('a.b.c', input, 3);
+      setAtPath('a.b.c', input, 3);
 
       expect(input.a.b.c).toBe(3);
     });

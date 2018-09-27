@@ -12,13 +12,11 @@ jest.mock('../../../src/renderer/components/settings-general-appearance', () => 
 }));
 
 describe('GeneralSettings component', () => {
-  beforeEach(() => {
-    this.store = {};
-  });
+  const store: any = {};
 
   it('renders', () => {
     const wrapper = shallow(
-      <GeneralSettings appState={this.store} />
+      <GeneralSettings appState={store} />
     );
 
     expect(wrapper).toMatchSnapshot();

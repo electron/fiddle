@@ -11,7 +11,7 @@ jest.mock('../../src/utils/import', () => ({
 describe('themes', () => {
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = window.ElectronFiddle.app.monaco;
+      const { editor } = window.ElectronFiddle.app.monaco as any;
 
       await activateTheme();
 
@@ -21,8 +21,7 @@ describe('themes', () => {
     });
 
     it(`does not do anything if Monaco isn't available yet`, async () => {
-      const { editor } = window.ElectronFiddle.app.monaco;
-      const oldMonaco = window.ElectronFiddle.app.monaco;
+      const { editor } = window.ElectronFiddle.app.monaco as any;
       window.ElectronFiddle.app.monaco = null;
 
       await activateTheme();
@@ -110,17 +109,17 @@ describe('themes', () => {
   describe('readThemeFile()', () => {
     it('returns the default (light) theme', async () => {
       const theme = await readThemeFile(DefaultThemes.LIGHT);
-      expect(theme.name).toBe('Fiddle (Light)');
+      expect(theme!.name).toBe('Fiddle (Light)');
     });
 
     it('returns the default (Dark) theme', async () => {
       const theme = await readThemeFile(DefaultThemes.DARK);
-      expect(theme.name).toBe('Fiddle (Dark)');
+      expect(theme!.name).toBe('Fiddle (Dark)');
     });
 
     it('returns the default (Dark) theme', async () => {
       const theme = await readThemeFile();
-      expect(theme.name).toBe('Fiddle (Dark)');
+      expect(theme!.name).toBe('Fiddle (Dark)');
     });
 
     it('reads the right file if ends with .json', async () => {

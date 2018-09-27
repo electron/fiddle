@@ -140,7 +140,6 @@ describe('fetch-types', () => {
 
     it('returns null if downloaded but not readable', async () => {
       const fs = require('fs-extra');
-      const def = `it's me, the type definition`;
       fs.existsSync.mockReturnValueOnce(true);
       fs.readFile.mockImplementationOnce(() => Promise.reject());
       (fetch as any).mockResponse(`it's me, the type definition`);

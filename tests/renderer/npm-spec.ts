@@ -9,10 +9,8 @@ import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/utils/exec');
 jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => {
-    if (p === 'builtin-modules') {
-      return { default: require('builtin-modules') };
-    }
+  fancyImport: async (_p: string) => {
+    return { default: require('builtin-modules') };
   }
 }));
 

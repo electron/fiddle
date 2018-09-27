@@ -5,8 +5,10 @@ import { WelcomeTour } from '../../../src/renderer/components/tour-welcome';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 describe('Header component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       isTourShowing: true,
       disableTour: jest.fn()
     };
@@ -15,12 +17,12 @@ describe('Header component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<WelcomeTour appState={this.store} />);
+    const wrapper = shallow(<WelcomeTour appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders the tour once started', () => {
-    const wrapper = shallow(<WelcomeTour appState={this.store} />);
+    const wrapper = shallow(<WelcomeTour appState={store} />);
     const instance: WelcomeTour = wrapper.instance() as any;
 
     instance.startTour();
@@ -30,12 +32,12 @@ describe('Header component', () => {
   });
 
   it('stops the tour on stopTour()', () => {
-    const wrapper = shallow(<WelcomeTour appState={this.store} />);
+    const wrapper = shallow(<WelcomeTour appState={store} />);
     const instance: WelcomeTour = wrapper.instance() as any;
 
     instance.stopTour();
 
     expect(wrapper.state('isTourStarted')).toBe(false);
-    expect(this.store.disableTour).toHaveBeenCalled();
+    expect(store.disableTour).toHaveBeenCalled();
   });
 });

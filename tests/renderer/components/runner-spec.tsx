@@ -21,6 +21,7 @@ jest.mock('child_process');
 
 describe('Runner component', () => {
   let mockChild: MockChildProcess;
+  let store: any;
 
   beforeEach(() => {
     mockChild = new MockChildProcess();
@@ -28,7 +29,7 @@ describe('Runner component', () => {
 
     (getIsNpmInstalled as jest.Mock).mockReturnValue(true);
 
-    this.store = {
+    store = {
       version: '2.0.2',
       versions: mockVersions,
       downloadVersion: jest.fn(),
@@ -45,26 +46,26 @@ describe('Runner component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('runs', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
     (spawn as any).mockReturnValueOnce(mockChild);
 
     expect(await instance.run()).toBe(true);
-    expect(this.store.binaryManager.getIsDownloaded).toHaveBeenCalled();
+    expect(store.binaryManager.getIsDownloaded).toHaveBeenCalled();
     expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
     expect(installModules).toHaveBeenCalled();
     expect(wrapper.state('isRunning')).toBe(true);
   });
 
   it('emits output', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
@@ -74,7 +75,7 @@ describe('Runner component', () => {
     expect(await instance.run()).toBe(true);
     mockChild.stdout.emit('data', 'hi');
     mockChild.stderr.emit('data', 'hi');
-    expect(this.store.pushOutput).toHaveBeenCalledTimes(8);
+    expect(store.pushOutput).toHaveBeenCalledTimes(8);
 
     // Stop
     mockChild.emit('close', 0);
@@ -82,7 +83,7 @@ describe('Runner component', () => {
   });
 
   it('stops on close', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
@@ -96,7 +97,7 @@ describe('Runner component', () => {
   });
 
   it('stops on stop()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
@@ -109,16 +110,16 @@ describe('Runner component', () => {
   });
 
   it('does not run version not yet downloaded', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
-    this.store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
+    store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
 
     expect(await instance.run()).toBe(false);
   });
 
   it('does not run if writing files fails', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (window.ElectronFiddle.app.fileManager.saveToTemp as jest.Mock)
@@ -130,7 +131,7 @@ describe('Runner component', () => {
   });
 
   it('installs modules on installModules()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     expect(await instance.npmInstall('')).toBe(true);
@@ -138,7 +139,7 @@ describe('Runner component', () => {
   });
 
   it('handles an error in installModules()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
     (installModules as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
@@ -149,21 +150,21 @@ describe('Runner component', () => {
   });
 
   it('performs a package operation in performForgeOperation()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(true);
   });
 
   it('performs a make operation in performForgeOperation()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(true);
   });
 
   it('handles an error in saveToTemp() in performForgeOperation()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
     (instance as any).saveToTemp = jest.fn();
 
@@ -171,7 +172,7 @@ describe('Runner component', () => {
   });
 
   it('handles an error in npmInstall() in performForgeOperation()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
     (installModules as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
@@ -181,7 +182,7 @@ describe('Runner component', () => {
   });
 
   it('handles an error in npmRun() in performForgeOperation()', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
     (npmRun as jest.Mock).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
@@ -191,7 +192,7 @@ describe('Runner component', () => {
   });
 
   it('does attempt a forge operation if npm is not installed', async () => {
-    const wrapper = shallow(<Runner appState={this.store} />);
+    const wrapper = shallow(<Runner appState={store} />);
     const instance: Runner = wrapper.instance() as any;
 
     (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
@@ -201,7 +202,7 @@ describe('Runner component', () => {
 
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
-      const wrapper = shallow(<Runner appState={this.store} />);
+      const wrapper = shallow(<Runner appState={store} />);
       const instance: Runner = wrapper.instance() as any;
 
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
@@ -217,7 +218,7 @@ describe('Runner component', () => {
     });
 
     it('does attempt installation if npm is installed', async () => {
-      const wrapper = shallow(<Runner appState={this.store} />);
+      const wrapper = shallow(<Runner appState={store} />);
       const instance: Runner = wrapper.instance() as any;
 
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);

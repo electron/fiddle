@@ -4,18 +4,22 @@ import * as React from 'react';
 import { Editor } from '../../../src/renderer/components/editor';
 
 describe('Editor component', () => {
+  let store: any;
+  let monaco: any;
+  let editorDispose = jest.fn();
+
   beforeEach(() => {
-    this.store = {
+    store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false
     };
 
-    this.editorDispose = jest.fn();
+    editorDispose.mockReset();
 
-    this.monaco = {
+    monaco = {
       editor: {
         create: jest.fn(() => ({
-          dispose: this.editorDispose
+          dispose: editorDispose
         })),
         dispose: jest.fn()
       }
@@ -24,7 +28,7 @@ describe('Editor component', () => {
 
   it('renders the editor container', () => {
     const wrapper = shallow(
-      <Editor appState={this.store} monaco={this.monaco} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
     );
 
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
@@ -32,13 +36,13 @@ describe('Editor component', () => {
 
   it('correctly sets the language', () => {
     let wrapper = shallow(
-      <Editor appState={this.store} monaco={this.monaco} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
     );
 
     expect((wrapper.instance() as any).language).toBe('javascript');
 
     wrapper = shallow(
-      <Editor appState={this.store} monaco={this.monaco} id='html'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='html'/>
     );
 
     expect((wrapper.instance() as any).language).toBe('html');
@@ -46,18 +50,22 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const wrapper = shallow(
-      <Editor appState={this.store} monaco={this.monaco} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
     );
 
-    expect(wrapper.instance().shouldComponentUpdate(null, null, null)).toBe(false);
+    expect((wrapper as any)
+      .instance()
+      .shouldComponentUpdate(null as any, null as any, null as any)
+    ).toBe(false);
   });
 
   it('initMonaco() attempts to create an editor', async () => {
     const didMount = jest.fn();
     const wrapper = shallow(
       <Editor
-        appState={this.store}
-        monaco={this.monaco}
+        appState={store}
+        monaco={monaco}
+        monoacoOptions={{}}
         id='main'
         editorDidMount={didMount}
       />
@@ -68,15 +76,16 @@ describe('Editor component', () => {
     await instance.initMonaco();
 
     expect(didMount).toHaveBeenCalled();
-    expect(this.monaco.editor.create).toHaveBeenCalled();
+    expect(monaco.editor.create).toHaveBeenCalled();
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
     const didMount = jest.fn();
     const wrapper = shallow(
       <Editor
-        appState={this.store}
-        monaco={this.monaco}
+        appState={store}
+        monaco={monaco}
+        monoacoOptions={{}}
         id='main'
         editorDidMount={didMount}
       />
@@ -87,6 +96,6 @@ describe('Editor component', () => {
     await instance.initMonaco();
     instance.componentWillUnmount();
 
-    expect(this.editorDispose).toHaveBeenCalled();
+    expect(editorDispose).toHaveBeenCalled();
   });
 });

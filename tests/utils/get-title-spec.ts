@@ -1,8 +1,6 @@
 import { getName, getTitle } from '../../src/utils/get-title';
 
 describe('get-title', () => {
-  const old = process.defaultApp;
-
   describe('getTitle()', () => {
     it('returns a solid default title', () => {
       const result = getTitle({} as any);

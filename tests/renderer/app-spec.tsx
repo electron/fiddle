@@ -12,17 +12,6 @@ jest.mock('../../src/renderer/state', () => ({
 
 describe('Editors component', () => {
   beforeEach(() => {
-    this.store = {
-      isTokenDialogShowing: false,
-      isSettingsShowing: false
-    };
-
-    this.monaco = {
-      editor: {
-        defineTheme: jest.fn()
-      }
-    };
-
     (window as any).ElectronFiddle = new ElectronFiddleMock();
   });
 
@@ -35,7 +24,7 @@ describe('Editors component', () => {
       expect(b.main).toBe('editor-value');
       expect(b.renderer).toBe('editor-value');
       expect(b.package).toBeTruthy();
-      expect(JSON.parse(b.package)).toBeTruthy();
+      expect(JSON.parse(b.package!)).toBeTruthy();
     });
 
     it('handles missing editors', async () => {
@@ -50,7 +39,7 @@ describe('Editors component', () => {
       expect(result.main).toBe('');
       expect(result.renderer).toBe('');
       expect(result.package).toBeTruthy();
-      expect(JSON.parse(result.package)).toBeTruthy();
+      expect(JSON.parse(result.package!)).toBeTruthy();
     });
 
     it('throws if the Fiddle object is not present', async () => {
@@ -59,7 +48,7 @@ describe('Editors component', () => {
       const app = new App();
       let threw = false;
       try {
-        const result = await app.getValues({});
+        await app.getValues({});
       } catch (error) {
         threw = true;
       }
@@ -91,7 +80,7 @@ describe('Editors component', () => {
       const app = new App();
       let threw = false;
       try {
-        const result = await app.setValues({ html: '', main: '', renderer: ''});
+        await app.setValues({ html: '', main: '', renderer: ''});
       } catch (error) {
         threw = true;
       }
@@ -116,12 +105,12 @@ describe('Editors component', () => {
 
   describe('setupTheme()', () => {
     it(`adds the current theme's css to the document`, async () => {
-      document.head.innerHTML = '<style id="fiddle-theme"></style>';
+      document.head!.innerHTML = '<style id="fiddle-theme"></style>';
 
       const app = new App();
       await app.setupTheme();
 
-      expect(document.head.innerHTML).toEqual(
+      expect(document.head!.innerHTML).toEqual(
         // tslint:disable:max-line-length
         `<style id="fiddle-theme">
           html, body {
@@ -144,9 +133,5 @@ describe('Editors component', () => {
         </style>`.replace(/        /gm, ''));
         // tslint:enable:max-line-length
     });
-  });
-
-  it('renders', () => {
-    const app = new App();
   });
 });

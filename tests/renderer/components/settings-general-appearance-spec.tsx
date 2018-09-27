@@ -21,15 +21,17 @@ jest.mock('../../../src/renderer/themes', () => ({
 }));
 
 describe('AppearanceSettings component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       setTheme: jest.fn()
     };
   });
 
   it('renders', () => {
     const wrapper = shallow(
-      <AppearanceSettings appState={this.store} />
+      <AppearanceSettings appState={store} />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -37,7 +39,7 @@ describe('AppearanceSettings component', () => {
 
   it('handles a theme change', () => {
     const wrapper = shallow(
-      <AppearanceSettings appState={this.store} />
+      <AppearanceSettings appState={store} />
     );
     const instance: AppearanceSettings = wrapper.instance() as any;
     instance.handleChange({
@@ -46,13 +48,13 @@ describe('AppearanceSettings component', () => {
       }
     } as any);
 
-    expect(this.store.setTheme).toHaveBeenCalledWith('defaultLight');
+    expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
   describe('openThemeFolder()', () => {
     it('calls it on click', () => {
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       instance.openThemeFolder = jest.fn();
@@ -63,7 +65,7 @@ describe('AppearanceSettings component', () => {
 
     it('attempts to open the folder', async () => {
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.openThemeFolder();
@@ -73,7 +75,7 @@ describe('AppearanceSettings component', () => {
 
     it('handles an error', async () => {
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       (shell as any).showItemInFolder.mockImplementationOnce(() => {
@@ -87,7 +89,7 @@ describe('AppearanceSettings component', () => {
   describe('createNewThemeFromCurrent()', () => {
     it('calls it on click', () => {
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       instance.createNewThemeFromCurrent = jest.fn();
@@ -99,7 +101,7 @@ describe('AppearanceSettings component', () => {
     it('creates a new file from the current theme', async () => {
       const fs = require('fs-extra');
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
@@ -116,9 +118,8 @@ describe('AppearanceSettings component', () => {
     });
 
     it('handles an error', async () => {
-      const fs = require('fs-extra');
       const wrapper = shallow(
-        <AppearanceSettings appState={this.store} />
+        <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
       (shell as any).openItem.mockImplementationOnce(() => {

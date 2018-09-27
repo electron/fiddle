@@ -3,7 +3,7 @@ import * as fs from 'fs';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
-import { listenForProtocolHandler, scanArgv, setupProtocolHandler } from '../../src/main/protocol';
+import { listenForProtocolHandler, setupProtocolHandler } from '../../src/main/protocol';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('fs');
