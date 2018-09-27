@@ -26,7 +26,7 @@ describe('menu', () => {
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(8);
 
-      result.forEach((submenu) => {
+      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
         expect(submenu).toBeTruthy();
       });
@@ -40,7 +40,7 @@ describe('menu', () => {
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu) => {
+      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
         expect(submenu).toBeTruthy();
       });
@@ -54,7 +54,7 @@ describe('menu', () => {
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu) => {
+      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
         expect(submenu).toBeTruthy();
       });
@@ -70,7 +70,7 @@ describe('menu', () => {
     });
 
     describe('getHelpItems()', () => {
-      let help;
+      let help: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
@@ -114,7 +114,7 @@ describe('menu', () => {
     });
 
     describe('getPreferencesItems()', () => {
-      let preferences;
+      let preferences: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
@@ -129,7 +129,7 @@ describe('menu', () => {
     });
 
     describe('getQuitItems()', () => {
-      let quit;
+      let quit: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
@@ -144,7 +144,7 @@ describe('menu', () => {
     });
 
     describe('getShowMeMenu()', () => {
-      let showMe;
+      let showMe: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
@@ -160,10 +160,10 @@ describe('menu', () => {
     });
 
     describe('getTasksMenu()', () => {
-      let tasks;
+      let tasks: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+      const mock = (electron.Menu.buildFromTemplate as any).mock;
         const menu = mock.calls[0][0];
         tasks = menu[menu.length - 3];
       });
@@ -185,7 +185,7 @@ describe('menu', () => {
     });
 
     describe('getFileMenu()', () => {
-      let file;
+      let file: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;

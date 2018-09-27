@@ -21,7 +21,7 @@ describe('content', () => {
 
   describe('isContentUnchanged()', () => {
     it('returns false if app is not available', async () => {
-      window.ElectronFiddle.app = null;
+      (window.ElectronFiddle.app as any) = null;
 
       const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
       expect(isUnchanged).toBe(false);
@@ -29,7 +29,7 @@ describe('content', () => {
 
     describe('main', () => {
       it('returns false if it changed', async () => {
-        window.ElectronFiddle.app.getValues.mockReturnValueOnce({
+        (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           main: 'hi'
         });
 
@@ -38,7 +38,7 @@ describe('content', () => {
       });
 
       it('returns true if it did not change', async () => {
-        window.ElectronFiddle.app.getValues.mockReturnValueOnce({
+        (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           main: require('../../src/content/main').main
         });
 
@@ -47,7 +47,7 @@ describe('content', () => {
       });
 
       it('returns true if it did not change (1.0 version)', async () => {
-        window.ElectronFiddle.app.getValues.mockReturnValueOnce({
+        (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           main: require('../../src/content/main-1-x-x').main
         });
 
@@ -58,7 +58,7 @@ describe('content', () => {
 
     describe('renderer', () => {
       it('returns false if it changed', async () => {
-        window.ElectronFiddle.app.getValues.mockReturnValueOnce({
+        (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           renderer: 'hi'
         });
 
@@ -67,7 +67,7 @@ describe('content', () => {
       });
 
       it('returns true if it did not change', async () => {
-        window.ElectronFiddle.app.getValues.mockReturnValueOnce({
+        (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           renderer: require('../../src/content/renderer').renderer
         });
 

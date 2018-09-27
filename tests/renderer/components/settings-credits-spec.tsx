@@ -29,34 +29,36 @@ describe('CreditsSettings component', () => {
     }
   ];
 
+  let store: any;
+
   beforeEach(() => {
-    this.store = {};
+    store = {};
   });
 
   it('renders', () => {
     const wrapper = shallow(
-      <CreditsSettings appState={this.store} contributors={mockContributors} />
+      <CreditsSettings appState={store} contributors={mockContributors} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders for contributors with less data', () => {
     const wrapper = shallow(
-      <CreditsSettings appState={this.store} contributors={mockContributorsBroken} />
+      <CreditsSettings appState={store} contributors={mockContributorsBroken} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders nothing if we do not have contributors', () => {
     const wrapper = shallow(
-      <CreditsSettings appState={this.store} contributors={[]} />
+      <CreditsSettings appState={store} contributors={[]} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('handles a click', () => {
     const wrapper = shallow(
-      <CreditsSettings appState={this.store} contributors={mockContributors} />
+      <CreditsSettings appState={store} contributors={mockContributors} />
     );
 
     wrapper.find('.contributor').simulate('click');

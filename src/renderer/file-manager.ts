@@ -1,4 +1,3 @@
-import { shell } from 'electron';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 

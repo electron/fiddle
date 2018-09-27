@@ -7,19 +7,21 @@ import { getOctokit } from '../../../src/utils/octokit';
 jest.mock('../../../src/utils/octokit');
 
 describe('AddressBar component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       gistId: null
     };
   });
 
   it('renders', () => {
-    const wrapper = shallow(<AddressBar appState={this.store} />);
+    const wrapper = shallow(<AddressBar appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('handles change', () => {
-    const wrapper = shallow(<AddressBar appState={this.store} />);
+    const wrapper = shallow(<AddressBar appState={store} />);
     wrapper.find('input').simulate('change', { target: { value: 'hi' } });
 
     expect(wrapper.state('value')).toBe('hi');
@@ -34,7 +36,7 @@ describe('AddressBar component', () => {
     const oldLoadFiddle = AddressBar.prototype.loadFiddle;
     AddressBar.prototype.loadFiddle = jest.fn();
     const preventDefault = jest.fn();
-    const wrapper = shallow(<AddressBar appState={this.store} />);
+    const wrapper = shallow(<AddressBar appState={store} />);
 
     wrapper.find('input').simulate('change', {
       target: { value: 'abcdtestid' }
@@ -68,9 +70,9 @@ describe('AddressBar component', () => {
       }
     });
 
-    const wrapper = shallow(<AddressBar appState={this.store} />);
+    const wrapper = shallow(<AddressBar appState={store} />);
 
-    this.store.gistId = 'abcdtestid';
+    store.gistId = 'abcdtestid';
     (global as any).window.confirm.mockReturnValueOnce(true);
 
     wrapper.find('input').simulate('change', {

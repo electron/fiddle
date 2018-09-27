@@ -5,23 +5,21 @@ import { ChromeMac } from '../../../src/renderer/components/chrome-mac';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Chrome-Mac component', () => {
-  beforeEach(() => {
-    this.store = {};
-  });
+  const store: any = {};
 
   afterEach(() => resetPlatform());
 
   it('renders', () => {
     overridePlatform('darwin');
 
-    const wrapper = shallow(<ChromeMac appState={this.store} />);
+    const wrapper = shallow(<ChromeMac appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders nothing on win32', () => {
     overridePlatform('win32');
 
-    const wrapper = shallow(<ChromeMac appState={this.store} />);
+    const wrapper = shallow(<ChromeMac appState={store} />);
     expect(wrapper.html()).toBe(null);
   });
 });

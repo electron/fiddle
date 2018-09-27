@@ -6,7 +6,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 
-import { BrowserWindow, dialog } from 'electron';
+import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
@@ -72,7 +72,7 @@ describe('files', () => {
     });
 
     it('tries to open an "open" dialog to be used as a save as dialog', () => {
-      showSaveDialog(null, 'hello');
+      showSaveDialog(IpcEvents.FS_SAVE_FIDDLE, 'hello');
 
       const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
 

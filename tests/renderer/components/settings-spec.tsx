@@ -16,17 +16,19 @@ jest.mock('../../../src/renderer/components/settings-credits', () => ({
 }));
 
 describe('CreditsSettings component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       isSettingsShowing: true
     };
   });
 
   it('renders null if settings not showing', () => {
-    this.store.isSettingsShowing = false;
+    store.isSettingsShowing = false;
 
     const wrapper = shallow(
-      <Settings appState={this.store} />
+      <Settings appState={store} />
     );
 
     expect(wrapper.html()).toBe(null);
@@ -34,7 +36,7 @@ describe('CreditsSettings component', () => {
 
   it('renders only the menu if page unknown', () => {
     const wrapper = shallow(
-      <Settings appState={this.store} />
+      <Settings appState={store} />
     );
 
     wrapper.setState({ section: 'blub' });
@@ -43,7 +45,7 @@ describe('CreditsSettings component', () => {
 
   it('renders the Electron page by default', () => {
     const wrapper = shallow(
-      <Settings appState={this.store} />
+      <Settings appState={store} />
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -51,7 +53,7 @@ describe('CreditsSettings component', () => {
 
   it('renders the General page after a click', () => {
     const wrapper = shallow(
-      <Settings appState={this.store} />
+      <Settings appState={store} />
     );
 
     wrapper.find('.General').simulate('click');
@@ -60,7 +62,7 @@ describe('CreditsSettings component', () => {
 
   it('renders the General page after a click', () => {
     const wrapper = shallow(
-      <Settings appState={this.store} />
+      <Settings appState={store} />
     );
 
     wrapper.find('.Credits').simulate('click');

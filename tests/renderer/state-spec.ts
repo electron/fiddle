@@ -94,7 +94,7 @@ describe('AppState', () => {
     });
 
     it('does not remove it if not necessary (version not existent)', async () => {
-      appState.versions['2.0.2'] = undefined;
+      appState.versions['2.0.2'] = undefined as any;
       await appState.removeVersion('v2.0.2');
       expect(appState.binaryManager.remove).toHaveBeenCalledTimes(0);
     });

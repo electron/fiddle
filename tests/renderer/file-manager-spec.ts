@@ -1,4 +1,3 @@
-import { shell } from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -30,8 +29,7 @@ describe('FileManager', () => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
 
-    this.store = {};
-    fm = new FileManager(this.store);
+    fm = new FileManager({} as any);
   });
 
   afterEach(() => {

@@ -13,13 +13,16 @@ jest.mock('../../../src/utils/focused-editor', () => ({
 }));
 
 describe('Editrors component', () => {
+  let store: any;
+  let monaco: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false
     };
 
-    this.monaco = {
+    monaco = {
       editor: {
         defineTheme: jest.fn()
       }
@@ -27,13 +30,13 @@ describe('Editrors component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Editors appState={this.store} />);
-    wrapper.setState({ monaco: this.monaco });
+    const wrapper = shallow(<Editors appState={store} />);
+    wrapper.setState({ monaco });
     expect(wrapper).toMatchSnapshot();
   });
 
   it('executes a command on an editor', () => {
-    const wrapper = shallow(<Editors appState={this.store} />);
+    const wrapper = shallow(<Editors appState={store} />);
     const instance = wrapper.instance();
     const mockAction = {
       isSupported: jest.fn(() => true),
@@ -52,7 +55,7 @@ describe('Editrors component', () => {
   });
 
   it('does not execute command if not supported', () => {
-    const wrapper = shallow(<Editors appState={this.store} />);
+    const wrapper = shallow(<Editors appState={store} />);
     const instance = wrapper.instance();
     const mockAction = {
       isSupported: jest.fn(() => false),

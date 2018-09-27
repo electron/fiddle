@@ -7,27 +7,29 @@ import { getOctokit } from '../../../src/utils/octokit';
 jest.mock('../../../src/utils/octokit');
 
 describe('Publish button component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {};
+    store = {};
   });
 
   it('renders', () => {
-    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const wrapper = shallow(<PublishButton appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('toggles the auth dialog on click if not authed', () => {
-    this.store.toggleAuthDialog = jest.fn();
+    store.toggleAuthDialog = jest.fn();
 
-    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const wrapper = shallow(<PublishButton appState={store} />);
     wrapper.find('button').simulate('click');
-    expect(this.store.toggleAuthDialog).toHaveBeenCalled();
+    expect(store.toggleAuthDialog).toHaveBeenCalled();
   });
 
   it('toggles the publish method on click if authed', async () => {
-    this.store.gitHubToken = 'github-token';
+    store.gitHubToken = 'github-token';
 
-    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
     instance.publishFiddle = jest.fn();
     await instance.handleClick();
@@ -45,7 +47,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
     await instance.publishFiddle();
@@ -74,7 +76,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={this.store} />);
+    const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
     await instance.publishFiddle();
@@ -83,4 +85,3 @@ describe('Publish button component', () => {
     expect(wrapper.state('isPublishing')).toBe(false);
   });
 });
-

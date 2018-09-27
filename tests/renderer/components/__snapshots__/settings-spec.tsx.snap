@@ -64,6 +64,7 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
         size={null}
         spin={false}
         symbol={false}
+        title=""
         transform={null}
       />
     </div>
@@ -135,6 +136,7 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
         size={null}
         spin={false}
         symbol={false}
+        title=""
         transform={null}
       />
     </div>
@@ -213,6 +215,7 @@ exports[`CreditsSettings component renders the General page after a click 1`] = 
         size={null}
         spin={false}
         symbol={false}
+        title=""
         transform={null}
       />
     </div>
@@ -291,6 +294,7 @@ exports[`CreditsSettings component renders the General page after a click 2`] = 
         size={null}
         spin={false}
         symbol={false}
+        title=""
         transform={null}
       />
     </div>

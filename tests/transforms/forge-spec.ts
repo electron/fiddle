@@ -10,7 +10,7 @@ describe('forgeTransform()', () => {
     filesBefore.set('package.json', JSON.stringify({}));
 
     const files = await forgeTransform(filesBefore);
-    expect(JSON.parse(files.get('package.json'))).toEqual({
+    expect(JSON.parse(files.get('package.json')!)).toEqual({
       devDependencies: {
         '@electron-forge/cli': '6.0.0-beta.22',
         '@electron-forge/maker-deb': '6.0.0-beta.22',

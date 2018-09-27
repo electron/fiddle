@@ -89,8 +89,8 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  *
  * @param {string} version
  */
-export async function updateEditorTypeDefinitions(version: string, i: number = 0) {
-  const defer = async () => {
+export async function updateEditorTypeDefinitions(version: string, i: number = 0): Promise<void> {
+  const defer = async (): Promise<void> => {
     if (i > 10) {
       console.warn(`Fetch Types: Failed, dependencies do not exist`);
       return;

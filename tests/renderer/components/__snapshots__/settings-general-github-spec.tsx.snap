@@ -42,6 +42,7 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
       size={null}
       spin={false}
       symbol={false}
+      title=""
       transform={null}
     />
      Sign In
@@ -93,6 +94,7 @@ exports[`GitHubSettings component renders when signed in 1`] = `
       size={null}
       spin={false}
       symbol={false}
+      title=""
       transform={null}
     />
      Remove Token & Sign Out

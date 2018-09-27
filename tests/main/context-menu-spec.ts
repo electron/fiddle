@@ -10,7 +10,7 @@ jest.mock('../../src/utils/devmode');
 jest.mock('../../src/main/ipc');
 
 describe('context-menu', () => {
-  let mockWindow;
+  let mockWindow: any;
   const mockFlags = {
     editFlags: {
       canCopy: false,

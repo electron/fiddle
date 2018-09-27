@@ -6,6 +6,8 @@ import { EditorId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
+import { getAtPath, setAtPath } from '../../utils/js-path';
+import { toggleMonaco } from '../../utils/toggle-monaco';
 import { ContentNames, getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -20,6 +22,13 @@ const options: any = {
     first: 'renderer',
     second: 'html',
   },
+};
+
+const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
+  minimap: {
+    enabled: false
+  },
+  wordWrap: 'on'
 };
 
 const ViewIdMosaic = Mosaic.ofType<EditorId>();
@@ -38,13 +47,13 @@ export interface EditorsProps {
 export interface EditorsState {
   monaco?: typeof MonacoType;
   isMounted?: boolean;
+  monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
 export class Editors extends React.Component<EditorsProps, EditorsState> {
   constructor(props: EditorsProps) {
     super(props);
-
-    this.state = {};
+    this.state = { monacoOptions: defaultMonacoOptions };
     this.loadMonaco();
   }
 
@@ -61,6 +70,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         renderer: await getContent(ContentNames.RENDERER, version),
         main: await getContent(ContentNames.MAIN, version)
       });
+    });
+
+    ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
+      this.toggleEditorOption('wordWrap');
+    });
+
+    ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
+      this.toggleEditorOption('minimap.enabled');
     });
 
     this.setState({ isMounted: true });
@@ -86,6 +103,34 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
   }
 
+  public toggleEditorOption(path: string) {
+    if (!window || !window.ElectronFiddle || !window.ElectronFiddle.editors) {
+      return;
+    }
+
+    try {
+      const { monacoOptions } = this.state;
+      const newOptions = { ...monacoOptions };
+      const currentSetting = getAtPath(path, newOptions);
+
+      setAtPath(path, newOptions, toggleMonaco(currentSetting));
+
+      Object.keys(window.ElectronFiddle.editors)
+      .forEach((key) => {
+        const editor: MonacoType.editor.IStandaloneCodeEditor | null
+          = window.ElectronFiddle.editors[key];
+
+        if (editor) {
+          editor.updateOptions(newOptions);
+        }
+      });
+
+      this.setState({ monacoOptions: newOptions });
+    } catch (error) {
+      console.warn(`Editors: Could not toggle property ${path}`, error);
+    }
+  }
+
   public render() {
     const { appState } = this.props;
     const { monaco } = this.state;
@@ -98,7 +143,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         // tslint:disable-next-line:jsx-no-multiline-js
         renderTile={(id, path) => (
           <ViewIdMosaicWindow className={id} path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
-            <Editor id={id} monaco={monaco} appState={appState} />
+            <Editor id={id} monaco={monaco} appState={appState} monoacoOptions={defaultMonacoOptions} />
           </ViewIdMosaicWindow>
         )}
         initialValue={options}
@@ -123,7 +168,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
 
     if (!this.state || !this.state.isMounted) {
-      this.state = { monaco };
+      this.state = { monaco, monacoOptions: defaultMonacoOptions };
     } else {
       this.setState({ monaco });
     }

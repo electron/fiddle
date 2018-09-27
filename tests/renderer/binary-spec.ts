@@ -124,7 +124,7 @@ describe('binary', () => {
   describe('setup()', () => {
     it(`downloads a version it hasn't seen before`, async () => {
       const eDownload = require('electron-download');
-      eDownload.mockImplementationOnce((p, c) => c(undefined, '/fake/path'));
+      eDownload.mockImplementationOnce((_p: any, c: any) => c(undefined, '/fake/path'));
 
       await binaryManager.setup('v3.0.0');
 

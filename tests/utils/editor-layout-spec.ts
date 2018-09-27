@@ -14,9 +14,9 @@ describe('editor-layout', () => {
 
     setTimeout(() => {
       const { main, html, renderer } = window.ElectronFiddle.editors;
-      expect(main.layout.mock.calls).toHaveLength(1);
-      expect(html.layout.mock.calls).toHaveLength(1);
-      expect(renderer.layout.mock.calls).toHaveLength(1);
+      expect((main!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
+      expect((html!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
+      expect((renderer!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
 
       done();
     }, 100);

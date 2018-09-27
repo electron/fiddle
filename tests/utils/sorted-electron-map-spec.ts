@@ -13,7 +13,7 @@ describe('sorted-eletron-map', () => {
         tag_name: 'v2.0.0'
       }
     };
-    const result = sortedElectronMap(map, (k, e) => e);
+    const result = sortedElectronMap(map, (_k, e) => e);
 
     expect(result[0]).toEqual({ tag_name: 'v3.0.0' });
     expect(result[1]).toEqual({ tag_name: 'v2.0.0' });

@@ -97,7 +97,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
             content: values.renderer || '// Empty',
           },
         },
-      });
+      } as any); // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
 
       this.props.appState.gistId = gist.data.id;
 

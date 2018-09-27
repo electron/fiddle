@@ -6,8 +6,10 @@ import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       version: '2.0.1',
       versions: mockVersions,
       versionPagesToFetch: 2,
@@ -18,54 +20,54 @@ describe('ElectronSettings component', () => {
     };
 
     // Render all the states
-    this.store.versions['2.0.2'].state = 'downloading';
-    this.store.versions['2.0.1'].state = 'ready';
-    this.store.versions['1.8.7'].state = 'unknown';
+    store.versions['2.0.2'].state = 'downloading';
+    store.versions['2.0.1'].state = 'ready';
+    store.versions['1.8.7'].state = 'unknown';
   });
 
   it('renders', () => {
     const wrapper = shallow(
-      <ElectronSettings appState={this.store} />
+      <ElectronSettings appState={store} />
     );
     expect(wrapper).toMatchSnapshot();
   });
 
   it('handles the deleteAll()', async () => {
     const wrapper = shallow(
-      <ElectronSettings appState={this.store} />
+      <ElectronSettings appState={store} />
     );
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
-    expect(this.store.removeVersion).toHaveBeenCalledTimes(2);
+    expect(store.removeVersion).toHaveBeenCalledTimes(2);
   });
 
   it('handles the downloadAll()', async () => {
     const wrapper = shallow(
-      <ElectronSettings appState={this.store} />
+      <ElectronSettings appState={store} />
     );
     const instance = wrapper.instance() as any;
     await instance.handleDownloadAll();
 
-    expect(this.store.downloadVersion).toHaveBeenCalled();
+    expect(store.downloadVersion).toHaveBeenCalled();
   });
 
   describe('handleDownloadClick()', () => {
     it('kicks off an update of Electron versions', async () => {
       const wrapper = shallow(
-        <ElectronSettings appState={this.store} />
+        <ElectronSettings appState={store} />
       );
       const instance = wrapper.instance() as any;
       await instance.handleDownloadClick();
 
-      expect(this.store.updateElectronVersions).toHaveBeenCalled();
+      expect(store.updateElectronVersions).toHaveBeenCalled();
     });
   });
 
   describe('handlePagesChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(
-        <ElectronSettings appState={this.store} />
+        <ElectronSettings appState={store} />
       );
       const instance = wrapper.instance() as any;
       await instance.handlePagesChange({
@@ -74,14 +76,14 @@ describe('ElectronSettings component', () => {
         }
       });
 
-      expect(this.store.versionPagesToFetch).toBe(4);
+      expect(store.versionPagesToFetch).toBe(4);
     });
   });
 
   describe('handleChannelChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(
-        <ElectronSettings appState={this.store} />
+        <ElectronSettings appState={store} />
       );
       const instance = wrapper.instance() as any;
       await instance.handleChannelChange({
@@ -98,7 +100,7 @@ describe('ElectronSettings component', () => {
         }
       });
 
-      expect(this.store.versionsToShow).toEqual([
+      expect(store.versionsToShow).toEqual([
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly
       ]);

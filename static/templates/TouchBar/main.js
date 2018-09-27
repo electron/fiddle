@@ -89,13 +89,13 @@ app.on('ready', () => {
 
   const touchBar = new TouchBar([
     spin,
-    new TouchBarSpacer({size: 'large'}),
+    new TouchBarSpacer({ size: 'large' }),
     reel1,
-    new TouchBarSpacer({size: 'small'}),
+    new TouchBarSpacer({ size: 'small' }),
     reel2,
-    new TouchBarSpacer({size: 'small'}),
+    new TouchBarSpacer({ size: 'small' }),
     reel3,
-    new TouchBarSpacer({size: 'large'}),
+    new TouchBarSpacer({ size: 'large' }),
     result
   ])
 

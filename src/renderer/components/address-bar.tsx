@@ -93,8 +93,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     try {
       const octo = await getOctokit();
       const gist = await octo.gists.get({
-        gist_id: appState.gistId,
-        id: appState.gistId,
+        gist_id: appState.gistId
       });
 
       await window.ElectronFiddle.app.setValues({

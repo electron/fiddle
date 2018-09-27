@@ -20,22 +20,24 @@ jest.mock('../../../src/renderer/components/publish-button', () => ({
 }));
 
 describe('Commands component', () => {
+  let store: any;
+
   beforeEach(() => {
-    this.store = {
+    store = {
       gistId: null
     };
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Commands appState={this.store} />);
+    const wrapper = shallow(<Commands appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('opens the console on console click', () => {
-    this.store.toggleConsole = jest.fn();
+    store.toggleConsole = jest.fn();
 
-    const wrapper = shallow(<Commands appState={this.store} />);
+    const wrapper = shallow(<Commands appState={store} />);
     wrapper.find('button').simulate('click');
-    expect(this.store.toggleConsole).toHaveBeenCalled();
+    expect(store.toggleConsole).toHaveBeenCalled();
   });
 });
