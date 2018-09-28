@@ -125,7 +125,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
     const deleteFontAwesomeIcon = isDeletingAll
       ? <FontAwesomeIcon icon={faSpinner} spin={true} />
-      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
+      : <FontAwesomeIcon icon={faTrash} />;
 
     return (
       <div className='settings-electron'>
