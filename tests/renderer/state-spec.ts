@@ -9,8 +9,8 @@ jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn()
 }));
 jest.mock('../../src/renderer/versions', () => ({
-  getUpdatedKnownVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
-  getKnownVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+  getUpdatedElectronVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
+  getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
   ElectronReleaseChannel: {
     stable: 'Stable',
     beta: 'Beta'

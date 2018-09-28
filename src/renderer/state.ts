@@ -10,7 +10,7 @@ import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { ElectronReleaseChannel, getElectronVersions, getUpdatedKnownVersions } from './versions';
+import { ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions } from './versions';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
@@ -124,7 +124,7 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      const versions = await getUpdatedKnownVersions(this.versionPagesToFetch);
+      const versions = await getUpdatedElectronVersions(this.versionPagesToFetch);
       this.versions = arrayToStringMap(versions);
       await this.updateDownloadedVersionState();
     } catch (error) {

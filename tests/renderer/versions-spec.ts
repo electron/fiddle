@@ -3,7 +3,7 @@ import {
   fetchVersions,
   getKnownVersions,
   getReleaseChannel,
-  getUpdatedKnownVersions
+  getUpdatedElectronVersions
 } from '../../src/renderer/versions';
 
 describe('versions', () => {
@@ -110,12 +110,12 @@ describe('versions', () => {
     });
   });
 
-  describe('getUpdatedKnownVersions()', () => {
+  describe('getUpdatedElectronVersions()', () => {
     it('gets known versions', async () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{"test":"two"}]`);
       (fetch as any).mockResponse('');
 
-      const result = await getUpdatedKnownVersions(1);
+      const result = await getUpdatedElectronVersions(1);
 
       expect(result).toEqual([{ test: 'two' }]);
     });

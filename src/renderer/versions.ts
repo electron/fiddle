@@ -127,7 +127,7 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
  * @export
  * @returns {Promise<Array<GitHubVersion>>}
  */
-export async function getUpdatedKnownVersions(
+export async function getUpdatedElectronVersions(
   pages: number,
 ): Promise<Array<GitHubVersion>> {
   try {
@@ -136,7 +136,7 @@ export async function getUpdatedKnownVersions(
     console.warn(`Versions: Failed to fetch versions`, { error });
   }
 
-  return getKnownVersions();
+  return getElectronVersions();
 }
 
 /**
