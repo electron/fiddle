@@ -1,4 +1,4 @@
-import { GitHubVersion } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState, GitHubVersion } from '../interfaces';
 
 export const enum ElectronReleaseChannel {
   stable = 'Stable',
@@ -79,8 +79,24 @@ function saveVersions(key: VersionKeys, versions: Array<GitHubVersion>) {
  *
  * @returns {Array<GitHubVersion>}
  */
-export function getElectronVersions(): Array<GitHubVersion> {
-  return [ ...getKnownVersions(), ...getLocalVersions() ];
+export function getElectronVersions(): Array<ElectronVersion> {
+  const known: Array<ElectronVersion> = getKnownVersions().map((version) => {
+    return {
+      ...version,
+      source: ElectronVersionSource.remote,
+      state: ElectronVersionState.unknown
+    };
+  });
+
+  const local: Array<ElectronVersion> = getKnownVersions().map((version) => {
+    return {
+      ...version,
+      source: ElectronVersionSource.local,
+      state: ElectronVersionState.unknown
+    };
+  });
+
+  return [ ...known, ...local ];
 }
 
 /**
@@ -125,11 +141,11 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
  * saved after.
  *
  * @export
- * @returns {Promise<Array<GitHubVersion>>}
+ * @returns {Promise<Array<ElectronVersion>>}
  */
 export async function getUpdatedElectronVersions(
   pages: number,
-): Promise<Array<GitHubVersion>> {
+): Promise<Array<ElectronVersion>> {
   try {
     await fetchVersions(pages);
   } catch (error) {

@@ -21,17 +21,14 @@ describe('array-to-stringmap', () => {
       '1.0.0': {
         name: 'Test Version 1',
         tag_name: 'v1.0.0',
-        state: 'unknown'
       },
       '2.0.0': {
         name: 'Test Version 2',
         tag_name: 'v2.0.0',
-        state: 'unknown'
       },
       '3.0.0': {
         name: 'Test Version 3',
         tag_name: '3.0.0',
-        state: 'unknown'
       },
     });
   });

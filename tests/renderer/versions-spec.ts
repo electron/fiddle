@@ -112,12 +112,13 @@ describe('versions', () => {
 
   describe('getUpdatedElectronVersions()', () => {
     it('gets known versions', async () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(`[{"test":"two"}]`);
+      (window as any).localStorage.getItem.mockReturnValue(`[{"test":"two"}]`);
       (fetch as any).mockResponse('');
 
       const result = await getUpdatedElectronVersions(1);
+      const expectedVersion = { test: 'two', state: 'unknown' };
 
-      expect(result).toEqual([{ test: 'two' }]);
+      expect(result).toEqual([{ ...expectedVersion, source: 'remote' }, { ...expectedVersion, source: 'local' }]);
     });
   });
 });

@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, OutputEntry, OutputOptions } from '../interfaces';
+import { ElectronVersion, ElectronVersionState, OutputEntry, OutputOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -196,7 +196,7 @@ export class AppState {
 
     // Update state
     const updatedVersions = { ...this.versions };
-    updatedVersions[version].state = 'unknown';
+    updatedVersions[version].state = ElectronVersionState.unknown;
 
     this.versions = updatedVersions;
     this.updateDownloadedVersionState();
@@ -217,7 +217,7 @@ export class AppState {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
-      updatedVersions[version].state = 'downloading';
+      updatedVersions[version].state = ElectronVersionState.downloading;
       this.versions = updatedVersions;
 
       await this.binaryManager.setup(version);
@@ -264,7 +264,7 @@ export class AppState {
     console.log(`State: Updating version state`);
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = 'ready';
+        updatedVersions[version].state = ElectronVersionState.ready;
       }
     });
 
