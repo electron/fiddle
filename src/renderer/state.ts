@@ -10,9 +10,9 @@ import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { ElectronReleaseChannel, getKnownVersions, getUpdatedKnownVersions } from './versions';
+import { ElectronReleaseChannel, getElectronVersions, getUpdatedKnownVersions } from './versions';
 
-const knownVersions = getKnownVersions();
+const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
   || normalizeVersion(knownVersions[0].tag_name);
 
@@ -175,7 +175,7 @@ export class AppState {
     window.ElectronFiddle.app.setupTheme();
   }
 
- /*
+ /**
   * Remove a version of Electron
   *
   * @param {string} input
@@ -202,7 +202,7 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
- /*
+ /**
   * Download a version of Electron.
   *
   * @param {string} input
@@ -227,7 +227,7 @@ export class AppState {
     }
   }
 
- /*
+ /**
   * Select a version of Electron (and download it if necessary).
   *
   * @param {string} input
@@ -252,7 +252,7 @@ export class AppState {
     await this.downloadVersion(version);
   }
 
- /*
+ /**
   * Go and check which versions have already been downloaded.
   *
   * @returns {Promise<void>}

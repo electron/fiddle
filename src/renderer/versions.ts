@@ -35,6 +35,72 @@ export function getReleaseChannel(
   return ElectronReleaseChannel.stable;
 }
 
+export const enum VersionKeys {
+  local = 'local-electron-versions',
+  known = 'known-electron-versions'
+}
+
+/**
+ * Retrieve Electron versions from localStorage.
+ *
+ * @param {VersionKeys} key
+ * @param {() => Array<GitHubVersion>} fallbackMethod
+ * @returns {Array<GitHubVersion>}
+ */
+function getVersions(
+  key: VersionKeys, fallbackMethod: () => Array<GitHubVersion>
+): Array<GitHubVersion> {
+  const fromLs = window.localStorage.getItem(key);
+
+  if (fromLs) {
+    try {
+      return JSON.parse(fromLs);
+    } catch (error) {
+      console.warn(`Parsing local Electron versions failed, returning []`);
+    }
+  }
+
+  return fallbackMethod();
+}
+
+/**
+ * Save an array of GitHubVersions to localStorage.
+ *
+ * @param {VersionKeys} key
+ * @param {Array<GitHubVersion} versions
+ */
+function saveVersions(key: VersionKeys, versions: Array<GitHubVersion>) {
+  const stringified = JSON.stringify(versions);
+  window.localStorage.setItem(key, stringified);
+}
+
+/**
+ * Return both known as well as local versions.
+ *
+ * @returns {Array<GitHubVersion>}
+ */
+export function getElectronVersions(): Array<GitHubVersion> {
+  return [ ...getKnownVersions(), ...getLocalVersions() ];
+}
+
+/**
+ * Retrieves local Electron versions, configured by the user.
+ *
+ * @returns {Array<GitHubVersion>}
+ */
+export function getLocalVersions(): Array<GitHubVersion> {
+  return getVersions(VersionKeys.local, () => []);
+}
+
+/**
+ * Saves local versions to localStorage.
+ *
+ * @param {Array<GitHubVersion>} versions
+ */
+export function saveLocalVersions(versions: Array<GitHubVersion>) {
+  return saveVersions(VersionKeys.local, versions);
+}
+
 /**
  * Retrieves our best guess regarding the latest Electron versions. Tries to
  * fetch them from localStorage, then from a static releases.json file.
@@ -42,17 +108,7 @@ export function getReleaseChannel(
  * @returns {Array<GitHubVersion>}
  */
 export function getKnownVersions(): Array<GitHubVersion> {
-  const fromLs = window.localStorage.getItem('known-electron-versions');
-
-  if (fromLs) {
-    try {
-      return JSON.parse(fromLs);
-    } catch (error) {
-      console.warn(`Parsing known versions failed, falling back`);
-    }
-  }
-
-  return require('../../static/releases.json');
+  return getVersions(VersionKeys.known, () => require('../../static/releases.json'));
 }
 
 /**
@@ -61,8 +117,7 @@ export function getKnownVersions(): Array<GitHubVersion> {
  * @param {Array<GitHubVersion>} versions
  */
 export function saveKnownVersions(versions: Array<GitHubVersion>) {
-  const stringified = JSON.stringify(versions);
-  window.localStorage.setItem('known-electron-versions', stringified);
+  return saveVersions(VersionKeys.known, versions);
 }
 
 /**
