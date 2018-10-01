@@ -66,6 +66,7 @@ export class AppState {
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
+  @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   private outputBuffer: string = '';
@@ -144,6 +145,10 @@ export class AppState {
 
   @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
+  }
+
+  @action public toggleAddVersionDialog() {
+    this.isAddVersionDialogShowing = !this.isAddVersionDialogShowing;
   }
 
   @action public toggleAuthDialog() {
@@ -347,6 +352,7 @@ export class AppState {
     this.isSettingsShowing = false;
     this.isTourShowing = false;
     this.isConsoleShowing = false;
+    this.isAddVersionDialogShowing = false;
 
     if (additionalOptions) {
       for (const key in additionalOptions) {
