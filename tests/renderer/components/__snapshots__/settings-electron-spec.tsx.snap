@@ -392,7 +392,8 @@ exports[`ElectronSettings component renders 1`] = `
                 title=""
                 transform={null}
               />
-               Delete
+               
+              Delete
             </button>
           </td>
         </tr>

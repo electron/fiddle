@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions, ElectronVersionSource } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
