@@ -47,6 +47,8 @@
   .settings-electron {
     .versions-to-show {
       margin-bottom: 2rem;
+      border-bottom: 1px solid @border-color-1;
+      padding-bottom: 1.5rem;
 
       p {
         margin-bottom: 1rem;
@@ -55,6 +57,23 @@
       label {
         display: inline;
         margin-right: 10px;
+      }
+    }
+
+    .advanced-options-buttons {
+      display: flex;
+      flex-flow: row wrap;
+
+      > div {
+        margin-right: 1rem;
+
+        button {
+          width: 100%;
+        }
+      }
+
+      > div:last-of-type {
+        margin-right: 0;
       }
     }
   }

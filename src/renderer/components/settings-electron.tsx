@@ -1,6 +1,7 @@
 import {
   faClipboardList,
   faCloudDownloadAlt,
+  faFile,
   faSpinner,
   faTrash
 } from '@fortawesome/fontawesome-free-solid';
@@ -39,6 +40,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.handleChannelChange = this.handleChannelChange.bind(this);
     this.handlePagesChange = this.handlePagesChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
+    this.handleAddVersion = this.handleAddVersion.bind(this);
 
     this.state = {
       isDownloadingAll: false,
@@ -117,7 +119,33 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.setState({ isDeletingAll: false });
   }
 
+  public handleAddVersion(): void {
+    this.props.appState.toggleAddVersionDialog();
+  }
+
   public render() {
+    return (
+      <div className='settings-electron'>
+        <h2>Electron Settings</h2>
+        <div className='advanced-options settings-section'>
+          {this.renderVersionOptions()}
+          {this.renderAdvancedButtons()}
+        </div>
+        <div>
+          <h2>Versions</h2>
+          {this.renderTable()}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Renders the various buttons for advanced operations
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
+  private renderAdvancedButtons(): JSX.Element {
     const { isDownloadingAll, isDeletingAll } = this.state;
     const isWorking = isDownloadingAll || isDeletingAll;
     const downloadFontAwesomeIcon = isDownloadingAll
@@ -128,11 +156,8 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       : <FontAwesomeIcon icon={faTrash} />;
 
     return (
-      <div className='settings-electron'>
-        <h2>Electron Settings</h2>
-        <div className='advanced-options settings-section'>
-          {this.renderVersionOptions()}
-
+      <div className='advanced-options-buttons'>
+        <div>
           <label>Download all versions of Electron.</label>
           <button
             className='button btn-download-all'
@@ -141,23 +166,36 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
           >
             {downloadFontAwesomeIcon} Download All Versions
           </button>
-          <label>Remove all downloaded versions of Electron.</label>
+        </div>
+        <div>
+          <label>Remove all downloaded versions.</label>
           <button
             className='button btn-delete-all'
             disabled={isWorking}
             onClick={this.handleDeleteAll}
           >
-            {deleteFontAwesomeIcon} Delete All Versions
+            {deleteFontAwesomeIcon} Delete All Downloads
           </button>
         </div>
         <div>
-          <h2>Versions</h2>
-          {this.renderTable()}
+          <label>Add a local build of Electron.</label>
+          <button
+            className='button btn-add-version'
+            onClick={this.handleAddVersion}
+          >
+            <FontAwesomeIcon icon={faFile} /> Add Local Electron Build
+          </button>
         </div>
       </div>
     );
   }
 
+  /**
+   * Renders the various options for which versions should be displayed
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
   private renderVersionOptions(): JSX.Element {
     const { appState } = this.props;
     const getIsChecked = (channel: ElectronReleaseChannel) => {
@@ -222,6 +260,12 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     );
   }
 
+  /**
+   * Renders the "Update Electron Release List" button
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
   private renderUpdateVersionsButton(): JSX.Element {
     const { appState } = this.props;
     const { isUpdatingElectronVersions } = appState;

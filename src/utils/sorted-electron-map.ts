@@ -15,6 +15,16 @@ export function sortedElectronMap<T>(
   mapFn: (key: string, version: ElectronVersion) => T
 ) {
   return Object.keys(versions)
-    .sort((a, b) => semver.gt(a, b, true) ? -1 : 1)
+    .sort((a, b) => {
+      if (!semver.valid(a)) {
+        return -1;
+      }
+
+      if (!semver.valid(b)) {
+        return 1;
+      }
+
+      return semver.gt(a, b, true) ? -1 : 1;
+    })
     .map((key) => mapFn(key, versions[key])) as Array<T>;
 }

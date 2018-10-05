@@ -89,11 +89,13 @@ export class BinaryManager {
    * Gets the expected path for the binary of a given Electron version
    *
    * @param {string} version
+   * @param {string} dir
    * @returns {string}
    */
-  public getElectronBinaryPath(version: string): string {
-    const dir = this.getDownloadPath(version);
-
+  public getElectronBinaryPath(
+    version: string,
+    dir: string = this.getDownloadPath(version)
+  ): string {
     switch (process.platform) {
       case 'darwin':
         return path.join(dir, 'Electron.app/Contents/MacOS/Electron');
@@ -138,10 +140,11 @@ export class BinaryManager {
    * Did we already download a given version?
    *
    * @param {string} version
+   * @param {string} dir
    * @returns {boolean}
    */
-  public async getIsDownloaded(version: string): Promise<boolean> {
-    const expectedPath = this.getElectronBinaryPath(version);
+  public async getIsDownloaded(version: string, dir?: string): Promise<boolean> {
+    const expectedPath = this.getElectronBinaryPath(version, dir);
     const fs = await fancyImport<typeof fsType>('fs-extra');
     return fs.existsSync(expectedPath);
   }

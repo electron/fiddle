@@ -88,7 +88,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     };
   });
 
-  const local: Array<ElectronVersion> = getKnownVersions().map((version) => {
+  const local: Array<ElectronVersion> = getLocalVersions().map((version) => {
     return {
       ...version,
       source: ElectronVersionSource.local,
@@ -97,6 +97,24 @@ export function getElectronVersions(): Array<ElectronVersion> {
   });
 
   return [ ...known, ...local ];
+}
+
+/**
+ * Add a version to the local versions
+ *
+ * @param {GitHubVersion} input
+ * @returns {Array<GitHubVersion>}
+ */
+export function addLocalVersion(input: GitHubVersion): Array<GitHubVersion> {
+  const versions = getLocalVersions();
+
+  if (!versions.find((v) => v.url !== input.url)) {
+    versions.push(input);
+  }
+
+  saveLocalVersions(versions);
+
+  return versions;
 }
 
 /**

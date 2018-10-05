@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, ElectronVersionState, OutputEntry, OutputOptions } from '../interfaces';
+import { ElectronVersion, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -10,7 +10,7 @@ import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions } from './versions';
+import { addLocalVersion, ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions } from './versions';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
@@ -178,6 +178,13 @@ export class AppState {
     this.theme = name || '';
     activateTheme(undefined, undefined, name);
     window.ElectronFiddle.app.setupTheme();
+  }
+
+  @action public async addLocalVersion(input: GitHubVersion) {
+    addLocalVersion(input);
+
+    this.versions = arrayToStringMap(getElectronVersions());
+    this.updateDownloadedVersionState();
   }
 
  /**

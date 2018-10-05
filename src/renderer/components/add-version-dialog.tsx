@@ -1,8 +1,9 @@
-import { faKey, faSpinner } from '@fortawesome/fontawesome-free-solid';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
+import * as path from 'path';
 import * as React from 'react';
 
+import { GitHubVersion } from '../../interfaces';
+import { getElectroNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
 import { Dialog } from './dialog';
 
@@ -11,7 +12,8 @@ export interface AddVersionDialogProps {
 }
 
 export interface AddVersionDialogState {
-  validInput: boolean;
+  isValidInput: boolean;
+  file?: File;
 }
 
 /**
@@ -26,11 +28,29 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     super(props);
 
     this.state = {
-      validInput: false
+      isValidInput: false
     };
 
-    this.obSubmit = this.obSubmit.bind(this);
+    this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
+    this.onChange = this.onChange.bind(this);
+  }
+
+  /**
+   * Handles a change of the file input
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public async onChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const { files } = event.target;
+    const { binaryManager } = this.props.appState;
+    const file = files && files[0] ? files[0] : undefined;
+
+    const isValidInput = !!(file
+      && file.path
+      && await binaryManager.getIsDownloaded('custom', file.path));
+
+    this.setState({ file, isValidInput });
   }
 
   /**
@@ -38,8 +58,32 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    *
    * @returns {Promise<void>}
    */
-  public async obSubmit(): Promise<void> {
-    console.log('hi');
+  public async onSubmit(): Promise<void> {
+    const { file } = this.state;
+
+    if (!file) return;
+
+    const name = file.path
+      .slice(-20)
+      .split(path.sep)
+      .slice(1)
+      .join(path.sep);
+
+    const toAdd: GitHubVersion = {
+      url: file.path,
+      assets_url: file.path,
+      body: `Local version, added at ${Date.now()}`,
+      created_at: Date.now().toString(),
+      name,
+      html_url: '',
+      prerelease: true,
+      published_at: Date.now().toString(),
+      tag_name: name,
+      target_commitish: ''
+    };
+
+    this.props.appState.addLocalVersion(toAdd);
+    this.onClose();
   }
 
   /**
@@ -55,29 +99,39 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    */
   public reset(): void {
     this.setState({
+      isValidInput: false,
+      file: undefined
     });
   }
 
   get buttons() {
-    const canSubmit = this.state.validInput;
+    const canSubmit = this.state.isValidInput;
 
     return [
       (
         <button
           className='button'
+          key='submit'
           disabled={!canSubmit}
-          onClick={this.obSubmit}
+          onClick={this.onSubmit}
         >
-          Done
+          Add
         </button>
       ), (
-        <button className='cancel' onClick={this.onClose}>Cancel</button>
+        <button
+          className='cancel'
+          key='cancel'
+          onClick={this.onClose}
+        >
+          Cancel
+        </button>
       )
     ];
   }
 
   public render() {
     const { isAddVersionDialogShowing } = this.props.appState;
+    const dirOptions = { webkitdirectory: 'true' };
 
     return (
       <Dialog
@@ -86,14 +140,46 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
         buttons={this.buttons}
         onClose={this.onClose}
         isCentered={true}
-        className='AddVersionDialog'
-        key='AddVersionDialog'
+        className='add-version-dialog'
+        key='add-version-dialog'
       >
-        <span className='generateTokenText'>
-          <FontAwesomeIcon icon={faKey} />
-          Generate and paste it here:
-        </span>
+        <label
+          htmlFor='custom-electron-version'
+          className='force-button'
+        >
+          Select the folder containing {getElectroNameForPlatform()}
+        </label>
+        <input
+          type='file'
+          onChange={this.onChange}
+          id='custom-electron-version'
+          name='custom-electron-version'
+          {...dirOptions}
+        />
+        {this.renderPath()}
       </Dialog>
+    );
+  }
+
+  private renderPath(): JSX.Element | null {
+    const { file, isValidInput } = this.state;
+
+    if (!file || !file.path) return null;
+
+    const info = isValidInput
+      ? `We found an ${getElectroNameForPlatform()} in this folder.`
+      : `We did not find a ${getElectroNameForPlatform()} in this folder...`;
+
+    return (
+      <>
+        <input
+          readOnly={true}
+          value={file.path}
+        />
+        <span>
+          {info}
+        </span>
+      </>
     );
   }
 }
