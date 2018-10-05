@@ -94,7 +94,7 @@ export class BinaryManager {
    */
   public getElectronBinaryPath(
     version: string,
-    dir: string = this.getDownloadPath(version)
+    dir: string = this.getDownloadPath(version),
   ): string {
     switch (process.platform) {
       case 'darwin':

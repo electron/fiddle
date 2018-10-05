@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
-import { EditorValues, FileTransform } from '../../interfaces';
+import { EditorValues, ElectronVersionSource, FileTransform } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { PackageJsonOptions } from '../../utils/get-package';
 import { normalizeVersion } from '../../utils/normalize-version';
@@ -140,9 +140,11 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
    */
   public async execute(dir: string): Promise<void> {
     const { appState } = this.props;
-    const { version, pushOutput } = appState;
+    const { version, pushOutput, versions } = appState;
 
-    const binaryPath = appState.binaryManager.getElectronBinaryPath(version);
+    const isLocal = versions[version] && versions[version].source === ElectronVersionSource.local;
+    const electronDir = isLocal ? versions[version].url : undefined;
+    const binaryPath = appState.binaryManager.getElectronBinaryPath(version, electronDir);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ dir, '--inspect' ]);
@@ -270,11 +272,12 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const { appState } = this.props;
     const { fileManager, getValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
-    const { binaryManager, version } = appState;
+    const { binaryManager, version, versions } = appState;
 
     appState.isConsoleShowing = true;
 
-    const isDownloaded = await binaryManager.getIsDownloaded(version);
+    const isLocal = versions[version] && versions[version].source === ElectronVersionSource.local;
+    const isDownloaded = isLocal || await binaryManager.getIsDownloaded(version);
     const values = await getValues(options);
     const dir = await this.saveToTemp(options);
 

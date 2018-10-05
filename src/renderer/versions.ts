@@ -92,7 +92,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     return {
       ...version,
       source: ElectronVersionSource.local,
-      state: ElectronVersionState.unknown
+      state: ElectronVersionState.ready
     };
   });
 
