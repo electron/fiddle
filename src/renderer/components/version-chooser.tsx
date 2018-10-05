@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { ElectronVersionSource } from '../../interfaces';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
 import { getReleaseChannel } from '../versions';
@@ -52,15 +53,18 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
         return null;
       }
 
-      const { tag_name, state } = item;
+      const { tag_name, state, source, name } = item;
       const version = tag_name;
       const icon = state === 'ready'
         ? '✅'
         : state === 'downloading' ? '⏬' : '⏹';
+      const sourceInfo = source === ElectronVersionSource.local
+        ? `(${name})`
+        : '';
 
       return (
         <option value={version} key={version}>
-          {icon} {version}
+          {icon} {version} {sourceInfo}
         </option>
       );
     });

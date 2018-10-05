@@ -83,7 +83,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       .slice(-20)
       .split(path.sep)
       .slice(1)
-      .join(path.sep) + ` ${version}`;
+      .join(path.sep);
 
     const toAdd: GitHubVersion = {
       url: file.path,
