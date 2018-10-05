@@ -118,7 +118,7 @@ describe('versions', () => {
       const result = await getUpdatedElectronVersions(1);
       const expectedVersion = { test: 'two', state: 'unknown' };
 
-      expect(result).toEqual([{ ...expectedVersion, source: 'remote' }, { ...expectedVersion, source: 'local' }]);
+      expect(result).toEqual([{ ...expectedVersion, source: 'remote' }, { ...expectedVersion, source: 'local', state: 'ready' }]);
     });
   });
 });
