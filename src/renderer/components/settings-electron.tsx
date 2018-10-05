@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion } from '../../interfaces';
+import { ElectronVersion, ElectronVersionSource } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
@@ -346,16 +346,19 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @returns {JSX.Element}
    */
   private renderAction(key: string, item: ElectronVersion): JSX.Element {
-    const { state } = item;
+    const { state, source } = item;
     const { appState } = this.props;
 
     // Already downloaded
     if (state === 'ready') {
       const remove = () => appState.removeVersion(key);
+      const label = source === ElectronVersionSource.local
+        ? 'Remove'
+        : 'Delete';
 
       return (
         <button className='button' onClick={remove}>
-          <FontAwesomeIcon icon={faTrash} /> Delete
+          <FontAwesomeIcon icon={faTrash} /> {label}
         </button>
       );
     }

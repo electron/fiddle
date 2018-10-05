@@ -1,6 +1,7 @@
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
+import * as semver from 'semver';
 
 import { GitHubVersion } from '../../interfaces';
 import { getElectroNameForPlatform } from '../../utils/electron-name';
@@ -12,8 +13,10 @@ export interface AddVersionDialogProps {
 }
 
 export interface AddVersionDialogState {
-  isValidInput: boolean;
+  isValidElectron: boolean;
+  isValidVersion: boolean;
   file?: File;
+  version: string;
 }
 
 /**
@@ -28,12 +31,15 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     super(props);
 
     this.state = {
-      isValidInput: false
+      isValidVersion: false,
+      isValidElectron: false,
+      version: ''
     };
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
-    this.onChange = this.onChange.bind(this);
+    this.onChangeFile = this.onChangeFile.bind(this);
+    this.onChangeVersion = this.onChangeVersion.bind(this);
   }
 
   /**
@@ -41,16 +47,26 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public async onChange(event: React.ChangeEvent<HTMLInputElement>) {
+  public async onChangeFile(event: React.ChangeEvent<HTMLInputElement>) {
     const { files } = event.target;
     const { binaryManager } = this.props.appState;
     const file = files && files[0] ? files[0] : undefined;
 
-    const isValidInput = !!(file
+    const isValidElectron = !!(file
       && file.path
       && await binaryManager.getIsDownloaded('custom', file.path));
 
-    this.setState({ file, isValidInput });
+    this.setState({ file, isValidElectron });
+  }
+
+  public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
+    const version = event.target.value || '';
+    const isValidVersion = !!semver.valid(version);
+
+    this.setState({
+      version,
+      isValidVersion,
+     });
   }
 
   /**
@@ -59,7 +75,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    * @returns {Promise<void>}
    */
   public async onSubmit(): Promise<void> {
-    const { file } = this.state;
+    const { file, version } = this.state;
 
     if (!file) return;
 
@@ -67,7 +83,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       .slice(-20)
       .split(path.sep)
       .slice(1)
-      .join(path.sep);
+      .join(path.sep) + ` ${version}`;
 
     const toAdd: GitHubVersion = {
       url: file.path,
@@ -78,7 +94,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       html_url: '',
       prerelease: true,
       published_at: Date.now().toString(),
-      tag_name: name,
+      tag_name: version,
       target_commitish: ''
     };
 
@@ -99,13 +115,15 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    */
   public reset(): void {
     this.setState({
-      isValidInput: false,
+      isValidElectron: false,
+      isValidVersion: false,
+      version: '',
       file: undefined
     });
   }
 
   get buttons() {
-    const canSubmit = this.state.isValidInput;
+    const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
 
     return [
       (
@@ -151,7 +169,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
         </label>
         <input
           type='file'
-          onChange={this.onChange}
+          onChange={this.onChangeFile}
           id='custom-electron-version'
           name='custom-electron-version'
           {...dirOptions}
@@ -162,11 +180,11 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
   }
 
   private renderPath(): JSX.Element | null {
-    const { file, isValidInput } = this.state;
+    const { file, isValidElectron } = this.state;
 
     if (!file || !file.path) return null;
 
-    const info = isValidInput
+    const info = isValidElectron
       ? `We found an ${getElectroNameForPlatform()} in this folder.`
       : `We did not find a ${getElectroNameForPlatform()} in this folder...`;
 
@@ -176,10 +194,33 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
           readOnly={true}
           value={file.path}
         />
-        <span>
+        <p>
           {info}
-        </span>
+        </p>
+        {this.renderVersionInput()}
       </>
     );
   }
+
+  private renderVersionInput(): JSX.Element | null {
+    const { isValidElectron, isValidVersion, version } = this.state;
+
+    if (!isValidElectron) return null;
+
+    return (
+      <>
+        <p>
+          Please specify a version, used for typings and the name.
+          Must be <code>semver</code> compliant.
+        </p>
+        <input
+          className={isValidVersion ? '' : 'hasError'}
+          value={version}
+          onChange={this.onChangeVersion}
+          placeholder='4.0.0'
+        />
+      </>
+    );
+  }
+
 }

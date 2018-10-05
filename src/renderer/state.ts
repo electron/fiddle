@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions } from '../interfaces';
+import { ElectronVersion, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions, ElectronVersionSource } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -10,7 +10,7 @@ import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { addLocalVersion, ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions } from './versions';
+import { addLocalVersion, ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions, saveLocalVersions } from './versions';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
@@ -195,6 +195,8 @@ export class AppState {
   */
   @action public async removeVersion(input: string) {
     const version = normalizeVersion(input);
+    const release = this.versions[version];
+
     console.log(`State: Removing Electron ${version}`);
 
     // Already not present?
@@ -203,12 +205,22 @@ export class AppState {
       return;
     }
 
-    // Actually remove
-    await this.binaryManager.remove(version);
-
     // Update state
     const updatedVersions = { ...this.versions };
-    updatedVersions[version].state = ElectronVersionState.unknown;
+
+    // Actually remove
+    if (release && release.source === ElectronVersionSource.local) {
+      delete updatedVersions[version];
+
+      const versionsAsArray = Object
+        .keys(updatedVersions)
+        .map((k) => updatedVersions[k]);
+
+      saveLocalVersions(versionsAsArray);
+    } else {
+      await this.binaryManager.remove(version);
+      updatedVersions[version].state = ElectronVersionState.unknown;
+    }
 
     this.versions = updatedVersions;
     this.updateDownloadedVersionState();
@@ -224,8 +236,12 @@ export class AppState {
     const version = normalizeVersion(input);
     console.log(`State: Downloading Electron ${version}`);
 
+    const release = this.versions[version] || { state: '', source: '' };
+    const isLocal = release.source === ElectronVersionSource.local;
+    const isReady = release.state === 'ready';
+
     // Fetch new binaries, maybe?
-    if ((this.versions[version] || { state: '' }).state !== 'ready') {
+    if (!isLocal && !isReady) {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
@@ -247,6 +263,14 @@ export class AppState {
   */
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
+
+    if (!this.versions[version]) {
+      console.warn(`State: Called setVersion() with ${version}, which does not exist.`);
+      this.setVersion(knownVersions[0].tag_name);
+
+      return;
+    }
+
     console.log(`State: Switching to Electron ${version}`);
 
     this.version = version;

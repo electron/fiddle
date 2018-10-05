@@ -131,8 +131,16 @@ export function getLocalVersions(): Array<GitHubVersion> {
  *
  * @param {Array<GitHubVersion>} versions
  */
-export function saveLocalVersions(versions: Array<GitHubVersion>) {
-  return saveVersions(VersionKeys.local, versions);
+export function saveLocalVersions(versions: Array<GitHubVersion | ElectronVersion>) {
+  const filteredVersions = versions.filter((v) => {
+    if (isElectronVersion(v)) {
+      return v.source === ElectronVersionSource.local;
+    }
+
+    return true;
+  });
+
+  return saveVersions(VersionKeys.local, filteredVersions);
 }
 
 /**
@@ -222,4 +230,10 @@ export function fetchVersionPage(page?: number): Promise<Array<GitHubVersion>> {
 
   return window.fetch(url)
     .then((response) => response.json());
+}
+
+export function isElectronVersion(
+  input: GitHubVersion | ElectronVersion
+): input is ElectronVersion {
+  return (input as ElectronVersion).source !== undefined;
 }
