@@ -161,7 +161,6 @@
   }
 
   input {
-    width: 100%;
     color: rgba(159, 234, 249, 0.5);
     height: 28px;
     margin-top: 10px;
@@ -205,6 +204,17 @@
   transition: opacity 0.4s ease-in-out;
   pointer-events: all;
   opacity: 0.5;
+}
+
+.add-version-dialog {
+  label {
+    white-space: normal;
+    height: unset;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
 }
 
 select {

@@ -35,6 +35,24 @@
     width: 250px;
   }
 
+  .electron-versions-table {
+    button {
+      margin: 0;
+      min-width: 250px;
+    }
+
+    .action {
+      text-align: center;
+      width: 250px;
+    }
+  }
+
+  .settings-appearance {
+    button {
+      margin-left: 0.5rem;
+    }
+  }
+
   .settings-content {
     height: 100%;
     width: 100%;
@@ -45,8 +63,27 @@
   }
 
   .settings-electron {
+    .advanced-options-buttons {
+      display: flex;
+      flex-flow: row wrap;
+
+      > div {
+        margin-right: 1rem;
+
+        button {
+          width: 100%;
+        }
+      }
+
+      > div:last-of-type {
+        margin-right: 0;
+      }
+    }
+
     .versions-to-show {
       margin-bottom: 2rem;
+      border-bottom: 1px solid @border-color-1;
+      padding-bottom: 1.5rem;
 
       p {
         margin-bottom: 1rem;
@@ -56,18 +93,6 @@
         display: inline;
         margin-right: 10px;
       }
-    }
-  }
-
-  .electron-versions-table {
-    button {
-      margin: 0;
-      min-width: 250px;
-    }
-
-    .action {
-      text-align: center;
-      width: 250px;
     }
   }
 
@@ -161,12 +186,6 @@
       &.selected {
         color: @foreground-2;
       }
-    }
-  }
-
-  .settings-appearance {
-    button {
-      margin-left: 0.5rem;
     }
   }
 }

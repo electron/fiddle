@@ -1,3 +1,4 @@
+import { ElectronVersionState } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -9,8 +10,8 @@ jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn()
 }));
 jest.mock('../../src/renderer/versions', () => ({
-  getUpdatedKnownVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
-  getKnownVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+  getUpdatedElectronVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
+  getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
   ElectronReleaseChannel: {
     stable: 'Stable',
     beta: 'Beta'
@@ -82,13 +83,14 @@ describe('AppState', () => {
 
   describe('removeVersion()', () => {
     it('removes a version', async () => {
-      appState.versions['2.0.2'].state = 'ready';
+      appState.versions['2.0.2'].state = ElectronVersionState.ready;
       await appState.removeVersion('v2.0.2');
 
       expect(appState.binaryManager.remove).toHaveBeenCalledWith('2.0.2');
     });
 
     it('does not remove it if not necessary', async () => {
+      appState.versions['2.0.2'].state = ElectronVersionState.unknown;
       await appState.removeVersion('v2.0.2');
       expect(appState.binaryManager.remove).toHaveBeenCalledTimes(0);
     });
@@ -102,6 +104,8 @@ describe('AppState', () => {
 
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
+      appState.versions['2.0.2'].state = ElectronVersionState.unknown;
+
       await appState.downloadVersion('v2.0.2');
       expect(appState.binaryManager.setup).toHaveBeenCalledWith('2.0.2');
     });
@@ -112,7 +116,7 @@ describe('AppState', () => {
     });
 
     it('does not download a version if already ready', async () => {
-      appState.versions['2.0.2'].state = 'ready';
+      appState.versions['2.0.2'].state = ElectronVersionState.ready;
 
       await appState.downloadVersion('v2.0.2');
       expect(appState.binaryManager.setup).toHaveBeenCalledTimes(0);
@@ -120,6 +124,12 @@ describe('AppState', () => {
   });
 
   describe('setVersion()', () => {
+    it('falls back if a version does not exist', async () => {
+      await appState.setVersion('v999.99.99');
+
+      expect(appState.version).toBe('2.0.2');
+    });
+
     it('downloads a version if necessary', async () => {
       appState.downloadVersion = jest.fn();
       await appState.setVersion('v2.0.2');
@@ -134,7 +144,7 @@ describe('AppState', () => {
       (appState.binaryManager.getDownloadedVersions as any).mockReturnValueOnce(mockResult);
       await appState.updateDownloadedVersionState();
 
-      expect(appState.versions['2.0.2'].state).toBe('ready');
+      expect(appState.versions['2.0.2'].state).toBe(ElectronVersionState.ready);
     });
   });
 

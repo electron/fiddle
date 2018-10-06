@@ -60,7 +60,16 @@ describe('CreditsSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the General page after a click', () => {
+  it('renders the Electron page after a click', () => {
+    const wrapper = shallow(
+      <Settings appState={store} />
+    );
+
+    wrapper.find('.Electron').simulate('click');
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the Credits page after a click', () => {
     const wrapper = shallow(
       <Settings appState={store} />
     );

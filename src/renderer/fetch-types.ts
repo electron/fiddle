@@ -101,7 +101,6 @@ export async function updateEditorTypeDefinitions(version: string, i: number = 0
   };
 
   // If this method is called before we're ready, we'll delay this work a bit
-  if (!window.ElectronFiddle) return defer();
   if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco) return defer();
 
   const { app } = window.ElectronFiddle;

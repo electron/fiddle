@@ -16,7 +16,8 @@ describe('ElectronSettings component', () => {
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
-      updateElectronVersions: jest.fn()
+      updateElectronVersions: jest.fn(),
+      toggleAddVersionDialog: jest.fn()
     };
 
     // Render all the states
@@ -61,6 +62,18 @@ describe('ElectronSettings component', () => {
       await instance.handleDownloadClick();
 
       expect(store.updateElectronVersions).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleAddVersion()', () => {
+    it('toggles the add version dialog', () => {
+      const wrapper = shallow(
+        <ElectronSettings appState={store} />
+      );
+      const instance = wrapper.instance() as any;
+      instance.handleAddVersion();
+
+      expect(store.toggleAddVersionDialog).toHaveBeenCalled();
     });
   });
 

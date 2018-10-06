@@ -1,6 +1,7 @@
 import {
   faClipboardList,
   faCloudDownloadAlt,
+  faFile,
   faSpinner,
   faTrash
 } from '@fortawesome/fontawesome-free-solid';
@@ -8,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion } from '../../interfaces';
+import { ElectronVersion, ElectronVersionSource } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
@@ -39,6 +40,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.handleChannelChange = this.handleChannelChange.bind(this);
     this.handlePagesChange = this.handlePagesChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
+    this.handleAddVersion = this.handleAddVersion.bind(this);
 
     this.state = {
       isDownloadingAll: false,
@@ -117,38 +119,20 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.setState({ isDeletingAll: false });
   }
 
-  public render() {
-    const { isDownloadingAll, isDeletingAll } = this.state;
-    const isWorking = isDownloadingAll || isDeletingAll;
-    const downloadFontAwesomeIcon = isDownloadingAll
-      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
-      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
-    const deleteFontAwesomeIcon = isDeletingAll
-      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
-      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
+  /**
+   * Opens the "add local version" dialog
+   */
+  public handleAddVersion(): void {
+    this.props.appState.toggleAddVersionDialog();
+  }
 
+  public render() {
     return (
       <div className='settings-electron'>
         <h2>Electron Settings</h2>
         <div className='advanced-options settings-section'>
           {this.renderVersionOptions()}
-
-          <label>Download all versions of Electron.</label>
-          <button
-            className='button btn-download-all'
-            disabled={isWorking}
-            onClick={this.handleDownloadAll}
-          >
-            {downloadFontAwesomeIcon} Download All Versions
-          </button>
-          <label>Remove all downloaded versions of Electron.</label>
-          <button
-            className='button btn-delete-all'
-            disabled={isWorking}
-            onClick={this.handleDeleteAll}
-          >
-            {deleteFontAwesomeIcon} Delete All Versions
-          </button>
+          {this.renderAdvancedButtons()}
         </div>
         <div>
           <h2>Versions</h2>
@@ -158,6 +142,63 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     );
   }
 
+  /**
+   * Renders the various buttons for advanced operations
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
+  private renderAdvancedButtons(): JSX.Element {
+    const { isDownloadingAll, isDeletingAll } = this.state;
+    const isWorking = isDownloadingAll || isDeletingAll;
+    const downloadFontAwesomeIcon = isDownloadingAll
+      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
+      : <FontAwesomeIcon icon={faCloudDownloadAlt} />;
+    const deleteFontAwesomeIcon = isDeletingAll
+      ? <FontAwesomeIcon icon={faSpinner} spin={true} />
+      : <FontAwesomeIcon icon={faTrash} />;
+
+    return (
+      <div className='advanced-options-buttons'>
+        <div>
+          <label>Download all versions of Electron.</label>
+          <button
+            className='button btn-download-all'
+            disabled={isWorking}
+            onClick={this.handleDownloadAll}
+          >
+            {downloadFontAwesomeIcon} Download All Versions
+          </button>
+        </div>
+        <div>
+          <label>Remove all downloaded versions.</label>
+          <button
+            className='button btn-delete-all'
+            disabled={isWorking}
+            onClick={this.handleDeleteAll}
+          >
+            {deleteFontAwesomeIcon} Delete All Downloads
+          </button>
+        </div>
+        <div>
+          <label>Add a local build of Electron.</label>
+          <button
+            className='button btn-add-version'
+            onClick={this.handleAddVersion}
+          >
+            <FontAwesomeIcon icon={faFile} /> Add Local Electron Build
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Renders the various options for which versions should be displayed
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
   private renderVersionOptions(): JSX.Element {
     const { appState } = this.props;
     const getIsChecked = (channel: ElectronReleaseChannel) => {
@@ -222,6 +263,12 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     );
   }
 
+  /**
+   * Renders the "Update Electron Release List" button
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
   private renderUpdateVersionsButton(): JSX.Element {
     const { appState } = this.props;
     const { isUpdatingElectronVersions } = appState;
@@ -302,16 +349,19 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @returns {JSX.Element}
    */
   private renderAction(key: string, item: ElectronVersion): JSX.Element {
-    const { state } = item;
+    const { state, source } = item;
     const { appState } = this.props;
 
     // Already downloaded
     if (state === 'ready') {
       const remove = () => appState.removeVersion(key);
+      const label = source === ElectronVersionSource.local
+        ? 'Remove'
+        : 'Delete';
 
       return (
         <button className='button' onClick={remove}>
-          <FontAwesomeIcon icon={faTrash} /> Delete
+          <FontAwesomeIcon icon={faTrash} /> {label}
         </button>
       );
     }

@@ -152,5 +152,15 @@ describe('binary', () => {
       expect(require('electron-download')).toHaveBeenCalledTimes(0);
       expect(binaryManager.state['3.0.0']).toBe('downloading');
     });
+
+    it('handles an error in the zip file', async () => {
+      const eDownload = require('electron-download');
+      eDownload.mockImplementationOnce((_p: any, c: any) => c(undefined, '/fake/path'));
+
+      const mockZip = require('extract-zip');
+      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) => c(new Error('bwap-bwap')));
+
+      await binaryManager.setup('v3.0.0');
+    });
   });
 });

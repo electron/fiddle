@@ -17,7 +17,8 @@ select {
 	box-shadow: none;
 	box-sizing: inherit; // Forced to replace inherit values of the normalize.css
 	height: 3.8rem;
-	width: 100%;
+	width: ~"calc(100% - 1rem)";
+	padding-left: 1rem;
 
 	&:focus {
 		border-color: @foreground-2;

@@ -1,10 +1,19 @@
-export type ElectronVersionState = 'downloading' | 'ready' | 'unknown';
-
 export type WindowNames = 'main';
 
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
+
+export enum ElectronVersionState {
+  ready = 'ready',
+  downloading = 'downloading',
+  unknown = 'unknown'
+}
+
+export enum ElectronVersionSource {
+  remote = 'remote',
+  local = 'local'
+}
 
 export interface GitHubVersion {
   url: string;
@@ -28,6 +37,7 @@ export interface EditorValues {
 
 export interface ElectronVersion extends GitHubVersion {
   state: ElectronVersionState;
+  source: ElectronVersionSource;
 }
 
 export interface OutputEntry {

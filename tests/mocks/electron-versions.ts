@@ -1,9 +1,9 @@
-import { ElectronVersion } from '../../src/interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
 import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 
 export const mockVersionsArray = [
   {
-    state: 'ready',
+    state: ElectronVersionState.ready,
     url: 'https://api.github.com/repos/electron/electron/releases/11120972',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11120972/assets',
     html_url: 'https://github.com/electron/electron/releases/tag/v2.0.2',
@@ -13,9 +13,10 @@ export const mockVersionsArray = [
     prerelease: false,
     created_at: '2018-05-22T18:52:16Z',
     published_at: '2018-05-22T20:14:35Z',
-    body: '## Bug Fixes\r\n\r\n* Fixed long jitter buffer delays...'
+    body: '## Bug Fixes\r\n\r\n* Fixed long jitter buffer delays...',
+    source: ElectronVersionSource.remote
   }, {
-    state: 'unknown',
+    state: ElectronVersionState.unknown,
     url: 'https://api.github.com/repos/electron/electron/releases/11032425',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032425/assets',
     html_url: 'https://github.com/electron/electron/releases/tag/v2.0.1',
@@ -25,9 +26,10 @@ export const mockVersionsArray = [
     prerelease: false,
     created_at: '2018-05-16T17:30:26Z',
     published_at: '2018-05-16T18:40:54Z',
-    body: '## Bug Fixes\r\n\r\n* Fixed flaky security-warnings test. #12776,...'
+    body: '## Bug Fixes\r\n\r\n* Fixed flaky security-warnings test. #12776,...',
+    source: ElectronVersionSource.remote
   }, {
-    state: 'ready',
+    state: ElectronVersionState.ready,
     url: 'https://api.github.com/repos/electron/electron/releases/11032343',
     assets_url: 'https://api.github.com/repos/electron/electron/releases/11032343/assets',
     html_url: 'https://github.com/electron/electron/releases/tag/v1.8.7',
@@ -37,7 +39,8 @@ export const mockVersionsArray = [
     prerelease: false,
     created_at: '2018-05-16T18:15:18Z',
     published_at: '2018-05-16T18:21:33Z',
-    body: '## Bug Fixes\r\n\r\n* Fixed context menu for sandbox devtools. #12734\r\n\r\n*...'
+    body: '## Bug Fixes\r\n\r\n* Fixed context menu for sandbox devtools. #12734\r\n\r\n*...',
+    source: ElectronVersionSource.remote
   }
 ];
 
