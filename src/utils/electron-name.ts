@@ -3,7 +3,7 @@
  *
  * @returns {string}
  */
-export function getElectroNameForPlatform(): string {
+export function getElectronNameForPlatform(): string {
   if (process.platform === 'win32') {
     return 'electron.exe';
   } else if (process.platform === 'darwin') {

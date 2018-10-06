@@ -193,5 +193,19 @@ describe('fetch-types', () => {
 
       await updateEditorTypeDefinitions('3.0.0', 11);
     });
+
+    it('handles definitions not existing', async () => {
+      (fetch as any).mockResponse(null);
+
+      let errored = false;
+
+      try {
+        await updateEditorTypeDefinitions('3.0.0', 11);
+      } catch (error) {
+        errored = true;
+      }
+
+      expect(errored).toBe(false);
+    });
   });
 });

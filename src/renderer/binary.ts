@@ -79,8 +79,15 @@ export class BinaryManager {
     const zipPath = await eDownload({ version });
     const extractPath = this.getDownloadPath(version);
     console.log(`BinaryManager: Electron ${version} downloaded, now unpacking`);
-    const electronFiles = await this.unzip(zipPath, extractPath);
-    console.log(electronFiles);
+
+    try {
+      const electronFiles = await this.unzip(zipPath, extractPath);
+      console.log(`Unzipped ${version}`, electronFiles);
+    } catch (error) {
+      console.warn(`Failure while unzipping ${version}`, error);
+
+      // Todo: Handle this case
+    }
 
     this.state[version] = 'ready';
   }

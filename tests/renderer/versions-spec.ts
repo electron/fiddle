@@ -1,10 +1,21 @@
+import { ElectronVersion, ElectronVersionSource } from '../../src/interfaces';
 import {
+  addLocalVersion,
   ElectronReleaseChannel,
   fetchVersions,
   getKnownVersions,
+  getLocalVersions,
   getReleaseChannel,
-  getUpdatedElectronVersions
+  getUpdatedElectronVersions,
+  saveLocalVersions,
+  VersionKeys
 } from '../../src/renderer/versions';
+
+const mockVersions: Array<Partial<ElectronVersion>> = [
+  { tag_name: 'test-0', url: '/test/path/0' },
+  { tag_name: 'test-1', url: '/test/path/1' },
+  { tag_name: 'test-2', url: '/test/path/2' },
+];
 
 describe('versions', () => {
   describe('getReleaseChannel()', () => {
@@ -30,6 +41,49 @@ describe('versions', () => {
       expect(getReleaseChannel({
         tag_name: 'v3.0.0'
       } as any)).toBe(ElectronReleaseChannel.stable);
+    });
+
+    it('identifies an unknown release as stable', () => {
+      expect(getReleaseChannel({} as any)).toBe(ElectronReleaseChannel.stable);
+    });
+  });
+
+  describe('addLocalVersion()', () => {
+    beforeEach(() => {
+      (window.localStorage.getItem as jest.Mock<any>).mockReturnValue(
+        JSON.stringify([mockVersions[0]])
+      );
+    });
+
+    it('adds a local version', () => {
+      expect(addLocalVersion(mockVersions[1] as any)).toEqual([ mockVersions[0], mockVersions[1] ]);
+    });
+
+    it('does not add duplicates', () => {
+      expect(addLocalVersion(mockVersions[0] as any)).toEqual([ mockVersions[0] ]);
+    });
+  });
+
+  describe('saveLocalVersions()', () => {
+    it('saves local versions', () => {
+      const mockLocalVersions = mockVersions.map((v) => {
+        v.source = ElectronVersionSource.local;
+        return v;
+      });
+
+      saveLocalVersions(mockLocalVersions as Array<ElectronVersion>);
+
+      const key = (window.localStorage.setItem as jest.Mock).mock.calls[0][0];
+      const value = (window.localStorage.setItem as jest.Mock).mock.calls[0][1];
+
+      expect(key).toBe(VersionKeys.local);
+      expect(value).toBe(JSON.stringify(mockLocalVersions));
+    });
+  });
+
+  describe('getLocalVersions', () => {
+    it('returns an empty array if none can be found', () => {
+      expect(getLocalVersions()).toEqual([]);
     });
   });
 

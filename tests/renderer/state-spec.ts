@@ -124,6 +124,12 @@ describe('AppState', () => {
   });
 
   describe('setVersion()', () => {
+    it('falls back if a version does not exist', async () => {
+      await appState.setVersion('v999.99.99');
+
+      expect(appState.version).toBe('2.0.2');
+    });
+
     it('downloads a version if necessary', async () => {
       appState.downloadVersion = jest.fn();
       await appState.setVersion('v2.0.2');

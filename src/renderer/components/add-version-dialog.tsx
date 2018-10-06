@@ -4,7 +4,7 @@ import * as React from 'react';
 import * as semver from 'semver';
 
 import { GitHubVersion } from '../../interfaces';
-import { getElectroNameForPlatform } from '../../utils/electron-name';
+import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
 import { Dialog } from './dialog';
 
@@ -165,7 +165,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
           htmlFor='custom-electron-version'
           className='force-button'
         >
-          Select the folder containing {getElectroNameForPlatform()}
+          Select the folder containing {getElectronNameForPlatform()}
         </label>
         <input
           type='file'
@@ -185,8 +185,8 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     if (!file || !file.path) return null;
 
     const info = isValidElectron
-      ? `We found an ${getElectroNameForPlatform()} in this folder.`
-      : `We did not find a ${getElectroNameForPlatform()} in this folder...`;
+      ? `We found an ${getElectronNameForPlatform()} in this folder.`
+      : `We did not find a ${getElectronNameForPlatform()} in this folder...`;
 
     return (
       <>

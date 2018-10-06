@@ -108,7 +108,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
 export function addLocalVersion(input: GitHubVersion): Array<GitHubVersion> {
   const versions = getLocalVersions();
 
-  if (!versions.find((v) => v.url !== input.url)) {
+  if (!versions.find((v) => v.url === input.url)) {
     versions.push(input);
   }
 

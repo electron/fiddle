@@ -119,6 +119,9 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.setState({ isDeletingAll: false });
   }
 
+  /**
+   * Opens the "add local version" dialog
+   */
   public handleAddVersion(): void {
     this.props.appState.toggleAddVersionDialog();
   }

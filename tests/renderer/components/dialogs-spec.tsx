@@ -16,7 +16,8 @@ describe('Dialogs component', () => {
   beforeEach(() => {
     store = {
       isTokenDialogShowing: false,
-      isSettingsShowing: false
+      isSettingsShowing: false,
+      isAddVersionDialogShowing: false,
     };
   });
 
@@ -40,5 +41,11 @@ describe('Dialogs component', () => {
     store.isSettingsShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
     expect(wrapper.text()).toBe('<Settings />');
+  });
+
+  it('renders the settings dialog', () => {
+    store.isAddVersionDialogShowing = true;
+    const wrapper = shallow(<Dialogs appState={store} />);
+    expect(wrapper.text()).toBe('<AddVersionDialog />');
   });
 });

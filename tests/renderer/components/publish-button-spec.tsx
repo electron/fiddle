@@ -64,6 +64,35 @@ describe('Publish button component', () => {
     });
   });
 
+  it('handles missing content', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        create: jest.fn(async () => ({ data: { id: '123' } }))
+      }
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<PublishButton appState={store} />);
+    const instance: PublishButton = wrapper.instance() as any;
+
+    (window as any).ElectronFiddle.app.getValues.mockReturnValueOnce({});
+
+    await instance.publishFiddle();
+
+    expect(mockOctokit.authenticate).toHaveBeenCalled();
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+      description: 'Electron Fiddle Gist',
+      files: {
+        'index.html': { content: '<!-- Empty -->' },
+        'renderer.js': { content: '// Empty' },
+        'main.js': { content: '// Empty' },
+      },
+      public: true
+    });
+  });
+
   it('handles an error in Gist publishing', async () => {
     const mockOctokit = {
       authenticate: jest.fn(),

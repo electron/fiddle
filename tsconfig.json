@@ -21,14 +21,13 @@
     "noEmitHelpers": true,
     "module": "commonjs",
     "moduleResolution": "node",
-    "sourceMap": true,
     "pretty": true,
     "target": "es2017",
     "jsx": "react",
     "typeRoots": [
       "./node_modules/@types"
     ],
-    "baseUrl": ".",
+    "baseUrl": "."
   },
   "include": [
     "src/**/*"
