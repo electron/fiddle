@@ -189,6 +189,9 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
           <FontAwesomeIcon icon={faKey} />
           Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
         </span>
+
+        {this.state.error ? <h5 className='error-text'>Please provide a valid GitHub Personal Access Token</h5> : null}
+
         <input
           ref={this.tokenInputRef}
           value={this.state.tokenInput || ''}
