@@ -77,7 +77,7 @@
     "@types/semver": "^5.5.0",
     "@types/tmp": "0.0.33",
     "chokidar": "^2.0.4",
-    "electron": "3.0.1",
+    "electron": "3.0.3",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
     "enzyme-to-json": "^3.3.4",
@@ -99,6 +99,6 @@
     "tslint": "^5.11.0",
     "tslint-microsoft-contrib": "^5.2.1",
     "tslint-react": "^3.6.0",
-    "typescript": "^3.1.1"
+    "typescript": "^3.1.2"
   }
 }
