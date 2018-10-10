@@ -159,6 +159,8 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     return [
       (
         <button
+          key='done'
+          type='submit'
           className='button'
           disabled={!canSubmit}
           onClick={this.onSubmitToken}
@@ -166,7 +168,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
           Done
         </button>
       ), (
-        <button className='cancel' onClick={this.onClose}>Cancel</button>
+        <button key='cancel' className='cancel' onClick={this.onClose}>Cancel</button>
       )
     ];
   }
