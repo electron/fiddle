@@ -8,6 +8,7 @@ exports[`TokenDialog component renders 1`] = `
         className="button"
         disabled={true}
         onClick={[Function]}
+        type="submit"
       >
         Done
       </button>,
