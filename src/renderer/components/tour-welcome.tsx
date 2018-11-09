@@ -219,8 +219,10 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
           isCentered={true}
           isShowing={true}
           isShowingBackdrop={true}
-          onConfirm={this.startTour}
-          onClose={this.stopTour}
+          buttons={[
+            <button key='cancel' className='btn-close' onClick={this.stopTour}>I'll figure it out</button>,
+            <button key='ok' className='btn-ok' onClick={this.startTour}>Show me around</button>
+          ]}
         >
           <h4>🙋‍ Hey There!</h4>
           <p>
