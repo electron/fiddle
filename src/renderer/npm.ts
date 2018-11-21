@@ -1,6 +1,7 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 import { fancyImport } from '../utils/import';
+import builtinModules from 'builtin-modules/static'
 
 export interface NpmOperationOptions {
   dir: string;
@@ -8,10 +9,27 @@ export interface NpmOperationOptions {
 
 export let isInstalled: boolean | null = null;
 
-const modulesToIgnore = [
-  'electron'
+/* add other modules to automatically ignore here */
+/* perhaps we can expose this to the settings module?*/
+const ignoredModules:Array<string> = [
+  'electron',
+  ...builtinModules
 ]
+
+
+/* regular expression to both match and extract module names */
 const requiregx:RegExp = /require\(['"](.*?)['"]\)/gm;
+
+
+/*
+ Quick and dirty filter functions for filtering module names
+*/
+const isIgnored = (str: string): boolean => ignoredModules.includes(str)
+const isLocalModule = (str: string): boolean => (/^[,/~]/.test(str))
+const isUnique = (item:any, idx:number, arr:Array<any>): boolean => {
+  return arr.lastIndexOf(item) === idx
+}
+
 
 /**
  * Checks if npm is installed by checking if a binary
@@ -39,51 +57,55 @@ export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean>
  * @param {EditorValues} values
  * @returns {Array<string>}
  */
-export async function findModulesInEditors(values: EditorValues): Promise<Array<string>> {
-  const files = [values.main, values.renderer];
-  const modules: Array<string> = [];
-
-  for (const file of files) {
-    const fileModules = await findModules(file);
-    modules.push(...fileModules);
-  }
-
-  return modules;
+export function findModulesInEditors(values: EditorValues) {
+  const files = [values.main, values.renderer]
+  const modules = files.reduce(
+    (agg, file) => [
+      ...agg,
+      ...findModules(file)
+    ],
+    []
+  )
+  console.log('Modules Found:', modules)
+  return modules
 }
 
 /**
  * Uses a simple regex to find `require()` statements in a string.
  * Tries to exclude electron and Node built-ins as well as file-path
- * references.
+ * references. Also will try to install base packages of modules
+ * that have a slash in them, for example: `lodash/fp` as the actual package
+ * is just `lodash`.
+
+ * However, it WILL try to add packages that are part of a huge
+ * monorepo that are named `@<group>/<package>`
  *
  * @param {string} input
  * @returns {Array<string>}
  */
-export async function findModules(input: string): Promise<Array<string>> {
-  const builtinList = (await fancyImport('builtin-modules') as any).default
-  const ignoredList:Array<string> = [...builtinList, ...modulesToIgnore]
-  const isNotIgnored = (str: string) => !ignoredList.includes(str) && !str.startsWith('.')
-  const modules = []
-  let match
-  while((match = requiregx.exec(input)) !== null) {
-    modules.push(match)
-  }
-  console.log('modules found:')
-  console.dir(modules)
-  const result = modules
-  .map(mod => mod[1])
-  .map(mod =>
-    mod.includes('/') && !mod.startsWith('@') ?
-    mod.split('/')[0] :
-    mod
-  )
-  .filter(isNotIgnored)
-  .filter((m,idx,arr) => arr.lastIndexOf(m) === idx)
-  console.log('results found:')
-  console.dir(result)
+export function findModules(input: string): Array<string> {
 
-  return result
-}
+
+    /* container definitions */
+    const modules:Array<string> = []
+    let match:RegExpMatchArray | null
+
+    /* grab all global require matches in the text */
+    while(match = (requiregx.exec(input) || null)) {
+      const mod = match[1]
+      modules.push(mod)
+    }
+    /* map and reduce */
+    return modules
+      .map(mod =>
+        mod.includes('/') && !mod.startsWith('@') ?
+        mod.split('/')[0] :
+        mod
+      )
+      .filter(m => !isIgnored(m))
+      .filter(m => !isLocalModule(m))
+      .filter(isUnique)
+  }
 
 /**
  * Installs given modules to a given folder.
