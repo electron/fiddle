@@ -8,6 +8,11 @@ export interface NpmOperationOptions {
 
 export let isInstalled: boolean | null = null;
 
+const modulesToIgnore = [
+  'electron'
+]
+const requiregx:RegExp = /require\(['"](.*?)['"]\)/gm;
+
 /**
  * Checks if npm is installed by checking if a binary
  * with that name can be found.
@@ -55,24 +60,29 @@ export async function findModulesInEditors(values: EditorValues): Promise<Array<
  * @returns {Array<string>}
  */
 export async function findModules(input: string): Promise<Array<string>> {
-  const matchRequire = /require\(['"]{1}([\w\d\/\-\_]*)['"]{1}\)/;
-  const matched = input.match(matchRequire);
-  const result: Array<string> = [];
-  const builtinModules = (await fancyImport('builtin-modules') as any).default;
-
-  if (matched && matched.length > 0) {
-    const candidates = matched.slice(1);
-    candidates.forEach((candidate) => {
-      if (candidate === 'electron') return;
-      if (builtinModules.indexOf(candidate) > -1) return;
-      if (candidate.startsWith('.')) return;
-      result.push(candidate);
-    });
+  const builtinList = (await fancyImport('builtin-modules') as any).default
+  const ignoredList:Array<string> = [...builtinList, ...modulesToIgnore]
+  const isNotIgnored = (str: string) => !ignoredList.includes(str) && !str.startsWith('.')
+  const modules = []
+  let match
+  while((match = requiregx.exec(input)) !== null) {
+    modules.push(match)
   }
+  console.log('modules found:')
+  console.dir(modules)
+  const result = modules
+  .map(mod => mod[1])
+  .map(mod =>
+    mod.includes('/') && !mod.startsWith('@') ?
+    mod.split('/')[0] :
+    mod
+  )
+  .filter(isNotIgnored)
+  .filter((m,idx,arr) => arr.lastIndexOf(m) === idx)
+  console.log('results found:')
+  console.dir(result)
 
-  console.log(`findModules: Result`, result);
-
-  return result;
+  return result
 }
 
 /**
