@@ -22,7 +22,8 @@ const CONTRIBUTORS_WHITELIST = [
   'felixrieseberg',
   'nctl144',
   'benicheni',
-  'hashimotoyt'
+  'hashimotoyt',
+  'ada-lovecraft'
 ];
 
 async function maybeFetchContributors() {
