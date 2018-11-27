@@ -1,9 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
-// tslint:disable-next-line:no-submodule-imports
-import * as builtinModules from 'builtin-modules/static';
-
 export interface NpmOperationOptions {
   dir: string;
 }
@@ -14,9 +11,11 @@ export let isInstalled: boolean | null = null;
 /* perhaps we can expose this to the settings module?*/
 const ignoredModules: Array<string> = [
   'electron',
-  ...builtinModules
+  // tslint:disable-next-line:no-submodule-imports
+  ...require('builtin-modules/static')
 ];
 
+console.log(ignoredModules)
 
 /* regular expression to both match and extract module names */
 const requiregx = /require\(['"](.*?)['"]\)/gm;
