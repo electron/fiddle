@@ -15,7 +15,7 @@ const ignoredModules: Array<string> = [
   ...require('builtin-modules/static')
 ];
 
-console.log(ignoredModules)
+console.log(ignoredModules);
 
 /* regular expression to both match and extract module names */
 const requiregx = /require\(['"](.*?)['"]\)/gm;
