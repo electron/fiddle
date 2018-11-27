@@ -2,12 +2,26 @@
 
 exports[`Header component renders 1`] = `
 <Dialog
+  buttons={
+    Array [
+      <button
+        className="btn-close"
+        onClick={[Function]}
+      >
+        I'll figure it out
+      </button>,
+      <button
+        className="btn-ok"
+        onClick={[Function]}
+      >
+        Show me around
+      </button>,
+    ]
+  }
   isCentered={true}
   isShowing={true}
   isShowingBackdrop={true}
   key="welcome-tour-dialog"
-  onClose={[Function]}
-  onConfirm={[Function]}
 >
   <h4>
     🙋‍ Hey There!
