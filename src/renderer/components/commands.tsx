@@ -1,4 +1,3 @@
-import { faTerminal } from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -39,7 +38,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
           <AddressBar appState={appState} />
           <PublishButton appState={appState} />
           <button className='button' onClick={() => appState.toggleConsole()}>
-            <FontAwesomeIcon icon={faTerminal} />
+            <FontAwesomeIcon icon='terminal' />
           </button>
         </div>
       </div>

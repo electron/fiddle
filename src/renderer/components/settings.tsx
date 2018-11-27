@@ -1,4 +1,3 @@
-import { faTimesCircle } from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -102,7 +101,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className='settings-content'>
           <div className='settings-close' onClick={appState.toggleSettings}>
-            <FontAwesomeIcon icon={faTimesCircle} />
+            <FontAwesomeIcon icon='times-circle' />
           </div>
           {this.renderContent()}
         </div>
