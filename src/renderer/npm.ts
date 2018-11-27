@@ -1,7 +1,8 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
-import { fancyImport } from '../utils/import';
-import builtinModules from 'builtin-modules/static'
+
+// tslint:disable-next-line:no-submodule-imports
+import * as builtinModules from 'builtin-modules/static';
 
 export interface NpmOperationOptions {
   dir: string;
@@ -11,24 +12,24 @@ export let isInstalled: boolean | null = null;
 
 /* add other modules to automatically ignore here */
 /* perhaps we can expose this to the settings module?*/
-const ignoredModules:Array<string> = [
+const ignoredModules: Array<string> = [
   'electron',
   ...builtinModules
-]
+];
 
 
 /* regular expression to both match and extract module names */
-const requiregx:RegExp = /require\(['"](.*?)['"]\)/gm;
+const requiregx = /require\(['"](.*?)['"]\)/gm;
 
 
 /*
  Quick and dirty filter functions for filtering module names
 */
-const isIgnored = (str: string): boolean => ignoredModules.includes(str)
-const isLocalModule = (str: string): boolean => (/^[,/~]/.test(str))
-const isUnique = (item:any, idx:number, arr:Array<any>): boolean => {
-  return arr.lastIndexOf(item) === idx
-}
+const isIgnored = (str: string): boolean => ignoredModules.includes(str);
+const isLocalModule = (str: string): boolean => (/^[,/~\.]/.test(str));
+const isUnique = (item: any, idx: number, arr: Array<any>): boolean => {
+  return arr.lastIndexOf(item) === idx;
+};
 
 
 /**
@@ -58,16 +59,18 @@ export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean>
  * @returns {Array<string>}
  */
 export function findModulesInEditors(values: EditorValues) {
-  const files = [values.main, values.renderer]
+  const files = [ values.main, values.renderer ];
   const modules = files.reduce(
     (agg, file) => [
       ...agg,
       ...findModules(file)
     ],
     []
-  )
-  console.log('Modules Found:', modules)
-  return modules
+  );
+
+  console.log('Modules Found:', modules);
+
+  return modules;
 }
 
 /**
@@ -76,7 +79,7 @@ export function findModulesInEditors(values: EditorValues) {
  * references. Also will try to install base packages of modules
  * that have a slash in them, for example: `lodash/fp` as the actual package
  * is just `lodash`.
-
+ *
  * However, it WILL try to add packages that are part of a huge
  * monorepo that are named `@<group>/<package>`
  *
@@ -84,28 +87,28 @@ export function findModulesInEditors(values: EditorValues) {
  * @returns {Array<string>}
  */
 export function findModules(input: string): Array<string> {
+  /* container definitions */
+  const modules: Array<string> = [];
+  let match: RegExpMatchArray | null;
 
-
-    /* container definitions */
-    const modules:Array<string> = []
-    let match:RegExpMatchArray | null
-
-    /* grab all global require matches in the text */
-    while(match = (requiregx.exec(input) || null)) {
-      const mod = match[1]
-      modules.push(mod)
-    }
-    /* map and reduce */
-    return modules
-      .map(mod =>
-        mod.includes('/') && !mod.startsWith('@') ?
-        mod.split('/')[0] :
-        mod
-      )
-      .filter(m => !isIgnored(m))
-      .filter(m => !isLocalModule(m))
-      .filter(isUnique)
+  /* grab all global require matches in the text */
+  // tslint:disable-next-line:no-conditional-assignment
+  while (match = (requiregx.exec(input) || null)) {
+    const mod = match[1];
+    modules.push(mod);
   }
+
+  /* map and reduce */
+  return modules
+    .map((mod) =>
+      mod.includes('/') && !mod.startsWith('@') ?
+      mod.split('/')[0] :
+      mod
+    )
+    .filter((m) => !isIgnored(m))
+    .filter((m) => !isLocalModule(m))
+    .filter(isUnique);
+}
 
 /**
  * Installs given modules to a given folder.
