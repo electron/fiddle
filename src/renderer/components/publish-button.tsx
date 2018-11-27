@@ -1,4 +1,3 @@
-import { faSpinner, faUpload } from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -120,7 +119,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
   public render() {
     const { isPublishing } = this.state;
     const className = classNames('button', 'button-publish', isPublishing);
-    const icon = isPublishing ? faSpinner : faUpload;
+    const icon = isPublishing ? 'spinner' : 'upload';
     const text = isPublishing ? 'Publishing...' : 'Publish';
 
     return (

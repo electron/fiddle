@@ -1,4 +1,3 @@
-import { faSignInAlt, faSignOutAlt } from '@fortawesome/fontawesome-free-solid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -36,7 +35,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
       ),
       (
         <button className='button' key='sign-in-button' onClick={signIn}>
-          <FontAwesomeIcon icon={faSignInAlt} /> Sign In
+          <FontAwesomeIcon icon='sign-in-alt' /> Sign In
         </button>
       )
     ];
@@ -60,7 +59,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
       ),
       (
         <button className='button' key='sign-out-button' onClick={signOut}>
-          <FontAwesomeIcon icon={faSignOutAlt} /> Remove Token & Sign Out
+          <FontAwesomeIcon icon='sign-out-alt' /> Remove Token & Sign Out
         </button>
       )
     ];
