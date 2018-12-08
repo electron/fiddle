@@ -1,12 +1,13 @@
+import { ControlGroup } from '@blueprintjs/core';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
 import { AddressBar } from './address-bar';
+import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 import { PublishButton } from './publish-button';
-import { Runner } from './runner';
 
 export interface CommandsProps {
   appState: AppState;
@@ -31,8 +32,10 @@ export class Commands extends React.Component<CommandsProps, {}> {
     return (
       <div className='commands'>
         <div>
-          <Runner appState={appState} />
+        <ControlGroup fill={true} vertical={false}>
           <VersionChooser appState={appState} />
+          <Runner appState={appState} />
+        </ControlGroup>
         </div>
         <div>
           <AddressBar appState={appState} />

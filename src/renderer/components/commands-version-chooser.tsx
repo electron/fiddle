@@ -139,7 +139,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
         onItemSelect={this.onItemSelect}
         noResults={<MenuItem disabled={true} text='No results.' />}
       >
-        <Button text={`Electron v${version}`} rightIcon='projects' />
+        <Button className='version-chooser' text={`Electron v${version}`} icon='projects' />
       </ElectronVersionSelect>
     );
   }
