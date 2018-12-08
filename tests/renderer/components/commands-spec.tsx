@@ -11,7 +11,7 @@ jest.mock('../../../src/renderer/components/commands-version-chooser', () => ({
   VersionChooser: 'version-chooser'
 }));
 
-jest.mock('../../../src/renderer/components/address-bar', () => ({
+jest.mock('../../../src/renderer/components/commands-address-bar', () => ({
   AddressBar: 'address-bar'
 }));
 

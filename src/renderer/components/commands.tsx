@@ -4,7 +4,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { AddressBar } from './address-bar';
+import { AddressBar } from './commands-address-bar';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 import { PublishButton } from './publish-button';

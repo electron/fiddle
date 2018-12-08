@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AddressBar } from '../../../src/renderer/components/address-bar';
+import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
 import { getOctokit } from '../../../src/utils/octokit';
 
 jest.mock('../../../src/utils/octokit');
