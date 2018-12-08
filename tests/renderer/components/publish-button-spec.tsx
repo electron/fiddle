@@ -18,11 +18,13 @@ describe('Publish button component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('toggles the auth dialog on click if not authed', () => {
+  it('toggles the auth dialog on click if not authed', async () => {
     store.toggleAuthDialog = jest.fn();
 
     const wrapper = shallow(<PublishButton appState={store} />);
-    wrapper.find('button').simulate('click');
+    const instance: PublishButton = wrapper.instance() as any;
+    await instance.handleClick();
+
     expect(store.toggleAuthDialog).toHaveBeenCalled();
   });
 

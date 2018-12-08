@@ -1,36 +1,11 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Publish button component renders 1`] = `
-<button
-  className="button button-publish"
+<Blueprint3.Button
   disabled={false}
+  icon="upload"
+  loading={false}
   onClick={[Function]}
->
-  <FontAwesomeIcon
-    border={false}
-    className=""
-    fixedWidth={false}
-    flip={null}
-    icon="upload"
-    inverse={false}
-    listItem={false}
-    mask={null}
-    pull={null}
-    pulse={false}
-    rotation={null}
-    size={null}
-    spin={false}
-    symbol={false}
-    title=""
-    transform={null}
-  />
-  <span
-    style={
-      Object {
-        "marginLeft": 8,
-      }
-    }
-  />
-  Publish
-</button>
+  text="Publish"
+/>
 `;

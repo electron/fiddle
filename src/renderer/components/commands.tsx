@@ -4,9 +4,9 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
+import { PublishButton } from './commands-publish-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
-import { PublishButton } from './commands-publish-button';
 
 export interface CommandsProps {
   appState: AppState;
