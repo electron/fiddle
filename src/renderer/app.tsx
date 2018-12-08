@@ -173,6 +173,12 @@ export class App {
     if (tag && theme.css) {
       tag.innerHTML = theme.css;
     }
+
+    if (theme.isDark || (theme.name || '').includes('dark')) {
+      document.body.classList.add('bp3-dark');
+    } else {
+      document.body.classList.remove('bp3-dark');
+    }
   }
 
   /**

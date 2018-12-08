@@ -1,10 +1,10 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Runner component renders 1`] = `
-<button
-  className="button button-run"
+<Blueprint3.Button
+  icon="play"
   onClick={[Function]}
 >
   Run
-</button>
+</Blueprint3.Button>
 `;

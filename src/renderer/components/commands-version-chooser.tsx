@@ -128,7 +128,10 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
   }
 
   public render() {
-    const { version } = this.props.appState;
+    const { version, versions } = this.props.appState;
+    const selectedVersion = versions[version];
+
+    if (!selectedVersion) return null;
 
     return (
       <ElectronVersionSelect
@@ -139,7 +142,11 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
         onItemSelect={this.onItemSelect}
         noResults={<MenuItem disabled={true} text='No results.' />}
       >
-        <Button className='version-chooser' text={`Electron v${version}`} icon='projects' />
+        <Button
+          className='version-chooser'
+          text={`Electron v${version}`}
+          icon={getItemIcon(selectedVersion)}
+        />
       </ElectronVersionSelect>
     );
   }

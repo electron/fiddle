@@ -1,5 +1,5 @@
+import { Button } from '@blueprintjs/core';
 import { ChildProcess, spawn } from 'child_process';
-import { Button, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -82,7 +82,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     return (
       <Button
-        intent={Intent.PRIMARY}
         onClick={() => action()}
         icon='play'
       >

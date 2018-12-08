@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Commands } from '../../../src/renderer/components/commands';
 
-jest.mock('../../../src/renderer/components/runner', () => ({
+jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner'
 }));
 
