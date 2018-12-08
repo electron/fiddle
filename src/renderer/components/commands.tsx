@@ -6,7 +6,7 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
-import { PublishButton } from './publish-button';
+import { PublishButton } from './commands-publish-button';
 
 export interface CommandsProps {
   appState: AppState;

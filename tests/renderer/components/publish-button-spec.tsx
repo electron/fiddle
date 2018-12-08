@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { PublishButton } from '../../../src/renderer/components/publish-button';
+import { PublishButton } from '../../../src/renderer/components/commands-publish-button';
 import { getOctokit } from '../../../src/utils/octokit';
 
 jest.mock('../../../src/utils/octokit');
