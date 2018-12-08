@@ -1,12 +1,11 @@
-const { run } = require('./run-bin');
-const { rendererOptions } = require('./parcel-build');
+const { compileParcel } = require('./parcel-build')
 
-async function watchParcel() {
-  await run('Parcel (Renderer, Watch)', 'parcel', [ 'watch', ...rendererOptions ])
+async function watchParcel () {
+  return compileParcel({ watch: true })
 }
 
 module.exports = {
   watchParcel
 }
 
-if (require.main === module) watchParcel();
+if (require.main === module) watchParcel()

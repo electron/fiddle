@@ -1,7 +1,7 @@
 /* tslint:disable */
 
-const path = require('path');
-const package = require('./package.json');
+const path = require('path')
+const packackeJson = require('./package.json')
 
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
 
@@ -31,7 +31,7 @@ module.exports = {
     },
     osxSign: {
       identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)'
-    },
+    }
   },
   makers: [
     {
@@ -81,4 +81,4 @@ module.exports = {
       }
     }
   ]
-};
+}
