@@ -1,0 +1,20 @@
+@import (inline) "../../node_modules/@blueprintjs/core/lib/css/blueprint.css";
+@import (inline) "../../node_modules/@blueprintjs/select/lib/css/blueprint-select.css";
+@import (inline) "../../node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import (inline) "../../node_modules/@blueprintjs/core/lib/less/variables.less";
+
+// Override some of the colors
+.bp3-dark {
+  .bp3-menu,
+  .bp3-popover .bp3-popover-content {
+    background-color: @background-1;
+  }
+
+  .bp3-popover .bp3-popover-arrow-fill {
+    fill: @background-1;
+  }
+
+  .bp3-button:not([class*="bp3-intent-"]) {
+    background-color: @background-1;
+  }
+}
