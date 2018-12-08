@@ -1,5 +1,4 @@
-import { ControlGroup } from '@blueprintjs/core';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, ControlGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -32,17 +31,22 @@ export class Commands extends React.Component<CommandsProps, {}> {
     return (
       <div className='commands'>
         <div>
-        <ControlGroup fill={true} vertical={false}>
-          <VersionChooser appState={appState} />
-          <Runner appState={appState} />
-        </ControlGroup>
+          <ControlGroup fill={true} vertical={false}>
+            <VersionChooser appState={appState} />
+            <Runner appState={appState} />
+          </ControlGroup>
+          <ControlGroup fill={true} vertical={false}>
+            <Button
+              active={appState.isConsoleShowing}
+              icon='console'
+              text='Console'
+              onClick={appState.toggleConsole}
+            />
+          </ControlGroup>
         </div>
         <div>
           <AddressBar appState={appState} />
           <PublishButton appState={appState} />
-          <button className='button' onClick={() => appState.toggleConsole()}>
-            <FontAwesomeIcon icon='terminal' />
-          </button>
         </div>
       </div>
     );

@@ -4,7 +4,6 @@ exports[`Runner component renders 1`] = `
 <Blueprint3.Button
   icon="play"
   onClick={[Function]}
->
-  Run
-</Blueprint3.Button>
+  text="Run"
+/>
 `;

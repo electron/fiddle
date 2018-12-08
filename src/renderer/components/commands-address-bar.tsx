@@ -1,3 +1,4 @@
+import { Button, InputGroup, Intent } from '@blueprintjs/core';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -69,15 +70,6 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   }
 
   /**
-   * Handles invalid input to the address bar
-   *
-   * @param {React.InvalidEvent<HTMLInputElement>} event
-   */
-  public handleInvalid(event: React.InvalidEvent<HTMLInputElement>) {
-    event.target.setCustomValidity('URL should begin with https://gist.github.com');
-  }
-
-  /**
    * Load a fiddle
    *
    * @returns {Promise<boolean>}
@@ -112,21 +104,33 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     return true;
   }
 
+  public renderLoadButton(isValueCorrect: boolean): JSX.Element {
+    return (
+      <Button
+        disabled={!isValueCorrect}
+        icon='cloud-download'
+        text='Load Fiddle'
+        onClick={this.loadFiddle}
+      />
+    );
+  }
+
   public render() {
     const { isUnsaved } = this.props.appState;
     const { value } = this.state;
-    const isEmpty = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
-    const className = classNames('address-bar', isUnsaved, { empty: !isEmpty });
+    const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
+    const className = classNames('address-bar', isUnsaved, { empty: !value });
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
-        <input
+        <InputGroup
           key='addressbar'
-          pattern='https:\/\/gist\.github\.com\/(.+)$'
+          leftIcon='geosearch'
+          intent={isCorrect || !value ? undefined : Intent.DANGER}
+          onChange={this.handleChange}
           placeholder='https://gist.github.com/...'
           value={value}
-          onChange={this.handleChange}
-          onInvalid={this.handleInvalid}
+          rightElement={this.renderLoadButton(isCorrect)}
         />
       </form>
     );

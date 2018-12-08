@@ -32,12 +32,4 @@ describe('Commands component', () => {
     const wrapper = shallow(<Commands appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
-
-  it('opens the console on console click', () => {
-    store.toggleConsole = jest.fn();
-
-    const wrapper = shallow(<Commands appState={store} />);
-    wrapper.find('button').simulate('click');
-    expect(store.toggleConsole).toHaveBeenCalled();
-  });
 });

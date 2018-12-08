@@ -1,10 +1,10 @@
-import { Button } from '@blueprintjs/core';
+import { Button, IButtonProps } from '@blueprintjs/core';
 import { ChildProcess, spawn } from 'child_process';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
-import { EditorValues, ElectronVersionSource, FileTransform } from '../../interfaces';
+import { EditorValues, ElectronVersionSource, ElectronVersionState, FileTransform } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { PackageJsonOptions } from '../../utils/get-package';
 import { normalizeVersion } from '../../utils/normalize-version';
@@ -67,27 +67,28 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
 
     const state = versions[normalizeVersion(version)].state;
+    const props: IButtonProps = {};
 
-    let text = 'Run';
-    let action: () => any = this.run;
-
-    if (state === 'downloading') {
-      text = 'Downloading';
+    if (state === ElectronVersionState.downloading) {
+      props.text = 'Downloading';
+      props.disabled = true;
+      props.loading = true;
+    } else if (state === ElectronVersionState.ready) {
+      if (isRunning) {
+        props.active = true;
+        props.text = 'Stop';
+        props.onClick = this.stop;
+        props.icon = 'stop';
+      } else {
+        props.text = 'Run';
+        props.onClick = this.run;
+        props.icon = 'play';
+      }
+    } else {
+      return null;
     }
 
-    if (isRunning) {
-      text = 'Stop';
-      action = this.stop;
-    }
-
-    return (
-      <Button
-        onClick={() => action()}
-        icon='play'
-      >
-        {text}
-      </Button>
-    );
+    return <Button {...props} />;
   }
 
   /**
