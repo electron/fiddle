@@ -7,7 +7,7 @@ jest.mock('../../../src/renderer/components/runner', () => ({
   Runner: 'runner'
 }));
 
-jest.mock('../../../src/renderer/components/version-chooser', () => ({
+jest.mock('../../../src/renderer/components/commands-version-chooser', () => ({
   VersionChooser: 'version-chooser'
 }));
 
