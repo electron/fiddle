@@ -2,7 +2,7 @@ import * as electron from 'electron';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { TokenDialog } from '../../../src/renderer/components/token-dialog';
+import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { getOctokit } from '../../../src/utils/octokit';
 import { overridePlatform, resetPlatform } from '../../utils';
 
