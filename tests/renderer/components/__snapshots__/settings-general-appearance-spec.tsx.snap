@@ -7,31 +7,55 @@ exports[`AppearanceSettings component renders 1`] = `
   <h4>
     Appearance
   </h4>
-  <label
-    key="theme-label"
+  <Blueprint3.FormGroup
+    inline={true}
+    label="Choose your theme"
   >
-    To add themes, add JSON theme files to 
-    <a
-      id="open-theme-folder"
-      onClick={[Function]}
+    <Blueprint3.Select
+      filterable={true}
+      itemPredicate={[Function]}
+      itemRenderer={[Function]}
+      items={Array []}
+      noResults={
+        <Blueprint3.MenuItem
+          disabled={true}
+          multiline={false}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="No results."
+        />
+      }
+      onItemSelect={[Function]}
     >
-      <code>
-        ~/.electron-fiddle/themes
-      </code>
-    </a>
-    .
-    <br />
-  </label>
-  <select
-    className="select-themes"
-    onChange={[Function]}
-    value="undefined"
-  />
-  <button
-    id="create-new-theme"
-    onClick={[Function]}
+      <Blueprint3.Button
+        icon="tint"
+      />
+    </Blueprint3.Select>
+  </Blueprint3.FormGroup>
+  <Blueprint3.Callout
+    style={
+      Object {
+        "maxWidth": 800,
+      }
+    }
   >
-    Create theme from current selection
-  </button>
+    <p>
+      To add themes, add JSON theme files to 
+      <a
+        id="open-theme-folder"
+        onClick={[Function]}
+      >
+        <code>
+          ~/.electron-fiddle/themes
+        </code>
+      </a>
+      . The easiest way to get started is to clone one of the two existing themes and to add your own colors.
+    </p>
+    <Blueprint3.Button
+      icon="duplicate"
+      onClick={[Function]}
+      text="Create theme from current selection"
+    />
+  </Blueprint3.Callout>
 </div>
 `;

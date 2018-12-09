@@ -1,4 +1,4 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -101,7 +101,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className='settings-content'>
           <div className='settings-close' onClick={appState.toggleSettings}>
-            <FontAwesomeIcon icon='times-circle' />
+            <Icon icon='cross' />
           </div>
           {this.renderContent()}
         </div>

@@ -37,23 +37,8 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
   </div>
@@ -97,23 +82,8 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-credits
@@ -164,23 +134,8 @@ exports[`CreditsSettings component renders the Electron page after a click 1`] =
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-electron
@@ -231,23 +186,8 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-general
@@ -298,23 +238,8 @@ exports[`CreditsSettings component renders the General page after a click 1`] = 
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-general

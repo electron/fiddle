@@ -42,11 +42,7 @@ describe('AppearanceSettings component', () => {
       <AppearanceSettings appState={store} />
     );
     const instance: AppearanceSettings = wrapper.instance() as any;
-    instance.handleChange({
-      target: {
-        value: 'defaultLight'
-      }
-    } as any);
+    instance.handleChange({ name: 'defaultLight' } as any);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
@@ -87,17 +83,6 @@ describe('AppearanceSettings component', () => {
   });
 
   describe('createNewThemeFromCurrent()', () => {
-    it('calls it on click', () => {
-      const wrapper = shallow(
-        <AppearanceSettings appState={store} />
-      );
-      const instance: AppearanceSettings = wrapper.instance() as any;
-      instance.createNewThemeFromCurrent = jest.fn();
-
-      wrapper.find('#create-new-theme').simulate('click');
-      expect(instance.createNewThemeFromCurrent).toHaveBeenCalled();
-    });
-
     it('creates a new file from the current theme', async () => {
       const fs = require('fs-extra');
       const wrapper = shallow(
@@ -106,7 +91,7 @@ describe('AppearanceSettings component', () => {
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
 
-      expect(shell.openItem).toHaveBeenCalled();
+      expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(fs.outputJSON).toHaveBeenCalled();
 
       const args = fs.outputJSON.mock.calls[0];
@@ -122,7 +107,7 @@ describe('AppearanceSettings component', () => {
         <AppearanceSettings appState={store} />
       );
       const instance: AppearanceSettings = wrapper.instance() as any;
-      (shell as any).openItem.mockImplementationOnce(() => {
+      (shell as any).showItemInFolder.mockImplementationOnce(() => {
         throw new Error('Bwap');
       });
 

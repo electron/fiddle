@@ -1,3 +1,4 @@
+import { Divider } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -22,7 +23,7 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps, {}> {
       <div>
         <h2>General Settings</h2>
         <AppearanceSettings appState={this.props.appState} />
-        <hr />
+        <Divider />
         <GitHubSettings appState={this.props.appState} />
       </div>
     );
