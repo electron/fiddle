@@ -29,16 +29,11 @@ exports[`AppearanceSettings component renders 1`] = `
     >
       <Blueprint3.Button
         icon="tint"
+        text="Select a theme"
       />
     </Blueprint3.Select>
   </Blueprint3.FormGroup>
-  <Blueprint3.Callout
-    style={
-      Object {
-        "maxWidth": 800,
-      }
-    }
-  >
+  <Blueprint3.Callout>
     <p>
       To add themes, add JSON theme files to 
       <a

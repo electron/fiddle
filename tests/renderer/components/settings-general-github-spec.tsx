@@ -28,16 +28,4 @@ describe('GitHubSettings component', () => {
     );
     expect(wrapper).toMatchSnapshot();
   });
-
-  it('handles a click on the signout button', () => {
-    store.gitHubToken = '123';
-    store.gitHubLogin = 'Test User';
-
-    const wrapper = shallow(
-      <GitHubSettings appState={store} />
-    );
-
-    wrapper.find('button').simulate('click');
-    expect(store.signOutGitHub).toHaveBeenCalled();
-  });
 });

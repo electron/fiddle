@@ -37,7 +37,7 @@ const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
  */
 const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
-      return null;
+    return null;
   }
 
   return (
@@ -58,6 +58,7 @@ export interface AppearanceSettingsProps {
 
 export interface AppearanceSettingsState {
   themes: Array<LoadedFiddleTheme>;
+  selectedTheme?: LoadedFiddleTheme;
 }
 
 /**
@@ -81,10 +82,15 @@ export class AppearanceSettings extends React.Component<
     };
 
     getAvailableThemes().then((themes) => {
-      this.setState({ themes });
+      const { theme } = this.props.appState;
+      const selectedTheme = theme &&
+        themes.find(({ file }) => file === theme) || themes[0];
+
+      this.setState({ themes, selectedTheme });
     });
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
+    this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
   /**
@@ -93,8 +99,9 @@ export class AppearanceSettings extends React.Component<
    *
    * @param {LoadedFiddleTheme} theme
    */
-  public handleChange({ name }: LoadedFiddleTheme) {
-    this.props.appState.setTheme(name);
+  public handleChange(theme: LoadedFiddleTheme) {
+    this.setState({ selectedTheme: theme });
+    this.props.appState.setTheme(theme.file);
   }
 
   /**
@@ -149,6 +156,9 @@ export class AppearanceSettings extends React.Component<
   }
 
   public render() {
+    const { selectedTheme } = this.state;
+    const selectedName = selectedTheme && selectedTheme.name || 'Select a theme';
+
     return (
       <div className='settings-appearance'>
         <h4>Appearance</h4>
@@ -165,16 +175,16 @@ export class AppearanceSettings extends React.Component<
             noResults={<MenuItem disabled={true} text='No results.' />}
           >
             <Button
-              text={this.props.appState.theme}
+              text={selectedName}
               icon='tint'
             />
           </ThemeSelect>
         </FormGroup>
-        <Callout style={{ maxWidth: 800 }}>
+        <Callout>
           <p>
             To add themes, add JSON theme files to <a
               id='open-theme-folder'
-              onClick={() => this.openThemeFolder()}
+              onClick={this.openThemeFolder}
             >
               <code>{THEMES_PATH}</code>
             </a>. The easiest way to get started is to clone one of the two existing

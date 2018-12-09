@@ -174,9 +174,9 @@ export class AppState {
     this.resetView({ isTourShowing: true });
   }
 
-  @action public setTheme(name?: string) {
-    this.theme = name || '';
-    activateTheme(undefined, undefined, name);
+  @action public setTheme(fileName?: string) {
+    this.theme = fileName || '';
+    activateTheme(undefined, undefined, fileName);
     window.ElectronFiddle.app.setupTheme();
   }
 

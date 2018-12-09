@@ -1,4 +1,4 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button, Callout } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -19,50 +19,43 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
   /**
    * Render the "logged out" settings experience.
    *
-   * @returns {Array<JSX.Element>}
+   * @returns {JSX.Element}
    */
-  public renderNotSignedIn(): Array<JSX.Element> {
+  public renderNotSignedIn(): JSX.Element {
     const signIn = () => {
       this.props.appState.isTokenDialogShowing = true;
     };
 
-    return [
-      (
-        <label key='signed-out-label'>
-          We can publish your fiddles to GitHub as a Gist -
+    return (
+      <Callout>
+        <p>
+          Your fiddles can be published as public GitHub Gists -
           that way you can share your fiddles with the world!
-        </label>
-      ),
-      (
-        <button className='button' key='sign-in-button' onClick={signIn}>
-          <FontAwesomeIcon icon='sign-in-alt' /> Sign In
-        </button>
-      )
-    ];
+        </p>
+        <Button onClick={signIn} icon='log-in' text='Sign out'/>
+      </Callout>
+    );
   }
 
   /**
    * Render the "logged in" settings experience.
    *
-   * @returns {Array<JSX.Element>}
+   * @returns {JSX.Element}
    */
-  public renderSignedIn(): Array<JSX.Element> {
+  public renderSignedIn(): JSX.Element {
     const { gitHubLogin } = this.props.appState;
     const signOut = this.props.appState.signOutGitHub;
 
-    return [
-      (
-        <label key='signed-in-label'>
+    return (
+      <Callout>
+        <p>
+          Your fiddles can be published as public GitHub Gists.
           Using the personal access token you gave us, we
-          logged you into GitHub as {gitHubLogin}.
-        </label>
-      ),
-      (
-        <button className='button' key='sign-out-button' onClick={signOut}>
-          <FontAwesomeIcon icon='sign-out-alt' /> Remove Token & Sign Out
-        </button>
-      )
-    ];
+          logged you into GitHub as <code>{gitHubLogin}</code>.
+        </p>
+        <Button onClick={signOut} icon='log-out' text='Sign out'/>
+      </Callout>
+    );
   }
 
   public render() {

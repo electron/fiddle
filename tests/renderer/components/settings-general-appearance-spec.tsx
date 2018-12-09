@@ -42,23 +42,12 @@ describe('AppearanceSettings component', () => {
       <AppearanceSettings appState={store} />
     );
     const instance: AppearanceSettings = wrapper.instance() as any;
-    instance.handleChange({ name: 'defaultLight' } as any);
+    instance.handleChange({ file: 'defaultLight' } as any);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
   describe('openThemeFolder()', () => {
-    it('calls it on click', () => {
-      const wrapper = shallow(
-        <AppearanceSettings appState={store} />
-      );
-      const instance: AppearanceSettings = wrapper.instance() as any;
-      instance.openThemeFolder = jest.fn();
-
-      wrapper.find('#open-theme-folder').simulate('click');
-      expect(instance.openThemeFolder).toHaveBeenCalled();
-    });
-
     it('attempts to open the folder', async () => {
       const wrapper = shallow(
         <AppearanceSettings appState={store} />
