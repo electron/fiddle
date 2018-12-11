@@ -1,4 +1,4 @@
-# <img src="https://user-images.githubusercontent.com/378023/49716907-7d2b0500-fc98-11e8-9a51-217e8a4a28bb.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
+# <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
 [![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle)
 
