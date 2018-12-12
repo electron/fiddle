@@ -1,4 +1,4 @@
-# Electron Fiddle
+# <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
 [![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle)
 
@@ -15,7 +15,7 @@ address bar.
   </a>
 </h3>
 
-![Screenshot](https://user-images.githubusercontent.com/1426799/43873471-8893e3a8-9b3b-11e8-975b-e357f8039b5c.png)
+<img src="https://user-images.githubusercontent.com/378023/49716908-7d2b0500-fc98-11e8-8f52-def504802509.png" width="880px" alt="Electron Fiddle screenshot">
 
 # Features
 

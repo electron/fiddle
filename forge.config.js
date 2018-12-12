@@ -3,6 +3,8 @@
 const path = require('path');
 const package = require('./package.json');
 
+const iconDir = path.resolve(__dirname, 'assets', 'icons');
+
 module.exports = {
   hooks: {
     generateAssets: require('./tools/generateAssets')
@@ -44,7 +46,7 @@ module.exports = {
         noMsi: true,
         remoteReleases: '',
         setupExe: `electron-fiddle-${package.version}-setup-${process.arch}.exe`,
-        setupIcon: path.resolve(__dirname, 'assets', 'icons', 'fiddle.ico'),
+        setupIcon: path.resolve(iconDir, 'fiddle.ico'),
         certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
         certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
       }
@@ -55,7 +57,12 @@ module.exports = {
     },
     {
       name: '@electron-forge/maker-deb',
-      platforms: ['linux']
+      platforms: ['linux'],
+      config: {
+        icon: {
+          scalable: path.resolve(iconDir, 'fiddle.svg')
+        }
+      }
     },
     {
       name: '@electron-forge/maker-rpm',
