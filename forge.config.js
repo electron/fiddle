@@ -3,6 +3,7 @@
 const path = require('path')
 const packackeJson = require('./package.json')
 
+const { arch, version } = packackeJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
 
 module.exports = {
@@ -45,7 +46,7 @@ module.exports = {
         loadingGif: './assets/loading.gif',
         noMsi: true,
         remoteReleases: '',
-        setupExe: `electron-fiddle-${package.version}-setup-${process.arch}.exe`,
+        setupExe: `electron-fiddle-${version}-setup-${arch}.exe`,
         setupIcon: path.resolve(iconDir, 'fiddle.ico'),
         certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
         certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
