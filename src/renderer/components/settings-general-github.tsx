@@ -32,7 +32,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
           Your fiddles can be published as public GitHub Gists -
           that way you can share your fiddles with the world!
         </p>
-        <Button onClick={signIn} icon='log-in' text='Sign out'/>
+        <Button onClick={signIn} icon='log-in' text='Sign in'/>
       </Callout>
     );
   }

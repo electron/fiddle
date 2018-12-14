@@ -12,7 +12,7 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
     <Blueprint3.Button
       icon="log-in"
       onClick={[Function]}
-      text="Sign out"
+      text="Sign in"
     />
   </Blueprint3.Callout>
 </div>

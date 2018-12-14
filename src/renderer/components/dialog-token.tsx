@@ -1,11 +1,11 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+
+import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { clipboard, shell } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
-import { Dialog } from './dialog';
 
 export interface TokenDialogProps {
   appState: AppState;
@@ -31,8 +31,6 @@ const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKE
  */
 @observer
 export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogState> {
-  private tokenInputRef: React.RefObject<HTMLInputElement>;
-
   constructor(props: TokenDialogProps) {
     super(props);
 
@@ -40,7 +38,6 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       verifying: false,
       error: false,
     };
-    this.tokenInputRef = React.createRef();
     this.onSubmitToken = this.onSubmitToken.bind(this);
     this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
     this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
@@ -137,39 +134,39 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     this.setState({ tokenInput: event.target.value });
   }
 
-  /**
-   * A spinner element!
-   *
-   * @readonly
-   */
-  get spinner() {
-    if (!this.state.verifying) return null;
-
-    return (
-      <div className='tokenSpinner'>
-        <FontAwesomeIcon icon='spinner' spin={true} />
-      </div>
-    );
-  }
-
   get buttons() {
     const canSubmit = !!this.state.tokenInput;
 
     return [
       (
-        <button
+        <Button
           key='done'
-          type='submit'
-          className='button'
           disabled={!canSubmit}
           onClick={this.onSubmitToken}
-        >
-          Done
-        </button>
+          loading={this.state.verifying}
+          text='Done'
+          icon='log-in'
+        />
       ), (
-        <button key='cancel' className='cancel' onClick={this.onClose}>Cancel</button>
+        <Button
+          key='cancel'
+          text='Cancel'
+          icon='log-out'
+          onClick={this.onClose}
+        />
       )
     ];
+  }
+
+  get invalidWarning() {
+    return (
+      <>
+        <Callout intent={Intent.DANGER}>
+          Please provide a valid GitHub Personal Access Token
+        </Callout>
+        <br />
+      </>
+    );
   }
 
   public render() {
@@ -177,29 +174,28 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
 
     return (
       <Dialog
-        isShowing={isTokenDialogShowing}
-        isShowingBackdrop={true}
-        buttons={this.buttons}
+        isOpen={isTokenDialogShowing}
         onClose={this.onClose}
-        isCentered={true}
-        className='tokenDialog'
-        key='tokenDialog'
+        title='GitHub Token'
       >
-        {this.spinner}
-        <span className='generateTokenText'>
-          <FontAwesomeIcon icon='key' />
-          Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
-        </span>
+        <div className='bp3-dialog-body'>
+          <p>
+            Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
+          </p>
 
-        {this.state.error ? <h5 className='error-text'>Please provide a valid GitHub Personal Access Token</h5> : null}
+          {this.state.error ? this.invalidWarning : null}
 
-        <input
-          ref={this.tokenInputRef}
-          value={this.state.tokenInput || ''}
-          onFocus={this.onTokenInputFocused}
-          onChange={this.handleChange}
-          className={this.state.error ? 'hasError' : ''}
-        />
+          <InputGroup
+            value={this.state.tokenInput || ''}
+            onFocus={this.onTokenInputFocused}
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className='bp3-dialog-footer'>
+          <div className='bp3-dialog-footer-actions'>
+            {this.buttons}
+          </div>
+        </div>
       </Dialog>
     );
   }
