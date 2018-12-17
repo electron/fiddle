@@ -2,12 +2,14 @@ import * as MonacoType from 'monaco-editor';
 
 export interface FiddleTheme {
   name?: string;
+  isDark?: boolean;
   editor: Partial<MonacoType.editor.IStandaloneThemeData>;
   common: {
     'fonts-common': string;
     'foreground-1': string;
     'foreground-2': string;
     'foreground-3': string;
+    'background-4': string;
     'background-3': string;
     'background-2': string;
     'background-1': string;
@@ -34,10 +36,12 @@ export interface LoadedFiddleTheme extends FiddleTheme {
 export const defaultDark: LoadedFiddleTheme = {
   name: 'Fiddle (Dark)',
   file: 'defaultDark',
+  isDark: true,
   common: {
     'foreground-1': '#9feafa',
     'foreground-2': '#8ac7d6',
     'foreground-3': '#608291',
+    'background-4': '#21232d',
     'background-3': '#2c2e3b',
     'background-2': '#1d2427',
     'background-1': '#2f3241',
@@ -65,10 +69,12 @@ export const defaultDark: LoadedFiddleTheme = {
 export const defaultLight: LoadedFiddleTheme = {
   name: 'Fiddle (Light)',
   file: 'defaultLight',
+  isDark: false,
   common: {
     'foreground-1': '#9feafa',
     'foreground-2': '#256e80',
     'foreground-3': '#608291',
+    'background-4': '#fbfbfb',
     'background-3': '#fbfbfb',
     'background-2': '#d6dde0',
     'background-1': '#f5f5f5',

@@ -56,7 +56,7 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.General').simulate('click');
+    wrapper.find('#settings-link-General').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -65,7 +65,7 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.Electron').simulate('click');
+    wrapper.find('#settings-link-Electron').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -74,7 +74,7 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.Credits').simulate('click');
+    wrapper.find('#settings-link-Credits').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 });

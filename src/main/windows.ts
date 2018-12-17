@@ -33,10 +33,13 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
  * @returns {Electron.BrowserWindow}
  */
 export function createMainWindow(): Electron.BrowserWindow {
+  console.log(`Creating main window`);
   const browserWindow = new BrowserWindow(getMainWindowOptions());
-  browserWindow.loadFile('./dist/index.html');
+  browserWindow.loadFile('./dist/static/index.html');
 
   browserWindow.webContents.once('dom-ready', () => {
+    browserWindow.show();
+
     if (browserWindow) {
       createContextMenu(browserWindow);
     }

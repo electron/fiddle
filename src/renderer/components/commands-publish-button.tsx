@@ -1,11 +1,10 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { IpcEvents } from '../../ipc-events';
-import { classNames } from '../../utils/classnames';
 import { getOctokit } from '../../utils/octokit';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -118,16 +117,15 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
   public render() {
     const { isPublishing } = this.state;
-    const className = classNames('button', 'button-publish', isPublishing);
-    const icon = isPublishing ? 'spinner' : 'upload';
-    const text = isPublishing ? 'Publishing...' : 'Publish';
 
     return (
-      <button className={className} onClick={this.handleClick} disabled={isPublishing}>
-        <FontAwesomeIcon icon={icon} spin={isPublishing} />
-        <span style={{ marginLeft: 8 }} />
-        {text}
-      </button>
+      <Button
+        onClick={this.handleClick}
+        loading={isPublishing}
+        disabled={isPublishing}
+        icon='upload'
+        text={isPublishing ? 'Publishing...' : 'Publish'}
+      />
     );
   }
 }

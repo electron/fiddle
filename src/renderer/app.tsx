@@ -1,16 +1,3 @@
-import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faClipboardList,
-  faCloudDownloadAlt,
-  faKey,
-  faSignInAlt,
-  faSignOutAlt,
-  faSpinner,
-  faTerminal,
-  faTimesCircle,
-  faTrash,
-  faUpload
-} from '@fortawesome/free-solid-svg-icons';
 import * as MonacoType from 'monaco-editor';
 
 import { EditorValues } from '../interfaces';
@@ -19,19 +6,6 @@ import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { appState } from './state';
 import { getTheme } from './themes';
-
-library.add(
-  faClipboardList,
-  faCloudDownloadAlt,
-  faKey,
-  faSignInAlt,
-  faSignOutAlt,
-  faSpinner,
-  faTerminal,
-  faTimesCircle,
-  faTrash,
-  faUpload
-);
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -172,6 +146,12 @@ export class App {
 
     if (tag && theme.css) {
       tag.innerHTML = theme.css;
+    }
+
+    if (theme.isDark || (theme.name || '').includes('dark')) {
+      document.body.classList.add('bp3-dark');
+    } else {
+      document.body.classList.remove('bp3-dark');
     }
   }
 

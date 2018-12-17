@@ -5,20 +5,34 @@ exports[`Commands component renders 1`] = `
   className="commands"
 >
   <div>
-    <runner
-      appState={
-        Object {
-          "gistId": null,
+    <Blueprint3.ControlGroup
+      fill={true}
+      vertical={false}
+    >
+      <version-chooser
+        appState={
+          Object {
+            "gistId": null,
+          }
         }
-      }
-    />
-    <version-chooser
-      appState={
-        Object {
-          "gistId": null,
+      />
+      <runner
+        appState={
+          Object {
+            "gistId": null,
+          }
         }
-      }
-    />
+      />
+    </Blueprint3.ControlGroup>
+    <Blueprint3.ControlGroup
+      fill={true}
+      vertical={false}
+    >
+      <Blueprint3.Button
+        icon="console"
+        text="Console"
+      />
+    </Blueprint3.ControlGroup>
   </div>
   <div>
     <address-bar
@@ -35,29 +49,6 @@ exports[`Commands component renders 1`] = `
         }
       }
     />
-    <button
-      className="button"
-      onClick={[Function]}
-    >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="terminal"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
-      />
-    </button>
   </div>
 </div>
 `;

@@ -1,0 +1,11 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Publish button component renders 1`] = `
+<Blueprint3.Button
+  disabled={false}
+  icon="upload"
+  loading={false}
+  onClick={[Function]}
+  text="Publish"
+/>
+`;

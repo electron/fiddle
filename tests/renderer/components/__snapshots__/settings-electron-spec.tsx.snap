@@ -7,234 +7,87 @@ exports[`ElectronSettings component renders 1`] = `
   <h2>
     Electron Settings
   </h2>
-  <div
-    className="advanced-options settings-section"
-  >
-    <div
-      className="versions-to-show"
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Include Electron versions from these release channels:"
     >
-      <p>
-        Include Electron versions from these release channels:
-      </p>
-      <label>
-        <input
-          checked={true}
-          id="Stable"
-          onChange={[Function]}
-          type="checkbox"
-        />
-        Stable
-      </label>
-      <label>
-        <input
-          checked={true}
-          id="Beta"
-          onChange={[Function]}
-          type="checkbox"
-        />
-        Beta
-      </label>
-      <label>
-        <input
-          checked={false}
-          id="Nightly"
-          onChange={[Function]}
-          type="checkbox"
-        />
-        Nightly
-      </label>
-      <label>
-        <input
-          checked={false}
-          id="Unsupported"
-          onChange={[Function]}
-          type="checkbox"
-        />
-        Unsupported
-      </label>
-      <p>
-        Number of recent Electron releases to include:
-      </p>
-      <select
+      <Blueprint3.Checkbox
+        checked={true}
+        id="Stable"
+        inline={true}
+        label="Stable"
         onChange={[Function]}
-      >
-        <option
-          value="1"
-        >
-          30
-        </option>
-        <option
-          value="2"
-        >
-          60
-        </option>
-        <option
-          value="3"
-        >
-          90
-        </option>
-        <option
-          value="4"
-        >
-          120
-        </option>
-        <option
-          value="5"
-        >
-          150
-        </option>
-        <option
-          value="6"
-        >
-          180
-        </option>
-        <option
-          value="7"
-        >
-          210
-        </option>
-        <option
-          value="8"
-        >
-          240
-        </option>
-        <option
-          value="9"
-        >
-          270
-        </option>
-        <option
-          value="10"
-        >
-          300
-        </option>
-      </select>
-      <br />
-      <button
-        className="button"
-        onClick={[Function]}
-      >
-        <FontAwesomeIcon
-          border={false}
-          className=""
-          fixedWidth={false}
-          flip={null}
-          icon="clipboard-list"
-          inverse={false}
-          listItem={false}
-          mask={null}
-          pull={null}
-          pulse={false}
-          rotation={null}
-          size={null}
-          spin={false}
-          symbol={false}
-          title=""
-          transform={null}
-        />
-         Update Electron Release List
-      </button>
-    </div>
-    <div
-      className="advanced-options-buttons"
+      />
+      <Blueprint3.Checkbox
+        checked={true}
+        id="Beta"
+        inline={true}
+        label="Beta"
+        onChange={[Function]}
+      />
+      <Blueprint3.Checkbox
+        checked={false}
+        id="Nightly"
+        inline={true}
+        label="Nightly"
+        onChange={[Function]}
+      />
+      <Blueprint3.Checkbox
+        checked={false}
+        id="Unsupported"
+        inline={true}
+        label="Unsupported"
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
+    <Blueprint3.FormGroup
+      label="Number of recent Electron releases to include:"
     >
-      <div>
-        <label>
-          Download all versions of Electron.
-        </label>
-        <button
-          className="button btn-download-all"
-          disabled={false}
-          onClick={[Function]}
-        >
-          <FontAwesomeIcon
-            border={false}
-            className=""
-            fixedWidth={false}
-            flip={null}
-            icon="cloud-download-alt"
-            inverse={false}
-            listItem={false}
-            mask={null}
-            pull={null}
-            pulse={false}
-            rotation={null}
-            size={null}
-            spin={false}
-            symbol={false}
-            title=""
-            transform={null}
-          />
-           Download All Versions
-        </button>
-      </div>
-      <div>
-        <label>
-          Remove all downloaded versions.
-        </label>
-        <button
-          className="button btn-delete-all"
-          disabled={false}
-          onClick={[Function]}
-        >
-          <FontAwesomeIcon
-            border={false}
-            className=""
-            fixedWidth={false}
-            flip={null}
-            icon="trash"
-            inverse={false}
-            listItem={false}
-            mask={null}
-            pull={null}
-            pulse={false}
-            rotation={null}
-            size={null}
-            spin={false}
-            symbol={false}
-            title=""
-            transform={null}
-          />
-           Delete All Downloads
-        </button>
-      </div>
-      <div>
-        <label>
-          Add a local build of Electron.
-        </label>
-        <button
-          className="button btn-add-version"
-          onClick={[Function]}
-        >
-          <FontAwesomeIcon
-            border={false}
-            className=""
-            fixedWidth={false}
-            flip={null}
-            icon="file"
-            inverse={false}
-            listItem={false}
-            mask={null}
-            pull={null}
-            pulse={false}
-            rotation={null}
-            size={null}
-            spin={false}
-            symbol={false}
-            title=""
-            transform={null}
-          />
-           Add Local Electron Build
-        </button>
-      </div>
-    </div>
-  </div>
-  <div>
-    <h2>
-      Versions
-    </h2>
-    <table
+      <Blueprint3.Slider
+        disabled={false}
+        initialValue={30}
+        labelStepSize={30}
+        max={300}
+        min={30}
+        onChange={[Function]}
+        showTrackFill={true}
+        stepSize={30}
+        value={60}
+        vertical={false}
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.ButtonGroup
+      fill={true}
+    >
+      <Blueprint3.Button
+        icon="numbered-list"
+        onClick={[Function]}
+        text="Update Electron Release List"
+      />
+      <Blueprint3.Button
+        disabled={false}
+        icon="download"
+        onClick={[Function]}
+        text="Download All Versions"
+      />
+      <Blueprint3.Button
+        disabled={false}
+        icon="trash"
+        onClick={[Function]}
+        text="Delete All Downloads"
+      />
+      <Blueprint3.Button
+        icon="document-open"
+        onClick={[Function]}
+        text="Add Local Electron Build"
+      />
+    </Blueprint3.ButtonGroup>
+    <HTMLTable
       className="electron-versions-table"
+      striped={true}
     >
       <thead>
         <tr>
@@ -259,33 +112,25 @@ exports[`ElectronSettings component renders 1`] = `
             v2.0.2
           </td>
           <td>
-            ⏬ Downloading
-          </td>
-          <td>
-            <button
-              className="button"
-              disabled={true}
-            >
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon="spinner"
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={true}
-                symbol={false}
-                title=""
-                transform={null}
+            <span>
+              <Blueprint3.Icon
+                icon="cloud-download"
               />
-               Downloading
-            </button>
+               
+              Downloading
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              disabled={true}
+              fill={true}
+              icon="cloud-download"
+              loading={true}
+              small={true}
+              text="Downloading"
+            />
           </td>
         </tr>
         <tr
@@ -295,34 +140,24 @@ exports[`ElectronSettings component renders 1`] = `
             v2.0.1
           </td>
           <td>
-            ✅ Downloaded
-          </td>
-          <td>
-            <button
-              className="button"
-              onClick={[Function]}
-            >
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon="trash"
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                title=""
-                transform={null}
+            <span>
+              <Blueprint3.Icon
+                icon="box"
               />
                
-              Delete
-            </button>
+              Downloaded
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              fill={true}
+              icon="trash"
+              onClick={[Function]}
+              small={true}
+              text="Delete"
+            />
           </td>
         </tr>
         <tr
@@ -332,37 +167,30 @@ exports[`ElectronSettings component renders 1`] = `
             v1.8.7
           </td>
           <td>
-            ⏹ Not downloaded
-          </td>
-          <td>
-            <button
-              className="button"
-              onClick={[Function]}
-            >
-              <FontAwesomeIcon
-                border={false}
-                className=""
-                fixedWidth={false}
-                flip={null}
-                icon="cloud-download-alt"
-                inverse={false}
-                listItem={false}
-                mask={null}
-                pull={null}
-                pulse={false}
-                rotation={null}
-                size={null}
-                spin={false}
-                symbol={false}
-                title=""
-                transform={null}
+            <span>
+              <Blueprint3.Icon
+                icon="cloud"
               />
-               Download
-            </button>
+               
+              Not downloaded
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              disabled={false}
+              fill={true}
+              icon="cloud-download"
+              loading={false}
+              onClick={[Function]}
+              small={true}
+              text="Download"
+            />
           </td>
         </tr>
       </tbody>
-    </table>
-  </div>
+    </HTMLTable>
+  </Blueprint3.Callout>
 </div>
 `;

@@ -6,7 +6,7 @@ import { Editor } from '../../../src/renderer/components/editor';
 describe('Editor component', () => {
   let store: any;
   let monaco: any;
-  let editorDispose = jest.fn();
+  const editorDispose = jest.fn();
 
   beforeEach(() => {
     store = {

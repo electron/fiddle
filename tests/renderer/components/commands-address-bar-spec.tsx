@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AddressBar } from '../../../src/renderer/components/address-bar';
+import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
 import { getOctokit } from '../../../src/utils/octokit';
 
 jest.mock('../../../src/utils/octokit');
@@ -22,14 +22,10 @@ describe('AddressBar component', () => {
 
   it('handles change', () => {
     const wrapper = shallow(<AddressBar appState={store} />);
-    wrapper.find('input').simulate('change', { target: { value: 'hi' } });
+    const instance: AddressBar = wrapper.instance() as any;
+    instance.handleChange({ target: { value: 'hi' } } as any);
 
     expect(wrapper.state('value')).toBe('hi');
-    expect(wrapper.find('input').html())
-      .toBe('<input ' +
-        'pattern="https:\\/\\/gist\\.github\\.com\\/(.+)$" ' +
-        'placeholder="https://gist.github.com/..." ' +
-        'value="hi"/>');
   });
 
   it('handles submit', () => {
@@ -37,10 +33,9 @@ describe('AddressBar component', () => {
     AddressBar.prototype.loadFiddle = jest.fn();
     const preventDefault = jest.fn();
     const wrapper = shallow(<AddressBar appState={store} />);
+    const instance: AddressBar = wrapper.instance() as any;
 
-    wrapper.find('input').simulate('change', {
-      target: { value: 'abcdtestid' }
-    });
+    instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     wrapper.find('form').simulate('submit', { preventDefault });
 
     expect(wrapper.state('value')).toBe('abcdtestid');
@@ -71,14 +66,12 @@ describe('AddressBar component', () => {
     });
 
     const wrapper = shallow(<AddressBar appState={store} />);
+    const instance: AddressBar = wrapper.instance() as any;
 
     store.gistId = 'abcdtestid';
     (global as any).window.confirm.mockReturnValueOnce(true);
 
-    wrapper.find('input').simulate('change', {
-      target: { value: 'abcdtestid' }
-    });
-
+    instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     await (wrapper.instance() as AddressBar).loadFiddle();
 
     expect(wrapper.state('value')).toBe('abcdtestid');

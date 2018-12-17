@@ -2,7 +2,7 @@ import { spawn } from 'child_process';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ForgeCommands, Runner } from '../../../src/renderer/components/runner';
+import { ForgeCommands, Runner } from '../../../src/renderer/components/commands-runner';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import {
   findModulesInEditors,

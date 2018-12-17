@@ -8,27 +8,42 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
     className="settings-menu"
   >
     <ul>
-      <li
-        className="General"
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
         key="General"
+        multiline={false}
         onClick={[Function]}
-      >
-        General
-      </li>
-      <li
-        className="Electron"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
         key="Electron"
+        multiline={false}
         onClick={[Function]}
-      >
-        Electron
-      </li>
-      <li
-        className="Credits"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
         key="Credits"
+        multiline={false}
         onClick={[Function]}
-      >
-        Credits
-      </li>
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
     </ul>
   </div>
   <div
@@ -37,23 +52,8 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
   </div>
@@ -68,27 +68,42 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
     className="settings-menu"
   >
     <ul>
-      <li
-        className="General"
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
         key="General"
+        multiline={false}
         onClick={[Function]}
-      >
-        General
-      </li>
-      <li
-        className="Electron"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
         key="Electron"
+        multiline={false}
         onClick={[Function]}
-      >
-        Electron
-      </li>
-      <li
-        className="selected Credits"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
         key="Credits"
+        multiline={false}
         onClick={[Function]}
-      >
-        Credits
-      </li>
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
     </ul>
   </div>
   <div
@@ -97,23 +112,8 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-credits
@@ -135,27 +135,42 @@ exports[`CreditsSettings component renders the Electron page after a click 1`] =
     className="settings-menu"
   >
     <ul>
-      <li
-        className="General"
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
         key="General"
+        multiline={false}
         onClick={[Function]}
-      >
-        General
-      </li>
-      <li
-        className="selected Electron"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
         key="Electron"
+        multiline={false}
         onClick={[Function]}
-      >
-        Electron
-      </li>
-      <li
-        className="Credits"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
         key="Credits"
+        multiline={false}
         onClick={[Function]}
-      >
-        Credits
-      </li>
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
     </ul>
   </div>
   <div
@@ -164,23 +179,8 @@ exports[`CreditsSettings component renders the Electron page after a click 1`] =
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-electron
@@ -202,27 +202,42 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
     className="settings-menu"
   >
     <ul>
-      <li
-        className="selected General"
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
         key="General"
+        multiline={false}
         onClick={[Function]}
-      >
-        General
-      </li>
-      <li
-        className="Electron"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
         key="Electron"
+        multiline={false}
         onClick={[Function]}
-      >
-        Electron
-      </li>
-      <li
-        className="Credits"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
         key="Credits"
+        multiline={false}
         onClick={[Function]}
-      >
-        Credits
-      </li>
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
     </ul>
   </div>
   <div
@@ -231,23 +246,8 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-general
@@ -269,27 +269,42 @@ exports[`CreditsSettings component renders the General page after a click 1`] = 
     className="settings-menu"
   >
     <ul>
-      <li
-        className="selected General"
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
         key="General"
+        multiline={false}
         onClick={[Function]}
-      >
-        General
-      </li>
-      <li
-        className="Electron"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
         key="Electron"
+        multiline={false}
         onClick={[Function]}
-      >
-        Electron
-      </li>
-      <li
-        className="Credits"
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
         key="Credits"
+        multiline={false}
         onClick={[Function]}
-      >
-        Credits
-      </li>
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
     </ul>
   </div>
   <div
@@ -298,23 +313,8 @@ exports[`CreditsSettings component renders the General page after a click 1`] = 
     <div
       className="settings-close"
     >
-      <FontAwesomeIcon
-        border={false}
-        className=""
-        fixedWidth={false}
-        flip={null}
-        icon="times-circle"
-        inverse={false}
-        listItem={false}
-        mask={null}
-        pull={null}
-        pulse={false}
-        rotation={null}
-        size={null}
-        spin={false}
-        symbol={false}
-        title=""
-        transform={null}
+      <Blueprint3.Icon
+        icon="cross"
       />
     </div>
     <settings-general

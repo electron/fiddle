@@ -1,8 +1,7 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { classNames } from '../../utils/classnames';
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
@@ -79,11 +78,17 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     return settingsSections.map((name) => {
       const isSelected = section === name;
-      const className = classNames({ selected: isSelected }, name);
       const onClick = () => this.setState({ section: name });
 
       return (
-        <li onClick={onClick} key={name} className={className}>{name}</li>
+        <MenuItem
+          onClick={onClick}
+          active={isSelected}
+          key={name}
+          id={`settings-link-${name}`}
+          text={name}
+          icon={this.getIconForSection(name)}
+        />
       );
     });
   }
@@ -101,11 +106,27 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className='settings-content'>
           <div className='settings-close' onClick={appState.toggleSettings}>
-            <FontAwesomeIcon icon='times-circle' />
+            <Icon icon='cross' />
           </div>
           {this.renderContent()}
         </div>
       </div>
     );
+  }
+
+  /**
+   * Get the settings icons
+   *
+   * @param {SettingsSections} section
+   * @memberof Settings
+   */
+  private getIconForSection(section: SettingsSections) {
+    if (section === SettingsSections.Credits) {
+      return 'heart';
+    } else if (section === SettingsSections.Electron) {
+      return 'floppy-disk';
+    }
+
+    return 'cog';
   }
 }

@@ -1,8 +1,9 @@
 /* tslint:disable */
 
-const path = require('path');
-const package = require('./package.json');
+const path = require('path')
+const packackeJson = require('./package.json')
 
+const { version } = packackeJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
 
 module.exports = {
@@ -31,7 +32,7 @@ module.exports = {
     },
     osxSign: {
       identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)'
-    },
+    }
   },
   makers: [
     {
@@ -45,7 +46,7 @@ module.exports = {
         loadingGif: './assets/loading.gif',
         noMsi: true,
         remoteReleases: '',
-        setupExe: `electron-fiddle-${package.version}-setup-${process.arch}.exe`,
+        setupExe: `electron-fiddle-${version}-setup.exe`,
         setupIcon: path.resolve(iconDir, 'fiddle.ico'),
         certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
         certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
@@ -81,4 +82,4 @@ module.exports = {
       }
     }
   ]
-};
+}

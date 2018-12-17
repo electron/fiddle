@@ -83,11 +83,7 @@ describe('ElectronSettings component', () => {
         <ElectronSettings appState={store} />
       );
       const instance = wrapper.instance() as any;
-      await instance.handlePagesChange({
-        currentTarget: {
-          value: '120'
-        }
-      });
+      await instance.handlePagesChange(120);
 
       expect(store.versionPagesToFetch).toBe(4);
     });

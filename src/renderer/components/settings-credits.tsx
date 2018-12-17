@@ -1,3 +1,4 @@
+import { Callout, Card } from '@blueprintjs/core';
 import { shell } from 'electron';
 import * as React from 'react';
 
@@ -44,14 +45,14 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
       const onClick = () => shell.openExternal(url);
 
       return (
-        <div key={login} className='contributor' onClick={onClick}>
+        <Card interactive={true} key={login} className='contributor' onClick={onClick}>
           <div className='avatar' style={style} />
           <div className='details'>
             <h5 className='name'>{name || login}</h5>
             {maybeLocation}
             {maybeBio}
           </div>
-        </div>
+        </Card>
       );
     });
   }
@@ -60,11 +61,12 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
     return (
       <div>
         <h2>Credits</h2>
-        <p>
+        <Callout>
           Electron Fiddle is, just like Electron, a free open source project
           welcoming contributors of all genders, cultures, and backgrounds. We
           would like to thank those who helped to make Electron Fiddle:
-        </p>
+        </Callout>
+        <br />
         <div className='contributors'>
           {this.renderContributors()}
         </div>

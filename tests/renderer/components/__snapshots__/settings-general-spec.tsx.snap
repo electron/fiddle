@@ -8,7 +8,7 @@ exports[`GeneralSettings component renders 1`] = `
   <settings-appearance
     appState={Object {}}
   />
-  <hr />
+  <Blueprint3.Divider />
   <settings-github
     appState={Object {}}
   />

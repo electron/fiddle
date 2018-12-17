@@ -1,13 +1,56 @@
+import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
+import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
+import { highlightText } from '../../utils/highlight-text';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
+
+const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
+
+/**
+ * Helper method: Returns the <Select /> predicate for an Electron
+ * version.
+ *
+ * @param {string} query
+ * @param {ElectronVersion} { tag_name }
+ * @returns
+ */
+const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
+  return name.toLowerCase().includes(query.toLowerCase());
+};
+
+
+/**
+ * Helper method: Returns the <Select /> <MenuItem /> for Electron
+ * versions.
+ *
+ * @param {ElectronVersion} item
+ * @param {IItemRendererProps} { handleClick, modifiers, query }
+ * @returns
+ */
+const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick, modifiers, query }) => {
+  if (!modifiers.matchesPredicate) {
+    return null;
+  }
+
+  return (
+    <MenuItem
+      active={modifiers.active}
+      disabled={modifiers.disabled}
+      text={highlightText(item.name, query)}
+      key={item.name}
+      onClick={handleClick}
+      icon='media'
+    />
+  );
+};
 
 export interface AppearanceSettingsProps {
   appState: AppState;
@@ -15,6 +58,7 @@ export interface AppearanceSettingsProps {
 
 export interface AppearanceSettingsState {
   themes: Array<LoadedFiddleTheme>;
+  selectedTheme?: LoadedFiddleTheme;
 }
 
 /**
@@ -38,18 +82,26 @@ export class AppearanceSettings extends React.Component<
     };
 
     getAvailableThemes().then((themes) => {
-      this.setState({ themes });
+      const { theme } = this.props.appState;
+      const selectedTheme = theme &&
+        themes.find(({ file }) => file === theme) || themes[0];
+
+      this.setState({ themes, selectedTheme });
     });
+
+    this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
+    this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
   /**
    * Handle change, which usually means that we'd like update
    * the current theme.
    *
-   * @param {React.ChangeEvent<HTMLSelectElement>} event
+   * @param {LoadedFiddleTheme} theme
    */
-  public handleChange(event: React.ChangeEvent<HTMLSelectElement>) {
-    this.props.appState.setTheme(event.target.value);
+  public handleChange(theme: LoadedFiddleTheme) {
+    this.setState({ selectedTheme: theme });
+    this.props.appState.setTheme(theme.file);
   }
 
   /**
@@ -74,7 +126,7 @@ export class AppearanceSettings extends React.Component<
         css: undefined
       }, { spaces: 2 });
 
-      shell.openItem(themePath);
+      shell.showItemInFolder(themePath);
 
       return true;
     } catch (error) {
@@ -103,48 +155,47 @@ export class AppearanceSettings extends React.Component<
     }
   }
 
-  /**
-   * Render the theme options.
-   *
-   * @returns {Array<JSX.Element>}
-   */
-  public renderOptions(): Array<JSX.Element> {
-    const { themes } = this.state;
-
-    return themes.map(({ name, file }) => {
-      return (
-        <option value={file} key={file}>
-          {name}
-        </option>
-      );
-    });
-  }
-
   public render() {
+    const { selectedTheme } = this.state;
+    const selectedName = selectedTheme && selectedTheme.name || 'Select a theme';
+
     return (
       <div className='settings-appearance'>
         <h4>Appearance</h4>
-        <label key='theme-label'>
-          To add themes, add JSON theme files to <a
-            id='open-theme-folder'
-            onClick={() => this.openThemeFolder()}
+        <FormGroup
+          label='Choose your theme'
+          inline={true}
+        >
+          <ThemeSelect
+            filterable={true}
+            items={this.state.themes}
+            itemRenderer={renderItem}
+            itemPredicate={filterItem}
+            onItemSelect={this.handleChange}
+            noResults={<MenuItem disabled={true} text='No results.' />}
           >
-            <code>{THEMES_PATH}</code>
-          </a>.<br />
-        </label>
-        <select
-          className='select-themes'
-          value={`${this.props.appState.theme}`}
-          onChange={this.handleChange}
-        >
-          {this.renderOptions()}
-        </select>
-        <button
-          id='create-new-theme'
-          onClick={() => this.createNewThemeFromCurrent()}
-        >
-          Create theme from current selection
-        </button>
+            <Button
+              text={selectedName}
+              icon='tint'
+            />
+          </ThemeSelect>
+        </FormGroup>
+        <Callout>
+          <p>
+            To add themes, add JSON theme files to <a
+              id='open-theme-folder'
+              onClick={this.openThemeFolder}
+            >
+              <code>{THEMES_PATH}</code>
+            </a>. The easiest way to get started is to clone one of the two existing
+            themes and to add your own colors.
+          </p>
+          <Button
+            onClick={this.createNewThemeFromCurrent}
+            text='Create theme from current selection'
+            icon='duplicate'
+          />
+        </Callout>
       </div>
     );
   }

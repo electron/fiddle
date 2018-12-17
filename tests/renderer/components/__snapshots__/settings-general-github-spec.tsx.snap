@@ -5,36 +5,16 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
   <h4>
     GitHub
   </h4>
-  <label
-    key="signed-out-label"
-  >
-    We can publish your fiddles to GitHub as a Gist - that way you can share your fiddles with the world!
-  </label>
-  <button
-    className="button"
-    key="sign-in-button"
-    onClick={[Function]}
-  >
-    <FontAwesomeIcon
-      border={false}
-      className=""
-      fixedWidth={false}
-      flip={null}
-      icon="sign-in-alt"
-      inverse={false}
-      listItem={false}
-      mask={null}
-      pull={null}
-      pulse={false}
-      rotation={null}
-      size={null}
-      spin={false}
-      symbol={false}
-      title=""
-      transform={null}
+  <Blueprint3.Callout>
+    <p>
+      Your fiddles can be published as public GitHub Gists - that way you can share your fiddles with the world!
+    </p>
+    <Blueprint3.Button
+      icon="log-in"
+      onClick={[Function]}
+      text="Sign in"
     />
-     Sign In
-  </button>
+  </Blueprint3.Callout>
 </div>
 `;
 
@@ -43,37 +23,19 @@ exports[`GitHubSettings component renders when signed in 1`] = `
   <h4>
     GitHub
   </h4>
-  <label
-    key="signed-in-label"
-  >
-    Using the personal access token you gave us, we logged you into GitHub as 
-    Test User
-    .
-  </label>
-  <button
-    className="button"
-    key="sign-out-button"
-    onClick={[MockFunction]}
-  >
-    <FontAwesomeIcon
-      border={false}
-      className=""
-      fixedWidth={false}
-      flip={null}
-      icon="sign-out-alt"
-      inverse={false}
-      listItem={false}
-      mask={null}
-      pull={null}
-      pulse={false}
-      rotation={null}
-      size={null}
-      spin={false}
-      symbol={false}
-      title=""
-      transform={null}
+  <Blueprint3.Callout>
+    <p>
+      Your fiddles can be published as public GitHub Gists. Using the personal access token you gave us, we logged you into GitHub as 
+      <code>
+        Test User
+      </code>
+      .
+    </p>
+    <Blueprint3.Button
+      icon="log-out"
+      onClick={[MockFunction]}
+      text="Sign out"
     />
-     Remove Token & Sign Out
-  </button>
+  </Blueprint3.Callout>
 </div>
 `;

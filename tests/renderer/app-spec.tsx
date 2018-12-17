@@ -117,6 +117,7 @@ describe('Editors component', () => {
             --foreground-1: #9feafa;
             --foreground-2: #8ac7d6;
             --foreground-3: #608291;
+            --background-4: #21232d;
             --background-3: #2c2e3b;
             --background-2: #1d2427;
             --background-1: #2f3241;

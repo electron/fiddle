@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AddVersionDialog } from './add-version-dialog';
+import { TokenDialog } from './dialog-token';
 import { Settings } from './settings';
-import { TokenDialog } from './token-dialog';
 
 export interface DialogsProps {
   appState: AppState;
