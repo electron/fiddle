@@ -112,9 +112,8 @@ describe('AddVersionDialog component', () => {
 
       const result = store.addLocalVersion.mock.calls[0][0];
 
-      expect(result.url).toBe('/test/path');
-      expect(result.assets_url).toBe('/test/path');
-      expect(result.tag_name).toBe('3.3.3');
+      expect(result.localPath).toBe('/test/path');
+      expect(result.version).toBe('3.3.3');
     });
   });
 });

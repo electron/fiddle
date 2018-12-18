@@ -1,4 +1,4 @@
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, GitHubVersion } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion } from '../interfaces';
 
 export const enum ElectronReleaseChannel {
   stable = 'Stable',
@@ -11,13 +11,13 @@ export const enum ElectronReleaseChannel {
  * Return the release channel for a given input
  * version.
  *
- * @param {GitHubVersion} input
+ * @param {NpmVersion} input
  * @returns {ElectronReleaseChannel}
  */
 export function getReleaseChannel(
-  input: GitHubVersion
+  input: NpmVersion
 ): ElectronReleaseChannel {
-  const tag = input.tag_name || '';
+  const tag = input.version || '';
 
   if (tag.includes('beta')) {
     return ElectronReleaseChannel.beta;
@@ -44,19 +44,32 @@ export const enum VersionKeys {
  * Retrieve Electron versions from localStorage.
  *
  * @param {VersionKeys} key
- * @param {() => Array<GitHubVersion>} fallbackMethod
- * @returns {Array<GitHubVersion>}
+ * @param {() => Array<NpmVersion>} fallbackMethod
+ * @returns {Array<NpmVersion>}
  */
 function getVersions(
-  key: VersionKeys, fallbackMethod: () => Array<GitHubVersion>
-): Array<GitHubVersion> {
+  key: VersionKeys, fallbackMethod: () => Array<NpmVersion>
+): Array<NpmVersion> {
   const fromLs = window.localStorage.getItem(key);
 
   if (fromLs) {
     try {
-      return JSON.parse(fromLs);
+      let result: Array<NpmVersion> = JSON.parse(fromLs);
+
+      if (!isExpectedFormat(result)) {
+        // Known versions can just be downloaded again.
+        if (key === VersionKeys.known) {
+          throw new Error(`Electron versions in LS does not match expected format`);
+        }
+
+        // Local versions are a bit more tricky and might be in an old format (pre 0.5)
+        result = migrateVersions(result);
+        saveLocalVersions(result);
+      }
+
+      return result;
     } catch (error) {
-      console.warn(`Parsing local Electron versions failed, returning []`);
+      console.warn(`Parsing local Electron versions failed, returning fallback method.`);
     }
   }
 
@@ -67,9 +80,9 @@ function getVersions(
  * Save an array of GitHubVersions to localStorage.
  *
  * @param {VersionKeys} key
- * @param {Array<GitHubVersion} versions
+ * @param {Array<NpmVersion} versions
  */
-function saveVersions(key: VersionKeys, versions: Array<GitHubVersion>) {
+function saveVersions(key: VersionKeys, versions: Array<NpmVersion>) {
   const stringified = JSON.stringify(versions);
   window.localStorage.setItem(key, stringified);
 }
@@ -77,7 +90,7 @@ function saveVersions(key: VersionKeys, versions: Array<GitHubVersion>) {
 /**
  * Return both known as well as local versions.
  *
- * @returns {Array<GitHubVersion>}
+ * @returns {Array<NpmVersion>}
  */
 export function getElectronVersions(): Array<ElectronVersion> {
   const known: Array<ElectronVersion> = getKnownVersions().map((version) => {
@@ -102,13 +115,13 @@ export function getElectronVersions(): Array<ElectronVersion> {
 /**
  * Add a version to the local versions
  *
- * @param {GitHubVersion} input
- * @returns {Array<GitHubVersion>}
+ * @param {NpmVersion} input
+ * @returns {Array<NpmVersion>}
  */
-export function addLocalVersion(input: GitHubVersion): Array<GitHubVersion> {
+export function addLocalVersion(input: NpmVersion): Array<NpmVersion> {
   const versions = getLocalVersions();
 
-  if (!versions.find((v) => v.url === input.url)) {
+  if (!versions.find((v) => v.localPath === input.localPath)) {
     versions.push(input);
   }
 
@@ -120,18 +133,20 @@ export function addLocalVersion(input: GitHubVersion): Array<GitHubVersion> {
 /**
  * Retrieves local Electron versions, configured by the user.
  *
- * @returns {Array<GitHubVersion>}
+ * @returns {Array<NpmVersion>}
  */
-export function getLocalVersions(): Array<GitHubVersion> {
-  return getVersions(VersionKeys.local, () => []);
+export function getLocalVersions(): Array<NpmVersion> {
+  const versions = getVersions(VersionKeys.local, () => []);
+
+  return versions;
 }
 
 /**
  * Saves local versions to localStorage.
  *
- * @param {Array<GitHubVersion>} versions
+ * @param {Array<NpmVersion>} versions
  */
-export function saveLocalVersions(versions: Array<GitHubVersion | ElectronVersion>) {
+export function saveLocalVersions(versions: Array<NpmVersion | ElectronVersion>) {
   const filteredVersions = versions.filter((v) => {
     if (isElectronVersion(v)) {
       return v.source === ElectronVersionSource.local;
@@ -147,18 +162,18 @@ export function saveLocalVersions(versions: Array<GitHubVersion | ElectronVersio
  * Retrieves our best guess regarding the latest Electron versions. Tries to
  * fetch them from localStorage, then from a static releases.json file.
  *
- * @returns {Array<GitHubVersion>}
+ * @returns {Array<NpmVersion>}
  */
-export function getKnownVersions(): Array<GitHubVersion> {
+export function getKnownVersions(): Array<NpmVersion> {
   return getVersions(VersionKeys.known, () => require('../../static/releases.json'));
 }
 
 /**
  * Saves known versions to localStorage.
  *
- * @param {Array<GitHubVersion>} versions
+ * @param {Array<NpmVersion>} versions
  */
-export function saveKnownVersions(versions: Array<GitHubVersion>) {
+export function saveKnownVersions(versions: Array<NpmVersion>) {
   return saveVersions(VersionKeys.known, versions);
 }
 
@@ -170,10 +185,9 @@ export function saveKnownVersions(versions: Array<GitHubVersion>) {
  * @returns {Promise<Array<ElectronVersion>>}
  */
 export async function getUpdatedElectronVersions(
-  pages: number,
 ): Promise<Array<ElectronVersion>> {
   try {
-    await fetchVersions(pages);
+    await fetchVersions();
   } catch (error) {
     console.warn(`Versions: Failed to fetch versions`, { error });
   }
@@ -182,37 +196,21 @@ export async function getUpdatedElectronVersions(
 }
 
 /**
- * Fetch the latest known versions directly from GitHub.
+ * Fetch the latest known versions directly from npm.
  *
- * @returns {Promise<Array<GitHubVersion>>}
+ * @returns {Promise<Array<NpmVersion>>}
  */
-export async function fetchVersions(pages: number) {
-  const output: Array<GitHubVersion> = [];
+export async function fetchVersions() {
+  const response = await window.fetch(`https://registry.npmjs.org/electron`);
+  const data = await response.json();
+  const versions: Record<string, any> = data.versions;
 
-  for (let i = 0; i < pages; i++) {
-    const page = await fetchVersionPage(i + 1);
+  const output: Array<NpmVersion> = Object
+    .keys(versions)
+    .map((version) => ({ version }));
 
-    if (page && page.length > 0 && page[0].tag_name) {
-      page.forEach((release) => {
-        const updated = {
-          url: release.url,
-          assets_url: release.assets_url,
-          html_url: release.html_url,
-          tag_name: release.tag_name,
-          target_commitish: release.target_commitish,
-          name: release.name,
-          prerelease: release.prerelease,
-          created_at: release.created_at,
-          published_at: release.published_at,
-          body: release.body
-        };
-
-        output.push(updated as GitHubVersion);
-      });
-    }
-  }
-
-  if (output && output.length > 0) {
+  if (output && output.length > 0 && isExpectedFormat(output)) {
+    console.log(`Fetched new Electron versions (Count: ${output.length})`);
     saveKnownVersions(output);
   }
 
@@ -220,20 +218,40 @@ export async function fetchVersions(pages: number) {
 }
 
 /**
- * Fetch a single releases page from GitHub.
+ * Is the given array an array of versions?
  *
- * @returns {Promise<Array<GitHubVersion>>}
+ * @param {Array<any>} input
+ * @returns {boolean}
  */
-export function fetchVersionPage(page?: number): Promise<Array<GitHubVersion>> {
-  const url = `https://api.github.com/repos/electron/electron/releases`
-    + ((page && page > 1) ? `?page=${page}` : '');
+export function isExpectedFormat(input: Array<any>): boolean {
+  return input.every((entry) => !!entry.version);
+}
 
-  return window.fetch(url)
-    .then((response) => response.json());
+/**
+ * Migrates old versions, if necessary
+ *
+ * @param {Array<any>} input
+ * @returns {Array<NpmVersion>}
+ */
+export function migrateVersions(input: Array<any> = []): Array<NpmVersion> {
+  return input
+    .filter((item) => !!item)
+    .map((item) => {
+      const { tag_name, name, url } = item;
+
+      if (!tag_name || !name || !url) return null;
+
+      return {
+        version: tag_name,
+        name,
+        localPath: url
+      };
+    })
+    .filter((item) => !!item) as Array<NpmVersion>;
 }
 
 export function isElectronVersion(
-  input: GitHubVersion | ElectronVersion
+  input: NpmVersion | ElectronVersion
 ): input is ElectronVersion {
   return (input as ElectronVersion).source !== undefined;
 }

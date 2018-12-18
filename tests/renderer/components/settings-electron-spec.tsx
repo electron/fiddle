@@ -12,7 +12,6 @@ describe('ElectronSettings component', () => {
     store = {
       version: '2.0.1',
       versions: mockVersions,
-      versionPagesToFetch: 2,
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
@@ -74,18 +73,6 @@ describe('ElectronSettings component', () => {
       instance.handleAddVersion();
 
       expect(store.toggleAddVersionDialog).toHaveBeenCalled();
-    });
-  });
-
-  describe('handlePagesChange()', () => {
-    it('handles a new selection', async () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={store} />
-      );
-      const instance = wrapper.instance() as any;
-      await instance.handlePagesChange(120);
-
-      expect(store.versionPagesToFetch).toBe(4);
     });
   });
 

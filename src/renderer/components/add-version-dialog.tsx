@@ -3,7 +3,7 @@ import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
 
-import { GitHubVersion } from '../../interfaces';
+import { NpmVersion } from '../../interfaces';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
 import { Dialog } from './dialog';
@@ -85,17 +85,10 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       .slice(1)
       .join(path.sep);
 
-    const toAdd: GitHubVersion = {
-      url: file.path,
-      assets_url: file.path,
-      body: `Local version, added at ${Date.now()}`,
-      created_at: Date.now().toString(),
-      name,
-      html_url: '',
-      prerelease: true,
-      published_at: Date.now().toString(),
-      tag_name: version,
-      target_commitish: ''
+    const toAdd: NpmVersion = {
+      localPath: file.path,
+      version,
+      name
     };
 
     this.props.appState.addLocalVersion(toAdd);

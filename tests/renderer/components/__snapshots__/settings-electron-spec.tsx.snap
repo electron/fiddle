@@ -40,22 +40,6 @@ exports[`ElectronSettings component renders 1`] = `
         onChange={[Function]}
       />
     </Blueprint3.FormGroup>
-    <Blueprint3.FormGroup
-      label="Number of recent Electron releases to include:"
-    >
-      <Blueprint3.Slider
-        disabled={false}
-        initialValue={30}
-        labelStepSize={30}
-        max={300}
-        min={30}
-        onChange={[Function]}
-        showTrackFill={true}
-        stepSize={30}
-        value={60}
-        vertical={false}
-      />
-    </Blueprint3.FormGroup>
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
@@ -106,10 +90,10 @@ exports[`ElectronSettings component renders 1`] = `
       </thead>
       <tbody>
         <tr
-          key="v2.0.2"
+          key="2.0.2"
         >
           <td>
-            v2.0.2
+            2.0.2
           </td>
           <td>
             <span>
@@ -134,10 +118,10 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
         </tr>
         <tr
-          key="v2.0.1"
+          key="2.0.1"
         >
           <td>
-            v2.0.1
+            2.0.1
           </td>
           <td>
             <span>
@@ -161,10 +145,10 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
         </tr>
         <tr
-          key="v1.8.7"
+          key="1.8.7"
         >
           <td>
-            v1.8.7
+            1.8.7
           </td>
           <td>
             <span>

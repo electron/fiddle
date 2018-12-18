@@ -7,8 +7,7 @@ import {
   HTMLTable,
   IButtonProps,
   Icon,
-  IconName,
-  Slider
+  IconName
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -42,7 +41,6 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.handleDownloadAll = this.handleDownloadAll.bind(this);
     this.handleDeleteAll = this.handleDeleteAll.bind(this);
     this.handleChannelChange = this.handleChannelChange.bind(this);
-    this.handlePagesChange = this.handlePagesChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handleAddVersion = this.handleAddVersion.bind(this);
 
@@ -54,15 +52,6 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
   public handleDownloadClick() {
     this.props.appState.updateElectronVersions();
-  }
-
-  /**
-   * Handles a change in how many pages should be displayed.
-   *
-   * @param {React.ChangeEvent<HTMLSelectElement>} event
-   */
-  public handlePagesChange(pages: number) {
-    this.props.appState.versionPagesToFetch = pages / 30;
   }
 
   /**
@@ -228,20 +217,6 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
             inline={true}
           />
         </FormGroup>
-
-        <FormGroup
-          label='Number of recent Electron releases to include:'
-        >
-          <Slider
-            initialValue={30}
-            min={30}
-            max={300}
-            stepSize={30}
-            labelStepSize={30}
-            value={appState.versionPagesToFetch * 30}
-            onChange={this.handlePagesChange}
-          />
-        </FormGroup>
       </Callout>
     );
   }
@@ -288,8 +263,8 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       }
 
       return (
-        <tr key={item.tag_name}>
-          <td>{item.tag_name}</td>
+        <tr key={item.version}>
+          <td>{item.version}</td>
           <td>{this.renderHumanState(item)}</td>
           <td className='action'>{this.renderAction(key, item)}</td>
         </tr>

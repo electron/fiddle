@@ -1,6 +1,6 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, GitHubVersion, OutputEntry, OutputOptions } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion, OutputEntry, OutputOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -14,7 +14,7 @@ import { addLocalVersion, ElectronReleaseChannel, getElectronVersions, getUpdate
 
 const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
-  || normalizeVersion(knownVersions[0].tag_name);
+  || normalizeVersion(knownVersions[0].version);
 
 /**
  * Editors exist outside of React's world. To make things *a lot*
@@ -45,9 +45,6 @@ export class AppState {
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
   @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic', true);
-  @observable public versionPagesToFetch: number = parseInt(
-    localStorage.getItem('versionPagesToFetch') || '2', 10
-  );
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow', true) as Array<ElectronReleaseChannel>
       || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
@@ -98,7 +95,6 @@ export class AppState {
     autorun(() => this.save('gitHubToken', this.gitHubToken));
     autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
     autorun(() => this.save('version', this.version));
-    autorun(() => this.save('versionPagesToFetch', this.versionPagesToFetch));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
 
     autorun(() => {
@@ -127,7 +123,7 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      const versions = await getUpdatedElectronVersions(this.versionPagesToFetch);
+      const versions = await getUpdatedElectronVersions();
       this.versions = arrayToStringMap(versions);
       await this.updateDownloadedVersionState();
     } catch (error) {
@@ -182,7 +178,7 @@ export class AppState {
     window.ElectronFiddle.app.setupTheme();
   }
 
-  @action public async addLocalVersion(input: GitHubVersion) {
+  @action public async addLocalVersion(input: NpmVersion) {
     addLocalVersion(input);
 
     this.versions = arrayToStringMap(getElectronVersions());
@@ -268,7 +264,7 @@ export class AppState {
 
     if (!this.versions[version]) {
       console.warn(`State: Called setVersion() with ${version}, which does not exist.`);
-      this.setVersion(knownVersions[0].tag_name);
+      this.setVersion(knownVersions[0].version);
 
       return;
     }

@@ -54,11 +54,11 @@ function getItemIcon({ state }: ElectronVersion) {
  * version.
  *
  * @param {string} query
- * @param {ElectronVersion} { tag_name }
+ * @param {ElectronVersion} { version }
  * @returns
  */
-const filterItem: ItemPredicate<ElectronVersion> = (query, { tag_name }) => {
-  return tag_name.toLowerCase().includes(query.toLowerCase());
+const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
+  return version.toLowerCase().includes(query.toLowerCase());
 };
 
 /**
@@ -78,8 +78,8 @@ const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifier
     <MenuItem
       active={modifiers.active}
       disabled={modifiers.disabled}
-      text={highlightText(item.tag_name, query)}
-      key={item.tag_name}
+      text={highlightText(item.version, query)}
+      key={item.version}
       onClick={handleClick}
       label={getItemLabel(item)}
       icon={getItemIcon(item)}
@@ -116,8 +116,8 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
    *
    * @param {React.ChangeEvent<HTMLSelectElement>} event
    */
-  public onItemSelect({ tag_name }: ElectronVersion) {
-    this.props.appState.setVersion(tag_name);
+  public onItemSelect({ version }: ElectronVersion) {
+    this.props.appState.setVersion(version);
   }
 
   public getItems(): Array<ElectronVersion> {

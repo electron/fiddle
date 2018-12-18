@@ -14,7 +14,7 @@ export function arrayToStringMap(
   const output = {};
 
   input.forEach((version) => {
-    const versionNumber = normalizeVersion(version.tag_name);
+    const versionNumber = normalizeVersion(version.version);
     output[versionNumber] = version;
   });
 
