@@ -18,7 +18,7 @@ exports[`AddressBar component renders 1`] = `
         text="Load Fiddle"
       />
     }
-    value={null}
+    value=""
   />
 </form>
 `;

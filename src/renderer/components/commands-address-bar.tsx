@@ -6,7 +6,7 @@ import * as React from 'react';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { classNames } from '../../utils/classnames';
 import { getTitle } from '../../utils/get-title';
-import { idFromUrl } from '../../utils/gist';
+import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
 
@@ -27,9 +27,10 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
 
-    this.state = {
-      value: this.props.appState.gistId
-    };
+    const { gistId } = this.props.appState;
+    const value = gistId ? urlFromId(gistId) : '';
+
+    this.state = { value };
   }
 
   /**
@@ -56,7 +57,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public componentDidMount() {
     reaction(
       () => this.props.appState.gistId,
-      (gistId: string) => this.setState({ value: gistId })
+      (gistId: string) => this.setState({ value: urlFromId(gistId) })
     );
   }
 
