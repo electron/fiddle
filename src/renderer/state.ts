@@ -44,6 +44,7 @@ export class AppState {
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
+  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic', true);
   @observable public versionPagesToFetch: number = parseInt(
     localStorage.getItem('versionPagesToFetch') || '2', 10
   );
@@ -89,12 +90,13 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
 
-    // Setup autoruns
+    // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
     autorun(() => this.save('gitHubToken', this.gitHubToken));
+    autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionPagesToFetch', this.versionPagesToFetch));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
@@ -419,7 +421,7 @@ export class AppState {
    * @param {string} key
    * @param {(string | number | object)} [value]
    */
-  private save(key: string, value?: string | number | object | null) {
+  private save(key: string, value?: string | number | object | null | boolean) {
     if (value) {
       const _value = typeof value === 'object'
         ? JSON.stringify(value)
