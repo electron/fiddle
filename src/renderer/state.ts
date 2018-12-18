@@ -264,7 +264,7 @@ export class AppState {
 
     if (!this.versions[version]) {
       console.warn(`State: Called setVersion() with ${version}, which does not exist.`);
-      this.setVersion(knownVersions[0].tag_name);
+      this.setVersion(knownVersions[0].version);
 
       return;
     }
