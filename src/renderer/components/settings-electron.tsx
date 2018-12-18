@@ -7,8 +7,7 @@ import {
   HTMLTable,
   IButtonProps,
   Icon,
-  IconName,
-  Slider
+  IconName
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
