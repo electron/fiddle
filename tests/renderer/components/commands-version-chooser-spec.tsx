@@ -25,7 +25,7 @@ describe('VersionChooser component', () => {
     const wrapper = shallow(<VersionChooser appState={store} />);
     const instance: VersionChooser = wrapper.instance() as any;
 
-    instance.onItemSelect({ tag_name: 'v2.0.1' } as any);
+    instance.onItemSelect({ version: 'v2.0.1' } as any);
 
     expect(store.setVersion).toHaveBeenCalledWith('v2.0.1');
   });

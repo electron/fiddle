@@ -19,7 +19,7 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
  * version.
  *
  * @param {string} query
- * @param {ElectronVersion} { tag_name }
+ * @param {ElectronVersion} { version }
  * @returns
  */
 const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {

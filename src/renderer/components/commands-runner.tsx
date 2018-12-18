@@ -145,7 +145,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     const { version, pushOutput, versions } = appState;
 
     const isLocal = versions[version] && versions[version].source === ElectronVersionSource.local;
-    const electronDir = isLocal ? versions[version].url : undefined;
+    const electronDir = isLocal ? versions[version].localPath : undefined;
     const binaryPath = appState.binaryManager.getElectronBinaryPath(version, electronDir);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
