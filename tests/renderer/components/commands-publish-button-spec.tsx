@@ -9,8 +9,20 @@ jest.mock('../../../src/utils/octokit');
 describe('Publish button component', () => {
   let store: any;
 
+  const expectedGistCreateOpts = {
+    description: 'Electron Fiddle Gist',
+    files: {
+      'index.html': { content: 'html-content' },
+      'renderer.js': { content: 'renderer-content' },
+      'main.js': { content: 'main-content' },
+    },
+    public: true
+  };
+
   beforeEach(() => {
-    store = {};
+    store = {
+      gitHubPublishAsPublic: true
+    };
   });
 
   it('renders', () => {
@@ -114,5 +126,37 @@ describe('Publish button component', () => {
 
     expect(mockOctokit.authenticate).toHaveBeenCalled();
     expect(wrapper.state('isPublishing')).toBe(false);
+  });
+
+  it('uses the privacy setting correctly', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        create: jest.fn(() => {
+          throw new Error('bwap bwap');
+        })
+      }
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<PublishButton appState={store} />);
+    const instance: PublishButton = wrapper.instance() as any;
+
+    instance.setPrivacy(false);
+    await instance.publishFiddle();
+
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+      ...expectedGistCreateOpts,
+      public: false,
+    });
+
+    instance.setPrivacy(true);
+    await instance.publishFiddle();
+
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+      ...expectedGistCreateOpts,
+      public: true,
+    });
   });
 });
