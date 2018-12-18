@@ -1,9 +1,9 @@
 /* tslint:disable */
 
 const path = require('path')
-const packackeJson = require('./package.json')
+const packageJson = require('./package.json')
 
-const { version } = packackeJson;
+const { version } = packageJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
 
 module.exports = {
@@ -38,18 +38,20 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
-      config: {
-        name: 'electron-fiddle',
-        authors: 'Electron Community',
-        exe: 'electron-fiddle.exe',
-        iconUrl: 'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
-        loadingGif: './assets/loading.gif',
-        noMsi: true,
-        remoteReleases: '',
-        setupExe: `electron-fiddle-${version}-setup.exe`,
-        setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-        certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
-        certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
+      config: arch => {
+        return {
+          name: 'electron-fiddle',
+          authors: 'Electron Community',
+          exe: 'electron-fiddle.exe',
+          iconUrl: 'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
+          loadingGif: './assets/loading.gif',
+          noMsi: true,
+          remoteReleases: '',
+          setupExe: `electron-fiddle-${version}-${arch}-setup.exe`,
+          setupIcon: path.resolve(iconDir, 'fiddle.ico'),
+          certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
+          certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
+        }
       }
     },
     {
