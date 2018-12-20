@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { AddVersionDialog } from './add-version-dialog';
+import { AddVersionDialog } from './dialog-add-version';
 import { TokenDialog } from './dialog-token';
 import { WarningDialog } from './dialog-warning';
 import { Settings } from './settings';

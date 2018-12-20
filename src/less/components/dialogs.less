@@ -10,10 +10,6 @@
   * {
     pointer-events: all;
   }
-
-  .generateTokenText svg {
-    margin-right: 4px;
-  }
 }
 
 .darwin {
@@ -171,31 +167,6 @@
     &:focus {
       border-color: @foreground-2;
     }
-
-    &.hasError {
-      border-color: #df3434;
-    }
-  }
-}
-
-.error-text {
-  margin: 0;
-  font-size: 14px;
-  color: #d73a49;
-}
-
-.tokenDialog {
-  .tokenSpinner {
-    position: absolute;
-    z-index: 3;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.8);
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
@@ -212,14 +183,13 @@
   opacity: 0.5;
 }
 
-.add-version-dialog {
-  label {
-    white-space: normal;
-    height: unset;
+.dialog-add-version {
+  .bp3-file-input {
+    width: 100%;
   }
 
-  input[type="file"] {
-    display: none;
+  .bp3-callout {
+    margin-top: 1rem;
   }
 }
 

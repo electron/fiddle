@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { AddVersionDialog } from '../../../src/renderer/components/add-version-dialog';
+import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('AddVersionDialog component', () => {
