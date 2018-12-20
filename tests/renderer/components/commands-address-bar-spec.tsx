@@ -11,7 +11,8 @@ describe('AddressBar component', () => {
 
   beforeEach(() => {
     store = {
-      gistId: null
+      gistId: null,
+      setWarningDialogTexts: jest.fn()
     };
   });
 
@@ -69,7 +70,6 @@ describe('AddressBar component', () => {
     const instance: AddressBar = wrapper.instance() as any;
 
     store.gistId = 'abcdtestid';
-    (global as any).window.confirm.mockReturnValueOnce(true);
 
     instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     await (wrapper.instance() as AddressBar).loadFiddle();

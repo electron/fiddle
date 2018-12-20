@@ -1,6 +1,14 @@
 import { action, autorun, observable } from 'mobx';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion, OutputEntry, OutputOptions } from '../interfaces';
+import {
+  ElectronVersion,
+  ElectronVersionSource,
+  ElectronVersionState,
+  NpmVersion,
+  OutputEntry,
+  OutputOptions,
+  WarningDialogTexts
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { getName } from '../utils/get-title';
@@ -10,7 +18,13 @@ import { ContentNames, getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-import { addLocalVersion, ElectronReleaseChannel, getElectronVersions, getUpdatedElectronVersions, saveLocalVersions } from './versions';
+import {
+  addLocalVersion,
+  ElectronReleaseChannel,
+  getElectronVersions,
+  getUpdatedElectronVersions,
+  saveLocalVersions
+} from './versions';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = localStorage.getItem('version')
@@ -58,10 +72,13 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | null = null;
   @observable public isUpdatingElectronVersions = false;
+  @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
+  @observable public warningDialogLastResult: boolean | null = null;
 
   // Various "isShowing" settings
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
+  @observable public isWarningDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
@@ -153,6 +170,14 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
+  @action public toogleWarningDialog() {
+    this.isWarningDialogShowing = !this.isWarningDialogShowing;
+
+    if (this.isWarningDialogShowing) {
+      this.warningDialogLastResult = null;
+    }
+  }
+
   @action public toggleSettings() {
     // We usually don't lose editor focus,
     // so you can still type. Let's force-blur.
@@ -176,6 +201,14 @@ export class AppState {
     this.theme = fileName || '';
     activateTheme(undefined, undefined, fileName);
     window.ElectronFiddle.app.setupTheme();
+  }
+
+  @action public setWarningDialogTexts(input: WarningDialogTexts) {
+    this.warningDialogTexts = {
+      ok: 'Okay',
+      cancel: 'Cancel',
+      ...input
+    };
   }
 
   @action public async addLocalVersion(input: NpmVersion) {
@@ -276,7 +309,7 @@ export class AppState {
     // Should we update the editor?
     if (await isContentUnchanged(ContentNames.MAIN)) {
       const main = await getContent(ContentNames.MAIN, version);
-      window.ElectronFiddle.app.setValues({ main });
+      window.ElectronFiddle.app.setValues({ main }, false);
     }
 
     // Update TypeScript definitions

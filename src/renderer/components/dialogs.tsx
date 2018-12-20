@@ -4,6 +4,7 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { AddVersionDialog } from './add-version-dialog';
 import { TokenDialog } from './dialog-token';
+import { WarningDialog } from './dialog-warning';
 import { Settings } from './settings';
 
 export interface DialogsProps {
@@ -36,6 +37,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
         {maybeToken}
         {maybeSettings}
         {maybeAddLocalVersion}
+        <WarningDialog appState={appState} />
       </div>
     );
   }

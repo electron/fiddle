@@ -79,14 +79,14 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public async loadFiddle(): Promise<boolean> {
     const { appState } = this.props;
 
-    if (!confirm('Are you sure you want to load a new fiddle, all current progress will be lost?')) {
-      return false;
-    }
-
     try {
       const octo = await getOctokit();
       const gist = await octo.gists.get({
         gist_id: appState.gistId
+      });
+
+      this.props.appState.setWarningDialogTexts({
+        label: 'Loading the fiddle will replace your current unsaved changes. Do you want to discard them?'
       });
 
       await window.ElectronFiddle.app.setValues({

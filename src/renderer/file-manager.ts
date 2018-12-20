@@ -72,6 +72,12 @@ export class FileManager {
     this.appState.gistId = '';
     this.appState.isMyGist = false;
     this.appState.localPath = filePath || null;
+
+    this.appState.setWarningDialogTexts({
+      label: `Opening this fiddle will replace your unsaved changes. Do you want to proceed?`,
+      ok: 'Yes'
+    });
+
     await window.ElectronFiddle.app.setValues(values);
     document.title = getTitle(this.appState);
   }

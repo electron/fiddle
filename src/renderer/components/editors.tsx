@@ -65,10 +65,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
 
+      this.props.appState.setWarningDialogTexts({
+        label: 'Your current fiddle is unsaved. Do you want to discard it?'
+      });
+
       window.ElectronFiddle.app.setValues({
         html: await getContent(ContentNames.HTML, version),
         renderer: await getContent(ContentNames.RENDERER, version),
-        main: await getContent(ContentNames.MAIN, version)
+        main: await getContent(ContentNames.MAIN, version),
       });
     });
 
