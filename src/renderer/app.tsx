@@ -1,3 +1,4 @@
+import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { EditorValues } from '../interfaces';
@@ -28,17 +29,22 @@ export class App {
    * Sets the values on all three editors.
    *
    * @param {EditorValues} values
+   * @param {warn} warn - Should we warn before overwriting unsaved data?
    */
-  public async setValues(values: Partial<EditorValues>): Promise<boolean> {
+  public async setValues(values: Partial<EditorValues>, warn: boolean = true): Promise<boolean> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
       throw new Error('Fiddle not ready');
     }
 
-    if (appState.isUnsaved) {
-      const isUserSure = confirm('Your current fiddle is unsaved. Are you sure you want to overwrite it?');
-      if (!isUserSure) return false;
+    if (appState.isUnsaved && warn) {
+      this.state.isWarningDialogShowing = true;
+      await when(() => !this.state.isWarningDialogShowing);
+
+      if (!this.state.warningDialogLastResult) {
+        return false;
+      }
     }
 
     const { main, html, renderer } = fiddle.editors;

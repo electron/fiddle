@@ -4,5 +4,20 @@ exports[`Dialogs component renders initially without visible dialogs 1`] = `
 <div
   className="dialogs"
   key="dialogs"
-/>
+>
+  <WarningDialog
+    appState={
+      Object {
+        "isAddVersionDialogShowing": false,
+        "isSettingsShowing": false,
+        "isTokenDialogShowing": false,
+        "warningDialogTexts": Object {
+          "cancel": "",
+          "label": "",
+          "ok": "",
+        },
+      }
+    }
+  />
+</div>
 `;

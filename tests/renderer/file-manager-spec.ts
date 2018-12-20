@@ -17,7 +17,7 @@ jest.mock('../../src/renderer/templates', () => ({
     renderer: ''
   })
 }));
-jest.mock('../../src/renderer/state');
+
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p)
 }));
@@ -29,7 +29,9 @@ describe('FileManager', () => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
 
-    fm = new FileManager({} as any);
+    fm = new FileManager({
+      setWarningDialogTexts: jest.fn()
+    } as any);
   });
 
   afterEach(() => {
@@ -53,7 +55,7 @@ describe('FileManager', () => {
       expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({
         html: '',
         renderer: '',
-        main: ''
+        main: '',
       });
     });
 

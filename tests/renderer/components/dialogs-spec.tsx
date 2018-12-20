@@ -18,6 +18,7 @@ describe('Dialogs component', () => {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       isAddVersionDialogShowing: false,
+      warningDialogTexts: { label: '', ok: '', cancel: '' }
     };
   });
 
@@ -34,18 +35,18 @@ describe('Dialogs component', () => {
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<TokenDialog />');
+    expect(wrapper.text()).toBe('<TokenDialog /><WarningDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<Settings />');
+    expect(wrapper.text()).toBe('<Settings /><WarningDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isAddVersionDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<AddVersionDialog />');
+    expect(wrapper.text()).toBe('<AddVersionDialog /><WarningDialog />');
   });
 });

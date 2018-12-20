@@ -43,6 +43,11 @@ export interface OutputOptions {
   isNotPre?: boolean;
 }
 
+export interface WarningDialogTexts {
+  ok?: string;
+  cancel?: string;
+  label: string;
+}
 
 export interface Templates {
   [index: string]: string | Templates;
