@@ -86,7 +86,6 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
-  private isClosing = false;
 
   constructor() {
     // Bind all actions
@@ -124,7 +123,6 @@ export class AppState {
           });
 
           this.isWarningDialogShowing = true;
-          this.isClosing = true;
 
           // We'll wait until the warning dialog was closed
           when(() => !this.isWarningDialogShowing).then(() => {
