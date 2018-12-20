@@ -1,4 +1,4 @@
-import { action, autorun, observable } from 'mobx';
+import { action, autorun, observable, when } from 'mobx';
 
 import {
   ElectronVersion,
@@ -86,6 +86,7 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
+  private isClosing = false;
 
   constructor() {
     // Bind all actions
@@ -117,11 +118,24 @@ export class AppState {
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
-          const result = !confirm('The current Fiddle is unsaved. Do you want to exit anyway?');
+          this.setWarningDialogTexts({
+            label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
+            ok: 'Quit'
+          });
 
-          if (result) {
-            window.close();
-          }
+          this.isWarningDialogShowing = true;
+          this.isClosing = true;
+
+          // We'll wait until the warning dialog was closed
+          when(() => !this.isWarningDialogShowing).then(() => {
+            // The user confirmed, let's close for real.
+            if (this.warningDialogLastResult) {
+              window.onbeforeunload = null;
+              window.close();
+            }
+          });
+
+          return false;
         };
       } else {
         window.onbeforeunload = null;
