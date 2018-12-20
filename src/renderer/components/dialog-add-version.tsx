@@ -1,3 +1,5 @@
+
+import { Button, Callout, Dialog, FileInput, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -6,7 +8,6 @@ import * as semver from 'semver';
 import { NpmVersion } from '../../interfaces';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
-import { Dialog } from './dialog';
 
 export interface AddVersionDialogProps {
   appState: AppState;
@@ -47,8 +48,8 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public async onChangeFile(event: React.ChangeEvent<HTMLInputElement>) {
-    const { files } = event.target;
+  public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
+    const { files } = event.target as any;
     const { binaryManager } = this.props.appState;
     const file = files && files[0] ? files[0] : undefined;
 
@@ -120,54 +121,55 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
 
     return [
       (
-        <button
-          className='button'
+        <Button
+          icon='add'
           key='submit'
           disabled={!canSubmit}
           onClick={this.onSubmit}
-        >
-          Add
-        </button>
+          text='Add'
+        />
       ), (
-        <button
-          className='cancel'
+        <Button
+          icon='cross'
           key='cancel'
           onClick={this.onClose}
-        >
-          Cancel
-        </button>
+          text='Cancel'
+        />
       )
     ];
   }
 
   public render() {
     const { isAddVersionDialogShowing } = this.props.appState;
-    const dirOptions = { webkitdirectory: 'true' };
+    const inputProps = { webkitdirectory: 'true' };
+    const { file } = this.state;
+
+    const text = file && file.path
+      ? file.path
+      : `Select the folder containing ${getElectronNameForPlatform()}...`;
 
     return (
       <Dialog
-        isShowing={isAddVersionDialogShowing}
-        isShowingBackdrop={true}
-        buttons={this.buttons}
+        isOpen={isAddVersionDialogShowing}
         onClose={this.onClose}
-        isCentered={true}
-        className='add-version-dialog'
-        key='add-version-dialog'
+        title='Add local Electron build'
+        className='dialog-add-version'
       >
-        <label
-          htmlFor='custom-electron-version'
-          className='force-button'
-        >
-          Select the folder containing {getElectronNameForPlatform()}
-        </label>
-        <input
-          type='file'
-          onChange={this.onChangeFile}
-          id='custom-electron-version'
-          name='custom-electron-version'
-          {...dirOptions}
-        />
-        {this.renderPath()}
+        <div className='bp3-dialog-body'>
+          <FileInput
+            onInputChange={this.onChangeFile}
+            id='custom-electron-version'
+            inputProps={inputProps as any}
+            text={text}
+          />
+          <br />
+          {this.renderPath()}
+        </div>
+        <div className='bp3-dialog-footer'>
+          <div className='bp3-dialog-footer-actions'>
+            {this.buttons}
+          </div>
+        </div>
       </Dialog>
     );
   }
@@ -182,16 +184,10 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       : `We did not find a ${getElectronNameForPlatform()} in this folder...`;
 
     return (
-      <>
-        <input
-          readOnly={true}
-          value={file.path}
-        />
-        <p>
-          {info}
-        </p>
+      <Callout>
+        {info}
         {this.renderVersionInput()}
-      </>
+      </Callout>
     );
   }
 
@@ -206,8 +202,8 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
           Please specify a version, used for typings and the name.
           Must be <code>semver</code> compliant.
         </p>
-        <input
-          className={isValidVersion ? '' : 'hasError'}
+        <InputGroup
+          intent={isValidVersion ? undefined : Intent.DANGER}
           value={version}
           onChange={this.onChangeVersion}
           placeholder='4.0.0'
