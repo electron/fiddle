@@ -1,4 +1,4 @@
-import { Callout, Card, Checkbox, FormGroup } from '@blueprintjs/core';
+import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 

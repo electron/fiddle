@@ -35,6 +35,18 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
       <Blueprint3.MenuItem
         active={false}
         disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
         icon="heart"
         id="settings-link-Credits"
         key="Credits"
@@ -91,6 +103,18 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
         popoverProps={Object {}}
         shouldDismissPopover={true}
         text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
       />
       <Blueprint3.MenuItem
         active={true}
@@ -162,6 +186,18 @@ exports[`CreditsSettings component renders the Electron page after a click 1`] =
       <Blueprint3.MenuItem
         active={false}
         disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
         icon="heart"
         id="settings-link-Credits"
         key="Credits"
@@ -229,6 +265,18 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
       <Blueprint3.MenuItem
         active={false}
         disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
         icon="heart"
         id="settings-link-Credits"
         key="Credits"
@@ -292,6 +340,18 @@ exports[`CreditsSettings component renders the General page after a click 1`] = 
         popoverProps={Object {}}
         shouldDismissPopover={true}
         text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
       />
       <Blueprint3.MenuItem
         active={false}

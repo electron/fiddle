@@ -40,6 +40,7 @@ describe('Runner component', () => {
         getIsDownloaded: jest.fn(() => true),
         getElectronBinaryPath: jest.fn((version: string) => `/fake/path/${version}/electron`)
       },
+      getName: async () => 'test-app-name'
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();
@@ -74,7 +75,6 @@ describe('Runner component', () => {
   });
 
   it('stops on close', async () => {
-
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
     (spawn as any).mockReturnValueOnce(mockChild);
 
@@ -93,6 +93,20 @@ describe('Runner component', () => {
     expect(await instance.run()).toBe(true);
     mockChild.emit('close', 0);
     expect(store.isRunning).toBe(false);
+  });
+
+  it('cleans the app data dir after a run', async (done) => {
+    (spawn as any).mockReturnValueOnce(mockChild);
+    expect(await instance.run()).toBe(true);
+    mockChild.emit('close', 0);
+
+    process.nextTick(() => {
+      expect(window.ElectronFiddle.app.fileManager.cleanup)
+      .toHaveBeenCalledTimes(2);
+      expect(window.ElectronFiddle.app.fileManager.cleanup)
+        .toHaveBeenLastCalledWith('/test-path/test-app-name');
+      done();
+    });
   });
 
   it('does not run version not yet downloaded', async () => {

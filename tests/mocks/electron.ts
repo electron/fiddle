@@ -95,7 +95,7 @@ const app = {
     removedItems: []
   })),
   getLoginItemSettings: jest.fn(),
-  getPath: jest.fn(),
+  getPath: () => '/test-path',
   quit: jest.fn(),
   relaunch: jest.fn(),
   setJumpList: jest.fn(),
