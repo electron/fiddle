@@ -19,6 +19,7 @@ const CONTRIBUTORS_WHITELIST = [
   'zeke',
   'charliehess',
   'marshallofsound',
+  'codebytere',
   'felixrieseberg',
   'nctl144',
   'benicheni',
