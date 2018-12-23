@@ -62,6 +62,7 @@ export class AppState {
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow', true) as Array<ElectronReleaseChannel>
       || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs', true);
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
 
@@ -112,6 +113,7 @@ export class AppState {
     autorun(() => this.save('gitHubName', this.gitHubName));
     autorun(() => this.save('gitHubToken', this.gitHubToken));
     autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
+    autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
 

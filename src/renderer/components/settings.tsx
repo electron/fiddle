@@ -1,21 +1,24 @@
-import { Icon, MenuItem } from '@blueprintjs/core';
+import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
+import { ExecutionSettings } from './settings-execution';
 import { GeneralSettings } from './settings-general';
 
 enum SettingsSections {
   General = 'General',
   Electron = 'Electron',
+  Execution = 'Execution',
   Credits = 'Credits'
 }
 
 const settingsSections = [
   SettingsSections.General,
   SettingsSections.Electron,
+  SettingsSections.Execution,
   SettingsSections.Credits
 ];
 
@@ -59,6 +62,10 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     if (section === SettingsSections.Electron) {
       return <ElectronSettings appState={appState} />;
+    }
+
+    if (section === SettingsSections.Execution) {
+      return <ExecutionSettings appState={appState} />;
     }
 
     if (section === SettingsSections.Credits) {
@@ -120,11 +127,13 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
    * @param {SettingsSections} section
    * @memberof Settings
    */
-  private getIconForSection(section: SettingsSections) {
+  private getIconForSection(section: SettingsSections): IconName {
     if (section === SettingsSections.Credits) {
       return 'heart';
     } else if (section === SettingsSections.Electron) {
       return 'floppy-disk';
+    } else if (section === SettingsSections.Execution) {
+      return 'play';
     }
 
     return 'cog';

@@ -3,6 +3,7 @@ import * as path from 'path';
 
 import { EditorValues, ElectronVersionSource, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { ipcRendererManager } from './ipc';
@@ -187,7 +188,7 @@ export class Runner {
 
     this.child.stdout.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
     this.child.stderr.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
-    this.child.on('close', (code) => {
+    this.child.on('close', async (code) => {
       const withCode = typeof code === 'number'
         ? ` with code ${code.toString()}.`
         : `.`;
@@ -195,7 +196,10 @@ export class Runner {
       pushOutput(`Electron exited${withCode}`);
       this.appState.isRunning = false;
       this.child = null;
-      window.ElectronFiddle.app.fileManager.cleanup(dir);
+
+      // Clean older folders
+      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await this.deleteUserData();
     });
   }
 
@@ -243,5 +247,21 @@ export class Runner {
     }
 
     return false;
+  }
+
+  /**
+   * Deletes the user data dir after a run.
+   */
+  public async deleteUserData() {
+    if (this.appState.isKeepingUserDataDirs) {
+      console.log(`Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`);
+      return;
+    }
+
+    const name = await this.appState.getName();
+    const appData = getAppDataDir(name);
+
+    console.log(`Cleanup: Deleting data dir ${appData}`);
+    await window.ElectronFiddle.app.fileManager.cleanup(appData);
   }
 }
