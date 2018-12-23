@@ -1,9 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Runner component renders 1`] = `
+exports[`Runner component renders default 1`] = `
 <Blueprint3.Button
   icon="play"
-  onClick={[Function]}
+  onClick={[MockFunction]}
   text="Run"
+/>
+`;
+
+exports[`Runner component renders running 1`] = `
+<Blueprint3.Button
+  active={true}
+  icon="stop"
+  onClick={[MockFunction]}
+  text="Stop"
 />
 `;

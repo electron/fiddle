@@ -44,7 +44,7 @@ async function maybeFetchContributors() {
       // File does not exist, move to fetch right away
       await fetchAndWriteContributorsFile();
     } else if (error) {
-      throw error;
+      console.log(process.env)
     };
   };
 }

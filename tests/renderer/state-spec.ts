@@ -167,25 +167,25 @@ describe('AppState', () => {
     it('takes a fancy buffer and turns it into output', () => {
       appState.pushOutput(Buffer.from('hi'));
 
-      expect(appState.output[0].text).toBe('hi');
-      expect(appState.output[0].timestamp).toBeTruthy();
+      expect(appState.output[1].text).toBe('hi');
+      expect(appState.output[1].timestamp).toBeTruthy();
     });
 
     it('ignores the "Debuggeer listening on..." output', () => {
       appState.pushOutput('Debugger listening on ws://localhost:123');
-      expect(appState.output.length).toBe(0);
+      expect(appState.output.length).toBe(1);
     });
 
     it('ignores the "For help see..." output', () => {
       appState.pushOutput('For help see https://nodejs.org/en/docs/inspector');
-      expect(appState.output.length).toBe(0);
+      expect(appState.output.length).toBe(1);
     });
 
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
       appState.pushOutput(Buffer.from('Buffer\r\nStuff'), { bypassBuffer: false });
-      expect(appState.output[0].text).toBe('Buffer');
+      expect(appState.output[1].text).toBe('Buffer');
 
       resetPlatform();
     });
@@ -195,8 +195,8 @@ describe('AppState', () => {
     it('pushes an error', () => {
       appState.pushError('Bwap bwap', new Error('Bwap bwap'));
 
-      expect(appState.output[0].text).toBe('⚠️ Bwap bwap. Error encountered:');
-      expect(appState.output[1].text).toBe('Error: Bwap bwap');
+      expect(appState.output[1].text).toBe('⚠️ Bwap bwap. Error encountered:');
+      expect(appState.output[2].text).toBe('Error: Bwap bwap');
     });
   });
 });

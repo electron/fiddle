@@ -74,6 +74,7 @@ export class AppState {
   @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
+  @observable public isRunning = false;
 
   // Various "isShowing" settings
   @observable public isConsoleShowing: boolean = false;
@@ -142,6 +143,9 @@ export class AppState {
 
     // Update our known versions
     this.updateElectronVersions();
+
+    // Make sure the console isn't all empty and sad
+    this.pushOutput('Console ready 🔬');
   }
 
   /**
