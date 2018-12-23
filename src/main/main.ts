@@ -1,5 +1,5 @@
-import { app } from 'electron';
-
+import { app, dialog } from 'electron';
+import { isFirstRun } from '../utils/check-first-run';
 import { isDevMode } from '../utils/devmode';
 import { setupDialogs } from './dialogs';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
@@ -16,11 +16,8 @@ app.setName('Electron Fiddle');
 listenForProtocolHandler();
 
 app.on('ready', async () => {
-  // If we're packaged, we want to run
-  // React in production mode.
-  if (!isDevMode()) {
-    process.env.NODE_ENV = 'production';
-  }
+  if (isFirstRun()) promptMoveToApplicationsFolder();
+  if (!isDevMode()) process.env.NODE_ENV = 'production';
 
   getOrCreateMainWindow();
 
@@ -33,6 +30,20 @@ app.on('ready', async () => {
   setupUpdates();
   setupDialogs();
 });
+
+function promptMoveToApplicationsFolder() {
+  if (!isDevMode() && !app.isInApplicationsFolder()) return;
+
+  dialog.showMessageBox({
+    type: 'question',
+    buttons: ['Move to Applications Folder', 'Do Not Move'],
+    defaultId: 0,
+    message: 'Move to Applications Folder?',
+  }, (response) => {
+    if (response !== 0) return;
+    app.moveToApplicationsFolder();
+  });
+}
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {

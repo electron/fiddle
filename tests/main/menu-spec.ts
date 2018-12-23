@@ -78,7 +78,7 @@ describe('menu', () => {
         help = menu[menu.length - 1];
       });
 
-      it('hows the welcome tour', () => {
+      it('shows the welcome tour', () => {
         help.submenu[1].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.SHOW_WELCOME_TOUR);
       });
