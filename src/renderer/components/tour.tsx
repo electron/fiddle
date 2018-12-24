@@ -1,12 +1,12 @@
-import { Button } from '@blueprintjs/core';
+import { Button, Classes, Dialog } from '@blueprintjs/core';
 import * as React from 'react';
 
-import { invertPosition, positionForRect } from '../../utils/position-for-rect';
-import { Dialog } from './dialog';
+import { positionForRect } from '../../utils/position-for-rect';
 
 export interface TourScriptStep {
   name: string;
   selector: string;
+  title: string;
   content: JSX.Element;
   getButtons?: (handlers: TourStepGetButtonParams) => Array<JSX.Element>;
 }
@@ -118,12 +118,29 @@ export class Tour extends React.Component<TourProps, TourState> {
 
     // No? Fine! Are we at the end of the tour?
     return this.props.tour.size === this.state.i
-      ? [
-        <Button onClick={this.stop} key='btn-stop' text='Finish Tour' />
-      ]
-      : [
-        <Button key='btn-stop' onClick={this.stop} text='Stop Tour' />,
-        <Button key='btn-adv' onClick={this.advance} text='Continue' />
+      ? [(
+        <Button
+          icon='tick-circle'
+          onClick={this.stop}
+          key='btn-stop'
+          text='Finish Tour'
+        />
+      )] : [
+        (
+          <Button
+            icon='stop'
+            key='btn-stop'
+            onClick={this.stop}
+            text='Stop Tour'
+          />
+        ), (
+          <Button
+            icon='step-forward'
+            key='btn-adv'
+            onClick={this.advance}
+            text='Continue'
+          />
+        )
       ];
   }
 
@@ -144,13 +161,31 @@ export class Tour extends React.Component<TourProps, TourState> {
       top: position.top,
       left: position.left,
       width: size.width - margin,
-      margin: `${margin}px`
+      margin: `${margin}px`,
+      zIndex: 1000
     };
-    const arrow = invertPosition(position.type);
 
     return (
-      <Dialog key={step.name} buttons={buttons} style={style} arrow={arrow}>
-        {step.content}
+      <Dialog
+        key={step.name}
+        isOpen={true}
+        style={style}
+        portalClassName='tour-portal'
+        backdropProps={{ style: { visibility: 'hidden' }}}
+      >
+        <div className={Classes.DIALOG_HEADER}>
+          <h4 className={Classes.HEADING}>
+            {step.title}
+          </h4>
+        </div>
+        <div className={Classes.DIALOG_BODY}>
+          {step.content}
+        </div>
+        <div className={Classes.DIALOG_FOOTER}>
+          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+            {buttons}
+          </div>
+        </div>
       </Dialog>
     );
   }
