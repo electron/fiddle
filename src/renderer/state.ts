@@ -62,6 +62,7 @@ export class AppState {
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow', true) as Array<ElectronReleaseChannel>
       || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs', true);
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
 
@@ -74,6 +75,7 @@ export class AppState {
   @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
+  @observable public isRunning = false;
 
   // Various "isShowing" settings
   @observable public isConsoleShowing: boolean = false;
@@ -111,6 +113,7 @@ export class AppState {
     autorun(() => this.save('gitHubName', this.gitHubName));
     autorun(() => this.save('gitHubToken', this.gitHubToken));
     autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
+    autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
 
@@ -142,6 +145,9 @@ export class AppState {
 
     // Update our known versions
     this.updateElectronVersions();
+
+    // Make sure the console isn't all empty and sad
+    this.pushOutput('Console ready 🔬');
   }
 
   /**

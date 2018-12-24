@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ExecutionSettings component renders 1`] = `
+<div>
+  <h2>
+    Exection
+  </h2>
+  <Blueprint3.Callout>
+    These advanced settings control how Electron Fiddle executes your fiddles.
+  </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Whenever Electron runs, it creates a user data directory for cookies, the cache,
+      and various other things that it needs to keep around. Since fiddles are usually
+      just run once, we delete this directory after your fiddle exits. Enable this
+      setting to keep the user data directories around."
+    >
+      <Blueprint3.Checkbox
+        label="Do not delete user data directories."
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;

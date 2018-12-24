@@ -5,6 +5,7 @@ import { EditorValues } from '../interfaces';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
+import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 
@@ -19,6 +20,7 @@ export class App {
   public monaco: typeof MonacoType | null = null;
   public state = appState;
   public fileManager = new FileManager(appState);
+  public runner = new Runner(appState);
 
   constructor() {
     this.getValues = this.getValues.bind(this);
