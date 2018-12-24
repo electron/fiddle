@@ -1,4 +1,4 @@
-import { shallow, render, mount } from 'enzyme';
+import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Tour } from '../../../src/renderer/components/tour';

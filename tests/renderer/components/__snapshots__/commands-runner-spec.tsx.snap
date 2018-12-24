@@ -2,6 +2,7 @@
 
 exports[`Runner component renders default 1`] = `
 <Blueprint3.Button
+  className="button-run"
   icon="play"
   onClick={[MockFunction]}
   text="Run"
@@ -11,6 +12,7 @@ exports[`Runner component renders default 1`] = `
 exports[`Runner component renders running 1`] = `
 <Blueprint3.Button
   active={true}
+  className="button-run"
   icon="stop"
   onClick={[MockFunction]}
   text="Stop"
