@@ -3,8 +3,8 @@
 const path = require('path')
 const packageJson = require('./package.json')
 
-const { version } = packageJson;
-const iconDir = path.resolve(__dirname, 'assets', 'icons');
+const { version } = packageJson
+const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
 module.exports = {
   hooks: {
@@ -38,7 +38,7 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
-      config: arch => {
+      config: (arch) => {
         return {
           name: 'electron-fiddle',
           authors: 'Electron Community',
@@ -80,6 +80,7 @@ module.exports = {
           owner: 'electron',
           name: 'fiddle'
         },
+        draft: true,
         prerelease: true
       }
     }

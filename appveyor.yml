@@ -14,7 +14,11 @@ cache:
   - '%APPDATA%\npm-cache -> appveyor.yml'
 
 test_script:
+  - node --version
+  - npm --version
   - npm run lint
   - npm run test
+  - if %APPVEYOR_REPO_TAG% EQU false npm run make
 
-build: off
+build_script:
+  - if %APPVEYOR_REPO_TAG% EQU true npm run publish
