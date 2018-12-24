@@ -1,3 +1,4 @@
+import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -103,8 +104,8 @@ function getWelcomeTour(): Set<TourScriptStep> {
       ),
       getButtons: ({ stop, advance }: TourStepGetButtonParams): Array<JSX.Element> => {
         return [
-          <button key='btn-stop' onClick={stop}>I'm good!</button>,
-          <button key='btn-adv' onClick={advance}>Electron Basics</button>
+          <Button key='btn-stop' onClick={stop} text={`I'm good!`} />,
+          <Button key='btn-adv' onClick={advance} text='Electron Basics' />
         ];
       }
     },
@@ -214,8 +215,8 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
 
     if (!isTourStarted) {
       const buttons = [
-        <button key='cancel' className='btn-close' onClick={this.stopTour}>I'll figure it out</button>,
-        <button key='ok' className='btn-ok' onClick={this.startTour}>Show me around</button>
+        <Button key='cancel' onClick={this.stopTour} text={`I'll figure it out`} />,
+        <Button key='ok' onClick={this.startTour} text='Show me around' />
       ];
 
       return (

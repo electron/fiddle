@@ -1,4 +1,6 @@
+import { Button } from '@blueprintjs/core';
 import * as React from 'react';
+
 import { invertPosition, positionForRect } from '../../utils/position-for-rect';
 import { Dialog } from './dialog';
 
@@ -117,11 +119,11 @@ export class Tour extends React.Component<TourProps, TourState> {
     // No? Fine! Are we at the end of the tour?
     return this.props.tour.size === this.state.i
       ? [
-        <button key='btn-stop' className='btn-stop' onClick={this.stop}>Finish Tour</button>
+        <Button onClick={this.stop} key='btn-stop' text='Finish Tour' />
       ]
       : [
-        <button key='btn-stop' className='btn-stop' onClick={this.stop}>Stop Tour</button>,
-        <button key='btn-adv' className='btn-adv' onClick={this.advance}>Continue</button>
+        <Button key='btn-stop' onClick={this.stop} text='Stop Tour' />,
+        <Button key='btn-adv' onClick={this.advance} text='Continue' />
       ];
   }
 
