@@ -3,9 +3,18 @@ environment:
     - nodejs_version: "8"
 
 init:
-  - git config --global core.symlinks true
+- git config --global core.symlinks true
 
 install:
+  # Setup the code signing certificate
+  - ps: >-
+      if (Test-Path $env:WINDOWS_CERTIFICATE_P12) {
+        $filename = Convert-Path .\cert.p12
+        $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_P12)
+        [IO.File]::WriteAllBytes($filename, $bytes)
+
+        $env:WINDOWS_CERTIFICATE_FILE = $filename
+      }
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
   - npm ci
