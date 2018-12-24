@@ -1,6 +1,7 @@
 /* tslint:disable */
 
 const path = require('path')
+const fs = require('fs')
 const packageJson = require('./package.json')
 
 const { version } = packageJson
@@ -39,6 +40,14 @@ module.exports = {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
       config: (arch) => {
+        const certificateFile = process.env.CI
+          ? path.join(__dirname, 'cert.p12')
+          : process.env.WINDOWS_CERTIFICATE_FILE;
+
+        if (!certificateFile || !fs.existsSync(certificateFile)) {
+          console.warn(`Warning: Could not find certificate file at ${certificateFile}`)
+        }
+
         return {
           name: 'electron-fiddle',
           authors: 'Electron Community',
@@ -49,8 +58,8 @@ module.exports = {
           remoteReleases: '',
           setupExe: `electron-fiddle-${version}-${arch}-setup.exe`,
           setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-          certificateFile: process.env.WINDOWS_CERTIFICATE_FILE,
-          certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD
+          certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD,
+          certificateFile
         }
       }
     },
