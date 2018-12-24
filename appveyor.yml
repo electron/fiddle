@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - nodejs_version: "8"
+    - nodejs_version: ""
 
 init:
 - git config --global core.symlinks true
@@ -22,12 +22,17 @@ install:
 cache:
   - '%APPDATA%\npm-cache -> appveyor.yml'
 
+artifacts:
+  - path: out/make/
+    name: MyApp
+
 test_script:
   - node --version
   - npm --version
   - npm run lint
   - npm run test
-  - if %APPVEYOR_REPO_TAG% EQU false npm run make
 
 build_script:
+  - if %APPVEYOR_REPO_TAG% EQU false npm run make
   - if %APPVEYOR_REPO_TAG% EQU true npm run publish
+  - ps: Tree ./out/make /F
