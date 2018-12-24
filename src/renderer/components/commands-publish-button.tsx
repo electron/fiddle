@@ -142,7 +142,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     );
 
     return (
-      <ButtonGroup>
+      <ButtonGroup className='button-publish'>
         <Popover
           content={privacyMenu}
           position={Position.BOTTOM}

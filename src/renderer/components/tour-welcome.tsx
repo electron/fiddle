@@ -43,7 +43,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'select-versions',
-      selector: 'select.select-versions',
+      selector: 'button.version-chooser',
       content: (
         <div>
           <h4>📇 Choose an Electron Version</h4>
@@ -60,7 +60,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'button-run',
-      selector: 'button.button-run',
+      selector: '.button-run',
       content: (
         <div>
           <h4>🚀 Run Your Fiddle</h4>
@@ -72,7 +72,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'button-publish',
-      selector: 'button.button-publish',
+      selector: '.button-publish',
       content: (
         <div>
           <h4>🗺 Share Your Fiddle</h4>
