@@ -1,6 +1,6 @@
 environment:
   matrix:
-    - nodejs_version: ""
+    - nodejs_version: "10"
 
 init:
 - git config --global core.symlinks true
