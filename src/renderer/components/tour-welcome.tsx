@@ -1,8 +1,8 @@
+import { Button, Classes, Dialog } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { Dialog } from './dialog';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
 
 export interface WelcomeTourProps {
@@ -24,9 +24,9 @@ function getWelcomeTour(): Set<TourScriptStep> {
     {
       name: 'fiddle-editors',
       selector: 'div.mosaic-root',
+      title: '📝 Fiddle Editors',
       content: (
-        <div>
-          <h4>📝 Fiddle Editors</h4>
+        <>
           <p>
             Electron Fiddle allows you to build little experiments and mini-apps with
             Electron. Each Fiddle has three files: A main script, a renderer script,
@@ -37,15 +37,15 @@ function getWelcomeTour(): Set<TourScriptStep> {
             it automatically. It will also automatically provide you with autocomplete
             information for the <code>electron</code> module.
           </p>
-        </div>
+        </>
       )
     },
     {
       name: 'select-versions',
-      selector: 'select.select-versions',
+      selector: 'button.version-chooser',
+      title: '📇 Choose an Electron Version',
       content: (
-        <div>
-          <h4>📇 Choose an Electron Version</h4>
+        <>
           <p>
             Electron Fiddle knows about all released Electron versions, downloading
             your versions automatically in the background.
@@ -54,27 +54,25 @@ function getWelcomeTour(): Set<TourScriptStep> {
             Open the preferences to see all available versions and delete those previously
             downloaded.
           </p>
-        </div>
+        </>
       )
     },
     {
       name: 'button-run',
-      selector: 'button.button-run',
+      selector: '.button-run',
+      title: '🚀 Run Your Fiddle',
       content: (
-        <div>
-          <h4>🚀 Run Your Fiddle</h4>
-          <p>
-            Hit this button to give your Fiddle a try and start it.
-          </p>
-        </div>
+        <p>
+          Hit this button to give your Fiddle a try and start it.
+        </p>
       )
     },
     {
       name: 'button-publish',
-      selector: 'button.button-publish',
+      selector: '.button-publish',
+      title: '🗺 Share Your Fiddle',
       content: (
-        <div>
-          <h4>🗺 Share Your Fiddle</h4>
+        <>
           <p>
             Like what you've built? You can save your Fiddle as a public GitHub Gist,
             allowing other users to load it by pasting the URL into the address bar.
@@ -85,35 +83,33 @@ function getWelcomeTour(): Set<TourScriptStep> {
             You can also package your Fiddle as a standalone binary or as an installer
             from the "Tasks" menu.
           </p>
-        </div>
+        </>
       )
     },
     {
       name: 'first-time-electron',
       selector: 'div.mosaic-root',
+      title: '👋 Getting Started With Electron?',
       content: (
-        <div>
-          <h4>👋 Getting Started With Electron?</h4>
-          <p>
-            We've finished our tour of Electron Fiddle, but if this is your
-            first time using Electron, we could introduce you to its basics.
-            Interested?
-          </p>
-        </div>
+        <p>
+          We've finished our tour of Electron Fiddle, but if this is your
+          first time using Electron, we could introduce you to its basics.
+          Interested?
+        </p>
       ),
       getButtons: ({ stop, advance }: TourStepGetButtonParams): Array<JSX.Element> => {
         return [
-          <button key='btn-stop' onClick={stop}>I'm good!</button>,
-          <button key='btn-adv' onClick={advance}>Electron Basics</button>
+          <Button key='btn-stop' onClick={stop} text={`I'm good!`} icon='stop' />,
+          <Button key='btn-adv' onClick={advance} text='Electron Basics' icon='help' />
         ];
       }
     },
     {
       name: 'main-editor',
       selector: 'div.mosaic-window.main',
+      title: '📝 Main Script',
       content: (
-        <div>
-          <h4>📝 Main Script</h4>
+        <>
           <p>
             Every Electron app starts with a main script, very similar to how
             a Node.js application is started. The main script runs in the "main
@@ -131,32 +127,30 @@ function getWelcomeTour(): Set<TourScriptStep> {
             The default fiddle creates a new <code>BrowserWindow</code> and loads
             an HTML file.
           </p>
-        </div>
+        </>
       )
     },
     {
       name: 'html-editor',
       selector: 'div.mosaic-window.html',
+      title: '📝 HTML',
       content: (
-        <div>
-          <h4>📝 HTML</h4>
-          <p>
-            In the default fiddle, this HTML file is loaded in the
-            <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
-            in a browser will work here, too. In addition, Electron allows you
-            to execute Node.js code. Take a close look at the
-             <code>&lt;script /&gt;</code> tag and notice how we can call <code>
-            require()</code> like we would in Node.js.
-          </p>
-        </div>
+        <p>
+          In the default fiddle, this HTML file is loaded in the
+          <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
+          in a browser will work here, too. In addition, Electron allows you
+          to execute Node.js code. Take a close look at the
+            <code>&lt;script /&gt;</code> tag and notice how we can call <code>
+          require()</code> like we would in Node.js.
+        </p>
       )
     },
     {
       name: 'renderer-editor',
       selector: 'div.mosaic-window.renderer',
+      title: '📝  Renderer Script',
       content: (
-        <div>
-          <h4>📝  Renderer Script</h4>
+        <>
           <p>
             This is the script we just required from the HTML file. In here, you can
             do anything that works in Node.js <i>and</i> anything that works in a browser.
@@ -166,7 +160,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
             <code>require</code> it. Electron Fiddle will automatically detect that you
             requested a module and install it as soon as you run your fiddle.
           </p>
-        </div>
+        </>
       )
     }
   ]);
@@ -206,6 +200,25 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
     this.setState({ isTourStarted: true });
   }
 
+  get buttons() {
+    return (
+      <>
+        <Button
+          key='cancel'
+          onClick={this.stopTour}
+          icon='cross'
+          text={`I'll figure it out`}
+        />
+        <Button
+          key='ok'
+          onClick={this.startTour}
+          icon='presentation'
+          text='Show me around'
+        />
+      </>
+    );
+  }
+
   public render() {
     const { isTourShowing } = this.props.appState;
     const { isTourStarted } = this.state;
@@ -213,28 +226,29 @@ export class WelcomeTour extends React.Component<WelcomeTourProps, WelcomeTourSt
     if (!isTourShowing) return null;
 
     if (!isTourStarted) {
-      const buttons = [
-        <button key='cancel' className='btn-close' onClick={this.stopTour}>I'll figure it out</button>,
-        <button key='ok' className='btn-ok' onClick={this.startTour}>Show me around</button>
-      ];
-
       return (
         <Dialog
           key='welcome-tour-dialog'
-          isCentered={true}
-          isShowing={true}
-          isShowingBackdrop={true}
-          buttons={buttons}
+          isOpen={true}
         >
-          <h4>🙋‍ Hey There!</h4>
-          <p>
-            Welcome to Electron Fiddle! If you're new to the app,
-            we'd like to give you a brief tour of its features.
-          </p>
-          <p>
-            We won't show this dialog again, but you can always
-            find the tour in the Help menu.
-          </p>
+          <div className={Classes.DIALOG_HEADER}>
+            <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
+          </div>
+          <div className={Classes.DIALOG_BODY}>
+            <p>
+              Welcome to Electron Fiddle! If you're new to the app,
+              we'd like to give you a brief tour of its features.
+            </p>
+            <p>
+              We won't show this dialog again, but you can always
+              find the tour in the Help menu.
+            </p>
+          </div>
+          <div className={Classes.DIALOG_FOOTER}>
+            <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+              {this.buttons}
+            </div>
+          </div>
         </Dialog>
       );
     } else {

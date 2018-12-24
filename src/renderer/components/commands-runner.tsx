@@ -30,7 +30,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     }
 
     const state = versions[normalizeVersion(version)].state;
-    const props: IButtonProps = {};
+    const props: IButtonProps = { className: 'button-run' };
 
     if (state === ElectronVersionState.downloading) {
       props.text = 'Downloading';

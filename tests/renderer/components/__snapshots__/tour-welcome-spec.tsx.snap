@@ -1,38 +1,51 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header component renders 1`] = `
-<Dialog
-  buttons={
-    Array [
-      <button
-        className="btn-close"
-        onClick={[Function]}
-      >
-        I'll figure it out
-      </button>,
-      <button
-        className="btn-ok"
-        onClick={[Function]}
-      >
-        Show me around
-      </button>,
-    ]
-  }
-  isCentered={true}
-  isShowing={true}
-  isShowingBackdrop={true}
+<Blueprint3.Dialog
+  canOutsideClickClose={true}
+  isOpen={true}
   key="welcome-tour-dialog"
 >
-  <h4>
-    🙋‍ Hey There!
-  </h4>
-  <p>
-    Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
-  </p>
-  <p>
-    We won't show this dialog again, but you can always find the tour in the Help menu.
-  </p>
-</Dialog>
+  <div
+    className="bp3-dialog-header"
+  >
+    <h4
+      className="bp3-heading"
+    >
+      🙋‍ Hey There!
+    </h4>
+  </div>
+  <div
+    className="bp3-dialog-body"
+  >
+    <p>
+      Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
+    </p>
+    <p>
+      We won't show this dialog again, but you can always find the tour in the Help menu.
+    </p>
+  </div>
+  <div
+    className="bp3-dialog-footer"
+  >
+    <div
+      className="bp3-dialog-footer-actions"
+    >
+      <Blueprint3.Button
+        icon="cross"
+        key="cancel"
+        onClick={[Function]}
+        text="I'll figure it out"
+      />
+      <Blueprint3.Button
+        icon="presentation"
+        key="ok"
+        onClick={[Function]}
+        text="Show me around"
+      />
+    </div>
+  </div>
+</Blueprint3.Dialog>
 `;
 
 exports[`Header component renders the tour once started 1`] = `
@@ -41,10 +54,7 @@ exports[`Header component renders the tour once started 1`] = `
   tour={
     Set {
       Object {
-        "content": <div>
-          <h4>
-            📝 Fiddle Editors
-          </h4>
+        "content": <React.Fragment>
           <p>
             Electron Fiddle allows you to build little experiments and mini-apps with Electron. Each Fiddle has three files: A main script, a renderer script, and an HTML file.
           </p>
@@ -59,70 +69,56 @@ exports[`Header component renders the tour once started 1`] = `
             </code>
              module.
           </p>
-        </div>,
+        </React.Fragment>,
         "name": "fiddle-editors",
         "selector": "div.mosaic-root",
+        "title": "📝 Fiddle Editors",
       },
       Object {
-        "content": <div>
-          <h4>
-            📇 Choose an Electron Version
-          </h4>
+        "content": <React.Fragment>
           <p>
             Electron Fiddle knows about all released Electron versions, downloading your versions automatically in the background.
           </p>
           <p>
             Open the preferences to see all available versions and delete those previously downloaded.
           </p>
-        </div>,
+        </React.Fragment>,
         "name": "select-versions",
-        "selector": "select.select-versions",
+        "selector": "button.version-chooser",
+        "title": "📇 Choose an Electron Version",
       },
       Object {
-        "content": <div>
-          <h4>
-            🚀 Run Your Fiddle
-          </h4>
-          <p>
-            Hit this button to give your Fiddle a try and start it.
-          </p>
-        </div>,
+        "content": <p>
+          Hit this button to give your Fiddle a try and start it.
+        </p>,
         "name": "button-run",
-        "selector": "button.button-run",
+        "selector": ".button-run",
+        "title": "🚀 Run Your Fiddle",
       },
       Object {
-        "content": <div>
-          <h4>
-            🗺 Share Your Fiddle
-          </h4>
+        "content": <React.Fragment>
           <p>
             Like what you've built? You can save your Fiddle as a public GitHub Gist, allowing other users to load it by pasting the URL into the address bar. If they don't have Electron Fiddle, they can see and download your code directly from GitHub.
           </p>
           <p>
             You can also package your Fiddle as a standalone binary or as an installer from the "Tasks" menu.
           </p>
-        </div>,
+        </React.Fragment>,
         "name": "button-publish",
-        "selector": "button.button-publish",
+        "selector": ".button-publish",
+        "title": "🗺 Share Your Fiddle",
       },
       Object {
-        "content": <div>
-          <h4>
-            👋 Getting Started With Electron?
-          </h4>
-          <p>
-            We've finished our tour of Electron Fiddle, but if this is your first time using Electron, we could introduce you to its basics. Interested?
-          </p>
-        </div>,
+        "content": <p>
+          We've finished our tour of Electron Fiddle, but if this is your first time using Electron, we could introduce you to its basics. Interested?
+        </p>,
         "getButtons": [Function],
         "name": "first-time-electron",
         "selector": "div.mosaic-root",
+        "title": "👋 Getting Started With Electron?",
       },
       Object {
-        "content": <div>
-          <h4>
-            📝 Main Script
-          </h4>
+        "content": <React.Fragment>
           <p>
             Every Electron app starts with a main script, very similar to how a Node.js application is started. The main script runs in the "main process". To display a user interface, the main process creates renderer processes – usually in the form of windows, which Electron calls
             <code>
@@ -144,39 +140,33 @@ exports[`Header component renders the tour once started 1`] = `
             </code>
              and loads an HTML file.
           </p>
-        </div>,
+        </React.Fragment>,
         "name": "main-editor",
         "selector": "div.mosaic-window.main",
+        "title": "📝 Main Script",
       },
       Object {
-        "content": <div>
-          <h4>
-            📝 HTML
-          </h4>
-          <p>
-            In the default fiddle, this HTML file is loaded in the
-            <code>
-              BrowserWindow
-            </code>
-            . Any HTML, CSS, or JavaScript that works in a browser will work here, too. In addition, Electron allows you to execute Node.js code. Take a close look at the
-            <code>
-              &lt;script /&gt;
-            </code>
-             tag and notice how we can call 
-            <code>
-              require()
-            </code>
-             like we would in Node.js.
-          </p>
-        </div>,
+        "content": <p>
+          In the default fiddle, this HTML file is loaded in the
+          <code>
+            BrowserWindow
+          </code>
+          . Any HTML, CSS, or JavaScript that works in a browser will work here, too. In addition, Electron allows you to execute Node.js code. Take a close look at the
+          <code>
+            &lt;script /&gt;
+          </code>
+           tag and notice how we can call 
+          <code>
+            require()
+          </code>
+           like we would in Node.js.
+        </p>,
         "name": "html-editor",
         "selector": "div.mosaic-window.html",
+        "title": "📝 HTML",
       },
       Object {
-        "content": <div>
-          <h4>
-            📝  Renderer Script
-          </h4>
+        "content": <React.Fragment>
           <p>
             This is the script we just required from the HTML file. In here, you can do anything that works in Node.js 
             <i>
@@ -195,9 +185,10 @@ exports[`Header component renders the tour once started 1`] = `
             </code>
              it. Electron Fiddle will automatically detect that you requested a module and install it as soon as you run your fiddle.
           </p>
-        </div>,
+        </React.Fragment>,
         "name": "renderer-editor",
         "selector": "div.mosaic-window.renderer",
+        "title": "📝  Renderer Script",
       },
     }
   }

@@ -10,6 +10,7 @@ describe('VersionChooser component', () => {
     {
       name: 'mock-step-1',
       selector: 'div.mock-1',
+      title: 'Step 1',
       content: (
         <span key='1'>mock-step-1</span>
       )
@@ -17,6 +18,7 @@ describe('VersionChooser component', () => {
     {
       name: 'mock-step-2',
       selector: 'div.mock-2',
+      title: 'Step 2',
       content: (
         <span key='2'>mock-step-2</span>
       )
@@ -48,23 +50,6 @@ describe('VersionChooser component', () => {
     const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
 
     expect(wrapper).toMatchSnapshot();
-  });
-
-  it('renders custom buttons', () => {
-    const mockStop = jest.fn();
-    const btnTour = new Set([
-      {
-        name: 'mock-step-1',
-        selector: 'div.mock-1',
-        content: (
-          <span>mock-step-1</span>
-        ),
-        getButtons: () => [ (<span key='1'>hi</span>) ]
-      }
-    ]);
-
-    const wrapper = shallow(<Tour tour={btnTour} onStop={mockStop} />);
-    expect(wrapper.html().includes('<span>hi</span>')).toBe(true);
   });
 
   it('stops on stop()', () => {
