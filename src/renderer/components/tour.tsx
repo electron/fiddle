@@ -198,7 +198,7 @@ export class Tour extends React.Component<TourProps, TourState> {
    */
   private getStep(step: TourScriptStep): JSX.Element | null {
     const { selector } = step;
-    const element = document.querySelector(selector);
+    const element = document.querySelector(selector) || document.body;
     if (!element) return null;
 
     const rect = element.getBoundingClientRect();
