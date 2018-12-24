@@ -1,4 +1,5 @@
 import { spawn } from 'child_process';
+import * as path from 'path';
 
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
@@ -104,7 +105,7 @@ describe('Runner component', () => {
       expect(window.ElectronFiddle.app.fileManager.cleanup)
       .toHaveBeenCalledTimes(2);
       expect(window.ElectronFiddle.app.fileManager.cleanup)
-        .toHaveBeenLastCalledWith('/test-path/test-app-name');
+        .toHaveBeenLastCalledWith(path.join(`/test-path/test-app-name`));
       done();
     });
   });
