@@ -1,11 +1,20 @@
 environment:
   matrix:
-    - nodejs_version: "8"
+    - nodejs_version: "10"
 
 init:
-  - git config --global core.symlinks true
+- git config --global core.symlinks true
 
 install:
+  # Setup the code signing certificate
+  - ps: >-
+      if (Test-Path $env:WINDOWS_CERTIFICATE_P12) {
+        $filename = Convert-Path .\cert.p12
+        $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_P12)
+        [IO.File]::WriteAllBytes($filename, $bytes)
+
+        $env:WINDOWS_CERTIFICATE_FILE = $filename
+      }
   - ps: Install-Product node $env:nodejs_version x64
   - node --version
   - npm ci
@@ -18,7 +27,12 @@ test_script:
   - npm --version
   - npm run lint
   - npm run test
-  - if %APPVEYOR_REPO_TAG% EQU false npm run make
+
+artifacts:
+  - path: 'out\make\squirrel.windows\**\*.exe'
 
 build_script:
+  - if %APPVEYOR_REPO_TAG% EQU false npm run make
   - if %APPVEYOR_REPO_TAG% EQU true npm run publish
+  - if %APPVEYOR_REPO_TAG% EQU true npm run publish -- --arch=ia32
+  - ps: Tree ./out/make /F
