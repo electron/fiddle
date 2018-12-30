@@ -1,7 +1,9 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { IpcEvents } from '../../../src/ipc-events';
 import { Editors } from '../../../src/renderer/components/editors';
+import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
 jest.mock('../../../src/renderer/components/editor', () => ({
@@ -19,7 +21,8 @@ describe('Editrors component', () => {
   beforeEach(() => {
     store = {
       isTokenDialogShowing: false,
-      isSettingsShowing: false
+      isSettingsShowing: false,
+      setWarningDialogTexts: () => ({})
     };
 
     monaco = {
@@ -33,25 +36,6 @@ describe('Editrors component', () => {
     const wrapper = shallow(<Editors appState={store} />);
     wrapper.setState({ monaco });
     expect(wrapper).toMatchSnapshot();
-  });
-
-  it('executes a command on an editor', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance = wrapper.instance();
-    const mockAction = {
-      isSupported: jest.fn(() => true),
-      run: jest.fn()
-    };
-    const mockEditor = {
-      getAction: jest.fn(() => mockAction)
-    };
-
-    (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
-
-    (instance as any).executeCommand('hello');
-    expect(mockEditor.getAction).toHaveBeenCalled();
-    expect(mockAction.isSupported).toHaveBeenCalled();
-    expect(mockAction.run).toHaveBeenCalled();
   });
 
   it('does not execute command if not supported', () => {
@@ -71,5 +55,46 @@ describe('Editrors component', () => {
     expect(mockEditor.getAction).toHaveBeenCalled();
     expect(mockAction.isSupported).toHaveBeenCalled();
     expect(mockAction.run).toHaveBeenCalledTimes(0);
+  });
+
+  describe('IPC commands', () => {
+    it('handles an MONACO_EXECUTE_COMMAND command', () => {
+      shallow(<Editors appState={store} />);
+
+      const mockAction = {
+        isSupported: jest.fn(() => true),
+        run: jest.fn()
+      };
+      const mockEditor = {
+        getAction: jest.fn(() => mockAction)
+      };
+
+      (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+
+      ipcRendererManager.emit(IpcEvents.MONACO_EXECUTE_COMMAND, null, 'hello');
+      expect(mockEditor.getAction).toHaveBeenCalled();
+      expect(mockAction.isSupported).toHaveBeenCalled();
+      expect(mockAction.run).toHaveBeenCalled();
+    });
+
+    it('handles an FS_NEW_FIDDLE command', (done) => {
+      shallow(<Editors appState={store} />);
+
+      ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
+      process.nextTick(() => {
+        expect(window.ElectronFiddle.app.setValues).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('handles the monaco editor option commands', () => {
+      shallow(<Editors appState={store} />);
+
+      ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
+
+      expect(window.ElectronFiddle.editors.html!.updateOptions).toHaveBeenCalled();
+      expect(window.ElectronFiddle.editors.renderer!.updateOptions).toHaveBeenCalled();
+      expect(window.ElectronFiddle.editors.main!.updateOptions).toHaveBeenCalled();
+    });
   });
 });

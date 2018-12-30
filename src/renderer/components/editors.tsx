@@ -76,12 +76,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       });
     });
 
-    ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
-      this.toggleEditorOption('wordWrap');
-    });
-
-    ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
-      this.toggleEditorOption('minimap.enabled');
+    ipcRendererManager.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {
+      this.toggleEditorOption(cmd);
     });
 
     this.setState({ isMounted: true });
