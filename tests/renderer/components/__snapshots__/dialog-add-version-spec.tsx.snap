@@ -19,9 +19,24 @@ exports[`AddVersionDialog component renders 1`] = `
         }
       }
       onInputChange={[Function]}
-      text="Select the folder containing Electron.app..."
+      text="/test/file"
     />
     <br />
+    <Blueprint3.Callout>
+      We found an Electron.app in this folder.
+      <p>
+        Please specify a version, used for typings and the name. Must be 
+        <code>
+          semver
+        </code>
+         compliant.
+      </p>
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        placeholder="4.0.0"
+        value=""
+      />
+    </Blueprint3.Callout>
   </div>
   <div
     className="bp3-dialog-footer"

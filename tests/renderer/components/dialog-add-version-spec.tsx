@@ -34,9 +34,18 @@ describe('AddVersionDialog component', () => {
   it('renders', () => {
     const wrapper = shallow(<AddVersionDialog appState={store} />);
 
-    wrapper.setState({ isValidVersion: true, isValidElectron: true });
+    wrapper.setState({
+      isValidVersion: true,
+      isValidElectron: true,
+      file: mockFile
+    });
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the second stage of the dialog', () => {
+    const wrapper = shallow(<AddVersionDialog appState={store} />);
+
   });
 
   describe('onChangeFile()', () => {
