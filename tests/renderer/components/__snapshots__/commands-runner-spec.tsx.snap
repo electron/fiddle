@@ -9,7 +9,26 @@ exports[`Runner component renders default 1`] = `
 />
 `;
 
+exports[`Runner component renders downloading 1`] = `
+<Blueprint3.Button
+  className="button-run"
+  disabled={true}
+  loading={true}
+  text="Downloading"
+/>
+`;
+
 exports[`Runner component renders running 1`] = `
+<Blueprint3.Button
+  active={true}
+  className="button-run"
+  icon="stop"
+  onClick={[MockFunction]}
+  text="Stop"
+/>
+`;
+
+exports[`Runner component renders running 2`] = `
 <Blueprint3.Button
   active={true}
   className="button-run"

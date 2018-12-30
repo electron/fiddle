@@ -24,7 +24,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
   public render() {
     const { isRunning, currentElectronVersion } = this.props.appState;
 
-    const state = currentElectronVersion.state;
+    const state = currentElectronVersion && currentElectronVersion.state;
     const props: IButtonProps = { className: 'button-run' };
 
     if (state === ElectronVersionState.downloading) {
