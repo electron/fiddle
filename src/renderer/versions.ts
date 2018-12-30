@@ -15,18 +15,20 @@ export const enum ElectronReleaseChannel {
  * @returns {string}
  */
 export function getDefaultVersion(
-  knownVersions: Array<ElectronVersion>
+  knownVersions: Array<ElectronVersion> = []
 ): string {
   const ls = localStorage.getItem('version');
 
-  if (ls && knownVersions[ls]) {
+  if (ls && knownVersions.find(({ version }) => version === ls)) {
     return ls;
   }
 
   // Self-heal: Version not formated correctly
   const normalized = ls && normalizeVersion(ls);
-  if (normalized && knownVersions[normalized]) {
-    return normalized;
+  if (normalized) {
+    if (knownVersions.find(({ version }) => version === normalized)) {
+      return normalized;
+    }
   }
 
   // Self-heal: Unknown version
