@@ -1,0 +1,16 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TokenDialog component renders 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  cancelButtonText=""
+  confirmButtonText=""
+  icon="warning-sign"
+  intent="danger"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+</Blueprint3.Alert>
+`;
