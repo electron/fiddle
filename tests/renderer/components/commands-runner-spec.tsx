@@ -20,7 +20,10 @@ describe('Runner component', () => {
     store = {
       version: '2.0.2',
       versions: mockVersions,
-      isRunning: false
+      isRunning: false,
+      get currentElectronVersion() {
+        return mockVersions['2.0.2']
+      }
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();

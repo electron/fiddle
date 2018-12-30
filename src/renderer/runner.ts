@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, ElectronVersionSource, FileTransform } from '../interfaces';
+import { EditorValues, ElectronVersion, ElectronVersionSource, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
@@ -13,6 +13,11 @@ import { AppState } from './state';
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make'
+}
+
+function isLocal(input: ElectronVersion): boolean {
+  return input &&
+    input.source === ElectronVersionSource.local;
 }
 
 export class Runner {
@@ -39,12 +44,13 @@ export class Runner {
   public async run(): Promise<boolean> {
     const { fileManager, getValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
-    const { binaryManager, version, versions } = this.appState;
+    const { binaryManager, currentElectronVersion } = this.appState;
+    const { version } = currentElectronVersion;
 
     this.appState.isConsoleShowing = true;
 
-    const isLocal = versions[version] && versions[version].source === ElectronVersionSource.local;
-    const isDownloaded = isLocal || await binaryManager.getIsDownloaded(version);
+    const isDownloaded = isLocal(currentElectronVersion)
+      || await binaryManager.getIsDownloaded(version);
     const values = await getValues(options);
     const dir = await this.saveToTemp(options);
 
@@ -175,10 +181,12 @@ export class Runner {
    * @memberof Runner
    */
   public async execute(dir: string): Promise<void> {
-    const { version, pushOutput, versions, binaryManager } = this.appState;
+    const { currentElectronVersion, pushOutput, binaryManager } = this.appState;
+    const { version } = currentElectronVersion;
+    const electronDir = isLocal(currentElectronVersion)
+      ? currentElectronVersion.localPath
+      : undefined;
 
-    const isLocal = versions[version] && versions[version].source === ElectronVersionSource.local;
-    const electronDir = isLocal ? versions[version].localPath : undefined;
     const binaryPath = binaryManager.getElectronBinaryPath(version, electronDir);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 

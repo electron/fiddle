@@ -41,6 +41,9 @@ describe('Runner component', () => {
         getIsDownloaded: jest.fn(() => true),
         getElectronBinaryPath: jest.fn((version: string) => `/fake/path/${version}/electron`)
       },
+      get currentElectronVersion() {
+        return mockVersions['2.0.2'];
+      },
       getName: async () => 'test-app-name'
     };
 

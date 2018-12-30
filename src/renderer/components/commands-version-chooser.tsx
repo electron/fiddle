@@ -18,11 +18,11 @@ const ElectronVersionSelect = Select.ofType<ElectronVersion>();
  * @param {ElectronVersion} { source, state }
  * @returns {string}
  */
-function getItemLabel({ source, state }: ElectronVersion): string {
+export function getItemLabel({ source, state, name }: ElectronVersion): string {
   let label = '';
 
   if (source === ElectronVersionSource.local) {
-    label = name;
+    label = name || 'Local';
   } else {
     if (state === ElectronVersionState.unknown) {
       label = `Not downloaded`;
@@ -43,7 +43,7 @@ function getItemLabel({ source, state }: ElectronVersion): string {
  * @param {ElectronVersion} { state }
  * @returns
  */
-function getItemIcon({ state }: ElectronVersion) {
+export function getItemIcon({ state }: ElectronVersion) {
   return state === 'ready'
     ? 'saved'
     : state === 'downloading' ? 'cloud-download' : 'cloud';
@@ -57,7 +57,7 @@ function getItemIcon({ state }: ElectronVersion) {
  * @param {ElectronVersion} { version }
  * @returns
  */
-const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
+export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
   return version.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -69,7 +69,7 @@ const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
       return null;
   }
@@ -128,10 +128,8 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
   }
 
   public render() {
-    const { version, versions } = this.props.appState;
-    const selectedVersion = versions[version];
-
-    if (!selectedVersion) return null;
+    const { currentElectronVersion } = this.props.appState;
+    const { version } = currentElectronVersion;
 
     return (
       <ElectronVersionSelect
@@ -145,7 +143,7 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
         <Button
           className='version-chooser'
           text={`Electron v${version}`}
-          icon={getItemIcon(selectedVersion)}
+          icon={getItemIcon(currentElectronVersion)}
         />
       </ElectronVersionSelect>
     );
