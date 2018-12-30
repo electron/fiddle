@@ -27,13 +27,3 @@ exports[`Runner component renders running 1`] = `
   text="Stop"
 />
 `;
-
-exports[`Runner component renders running 2`] = `
-<Blueprint3.Button
-  active={true}
-  className="button-run"
-  icon="stop"
-  onClick={[MockFunction]}
-  text="Stop"
-/>
-`;

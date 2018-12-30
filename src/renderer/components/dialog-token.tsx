@@ -53,9 +53,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
    */
   public async onSubmitToken(): Promise<void> {
     if (!this.state.tokenInput) return;
-    this.setState({
-      verifying: true,
-    });
+    this.setState({ verifying: true });
 
     const octo = await getOctokit();
     octo.authenticate({

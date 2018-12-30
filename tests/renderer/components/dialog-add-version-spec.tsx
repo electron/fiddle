@@ -43,11 +43,6 @@ describe('AddVersionDialog component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the second stage of the dialog', () => {
-    const wrapper = shallow(<AddVersionDialog appState={store} />);
-
-  });
-
   describe('onChangeFile()', () => {
     it('handles the change event', async () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);

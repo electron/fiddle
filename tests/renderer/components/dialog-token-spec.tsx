@@ -82,12 +82,12 @@ describe('TokenDialog component', () => {
     });
   });
 
-  it('reset() resets the component', () => {
+  it('onClose() resets the component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: TokenDialog = wrapper.instance() as any;
 
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
-    instance.reset();
+    instance.onClose();
 
     expect(wrapper.state()).toEqual({
       verifying: false,
@@ -116,49 +116,60 @@ describe('TokenDialog component', () => {
     expect(electron.shell.openExternal).toHaveBeenCalled();
   });
 
-  it('onSubmitToken() tries to sign the user in', async () => {
-    const mockUser = {
-      avatar_url: 'https://avatars.fake/hi',
-      login: 'test-login',
-      name: 'Test User'
-    };
-    const mockOctokit = {
-      authenticate: jest.fn(),
-      users: {
-        get: jest.fn(async () => ({ data: mockUser }))
-      }
-    };
+  describe('onSubmitToken()', () => {
+    let mockOctokit: any;
+    let mockUser: any;
 
-    (getOctokit as any).mockReturnValue(mockOctokit);
+    beforeEach(() => {
+      mockUser = {
+        avatar_url: 'https://avatars.fake/hi',
+        login: 'test-login',
+        name: 'Test User'
+      };
 
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    wrapper.setState({ tokenInput: mockValidToken });
-    const instance: TokenDialog = wrapper.instance() as any;
+      mockOctokit = {
+        authenticate: jest.fn(),
+        users: {
+          get: jest.fn(async () => ({ data: mockUser }))
+        }
+      };
 
-    await instance.onSubmitToken();
+      (getOctokit as any).mockReturnValue(mockOctokit);
+    });
 
-    expect(store.gitHubToken).toBe(mockValidToken);
-    expect(store.gitHubLogin).toBe(mockUser.login);
-    expect(store.gitHubName).toBe(mockUser.name);
-    expect(store.gitHubAvatarUrl).toBe(mockUser.avatar_url);
-  });
+    it('handles missing input', async () => {
+      const wrapper = shallow(<TokenDialog appState={store} />);
+      wrapper.setState({ tokenInput: '' });
+      const instance: TokenDialog = wrapper.instance() as any;
 
-  it('onSubmitToken() handles an error', async () => {
-    const mockOctokit = {
-      authenticate: jest.fn(),
-      users: {
-        get: jest.fn(async () => ({ data: null }))
-      }
-    };
+      await instance.onSubmitToken();
 
-    (getOctokit as any).mockReturnValue(mockOctokit);
+      expect(instance.state.verifying).toBe(false);
+    });
 
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    wrapper.setState({ tokenInput: mockValidToken });
-    const instance: TokenDialog = wrapper.instance() as any;
+    it('tries to sign the user in', async () => {
+      const wrapper = shallow(<TokenDialog appState={store} />);
+      wrapper.setState({ tokenInput: mockValidToken });
+      const instance: TokenDialog = wrapper.instance() as any;
 
-    await instance.onSubmitToken();
+      await instance.onSubmitToken();
 
-    expect(wrapper.state('error')).toBe(true);
+      expect(store.gitHubToken).toBe(mockValidToken);
+      expect(store.gitHubLogin).toBe(mockUser.login);
+      expect(store.gitHubName).toBe(mockUser.name);
+      expect(store.gitHubAvatarUrl).toBe(mockUser.avatar_url);
+    });
+
+    it('handles an error', async () => {
+      mockOctokit.users.get.mockReturnValue({ data: null });
+
+      const wrapper = shallow(<TokenDialog appState={store} />);
+      wrapper.setState({ tokenInput: mockValidToken });
+      const instance: TokenDialog = wrapper.instance() as any;
+
+      await instance.onSubmitToken();
+
+      expect(wrapper.state('error')).toBe(true);
+    });
   });
 });
