@@ -18,4 +18,12 @@ describe('isFirstRun', () => {
     expect(isFirstRun()).toBe(true);
     expect(fs.outputFileSync as jest.Mock).toHaveBeenCalledTimes(1);
   });
+
+  it('handles an error', () => {
+    (fs.existsSync as jest.Mock).mockImplementationOnce(() => {
+      throw new Error('bwap bwap');
+    });
+
+    expect(isFirstRun()).toBe(true);
+  });
 });

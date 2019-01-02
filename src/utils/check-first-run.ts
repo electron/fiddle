@@ -15,9 +15,12 @@ const getConfigPath = () => {
  */
 export function isFirstRun(): boolean {
   const configPath = getConfigPath();
-  if (fs.existsSync(configPath)) return false;
 
   try {
+    if (fs.existsSync(configPath)) {
+      return false;
+    }
+
     fs.outputFileSync(configPath, '');
   } catch (error) {
     console.warn(`First run: Unable to write firstRun file`, error);

@@ -89,6 +89,8 @@ const app = {
   isDefaultProtocolClient: jest.fn().mockReturnValue(true),
   setAsDefaultProtocolClient: jest.fn(),
   isReady: jest.fn().mockReturnValue(true),
+  isInApplicationsFolder: jest.fn().mockReturnValue(true),
+  moveToApplicationsFolder: jest.fn(),
   getAppMetrics: jest.fn(),
   getGPUFeatureStatus: jest.fn(),
   getJumpListSettings: jest.fn(() => ({
@@ -99,6 +101,7 @@ const app = {
   quit: jest.fn(),
   relaunch: jest.fn(),
   setJumpList: jest.fn(),
+  setName: jest.fn(),
   requestSingleInstanceLock: jest.fn(),
   on: jest.fn(),
   once: jest.fn()
