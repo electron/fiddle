@@ -1,6 +1,7 @@
 import { ElectronVersionState } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
+import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/binary', () => ({
@@ -12,6 +13,7 @@ jest.mock('../../src/renderer/fetch-types', () => ({
 jest.mock('../../src/renderer/versions', () => ({
   getUpdatedElectronVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
   getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+  getDefaultVersion: () => '2.0.2',
   ElectronReleaseChannel: {
     stable: 'Stable',
     beta: 'Beta'
@@ -37,6 +39,22 @@ describe('AppState', () => {
       expect(await appState.getName()).toBe('hi');
     });
   });
+
+  describe('get currentElectronVersion()', () => {
+    it('returns the current version', () => {
+      appState.version = '2.0.2';
+      appState.versions = mockVersions;
+
+      expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
+    });
+
+    it('falls back to the defaultVersion', () => {
+      appState.version = 'garbage';
+      appState.versions = mockVersions;
+
+      expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
+    });
+   });
 
   describe('toggleConsole()', () => {
     it('toggles the console', () => {

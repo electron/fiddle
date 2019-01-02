@@ -4,6 +4,7 @@ export class EditorMock {
   public setValue = jest.fn();
   public getValue = jest.fn().mockReturnValue('editor-value');
   public onDidChangeModelContent = jest.fn();
+  public updateOptions = jest.fn();
 
   constructor(public readonly name: string) {}
 }

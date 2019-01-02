@@ -99,7 +99,7 @@ function getWelcomeTour(): Set<TourScriptStep> {
       ),
       getButtons: ({ stop, advance }: TourStepGetButtonParams): Array<JSX.Element> => {
         return [
-          <Button key='btn-stop' onClick={stop} text={`I'm good!`} icon='stop' />,
+          <Button key='btn-stop' onClick={stop} text="I'm good!" icon='stop' />,
           <Button key='btn-adv' onClick={advance} text='Electron Basics' icon='help' />
         ];
       }

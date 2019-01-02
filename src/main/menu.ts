@@ -250,11 +250,11 @@ export function setupMenu() {
         item.submenu.push({ type: 'separator' }, { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' }); // Add zooming actions
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Soft Wrap',
-          click: () => ipcMainManager.send(IpcEvents.TOGGLE_SOFT_WRAP),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'wordWrap' ]),
         });
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Mini Map',
-          click: () => ipcMainManager.send(IpcEvents.TOGGLE_MINI_MAP),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'minimap.enabled' ]),
         });
       }
 

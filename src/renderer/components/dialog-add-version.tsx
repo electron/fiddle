@@ -104,18 +104,6 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     this.reset();
   }
 
-  /**
-   * Reset this component's state
-   */
-  public reset(): void {
-    this.setState({
-      isValidElectron: false,
-      isValidVersion: false,
-      version: '',
-      file: undefined
-    });
-  }
-
   get buttons() {
     const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
 
@@ -212,4 +200,15 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     );
   }
 
+  /**
+   * Reset this component's state
+   */
+  private reset(): void {
+    this.setState({
+      isValidElectron: false,
+      isValidVersion: false,
+      version: '',
+      file: undefined
+    });
+  }
 }

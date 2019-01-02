@@ -6,6 +6,7 @@ import { AppState } from '../state';
 
 export interface CommandsProps {
   appState: AppState;
+  // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }
 

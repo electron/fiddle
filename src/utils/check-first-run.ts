@@ -18,13 +18,10 @@ export function isFirstRun(): boolean {
   if (fs.existsSync(configPath)) return false;
 
   try {
-    fs.writeFileSync(configPath, '');
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      fs.mkdirpSync(path.join(app.getPath('userData'), 'FirstRun'));
-      return isFirstRun();
-    }
-    throw err;
+    fs.outputFileSync(configPath, '');
+  } catch (error) {
+    console.warn(`First run: Unable to write firstRun file`, error);
   }
+
   return true;
 }

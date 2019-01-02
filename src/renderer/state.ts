@@ -1,4 +1,4 @@
-import { action, autorun, observable, when } from 'mobx';
+import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
   ElectronVersion,
@@ -21,14 +21,14 @@ import { activateTheme } from './themes';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
+  getDefaultVersion,
   getElectronVersions,
   getUpdatedElectronVersions,
   saveLocalVersions
 } from './versions';
 
 const knownVersions = getElectronVersions();
-const defaultVersion = localStorage.getItem('version')
-  || normalizeVersion(knownVersions[0].version);
+const defaultVersion = getDefaultVersion(knownVersions);
 
 /**
  * Editors exist outside of React's world. To make things *a lot*
@@ -51,7 +51,7 @@ window.ElectronFiddle = {
  * @class AppState
  */
 export class AppState {
-  // Persisted settings
+  // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
@@ -66,7 +66,7 @@ export class AppState {
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
 
-  // Various session-only state
+  // -- Various session-only state ------------------
   @observable public gistId: string = '';
   @observable public isMyGist: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
@@ -77,7 +77,7 @@ export class AppState {
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public isRunning = false;
 
-  // Various "isShowing" settings
+  // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isWarningDialogShowing: boolean = false;
@@ -148,6 +148,18 @@ export class AppState {
 
     // Make sure the console isn't all empty and sad
     this.pushOutput('Console ready 🔬');
+  }
+
+  /**
+   * Returns the current ElectronVersion or the first
+   * one that can be found.
+   */
+  @computed get currentElectronVersion(): ElectronVersion {
+    if (this.versions[this.version]) {
+      return this.versions[this.version];
+    } else {
+      return this.versions[defaultVersion];
+    }
   }
 
   /**

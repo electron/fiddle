@@ -5,6 +5,7 @@ import {
   addLocalVersion,
   ElectronReleaseChannel,
   fetchVersions,
+  getDefaultVersion,
   getKnownVersions,
   getLocalVersions,
   getReleaseChannel,
@@ -20,6 +21,26 @@ const mockVersions: Array<Partial<ElectronVersion>> = [
 ];
 
 describe('versions', () => {
+  describe('getDefaultVersion()', () => {
+    it('handles a stored version', () => {
+      (localStorage.getItem as any).mockReturnValue('2.0.2');
+      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('handles a v-prefixed version', () => {
+      (localStorage.getItem as any).mockReturnValue('v2.0.2');
+      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('handles garbage data', () => {
+      (localStorage.getItem as any).mockReturnValue('v3.0.0');
+      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      expect(output).toBe('2.0.2');
+    });
+  });
+
   describe('getReleaseChannel()', () => {
     it('identifies a nightly release', () => {
       expect(getReleaseChannel({

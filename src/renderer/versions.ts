@@ -1,10 +1,43 @@
 import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion } from '../interfaces';
+import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
   stable = 'Stable',
   beta = 'Beta',
   nightly = 'Nightly',
   unsupported = 'Unsupported'
+}
+
+/**
+ * Returns a sensible default version string.
+ *
+ * @param {Array<ElectronVersion>} knownVersions
+ * @returns {string}
+ */
+export function getDefaultVersion(
+  knownVersions: Array<ElectronVersion> = []
+): string {
+  const ls = localStorage.getItem('version');
+
+  if (ls && knownVersions.find(({ version }) => version === ls)) {
+    return ls;
+  }
+
+  // Self-heal: Version not formated correctly
+  const normalized = ls && normalizeVersion(ls);
+  if (normalized) {
+    if (knownVersions.find(({ version }) => version === normalized)) {
+      return normalized;
+    }
+  }
+
+  // Self-heal: Unknown version
+  if (ls && knownVersions[0]) {
+    return knownVersions[0].version;
+  }
+
+  // Report error
+  throw new Error('Corrupted version data');
 }
 
 /**

@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { ElectronVersionState } from '../../interfaces';
-import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
 
 export interface RunnerState {
@@ -23,13 +22,9 @@ export interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps, RunnerState> {
   public render() {
-    const { versions, version, isRunning } = this.props.appState;
+    const { isRunning, currentElectronVersion } = this.props.appState;
 
-    if (!versions || !version || !versions[normalizeVersion(version)]) {
-      return null;
-    }
-
-    const state = versions[normalizeVersion(version)].state;
+    const state = currentElectronVersion && currentElectronVersion.state;
     const props: IButtonProps = { className: 'button-run' };
 
     if (state === ElectronVersionState.downloading) {
