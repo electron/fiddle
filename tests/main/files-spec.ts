@@ -123,5 +123,33 @@ describe('files', () => {
       expect(dialog.showMessageBox).toHaveBeenCalled();
       expect(mockTarget.webContents.send).toHaveBeenCalledTimes(0);
     });
+
+    it('does not overwrite files if an error happens', async () => {
+      showSaveDialog();
+
+      const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
+      const cb = call[1];
+      const mockTarget = {
+        webContents: {
+          send: jest.fn()
+        }
+      };
+
+      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => {
+        throw new Error('Nope');
+      });
+      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+
+      let errored = false;
+
+      try {
+        await cb('/fake/path');
+      } catch (error) {
+        errored = error;
+      }
+
+      expect(errored).toEqual(new Error('Nope'));
+    });
   });
 });
