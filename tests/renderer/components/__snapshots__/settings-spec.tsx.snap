@@ -151,6 +151,85 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
 </div>
 `;
 
+exports[`CreditsSettings component renders the Credits page after a click 2`] = `
+<div
+  className="settings"
+>
+  <div
+    className="settings-menu"
+  >
+    <ul>
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
+        key="General"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
+        key="Electron"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
+      />
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
+        key="Credits"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
+    </ul>
+  </div>
+  <div
+    className="settings-content"
+  >
+    <div
+      className="settings-close"
+    >
+      <Blueprint3.Icon
+        icon="cross"
+      />
+    </div>
+    <settings-credits
+      appState={
+        Object {
+          "isSettingsShowing": true,
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
 exports[`CreditsSettings component renders the Electron page after a click 1`] = `
 <div
   className="settings"
@@ -299,6 +378,85 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
       />
     </div>
     <settings-general
+      appState={
+        Object {
+          "isSettingsShowing": true,
+        }
+      }
+    />
+  </div>
+</div>
+`;
+
+exports[`CreditsSettings component renders the Execution page after a click 1`] = `
+<div
+  className="settings"
+>
+  <div
+    className="settings-menu"
+  >
+    <ul>
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="cog"
+        id="settings-link-General"
+        key="General"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="General"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="floppy-disk"
+        id="settings-link-Electron"
+        key="Electron"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Electron"
+      />
+      <Blueprint3.MenuItem
+        active={true}
+        disabled={false}
+        icon="play"
+        id="settings-link-Execution"
+        key="Execution"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Execution"
+      />
+      <Blueprint3.MenuItem
+        active={false}
+        disabled={false}
+        icon="heart"
+        id="settings-link-Credits"
+        key="Credits"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Credits"
+      />
+    </ul>
+  </div>
+  <div
+    className="settings-content"
+  >
+    <div
+      className="settings-close"
+    >
+      <Blueprint3.Icon
+        icon="cross"
+      />
+    </div>
+    <ExecutionSettings
       appState={
         Object {
           "isSettingsShowing": true,

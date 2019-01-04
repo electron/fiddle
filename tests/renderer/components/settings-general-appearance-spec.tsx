@@ -1,8 +1,13 @@
+import { IItemRendererProps } from '@blueprintjs/select';
+import { shell } from 'electron';
 import { shallow } from 'enzyme';
 import * as React from 'react';
-const { shell } = require('electron');
 
-import { AppearanceSettings } from '../../../src/renderer/components/settings-general-appearance';
+import {
+  AppearanceSettings,
+  filterItem,
+  renderItem
+} from '../../../src/renderer/components/settings-general-appearance';
 
 jest.mock('fs-extra');
 jest.mock('../../../src/utils/import', () => ({
@@ -102,6 +107,49 @@ describe('AppearanceSettings component', () => {
 
       const result = await instance.createNewThemeFromCurrent();
       expect(result).toBe(false);
+    });
+  });
+
+  describe('filterItem()', () => {
+    it('filters', () => {
+      const foo = filterItem('foo', { name: 'foo' } as any);
+      expect(foo).toBe(true);
+
+      const bar = filterItem('foo', { name: 'bar' } as any);
+      expect(bar).toBe(false);
+    });
+  });
+
+  describe('renderItem()', () => {
+    const mockItemProps: IItemRendererProps = {
+      handleClick: () => ({}),
+      index: 0,
+      modifiers: {
+        active: false,
+        disabled: false,
+        matchesPredicate: true
+      },
+      query: ''
+    };
+
+    it('returns null for non-matching', () => {
+      const result = renderItem({ name: 'foo' } as any, {
+        ...mockItemProps,
+        modifiers: {
+          ...mockItemProps.modifiers,
+          matchesPredicate: false
+        }
+      });
+
+      expect(result).toBe(null);
+    });
+
+    it('returns a MenuItem for matching', () => {
+      const result = renderItem({ name: 'foo' } as any, {
+        ...mockItemProps
+      });
+
+      expect(result).toMatchSnapshot();
     });
   });
 });
