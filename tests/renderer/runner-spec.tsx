@@ -1,6 +1,7 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
 
+import { IpcEvents } from '../../src/ipc-events';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
   findModulesInEditors,
@@ -13,7 +14,6 @@ import { AppState } from '../../src/renderer/state';
 import { MockChildProcess } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { mockVersions } from '../mocks/electron-versions';
-import { IpcEvents } from '../../src/ipc-events';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -144,12 +144,17 @@ describe('Runner component', () => {
     });
 
     it('does not run if installing modules fails', async () => {
+      const oldError = console.error;
+      console.error = jest.fn();
+
       instance.installModulesForEditor = jest.fn()
         .mockImplementationOnce(async () => {
           throw new Error('Bwap-bwap');
         });
 
       expect(await instance.run()).toBe(false);
+
+      console.error = oldError;
     });
   });
 

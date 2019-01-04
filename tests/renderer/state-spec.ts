@@ -2,9 +2,9 @@ import { ElectronVersionSource, ElectronVersionState } from '../../src/interface
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { saveLocalVersions } from '../../src/renderer/versions';
+import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
-import { getName } from '../../src/utils/get-title';
 
 jest.mock('../../src/renderer/binary', () => ({
   BinaryManager: require('../mocks/binary').MockBinaryManager
@@ -45,7 +45,7 @@ describe('AppState', () => {
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
 
-      const result = window.onbeforeunload(undefined as any);
+      const result = window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
       expect(appState.isWarningDialogShowing).toBe(true);
 
@@ -62,7 +62,7 @@ describe('AppState', () => {
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
 
-      const result = window.onbeforeunload(undefined as any);
+      const result = window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
       expect(appState.isWarningDialogShowing).toBe(true);
 
