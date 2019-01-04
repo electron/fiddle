@@ -22,6 +22,14 @@ describe('exec', () => {
     expect(result).toBe('hi');
   });
 
+  it('handles a returned string', async () => {
+    const cpExec = require('child_process').exec;
+    cpExec.mockImplementation((_a: any, _b: any, c: any) => c(null, 'hi'));
+
+    const result = await exec('a/dir', 'echo hi');
+    expect(result).toBe('hi');
+  });
+
   it('handles errors', async () => {
     let errored = false;
     const cpExec = require('child_process').exec;
