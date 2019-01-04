@@ -149,6 +149,24 @@ describe('Editors component', () => {
       });
     });
 
+    it('setupUnsavedOnChangeListener()', async () => {
+      const app = new App();
+
+      await app.setValues({
+        html: 'html-value',
+        main: 'main-value',
+        renderer: 'renderer-value'
+      });
+
+      const fn = window.ElectronFiddle.editors!.renderer!.onDidChangeModelContent;
+      const call = (fn as jest.Mock<any>).mock.calls[0];
+      const cb = call[0];
+
+      cb();
+
+      expect(app.state.isUnsaved).toBe(true);
+    });
+
     it('throws if the Fiddle object is not present', async () => {
       (window as any).ElectronFiddle = null;
 
