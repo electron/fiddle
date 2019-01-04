@@ -35,7 +35,7 @@ const defaultVersion = getDefaultVersion(knownVersions);
  * easier, we keep them around in a global object. Don't judge us,
  * we're really only doing that for the editors.
  */
-window.ElectronFiddle = {
+window.ElectronFiddle = window.ElectronFiddle || {
   editors: {
     main: null,
     renderer: null,
@@ -241,7 +241,7 @@ export class AppState {
     };
   }
 
-  @action public async addLocalVersion(input: NpmVersion) {
+  @action public addLocalVersion(input: NpmVersion) {
     addLocalVersion(input);
 
     this.versions = arrayToStringMap(getElectronVersions());
