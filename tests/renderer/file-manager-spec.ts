@@ -1,3 +1,5 @@
+import { RENDERER_JS_NAME } from '../../src/constants';
+import { Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -64,6 +66,11 @@ describe('FileManager', () => {
       ipcRendererManager.emit(IpcEvents.FS_OPEN_FIDDLE);
       expect(fm.openFiddle).toHaveBeenCalled();
     });
+
+    it('does not do anything with incorrect inputs', async () => {
+      await fm.openFiddle({} as any);
+      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledTimes(0);
+    });
   });
 
   describe('saveFiddle()', () => {
@@ -97,6 +104,13 @@ describe('FileManager', () => {
       fm.saveFiddle = jest.fn();
       ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
       expect(fm.saveFiddle).toHaveBeenCalled();
+    });
+
+    it('asks for a path via IPC if none can  be found', async () => {
+      await fm.saveFiddle();
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FS_SAVE_FIDDLE_DIALOG
+      );
     });
   });
 
@@ -134,6 +148,12 @@ describe('FileManager', () => {
         renderer: ''
       });
     });
+
+    it('runs openTemplate on IPC event', () => {
+      fm.openTemplate = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FS_OPEN_TEMPLATE);
+      expect(fm.openTemplate).toHaveBeenCalled();
+    });
   });
 
   describe('cleanup()', () => {
@@ -165,6 +185,25 @@ describe('FileManager', () => {
       const result = await fm.cleanup('/fake/dir');
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('getFiles()', () => {
+    it('applies transforms', async () => {
+      const result = await fm.getFiles(undefined, async (files: Files) => {
+        files.set(RENDERER_JS_NAME, 'hi');
+        return files;
+      });
+
+      expect(result.get(RENDERER_JS_NAME)).toBe('hi');
+    });
+
+    it('handles transform error', async () => {
+      const result = await fm.getFiles(undefined, async () => {
+        throw new Error('bwap bwap');
+      });
+
+      expect(result.get(RENDERER_JS_NAME)).toBe('renderer-content');
     });
   });
 });
