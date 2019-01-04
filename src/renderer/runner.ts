@@ -260,7 +260,7 @@ export class Runner {
   /**
    * Deletes the user data dir after a run.
    */
-  public async deleteUserData() {
+  private async deleteUserData() {
     if (this.appState.isKeepingUserDataDirs) {
       console.log(`Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`);
       return;

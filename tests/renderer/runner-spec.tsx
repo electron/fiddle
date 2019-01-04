@@ -13,6 +13,7 @@ import { AppState } from '../../src/renderer/state';
 import { MockChildProcess } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { mockVersions } from '../mocks/electron-versions';
+import { IpcEvents } from '../../src/ipc-events';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -99,83 +100,120 @@ describe('Runner component', () => {
     expect(store.isRunning).toBe(false);
   });
 
-  it('cleans the app data dir after a run', async (done) => {
-    (spawn as any).mockReturnValueOnce(mockChild);
-    expect(await instance.run()).toBe(true);
-    mockChild.emit('close', 0);
+  describe('run()', () => {
+    it('cleans the app data dir after a run', async (done) => {
+      (spawn as any).mockReturnValueOnce(mockChild);
+      expect(await instance.run()).toBe(true);
+      mockChild.emit('close', 0);
 
-    process.nextTick(() => {
-      expect(window.ElectronFiddle.app.fileManager.cleanup)
-      .toHaveBeenCalledTimes(2);
-      expect(window.ElectronFiddle.app.fileManager.cleanup)
-        .toHaveBeenLastCalledWith(path.join(`/test-path/test-app-name`));
-      done();
+      process.nextTick(() => {
+        expect(window.ElectronFiddle.app.fileManager.cleanup)
+        .toHaveBeenCalledTimes(2);
+        expect(window.ElectronFiddle.app.fileManager.cleanup)
+          .toHaveBeenLastCalledWith(path.join(`/test-path/test-app-name`));
+        done();
+      });
+    });
+
+    it('does not clean the app data dir after a run if configured', async (done) => {
+      (instance as any).appState.isKeepingUserDataDirs = true;
+      (spawn as any).mockReturnValueOnce(mockChild);
+      expect(await instance.run()).toBe(true);
+      mockChild.emit('close', 0);
+
+      process.nextTick(() => {
+        expect(window.ElectronFiddle.app.fileManager.cleanup)
+          .toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    it('does not run version not yet downloaded', async () => {
+      store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
+
+      expect(await instance.run()).toBe(false);
+    });
+
+    it('does not run if writing files fails', async () => {
+      (window.ElectronFiddle.app.fileManager.saveToTemp as jest.Mock)
+        .mockImplementationOnce(() => {
+          throw new Error('bwap bwap');
+        });
+
+      expect(await instance.run()).toBe(false);
+    });
+
+    it('does not run if installing modules fails', async () => {
+      instance.installModulesForEditor = jest.fn()
+        .mockImplementationOnce(async () => {
+          throw new Error('Bwap-bwap');
+        });
+
+      expect(await instance.run()).toBe(false);
     });
   });
 
-  it('does not run version not yet downloaded', async () => {
-    store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
+  describe('installModules()', () => {
+    it('installs modules', async () => {
+      expect(await instance.npmInstall('')).toBe(true);
+      expect(installModules).toHaveBeenCalled();
+    });
 
-    expect(await instance.run()).toBe(false);
-  });
-
-  it('does not run if writing files fails', async () => {
-    (window.ElectronFiddle.app.fileManager.saveToTemp as jest.Mock)
-      .mockImplementationOnce(() => {
+    it('handles an error', async () => {
+      (installModules as jest.Mock).mockImplementationOnce(() => {
         throw new Error('bwap bwap');
       });
 
-    expect(await instance.run()).toBe(false);
+      expect(await instance.npmInstall('')).toBe(false);
+      expect(installModules).toHaveBeenCalled();
+    });
   });
 
-  it('installs modules on installModules()', async () => {
-    expect(await instance.npmInstall('')).toBe(true);
-    expect(installModules).toHaveBeenCalled();
-  });
+  describe('performForgeOperation()', () => {
+    it('runs in response to an IPC event', () => {
+      instance.performForgeOperation = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FIDDLE_PACKAGE);
+      expect(instance.performForgeOperation).toHaveBeenCalledTimes(1);
 
-  it('handles an error in installModules()', async () => {
-    (installModules as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('bwap bwap');
+      ipcRendererManager.emit(IpcEvents.FIDDLE_MAKE);
+      expect(instance.performForgeOperation).toHaveBeenCalledTimes(2);
     });
 
-    expect(await instance.npmInstall('')).toBe(false);
-    expect(installModules).toHaveBeenCalled();
-  });
-
-  it('performs a package operation in performForgeOperation()', async () => {
-    expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(true);
-  });
-
-  it('performs a make operation in performForgeOperation()', async () => {
-    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(true);
-  });
-
-  it('handles an error in saveToTemp() in performForgeOperation()', async () => {
-    (instance as any).saveToTemp = jest.fn();
-
-    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
-  });
-
-  it('handles an error in npmInstall() in performForgeOperation()', async () => {
-    (installModules as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('bwap bwap');
+    it('performs a package operation', async () => {
+      expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(true);
     });
 
-    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
-  });
-
-  it('handles an error in npmRun() in performForgeOperation()', async () => {
-    (npmRun as jest.Mock).mockImplementationOnce(() => {
-      throw new Error('bwap bwap');
+    it('performs a make operation', async () => {
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(true);
     });
 
-    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
-  });
+    it('handles an error in saveToTemp()', async () => {
+      (instance as any).saveToTemp = jest.fn();
 
-  it('does attempt a forge operation if npm is not installed', async () => {
-    (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+    });
 
-    expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+    it('handles an error in npmInstall()', async () => {
+      (installModules as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('bwap bwap');
+      });
+
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+    });
+
+    it('handles an error in npmRun()', async () => {
+      (npmRun as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('bwap bwap');
+      });
+
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+    });
+
+    it('does attempt a forge operation if npm is not installed', async () => {
+      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+    });
   });
 
   describe('installModulesForEditor()', () => {
