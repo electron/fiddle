@@ -36,6 +36,11 @@ export function getDefaultVersion(
     return knownVersions[0].version;
   }
 
+  // Alright, the first version?
+  if (knownVersions && knownVersions[0] && knownVersions[0].version) {
+    return knownVersions[0].version;
+  }
+
   // Report error
   throw new Error('Corrupted version data');
 }
