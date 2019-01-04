@@ -1,6 +1,5 @@
 import { App } from '../../src/renderer/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { mockVersions } from '../mocks/electron-versions';
 import { MockState } from '../mocks/state';
 
 jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
@@ -27,7 +26,7 @@ describe('Editors component', () => {
 
   describe('setup()', () => {
     it('renders the app', async () => {
-      document.body.id = 'app';
+      document.body.innerHTML = '<div id="app" />';
 
       const app = new App();
       const result = await app.setup() as HTMLDivElement;
