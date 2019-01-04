@@ -1,5 +1,6 @@
 import { App } from '../../src/renderer/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { mockVersions } from '../mocks/electron-versions';
 import { MockState } from '../mocks/state';
 
 jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
@@ -9,10 +10,30 @@ jest.mock('../../src/renderer/state', () => ({
     getName: () => 'Test'
   }
 }));
+jest.mock('../../src/renderer/components/header', () => ({
+  Header: () => 'Header;'
+}));
+jest.mock('../../src/renderer/components/dialogs', () => ({
+  Dialogs: () => 'Dialogs;'
+}));
+jest.mock('../../src/renderer/components/editors', () => ({
+  Editors: () => 'Editors;'
+}));
 
 describe('Editors component', () => {
   beforeEach(() => {
     (window as any).ElectronFiddle = new ElectronFiddleMock();
+  });
+
+  describe('setup()', () => {
+    it('renders the app', async () => {
+      document.body.id = 'app';
+
+      const app = new App();
+      const result = await app.setup() as HTMLDivElement;
+
+      expect(result.innerHTML).toBe('Header;Dialogs;Editors;');
+    });
   });
 
   describe('getValues()', () => {

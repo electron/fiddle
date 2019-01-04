@@ -99,7 +99,7 @@ export class App {
    * Initial setup call, loading Monaco and kicking off the React
    * render process.
    */
-  public async setup(): Promise<void> {
+  public async setup(): Promise<void | Element | React.Component> {
     this.setupTheme();
 
     const React = await import('react');
@@ -117,7 +117,7 @@ export class App {
       </div>
     );
 
-    render(app, document.getElementById('app'));
+    const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
 
@@ -126,6 +126,8 @@ export class App {
     setTimeout(() => {
       this.setupUnsavedOnChangeListener();
     }, 1500);
+
+    return rendered;
   }
 
   /**
