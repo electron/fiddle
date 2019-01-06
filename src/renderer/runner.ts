@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, ElectronVersion, ElectronVersionSource, FileTransform } from '../interfaces';
+import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
@@ -13,11 +13,6 @@ import { AppState } from './state';
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make'
-}
-
-function isLocal(input: ElectronVersion): boolean {
-  return input &&
-    input.source === ElectronVersionSource.local;
 }
 
 export class Runner {
@@ -45,12 +40,10 @@ export class Runner {
     const { fileManager, getValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { binaryManager, currentElectronVersion } = this.appState;
-    const { version } = currentElectronVersion;
+    const { version, localPath } = currentElectronVersion;
 
     this.appState.isConsoleShowing = true;
 
-    const isDownloaded = isLocal(currentElectronVersion)
-      || await binaryManager.getIsDownloaded(version);
     const values = await getValues(options);
     const dir = await this.saveToTemp(options);
 
@@ -64,7 +57,9 @@ export class Runner {
       return false;
     }
 
-    if (!isDownloaded) {
+    const isReady = await binaryManager.getIsDownloaded(version, localPath);
+
+    if (!isReady) {
       console.warn(`Runner: Binary ${version} not ready`);
 
       let message = `Could not start fiddle: `;
@@ -182,12 +177,8 @@ export class Runner {
    */
   public async execute(dir: string): Promise<void> {
     const { currentElectronVersion, pushOutput, binaryManager } = this.appState;
-    const { version } = currentElectronVersion;
-    const electronDir = isLocal(currentElectronVersion)
-      ? currentElectronVersion.localPath
-      : undefined;
-
-    const binaryPath = binaryManager.getElectronBinaryPath(version, electronDir);
+    const { version, localPath } = currentElectronVersion;
+    const binaryPath = binaryManager.getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     this.child = spawn(binaryPath, [ dir, '--inspect' ]);

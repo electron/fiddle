@@ -74,8 +74,14 @@ describe('Runner component', () => {
     mockChild.stderr.emit('data', 'hi');
     expect(store.pushOutput).toHaveBeenCalledTimes(7);
 
-    // Stop
+    // Stop (with code)
     mockChild.emit('close', 0);
+    expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited with code 0.');
+
+    // Stop (without code)
+    mockChild.emit('close');
+    expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
+
     expect(store.isRunning).toBe(false);
   });
 

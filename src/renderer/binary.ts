@@ -156,6 +156,7 @@ export class BinaryManager {
   public async getIsDownloaded(version: string, dir?: string): Promise<boolean> {
     const expectedPath = this.getElectronBinaryPath(version, dir);
     const fs = await fancyImport<typeof fsType>('fs-extra');
+
     return fs.existsSync(expectedPath);
   }
 
