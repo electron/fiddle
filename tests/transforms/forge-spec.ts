@@ -1,6 +1,6 @@
 import { forgeTransform} from '../../src/renderer/transforms/forge';
 
-jest.mock('../../src/constants', () => ({
+jest.mock('../../src/shared-constants', () => ({
   PACKAGE_NAME: 'package.json'
 }));
 
