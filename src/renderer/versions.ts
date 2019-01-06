@@ -31,14 +31,10 @@ export function getDefaultVersion(
     }
   }
 
-  // Self-heal: Unknown version
-  if (ls && knownVersions[0]) {
-    return knownVersions[0].version;
-  }
-
   // Alright, the first version?
-  if (knownVersions && knownVersions[0] && knownVersions[0].version) {
-    return knownVersions[0].version;
+  const last = knownVersions[knownVersions.length - 1];
+  if (last) {
+    return last.version;
   }
 
   // Report error
