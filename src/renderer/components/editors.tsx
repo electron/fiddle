@@ -31,8 +31,8 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   wordWrap: 'on'
 };
 
-const ViewIdMosaic = Mosaic.ofType<EditorId>();
-const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>();
+const ViewIdMosaic = Mosaic.ofType<EditorId>() as any;
+const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>() as any;
 
 const TITLE_MAP: Record<EditorId, string> = {
   main: 'Main Process',
@@ -137,11 +137,12 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     if (!monaco) return null;
 
+
     return (
       <ViewIdMosaic
         onChange={updateEditorLayout}
         // tslint:disable-next-line:jsx-no-multiline-js
-        renderTile={(id, path) => (
+        renderTile={(id: any, path: any) => (
           <ViewIdMosaicWindow className={id} path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
             <Editor id={id} monaco={monaco} appState={appState} monoacoOptions={defaultMonacoOptions} />
           </ViewIdMosaicWindow>
