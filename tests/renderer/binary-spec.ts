@@ -8,7 +8,7 @@ jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
 });
-jest.mock('../../src/constants', () => ({
+jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/'
 }));
 jest.mock('../../src/utils/import', () => ({

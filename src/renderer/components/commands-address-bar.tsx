@@ -4,7 +4,7 @@ import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
 import { getTitle } from '../../utils/get-title';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';

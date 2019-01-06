@@ -1,9 +1,9 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { USER_DATA_PATH } from '../constants';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
+import { USER_DATA_PATH } from './constants';
 
 /**
  * The binary manager takes care of downloading Electron versions

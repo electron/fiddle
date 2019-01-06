@@ -1,8 +1,8 @@
 import * as fsExtraType from 'fs-extra';
 import * as pathType from 'path';
 
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../constants';
 import { EditorValues } from '../interfaces';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { fancyImport } from '../utils/import';
 
 /**

@@ -3,8 +3,8 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
 import { IpcEvents } from '../../ipc-events';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';

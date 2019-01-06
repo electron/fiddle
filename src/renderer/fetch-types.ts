@@ -2,9 +2,9 @@ import * as fsType from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 
-import { USER_DATA_PATH } from '../constants';
 import { callIn } from '../utils/call-in';
 import { fancyImport } from '../utils/import';
+import { USER_DATA_PATH } from './constants';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
 
