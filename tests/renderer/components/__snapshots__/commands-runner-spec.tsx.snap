@@ -1,5 +1,18 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Runner component renders "checking status" 1`] = `
+<Blueprint3.Button
+  className="button-run"
+  disabled={true}
+  icon={
+    <Blueprint3.Spinner
+      size={16}
+    />
+  }
+  text="Checking status"
+/>
+`;
+
 exports[`Runner component renders default 1`] = `
 <Blueprint3.Button
   className="button-run"
@@ -13,7 +26,11 @@ exports[`Runner component renders downloading 1`] = `
 <Blueprint3.Button
   className="button-run"
   disabled={true}
-  loading={true}
+  icon={
+    <Blueprint3.Spinner
+      size={16}
+    />
+  }
   text="Downloading"
 />
 `;
