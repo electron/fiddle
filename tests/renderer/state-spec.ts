@@ -1,11 +1,16 @@
 import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { isContentUnchanged, getContent } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { saveLocalVersions } from '../../src/renderer/versions';
+import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
+jest.mock('../../src/renderer/content', () => ({
+  isContentUnchanged: jest.fn(),
+  getContent: jest.fn()
+}));
 jest.mock('../../src/renderer/binary', () => ({
   BinaryManager: require('../mocks/binary').MockBinaryManager
 }));
@@ -13,7 +18,9 @@ jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn()
 }));
 jest.mock('../../src/renderer/versions', () => ({
-  getUpdatedElectronVersions: () => Promise.resolve(require('../mocks/electron-versions').mockVersionsArray),
+  getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
+    return require('../mocks/electron-versions').mockVersionsArray;
+  }),
   getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
   getDefaultVersion: () => '2.0.2',
   ElectronReleaseChannel: {
@@ -72,6 +79,17 @@ describe('AppState', () => {
         expect(window.close).toHaveBeenCalledTimes(0);
         done();
       });
+    });
+  });
+
+  describe('updateElectronVersions()', () => {
+    it('handles errors gracefully', async () => {
+      (getUpdatedElectronVersions as jest.Mock)
+        .mockImplementationOnce(async () => {
+          throw new Error('Bwap-bwap');
+        });
+
+      await appState.updateDownloadedVersionState();
     });
   });
 
@@ -240,6 +258,16 @@ describe('AppState', () => {
 
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
+
+    it('possibly updates the editors', async () => {
+      appState.versions['1.0.0'] = { version: '1.0.0' } as any;
+      (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
+
+      await appState.setVersion('v1.0.0');
+
+      expect(getContent).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('setTheme()', () => {
@@ -291,7 +319,7 @@ describe('AppState', () => {
   describe('updateDownloadedVersionState()', () => {
     it('downloads a version if necessary', async () => {
       const mockResult = Promise.resolve(['2.0.2']);
-      (appState.binaryManager.getDownloadedVersions as any).mockReturnValueOnce(mockResult);
+      (appState.binaryManager.getDownloadedVersions as jest.Mock).mockReturnValueOnce(mockResult);
       await appState.updateDownloadedVersionState();
 
       expect(appState.versions['2.0.2'].state).toBe(ElectronVersionState.ready);

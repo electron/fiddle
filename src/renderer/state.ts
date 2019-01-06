@@ -58,11 +58,11 @@ export class AppState {
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
-  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic', true);
+  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
-    this.retrieve('versionsToShow', true) as Array<ElectronReleaseChannel>
+    this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
       || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
-  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs', true);
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
 
@@ -165,6 +165,8 @@ export class AppState {
   /**
    * Update the Electron versions: First, fetch them from GitHub,
    * then update their respective downloaded state.
+   *
+   * Fails silently.
    */
   @action public async updateElectronVersions() {
     this.isUpdatingElectronVersions = true;
@@ -174,7 +176,7 @@ export class AppState {
       this.versions = arrayToStringMap(versions);
       await this.updateDownloadedVersionState();
     } catch (error) {
-      console.warn(`State: Could not update Electron versions`);
+      console.warn(`State: Could not update Electron versions`, error);
     }
 
     this.isUpdatingElectronVersions = false;
@@ -497,17 +499,12 @@ export class AppState {
    *
    * @template T
    * @param {string} key
-   * @param {boolean} parse
    * @returns {(T | string | null)}
    */
-  private retrieve<T>(key: string, parse: boolean): T | string | null {
+  private retrieve<T>(key: string): T | string | null {
     const value = localStorage.getItem(key);
 
-    if (parse) {
-      return JSON.parse(value || 'null') as T;
-    }
-
-    return value;
+    return JSON.parse(value || 'null') as T;
   }
 }
 
