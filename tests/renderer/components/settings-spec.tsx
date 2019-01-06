@@ -69,6 +69,15 @@ describe('CreditsSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('renders the Execution page after a click', () => {
+    const wrapper = shallow(
+      <Settings appState={store} />
+    );
+
+    wrapper.find('#settings-link-Execution').simulate('click');
+    expect(wrapper).toMatchSnapshot();
+  });
+
   it('renders the Credits page after a click', () => {
     const wrapper = shallow(
       <Settings appState={store} />

@@ -1,6 +1,6 @@
-
 import { App } from '../../src/renderer/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { MockState } from '../mocks/state';
 
 jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
 jest.mock('../../src/renderer/state', () => ({
@@ -9,10 +9,30 @@ jest.mock('../../src/renderer/state', () => ({
     getName: () => 'Test'
   }
 }));
+jest.mock('../../src/renderer/components/header', () => ({
+  Header: () => 'Header;'
+}));
+jest.mock('../../src/renderer/components/dialogs', () => ({
+  Dialogs: () => 'Dialogs;'
+}));
+jest.mock('../../src/renderer/components/editors', () => ({
+  Editors: () => 'Editors;'
+}));
 
 describe('Editors component', () => {
   beforeEach(() => {
     (window as any).ElectronFiddle = new ElectronFiddleMock();
+  });
+
+  describe('setup()', () => {
+    it('renders the app', async () => {
+      document.body.innerHTML = '<div id="app" />';
+
+      const app = new App();
+      const result = await app.setup() as HTMLDivElement;
+
+      expect(result.innerHTML).toBe('Header;Dialogs;Editors;');
+    });
   });
 
   describe('getValues()', () => {
@@ -74,6 +94,79 @@ describe('Editors component', () => {
         .toHaveBeenCalledWith('renderer-value');
     });
 
+    it('warns when the contents are unsaved, does not proceed if denied', (done) => {
+      const app = new App();
+      (app.state as any) = new MockState();
+      app.state.isUnsaved = true;
+
+      app.setValues({
+        html: 'html-value',
+        main: 'main-value',
+        renderer: 'renderer-value'
+      }).then((result) => {
+        expect(result).toBe(true);
+        expect((window as any).ElectronFiddle.editors.html.setValue)
+          .toHaveBeenCalledWith('html-value');
+        expect((window as any).ElectronFiddle.editors.main.setValue)
+          .toHaveBeenCalledWith('main-value');
+        expect((window as any).ElectronFiddle.editors.renderer.setValue)
+          .toHaveBeenCalledWith('renderer-value');
+
+        done();
+      });
+
+      setTimeout(() => {
+        expect(app.state.isWarningDialogShowing).toBe(true);
+        app.state.warningDialogLastResult = true;
+        app.state.isWarningDialogShowing = false;
+      });
+    });
+
+    it('warns when the contents are unsaved, does proceed if allowed', (done) => {
+      const app = new App();
+      (app.state as any) = new MockState();
+      app.state.isUnsaved = true;
+
+      app.setValues({
+        html: 'html-value',
+        main: 'main-value',
+        renderer: 'renderer-value'
+      }).then((result) => {
+        expect(result).toBe(false);
+        expect((window as any).ElectronFiddle.editors.html.setValue)
+          .toHaveBeenCalledTimes(0);
+        expect((window as any).ElectronFiddle.editors.main.setValue)
+          .toHaveBeenCalledTimes(0);
+        expect((window as any).ElectronFiddle.editors.renderer.setValue)
+          .toHaveBeenCalledTimes(0);
+
+        done();
+      });
+
+      setTimeout(() => {
+        expect(app.state.isWarningDialogShowing).toBe(true);
+        app.state.isWarningDialogShowing = false;
+      });
+    });
+
+    it('setupUnsavedOnChangeListener()', async () => {
+      const app = new App();
+
+      await app.setValues({
+        html: 'html-value',
+        main: 'main-value',
+        renderer: 'renderer-value'
+      });
+
+      const fn = window.ElectronFiddle.editors!.renderer!.onDidChangeModelContent;
+      const call = (fn as jest.Mock<any>).mock.calls[0];
+      const cb = call[0];
+
+      cb();
+
+      expect(app.state.isUnsaved).toBe(true);
+    });
+
     it('throws if the Fiddle object is not present', async () => {
       (window as any).ElectronFiddle = null;
 
@@ -133,6 +226,26 @@ describe('Editors component', () => {
           }
         </style>`.replace(/        /gm, ''));
         // tslint:enable:max-line-length
+    });
+
+    it('removes the dark theme option if required', async () => {
+      document.body.classList.add('bp3-dark');
+
+      const app = new App();
+      app.state.theme = 'defaultLight';
+
+      await app.setupTheme();
+
+      expect(document.body.classList.value).toBe('');
+    });
+
+    it('adds the dark theme option if required', async () => {
+      const app = new App();
+      app.state.theme = 'custom-dark';
+
+      await app.setupTheme();
+
+      expect(document.body.classList.value).toBe('bp3-dark');
     });
   });
 });

@@ -16,7 +16,7 @@ describe('focused-editor', () => {
     expect((getFocusedEditor() as any).name).toBe('renderer');
   });
 
-  it('getFocusedEditor() returns null if none focused', () => {
+  it('getFocusedEditor() returns null if the editor does not exist', () => {
     expect((getFocusedEditor() as any)).toBe(null);
   });
 });

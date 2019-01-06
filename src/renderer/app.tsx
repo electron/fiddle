@@ -40,7 +40,7 @@ export class App {
       throw new Error('Fiddle not ready');
     }
 
-    if (appState.isUnsaved && warn) {
+    if (this.state.isUnsaved && warn) {
       this.state.isWarningDialogShowing = true;
       await when(() => !this.state.isWarningDialogShowing);
 
@@ -63,7 +63,7 @@ export class App {
       renderer.setValue(values.renderer);
     }
 
-    appState.isUnsaved = false;
+    this.state.isUnsaved = false;
     this.setupUnsavedOnChangeListener();
 
     return true;
@@ -89,7 +89,7 @@ export class App {
     };
 
     if (options && options.include !==  false) {
-      values.package = await getPackageJson(appState, values, options);
+      values.package = await getPackageJson(this.state, values, options);
     }
 
     return values;
@@ -99,7 +99,7 @@ export class App {
    * Initial setup call, loading Monaco and kicking off the React
    * render process.
    */
-  public async setup(): Promise<void> {
+  public async setup(): Promise<void | Element | React.Component> {
     this.setupTheme();
 
     const React = await import('react');
@@ -111,13 +111,13 @@ export class App {
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Header appState={appState} />
-        <Dialogs appState={appState} />
-        <Editors appState={appState} />
+        <Header appState={this.state} />
+        <Dialogs appState={this.state} />
+        <Editors appState={this.state} />
       </div>
     );
 
-    render(app, document.getElementById('app'));
+    const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
 
@@ -126,6 +126,8 @@ export class App {
     setTimeout(() => {
       this.setupUnsavedOnChangeListener();
     }, 1500);
+
+    return rendered;
   }
 
   /**
@@ -137,7 +139,7 @@ export class App {
     Object.keys(window.ElectronFiddle.editors).forEach((key) => {
       const editor = window.ElectronFiddle.editors[key];
       const disposable = editor.onDidChangeModelContent(() => {
-        appState.isUnsaved = true;
+        this.state.isUnsaved = true;
         disposable.dispose();
       });
     });
@@ -150,7 +152,7 @@ export class App {
    */
   public async setupTheme(): Promise<void> {
     const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
-    const theme = await getTheme(appState.theme);
+    const theme = await getTheme(this.state.theme);
 
     if (tag && theme.css) {
       tag.innerHTML = theme.css;

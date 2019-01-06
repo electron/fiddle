@@ -1,5 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`AppearanceSettings component renderItem() returns a MenuItem for matching 1`] = `
+<Blueprint3.MenuItem
+  active={false}
+  disabled={false}
+  icon="media"
+  multiline={false}
+  onClick={[Function]}
+  popoverProps={Object {}}
+  shouldDismissPopover={true}
+  text={
+    Array [
+      "foo",
+    ]
+  }
+/>
+`;
+
 exports[`AppearanceSettings component renders 1`] = `
 <div
   className="settings-appearance"

@@ -1,6 +1,8 @@
-import { ElectronVersionState } from '../../src/interfaces';
+import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
+import { saveLocalVersions } from '../../src/renderer/versions';
+import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -17,9 +19,13 @@ jest.mock('../../src/renderer/versions', () => ({
   ElectronReleaseChannel: {
     stable: 'Stable',
     beta: 'Beta'
-  }
+  },
+  addLocalVersion: jest.fn(),
+  saveLocalVersions: jest.fn()
 }));
-jest.mock('../../src/utils/get-title', () => ({}));
+jest.mock('../../src/utils/get-title', () => ({
+  getName: jest.fn()
+}));
 
 describe('AppState', () => {
   let appState = new AppState();
@@ -33,10 +39,52 @@ describe('AppState', () => {
     expect(appState).toBeTruthy();
   });
 
+  describe('onbeforeunload handler', () => {
+    it('closes the window', (done) => {
+      window.close = jest.fn();
+      appState.isUnsaved = true;
+      expect(window.onbeforeunload).toBeTruthy();
+
+      const result = window.onbeforeunload!(undefined as any);
+      expect(result).toBe(false);
+      expect(appState.isWarningDialogShowing).toBe(true);
+
+      appState.warningDialogLastResult = true;
+      appState.isWarningDialogShowing = false;
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('closes the window', (done) => {
+      window.close = jest.fn();
+      appState.isUnsaved = true;
+      expect(window.onbeforeunload).toBeTruthy();
+
+      const result = window.onbeforeunload!(undefined as any);
+      expect(result).toBe(false);
+      expect(appState.isWarningDialogShowing).toBe(true);
+
+      appState.warningDialogLastResult = false;
+      appState.isWarningDialogShowing = false;
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalledTimes(0);
+        done();
+      });
+    });
+  });
+
   describe('getName()', () => {
     it('returns the name', async () => {
       (appState as any).name = 'hi';
       expect(await appState.getName()).toBe('hi');
+    });
+
+    it('returns the name, even if none exists', async () => {
+      (getName as jest.Mock).mockReturnValue('test');
+      (appState as any).name = undefined;
+      expect(await appState.getName()).toBe('test');
     });
   });
 
@@ -83,6 +131,28 @@ describe('AppState', () => {
     });
   });
 
+  describe('toggleAddVersionDialog()', () => {
+    it('toggles the add version dialog', () => {
+      appState.toggleAddVersionDialog();
+      expect(appState.isAddVersionDialogShowing).toBe(true);
+      appState.toggleAddVersionDialog();
+      expect(appState.isAddVersionDialogShowing).toBe(false);
+    });
+  });
+
+  describe('toogleWarningDialog()', () => {
+    it('toggles the warnign dialog', () => {
+      appState.warningDialogLastResult = true;
+
+      appState.toogleWarningDialog();
+      expect(appState.isWarningDialogShowing).toBe(true);
+      expect(appState.warningDialogLastResult).toBe(null);
+
+      appState.toogleWarningDialog();
+      expect(appState.isWarningDialogShowing).toBe(false);
+    });
+  });
+
   describe('disableTour()', () => {
     it('disables the tour', () => {
       appState.isTourShowing = false;
@@ -116,6 +186,22 @@ describe('AppState', () => {
     it('does not remove it if not necessary (version not existent)', async () => {
       appState.versions['2.0.2'] = undefined as any;
       await appState.removeVersion('v2.0.2');
+      expect(appState.binaryManager.remove).toHaveBeenCalledTimes(0);
+    });
+
+    it('removes (and not deletes) a local version', async () => {
+      appState.versions['/local/path'] = {
+        localPath: 'local/path',
+        name: 'local-foo',
+        source: ElectronVersionSource.local,
+        state: ElectronVersionState.ready,
+        version: '4.0.0'
+      };
+
+      await appState.removeVersion('/local/path');
+
+      expect(saveLocalVersions).toHaveBeenCalledTimes(1);
+      expect(appState.versions['/local/path']).toBeUndefined();
       expect(appState.binaryManager.remove).toHaveBeenCalledTimes(0);
     });
   });
@@ -153,6 +239,52 @@ describe('AppState', () => {
       await appState.setVersion('v2.0.2');
 
       expect(appState.downloadVersion).toHaveBeenCalled();
+    });
+  });
+
+  describe('setTheme()', () => {
+    it('calls setupTheme()', () => {
+      appState.setTheme('custom');
+
+      expect(appState.theme).toBe('custom');
+      expect(window.ElectronFiddle.app.setupTheme).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles a missing theme name', () => {
+      appState.setTheme();
+
+      expect(appState.theme).toBe('');
+      expect(window.ElectronFiddle.app.setupTheme).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('setWarningDialogTexts()', () => {
+    it('sets the warning dialog texts', () => {
+      appState.setWarningDialogTexts({ label: 'foo' });
+      expect(appState.warningDialogTexts).toEqual({
+        label: 'foo',
+        ok: 'Okay',
+        cancel: 'Cancel'
+      });
+    });
+  });
+
+  describe('addLocalVersion()', () => {
+    it('refreshes version state', async () => {
+      appState.versions = {};
+
+      await appState.addLocalVersion({
+        localPath: '/fake/path',
+        name: 'local-foo',
+        version: '4.0.0'
+      });
+
+      // We just want to verify that the version state was
+      // refreshed - we didn't actually add the local version
+      // above, since versions.ts is mocked
+      expect(Object.keys(appState.versions)).toEqual(
+        [ '2.0.2', '2.0.1', '1.8.7' ]
+      );
     });
   });
 

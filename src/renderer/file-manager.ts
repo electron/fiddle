@@ -35,13 +35,19 @@ export class FileManager {
     });
   }
 
+  /**
+   * Opens a template.
+   *
+   * @param {string} name
+   * @memberof FileManager
+   */
   public async openTemplate(name: string) {
     const values = await getTemplateValues(name);
     this.setFiddle(values);
   }
 
   /**
-   * Tries to open a fiddle
+   * Tries to open a fiddle.
    *
    * @param {string} filePath
    * @memberof FileManager
@@ -89,7 +95,7 @@ export class FileManager {
    * @param {string} filePath
    * @memberof FileManager
    */
-  public async saveFiddle(filePath: string, ...transforms: Array<FileTransform>) {
+  public async saveFiddle(filePath?: string, ...transforms: Array<FileTransform>) {
     const { localPath } = this.appState;
     const pathToSave = filePath || localPath;
 
@@ -104,6 +110,7 @@ export class FileManager {
         try {
           await this.saveFile(path.join(pathToSave, fileName), content);
         } catch (error) {
+          // Todo: Warn the user
           console.warn(`FileManager: Failed to save file`, { fileName, error });
         }
       }

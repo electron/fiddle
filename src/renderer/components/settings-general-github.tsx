@@ -16,23 +16,25 @@ export interface GitHubSettingsProps {
  */
 @observer
 export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
+  constructor(props: GitHubSettingsProps) {
+    super(props);
+
+    this.signIn = this.signIn.bind(this);
+  }
+
   /**
    * Render the "logged out" settings experience.
    *
    * @returns {JSX.Element}
    */
   public renderNotSignedIn(): JSX.Element {
-    const signIn = () => {
-      this.props.appState.isTokenDialogShowing = true;
-    };
-
     return (
       <Callout>
         <p>
           Your fiddles can be published as public GitHub Gists -
           that way you can share your fiddles with the world!
         </p>
-        <Button onClick={signIn} icon='log-in' text='Sign in'/>
+        <Button onClick={this.signIn} icon='log-in' text='Sign in'/>
       </Callout>
     );
   }
@@ -71,5 +73,12 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
         {maybeSignedIn}
       </div>
     );
+  }
+
+  /**
+   * Simply shows the GitHub Token dialog.``
+   */
+  private signIn() {
+    this.props.appState.isTokenDialogShowing = true;
   }
 }

@@ -28,4 +28,13 @@ describe('GitHubSettings component', () => {
     );
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('opens the token dialog on click', () => {
+    const wrapper = shallow(
+      <GitHubSettings appState={store} />
+    );
+
+    wrapper.childAt(1).childAt(1).simulate('click');
+    expect(store.isTokenDialogShowing).toBe(true);
+  });
 });

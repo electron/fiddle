@@ -39,6 +39,23 @@ describe('versions', () => {
       const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
       expect(output).toBe('2.0.2');
     });
+
+    it('handles if no version is set', () => {
+      (localStorage.getItem as any).mockReturnValue(null);
+      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('throws if everything goes wrong', () => {
+      const oldError = console.error;
+      const testFn = () => {
+        return getDefaultVersion(null as any);
+      };
+      console.error = jest.fn();
+
+      expect(testFn).toThrow();
+      console.error = oldError;
+    });
   });
 
   describe('getReleaseChannel()', () => {

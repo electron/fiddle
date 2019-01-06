@@ -10,6 +10,8 @@ export class AppMock {
     html: 'html-content'
   }));
 
+  public setupTheme = jest.fn();
+
   public typeDefDisposable = {
     dispose: jest.fn()
   };

@@ -22,7 +22,7 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
  * @param {ElectronVersion} { version }
  * @returns
  */
-const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
+export const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
   return name.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -35,7 +35,7 @@ const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
     return null;
   }
