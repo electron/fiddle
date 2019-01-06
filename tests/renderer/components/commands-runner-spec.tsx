@@ -47,9 +47,9 @@ describe('Runner component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders null if there is no Electron version', () => {
-    store.version = '';
+  it('renders "checking status"', () => {
+    store.versions['2.0.2'].state = ElectronVersionState.unknown;
     const wrapper = shallow(<Runner appState={store} />);
-    expect(wrapper.html()).toBe(null);
+    expect(wrapper).toMatchSnapshot();
   });
 });

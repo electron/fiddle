@@ -78,9 +78,12 @@ export class BinaryManager {
 
     const zipPath = await eDownload({ version });
     const extractPath = this.getDownloadPath(version);
-    console.log(`BinaryManager: Electron ${version} downloaded, now unpacking`);
+    console.log(`BinaryManager: Electron ${version} downloaded, now unpacking to ${extractPath}`);
 
     try {
+      // Ensure the target path is empty
+      await fs.emptyDir(extractPath);
+
       const electronFiles = await this.unzip(zipPath, extractPath);
       console.log(`Unzipped ${version}`, electronFiles);
     } catch (error) {
@@ -179,7 +182,11 @@ export class BinaryManager {
 
       process.noAsar = true;
 
-      extract(zipPath, { dir: extractPath }, (error: Error) => {
+      const options = {
+        dir: extractPath,
+      };
+
+      extract(zipPath, options, (error: Error) => {
         if (error) {
           reject(error);
           return;

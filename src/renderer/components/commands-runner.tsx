@@ -1,4 +1,4 @@
-import { Button, IButtonProps } from '@blueprintjs/core';
+import { Button, IButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -30,7 +30,7 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
     if (state === ElectronVersionState.downloading) {
       props.text = 'Downloading';
       props.disabled = true;
-      props.loading = true;
+      props.icon = <Spinner size={16} />;
     } else if (state === ElectronVersionState.ready) {
       if (isRunning) {
         props.active = true;
@@ -43,7 +43,9 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
         props.icon = 'play';
       }
     } else {
-      return null;
+      props.text = 'Checking status';
+      props.disabled = true;
+      props.icon = <Spinner size={16} />;
     }
 
     return <Button {...props} />;

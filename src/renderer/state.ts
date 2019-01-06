@@ -358,12 +358,12 @@ export class AppState {
     const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     const updatedVersions = { ...this.versions };
 
-    console.log(`State: Updating version state`);
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = ElectronVersionState.ready;
       }
     });
+    console.log(`State: Updated version state`, updatedVersions);
 
     this.versions = updatedVersions;
   }
