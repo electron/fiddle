@@ -57,6 +57,7 @@ install:
 
 script:
 - npm run lint
-- npm run test -- --runInBand
+- npm run test:coverage
 - if test -z "$TRAVIS_TAG"; then npm run make; fi
+
 after_success: if test -n "$TRAVIS_TAG"; then npm run publish; fi

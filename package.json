@@ -20,6 +20,7 @@
     "publish": "electron-forge publish",
     "start": "rimraf ./dist && electron-forge start",
     "test": "jest --config=jest.json --coverage",
+    "test:coverage": "jest --config=jest.json --coverage --runInBand --coverageReporters=text-lcov | coveralls",
     "tsc": "node ./tools/tsc.js",
     "electron-releases": "node ./tools/fetch-releases.js"
   },
@@ -75,6 +76,7 @@
     "@types/semver": "^5.5.0",
     "@types/tmp": "0.0.33",
     "chokidar": "^2.0.4",
+    "coveralls": "^3.0.2",
     "electron": "3.0.13",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
