@@ -1,5 +1,5 @@
-import { PACKAGE_NAME } from '../../constants';
 import { Files } from '../../interfaces';
+import { PACKAGE_NAME } from '../../shared-constants';
 
 /**
  * This transform turns the files into an electron-forge

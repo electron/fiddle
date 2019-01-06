@@ -1,9 +1,9 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../constants';
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
