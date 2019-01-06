@@ -1,10 +1,10 @@
 import { Button, InputGroup, Intent } from '@blueprintjs/core';
+import classnames from 'classnames';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../constants';
-import { classNames } from '../../utils/classnames';
 import { getTitle } from '../../utils/get-title';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';
@@ -120,7 +120,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     const { isUnsaved } = this.props.appState;
     const { value } = this.state;
     const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
-    const className = classNames('address-bar', isUnsaved, { empty: !value });
+    const className = classnames('address-bar', isUnsaved, { empty: !value });
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
