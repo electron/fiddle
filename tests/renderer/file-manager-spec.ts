@@ -1,8 +1,8 @@
-import { RENDERER_JS_NAME } from '../../src/constants';
 import { Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { RENDERER_JS_NAME } from '../../src/shared-constants';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('fs-extra');
