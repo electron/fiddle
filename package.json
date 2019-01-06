@@ -52,7 +52,7 @@
     "namor": "^1.1.1",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
-    "react-mosaic-component": "^1.1.1",
+    "react-mosaic-component": "^2.0.2",
     "semver": "^5.6.0",
     "tmp": "0.0.33",
     "tslib": "^1.9.3",
