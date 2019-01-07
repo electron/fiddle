@@ -19,9 +19,11 @@ describe('files', () => {
   describe('setupFileListeners()', () => {
     setupFileListeners();
 
-    expect(ipcMainManager.eventNames()).toEqual([
-      IpcEvents.FS_SAVE_FIDDLE_DIALOG
-    ]);
+    it('sets up the listener', () => {
+      expect(ipcMainManager.eventNames()).toEqual([
+        IpcEvents.FS_SAVE_FIDDLE_DIALOG
+      ]);
+    });
   });
 
   describe('showOpenDialog', () => {
