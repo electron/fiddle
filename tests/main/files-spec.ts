@@ -6,7 +6,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 
-import { dialog } from 'electron';
+import { dialog, ipcMain } from 'electron';
 import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
@@ -17,12 +17,16 @@ jest.mock('fs-extra', () => ({
 
 describe('files', () => {
   describe('setupFileListeners()', () => {
-    setupFileListeners();
 
     it('sets up the listener', () => {
+      setupFileListeners();
+
       expect(ipcMainManager.eventNames()).toEqual([
         IpcEvents.FS_SAVE_FIDDLE_DIALOG
       ]);
+
+      ipcMainManager.emit(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
+      expect(dialog.showOpenDialog).toHaveBeenCalled();
     });
   });
 
@@ -83,6 +87,20 @@ describe('files', () => {
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle as hello'
+      });
+    });
+
+    it('handles not getting a path returned', async (done) => {
+      showSaveDialog();
+
+      const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
+      const cb = call[1];
+
+      await cb();
+
+      process.nextTick(() => {
+        expect(fs.existsSync).toHaveBeenCalledTimes(0);
+        done();
       });
     });
 
