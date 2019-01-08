@@ -19,20 +19,20 @@ export function getDefaultVersion(
 ): string {
   const ls = localStorage.getItem('version');
 
-  if (ls && knownVersions.find(({ version }) => version === ls)) {
+  if (ls && knownVersions && knownVersions.find(({ version }) => version === ls)) {
     return ls;
   }
 
   // Self-heal: Version not formated correctly
   const normalized = ls && normalizeVersion(ls);
   if (normalized) {
-    if (knownVersions.find(({ version }) => version === normalized)) {
+    if (knownVersions && knownVersions.find(({ version }) => version === normalized)) {
       return normalized;
     }
   }
 
   // Alright, the first version?
-  const last = knownVersions[knownVersions.length - 1];
+  const last = knownVersions && knownVersions[knownVersions.length - 1];
   if (last) {
     return last.version;
   }

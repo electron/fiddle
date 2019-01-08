@@ -47,14 +47,11 @@ describe('versions', () => {
     });
 
     it('throws if everything goes wrong', () => {
-      const oldError = console.error;
       const testFn = () => {
         return getDefaultVersion(null as any);
       };
-      console.error = jest.fn();
 
       expect(testFn).toThrow();
-      console.error = oldError;
     });
   });
 
@@ -139,7 +136,7 @@ describe('versions', () => {
           "published_at": "1538771049442",
           "tag_name": "4.0.0",
           "target_commitish": ""
-        }]
+        }, { "garbage": "true" }]
       `.trim());
 
       expect(getLocalVersions()).toEqual([{
@@ -177,6 +174,12 @@ describe('versions', () => {
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
+
+      expect(getKnownVersions().length).toBe(167);
+    });
+
+    it('falls back to a local require', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "garbage": "true" }]`);
 
       expect(getKnownVersions().length).toBe(167);
     });
