@@ -104,7 +104,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public toggleEditorOption(path: string): boolean {
-    if (!window || !window.ElectronFiddle || !window.ElectronFiddle.editors) {
+    if (!window.ElectronFiddle.editors) {
       return false;
     }
 

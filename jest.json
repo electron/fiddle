@@ -20,7 +20,8 @@
   ],
   "coverageReporters": [
     "json",
-    "html"
+    "html",
+    "lcov"
   ],
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",

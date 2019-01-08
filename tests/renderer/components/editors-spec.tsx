@@ -63,12 +63,14 @@ describe('Editrors component', () => {
 
   describe('toggleEditorOption()', () => {
     it('handles a missing ElectronFiddle global', () => {
-      window.ElectronFiddle = undefined as any;
+      const oldEditors = window.ElectronFiddle.editors;
+      window.ElectronFiddle.editors = undefined as any;
 
       const wrapper = shallow(<Editors appState={store} />);
       const instance: Editors = wrapper.instance() as any;
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
+      window.ElectronFiddle.editors = oldEditors;
     });
 
     it('handles an error', () => {
