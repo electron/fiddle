@@ -54,7 +54,7 @@ describe('TokenDialog component', () => {
     instance.onTokenInputFocused();
 
     expect((electron as any).clipboard.readText).toHaveBeenCalled();
-    expect(wrapper.state('tokenInput')).toBe(undefined);
+    expect(wrapper.state('tokenInput')).toBe('');
   });
 
   it('tries to read the clipboard on focus and does not enter it if invalid', () => {
@@ -65,7 +65,18 @@ describe('TokenDialog component', () => {
     instance.onTokenInputFocused();
 
     expect((electron as any).clipboard.readText).toHaveBeenCalled();
-    expect(wrapper.state('tokenInput')).toBe(undefined);
+    expect(wrapper.state('tokenInput')).toBe('');
+  });
+
+  it('tries to read the clipboard on focus and does not enter it if invalid', () => {
+    const wrapper = shallow(<TokenDialog appState={store} />);
+    const instance: TokenDialog = wrapper.instance() as any;
+
+    (electron as any).clipboard.readText.mockReturnValueOnce(undefined);
+    instance.onTokenInputFocused();
+
+    expect((electron as any).clipboard.readText).toHaveBeenCalled();
+    expect(wrapper.state('tokenInput')).toBe('');
   });
 
   it('reset() resets the component', () => {

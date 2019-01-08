@@ -12,7 +12,7 @@ export interface TokenDialogProps {
 }
 
 export interface TokenDialogState {
-  tokenInput?: string;
+  tokenInput: string;
   verifying: boolean;
   error: boolean;
 }
@@ -37,7 +37,9 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     this.state = {
       verifying: false,
       error: false,
+      tokenInput: ''
     };
+
     this.onSubmitToken = this.onSubmitToken.bind(this);
     this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
     this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
@@ -58,7 +60,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     const octo = await getOctokit();
     octo.authenticate({
       type: 'token',
-      token: this.state.tokenInput || '',
+      token: this.state.tokenInput,
     });
 
     try {
