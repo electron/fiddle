@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { IpcEvents } from '../../../src/ipc-events';
@@ -11,7 +11,7 @@ jest.mock('monaco-loader', () => jest.fn(async () => {
 }));
 
 jest.mock('../../../src/renderer/components/editor', () => ({
-  Editor: 'Editor'
+  Editor: () => 'Editor'
 }));
 
 jest.mock('../../../src/utils/focused-editor', () => ({
@@ -37,7 +37,7 @@ describe('Editrors component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Editors appState={store} />);
+    const wrapper = mount(<Editors appState={store} />);
     wrapper.setState({ monaco });
     expect(wrapper).toMatchSnapshot();
   });
