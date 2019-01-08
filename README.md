@@ -56,6 +56,13 @@ fiddle has grown up, export it as a project with or without
 [electron-forge][electron-forge]. Then, use your favorite editor and take on
 the world!
 
+## Troubleshooting
+### Notifications not showing on Windows 10 Fall Update and Newer
+This is because Windows is only allowing known applications to fire notifications.
+- Add `electron.exe` to start menu. It's normally at `C:\Users\YOUR_USERNAMER\AppData\Roaming\Electron Fiddle\electron-bin\{ELECTRON_VERSION}\electron.exe`. Right-clicking and 'Pin to Start Menu' does the trick.
+![image](https://user-images.githubusercontent.com/1991125/50834222-70c8c380-138e-11e9-924d-3d8eb6ebe36c.png)
+- Add a ModelId to your Main Process like so: `app.setAppUserModelId(process.execPath)`
+
 ## License
 
 [MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE.md).
