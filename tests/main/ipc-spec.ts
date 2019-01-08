@@ -22,7 +22,7 @@ describe('IpcMainManager', () => {
   });
 
   describe('send()', () => {
-    it('sends an event', () => {
+    it('sends an event and finds the main window', () => {
       const mockTarget = {
         webContents: {
           send: jest.fn()
@@ -33,7 +33,18 @@ describe('IpcMainManager', () => {
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
 
-      expect(electron.ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'hello');
+      expect(mockTarget.webContents.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
+    });
+
+    it('sends an event to a target window', () => {
+      const mockTarget = {
+        send: jest.fn()
+      };
+
+      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget as any);
+
+      expect(mockTarget.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
     });
   });
 });
