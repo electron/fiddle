@@ -19,7 +19,7 @@ export interface WelcomeTourState {
  *
  * @returns {Set<TourScriptStep>}
  */
-function getWelcomeTour(): Set<TourScriptStep> {
+export function getWelcomeTour(): Set<TourScriptStep> {
   return new Set([
     {
       name: 'fiddle-editors',
