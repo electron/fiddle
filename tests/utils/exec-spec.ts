@@ -1,46 +1,80 @@
-import { exec } from '../../src/utils/exec';
-
 jest.mock('child_process');
 
-jest.mock('fix-path', async () => {
-  return {
-    default: jest.fn()
-  };
-});
-
+const mockFixPath = jest.fn();
+jest.mock('fix-path', () => mockFixPath);
 
 describe('exec', () => {
-  it('executes a given string', async () => {
-    const cpExec = require('child_process').exec;
-    cpExec.mockImplementation((_a: any, _b: any, c: any) => c(null, Buffer.from('hi')));
+  const oldPlatform = process.platform;
 
-    const result = await exec('a/dir', 'echo hi');
-    const call = cpExec.mock.calls[0];
+  // Allow us to reset the module between each run
+  let execModule = require('../../src/utils/exec');
 
-    expect(call[0]).toBe('echo hi');
-    expect(call[1]).toEqual({ cwd: 'a/dir', maxBuffer: 20480000 });
-    expect(result).toBe('hi');
+  beforeEach(() => {
+    jest.resetModules();
+    execModule = require('../../src/utils/exec');
   });
 
-  it('handles a returned string', async () => {
-    const cpExec = require('child_process').exec;
-    cpExec.mockImplementation((_a: any, _b: any, c: any) => c(null, 'hi'));
-
-    const result = await exec('a/dir', 'echo hi');
-    expect(result).toBe('hi');
+  afterEach(() => {
+    Object.defineProperty(process, 'platform', {
+      value: oldPlatform
+    });
   });
 
-  it('handles errors', async () => {
-    let errored = false;
-    const cpExec = require('child_process').exec;
-    (cpExec as jest.Mock<any>).mockImplementation((_a: any, _b: any, c: any) => c(new Error('Poop!')));
+  describe('exec()', () => {
+    it('executes a given string', async () => {
+      const cpExec = require('child_process').exec;
+      cpExec.mockImplementation((_a: any, _b: any, c: any) => c(null, Buffer.from('hi')));
 
-    try {
-      await exec('a/dir', 'echo hi');
-    } catch (error) {
-      errored = true;
-    }
+      const result = await execModule.exec('a/dir', 'echo hi');
+      const call = cpExec.mock.calls[0];
 
-    expect(errored).toBe(true);
+      expect(call[0]).toBe('echo hi');
+      expect(call[1]).toEqual({ cwd: 'a/dir', maxBuffer: 20480000 });
+      expect(result).toBe('hi');
+    });
+
+    it('handles a returned string', async () => {
+      const cpExec = require('child_process').exec;
+      cpExec.mockImplementation((_a: any, _b: any, c: any) => c(null, 'hi'));
+
+      const result = await execModule.exec('a/dir', 'echo hi');
+      expect(result).toBe('hi');
+    });
+
+    it('handles errors', async () => {
+      let errored = false;
+      const cpExec = require('child_process').exec;
+      (cpExec as jest.Mock<any>).mockImplementation((_a: any, _b: any, c: any) => c(new Error('Poop!')));
+
+      try {
+        await execModule.exec('a/dir', 'echo hi');
+      } catch (error) {
+        errored = true;
+      }
+
+      expect(errored).toBe(true);
+    });
+  });
+
+  describe('maybeFixPath()', () => {
+    it('does not do anything on Windows', async () => {
+      Object.defineProperty(process, 'platform', {
+        value: 'win32'
+      });
+
+      await execModule.maybeFixPath();
+
+      expect(mockFixPath).toHaveBeenCalledTimes(0);
+    });
+
+    it('does call fix-path on macOS', async () => {
+      Object.defineProperty(process, 'platform', {
+        value: 'darwin'
+      });
+
+      await execModule.maybeFixPath();
+
+      expect(mockFixPath).toHaveBeenCalledTimes(1);
+    });
   });
 });

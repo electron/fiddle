@@ -33,9 +33,9 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
  *
  * @returns {Promise<void>}
  */
-async function maybeFixPath(): Promise<void> {
+export async function maybeFixPath(): Promise<void> {
   if (!_fixPathCalled && process.platform !== 'win32') {
-    const fixPaths = (await import('fix-path')).default;
+    const fixPaths = require('fix-path');
     fixPaths();
   }
 
