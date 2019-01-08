@@ -33,7 +33,7 @@ describe('Runner component', () => {
 
     store = {
       version: '2.0.2',
-      versions: mockVersions,
+      versions: { ...mockVersions },
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       pushOutput: jest.fn(),

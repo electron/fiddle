@@ -12,7 +12,7 @@ describe('ElectronSettings component', () => {
   beforeEach(() => {
     store = {
       version: '2.0.1',
-      versions: mockVersions,
+      versions: { ...mockVersions },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
@@ -87,9 +87,7 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles the deleteAll()', async () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    const wrapper = shallow(<ElectronSettings appState={store} />);
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 

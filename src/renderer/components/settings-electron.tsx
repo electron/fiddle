@@ -102,6 +102,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     for (const key in versions) {
       // If this isn't the currently selected version, remove it
       if (normalizeVersion(key) !== normalizeVersion(version)) {
+        key//?
         await removeVersion(key);
       }
     }

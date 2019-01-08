@@ -6,7 +6,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 
-import { dialog, ipcMain } from 'electron';
+import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 

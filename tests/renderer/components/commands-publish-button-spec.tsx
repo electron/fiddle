@@ -143,7 +143,7 @@ describe('Publish button component', () => {
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
-    instance.setPrivacy(false);
+    instance.setPrivate();
     await instance.publishFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
@@ -151,7 +151,7 @@ describe('Publish button component', () => {
       public: false,
     });
 
-    instance.setPrivacy(true);
+    instance.setPublic();
     await instance.publishFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({

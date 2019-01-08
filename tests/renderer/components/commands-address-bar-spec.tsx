@@ -106,7 +106,6 @@ describe('AddressBar component', () => {
       });
 
       const wrapper = shallow(<AddressBar appState={store} />);
-      const instance: AddressBar = wrapper.instance() as any;
       const result = await (wrapper.instance() as AddressBar).loadFiddle();
 
       expect(result).toBe(false);

@@ -7,7 +7,7 @@ import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
 jest.mock('monaco-loader', () => jest.fn(async () => {
-  return { monaco: true }
+  return { monaco: true };
 }));
 
 jest.mock('../../../src/renderer/components/editor', () => ({
@@ -63,7 +63,7 @@ describe('Editrors component', () => {
 
   describe('toggleEditorOption()', () => {
     it('handles a missing ElectronFiddle global', () => {
-      window.ElectronFiddle = undefined;
+      window.ElectronFiddle = undefined as any;
 
       const wrapper = shallow(<Editors appState={store} />);
       const instance: Editors = wrapper.instance() as any;

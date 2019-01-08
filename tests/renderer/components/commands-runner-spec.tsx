@@ -20,7 +20,7 @@ describe('Runner component', () => {
 
     store = {
       version: '2.0.2',
-      versions: mockVersions,
+      versions: { ...mockVersions },
       isRunning: false,
       get currentElectronVersion() {
         return mockVersions[this.version];
