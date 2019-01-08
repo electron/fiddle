@@ -24,7 +24,8 @@
   ],
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
-    "!**/*.d.ts"
+    "!**/*.d.ts",
+    "!**/*-constants.ts"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",

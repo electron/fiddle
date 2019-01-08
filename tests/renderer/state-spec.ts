@@ -1,5 +1,5 @@
 import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
-import { isContentUnchanged, getContent } from '../../src/renderer/content';
+import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';

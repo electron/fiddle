@@ -4,7 +4,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as React from 'react';
 
-import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 
 export interface CreditsSettingsProps {
