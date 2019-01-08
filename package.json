@@ -20,7 +20,7 @@
     "publish": "electron-forge publish",
     "start": "rimraf ./dist && electron-forge start",
     "test": "jest --config=jest.json --coverage",
-    "test:coverage": "jest --config=jest.json --coverage --runInBand --coverageReporters=text-lcov | coveralls",
+    "test:coverage": "jest --config=jest.json --coverage --runInBand --coverageReporters=text-lcov && cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "tsc": "node ./tools/tsc.js",
     "electron-releases": "node ./tools/fetch-releases.js"
   },
