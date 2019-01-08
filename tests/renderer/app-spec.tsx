@@ -27,11 +27,17 @@ describe('Editors component', () => {
   describe('setup()', () => {
     it('renders the app', async () => {
       document.body.innerHTML = '<div id="app" />';
+      jest.useFakeTimers();
 
       const app = new App();
       const result = await app.setup() as HTMLDivElement;
+      app.setupUnsavedOnChangeListener = jest.fn();
+      jest.runAllTimers();
 
       expect(result.innerHTML).toBe('Header;Dialogs;Editors;');
+      expect(app.setupUnsavedOnChangeListener).toHaveBeenCalled();
+
+      jest.useRealTimers();
     });
   });
 
@@ -149,7 +155,23 @@ describe('Editors component', () => {
       });
     });
 
-    it('setupUnsavedOnChangeListener()', async () => {
+    it('throws if the Fiddle object is not present', async () => {
+      (window as any).ElectronFiddle = null;
+
+      const app = new App();
+      let threw = false;
+      try {
+        await app.setValues({ html: '', main: '', renderer: ''});
+      } catch (error) {
+        threw = true;
+      }
+
+      expect(threw).toBe(true);
+    });
+  });
+
+  describe('setupUnsavedOnChangeListener()', () => {
+    it('listens for model change events', async () => {
       const app = new App();
 
       await app.setValues({
@@ -165,20 +187,6 @@ describe('Editors component', () => {
       cb();
 
       expect(app.state.isUnsaved).toBe(true);
-    });
-
-    it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-
-      const app = new App();
-      let threw = false;
-      try {
-        await app.setValues({ html: '', main: '', renderer: ''});
-      } catch (error) {
-        threw = true;
-      }
-
-      expect(threw).toBe(true);
     });
   });
 
