@@ -4,6 +4,7 @@ import { isDevMode } from '../utils/devmode';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
+import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 
@@ -48,7 +49,7 @@ export function onWindowsAllClosed() {
 export function main() {
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
-  if (require('electron-squirrel-startup')) {
+  if (shouldQuit()) {
     app.quit();
     return;
   }
