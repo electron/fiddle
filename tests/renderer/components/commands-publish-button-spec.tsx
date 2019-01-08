@@ -159,4 +159,17 @@ describe('Publish button component', () => {
       public: true,
     });
   });
+
+  describe('privacy menu', () => {
+    it('toggles the privacy setting', () => {
+      const wrapper = shallow(<PublishButton appState={store} />);
+      const instance: PublishButton = wrapper.instance() as any;
+
+      instance.setPublic();
+      expect(store.gitHubPublishAsPublic).toBe(true);
+
+      instance.setPrivate();
+      expect(store.gitHubPublishAsPublic).toBe(false);
+    });
+  });
 });

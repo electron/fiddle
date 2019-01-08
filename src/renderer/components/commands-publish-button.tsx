@@ -32,6 +32,8 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     this.state = { isPublishing: false };
     this.handleClick = this.handleClick.bind(this);
     this.publishFiddle = this.publishFiddle.bind(this);
+    this.setPrivate = this.setPrivate.bind(this);
+    this.setPublic = this.setPublic.bind(this);
   }
 
   public componentDidMount() {
@@ -115,8 +117,22 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     this.setState({ isPublishing: false });
   }
 
-  public setPrivacy(publishAsPublic: boolean) {
-    this.props.appState.gitHubPublishAsPublic = publishAsPublic;
+  /**
+   * Publish fiddles as private.
+   *
+   * @memberof PublishButton
+   */
+  public setPrivate() {
+    this.setPrivacy(false);
+  }
+
+  /**
+   * Publish fiddles as public.
+   *
+   * @memberof PublishButton
+   */
+  public setPublic() {
+    this.setPrivacy(true);
   }
 
   public render() {
@@ -130,13 +146,13 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
           text='Private'
           icon='lock'
           active={!gitHubPublishAsPublic}
-          onClick={() => this.setPrivacy(false)}
+          onClick={this.setPrivate}
         />
         <MenuItem
           text='Public'
           icon='unlock'
           active={gitHubPublishAsPublic}
-          onClick={() => this.setPrivacy(true)}
+          onClick={this.setPublic}
         />
       </Menu>
     );
@@ -161,5 +177,9 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
         />
       </ButtonGroup>
     );
+  }
+
+  private setPrivacy(publishAsPublic: boolean) {
+    this.props.appState.gitHubPublishAsPublic = publishAsPublic;
   }
 }
