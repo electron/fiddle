@@ -11,13 +11,13 @@ describe('first-run', () => {
   const oldDefaultApp = process.defaultApp;
   const oldPlatform = process.platform;
 
-  beforeAll(() => {
+  beforeEach(() => {
     Object.defineProperty(process, 'platform', {
       value: 'darwin'
     });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     Object.defineProperty(process, 'platform', {
       value: oldPlatform
     });
@@ -45,6 +45,19 @@ describe('first-run', () => {
     it(`doesn't run unless required (dev mode)`, () => {
       (isFirstRun as jest.Mock).mockReturnValueOnce(true);
       process.defaultApp = true;
+      (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
+
+      onFirstRunMaybe();
+
+      expect(dialog.showMessageBox).toHaveBeenCalledTimes(0);
+    });
+
+    it(`doesn't run unless required (Windows, Linux)`, () => {
+      Object.defineProperty(process, 'platform', {
+        value: 'win32'
+      });
+
+      (isFirstRun as jest.Mock).mockReturnValueOnce(true);
       (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
 
       onFirstRunMaybe();
