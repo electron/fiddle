@@ -1,6 +1,7 @@
 import { app } from 'electron';
 
 import { main, onReady, onWindowsAllClosed } from '../../src/main/main';
+import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
@@ -12,7 +13,9 @@ jest.mock('../../src/main/update', () => ({
   setupUpdates: jest.fn()
 }));
 
-jest.mock('electron-squirrel-startup', () => false);
+jest.mock('../../src/main/squirrel', () => ({
+  shouldQuit: jest.fn(() => false)
+}));
 
 /**
  * This test is very basic and some might say that it's
@@ -37,12 +40,10 @@ describe('main', () => {
 
   describe('main()', () => {
     it('quits during Squirrel events', () => {
-      jest.mock('electron-squirrel-startup', () => true);
+      (shouldQuit as jest.Mock).mockReturnValueOnce(true);
 
       main();
       expect(app.quit).toHaveBeenCalledTimes(1);
-
-      jest.mock('electron-squirrel-startup', () => false);
     });
 
     it('listens to core events', () => {

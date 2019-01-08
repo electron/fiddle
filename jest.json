@@ -20,11 +20,13 @@
   ],
   "coverageReporters": [
     "json",
-    "html"
+    "html",
+    "lcov"
   ],
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
-    "!**/*.d.ts"
+    "!**/*.d.ts",
+    "!**/*constants.ts"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",

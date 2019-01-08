@@ -162,7 +162,7 @@ export class Tour extends React.Component<TourProps, TourState> {
       left: position.left,
       width: size.width - margin,
       margin: `${margin}px`,
-      zIndex: 1000
+      zIndex: 1000,
     };
 
     return (
@@ -198,9 +198,7 @@ export class Tour extends React.Component<TourProps, TourState> {
    */
   private getStep(step: TourScriptStep): JSX.Element | null {
     const { selector } = step;
-    const element = document.querySelector(selector) || document.body;
-    if (!element) return null;
-
+    const element = document.querySelector(selector) || document.body!;
     const rect = element.getBoundingClientRect();
     const { top, left, width, height } = rect;
 

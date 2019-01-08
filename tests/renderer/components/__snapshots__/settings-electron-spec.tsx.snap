@@ -90,6 +90,33 @@ exports[`ElectronSettings component renders 1`] = `
       </thead>
       <tbody>
         <tr
+          key="3.0.0"
+        >
+          <td>
+            3.0.0
+          </td>
+          <td>
+            <span>
+              <Blueprint3.Icon
+                icon="box"
+              />
+               
+              Downloaded
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              fill={true}
+              icon="trash"
+              onClick={[Function]}
+              small={true}
+              text="Remove"
+            />
+          </td>
+        </tr>
+        <tr
           key="2.0.2"
         >
           <td>

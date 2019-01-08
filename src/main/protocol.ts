@@ -14,8 +14,10 @@ const handlePotentialProtocolLaunch = (url: string) => {
     app.once('ready', () => handlePotentialProtocolLaunch(url));
     return;
   }
+
   const parsed = nodeUrl.parse(url.replace(/\/$/, ''));
   if (!parsed.pathname) return;
+
   const pathParts = parsed.pathname.split('/');
   if (pathParts.length <= 0 || pathParts.length > 2) return;
 

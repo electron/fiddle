@@ -18,7 +18,7 @@ describe('ipcRendererManager', () => {
   });
 
   describe('send()', () => {
-    it('emits an Electron IPC event', () => {
+    it('sends an event', () => {
       ipcRendererManager.send(IpcEvents.FIDDLE_RUN, 'hello');
       expect(electron.ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'hello');
     });

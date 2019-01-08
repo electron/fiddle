@@ -31,6 +31,8 @@ window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
 
 beforeEach(() => {
+  document.body.innerHTML = '<div id="app" />';
+
   global.ElectronFiddle = new ElectronFiddleMock();
   process.env.JEST = true;
   process.env.TEST = true;

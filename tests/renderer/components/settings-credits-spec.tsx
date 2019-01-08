@@ -1,8 +1,17 @@
 import * as electron from 'electron';
 import { shallow } from 'enzyme';
+import * as fs from 'fs-extra';
 import * as React from 'react';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
+
+jest.mock('fs-extra', () => ({
+  readJSON: jest.fn()
+}));
+
+jest.mock('../../../src/utils/import', () => ({
+  fancyImport: async (p: string) => require(p)
+}));
 
 describe('CreditsSettings component', () => {
   const mockContributors = [
@@ -35,31 +44,62 @@ describe('CreditsSettings component', () => {
     store = {};
   });
 
-  it('renders', () => {
-    const wrapper = shallow(
-      <CreditsSettings appState={store} contributors={mockContributors} />
-    );
+  it('renders', async () => {
+    (fs.readJSON as jest.Mock).mockImplementation(async () => {
+      return mockContributors;
+    });
+
+    const wrapper = shallow(<CreditsSettings appState={store} />);
+    const instance: CreditsSettings = wrapper.instance() as any;
+    await instance.getContributors();
+
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders for contributors with less data', () => {
-    const wrapper = shallow(
-      <CreditsSettings appState={store} contributors={mockContributorsBroken} />
-    );
+  it('renders for contributors with less data', async () => {
+    (fs.readJSON as jest.Mock).mockImplementation(async () => {
+      return mockContributorsBroken;
+    });
+
+    const wrapper = shallow(<CreditsSettings appState={store} />);
+    const instance: CreditsSettings = wrapper.instance() as any;
+    await instance.getContributors();
+
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders nothing if we do not have contributors', () => {
-    const wrapper = shallow(
-      <CreditsSettings appState={store} contributors={[]} />
-    );
+  it('renders nothing if we do not have contributors', async () => {
+    (fs.readJSON as jest.Mock).mockImplementation(async () => {
+      return [];
+    });
+
+    const wrapper = shallow(<CreditsSettings appState={store} />);
+    const instance: CreditsSettings = wrapper.instance() as any;
+    await instance.getContributors();
+
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('handles a click', () => {
-    const wrapper = shallow(
-      <CreditsSettings appState={store} contributors={mockContributors} />
-    );
+  it('handles a read error', async () => {
+    (fs.readJSON as jest.Mock).mockImplementation(async () => {
+      throw new Error('Bwap-bwap');
+    });
+
+    const wrapper = shallow(<CreditsSettings appState={store} />);
+    const instance: CreditsSettings = wrapper.instance() as any;
+    await instance.getContributors();
+
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('handles a click', async () => {
+    (fs.readJSON as jest.Mock).mockImplementation(async () => {
+      return mockContributors;
+    });
+
+    const wrapper = shallow(<CreditsSettings appState={store} />);
+    const instance: CreditsSettings = wrapper.instance() as any;
+    await instance.getContributors();
 
     wrapper.find('.contributor').simulate('click');
     expect(electron.shell.openExternal).toHaveBeenCalled();

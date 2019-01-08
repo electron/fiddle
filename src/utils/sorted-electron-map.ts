@@ -16,6 +16,10 @@ export function sortedElectronMap<T>(
 ) {
   return Object.keys(versions)
     .sort((a, b) => {
+      if (!semver.valid(a) && !semver.valid(b)) {
+        return a.localeCompare(b);
+      }
+
       if (!semver.valid(a)) {
         return -1;
       }

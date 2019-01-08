@@ -10,7 +10,9 @@ import { ipcMainManager } from './ipc';
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
-  ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => showSaveDialog());
+  ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => {
+    showSaveDialog();
+  });
 }
 
 /**

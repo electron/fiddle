@@ -21,7 +21,7 @@ describe('VersionChooser component', () => {
   beforeEach(() => {
     store = {
       version: '2.0.2',
-      versions: mockVersions,
+      versions: { ...mockVersions },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       setVersion: jest.fn(),
       get currentElectronVersion() {

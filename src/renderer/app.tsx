@@ -158,7 +158,7 @@ export class App {
       tag.innerHTML = theme.css;
     }
 
-    if (theme.isDark || (theme.name || '').includes('dark')) {
+    if (theme.isDark || theme.name.includes('dark')) {
       document.body.classList.add('bp3-dark');
     } else {
       document.body.classList.remove('bp3-dark');
@@ -174,10 +174,7 @@ export class App {
   }
 }
 
-// tslint:disable-next-line:no-string-literal
-if (!process.env.TEST && !process.env.JEST_WORKER_ID) {
-  window.ElectronFiddle.contentChangeListeners = [];
-  window.ElectronFiddle.app = new App();
-  window.ElectronFiddle.app.setup()
-    .catch((error) => console.error(error));
-}
+window.ElectronFiddle = window.ElectronFiddle || {};
+window.ElectronFiddle.contentChangeListeners = window.ElectronFiddle.contentChangeListeners || [];
+window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
+window.ElectronFiddle.app.setup();

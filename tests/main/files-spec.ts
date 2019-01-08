@@ -17,11 +17,17 @@ jest.mock('fs-extra', () => ({
 
 describe('files', () => {
   describe('setupFileListeners()', () => {
-    setupFileListeners();
 
-    expect(ipcMainManager.eventNames()).toEqual([
-      IpcEvents.FS_SAVE_FIDDLE_DIALOG
-    ]);
+    it('sets up the listener', () => {
+      setupFileListeners();
+
+      expect(ipcMainManager.eventNames()).toEqual([
+        IpcEvents.FS_SAVE_FIDDLE_DIALOG
+      ]);
+
+      ipcMainManager.emit(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
+      expect(dialog.showOpenDialog).toHaveBeenCalled();
+    });
   });
 
   describe('showOpenDialog', () => {
@@ -81,6 +87,20 @@ describe('files', () => {
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle as hello'
+      });
+    });
+
+    it('handles not getting a path returned', async (done) => {
+      showSaveDialog();
+
+      const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
+      const cb = call[1];
+
+      await cb();
+
+      process.nextTick(() => {
+        expect(fs.existsSync).toHaveBeenCalledTimes(0);
+        done();
       });
     });
 

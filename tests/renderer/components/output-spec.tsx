@@ -27,6 +27,11 @@ describe('Output component', () => {
       {
         timestamp: 1532704073130,
         text: 'Hi!'
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+        isNotPre: true
       }
     ];
 
@@ -36,6 +41,17 @@ describe('Output component', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('calculates a timestamp', () => {
+    const wrapper = shallow(<Output appState={store} />);
+    const instance: Output = wrapper.instance() as any;
+
+    const result = instance.renderTimestamp(1546834508111);
+
+    // Depends on the server, we just want to verify that we
+    // get _something_
+    expect(result).toBeTruthy();
   });
 
   it('hides the console via class', () => {

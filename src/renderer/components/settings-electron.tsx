@@ -331,7 +331,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       buttonProps.loading = false;
       buttonProps.text = 'Download';
       buttonProps.icon = 'cloud-download';
-      buttonProps.onClick = () => appState.setVersion(key);
+      buttonProps.onClick = () => appState.downloadVersion(key);
     }
 
     return <Button {...buttonProps} />;

@@ -15,5 +15,20 @@ exports[`Output component renders with output 1`] = `
     </span>
     Hi!
   </p>
+  <p
+    key="1532704073130--1--0"
+    style={
+      Object {
+        "whiteSpace": "initial",
+      }
+    }
+  >
+    <span
+      className="timestamp"
+    >
+      1532704073130
+    </span>
+    Hi!
+  </p>
 </div>
 `;

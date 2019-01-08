@@ -66,6 +66,18 @@ describe('npm', () => {
       expect(result).toBe(false);
       expect((exec as jest.Mock).mock.calls[0][1]).toBe('which npm');
     });
+
+    it('uses the cache', async () => {
+      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+
+      const one = await getIsNpmInstalled(true);
+      expect(one).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+
+      const two = await getIsNpmInstalled();
+      expect(two).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('findModulesInEditors()', () => {
@@ -85,6 +97,12 @@ describe('npm', () => {
       installModules({ dir: '/my/directory' }, 'say', 'thing');
 
       expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
+    });
+
+    it('attempts to installs all modules', async () => {
+      installModules({ dir: '/my/directory' });
+
+      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
     });
   });
 

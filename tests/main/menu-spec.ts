@@ -7,6 +7,7 @@ import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/windows');
+jest.mock('../../src/main/ipc');
 
 describe('menu', () => {
   beforeEach(() => {
@@ -58,6 +59,23 @@ describe('menu', () => {
         expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
         expect(submenu).toBeTruthy();
       });
+    });
+
+    it('adds Monaco toggle options', () => {
+      overridePlatform('linux');
+
+      setupMenu();
+
+      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+
+      const toggleSoftWrap = submenu.find(({ label }) => label === 'Toggle Soft Wrap');
+      (toggleSoftWrap as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(1);
+
+      const toggleMap = submenu.find(({ label }) => label === 'Toggle Mini Map');
+      (toggleMap as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -107,12 +107,7 @@ export class FileManager {
       const files = await this.getFiles(undefined, ...transforms);
 
       for (const [fileName, content] of files) {
-        try {
-          await this.saveFile(path.join(pathToSave, fileName), content);
-        } catch (error) {
-          // Todo: Warn the user
-          console.warn(`FileManager: Failed to save file`, { fileName, error });
-        }
+        await this.saveFile(path.join(pathToSave, fileName), content);
       }
 
       if (pathToSave !== localPath) {

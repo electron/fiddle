@@ -1,22 +1,45 @@
 import { Callout, Card } from '@blueprintjs/core';
 import { shell } from 'electron';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 import * as React from 'react';
 
 import { AppState } from '../state';
 
 export interface CreditsSettingsProps {
   appState: AppState;
-  contributors?: Array<any>;
+}
+
+export interface CreditsSettingsState {
+  contributors: Array<Contributor>;
+}
+
+export interface Contributor {
+  url: string;
+  api: string;
+  login: string;
+  avatar: string;
+  name: string;
+  bio: string;
+  location: string;
 }
 
 /**
  * Settings content to manage Credits-related preferences.
  *
  * @class CreditsSettings
- * @extends {React.Component<CreditsSettingsProps, {}>}
+ * @extends {React.Component<CreditsSettingsProps, CreditsSettingsState>}
  */
-export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
-  private contributors: Array<any> | null = null;
+export class CreditsSettings extends React.Component<CreditsSettingsProps, CreditsSettingsState> {
+  constructor(props: CreditsSettingsProps) {
+    super(props);
+
+    this.state = {
+      contributors: []
+    };
+
+    this.getContributors();
+  }
 
   /**
    * Renders a list of contributors of Electron Fiddle.
@@ -24,15 +47,9 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
    * @returns {Array<JSX.Element>}
    */
   public renderContributors(): Array<JSX.Element> {
-    this.contributors = this.contributors
-      || this.props.contributors
-      || require('../../../static/contributors.json');
+    const { contributors } = this.state;
 
-    if (!this.contributors || !Array.isArray(this.contributors)) {
-      return [];
-    }
-
-    return this.contributors.map(({ name, avatar, url, login, location, bio }) => {
+    return contributors.map(({ name, avatar, url, login, location, bio }) => {
       const maybeLocation = location
         ? <p className='location'>📍 {location}</p>
         : null;
@@ -72,5 +89,15 @@ export class CreditsSettings extends React.Component<CreditsSettingsProps, {}> {
         </div>
       </div>
     );
+  }
+
+  public async getContributors() {
+    try {
+      const contributorsFile = path.join(__dirname, '../../static/contributors.json');
+      const contributors = await fs.readJSON(contributorsFile);
+      this.setState({ contributors });
+    } catch (error) {
+      console.warn(`CreditsSettings: Fetching contributors failed`, error);
+    }
   }
 }

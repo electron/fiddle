@@ -20,7 +20,7 @@ export async function activateTheme(
   const _monaco = monaco || window.ElectronFiddle.app.monaco;
   const _theme = theme || await getTheme(name);
 
-  if (!_monaco) return;
+  if (!_monaco || !_monaco.editor) return;
 
   _monaco.editor.defineTheme('main', _theme.editor as any);
   _monaco.editor.setTheme('main');

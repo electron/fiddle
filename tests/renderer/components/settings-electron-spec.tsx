@@ -1,6 +1,7 @@
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
+import { ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
@@ -11,7 +12,7 @@ describe('ElectronSettings component', () => {
   beforeEach(() => {
     store = {
       version: '2.0.1',
-      versions: mockVersions,
+      versions: { ...mockVersions },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
@@ -26,16 +27,67 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    store.versions['3.0.0-nightly.1'] = {
+      state: ElectronVersionState.ready,
+      version: '3.0.0-nightly.1',
+      source: ElectronVersionSource.local
+    };
+
+    store.versions['3.0.0'] = {
+      state: ElectronVersionState.ready,
+      version: '3.0.0',
+      source: ElectronVersionSource.local
+    };
+
+    const wrapper = shallow(<ElectronSettings appState={store} />);
+
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('handles removing a version', async () => {
+    store.versions['3.0.0-nightly.1'] = {
+      state: ElectronVersionState.ready,
+      version: '3.0.0-nightly.1',
+      source: ElectronVersionSource.local
+    };
+
+    store.versions['3.0.0'] = {
+      state: ElectronVersionState.ready,
+      version: '3.0.0',
+      source: ElectronVersionSource.local
+    };
+
+    const wrapper = mount(<ElectronSettings appState={store} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.removeVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles downloading a version', async () => {
+    store.versions = {
+      '3.0.0': {
+        state: ElectronVersionState.unknown,
+        version: '3.0.0',
+        source: ElectronVersionSource.remote
+      }
+    };
+
+    const wrapper = mount(<ElectronSettings appState={store} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.downloadVersion).toHaveBeenCalledTimes(1);
+  });
+
   it('handles the deleteAll()', async () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    const wrapper = shallow(<ElectronSettings appState={store} />);
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
