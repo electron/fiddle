@@ -9,6 +9,11 @@ import {
   renderItem
 } from '../../../src/renderer/components/settings-general-appearance';
 
+let mockThemes = [{
+  name: 'defaultDark',
+  file: 'defaultDark'
+}];
+
 jest.mock('fs-extra');
 jest.mock('../../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p)
@@ -16,10 +21,7 @@ jest.mock('../../../src/utils/import', () => ({
 
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
-  getAvailableThemes: () => Promise.resolve([{
-    name: 'defaultDark',
-    file: 'defaultDark'
-  }]),
+  getAvailableThemes: () => Promise.resolve(mockThemes),
   getTheme: () => Promise.resolve({
     common: {}
   })
@@ -40,6 +42,16 @@ describe('AppearanceSettings component', () => {
     );
 
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the correct selected theme', (done) => {
+    store.theme = 'defaultDark';
+    const wrapper = shallow(<AppearanceSettings appState={store} />);
+
+    process.nextTick(() => {
+      expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
+      done();
+    });
   });
 
   it('handles a theme change', () => {
