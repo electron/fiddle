@@ -9,7 +9,7 @@ import {
   renderItem
 } from '../../../src/renderer/components/settings-general-appearance';
 
-let mockThemes = [{
+const mockThemes = [{
   name: 'defaultDark',
   file: 'defaultDark'
 }];

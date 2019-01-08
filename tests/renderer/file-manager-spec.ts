@@ -108,6 +108,7 @@ describe('FileManager', () => {
 
     it('asks for a path via IPC if none can  be found', async () => {
       await fm.saveFiddle();
+
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
         IpcEvents.FS_SAVE_FIDDLE_DIALOG
       );
@@ -125,16 +126,24 @@ describe('FileManager', () => {
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 
-    it('handles an error', async () => {
+    it('throws an error', async () => {
       const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
 
-      await fm.saveFiddle('/fake/path');
+      const testFn = async () => {
+        await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
+      };
+      let errored = false;
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      try {
+        await testFn();
+      } catch (error) {
+        errored = true;
+      }
+
+      expect(errored).toBe(true);
     });
   });
 
