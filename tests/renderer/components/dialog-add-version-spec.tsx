@@ -41,6 +41,14 @@ describe('AddVersionDialog component', () => {
     });
 
     expect(wrapper).toMatchSnapshot();
+
+    wrapper.setState({
+      isValidVersion: false,
+      isValidElectron: true,
+      file: mockFile
+    });
+
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('onChangeFile()', () => {
