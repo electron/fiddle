@@ -80,6 +80,13 @@ describe('protocol', () => {
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
       expect(app.once).toHaveBeenCalled();
+
+      const cb = (app.once as jest.Mock).mock.calls[0][1];
+      (app.isReady as any).mockReturnValue(true);
+
+      cb();
+
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, ['/hi']);
     });
   });
 });
