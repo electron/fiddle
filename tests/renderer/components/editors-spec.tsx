@@ -6,6 +6,10 @@ import { Editors } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
+jest.mock('monaco-loader', () => jest.fn(async () => {
+  return { monaco: true }
+}));
+
 jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: 'Editor'
 }));
@@ -40,7 +44,7 @@ describe('Editrors component', () => {
 
   it('does not execute command if not supported', () => {
     const wrapper = shallow(<Editors appState={store} />);
-    const instance = wrapper.instance();
+    const instance: Editors = wrapper.instance() as any;
     const mockAction = {
       isSupported: jest.fn(() => false),
       run: jest.fn()
@@ -51,10 +55,47 @@ describe('Editrors component', () => {
 
     (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
 
-    (instance as any).executeCommand('hello');
+    instance.executeCommand('hello');
     expect(mockEditor.getAction).toHaveBeenCalled();
     expect(mockAction.isSupported).toHaveBeenCalled();
     expect(mockAction.run).toHaveBeenCalledTimes(0);
+  });
+
+  describe('toggleEditorOption()', () => {
+    it('handles a missing ElectronFiddle global', () => {
+      window.ElectronFiddle = undefined;
+
+      const wrapper = shallow(<Editors appState={store} />);
+      const instance: Editors = wrapper.instance() as any;
+
+      expect(instance.toggleEditorOption('wordWrap')).toBe(false);
+    });
+
+    it('handles an error', () => {
+      (window.ElectronFiddle.editors.html!.updateOptions as jest.Mock).mockImplementationOnce(
+        () => {
+          throw new Error('Bwap bwap');
+        }
+      );
+
+      const wrapper = shallow(<Editors appState={store} />);
+      const instance: Editors = wrapper.instance() as any;
+
+      expect(instance.toggleEditorOption('wordWrap')).toBe(false);
+    });
+
+    it('updates a setting', () => {
+      const wrapper = shallow(<Editors appState={store} />);
+      const instance: Editors = wrapper.instance() as any;
+
+      expect(instance.toggleEditorOption('wordWrap')).toBe(true);
+      expect(window.ElectronFiddle.editors.html!.updateOptions).toHaveBeenCalledWith(
+        {
+          minimap: { enabled: false },
+          wordWrap: 'off'
+        }
+      );
+    });
   });
 
   describe('IPC commands', () => {
@@ -95,6 +136,19 @@ describe('Editrors component', () => {
       expect(window.ElectronFiddle.editors.html!.updateOptions).toHaveBeenCalled();
       expect(window.ElectronFiddle.editors.renderer!.updateOptions).toHaveBeenCalled();
       expect(window.ElectronFiddle.editors.main!.updateOptions).toHaveBeenCalled();
+    });
+  });
+
+  describe('loadMonaco()', () => {
+    it('loads Monaco', (done) => {
+      window.ElectronFiddle.app.monaco = null;
+
+      shallow(<Editors appState={store} />);
+
+      process.nextTick(() => {
+        expect(window.ElectronFiddle.app.monaco).toEqual({ monaco: true});
+        done();
+      });
     });
   });
 });

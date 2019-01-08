@@ -103,9 +103,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
   }
 
-  public toggleEditorOption(path: string) {
+  public toggleEditorOption(path: string): boolean {
     if (!window || !window.ElectronFiddle || !window.ElectronFiddle.editors) {
-      return;
+      return false;
     }
 
     try {
@@ -116,18 +116,22 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       setAtPath(path, newOptions, toggleMonaco(currentSetting));
 
       Object.keys(window.ElectronFiddle.editors)
-      .forEach((key) => {
-        const editor: MonacoType.editor.IStandaloneCodeEditor | null
-          = window.ElectronFiddle.editors[key];
+        .forEach((key) => {
+          const editor: MonacoType.editor.IStandaloneCodeEditor | null
+            = window.ElectronFiddle.editors[key];
 
-        if (editor) {
-          editor.updateOptions(newOptions);
-        }
-      });
+          if (editor) {
+            editor.updateOptions(newOptions);
+          }
+        });
 
       this.setState({ monacoOptions: newOptions });
+
+      return true;
     } catch (error) {
       console.warn(`Editors: Could not toggle property ${path}`, error);
+
+      return false;
     }
   }
 
@@ -156,10 +160,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * Loads monaco. If it's already loaded, it'll just set it on the current state.
    * We're doing things a bit roundabout to ensure that we're not overloading the
    * mobx state with a gigantic Monaco tree.
-   *
-   * @private
    */
-  private async loadMonaco(): Promise<void> {
+  public async loadMonaco(): Promise<void> {
     const { app } = window.ElectronFiddle;
     const loader = require('monaco-loader');
     const monaco = app.monaco || await loader();
