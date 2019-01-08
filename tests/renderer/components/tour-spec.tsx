@@ -1,8 +1,9 @@
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Tour } from '../../../src/renderer/components/tour';
 import { overridePlatform, resetPlatform } from '../../utils';
+
 
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
@@ -52,6 +53,44 @@ describe('VersionChooser component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('renders supplied buttons', () => {
+    mockTour.forEach((item) => {
+      (item as any).getButtons = () => (
+        [ <button key='hello'>Hello</button> ]
+      );
+    });
+
+    const mockStop = jest.fn();
+    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+
+    expect(wrapper.find('button').text()).toBe('Hello');
+  });
+
+  it('renders "Finish Tour" at the end', () => {
+    const singleItemTour = new Set([{
+      name: 'mock-step-1',
+      selector: 'div.mock-1',
+      title: 'Step 1',
+      content: (
+        <span key='1'>mock-step-1</span>
+      )
+    }]);
+
+    const mockStop = jest.fn();
+    const wrapper = mount(<Tour tour={singleItemTour} onStop={mockStop} />);
+
+    expect(wrapper.find('button').text()).toBe('tick-circleFinish Tour');
+  });
+
+  it('handles a missing target', () => {
+    (document.querySelector as jest.Mock).mockReturnValueOnce(null);
+
+    const mockStop = jest.fn();
+    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+
+    expect(wrapper.find('svg').length).toBe(1);
+  });
+
   it('stops on stop()', () => {
     const mockStop = jest.fn();
     const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
@@ -75,11 +114,7 @@ describe('VersionChooser component', () => {
   });
 
   it('handles a resize', () => {
-    const oldTimeout = window.setTimeout;
-    window.setTimeout = (fn: any) => {
-      fn();
-      return 1;
-    };
+    jest.useFakeTimers();
 
     const mockStop = jest.fn();
     const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
@@ -88,9 +123,24 @@ describe('VersionChooser component', () => {
     instance.forceUpdate = jest.fn();
     instance.onResize();
 
-    expect(instance.resizeHandle).toBeTruthy();
-    expect(instance.forceUpdate).toHaveBeenCalled();
 
-    window.setTimeout = oldTimeout;
+    expect(instance.resizeHandle).toBeTruthy();
+    jest.runAllTimers();
+
+    expect(instance.forceUpdate).toHaveBeenCalled();
+  });
+
+  it('removes the resize listener', () => {
+    const oldRemove = window.removeEventListener;
+    window.removeEventListener = jest.fn();
+
+    const mockStop = jest.fn();
+    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+    const instance: Tour = wrapper.instance() as any;
+
+    instance.componentWillUnmount();
+    expect(window.removeEventListener).toHaveBeenCalled();
+
+    window.removeEventListener = oldRemove;
   });
 });
