@@ -127,6 +127,10 @@ const shell = {
   showItemInFolder: jest.fn()
 };
 
+const systemPreferences = {
+  getUserDefault: jest.fn()
+};
+
 const electronMock = {
   app,
   autoUpdater,
@@ -183,12 +187,14 @@ const electronMock = {
       argv: [ '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle' ]
     },
     shell,
-    require: jest.fn()
+    require: jest.fn(),
+    systemPreferences,
   },
   require: jest.fn(),
   screen: new Screen(),
   session,
   shell,
+  systemPreferences,
   webContents: MockWebContents
 };
 
