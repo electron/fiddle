@@ -121,6 +121,7 @@ function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
     {
       label: 'Run Fiddle...',
+      accelerator: 'F5',
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
     },
     {
