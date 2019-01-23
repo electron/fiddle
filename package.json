@@ -79,7 +79,7 @@
     "@types/tmp": "0.0.33",
     "chokidar": "^2.0.4",
     "coveralls": "^3.0.2",
-    "electron": "3.0.14",
+    "electron": "4.0.2",
     "enzyme": "^3.6.0",
     "enzyme-adapter-react-16": "^1.5.0",
     "enzyme-to-json": "^3.3.5",
