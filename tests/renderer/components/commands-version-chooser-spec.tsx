@@ -21,7 +21,7 @@ describe('VersionChooser component', () => {
   beforeEach(() => {
     store = {
       version: '2.0.2',
-      versions: { ...mockVersions },
+      versions: { ...mockVersions, '3.1.3': undefined, '3.1.4': { ...mockVersion, state: ElectronVersionState.unknown } },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       setVersion: jest.fn(),

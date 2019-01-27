@@ -9,6 +9,11 @@ exports[`VersionChooser component handles corrupt data 1`] = `
     Array [
       Object {
         "source": "remote",
+        "state": "unknown",
+        "version": "1.0.0",
+      },
+      Object {
+        "source": "remote",
         "state": "ready",
         "version": "2.0.2",
       },
@@ -68,6 +73,11 @@ exports[`VersionChooser component renders 1`] = `
   itemRenderer={[Function]}
   items={
     Array [
+      Object {
+        "source": "remote",
+        "state": "unknown",
+        "version": "1.0.0",
+      },
       Object {
         "source": "remote",
         "state": "ready",
