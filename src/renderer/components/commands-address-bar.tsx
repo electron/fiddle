@@ -39,9 +39,17 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    *
    * @param {React.SyntheticEvent<HTMLFormElement>} event
    */
-  public async handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
+  public handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
+    this.submit();
+  }
 
+  /**
+   * Commit the address bar's value to app state and load the fiddle.
+   *
+   * @memberof AddressBar
+   */
+  public submit() {
     this.props.appState.gistId = idFromUrl(this.state.value) || this.state.value;
 
     console.log('Loading');
@@ -111,7 +119,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         disabled={!isValueCorrect}
         icon='cloud-download'
         text='Load Fiddle'
-        onClick={this.loadFiddle}
+        onClick={this.submit}
       />
     );
   }
