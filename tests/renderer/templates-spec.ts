@@ -36,5 +36,16 @@ describe('templates', () => {
       expect(values.main).toBe('');
       expect(values.renderer).toBe('');
     });
+
+    it('handles errors and reports the templates content', async () => {
+      const fs = require('fs-extra');
+
+      fs.readFile.mockReturnValue(Promise.reject('bwap'));
+      fs.existsSync.mockReturnValue(true);
+
+      await getTemplateValues('test');
+      expect(fs.existsSync).toHaveBeenCalledTimes(3);
+      expect(fs.readdirSync).toHaveBeenCalledTimes(3);
+    });
   });
 });
