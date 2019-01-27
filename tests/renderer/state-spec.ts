@@ -64,7 +64,27 @@ describe('AppState', () => {
       });
     });
 
-    it('closes the window', (done) => {
+    it('closes the app', (done) => {
+      const { remote } = require('electron');
+      window.close = jest.fn();
+      appState.isUnsaved = true;
+      (remote.getGlobal as jest.Mock).mockReturnValueOnce(true);
+      expect(window.onbeforeunload).toBeTruthy();
+
+      const result = window.onbeforeunload!(undefined as any);
+      expect(result).toBe(false);
+      expect(appState.isWarningDialogShowing).toBe(true);
+
+      appState.warningDialogLastResult = true;
+      appState.isWarningDialogShowing = false;
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalledTimes(0);
+        expect(remote.app.quit).toHaveBeenCalledTimes(1);
+        done();
+      });
+    });
+
+    it('does not close the window', (done) => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();

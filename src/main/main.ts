@@ -29,6 +29,15 @@ export async function onReady() {
 }
 
 /**
+ * Handle the "before-quit" event
+ *
+ * @export
+ */
+export function onBeforeQuit() {
+  (global as any).isQuitting = true;
+}
+
+/**
  * All windows have been closed, quit on anything but
  * macOS.
  */
@@ -62,6 +71,7 @@ export function main() {
 
   // Launch
   app.on('ready', onReady);
+  app.on('before-quit', onBeforeQuit);
   app.on('window-all-closed', onWindowsAllClosed);
   app.on('activate', getOrCreateMainWindow);
 }

@@ -181,6 +181,7 @@ const electronMock = {
     session,
     BrowserWindow: MockBrowserWindow,
     getCurrentWindow: jest.fn(),
+    getGlobal: jest.fn(),
     Menu: MockMenu,
     MenuItem: MockMenuItem,
     process: {
