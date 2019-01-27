@@ -23,6 +23,7 @@ describe('VersionChooser component', () => {
       version: '2.0.2',
       versions: { ...mockVersions },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       setVersion: jest.fn(),
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
