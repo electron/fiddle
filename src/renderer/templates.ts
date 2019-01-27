@@ -15,8 +15,8 @@ import { fancyImport } from '../utils/import';
 export async function getTemplateValues(name: string): Promise<EditorValues> {
   const path = await fancyImport<typeof pathType>('path');
   const fs = await fancyImport<typeof fsExtraType>('fs-extra');
-
-  const templatePath = path.join(__dirname, '../../static/templates', name.toLowerCase());
+  const templatesPath = path.join(__dirname, '../../static/templates');
+  const templatePath = path.join(templatesPath, name.toLowerCase());
 
   const getFile = async (fileName: string) => {
     try {
@@ -25,7 +25,15 @@ export async function getTemplateValues(name: string): Promise<EditorValues> {
 
       return content;
     } catch (error) {
-      console.warn(`Could not get template file:`, error);
+      console.warn(`getTemplateValues(): Could not get template file:`, error);
+
+      if (fs.existsSync(templatesPath)) {
+        const contents = fs.readdirSync(templatesPath);
+        console.log(`getTemplateValues(): ${templatesPath} contents:`, contents);
+      } else {
+        console.log(`getTemplateValues(): ${templatesPath} does not exist`);
+      }
+
       return '';
     }
   };
