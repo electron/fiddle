@@ -40,6 +40,31 @@ exports[`ElectronSettings component renders 1`] = `
         onChange={[Function]}
       />
     </Blueprint3.FormGroup>
+    <Blueprint3.FormGroup
+      label="Include Electron versions that are:"
+    >
+      <Blueprint3.Checkbox
+        checked={true}
+        id="downloading"
+        inline={true}
+        label="Downloading"
+        onChange={[Function]}
+      />
+      <Blueprint3.Checkbox
+        checked={true}
+        id="ready"
+        inline={true}
+        label="Downloaded"
+        onChange={[Function]}
+      />
+      <Blueprint3.Checkbox
+        checked={false}
+        id="unknown"
+        inline={true}
+        label="Not Downloaded"
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
@@ -168,35 +193,6 @@ exports[`ElectronSettings component renders 1`] = `
               onClick={[Function]}
               small={true}
               text="Delete"
-            />
-          </td>
-        </tr>
-        <tr
-          key="1.8.7"
-        >
-          <td>
-            1.8.7
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="cloud"
-              />
-               
-              Not downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              disabled={false}
-              fill={true}
-              icon="cloud-download"
-              loading={false}
-              onClick={[Function]}
-              small={true}
-              text="Download"
             />
           </td>
         </tr>

@@ -41,6 +41,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.handleDownloadAll = this.handleDownloadAll.bind(this);
     this.handleDeleteAll = this.handleDeleteAll.bind(this);
     this.handleChannelChange = this.handleChannelChange.bind(this);
+    this.handleStateChange = this.handleStateChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handleAddVersion = this.handleAddVersion.bind(this);
 
@@ -52,6 +53,24 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
   public handleDownloadClick() {
     this.props.appState.updateElectronVersions();
+  }
+
+  /**
+   * Handles a change in which channels should be displayed.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleStateChange(
+    event: React.FormEvent<HTMLInputElement>
+  ) {
+    const { id, checked } = event.currentTarget;
+    const { appState } = this.props;
+
+    if (!checked) {
+      appState.statesToShow = appState.statesToShow.filter((s) => s !== id);
+    } else {
+      appState.statesToShow.push(id as ElectronVersionState);
+    }
   }
 
   /**
@@ -120,7 +139,10 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     return (
       <div className='settings-electron'>
         <h2>Electron Settings</h2>
-        {this.renderVersionOptions()}
+        <Callout>
+          {this.renderVersionChannelOptions()}
+          {this.renderVersionStateOptions()}
+        </Callout>
         <br />
         <Callout>
           {this.renderAdvancedButtons()}
@@ -173,51 +195,91 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
   /**
    * Renders the various options for which versions should be displayed
+   * in the small dropdown.
    *
    * @private
    * @returns {JSX.Element}
    */
-  private renderVersionOptions(): JSX.Element {
+  private renderVersionStateOptions(): JSX.Element {
+    const { appState } = this.props;
+    const getIsChecked = (state: ElectronVersionState) => {
+      return appState.statesToShow.includes(state);
+    };
+
+    return (
+      <FormGroup
+        label='Include Electron versions that are:'
+      >
+        <Checkbox
+          checked={getIsChecked(ElectronVersionState.downloading)}
+          label='Downloading'
+          id='downloading'
+          onChange={this.handleStateChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(ElectronVersionState.ready)}
+          label='Downloaded'
+          id='ready'
+          onChange={this.handleStateChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(ElectronVersionState.unknown)}
+          label='Not Downloaded'
+          id='unknown'
+          onChange={this.handleStateChange}
+          inline={true}
+        />
+      </FormGroup>
+    );
+  }
+
+  /**
+   * Renders the various options for which versions should be displayed
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
+  private renderVersionChannelOptions(): JSX.Element {
     const { appState } = this.props;
     const getIsChecked = (channel: ElectronReleaseChannel) => {
       return appState.versionsToShow.includes(channel);
     };
 
     return (
-      <Callout>
-        <FormGroup
-          label='Include Electron versions from these release channels:'
-        >
-          <Checkbox
-            checked={getIsChecked(ElectronReleaseChannel.stable)}
-            label='Stable'
-            id='Stable'
-            onChange={this.handleChannelChange}
-            inline={true}
-          />
-          <Checkbox
-            checked={getIsChecked(ElectronReleaseChannel.beta)}
-            label='Beta'
-            id='Beta'
-            onChange={this.handleChannelChange}
-            inline={true}
-          />
-          <Checkbox
-            checked={getIsChecked(ElectronReleaseChannel.nightly)}
-            label='Nightly'
-            id='Nightly'
-            onChange={this.handleChannelChange}
-            inline={true}
-          />
-          <Checkbox
-            checked={getIsChecked(ElectronReleaseChannel.unsupported)}
-            label='Unsupported'
-            id='Unsupported'
-            onChange={this.handleChannelChange}
-            inline={true}
-          />
-        </FormGroup>
-      </Callout>
+      <FormGroup
+        label='Include Electron versions from these release channels:'
+      >
+        <Checkbox
+          checked={getIsChecked(ElectronReleaseChannel.stable)}
+          label='Stable'
+          id='Stable'
+          onChange={this.handleChannelChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(ElectronReleaseChannel.beta)}
+          label='Beta'
+          id='Beta'
+          onChange={this.handleChannelChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(ElectronReleaseChannel.nightly)}
+          label='Nightly'
+          id='Nightly'
+          onChange={this.handleChannelChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(ElectronReleaseChannel.unsupported)}
+          label='Unsupported'
+          id='Unsupported'
+          onChange={this.handleChannelChange}
+          inline={true}
+        />
+      </FormGroup>
     );
   }
 
@@ -254,11 +316,16 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @returns {Array<JSX.Element>}
    */
   private renderTableRows(): Array<JSX.Element | null> {
-    const { versions, versionsToShow } = this.props.appState;
+    const { versions, versionsToShow, statesToShow } = this.props.appState;
 
     return sortedElectronMap<JSX.Element | null>(versions, (key, item) => {
       // Check if we want to show the version
       if (!versionsToShow.includes(getReleaseChannel(item))) {
+        return null;
+      }
+
+      // Check if we want to show the state
+      if (!statesToShow.includes(item.state)) {
         return null;
       }
 
@@ -273,7 +340,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
   }
 
   /**
-   * Returns a human-readable state indicator for an Electorn version
+   * Returns a human-readable state indicator for an Electron version
    *
    * @param {ElectronVersion} item
    * @returns {JSX.Element}

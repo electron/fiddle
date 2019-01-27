@@ -62,6 +62,9 @@ export class AppState {
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
       || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
+  @observable public statesToShow: Array<ElectronVersionState> =
+      this.retrieve('statesToShow') as Array<ElectronVersionState>
+      || [ ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown ];
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
@@ -116,6 +119,7 @@ export class AppState {
     autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
+    autorun(() => this.save('statesToShow', this.statesToShow));
 
     autorun(() => {
       if (this.isUnsaved) {
