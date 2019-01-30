@@ -1,6 +1,6 @@
 import { app } from 'electron';
 
-import { main, onReady, onWindowsAllClosed } from '../../src/main/main';
+import { main, onBeforeQuit, onReady, onWindowsAllClosed } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
@@ -48,7 +48,16 @@ describe('main', () => {
 
     it('listens to core events', () => {
       main();
-      expect(app.on).toHaveBeenCalledTimes(4);
+      expect(app.on).toHaveBeenCalledTimes(5);
+    });
+  });
+
+  describe('onBeforeQuit()', () => {
+    it('sets a global', () => {
+      onBeforeQuit();
+
+      expect((global as any).isQuitting).toBe(true);
+      (global as any).isQuitting = false;
     });
   });
 

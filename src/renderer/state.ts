@@ -132,7 +132,16 @@ export class AppState {
             // The user confirmed, let's close for real.
             if (this.warningDialogLastResult) {
               window.onbeforeunload = null;
-              window.close();
+
+              // Should we just close or quit?
+              const remote = require('electron').remote;
+              const isQuitting = remote.getGlobal('isQuitting');
+
+              if (isQuitting) {
+                remote.app.quit();
+              } else {
+                window.close();
+              }
             }
           });
 
