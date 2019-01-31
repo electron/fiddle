@@ -47,8 +47,8 @@ exports[`VersionChooser component renderItem() renders an item 1`] = `
 <Blueprint3.MenuItem
   active={true}
   disabled={false}
-  icon="saved"
-  label="Downloaded"
+  icon="cloud"
+  label="Not downloaded"
   multiline={false}
   onClick={[Function]}
   popoverProps={Object {}}

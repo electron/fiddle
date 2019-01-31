@@ -14,6 +14,7 @@ describe('ElectronSettings component', () => {
       version: '2.0.1',
       versions: { ...mockVersions },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
@@ -76,6 +77,8 @@ describe('ElectronSettings component', () => {
       }
     };
 
+    store.statesToShow.push(ElectronVersionState.unknown);
+
     const wrapper = mount(<ElectronSettings appState={store} />);
 
     wrapper
@@ -125,6 +128,33 @@ describe('ElectronSettings component', () => {
       instance.handleAddVersion();
 
       expect(store.toggleAddVersionDialog).toHaveBeenCalled();
+    });
+  });
+
+  describe('handleVersionChange()', () => {
+    it('handles a new selection', async () => {
+      const wrapper = shallow(
+        <ElectronSettings appState={store} />
+      );
+      const instance = wrapper.instance() as any;
+      await instance.handleStateChange({
+        currentTarget: {
+          id: ElectronVersionState.ready,
+          checked: false
+        }
+      });
+
+      await instance.handleStateChange({
+        currentTarget: {
+          id: ElectronVersionState.unknown,
+          checked: true
+        }
+      });
+
+      expect(store.statesToShow).toEqual([
+        ElectronVersionState.downloading,
+        ElectronVersionState.unknown
+      ]);
     });
   });
 

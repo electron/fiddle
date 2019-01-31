@@ -12,17 +12,29 @@ const { remote, local } = ElectronVersionSource;
 describe('VersionChooser component', () => {
   let store: any;
 
-  const mockVersion = {
+  const mockVersion1 = {
     source: remote,
-    state: ready,
+    state: unknown,
     version: '1.0.0'
+  };
+
+  const mockVersion2 = {
+    source: remote,
+    state: unknown,
+    version: '3.0.0-unsupported'
   };
 
   beforeEach(() => {
     store = {
       version: '2.0.2',
-      versions: { ...mockVersions },
+      versions: {
+        ...mockVersions,
+        '3.1.3': undefined,
+        '1.0.0': { ...mockVersion1 },
+        '3.0.0-unsupported': { ...mockVersion2 }
+      },
       versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       setVersion: jest.fn(),
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
@@ -55,7 +67,7 @@ describe('VersionChooser component', () => {
 
   describe('renderItem()', () => {
     it('renders an item', () => {
-      const item = renderItem(mockVersion, {
+      const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
         index: 0,
         modifiers: { active: true, disabled: false, matchesPredicate: true },
@@ -66,7 +78,7 @@ describe('VersionChooser component', () => {
     });
 
     it('returns null if it does not match predicate', () => {
-      const item = renderItem(mockVersion, {
+      const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
         index: 0,
         modifiers: { active: true, disabled: false, matchesPredicate: false },
@@ -80,7 +92,7 @@ describe('VersionChooser component', () => {
   describe('getItemLabel()', () => {
     it('returns the correct label for a local version', () => {
       const input: ElectronVersion = {
-        ...mockVersion,
+        ...mockVersion1,
         source: local,
       };
 
@@ -90,7 +102,7 @@ describe('VersionChooser component', () => {
 
     it('returns the correct label for a version not downloaded', () => {
       const input: ElectronVersion = {
-        ...mockVersion,
+        ...mockVersion1,
         state: unknown
       };
 
@@ -99,7 +111,7 @@ describe('VersionChooser component', () => {
 
     it('returns the correct label for a version downloaded', () => {
       const input: ElectronVersion = {
-        ...mockVersion,
+        ...mockVersion1,
         state: ready
       };
 
@@ -108,7 +120,7 @@ describe('VersionChooser component', () => {
 
     it('returns the correct label for a version downloading', () => {
       const input: ElectronVersion = {
-        ...mockVersion,
+        ...mockVersion1,
         state: downloading
       };
 
@@ -118,21 +130,21 @@ describe('VersionChooser component', () => {
 
   describe('getItemIcon()', () => {
     it('returns the correct icon', () => {
-      const vDownloaded = { ...mockVersion };
+      const vDownloaded = { ...mockVersion1, state: ready };
       expect(getItemIcon(vDownloaded)).toBe('saved');
 
-      const vDownloading = { ...mockVersion, state: downloading };
+      const vDownloading = { ...mockVersion1, state: downloading };
       expect(getItemIcon(vDownloading)).toBe('cloud-download');
 
-      const vUnknown = { ...mockVersion, state: unknown };
+      const vUnknown = { ...mockVersion1, state: unknown };
       expect(getItemIcon(vUnknown)).toBe('cloud');
     });
   });
 
   describe('filterItem()', () => {
     it('correctly matches a query', () => {
-      expect(filterItem('test', mockVersion)).toBe(false);
-      expect(filterItem('1.0.0', mockVersion)).toBe(true);
+      expect(filterItem('test', mockVersion1)).toBe(false);
+      expect(filterItem('1.0.0', mockVersion1)).toBe(true);
     });
   });
 });

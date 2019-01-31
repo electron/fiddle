@@ -121,10 +121,26 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
   }
 
   public getItems(): Array<ElectronVersion> {
-    const { versions, versionsToShow } = this.props.appState;
+    const { versions, versionsToShow, statesToShow } = this.props.appState;
 
     return sortedElectronMap<ElectronVersion>(versions, (_key, item) => item)
-      .filter((item) => !!item && versionsToShow.includes(getReleaseChannel(item)));
+      .filter((item) => {
+        if (!item) {
+          return false;
+        }
+
+        // Check if we want to show the version
+        if (!versionsToShow.includes(getReleaseChannel(item))) {
+          return false;
+        }
+
+        // Check if we want to show the state
+        if (!statesToShow.includes(item.state)) {
+          return false;
+        }
+
+        return true;
+      });
   }
 
   public render() {
