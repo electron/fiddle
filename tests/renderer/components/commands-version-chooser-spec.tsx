@@ -130,7 +130,7 @@ describe('VersionChooser component', () => {
 
   describe('getItemIcon()', () => {
     it('returns the correct icon', () => {
-      const vDownloaded = { ...mockVersion1 };
+      const vDownloaded = { ...mockVersion1, state: ready };
       expect(getItemIcon(vDownloaded)).toBe('saved');
 
       const vDownloading = { ...mockVersion1, state: downloading };
