@@ -26,6 +26,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     this.loadFiddle = this.loadFiddle.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.submit = this.submit.bind(this);
 
     const { gistId } = this.props.appState;
     const value = gistId ? urlFromId(gistId) : '';
@@ -50,12 +51,8 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @memberof AddressBar
    */
   public submit() {
-    this.props.appState.gistId = idFromUrl(this.state.value) || this.state.value;
-
-    console.log('Loading');
-
     if (this.state.value) {
-      this.loadFiddle();
+      this.loadFiddle(idFromUrl(this.state.value) || this.state.value);
     }
   }
 
@@ -84,16 +81,24 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @returns {Promise<boolean>}
    * @memberof AddressBar
    */
-  public async loadFiddle(): Promise<boolean> {
+  public async loadFiddle(gistId: string): Promise<boolean> {
     const { appState } = this.props;
 
     try {
       const octo = await getOctokit();
-      const gist = await octo.gists.get({
-        gist_id: appState.gistId
-      });
 
-      this.props.appState.setWarningDialogTexts({
+      // You can load Gists without being authenticated,
+      // but we get better rate limits when authenticated
+      if (appState.gitHubToken) {
+        octo.authenticate({
+          type: 'token',
+          token: appState.gitHubToken!
+        });
+      }
+
+      const gist = await octo.gists.get({ gist_id: gistId });
+
+      appState.setWarningDialogTexts({
         label: 'Loading the fiddle will replace your current unsaved changes. Do you want to discard them?'
       });
 
@@ -104,8 +109,16 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       });
 
       document.title = getTitle(appState);
+      appState.gistId = gistId;
       appState.localPath = null;
     } catch (error) {
+      appState.setWarningDialogTexts({
+        label: `Loading the fiddle failed: ${error}`,
+        cancel: undefined
+      });
+
+      appState.toogleWarningDialog();
+
       console.warn(`Loading Fiddle failed`, error);
       return false;
     }
