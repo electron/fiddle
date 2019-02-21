@@ -38,7 +38,7 @@
   "dependencies": {
     "@blueprintjs/core": "^3.10.0",
     "@blueprintjs/select": "^3.4.0",
-    "@octokit/rest": "^15.12.1",
+    "@octokit/rest": "^16.16.0",
     "builtin-modules": "^3.0.0",
     "classnames": "^2.2.6",
     "electron-default-menu": "^1.0.1",
