@@ -133,7 +133,7 @@ describe('binary', () => {
     });
 
     it(`does not download a version again`, async () => {
-      binaryManager.getIsDownloaded = jest.fn(() => true);
+      binaryManager.getIsDownloaded = jest.fn(async () => true);
 
       await binaryManager.setup('v3.0.0');
 
@@ -143,7 +143,7 @@ describe('binary', () => {
     });
 
     it(`does not download a version while already downloading`, async () => {
-      binaryManager.getIsDownloaded = jest.fn(() => true);
+      binaryManager.getIsDownloaded = jest.fn(async () => true);
       binaryManager.state['3.0.0'] = 'downloading';
 
       await binaryManager.setup('v3.0.0');
