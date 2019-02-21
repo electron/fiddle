@@ -15,7 +15,7 @@ import { fancyImport } from '../utils/import';
 export async function getTemplateValues(name: string): Promise<EditorValues> {
   const path = await fancyImport<typeof pathType>('path');
   const fs = await fancyImport<typeof fsExtraType>('fs-extra');
-  const templatesPath = path.join(__dirname, '../../static/templates');
+  const templatesPath = path.join(__dirname, '../../static/show-me');
   const templatePath = path.join(templatesPath, name.toLowerCase());
 
   const getFile = async (fileName: string) => {

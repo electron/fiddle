@@ -11,7 +11,7 @@
     "lint:style": "stylelint ./src/less/*.less --fix",
     "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\" --fix",
     "lint:tests": "tslint ./tests/**/*.ts{,x} -c tslint.json --fix",
-    "lint:templates": "standard ./static/templates/**/*.js",
+    "lint:templates": "standard ./static/show-me/**/*.js",
     "lint": "npm-run-all lint:*",
     "make": "electron-forge make",
     "package": "electron-forge package",
