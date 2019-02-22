@@ -64,7 +64,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     });
 
     try {
-      const { data } = await octo.users.get({});
+      const { data } = await octo.users.getAuthenticated();
       this.props.appState.gitHubAvatarUrl = data.avatar_url;
       this.props.appState.gitHubLogin = data.login;
       this.props.appState.gitHubName = data.name;

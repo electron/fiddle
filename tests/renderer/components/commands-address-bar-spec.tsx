@@ -13,7 +13,8 @@ describe('AddressBar component', () => {
   beforeEach(() => {
     store = {
       gistId: null,
-      setWarningDialogTexts: jest.fn()
+      setWarningDialogTexts: jest.fn(),
+      toogleWarningDialog: jest.fn()
     };
   });
 
@@ -90,7 +91,7 @@ describe('AddressBar component', () => {
       store.gistId = 'abcdtestid';
 
       instance.handleChange({ target: { value: 'abcdtestid' } } as any);
-      await (wrapper.instance() as AddressBar).loadFiddle();
+      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
 
       expect(wrapper.state('value')).toBe('abcdtestid');
       expect(document.title).toBe('Electron Fiddle - gist.github.com/abcdtestid');
@@ -106,7 +107,7 @@ describe('AddressBar component', () => {
       });
 
       const wrapper = shallow(<AddressBar appState={store} />);
-      const result = await (wrapper.instance() as AddressBar).loadFiddle();
+      const result = await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
 
       expect(result).toBe(false);
     });

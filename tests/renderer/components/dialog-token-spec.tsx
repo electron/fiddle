@@ -141,7 +141,7 @@ describe('TokenDialog component', () => {
       mockOctokit = {
         authenticate: jest.fn(),
         users: {
-          get: jest.fn(async () => ({ data: mockUser }))
+          getAuthenticated: jest.fn(async () => ({ data: mockUser }))
         }
       };
 
@@ -172,7 +172,7 @@ describe('TokenDialog component', () => {
     });
 
     it('handles an error', async () => {
-      mockOctokit.users.get.mockReturnValue({ data: null });
+      mockOctokit.users.getAuthenticated.mockReturnValue({ data: null });
 
       const wrapper = shallow(<TokenDialog appState={store} />);
       wrapper.setState({ tokenInput: mockValidToken });
