@@ -59,11 +59,11 @@ exports[`Header component renders the tour once started 1`] = `
             Electron Fiddle allows you to build little experiments and mini-apps with Electron. Each Fiddle has three files: A main script, a renderer script, and an HTML file.
           </p>
           <p>
-            If you 
+            If you
             <code>
               require()
             </code>
-             a module, Fiddle will install it automatically. It will also automatically provide you with autocomplete information for the 
+             a module, Fiddle will install it automatically. It will also automatically provide you with autocomplete information for the
             <code>
               electron
             </code>
@@ -120,21 +120,20 @@ exports[`Header component renders the tour once started 1`] = `
       Object {
         "content": <React.Fragment>
           <p>
-            Every Electron app starts with a main script, very similar to how a Node.js application is started. The main script runs in the "main process". To display a user interface, the main process creates renderer processes – usually in the form of windows, which Electron calls
-            <code>
+            Every Electron app starts with a main script, very similar to how a Node.js application is started. The main script runs in the "main process". To display a user interface, the main process creates renderer processes – usually in the form of windows, which Electron calls <code>
               BrowserWindow
             </code>
             .
           </p>
           <p>
-            To get started, pretend that the main process is just like a Node.js process. All APIs and features found in Electron are accessible through the 
+            To get started, pretend that the main process is just like a Node.js process. All APIs and features found in Electron are accessible through the
             <code>
               electron
             </code>
              module, which can be required like any other Node.js module.
           </p>
           <p>
-            The default fiddle creates a new 
+            The default fiddle creates a new
             <code>
               BrowserWindow
             </code>
@@ -155,7 +154,7 @@ exports[`Header component renders the tour once started 1`] = `
           <code>
             &lt;script /&gt;
           </code>
-           tag and notice how we can call 
+           tag and notice how we can call
           <code>
             require()
           </code>
@@ -168,14 +167,14 @@ exports[`Header component renders the tour once started 1`] = `
       Object {
         "content": <React.Fragment>
           <p>
-            This is the script we just required from the HTML file. In here, you can do anything that works in Node.js 
+            This is the script we just required from the HTML file. In here, you can do anything that works in Node.js
             <i>
               and
             </i>
              anything that works in a browser.
           </p>
           <p>
-            By the way: If you want to use an 
+            By the way: If you want to use an
             <code>
               npm
             </code>

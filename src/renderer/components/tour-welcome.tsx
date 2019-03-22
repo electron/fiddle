@@ -114,8 +114,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
             Every Electron app starts with a main script, very similar to how
             a Node.js application is started. The main script runs in the "main
             process". To display a user interface, the main process creates renderer
-            processes – usually in the form of windows, which Electron calls
-            <code>BrowserWindow</code>.
+            processes – usually in the form of windows, which Electron calls <code>BrowserWindow</code>.
           </p>
           <p>
             To get started, pretend that the main process is just like a Node.js
