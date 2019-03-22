@@ -172,14 +172,7 @@ exports[`Header component renders the tour once started 1`] = `
              anything that works in a browser.
           </p>
           <p>
-            By the way: If you want to use an
-            <code>
-              npm
-            </code>
-             module here, just
-            <code>
-              require
-            </code>
+            By the way: If you want to use an <code>npm</code> module here, just <code>require</code>
              it. Electron Fiddle will automatically detect that you requested a module and install it as soon as you run your fiddle.
           </p>
         </React.Fragment>,
