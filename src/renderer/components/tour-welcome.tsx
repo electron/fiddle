@@ -135,11 +135,9 @@ export function getWelcomeTour(): Set<TourScriptStep> {
       title: '📝 HTML',
       content: (
         <p>
-          In the default fiddle, this HTML file is loaded in the
-          <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
+          In the default fiddle, this HTML file is loaded in the <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
           in a browser will work here, too. In addition, Electron allows you
-          to execute Node.js code. Take a close look at the
-            <code>&lt;script /&gt;</code> tag and notice how we can call <code>
+          to execute Node.js code. Take a close look at the <code>&lt;script /&gt;</code> tag and notice how we can call <code>
           require()</code> like we would in Node.js.
         </p>
       )
