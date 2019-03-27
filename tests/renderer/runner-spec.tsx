@@ -64,6 +64,22 @@ describe('Runner component', () => {
     expect(store.isRunning).toBe(true);
   });
 
+  it('runs with logging when enabled', async () => {
+    store.isEnablingElectronLogging = true;
+    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (spawn as jest.Mock).mockImplementationOnce((_, __, opts) => {
+      expect(opts.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
+      expect(opts.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
+      return mockChild;
+    });
+
+    expect(await instance.run()).toBe(true);
+    expect(store.binaryManager.getIsDownloaded).toHaveBeenCalled();
+    expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
+    expect(installModules).toHaveBeenCalled();
+    expect(store.isRunning).toBe(true);
+  });
+
   it('emits output', async () => {
     (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
     (spawn as any).mockReturnValueOnce(mockChild);

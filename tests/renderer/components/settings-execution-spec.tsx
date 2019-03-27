@@ -36,4 +36,24 @@ describe('ExecutionSettings component', () => {
       expect(store.isKeepingUserDataDirs).toBe(true);
     });
   });
+
+  describe('handleElectronLoggingChange()', () => {
+    it('handles a new selection', async () => {
+      const wrapper = shallow(
+        <ExecutionSettings appState={store} />
+      );
+      const instance = wrapper.instance() as any;
+      await instance.handleElectronLoggingChange({
+        currentTarget: { checked: false }
+      });
+
+      expect(store.isEnablingElectronLogging).toBe(false);
+
+      await instance.handleElectronLoggingChange({
+        currentTarget: { checked: true }
+      });
+
+      expect(store.isEnablingElectronLogging).toBe(true);
+    });
+  });
 });

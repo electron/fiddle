@@ -22,5 +22,17 @@ exports[`ExecutionSettings component renders 1`] = `
       />
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="There are some flags that Electron uses to log extra information both internally
+      and through Chromium.  Enable this option to make Fiddle produce those logs."
+    >
+      <Blueprint3.Checkbox
+        label="Enable advanced Electron logging."
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
 </div>
 `;

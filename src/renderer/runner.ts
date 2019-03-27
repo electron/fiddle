@@ -181,7 +181,19 @@ export class Runner {
     const binaryPath = binaryManager.getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
-    this.child = spawn(binaryPath, [ dir, '--inspect' ]);
+    const env = { ...process.env };
+    if (this.appState.isEnablingElectronLogging) {
+      env.ELECTRON_ENABLE_LOGGING = 'true';
+      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
+    } else {
+      delete env.ELECTRON_ENABLE_LOGGING;
+      delete env.ELECTRON_ENABLE_STACK_DUMPING;
+    }
+
+    this.child = spawn(binaryPath, [ dir, '--inspect' ], {
+      cwd: dir,
+      env,
+    });
     this.appState.isRunning = true;
     pushOutput(`Electron v${version} started.`);
 
