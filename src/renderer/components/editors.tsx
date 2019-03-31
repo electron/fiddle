@@ -47,7 +47,7 @@ export interface EditorsState {
 export class Editors extends React.Component<EditorsProps, EditorsState> {
   // A reaction: Each time mosaicArrangement is changed, we'll update
   // the editor layout. That method is itself debounced.
-  private disposeLayoutAutorun = reaction(
+  public disposeLayoutAutorun = reaction(
     () => this.props.appState.mosaicArrangement,
     () => updateEditorLayout()
   );

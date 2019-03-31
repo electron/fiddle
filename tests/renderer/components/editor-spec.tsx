@@ -23,7 +23,8 @@ describe('Editor component', () => {
       editor: {
         create: jest.fn(() => ({
           dispose: editorDispose,
-          setModel: jest.fn()
+          setModel: jest.fn(),
+          restoreViewState: jest.fn()
         })),
         createModel: jest.fn(),
         setModel: jest.fn(),
@@ -83,6 +84,31 @@ describe('Editor component', () => {
 
     expect(didMount).toHaveBeenCalled();
     expect(monaco.editor.create).toHaveBeenCalled();
+    expect(monaco.editor.createModel).toHaveBeenCalled();
+  });
+
+  it('initMonaco() attempts to create an editor and restores a backup', async () => {
+    store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+      model: true,
+      viewState: true
+    });
+
+    const wrapper = shallow(
+      <Editor
+        appState={store}
+        monaco={monaco}
+        monoacoOptions={{}}
+        id={EditorId.main}
+        editorDidMount={() => undefined}
+      />
+    );
+    const instance: any = wrapper.instance();
+
+    instance.containerRef.current = 'ref';
+    await instance.initMonaco();
+
+    expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
+    expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {

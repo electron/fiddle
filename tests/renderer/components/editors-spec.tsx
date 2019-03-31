@@ -2,9 +2,10 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { IpcEvents } from '../../../src/ipc-events';
-import { Editors } from '../../../src/renderer/components/editors';
+import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
+import { EditorId } from '../../../src/interfaces';
 
 jest.mock('monaco-loader', () => jest.fn(async () => {
   return { monaco: true };
@@ -18,7 +19,7 @@ jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn()
 }));
 
-describe('Editrors component', () => {
+describe('Editors component', () => {
   let store: any;
   let monaco: any;
 
@@ -98,6 +99,33 @@ describe('Editrors component', () => {
         }
       );
     });
+  });
+
+  it('renders a toolbar', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+    const toolbar = instance.renderToolbar({ title: TITLE_MAP[EditorId.main] } as any, EditorId.main);
+
+    expect(toolbar).toMatchSnapshot();
+  });
+
+  it('componentWillUnmount() unsubscribes the layout reaction', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+    (instance as any).disposeLayoutAutorun = jest.fn();
+
+    instance.componentWillUnmount();
+
+    expect(instance.disposeLayoutAutorun).toHaveBeenCalledTimes(1);
+  });
+
+  it('onChange() updates the mosaic arrangement in the appState', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+
+    instance.onChange({ testArrangement: true } as any);
+
+    expect(store.mosaicArrangement).toEqual({ testArrangement: true });
   });
 
   describe('IPC commands', () => {
