@@ -8,14 +8,6 @@ exports[`Editor toolbar button component MaximizeButton renders 1`] = `
 />
 `;
 
-exports[`Editor toolbar button component MaximizeButton renders 2`] = `
-<Blueprint3.Button
-  className="bp3-small"
-  icon="maximize"
-  onClick={[Function]}
-/>
-`;
-
 exports[`Editor toolbar button component RemoveButton renders 1`] = `
 <Blueprint3.Button
   className="bp3-small"

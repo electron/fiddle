@@ -18,7 +18,7 @@ describe('getEditorViewState()', () => {
 
   it('throws if window.Fiddle is not ready', () => {
     const { ElectronFiddle: fiddle } = window as any;
-    window.ElectronFiddle = undefined;
+    (window as any).ElectronFiddle = undefined;
 
     expect(() => getEditorViewState(EditorId.html)).toThrow('Fiddle not ready');
 

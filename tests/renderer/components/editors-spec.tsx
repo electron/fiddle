@@ -1,11 +1,13 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
+import { EditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
-import { EditorId } from '../../../src/interfaces';
+import { observable } from 'mobx';
+import { updateEditorLayout } from '../../../src/utils/editor-layout';
 
 jest.mock('monaco-loader', () => jest.fn(async () => {
   return { monaco: true };
@@ -17,6 +19,10 @@ jest.mock('../../../src/renderer/components/editor', () => ({
 
 jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn()
+}));
+
+jest.mock('../../../src/utils/editor-layout', () => ({
+  updateEditorLayout: jest.fn()
 }));
 
 describe('Editors component', () => {
@@ -179,6 +185,22 @@ describe('Editors component', () => {
         expect(window.ElectronFiddle.app.monaco).toEqual({ monaco: true});
         done();
       });
+    });
+  });
+
+  describe('disposeLayoutAutorun()', () => {
+    it('automatically updates the layout when the mosaic arrangement changes', () => {
+      class MockStore {
+        @observable public mosaicArrangement: any = {};
+      }
+
+      const mockStore = new MockStore();
+
+      shallow(<Editors appState={mockStore as any} />);
+
+      mockStore.mosaicArrangement = EditorId.main;
+
+      expect(updateEditorLayout).toHaveBeenCalledTimes(1);
     });
   });
 });

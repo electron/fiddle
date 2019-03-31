@@ -1,8 +1,9 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { EditorId } from '../../../src/interfaces';
 import { MaximizeButton, RemoveButton } from '../../../src/renderer/components/editors-toolbar-button';
-import { overridePlatform, resetPlatform } from '../../utils';
+
 
 describe('Editor toolbar button component', () => {
   let store: any = {};
@@ -11,11 +12,21 @@ describe('Editor toolbar button component', () => {
   beforeAll(() => {
     mockContext = {
       mosaicWindowActions: {
-        getPath: jest.fn()
+        getPath: jest.fn(),
+        split: jest.fn(),
+        replaceWithNew: jest.fn(),
+        setAdditionalControlsOpen: jest.fn(),
+        connectDragSource: jest.fn()
       },
       mosaicActions: {
-        expand: jest.fn()
-      }
+        expand: jest.fn(),
+        remove: jest.fn(),
+        hide: jest.fn(),
+        replaceWith: jest.fn(),
+        updateTree: jest.fn(),
+        getRoot: jest.fn()
+      },
+      mosaicId: 'test'
     };
 
     store = {
@@ -25,14 +36,17 @@ describe('Editor toolbar button component', () => {
 
   describe('MaximizeButton', () => {
     it('renders', () => {
-      const wrapper = shallow(<MaximizeButton appState={store} />);
+      const wrapper = shallow(<MaximizeButton id={EditorId.main} appState={store} />, {
+        context: mockContext
+      });
       expect(wrapper).toMatchSnapshot();
     });
 
     it('handles a click', () => {
-      const wrapper = shallow(<MaximizeButton appState={store} />);
+      const wrapper = shallow(<MaximizeButton id={EditorId.main} appState={store} />, {
+        context: mockContext
+      });
       const instance: MaximizeButton = wrapper.instance() as any;
-      instance.context = mockContext;
 
       instance.expand();
       expect(mockContext.mosaicActions.expand).toHaveBeenCalledTimes(1);
@@ -41,14 +55,16 @@ describe('Editor toolbar button component', () => {
 
   describe('RemoveButton', () => {
     it('renders', () => {
-      const wrapper = shallow(<RemoveButton appState={store} />);
+      const wrapper = shallow(<RemoveButton id={EditorId.main} appState={store} />, {
+        context: mockContext
+      });
       expect(wrapper).toMatchSnapshot();
     });
 
     it('handles a click', () => {
-      const wrapper = shallow(<RemoveButton appState={store} />);
-      const instance: MaximizeButton = wrapper.instance() as any;
-      instance.context = mockContext;
+      const wrapper = shallow(<RemoveButton id={EditorId.main} appState={store} />, {
+        context: mockContext
+      });      const instance: RemoveButton = wrapper.instance() as any;
 
       instance.remove();
       expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);

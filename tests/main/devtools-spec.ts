@@ -1,7 +1,5 @@
 import { setupDevTools } from '../../src/main/devtools';
 
-import { isDevMode } from '../../src/utils/devmode';
-
 let mockIsDevMode = false;
 
 jest.mock('../../src/utils/devmode', () => ({

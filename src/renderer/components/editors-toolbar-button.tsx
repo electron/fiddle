@@ -31,7 +31,7 @@ export class MaximizeButton extends React.PureComponent<ToolbarButtonProps> {
     );
   }
 
-  private expand() {
+  public expand() {
     const path = this.context.mosaicWindowActions.getPath();
     return this.context.mosaicActions.expand(path);
   }
@@ -56,7 +56,7 @@ export class RemoveButton extends React.PureComponent<ToolbarButtonProps> {
     );
   }
 
-  private remove() {
+  public remove() {
     this.props.appState.hideAndBackupEditor(this.props.id);
   }
 }

@@ -8,7 +8,7 @@ describe('getEditorValue()', () => {
 
   it('throws if window.Fiddle is not ready', () => {
     const oldFiddle = window.ElectronFiddle;
-    window.ElectronFiddle = undefined;
+    (window as any).ElectronFiddle = undefined;
 
     expect(() => getEditorValue(EditorId.html)).toThrow('Fiddle not ready');
 
