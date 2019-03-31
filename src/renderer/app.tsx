@@ -1,8 +1,9 @@
 import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
-import { EditorValues } from '../interfaces';
+import { EditorId, EditorValues } from '../interfaces';
 import { updateEditorLayout } from '../utils/editor-layout';
+import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { Runner } from './runner';
@@ -81,11 +82,10 @@ export class App {
       throw new Error('Fiddle not ready');
     }
 
-    const { main, html, renderer } = fiddle.editors;
     const values: EditorValues = {
-      html: html && html.getValue() ? html.getValue() : '',
-      main: main && main.getValue() ? main.getValue() : '',
-      renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
+      html: getEditorValue(EditorId.html),
+      main: getEditorValue(EditorId.main),
+      renderer: getEditorValue(EditorId.renderer),
     };
 
     if (options && options.include !==  false) {

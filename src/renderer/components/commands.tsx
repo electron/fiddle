@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
+import { EditorDropdown } from './commands-editors';
 import { PublishButton } from './commands-publish-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
@@ -42,6 +43,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
               text='Console'
               onClick={appState.toggleConsole}
             />
+            <EditorDropdown appState={appState} />
           </ControlGroup>
         </div>
         <div>

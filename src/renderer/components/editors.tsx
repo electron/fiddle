@@ -1,6 +1,8 @@
+import { reaction } from 'mobx';
+import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
-import { Mosaic, MosaicWindow } from 'react-mosaic-component';
+import { Mosaic, MosaicNode, MosaicWindow, MosaicWindowProps } from 'react-mosaic-component';
 
 import { EditorId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
@@ -8,21 +10,12 @@ import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
-import { ContentNames, getContent } from '../content';
+import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
-
-const options: any = {
-  direction: 'row',
-  first: 'main',
-  second: {
-    direction: 'column',
-    first: 'renderer',
-    second: 'html',
-  },
-};
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -34,7 +27,7 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 const ViewIdMosaic = Mosaic.ofType<EditorId>() as any;
 const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>() as any;
 
-const TITLE_MAP: Record<EditorId, string> = {
+export const TITLE_MAP: Record<EditorId, string> = {
   main: 'Main Process',
   renderer: 'Renderer Process',
   html: 'HTML'
@@ -50,13 +43,30 @@ export interface EditorsState {
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
+@observer
 export class Editors extends React.Component<EditorsProps, EditorsState> {
+  // A reaction: Each time mosaicArrangement is changed, we'll update
+  // the editor layout. That method is itself debounced.
+  private disposeLayoutAutorun = reaction(
+    () => this.props.appState.mosaicArrangement,
+    () => updateEditorLayout()
+  );
+
   constructor(props: EditorsProps) {
     super(props);
+
+    this.onChange = this.onChange.bind(this);
+
     this.state = { monacoOptions: defaultMonacoOptions };
+
     this.loadMonaco();
   }
 
+  /**
+   * Executed right after the component mounts. We'll setup the IPC listeners here.
+   *
+   * @memberof Editors
+   */
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
       this.executeCommand(cmd);
@@ -70,9 +80,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       });
 
       window.ElectronFiddle.app.setValues({
-        html: await getContent(ContentNames.HTML, version),
-        renderer: await getContent(ContentNames.RENDERER, version),
-        main: await getContent(ContentNames.MAIN, version),
+        html: await getContent(EditorId.html, version),
+        renderer: await getContent(EditorId.renderer, version),
+        main: await getContent(EditorId.main, version),
       });
     });
 
@@ -81,6 +91,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     });
 
     this.setState({ isMounted: true });
+  }
+
+  public componentWillUnmount() {
+    this.disposeLayoutAutorun();
   }
 
   /**
@@ -135,25 +149,65 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
   }
 
+  /**
+   * Renders the little tool bar on top of editors
+   *
+   * @param {MosaicWindowProps<EditorId>} { title }
+   * @param {EditorId} id
+   * @returns {JSX.Element}
+   */
+  public renderToolbar({ title }: MosaicWindowProps<EditorId>, id: EditorId): JSX.Element {
+    return (
+      <div>
+        {/* Left */}
+        <div>
+          <h5>
+            {title}
+          </h5>
+        </div>
+        {/* Middle */}
+        <div />
+        {/* Right */}
+        <div className='mosaic-controls'>
+          <MaximizeButton id={id} appState={this.props.appState} />
+          <RemoveButton id={id} appState={this.props.appState} />
+        </div>
+      </div>
+    );
+  }
+
   public render() {
     const { appState } = this.props;
     const { monaco } = this.state;
 
     if (!monaco) return null;
 
-
     return (
       <ViewIdMosaic
-        onChange={updateEditorLayout}
+        onChange={this.onChange}
+        value={appState.mosaicArrangement}
         // tslint:disable-next-line:jsx-no-multiline-js
         renderTile={(id: any, path: any) => (
-          <ViewIdMosaicWindow className={id} path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
-            <Editor id={id} monaco={monaco} appState={appState} monoacoOptions={defaultMonacoOptions} />
+          <ViewIdMosaicWindow
+            className={id}
+            path={path}
+            title={TITLE_MAP[id]}
+            renderToolbar={(props: MosaicWindowProps<EditorId>) => this.renderToolbar(props, id)}
+          >
+            <Editor
+              id={id}
+              monaco={monaco}
+              appState={appState}
+              monoacoOptions={defaultMonacoOptions}
+            />
           </ViewIdMosaicWindow>
         )}
-        initialValue={options}
       />
     );
+  }
+
+  public onChange(currentNode: MosaicNode<EditorId> | null) {
+    this.props.appState.mosaicArrangement = currentNode;
   }
 
   /**
@@ -171,7 +225,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
 
     if (!this.state || !this.state.isMounted) {
-      this.state = { monaco, monacoOptions: defaultMonacoOptions };
+      this.state = {
+        monaco,
+        monacoOptions: defaultMonacoOptions
+      };
     } else {
       this.setState({ monaco });
     }

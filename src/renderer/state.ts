@@ -1,6 +1,8 @@
 import { action, autorun, computed, observable, when } from 'mobx';
+import { MosaicNode } from 'react-mosaic-component';
 
 import {
+  EditorId,
   ElectronVersion,
   ElectronVersionSource,
   ElectronVersionState,
@@ -11,10 +13,12 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
+import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
+import { createMosaicArrangement, getVisibleEditors } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
 import { BinaryManager } from './binary';
-import { ContentNames, getContent, isContentUnchanged } from './content';
+import { getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
@@ -29,6 +33,16 @@ import {
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
+
+export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<EditorId> = {
+  direction: 'row',
+  first: EditorId.main,
+  second: {
+    direction: 'column',
+    first: EditorId.renderer,
+    second: EditorId.html,
+  }
+};
 
 /**
  * Editors exist outside of React's world. To make things *a lot*
@@ -80,6 +94,7 @@ export class AppState {
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public isRunning = false;
+  @observable public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
 
   // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;
@@ -89,6 +104,9 @@ export class AppState {
   @observable public isUnsaved: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
+
+  // -- Editor Values stored when we close the editor ------------------
+  @observable public closedEditors: Partial<Record<EditorId, EditorBackup>> = {};
 
   private outputBuffer: string = '';
   private name: string;
@@ -354,8 +372,8 @@ export class AppState {
     this.version = version;
 
     // Should we update the editor?
-    if (await isContentUnchanged(ContentNames.MAIN)) {
-      const main = await getContent(ContentNames.MAIN, version);
+    if (await isContentUnchanged(EditorId.main)) {
+      const main = await getContent(EditorId.main, version);
       window.ElectronFiddle.app.setValues({ main }, false);
     }
 
@@ -448,6 +466,57 @@ export class AppState {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
+  }
+
+  /**
+   * Sets the editor value for a given editor. Deletes the value after
+   * accessing it.
+   *
+   * @param {EditorId} id
+   */
+  @action public getAndRemoveEditorValueBackup(id: EditorId): EditorBackup | null {
+    const value = this.closedEditors[id];
+
+    if (value) {
+      delete this.closedEditors[id];
+      return value;
+    }
+
+    return null;
+  }
+
+  @action public setVisibleEditors(visible: Array<EditorId>) {
+    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
+
+    for (const id of [ EditorId.main, EditorId.html, EditorId.renderer ]) {
+      if (!visible[id] && currentlyVisible[id]) {
+        this.closedEditors[id] = getEditorBackup(id);
+      }
+    }
+
+    this.mosaicArrangement = createMosaicArrangement(visible);
+  }
+
+  /**
+   * Hides the editor for a given editor.
+   *
+   * @param {EditorId} id
+   */
+  @action public hideAndBackupEditor(id: EditorId) {
+    this.closedEditors[id] = getEditorBackup(id);
+
+    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
+    this.setVisibleEditors(currentlyVisible.filter((v) => v !== id));
+  }
+
+  /**
+   * Shows the editor value for a given editor.
+   *
+   * @param {EditorId} id
+   */
+  @action public showEditor(id: EditorId) {
+    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
+    this.setVisibleEditors([ ...currentlyVisible, id ]);
   }
 
   /**

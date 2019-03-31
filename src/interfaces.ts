@@ -53,6 +53,10 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
-export type EditorId = 'main' | 'renderer' | 'html';
+export const enum EditorId {
+  'main' = 'main',
+  'renderer' = 'renderer',
+  'html' = 'html'
+}
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';

@@ -1,30 +1,26 @@
-export const enum ContentNames {
-  HTML = 'html',
-  RENDERER = 'renderer',
-  MAIN = 'main'
-}
+import { EditorId } from '../interfaces';
 
 /**
  * Returns expected content for a given name.
  *
  * @export
- * @param {ContentNames} name
+ * @param {EditorId} name
  * @param {string} [version]
  * @returns {Promise<string>}
  */
 export async function getContent(
-  name: ContentNames,
-  version?: string
+  name: EditorId,
+  version?: string,
 ): Promise<string> {
-  if (name === ContentNames.HTML) {
+  if (name === EditorId.html) {
     return (await import('../content/html')).html;
   }
 
-  if (name === ContentNames.RENDERER) {
+  if (name === EditorId.renderer) {
     return (await import('../content/renderer')).renderer;
   }
 
-  if (name === ContentNames.MAIN) {
+  if (name === EditorId.main) {
     // We currently only distinguish between loadFile
     // and loadURL. Todo: Properly version the quick-start.
     if (version && version.startsWith('1.')) {
@@ -40,18 +36,18 @@ export async function getContent(
 /**
  * Did the content change?
  *
- * @param {ContentNames} name
+ * @param {EditorId} name
  * @returns {Promise<boolean>}
  */
-export async function isContentUnchanged(name: ContentNames): Promise<boolean> {
+export async function isContentUnchanged(name: EditorId): Promise<boolean> {
   if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
 
   const values = await window.ElectronFiddle.app.getValues({ include: false });
 
   // Handle main case, which needs to check both possible versions
-  if (name === ContentNames.MAIN) {
-    const isChanged1x = await getContent(ContentNames.MAIN, '1.0') === values.main;
-    const isChangedOther = await getContent(ContentNames.MAIN) === values.main;
+  if (name === EditorId.main) {
+    const isChanged1x = await getContent(EditorId.main, '1.0') === values.main;
+    const isChangedOther = await getContent(EditorId.main) === values.main;
 
     return isChanged1x || isChangedOther;
   } else {
