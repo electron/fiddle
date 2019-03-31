@@ -79,7 +79,8 @@ export class Editor extends React.Component<EditorProps> {
         model: null,
         ...monoacoOptions
       });
-      this.editorDidMount(this.editor);
+
+      await this.editorDidMount(this.editor);
     }
   }
 

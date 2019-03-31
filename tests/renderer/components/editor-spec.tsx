@@ -1,6 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { EditorId } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
 
 describe('Editor component', () => {
@@ -11,7 +12,9 @@ describe('Editor component', () => {
   beforeEach(() => {
     store = {
       isTokenDialogShowing: false,
-      isSettingsShowing: false
+      isSettingsShowing: false,
+      closedEditors: {},
+      getAndRemoveEditorValueBackup: jest.fn()
     };
 
     editorDispose.mockReset();
@@ -19,8 +22,11 @@ describe('Editor component', () => {
     monaco = {
       editor: {
         create: jest.fn(() => ({
-          dispose: editorDispose
+          dispose: editorDispose,
+          setModel: jest.fn()
         })),
+        createModel: jest.fn(),
+        setModel: jest.fn(),
         dispose: jest.fn()
       }
     };
@@ -28,7 +34,7 @@ describe('Editor component', () => {
 
   it('renders the editor container', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
     );
 
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
@@ -36,13 +42,13 @@ describe('Editor component', () => {
 
   it('correctly sets the language', () => {
     let wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
     );
 
     expect((wrapper.instance() as any).language).toBe('javascript');
 
     wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='html'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.html} />
     );
 
     expect((wrapper.instance() as any).language).toBe('html');
@@ -50,7 +56,7 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id='main'/>
+      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
     );
 
     expect((wrapper as any)
@@ -66,7 +72,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monoacoOptions={{}}
-        id='main'
+        id={EditorId.main}
         editorDidMount={didMount}
       />
     );
@@ -86,7 +92,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monoacoOptions={{}}
-        id='main'
+        id={EditorId.main}
         editorDidMount={didMount}
       />
     );

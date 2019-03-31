@@ -5,340 +5,38 @@ exports[`Editrors component renders 1`] = `
   className="mosaic-blueprint-theme mosaic mosaic-drop-target"
 >
   <div
-    className="mosaic-root"
+    className="mosaic-zero-state bp3-non-ideal-state"
   >
     <div
-      className="mosaic-tile"
-      key="main"
-      style={
-        Object {
-          "bottom": "0%",
-          "left": "0%",
-          "right": "50%",
-          "top": "0%",
-        }
-      }
+      className="bp3-non-ideal-state-visual"
     >
-      <div
-        className="mosaic-window mosaic-drop-target main"
+      <span
+        className="bp3-icon bp3-icon-applications"
+        icon="applications"
       >
-        <div
-          className="mosaic-window-toolbar draggable"
+        <svg
+          data-icon="applications"
+          height={120}
+          viewBox="0 0 20 20"
+          width={120}
         >
-          <div
-            className="mosaic-window-title"
-            title="Main Process"
-          >
-            Main Process
-          </div>
-          <div
-            className="mosaic-window-controls bp3-button-group"
-          >
-            <div />
-          </div>
-        </div>
-        <div
-          className="mosaic-window-body"
-        >
-          Editor
-        </div>
-        <div
-          className="mosaic-window-body-overlay"
-          onClick={[Function]}
-        />
-        <div
-          className="mosaic-window-additional-actions-bar"
-        />
-        <div
-          className="mosaic-preview"
-        >
-          <div
-            className="mosaic-window-toolbar"
-          >
-            <div
-              className="mosaic-window-title"
-            >
-              Main Process
-            </div>
-          </div>
-          <div
-            className="mosaic-window-body"
-          >
-            <h4>
-              Main Process
-            </h4>
-            <span
-              className="bp3-icon bp3-icon-application"
-              icon="application"
-            >
-              <svg
-                data-icon="application"
-                height={72}
-                viewBox="0 0 20 20"
-                width={72}
-              >
-                <desc>
-                  application
-                </desc>
-                <path
-                  d="M3.5 9h9c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-9c-.28 0-.5.22-.5.5s.22.5.5.5zm0 2h5c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-5c-.28 0-.5.22-.5.5s.22.5.5.5zM19 1H1c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm-1 16H2V6h16v11zM3.5 13h7c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-7c-.28 0-.5.22-.5.5s.22.5.5.5z"
-                  fillRule="evenodd"
-                  key="0"
-                />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div
-          className="drop-target-container"
-        >
-          <div
-            className="drop-target top"
+          <desc>
+            applications
+          </desc>
+          <path
+            d="M15 5H1c-.55 0-1 .45-1 1v13c0 .55.45 1 1 1h14c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1zm-1 13H2V8h12v10zM3.5 10h7c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-7c-.28 0-.5.22-.5.5s.22.5.5.5zm0 2h3c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-3c-.28 0-.5.22-.5.5s.22.5.5.5zm0 2h5c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-5c-.28 0-.5.22-.5.5s.22.5.5.5zM19 0H5c-.55 0-1 .45-1 1v3h2V3h12v10h-1v2h2c.55 0 1-.45 1-1V1c0-.55-.45-1-1-1z"
+            fillRule="evenodd"
+            key="0"
           />
-          <div
-            className="drop-target bottom"
-          />
-          <div
-            className="drop-target left"
-          />
-          <div
-            className="drop-target right"
-          />
-        </div>
-      </div>
+        </svg>
+      </span>
     </div>
-    <div
-      className="mosaic-split -row"
-      onMouseDown={[Function]}
-      style={
-        Object {
-          "bottom": "0%",
-          "left": "50%",
-          "right": "0%",
-          "top": "0%",
-        }
-      }
+    <h4
+      className="bp3-heading"
     >
-      <div
-        className="mosaic-split-line"
-      />
-    </div>
-    <div
-      className="mosaic-tile"
-      key="renderer"
-      style={
-        Object {
-          "bottom": "50%",
-          "left": "50%",
-          "right": "0%",
-          "top": "0%",
-        }
-      }
-    >
-      <div
-        className="mosaic-window mosaic-drop-target renderer"
-      >
-        <div
-          className="mosaic-window-toolbar draggable"
-        >
-          <div
-            className="mosaic-window-title"
-            title="Renderer Process"
-          >
-            Renderer Process
-          </div>
-          <div
-            className="mosaic-window-controls bp3-button-group"
-          >
-            <div />
-          </div>
-        </div>
-        <div
-          className="mosaic-window-body"
-        >
-          Editor
-        </div>
-        <div
-          className="mosaic-window-body-overlay"
-          onClick={[Function]}
-        />
-        <div
-          className="mosaic-window-additional-actions-bar"
-        />
-        <div
-          className="mosaic-preview"
-        >
-          <div
-            className="mosaic-window-toolbar"
-          >
-            <div
-              className="mosaic-window-title"
-            >
-              Renderer Process
-            </div>
-          </div>
-          <div
-            className="mosaic-window-body"
-          >
-            <h4>
-              Renderer Process
-            </h4>
-            <span
-              className="bp3-icon bp3-icon-application"
-              icon="application"
-            >
-              <svg
-                data-icon="application"
-                height={72}
-                viewBox="0 0 20 20"
-                width={72}
-              >
-                <desc>
-                  application
-                </desc>
-                <path
-                  d="M3.5 9h9c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-9c-.28 0-.5.22-.5.5s.22.5.5.5zm0 2h5c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-5c-.28 0-.5.22-.5.5s.22.5.5.5zM19 1H1c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm-1 16H2V6h16v11zM3.5 13h7c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-7c-.28 0-.5.22-.5.5s.22.5.5.5z"
-                  fillRule="evenodd"
-                  key="0"
-                />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div
-          className="drop-target-container"
-        >
-          <div
-            className="drop-target top"
-          />
-          <div
-            className="drop-target bottom"
-          />
-          <div
-            className="drop-target left"
-          />
-          <div
-            className="drop-target right"
-          />
-        </div>
-      </div>
-    </div>
-    <div
-      className="mosaic-split -column"
-      onMouseDown={[Function]}
-      style={
-        Object {
-          "bottom": "0%",
-          "left": "50%",
-          "right": "0%",
-          "top": "50%",
-        }
-      }
-    >
-      <div
-        className="mosaic-split-line"
-      />
-    </div>
-    <div
-      className="mosaic-tile"
-      key="html"
-      style={
-        Object {
-          "bottom": "0%",
-          "left": "50%",
-          "right": "0%",
-          "top": "50%",
-        }
-      }
-    >
-      <div
-        className="mosaic-window mosaic-drop-target html"
-      >
-        <div
-          className="mosaic-window-toolbar draggable"
-        >
-          <div
-            className="mosaic-window-title"
-            title="HTML"
-          >
-            HTML
-          </div>
-          <div
-            className="mosaic-window-controls bp3-button-group"
-          >
-            <div />
-          </div>
-        </div>
-        <div
-          className="mosaic-window-body"
-        >
-          Editor
-        </div>
-        <div
-          className="mosaic-window-body-overlay"
-          onClick={[Function]}
-        />
-        <div
-          className="mosaic-window-additional-actions-bar"
-        />
-        <div
-          className="mosaic-preview"
-        >
-          <div
-            className="mosaic-window-toolbar"
-          >
-            <div
-              className="mosaic-window-title"
-            >
-              HTML
-            </div>
-          </div>
-          <div
-            className="mosaic-window-body"
-          >
-            <h4>
-              HTML
-            </h4>
-            <span
-              className="bp3-icon bp3-icon-application"
-              icon="application"
-            >
-              <svg
-                data-icon="application"
-                height={72}
-                viewBox="0 0 20 20"
-                width={72}
-              >
-                <desc>
-                  application
-                </desc>
-                <path
-                  d="M3.5 9h9c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-9c-.28 0-.5.22-.5.5s.22.5.5.5zm0 2h5c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-5c-.28 0-.5.22-.5.5s.22.5.5.5zM19 1H1c-.55 0-1 .45-1 1v16c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V2c0-.55-.45-1-1-1zm-1 16H2V6h16v11zM3.5 13h7c.28 0 .5-.22.5-.5s-.22-.5-.5-.5h-7c-.28 0-.5.22-.5.5s.22.5.5.5z"
-                  fillRule="evenodd"
-                  key="0"
-                />
-              </svg>
-            </span>
-          </div>
-        </div>
-        <div
-          className="drop-target-container"
-        >
-          <div
-            className="drop-target top"
-          />
-          <div
-            className="drop-target bottom"
-          />
-          <div
-            className="drop-target left"
-          />
-          <div
-            className="drop-target right"
-          />
-        </div>
-      </div>
-    </div>
+      No Windows Present
+    </h4>
+    <div />
   </div>
   <div
     className="drop-target-container"
