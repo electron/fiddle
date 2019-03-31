@@ -7,7 +7,9 @@
   "bail": true,
   "resetMocks": true,
   "resetModules": true,
-  "setupTestFrameworkScriptFile": "<rootDir>/tests/setup.js",
+  "setupFilesAfterEnv": [
+    "<rootDir>/tests/setup.js"
+  ],
   "moduleFileExtensions": [
     "js",
     "jsx",
