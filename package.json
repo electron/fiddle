@@ -42,6 +42,7 @@
     "builtin-modules": "^3.0.0",
     "classnames": "^2.2.6",
     "electron-default-menu": "^1.0.1",
+    "electron-devtools-installer": "^2.2.4",
     "electron-download": "^4.1.1",
     "electron-squirrel-startup": "^1.0.0",
     "extract-zip": "^1.6.7",
