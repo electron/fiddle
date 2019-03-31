@@ -489,7 +489,7 @@ export class AppState {
     const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
 
     for (const id of [ EditorId.main, EditorId.html, EditorId.renderer ]) {
-      if (!visible[id] && currentlyVisible[id]) {
+      if (!visible.includes(id) && currentlyVisible.includes(id)) {
         this.closedEditors[id] = getEditorBackup(id);
       }
     }
