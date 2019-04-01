@@ -113,8 +113,10 @@ describe('Editors component', () => {
         renderer: 'renderer-value'
       });
 
-      expect(app.state.closedEditors.main.model.setValue)
+      expect(app.state.closedEditors.main!.model!.setValue)
         .toHaveBeenCalledWith('main-value');
+
+      window.ElectronFiddle.editors.main = oldMainEditor;
     });
 
     it('warns when the contents are unsaved, does not proceed if denied', (done) => {

@@ -2,7 +2,7 @@ import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { EditorId, ALL_EDITORS } from '../../interfaces';
+import { ALL_EDITORS, EditorId } from '../../interfaces';
 import { getVisibleEditors } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
