@@ -58,7 +58,8 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
           icon={visibleEditors.includes(id) ? 'eye-open' : 'eye-off'}
           key={id}
           text={TITLE_MAP[id]}
-          onClick={() => this.onItemClick(id)}
+          id={id}
+          onClick={this.onItemClick}
         />
       );
     }
@@ -66,7 +67,8 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
     return result;
   }
 
-  public onItemClick(id: EditorId) {
+  public onItemClick(event: React.MouseEvent) {
+    const { id } = event.currentTarget;
     const { appState } = this.props;
     const visibleEditors = getVisibleEditors(appState.mosaicArrangement);
 

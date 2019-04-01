@@ -24,15 +24,15 @@ describe('EditorDropdown component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('handles a click for a visible item', () => {
+  it('handles a click for an item', () => {
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.onItemClick(EditorId.html);
+    dropdown.onItemClick({ currentTarget: { id: EditorId.html } } as any);
     expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);
     expect(store.showEditor).toHaveBeenCalledTimes(0);
 
-    dropdown.onItemClick(EditorId.main);
+    dropdown.onItemClick({ currentTarget: { id: EditorId.main } } as any);
     expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);
     expect(store.showEditor).toHaveBeenCalledTimes(1);
   });

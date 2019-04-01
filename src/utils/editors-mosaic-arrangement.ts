@@ -1,7 +1,7 @@
 import { MosaicNode } from 'react-mosaic-component';
 
 import { EditorId } from '../interfaces';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../renderer/state';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from '../renderer/constants';
 
 /**
  * Create a mosaic arrangement given an array of editor ids.

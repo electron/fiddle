@@ -1,5 +1,5 @@
 import { EditorId } from '../../src/interfaces';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/state';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { createMosaicArrangement, getVisibleEditors } from '../../src/utils/editors-mosaic-arrangement';
 
 describe('Mosaic Arrangement Utilities', () => {

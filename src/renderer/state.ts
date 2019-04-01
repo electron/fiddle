@@ -18,6 +18,7 @@ import { createMosaicArrangement, getVisibleEditors } from '../utils/editors-mos
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
 import { BinaryManager } from './binary';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
 import { updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
@@ -33,16 +34,6 @@ import {
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
-
-export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<EditorId> = {
-  direction: 'row',
-  first: EditorId.main,
-  second: {
-    direction: 'column',
-    first: EditorId.renderer,
-    second: EditorId.html,
-  }
-};
 
 /**
  * Editors exist outside of React's world. To make things *a lot*

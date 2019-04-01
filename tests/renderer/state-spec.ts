@@ -1,7 +1,8 @@
-import { ElectronVersionSource, ElectronVersionState, EditorId } from '../../src/interfaces';
+import { EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { AppState, DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/state';
+import { AppState } from '../../src/renderer/state';
 import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';

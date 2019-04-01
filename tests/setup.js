@@ -20,7 +20,16 @@ jest.mock('../src/shared-constants', () => ({
 }));
 jest.mock('../src/renderer/constants', () => ({
   USER_DATA_PATH: '/Users/fake-user',
-  CONFIG_PATH: '~/.electron-fiddle'
+  CONFIG_PATH: '~/.electron-fiddle',
+  DEFAULT_MOSAIC_ARRANGEMENT: {
+    direction: 'row',
+    first: 'main',
+    second: {
+      direction: 'column',
+      first: 'renderer',
+      second: 'html',
+    }
+  }
 }));
 
 delete window.localStorage;

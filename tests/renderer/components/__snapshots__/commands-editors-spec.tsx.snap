@@ -9,6 +9,7 @@ exports[`EditorDropdown component renders 1`] = `
       <Blueprint3.MenuItem
         disabled={false}
         icon="eye-off"
+        id="main"
         multiline={false}
         onClick={[Function]}
         popoverProps={Object {}}
@@ -18,6 +19,7 @@ exports[`EditorDropdown component renders 1`] = `
       <Blueprint3.MenuItem
         disabled={false}
         icon="eye-open"
+        id="renderer"
         multiline={false}
         onClick={[Function]}
         popoverProps={Object {}}
@@ -27,6 +29,7 @@ exports[`EditorDropdown component renders 1`] = `
       <Blueprint3.MenuItem
         disabled={false}
         icon="eye-open"
+        id="html"
         multiline={false}
         onClick={[Function]}
         popoverProps={Object {}}
