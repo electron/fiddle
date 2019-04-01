@@ -5,7 +5,7 @@ exports[`Editors component renders 1`] = `
   className="mosaic-blueprint-theme mosaic mosaic-drop-target"
 >
   <div
-    className="mosaic-zero-state bp3-non-ideal-state"
+    className="bp3-non-ideal-state"
   >
     <div
       className="bp3-non-ideal-state-visual"
@@ -16,9 +16,9 @@ exports[`Editors component renders 1`] = `
       >
         <svg
           data-icon="applications"
-          height={120}
+          height={60}
           viewBox="0 0 20 20"
-          width={120}
+          width={60}
         >
           <desc>
             applications
@@ -31,12 +31,23 @@ exports[`Editors component renders 1`] = `
         </svg>
       </span>
     </div>
-    <h4
-      className="bp3-heading"
+    <div>
+      You have closed all editors. You can open them again with the button below or the "Editors" button above!
+    </div>
+    <button
+      className="bp3-button"
+      onClick={[Function]}
+      onKeyDown={[Function]}
+      onKeyUp={[Function]}
+      type="button"
     >
-      No Windows Present
-    </h4>
-    <div />
+      <span
+        className="bp3-button-text"
+        key="text"
+      >
+        Open all editors
+      </span>
+    </button>
   </div>
   <div
     className="drop-target-container"

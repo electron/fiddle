@@ -15,6 +15,7 @@ import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
+import { renderNonIdealState } from './editors-non-ideal-state';
 import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
@@ -186,6 +187,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       <ViewIdMosaic
         onChange={this.onChange}
         value={appState.mosaicArrangement}
+        zeroStateView={renderNonIdealState(appState)}
         // tslint:disable-next-line:jsx-no-multiline-js
         renderTile={(id: any, path: any) => (
           <ViewIdMosaicWindow
