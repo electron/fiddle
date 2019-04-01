@@ -1,4 +1,4 @@
-import { EditorId } from '../../src/interfaces';
+import { ALL_EDITORS, EditorId } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { createMosaicArrangement, getVisibleEditors } from '../../src/utils/editors-mosaic-arrangement';
 
@@ -53,7 +53,7 @@ describe('Mosaic Arrangement Utilities', () => {
     it('returns the correct array for three visible panels', () => {
       const result = getVisibleEditors(DEFAULT_MOSAIC_ARRANGEMENT);
 
-      expect(result).toEqual([ EditorId.main, EditorId.renderer, EditorId.html ]);
+      expect(result).toEqual(ALL_EDITORS);
     });
   });
 });

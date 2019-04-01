@@ -6,7 +6,8 @@ jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manage
 jest.mock('../../src/renderer/state', () => ({
   appState: {
     theme: 'defaultDark',
-    getName: () => 'Test'
+    getName: () => 'Test',
+    closedEditors: {}
   }
 }));
 jest.mock('../../src/renderer/components/header', () => ({
@@ -98,6 +99,22 @@ describe('Editors component', () => {
         .toHaveBeenCalledWith('main-value');
       expect((window as any).ElectronFiddle.editors.renderer.setValue)
         .toHaveBeenCalledWith('renderer-value');
+    });
+
+    it('attempts to set values for closed editors', () => {
+      const oldMainEditor = window.ElectronFiddle.editors.main;
+      delete window.ElectronFiddle.editors.main;
+
+      const app = new App();
+      (app.state.closedEditors as any).main = { model: { setValue: jest.fn() } };
+      app.setValues({
+        html: 'html-value',
+        main: 'main-value',
+        renderer: 'renderer-value'
+      });
+
+      expect(app.state.closedEditors.main.model.setValue)
+        .toHaveBeenCalledWith('main-value');
     });
 
     it('warns when the contents are unsaved, does not proceed if denied', (done) => {

@@ -2,7 +2,7 @@ import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { EditorId } from '../../interfaces';
+import { EditorId, ALL_EDITORS } from '../../interfaces';
 import { getVisibleEditors } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
@@ -48,11 +48,10 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
 
   public renderMenuItems() {
     const { appState } = this.props;
-    const editors = [ EditorId.main, EditorId.renderer, EditorId.html ];
     const result: Array<JSX.Element> = [];
     const visibleEditors = getVisibleEditors(appState.mosaicArrangement);
 
-    for (const id of editors) {
+    for (const id of ALL_EDITORS) {
       result.push(
         <MenuItem
           icon={visibleEditors.includes(id) ? 'eye-open' : 'eye-off'}
@@ -72,10 +71,10 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
     const { appState } = this.props;
     const visibleEditors = getVisibleEditors(appState.mosaicArrangement);
 
-    if (visibleEditors.includes(id)) {
-      appState.hideAndBackupEditor(id);
+    if (visibleEditors.includes(id as EditorId)) {
+      appState.hideAndBackupEditor(id as EditorId);
     } else {
-      appState.showEditor(id);
+      appState.showEditor(id as EditorId);
     }
   }
 }

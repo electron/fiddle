@@ -59,4 +59,6 @@ export const enum EditorId {
   'html' = 'html'
 }
 
+export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.html ];
+
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';

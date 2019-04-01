@@ -1,7 +1,7 @@
 import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
-import { EditorId, EditorValues } from '../interfaces';
+import { ALL_EDITORS, EditorId, EditorValues } from '../interfaces';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
@@ -50,18 +50,17 @@ export class App {
       }
     }
 
-    const { main, html, renderer } = fiddle.editors;
+    for (const name of ALL_EDITORS) {
+      const editor = fiddle.editors[name];
+      const backup = this.state.closedEditors[name];
 
-    if (html && html.setValue && values.html) {
-      html.setValue(values.html);
-    }
-
-    if (main && main.setValue && values.main) {
-      main.setValue(values.main);
-    }
-
-    if (renderer && renderer.setValue && values.renderer) {
-      renderer.setValue(values.renderer);
+      if (backup && backup.model && values[name]) {
+        // The editor does not exist, attempt to set it on the backup
+        backup.model.setValue(values[name]!);
+      } else if (editor && editor.setValue && values[name]) {
+        // The editor exists, set the value directly
+        editor.setValue(values[name]!);
+      }
     }
 
     this.state.isUnsaved = false;
