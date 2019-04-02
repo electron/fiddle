@@ -1,4 +1,5 @@
-import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
@@ -395,6 +396,63 @@ describe('AppState', () => {
 
       expect(appState.output[1].text).toBe('⚠️ Bwap bwap. Error encountered:');
       expect(appState.output[2].text).toBe('Error: Bwap bwap');
+    });
+  });
+
+  describe('getAndRemoveEditorValueBackup()', () => {
+    it('returns null if there is no backup', () => {
+      const result = appState.getAndRemoveEditorValueBackup(EditorId.main);
+      expect(result).toEqual(null);
+    });
+
+    it('returns and deletes a backup if there is one', () => {
+      appState.closedEditors[EditorId.main] = { testBackup: true } as any;
+      const result = appState.getAndRemoveEditorValueBackup(EditorId.main);
+      expect(result).toEqual({ testBackup: true });
+      expect(appState.closedEditors[EditorId.main]).toBeUndefined();
+    });
+  });
+
+  describe('setVisibleEditors()', () => {
+    it('updates the visible editors and creates a backup', () => {
+      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      appState.closedEditors = {};
+      appState.setVisibleEditors([ EditorId.main ]);
+
+      expect(appState.mosaicArrangement).toEqual(EditorId.main);
+      expect(appState.closedEditors[EditorId.renderer]).toBeTruthy();
+      expect(appState.closedEditors[EditorId.html]).toBeTruthy();
+      expect(appState.closedEditors[EditorId.main]).toBeUndefined();
+    });
+  });
+
+  describe('hideAndBackupEditor()', () => {
+    it('hides a given editor and creates a backup', () => {
+      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      appState.closedEditors = {};
+      appState.hideAndBackupEditor(EditorId.main);
+
+      expect(appState.mosaicArrangement).toEqual({
+        direction: 'column',
+        first: EditorId.renderer,
+        second: EditorId.html
+      });
+      expect(appState.closedEditors[EditorId.main]).toBeTruthy();
+      expect(appState.closedEditors[EditorId.renderer]).toBeUndefined();
+      expect(appState.closedEditors[EditorId.html]).toBeUndefined();
+    });
+  });
+
+  describe('showEditor()', () => {
+    it('shows a given editor', () => {
+      appState.mosaicArrangement = EditorId.main;
+      appState.showEditor(EditorId.html);
+
+      expect(appState.mosaicArrangement).toEqual({
+        direction: 'column',
+        first: EditorId.main,
+        second: EditorId.html
+      });
     });
   });
 });

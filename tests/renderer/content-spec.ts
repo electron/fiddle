@@ -1,17 +1,18 @@
-import { ContentNames, getContent, isContentUnchanged } from '../../src/renderer/content';
+import { EditorId } from '../../src/interfaces';
+import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
 describe('content', () => {
   describe('getContent()', () => {
     it('returns content for HTML editor', () => {
-      expect(getContent(ContentNames.HTML)).toBeTruthy();
+      expect(getContent(EditorId.html)).toBeTruthy();
     });
 
     it('returns content for the renderer editor', () => {
-      expect(getContent(ContentNames.RENDERER)).toBeTruthy();
+      expect(getContent(EditorId.renderer)).toBeTruthy();
     });
 
     it('returns content for the main editor', () => {
-      expect(getContent(ContentNames.MAIN)).toBeTruthy();
+      expect(getContent(EditorId.main)).toBeTruthy();
     });
 
     it('returns an empty string for an unknown request', () => {
@@ -23,17 +24,17 @@ describe('content', () => {
     it('returns false if app is not available', async () => {
       (window.ElectronFiddle.app as any) = null;
 
-      const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
+      const isUnchanged = await isContentUnchanged(EditorId.main);
       expect(isUnchanged).toBe(false);
     });
 
-    describe('main', () => {
+    describe(EditorId.main, () => {
       it('returns false if it changed', async () => {
         (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           main: 'hi'
         });
 
-        const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
+        const isUnchanged = await isContentUnchanged(EditorId.main);
         expect(isUnchanged).toBe(false);
       });
 
@@ -42,7 +43,7 @@ describe('content', () => {
           main: require('../../src/content/main').main
         });
 
-        const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
+        const isUnchanged = await isContentUnchanged(EditorId.main);
         expect(isUnchanged).toBe(true);
       });
 
@@ -51,18 +52,18 @@ describe('content', () => {
           main: require('../../src/content/main-1-x-x').main
         });
 
-        const isUnchanged = await isContentUnchanged(ContentNames.MAIN);
+        const isUnchanged = await isContentUnchanged(EditorId.main);
         expect(isUnchanged).toBe(true);
       });
     });
 
-    describe('renderer', () => {
+    describe(EditorId.renderer, () => {
       it('returns false if it changed', async () => {
         (window.ElectronFiddle.app.getValues as jest.Mock<any>).mockReturnValueOnce({
           renderer: 'hi'
         });
 
-        const isUnchanged = await isContentUnchanged(ContentNames.RENDERER);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer);
         expect(isUnchanged).toBe(false);
       });
 
@@ -71,7 +72,7 @@ describe('content', () => {
           renderer: require('../../src/content/renderer').renderer
         });
 
-        const isUnchanged = await isContentUnchanged(ContentNames.RENDERER);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer);
         expect(isUnchanged).toBe(true);
       });
     });

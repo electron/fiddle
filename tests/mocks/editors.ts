@@ -1,6 +1,9 @@
 export class EditorMock {
   public layout = jest.fn();
   public hasTextFocus = jest.fn();
+  public getModel = jest.fn().mockReturnValue({ testModel: true });
+  public restoreViewState = jest.fn();
+  public saveViewState = jest.fn().mockReturnValue({ testViewState: true });
   public setValue = jest.fn();
   public getValue = jest.fn().mockReturnValue('editor-value');
   public onDidChangeModelContent = jest.fn().mockReturnValue({

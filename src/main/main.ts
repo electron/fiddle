@@ -1,6 +1,7 @@
 import { app } from 'electron';
 
 import { isDevMode } from '../utils/devmode';
+import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
@@ -26,6 +27,7 @@ export async function onReady() {
   setupFileListeners();
   setupUpdates();
   setupDialogs();
+  setupDevTools();
 }
 
 /**

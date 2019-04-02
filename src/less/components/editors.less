@@ -2,6 +2,27 @@
   animation: fadein 0.15s;
 }
 
+.mosaic-window-toolbar  {
+  & > div {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 3px 0 29px;
+
+    .mosaic-controls {
+      transform: scale(0.7);
+    }
+
+    h5 {
+      margin: 4px 0 0 0;
+    }
+
+    button {
+      margin-left: 8px;
+    }
+  }
+}
+
 @keyframes fadein {
   from { opacity: 0; }
   to { opacity: 1; }

@@ -1,9 +1,12 @@
 import { mount, shallow } from 'enzyme';
+import { observable } from 'mobx';
 import * as React from 'react';
 
+import { EditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
-import { Editors } from '../../../src/renderer/components/editors';
+import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { updateEditorLayout } from '../../../src/utils/editor-layout';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
 jest.mock('monaco-loader', () => jest.fn(async () => {
@@ -18,7 +21,11 @@ jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn()
 }));
 
-describe('Editrors component', () => {
+jest.mock('../../../src/utils/editor-layout', () => ({
+  updateEditorLayout: jest.fn()
+}));
+
+describe('Editors component', () => {
   let store: any;
   let monaco: any;
 
@@ -100,6 +107,33 @@ describe('Editrors component', () => {
     });
   });
 
+  it('renders a toolbar', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+    const toolbar = instance.renderToolbar({ title: TITLE_MAP[EditorId.main] } as any, EditorId.main);
+
+    expect(toolbar).toMatchSnapshot();
+  });
+
+  it('componentWillUnmount() unsubscribes the layout reaction', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+    (instance as any).disposeLayoutAutorun = jest.fn();
+
+    instance.componentWillUnmount();
+
+    expect(instance.disposeLayoutAutorun).toHaveBeenCalledTimes(1);
+  });
+
+  it('onChange() updates the mosaic arrangement in the appState', () => {
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+
+    instance.onChange({ testArrangement: true } as any);
+
+    expect(store.mosaicArrangement).toEqual({ testArrangement: true });
+  });
+
   describe('IPC commands', () => {
     it('handles an MONACO_EXECUTE_COMMAND command', () => {
       shallow(<Editors appState={store} />);
@@ -151,6 +185,22 @@ describe('Editrors component', () => {
         expect(window.ElectronFiddle.app.monaco).toEqual({ monaco: true});
         done();
       });
+    });
+  });
+
+  describe('disposeLayoutAutorun()', () => {
+    it('automatically updates the layout when the mosaic arrangement changes', () => {
+      class MockStore {
+        @observable public mosaicArrangement: any = {};
+      }
+
+      const mockStore = new MockStore();
+
+      shallow(<Editors appState={mockStore as any} />);
+
+      mockStore.mosaicArrangement = EditorId.main;
+
+      expect(updateEditorLayout).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -32,6 +32,13 @@ exports[`Commands component renders 1`] = `
         icon="console"
         text="Console"
       />
+      <EditorDropdown
+        appState={
+          Object {
+            "gistId": null,
+          }
+        }
+      />
     </Blueprint3.ControlGroup>
   </div>
   <div>

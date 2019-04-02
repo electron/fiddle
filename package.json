@@ -42,6 +42,7 @@
     "builtin-modules": "^3.0.0",
     "classnames": "^2.2.6",
     "electron-default-menu": "^1.0.1",
+    "electron-devtools-installer": "^2.2.4",
     "electron-download": "^4.1.1",
     "electron-squirrel-startup": "^1.0.0",
     "extract-zip": "^1.6.7",
@@ -60,6 +61,7 @@
     "update-electron-app": "^1.3.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.4.0",
     "@electron-forge/cli": "^6.0.0-beta.34",
     "@electron-forge/maker-deb": "^6.0.0-beta.34",
     "@electron-forge/maker-rpm": "^6.0.0-beta.34",
