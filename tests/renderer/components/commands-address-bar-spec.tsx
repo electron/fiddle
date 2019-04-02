@@ -7,6 +7,24 @@ import { MockState } from '../../mocks/state';
 
 jest.mock('../../../src/utils/octokit');
 
+const mockGists = {
+  get: async () => ({
+    data: {
+      files: {
+        'renderer.js': {
+          content: 'renderer-content'
+        },
+        'main.js': {
+          content: 'main-content'
+        },
+        'index.html': {
+          content: 'html'
+        }
+      }
+    }
+  })
+};
+
 describe('AddressBar component', () => {
   let store: any;
 
@@ -65,25 +83,7 @@ describe('AddressBar component', () => {
 
   describe('loadFiddle()', () => {
     it('loads a fiddle', async () => {
-      (getOctokit as jest.Mock).mockReturnValue({
-        gists: {
-          get: async () => ({
-            data: {
-              files: {
-                'renderer.js': {
-                  content: 'renderer-content'
-                },
-                'main.js': {
-                  content: 'main-content'
-                },
-                'index.html': {
-                  content: 'html'
-                }
-              }
-            }
-          })
-        }
-      });
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGists });
 
       const wrapper = shallow(<AddressBar appState={store} />);
       const instance: AddressBar = wrapper.instance() as any;
@@ -110,6 +110,26 @@ describe('AddressBar component', () => {
       const result = await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
 
       expect(result).toBe(false);
+    });
+
+    it('uses GitHub authentication when available', async () => {
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGists, authenticate: jest.fn() });
+
+      const { authenticate } = await getOctokit();
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      store.gistId = 'abcdtestid';
+      store.gitHubToken = 'testToken';
+
+      instance.handleChange({ target: { value: 'abcdtestid' } } as any);
+      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+
+      expect(authenticate).toHaveBeenCalledTimes(1);
+      expect((authenticate as jest.Mock).mock.calls[0][0]).toEqual({
+        type: 'token',
+        token: store.gitHubToken
+      });
     });
   });
 });
