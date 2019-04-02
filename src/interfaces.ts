@@ -53,11 +53,19 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
+// Editors
 export const enum EditorId {
   'main' = 'main',
   'renderer' = 'renderer',
   'html' = 'html'
 }
+
+// Panels that can show up as a mosaic
+export const enum PanelId {
+  'show-me' = 'show-me'
+}
+
+export type MosaicId = EditorId | PanelId;
 
 export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.html ];
 

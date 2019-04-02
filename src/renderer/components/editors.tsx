@@ -4,12 +4,13 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import { Mosaic, MosaicNode, MosaicWindow, MosaicWindowProps } from 'react-mosaic-component';
 
-import { EditorId } from '../../interfaces';
+import { EditorId, MosaicId, PanelId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
+import { isEditorId } from '../../utils/type-checks';
 import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -57,6 +58,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     super(props);
 
     this.onChange = this.onChange.bind(this);
+    this.renderEditor = this.renderEditor.bind(this);
+    this.renderTile = this.renderTile.bind(this);
+    this.renderGenericPanel = this.renderGenericPanel.bind(this);
 
     this.state = { monacoOptions: defaultMonacoOptions };
 
@@ -151,13 +155,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   /**
-   * Renders the little tool bar on top of editors
+   * Renders the little tool bar on top of each panel
    *
-   * @param {MosaicWindowProps<EditorId>} { title }
-   * @param {EditorId} id
+   * @param {MosaicWindowProps<MosaicId>} { title }
+   * @param {MosaicId} id
    * @returns {JSX.Element}
    */
-  public renderToolbar({ title }: MosaicWindowProps<EditorId>, id: EditorId): JSX.Element {
+  public renderToolbar(
+    { title }: MosaicWindowProps<MosaicId>, id: MosaicId
+  ): JSX.Element {
     return (
       <div>
         {/* Left */}
@@ -177,6 +183,67 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
   }
 
+  /**
+   * Renders a Mosaic tile
+   *
+   * @param {string} id
+   * @param {string} path
+   * @returns {JSX.Element | null}
+   */
+  public renderTile(id: MosaicId, path: string): JSX.Element | null {
+    const { appState } = this.props;
+    const content = isEditorId(id)
+      ? this.renderEditor(id)
+      : this.renderGenericPanel(id, appState);
+
+    return (
+      <ViewIdMosaicWindow
+        className={id}
+        path={path}
+        title={TITLE_MAP[id]}
+        renderToolbar={(props: MosaicWindowProps<MosaicId>) => this.renderToolbar(props, id)}
+      >
+        {content}
+      </ViewIdMosaicWindow>
+    );
+  }
+
+  /**
+   * Renders a generic panel – so not an editor, but something else
+   *
+   * @param {PanelId} _id
+   * @param {AppState} _appState
+   * @returns {JSX.Element}
+   */
+  public renderGenericPanel(_id: PanelId, _appState: AppState): JSX.Element {
+    return (
+      <div />
+    );
+  }
+
+  /**
+   * Render an editor
+   *
+   * @param {EditorId} id
+   * @returns {(JSX.Element | null)}
+   * @memberof Editors
+   */
+  public renderEditor(id: EditorId): JSX.Element | null {
+    const { appState } = this.props;
+    const { monaco } = this.state;
+
+    if (!monaco) return null;
+
+    return (
+      <Editor
+        id={id}
+        monaco={monaco}
+        appState={appState}
+        monoacoOptions={defaultMonacoOptions}
+      />
+    );
+  }
+
   public render() {
     const { appState } = this.props;
     const { monaco } = this.state;
@@ -188,22 +255,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         onChange={this.onChange}
         value={appState.mosaicArrangement}
         zeroStateView={renderNonIdealState(appState)}
-        // tslint:disable-next-line:jsx-no-multiline-js
-        renderTile={(id: any, path: any) => (
-          <ViewIdMosaicWindow
-            className={id}
-            path={path}
-            title={TITLE_MAP[id]}
-            renderToolbar={(props: MosaicWindowProps<EditorId>) => this.renderToolbar(props, id)}
-          >
-            <Editor
-              id={id}
-              monaco={monaco}
-              appState={appState}
-              monoacoOptions={defaultMonacoOptions}
-            />
-          </ViewIdMosaicWindow>
-        )}
+        renderTile={this.renderTile}
       />
     );
   }
