@@ -5,6 +5,7 @@ import * as React from 'react';
 import { EditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../../src/renderer/constants';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
@@ -33,7 +34,8 @@ describe('Editors component', () => {
     store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
-      setWarningDialogTexts: () => ({})
+      setWarningDialogTexts: () => ({}),
+      mosaicArrangement: DEFAULT_MOSAIC_ARRANGEMENT
     };
 
     monaco = {

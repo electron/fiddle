@@ -208,6 +208,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
   }
 
+  /**
+   * Handles a change in the visible nodes
+   *
+   * @param {(MosaicNode<EditorId> | null)} currentNode
+   */
   public onChange(currentNode: MosaicNode<EditorId> | null) {
     this.props.appState.mosaicArrangement = currentNode;
   }
