@@ -1,9 +1,10 @@
-import { EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
+import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -415,7 +416,7 @@ describe('AppState', () => {
 
   describe('setVisibleMosaics()', () => {
     it('updates the visible editors and creates a backup', () => {
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
       appState.closedPanels = {};
       appState.setVisibleMosaics([ EditorId.main ]);
 

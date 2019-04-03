@@ -17,12 +17,13 @@ export function createMosaicArrangement(
   }
 
   // This cuts out the first half of input. Input becomes the second half.
-  const firstHalf = input.splice(0, Math.floor(input.length / 2));
+  const secondHalf = [ ...input ];
+  const firstHalf = secondHalf.splice(0, Math.floor(secondHalf.length / 2));
 
   return {
     direction,
     first: createMosaicArrangement(firstHalf, 'column'),
-    second: createMosaicArrangement(input, 'column')
+    second: createMosaicArrangement(secondHalf, 'column')
   };
 }
 

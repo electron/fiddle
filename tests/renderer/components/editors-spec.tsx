@@ -2,12 +2,12 @@ import { mount, shallow } from 'enzyme';
 import { observable } from 'mobx';
 import * as React from 'react';
 
-import { EditorId } from '../../../src/interfaces';
+import { ALL_MOSAICS, EditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../../src/renderer/constants';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
+import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 
 jest.mock('monaco-loader', () => jest.fn(async () => {
@@ -35,7 +35,7 @@ describe('Editors component', () => {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       setWarningDialogTexts: () => ({}),
-      mosaicArrangement: DEFAULT_MOSAIC_ARRANGEMENT
+      mosaicArrangement: createMosaicArrangement(ALL_MOSAICS)
     };
 
     monaco = {

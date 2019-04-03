@@ -233,12 +233,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     const { appState } = this.props;
     const { monaco } = this.state;
 
-    if (!monaco) return null;
-
     return (
       <Editor
         id={id}
-        monaco={monaco}
+        monaco={monaco!}
         appState={appState}
         monoacoOptions={defaultMonacoOptions}
       />
