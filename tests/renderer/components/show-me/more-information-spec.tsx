@@ -1,6 +1,5 @@
 import * as electron from 'electron';
-import { mount, shallow } from 'enzyme';
-import * as React from 'react';
+import { mount } from 'enzyme';
 
 import { renderMoreDocumentation } from '../../../../src/renderer/components/show-me/more-information';
 

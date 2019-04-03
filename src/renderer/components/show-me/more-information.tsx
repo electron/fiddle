@@ -19,13 +19,13 @@ export function renderMoreDocumentation(
     <>
       <br />
       <p className='b3-running-text'>
-        For more documentation, visit <a onClick={() => shell.openExternal(fullUrl)}>{url}</a>, where
+        For more documentation, visit <a id='open-url' onClick={() => shell.openExternal(fullUrl)}>{url}</a>, where
         you can find the full documentation for Electron.
       </p>
       <p className='bp3-text-muted'>
         By the way, Electron Fiddle and the documentation you see here is entirely open source. If you
         have ideas on how to improve it, we'd love to have your contributions! You can find the
-        repository on <a onClick={() => shell.openExternal(gitHubUrl)}>GitHub</a>.
+        repository on <a id='open-github' onClick={() => shell.openExternal(gitHubUrl)}>GitHub</a>.
       </p>
     </>
   );
