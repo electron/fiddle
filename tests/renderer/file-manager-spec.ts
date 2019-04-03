@@ -152,9 +152,12 @@ describe('FileManager', () => {
       fm.setFiddle = jest.fn();
       await fm.openTemplate('test');
       expect(fm.setFiddle).toHaveBeenCalledWith({
-        html: '',
-        main: '',
-        renderer: ''
+        templateName: 'test',
+        values: {
+          html: '',
+          main: '',
+          renderer: ''
+        }
       });
     });
 

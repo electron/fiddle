@@ -32,6 +32,12 @@ export interface ElectronVersion extends NpmVersion {
   source: ElectronVersionSource;
 }
 
+export interface SetFiddleOptions {
+  values: EditorValues;
+  filePath?: string;
+  templateName?: string;
+}
+
 export interface OutputEntry {
   text: string;
   timestamp: number;

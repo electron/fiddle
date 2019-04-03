@@ -18,6 +18,7 @@ import { activateTheme } from '../themes';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
 import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { ShowMe } from './show-me';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -85,10 +86,12 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         label: 'Your current fiddle is unsaved. Do you want to discard it?'
       });
 
-      window.ElectronFiddle.app.setValues({
-        html: await getContent(EditorId.html, version),
-        renderer: await getContent(EditorId.renderer, version),
-        main: await getContent(EditorId.main, version),
+      window.ElectronFiddle.app.fileManager.setFiddle({
+        values: {
+          html: await getContent(EditorId.html, version),
+          renderer: await getContent(EditorId.renderer, version),
+          main: await getContent(EditorId.main, version),
+        }
       });
     });
 
@@ -216,10 +219,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {AppState} _appState
    * @returns {JSX.Element}
    */
-  public renderGenericPanel(_id: PanelId, _appState: AppState): JSX.Element {
-    return (
-      <div />
-    );
+  public renderGenericPanel(_id: PanelId, appState: AppState): JSX.Element {
+    return <ShowMe appState={appState} />;
   }
 
   /**

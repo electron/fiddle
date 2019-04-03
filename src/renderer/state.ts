@@ -83,12 +83,13 @@ export class AppState {
   @observable public isMyGist: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
-  @observable public localPath: string | null = null;
+  @observable public localPath: string | undefined;
   @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public isRunning = false;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public templateName: string | undefined;
 
   // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;

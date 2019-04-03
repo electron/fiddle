@@ -161,7 +161,7 @@ describe('Editors component', () => {
 
       ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
       process.nextTick(() => {
-        expect(window.ElectronFiddle.app.setValues).toHaveBeenCalled();
+        expect(window.ElectronFiddle.app.fileManager.setFiddle).toHaveBeenCalled();
         done();
       });
     });

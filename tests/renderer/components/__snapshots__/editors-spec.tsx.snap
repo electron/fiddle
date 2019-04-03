@@ -616,7 +616,19 @@ exports[`Editors component renders 1`] = `
         <div
           className="mosaic-window-body"
         >
-          <div />
+          <div
+            className="show-me-panel"
+          >
+            <h2>
+              What's 
+              ?
+            </h2>
+            <p
+              className="bp3r-running-text"
+            >
+              We're just trying to help.
+            </p>
+          </div>
         </div>
         <div
           className="mosaic-window-body-overlay"

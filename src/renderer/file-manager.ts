@@ -1,7 +1,7 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { EditorValues, Files, FileTransform } from '../interfaces';
+import { EditorValues, Files, FileTransform, SetFiddleOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
@@ -43,7 +43,8 @@ export class FileManager {
    */
   public async openTemplate(name: string) {
     const values = await getTemplateValues(name);
-    this.setFiddle(values);
+
+    this.setFiddle({ values, templateName: name });
   }
 
   /**
@@ -65,19 +66,20 @@ export class FileManager {
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
     };
 
-    this.setFiddle(values);
+    this.setFiddle({ values, filePath });
   }
 
   /**
    * Got values? This method will load them.
    *
-   * @param {EditorValues} values
+   * @param {SetFiddleOptions} options
    * @memberof FileManager
    */
-  public async setFiddle(values: EditorValues, filePath?: string) {
+  public async setFiddle({ values, filePath, templateName }: SetFiddleOptions) {
     this.appState.gistId = '';
     this.appState.isMyGist = false;
-    this.appState.localPath = filePath || null;
+    this.appState.localPath = filePath;
+    this.appState.templateName = templateName;
 
     this.appState.setWarningDialogTexts({
       label: `Opening this fiddle will replace your unsaved changes. Do you want to proceed?`,
