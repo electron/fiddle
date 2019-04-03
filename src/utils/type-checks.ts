@@ -13,13 +13,13 @@ export function isEditorId(input: EditorId | PanelId | MosaicId): input is Edito
 }
 
 /**
- * Is the given string of type `MosaicId`?
+ * Is the given string of type `isPanelId`?
  *
  * @export
  * @param {(EditorId | PanelId | MosaicId)} input
  * @returns {input is MosaicId}
  */
-export function isPanelId(input: EditorId | PanelId | MosaicId): input is MosaicId {
+export function isPanelId(input: EditorId | PanelId | MosaicId): input is PanelId {
   return !(ALL_EDITORS as any).includes(input);
 }
 
