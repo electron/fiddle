@@ -13,7 +13,8 @@ describe('EditorDropdown component', () => {
   beforeEach(() => {
     store = {
       hideAndBackupMosaic: jest.fn(),
-      showMosaic: jest.fn()
+      showMosaic: jest.fn(),
+      closedPanels: {}
     };
 
     (getVisibleMosaics as jest.Mock).mockReturnValue([ EditorId.html, EditorId.renderer ]);

@@ -1,72 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`EditorDropdown component renders 1`] = `
-<Blueprint3.Popover
-  boundary="scrollParent"
-  captureDismiss={false}
-  content={
-    <Blueprint3.Menu>
-      <Blueprint3.MenuItem
-        disabled={false}
-        icon="eye-off"
-        id="main"
-        multiline={false}
-        onClick={[Function]}
-        popoverProps={Object {}}
-        shouldDismissPopover={true}
-        text="Main Process"
-      />
-      <Blueprint3.MenuItem
-        disabled={false}
-        icon="eye-open"
-        id="renderer"
-        multiline={false}
-        onClick={[Function]}
-        popoverProps={Object {}}
-        shouldDismissPopover={true}
-        text="Renderer Process"
-      />
-      <Blueprint3.MenuItem
-        disabled={false}
-        icon="eye-open"
-        id="html"
-        multiline={false}
-        onClick={[Function]}
-        popoverProps={Object {}}
-        shouldDismissPopover={true}
-        text="HTML"
-      />
-      <Blueprint3.MenuItem
-        disabled={false}
-        icon="eye-off"
-        id="showMe"
-        multiline={false}
-        onClick={[Function]}
-        popoverProps={Object {}}
-        shouldDismissPopover={true}
-        text="Docs & Info"
-      />
-    </Blueprint3.Menu>
-  }
-  defaultIsOpen={false}
-  disabled={false}
-  hasBackdrop={false}
-  hoverCloseDelay={300}
-  hoverOpenDelay={150}
-  inheritDarkTheme={true}
-  interactionKind="click"
-  minimal={false}
-  modifiers={Object {}}
-  openOnTargetFocus={true}
-  position="bottom"
-  targetTagName="span"
-  transitionDuration={300}
-  usePortal={true}
-  wrapperTagName="span"
->
+<Fragment>
+  <Blueprint3.Popover
+    boundary="scrollParent"
+    captureDismiss={false}
+    content={
+      <Blueprint3.Menu>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-off"
+          id="main"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Main Process"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="renderer"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Renderer Process"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="html"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="HTML"
+        />
+      </Blueprint3.Menu>
+    }
+    defaultIsOpen={false}
+    disabled={false}
+    hasBackdrop={false}
+    hoverCloseDelay={300}
+    hoverOpenDelay={150}
+    inheritDarkTheme={true}
+    interactionKind="click"
+    minimal={false}
+    modifiers={Object {}}
+    openOnTargetFocus={true}
+    position="bottom"
+    targetTagName="span"
+    transitionDuration={300}
+    usePortal={true}
+    wrapperTagName="span"
+  >
+    <Blueprint3.Button
+      icon="applications"
+      text="Editors"
+    />
+  </Blueprint3.Popover>
   <Blueprint3.Button
-    icon="applications"
-    text="Editors"
+    active={true}
+    icon="help"
+    id="showMe"
+    onClick={[Function]}
+    text="Docs & Info"
   />
-</Blueprint3.Popover>
+</Fragment>
 `;
