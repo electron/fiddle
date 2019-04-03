@@ -11,7 +11,8 @@ import {
   NpmVersion,
   OutputEntry,
   OutputOptions,
-  WarningDialogTexts
+  WarningDialogTexts,
+  ALL_PANELS
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -19,7 +20,7 @@ import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
-import { isEditorBackup, isEditorId } from '../utils/type-checks';
+import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
@@ -101,7 +102,9 @@ export class AppState {
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {};
+  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
+    showMe: true // Closed by default
+  };
 
   private outputBuffer: string = '';
   private name: string;
@@ -488,6 +491,12 @@ export class AppState {
         this.closedPanels[id] = isEditorId(id)
           ? getEditorBackup(id)
           : true;
+      }
+
+      // Remove the backup for panels now. Editors will remove their
+      // backup once the data has been loaded.
+      if (isPanelId(id) && visible.includes(id) && !currentlyVisible.includes(id)) {
+        delete this.closedPanels[id];
       }
     }
 

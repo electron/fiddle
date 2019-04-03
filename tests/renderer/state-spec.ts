@@ -1,4 +1,4 @@
-import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, PanelId } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -424,6 +424,14 @@ describe('AppState', () => {
       expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();
       expect(appState.closedPanels[EditorId.html]).toBeTruthy();
       expect(appState.closedPanels[EditorId.main]).toBeUndefined();
+    });
+
+    it('removes the backup for a non-editor right away', () => {
+      appState.closedPanels = {};
+      appState.closedPanels[PanelId.showMe] = true;
+      appState.setVisibleMosaics(ALL_MOSAICS);
+
+      expect(appState.closedPanels[PanelId.showMe]).toBeUndefined();
     });
   });
 
