@@ -19,7 +19,7 @@ export function isEditorId(input: EditorId | PanelId | MosaicId): input is Edito
  * @param {(EditorId | PanelId | MosaicId)} input
  * @returns {input is MosaicId}
  */
-export function isMosaicId(input: EditorId | PanelId | MosaicId): input is MosaicId {
+export function isPanelId(input: EditorId | PanelId | MosaicId): input is MosaicId {
   return !(ALL_EDITORS as any).includes(input);
 }
 
