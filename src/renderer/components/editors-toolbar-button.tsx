@@ -64,10 +64,6 @@ export class RemoveButton extends React.PureComponent<ToolbarButtonProps> {
    * Remove this panel
    */
   public remove() {
-    const { id } = this.props;
-
-    if (isEditorId(id)) {
-      this.props.appState.hideAndBackupEditor(id);
-    }
+    this.props.appState.hideAndBackupMosaic(this.props.id);
   }
 }

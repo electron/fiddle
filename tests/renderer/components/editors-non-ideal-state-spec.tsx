@@ -8,11 +8,11 @@ describe('renderNonIdealState()', () => {
   });
 
   it('handles a click', () => {
-    const mockState = { setVisibleEditors: jest.fn() };
+    const mockState = { setVisibleMosaics: jest.fn() };
     const wrapper = mount(renderNonIdealState(mockState as any));
     wrapper.find('button').simulate('click');
 
-    expect(mockState.setVisibleEditors).toHaveBeenCalledTimes(1);
+    expect(mockState.setVisibleMosaics).toHaveBeenCalledTimes(1);
   });
 });
 

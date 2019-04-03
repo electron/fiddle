@@ -13,7 +13,7 @@ describe('Editor component', () => {
     store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
-      closedEditors: {},
+      closedPanels: {},
       getAndRemoveEditorValueBackup: jest.fn()
     };
 

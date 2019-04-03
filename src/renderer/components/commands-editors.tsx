@@ -2,8 +2,8 @@ import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ALL_EDITORS, EditorId } from '../../interfaces';
-import { getVisibleEditors } from '../../utils/editors-mosaic-arrangement';
+import { ALL_MOSAICS, MosaicId } from '../../interfaces';
+import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
 
@@ -49,12 +49,12 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
   public renderMenuItems() {
     const { appState } = this.props;
     const result: Array<JSX.Element> = [];
-    const visibleEditors = getVisibleEditors(appState.mosaicArrangement);
+    const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    for (const id of ALL_EDITORS) {
+    for (const id of ALL_MOSAICS) {
       result.push(
         <MenuItem
-          icon={visibleEditors.includes(id) ? 'eye-open' : 'eye-off'}
+          icon={visibleMosaics.includes(id) ? 'eye-open' : 'eye-off'}
           key={id}
           text={TITLE_MAP[id]}
           id={id}
@@ -69,12 +69,14 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
   public onItemClick(event: React.MouseEvent) {
     const { id } = event.currentTarget;
     const { appState } = this.props;
-    const visibleEditors = getVisibleEditors(appState.mosaicArrangement);
+    const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    if (visibleEditors.includes(id as EditorId)) {
-      appState.hideAndBackupEditor(id as EditorId);
+    if (visibleMosaics.includes(id as MosaicId)) {
+      console.log(`EditorDropdown: Closing ${id}`);
+      appState.hideAndBackupMosaic(id as MosaicId);
     } else {
-      appState.showEditor(id as EditorId);
+      console.log(`EditorDropdown: Opening ${id}`);
+      appState.showMosaic(id as MosaicId);
     }
   }
 }

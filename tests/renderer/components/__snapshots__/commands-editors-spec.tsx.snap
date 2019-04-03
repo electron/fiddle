@@ -36,6 +36,16 @@ exports[`EditorDropdown component renders 1`] = `
         shouldDismissPopover={true}
         text="HTML"
       />
+      <Blueprint3.MenuItem
+        disabled={false}
+        icon="eye-off"
+        id="showMe"
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Docs & Info"
+      />
     </Blueprint3.Menu>
   }
   defaultIsOpen={false}

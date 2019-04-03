@@ -1,39 +1,39 @@
-import { MosaicNode } from 'react-mosaic-component';
+import { MosaicDirection, MosaicNode } from 'react-mosaic-component';
 
-import { EditorId } from '../interfaces';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../renderer/constants';
+import { MosaicId } from '../interfaces';
 
 /**
  * Create a mosaic arrangement given an array of editor ids.
  *
  * @export
- * @param {Array<EditorId>} input
- * @returns {MosaicNode<EditorId>}
+ * @param {Array<MosaicId>} input
+ * @returns {MosaicNode<MosaicId>}
  */
-export function createMosaicArrangement(input: Array<EditorId>): MosaicNode<EditorId> {
-  if (input.length === 2) {
-    return {
-      direction: 'column',
-      first: input[0],
-      second: input[1]
-    };
+export function createMosaicArrangement(
+  input: Array<MosaicId>, direction: MosaicDirection = 'row'
+): MosaicNode<MosaicId> {
+  if (input.length === 1) {
+    return input[0];
   }
 
-  if (input.length === 3) {
-    return DEFAULT_MOSAIC_ARRANGEMENT;
-  }
+  // This cuts out the first half of input. Input becomes the second half.
+  const firstHalf = input.splice(0, Math.floor(input.length / 2));
 
-  return input[0];
+  return {
+    direction,
+    first: createMosaicArrangement(firstHalf, 'column'),
+    second: createMosaicArrangement(input, 'column')
+  };
 }
 
 /**
  * Returns an array of visible editors given a mosaic arrangement.
  *
  * @export
- * @param {MosaicNode<EditorId> | null} input
- * @returns {Array<EditorId>}
+ * @param {MosaicNode<MosaicId> | null} input
+ * @returns {Array<MosaicId>}
  */
-export function getVisibleEditors(input: MosaicNode<EditorId> | null): Array<EditorId> {
+export function getVisibleMosaics(input: MosaicNode<MosaicId> | null): Array<MosaicId> {
   // Handle the unlikely null case
   if (!input) return [];
 
@@ -42,13 +42,13 @@ export function getVisibleEditors(input: MosaicNode<EditorId> | null): Array<Edi
     return [ input ];
   }
 
-  // Handle the other cases (2 or 3)
+  // Handle the other cases (2 - 4)
   const result = [];
   for (const node of [ input.first, input.second ]) {
     if (typeof node === 'string') {
       result.push(node);
     } else {
-      result.push(...getVisibleEditors(node));
+      result.push(...getVisibleMosaics(node));
     }
   }
 

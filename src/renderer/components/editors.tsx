@@ -29,10 +29,11 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 const ViewIdMosaic = Mosaic.ofType<EditorId>() as any;
 const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>() as any;
 
-export const TITLE_MAP: Record<EditorId, string> = {
+export const TITLE_MAP: Record<MosaicId, string> = {
   main: 'Main Process',
   renderer: 'Renderer Process',
-  html: 'HTML'
+  html: 'HTML',
+  showMe: 'Docs & Info'
 };
 
 export interface EditorsProps {

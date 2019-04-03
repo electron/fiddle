@@ -7,7 +7,7 @@ jest.mock('../../src/renderer/state', () => ({
   appState: {
     theme: 'defaultDark',
     getName: () => 'Test',
-    closedEditors: {}
+    closedPanels: {}
   }
 }));
 jest.mock('../../src/renderer/components/header', () => ({
@@ -106,14 +106,14 @@ describe('Editors component', () => {
       delete window.ElectronFiddle.editors.main;
 
       const app = new App();
-      (app.state.closedEditors as any).main = { model: { setValue: jest.fn() } };
+      (app.state.closedPanels as any).main = { model: { setValue: jest.fn() } };
       app.setValues({
         html: 'html-value',
         main: 'main-value',
         renderer: 'renderer-value'
       });
 
-      expect(app.state.closedEditors.main!.model!.setValue)
+      expect(app.state.closedPanels.main!.model!.setValue)
         .toHaveBeenCalledWith('main-value');
 
       window.ElectronFiddle.editors.main = oldMainEditor;

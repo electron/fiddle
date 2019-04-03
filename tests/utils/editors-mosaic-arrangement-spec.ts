@@ -1,6 +1,6 @@
 import { ALL_EDITORS, EditorId } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
-import { createMosaicArrangement, getVisibleEditors } from '../../src/utils/editors-mosaic-arrangement';
+import { createMosaicArrangement, getVisibleMosaics } from '../../src/utils/editors-mosaic-arrangement';
 
 describe('Mosaic Arrangement Utilities', () => {
   describe('createMosaicArrangement()', () => {
@@ -14,7 +14,7 @@ describe('Mosaic Arrangement Utilities', () => {
       const result = createMosaicArrangement([ EditorId.main, EditorId.renderer ]);
 
       expect(result).toEqual({
-        direction: 'column',
+        direction: 'row',
         first: EditorId.main,
         second: EditorId.renderer
       });
@@ -27,21 +27,21 @@ describe('Mosaic Arrangement Utilities', () => {
     });
   });
 
-  describe('getVisibleEditors()', () => {
+  describe('getVisibleMosaics()', () => {
     it('returns the correct array for no panels', () => {
-      const result = getVisibleEditors(null);
+      const result = getVisibleMosaics(null);
 
       expect(result).toEqual([]);
     });
 
     it('returns the correct array for one visible panel', () => {
-      const result = getVisibleEditors(EditorId.main);
+      const result = getVisibleMosaics(EditorId.main);
 
       expect(result).toEqual([ EditorId.main ]);
     });
 
     it('returns the correct array for two visible panels', () => {
-      const result = getVisibleEditors({
+      const result = getVisibleMosaics({
         direction: 'column',
         first: EditorId.main,
         second: EditorId.renderer
@@ -51,7 +51,7 @@ describe('Mosaic Arrangement Utilities', () => {
     });
 
     it('returns the correct array for three visible panels', () => {
-      const result = getVisibleEditors(DEFAULT_MOSAIC_ARRANGEMENT);
+      const result = getVisibleMosaics(DEFAULT_MOSAIC_ARRANGEMENT);
 
       expect(result).toEqual(ALL_EDITORS);
     });

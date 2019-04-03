@@ -10,7 +10,7 @@ export function renderNonIdealState(appState: AppState) {
   const resolveButton = (
     <Button
       text='Open all editors'
-      onClick={() => appState.setVisibleEditors(allEditors)}
+      onClick={() => appState.setVisibleMosaics(allEditors)}
     />
   );
 
