@@ -20,7 +20,7 @@ export function getSubsetOnly(moduleName: string): JSX.Element {
     <p className='bp3-running-text'>
       The following demos display only a subset of what the <code>{moduleName}</code>
       module is capable of. If you want to see its full abilities, check out the
-      documentation on <a onClick={() => shell.openExternal(full)}>{short}</a>.
+      documentation on <a id='open-url' onClick={() => shell.openExternal(full)}>{short}</a>.
     </p>
   );
 }

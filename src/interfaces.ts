@@ -78,3 +78,8 @@ export const ALL_PANELS = [ PanelId.showMe ];
 export const ALL_MOSAICS = [ ...ALL_EDITORS, ...ALL_PANELS ];
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
+
+export const enum DocsDemoPage {
+  DEFAULT = 'DEFAULT',
+  DEMO_APP = 'DEMO_APP'
+}

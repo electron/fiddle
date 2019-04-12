@@ -2,12 +2,13 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
+import { DOCS_DEMO_COMPONENTS } from './show-me/index';
 
 export interface ShowMeProps {
   appState: AppState;
 }
 
-/**
+/**3
  * The root component for "show me" content - the fourth helpful
  * panel.
  *
@@ -17,14 +18,12 @@ export interface ShowMeProps {
 @observer
 export class ShowMe extends React.Component<ShowMeProps, {}> {
   public render() {
-    const { templateName } = this.props.appState;
+    const { currentDocsDemoPage: showMeName } = this.props.appState;
+    const Content = DOCS_DEMO_COMPONENTS[showMeName];
 
     return (
       <div className='show-me-panel'>
-        <h2>What's {templateName}?</h2>
-        <p className='bp3r-running-text'>
-          We're just trying to help.
-        </p>
+        <Content appState={this.props.appState} />
       </div>
     );
   }

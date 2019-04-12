@@ -34,7 +34,7 @@ export const TITLE_MAP: Record<MosaicId, string> = {
   main: 'Main Process',
   renderer: 'Renderer Process',
   html: 'HTML',
-  showMe: 'Docs & Info'
+  showMe: 'Docs & Demos'
 };
 
 export interface EditorsProps {

@@ -3,6 +3,7 @@ import { MosaicNode } from 'react-mosaic-component';
 
 import {
   ALL_MOSAICS,
+  DocsDemoPage,
   EditorId,
   ElectronVersion,
   ElectronVersionSource,
@@ -11,8 +12,7 @@ import {
   NpmVersion,
   OutputEntry,
   OutputOptions,
-  WarningDialogTexts,
-  ALL_PANELS
+  WarningDialogTexts
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -91,6 +91,7 @@ export class AppState {
   @observable public isRunning = false;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
+  @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
 
   // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;

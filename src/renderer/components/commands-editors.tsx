@@ -37,7 +37,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
         </Popover>
         <Button
           icon='help'
-          text='Docs & Info'
+          text='Docs & Demos'
           id={PanelId.showMe}
           onClick={this.onItemClick}
           active={!this.props.appState.closedPanels.showMe}
