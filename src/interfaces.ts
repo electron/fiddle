@@ -68,13 +68,13 @@ export const enum EditorId {
 
 // Panels that can show up as a mosaic
 export const enum PanelId {
-  'showMe' = 'showMe'
+  'docsDemo' = 'docsDemo'
 }
 
 export type MosaicId = EditorId | PanelId;
 
 export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.html ];
-export const ALL_PANELS = [ PanelId.showMe ];
+export const ALL_PANELS = [ PanelId.docsDemo ];
 export const ALL_MOSAICS = [ ...ALL_EDITORS, ...ALL_PANELS ];
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';

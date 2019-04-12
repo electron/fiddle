@@ -7,7 +7,7 @@ import { renderMoreDocumentation } from './more-information';
 import { getSubsetOnly } from './subset-only';
 
 /**
- * Show and hide button examples, only rendererd on macOS
+ * Show and hide button examples, only rendered on macOS
  *
  * @returns {JSX.Element | null}
  */

@@ -19,7 +19,7 @@ export interface ShowMeProps {
 export class ShowMe extends React.Component<ShowMeProps, {}> {
   public render() {
     const { currentDocsDemoPage: showMeName } = this.props.appState;
-    const Content = DOCS_DEMO_COMPONENTS[showMeName];
+    const Content = DOCS_DEMO_COMPONENTS[showMeName] || DOCS_DEMO_COMPONENTS.DEFAULT;
 
     return (
       <div className='show-me-panel'>

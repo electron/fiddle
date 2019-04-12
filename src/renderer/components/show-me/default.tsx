@@ -2,11 +2,11 @@ import { Button, Icon } from '@blueprintjs/core';
 import * as React from 'react';
 
 import { DocsDemoPage } from '../../../interfaces';
-import { AppState, appState } from '../../state';
+import { AppState } from '../../state';
 import { DOCS_DEMO_COMPONENTS, DOCS_DEMO_NAMES } from './index';
 import { renderMoreDocumentation } from './more-information';
 
-export function ShowMeDefault(_props: { appState: AppState }): JSX.Element {
+export function ShowMeDefault(props: { appState: AppState }): JSX.Element {
   const showMeMenu: Array<JSX.Element> = Object.keys(DOCS_DEMO_COMPONENTS)
     .filter((key) => key !== DocsDemoPage.DEFAULT)
     .map((key) => {
@@ -16,7 +16,7 @@ export function ShowMeDefault(_props: { appState: AppState }): JSX.Element {
             minimal={true}
             icon='play'
             text={DOCS_DEMO_NAMES[key]}
-            onClick={() => (appState.currentDocsDemoPage = key as DocsDemoPage)}
+            onClick={() => (props.appState.currentDocsDemoPage = key as DocsDemoPage)}
           />
         </li>
       );

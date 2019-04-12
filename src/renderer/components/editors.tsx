@@ -17,7 +17,7 @@ import { AppState } from '../state';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
-import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { DocsDemoGoHomeButton, MaximizeButton, RemoveButton } from './editors-toolbar-button';
 import { ShowMe } from './show-me';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
@@ -34,7 +34,7 @@ export const TITLE_MAP: Record<MosaicId, string> = {
   main: 'Main Process',
   renderer: 'Renderer Process',
   html: 'HTML',
-  showMe: 'Docs & Demos'
+  docsDemo: 'Docs & Demos'
 };
 
 export interface EditorsProps {
@@ -168,6 +168,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   public renderToolbar(
     { title }: MosaicWindowProps<MosaicId>, id: MosaicId
   ): JSX.Element {
+    const docsDemoGoHomeMaybe = id === PanelId.docsDemo
+      ? <DocsDemoGoHomeButton id={id} appState={this.props.appState} />
+      : null;
+
     return (
       <div>
         {/* Left */}
@@ -180,6 +184,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         <div />
         {/* Right */}
         <div className='mosaic-controls'>
+          {docsDemoGoHomeMaybe}
           <MaximizeButton id={id} appState={this.props.appState} />
           <RemoveButton id={id} appState={this.props.appState} />
         </div>

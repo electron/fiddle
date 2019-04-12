@@ -104,7 +104,7 @@ export class AppState {
 
   // -- Editor Values stored when we close the editor ------------------
   @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
-    showMe: true // Closed by default
+    docsDemo: true // Closed by default
   };
 
   private outputBuffer: string = '';

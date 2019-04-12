@@ -38,9 +38,9 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
         <Button
           icon='help'
           text='Docs & Demos'
-          id={PanelId.showMe}
+          id={PanelId.docsDemo}
           onClick={this.onItemClick}
-          active={!this.props.appState.closedPanels.showMe}
+          active={!this.props.appState.closedPanels.docsDemo}
         />
       </>
     );
