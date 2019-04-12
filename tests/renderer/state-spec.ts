@@ -428,10 +428,10 @@ describe('AppState', () => {
 
     it('removes the backup for a non-editor right away', () => {
       appState.closedPanels = {};
-      appState.closedPanels[PanelId.showMe] = true;
+      appState.closedPanels[PanelId.docsDemo] = true;
       appState.setVisibleMosaics(ALL_MOSAICS);
 
-      expect(appState.closedPanels[PanelId.showMe]).toBeUndefined();
+      expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();
     });
   });
 

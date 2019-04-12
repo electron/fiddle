@@ -5,14 +5,14 @@ describe('Type checks', () => {
   describe('isEditorId()', () => {
     it('works', () => {
       expect(isEditorId(EditorId.html)).toBe(true);
-      expect(isEditorId(PanelId.showMe)).toBe(false);
+      expect(isEditorId(PanelId.docsDemo)).toBe(false);
     });
   });
 
   describe('isPanelId()', () => {
     it('works', () => {
       expect(isPanelId(EditorId.html)).toBe(false);
-      expect(isPanelId(PanelId.showMe)).toBe(true);
+      expect(isPanelId(PanelId.docsDemo)).toBe(true);
     });
   });
 

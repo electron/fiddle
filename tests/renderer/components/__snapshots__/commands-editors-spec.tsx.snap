@@ -63,9 +63,9 @@ exports[`EditorDropdown component renders 1`] = `
   <Blueprint3.Button
     active={true}
     icon="help"
-    id="showMe"
+    id="docsDemo"
     onClick={[Function]}
-    text="Docs & Info"
+    text="Docs & Demos"
   />
 </Fragment>
 `;

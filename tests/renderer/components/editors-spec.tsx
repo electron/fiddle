@@ -2,7 +2,7 @@ import { mount, shallow } from 'enzyme';
 import { observable } from 'mobx';
 import * as React from 'react';
 
-import { ALL_MOSAICS, EditorId } from '../../../src/interfaces';
+import { ALL_MOSAICS, DocsDemoPage, EditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
@@ -35,7 +35,8 @@ describe('Editors component', () => {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       setWarningDialogTexts: () => ({}),
-      mosaicArrangement: createMosaicArrangement(ALL_MOSAICS)
+      mosaicArrangement: createMosaicArrangement(ALL_MOSAICS),
+      currentDocsDemoPage: DocsDemoPage.DEFAULT
     };
 
     monaco = {

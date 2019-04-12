@@ -180,7 +180,7 @@ describe('fetch-types', () => {
 
       setTimeout(() => {
         window.ElectronFiddle.app = app;
-      }, 200);
+      }, 300);
 
       await updateEditorTypeDefinitions('3.0.0');
 

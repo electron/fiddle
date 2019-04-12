@@ -528,7 +528,7 @@ exports[`Editors component renders 1`] = `
     </div>
     <div
       className="mosaic-tile"
-      key="showMe"
+      key="docsDemo"
       style={
         Object {
           "bottom": "0%",
@@ -539,7 +539,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target showMe"
+        className="mosaic-window mosaic-drop-target docsDemo"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -547,13 +547,47 @@ exports[`Editors component renders 1`] = `
           <div>
             <div>
               <h5>
-                Docs & Info
+                Docs & Demos
               </h5>
             </div>
             <div />
             <div
               className="mosaic-controls"
             >
+              <button
+                className="bp3-button bp3-small"
+                onClick={[Function]}
+                onKeyDown={[Function]}
+                onKeyUp={[Function]}
+                type="button"
+              >
+                <span
+                  className="bp3-icon bp3-icon-home"
+                  icon="home"
+                >
+                  <svg
+                    data-icon="home"
+                    height={16}
+                    viewBox="0 0 16 16"
+                    width={16}
+                  >
+                    <desc>
+                      home
+                    </desc>
+                    <path
+                      d="M2 10v5c0 .55.45 1 1 1h3v-5h4v5h3c.55 0 1-.45 1-1v-5L8 4l-6 6zm13.71-2.71L14 5.59V2c0-.55-.45-1-1-1s-1 .45-1 1v1.59L8.71.29C8.53.11 8.28 0 8 0s-.53.11-.71.29l-7 7a1.003 1.003 0 0 0 1.42 1.42L8 2.41l6.29 6.29c.18.19.43.3.71.3a1.003 1.003 0 0 0 .71-1.71z"
+                      fillRule="evenodd"
+                      key="0"
+                    />
+                  </svg>
+                </span>
+                <span
+                  className="bp3-button-text"
+                  key="text"
+                >
+                  Overview
+                </span>
+              </button>
               <button
                 className="bp3-button bp3-small"
                 onClick={[Function]}
@@ -658,7 +692,7 @@ exports[`Editors component renders 1`] = `
                 className="show-me-list"
               >
                 <li
-                  key="App"
+                  key="DEMO_APP"
                 >
                   <button
                     className="bp3-button bp3-minimal"
@@ -691,1033 +725,7 @@ exports[`Editors component renders 1`] = `
                       className="bp3-button-text"
                       key="text"
                     >
-                      App
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="AutoUpdater"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      AutoUpdater
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="BrowserView"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      BrowserView
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="BrowserWindow"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      BrowserWindow
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Clipboard"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Clipboard
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="ContentTracing"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      ContentTracing
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Cookies"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Cookies
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="CrashReporter"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      CrashReporter
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Debugger"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Debugger
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="DesktopCapturer"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      DesktopCapturer
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Dialog"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Dialog
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="GlobalShortcut"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      GlobalShortcut
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="IPC"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      IPC
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Menu"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Menu
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="NativeImage"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      NativeImage
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Net"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Net
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Notification"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Notification
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="PowerMonitor"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      PowerMonitor
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="PowerSaveBlocker"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      PowerSaveBlocker
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Remote"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Remote
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Screen"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Screen
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Session"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Session
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Shell"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Shell
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="SystemPreferences"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      SystemPreferences
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="TouchBar"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      TouchBar
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="Tray"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      Tray
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="WebContents"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      WebContents
-                    </span>
-                  </button>
-                </li>
-                <li
-                  key="WebFrame"
-                >
-                  <button
-                    className="bp3-button bp3-minimal"
-                    onClick={[Function]}
-                    onKeyDown={[Function]}
-                    onKeyUp={[Function]}
-                    type="button"
-                  >
-                    <span
-                      className="bp3-icon bp3-icon-play"
-                      icon="play"
-                    >
-                      <svg
-                        data-icon="play"
-                        height={16}
-                        viewBox="0 0 16 16"
-                        width={16}
-                      >
-                        <desc>
-                          play
-                        </desc>
-                        <path
-                          d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 0 0 5 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
-                          fillRule="evenodd"
-                          key="0"
-                        />
-                      </svg>
-                    </span>
-                    <span
-                      className="bp3-button-text"
-                      key="text"
-                    >
-                      WebFrame
+                      App Demos
                     </span>
                   </button>
                 </li>
@@ -1728,6 +736,7 @@ exports[`Editors component renders 1`] = `
               >
                 For more documentation, visit 
                 <a
+                  id="open-url"
                   onClick={[Function]}
                 >
                   electronjs.org/docs
@@ -1739,6 +748,7 @@ exports[`Editors component renders 1`] = `
               >
                 By the way, Electron Fiddle and the documentation you see here is entirely open source. If you have ideas on how to improve it, we'd love to have your contributions! You can find the repository on 
                 <a
+                  id="open-github"
                   onClick={[Function]}
                 >
                   GitHub
@@ -1764,14 +774,14 @@ exports[`Editors component renders 1`] = `
             <div
               className="mosaic-window-title"
             >
-              Docs & Info
+              Docs & Demos
             </div>
           </div>
           <div
             className="mosaic-window-body"
           >
             <h4>
-              Docs & Info
+              Docs & Demos
             </h4>
             <span
               className="bp3-icon bp3-icon-application"
@@ -1847,6 +857,7 @@ exports[`Editors component renders a toolbar 1`] = `
     <MaximizeButton
       appState={
         Object {
+          "currentDocsDemoPage": "DEFAULT",
           "isSettingsShowing": false,
           "isTokenDialogShowing": false,
           "mosaicArrangement": Object {
@@ -1859,7 +870,7 @@ exports[`Editors component renders a toolbar 1`] = `
             "second": Object {
               "direction": "column",
               "first": "html",
-              "second": "showMe",
+              "second": "docsDemo",
             },
           },
           "setWarningDialogTexts": [Function],
@@ -1870,6 +881,7 @@ exports[`Editors component renders a toolbar 1`] = `
     <RemoveButton
       appState={
         Object {
+          "currentDocsDemoPage": "DEFAULT",
           "isSettingsShowing": false,
           "isTokenDialogShowing": false,
           "mosaicArrangement": Object {
@@ -1882,7 +894,7 @@ exports[`Editors component renders a toolbar 1`] = `
             "second": Object {
               "direction": "column",
               "first": "html",
-              "second": "showMe",
+              "second": "docsDemo",
             },
           },
           "setWarningDialogTexts": [Function],

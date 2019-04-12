@@ -1,4 +1,5 @@
 import { App } from '../../src/renderer/app';
+import { EditorBackup } from '../../src/utils/editor-backup';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
 
@@ -113,7 +114,7 @@ describe('Editors component', () => {
         renderer: 'renderer-value'
       });
 
-      expect(app.state.closedPanels.main!.model!.setValue)
+      expect((app.state.closedPanels.main as EditorBackup)!.model!.setValue)
         .toHaveBeenCalledWith('main-value');
 
       window.ElectronFiddle.editors.main = oldMainEditor;
