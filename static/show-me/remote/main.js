@@ -13,7 +13,7 @@ app.on('ready', () => {
     width: 600,
     webPreferences: {
       nodeIntegration: true
-    } 
+    }
   })
   mainWindow.loadFile('index.html')
 })
