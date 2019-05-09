@@ -10,12 +10,12 @@ const { app, BrowserWindow, ipcMain } = require('electron')
 let mainWindow = null
 
 app.on('ready', () => {
-  mainWindow = new BrowserWindow({ 
+  mainWindow = new BrowserWindow({
     height: 600,
     width: 600,
     webPreferences: {
       nodeIntegration: true
-    } 
+    }
   })
 
   ipcMain.on('asynchronous-message', (event, arg) => {
