@@ -17,12 +17,12 @@ app.on('ready', () => {
   const primaryDisplay = screen.getPrimaryDisplay()
   const { width, height } = primaryDisplay.workAreaSize
 
-  mainWindow = new BrowserWindow({ 
+  mainWindow = new BrowserWindow({
     width,
     height,
     webPreferences: {
       nodeIntegration: true
-    } 
+    }
   })
 
   mainWindow.loadFile('index.html')
