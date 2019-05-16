@@ -15,7 +15,7 @@ exports[`EditorDropdown component renders 1`] = `
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="Main Process"
+          text="Main Process (main.js)"
         />
         <Blueprint3.MenuItem
           disabled={false}
@@ -25,7 +25,7 @@ exports[`EditorDropdown component renders 1`] = `
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="Renderer Process"
+          text="Renderer Process (renderer.js)"
         />
         <Blueprint3.MenuItem
           disabled={false}
@@ -35,7 +35,7 @@ exports[`EditorDropdown component renders 1`] = `
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="HTML"
+          text="HTML (index.html)"
         />
       </Blueprint3.Menu>
     }

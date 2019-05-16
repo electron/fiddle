@@ -28,7 +28,7 @@ exports[`Editors component renders 1`] = `
           <div>
             <div>
               <h5>
-                Main Process
+                Main Process (main.js)
               </h5>
             </div>
             <div />
@@ -115,14 +115,14 @@ exports[`Editors component renders 1`] = `
             <div
               className="mosaic-window-title"
             >
-              Main Process
+              Main Process (main.js)
             </div>
           </div>
           <div
             className="mosaic-window-body"
           >
             <h4>
-              Main Process
+              Main Process (main.js)
             </h4>
             <span
               className="bp3-icon bp3-icon-application"
@@ -201,7 +201,7 @@ exports[`Editors component renders 1`] = `
           <div>
             <div>
               <h5>
-                Renderer Process
+                Renderer Process (renderer.js)
               </h5>
             </div>
             <div />
@@ -288,14 +288,14 @@ exports[`Editors component renders 1`] = `
             <div
               className="mosaic-window-title"
             >
-              Renderer Process
+              Renderer Process (renderer.js)
             </div>
           </div>
           <div
             className="mosaic-window-body"
           >
             <h4>
-              Renderer Process
+              Renderer Process (renderer.js)
             </h4>
             <span
               className="bp3-icon bp3-icon-application"
@@ -374,7 +374,7 @@ exports[`Editors component renders 1`] = `
           <div>
             <div>
               <h5>
-                HTML
+                HTML (index.html)
               </h5>
             </div>
             <div />
@@ -461,14 +461,14 @@ exports[`Editors component renders 1`] = `
             <div
               className="mosaic-window-title"
             >
-              HTML
+              HTML (index.html)
             </div>
           </div>
           <div
             className="mosaic-window-body"
           >
             <h4>
-              HTML
+              HTML (index.html)
             </h4>
             <span
               className="bp3-icon bp3-icon-application"
@@ -847,7 +847,7 @@ exports[`Editors component renders a toolbar 1`] = `
 <div>
   <div>
     <h5>
-      Main Process
+      Main Process (main.js)
     </h5>
   </div>
   <div />
