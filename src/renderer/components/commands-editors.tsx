@@ -35,14 +35,24 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
         <Popover content={this.renderMenu()} position={Position.BOTTOM}>
           <Button icon='applications' text='Editors' />
         </Popover>
-        <Button
-          icon='help'
-          text='Docs & Demos'
-          id={PanelId.docsDemo}
-          onClick={this.onItemClick}
-          active={!this.props.appState.closedPanels.docsDemo}
-        />
+        {this.renderDocsDemos()}
       </>
+    );
+  }
+
+  public renderDocsDemos() {
+    if (!process.env.FIDDLE_DOCS_DEMOS) {
+      return null;
+    }
+
+    return (
+      <Button
+        icon='help'
+        text='Docs & Demos'
+        id={PanelId.docsDemo}
+        onClick={this.onItemClick}
+        active={!this.props.appState.closedPanels.docsDemo}
+      />
     );
   }
 

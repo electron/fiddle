@@ -91,6 +91,7 @@ export function ShowMeApp(_props: any): JSX.Element {
           app again.
         </p>
         <Button
+          id='focus'
           icon='lightbulb'
           text={`Focus Electron Fiddle${secondsLeft > 0 ? ` in ${secondsLeft}s` : ''}`}
           onClick={playFocus}
@@ -106,6 +107,7 @@ export function ShowMeApp(_props: any): JSX.Element {
           can help. The button queries the operating system for some of them.
         </p>
         <Button
+          id='special-paths'
           icon='play'
           text={`Get special directory paths`}
           onClick={playPaths}
@@ -124,6 +126,7 @@ export function ShowMeApp(_props: any): JSX.Element {
           A good example are process metrics.
         </p>
         <Button
+          id='process-metrics'
           icon='play'
           text={`Get process metrics`}
           onClick={playMetrics}

@@ -102,6 +102,7 @@ const app = {
     if (name === 'home') return `~`;
     return '/test-path';
   },
+  focus: jest.fn(),
   quit: jest.fn(),
   relaunch: jest.fn(),
   setJumpList: jest.fn(),
