@@ -14,7 +14,7 @@ install:
         $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_P12)
         [IO.File]::WriteAllBytes($filename, $bytes)
       }
-  - ps: Install-Product node $env:nodejs_version x64
+  - ps: Install-Product node $env:nodejs_version
   - node --version
   - npm ci
 
