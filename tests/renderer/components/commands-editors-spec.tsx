@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { EditorId } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
-import { getVisibleEditors } from '../../../src/utils/editors-mosaic-arrangement';
+import { getVisibleMosaics } from '../../../src/utils/editors-mosaic-arrangement';
 
 jest.mock('../../../src/utils/editors-mosaic-arrangement');
 
@@ -11,15 +11,25 @@ describe('EditorDropdown component', () => {
   let store: any;
 
   beforeEach(() => {
+    (process.env as any).FIDDLE_DOCS_DEMOS = false;
+
     store = {
-      hideAndBackupEditor: jest.fn(),
-      showEditor: jest.fn()
+      hideAndBackupMosaic: jest.fn(),
+      showMosaic: jest.fn(),
+      closedPanels: {}
     };
 
-    (getVisibleEditors as jest.Mock).mockReturnValue([ EditorId.html, EditorId.renderer ]);
+    (getVisibleMosaics as jest.Mock).mockReturnValue([ EditorId.html, EditorId.renderer ]);
   });
 
   it('renders', () => {
+    const wrapper = shallow(<EditorDropdown appState={store} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the extra button if the FIDDLE_DOCS_DEMOS is set', () => {
+    (process.env as any).FIDDLE_DOCS_DEMOS = true;
+
     const wrapper = shallow(<EditorDropdown appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -29,11 +39,11 @@ describe('EditorDropdown component', () => {
     const dropdown = wrapper.instance() as EditorDropdown;
 
     dropdown.onItemClick({ currentTarget: { id: EditorId.html } } as any);
-    expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);
-    expect(store.showEditor).toHaveBeenCalledTimes(0);
+    expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+    expect(store.showMosaic).toHaveBeenCalledTimes(0);
 
     dropdown.onItemClick({ currentTarget: { id: EditorId.main } } as any);
-    expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);
-    expect(store.showEditor).toHaveBeenCalledTimes(1);
+    expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+    expect(store.showMosaic).toHaveBeenCalledTimes(1);
   });
 });

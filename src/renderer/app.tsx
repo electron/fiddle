@@ -5,6 +5,7 @@ import { ALL_EDITORS, EditorId, EditorValues } from '../interfaces';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
+import { isEditorBackup } from '../utils/type-checks';
 import { FileManager } from './file-manager';
 import { Runner } from './runner';
 import { appState } from './state';
@@ -52,9 +53,9 @@ export class App {
 
     for (const name of ALL_EDITORS) {
       const editor = fiddle.editors[name];
-      const backup = this.state.closedEditors[name];
+      const backup = this.state.closedPanels[name];
 
-      if (backup && backup.model && values[name]) {
+      if (isEditorBackup(backup) && backup.model && values[name]) {
         // The editor does not exist, attempt to set it on the backup
         backup.model.setValue(values[name]!);
       } else if (editor && editor.setValue && values[name]) {

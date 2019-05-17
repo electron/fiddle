@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSubsetOnly() renders 1`] = `
+<p
+  className="bp3-running-text"
+>
+  The following demos display only a subset of what the 
+  <code>
+    app
+  </code>
+  module is capable of. If you want to see its full abilities, check out the documentation on 
+  <a
+    id="open-url"
+    onClick={[Function]}
+  >
+    electronjs.org/docs/api/app
+  </a>
+  .
+</p>
+`;

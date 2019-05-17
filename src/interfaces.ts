@@ -32,6 +32,12 @@ export interface ElectronVersion extends NpmVersion {
   source: ElectronVersionSource;
 }
 
+export interface SetFiddleOptions {
+  values: EditorValues;
+  filePath?: string;
+  templateName?: string;
+}
+
 export interface OutputEntry {
   text: string;
   timestamp: number;
@@ -53,12 +59,27 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
+// Editors
 export const enum EditorId {
   'main' = 'main',
   'renderer' = 'renderer',
   'html' = 'html'
 }
 
+// Panels that can show up as a mosaic
+export const enum PanelId {
+  'docsDemo' = 'docsDemo'
+}
+
+export type MosaicId = EditorId | PanelId;
+
 export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.html ];
+export const ALL_PANELS = [ PanelId.docsDemo ];
+export const ALL_MOSAICS = [ ...ALL_EDITORS, ...ALL_PANELS ];
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
+
+export const enum DocsDemoPage {
+  DEFAULT = 'DEFAULT',
+  DEMO_APP = 'DEMO_APP'
+}

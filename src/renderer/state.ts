@@ -2,10 +2,13 @@ import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
+  ALL_MOSAICS,
+  DocsDemoPage,
   EditorId,
   ElectronVersion,
   ElectronVersionSource,
   ElectronVersionState,
+  MosaicId,
   NpmVersion,
   OutputEntry,
   OutputOptions,
@@ -14,9 +17,10 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import { createMosaicArrangement, getVisibleEditors } from '../utils/editors-mosaic-arrangement';
+import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
+import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
@@ -80,12 +84,14 @@ export class AppState {
   @observable public isMyGist: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
-  @observable public localPath: string | null = null;
+  @observable public localPath: string | undefined;
   @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public isRunning = false;
-  @observable public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public templateName: string | undefined;
+  @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
 
   // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;
@@ -97,7 +103,9 @@ export class AppState {
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedEditors: Partial<Record<EditorId, EditorBackup>> = {};
+  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
+    docsDemo: true // Closed by default
+  };
 
   private outputBuffer: string = '';
   private name: string;
@@ -466,48 +474,57 @@ export class AppState {
    * @param {EditorId} id
    */
   @action public getAndRemoveEditorValueBackup(id: EditorId): EditorBackup | null {
-    const value = this.closedEditors[id];
+    const value = this.closedPanels[id];
 
-    if (value) {
-      delete this.closedEditors[id];
+    if (isEditorBackup(value)) {
+      delete this.closedPanels[id];
       return value;
     }
 
     return null;
   }
 
-  @action public setVisibleEditors(visible: Array<EditorId>) {
-    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
+  @action public setVisibleMosaics(visible: Array<MosaicId>) {
+    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
-    for (const id of [ EditorId.main, EditorId.html, EditorId.renderer ]) {
+    for (const id of ALL_MOSAICS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedEditors[id] = getEditorBackup(id);
+        this.closedPanels[id] = isEditorId(id)
+          ? getEditorBackup(id)
+          : true;
+      }
+
+      // Remove the backup for panels now. Editors will remove their
+      // backup once the data has been loaded.
+      if (isPanelId(id) && visible.includes(id) && !currentlyVisible.includes(id)) {
+        delete this.closedPanels[id];
       }
     }
 
-    this.mosaicArrangement = createMosaicArrangement(visible);
+    const updatedArrangement = createMosaicArrangement(visible);
+    console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
+
+    this.mosaicArrangement = updatedArrangement;
   }
 
   /**
-   * Hides the editor for a given editor.
+   * Hides the panel for a given MosaicId.
    *
-   * @param {EditorId} id
+   * @param {MosaicId} id
    */
-  @action public hideAndBackupEditor(id: EditorId) {
-    this.closedEditors[id] = getEditorBackup(id);
-
-    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
-    this.setVisibleEditors(currentlyVisible.filter((v) => v !== id));
+  @action public hideAndBackupMosaic(id: MosaicId) {
+    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
+    this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
   }
 
   /**
    * Shows the editor value for a given editor.
    *
-   * @param {EditorId} id
+   * @param {MosaicId} id
    */
-  @action public showEditor(id: EditorId) {
-    const currentlyVisible = getVisibleEditors(this.mosaicArrangement);
-    this.setVisibleEditors([ ...currentlyVisible, id ]);
+  @action public showMosaic(id: MosaicId) {
+    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
+    this.setVisibleMosaics([ ...currentlyVisible, id ]);
   }
 
   /**

@@ -30,7 +30,7 @@ describe('Editor toolbar button component', () => {
     };
 
     store = {
-      hideAndBackupEditor: jest.fn()
+      hideAndBackupMosaic: jest.fn()
     };
   });
 
@@ -67,7 +67,7 @@ describe('Editor toolbar button component', () => {
       });      const instance: RemoveButton = wrapper.instance() as any;
 
       instance.remove();
-      expect(store.hideAndBackupEditor).toHaveBeenCalledTimes(1);
+      expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     });
   });
 });

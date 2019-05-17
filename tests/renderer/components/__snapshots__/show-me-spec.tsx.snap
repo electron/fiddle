@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ShowMe component renders 1`] = `
+<div
+  className="show-me-panel"
+>
+  <ShowMeDefault
+    appState={Object {}}
+  />
+</div>
+`;
+
+exports[`ShowMe component renders a template spec 1`] = `
+<div
+  className="show-me-panel"
+>
+  <ShowMeDefault
+    appState={
+      Object {
+        "templateName": "app",
+      }
+    }
+  />
+</div>
+`;

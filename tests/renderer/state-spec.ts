@@ -1,9 +1,10 @@
-import { EditorId, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, PanelId } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
+import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -406,50 +407,58 @@ describe('AppState', () => {
     });
 
     it('returns and deletes a backup if there is one', () => {
-      appState.closedEditors[EditorId.main] = { testBackup: true } as any;
+      appState.closedPanels[EditorId.main] = { testBackup: true } as any;
       const result = appState.getAndRemoveEditorValueBackup(EditorId.main);
       expect(result).toEqual({ testBackup: true });
-      expect(appState.closedEditors[EditorId.main]).toBeUndefined();
+      expect(appState.closedPanels[EditorId.main]).toBeUndefined();
     });
   });
 
-  describe('setVisibleEditors()', () => {
+  describe('setVisibleMosaics()', () => {
     it('updates the visible editors and creates a backup', () => {
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
-      appState.closedEditors = {};
-      appState.setVisibleEditors([ EditorId.main ]);
+      appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
+      appState.closedPanels = {};
+      appState.setVisibleMosaics([ EditorId.main ]);
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
-      expect(appState.closedEditors[EditorId.renderer]).toBeTruthy();
-      expect(appState.closedEditors[EditorId.html]).toBeTruthy();
-      expect(appState.closedEditors[EditorId.main]).toBeUndefined();
+      expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();
+      expect(appState.closedPanels[EditorId.html]).toBeTruthy();
+      expect(appState.closedPanels[EditorId.main]).toBeUndefined();
+    });
+
+    it('removes the backup for a non-editor right away', () => {
+      appState.closedPanels = {};
+      appState.closedPanels[PanelId.docsDemo] = true;
+      appState.setVisibleMosaics(ALL_MOSAICS);
+
+      expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();
     });
   });
 
-  describe('hideAndBackupEditor()', () => {
+  describe('hideAndBackupMosaic()', () => {
     it('hides a given editor and creates a backup', () => {
       appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
-      appState.closedEditors = {};
-      appState.hideAndBackupEditor(EditorId.main);
+      appState.closedPanels = {};
+      appState.hideAndBackupMosaic(EditorId.main);
 
       expect(appState.mosaicArrangement).toEqual({
-        direction: 'column',
+        direction: 'row',
         first: EditorId.renderer,
         second: EditorId.html
       });
-      expect(appState.closedEditors[EditorId.main]).toBeTruthy();
-      expect(appState.closedEditors[EditorId.renderer]).toBeUndefined();
-      expect(appState.closedEditors[EditorId.html]).toBeUndefined();
+      expect(appState.closedPanels[EditorId.main]).toBeTruthy();
+      expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
+      expect(appState.closedPanels[EditorId.html]).toBeUndefined();
     });
   });
 
-  describe('showEditor()', () => {
+  describe('showMosaic()', () => {
     it('shows a given editor', () => {
       appState.mosaicArrangement = EditorId.main;
-      appState.showEditor(EditorId.html);
+      appState.showMosaic(EditorId.html);
 
       expect(appState.mosaicArrangement).toEqual({
-        direction: 'column',
+        direction: 'row',
         first: EditorId.main,
         second: EditorId.html
       });

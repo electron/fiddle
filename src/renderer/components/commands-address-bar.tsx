@@ -110,7 +110,8 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
 
       document.title = getTitle(appState);
       appState.gistId = gistId;
-      appState.localPath = null;
+      appState.localPath = undefined;
+      appState.templateName = undefined;
     } catch (error) {
       appState.setWarningDialogTexts({
         label: `Loading the fiddle failed: ${error}`,
