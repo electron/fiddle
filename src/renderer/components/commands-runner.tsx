@@ -48,6 +48,6 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
       props.icon = <Spinner size={16} />;
     }
 
-    return <Button {...props} />;
+    return <Button {...props} type={undefined} />;
   }
 }
