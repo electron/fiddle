@@ -20,7 +20,8 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
     webPreferences: {
-      webviewTag: false
+      webviewTag: false,
+      nodeIntegration: true
     }
   };
 }

@@ -12,6 +12,7 @@ exports[`AddVersionDialog component renders 1`] = `
     className="bp3-dialog-body"
   >
     <Blueprint3.FileInput
+      hasSelection={false}
       id="custom-electron-version"
       inputProps={
         Object {
@@ -74,6 +75,7 @@ exports[`AddVersionDialog component renders 2`] = `
     className="bp3-dialog-body"
   >
     <Blueprint3.FileInput
+      hasSelection={false}
       id="custom-electron-version"
       inputProps={
         Object {

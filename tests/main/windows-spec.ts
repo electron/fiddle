@@ -7,6 +7,14 @@ import { overridePlatform, resetPlatform } from '../utils';
 jest.mock('../../src/main/context-menu');
 
 describe('windows', () => {
+  beforeAll(() => {
+    overridePlatform('win32');
+  });
+
+  afterAll(() => {
+    resetPlatform();
+  });
+
   describe('getMainWindowOptions()', () => {
     const expectedBase = {
       width: 1200,
@@ -16,7 +24,8 @@ describe('windows', () => {
       acceptFirstMouse: true,
       backgroundColor: '#1d2427',
       webPreferences: {
-        webviewTag: false
+        webviewTag: false,
+        nodeIntegration: true
       }
     };
 

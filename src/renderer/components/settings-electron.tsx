@@ -401,6 +401,6 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       buttonProps.onClick = () => appState.downloadVersion(key);
     }
 
-    return <Button {...buttonProps} />;
+    return <Button {...buttonProps} type={undefined} />;
   }
 }
