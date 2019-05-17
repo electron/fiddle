@@ -60,5 +60,82 @@ exports[`EditorDropdown component renders 1`] = `
       text="Editors"
     />
   </Blueprint3.Popover>
+  <Blueprint3.Button
+    active={true}
+    icon="help"
+    id="docsDemo"
+    onClick={[Function]}
+    text="Docs & Demos"
+  />
+</Fragment>
+`;
+
+exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DEMOS is set 1`] = `
+<Fragment>
+  <Blueprint3.Popover
+    boundary="scrollParent"
+    captureDismiss={false}
+    content={
+      <Blueprint3.Menu>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-off"
+          id="main"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Main Process (main.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="renderer"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Renderer Process (renderer.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="html"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="HTML (index.html)"
+        />
+      </Blueprint3.Menu>
+    }
+    defaultIsOpen={false}
+    disabled={false}
+    hasBackdrop={false}
+    hoverCloseDelay={300}
+    hoverOpenDelay={150}
+    inheritDarkTheme={true}
+    interactionKind="click"
+    minimal={false}
+    modifiers={Object {}}
+    openOnTargetFocus={true}
+    position="bottom"
+    targetTagName="span"
+    transitionDuration={300}
+    usePortal={true}
+    wrapperTagName="span"
+  >
+    <Blueprint3.Button
+      icon="applications"
+      text="Editors"
+    />
+  </Blueprint3.Popover>
+  <Blueprint3.Button
+    active={true}
+    icon="help"
+    id="docsDemo"
+    onClick={[Function]}
+    text="Docs & Demos"
+  />
 </Fragment>
 `;

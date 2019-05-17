@@ -86,12 +86,14 @@ function CreateWindowStub() {
 const app = {
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
+  hide: jest.fn(),
+  show: jest.fn(),
   isDefaultProtocolClient: jest.fn().mockReturnValue(true),
   setAsDefaultProtocolClient: jest.fn(),
   isReady: jest.fn().mockReturnValue(true),
   isInApplicationsFolder: jest.fn().mockReturnValue(true),
   moveToApplicationsFolder: jest.fn(),
-  getAppMetrics: jest.fn(),
+  getAppMetrics: jest.fn().mockReturnValue({ metrics: 123 }),
   getGPUFeatureStatus: jest.fn(),
   getJumpListSettings: jest.fn(() => ({
     removedItems: []

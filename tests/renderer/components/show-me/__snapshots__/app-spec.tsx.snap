@@ -128,6 +128,7 @@ Array [
       </p>,
       <button
         className="bp3-button"
+        id="show-hide"
         onClick={[Function]}
         onKeyDown={[Function]}
         onKeyUp={[Function]}
@@ -228,7 +229,9 @@ Array [
         Get special directory paths
       </span>
     </button>
-    <pre />
+    <pre
+      id="special-paths-content"
+    />
   </div>,
   <div
     className="bp3-callout bp3-callout-icon"
@@ -300,7 +303,9 @@ Array [
         Get process metrics
       </span>
     </button>
-    <pre />
+    <pre
+      id="process-metrics-content"
+    />
   </div>,
   <br />,
   <p

@@ -11,6 +11,8 @@ describe('EditorDropdown component', () => {
   let store: any;
 
   beforeEach(() => {
+    (process.env as any).FIDDLE_DOCS_DEMOS = false;
+
     store = {
       hideAndBackupMosaic: jest.fn(),
       showMosaic: jest.fn(),
@@ -21,6 +23,13 @@ describe('EditorDropdown component', () => {
   });
 
   it('renders', () => {
+    const wrapper = shallow(<EditorDropdown appState={store} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the extra button if the FIDDLE_DOCS_DEMOS is set', () => {
+    (process.env as any).FIDDLE_DOCS_DEMOS = true;
+
     const wrapper = shallow(<EditorDropdown appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });

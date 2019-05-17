@@ -26,6 +26,7 @@ function ShowHide() {
     <>
       <p>This button hides Electron Fiddle right away, showing it again in two seconds.</p>
       <Button
+        id='show-hide'
         icon='eye-off'
         text='Hide Electron Fiddle'
         onClick={onClick}
@@ -33,9 +34,9 @@ function ShowHide() {
     </>
   );
 }
-
 export function ShowMeApp(_props: any): JSX.Element {
   const [ secondsLeft, setSeconds ] = React.useState(-1);
+
   const playFocus = () => {
     setSeconds(3);
     setTimeout(() => setSeconds(2), 1000);
@@ -112,7 +113,7 @@ export function ShowMeApp(_props: any): JSX.Element {
           text={`Get special directory paths`}
           onClick={playPaths}
         />
-        <pre>
+        <pre id='special-paths-content'>
           {paths}
         </pre>
       </Callout>
@@ -131,7 +132,7 @@ export function ShowMeApp(_props: any): JSX.Element {
           text={`Get process metrics`}
           onClick={playMetrics}
         />
-        <pre>
+        <pre id='process-metrics-content'>
           {metrics}
         </pre>
       </Callout>
