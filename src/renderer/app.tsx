@@ -1,7 +1,9 @@
 import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
+import { ipcRenderer } from 'electron';
 import { ALL_EDITORS, EditorId, EditorValues } from '../interfaces';
+import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
@@ -120,6 +122,8 @@ export class App {
     const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
+
+    ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
     // Todo: A timer here is terrible. Let's fix this
     // and ensure we actually do it once Editors have mounted.

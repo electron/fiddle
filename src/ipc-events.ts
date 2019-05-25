@@ -42,3 +42,5 @@ export const ipcRendererEvents = [
   IpcEvents.FS_SAVE_FIDDLE_GIST,
   IpcEvents.SHOW_WELCOME_TOUR
 ];
+
+export const WEBCONTENTS_READY_FOR_IPC_SIGNAL = 'WEBCONTENTS_READY_FOR_IPC_SIGNAL';

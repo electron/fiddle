@@ -55,6 +55,7 @@ describe('files', () => {
       };
 
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await cb('/my/fake/path');
       expect(mockTarget.webContents.send).toHaveBeenCalledTimes(1);
@@ -118,6 +119,7 @@ describe('files', () => {
       (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => true);
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await cb('/my/fake/path');
       expect(dialog.showMessageBox).toHaveBeenCalled();
@@ -138,6 +140,7 @@ describe('files', () => {
       (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => false);
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await cb('/my/fake/path');
       expect(dialog.showMessageBox).toHaveBeenCalled();

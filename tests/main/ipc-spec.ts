@@ -30,6 +30,7 @@ describe('IpcMainManager', () => {
       };
 
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
 
@@ -42,9 +43,23 @@ describe('IpcMainManager', () => {
       };
 
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
+      ipcMainManager.readyWebContents.add(mockTarget as any);
+
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget as any);
 
       expect(mockTarget.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
+    });
+
+    it('does not send an event to a target window if it is not ready', () => {
+      const mockTarget = {
+        send: jest.fn()
+      };
+
+      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
+
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget as any);
+
+      expect(mockTarget.send).toHaveBeenCalledTimes(0);
     });
   });
 });
