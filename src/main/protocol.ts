@@ -16,17 +16,38 @@ const handlePotentialProtocolLaunch = (url: string) => {
   }
 
   const parsed = nodeUrl.parse(url.replace(/\/$/, ''));
-  if (!parsed.pathname) return;
+  if (!parsed.pathname || !parsed.hostname) return;
 
-  const pathParts = parsed.pathname.split('/');
-  if (pathParts.length <= 0 || pathParts.length > 2) return;
-
-  ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [parsed.pathname]);
+  const pathParts = parsed.pathname.split('/').slice(1);
+  if (pathParts.length === 0) return;
+  switch (parsed.hostname) {
+    case 'gist':
+      if (pathParts.length === 1) {
+        // We only have a gist ID
+        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [{
+          id: pathParts[0],
+        }]);
+      } else if (pathParts.length === 2) {
+        // We have a gist owner and gist ID, we can ignore the owner
+        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [{
+          id: pathParts[1],
+        }]);
+      } else {
+        // This is a super invalid gist launch
+        return;
+      }
+      break;
+    case 'electron':
+      break;
+    default:
+      return;
+  }
 };
 
 export const scanArgv = (argv: Array<string>) => {
   const protocolArg = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
   if (protocolArg) {
+    console.info('Found protocol arg in argv:', protocolArg);
     handlePotentialProtocolLaunch(protocolArg);
   }
 };

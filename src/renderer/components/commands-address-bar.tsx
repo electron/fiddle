@@ -1,13 +1,15 @@
 import { Button, InputGroup, Intent } from '@blueprintjs/core';
 import classnames from 'classnames';
-import { reaction } from 'mobx';
+import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { IpcEvents } from '../../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
 import { getTitle } from '../../utils/get-title';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';
+import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 export interface AddressBarProps {
@@ -24,6 +26,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     super(props);
 
     this.loadFiddle = this.loadFiddle.bind(this);
+    this.loadFiddleFromIpc = this.loadFiddleFromIpc.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.submit = this.submit.bind(this);
@@ -64,6 +67,24 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       () => this.props.appState.gistId,
       (gistId: string) => this.setState({ value: urlFromId(gistId) })
     );
+    ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromIpc);
+  }
+
+  public componentWillUnmount() {
+    ipcRendererManager.removeListener(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromIpc);
+  }
+
+  public async loadFiddleFromIpc(_: any, gistInfo: { id: string }) {
+    const { appState } = this.props;
+    appState.setWarningDialogTexts({
+      label: 'Are you sure you sure you want to load this gist? Only load and run it if you trust the source'
+    });
+    appState.isWarningDialogShowing = true;
+    await when(() => !appState.isWarningDialogShowing);
+
+    if (appState.warningDialogLastResult) {
+      this.loadFiddle(gistInfo.id);
+    }
   }
 
   /**

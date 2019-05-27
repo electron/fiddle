@@ -41,8 +41,20 @@ describe('protocol', () => {
 
       const handler = (app.on as any).mock.calls[0][1];
 
-      handler({}, 'electron-fiddle://hello/hi');
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, ['/hi']);
+      handler({}, 'electron-fiddle://gist/hi');
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi' }]);
+    });
+
+    it('handles a Fiddle url with a username (open-url)', () => {
+      overridePlatform('darwin');
+      (app.isReady as any).mockReturnValue(true);
+
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[0][1];
+
+      handler({}, 'electron-fiddle://gist/username/gistID');
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'gistID' }]);
     });
 
     it('handles a non-fiddle url (open-url)', () => {
@@ -54,19 +66,19 @@ describe('protocol', () => {
       const handler = (app.on as any).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://noop');
-      handler({}, 'electron-fiddle://noop/noop/noop');
+      handler({}, 'electron-fiddle://gist/noop/noop/null');
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
     });
 
     it('handles a Fiddle url (argv)', () => {
       overridePlatform('win32');
 
-      process.argv = ['electron-fiddle://hello/hi'];
+      process.argv = ['electron-fiddle://gist/hi-arg'];
       (app.isReady as any).mockReturnValue(true);
 
       listenForProtocolHandler();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, ['/hi']);
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-arg' }]);
     });
 
     it('waits for the app to be ready', () => {
@@ -76,7 +88,7 @@ describe('protocol', () => {
       listenForProtocolHandler();
 
       const handler = (app.on as any).mock.calls[0][1];
-      handler({}, 'electron-fiddle://hello/hi');
+      handler({}, 'electron-fiddle://gist/hi-ready');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
       expect(app.once).toHaveBeenCalled();
@@ -86,7 +98,7 @@ describe('protocol', () => {
 
       cb();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, ['/hi']);
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-ready' }]);
     });
   });
 });
