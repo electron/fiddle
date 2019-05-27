@@ -38,6 +38,17 @@ const handlePotentialProtocolLaunch = (url: string) => {
       }
       break;
     case 'electron':
+      if (pathParts.length > 1) {
+        // First part of the commit HASH / ref / branch
+        // Rest is the path to the example
+        ipcMainManager.send(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [{
+          ref: pathParts[0],
+          path: pathParts.slice(1).join('/'),
+        }]);
+      } else {
+        // This is an invalid electron launch
+        return;
+      }
       break;
     default:
       return;
