@@ -4,9 +4,14 @@ import { main, onBeforeQuit, onReady, onWindowsAllClosed } from '../../src/main/
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
+import { setupAboutPanel } from '../../src/utils/set-about-panel';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn()
+}));
+
+jest.mock('../../src/utils/set-about-panel', () => ({
+  setupAboutPanel: jest.fn()
 }));
 
 jest.mock('../../src/main/update', () => ({
@@ -65,6 +70,7 @@ describe('main', () => {
     it('opens a BrowserWindow, sets up updates', async () => {
       await onReady();
 
+      expect(setupAboutPanel).toHaveBeenCalledTimes(1);
       expect(getOrCreateMainWindow).toHaveBeenCalledTimes(1);
       expect(setupUpdates).toHaveBeenCalledTimes(1);
     });
