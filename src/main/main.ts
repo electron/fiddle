@@ -1,6 +1,7 @@
 import { app } from 'electron';
 
 import { isDevMode } from '../utils/devmode';
+import { setupAboutPanel } from '../utils/set-about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
@@ -18,6 +19,7 @@ export async function onReady() {
   if (!isDevMode()) process.env.NODE_ENV = 'production';
 
   getOrCreateMainWindow();
+  setupAboutPanel();
 
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
