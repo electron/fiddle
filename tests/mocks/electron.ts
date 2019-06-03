@@ -79,8 +79,16 @@ function CreateWindowStub() {
     setIgnoreMouseEvents: jest.fn(),
     setTitle: jest.fn(),
     reload: jest.fn(),
-    isDestroyed: jest.fn(() => false)
+    isDestroyed: jest.fn(() => false),
+    setTouchBar: jest.fn()
   };
+}
+
+class MockTouchBar {
+  public static TouchBarButton = jest.fn();
+  public static TouchBarScrubber = jest.fn();
+  public static TouchBarSpacer = jest.fn();
+  public static TouchBarLabel = jest.fn();
 }
 
 const app = {
@@ -196,6 +204,7 @@ const electronMock = {
     },
     shell,
     require: jest.fn(),
+    TouchBar: MockTouchBar,
     systemPreferences,
   },
   require: jest.fn(),
@@ -203,6 +212,7 @@ const electronMock = {
   session,
   shell,
   systemPreferences,
+  TouchBar: MockTouchBar,
   webContents: MockWebContents
 };
 
