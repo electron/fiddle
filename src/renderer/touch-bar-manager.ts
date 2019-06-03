@@ -7,6 +7,7 @@ import { autorun } from 'mobx';
 
 import { ElectronVersion, ElectronVersionState } from '../interfaces';
 import { getNiceGreeting } from '../utils/nice-greeting';
+import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { AppState } from './state';
 
 const { TouchBar } = remote;
@@ -57,6 +58,7 @@ export class TouchBarManager {
     this.selectVersion = this.selectVersion.bind(this);
     this.updateStartStopBtn = this.updateStartStopBtn.bind(this);
     this.updateVersionSelectorItems = this.updateVersionSelectorItems.bind(this);
+    this.updateVersionButton = this.updateVersionButton.bind(this);
 
     this.startStopBtn = new TouchBarButton(this.getStartStopButtonOptions());
     this.consoleBtn = new TouchBarButton(this.getConsoleButtonOptions());
@@ -83,6 +85,7 @@ export class TouchBarManager {
 
     autorun(this.updateStartStopBtn);
     autorun(this.updateVersionSelectorItems);
+    autorun(this.updateVersionButton);
   }
 
   /**
@@ -101,15 +104,18 @@ export class TouchBarManager {
     this.versionSelector.items = this.getVersions();
   }
 
+  /**
+   * Whenever the Electron version changes, update the version button
+   */
+  public updateVersionButton() {
+    const { label } = this.getVersionButtonOptions();
+    this.versionSelectorBtn.label = label!;
+  }
+
   public getVersions() {
-    return Object
-      .entries(this.appState.versions || {})
-      .map(([ key, version ]) => {
-        return {
-          label: `${getItemIcon(version)} ${key}`,
-        };
-      })
-      .reverse();
+    return sortedElectronMap(this.appState.versions || {}, (key, version) => ({
+      label: `${getItemIcon(version)} ${key}`,
+    }));
   }
 
   /**
@@ -270,9 +276,7 @@ export class TouchBarManager {
    * @param {number} index
    */
   public selectVersion(index: number) {
-    const versions = Object
-      .keys(this.appState.versions)
-      .reverse();
+    const versions = sortedElectronMap(this.appState.versions || {}, (k) => k);
 
     this.selectedVersion = versions[index];
   }

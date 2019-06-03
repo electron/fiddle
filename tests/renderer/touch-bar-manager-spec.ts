@@ -30,7 +30,7 @@ describe('TouchBarManager', () => {
     const [ item ] = touchBarMgr.versionSelector.items;
 
     expect(item.icon).toBe(undefined);
-    expect(item.label).toBe(`💾 1.8.7`);
+    expect(item.label).toBe(`💾 2.0.2`);
   });
 
   it('updates the versions when the versions change', () => {

@@ -171,7 +171,7 @@ export class BinaryManager {
   }
 
   /**
-   * Unzips an electron package so that we can actaully use it.
+   * Unzips an electron package so that we can actually use it.
    *
    * @param {string} zipPath
    * @param {string} extractPath
