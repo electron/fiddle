@@ -66,8 +66,8 @@ describe('AddressBar component', () => {
   });
 
   it('handles submit', () => {
-    const oldLoadFiddle = AddressBar.prototype.loadFiddle;
-    AddressBar.prototype.loadFiddle = jest.fn();
+    const oldLoadFiddle = AddressBar.prototype.fetchGistAndLoad;
+    AddressBar.prototype.fetchGistAndLoad = jest.fn();
     const preventDefault = jest.fn();
     const wrapper = shallow(<AddressBar appState={store} />);
     const instance: AddressBar = wrapper.instance() as any;
@@ -78,7 +78,7 @@ describe('AddressBar component', () => {
     expect(wrapper.state('value')).toBe('abcdtestid');
     expect(preventDefault).toHaveBeenCalled();
 
-    AddressBar.prototype.loadFiddle = oldLoadFiddle;
+    AddressBar.prototype.fetchGistAndLoad = oldLoadFiddle;
   });
 
   describe('loadFiddle()', () => {
@@ -91,7 +91,7 @@ describe('AddressBar component', () => {
       store.gistId = 'abcdtestid';
 
       instance.handleChange({ target: { value: 'abcdtestid' } } as any);
-      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      await (wrapper.instance() as AddressBar).fetchGistAndLoad('abcdtestid');
 
       expect(wrapper.state('value')).toBe('abcdtestid');
       expect(document.title).toBe('Electron Fiddle - gist.github.com/abcdtestid');
@@ -107,7 +107,7 @@ describe('AddressBar component', () => {
       });
 
       const wrapper = shallow(<AddressBar appState={store} />);
-      const result = await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      const result = await (wrapper.instance() as AddressBar).fetchGistAndLoad('abcdtestid');
 
       expect(result).toBe(false);
     });
@@ -123,7 +123,7 @@ describe('AddressBar component', () => {
       store.gitHubToken = 'testToken';
 
       instance.handleChange({ target: { value: 'abcdtestid' } } as any);
-      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      await (wrapper.instance() as AddressBar).fetchGistAndLoad('abcdtestid');
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect((authenticate as jest.Mock).mock.calls[0][0]).toEqual({
