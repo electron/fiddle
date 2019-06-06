@@ -12,6 +12,7 @@ import { FileManager } from './file-manager';
 import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
+import { TouchBarManager } from './touch-bar-manager';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -25,10 +26,15 @@ export class App {
   public state = appState;
   public fileManager = new FileManager(appState);
   public runner = new Runner(appState);
+  public touchBarManager: TouchBarManager | undefined;
 
   constructor() {
     this.getValues = this.getValues.bind(this);
     this.setValues = this.setValues.bind(this);
+
+    if (process.platform === 'darwin') {
+      this.touchBarManager = new TouchBarManager(appState);
+    }
   }
 
   /**
