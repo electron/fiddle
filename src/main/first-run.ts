@@ -21,14 +21,17 @@ function promptMoveToApplicationsFolder(): void {
   if (process.platform !== 'darwin') return;
   if (isDevMode() || app.isInApplicationsFolder()) return;
 
-  dialog.showMessageBox({
-    type: 'question',
-    buttons: ['Move to Applications Folder', 'Do Not Move'],
-    defaultId: 0,
-    message: 'Move to Applications Folder?',
-  }, (response) => {
-    if (response === 0) {
-      app.moveToApplicationsFolder();
+  dialog.showMessageBox(
+    {
+      type: 'question',
+      buttons: ['Move to Applications Folder', 'Do Not Move'],
+      defaultId: 0,
+      message: 'Move to Applications Folder?'
+    },
+    response => {
+      if (response === 0) {
+        app.moveToApplicationsFolder();
+      }
     }
-  });
+  );
 }

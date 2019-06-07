@@ -1,4 +1,9 @@
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion } from '../interfaces';
+import {
+  ElectronVersion,
+  ElectronVersionSource,
+  ElectronVersionState,
+  NpmVersion
+} from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
@@ -19,14 +24,21 @@ export function getDefaultVersion(
 ): string {
   const ls = localStorage.getItem('version');
 
-  if (ls && knownVersions && knownVersions.find(({ version }) => version === ls)) {
+  if (
+    ls &&
+    knownVersions &&
+    knownVersions.find(({ version }) => version === ls)
+  ) {
     return ls;
   }
 
   // Self-heal: Version not formated correctly
   const normalized = ls && normalizeVersion(ls);
   if (normalized) {
-    if (knownVersions && knownVersions.find(({ version }) => version === normalized)) {
+    if (
+      knownVersions &&
+      knownVersions.find(({ version }) => version === normalized)
+    ) {
       return normalized;
     }
   }
@@ -48,9 +60,7 @@ export function getDefaultVersion(
  * @param {NpmVersion} input
  * @returns {ElectronReleaseChannel}
  */
-export function getReleaseChannel(
-  input: NpmVersion
-): ElectronReleaseChannel {
+export function getReleaseChannel(input: NpmVersion): ElectronReleaseChannel {
   const tag = input.version || '';
 
   if (tag.includes('beta')) {
@@ -82,7 +92,8 @@ export const enum VersionKeys {
  * @returns {Array<NpmVersion>}
  */
 function getVersions(
-  key: VersionKeys, fallbackMethod: () => Array<NpmVersion>
+  key: VersionKeys,
+  fallbackMethod: () => Array<NpmVersion>
 ): Array<NpmVersion> {
   const fromLs = window.localStorage.getItem(key);
 
@@ -93,7 +104,9 @@ function getVersions(
       if (!isExpectedFormat(result)) {
         // Known versions can just be downloaded again.
         if (key === VersionKeys.known) {
-          throw new Error(`Electron versions in LS does not match expected format`);
+          throw new Error(
+            `Electron versions in LS does not match expected format`
+          );
         }
 
         // Local versions are a bit more tricky and might be in an old format (pre 0.5)
@@ -103,7 +116,9 @@ function getVersions(
 
       return result;
     } catch (error) {
-      console.warn(`Parsing local Electron versions failed, returning fallback method.`);
+      console.warn(
+        `Parsing local Electron versions failed, returning fallback method.`
+      );
     }
   }
 
@@ -127,7 +142,7 @@ function saveVersions(key: VersionKeys, versions: Array<NpmVersion>) {
  * @returns {Array<NpmVersion>}
  */
 export function getElectronVersions(): Array<ElectronVersion> {
-  const known: Array<ElectronVersion> = getKnownVersions().map((version) => {
+  const known: Array<ElectronVersion> = getKnownVersions().map(version => {
     return {
       ...version,
       source: ElectronVersionSource.remote,
@@ -135,7 +150,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     };
   });
 
-  const local: Array<ElectronVersion> = getLocalVersions().map((version) => {
+  const local: Array<ElectronVersion> = getLocalVersions().map(version => {
     return {
       ...version,
       source: ElectronVersionSource.local,
@@ -143,7 +158,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     };
   });
 
-  return [ ...known, ...local ];
+  return [...known, ...local];
 }
 
 /**
@@ -155,7 +170,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
 export function addLocalVersion(input: NpmVersion): Array<NpmVersion> {
   const versions = getLocalVersions();
 
-  if (!versions.find((v) => v.localPath === input.localPath)) {
+  if (!versions.find(v => v.localPath === input.localPath)) {
     versions.push(input);
   }
 
@@ -180,8 +195,10 @@ export function getLocalVersions(): Array<NpmVersion> {
  *
  * @param {Array<NpmVersion>} versions
  */
-export function saveLocalVersions(versions: Array<NpmVersion | ElectronVersion>) {
-  const filteredVersions = versions.filter((v) => {
+export function saveLocalVersions(
+  versions: Array<NpmVersion | ElectronVersion>
+) {
+  const filteredVersions = versions.filter(v => {
     if (isElectronVersion(v)) {
       return v.source === ElectronVersionSource.local;
     }
@@ -199,7 +216,9 @@ export function saveLocalVersions(versions: Array<NpmVersion | ElectronVersion>)
  * @returns {Array<NpmVersion>}
  */
 export function getKnownVersions(): Array<NpmVersion> {
-  return getVersions(VersionKeys.known, () => require('../../static/releases.json'));
+  return getVersions(VersionKeys.known, () =>
+    require('../../static/releases.json')
+  );
 }
 
 /**
@@ -218,8 +237,9 @@ export function saveKnownVersions(versions: Array<NpmVersion>) {
  * @export
  * @returns {Promise<Array<ElectronVersion>>}
  */
-export async function getUpdatedElectronVersions(
-): Promise<Array<ElectronVersion>> {
+export async function getUpdatedElectronVersions(): Promise<
+  Array<ElectronVersion>
+> {
   try {
     await fetchVersions();
   } catch (error) {
@@ -239,9 +259,9 @@ export async function fetchVersions() {
   const data = await response.json();
   const versions: Record<string, any> = data.versions;
 
-  const output: Array<NpmVersion> = Object
-    .keys(versions)
-    .map((version) => ({ version }));
+  const output: Array<NpmVersion> = Object.keys(versions).map(version => ({
+    version
+  }));
 
   if (output && output.length > 0 && isExpectedFormat(output)) {
     console.log(`Fetched new Electron versions (Count: ${output.length})`);
@@ -258,7 +278,7 @@ export async function fetchVersions() {
  * @returns {boolean}
  */
 export function isExpectedFormat(input: Array<any>): boolean {
-  return input.every((entry) => !!entry.version);
+  return input.every(entry => !!entry.version);
 }
 
 /**
@@ -269,8 +289,8 @@ export function isExpectedFormat(input: Array<any>): boolean {
  */
 export function migrateVersions(input: Array<any> = []): Array<NpmVersion> {
   return input
-    .filter((item) => !!item)
-    .map((item) => {
+    .filter(item => !!item)
+    .map(item => {
       const { tag_name, name, url } = item;
 
       if (!tag_name || !name || !url) return null;
@@ -281,7 +301,7 @@ export function migrateVersions(input: Array<any> = []): Array<NpmVersion> {
         localPath: url
       };
     })
-    .filter((item) => !!item) as Array<NpmVersion>;
+    .filter(item => !!item) as Array<NpmVersion>;
 }
 
 export function isElectronVersion(

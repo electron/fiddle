@@ -30,5 +30,5 @@ export function sortedElectronMap<T>(
 
       return semver.gt(a, b, true) ? -1 : 1;
     })
-    .map((key) => mapFn(key, versions[key])) as Array<T>;
+    .map(key => mapFn(key, versions[key])) as Array<T>;
 }

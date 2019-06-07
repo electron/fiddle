@@ -1,7 +1,6 @@
 import * as electron from 'electron';
 import * as React from 'react';
 
-// tslint:disable-next-line:no-submodule-imports
 import { act } from 'react-dom/test-utils';
 
 import { mount } from 'enzyme';

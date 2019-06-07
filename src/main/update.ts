@@ -9,7 +9,7 @@ export function setupUpdates() {
 
     updateApp({
       repo: 'electron/fiddle',
-      updateInterval: '1 hour',
+      updateInterval: '1 hour'
     });
   }, 10000);
 }

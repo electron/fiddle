@@ -9,5 +9,5 @@ let username: string = '';
  * @returns {string}
  */
 export function getUsername(): string {
-  return username = username || os.userInfo().username;
+  return (username = username || os.userInfo().username);
 }

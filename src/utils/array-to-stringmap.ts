@@ -13,7 +13,7 @@ export function arrayToStringMap(
 ): Record<string, ElectronVersion> {
   const output = {};
 
-  input.forEach((version) => {
+  input.forEach(version => {
     const versionNumber = normalizeVersion(version.version);
     output[versionNumber] = version;
   });

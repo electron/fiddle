@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 const { run } = require('./run-bin')
 
 async function compileTypeScript () {

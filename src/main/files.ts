@@ -3,7 +3,12 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PACKAGE_NAME,
+  RENDERER_JS_NAME
+} from '../shared-constants';
 import { ipcMainManager } from './ipc';
 
 /**
@@ -20,16 +25,19 @@ export function setupFileListeners() {
  * the path to the renderer
  */
 export function showOpenDialog() {
-  dialog.showOpenDialog({
-    title: 'Open Fiddle',
-    properties: ['openDirectory']
-  }, (filePaths) => {
-    if (!filePaths || filePaths.length < 1) {
-      return;
-    }
+  dialog.showOpenDialog(
+    {
+      title: 'Open Fiddle',
+      properties: ['openDirectory']
+    },
+    filePaths => {
+      if (!filePaths || filePaths.length < 1) {
+        return;
+      }
 
-    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [ filePaths[0] ]);
-  });
+      ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [filePaths[0]]);
+    }
+  );
 }
 
 /**
@@ -38,22 +46,25 @@ export function showOpenDialog() {
  */
 export function showSaveDialog(event?: IpcEvents, as?: string) {
   // We want to save to a folder, so we'll use an open dialog here
-  dialog.showOpenDialog({
-    buttonLabel: 'Save here',
-    properties: ['openDirectory', 'createDirectory'],
-    title: `Save Fiddle${as ? ` as ${as}` : ''}`
-  }, async (filePaths) => {
-    if (!filePaths || filePaths.length < 1) {
-      return;
-    }
+  dialog.showOpenDialog(
+    {
+      buttonLabel: 'Save here',
+      properties: ['openDirectory', 'createDirectory'],
+      title: `Save Fiddle${as ? ` as ${as}` : ''}`
+    },
+    async filePaths => {
+      if (!filePaths || filePaths.length < 1) {
+        return;
+      }
 
-    console.log(`Asked to save to ${filePaths[0]}`);
+      console.log(`Asked to save to ${filePaths[0]}`);
 
-    // Let's confirm real quick if we want this
-    if (await ensureSaveTargetEmpty(filePaths[0])) {
-      ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
+      // Let's confirm real quick if we want this
+      if (await ensureSaveTargetEmpty(filePaths[0])) {
+        ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
+      }
     }
-  });
+  );
 }
 
 /**
@@ -92,9 +103,9 @@ async function confirmFileOverwrite(filePath: string): Promise<boolean> {
   try {
     const result = await dialog.showMessageBox({
       type: 'warning',
-      buttons: [ 'Cancel', 'Yes' ],
+      buttons: ['Cancel', 'Yes'],
       message: 'Overwrite files?',
-      detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
+      detail: `The file ${filePath} already exists. Do you want to overwrite it?`
     });
 
     return !!result;

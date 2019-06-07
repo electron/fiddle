@@ -26,7 +26,6 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
   };
 }
 
-
 /**
  * Creates a new main window.
  *
@@ -47,8 +46,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   browserWindow.on('closed', () => {
-    browserWindows = browserWindows
-      .filter((bw) => browserWindow !== bw);
+    browserWindows = browserWindows.filter(bw => browserWindow !== bw);
   });
 
   browserWindow.webContents.on('new-window', (event, url) => {
@@ -72,5 +70,7 @@ export function createMainWindow(): Electron.BrowserWindow {
  * @returns {Electron.BrowserWindow}
  */
 export function getOrCreateMainWindow(): Electron.BrowserWindow {
-  return BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow();
+  return (
+    BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow()
+  );
 }

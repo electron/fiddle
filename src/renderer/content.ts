@@ -10,7 +10,7 @@ import { EditorId } from '../interfaces';
  */
 export async function getContent(
   name: EditorId,
-  version?: string,
+  version?: string
 ): Promise<string> {
   if (name === EditorId.html) {
     return (await import('../content/html')).html;
@@ -46,11 +46,12 @@ export async function isContentUnchanged(name: EditorId): Promise<boolean> {
 
   // Handle main case, which needs to check both possible versions
   if (name === EditorId.main) {
-    const isChanged1x = await getContent(EditorId.main, '1.0') === values.main;
-    const isChangedOther = await getContent(EditorId.main) === values.main;
+    const isChanged1x =
+      (await getContent(EditorId.main, '1.0')) === values.main;
+    const isChangedOther = (await getContent(EditorId.main)) === values.main;
 
     return isChanged1x || isChangedOther;
   } else {
-    return values[name] === await getContent(name);
+    return values[name] === (await getContent(name));
   }
 }

@@ -15,7 +15,7 @@ export function getNiceGreeting() {
     '🙇‍♀️ Thanks for trying out Electron & Fiddle',
     '🐕 Go pet a dog today',
     '🐈 Go pet a cat today',
-    '💧 Stay hydrated',
+    '💧 Stay hydrated'
   ];
 
   const min = 0;

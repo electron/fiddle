@@ -11,10 +11,8 @@ let _octo: GitHubType;
  * @export
  * @returns {Promise<typeof GitHubType>}
  */
-export async function getOctokit(
-  appState?: AppState
-): Promise<GitHubType> {
-  _Octokit = _Octokit || (await import('@octokit/rest') as any).default;
+export async function getOctokit(appState?: AppState): Promise<GitHubType> {
+  _Octokit = _Octokit || ((await import('@octokit/rest')) as any).default;
   _octo = _octo || new _Octokit();
 
   // You can load Gists without being authenticated,

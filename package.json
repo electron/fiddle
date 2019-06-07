@@ -9,7 +9,7 @@
     "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
     "lint:style": "stylelint ./src/less/*.less --fix",
-    "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\" --fix",
+    "lint:ts": "prettier --write src/**/*.{ts,tsx}",
     "lint:tests": "tslint ./tests/**/*.ts{,x} -c tslint.json --fix",
     "lint:templates": "standard ./static/show-me/**/*.js",
     "lint": "npm-run-all lint:*",
@@ -94,15 +94,13 @@
     "node-fetch": "^2.6.0",
     "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.12.3",
+    "prettier": "^1.18.2",
     "react-test-renderer": "^16.8.6",
     "rimraf": "^2.6.3",
     "standard": "^12.0.1",
     "stylelint": "^10.0.1",
     "stylelint-config-standard": "^18.3.0",
     "ts-jest": "^24.0.2",
-    "tslint": "^5.16.0",
-    "tslint-microsoft-contrib": "^6.1.1",
-    "tslint-react": "^4.0.0",
     "typescript": "^3.4.5"
   }
 }

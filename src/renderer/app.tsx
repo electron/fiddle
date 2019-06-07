@@ -43,7 +43,10 @@ export class App {
    * @param {EditorValues} values
    * @param {warn} warn - Should we warn before overwriting unsaved data?
    */
-  public async setValues(values: Partial<EditorValues>, warn: boolean = true): Promise<boolean> {
+  public async setValues(
+    values: Partial<EditorValues>,
+    warn: boolean = true
+  ): Promise<boolean> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -93,10 +96,10 @@ export class App {
     const values: EditorValues = {
       html: getEditorValue(EditorId.html),
       main: getEditorValue(EditorId.main),
-      renderer: getEditorValue(EditorId.renderer),
+      renderer: getEditorValue(EditorId.renderer)
     };
 
-    if (options && options.include !==  false) {
+    if (options && options.include !== false) {
       values.package = await getPackageJson(this.state, values, options);
     }
 
@@ -146,7 +149,7 @@ export class App {
    * if you're about to throw things away.
    */
   public setupUnsavedOnChangeListener() {
-    Object.keys(window.ElectronFiddle.editors).forEach((key) => {
+    Object.keys(window.ElectronFiddle.editors).forEach(key => {
       const editor = window.ElectronFiddle.editors[key];
       const disposable = editor.onDidChangeModelContent(() => {
         this.state.isUnsaved = true;
@@ -161,7 +164,9 @@ export class App {
    * @returns {Promise<void>}
    */
   public async setupTheme(): Promise<void> {
-    const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
+    const tag: HTMLStyleElement | null = document.querySelector(
+      'style#fiddle-theme'
+    );
     const theme = await getTheme(this.state.theme);
 
     if (tag && theme.css) {
@@ -185,6 +190,7 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners = window.ElectronFiddle.contentChangeListeners || [];
+window.ElectronFiddle.contentChangeListeners =
+  window.ElectronFiddle.contentChangeListeners || [];
 window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
 window.ElectronFiddle.app.setup();

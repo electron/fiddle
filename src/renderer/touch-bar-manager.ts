@@ -28,9 +28,7 @@ const {
 export function getItemIcon(
   { state }: Partial<ElectronVersion> = { state: ElectronVersionState.unknown }
 ) {
-  return state === 'ready'
-    ? '💾'
-    : state === 'downloading' ? '⏬' : '☁';
+  return state === 'ready' ? '💾' : state === 'downloading' ? '⏬' : '☁';
 }
 
 export class TouchBarManager {
@@ -43,28 +41,39 @@ export class TouchBarManager {
   public selectedVersion: string = '';
   public versionSelectorSelectBtn: Electron.TouchBarButton;
   // Lol have mercy, TS
-  public items: Array<Electron.TouchBarButton
-    | Electron.TouchBarColorPicker
-    | Electron.TouchBarGroup
-    | Electron.TouchBarLabel
-    | Electron.TouchBarPopover
-    | Electron.TouchBarScrubber
-    | Electron.TouchBarSegmentedControl
-    | Electron.TouchBarSlider
-    | Electron.TouchBarSpacer>
+  public items:
+    | Array<
+        | Electron.TouchBarButton
+        | Electron.TouchBarColorPicker
+        | Electron.TouchBarGroup
+        | Electron.TouchBarLabel
+        | Electron.TouchBarPopover
+        | Electron.TouchBarScrubber
+        | Electron.TouchBarSegmentedControl
+        | Electron.TouchBarSlider
+        | Electron.TouchBarSpacer
+      >
     | undefined;
 
   constructor(public readonly appState: AppState) {
     this.selectVersion = this.selectVersion.bind(this);
     this.updateStartStopBtn = this.updateStartStopBtn.bind(this);
-    this.updateVersionSelectorItems = this.updateVersionSelectorItems.bind(this);
+    this.updateVersionSelectorItems = this.updateVersionSelectorItems.bind(
+      this
+    );
     this.updateVersionButton = this.updateVersionButton.bind(this);
 
     this.startStopBtn = new TouchBarButton(this.getStartStopButtonOptions());
     this.consoleBtn = new TouchBarButton(this.getConsoleButtonOptions());
-    this.versionSelectorBtn = new TouchBarButton(this.getVersionButtonOptions());
-    this.versionSelectorSelectBtn = new TouchBarButton(this.getVersionSelectorSelectButtonOptions());
-    this.versionSelector = new TouchBarScrubber(this.getVersionSelectorOptions());
+    this.versionSelectorBtn = new TouchBarButton(
+      this.getVersionButtonOptions()
+    );
+    this.versionSelectorSelectBtn = new TouchBarButton(
+      this.getVersionSelectorSelectButtonOptions()
+    );
+    this.versionSelector = new TouchBarScrubber(
+      this.getVersionSelectorOptions()
+    );
 
     this.setupTouchBar();
   }
@@ -114,7 +123,7 @@ export class TouchBarManager {
 
   public getVersions() {
     return sortedElectronMap(this.appState.versions || {}, (key, version) => ({
-      label: `${getItemIcon(version)} ${key}`,
+      label: `${getItemIcon(version)} ${key}`
     }));
   }
 
@@ -126,7 +135,9 @@ export class TouchBarManager {
   public setTouchBar(options: Partial<Electron.TouchBarConstructorOptions>) {
     try {
       this.items = options.items;
-      this.touchBar = new TouchBar(options as Electron.TouchBarConstructorOptions);
+      this.touchBar = new TouchBar(
+        options as Electron.TouchBarConstructorOptions
+      );
       this.browserWindow = this.browserWindow || remote.getCurrentWindow();
       this.browserWindow.setTouchBar(this.touchBar);
     } catch (error) {
@@ -167,13 +178,8 @@ export class TouchBarManager {
    */
   public setVersionSelectorItems() {
     this.setTouchBar({
-      items: [
-        this.versionSelector,
-        this.versionSelectorSelectBtn,
-      ],
-      escapeItem: new TouchBarButton(
-        this.getVersionSelectorEscButtonOptions()
-      )
+      items: [this.versionSelector, this.versionSelectorSelectBtn],
+      escapeItem: new TouchBarButton(this.getVersionSelectorEscButtonOptions())
     });
   }
 
@@ -214,13 +220,12 @@ export class TouchBarManager {
    * @returns {TouchBarButtonConstructorOptions}
    */
   public getStartStopButtonOptions(): TouchBarButtonConstructorOptions {
-    const label = this.appState.isRunning
-      ? '🛑 Stop'
-      : '🚀 Run';
+    const label = this.appState.isRunning ? '🛑 Stop' : '🚀 Run';
 
-    const click = () => this.appState.isRunning
-      ? window.ElectronFiddle.app.runner.stop()
-      : window.ElectronFiddle.app.runner.run();
+    const click = () =>
+      this.appState.isRunning
+        ? window.ElectronFiddle.app.runner.stop()
+        : window.ElectronFiddle.app.runner.run();
 
     return { label, click };
   }
@@ -255,8 +260,7 @@ export class TouchBarManager {
    *
    * @returns {TouchBarScrubberConstructorOptions}
    */
-  public getVersionSelectorOptions(
-  ): TouchBarScrubberConstructorOptions {
+  public getVersionSelectorOptions(): TouchBarScrubberConstructorOptions {
     return {
       select: this.selectVersion,
       highlight: this.selectVersion,
@@ -276,7 +280,7 @@ export class TouchBarManager {
    * @param {number} index
    */
   public selectVersion(index: number) {
-    const versions = sortedElectronMap(this.appState.versions || {}, (k) => k);
+    const versions = sortedElectronMap(this.appState.versions || {}, k => k);
 
     this.selectedVersion = versions[index];
   }

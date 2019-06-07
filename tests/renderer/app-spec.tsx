@@ -252,7 +252,6 @@ describe('Editors component', () => {
       await app.setupTheme();
 
       expect(document.head!.innerHTML).toEqual(
-        // tslint:disable:max-line-length
         `<style id="fiddle-theme">
           html, body {
             --foreground-1: #9feafa;
@@ -273,7 +272,6 @@ describe('Editors component', () => {
             --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           }
         </style>`.replace(/        /gm, ''));
-        // tslint:enable:max-line-length
     });
 
     it('removes the dark theme option if required', async () => {

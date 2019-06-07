@@ -23,7 +23,9 @@ export const DEFAULT_OPTIONS = {
  * @returns {string}
  */
 export async function getPackageJson(
-  appState: AppState, values?: EditorValues, options?: PackageJsonOptions
+  appState: AppState,
+  values?: EditorValues,
+  options?: PackageJsonOptions
 ): Promise<string> {
   const { includeElectron, includeDependencies } = options || DEFAULT_OPTIONS;
   const name = await appState.getName();
@@ -37,23 +39,27 @@ export async function getPackageJson(
 
   if (includeDependencies && values) {
     const modules = await findModulesInEditors(values);
-    modules.forEach((mod) => {
+    modules.forEach(mod => {
       dependencies[mod] = '*';
     });
   }
 
-  return JSON.stringify({
-    name,
-    productName: name,
-    description: 'My Electron application description',
-    keywords: [],
-    main: './main.js',
-    version: '1.0.0',
-    author: getUsername(),
-    scripts: {
-      start: 'electron .'
+  return JSON.stringify(
+    {
+      name,
+      productName: name,
+      description: 'My Electron application description',
+      keywords: [],
+      main: './main.js',
+      version: '1.0.0',
+      author: getUsername(),
+      scripts: {
+        start: 'electron .'
+      },
+      dependencies,
+      devDependencies
     },
-    dependencies,
-    devDependencies
-  }, undefined, 2);
+    undefined,
+    2
+  );
 }

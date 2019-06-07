@@ -38,7 +38,10 @@ export class BinaryManager {
         process.noAsar = false;
       }
     } catch (error) {
-      console.warn(`Binary Manager: Tried to remove ${version}, but failed`, error);
+      console.warn(
+        `Binary Manager: Tried to remove ${version}, but failed`,
+        error
+      );
 
       if (i < 3) {
         console.log(`Binary Manager: Trying again`);
@@ -78,7 +81,9 @@ export class BinaryManager {
 
     const zipPath = await eDownload({ version });
     const extractPath = this.getDownloadPath(version);
-    console.log(`BinaryManager: Electron ${version} downloaded, now unpacking to ${extractPath}`);
+    console.log(
+      `BinaryManager: Electron ${version} downloaded, now unpacking to ${extractPath}`
+    );
 
     try {
       // Ensure the target path is empty
@@ -104,7 +109,7 @@ export class BinaryManager {
    */
   public getElectronBinaryPath(
     version: string,
-    dir: string = this.getDownloadPath(version),
+    dir: string = this.getDownloadPath(version)
   ): string {
     switch (process.platform) {
       case 'darwin':
@@ -115,7 +120,9 @@ export class BinaryManager {
       case 'win32':
         return path.join(dir, 'electron.exe');
       default:
-        throw new Error(`Electron builds are not available for ${process.platform}`);
+        throw new Error(
+          `Electron builds are not available for ${process.platform}`
+        );
     }
   }
 
@@ -153,7 +160,10 @@ export class BinaryManager {
    * @param {string} dir
    * @returns {boolean}
    */
-  public async getIsDownloaded(version: string, dir?: string): Promise<boolean> {
+  public async getIsDownloaded(
+    version: string,
+    dir?: string
+  ): Promise<boolean> {
     const expectedPath = this.getElectronBinaryPath(version, dir);
     const fs = await fancyImport<typeof fsType>('fs-extra');
 
@@ -184,7 +194,7 @@ export class BinaryManager {
       process.noAsar = true;
 
       const options = {
-        dir: extractPath,
+        dir: extractPath
       };
 
       extract(zipPath, options, (error: Error) => {

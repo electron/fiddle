@@ -12,15 +12,18 @@ import * as React from 'react';
  * @param {string} query
  * @returns
  */
-export function highlightText(text: string, query: string): Array<React.ReactNode | string> | null {
+export function highlightText(
+  text: string,
+  query: string
+): Array<React.ReactNode | string> | null {
   let lastIndex = 0;
 
   const words = query
     .split(/\s+/)
-    .filter((word) => word.length > 0)
-    .map((s) => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'));
+    .filter(word => word.length > 0)
+    .map(s => s.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, '\\$1'));
 
-  if (words.length === 0) return [ text ];
+  if (words.length === 0) return [text];
 
   const regexp = new RegExp(words.join('|'), 'gi');
   const tokens: Array<React.ReactNode> = [];

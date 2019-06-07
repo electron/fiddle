@@ -1,4 +1,9 @@
-import { BrowserWindow, ContextMenuParams, Menu, MenuItemConstructorOptions } from 'electron';
+import {
+  BrowserWindow,
+  ContextMenuParams,
+  Menu,
+  MenuItemConstructorOptions
+} from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { ipcMainManager } from './ipc';
@@ -30,9 +35,10 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
  * @param {ContextMenuParams} { x, y }
  * @returns {Array<MenuItemConstructorOptions>}
  */
-export function getMonacoItems(
-  { pageURL, editFlags }: ContextMenuParams
-): Array<MenuItemConstructorOptions> {
+export function getMonacoItems({
+  pageURL,
+  editFlags
+}: ContextMenuParams): Array<MenuItemConstructorOptions> {
   if (!editFlags.canPaste || !/.*index\.html(#?)$/.test(pageURL || '')) {
     return [];
   }
@@ -42,7 +48,7 @@ export function getMonacoItems(
       id: 'go_to_definition',
       label: 'Go to Definition',
       click() {
-        const cmd = [ 'editor.action.goToDeclaration' ];
+        const cmd = ['editor.action.goToDeclaration'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
@@ -50,7 +56,7 @@ export function getMonacoItems(
       id: 'peek_definition',
       label: 'Peek Definition',
       click() {
-        const cmd = [ 'editor.action.previewDeclaration' ];
+        const cmd = ['editor.action.previewDeclaration'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
@@ -58,7 +64,7 @@ export function getMonacoItems(
       id: 'references',
       label: 'Find References',
       click() {
-        const cmd = [ 'editor.action.referenceSearch.trigger' ];
+        const cmd = ['editor.action.referenceSearch.trigger'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
@@ -67,7 +73,7 @@ export function getMonacoItems(
       id: 'palette',
       label: 'Command Palette',
       click() {
-        const cmd = [ 'editor.action.quickCommand' ];
+        const cmd = ['editor.action.quickCommand'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
@@ -76,7 +82,7 @@ export function getMonacoItems(
       id: 'format_document',
       label: 'Format Document',
       click() {
-        const cmd = [ 'editor.action.formatDocument' ];
+        const cmd = ['editor.action.formatDocument'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
@@ -84,11 +90,11 @@ export function getMonacoItems(
       id: 'format_selection',
       label: 'Format Selection',
       click() {
-        const cmd = [ 'editor.action.formatSelection' ];
+        const cmd = ['editor.action.formatSelection'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       }
     },
-    { type: 'separator' },
+    { type: 'separator' }
   ];
 }
 
@@ -100,25 +106,28 @@ export function getMonacoItems(
  * @returns {Array<MenuItemConstructorOptions>}
  */
 export function getInspectItems(
-  browserWindow: BrowserWindow, { x, y }: ContextMenuParams
+  browserWindow: BrowserWindow,
+  { x, y }: ContextMenuParams
 ): Array<MenuItemConstructorOptions> {
   if (!isDevMode()) return [];
 
-  return [{
-    id: 'inspect',
-    label: 'Inspect Element',
-    click: () => {
-      browserWindow.webContents.inspectElement(x, y);
+  return [
+    {
+      id: 'inspect',
+      label: 'Inspect Element',
+      click: () => {
+        browserWindow.webContents.inspectElement(x, y);
 
-      try {
-        if (browserWindow.webContents.isDevToolsOpened()) {
-          browserWindow.webContents.devToolsWebContents.focus();
+        try {
+          if (browserWindow.webContents.isDevToolsOpened()) {
+            browserWindow.webContents.devToolsWebContents.focus();
+          }
+        } catch (error) {
+          console.warn(`Tried to focus dev tools, but failed`, { error });
         }
-      } catch (error) {
-        console.warn(`Tried to focus dev tools, but failed`, { error });
       }
     }
-  }];
+  ];
 }
 
 /**
@@ -138,17 +147,20 @@ export function createContextMenu(browserWindow: BrowserWindow) {
         label: 'Cut',
         role: 'cut',
         enabled: editFlags.canCut
-      }, {
+      },
+      {
         id: 'copy',
         label: 'Copy',
         role: 'copy',
         enabled: editFlags.canCopy
-      }, {
+      },
+      {
         id: 'paste',
         label: 'Paste',
         role: 'paste',
         enabled: editFlags.canPaste
-      }, {
+      },
+      {
         type: 'separator'
       },
       ...getInspectItems(browserWindow, props)

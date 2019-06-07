@@ -14,7 +14,7 @@ export class IpcRendererManager extends EventEmitter {
   constructor() {
     super();
 
-    ipcRendererEvents.forEach((name) => {
+    ipcRendererEvents.forEach(name => {
       ipcRenderer.on(name, (...args: Array<any>) => this.emit(name, ...args));
     });
   }

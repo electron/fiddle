@@ -2,7 +2,11 @@ import * as fsExtraType from 'fs-extra';
 import * as pathType from 'path';
 
 import { EditorValues } from '../interfaces';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  RENDERER_JS_NAME
+} from '../shared-constants';
 import { fancyImport } from '../utils/import';
 
 /**
@@ -29,7 +33,10 @@ export async function getTemplateValues(name: string): Promise<EditorValues> {
 
       if (fs.existsSync(templatesPath)) {
         const contents = fs.readdirSync(templatesPath);
-        console.log(`getTemplateValues(): ${templatesPath} contents:`, contents);
+        console.log(
+          `getTemplateValues(): ${templatesPath} contents:`,
+          contents
+        );
       } else {
         console.log(`getTemplateValues(): ${templatesPath} does not exist`);
       }

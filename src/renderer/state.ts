@@ -17,7 +17,10 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
+import {
+  createMosaicArrangement,
+  getVisibleMosaics
+} from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
@@ -44,14 +47,16 @@ const defaultVersion = getDefaultVersion(knownVersions);
  * easier, we keep them around in a global object. Don't judge us,
  * we're really only doing that for the editors.
  */
-window.ElectronFiddle = window.ElectronFiddle || {
-  editors: {
-    main: null,
-    renderer: null,
-    html: null
-  },
-  app: null
-} as any;
+window.ElectronFiddle =
+  window.ElectronFiddle ||
+  ({
+    editors: {
+      main: null,
+      renderer: null,
+      html: null
+    },
+    app: null
+  } as any);
 
 /**
  * The application's state. Exported as a singleton below.
@@ -63,33 +68,62 @@ export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
-  @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
-  @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
-  @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
-  @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
-  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
-  @observable public versionsToShow: Array<ElectronReleaseChannel> =
-    this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
-      || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
-  @observable public statesToShow: Array<ElectronVersionState> =
-      this.retrieve('statesToShow') as Array<ElectronVersionState>
-      || [ ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown ];
-  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
-  @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
+  @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
+    'gitHubAvatarUrl'
+  );
+  @observable public gitHubName: string | null = localStorage.getItem(
+    'gitHubName'
+  );
+  @observable public gitHubLogin: string | null = localStorage.getItem(
+    'gitHubLogin'
+  );
+  @observable public gitHubToken: string | null =
+    localStorage.getItem('gitHubToken') || null;
+  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve(
+    'gitHubPublishAsPublic'
+  );
+  @observable public versionsToShow: Array<
+    ElectronReleaseChannel
+  > = (this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>) || [
+    ElectronReleaseChannel.stable,
+    ElectronReleaseChannel.beta
+  ];
+  @observable public statesToShow: Array<ElectronVersionState> = (this.retrieve(
+    'statesToShow'
+  ) as Array<ElectronVersionState>) || [
+    ElectronVersionState.downloading,
+    ElectronVersionState.ready,
+    ElectronVersionState.unknown
+  ];
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve(
+    'isKeepingUserDataDirs'
+  );
+  @observable public isEnablingElectronLogging: boolean = !!this.retrieve(
+    'isEnablingElectronLogging'
+  );
 
   @observable public binaryManager: BinaryManager = new BinaryManager();
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
   @observable public isMyGist: boolean = false;
-  @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public versions: Record<
+    string,
+    ElectronVersion
+  > = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public isUpdatingElectronVersions = false;
-  @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
+  @observable public warningDialogTexts = {
+    label: '',
+    ok: 'Okay',
+    cancel: 'Cancel'
+  };
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public isRunning = false;
-  @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public mosaicArrangement: MosaicNode<
+    MosaicId
+  > | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
 
@@ -100,10 +134,14 @@ export class AppState {
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
-  @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
+  @observable public isTourShowing: boolean = !localStorage.getItem(
+    'hasShownTour'
+  );
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
+  @observable public closedPanels: Partial<
+    Record<MosaicId, EditorBackup | true>
+  > = {
     docsDemo: true // Closed by default
   };
 
@@ -133,9 +171,15 @@ export class AppState {
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
     autorun(() => this.save('gitHubToken', this.gitHubToken));
-    autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
-    autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
-    autorun(() => this.save('isEnablingElectronLogging', this.isEnablingElectronLogging));
+    autorun(() =>
+      this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic)
+    );
+    autorun(() =>
+      this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs)
+    );
+    autorun(() =>
+      this.save('isEnablingElectronLogging', this.isEnablingElectronLogging)
+    );
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
     autorun(() => this.save('statesToShow', this.statesToShow));
@@ -282,12 +326,12 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
- /**
-  * Remove a version of Electron
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Remove a version of Electron
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async removeVersion(input: string) {
     const version = normalizeVersion(input);
     const release = this.versions[version];
@@ -307,9 +351,9 @@ export class AppState {
     if (release && release.source === ElectronVersionSource.local) {
       delete updatedVersions[version];
 
-      const versionsAsArray = Object
-        .keys(updatedVersions)
-        .map((k) => updatedVersions[k]);
+      const versionsAsArray = Object.keys(updatedVersions).map(
+        k => updatedVersions[k]
+      );
 
       saveLocalVersions(versionsAsArray);
     } else {
@@ -321,12 +365,12 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
- /**
-  * Download a version of Electron.
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Download a version of Electron.
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async downloadVersion(input: string) {
     const version = normalizeVersion(input);
     console.log(`State: Downloading Electron ${version}`);
@@ -346,21 +390,25 @@ export class AppState {
       await this.binaryManager.setup(version);
       this.updateDownloadedVersionState();
     } else {
-      console.log(`State: Version ${version} already downloaded, doing nothing.`);
+      console.log(
+        `State: Version ${version} already downloaded, doing nothing.`
+      );
     }
   }
 
- /**
-  * Select a version of Electron (and download it if necessary).
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Select a version of Electron (and download it if necessary).
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
 
     if (!this.versions[version]) {
-      console.warn(`State: Called setVersion() with ${version}, which does not exist.`);
+      console.warn(
+        `State: Called setVersion() with ${version}, which does not exist.`
+      );
       this.setVersion(knownVersions[0].version);
 
       return;
@@ -383,16 +431,16 @@ export class AppState {
     await this.downloadVersion(version);
   }
 
- /**
-  * Go and check which versions have already been downloaded.
-  *
-  * @returns {Promise<void>}
-  */
+  /**
+   * Go and check which versions have already been downloaded.
+   *
+   * @returns {Promise<void>}
+   */
   @action public async updateDownloadedVersionState(): Promise<void> {
     const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     const updatedVersions = { ...this.versions };
 
-    (downloadedVersions || []).forEach((version) => {
+    (downloadedVersions || []).forEach(version => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = ElectronVersionState.ready;
       }
@@ -421,7 +469,8 @@ export class AppState {
    * @param {(string | Buffer)} data
    */
   @action public pushOutput(
-    data: string | Buffer, options: OutputOptions = { isNotPre: false, bypassBuffer: true }
+    data: string | Buffer,
+    options: OutputOptions = { isNotPre: false, bypassBuffer: true }
   ) {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
@@ -473,7 +522,9 @@ export class AppState {
    *
    * @param {EditorId} id
    */
-  @action public getAndRemoveEditorValueBackup(id: EditorId): EditorBackup | null {
+  @action public getAndRemoveEditorValueBackup(
+    id: EditorId
+  ): EditorBackup | null {
     const value = this.closedPanels[id];
 
     if (isEditorBackup(value)) {
@@ -489,20 +540,26 @@ export class AppState {
 
     for (const id of ALL_MOSAICS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = isEditorId(id)
-          ? getEditorBackup(id)
-          : true;
+        this.closedPanels[id] = isEditorId(id) ? getEditorBackup(id) : true;
       }
 
       // Remove the backup for panels now. Editors will remove their
       // backup once the data has been loaded.
-      if (isPanelId(id) && visible.includes(id) && !currentlyVisible.includes(id)) {
+      if (
+        isPanelId(id) &&
+        visible.includes(id) &&
+        !currentlyVisible.includes(id)
+      ) {
         delete this.closedPanels[id];
       }
     }
 
     const updatedArrangement = createMosaicArrangement(visible);
-    console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
+    console.log(
+      `State: Setting visible mosaic panels`,
+      visible,
+      updatedArrangement
+    );
 
     this.mosaicArrangement = updatedArrangement;
   }
@@ -514,7 +571,7 @@ export class AppState {
    */
   @action public hideAndBackupMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
+    this.setVisibleMosaics(currentlyVisible.filter(v => v !== id));
   }
 
   /**
@@ -524,7 +581,7 @@ export class AppState {
    */
   @action public showMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics([ ...currentlyVisible, id ]);
+    this.setVisibleMosaics([...currentlyVisible, id]);
   }
 
   /**
@@ -576,9 +633,8 @@ export class AppState {
    */
   private save(key: string, value?: string | number | object | null | boolean) {
     if (value) {
-      const _value = typeof value === 'object'
-        ? JSON.stringify(value)
-        : value.toString();
+      const _value =
+        typeof value === 'object' ? JSON.stringify(value) : value.toString();
 
       localStorage.setItem(key, _value);
     } else {

@@ -1,9 +1,19 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { EditorValues, Files, FileTransform, SetFiddleOptions } from '../interfaces';
+import {
+  EditorValues,
+  Files,
+  FileTransform,
+  SetFiddleOptions
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PACKAGE_NAME,
+  RENDERER_JS_NAME
+} from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
@@ -30,9 +40,12 @@ export class FileManager {
       this.saveFiddle(filePath, dotfilesTransform);
     });
 
-    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_FORGE, (_event, filePath) => {
-      this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
-    });
+    ipcRendererManager.on(
+      IpcEvents.FS_SAVE_FIDDLE_FORGE,
+      (_event, filePath) => {
+        this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
+      }
+    );
   }
 
   /**
@@ -63,7 +76,7 @@ export class FileManager {
     const values: EditorValues = {
       html: await this.readFile(path.join(filePath, INDEX_HTML_NAME)),
       main: await this.readFile(path.join(filePath, MAIN_JS_NAME)),
-      renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
+      renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME))
     };
 
     this.setFiddle({ values, filePath });
@@ -97,7 +110,10 @@ export class FileManager {
    * @param {string} filePath
    * @memberof FileManager
    */
-  public async saveFiddle(filePath?: string, ...transforms: Array<FileTransform>) {
+  public async saveFiddle(
+    filePath?: string,
+    ...transforms: Array<FileTransform>
+  ) {
     const { localPath } = this.appState;
     const pathToSave = filePath || localPath;
 
@@ -121,7 +137,6 @@ export class FileManager {
     }
   }
 
-
   /**
    * Get files to save, but with a transform applied
    *
@@ -130,7 +145,10 @@ export class FileManager {
    * @returns {Promise<Files>}
    * @memberof FileManager
    */
-  public async getFiles(options?: PackageJsonOptions, ...transforms: Array<FileTransform>): Promise<Files> {
+  public async getFiles(
+    options?: PackageJsonOptions,
+    ...transforms: Array<FileTransform>
+  ): Promise<Files> {
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await window.ElectronFiddle.app.getValues(pOptions);
     let output: Files = new Map();
@@ -145,13 +163,15 @@ export class FileManager {
         console.log(`getFiles: Applying ${transform.name}`);
         output = await transform(output);
       } catch (error) {
-        console.warn(`getFiles: Failed to apply transform`, { transform, error });
+        console.warn(`getFiles: Failed to apply transform`, {
+          transform,
+          error
+        });
       }
     }
 
     return output;
   }
-
 
   /**
    * Attempts to clean a given directory. Used to manually
@@ -185,7 +205,8 @@ export class FileManager {
    * @returns {Promise<string>}
    */
   public async saveToTemp(
-    options: PackageJsonOptions, ...transforms: Array<FileTransform>
+    options: PackageJsonOptions,
+    ...transforms: Array<FileTransform>
   ): Promise<string> {
     const fs = await fancyImport<typeof fsType>('fs-extra');
     const tmp = await import('tmp');

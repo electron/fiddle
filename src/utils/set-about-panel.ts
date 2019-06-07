@@ -10,16 +10,17 @@ export function setupAboutPanel(): void {
     applicationName: 'Electron Fiddle',
     applicationVersion: app.getVersion(),
     version: process.versions.electron,
-    copyright: '© Electron Authors',
+    copyright: '© Electron Authors'
   };
 
   switch (process.platform) {
     case 'linux':
       options.website = 'https://electronjs.org/fiddle';
     case 'darwin':
-      options.credits = 'https://github.com/electron/fiddle/graphs/contributors';
+      options.credits =
+        'https://github.com/electron/fiddle/graphs/contributors';
     default:
-      // fallthrough
+    // fallthrough
   }
 
   app.setAboutPanelOptions(options);

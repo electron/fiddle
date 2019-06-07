@@ -1,4 +1,10 @@
-import { app, BrowserWindow, Menu, MenuItemConstructorOptions, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItemConstructorOptions,
+  shell
+} from 'electron';
 
 import { Templates } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -69,7 +75,7 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
       click() {
         shell.openExternal('https://github.com/electron/electron/issues');
       }
-    },
+    }
   ];
 }
 
@@ -83,13 +89,15 @@ function getPreferencesItems(): Array<MenuItemConstructorOptions> {
   return [
     {
       type: 'separator'
-    }, {
+    },
+    {
       label: 'Preferences',
       accelerator: 'CmdOrCtrl+,',
       click() {
         ipcMainManager.send(IpcEvents.OPEN_SETTINGS);
       }
-    }, {
+    },
+    {
       type: 'separator'
     }
   ];
@@ -104,7 +112,8 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
   return [
     {
       type: 'separator'
-    }, {
+    },
+    {
       label: 'Exit',
       accelerator: 'Ctrl+Q,',
       click: app.quit
@@ -140,30 +149,34 @@ function getTasksMenu(): MenuItemConstructorOptions {
   };
 }
 
-function getShowMeMenuItem(key: string, item: string | Templates): MenuItemConstructorOptions {
+function getShowMeMenuItem(
+  key: string,
+  item: string | Templates
+): MenuItemConstructorOptions {
   if (typeof item === 'string') {
     return {
       label: key,
-      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [ key ])
+      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key])
     };
   }
 
   return {
     label: key,
-    submenu: Object.keys(item).map((subkey) => {
+    submenu: Object.keys(item).map(subkey => {
       return getShowMeMenuItem(subkey, item[subkey]);
     })
   };
 }
 
 function getShowMeMenu(): MenuItemConstructorOptions {
-  const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(SHOW_ME_TEMPLATES)
-    .map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
+  const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(
+    SHOW_ME_TEMPLATES
+  ).map(key => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
 
-    return {
-      label: 'Show Me',
-      submenu: showMeMenu
-    };
+  return {
+    label: 'Show Me',
+    submenu: showMeMenu
+  };
 }
 
 /**
@@ -177,11 +190,13 @@ function getFileMenu(): MenuItemConstructorOptions {
       label: 'New Fiddle',
       click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE),
       accelerator: 'CmdOrCtrl+N'
-    }, {
+    },
+    {
       label: 'New Window',
       click: () => createMainWindow(),
       accelerator: 'CmdOrCtrl+Shift+N'
-    }, {
+    },
+    {
       type: 'separator'
     },
     {
@@ -207,17 +222,23 @@ function getFileMenu(): MenuItemConstructorOptions {
     },
     {
       label: 'Save to Gist',
-      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST),
+      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST)
     },
     {
       label: 'Save as Forge Project',
-      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Forge Project')
+      click: () =>
+        showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Forge Project')
     }
   ];
 
   // macOS has these items in the "Fiddle" menu
   if (process.platform !== 'darwin') {
-    fileMenu.splice(fileMenu.length, 0, ...getPreferencesItems(), ...getQuitItems());
+    fileMenu.splice(
+      fileMenu.length,
+      0,
+      ...getPreferencesItems(),
+      ...getQuitItems()
+    );
   }
 
   return {
@@ -232,46 +253,60 @@ function getFileMenu(): MenuItemConstructorOptions {
 export function setupMenu() {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
-  const menu = (defaultMenu(app, shell) as Array<MenuItemConstructorOptions>)
-    .map((item) => {
-      const { label } = item;
+  const menu = (defaultMenu(app, shell) as Array<
+    MenuItemConstructorOptions
+  >).map(item => {
+    const { label } = item;
 
-      // Append the "Settings" item
-      if (
-        process.platform === 'darwin'
-        && label === app.getName()
-        && isSubmenu(item.submenu)
-      ) {
-        item.submenu.splice(2, 0, ...getPreferencesItems());
-      }
+    // Append the "Settings" item
+    if (
+      process.platform === 'darwin' &&
+      label === app.getName() &&
+      isSubmenu(item.submenu)
+    ) {
+      item.submenu.splice(2, 0, ...getPreferencesItems());
+    }
 
-      // Tweak "View" menu
-      if (label === 'View' && isSubmenu(item.submenu)) {
-        item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools'); // Remove "Toggle Developer Tools"
-        item.submenu.push({ type: 'separator' }, { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' }); // Add zooming actions
-        item.submenu.push({ type: 'separator' }, {
+    // Tweak "View" menu
+    if (label === 'View' && isSubmenu(item.submenu)) {
+      item.submenu = item.submenu.filter(
+        subItem => subItem.label !== 'Toggle Developer Tools'
+      ); // Remove "Toggle Developer Tools"
+      item.submenu.push(
+        { type: 'separator' },
+        { role: 'resetzoom' },
+        { role: 'zoomin' },
+        { role: 'zoomout' }
+      ); // Add zooming actions
+      item.submenu.push(
+        { type: 'separator' },
+        {
           label: 'Toggle Soft Wrap',
-          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'wordWrap' ]),
-        });
-        item.submenu.push({ type: 'separator' }, {
+          click: () =>
+            ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, ['wordWrap'])
+        }
+      );
+      item.submenu.push(
+        { type: 'separator' },
+        {
           label: 'Toggle Mini Map',
-          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'minimap.enabled' ]),
-        });
-      }
+          click: () =>
+            ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [
+              'minimap.enabled'
+            ])
+        }
+      );
+    }
 
-      // Append items to "Help"
-      if (label === 'Help' && isSubmenu(item.submenu)) {
-        item.submenu = getHelpItems();
-      }
+    // Append items to "Help"
+    if (label === 'Help' && isSubmenu(item.submenu)) {
+      item.submenu = getHelpItems();
+    }
 
-      return item;
-    });
+    return item;
+  });
 
-  menu.splice(
-    process.platform === 'darwin' ? 1 : 0,
-    0,
-    getFileMenu()
-  );
+  menu.splice(process.platform === 'darwin' ? 1 : 0, 0, getFileMenu());
 
   menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu());
 
