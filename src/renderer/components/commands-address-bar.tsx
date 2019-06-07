@@ -4,15 +4,15 @@ import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { EditorId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
 import { getTitle } from '../../utils/get-title';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';
+import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { getContent } from '../content';
-import { EditorId } from '../../interfaces';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -98,7 +98,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
 
   /**
    * Verifies from the user that we should be loading this fiddle
-   * 
+   *
    * @param what What are we loading from (gist, example, etc.)
    */
   public async verifyRemoteLoad(what: string): Promise<boolean> {
@@ -148,24 +148,27 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         renderer: await getContent(EditorId.renderer, appState.version),
         main: await getContent(EditorId.main, appState.version),
       };
-      const loaders: Promise<void>[] = [];
+      const loaders: Array<Promise<void>> = [];
       if (!Array.isArray(folder.data)) {
         throw new Error('The example Fiddle tried to launch is not a valid Electron Example');
       }
 
       for (const child of folder.data) {
         switch (child.name) {
-          case 'main.js':
-            loaders.push(fetch(child.download_url).then(r => r.text()).then(t => { values.main = t; }));
+          case MAIN_JS_NAME:
+            loaders.push(fetch(child.download_url).then((r) => r.text()).then((t) => { values.main = t; }));
             break;
-          case 'index.html':
-            loaders.push(fetch(child.download_url).then(r => r.text()).then(t => { values.html = t; }));
+          case INDEX_HTML_NAME:
+            loaders.push(fetch(child.download_url).then((r) => r.text()).then((t) => { values.html = t; }));
             break;
-          case 'renderer.js':
-            loaders.push(fetch(child.download_url).then(r => r.text()).then(t => { values.renderer = t; }));
+          case RENDERER_JS_NAME:
+            loaders.push(fetch(child.download_url).then((r) => r.text()).then((t) => { values.renderer = t; }));
+            break;
+          default:
             break;
         }
       }
+
       await Promise.all(loaders);
 
       appState.setWarningDialogTexts({
