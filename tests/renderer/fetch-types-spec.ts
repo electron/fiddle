@@ -43,7 +43,9 @@ describe('fetch-types', () => {
 
   describe('getOfflineTypeDefinitionPath()', () => {
     it('returns a path', async () => {
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
       expect(getOfflineTypeDefinitionPath('3.0.0')).toBe(expected);
     });
   });
@@ -54,7 +56,9 @@ describe('fetch-types', () => {
       fs.existsSync.mockReturnValueOnce(true);
 
       const result = await getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(true);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -65,7 +69,9 @@ describe('fetch-types', () => {
       fs.existsSync.mockReturnValueOnce(false);
 
       const result = await getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(false);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -79,7 +85,9 @@ describe('fetch-types', () => {
       (fetch as any).mockResponse(`it's me, the type definition`);
 
       const result = await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(`it's me, the type definition`);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -92,7 +100,9 @@ describe('fetch-types', () => {
       (fetch as any).mockReject();
 
       const result = await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(null);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -105,9 +115,14 @@ describe('fetch-types', () => {
       (fetch as any).mockResponse(`it's me, the type definition`);
 
       await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
-      expect(fs.outputFile).toHaveBeenCalledWith(expected, `it's me, the type definition`);
+      expect(fs.outputFile).toHaveBeenCalledWith(
+        expected,
+        `it's me, the type definition`
+      );
     });
 
     it('returns them even if saving them failed', async () => {
@@ -118,7 +133,9 @@ describe('fetch-types', () => {
       (fetch as any).mockResponse(def);
 
       const result = await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(fs.outputFile).toHaveBeenCalledWith(expected, def);
       expect(result).toBe(def);
@@ -132,7 +149,9 @@ describe('fetch-types', () => {
       (fetch as any).mockResponse(`it's me, the type definition`);
 
       const result = await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(def);
       expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
@@ -145,7 +164,9 @@ describe('fetch-types', () => {
       (fetch as any).mockResponse(`it's me, the type definition`);
 
       const result = await getTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts'
+      );
 
       expect(result).toBe(null);
       expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
@@ -166,8 +187,9 @@ describe('fetch-types', () => {
       const { app } = (window as any).ElectronFiddle;
       const { monaco } = app;
 
-      expect(monaco.languages.typescript.javascriptDefaults.addExtraLib)
-        .toHaveBeenCalled();
+      expect(
+        monaco.languages.typescript.javascriptDefaults.addExtraLib
+      ).toHaveBeenCalled();
     });
 
     it('it waits for Monaco to show up', async () => {
@@ -184,8 +206,9 @@ describe('fetch-types', () => {
 
       await updateEditorTypeDefinitions('3.0.0');
 
-      expect(monaco.languages.typescript.javascriptDefaults.addExtraLib)
-        .toHaveBeenCalled();
+      expect(
+        monaco.languages.typescript.javascriptDefaults.addExtraLib
+      ).toHaveBeenCalled();
     });
 
     it('it does not wait forever', async () => {

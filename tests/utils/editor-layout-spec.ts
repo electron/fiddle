@@ -6,7 +6,7 @@ describe('editor-layout', () => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
   });
 
-  it('updateEditorLayout calls layout() just once', (done) => {
+  it('updateEditorLayout calls layout() just once', done => {
     updateEditorLayout();
     updateEditorLayout();
     updateEditorLayout();

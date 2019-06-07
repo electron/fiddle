@@ -4,7 +4,7 @@ const { ElectronFiddleMock } = require('./mocks/electron-fiddle');
 const { createSerializer } = require('enzyme-to-json');
 
 configure({ adapter: new Adapter() });
-expect.addSnapshotSerializer(createSerializer({mode: 'deep'}));
+expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
 global.confirm = jest.fn();
 global.fetch = require('jest-fetch-mock');

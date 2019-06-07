@@ -1,4 +1,7 @@
-import { invertPosition, positionForRect } from '../../src/utils/position-for-rect';
+import {
+  invertPosition,
+  positionForRect
+} from '../../src/utils/position-for-rect';
 import { overridePlatform } from '../utils';
 
 describe('position-for-rect', () => {
@@ -30,7 +33,7 @@ describe('position-for-rect', () => {
     beforeEach(() => {
       Object.defineProperties(window, {
         innerWidth: { value: innerWidth, writable: true },
-        innerHeight: { value: innerHeight, writable: true },
+        innerHeight: { value: innerHeight, writable: true }
       });
     });
 

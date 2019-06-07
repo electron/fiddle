@@ -17,7 +17,6 @@ jest.mock('fs-extra', () => ({
 
 describe('files', () => {
   describe('setupFileListeners()', () => {
-
     it('sets up the listener', () => {
       setupFileListeners();
 
@@ -91,7 +90,7 @@ describe('files', () => {
       });
     });
 
-    it('handles not getting a path returned', async (done) => {
+    it('handles not getting a path returned', async done => {
       showSaveDialog();
 
       const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
@@ -116,7 +115,9 @@ describe('files', () => {
         }
       };
 
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => true);
+      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
+        async () => true
+      );
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
@@ -137,7 +138,9 @@ describe('files', () => {
         }
       };
 
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => false);
+      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
+        async () => false
+      );
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);

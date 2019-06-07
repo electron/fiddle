@@ -35,7 +35,9 @@ describe('npm', () => {
     it('returns true if npm installed', async () => {
       overridePlatform('darwin');
 
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm')
+      );
 
       const result = await getIsNpmInstalled();
 
@@ -46,7 +48,9 @@ describe('npm', () => {
     it('returns true if npm installed', async () => {
       overridePlatform('win32');
 
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm')
+      );
 
       const result = await getIsNpmInstalled(true);
 
@@ -68,7 +72,9 @@ describe('npm', () => {
     });
 
     it('uses the cache', async () => {
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm')
+      );
 
       const one = await getIsNpmInstalled(true);
       expect(one).toBe(true);
@@ -96,13 +102,19 @@ describe('npm', () => {
     it('attempts to install a single module', async () => {
       installModules({ dir: '/my/directory' }, 'say', 'thing');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
+      expect(exec).toHaveBeenCalledWith(
+        '/my/directory',
+        'npm install -S say thing'
+      );
     });
 
     it('attempts to installs all modules', async () => {
       installModules({ dir: '/my/directory' });
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
+      expect(exec).toHaveBeenCalledWith(
+        '/my/directory',
+        'npm install --dev --prod'
+      );
     });
   });
 

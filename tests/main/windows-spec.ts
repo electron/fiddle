@@ -1,6 +1,8 @@
 import { createContextMenu } from '../../src/main/context-menu';
 import {
-  browserWindows, getMainWindowOptions, getOrCreateMainWindow
+  browserWindows,
+  getMainWindowOptions,
+  getOrCreateMainWindow
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -45,7 +47,10 @@ describe('windows', () => {
 
     it('returns the expected output on macOS', () => {
       overridePlatform('darwin');
-      expect(getMainWindowOptions()).toEqual({ ...expectedBase, titleBarStyle: 'hidden' });
+      expect(getMainWindowOptions()).toEqual({
+        ...expectedBase,
+        titleBarStyle: 'hidden'
+      });
     });
   });
 

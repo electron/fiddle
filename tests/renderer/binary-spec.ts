@@ -63,12 +63,12 @@ describe('binary', () => {
     it('finds downloaded versions', async () => {
       const fs = require('fs-extra');
 
-      (fs.readdir as jest.Mock<any>).mockReturnValue([ 'v3.0.0' ]);
+      (fs.readdir as jest.Mock<any>).mockReturnValue(['v3.0.0']);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
       const result = await binaryManager.getDownloadedVersions();
 
-      expect(result).toEqual([ 'v3.0.0' ]);
+      expect(result).toEqual(['v3.0.0']);
     });
 
     it('is okay without versions ', async () => {
@@ -95,7 +95,9 @@ describe('binary', () => {
       overridePlatform('win32');
 
       const result = binaryManager.getElectronBinaryPath('v3.0.0');
-      expect(result).toBe(path.join('user/data/electron-bin/v3.0.0/electron.exe'));
+      expect(result).toBe(
+        path.join('user/data/electron-bin/v3.0.0/electron.exe')
+      );
     });
 
     it('returns the correct path on Linux', () => {
@@ -109,22 +111,24 @@ describe('binary', () => {
       overridePlatform('darwin');
 
       const result = binaryManager.getElectronBinaryPath('v3.0.0');
-      const expected = 'user/data/electron-bin/v3.0.0/Electron.app/Contents/MacOS/Electron';
+      const expected =
+        'user/data/electron-bin/v3.0.0/Electron.app/Contents/MacOS/Electron';
       expect(result).toBe(path.join(expected));
     });
 
     it('throws on other platforms', () => {
       overridePlatform('bleepbloop');
 
-      expect(() => binaryManager.getElectronBinaryPath('v3.0.0'))
-        .toThrow();
+      expect(() => binaryManager.getElectronBinaryPath('v3.0.0')).toThrow();
     });
   });
 
   describe('setup()', () => {
     it(`downloads a version it hasn't seen before`, async () => {
       const eDownload = require('electron-download');
-      eDownload.mockImplementationOnce((_p: any, c: any) => c(undefined, '/fake/path'));
+      eDownload.mockImplementationOnce((_p: any, c: any) =>
+        c(undefined, '/fake/path')
+      );
 
       await binaryManager.setup('v3.0.0');
 
@@ -155,10 +159,14 @@ describe('binary', () => {
 
     it('handles an error in the zip file', async () => {
       const eDownload = require('electron-download');
-      eDownload.mockImplementationOnce((_p: any, c: any) => c(undefined, '/fake/path'));
+      eDownload.mockImplementationOnce((_p: any, c: any) =>
+        c(undefined, '/fake/path')
+      );
 
       const mockZip = require('extract-zip');
-      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) => c(new Error('bwap-bwap')));
+      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) =>
+        c(new Error('bwap-bwap'))
+      );
 
       await binaryManager.setup('v3.0.0');
     });

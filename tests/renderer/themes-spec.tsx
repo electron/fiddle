@@ -1,6 +1,11 @@
 import * as path from 'path';
 
-import { activateTheme, getAvailableThemes, getTheme, readThemeFile } from '../../src/renderer/themes';
+import {
+  activateTheme,
+  getAvailableThemes,
+  getTheme,
+  readThemeFile
+} from '../../src/renderer/themes';
 import { DefaultThemes } from '../../src/renderer/themes-defaults';
 
 jest.mock('fs-extra');
@@ -40,7 +45,7 @@ describe('themes', () => {
     it('reads the themes folder for themes', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValue(true);
-      fs.readdir.mockReturnValueOnce([ 'test-theme1.json', 'test-theme2.json' ]);
+      fs.readdir.mockReturnValueOnce(['test-theme1.json', 'test-theme2.json']);
       fs.readJSON.mockReturnValue({ test: true });
 
       const themes = await getAvailableThemes();
@@ -70,7 +75,7 @@ describe('themes', () => {
     it('handles a readJSON error', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(true);
-      fs.readdir.mockImplementationOnce(() => [ 'hi' ]);
+      fs.readdir.mockImplementationOnce(() => ['hi']);
       fs.readJSON.mockImplementationOnce(() => Promise.reject('Bwap'));
 
       const themes = await getAvailableThemes();

@@ -51,7 +51,11 @@ export class MockMenuItem {
   public visible: boolean;
   public label: string;
   public type: string;
-  public click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => void;
+  public click: (
+    menuItem: Electron.MenuItem,
+    browserWindow: Electron.BrowserWindow,
+    event: Electron.Event
+  ) => void;
 
   constructor(options: Electron.MenuItemConstructorOptions) {
     this.enabled = !!options.enabled;
@@ -128,7 +132,7 @@ const autoUpdater = new MockAutoUpdater();
 
 const session = {
   defaultSession: {
-    clearCache: jest.fn((cb) => cb()),
+    clearCache: jest.fn(cb => cb()),
     clearStorageData: jest.fn((_opts, cb) => cb()),
     cookies: {
       get: jest.fn()
@@ -168,7 +172,7 @@ const electronMock = {
     createFromDataURL: jest.fn(function() {
       return { toPNG: jest.fn(() => 'content') };
     }),
-    createEmpty: jest.fn(),
+    createEmpty: jest.fn()
   },
   match: jest.fn(),
   Menu: MockMenu,
@@ -200,12 +204,12 @@ const electronMock = {
     Menu: MockMenu,
     MenuItem: MockMenuItem,
     process: {
-      argv: [ '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle' ]
+      argv: ['/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle']
     },
     shell,
     require: jest.fn(),
     TouchBar: MockTouchBar,
-    systemPreferences,
+    systemPreferences
   },
   require: jest.fn(),
   screen: new Screen(),

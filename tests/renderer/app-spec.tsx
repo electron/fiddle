@@ -4,7 +4,9 @@ import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('../../src/renderer/file-manager', () => require('../mocks/file-manager'));
+jest.mock('../../src/renderer/file-manager', () =>
+  require('../mocks/file-manager')
+);
 jest.mock('../../src/renderer/state', () => ({
   appState: {
     theme: 'defaultDark',
@@ -33,7 +35,7 @@ describe('Editors component', () => {
       jest.useFakeTimers();
 
       const app = new App();
-      const result = await app.setup() as HTMLDivElement;
+      const result = (await app.setup()) as HTMLDivElement;
       app.setupUnsavedOnChangeListener = jest.fn();
       jest.runAllTimers();
 
@@ -54,10 +56,10 @@ describe('Editors component', () => {
 
     it('does not create a touch bar manager on Windows and Linux', () => {
       overridePlatform('win32');
-      expect((new App()).touchBarManager).toBeFalsy();
+      expect(new App().touchBarManager).toBeFalsy();
 
       overridePlatform('linux');
-      expect((new App()).touchBarManager).toBeFalsy();
+      expect(new App().touchBarManager).toBeFalsy();
 
       resetPlatform();
     });
@@ -114,12 +116,15 @@ describe('Editors component', () => {
         renderer: 'renderer-value'
       });
 
-      expect((window as any).ElectronFiddle.editors.html.setValue)
-        .toHaveBeenCalledWith('html-value');
-      expect((window as any).ElectronFiddle.editors.main.setValue)
-        .toHaveBeenCalledWith('main-value');
-      expect((window as any).ElectronFiddle.editors.renderer.setValue)
-        .toHaveBeenCalledWith('renderer-value');
+      expect(
+        (window as any).ElectronFiddle.editors.html.setValue
+      ).toHaveBeenCalledWith('html-value');
+      expect(
+        (window as any).ElectronFiddle.editors.main.setValue
+      ).toHaveBeenCalledWith('main-value');
+      expect(
+        (window as any).ElectronFiddle.editors.renderer.setValue
+      ).toHaveBeenCalledWith('renderer-value');
     });
 
     it('attempts to set values for closed editors', () => {
@@ -134,32 +139,38 @@ describe('Editors component', () => {
         renderer: 'renderer-value'
       });
 
-      expect((app.state.closedPanels.main as EditorBackup)!.model!.setValue)
-        .toHaveBeenCalledWith('main-value');
+      expect(
+        (app.state.closedPanels.main as EditorBackup)!.model!.setValue
+      ).toHaveBeenCalledWith('main-value');
 
       window.ElectronFiddle.editors.main = oldMainEditor;
     });
 
-    it('warns when the contents are unsaved, does not proceed if denied', (done) => {
+    it('warns when the contents are unsaved, does not proceed if denied', done => {
       const app = new App();
       (app.state as any) = new MockState();
       app.state.isUnsaved = true;
 
-      app.setValues({
-        html: 'html-value',
-        main: 'main-value',
-        renderer: 'renderer-value'
-      }).then((result) => {
-        expect(result).toBe(true);
-        expect((window as any).ElectronFiddle.editors.html.setValue)
-          .toHaveBeenCalledWith('html-value');
-        expect((window as any).ElectronFiddle.editors.main.setValue)
-          .toHaveBeenCalledWith('main-value');
-        expect((window as any).ElectronFiddle.editors.renderer.setValue)
-          .toHaveBeenCalledWith('renderer-value');
+      app
+        .setValues({
+          html: 'html-value',
+          main: 'main-value',
+          renderer: 'renderer-value'
+        })
+        .then(result => {
+          expect(result).toBe(true);
+          expect(
+            (window as any).ElectronFiddle.editors.html.setValue
+          ).toHaveBeenCalledWith('html-value');
+          expect(
+            (window as any).ElectronFiddle.editors.main.setValue
+          ).toHaveBeenCalledWith('main-value');
+          expect(
+            (window as any).ElectronFiddle.editors.renderer.setValue
+          ).toHaveBeenCalledWith('renderer-value');
 
-        done();
-      });
+          done();
+        });
 
       setTimeout(() => {
         expect(app.state.isWarningDialogShowing).toBe(true);
@@ -168,26 +179,31 @@ describe('Editors component', () => {
       });
     });
 
-    it('warns when the contents are unsaved, does proceed if allowed', (done) => {
+    it('warns when the contents are unsaved, does proceed if allowed', done => {
       const app = new App();
       (app.state as any) = new MockState();
       app.state.isUnsaved = true;
 
-      app.setValues({
-        html: 'html-value',
-        main: 'main-value',
-        renderer: 'renderer-value'
-      }).then((result) => {
-        expect(result).toBe(false);
-        expect((window as any).ElectronFiddle.editors.html.setValue)
-          .toHaveBeenCalledTimes(0);
-        expect((window as any).ElectronFiddle.editors.main.setValue)
-          .toHaveBeenCalledTimes(0);
-        expect((window as any).ElectronFiddle.editors.renderer.setValue)
-          .toHaveBeenCalledTimes(0);
+      app
+        .setValues({
+          html: 'html-value',
+          main: 'main-value',
+          renderer: 'renderer-value'
+        })
+        .then(result => {
+          expect(result).toBe(false);
+          expect(
+            (window as any).ElectronFiddle.editors.html.setValue
+          ).toHaveBeenCalledTimes(0);
+          expect(
+            (window as any).ElectronFiddle.editors.main.setValue
+          ).toHaveBeenCalledTimes(0);
+          expect(
+            (window as any).ElectronFiddle.editors.renderer.setValue
+          ).toHaveBeenCalledTimes(0);
 
-        done();
-      });
+          done();
+        });
 
       setTimeout(() => {
         expect(app.state.isWarningDialogShowing).toBe(true);
@@ -201,7 +217,7 @@ describe('Editors component', () => {
       const app = new App();
       let threw = false;
       try {
-        await app.setValues({ html: '', main: '', renderer: ''});
+        await app.setValues({ html: '', main: '', renderer: '' });
       } catch (error) {
         threw = true;
       }
@@ -220,7 +236,8 @@ describe('Editors component', () => {
         renderer: 'renderer-value'
       });
 
-      const fn = window.ElectronFiddle.editors!.renderer!.onDidChangeModelContent;
+      const fn = window.ElectronFiddle.editors!.renderer!
+        .onDidChangeModelContent;
       const call = (fn as jest.Mock<any>).mock.calls[0];
       const cb = call[0];
 
@@ -237,10 +254,10 @@ describe('Editors component', () => {
       const app = new App();
       app.setupResizeListener();
 
-      expect(window.addEventListener)
-        .toHaveBeenCalled();
-      expect((window.addEventListener as jest.Mock).mock.calls[0][0])
-        .toBe('resize');
+      expect(window.addEventListener).toHaveBeenCalled();
+      expect((window.addEventListener as jest.Mock).mock.calls[0][0]).toBe(
+        'resize'
+      );
     });
   });
 
@@ -271,7 +288,8 @@ describe('Editors component', () => {
             --error-color: #df3434;
             --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           }
-        </style>`.replace(/        /gm, ''));
+        </style>`.replace(/        /gm, '')
+      );
     });
 
     it('removes the dark theme option if required', async () => {

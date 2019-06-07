@@ -57,7 +57,7 @@ describe('FileManager', () => {
       expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({
         html: '',
         renderer: '',
-        main: '',
+        main: ''
       });
     });
 
@@ -120,7 +120,10 @@ describe('FileManager', () => {
       const fs = require('fs-extra');
       const tmp = require('tmp');
 
-      await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
+      await fm.saveToTemp({
+        includeDependencies: false,
+        includeElectron: false
+      });
 
       expect(fs.outputFile).toHaveBeenCalledTimes(4);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
@@ -133,7 +136,10 @@ describe('FileManager', () => {
       });
 
       const testFn = async () => {
-        await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
+        await fm.saveToTemp({
+          includeDependencies: false,
+          includeElectron: false
+        });
       };
       let errored = false;
 

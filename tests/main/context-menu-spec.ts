@@ -1,4 +1,9 @@
-import { createContextMenu, getInspectItems, getMonacoItems, getRunItems } from '../../src/main/context-menu';
+import {
+  createContextMenu,
+  getInspectItems,
+  getMonacoItems,
+  getRunItems
+} from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';
 import { MockBrowserWindow } from '../mocks/browser-window';
@@ -30,7 +35,7 @@ describe('context-menu', () => {
   describe('getContextMenu()', () => {
     it('attaches to the context-menu', () => {
       const eventNames = mockWindow.webContents.eventNames();
-      expect(eventNames).toEqual([ 'context-menu' ]);
+      expect(eventNames).toEqual(['context-menu']);
     });
 
     it('creates a default context-menu with inspect for dev mode', () => {
@@ -138,7 +143,9 @@ describe('context-menu', () => {
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
-      expect(mockWindow.webContents.devToolsWebContents.focus).toHaveBeenCalled();
+      expect(
+        mockWindow.webContents.devToolsWebContents.focus
+      ).toHaveBeenCalled();
     });
 
     it('catches an error', () => {
@@ -146,10 +153,11 @@ describe('context-menu', () => {
       const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
       mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
       mockWindow.webContents.devToolsWebContents = new MockWebContents();
-      mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(() => {
-        throw new Error('💩');
-      });
-
+      mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(
+        () => {
+          throw new Error('💩');
+        }
+      );
 
       (result[0] as any).click();
     });
@@ -157,25 +165,26 @@ describe('context-menu', () => {
 
   describe('getMonacoItems()', () => {
     it('returns an empty array if canPaste is false', () => {
-      const result = getMonacoItems({ editFlags: { canPaste: false }} as any);
+      const result = getMonacoItems({ editFlags: { canPaste: false } } as any);
       expect(result).toHaveLength(0);
     });
 
     it('returns an array if the page url suggest the editor is up', () => {
       const result = getMonacoItems({
         editFlags: { canPaste: true },
-        pageURL: 'index.html'} as any
-      );
+        pageURL: 'index.html'
+      } as any);
       expect(result).toHaveLength(9);
     });
 
     it('executes an IPC send() for each element', () => {
       const result = getMonacoItems({
         editFlags: { canPaste: true },
-        pageURL: 'index.html'} as any
-      );      let i = 0;
+        pageURL: 'index.html'
+      } as any);
+      let i = 0;
 
-      result.forEach((item) => {
+      result.forEach(item => {
         if (item.click) {
           i = i + 1;
           (item as any).click();

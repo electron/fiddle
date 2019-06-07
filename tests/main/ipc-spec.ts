@@ -34,7 +34,9 @@ describe('IpcMainManager', () => {
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
 
-      expect(mockTarget.webContents.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
+      expect(mockTarget.webContents.send).toHaveBeenCalledWith(
+        IpcEvents.FIDDLE_RUN
+      );
     });
 
     it('sends an event to a target window', () => {

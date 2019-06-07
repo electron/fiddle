@@ -1,9 +1,18 @@
-import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, PanelId } from '../../src/interfaces';
+import {
+  ALL_MOSAICS,
+  EditorId,
+  ElectronVersionSource,
+  ElectronVersionState,
+  PanelId
+} from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
+import {
+  getUpdatedElectronVersions,
+  saveLocalVersions
+} from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
@@ -23,7 +32,8 @@ jest.mock('../../src/renderer/versions', () => ({
   getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
     return require('../mocks/electron-versions').mockVersionsArray;
   }),
-  getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+  getElectronVersions: () =>
+    require('../mocks/electron-versions').mockVersionsArray,
   getDefaultVersion: () => '2.0.2',
   ElectronReleaseChannel: {
     stable: 'Stable',
@@ -49,7 +59,7 @@ describe('AppState', () => {
   });
 
   describe('onbeforeunload handler', () => {
-    it('closes the window', (done) => {
+    it('closes the window', done => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -66,7 +76,7 @@ describe('AppState', () => {
       });
     });
 
-    it('closes the app', (done) => {
+    it('closes the app', done => {
       const { remote } = require('electron');
       window.close = jest.fn();
       appState.isUnsaved = true;
@@ -86,7 +96,7 @@ describe('AppState', () => {
       });
     });
 
-    it('does not close the window', (done) => {
+    it('does not close the window', done => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -106,10 +116,11 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock)
-        .mockImplementationOnce(async () => {
+      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
+        async () => {
           throw new Error('Bwap-bwap');
-        });
+        }
+      );
 
       await appState.updateDownloadedVersionState();
     });
@@ -142,7 +153,7 @@ describe('AppState', () => {
 
       expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
     });
-   });
+  });
 
   describe('toggleConsole()', () => {
     it('toggles the console', () => {
@@ -332,16 +343,19 @@ describe('AppState', () => {
       // We just want to verify that the version state was
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual(
-        [ '2.0.2', '2.0.1', '1.8.7' ]
-      );
+      expect(Object.keys(appState.versions)).toEqual([
+        '2.0.2',
+        '2.0.1',
+        '1.8.7'
+      ]);
     });
   });
 
   describe('updateDownloadedVersionState()', () => {
     it('downloads a version if necessary', async () => {
       const mockResult = Promise.resolve(['2.0.2']);
-      (appState.binaryManager.getDownloadedVersions as jest.Mock).mockReturnValueOnce(mockResult);
+      (appState.binaryManager
+        .getDownloadedVersions as jest.Mock).mockReturnValueOnce(mockResult);
       await appState.updateDownloadedVersionState();
 
       expect(appState.versions['2.0.2'].state).toBe(ElectronVersionState.ready);
@@ -384,7 +398,9 @@ describe('AppState', () => {
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
-      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), { bypassBuffer: false });
+      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), {
+        bypassBuffer: false
+      });
       expect(appState.output[1].text).toBe('Buffer');
 
       resetPlatform();
@@ -418,7 +434,7 @@ describe('AppState', () => {
     it('updates the visible editors and creates a backup', () => {
       appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
       appState.closedPanels = {};
-      appState.setVisibleMosaics([ EditorId.main ]);
+      appState.setVisibleMosaics([EditorId.main]);
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
       expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();

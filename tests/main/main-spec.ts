@@ -1,6 +1,11 @@
 import { app } from 'electron';
 
-import { main, onBeforeQuit, onReady, onWindowsAllClosed } from '../../src/main/main';
+import {
+  main,
+  onBeforeQuit,
+  onReady,
+  onWindowsAllClosed
+} from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';

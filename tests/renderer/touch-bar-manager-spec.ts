@@ -1,4 +1,7 @@
-import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import {
+  ElectronVersionSource,
+  ElectronVersionState
+} from '../../src/interfaces';
 import { AppState } from '../../src/renderer/state';
 import { TouchBarManager } from '../../src/renderer/touch-bar-manager';
 import { mockVersions } from '../mocks/electron-versions';
@@ -27,7 +30,7 @@ describe('TouchBarManager', () => {
 
     expect(touchBarMgr.versionSelector.items).toHaveLength(3);
 
-    const [ item ] = touchBarMgr.versionSelector.items;
+    const [item] = touchBarMgr.versionSelector.items;
 
     expect(item.icon).toBe(undefined);
     expect(item.label).toBe(`💾 2.0.2`);
@@ -43,7 +46,7 @@ describe('TouchBarManager', () => {
 
     expect(touchBarMgr.versionSelector.items).toHaveLength(4);
 
-    const [ item ] = touchBarMgr.versionSelector.items;
+    const [item] = touchBarMgr.versionSelector.items;
 
     expect(item.icon).toBe(undefined);
     expect(item.label).toBe(`⏬ 3.3.3`);

@@ -6,9 +6,11 @@ describe('array-to-stringmap', () => {
     const input: Array<Partial<NpmVersion>> = [
       {
         version: 'v1.0.0'
-      }, {
+      },
+      {
         version: 'v2.0.0'
-      }, {
+      },
+      {
         version: '3.0.0'
       }
     ];
@@ -16,14 +18,14 @@ describe('array-to-stringmap', () => {
 
     expect(output).toEqual({
       '1.0.0': {
-        version: 'v1.0.0',
+        version: 'v1.0.0'
       },
       '2.0.0': {
-        version: 'v2.0.0',
+        version: 'v2.0.0'
       },
       '3.0.0': {
-        version: '3.0.0',
-      },
+        version: '3.0.0'
+      }
     });
   });
 });

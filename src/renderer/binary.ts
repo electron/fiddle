@@ -187,16 +187,16 @@ export class BinaryManager {
    * @param {string} extractPath
    * @returns {Promise<void>}
    */
-  private unzip(zipPath: string, extractPath: string): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      const extract = (await fancyImport<any>('extract-zip')).default;
+  private async unzip(zipPath: string, extractPath: string): Promise<void> {
+    const extract = (await fancyImport<any>('extract-zip')).default;
 
-      process.noAsar = true;
+    process.noAsar = true;
 
-      const options = {
-        dir: extractPath
-      };
+    const options = {
+      dir: extractPath
+    };
 
+    return new Promise((resolve, reject) => {
       extract(zipPath, options, (error: Error) => {
         if (error) {
           reject(error);
