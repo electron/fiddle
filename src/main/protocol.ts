@@ -19,8 +19,9 @@ const handlePotentialProtocolLaunch = (url: string) => {
   if (!parsed.pathname || !parsed.hostname) return;
 
   const pathParts = parsed.pathname.split('/').slice(1);
-  if (pathParts.length === 0) return;
+
   switch (parsed.hostname) {
+    // electron-fiddle://gist/blub
     case 'gist':
       if (pathParts.length === 1) {
         // We only have a gist ID
@@ -37,7 +38,19 @@ const handlePotentialProtocolLaunch = (url: string) => {
         return;
       }
       break;
+    // electron-fiddle://electron/{ref}/{path}
     case 'electron':
+      if (pathParts.length > 1) {
+        // First part of the commit HASH / ref / branch
+        // Rest is the path to the example
+        ipcMainManager.send(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [{
+          ref: pathParts[0],
+          path: pathParts.slice(1).join('/'),
+        }]);
+      } else {
+        // This is an invalid electron launch
+        return;
+      }
       break;
     default:
       return;

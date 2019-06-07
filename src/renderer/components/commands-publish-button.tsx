@@ -73,12 +73,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
   public async publishFiddle(): Promise<void> {
     this.setState({ isPublishing: true });
 
-    const octo = await getOctokit();
-    octo.authenticate({
-      type: 'token',
-      token: this.props.appState.gitHubToken!
-    });
-
+    const octo = await getOctokit(this.props.appState);
     const { gitHubPublishAsPublic } = this.props.appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getValues(options);

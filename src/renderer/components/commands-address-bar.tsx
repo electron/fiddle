@@ -4,11 +4,13 @@ import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { EditorId, EditorValues } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
 import { getTitle } from '../../utils/get-title';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { getOctokit } from '../../utils/octokit';
+import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -25,11 +27,14 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   constructor(props: AddressBarProps) {
     super(props);
 
-    this.loadFiddle = this.loadFiddle.bind(this);
-    this.loadFiddleFromIpc = this.loadFiddleFromIpc.bind(this);
+    this.fetchExampleAndLoad = this.fetchExampleAndLoad.bind(this);
+    this.fetchGistAndLoad = this.fetchGistAndLoad.bind(this);
+    this.loadFiddleFromGist = this.loadFiddleFromGist.bind(this);
+    this.loadFiddleFromElectronExample = this.loadFiddleFromElectronExample.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.submit = this.submit.bind(this);
+    this.verifyRemoteLoad = this.verifyRemoteLoad.bind(this);
 
     const { gistId } = this.props.appState;
     const value = gistId ? urlFromId(gistId) : '';
@@ -55,7 +60,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    */
   public submit() {
     if (this.state.value) {
-      this.loadFiddle(idFromUrl(this.state.value) || this.state.value);
+      this.fetchGistAndLoad(idFromUrl(this.state.value) || this.state.value);
     }
   }
 
@@ -67,24 +72,44 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       () => this.props.appState.gistId,
       (gistId: string) => this.setState({ value: urlFromId(gistId) })
     );
-    ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromIpc);
+    ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromGist);
+    ipcRendererManager.on(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, this.loadFiddleFromElectronExample);
   }
 
   public componentWillUnmount() {
-    ipcRendererManager.removeListener(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromIpc);
+    ipcRendererManager.removeListener(IpcEvents.LOAD_GIST_REQUEST, this.loadFiddleFromGist);
+    ipcRendererManager.removeListener(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, this.loadFiddleFromElectronExample);
   }
 
-  public async loadFiddleFromIpc(_: any, gistInfo: { id: string }) {
+  public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
+    console.log(`Loading fiddle from Electron example`, _, exampleInfo);
+    const ok = await this.verifyRemoteLoad('example from the Electron docs');
+    if (!ok) return;
+
+    this.fetchExampleAndLoad(exampleInfo.ref, exampleInfo.path);
+  }
+
+  public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
+    const ok = await this.verifyRemoteLoad('gist');
+    if (!ok) return;
+
+    this.fetchGistAndLoad(gistInfo.id);
+  }
+
+  /**
+   * Verifies from the user that we should be loading this fiddle
+   *
+   * @param what What are we loading from (gist, example, etc.)
+   */
+  public async verifyRemoteLoad(what: string): Promise<boolean> {
     const { appState } = this.props;
     appState.setWarningDialogTexts({
-      label: 'Are you sure you sure you want to load this gist? Only load and run it if you trust the source'
+      label: `Are you sure you sure you want to load this ${what}? Only load and run it if you trust the source`
     });
     appState.isWarningDialogShowing = true;
     await when(() => !appState.isWarningDialogShowing);
 
-    if (appState.warningDialogLastResult) {
-      this.loadFiddle(gistInfo.id);
-    }
+    return !!appState.warningDialogLastResult;
   }
 
   /**
@@ -96,56 +121,83 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     this.setState({ value: event.target.value });
   }
 
+  public async fetchExampleAndLoad(ref: string, path: string): Promise<boolean> {
+    const { appState } = this.props;
+
+    try {
+      const octo = await getOctokit(this.props.appState);
+
+      // TODO: Maybe we should fetch the package.json for the given ref to use the correct version of Electron?
+      const folder = await octo.repos.getContents({
+        owner: 'electron',
+        repo: 'electron',
+        ref,
+        path,
+      });
+
+      const values = {
+        html: await getContent(EditorId.html, appState.version),
+        renderer: await getContent(EditorId.renderer, appState.version),
+        main: await getContent(EditorId.main, appState.version),
+      };
+
+      const loaders: Array<Promise<void>> = [];
+      if (!Array.isArray(folder.data)) {
+        throw new Error('The example Fiddle tried to launch is not a valid Electron example');
+      }
+
+      for (const child of folder.data) {
+        switch (child.name) {
+          case MAIN_JS_NAME:
+            loaders.push(fetch(child.download_url)
+              .then((r) => r.text()).then((t) => { values.main = t; })
+            );
+
+            break;
+          case INDEX_HTML_NAME:
+            loaders.push(fetch(child.download_url)
+              .then((r) => r.text()).then((t) => { values.html = t; })
+            );
+
+            break;
+          case RENDERER_JS_NAME:
+            loaders.push(fetch(child.download_url)
+              .then((r) => r.text()).then((t) => { values.renderer = t; })
+            );
+
+            break;
+          default:
+            break;
+        }
+      }
+
+      await Promise.all(loaders);
+
+      return this.handleLoadingSuccess(values, '');
+    } catch (error) {
+      return this.handleLoadingFailed(error);
+    }
+  }
+
   /**
    * Load a fiddle
    *
    * @returns {Promise<boolean>}
    * @memberof AddressBar
    */
-  public async loadFiddle(gistId: string): Promise<boolean> {
-    const { appState } = this.props;
-
+  public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
-      const octo = await getOctokit();
-
-      // You can load Gists without being authenticated,
-      // but we get better rate limits when authenticated
-      if (appState.gitHubToken) {
-        octo.authenticate({
-          type: 'token',
-          token: appState.gitHubToken!
-        });
-      }
-
+      const octo = await getOctokit(this.props.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
 
-      appState.setWarningDialogTexts({
-        label: 'Loading the fiddle will replace your current unsaved changes. Do you want to discard them?'
-      });
-
-      await window.ElectronFiddle.app.setValues({
+      return this.handleLoadingSuccess({
         html: gist.data.files[INDEX_HTML_NAME].content,
         main: gist.data.files[MAIN_JS_NAME].content,
         renderer: gist.data.files[RENDERER_JS_NAME].content,
-      });
-
-      document.title = getTitle(appState);
-      appState.gistId = gistId;
-      appState.localPath = undefined;
-      appState.templateName = undefined;
+      }, gistId);
     } catch (error) {
-      appState.setWarningDialogTexts({
-        label: `Loading the fiddle failed: ${error}`,
-        cancel: undefined
-      });
-
-      appState.toogleWarningDialog();
-
-      console.warn(`Loading Fiddle failed`, error);
-      return false;
+      return this.handleLoadingFailed(error);
     }
-
-    return true;
   }
 
   public renderLoadButton(isValueCorrect: boolean): JSX.Element {
@@ -178,5 +230,50 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         />
       </form>
     );
+  }
+
+  /**
+   * Loading a fiddle from GitHub succeeded, let's move on.
+   *
+   * @private
+   * @param {Partial<EditorValues>} values
+   * @param {string} gistId
+   * @returns {boolean}
+   */
+  private async handleLoadingSuccess(values: Partial<EditorValues>, gistId: string): Promise<boolean> {
+    const { appState } = this.props;
+
+    appState.setWarningDialogTexts({
+      label: 'Loading the fiddle will replace your current unsaved changes. Do you want to discard them?'
+    });
+
+    await window.ElectronFiddle.app.setValues(values);
+
+    document.title = getTitle(appState);
+    appState.gistId = gistId;
+    appState.localPath = undefined;
+    appState.templateName = undefined;
+
+    return true;
+  }
+
+  /**
+   * Loading a fiddle from GitHub failed - this method handles this case
+   * gracefully.
+   *
+   * @private
+   * @param {Error} error
+   * @returns {boolean}
+   */
+  private handleLoadingFailed(error: Error): false {
+    this.props.appState.setWarningDialogTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
+
+    this.props.appState.toogleWarningDialog();
+
+    console.warn(`Loading Fiddle failed`, error);
+    return false;
   }
 }

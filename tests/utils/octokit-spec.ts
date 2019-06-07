@@ -8,6 +8,8 @@ jest.mock('@octokit/rest', () => ({
     mockRequired++;
 
     return class MockOctokit {
+      public authenticate = jest.fn();
+
       constructor() {
         mockConstructed++;
       }
@@ -24,6 +26,20 @@ describe('octokit', () => {
       expect(octokit).toBeTruthy();
       expect(mockRequired).toBe(1);
       expect(mockConstructed).toBe(1);
+    });
+
+    it('uses GitHub authentication when available', async () => {
+      const mockStore = {
+        gistId: 'abcdtestid',
+        gitHubToken: 'testToken'
+      };
+      const { authenticate } = await getOctokit(mockStore as any);
+
+      expect(authenticate).toHaveBeenCalledTimes(1);
+      expect((authenticate as jest.Mock).mock.calls[0][0]).toEqual({
+        type: 'token',
+        token: mockStore.gitHubToken
+      });
     });
   });
 });

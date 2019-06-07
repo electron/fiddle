@@ -1,7 +1,9 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { observable } from 'mobx';
 import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../../src/shared-constants';
 import { getOctokit } from '../../../src/utils/octokit';
 import { MockState } from '../../mocks/state';
 
@@ -25,15 +27,38 @@ const mockGists = {
   })
 };
 
+const mockRepos = {
+  getContents: async () => ({
+    data: [
+      {
+        name: MAIN_JS_NAME,
+        download_url: 'https://main'
+      }, {
+        name: RENDERER_JS_NAME,
+        download_url: 'https://renderer'
+      }, {
+        name: INDEX_HTML_NAME,
+        download_url: 'https://html'
+      }, {
+        name: 'other_stuff',
+        download_url: 'https://google.com'
+      }
+    ]
+  })
+};
+
 describe('AddressBar component', () => {
   let store: any;
 
+  class MockStore {
+    @observable public gistId: string | null = null;
+    @observable public isWarningDialogShowing: boolean = false;
+    public setWarningDialogTexts = jest.fn();
+    public toogleWarningDialog = jest.fn();
+  }
+
   beforeEach(() => {
-    store = {
-      gistId: null,
-      setWarningDialogTexts: jest.fn(),
-      toogleWarningDialog: jest.fn()
-    };
+    store = new MockStore();
   });
 
   it('renders', () => {
@@ -66,8 +91,8 @@ describe('AddressBar component', () => {
   });
 
   it('handles submit', () => {
-    const oldLoadFiddle = AddressBar.prototype.loadFiddle;
-    AddressBar.prototype.loadFiddle = jest.fn();
+    const oldLoadFiddle = AddressBar.prototype.fetchGistAndLoad;
+    AddressBar.prototype.fetchGistAndLoad = jest.fn();
     const preventDefault = jest.fn();
     const wrapper = shallow(<AddressBar appState={store} />);
     const instance: AddressBar = wrapper.instance() as any;
@@ -78,10 +103,10 @@ describe('AddressBar component', () => {
     expect(wrapper.state('value')).toBe('abcdtestid');
     expect(preventDefault).toHaveBeenCalled();
 
-    AddressBar.prototype.loadFiddle = oldLoadFiddle;
+    AddressBar.prototype.fetchGistAndLoad = oldLoadFiddle;
   });
 
-  describe('loadFiddle()', () => {
+  describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGists });
 
@@ -91,7 +116,7 @@ describe('AddressBar component', () => {
       store.gistId = 'abcdtestid';
 
       instance.handleChange({ target: { value: 'abcdtestid' } } as any);
-      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      await (wrapper.instance() as AddressBar).fetchGistAndLoad('abcdtestid');
 
       expect(wrapper.state('value')).toBe('abcdtestid');
       expect(document.title).toBe('Electron Fiddle - gist.github.com/abcdtestid');
@@ -107,29 +132,175 @@ describe('AddressBar component', () => {
       });
 
       const wrapper = shallow(<AddressBar appState={store} />);
-      const result = await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      const result = await (wrapper.instance() as AddressBar).fetchGistAndLoad('abcdtestid');
 
       expect(result).toBe(false);
     });
+  });
 
-    it('uses GitHub authentication when available', async () => {
-      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGists, authenticate: jest.fn() });
+  describe('fetchExampleAndLoad()', () => {
+    it('loads an Electron exmaple', async () => {
+      (getOctokit as jest.Mock).mockReturnValue({ repos: mockRepos });
 
-      const { authenticate } = await getOctokit();
       const wrapper = shallow(<AddressBar appState={store} />);
       const instance: AddressBar = wrapper.instance() as any;
 
-      store.gistId = 'abcdtestid';
-      store.gitHubToken = 'testToken';
+      // Setup the mock
+      (fetch as any).mockResponses(
+        [ 'main' ],
+        [ 'renderer' ],
+        [ 'index' ]
+      );
 
-      instance.handleChange({ target: { value: 'abcdtestid' } } as any);
-      await (wrapper.instance() as AddressBar).loadFiddle('abcdtestid');
+      await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
-      expect(authenticate).toHaveBeenCalledTimes(1);
-      expect((authenticate as jest.Mock).mock.calls[0][0]).toEqual({
-        type: 'token',
-        token: store.gitHubToken
+      expect(document.title).toBe('Electron Fiddle - Unsaved');
+      const { calls } = (window.ElectronFiddle.app.setValues as any).mock;
+
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toEqual([{
+        html: 'index',
+        main: 'main',
+        renderer: 'renderer'
+      }]);
+    });
+
+    it('handles an error', async () => {
+      (getOctokit as jest.Mock).mockReturnValue({
+        repos: {
+          getContents: async () => {
+            throw new Error('Bwap bwap');
+          }
+        }
       });
+
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      // Setup the mock
+      (fetch as any).mockResponses(
+        [ 'main' ],
+        [ 'renderer' ],
+        [ 'index' ]
+      );
+
+      const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
+      expect(result).toBe(false);
+    });
+
+    it('handles incorrect results', async () => {
+      (getOctokit as jest.Mock).mockReturnValue({
+        repos: {
+          getContents: async () => ({
+            not_an_array: true
+          })
+        }
+      });
+
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      // Setup the mock
+      (fetch as any).mockResponses(
+        [ 'main' ],
+        [ 'renderer' ],
+        [ 'index' ]
+      );
+
+      const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
+      expect(result).toBe(false);
+      expect(store.setWarningDialogTexts.mock.calls[0][0].label).toEqual(
+        'Loading the fiddle failed: Error: The example Fiddle tried to launch is not a valid Electron example'
+      );
+    });
+  });
+
+  describe('verifyRemoteLoad()', () => {
+    it('asks the user if they want to load remote content', (done) => {
+      const mockStore: any = new MockStore();
+      const wrapper = shallow(<AddressBar appState={mockStore} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad('test').then(done);
+
+      expect(mockStore.isWarningDialogShowing).toBe(true);
+      mockStore.isWarningDialogShowing = false;
+    });
+  });
+
+  describe('verifyRemoteLoad()', () => {
+    it('asks the user if they want to load remote content', (done) => {
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad('test').then(done);
+
+      expect(store.isWarningDialogShowing).toBe(true);
+      store.isWarningDialogShowing = false;
+    });
+  });
+
+  describe('loadFiddleFromElectronExample()', () => {
+    it('loads the example with confirmation', async () => {
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
+      instance.fetchExampleAndLoad = jest.fn();
+      await instance.loadFiddleFromElectronExample(
+        {},
+        { path: 'test/path', ref: '4.0.0' }
+      );
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith('4.0.0', 'test/path');
+    });
+
+    it('does not load the example without confirmation', async () => {
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(false);
+      instance.fetchExampleAndLoad = jest.fn();
+      await instance.loadFiddleFromElectronExample(
+        {},
+        { path: 'test/path', ref: '4.0.0' }
+      );
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.fetchExampleAndLoad).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('loadFiddleFromGist()', () => {
+    it('loads the example with confirmation', async () => {
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
+      instance.fetchGistAndLoad = jest.fn();
+      await instance.loadFiddleFromGist(
+        {},
+        { id: 'gist' }
+      );
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
+    });
+
+    it('does not load the example without confirmation', async () => {
+      const wrapper = shallow(<AddressBar appState={store} />);
+      const instance: AddressBar = wrapper.instance() as any;
+
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(false);
+      instance.fetchGistAndLoad = jest.fn();
+      await instance.loadFiddleFromGist(
+        {},
+        { id: 'gist' }
+      );
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.fetchGistAndLoad).toHaveBeenCalledTimes(0);
     });
   });
 });
