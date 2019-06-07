@@ -66,7 +66,6 @@ describe('Publish button component', () => {
 
     await instance.publishFiddle();
 
-    expect(mockOctokit.authenticate).toHaveBeenCalled();
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
       files: {
@@ -95,7 +94,6 @@ describe('Publish button component', () => {
 
     await instance.publishFiddle();
 
-    expect(mockOctokit.authenticate).toHaveBeenCalled();
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
       files: {
@@ -124,7 +122,6 @@ describe('Publish button component', () => {
 
     await instance.publishFiddle();
 
-    expect(mockOctokit.authenticate).toHaveBeenCalled();
     expect(wrapper.state('isPublishing')).toBe(false);
   });
 

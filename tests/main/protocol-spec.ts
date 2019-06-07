@@ -14,6 +14,7 @@ describe('protocol', () => {
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
     ipcMainManager.send = jest.fn();
+    (app.isReady as any).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -35,7 +36,6 @@ describe('protocol', () => {
   describe('listenForProtocolHandler()', () => {
     it('handles a Fiddle url (open-url)', () => {
       overridePlatform('darwin');
-      (app.isReady as any).mockReturnValue(true);
 
       listenForProtocolHandler();
 
@@ -47,7 +47,6 @@ describe('protocol', () => {
 
     it('handles a Fiddle url with a username (open-url)', () => {
       overridePlatform('darwin');
-      (app.isReady as any).mockReturnValue(true);
 
       listenForProtocolHandler();
 
@@ -59,7 +58,6 @@ describe('protocol', () => {
 
     it('handles a non-fiddle url (open-url)', () => {
       overridePlatform('darwin');
-      (app.isReady as any).mockReturnValue(true);
 
       listenForProtocolHandler();
 
@@ -74,7 +72,6 @@ describe('protocol', () => {
       overridePlatform('win32');
 
       process.argv = ['electron-fiddle://gist/hi-arg'];
-      (app.isReady as any).mockReturnValue(true);
 
       listenForProtocolHandler();
 
@@ -99,6 +96,49 @@ describe('protocol', () => {
       cb();
 
       expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-ready' }]);
+    });
+
+    it('handles an electron path url', () => {
+      // electron-fiddle://electron/{ref}/{path}
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[0][1];
+
+      handler({}, 'electron-fiddle://electron/4.0.0/test/path');
+
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [
+        {
+          ref: '4.0.0',
+          path: 'test/path'
+        }
+      ]);
+    });
+
+    it('handles a flawed electron path url', () => {
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[0][1];
+      handler({}, 'electron-fiddle://electron/4.0.0');
+
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
+    });
+
+    it('handles a flawed url (unclear instruction)', () => {
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[0][1];
+      handler({}, 'electron-fiddle://noop/123');
+
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
+    });
+
+    it('handles a flawed url (no instruction)', () => {
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[0][1];
+      handler({}, 'electron-fiddle://');
+
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
     });
   });
 });
