@@ -52,6 +52,11 @@ const handlePotentialProtocolLaunch = (url: string) => {
         return;
       }
       break;
+    case 'token':
+      if (pathParts.length === 1) {
+        // We have a token
+        ipcMainManager.send(IpcEvents.SET_GITHUB_TOKEN, [pathParts[0]]);
+      }
     default:
       return;
   }

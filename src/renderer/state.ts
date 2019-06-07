@@ -116,6 +116,7 @@ export class AppState {
     this.pushError = this.pushError.bind(this);
     this.pushOutput = this.pushOutput.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
+    this.setToken = this.setToken.bind(this);
     this.setVersion = this.setVersion.bind(this);
     this.showTour = this.showTour.bind(this);
     this.signOutGitHub = this.signOutGitHub.bind(this);
@@ -126,6 +127,7 @@ export class AppState {
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
+    ipcRendererManager.on(IpcEvents.SET_GITHUB_TOKEN, this.setToken);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -259,6 +261,19 @@ export class AppState {
 
   @action public showTour() {
     this.resetView({ isTourShowing: true });
+  }
+
+  @action public async setToken(_: any, token: string) {
+    this.setWarningDialogTexts({
+      label: 'Do you want to sign in to Electron Fiddle using this token?',
+      ok: 'Yes',
+      cancel: 'No'
+    });
+    this.isWarningDialogShowing = true;
+    await when(() => !this.isWarningDialogShowing);
+    if (this.warningDialogLastResult) {
+      this.gitHubToken = token;
+    }
   }
 
   @action public setTheme(fileName?: string) {
