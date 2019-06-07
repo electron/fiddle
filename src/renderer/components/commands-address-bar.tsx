@@ -143,7 +143,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
 
       const loaders: Array<Promise<void>> = [];
       if (!Array.isArray(folder.data)) {
-        throw new Error('The example Fiddle tried to launch is not a valid Electron Example');
+        throw new Error('The example Fiddle tried to launch is not a valid Electron example');
       }
 
       for (const child of folder.data) {

@@ -152,10 +152,10 @@ describe('AddressBar component', () => {
         [ 'index' ]
       );
 
-      await (wrapper.instance() as AddressBar).fetchExampleAndLoad('4.0.0', 'test/path');
+      await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
       expect(document.title).toBe('Electron Fiddle - Unsaved');
-      const { calls } = (window.ElectronFiddle.app.setValues.mock as jest.Mock);
+      const { calls } = (window.ElectronFiddle.app.setValues as any).mock;
 
       expect(calls).toHaveLength(1);
       expect(calls[0]).toEqual([{
