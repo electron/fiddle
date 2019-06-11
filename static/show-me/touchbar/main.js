@@ -87,17 +87,19 @@ app.on('ready', () => {
     spinning = false
   }
 
-  const touchBar = new TouchBar([
-    spin,
-    new TouchBarSpacer({ size: 'large' }),
-    reel1,
-    new TouchBarSpacer({ size: 'small' }),
-    reel2,
-    new TouchBarSpacer({ size: 'small' }),
-    reel3,
-    new TouchBarSpacer({ size: 'large' }),
-    result
-  ])
+  const touchBar = new TouchBar({
+    items: [
+      spin,
+      new TouchBarSpacer({ size: 'large' }),
+      reel1,
+      new TouchBarSpacer({ size: 'small' }),
+      reel2,
+      new TouchBarSpacer({ size: 'small' }),
+      reel3,
+      new TouchBarSpacer({ size: 'large' }),
+      result
+    ]
+  })
 
   mainWindow.setTouchBar(touchBar)
 })
