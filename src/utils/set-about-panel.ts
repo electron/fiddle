@@ -6,6 +6,8 @@ import { AboutPanelOptionsOptions, app } from 'electron';
  * @returns
  */
 export function setupAboutPanel(): void {
+  if (process.platform === 'win32') return;
+
   const options: AboutPanelOptionsOptions = {
     applicationName: 'Electron Fiddle',
     applicationVersion: app.getVersion(),
