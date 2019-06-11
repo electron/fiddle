@@ -13,6 +13,7 @@ jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
 jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
 jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
+jest.mock('electron-download');
 
 delete window.localStorage;
 // We'll do this twice.
