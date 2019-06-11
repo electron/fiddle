@@ -56,6 +56,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
   public async onSubmitToken(): Promise<void> {
     if (!this.state.tokenInput) return;
     this.setState({ verifying: true });
+    this.props.appState.gitHubToken = this.state.tokenInput;
 
     const octo = await getOctokit(this.props.appState);
 
@@ -64,16 +65,14 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       this.props.appState.gitHubAvatarUrl = data.avatar_url;
       this.props.appState.gitHubLogin = data.login;
       this.props.appState.gitHubName = data.name;
+      this.setState({ verifying: false, error: false });
     } catch (error) {
       console.warn(`Authenticating against GitHub failed`, error);
       this.setState({ verifying: false, error: true });
       return;
     }
 
-    this.props.appState.gitHubToken = this.state.tokenInput;
     this.props.appState.isTokenDialogShowing = false;
-
-    this.setState({ verifying: false, error: false });
   }
 
   /**
