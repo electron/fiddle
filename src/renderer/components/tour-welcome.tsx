@@ -115,7 +115,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
             a Node.js application is started. The main script runs in the "main
             process". To display a user interface, the main process creates renderer
             processes – usually in the form of windows, which Electron calls
-            <code>BrowserWindow</code>.
+             <code>BrowserWindow</code>.
           </p>
           <p>
             To get started, pretend that the main process is just like a Node.js
@@ -137,7 +137,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
       content: (
         <p>
           In the default fiddle, this HTML file is loaded in the
-          <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
+           <code>BrowserWindow</code>. Any HTML, CSS, or JavaScript that works
           in a browser will work here, too. In addition, Electron allows you
           to execute Node.js code. Take a close look at the
             <code>&lt;script /&gt;</code> tag and notice how we can call <code>
