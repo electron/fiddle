@@ -43,6 +43,11 @@ export class Commands extends React.Component<CommandsProps, {}> {
               text='Console'
               onClick={appState.toggleConsole}
             />
+            <Button
+              icon='disable'
+              text='Clear'
+              onClick={appState.clearConsole}
+            />
             <EditorDropdown appState={appState} />
           </ControlGroup>
         </div>
