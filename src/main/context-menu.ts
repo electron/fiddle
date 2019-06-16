@@ -16,6 +16,11 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
     },
     {
+      id: 'clear_console',
+      label: 'Clear Console',
+      click: () => ipcMainManager.send(IpcEvents.CLEAR_CONSOLE)
+    },
+    {
       type: 'separator'
     }
   ];

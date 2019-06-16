@@ -127,6 +127,7 @@ export class AppState {
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
+    ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
