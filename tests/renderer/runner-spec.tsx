@@ -37,6 +37,7 @@ describe('Runner component', () => {
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       pushOutput: jest.fn(),
+      clearConsole: jest.fn(),
       pushError: jest.fn(),
       binaryManager: {
         getIsDownloaded: jest.fn(() => true),
@@ -148,6 +149,15 @@ describe('Runner component', () => {
           .toHaveBeenCalledTimes(1);
         done();
       });
+    });
+
+    it('automatically cleans the console when enabled', async () => {
+      store.isClearingConsoleOnRun = true;
+      (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+      (spawn as any).mockReturnValueOnce(mockChild);
+      expect(await instance.run()).toBe(true);
+      expect(store.clearConsole).toHaveBeenCalled();
+      mockChild.emit('close', 0);
     });
 
     it('does not run version not yet downloaded', async () => {
