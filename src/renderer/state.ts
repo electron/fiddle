@@ -121,6 +121,7 @@ export class AppState {
     this.signOutGitHub = this.signOutGitHub.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.toggleConsole = this.toggleConsole.bind(this);
+    this.clearConsole = this.clearConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
 
@@ -224,6 +225,10 @@ export class AppState {
 
   @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
+  }
+
+  @action public clearConsole() {
+    this.output = [];
   }
 
   @action public toggleAddVersionDialog() {
