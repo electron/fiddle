@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ConsoleSettings component renders 1`] = `
+<div>
+  <h4>
+    Console
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Enable this option to automatically clear the console whenever you run your
+      fiddle."
+    >
+      <Blueprint3.Checkbox
+        label="Clear on run."
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;
