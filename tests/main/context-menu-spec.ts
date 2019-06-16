@@ -43,14 +43,15 @@ describe('context-menu', () => {
 
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
 
-      expect(template).toHaveLength(7);
+      expect(template).toHaveLength(8);
       expect(template[0].id).toBe('run');
-      expect(template[1].type).toBe('separator');
-      expect(template[2].id).toBe('cut');
-      expect(template[3].id).toBe('copy');
-      expect(template[4].id).toBe('paste');
-      expect(template[5].type).toBe('separator');
-      expect(template[6].id).toBe('inspect');
+      expect(template[1].id).toBe('clear_console');
+      expect(template[2].type).toBe('separator');
+      expect(template[3].id).toBe('cut');
+      expect(template[4].id).toBe('copy');
+      expect(template[5].id).toBe('paste');
+      expect(template[6].type).toBe('separator');
+      expect(template[7].id).toBe('inspect');
     });
 
     it('creates a default context-menu without inspect in production', () => {
@@ -62,7 +63,7 @@ describe('context-menu', () => {
       mockWindow.webContents.emit('context-menu', null, mockFlags);
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
 
-      expect(template).toHaveLength(6);
+      expect(template).toHaveLength(7);
     });
 
     it('disables cut/copy/paste if not in editFlags', () => {
@@ -75,12 +76,12 @@ describe('context-menu', () => {
 
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
 
-      expect(template[2].id).toBe('cut');
-      expect(template[2].enabled).toBe(false);
-      expect(template[3].id).toBe('copy');
+      expect(template[3].id).toBe('cut');
       expect(template[3].enabled).toBe(false);
-      expect(template[4].id).toBe('paste');
+      expect(template[4].id).toBe('copy');
       expect(template[4].enabled).toBe(false);
+      expect(template[5].id).toBe('paste');
+      expect(template[5].enabled).toBe(false);
     });
 
     it('enables cut/copy/paste if in editFlags', () => {
@@ -100,12 +101,12 @@ describe('context-menu', () => {
 
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
 
-      expect(template[2].id).toBe('cut');
-      expect(template[2].enabled).toBe(true);
-      expect(template[3].id).toBe('copy');
+      expect(template[3].id).toBe('cut');
       expect(template[3].enabled).toBe(true);
-      expect(template[4].id).toBe('paste');
+      expect(template[4].id).toBe('copy');
       expect(template[4].enabled).toBe(true);
+      expect(template[5].id).toBe('paste');
+      expect(template[5].enabled).toBe(true);
     });
   });
 
