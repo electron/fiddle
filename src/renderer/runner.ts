@@ -42,8 +42,9 @@ export class Runner {
     const { binaryManager, currentElectronVersion } = this.appState;
     const { version, localPath } = currentElectronVersion;
 
-    if (this.appState.isClearingConsoleOnRun)
+    if (this.appState.isClearingConsoleOnRun) {
       this.appState.clearConsole();
+    }
     this.appState.isConsoleShowing = true;
 
     const values = await getValues(options);
