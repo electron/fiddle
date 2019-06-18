@@ -32,10 +32,6 @@ exports[`Commands component renders 1`] = `
         icon="console"
         text="Console"
       />
-      <Blueprint3.Button
-        icon="disable"
-        text="Clear"
-      />
       <EditorDropdown
         appState={
           Object {
