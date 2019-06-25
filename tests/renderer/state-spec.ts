@@ -153,6 +153,14 @@ describe('AppState', () => {
     });
   });
 
+  describe.only('clearConsole()', () => {
+    it('clears the console', () => {
+      expect(appState.output.length).toBe(1);
+      appState.clearConsole();
+      expect(appState.output.length).toBe(0);
+    });
+  });
+
   describe('toggleAuthDialog()', () => {
     it('toggles the token dialog', () => {
       appState.toggleAuthDialog();

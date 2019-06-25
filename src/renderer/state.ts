@@ -63,6 +63,7 @@ export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
+  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
@@ -121,14 +122,17 @@ export class AppState {
     this.signOutGitHub = this.signOutGitHub.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.toggleConsole = this.toggleConsole.bind(this);
+    this.clearConsole = this.clearConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
+    ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
+    autorun(() => this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun));
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
@@ -224,6 +228,10 @@ export class AppState {
 
   @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
+  }
+
+  @action public clearConsole() {
+    this.output = [];
   }
 
   @action public toggleAddVersionDialog() {
