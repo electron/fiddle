@@ -146,7 +146,9 @@ async function fetchAndWriteContributorsFile () {
           throw new Error('Contributors array is empty')
         }
       } catch (error) {
-        if (process.env.CI) throw error;
+        if (missingContributorsShouldThrow()) {
+          throw error
+        }
 
         console.warn(`Fetching contributors failed!`, error)
         console.log(`We'll continue without.`)
@@ -159,6 +161,20 @@ async function fetchAndWriteContributorsFile () {
       resolve()
     })
   })
+}
+
+function missingContributorsShouldThrow() {
+  // Not in CI?
+  if (!process.env.CI) {
+    return false
+  }
+
+  // A Pull Request? Fine, we can do without
+  if (process.env.TRAVIS_PULL_REQUEST || process.env.APPVEYOR_PULL_REQUEST_NUMBER ) {
+    return false
+  }
+
+  return true
 }
 
 module.exports = {
