@@ -206,7 +206,7 @@ function getFileMenu(): MenuItemConstructorOptions {
       type: 'separator'
     },
     {
-      label: 'Save to Gist',
+      label: 'Publish to Gist',
       click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST),
     },
     {
