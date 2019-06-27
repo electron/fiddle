@@ -122,7 +122,7 @@ describe('Publish button component', () => {
 
     await instance.publishFiddle();
 
-    expect(wrapper.state('isPublishing')).toBe(false);
+    expect(store.isPublishing).toBe(false);
   });
 
   it('uses the privacy setting correctly', async () => {
