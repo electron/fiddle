@@ -7,7 +7,7 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
   </h4>
   <Blueprint3.Callout>
     <p>
-      Your fiddles can be published as public GitHub Gists - that way you can share your fiddles with the world!
+      Your fiddles can be published as GitHub Gists - that way you can share your fiddles with the world!
     </p>
     <Blueprint3.Button
       icon="log-in"
