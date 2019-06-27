@@ -83,6 +83,7 @@ export class AppState {
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
   @observable public isMyGist: boolean = false;
+  @observable public isPublishing: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;

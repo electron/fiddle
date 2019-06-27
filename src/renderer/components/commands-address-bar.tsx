@@ -212,22 +212,24 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   }
 
   public render() {
-    const { isUnsaved } = this.props.appState;
+    const { isUnsaved, isPublishing } = this.props.appState;
     const { value } = this.state;
     const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
     const className = classnames('address-bar', isUnsaved, { empty: !value });
 
     return (
       <form className={className} onSubmit={this.handleSubmit}>
-        <InputGroup
-          key='addressbar'
-          leftIcon='geosearch'
-          intent={isCorrect || !value ? undefined : Intent.DANGER}
-          onChange={this.handleChange}
-          placeholder='https://gist.github.com/...'
-          value={value}
-          rightElement={this.renderLoadButton(isCorrect)}
-        />
+        <fieldset disabled={isPublishing}>
+          <InputGroup
+            key='addressbar'
+            leftIcon='geosearch'
+            intent={isCorrect || !value ? undefined : Intent.DANGER}
+            onChange={this.handleChange}
+            placeholder='https://gist.github.com/...'
+            value={value}
+            rightElement={this.renderLoadButton(isCorrect)}
+          />
+        </fieldset>
       </form>
     );
   }
