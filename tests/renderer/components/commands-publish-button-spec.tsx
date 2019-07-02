@@ -157,6 +157,28 @@ describe('Publish button component', () => {
     });
   });
 
+  it('disables during gist publishing', async () => {
+    store.isPublishing = false;
+    const wrapper = shallow(<PublishButton appState={store} />);
+    const instance: PublishButton = wrapper.instance() as any;
+
+    expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+
+    instance.publishFiddle = jest.fn().mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        wrapper.setProps({appState: {store, isPublishing: true}}, () => {
+          expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+        });
+        wrapper.setProps({appState: {store, isPublishing: false}}, () => {
+          expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+        });
+        resolve();
+      })
+    })
+
+    await instance.publishFiddle();
+  })
+
   describe('privacy menu', () => {
     it('toggles the privacy setting', () => {
       const wrapper = shallow(<PublishButton appState={store} />);
