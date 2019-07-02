@@ -31,7 +31,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps, {}> {
     return (
       <Callout>
         <p>
-          Your fiddles can be published as public GitHub Gists -
+          Your fiddles can be published as GitHub Gists -
           that way you can share your fiddles with the world!
         </p>
         <Button onClick={this.signIn} icon='log-in' text='Sign in'/>

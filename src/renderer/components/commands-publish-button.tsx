@@ -13,10 +13,6 @@ export interface PublishButtonProps {
   appState: AppState;
 }
 
-export interface PublishButtonState {
-  isPublishing: boolean;
-}
-
 /**
  * The "publish" button takes care of logging you in.
  *
@@ -25,11 +21,9 @@ export interface PublishButtonState {
  * @extends {React.Component<PublishButtonProps, PublishButtonState>}
  */
 @observer
-export class PublishButton extends React.Component<PublishButtonProps, PublishButtonState> {
+export class PublishButton extends React.Component<PublishButtonProps> {
   constructor(props: PublishButtonProps) {
     super(props);
-
-    this.state = { isPublishing: false };
     this.handleClick = this.handleClick.bind(this);
     this.publishFiddle = this.publishFiddle.bind(this);
     this.setPrivate = this.setPrivate.bind(this);
@@ -71,7 +65,8 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
    * and update all related properties in the app state.
    */
   public async publishFiddle(): Promise<void> {
-    this.setState({ isPublishing: true });
+    const { appState } = this.props;
+    appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
     const { gitHubPublishAsPublic } = this.props.appState;
@@ -95,7 +90,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
         },
       } as any); // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
 
-      this.props.appState.gistId = gist.data.id;
+      appState.gistId = gist.data.id;
 
       console.log(`Publish Button: Publishing done`, { gist });
     } catch (error) {
@@ -109,7 +104,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
-    this.setState({ isPublishing: false });
+    appState.isPublishing = false;
   }
 
   /**
@@ -132,7 +127,7 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
 
   public render() {
     const { gitHubPublishAsPublic } = this.props.appState;
-    const { isPublishing } = this.state;
+    const { isPublishing } = this.props.appState;
 
     const privacyIcon = gitHubPublishAsPublic ? 'unlock' : 'lock';
     const privacyMenu = (
@@ -153,24 +148,24 @@ export class PublishButton extends React.Component<PublishButtonProps, PublishBu
     );
 
     return (
-      <ButtonGroup className='button-publish'>
-        <Popover
-          content={privacyMenu}
-          position={Position.BOTTOM}
-          disabled={isPublishing}
-        >
-          <Button
-            icon={privacyIcon}
-          />
-        </Popover>
-        <Button
-          onClick={this.handleClick}
-          loading={isPublishing}
-          disabled={isPublishing}
-          icon='upload'
-          text={isPublishing ? 'Publishing...' : 'Publish'}
-        />
-      </ButtonGroup>
+      <fieldset disabled={isPublishing}>
+        <ButtonGroup className='button-publish'>
+            <Popover
+              content={privacyMenu}
+              position={Position.BOTTOM}
+            >
+              <Button
+                icon={privacyIcon}
+              />
+            </Popover>
+            <Button
+              onClick={this.handleClick}
+              loading={isPublishing}
+              icon='upload'
+              text={isPublishing ? 'Publishing...' : 'Publish'}
+            />
+        </ButtonGroup>
+      </fieldset>
     );
   }
 
