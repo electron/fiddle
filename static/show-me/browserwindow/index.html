@@ -5,11 +5,10 @@
 </head>
 <body>
   <h1>Hello from your BrowserWindow!</h1>
-  <button></button>
+  <button id="close-btn">Close this window</button>
   <script>
-    document.querySelector('Close this window').onclick = () => {
-      window.close()
-    }
+    const button = document.querySelector('#close-btn')
+    button.addEventListener('click', () => window.close())
   </script>
 </body>
 </html>
