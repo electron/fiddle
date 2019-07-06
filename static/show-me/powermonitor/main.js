@@ -23,6 +23,6 @@ app.on('ready', () => {
   })
 
   powerMonitor.on('on-battery', () => {
-    console.log(`We're on AC power`)
+    console.log(`We're on battery power`)
   })
 })
