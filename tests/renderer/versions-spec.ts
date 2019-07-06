@@ -148,16 +148,19 @@ describe('versions', () => {
   });
 
   describe('fetchVersions()', () => {
-    const mockResponse = fs.readFileSync(path.join(__dirname, '../mocks/npm-response.json'));
+    const mockResponseMain = fs.readFileSync(path.join(__dirname, '../mocks/npm-response-main.json'));
+    const mockResponseNightlies = fs.readFileSync(path.join(__dirname, '../mocks/npm-response-nightlies.json'));
 
     it('fetches versions', async () => {
-      (fetch as any).mockResponseOnce(mockResponse);
+      (fetch as any).mockResponses([mockResponseMain], [mockResponseNightlies]);
 
       const result = await fetchVersions();
       const expected = [
         { version: '3.0.1' },
         { version: '3.0.2' },
-        { version: '4.0.0-nightly.20181006' }
+        { version: '4.0.0-nightly.20181006' },
+        { version: '7.0.0-nightly.20190529' },
+        { version: '7.0.0-nightly.20190704' }
       ];
 
       expect(result).toEqual(expected);

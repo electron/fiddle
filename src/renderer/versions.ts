@@ -235,13 +235,18 @@ export async function getUpdatedElectronVersions(
  * @returns {Promise<Array<NpmVersion>>}
  */
 export async function fetchVersions() {
-  const response = await window.fetch(`https://registry.npmjs.org/electron`);
-  const data = await response.json();
-  const versions: Record<string, any> = data.versions;
+  const channels = [
+    `https://registry.npmjs.org/electron`,        // stable, beta
+    `https://registry.npmjs.org/electron-nightly` // nightly
+  ];
 
-  const output: Array<NpmVersion> = Object
-    .keys(versions)
-    .map((version) => ({ version }));
+  const output: Array<NpmVersion> = [];
+  for (const channelUrl of channels) {
+    const response = await window.fetch(channelUrl);
+    const data = await response.json();
+    const versions: Record<string, any> = data.versions;
+    output.push(...Object.keys(versions).map((version) => ({ version })));
+  }
 
   if (output && output.length > 0 && isExpectedFormat(output)) {
     console.log(`Fetched new Electron versions (Count: ${output.length})`);
