@@ -2,6 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "removeComments": false,
     "preserveConstEnums": true,

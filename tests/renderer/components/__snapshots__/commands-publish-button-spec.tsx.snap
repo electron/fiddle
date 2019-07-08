@@ -34,6 +34,7 @@ exports[`Publish button component renders 1`] = `
       }
       defaultIsOpen={false}
       disabled={false}
+      fill={false}
       hasBackdrop={false}
       hoverCloseDelay={300}
       hoverOpenDelay={150}

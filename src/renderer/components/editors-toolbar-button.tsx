@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button } from '@blueprintjs/core';
-import { MosaicWindowContext } from 'react-mosaic-component';
+import { MosaicContext, MosaicRootActions, MosaicWindowContext } from 'react-mosaic-component';
 
 import { DocsDemoPage, MosaicId } from '../../interfaces';
 import { AppState } from '../state';
@@ -11,86 +11,78 @@ export interface ToolbarButtonProps {
   id: MosaicId;
 }
 
-export class MaximizeButton extends React.PureComponent<ToolbarButtonProps> {
-  public static contextTypes = MosaicWindowContext;
-  public context: MosaicWindowContext<MosaicId>;
+export abstract class ToolbarButton extends React.PureComponent<ToolbarButtonProps> {
+  public static contextType = MosaicWindowContext;
+  public context: MosaicWindowContext;
 
   constructor(props: ToolbarButtonProps) {
     super(props);
-
-    this.expand = this.expand.bind(this);
   }
 
   public render() {
+    return (
+      <MosaicContext.Consumer>
+        {({ mosaicActions }) => this.createButton(mosaicActions)}
+      </MosaicContext.Consumer>
+    );
+  }
+
+  /**
+   * Create a button that performs the actual action
+   */
+  public abstract createButton(_mosaicActions: MosaicRootActions<any>): React.ReactNode;
+}
+
+export class MaximizeButton extends ToolbarButton {
+  /**
+   * Create a button that can expand this panel
+   */
+  public createButton(mosaicActions: MosaicRootActions<any>) {
+    const onClick = () => {
+      mosaicActions.expand(this.context.mosaicWindowActions.getPath());
+    };
+
     return (
       <Button
         icon='maximize'
         className='bp3-small'
-        onClick={this.expand}
+        onClick={onClick}
       />
     );
   }
-
-  /**
-   * Expand this panel
-   */
-  public expand() {
-    const path = this.context.mosaicWindowActions.getPath();
-    return this.context.mosaicActions.expand(path);
-  }
 }
 
-export class RemoveButton extends React.PureComponent<ToolbarButtonProps> {
-  public static contextTypes = MosaicWindowContext;
-  public context: MosaicWindowContext<MosaicId>;
+export class RemoveButton extends ToolbarButton {
+  /**
+   * Create a button that can remove this panel
+   */
+  public createButton(_mosaicActions: MosaicRootActions<any>) {
+    const onClick = () => this.props.appState.hideAndBackupMosaic(this.props.id);
 
-  constructor(props: ToolbarButtonProps) {
-    super(props);
-    this.remove = this.remove.bind(this);
-  }
-
-  public render() {
     return (
       <Button
         icon='cross'
         className='bp3-small'
-        onClick={this.remove}
+        onClick={onClick}
       />
     );
   }
-
-  /**
-   * Remove this panel
-   */
-  public remove() {
-    this.props.appState.hideAndBackupMosaic(this.props.id);
-  }
 }
 
-export class DocsDemoGoHomeButton extends React.PureComponent<ToolbarButtonProps> {
-  public static contextTypes = MosaicWindowContext;
-  public context: MosaicWindowContext<MosaicId>;
+export class DocsDemoGoHomeButton extends ToolbarButton {
+  /**
+   * Create a button that can remove this panel
+   */
+  public createButton(_mosaicActions: MosaicRootActions<any>) {
+    const onClick = () => this.props.appState.currentDocsDemoPage = DocsDemoPage.DEFAULT;
 
-  constructor(props: ToolbarButtonProps) {
-    super(props);
-    this.goHome = this.goHome.bind(this);
-  }
-
-  public render() {
     return (
       <Button
         icon='home'
         className='bp3-small'
-        onClick={this.goHome}
+        onClick={onClick}
         text='Overview'
       />
     );
-  }
-
-  /**
-   * Remove this panel
-   */
-  public goHome() {
-    this.props.appState.currentDocsDemoPage = DocsDemoPage.DEFAULT;
   }
 }

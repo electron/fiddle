@@ -4,10 +4,22 @@ import * as React from 'react';
 import { EditorId } from '../../../src/interfaces';
 import { MaximizeButton, RemoveButton } from '../../../src/renderer/components/editors-toolbar-button';
 
+let mockContext: any = {};
+
+jest.mock('react-mosaic-component', () => {
+  const { MosaicContext, MosaicRootActions, MosaicWindowContext } = require.requireActual('react-mosaic-component');
+
+  MosaicContext.Consumer = (props: any) => props.children(mockContext);
+
+  return {
+    MosaicContext,
+    MosaicRootActions,
+    MosaicWindowContext
+  };
+});
 
 describe('Editor toolbar button component', () => {
   let store: any = {};
-  let mockContext: any = {};
 
   beforeAll(() => {
     mockContext = {
@@ -39,6 +51,7 @@ describe('Editor toolbar button component', () => {
       const wrapper = shallow(<MaximizeButton id={EditorId.main} appState={store} />, {
         context: mockContext
       });
+
       expect(wrapper).toMatchSnapshot();
     });
 
@@ -46,9 +59,10 @@ describe('Editor toolbar button component', () => {
       const wrapper = shallow(<MaximizeButton id={EditorId.main} appState={store} />, {
         context: mockContext
       });
-      const instance: MaximizeButton = wrapper.instance() as any;
 
-      instance.expand();
+      wrapper.instance().context = mockContext;
+
+      wrapper.dive().dive().find('button').simulate('click');
       expect(mockContext.mosaicActions.expand).toHaveBeenCalledTimes(1);
     });
   });
@@ -64,9 +78,9 @@ describe('Editor toolbar button component', () => {
     it('handles a click', () => {
       const wrapper = shallow(<RemoveButton id={EditorId.main} appState={store} />, {
         context: mockContext
-      });      const instance: RemoveButton = wrapper.instance() as any;
+      });
 
-      instance.remove();
+      wrapper.dive().dive().find('button').simulate('click');
       expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     });
   });

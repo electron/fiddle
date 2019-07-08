@@ -173,11 +173,11 @@ describe('Publish button component', () => {
           expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
         });
         resolve();
-      })
-    })
+      });
+    });
 
     await instance.publishFiddle();
-  })
+  });
 
   describe('privacy menu', () => {
     it('toggles the privacy setting', () => {

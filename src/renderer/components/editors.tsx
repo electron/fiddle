@@ -2,7 +2,7 @@ import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
-import { Mosaic, MosaicNode, MosaicWindow, MosaicWindowProps } from 'react-mosaic-component';
+import { Mosaic, MosaicBranch, MosaicNode, MosaicWindow, MosaicWindowProps } from 'react-mosaic-component';
 
 import { EditorId, MosaicId, PanelId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
@@ -26,9 +26,6 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   },
   wordWrap: 'on'
 };
-
-const ViewIdMosaic = Mosaic.ofType<EditorId>() as any;
-const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>() as any;
 
 export const TITLE_MAP: Record<MosaicId, string> = {
   main: 'Main Process (main.js)',
@@ -199,21 +196,21 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {string} path
    * @returns {JSX.Element | null}
    */
-  public renderTile(id: MosaicId, path: string): JSX.Element | null {
+  public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
     const { appState } = this.props;
     const content = isEditorId(id)
       ? this.renderEditor(id)
       : this.renderGenericPanel(id, appState);
 
     return (
-      <ViewIdMosaicWindow
+      <MosaicWindow<EditorId>
         className={id}
         path={path}
         title={TITLE_MAP[id]}
         renderToolbar={(props: MosaicWindowProps<MosaicId>) => this.renderToolbar(props, id)}
       >
         {content}
-      </ViewIdMosaicWindow>
+      </MosaicWindow>
     );
   }
 
@@ -256,7 +253,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     if (!monaco) return null;
 
     return (
-      <ViewIdMosaic
+      <Mosaic<EditorId | PanelId>
         onChange={this.onChange}
         value={appState.mosaicArrangement}
         zeroStateView={renderNonIdealState(appState)}
