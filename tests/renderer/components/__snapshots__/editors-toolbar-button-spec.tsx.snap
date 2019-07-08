@@ -1,17 +1,13 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Editor toolbar button component MaximizeButton renders 1`] = `
-<Blueprint3.Button
-  className="bp3-small"
-  icon="maximize"
-  onClick={[Function]}
-/>
+<Component>
+  <Component />
+</Component>
 `;
 
 exports[`Editor toolbar button component RemoveButton renders 1`] = `
-<Blueprint3.Button
-  className="bp3-small"
-  icon="cross"
-  onClick={[Function]}
-/>
+<Component>
+  <Component />
+</Component>
 `;

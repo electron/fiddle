@@ -41,6 +41,7 @@ exports[`EditorDropdown component renders 1`] = `
     }
     defaultIsOpen={false}
     disabled={false}
+    fill={false}
     hasBackdrop={false}
     hoverCloseDelay={300}
     hoverOpenDelay={150}
@@ -111,6 +112,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
     }
     defaultIsOpen={false}
     disabled={false}
+    fill={false}
     hasBackdrop={false}
     hoverCloseDelay={300}
     hoverOpenDelay={150}

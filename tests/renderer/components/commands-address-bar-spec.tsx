@@ -116,7 +116,7 @@ describe('AddressBar component', () => {
     wrapper.setProps({appState: {...store, isPublishing: false}}, () => {
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
     });
-  })
+  });
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
