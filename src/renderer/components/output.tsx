@@ -4,6 +4,7 @@ import * as React from 'react';
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { MosaicContext } from 'react-mosaic-component';
+import { WrapperMosaicId } from './output-editors-wrapper';
 
 export interface CommandsProps {
   appState: AppState;
@@ -22,7 +23,7 @@ export interface CommandsProps {
 export class Output extends React.Component<CommandsProps, {}> {
   private outputRef = React.createRef<HTMLDivElement>();
   static contextType = MosaicContext;
-  public context: MosaicContext<string>;
+  public context: MosaicContext<WrapperMosaicId>;
 
   constructor(props: CommandsProps) {
     super(props);
