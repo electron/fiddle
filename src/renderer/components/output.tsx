@@ -3,6 +3,7 @@ import * as React from 'react';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
+import { MosaicContext } from 'react-mosaic-component';
 
 export interface CommandsProps {
   appState: AppState;
@@ -20,6 +21,8 @@ export interface CommandsProps {
 @observer
 export class Output extends React.Component<CommandsProps, {}> {
   private outputRef = React.createRef<HTMLDivElement>();
+  static contextType = MosaicContext;
+  public context: MosaicContext<string>;
 
   constructor(props: CommandsProps) {
     super(props);
@@ -73,7 +76,11 @@ export class Output extends React.Component<CommandsProps, {}> {
 
   public render() {
     const { isConsoleShowing, output } = this.props.appState;
-    const className = isConsoleShowing ? 'output showing' : 'output';
+    if (!isConsoleShowing) {
+      this.context.mosaicActions.expand(['first'], 0);
+    } else {
+      this.context.mosaicActions.expand(['first'], 25);
+    }
 
     // The last 1000 lines
     const lines = output
@@ -81,7 +88,7 @@ export class Output extends React.Component<CommandsProps, {}> {
       .map(this.renderEntry);
 
     return (
-      <div className={className} ref={this.outputRef}>
+      <div className="output" ref={this.outputRef}>
         {lines}
       </div>
     );

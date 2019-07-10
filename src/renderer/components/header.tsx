@@ -3,7 +3,6 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { ChromeMac } from './chrome-mac';
 import { Commands } from './commands';
-import { Output } from './output';
 import { WelcomeTour } from './tour-welcome';
 
 export interface HeaderProps {
@@ -23,7 +22,6 @@ export class Header extends React.Component<HeaderProps, {}> {
         <ChromeMac appState={this.props.appState} />
         <header id='header'>
           <Commands key='commands' appState={this.props.appState} />
-          <Output key='output' appState={this.props.appState} />
         </header>
         <WelcomeTour appState={this.props.appState} />
       </>
