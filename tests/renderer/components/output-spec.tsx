@@ -38,7 +38,7 @@ describe('Output component', () => {
 
   it('renders', () => {
     const wrapper = shallow(<Output appState={store} />);
-    expect(wrapper.html()).toBe('<div class="output showing"></div>');
+    expect(wrapper.html()).toBe('<div class="output"></div>');
   });
 
   it('renders with output', () => {
