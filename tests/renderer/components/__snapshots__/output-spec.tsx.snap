@@ -2,7 +2,7 @@
 
 exports[`Output component renders with output 1`] = `
 <div
-  className="output showing"
+  className="output"
 >
   <p
     key="1532704073130--0--0"
