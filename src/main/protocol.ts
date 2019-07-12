@@ -5,6 +5,7 @@ import * as nodeUrl from 'url';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
+import { isDevMode } from '../utils/devmode';
 
 const PROTOCOL = 'electron-fiddle';
 const squirrelPath = path.resolve(path.dirname(process.execPath), '..', 'electron-fiddle.exe');
@@ -65,6 +66,12 @@ export const scanArgv = (argv: Array<string>) => {
   }
 };
 
+export const scanNpmArgv = (argv: string) => {
+  const parsedArgv = JSON.parse(argv);
+  const { original: args } = parsedArgv;
+  scanArgv(args);
+}
+
 export const listenForProtocolHandler = () => {
   const gotTheLock = app.requestSingleInstanceLock();
   if (!gotTheLock) app.quit();
@@ -75,7 +82,10 @@ export const listenForProtocolHandler = () => {
     }
   });
 
-  if (process.platform === 'win32') {
+  // pass protocol URL via npm start args in dev mode
+  if (isDevMode() && process.env.npm_config_argv) {
+    scanNpmArgv(process.env.npm_config_argv);
+  } else if (process.platform === 'win32') {
     scanArgv(process.argv);
   }
 };
