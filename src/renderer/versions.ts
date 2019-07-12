@@ -45,13 +45,19 @@ export function getDefaultVersion(
  * Return the release channel for a given input
  * version.
  *
- * @param {NpmVersion} input
+ * @param {NpmVersion | string} input
  * @returns {ElectronReleaseChannel}
  */
 export function getReleaseChannel(
-  input: NpmVersion
+  input: NpmVersion | string
 ): ElectronReleaseChannel {
-  const tag = input.version || '';
+
+  let tag;
+  if (typeof input === 'string') {
+    tag = input;
+  } else {
+    tag = input.version || '';
+  }
 
   if (tag.includes('beta')) {
     return ElectronReleaseChannel.beta;
