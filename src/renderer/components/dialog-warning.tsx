@@ -13,7 +13,7 @@ export interface WarningDialogState {
 }
 
 /**
- * The token dialog asks the user for a GitHub Personal Access Token.
+ * The token dialog prompts the user to either continue or cancel the operation.
  * It's also responsible for checking if the token is correct.
  *
  * @export
@@ -35,7 +35,7 @@ export class WarningDialog extends React.Component<WarningDialogProps, WarningDi
 
   public render() {
     const { isWarningDialogShowing, warningDialogTexts } = this.props.appState;
-
+    
     return (
       <Alert
         isOpen={isWarningDialogShowing}

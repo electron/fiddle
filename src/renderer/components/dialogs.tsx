@@ -6,6 +6,7 @@ import { AddVersionDialog } from './dialog-add-version';
 import { TokenDialog } from './dialog-token';
 import { WarningDialog } from './dialog-warning';
 import { Settings } from './settings';
+import { ConfirmDialog } from './dialog-confirm';
 
 export interface DialogsProps {
   appState: AppState;
@@ -31,13 +32,14 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
     const maybeAddLocalVersion = isAddVersionDialogShowing
       ? <AddVersionDialog key='add-version-dialog' appState={appState} />
       : null;
+    const eitherWarningOrPrompt = appState.isWarningDialogShowing ? <WarningDialog appState={appState} /> ? appState.isConfirmationPromptShowing ? <ConfirmDialog appState={appState}/> : null;
 
     return (
       <div key='dialogs' className='dialogs'>
         {maybeToken}
         {maybeSettings}
         {maybeAddLocalVersion}
-        <WarningDialog appState={appState} />
+        {eitherWarningOrPrompt}
       </div>
     );
   }
