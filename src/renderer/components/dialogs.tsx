@@ -32,7 +32,10 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
     const maybeAddLocalVersion = isAddVersionDialogShowing
       ? <AddVersionDialog key='add-version-dialog' appState={appState} />
       : null;
-    const eitherWarningOrPrompt = appState.isWarningDialogShowing ? <WarningDialog appState={appState} /> ? appState.isConfirmationPromptShowing ? <ConfirmDialog appState={appState}/> : null;
+    const eitherWarningOrPrompt = appState.isWarningDialogShowing
+      ? <WarningDialog appState={appState} />
+      : appState.isConfirmationPromptShowing
+      ? <ConfirmDialog appState={appState}/> : null;
 
     return (
       <div key='dialogs' className='dialogs'>
