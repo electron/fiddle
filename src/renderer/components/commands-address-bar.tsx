@@ -13,6 +13,7 @@ import { getOctokit } from '../../utils/octokit';
 import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { getReleaseChannel } from '../versions';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -127,13 +128,25 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     try {
       const octo = await getOctokit(this.props.appState);
 
-      // TODO: Maybe we should fetch the package.json for the given ref to use the correct version of Electron?
       const folder = await octo.repos.getContents({
         owner: 'electron',
         repo: 'electron',
         ref,
         path,
       });
+
+      // ensure we have the package version from the example
+      const version = await this.getElectronVersion(ref);
+
+      // check if version is part of release channel
+      const versionReleaseChannel = getReleaseChannel(version);
+
+      if (appState.versionsToShow.includes(versionReleaseChannel)) {
+        appState.setVersion(version);
+      } else {
+        // pop up warning for version not included
+        // prompt should ask if you want to enable state or
+      }
 
       const values = {
         html: await getContent(EditorId.html, appState.version),
@@ -177,6 +190,20 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     } catch (error) {
       return this.handleLoadingFailed(error);
     }
+  }
+
+  private async getElectronVersion(ref: string) {
+    const octo = await getOctokit(this.props.appState);
+    const { data: packageJsonData } = await octo.repos.getContents({
+      owner: 'electron',
+      repo: 'electron',
+      ref,
+      path: 'package.json'
+    });
+
+    const packageJsonString = Buffer.from(packageJsonData.content, 'base64').toString('utf8');
+    const { version } = JSON.parse(packageJsonString);
+    return version;
   }
 
   /**
