@@ -90,7 +90,7 @@ module.exports = {
           name: 'fiddle'
         },
         draft: true,
-        prerelease: true
+        prerelease: false
       }
     }
   ]
