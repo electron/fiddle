@@ -77,7 +77,7 @@ describe('Output component', () => {
     expect(result).toBeTruthy();
   });
 
-  it.only('hides the console with react-mosaic-component', () => {
+  it('hides the console with react-mosaic-component', () => {
     // manually trigger lifecycle methods so that 
     // context can be set before mounting method
     const wrapper = shallow(<Output appState={store} />, {
