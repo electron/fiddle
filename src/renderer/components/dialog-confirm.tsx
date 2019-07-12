@@ -14,7 +14,6 @@ export interface ConfirmDialogState {
 
 /**
  * The token dialog prompts the user to either continue or cancel the operation.
- * It's also responsible for checking if the token is correct.
  *
  * @export
  * @class ConfirmDialog
