@@ -68,7 +68,7 @@ export const scanArgv = (argv: Array<string>) => {
 
 export const scanNpmArgv = (argv: string) => {
   const parsedArgv = JSON.parse(argv);
-  const { remain: args } = parsedArgv;
+  const { original: args } = parsedArgv;
   scanArgv(args);
 }
 
