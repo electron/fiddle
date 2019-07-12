@@ -35,7 +35,6 @@ export class WarningDialog extends React.Component<WarningDialogProps, WarningDi
 
   public render() {
     const { isWarningDialogShowing, warningDialogTexts } = this.props.appState;
-    
     return (
       <Alert
         isOpen={isWarningDialogShowing}
