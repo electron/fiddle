@@ -29,7 +29,7 @@ export class OutputEditorsWrapper extends React.Component<WrapperProps, WrapperS
     }
   }
 
-  private ELEMENTS = {
+  private MOSAIC_ELEMENTS = {
     output: <Output appState={this.props.appState} />,
     editors: <Editors appState={this.props.appState} />
   }
@@ -38,9 +38,9 @@ export class OutputEditorsWrapper extends React.Component<WrapperProps, WrapperS
     return (
       <>
         <Mosaic<WrapperMosaicId>
-          renderTile={(id: string) => this.ELEMENTS[id]}
+          renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
           resize={{
-            minimumPaneSizePercentage: 0 // Default: 20
+            minimumPaneSizePercentage: 0
           }}
           value={this.state.mosaicArrangement}
           onChange={this.onChange}
