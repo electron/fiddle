@@ -103,7 +103,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public async verifyRemoteLoad(what: string, fiddlePath?: string): Promise<boolean> {
     const { appState } = this.props;
     appState.setConfirmationPromptTexts({
-      label: `Are you sure you sure you want to load this \`${what}\` from fiddle path \`${fiddlePath}\`? Only load and run it if you trust the source.`
+      label: `Are you sure you sure you want to load this \'${what}\' from fiddle path \'${fiddlePath}?\' Only load and run it if you trust the source.`
     });
     appState.isConfirmationPromptShowing = true;
     await when(() => !appState.isConfirmationPromptShowing);
