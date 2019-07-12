@@ -272,6 +272,10 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       label: `Loading the fiddle failed: ${error}`,
       cancel: undefined
     });
+    this.props.appState.setConfirmationPromptTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
 
     this.props.appState.toogleWarningDialog();
 

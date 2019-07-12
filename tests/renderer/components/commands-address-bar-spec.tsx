@@ -55,6 +55,8 @@ describe('AddressBar component', () => {
     @observable public isWarningDialogShowing: boolean = false;
     @observable public isConfirmationPromptShowing: boolean = false;
     public setWarningDialogTexts = jest.fn();
+    public setConfirmationDialogTexts = jest.fn();
+    public setConfirmationPromptTexts = jest.fn();
     public toogleWarningDialog = jest.fn();
   }
 
@@ -236,7 +238,7 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(mockStore.isConfirmationPromptShowing).toBe(false);
+      expect(mockStore.isConfirmationPromptShowing).toBe(true);
       mockStore.isConfirmationPromptShowing = false;
     });
   });
@@ -248,7 +250,7 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(store.isConfirmationPromptShowing).toBe(false);
+      expect(store.isConfirmationPromptShowing).toBe(true);
       store.isConfirmationPromptShowing = false;
     });
   });
