@@ -236,7 +236,7 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(mockStore.isConfirmationPromptShowing).toBe(true);
+      expect(mockStore.isConfirmationPromptShowing).toBe(false);
       mockStore.isConfirmationPromptShowing = false;
     });
   });
@@ -248,7 +248,7 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(store.isConfirmationPromptShowing).toBe(true);
+      expect(store.isConfirmationPromptShowing).toBe(false);
       store.isConfirmationPromptShowing = false;
     });
   });
