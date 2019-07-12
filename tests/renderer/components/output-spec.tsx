@@ -2,15 +2,38 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Output } from '../../../src/renderer/components/output';
+import { MockState } from '../../mocks/state';
+
+let mockContext: any = {};
+
+jest.mock('react-mosaic-component', () => {
+  const { MosaicContext, MosaicRootActions } = jest.requireActual('react-mosaic-component');
+
+  return {
+    MosaicContext,
+    MosaicRootActions
+  };
+});
+
+beforeAll(() => {
+  mockContext = {
+    mosaicActions: {
+      expand: jest.fn(),
+      remove: jest.fn(),
+      hide: jest.fn(),
+      replaceWith: jest.fn(),
+      updateTree: jest.fn(),
+      getRoot: jest.fn()
+    },
+    mosaicId: 'output'
+  };
+})
 
 describe('Output component', () => {
   let store: any;
 
   beforeEach(() => {
-    store = {
-      isConsoleShowing: true,
-      output: []
-    };
+    store = new MockState();
   });
 
   it('renders', () => {
@@ -54,14 +77,19 @@ describe('Output component', () => {
     expect(result).toBeTruthy();
   });
 
-  it('hides the console via class', () => {
+  it.only('hides the console with react-mosaic-component', () => {
+    // manually trigger lifecycle methods so that 
+    // context can be set before mounting method
+    const wrapper = shallow(<Output appState={store} />, {
+      context: mockContext,
+      disableLifecycleMethods: true
+    });
+    wrapper.instance().context = mockContext;
+    wrapper.instance().componentDidMount!();
+
+    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 25);
     store.isConsoleShowing = false;
-
-    const wrapper = shallow(
-      <Output appState={store} />
-    );
-
-    expect(wrapper.html().includes('showing')).toBe(false);
+    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 0);
   });
 
   it('handles componentDidUpdate', () => {
