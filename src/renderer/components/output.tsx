@@ -5,6 +5,7 @@ import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { MosaicContext } from 'react-mosaic-component';
 import { WrapperMosaicId } from './output-editors-wrapper';
+import { autorun } from 'mobx';
 
 export interface CommandsProps {
   appState: AppState;
@@ -30,6 +31,19 @@ export class Output extends React.Component<CommandsProps, {}> {
 
     this.renderTimestamp = this.renderTimestamp.bind(this);
     this.renderEntry = this.renderEntry.bind(this);
+  }
+
+
+  public componentDidMount() {
+    autorun(() => {
+      const { isConsoleShowing } = this.props.appState;
+
+      if (!isConsoleShowing) {
+        this.context.mosaicActions.expand(['first'], 0);
+      } else {
+        this.context.mosaicActions.expand(['first'], 25);
+      }
+    })
   }
 
   public componentDidUpdate() {
@@ -76,12 +90,7 @@ export class Output extends React.Component<CommandsProps, {}> {
   }
 
   public render() {
-    const { isConsoleShowing, output } = this.props.appState;
-    if (!isConsoleShowing) {
-      this.context.mosaicActions.expand(['first'], 0);
-    } else {
-      this.context.mosaicActions.expand(['first'], 25);
-    }
+    const { output } = this.props.appState;
 
     // The last 1000 lines
     const lines = output
