@@ -82,6 +82,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   }
 
   public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
+    console.log(`Loading fiddle from Electron example`, _, exampleInfo);
     const ok = await this.verifyRemoteLoad('example from the Electron docs', exampleInfo.ref );
     if (!ok) return;
 
