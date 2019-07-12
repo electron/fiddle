@@ -268,17 +268,14 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
-    if (navigator.onLine) {
-      this.props.appState.setWarningDialogTexts({
-        label: `Loading the fiddle failed: ${error}`,
-        cancel: undefined
-      });
-    } else {
-      this.props.appState.setWarningDialogTexts({
-        label: `Loading the fiddle failed. Your computer seems to be offline. Error: ${error}`,
-        cancel: undefined
-      });
-    }
+    this.props.appState.setWarningDialogTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
+    this.props.appState.setConfirmationPromptTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
 
     this.props.appState.toogleWarningDialog();
 
