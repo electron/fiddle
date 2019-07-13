@@ -13,7 +13,8 @@ import { getOctokit } from '../../utils/octokit';
 import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { getReleaseChannel } from '../versions';
+import { getReleaseChannel, ElectronReleaseChannel } from '../versions';
+import { sortedElectronMap } from '../../utils/sorted-electron-map';
 
 export interface AddressBarProps {
   appState: AppState;
@@ -113,6 +114,19 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     return !!appState.warningDialogLastResult;
   }
 
+  public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
+    const { appState } = this.props;
+    appState.setWarningDialogTexts({
+      label: `You're loading an example with a version of Electron with an unincluded release
+              channel (${channel}). Do you want to enable the release channel to load the
+              version of Electron from the example?`
+    });
+    appState.isWarningDialogShowing = true;
+    await when(() => !appState.isWarningDialogShowing);
+
+    return !!appState.warningDialogLastResult;
+  }
+
   /**
    * Handle the change event, which usually just updates the address bar's value
    *
@@ -135,18 +149,26 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
         path,
       });
 
-      // ensure we have the package version from the example
       const version = await this.getElectronVersion(ref);
 
-      // check if version is part of release channel
-      const versionReleaseChannel = getReleaseChannel(version);
-
-      if (appState.versionsToShow.includes(versionReleaseChannel)) {
-        appState.setVersion(version);
-      } else {
-        // pop up warning for version not included
-        // prompt should ask if you want to enable state or
+      const supportedVersions = sortedElectronMap(appState.versions, (k) => k);
+      if (!supportedVersions.includes(version)) {
+        this.handleLoadingFailed(new Error('Version of Electron in example not supported'));
+        return false;
       }
+
+      // check if version is part of release channel
+      const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(version);
+
+      if (!appState.versionsToShow.includes(versionReleaseChannel)) {
+
+        const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
+        if (!ok) return false;
+
+        appState.versionsToShow.push(versionReleaseChannel);
+      }
+
+      appState.setVersion(version);
 
       const values = {
         html: await getContent(EditorId.html, appState.version),
@@ -192,7 +214,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     }
   }
 
-  private async getElectronVersion(ref: string) {
+  private async getElectronVersion(ref: string): Promise<string> {
     const octo = await getOctokit(this.props.appState);
     const { data: packageJsonData } = await octo.repos.getContents({
       owner: 'electron',
