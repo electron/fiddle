@@ -18,8 +18,8 @@ jest.mock('../../src/renderer/components/header', () => ({
 jest.mock('../../src/renderer/components/dialogs', () => ({
   Dialogs: () => 'Dialogs;'
 }));
-jest.mock('../../src/renderer/components/editors', () => ({
-  Editors: () => 'Editors;'
+jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
+  OutputEditorsWrapper: () => 'OutputEditorsWrapper;'
 }));
 
 describe('Editors component', () => {
@@ -37,7 +37,7 @@ describe('Editors component', () => {
       app.setupUnsavedOnChangeListener = jest.fn();
       jest.runAllTimers();
 
-      expect(result.innerHTML).toBe('Header;Dialogs;Editors;');
+      expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
       expect(app.setupUnsavedOnChangeListener).toHaveBeenCalled();
 
       jest.useRealTimers();
