@@ -83,7 +83,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
 
   public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
     console.log(`Loading fiddle from Electron example`, _, exampleInfo);
-    const ok = await this.verifyRemoteLoad('example from the Electron docs');
+    const ok = await this.verifyRemoteLoad('example from the Electron docs', exampleInfo.ref );
     if (!ok) return;
 
     this.fetchExampleAndLoad(exampleInfo.ref, exampleInfo.path);
@@ -101,15 +101,15 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    *
    * @param what What are we loading from (gist, example, etc.)
    */
-  public async verifyRemoteLoad(what: string): Promise<boolean> {
+  public async verifyRemoteLoad(what: string, fiddlePath?: string): Promise<boolean> {
     const { appState } = this.props;
-    appState.setWarningDialogTexts({
-      label: `Are you sure you sure you want to load this ${what}? Only load and run it if you trust the source`
+    appState.setConfirmationPromptTexts({
+      label: `Are you sure you sure you want to load this '${what}' from fiddle path '${fiddlePath}'? Only load and run it if you trust the source.`
     });
-    appState.isWarningDialogShowing = true;
-    await when(() => !appState.isWarningDialogShowing);
+    appState.isConfirmationPromptShowing = true;
+    await when(() => !appState.isConfirmationPromptShowing);
 
-    return !!appState.warningDialogLastResult;
+    return !!appState.confirmationPromptLastResult;
   }
 
   /**
@@ -268,17 +268,14 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
    * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
-    if (navigator.onLine) {
-      this.props.appState.setWarningDialogTexts({
-        label: `Loading the fiddle failed: ${error}`,
-        cancel: undefined
-      });
-    } else {
-      this.props.appState.setWarningDialogTexts({
-        label: `Loading the fiddle failed. Your computer seems to be offline. Error: ${error}`,
-        cancel: undefined
-      });
-    }
+    this.props.appState.setWarningDialogTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
+    this.props.appState.setConfirmationPromptTexts({
+      label: `Loading the fiddle failed: ${error}`,
+      cancel: undefined
+    });
 
     this.props.appState.toogleWarningDialog();
 

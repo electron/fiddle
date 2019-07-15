@@ -53,7 +53,10 @@ describe('AddressBar component', () => {
   class MockStore {
     @observable public gistId: string | null = null;
     @observable public isWarningDialogShowing: boolean = false;
+    @observable public isConfirmationPromptShowing: boolean = false;
     public setWarningDialogTexts = jest.fn();
+    public setConfirmationDialogTexts = jest.fn();
+    public setConfirmationPromptTexts = jest.fn();
     public toogleWarningDialog = jest.fn();
   }
 
@@ -235,8 +238,8 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(mockStore.isWarningDialogShowing).toBe(true);
-      mockStore.isWarningDialogShowing = false;
+      expect(mockStore.isConfirmationPromptShowing).toBe(true);
+      mockStore.isConfirmationPromptShowing = false;
     });
   });
 
@@ -247,8 +250,8 @@ describe('AddressBar component', () => {
 
       instance.verifyRemoteLoad('test').then(done);
 
-      expect(store.isWarningDialogShowing).toBe(true);
-      store.isWarningDialogShowing = false;
+      expect(store.isConfirmationPromptShowing).toBe(true);
+      store.isConfirmationPromptShowing = false;
     });
   });
 
