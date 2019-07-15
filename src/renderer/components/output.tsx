@@ -1,11 +1,11 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { autorun } from 'mobx';
+import { MosaicContext } from 'react-mosaic-component';
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
-import { MosaicContext } from 'react-mosaic-component';
 import { WrapperMosaicId } from './output-editors-wrapper';
-import { autorun } from 'mobx';
 
 export interface CommandsProps {
   appState: AppState;
@@ -22,9 +22,9 @@ export interface CommandsProps {
  */
 @observer
 export class Output extends React.Component<CommandsProps, {}> {
-  private outputRef = React.createRef<HTMLDivElement>();
-  static contextType = MosaicContext;
+  public static contextType = MosaicContext;
   public context: MosaicContext<WrapperMosaicId>;
+  private outputRef = React.createRef<HTMLDivElement>();
 
   constructor(props: CommandsProps) {
     super(props);
@@ -40,14 +40,14 @@ export class Output extends React.Component<CommandsProps, {}> {
       // is not fully supported, so this condition makes the tests pass
       if (this.context.mosaicActions && this.context.mosaicActions.expand) {
         const { isConsoleShowing } = this.props.appState;
-  
+
         if (!isConsoleShowing) {
           this.context.mosaicActions.expand(['first'], 0);
         } else {
           this.context.mosaicActions.expand(['first'], 25);
         }
       }
-    })
+    });
   }
 
   public componentDidUpdate() {
@@ -102,7 +102,7 @@ export class Output extends React.Component<CommandsProps, {}> {
       .map(this.renderEntry);
 
     return (
-      <div className="output" ref={this.outputRef}>
+      <div className='output' ref={this.outputRef}>
         {lines}
       </div>
     );
