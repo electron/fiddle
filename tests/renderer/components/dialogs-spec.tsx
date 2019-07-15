@@ -28,25 +28,25 @@ describe('Dialogs component', () => {
 
   it('renders initially without visible dialogs', () => {
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    
     expect(wrapper.find('.dialogs').html()).toBe('<div class="dialogs"></div>');
   });
 
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<TokenDialog /><WarningDialog />');
+    expect(wrapper.text()).toBe('<TokenDialog /><ConfirmDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<Settings /><WarningDialog />');
+    expect(wrapper.text()).toBe('<Settings /><ConfirmDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isAddVersionDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<AddVersionDialog /><WarningDialog />');
+    expect(wrapper.text()).toBe('<AddVersionDialog /><ConfirmDialog />');
   });
 });
