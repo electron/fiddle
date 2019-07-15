@@ -34,8 +34,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
       : null;
     const eitherWarningOrPrompt = appState.isWarningDialogShowing
       ? <WarningDialog appState={appState} />
-      : appState.isConfirmationPromptShowing
-      ? <ConfirmDialog appState={appState}/> : null;
+      : <ConfirmDialog appState={appState}/>;
 
     return (
       <div key='dialogs' className='dialogs'>
