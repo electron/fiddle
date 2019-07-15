@@ -4,8 +4,8 @@ import * as path from 'path';
 import * as nodeUrl from 'url';
 
 import { IpcEvents } from '../ipc-events';
-import { ipcMainManager } from './ipc';
 import { isDevMode } from '../utils/devmode';
+import { ipcMainManager } from './ipc';
 
 const PROTOCOL = 'electron-fiddle';
 const squirrelPath = path.resolve(path.dirname(process.execPath), '..', 'electron-fiddle.exe');
@@ -70,7 +70,7 @@ export const scanNpmArgv = (argv: string) => {
   const parsedArgv = JSON.parse(argv);
   const { original: args } = parsedArgv;
   scanArgv(args);
-}
+};
 
 export const listenForProtocolHandler = () => {
   const gotTheLock = app.requestSingleInstanceLock();

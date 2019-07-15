@@ -9,6 +9,7 @@ import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { isEditorBackup } from '../utils/type-checks';
 import { FileManager } from './file-manager';
+import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
@@ -25,6 +26,7 @@ export class App {
   public monaco: typeof MonacoType | null = null;
   public state = appState;
   public fileManager = new FileManager(appState);
+  public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
   public touchBarManager: TouchBarManager | undefined;
 

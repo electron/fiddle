@@ -18,3 +18,6 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
     second: EditorId.html,
   }
 };
+
+export const ELECTRON_ORG = 'electron';
+export const ELECTRON_REPO = 'electron';

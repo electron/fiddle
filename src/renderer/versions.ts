@@ -52,12 +52,7 @@ export function getReleaseChannel(
   input: NpmVersion | string
 ): ElectronReleaseChannel {
 
-  let tag;
-  if (typeof input === 'string') {
-    tag = input;
-  } else {
-    tag = input.version || '';
-  }
+  const tag = (typeof input === 'string') ? input : (input.version || '');
 
   if (tag.includes('beta')) {
     return ElectronReleaseChannel.beta;
