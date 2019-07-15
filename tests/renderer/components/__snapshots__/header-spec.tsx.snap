@@ -12,10 +12,6 @@ exports[`Header component renders 1`] = `
       appState={Object {}}
       key="commands"
     />
-    <output
-      appState={Object {}}
-      key="output"
-    />
   </header>
   <welcome-tour
     appState={Object {}}

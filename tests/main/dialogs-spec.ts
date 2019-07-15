@@ -11,7 +11,8 @@ describe('dialogs', () => {
     setupDialogs();
 
     expect(ipcMainManager.eventNames()).toEqual([
-      IpcEvents.SHOW_WARNING_DIALOG
+      IpcEvents.SHOW_WARNING_DIALOG,
+      IpcEvents.SHOW_CONFIRMATION_DIALOG
     ]);
   });
 

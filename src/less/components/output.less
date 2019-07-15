@@ -7,19 +7,14 @@
   color: var(--text-color-1);
   background: var(--background-2);
   box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, 0.15);
+  border-top: @border;
   top: 10vh;
   padding: 0;
+  padding-top: 10px;
   padding-left: 10px;
-  height: 0;
+  height: 100%;
   overflow-y: scroll;
-  transition: height 0.2s linear, padding 0.2s linear;
   -webkit-app-region: no-drag;
-
-  &.showing {
-    border-top: @border;
-    padding-top: 10px;
-    height: 150px;
-  }
 
   p {
     margin-bottom: 0;

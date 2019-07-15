@@ -89,7 +89,9 @@ export class AppState {
   @observable public localPath: string | undefined;
   @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
+  @observable public confirmationDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
+  @observable public confirmationPromptLastResult: boolean | null = null;
   @observable public isRunning = false;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
@@ -99,6 +101,7 @@ export class AppState {
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isWarningDialogShowing: boolean = false;
+  @observable public isConfirmationPromptShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
@@ -251,6 +254,14 @@ export class AppState {
     }
   }
 
+  @action public toogleConfirmationPromptDialog() {
+    this.isConfirmationPromptShowing = !this.isConfirmationPromptShowing;
+
+    if (this.isConfirmationPromptShowing) {
+      this.confirmationPromptLastResult = null;
+    }
+  }
+
   @action public toggleSettings() {
     // We usually don't lose editor focus,
     // so you can still type. Let's force-blur.
@@ -278,6 +289,14 @@ export class AppState {
 
   @action public setWarningDialogTexts(input: WarningDialogTexts) {
     this.warningDialogTexts = {
+      ok: 'Okay',
+      cancel: 'Cancel',
+      ...input
+    };
+  }
+
+  @action public setConfirmationPromptTexts(input: WarningDialogTexts) {
+    this.confirmationDialogTexts = {
       ok: 'Okay',
       cancel: 'Cancel',
       ...input

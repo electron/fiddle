@@ -114,16 +114,16 @@ export class App {
 
     const React = await import('react');
     const { render } = await import('react-dom');
-    const { Header } = await import('./components/header');
     const { Dialogs } = await import('./components/dialogs');
-    const { Editors } = await import('./components/editors');
+    const { OutputEditorsWrapper } = await import('./components/output-editors-wrapper');
+    const { Header } = await import('./components/header');
 
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Header appState={this.state} />
         <Dialogs appState={this.state} />
-        <Editors appState={this.state} />
+        <Header appState={this.state} />
+        <OutputEditorsWrapper appState={this.state} />
       </div>
     );
 

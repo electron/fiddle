@@ -15,7 +15,10 @@ describe('AddressBar component', () => {
   class MockStore {
     @observable public gistId: string | null = null;
     @observable public isWarningDialogShowing: boolean = false;
+    @observable public isConfirmationPromptShowing: boolean = false;
     public setWarningDialogTexts = jest.fn();
+    public setConfirmationDialogTexts = jest.fn();
+    public setConfirmationPromptTexts = jest.fn();
     public toogleWarningDialog = jest.fn();
   }
 
