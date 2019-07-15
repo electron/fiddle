@@ -1,5 +1,6 @@
 import { FileManager } from './file-manager';
 import { RunnerMock } from './runner';
+import { RemoteLoader } from './remote-loader';
 
 export class AppMock {
   public setupUnsavedOnChangeListener = jest.fn();
@@ -18,6 +19,7 @@ export class AppMock {
 
   public fileManager = new FileManager();
   public runner = new RunnerMock();
+  public remoteLoader = new RemoteLoader();
 
   public monaco = {
     editor: {
