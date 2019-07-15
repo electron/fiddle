@@ -25,7 +25,7 @@ describe('Dialogs component', () => {
   afterAll(() => {
     resetPlatform();
   });
-  
+
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
