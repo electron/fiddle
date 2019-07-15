@@ -17,7 +17,8 @@ export class RemoteLoader {
     this.verifyReleaseChannelEnabled.bind(this);
     this.fetchExampleAndLoad.bind(this);
     this.fetchGistAndLoad.bind(this);
-    this.getElectronVersion.bind(this);
+    this.setElectronVersionWithRef.bind(this);
+    this.getPackageVersionFromRef.bind(this);
     this.handleLoadingSuccess.bind(this);
     this.handleLoadingFailed.bind(this);
   }
@@ -48,26 +49,8 @@ export class RemoteLoader {
         path,
       });
 
-      const version = await this.getElectronVersion(ref);
-
-      const supportedVersions = sortedElectronMap(this.appState.versions, (k) => k);
-      if (!supportedVersions.includes(version)) {
-        this.handleLoadingFailed(new Error('Version of Electron in example not supported'));
-        return false;
-      }
-
-      // check if version is part of release channel
-      const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(version);
-
-      if (!this.appState.versionsToShow.includes(versionReleaseChannel)) {
-
-        const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
-        if (!ok) return false;
-
-        this.appState.versionsToShow.push(versionReleaseChannel);
-      }
-
-      this.appState.setVersion(version);
+      const ok = await this.setElectronVersionWithRef(ref);
+      if (!ok) return false;
 
       const values = {
         html: await getContent(EditorId.html, this.appState.version),
@@ -134,7 +117,30 @@ export class RemoteLoader {
     }
   }
 
-  private async getElectronVersion(ref: string): Promise<string> {
+  public async setElectronVersionWithRef(ref: string): Promise<boolean> {
+    const version = await this.getPackageVersionFromRef(ref);
+
+    const supportedVersions = sortedElectronMap(this.appState.versions, (k) => k);
+    if (!supportedVersions.includes(version)) {
+      this.handleLoadingFailed(new Error('Version of Electron in example not supported'));
+      return false;
+    }
+
+    // check if version is part of release channel
+    const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(version);
+
+    if (!this.appState.versionsToShow.includes(versionReleaseChannel)) {
+      const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
+      if (!ok) false;
+
+      this.appState.versionsToShow.push(versionReleaseChannel);
+    }
+
+    this.appState.setVersion(version);
+    return true;
+  }
+
+  public async getPackageVersionFromRef(ref: string): Promise<string> {
     const octo = await getOctokit(this.appState);
     const { data: packageJsonData } = await octo.repos.getContents({
       owner: ELECTRON_ORG,
@@ -153,7 +159,7 @@ export class RemoteLoader {
    *
    * @param what What are we loading from (gist, example, etc.)
    */
-  private async verifyRemoteLoad(what: string): Promise<boolean> {
+  public async verifyRemoteLoad(what: string): Promise<boolean> {
     this.appState.setWarningDialogTexts({
       label: `Are you sure you sure you want to load this ${what}? Only load and run it if you trust the source`
     });
@@ -163,7 +169,7 @@ export class RemoteLoader {
     return !!this.appState.warningDialogLastResult;
   }
 
-  private async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
+  public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
     this.appState.setWarningDialogTexts({
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
