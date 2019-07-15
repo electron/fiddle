@@ -25,7 +25,7 @@ export class RemoteLoader {
 
   public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
     console.log(`Loading fiddle from Electron example`, _, exampleInfo);
-    const ok = await this.verifyRemoteLoad('example from the Electron docs');
+    const ok = await this.verifyRemoteLoad('example from the Electron docs', exampleInfo.ref);
     if (!ok) return;
 
     this.fetchExampleAndLoad(exampleInfo.ref, exampleInfo.path);
@@ -159,14 +159,14 @@ export class RemoteLoader {
    *
    * @param what What are we loading from (gist, example, etc.)
    */
-  public async verifyRemoteLoad(what: string): Promise<boolean> {
-    this.appState.setWarningDialogTexts({
-      label: `Are you sure you sure you want to load this ${what}? Only load and run it if you trust the source`
+  public async verifyRemoteLoad(what: string, fiddlePath?: string): Promise<boolean> {
+    this.appState.setConfirmationPromptTexts({
+      label: `Are you sure you sure you want to load this '${what}' from fiddle path '${fiddlePath}'? Only load and run it if you trust the source.`
     });
-    this.appState.isWarningDialogShowing = true;
-    await when(() => !this.appState.isWarningDialogShowing);
+    this.appState.isConfirmationPromptShowing = true;
+    await when(() => !this.appState.isConfirmationPromptShowing);
 
-    return !!this.appState.warningDialogLastResult;
+    return !!this.appState.confirmationPromptLastResult;
   }
 
   public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {

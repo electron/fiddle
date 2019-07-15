@@ -52,8 +52,11 @@ const mockGetRepos = {
 
 class MockStore {
   @observable public isWarningDialogShowing: boolean = false;
+  @observable public isConfirmationPromptShowing: boolean = false;
   public setWarningDialogTexts = jest.fn();
   public toogleWarningDialog = jest.fn();
+  public setConfirmationDialogTexts = jest.fn();
+  public setConfirmationPromptTexts = jest.fn();
   public versions = {
     '4.0.0': {
       version: '4.0.0'
@@ -219,8 +222,8 @@ describe('RemoteLoader', () => {
   describe('verifyRemoteLoad()', () => {
     it('asks the user if they want to load remote content', (done) => {
       instance.verifyRemoteLoad('test').then(done);
-      expect(store.isWarningDialogShowing).toBe(true);
-      store.isWarningDialogShowing = false;
+      expect(store.isConfirmationPromptShowing).toBe(true);
+      store.isConfirmationPromptShowing = false;
     });
   });
 
