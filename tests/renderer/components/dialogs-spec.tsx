@@ -25,13 +25,7 @@ describe('Dialogs component', () => {
   afterAll(() => {
     resetPlatform();
   });
-
-  it('renders initially without visible dialogs', () => {
-    const wrapper = shallow(<Dialogs appState={store} />);
-    
-    expect(wrapper.find('.dialogs').html()).toBe('<div class="dialogs"></div>');
-  });
-
+  
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
