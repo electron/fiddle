@@ -1,10 +1,10 @@
-import { getOctokit } from '../../src/utils/octokit';
 import { observable } from 'mobx';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../src/shared-constants';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { ElectronReleaseChannel } from '../../src/renderer/versions';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../src/shared-constants';
+import { getOctokit } from '../../src/utils/octokit';
+import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('../../src/utils/octokit');
 
@@ -18,7 +18,7 @@ const mockGistFiles = {
     [INDEX_HTML_NAME]: {
       content: 'html'
     }
-}
+};
 
 const mockGetGists = {
   get: async () => ({
@@ -42,7 +42,7 @@ const mockRepos = [
     name: 'other_stuff',
     download_url: 'https://google.com'
   }
-]
+];
 
 const mockGetRepos = {
   getContents: async () => ({
@@ -79,12 +79,12 @@ describe('RemoteLoader', () => {
 
     store = new MockStore() as any;
     instance = new RemoteLoader(store);
-  })
+  });
 
   afterEach(() => {
     ipcRendererManager.removeAllListeners();
   });
-  
+
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
@@ -123,7 +123,7 @@ describe('RemoteLoader', () => {
         [ 'renderer' ],
         [ 'index' ]
       );
-    })
+    });
 
     it('loads an Electron example', async () => {
       (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
@@ -174,32 +174,32 @@ describe('RemoteLoader', () => {
   describe('setElectronVersionFromRef()', () => {
     it('sets version from ref if release channel enabled', async () => {
       instance.getPackageVersionFromRef = jest.fn().mockReturnValueOnce('4.0.0');
-      
+
       const result = await instance.setElectronVersionWithRef('4.0.0');
       expect(result).toBe(true);
       expect(store.setVersion).toBeCalledWith('4.0.0');
-    })
+    });
 
     it('enables release channel when authorized', async () => {
       instance.getPackageVersionFromRef = jest.fn().mockReturnValueOnce('4.0.0-beta');
       instance.verifyReleaseChannelEnabled = jest.fn().mockReturnValue(true);
-      
+
       const result = await instance.setElectronVersionWithRef('4.0.0-beta');
       expect(result).toBe(true);
       expect(store.versionsToShow).toContain(ElectronReleaseChannel.beta);
-    })
+    });
 
     it('does not load unsupported versions of Fiddle', async () => {
       instance.getPackageVersionFromRef = jest.fn().mockReturnValueOnce('5.0.0');
-      
+
       const result = await instance.setElectronVersionWithRef('5.0.0');
       expect(result).toBe(false);
       expect(store.setWarningDialogTexts).toBeCalledWith({
         label: 'Loading the fiddle failed: Error: Version of Electron in example not supported',
         cancel: undefined
-      })
-    })
-  })
+      });
+    });
+  });
 
   describe('getPackageFromRef()', () => {
     it('gets electron version from package.json', async () => {
@@ -215,9 +215,9 @@ describe('RemoteLoader', () => {
 
       const result = await instance.getPackageVersionFromRef('4.0.0');
       expect(result).toBe('4.0.0');
-    })
+    });
 
-  })
+  });
 
   describe('verifyRemoteLoad()', () => {
     it('asks the user if they want to load remote content', (done) => {
@@ -232,8 +232,8 @@ describe('RemoteLoader', () => {
       instance.verifyReleaseChannelEnabled(ElectronReleaseChannel.beta).then(done);
       expect(store.isWarningDialogShowing).toBe(true);
       store.isWarningDialogShowing = false;
-    })
-  })
+    });
+  });
 
   describe('loadFiddleFromElectronExample()', () => {
     it('loads the example with confirmation', async () => {

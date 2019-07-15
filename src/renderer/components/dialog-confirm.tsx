@@ -34,9 +34,9 @@ export class ConfirmDialog extends React.Component<ConfirmDialogProps, ConfirmDi
 
   public render() {
     const { isConfirmationPromptShowing, confirmationDialogTexts } = this.props.appState;
-    
+
     return (
-      <Alert 
+      <Alert
         isOpen={isConfirmationPromptShowing}
         onClose={this.onClose}
         icon='help'

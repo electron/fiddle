@@ -131,7 +131,7 @@ export class RemoteLoader {
 
     if (!this.appState.versionsToShow.includes(versionReleaseChannel)) {
       const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
-      if (!ok) false;
+      if (!ok) return false;
 
       this.appState.versionsToShow.push(versionReleaseChannel);
     }

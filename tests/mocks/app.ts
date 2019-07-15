@@ -1,6 +1,6 @@
 import { FileManager } from './file-manager';
-import { RunnerMock } from './runner';
 import { RemoteLoader } from './remote-loader';
+import { RunnerMock } from './runner';
 
 export class AppMock {
   public setupUnsavedOnChangeListener = jest.fn();

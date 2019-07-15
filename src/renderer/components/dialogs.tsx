@@ -3,10 +3,10 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AddVersionDialog } from './dialog-add-version';
+import { ConfirmDialog } from './dialog-confirm';
 import { TokenDialog } from './dialog-token';
 import { WarningDialog } from './dialog-warning';
 import { Settings } from './settings';
-import { ConfirmDialog } from './dialog-confirm';
 
 export interface DialogsProps {
   appState: AppState;
