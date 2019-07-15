@@ -153,7 +153,7 @@ describe('AppState', () => {
     });
   });
 
-  describe.only('clearConsole()', () => {
+  describe('clearConsole()', () => {
     it('clears the console', () => {
       expect(appState.output.length).toBe(1);
       appState.clearConsole();
