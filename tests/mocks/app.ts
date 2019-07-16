@@ -1,4 +1,5 @@
 import { FileManager } from './file-manager';
+import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
 
 export class AppMock {
@@ -18,6 +19,7 @@ export class AppMock {
 
   public fileManager = new FileManager();
   public runner = new RunnerMock();
+  public remoteLoader = new RemoteLoader();
 
   public monaco = {
     editor: {
