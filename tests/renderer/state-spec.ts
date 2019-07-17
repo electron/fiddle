@@ -188,15 +188,15 @@ describe('AppState', () => {
     });
   });
 
-  describe('toogleWarningDialog()', () => {
+  describe('toggleWarningDialog()', () => {
     it('toggles the warnign dialog', () => {
       appState.warningDialogLastResult = true;
 
-      appState.toogleWarningDialog();
+      appState.toggleWarningDialog();
       expect(appState.isWarningDialogShowing).toBe(true);
       expect(appState.warningDialogLastResult).toBe(null);
 
-      appState.toogleWarningDialog();
+      appState.toggleWarningDialog();
       expect(appState.isWarningDialogShowing).toBe(false);
     });
   });
