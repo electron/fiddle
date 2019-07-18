@@ -223,7 +223,7 @@ export class RemoteLoader {
       });
     }
 
-    this.appState.toogleWarningDialog();
+    this.appState.toggleWarningDialog();
 
     console.warn(`Loading Fiddle failed`, error);
     return false;

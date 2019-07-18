@@ -19,7 +19,7 @@ describe('AddressBar component', () => {
     public setWarningDialogTexts = jest.fn();
     public setConfirmationDialogTexts = jest.fn();
     public setConfirmationPromptTexts = jest.fn();
-    public toogleWarningDialog = jest.fn();
+    public toggleWarningDialog = jest.fn();
   }
 
   beforeEach(() => {

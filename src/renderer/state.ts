@@ -246,7 +246,7 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toogleWarningDialog() {
+  @action public toggleWarningDialog() {
     this.isWarningDialogShowing = !this.isWarningDialogShowing;
 
     if (this.isWarningDialogShowing) {
@@ -254,7 +254,7 @@ export class AppState {
     }
   }
 
-  @action public toogleConfirmationPromptDialog() {
+  @action public toggleConfirmationPromptDialog() {
     this.isConfirmationPromptShowing = !this.isConfirmationPromptShowing;
 
     if (this.isConfirmationPromptShowing) {

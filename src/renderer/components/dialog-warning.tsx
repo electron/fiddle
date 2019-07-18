@@ -29,7 +29,7 @@ export class WarningDialog extends React.Component<WarningDialogProps, WarningDi
 
   public onClose(result: boolean) {
     this.props.appState.warningDialogLastResult = result;
-    this.props.appState.toogleWarningDialog();
+    this.props.appState.toggleWarningDialog();
   }
 
   public render() {

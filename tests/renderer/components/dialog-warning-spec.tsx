@@ -17,7 +17,7 @@ describe('TokenDialog component', () => {
     store = {
       isWarningDialogShowing: false,
       warningDialogTexts: { label: '', ok: '', cancel: '' },
-      toogleWarningDialog: jest.fn()
+      toggleWarningDialog: jest.fn()
     };
   });
 
@@ -37,6 +37,6 @@ describe('TokenDialog component', () => {
     const instance: WarningDialog = wrapper.instance() as any;
 
     instance.onClose(true);
-    expect(store.toogleWarningDialog).toHaveBeenCalledTimes(1);
+    expect(store.toggleWarningDialog).toHaveBeenCalledTimes(1);
   });
 });

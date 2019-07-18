@@ -54,7 +54,7 @@ class MockStore {
   @observable public isWarningDialogShowing: boolean = false;
   @observable public isConfirmationPromptShowing: boolean = false;
   public setWarningDialogTexts = jest.fn();
-  public toogleWarningDialog = jest.fn();
+  public toggleWarningDialog = jest.fn();
   public setConfirmationDialogTexts = jest.fn();
   public setConfirmationPromptTexts = jest.fn();
   public versions = {

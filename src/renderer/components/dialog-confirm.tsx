@@ -29,7 +29,7 @@ export class ConfirmDialog extends React.Component<ConfirmDialogProps, ConfirmDi
 
   public onClose(result: boolean) {
     this.props.appState.confirmationPromptLastResult = result;
-    this.props.appState.toogleConfirmationPromptDialog();
+    this.props.appState.toggleConfirmationPromptDialog();
   }
 
   public render() {
