@@ -35,7 +35,7 @@ describe('Editor component', () => {
 
   it('renders the editor container', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
     );
 
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
@@ -43,13 +43,13 @@ describe('Editor component', () => {
 
   it('correctly sets the language', () => {
     let wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
     );
 
     expect((wrapper.instance() as any).language).toBe('javascript');
 
     wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.html} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.html} />
     );
 
     expect((wrapper.instance() as any).language).toBe('html');
@@ -57,7 +57,7 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monoacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
     );
 
     expect((wrapper as any)
@@ -72,7 +72,7 @@ describe('Editor component', () => {
       <Editor
         appState={store}
         monaco={monaco}
-        monoacoOptions={{}}
+        monacoOptions={{}}
         id={EditorId.main}
         editorDidMount={didMount}
       />
@@ -97,7 +97,7 @@ describe('Editor component', () => {
       <Editor
         appState={store}
         monaco={monaco}
-        monoacoOptions={{}}
+        monacoOptions={{}}
         id={EditorId.main}
         editorDidMount={() => undefined}
       />
@@ -117,7 +117,7 @@ describe('Editor component', () => {
       <Editor
         appState={store}
         monaco={monaco}
-        monoacoOptions={{}}
+        monacoOptions={{}}
         id={EditorId.main}
         editorDidMount={didMount}
       />

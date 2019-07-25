@@ -11,7 +11,7 @@ import { AppState } from '../state';
 export interface EditorProps {
   appState: AppState;
   monaco: typeof MonacoType;
-  monoacoOptions: MonacoType.editor.IEditorOptions;
+  monacoOptions: MonacoType.editor.IEditorOptions;
   id: EditorId;
   options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
@@ -68,7 +68,7 @@ export class Editor extends React.Component<EditorProps> {
    * Initialize Monaco.
    */
   public async initMonaco() {
-    const { monaco, monoacoOptions } = this.props;
+    const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.containerRef.current;
 
     if (ref) {
@@ -77,7 +77,7 @@ export class Editor extends React.Component<EditorProps> {
         theme: 'main',
         contextmenu: false,
         model: null,
-        ...monoacoOptions
+        ...monacoOptions
       });
 
       await this.editorDidMount(this.editor);

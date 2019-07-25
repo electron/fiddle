@@ -241,7 +241,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         id={id}
         monaco={monaco!}
         appState={appState}
-        monoacoOptions={defaultMonacoOptions}
+        monacoOptions={defaultMonacoOptions}
       />
     );
   }
