@@ -121,6 +121,9 @@ export class Editor extends React.Component<EditorProps> {
     } else {
       const value = await getContent(id, version);
       const model = monaco.editor.createModel(value, this.language);
+      model.updateOptions({
+        tabSize: 2
+      });
 
       this.editor.setModel(model);
     }

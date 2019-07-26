@@ -8,6 +8,7 @@ describe('Editor component', () => {
   let store: any;
   let monaco: any;
   const editorDispose = jest.fn();
+  const updateOptions = jest.fn();
 
   beforeEach(() => {
     store = {
@@ -26,7 +27,9 @@ describe('Editor component', () => {
           setModel: jest.fn(),
           restoreViewState: jest.fn()
         })),
-        createModel: jest.fn(),
+        createModel: jest.fn(() => ({
+          updateOptions: updateOptions
+        })),
         setModel: jest.fn(),
         dispose: jest.fn()
       }
@@ -66,49 +69,72 @@ describe('Editor component', () => {
     ).toBe(false);
   });
 
-  it('initMonaco() attempts to create an editor', async () => {
-    const didMount = jest.fn();
-    const wrapper = shallow(
-      <Editor
-        appState={store}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={EditorId.main}
-        editorDidMount={didMount}
-      />
-    );
-    const instance: any = wrapper.instance();
-
-    instance.containerRef.current = 'ref';
-    await instance.initMonaco();
-
-    expect(didMount).toHaveBeenCalled();
-    expect(monaco.editor.create).toHaveBeenCalled();
-    expect(monaco.editor.createModel).toHaveBeenCalled();
-  });
-
-  it('initMonaco() attempts to create an editor and restores a backup', async () => {
-    store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
-      model: true,
-      viewState: true
+  describe('initMonaco()', async () => {
+    it('attempts to create an editor', async () => {
+      const didMount = jest.fn();
+      const wrapper = shallow(
+        <Editor
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          id={EditorId.main}
+          editorDidMount={didMount}
+        />
+      );
+      const instance: any = wrapper.instance();
+  
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
+  
+      expect(didMount).toHaveBeenCalled();
+      expect(monaco.editor.create).toHaveBeenCalled();
+      expect(monaco.editor.createModel).toHaveBeenCalled();
     });
 
-    const wrapper = shallow(
-      <Editor
-        appState={store}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={EditorId.main}
-        editorDidMount={() => undefined}
-      />
-    );
-    const instance: any = wrapper.instance();
+    it('attempts to restore a backup if available', async () => {
+      store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+        model: true,
+        viewState: true
+      });
+  
+      const wrapper = shallow(
+        <Editor
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          id={EditorId.main}
+          editorDidMount={() => undefined}
+        />
+      );
+      const instance: any = wrapper.instance();
+  
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
+  
+      expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
+      expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
+    });
 
-    instance.containerRef.current = 'ref';
-    await instance.initMonaco();
+    it('initializes with a fixed tab size', async () => {
+      const didMount = jest.fn();
+      const wrapper = shallow(
+        <Editor
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          id={EditorId.main}
+          editorDidMount={didMount}
+        />
+      );
+      const instance: any = wrapper.instance();
+  
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
 
-    expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
-    expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
+      expect(updateOptions).toHaveBeenCalledWith(expect.objectContaining({
+        tabSize: 2
+      }));
+    });
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
