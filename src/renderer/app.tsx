@@ -65,12 +65,14 @@ export class App {
       const editor = fiddle.editors[name];
       const backup = this.state.closedPanels[name];
 
-      if (isEditorBackup(backup) && backup.model && values[name]) {
-        // The editor does not exist, attempt to set it on the backup
-        backup.model.setValue(values[name]!);
-      } else if (editor && editor.setValue && values[name]) {
-        // The editor exists, set the value directly
-        editor.setValue(values[name]!);
+      if (typeof values[name] !== 'undefined') {
+        if (isEditorBackup(backup) && backup.model) {
+          // The editor does not exist, attempt to set it on the backup
+          backup.model.setValue(values[name]!);
+        } else if (editor && editor.setValue) {
+          // The editor exists, set the value directly
+          editor.setValue(values[name]!);
+        }
       }
     }
 
