@@ -4,6 +4,7 @@ import * as path from 'path';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
+import { getOfflineTypeDefinitionPath } from './fetch-types';
 
 /**
  * The binary manager takes care of downloading Electron versions
@@ -19,31 +20,48 @@ export class BinaryManager {
    * four times before giving up if an error occurs.
    *
    * @param {string} iVersion
-   * @param {number} iteration
    * @returns {Promise<void>}
    */
-  public async remove(iVersion: string, i: number = 0): Promise<void> {
+  public async remove(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
     const fs = await fancyImport<typeof fsType>('fs-extra');
+    let isDeleted = false;
 
-    try {
+    // utility to re-run removal functions upon failure
+    // due to windows filesystem lockfile jank
+    const rerunner = async (func: () => Promise<void>, counter: number = 1) => {
+      try {
+        await func();
+      } catch (error) {
+        console.warn(`Binary Manager: failed to run ${func.name} for ${version}, but failed`, error);
+        if (counter < 4) {
+          console.log(`Binary Manager: Trying again to run ${func.name}`);
+          await rerunner(func, counter + 1);
+        }
+      }
+    };
+
+    const binaryCleaner = async () => {
       if (await this.getIsDownloaded(version)) {
         // This is necessary since we're messing with .asar files inside
         // the Electron binaries. Electron, powering Fiddle, will try to
         // "correct" our calls, but we don't want that right here.
         process.noAsar = true;
-
         await fs.remove(this.getDownloadPath(version));
-
         process.noAsar = false;
-      }
-    } catch (error) {
-      console.warn(`Binary Manager: Tried to remove ${version}, but failed`, error);
 
-      if (i < 3) {
-        console.log(`Binary Manager: Trying again`);
-        return this.remove(version, i + 1);
+        isDeleted = true;
       }
+    };
+
+    const typeDefsCleaner = async () => {
+      await this.removeTypeDefsForVersion(version);
+    };
+
+    await rerunner(binaryCleaner);
+
+    if (isDeleted) {
+      await rerunner(typeDefsCleaner);
     }
   }
 
@@ -160,6 +178,20 @@ export class BinaryManager {
     return fs.existsSync(expectedPath);
   }
 
+  public async removeTypeDefsForVersion(version: string) {
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    const _version = normalizeVersion(version);
+    const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
+
+    if (fs.existsSync(typeDefsDir)) {
+      try {
+        await fs.remove(typeDefsDir);
+      } catch (error) {
+        throw error;
+      }
+    }
+  }
+
   /**
    * Gets the expected path for a given Electron version
    *
@@ -169,6 +201,7 @@ export class BinaryManager {
   private getDownloadPath(version: string): string {
     return path.join(USER_DATA_PATH, 'electron-bin', version);
   }
+
 
   /**
    * Unzips an electron package so that we can actually use it.

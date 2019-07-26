@@ -1,5 +1,6 @@
 import { BinaryManager } from '../../src/renderer/binary';
 import { overridePlatform, resetPlatform } from '../utils';
+import { USER_DATA_PATH } from '../../src/renderer/constants';
 
 import * as path from 'path';
 
@@ -56,6 +57,55 @@ describe('binary', () => {
 
       await binaryManager.remove('v3.0.0');
       expect(fs.remove).toHaveBeenCalledTimes(4);
+    });
+
+    it('attempts to clean up the version\'s associated typedefs', async () => {
+      const fs = require('fs-extra');
+      binaryManager.removeTypeDefsForVersion = jest.fn();
+
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+
+      await binaryManager.remove('v3.0.0');
+      expect(fs.remove).toHaveBeenCalled();
+      expect(binaryManager.removeTypeDefsForVersion).toHaveBeenCalled();
+    });
+
+    it('retries typedef cleanup upon failure', async () => {
+      const fs = require('fs-extra');
+      binaryManager.removeTypeDefsForVersion = jest.fn().mockImplementation(() => {
+        throw new Error('Bwap bwap');
+      });
+
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+
+      await binaryManager.remove('v3.0.0');
+      expect(binaryManager.removeTypeDefsForVersion).toHaveBeenCalledTimes(4);
+      
+    });
+  });
+
+  describe('removeTypeDefsForVersion()', () => {
+    it('removes a version\'s typedefs', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      await binaryManager.removeTypeDefsForVersion('v3.0.0');
+      expect(fs.remove).toHaveBeenCalledWith(path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'));
+    });
+
+    it('throws upon fs failure', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (fs.remove as jest.Mock<any>).mockImplementation(() => {
+        throw new Error('Bwap bwap');
+      });
+
+      expect.assertions(1);
+
+      try {
+        await binaryManager.removeTypeDefsForVersion('v3.0.0');
+      } catch(e) {
+        expect(e).toEqual(new Error('Bwap bwap'));
+      }
     });
   });
 
