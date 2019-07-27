@@ -208,6 +208,17 @@ describe('Editors component', () => {
 
       expect(threw).toBe(true);
     });
+
+    it('does not set a value if none passed in', async () => {
+        const app = new App();
+        await app.setValues({
+          html: 'html-value',
+          main: 'main-value',
+        });
+  
+        expect((window as any).ElectronFiddle.editors.renderer.setValue)
+          .not.toHaveBeenCalled();
+    });
   });
 
   describe('setupUnsavedOnChangeListener()', () => {
