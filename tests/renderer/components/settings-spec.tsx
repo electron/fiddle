@@ -15,7 +15,7 @@ jest.mock('../../../src/renderer/components/settings-credits', () => ({
   CreditsSettings: 'settings-credits'
 }));
 
-describe('CreditsSettings component', () => {
+describe('Settings component', () => {
   let store: any;
 
   beforeEach(() => {
