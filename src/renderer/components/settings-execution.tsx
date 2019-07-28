@@ -63,7 +63,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
 
     return (
       <div>
-        <h2>Exection</h2>
+        <h2>Execution</h2>
         <Callout>
           These advanced settings control how Electron Fiddle executes your fiddles.
         </Callout>
