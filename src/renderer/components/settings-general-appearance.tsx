@@ -111,8 +111,9 @@ export class AppearanceSettings extends React.Component<
    * @memberof AppearanceSettings
    */
   public async createNewThemeFromCurrent(): Promise<boolean> {
+    const { appState } = this.props;
     const fs = await fancyImport<typeof fsType>('fs-extra');
-    const theme = await getTheme(this.props.appState.theme);
+    const theme = await getTheme(appState.theme);
 
     try {
       const namor = await fancyImport<any>('namor');
@@ -127,6 +128,8 @@ export class AppearanceSettings extends React.Component<
       }, { spaces: 2 });
 
       shell.showItemInFolder(themePath);
+
+      this.setState({themes: await getAvailableThemes()});
 
       return true;
     } catch (error) {
