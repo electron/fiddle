@@ -87,7 +87,7 @@ describe('Settings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('closes upon pressing Escape key', () => {
+  it.only('closes upon pressing Escape key', () => {
     expect(store.isSettingsShowing).toBe(true);
     // mock event listener API
     const map: any = {};
@@ -95,12 +95,21 @@ describe('Settings component', () => {
       map[event] = cb;
     });
 
-    shallow(
+    window.removeEventListener = jest.fn().mockImplementation((event) => {
+      delete map[event];
+    });
+
+    const wrapper = shallow(
       <Settings appState={store} />
     );
 
     // trigger mock 'keyup' event
     map.keyup({code: 'Escape'});
+    expect(Object.keys(map)).toHaveLength(1);
     expect(store.isSettingsShowing).toBe(false);
+
+    // check if event listener is removed upon unmount
+    wrapper.unmount();
+    expect(Object.keys(map)).toHaveLength(0);
   });
 });
