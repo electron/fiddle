@@ -86,4 +86,21 @@ describe('Settings component', () => {
     wrapper.find('#settings-link-Credits').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
+
+  it('closes upon pressing Escape key', () => {
+    expect(store.isSettingsShowing).toBe(true);
+    // mock event listener API
+    const map: any = {};
+    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+      map[event] = cb;
+    });
+
+    shallow(
+      <Settings appState={store} />
+    );
+
+    // trigger mock 'keyup' event
+    map.keyup({code: 'Escape'});
+    expect(store.isSettingsShowing).toBe(false);
+  });
 });

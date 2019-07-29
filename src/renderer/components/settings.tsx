@@ -44,6 +44,16 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     this.state = {
       section: SettingsSections.General
     };
+
+    this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
+  }
+
+  public componentDidMount() {
+    window.addEventListener('keyup', this.closeSettingsPanel, true);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener('keyup', this.closeSettingsPanel);
   }
 
   /**
@@ -137,5 +147,15 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     }
 
     return 'cog';
+  }
+
+  /**
+   * Trigger closing of the settings panel upon Esc
+   */
+  private closeSettingsPanel(event: KeyboardEvent) {
+    const { appState } = this.props;
+    if (event.code === 'Escape') {
+      appState.isSettingsShowing = false;
+    }
   }
 }
