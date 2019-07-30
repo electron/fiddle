@@ -8,6 +8,8 @@ import {
   filterItem,
   renderItem
 } from '../../../src/renderer/components/settings-general-appearance';
+import { getAvailableThemes } from '../../../src/renderer/themes';
+import { FiddleTheme } from '../../../src/renderer/themes-defaults';
 
 const mockThemes = [{
   name: 'defaultDark',
@@ -21,7 +23,7 @@ jest.mock('../../../src/utils/import', () => ({
 
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
-  getAvailableThemes: () => Promise.resolve(mockThemes),
+  getAvailableThemes: jest.fn(),
   getTheme: () => Promise.resolve({
     common: {}
   })
@@ -34,6 +36,8 @@ describe('AppearanceSettings component', () => {
     store = {
       setTheme: jest.fn()
     };
+
+    (getAvailableThemes as jest.Mock).mockResolvedValue(mockThemes);
   });
 
   it('renders', () => {
@@ -106,6 +110,22 @@ describe('AppearanceSettings component', () => {
       expect(args[1].name === 'defaultDark').toBe(false);
       expect(args[1].common).toBeDefined();
       expect(args[1].file).toBeUndefined();
+    });
+
+    it('adds the newly created theme to the Themes dropdown', async () => {
+      const fs = require('fs-extra');
+      const arr: Array<FiddleTheme> = [];
+      (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
+      (fs.outputJSON as jest.Mock).mockImplementation((_, theme: FiddleTheme) => {
+        arr.push(theme);
+      });
+      const wrapper = shallow(
+        <AppearanceSettings appState={store} />
+      );
+      expect(wrapper.state('themes')).toHaveLength(0);
+      const instance: AppearanceSettings = wrapper.instance() as any;
+      await instance.createNewThemeFromCurrent();
+      expect(wrapper.state('themes')).toHaveLength(1);
     });
 
     it('handles an error', async () => {

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
+exports[`Settings component renders only the menu if page unknown 1`] = `
 <div
   className="settings"
 >
@@ -72,7 +72,7 @@ exports[`CreditsSettings component renders only the menu if page unknown 1`] = `
 </div>
 `;
 
-exports[`CreditsSettings component renders the Credits page after a click 1`] = `
+exports[`Settings component renders the Credits page after a click 1`] = `
 <div
   className="settings"
 >
@@ -151,7 +151,7 @@ exports[`CreditsSettings component renders the Credits page after a click 1`] = 
 </div>
 `;
 
-exports[`CreditsSettings component renders the Electron page after a click 1`] = `
+exports[`Settings component renders the Electron page after a click 1`] = `
 <div
   className="settings"
 >
@@ -230,7 +230,7 @@ exports[`CreditsSettings component renders the Electron page after a click 1`] =
 </div>
 `;
 
-exports[`CreditsSettings component renders the Electron page by default 1`] = `
+exports[`Settings component renders the Electron page by default 1`] = `
 <div
   className="settings"
 >
@@ -309,7 +309,7 @@ exports[`CreditsSettings component renders the Electron page by default 1`] = `
 </div>
 `;
 
-exports[`CreditsSettings component renders the Execution page after a click 1`] = `
+exports[`Settings component renders the Execution page after a click 1`] = `
 <div
   className="settings"
 >
@@ -388,7 +388,7 @@ exports[`CreditsSettings component renders the Execution page after a click 1`] 
 </div>
 `;
 
-exports[`CreditsSettings component renders the General page after a click 1`] = `
+exports[`Settings component renders the General page after a click 1`] = `
 <div
   className="settings"
 >
