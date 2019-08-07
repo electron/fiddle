@@ -105,5 +105,8 @@
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-react": "^4.2.0",
     "typescript": "^3.8.2"
+  },
+  "resolutions": {
+    "node-gyp": "5.0.0"
   }
 }
