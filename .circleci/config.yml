@@ -1,0 +1,212 @@
+step-restore-cache: &step-restore-cache
+  restore_cache:
+    keys:
+      - v1-modules-{{ arch }}-{{ checksum "yarn.lock" }}
+      - v1-modules-{{ arch }}
+step-install: &step-install
+  run: npx yarn --frozen-lockfile && rm -rf node_modules/electron/dist
+step-save-cache: &step-save-cache
+  save_cache:
+    paths:
+      - node_modules
+    key: v1-modules-{{ arch }}-{{ checksum "yarn.lock" }}
+step-install-electron: &step-install-electron
+  run: cd node_modules/electron && node install.js
+
+steps-test: &steps-test
+  steps:
+    - checkout
+    - *step-restore-cache
+    - *step-install
+    - *step-save-cache
+    - *step-install-electron
+    - run: npm run lint
+    - run: npm run test -- --maxWorkers=4
+
+steps-build: &steps-build
+  steps:
+    - checkout
+    - *step-restore-cache
+    - *step-install
+    - *step-save-cache
+    - *step-install-electron
+    - when:
+        condition: <<parameters.on_linux>>
+        steps:
+          - run:
+              name: Install Linux Dependencies
+              command: sudo apt install -y rpm fakeroot
+    - when:
+        condition: <<parameters.on_mac>>
+        steps:
+          - run:
+              name: Import macOS Certificate
+              command: .circleci/import-macos-cert.sh
+    - when:
+        condition: <<parameters.on_win>>
+        steps:
+          - run:
+              name: Import Windows Certificate
+              command: |
+                if (Test-Path Env:\WINDOWS_CERTIFICATE_P12) {
+                  $workingDirectory = Convert-Path (Resolve-Path -path ".")
+                  $filename = "$workingDirectory\cert.p12"
+                  $bytes = [Convert]::FromBase64String($env:WINDOWS_CERTIFICATE_P12)
+                  [IO.File]::WriteAllBytes($filename, $bytes)
+                }
+              shell: powershell.exe
+    - run: npm run publish -- --dry-run --arch=$TARGET_ARCH
+    - store_artifacts:
+        path: out/make
+        destination: dist
+    - persist_to_workspace:
+        root: .
+        paths:
+            - out/make
+            - out/publish-dry-run
+
+steps-publish: &steps-publish
+  steps:
+    - run: echo 123
+
+version: 2.1
+orbs:
+  win: circleci/windows@1.0.0
+jobs:
+  test-linux:
+    docker:
+      - image: circleci/node:10
+    <<: *steps-test
+  build-linux:
+    docker:
+      - image: circleci/node:10
+    environment:
+      TARGET_ARCH: x64
+    parameters:
+      on_linux:
+        type: boolean
+        default: true
+      on_mac:
+        type: boolean
+        default: false
+      on_win:
+        type: boolean
+        default: false
+    <<: *steps-build
+
+  test-mac:
+    macos:
+      xcode: "10.2.0"
+    <<: *steps-test
+  build-mac:
+    macos:
+      xcode: "10.2.0"
+    environment:
+      TARGET_ARCH: x64
+    parameters:
+      on_linux:
+        type: boolean
+        default: false
+      on_mac:
+        type: boolean
+        default: true
+      on_win:
+        type: boolean
+        default: false
+    <<: *steps-build
+
+  test-windows:
+    executor:
+      name: win/vs2019
+      shell: bash.exe
+    <<: *steps-test
+  build-windows-ia32:
+    executor:
+      name: win/vs2019
+      shell: bash.exe
+    environment:
+      TARGET_ARCH: ia32
+    parameters:
+      on_linux:
+        type: boolean
+        default: false
+      on_mac:
+        type: boolean
+        default: false
+      on_win:
+        type: boolean
+        default: true
+    <<: *steps-build
+  build-windows-x64:
+    executor:
+      name: win/vs2019
+      shell: bash.exe
+    environment:
+      TARGET_ARCH: x64
+    parameters:
+      on_linux:
+        type: boolean
+        default: false
+      on_mac:
+        type: boolean
+        default: false
+      on_win:
+        type: boolean
+        default: true
+    <<: *steps-build
+
+  finalize:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - *step-restore-cache
+      - *step-install
+      - attach_workspace:
+          at: .
+      - store_artifacts:
+          path: out/make
+          destination: dist
+
+  release:
+    docker:
+      - image: circleci/node:10
+    steps:
+      - checkout
+      - *step-restore-cache
+      - *step-install
+      - attach_workspace:
+          at: .
+      - run: npm run publish -- --from-dry-run
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test-linux
+      - test-mac
+      - test-windows
+
+      - build-linux
+      - build-mac
+      - build-windows-ia32
+      - build-windows-x64
+
+      - finalize:
+          requires:
+            - build-linux
+            - build-mac
+            - build-windows-ia32
+            - build-windows-x64
+      - release:
+          requires:
+            - build-linux
+            - build-mac
+            - build-windows-ia32
+            - build-windows-x64
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /v.*/
+

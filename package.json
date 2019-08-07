@@ -63,12 +63,12 @@
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",
-    "@electron-forge/cli": "^6.0.0-beta.42",
-    "@electron-forge/maker-deb": "^6.0.0-beta.42",
-    "@electron-forge/maker-rpm": "^6.0.0-beta.42",
-    "@electron-forge/maker-squirrel": "^6.0.0-beta.42",
-    "@electron-forge/maker-zip": "^6.0.0-beta.42",
-    "@electron-forge/publisher-github": "^6.0.0-beta.42",
+    "@electron-forge/cli": "^6.0.0-beta.44",
+    "@electron-forge/maker-deb": "^6.0.0-beta.44",
+    "@electron-forge/maker-rpm": "^6.0.0-beta.44",
+    "@electron-forge/maker-squirrel": "^6.0.0-beta.44",
+    "@electron-forge/maker-zip": "^6.0.0-beta.44",
+    "@electron-forge/publisher-github": "^6.0.0-beta.44",
     "@types/builtin-modules": "^3.1.1",
     "@types/classnames": "^2.2.9",
     "@types/enzyme": "^3.10.0",
@@ -104,5 +104,8 @@
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-react": "^4.0.0",
     "typescript": "^3.5.2"
+  },
+  "resolutions": {
+    "node-gyp": "5.0.0"
   }
 }
