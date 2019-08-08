@@ -15,15 +15,25 @@ const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
  * @param {string} version
  * @returns {Promise<string>}
  */
-export function fetchTypeDefinitions(version: string): Promise<string> {
+export async function fetchTypeDefinitions(version: string): Promise<string> {
   const url = `https://unpkg.com/electron@${version}/electron.d.ts`;
 
-  return window.fetch(url)
-    .then((response) => response.text())
-    .catch((error) => {
-      console.warn(`Fetch Types: Could not fetch definitions`, error);
-      return '';
-    });
+  let text: string;
+  try {
+    const response = await window.fetch(url);
+    text = await response.text();
+  } catch (error) {
+    console.warn(`Fetch Types: Could not fetch definitions`, error);
+    return '';
+  }
+
+  // for invalid packa
+  if (text.includes('Cannot find package')) {
+    console.warn(`Fetch Types: ${text}`);
+    return '';
+  } else {
+    return text;
+  }
 }
 
 /**
