@@ -215,7 +215,7 @@ describe('Editors component', () => {
           html: 'html-value',
           main: 'main-value',
         });
-  
+
         expect((window as any).ElectronFiddle.editors.renderer.setValue)
           .not.toHaveBeenCalled();
     });

@@ -1,6 +1,6 @@
 import { BinaryManager } from '../../src/renderer/binary';
-import { overridePlatform, resetPlatform } from '../utils';
 import { USER_DATA_PATH } from '../../src/renderer/constants';
+import { overridePlatform, resetPlatform } from '../utils';
 
 import * as path from 'path';
 
@@ -80,7 +80,7 @@ describe('binary', () => {
 
       await binaryManager.remove('v3.0.0');
       expect(binaryManager.removeTypeDefsForVersion).toHaveBeenCalledTimes(4);
-      
+
     });
   });
 
@@ -103,7 +103,7 @@ describe('binary', () => {
 
       try {
         await binaryManager.removeTypeDefsForVersion('v3.0.0');
-      } catch(e) {
+      } catch (e) {
         expect(e).toEqual(new Error('Bwap bwap'));
       }
     });
