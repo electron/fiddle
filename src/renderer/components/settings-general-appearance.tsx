@@ -1,11 +1,12 @@
 import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { shell } from 'electron';
+import { remote, shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 
+import * as MonacoType from 'monaco-editor';
 import { highlightText } from '../../utils/highlight-text';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
@@ -90,6 +91,7 @@ export class AppearanceSettings extends React.Component<
     });
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
+    this.createNewThemeFromMonaco = this.createNewThemeFromMonaco.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
@@ -137,6 +139,37 @@ export class AppearanceSettings extends React.Component<
 
       return false;
     }
+  }
+
+  /**
+   * Creates a new template that takes in Monaco editor JSON theme only.
+   */
+  public async createNewThemeFromMonaco(): Promise<boolean> {
+    // fetch current theme
+    const defaultTheme = await getTheme(this.props.appState.theme);
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    const currWindow = remote.BrowserWindow.getAllWindows()[0];
+    try {
+      const name = await this.promptForTheme(currWindow, defaultTheme);
+      if (name instanceof Error) {
+        throw name;
+      }
+      const themePath = path.join(THEMES_PATH, `${name}.json`);
+      await fs.outputJSON(themePath, {
+        ...defaultTheme,
+        name,
+        file: undefined,
+        css: undefined
+      }, {spaces: 2});
+      shell.showItemInFolder(themePath);
+      this.setState({themes: await getAvailableThemes()});
+      return true;
+    } catch (error) {
+      console.warn(`Themes: Failed to create new theme from user's JSON file`, error);
+      return false;
+    }
+
+    return false;
   }
 
   /**
@@ -198,8 +231,28 @@ export class AppearanceSettings extends React.Component<
             text='Create theme from current selection'
             icon='duplicate'
           />
+          <Button
+            onClick={this.createNewThemeFromMonaco}
+            text='Add a VSCode Editor theme'
+            icon='duplicate'
+          />
         </Callout>
       </div>
     );
   }
+
+  private async promptForTheme(currWindow: Electron.BrowserWindow, defaultTheme: LoadedFiddleTheme) {
+    const filePicked = await remote.dialog.showOpenDialog(currWindow, {
+      title: 'Pick a VSCode editor theme file',
+      properties: ['openFile'],
+      filters: [ { name: 'JSON', extensions: ['json']}]
+    });
+    if (filePicked === undefined || filePicked.length === 0) {
+      return Error('Prompt cancelled by user');
+    }
+    defaultTheme.editor = fsType.readJSONSync(filePicked[0]) as Partial<MonacoType.editor.IStandaloneThemeData>;
+    const name = path.parse(filePicked[0]).name;
+    return name;
+  }
+
 }
