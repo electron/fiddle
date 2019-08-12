@@ -91,10 +91,15 @@ export async function getDownloadedVersionTypeDefs(version: ElectronVersion): Pr
   }
 }
 
-export async function getLocalVersionTypeDefs(version: ElectronVersion) {    // module path is inside out/Debug for local builds.
-  const fs = await fancyImport<typeof fsType>('fs-extra');
-  const typesPath = getLocalTypePathForVersion(version);
-  return fs.readFile(typesPath!, 'utf-8');
+export async function getLocalVersionTypeDefs(version: ElectronVersion) {
+  if (version.source === ElectronVersionSource.local && !!version.localPath) {
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    const typesPath = getLocalTypePathForVersion(version);
+    if (!!typesPath && fs.existsSync(typesPath)) {
+      return fs.readFile(typesPath, 'utf-8');
+    }
+  }
+  return null;
 }
 
 /**
@@ -149,6 +154,6 @@ export function getLocalTypePathForVersion(version: ElectronVersion) {
       'electron.d.ts'
     );
   } else {
-    return undefined;
+    return null;
   }
 }

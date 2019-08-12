@@ -26,7 +26,7 @@ import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
-import { updateEditorTypeDefinitions, getLocalTypePathForVersion } from './fetch-types';
+import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
