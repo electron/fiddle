@@ -234,7 +234,7 @@ export class AppearanceSettings extends React.Component<
           />
           <Button
             onClick={this.createNewThemeFromMonaco}
-            text='Add a VSCode Editor theme'
+            text='Add a Monaco Editor theme'
             icon='duplicate'
           />
         </Callout>
