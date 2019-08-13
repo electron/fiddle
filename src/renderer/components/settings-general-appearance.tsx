@@ -164,7 +164,6 @@ export class AppearanceSettings extends React.Component<
       this.setState({themes: await getAvailableThemes()});
       return true;
     } catch (error) {
-      console.warn(`Themes: Failed to create new theme from user's JSON file`, error);
       return false;
     }
 
