@@ -151,7 +151,7 @@ export class AppearanceSettings extends React.Component<
     try {
       const name = await this.promptForTheme(defaultTheme);
       if (name instanceof Error) {
-        throw name;
+        return false;
       }
       const themePath = path.join(THEMES_PATH, `${name}.json`);
       await fs.outputJSON(themePath, {
