@@ -148,9 +148,8 @@ export class AppearanceSettings extends React.Component<
     // fetch current theme
     const defaultTheme = await getTheme(this.props.appState.theme);
     const fs = await fancyImport<typeof fsType>('fs-extra');
-    const currWindow = remote.BrowserWindow.getAllWindows()[0];
     try {
-      const name = await this.promptForTheme(currWindow, defaultTheme);
+      const name = await this.promptForTheme(defaultTheme);
       if (name instanceof Error) {
         throw name;
       }
@@ -244,8 +243,8 @@ export class AppearanceSettings extends React.Component<
     );
   }
 
-  private async promptForTheme(currWindow: Electron.BrowserWindow, defaultTheme: LoadedFiddleTheme) {
-    const filePicked = await remote.dialog.showOpenDialog(currWindow, {
+  private async promptForTheme(defaultTheme: LoadedFiddleTheme) {
+    const filePicked = await remote.dialog.showOpenDialog({
       title: 'Pick a VSCode editor theme file',
       properties: ['openFile'],
       filters: [ { name: 'JSON', extensions: ['json']}]
