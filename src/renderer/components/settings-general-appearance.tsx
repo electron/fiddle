@@ -253,7 +253,12 @@ export class AppearanceSettings extends React.Component<
     if (filePicked === undefined || filePicked.length === 0) {
       return Error('Prompt cancelled by user');
     }
-    defaultTheme.editor = fsType.readJSONSync(filePicked[0]) as Partial<MonacoType.editor.IStandaloneThemeData>;
+    const editor = fsType.readJSONSync(filePicked[0]);
+    defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+    if (editor.name) {
+      // if this exists, set that as the name
+      return editor.name;
+    }
     const name = path.parse(filePicked[0]).name;
     return name;
   }
