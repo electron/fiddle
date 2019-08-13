@@ -74,7 +74,7 @@ exports[`AppearanceSettings component renders 1`] = `
     <Blueprint3.Button
       icon="duplicate"
       onClick={[Function]}
-      text="Add a VSCode Editor theme"
+      text="Add a Monaco Editor theme"
     />
   </Blueprint3.Callout>
 </div>
