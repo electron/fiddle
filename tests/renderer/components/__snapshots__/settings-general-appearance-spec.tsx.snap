@@ -64,7 +64,7 @@ exports[`AppearanceSettings component renders 1`] = `
       . The easiest way to get started is to clone one of the two existing themes and to add your own colors.
     </p>
     <p>
-      Additionally, if you wish to import an editor theme from VSCode, just pick your JSON file and Fiddle will do the rest.
+      Additionally, if you wish to import a Monaco Editor theme, just pick your JSON file and Fiddle will do the rest.
     </p>
     <Blueprint3.Button
       icon="duplicate"
@@ -74,7 +74,7 @@ exports[`AppearanceSettings component renders 1`] = `
     <Blueprint3.Button
       icon="duplicate"
       onClick={[Function]}
-      text="Add a VSCode Editor theme"
+      text="Add a Monaco Editor theme"
     />
   </Blueprint3.Callout>
 </div>

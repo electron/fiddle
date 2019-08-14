@@ -225,7 +225,7 @@ export class AppearanceSettings extends React.Component<
             themes and to add your own colors.
           </p>
           <p>
-            Additionally, if you wish to import an editor theme from VSCode, just pick your JSON file and Fiddle will do the rest.
+            Additionally, if you wish to import a Monaco Editor theme, just pick your JSON file and Fiddle will do the rest.
           </p>
           <Button
             onClick={this.createNewThemeFromCurrent}
@@ -234,7 +234,7 @@ export class AppearanceSettings extends React.Component<
           />
           <Button
             onClick={this.createNewThemeFromMonaco}
-            text='Add a VSCode Editor theme'
+            text='Add a Monaco Editor theme'
             icon='duplicate'
           />
         </Callout>
