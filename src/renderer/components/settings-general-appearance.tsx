@@ -150,7 +150,7 @@ export class AppearanceSettings extends React.Component<
     const fs = await fancyImport<typeof fsType>('fs-extra');
     try {
       const name = await this.promptForTheme(defaultTheme);
-      if (name instanceof Error) {
+      if (!name) {
         return false;
       }
       const themePath = path.join(THEMES_PATH, `${name}.json`);
@@ -249,7 +249,7 @@ export class AppearanceSettings extends React.Component<
       filters: [ { name: 'JSON', extensions: ['json']}]
     });
     if (filePicked === undefined || filePicked.length === 0) {
-      return Error('Prompt cancelled by user');
+      return null;
     }
     const editor = fsType.readJSONSync(filePicked[0]);
     defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
