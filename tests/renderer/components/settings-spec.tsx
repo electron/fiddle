@@ -87,7 +87,7 @@ describe('Settings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it.only('closes upon pressing Escape key', () => {
+  it('closes upon pressing Escape key', () => {
     expect(store.isSettingsShowing).toBe(true);
     // mock event listener API
     const map: any = {};

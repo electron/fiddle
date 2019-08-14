@@ -1,3 +1,4 @@
+import * as fsType from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -19,14 +20,16 @@ import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
+import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
-import { updateEditorTypeDefinitions } from './fetch-types';
+import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
+
 import {
   addLocalVersion,
   ElectronReleaseChannel,
@@ -96,6 +99,7 @@ export class AppState {
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
+  @observable public localTypeWatcher: fsType.FSWatcher | undefined;
 
   // -- Various "isShowing" settings ------------------
   @observable public isConsoleShowing: boolean = false;
@@ -405,7 +409,24 @@ export class AppState {
     }
 
     // Update TypeScript definitions
-    updateEditorTypeDefinitions(version);
+    const versionObject = this.versions[version];
+
+    if (versionObject.source === ElectronVersionSource.local) {
+      const fs = await fancyImport<typeof fsType>('fs-extra');
+      const typePath = getLocalTypePathForVersion(versionObject);
+      console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
+      this.localTypeWatcher = fs.watch(typePath!, async () => {
+        console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
+        await updateEditorTypeDefinitions(versionObject);
+      });
+    } else {
+      if (!!this.localTypeWatcher) {
+        console.info(`TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`);
+        this.localTypeWatcher.close();
+        this.localTypeWatcher = undefined;
+      }
+    }
+    await updateEditorTypeDefinitions(versionObject);
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(version);
