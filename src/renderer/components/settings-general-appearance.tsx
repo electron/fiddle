@@ -289,27 +289,6 @@ export class AppearanceSettings extends React.Component<
     console.log(await this.findThemeDirectories(vsCodeDir));
   }
 
-  // private recurseFolders(dir: string): Array<string> {
-  //   const results: Array<string> = []; // potential 'theme' folders that could be candi dates.
-  //   const dirList = fsType.readdirSync(dir);
-
-  //   dirList.forEach((name) => {
-  //     const currResults: Array<string> = [];
-  //     const currDir = path.resolve(dir, name);
-  //     if (fsType.lstatSync(currDir).isDirectory() && name === 'themes') {
-  //       console.log('💖 found: ', currDir);
-  //       currResults.push(currDir);
-  //     } else if (fsType.lstatSync(currDir).isDirectory()) {
-  //       console.log('🤔 peeking into: ', currDir);
-  //       currResults.concat(this.recurseFolders(currDir));
-  //     } else {
-  //       console.log('💔 could not find anything :(');
-  //     }
-  //     return results.concat(currResults);
-  //   });
-  //   return results;
-  // }
-
   private async findThemeDirectories(currentDir: string, visited: Set<string> = new Set(), found: Set<string> = new Set()) {
     if (visited.has(currentDir)) return found;
     await Promise.all(childDirs(currentDir).map(async (child) => {
