@@ -259,8 +259,6 @@ export class AppearanceSettings extends React.Component<
             text='Import Monaco themes from VSCode'
             icon='import'
           />
-
-          {/* </Button> */}
         </Callout>
       </div>
     );
@@ -286,16 +284,13 @@ export class AppearanceSettings extends React.Component<
   }
 
   private async checkForVSCodeThemes() {
-    const dirPicked = await remote.dialog.showOpenDialog({
-      title: 'Choose your VSCode folder',
-      properties: ['openDirectory', 'showHiddenFiles']
-    });
-    if (dirPicked == undefined || dirPicked.length === 0) {
-      return null;
+    const homedir = require('os').homedir();
+    const vsCodeDir = path.resolve(homedir, '.vscode')
+    if(fsType.existsSync(vsCodeDir)) {
+      return;
+    } else {
+      console.log('VSCodeFolderDir', VSCodeFolderDir);
     }
-    const VSCodeFolderDir = dirPicked[0];
-    console.log('VSCodeFolderDir', VSCodeFolderDir);
-
   }
 
 }
