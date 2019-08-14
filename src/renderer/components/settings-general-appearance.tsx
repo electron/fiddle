@@ -92,6 +92,7 @@ export class AppearanceSettings extends React.Component<
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.createNewThemeFromMonaco = this.createNewThemeFromMonaco.bind(this);
+    this.importVSCodeMonacoThemes = this.importVSCodeMonacoThemes.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
@@ -143,6 +144,8 @@ export class AppearanceSettings extends React.Component<
 
   /**
    * Creates a new template that takes in Monaco editor JSON theme only.
+   * @returns {Promise<boolean>}
+   * @memberof AppearanceSettings
    */
   public async createNewThemeFromMonaco(): Promise<boolean> {
     // fetch current theme
@@ -166,7 +169,21 @@ export class AppearanceSettings extends React.Component<
     } catch (error) {
       return false;
     }
+  }
 
+  /**
+   * Imports VSCode themes from VSCode directory (if any).
+   * @returns {Promise<boolean>}
+   * @memberof AppearanceSettings
+   */
+  public async importVSCodeMonacoThemes(): Promise<boolean> {
+    // go into the users VSCode if any ()
+    // count the number of possible 'themes' (if any)
+    // prompt the user if they want to add X amount of themes
+    // If OK -> add themes to .electron-fiddle/themes
+    if (this.checkForVSCodeThemes()) {
+      return false;
+    }
     return false;
   }
 
@@ -237,6 +254,13 @@ export class AppearanceSettings extends React.Component<
             text='Add a Monaco Editor theme'
             icon='duplicate'
           />
+          <Button
+            onClick={this.importVSCodeMonacoThemes}
+            text='Import Monaco themes from VSCode'
+            icon='import'
+          />
+
+          {/* </Button> */}
         </Callout>
       </div>
     );
@@ -259,6 +283,19 @@ export class AppearanceSettings extends React.Component<
     }
     const name = path.parse(filePicked[0]).name;
     return name;
+  }
+
+  private async checkForVSCodeThemes() {
+    const dirPicked = await remote.dialog.showOpenDialog({
+      title: 'Choose your VSCode folder',
+      properties: ['openDirectory', 'showHiddenFiles']
+    });
+    if (dirPicked == undefined || dirPicked.length === 0) {
+      return null;
+    }
+    const VSCodeFolderDir = dirPicked[0];
+    console.log('VSCodeFolderDir', VSCodeFolderDir);
+
   }
 
 }
