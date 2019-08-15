@@ -3,10 +3,10 @@ import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { remote, shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
+import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 import * as React from 'react';
 
-import * as MonacoType from 'monaco-editor';
 import { highlightText } from '../../utils/highlight-text';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
@@ -152,20 +152,20 @@ export class AppearanceSettings extends React.Component<
     const fs = await fancyImport<typeof fsType>('fs-extra');
     try {
       const name = await this.promptForTheme(defaultTheme);
-      if (!name) {
-        return false;
-      }
+      if (!name) return false;
       const themePath = path.join(THEMES_PATH, `${name}.json`);
+
       await fs.outputJSON(themePath, {
         ...defaultTheme,
         name,
         file: undefined,
         css: undefined
       }, {spaces: 2});
+
       shell.showItemInFolder(themePath);
       this.setState({themes: await getAvailableThemes()});
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -225,7 +225,7 @@ export class AppearanceSettings extends React.Component<
             themes and to add your own colors.
           </p>
           <p>
-            Additionally, if you wish to import a Monaco Editor theme, just pick your JSON file and Fiddle will do the rest.
+            Additionally, if you wish to import a Monaco Editor theme, pick your JSON file and Fiddle will attempt to import it.
           </p>
           <Button
             onClick={this.createNewThemeFromCurrent}
