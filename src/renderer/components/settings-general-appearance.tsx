@@ -92,6 +92,7 @@ export class AppearanceSettings extends React.Component<
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.createNewThemeFromMonaco = this.createNewThemeFromMonaco.bind(this);
+    this.importVSCodeMonacoThemes = this.importVSCodeMonacoThemes.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
@@ -143,6 +144,8 @@ export class AppearanceSettings extends React.Component<
 
   /**
    * Creates a new template that takes in Monaco editor JSON theme only.
+   * @returns {Promise<boolean>}
+   * @memberof AppearanceSettings
    */
   public async createNewThemeFromMonaco(): Promise<boolean> {
     // fetch current theme
@@ -166,7 +169,21 @@ export class AppearanceSettings extends React.Component<
     } catch (error) {
       return false;
     }
+  }
 
+  /**
+   * Imports VSCode themes from VSCode directory (if any).
+   * @returns {Promise<boolean>}
+   * @memberof AppearanceSettings
+   */
+  public async importVSCodeMonacoThemes(): Promise<boolean> {
+    // go into the users VSCode if any ()
+    // count the number of possible 'themes' (if any)
+    // prompt the user if they want to add X amount of themes
+    // If OK -> add themes to .electron-fiddle/themes
+    if (this.checkForVSCodeThemes()) {
+      return false;
+    }
     return false;
   }
 
@@ -237,6 +254,11 @@ export class AppearanceSettings extends React.Component<
             text='Add a Monaco Editor theme'
             icon='duplicate'
           />
+          <Button
+            onClick={this.importVSCodeMonacoThemes}
+            text='Import Monaco themes from VSCode'
+            icon='import'
+          />
         </Callout>
       </div>
     );
@@ -264,6 +286,30 @@ export class AppearanceSettings extends React.Component<
       }
     } catch {
       return null;
+    }
+  }
+
+  private async checkForVSCodeThemes() {
+    const homedir = require('os').homedir();
+    const vsCodeDir = path.resolve(homedir, '.vscode');
+    console.log(await this.findThemeDirectories(vsCodeDir));
+  }
+
+  private async findThemeDirectories(currentDir: string, visited: Set<string> = new Set(), found: Set<string> = new Set()) {
+    if (visited.has(currentDir)) return found;
+    await Promise.all(childDirs(currentDir).map(async (child) => {
+      child = path.resolve(currentDir, child);
+      if (isTheme(child)) found.add(child);
+      await this.findThemeDirectories(child, visited, found);
+    }));
+    return found;
+
+    function childDirs(dir: string) {
+      return fsType.readdirSync(dir).filter((f) => fsType.lstatSync(path.resolve(dir, f)).isDirectory());
+    }
+    // path.basename
+    function isTheme(dir: string) {
+      return (path.basename(dir) === 'themes' && fsType.lstatSync(dir).isDirectory()) ? true : false;
     }
   }
 
