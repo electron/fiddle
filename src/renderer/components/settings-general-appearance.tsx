@@ -251,14 +251,20 @@ export class AppearanceSettings extends React.Component<
     if (filePicked === undefined || filePicked.length === 0) {
       return null;
     }
-    const editor = fsType.readJSONSync(filePicked[0]);
-    defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
-    if (editor.name) {
-      // if this exists, set that as the name
-      return editor.name;
+    try {
+      const editor = fsType.readJSONSync(filePicked[0]);
+      if (!editor.base && !editor.rules) return null;
+      defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+      if (editor.name) {
+        // if this exists, set that as the name
+        return editor.name;
+      } else {
+        const name = path.parse(filePicked[0]).name;
+        return name;
+      }
+    } catch {
+      return null;
     }
-    const name = path.parse(filePicked[0]).name;
-    return name;
   }
 
 }
