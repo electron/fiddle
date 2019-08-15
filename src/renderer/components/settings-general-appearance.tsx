@@ -254,11 +254,6 @@ export class AppearanceSettings extends React.Component<
             text='Add a Monaco Editor theme'
             icon='duplicate'
           />
-          <Button
-            onClick={this.importVSCodeMonacoThemes}
-            text='Import Monaco themes from VSCode'
-            icon='import'
-          />
         </Callout>
       </div>
     );
@@ -286,30 +281,6 @@ export class AppearanceSettings extends React.Component<
       }
     } catch {
       return null;
-    }
-  }
-
-  private async checkForVSCodeThemes() {
-    const homedir = require('os').homedir();
-    const vsCodeDir = path.resolve(homedir, '.vscode');
-    console.log(await this.findThemeDirectories(vsCodeDir));
-  }
-
-  private async findThemeDirectories(currentDir: string, visited: Set<string> = new Set(), found: Set<string> = new Set()) {
-    if (visited.has(currentDir)) return found;
-    await Promise.all(childDirs(currentDir).map(async (child) => {
-      child = path.resolve(currentDir, child);
-      if (isTheme(child)) found.add(child);
-      await this.findThemeDirectories(child, visited, found);
-    }));
-    return found;
-
-    function childDirs(dir: string) {
-      return fsType.readdirSync(dir).filter((f) => fsType.lstatSync(path.resolve(dir, f)).isDirectory());
-    }
-    // path.basename
-    function isTheme(dir: string) {
-      return (path.basename(dir) === 'themes' && fsType.lstatSync(dir).isDirectory()) ? true : false;
     }
   }
 
