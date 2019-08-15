@@ -92,7 +92,6 @@ export class AppearanceSettings extends React.Component<
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.createNewThemeFromMonaco = this.createNewThemeFromMonaco.bind(this);
-    this.importVSCodeMonacoThemes = this.importVSCodeMonacoThemes.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
@@ -172,22 +171,6 @@ export class AppearanceSettings extends React.Component<
   }
 
   /**
-   * Imports VSCode themes from VSCode directory (if any).
-   * @returns {Promise<boolean>}
-   * @memberof AppearanceSettings
-   */
-  public async importVSCodeMonacoThemes(): Promise<boolean> {
-    // go into the users VSCode if any ()
-    // count the number of possible 'themes' (if any)
-    // prompt the user if they want to add X amount of themes
-    // If OK -> add themes to .electron-fiddle/themes
-    if (this.checkForVSCodeThemes()) {
-      return false;
-    }
-    return false;
-  }
-
-  /**
    * Creates the themes folder in .electron-fiddle if one does not
    * exist yet, then shows that folder in the Finder/Explorer.
    *
@@ -261,7 +244,7 @@ export class AppearanceSettings extends React.Component<
 
   private async promptForTheme(defaultTheme: LoadedFiddleTheme) {
     const filePicked = await remote.dialog.showOpenDialog({
-      title: 'Pick a VSCode editor theme file',
+      title: 'Pick a Monaco editor theme file',
       properties: ['openFile'],
       filters: [ { name: 'JSON', extensions: ['json']}]
     });
@@ -270,7 +253,7 @@ export class AppearanceSettings extends React.Component<
     }
     try {
       const editor = fsType.readJSONSync(filePicked[0]);
-      if (!editor.base && !editor.rules) return null;
+      if (!editor.base && !editor.rules) return null; // has to have these attributes
       defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
       if (editor.name) {
         // if this exists, set that as the name
