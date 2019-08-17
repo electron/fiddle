@@ -1,4 +1,4 @@
-import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
+import { Button, Callout, FormGroup, HTMLInputProps, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { remote, shell } from 'electron';
 import * as fsType from 'fs-extra';
@@ -77,6 +77,7 @@ export class AppearanceSettings extends React.Component<
 
     this.handleChange = this.handleChange.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
+    this.handleAddTheme = this.handleAddTheme.bind(this);
 
     this.state = {
       themes: []
@@ -146,7 +147,12 @@ export class AppearanceSettings extends React.Component<
    * @returns {Promise<boolean>}
    * @memberof AppearanceSettings
    */
-  public async createNewThemeFromMonaco(): Promise<boolean> {
+  public async createNewThemeFromMonaco(e: React.ChangeEvent<HTMLInputElement>): Promise<boolean> {
+    // const selectedFile = document.getElementById('input').files[0];
+
+    // const selectedFile = document.getElementById('input').files[0];
+    console.log('What did you get: ', e.target.value);
+    // console.log('Type: ', e.currentTarget.);
     // fetch current theme
     const defaultTheme = await getTheme(this.props.appState.theme);
     const fs = await fancyImport<typeof fsType>('fs-extra');
@@ -191,6 +197,7 @@ export class AppearanceSettings extends React.Component<
 
   public render() {
     const { selectedTheme } = this.state;
+    const inputProperties: HTMLInputProps = { type: 'file', accept: 'json', onChange: this.createNewThemeFromMonaco};
     const selectedName = selectedTheme && selectedTheme.name || 'Select a theme';
 
     return (
@@ -233,13 +240,23 @@ export class AppearanceSettings extends React.Component<
             icon='duplicate'
           />
           <Button
-            onClick={this.createNewThemeFromMonaco}
+            icon='document-open'
+            onClick={this.handleAddTheme}
             text='Add a Monaco Editor theme'
-            icon='duplicate'
           />
         </Callout>
       </div>
     );
+  }
+
+  /**
+   * Opens the "add monaco theme" dialog
+   */
+  public handleAddTheme(): void {
+    console.log('HELLO!!!');
+    // console.log(this.props);
+    // console.log(this.props.appState);
+    this.props.appState.toggleAddMonacoThemeDialog();
   }
 
   private async promptForTheme(defaultTheme: LoadedFiddleTheme) {
@@ -248,9 +265,8 @@ export class AppearanceSettings extends React.Component<
       properties: ['openFile'],
       filters: [ { name: 'JSON', extensions: ['json']}]
     });
-    if (filePicked === undefined || filePicked.length === 0) {
-      return null;
-    }
+
+    if (filePicked === undefined || filePicked.length === 0) return null;
     try {
       const editor = fsType.readJSONSync(filePicked[0]);
       if (!editor.base && !editor.rules) return null; // has to have these attributes

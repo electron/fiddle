@@ -2,6 +2,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
+import { AddThemeDialog } from './dialog-add-monaco-theme'
 import { AddVersionDialog } from './dialog-add-version';
 import { ConfirmDialog } from './dialog-confirm';
 import { TokenDialog } from './dialog-token';
@@ -22,7 +23,7 @@ export interface DialogsProps {
 export class Dialogs extends React.Component<DialogsProps, {}> {
   public render() {
     const { appState } = this.props;
-    const { isTokenDialogShowing, isSettingsShowing, isAddVersionDialogShowing } = appState;
+    const { isTokenDialogShowing, isSettingsShowing, isAddVersionDialogShowing, isMonacoVersionDialogShowing } = appState;
     const maybeToken = isTokenDialogShowing
       ? <TokenDialog key='dialogs' appState={appState} />
       : null;
@@ -31,6 +32,8 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
       : null;
     const maybeAddLocalVersion = isAddVersionDialogShowing
       ? <AddVersionDialog key='add-version-dialog' appState={appState} />
+      : null;
+    const maybeMonaco = isMonacoVersionDialogShowing ? <AddThemeDialog appState={appState} />
       : null;
     const eitherWarningOrPrompt = appState.isWarningDialogShowing
       ? <WarningDialog appState={appState} />
@@ -41,6 +44,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
         {maybeToken}
         {maybeSettings}
         {maybeAddLocalVersion}
+        {maybeMonaco}
         {eitherWarningOrPrompt}
       </div>
     );
