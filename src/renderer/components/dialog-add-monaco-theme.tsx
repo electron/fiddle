@@ -1,6 +1,11 @@
 import { Button, Callout, Dialog, FileInput, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import * as fsType from 'fs-extra';
+import * as MonacoType from 'monaco-editor';
+import * as path from 'path';
+import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
+import { shell } from 'electron';
 
 import { AppState } from '../state';
 
@@ -27,7 +32,6 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     this.state = {
       name: 'test'
     };
-    console.log('IS IT Constructing?!');
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -54,13 +58,50 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
    */
   public async onSubmit(): Promise<void> {
     const { file } = this.state;
+    const defaultTheme = await getTheme(this.props.appState.theme);
 
     if (!file) return;
 
-    console.log('GOT A FILE!!! ', file.path);
+    try {
+      const editor = fsType.readJSONSync(file[0]);
+      if (!editor.base && !editor.rules) return; // has to have these attributes
+      defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+      const name = editor.name ? editor.name : path.parse(file[0]).name;
+      this.createNewThemeFromMonaco(name);
+    } catch {
+      return;
+    }
 
     this.onClose();
     return;
+  }
+
+  public async createNewThemeFromMonaco(name: string): Promise<boolean> {
+    // const selectedFile = document.getElementById('input').files[0];
+
+    // const selectedFile = document.getElementById('input').files[0];
+    console.log('What did you get: ', e.target.value);
+    // console.log('Type: ', e.currentTarget.);
+    // fetch current theme
+    const defaultTheme = await getTheme(this.props.appState.theme);
+    try {
+      if (!name) return false;
+      const themePath = path.join(THEMES_PATH, `${name}.json`);
+
+      await fsType.outputJSON(themePath, {
+        ...defaultTheme,
+        name,
+        file: undefined,
+        css: undefined
+      }, {spaces: 2});
+
+      // shell.showItemInFolder(themePath);
+      // this.props.appState.setTheme(themePath);
+      // this.setState({themes: await getAvailableThemes()});
+      return true;
+    } catch {
+      return false;
+    }
   }
 
   get buttons() {
@@ -93,11 +134,11 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
 
   public render() {
     const { isMonacoVersionDialogShowing } = this.props.appState;
-    const inputProps = { webkitdirectory: 'true' };
+    // const inputProps = { webkitdirectory: 'true' };
+    const inputProps = { accept: '.json' };
     const { file } = this.state;
 
-    const text =  'test test';
-    console.log('IS IT SHOWING AM I HERE OR WHAT?!', isMonacoVersionDialogShowing)
+    const text = file && file.path ? file.path : `Select the JSON Monaco file.`;
     return (
       <Dialog
         isOpen={isMonacoVersionDialogShowing}
