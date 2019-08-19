@@ -1,4 +1,4 @@
-import { Button, Callout, FormGroup, HTMLInputProps, MenuItem } from '@blueprintjs/core';
+import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { remote, shell } from 'electron';
 import * as fsType from 'fs-extra';
@@ -197,7 +197,6 @@ export class AppearanceSettings extends React.Component<
 
   public render() {
     const { selectedTheme } = this.state;
-    const inputProperties: HTMLInputProps = { type: 'file', accept: 'json', onChange: this.createNewThemeFromMonaco};
     const selectedName = selectedTheme && selectedTheme.name || 'Select a theme';
 
     return (
