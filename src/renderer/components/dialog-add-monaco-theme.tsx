@@ -1,20 +1,20 @@
-import { Button, Callout, Dialog, FileInput, InputGroup, Intent } from '@blueprintjs/core';
-import { observer } from 'mobx-react';
-import * as React from 'react';
+import { Button, Dialog, FileInput } from '@blueprintjs/core';
+import { shell } from 'electron';
 import * as fsType from 'fs-extra';
+import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
-import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
-import { shell } from 'electron';
+import * as React from 'react';
+import { getTheme, THEMES_PATH } from '../themes';
 
 import { AppState } from '../state';
+import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
 
 export interface AddThemeDialogProps {
   appState: AppState;
 }
 
 export interface AddThemeDialogState {
-  name: string;
   file?: File;
 }
 
@@ -30,7 +30,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     super(props);
 
     this.state = {
-      name: 'test'
+      file: undefined
     };
 
     this.onSubmit = this.onSubmit.bind(this);
@@ -58,16 +58,17 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
    */
   public async onSubmit(): Promise<void> {
     const { file } = this.state;
-    const defaultTheme = await getTheme(this.props.appState.theme);
-
+    const currentTheme = this.props.appState.theme;
+    const defaultTheme = !!currentTheme ? await getTheme(currentTheme) : defaultDark;
     if (!file) return;
 
     try {
-      const editor = fsType.readJSONSync(file[0]);
+      const editor = fsType.readJSONSync(file.path);
       if (!editor.base && !editor.rules) return; // has to have these attributes
       defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
-      const name = editor.name ? editor.name : path.parse(file[0]).name;
-      this.createNewThemeFromMonaco(name);
+      const newTheme = defaultTheme;
+      const name = editor.name ? editor.name : file.name;
+      this.createNewThemeFromMonaco(name, newTheme);
     } catch {
       return;
     }
@@ -76,28 +77,19 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     return;
   }
 
-  public async createNewThemeFromMonaco(name: string): Promise<boolean> {
-    // const selectedFile = document.getElementById('input').files[0];
+  public async createNewThemeFromMonaco(name: string, newTheme: LoadedFiddleTheme): Promise<boolean> {
 
-    // const selectedFile = document.getElementById('input').files[0];
-    console.log('What did you get: ', e.target.value);
-    // console.log('Type: ', e.currentTarget.);
-    // fetch current theme
-    const defaultTheme = await getTheme(this.props.appState.theme);
     try {
       if (!name) return false;
-      const themePath = path.join(THEMES_PATH, `${name}.json`);
+      const themePath = path.join(THEMES_PATH, `${name}`);
 
       await fsType.outputJSON(themePath, {
-        ...defaultTheme,
+        ...newTheme,
         name,
-        file: undefined,
-        css: undefined
       }, {spaces: 2});
 
-      // shell.showItemInFolder(themePath);
-      // this.props.appState.setTheme(themePath);
-      // this.setState({themes: await getAvailableThemes()});
+      this.props.appState.setTheme(themePath);
+      shell.showItemInFolder(themePath);
       return true;
     } catch {
       return false;
@@ -138,7 +130,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     const inputProps = { accept: '.json' };
     const { file } = this.state;
 
-    const text = file && file.path ? file.path : `Select the JSON Monaco file.`;
+    const text = file && file.path ? file.path : `Select the JSON Monaco file...`;
     return (
       <Dialog
         isOpen={isMonacoVersionDialogShowing}
@@ -149,7 +141,6 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
         <div className='bp3-dialog-body'>
           <FileInput
             onInputChange={this.onChangeFile}
-            // id='custom-electron-version'
             inputProps={inputProps as any}
             text={text}
           />
@@ -168,9 +159,10 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
    * Reset this component's state
    */
   private reset(): void {
-    this.setState({
-      
-    });
+    this.setState(
+      { file: undefined }
+    );
+    return;
   }
 
 }
