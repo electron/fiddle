@@ -2,7 +2,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { AddThemeDialog } from './dialog-add-monaco-theme'
+import { AddThemeDialog } from './dialog-add-monaco-theme';
 import { AddVersionDialog } from './dialog-add-version';
 import { ConfirmDialog } from './dialog-confirm';
 import { TokenDialog } from './dialog-token';
