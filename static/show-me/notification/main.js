@@ -20,21 +20,21 @@ app.on('ready', () => {
   if (Notification.isSupported()) {
     const notification = new Notification({
       title: 'Hello World!',
-      subtitle: `Nice to see you`,
+      subtitle: 'Nice to see you',
       body: 'Are you having a good day?',
       hasReply: true
     })
 
-    notification.on('show', () => console.log(`Notification shown`))
-    notification.on('click', () => console.log(`Notification clicked`))
-    notification.on('close', () => console.log(`Notification closed`))
+    notification.on('show', () => console.log('Notification shown'))
+    notification.on('click', () => console.log('Notification clicked'))
+    notification.on('close', () => console.log('Notification closed'))
     notification.on('reply', (event, reply) => {
       console.log(`Reply: ${reply}`)
     })
 
     notification.show()
   } else {
-    console.log(`Hm, are notifications supported on this system?`)
+    console.log('Hm, are notifications supported on this system?')
   }
 
   mainWindow.loadFile('index.html')
