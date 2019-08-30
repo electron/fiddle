@@ -82,7 +82,7 @@
     "@types/tmp": "0.1.0",
     "chokidar": "^2.1.6",
     "coveralls": "^3.0.4",
-    "electron": "6.0.5",
+    "electron": "6.0.6",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.14.0",
     "enzyme-to-json": "^3.4.0",
@@ -96,13 +96,13 @@
     "parcel-bundler": "^1.12.3",
     "react-test-renderer": "^16.9.0",
     "rimraf": "^3.0.0",
-    "standard": "^14.0.2",
+    "standard": "^14.1.0",
     "stylelint": "^10.1.0",
     "stylelint-config-standard": "^18.3.0",
     "ts-jest": "^24.0.2",
     "tslint": "^5.19.0",
     "tslint-microsoft-contrib": "^6.2.0",
     "tslint-react": "^4.0.0",
-    "typescript": "^3.5.3"
+    "typescript": "^3.6.2"
   }
 }
