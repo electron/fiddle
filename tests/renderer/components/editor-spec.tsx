@@ -28,7 +28,7 @@ describe('Editor component', () => {
           restoreViewState: jest.fn()
         })),
         createModel: jest.fn(() => ({
-          updateOptions: updateOptions
+          updateOptions
         })),
         setModel: jest.fn(),
         dispose: jest.fn()
@@ -82,10 +82,10 @@ describe('Editor component', () => {
         />
       );
       const instance: any = wrapper.instance();
-  
+
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
-  
+
       expect(didMount).toHaveBeenCalled();
       expect(monaco.editor.create).toHaveBeenCalled();
       expect(monaco.editor.createModel).toHaveBeenCalled();
@@ -96,7 +96,7 @@ describe('Editor component', () => {
         model: true,
         viewState: true
       });
-  
+
       const wrapper = shallow(
         <Editor
           appState={store}
@@ -107,10 +107,10 @@ describe('Editor component', () => {
         />
       );
       const instance: any = wrapper.instance();
-  
+
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
-  
+
       expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
       expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
     });
@@ -127,7 +127,7 @@ describe('Editor component', () => {
         />
       );
       const instance: any = wrapper.instance();
-  
+
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
 

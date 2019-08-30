@@ -27,7 +27,7 @@ beforeAll(() => {
     },
     mosaicId: 'output'
   };
-})
+});
 
 describe('Output component', () => {
   let store: any;
@@ -78,7 +78,7 @@ describe('Output component', () => {
   });
 
   it('hides the console with react-mosaic-component', () => {
-    // manually trigger lifecycle methods so that 
+    // manually trigger lifecycle methods so that
     // context can be set before mounting method
     const wrapper = shallow(<Output appState={store} />, {
       context: mockContext,

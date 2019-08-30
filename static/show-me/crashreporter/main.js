@@ -18,6 +18,6 @@ app.on('ready', () => {
   mainWindow.loadFile('index.html')
 
   mainWindow.webContents.on('crashed', () => {
-    console.log(`Window crashed!`)
+    console.log('Window crashed!')
   })
 })

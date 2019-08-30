@@ -200,8 +200,8 @@ export class Runner {
     this.appState.isRunning = true;
     pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
-    this.child.stderr.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
+    this.child.stdout!.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
+    this.child.stderr!.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
     this.child.on('close', async (code) => {
       const withCode = typeof code === 'number'
         ? ` with code ${code.toString()}.`

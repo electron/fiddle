@@ -12,6 +12,7 @@ jest.mock('../../src/main/ipc');
 describe('menu', () => {
   beforeEach(() => {
     (electron.app.getName as any).mockReturnValue('Electron Fiddle');
+    (electron.dialog.showOpenDialog as any).mockReturnValue(Promise.resolve({}));
   });
 
   afterEach(() => {

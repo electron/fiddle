@@ -14,7 +14,7 @@ app.on('ready', () => {
     win = null
   })
 
-  let view = new BrowserView({
+  const view = new BrowserView({
     webPreferences: {
       nodeIntegration: false
     }

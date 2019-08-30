@@ -15,7 +15,7 @@ import { getOrCreateMainWindow } from './windows';
  * the method that takes care of booting the application.
  */
 export async function onReady() {
-  onFirstRunMaybe();
+  await onFirstRunMaybe();
   if (!isDevMode()) process.env.NODE_ENV = 'production';
 
   getOrCreateMainWindow();
