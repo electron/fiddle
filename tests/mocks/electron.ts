@@ -157,8 +157,8 @@ const electronMock = {
     writeImage: jest.fn()
   },
   dialog: {
-    showOpenDialog: jest.fn(),
-    showMessageBox: jest.fn()
+    showOpenDialog: jest.fn(() => Promise.resolve({})),
+    showMessageBox: jest.fn(() => Promise.resolve({}))
   },
   ipcMain: new MockIPC(),
   ipcRenderer: new MockIPC(),

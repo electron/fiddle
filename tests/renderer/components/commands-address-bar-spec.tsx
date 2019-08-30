@@ -3,8 +3,8 @@ import * as React from 'react';
 
 import { observable } from 'mobx';
 import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
-import { MockState } from '../../mocks/state';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
+import { MockState } from '../../mocks/state';
 
 jest.mock('../../../src/utils/octokit');
 

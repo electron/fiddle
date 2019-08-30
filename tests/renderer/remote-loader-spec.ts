@@ -204,7 +204,7 @@ describe('RemoteLoader', () => {
   describe('getPackageFromRef()', () => {
     it('gets electron version from package.json', async () => {
       const versionString = JSON.stringify({ version: '4.0.0' });
-      const content = (new Buffer(versionString)).toString('base64');
+      const content = (Buffer.from(versionString)).toString('base64');
       const mockGetPackageJson = {
         getContents: async () => ({
           data: { content }

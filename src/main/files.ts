@@ -19,41 +19,41 @@ export function setupFileListeners() {
  * Shows the "Open Fiddle" dialog and forwards
  * the path to the renderer
  */
-export function showOpenDialog() {
-  dialog.showOpenDialog({
+export async function showOpenDialog() {
+  const { filePaths } = await dialog.showOpenDialog({
     title: 'Open Fiddle',
     properties: ['openDirectory']
-  }, (filePaths) => {
-    if (!filePaths || filePaths.length < 1) {
-      return;
-    }
-
-    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [ filePaths[0] ]);
   });
+
+  if (!filePaths || filePaths.length < 1) {
+    return;
+  }
+
+  ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [ filePaths[0] ]);
 }
 
 /**
  * Shows the "Save Fiddle" dialog and forwards
  * the path to the renderer
  */
-export function showSaveDialog(event?: IpcEvents, as?: string) {
+export async function showSaveDialog(event?: IpcEvents, as?: string) {
   // We want to save to a folder, so we'll use an open dialog here
-  dialog.showOpenDialog({
+  const { filePaths } = await dialog.showOpenDialog({
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory'],
     title: `Save Fiddle${as ? ` as ${as}` : ''}`
-  }, async (filePaths) => {
-    if (!filePaths || filePaths.length < 1) {
-      return;
-    }
-
-    console.log(`Asked to save to ${filePaths[0]}`);
-
-    // Let's confirm real quick if we want this
-    if (await ensureSaveTargetEmpty(filePaths[0])) {
-      ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
-    }
   });
+
+  if (!filePaths || filePaths.length < 1) {
+    return;
+  }
+
+  console.log(`Asked to save to ${filePaths[0]}`);
+
+  // Let's confirm real quick if we want this
+  if (await ensureSaveTargetEmpty(filePaths[0])) {
+    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
+  }
 }
 
 /**

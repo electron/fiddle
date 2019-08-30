@@ -1,5 +1,6 @@
 import { ipcMain } from 'electron';
 import { EventEmitter } from 'events';
+
 import { IpcEvents, ipcMainEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { getOrCreateMainWindow } from './windows';
 
@@ -22,8 +23,9 @@ export class IpcMainManager extends EventEmitter {
       ipcMain.on(name, (...args: Array<any>) => this.emit(name, ...args));
     });
 
-    ipcMain.on(WEBCONTENTS_READY_FOR_IPC_SIGNAL, (event: Electron.Event) => {
+    ipcMain.on(WEBCONTENTS_READY_FOR_IPC_SIGNAL, (event: Electron.IpcMainEvent) => {
       this.readyWebContents.add(event.sender);
+
       const queue = this.messageQueue.get(event.sender);
       this.messageQueue.delete(event.sender);
       if (!queue) return;
