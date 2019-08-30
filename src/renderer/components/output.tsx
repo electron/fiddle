@@ -1,11 +1,12 @@
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-
-import { autorun } from 'mobx';
 import { MosaicContext } from 'react-mosaic-component';
+
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { WrapperMosaicId } from './output-editors-wrapper';
+
 
 export interface CommandsProps {
   appState: AppState;
@@ -36,11 +37,11 @@ export class Output extends React.Component<CommandsProps, {}> {
 
   public componentDidMount() {
     autorun(() => {
+      const { isConsoleShowing } = this.props.appState;
+
       // this context should always exist, but mocking context in enzyme
       // is not fully supported, so this condition makes the tests pass
       if (this.context.mosaicActions && this.context.mosaicActions.expand) {
-        const { isConsoleShowing } = this.props.appState;
-
         if (!isConsoleShowing) {
           this.context.mosaicActions.expand(['first'], 0);
         } else {
@@ -93,8 +94,12 @@ export class Output extends React.Component<CommandsProps, {}> {
     ));
   }
 
-  public render() {
-    const { output } = this.props.appState;
+  public render(): JSX.Element | null {
+    const { output, isConsoleShowing } = this.props.appState;
+
+    if (!isConsoleShowing) {
+      return null;
+    }
 
     // The last 1000 lines
     const lines = output
