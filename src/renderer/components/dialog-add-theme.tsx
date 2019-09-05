@@ -126,7 +126,6 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
 
   public render() {
     const { isThemeDialogShowing } = this.props.appState;
-    // const inputProps = { webkitdirectory: 'true' };
     const inputProps = { accept: '.json' };
     const { file } = this.state;
 
@@ -135,7 +134,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
       <Dialog
         isOpen={isThemeDialogShowing}
         onClose={this.onClose}
-        title='Add local Electron build'
+        title='Add theme'
         className='dialog-add-version'
       >
         <div className='bp3-dialog-body'>
