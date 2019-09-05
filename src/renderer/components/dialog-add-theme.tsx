@@ -26,12 +26,11 @@ export interface AddThemeDialogState {
  */
 @observer
 export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThemeDialogState> {
+  resetState = { file: undefined }
+
   constructor(props: AddThemeDialogProps) {
     super(props);
-
-    this.state = {
-      file: undefined
-    };
+    this.state = this.resetState;
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
@@ -58,8 +57,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
    */
   public async onSubmit(): Promise<void> {
     const { file } = this.state;
-    const currentTheme = this.props.appState.theme;
-    const defaultTheme = !!currentTheme ? await getTheme(currentTheme) : defaultDark;
+    const defaultTheme = !!this.props.appState.theme ? await getTheme(this.props.appState.theme) : defaultDark;
     if (!file) return;
 
     try {
@@ -68,7 +66,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
       defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
       const newTheme = defaultTheme;
       const name = editor.name ? editor.name : file.name;
-      this.createNewThemeFromMonaco(name, newTheme);
+      await this.createNewThemeFromMonaco(name, newTheme);
     } catch {
       return;
     }
@@ -78,8 +76,6 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
   }
 
   public async createNewThemeFromMonaco(name: string, newTheme: LoadedFiddleTheme): Promise<boolean> {
-
-    try {
       if (!name) return false;
       const themePath = path.join(THEMES_PATH, `${name}`);
 
@@ -91,9 +87,6 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
       this.props.appState.setTheme(themePath);
       shell.showItemInFolder(themePath);
       return true;
-    } catch {
-      return false;
-    }
   }
 
   get buttons() {
@@ -129,7 +122,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     const inputProps = { accept: '.json' };
     const { file } = this.state;
 
-    const text = file && file.path ? file.path : `Select the JSON Monaco file...`;
+    const text = file && file.path ? file.path : `Select the Monaco file...`;
     return (
       <Dialog
         isOpen={isThemeDialogShowing}
@@ -158,9 +151,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
    * Reset this component's state
    */
   private reset(): void {
-    this.setState(
-      { file: undefined }
-    );
+    this.setState(this.resetState);
     return;
   }
 
