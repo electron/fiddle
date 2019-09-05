@@ -120,12 +120,12 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
   }
 
   public onClose() {
-    this.props.appState.isMonacoVersionDialogShowing = false;
+    this.props.appState.isThemeDialogShowing = false;
     this.reset();
   }
 
   public render() {
-    const { isMonacoVersionDialogShowing } = this.props.appState;
+    const { isThemeDialogShowing } = this.props.appState;
     // const inputProps = { webkitdirectory: 'true' };
     const inputProps = { accept: '.json' };
     const { file } = this.state;
@@ -133,7 +133,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
     const text = file && file.path ? file.path : `Select the JSON Monaco file...`;
     return (
       <Dialog
-        isOpen={isMonacoVersionDialogShowing}
+        isOpen={isThemeDialogShowing}
         onClose={this.onClose}
         title='Add local Electron build'
         className='dialog-add-version'
