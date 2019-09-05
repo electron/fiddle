@@ -265,8 +265,9 @@ export class AppearanceSettings extends React.Component<
       filters: [ { name: 'JSON', extensions: ['json']}]
     });
 
-    if (filePicked === undefined || filePicked.length === 0) return null;
+    
     try {
+      if (filePicked === undefined || filePicked.length === 0) return null;
       const editor = fsType.readJSONSync(filePicked[0]);
       if (!editor.base && !editor.rules) return null; // has to have these attributes
       defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
