@@ -1,46 +1,50 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`VersionChooser component handles corrupt data 1`] = `
-<Blueprint3.Select
-  filterable={true}
-  itemPredicate={[Function]}
-  itemRenderer={[Function]}
-  items={
-    Array [
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "2.0.2",
-      },
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "2.0.1",
-      },
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "1.8.7",
-      },
-    ]
-  }
-  noResults={
-    <Blueprint3.MenuItem
-      disabled={true}
-      multiline={false}
-      popoverProps={Object {}}
-      shouldDismissPopover={true}
-      text="No results."
+<Blueprint3.ButtonGroup>
+  <Blueprint3.Select
+    disabled={false}
+    filterable={true}
+    itemPredicate={[Function]}
+    itemRenderer={[Function]}
+    items={
+      Array [
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "2.0.2",
+        },
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "2.0.1",
+        },
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "1.8.7",
+        },
+      ]
+    }
+    noResults={
+      <Blueprint3.MenuItem
+        disabled={true}
+        multiline={false}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="No results."
+      />
+    }
+    onItemSelect={[Function]}
+  >
+    <Blueprint3.Button
+      className="version-chooser"
+      disabled={false}
+      icon="saved"
+      text="Electron v2.0.2"
     />
-  }
-  onItemSelect={[Function]}
->
-  <Blueprint3.Button
-    className="version-chooser"
-    icon="saved"
-    text="Electron v2.0.2"
-  />
-</Blueprint3.Select>
+  </Blueprint3.Select>
+</Blueprint3.ButtonGroup>
 `;
 
 exports[`VersionChooser component renderItem() renders an item 1`] = `
@@ -62,44 +66,48 @@ exports[`VersionChooser component renderItem() renders an item 1`] = `
 `;
 
 exports[`VersionChooser component renders 1`] = `
-<Blueprint3.Select
-  filterable={true}
-  itemPredicate={[Function]}
-  itemRenderer={[Function]}
-  items={
-    Array [
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "2.0.2",
-      },
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "2.0.1",
-      },
-      Object {
-        "source": "remote",
-        "state": "ready",
-        "version": "1.8.7",
-      },
-    ]
-  }
-  noResults={
-    <Blueprint3.MenuItem
-      disabled={true}
-      multiline={false}
-      popoverProps={Object {}}
-      shouldDismissPopover={true}
-      text="No results."
+<Blueprint3.ButtonGroup>
+  <Blueprint3.Select
+    disabled={false}
+    filterable={true}
+    itemPredicate={[Function]}
+    itemRenderer={[Function]}
+    items={
+      Array [
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "2.0.2",
+        },
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "2.0.1",
+        },
+        Object {
+          "source": "remote",
+          "state": "ready",
+          "version": "1.8.7",
+        },
+      ]
+    }
+    noResults={
+      <Blueprint3.MenuItem
+        disabled={true}
+        multiline={false}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="No results."
+      />
+    }
+    onItemSelect={[Function]}
+  >
+    <Blueprint3.Button
+      className="version-chooser"
+      disabled={false}
+      icon="saved"
+      text="Electron v2.0.2"
     />
-  }
-  onItemSelect={[Function]}
->
-  <Blueprint3.Button
-    className="version-chooser"
-    icon="saved"
-    text="Electron v2.0.2"
-  />
-</Blueprint3.Select>
+  </Blueprint3.Select>
+</Blueprint3.ButtonGroup>
 `;

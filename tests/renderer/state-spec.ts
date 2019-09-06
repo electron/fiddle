@@ -1,4 +1,5 @@
 import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, PanelId } from '../../src/interfaces';
+import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -142,7 +143,7 @@ describe('AppState', () => {
 
       expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
     });
-   });
+  });
 
   describe('toggleConsole()', () => {
     it('toggles the console', () => {
@@ -176,6 +177,33 @@ describe('AppState', () => {
       expect(appState.isSettingsShowing).toBe(true);
       appState.toggleSettings();
       expect(appState.isSettingsShowing).toBe(false);
+    });
+  });
+
+  describe('toggleBisectCommands()', () => {
+    it('toggles visibility of the bisect commands', () => {
+      const isVisible = appState.isBisectCommandShowing;
+      appState.toggleBisectCommands();
+      expect(isVisible).not.toBe(appState.isBisectCommandShowing);
+    });
+
+    it('takes no action if bisect dialog is active', () => {
+      const isVisible = appState.isBisectCommandShowing;
+
+      expect(appState.isBisectDialogShowing).toBe(false);
+      appState.toggleBisectDialog();
+
+      appState.toggleBisectCommands();
+      expect(isVisible).toBe(appState.isBisectCommandShowing);
+    });
+
+    it('takes no action if bisect instance is active', () => {
+      const isVisible = appState.isBisectCommandShowing;
+
+      appState.Bisector = new Bisector([]);
+
+      appState.toggleBisectCommands();
+      expect(isVisible).toBe(appState.isBisectCommandShowing);
     });
   });
 
@@ -296,7 +324,7 @@ describe('AppState', () => {
       await appState.setVersion('v1.0.0');
 
       expect(getContent).toHaveBeenCalledTimes(1);
-    expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -341,7 +369,7 @@ describe('AppState', () => {
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
       expect(Object.keys(appState.versions)).toEqual(
-        [ '2.0.2', '2.0.1', '1.8.7' ]
+        ['2.0.2', '2.0.1', '1.8.7']
       );
     });
   });
@@ -426,7 +454,7 @@ describe('AppState', () => {
     it('updates the visible editors and creates a backup', () => {
       appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
       appState.closedPanels = {};
-      appState.setVisibleMosaics([ EditorId.main ]);
+      appState.setVisibleMosaics([EditorId.main]);
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
       expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();

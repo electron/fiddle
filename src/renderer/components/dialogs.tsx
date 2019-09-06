@@ -4,6 +4,7 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { AddThemeDialog } from './dialog-add-theme';
 import { AddVersionDialog } from './dialog-add-version';
+import { BisectDialog } from './dialog-bisect';
 import { ConfirmDialog } from './dialog-confirm';
 import { TokenDialog } from './dialog-token';
 import { WarningDialog } from './dialog-warning';
@@ -23,7 +24,13 @@ export interface DialogsProps {
 export class Dialogs extends React.Component<DialogsProps, {}> {
   public render() {
     const { appState } = this.props;
-    const { isTokenDialogShowing, isSettingsShowing, isAddVersionDialogShowing, isThemeDialogShowing } = appState;
+    const {
+      isTokenDialogShowing,
+      isSettingsShowing,
+      isAddVersionDialogShowing,
+      isThemeDialogShowing,
+      isBisectDialogShowing
+    } = appState;
     const maybeToken = isTokenDialogShowing
       ? <TokenDialog key='dialogs' appState={appState} />
       : null;
@@ -35,9 +42,12 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
       : null;
     const maybeMonaco = isThemeDialogShowing ? <AddThemeDialog appState={appState} />
       : null;
+    const maybeBisect = isBisectDialogShowing
+      ? <BisectDialog key='bisect-dialog' appState={appState} />
+      : null;
     const eitherWarningOrPrompt = appState.isWarningDialogShowing
       ? <WarningDialog appState={appState} />
-      : <ConfirmDialog appState={appState}/>;
+      : <ConfirmDialog appState={appState} />;
 
     return (
       <div key='dialogs' className='dialogs'>
@@ -45,6 +55,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
         {maybeSettings}
         {maybeAddLocalVersion}
         {maybeMonaco}
+        {maybeBisect}
         {eitherWarningOrPrompt}
       </div>
     );
