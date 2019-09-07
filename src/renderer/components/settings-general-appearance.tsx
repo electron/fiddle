@@ -1,6 +1,6 @@
 import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { remote, shell } from 'electron';
+import { shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
