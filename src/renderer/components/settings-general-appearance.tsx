@@ -92,7 +92,6 @@ export class AppearanceSettings extends React.Component<
     });
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
-    this.createNewThemeFromMonaco = this.createNewThemeFromMonaco.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
@@ -138,40 +137,6 @@ export class AppearanceSettings extends React.Component<
     } catch (error) {
       console.warn(`Themes: Failed to create new theme from current`, error);
 
-      return false;
-    }
-  }
-
-  /**
-   * Creates a new template that takes in Monaco editor JSON theme only.
-   * @returns {Promise<boolean>}
-   * @memberof AppearanceSettings
-   */
-  public async createNewThemeFromMonaco(e: React.ChangeEvent<HTMLInputElement>): Promise<boolean> {
-    // const selectedFile = document.getElementById('input').files[0];
-
-    // const selectedFile = document.getElementById('input').files[0];
-    console.log('What did you get: ', e.target.value);
-    // console.log('Type: ', e.currentTarget.);
-    // fetch current theme
-    const defaultTheme = await getTheme(this.props.appState.theme);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    try {
-      const name = await this.promptForTheme(defaultTheme);
-      if (!name) return false;
-      const themePath = path.join(THEMES_PATH, `${name}.json`);
-
-      await fs.outputJSON(themePath, {
-        ...defaultTheme,
-        name,
-        file: undefined,
-        css: undefined
-      }, {spaces: 2});
-
-      shell.showItemInFolder(themePath);
-      this.setState({themes: await getAvailableThemes()});
-      return true;
-    } catch {
       return false;
     }
   }
@@ -256,31 +221,6 @@ export class AppearanceSettings extends React.Component<
     // console.log(this.props);
     // console.log(this.props.appState);
     this.props.appState.toggleAddMonacoThemeDialog();
-  }
-
-  private async promptForTheme(defaultTheme: LoadedFiddleTheme) {
-    const filePicked = await remote.dialog.showOpenDialog({
-      title: 'Pick a Monaco editor theme file',
-      properties: ['openFile'],
-      filters: [ { name: 'JSON', extensions: ['json']}]
-    });
-
-    
-    try {
-      if (filePicked === undefined) return null;
-      const editor = fsType.readJSONSync(filePicked[0]);
-      if (!editor.base && !editor.rules) return null; // has to have these attributes
-      defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
-      if (editor.name) {
-        // if this exists, set that as the name
-        return editor.name;
-      } else {
-        const name = path.parse(filePicked[0]).name;
-        return name;
-      }
-    } catch {
-      return null;
-    }
   }
 
 }
