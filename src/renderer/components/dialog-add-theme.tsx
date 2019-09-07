@@ -9,6 +9,7 @@ import { getTheme, THEMES_PATH } from '../themes';
 
 import { AppState } from '../state';
 import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
+import { WarningDialog, WarningDialogProps } from './dialog-warning';
 
 export interface AddThemeDialogProps {
   appState: AppState;
@@ -62,12 +63,14 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
 
     try {
       const editor = fsType.readJSONSync(file.path);
-      if (!editor.base && !editor.rules) return; // has to have these attributes
+      if (!editor.base && !editor.rules) throw Error('File does not match specifications'); // has to have these attributes
       defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
       const newTheme = defaultTheme;
       const name = editor.name ? editor.name : file.name;
       await this.createNewThemeFromMonaco(name, newTheme);
-    } catch {
+    } catch (error) {
+      this.props.appState.setWarningDialogTexts({'label': `Error: ${error}, please pick a different file.`});
+      this.props.appState.isWarningDialogShowing = true;
       return;
     }
 
