@@ -3,7 +3,6 @@ import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { remote, shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
-import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 import * as React from 'react';
 
@@ -217,9 +216,6 @@ export class AppearanceSettings extends React.Component<
    * Opens the "add monaco theme" dialog
    */
   public handleAddTheme(): void {
-    console.log('HELLO!!!');
-    // console.log(this.props);
-    // console.log(this.props.appState);
     this.props.appState.toggleAddMonacoThemeDialog();
   }
 

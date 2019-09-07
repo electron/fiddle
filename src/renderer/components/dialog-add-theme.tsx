@@ -9,7 +9,6 @@ import { getTheme, THEMES_PATH } from '../themes';
 
 import { AppState } from '../state';
 import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
-import { WarningDialog, WarningDialogProps } from './dialog-warning';
 
 export interface AddThemeDialogProps {
   appState: AppState;
