@@ -48,6 +48,12 @@ export class OutputEditorsWrapper extends React.Component<WrapperProps, WrapperS
   }
 
   private onChange = (currentNode: any) => {
+    const isConsoleShowing = currentNode.splitPercentage !== 0;
+
+    if (isConsoleShowing !== this.props.appState.isConsoleShowing) {
+      this.props.appState.isConsoleShowing = isConsoleShowing;
+    }
+
     this.setState({mosaicArrangement: currentNode});
   }
 }
