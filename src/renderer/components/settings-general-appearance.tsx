@@ -76,6 +76,7 @@ export class AppearanceSettings extends React.Component<
 
     this.handleChange = this.handleChange.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
+    this.handleAddTheme = this.handleAddTheme.bind(this);
 
     this.state = {
       themes: []
@@ -193,13 +194,29 @@ export class AppearanceSettings extends React.Component<
             </a>. The easiest way to get started is to clone one of the two existing
             themes and to add your own colors.
           </p>
+          <p>
+            Additionally, if you wish to import a Monaco Editor theme, pick your JSON file and Fiddle will attempt to import it.
+          </p>
           <Button
             onClick={this.createNewThemeFromCurrent}
             text='Create theme from current selection'
             icon='duplicate'
           />
+          <Button
+            icon='document-open'
+            onClick={this.handleAddTheme}
+            text='Add a Monaco Editor theme'
+          />
         </Callout>
       </div>
     );
   }
+
+  /**
+   * Opens the "add monaco theme" dialog
+   */
+  public handleAddTheme(): void {
+    this.props.appState.toggleAddMonacoThemeDialog();
+  }
+
 }

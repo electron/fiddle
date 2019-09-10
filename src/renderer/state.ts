@@ -109,6 +109,7 @@ export class AppState {
   @observable public isSettingsShowing: boolean = false;
   @observable public isUnsaved: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
+  @observable public isThemeDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
@@ -244,6 +245,10 @@ export class AppState {
 
   @action public toggleAddVersionDialog() {
     this.isAddVersionDialogShowing = !this.isAddVersionDialogShowing;
+  }
+
+  @action public toggleAddMonacoThemeDialog() {
+    this.isThemeDialogShowing = !this.isThemeDialogShowing;
   }
 
   @action public toggleAuthDialog() {
@@ -588,6 +593,7 @@ export class AppState {
     this.isTourShowing = false;
     this.isConsoleShowing = false;
     this.isAddVersionDialogShowing = false;
+    this.isThemeDialogShowing = false;
 
     if (additionalOptions) {
       for (const key in additionalOptions) {
