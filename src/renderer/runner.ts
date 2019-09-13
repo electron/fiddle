@@ -37,7 +37,7 @@ export class Runner {
    * @returns {Promise<boolean>}
    */
   public async run(): Promise<boolean> {
-    const { fileManager, getValues } = window.ElectronFiddle.app;
+    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { binaryManager, currentElectronVersion } = this.appState;
     const { version, localPath } = currentElectronVersion;
@@ -47,7 +47,7 @@ export class Runner {
     }
     this.appState.isConsoleShowing = true;
 
-    const values = await getValues(options);
+    const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
 
     if (!dir) return false;

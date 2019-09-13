@@ -79,17 +79,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
 
-      this.props.appState.setWarningDialogTexts({
-        label: 'Your current fiddle is unsaved. Do you want to discard it?'
-      });
-
-      window.ElectronFiddle.app.fileManager.setFiddle({
-        values: {
-          html: await getContent(EditorId.html, version),
-          renderer: await getContent(EditorId.renderer, version),
-          main: await getContent(EditorId.main, version),
-        }
-      });
+      await window.ElectronFiddle.app.replaceFiddle({
+        html: await getContent(EditorId.html, version),
+        renderer: await getContent(EditorId.renderer, version),
+        main: await getContent(EditorId.main, version),
+      }, {});
     });
 
     ipcRendererManager.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {

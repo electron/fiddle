@@ -42,23 +42,25 @@ describe('FileManager', () => {
 
   describe('openFiddle()', () => {
     it('opens a local fiddle', async () => {
-      await fm.openFiddle('/fake/path');
+      const fakePath = '/fake/path';
+      await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({});
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({}, {filePath: fakePath});
     });
 
-    it('handles an error', async () => {
+    it('writes empty strings if readFile throws an error', async () => {
       const fs = require('fs-extra');
       (fs.readFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
-      await fm.openFiddle('/fake/path');
+      const fakePath = '/fake/path';
+      await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({
         html: '',
         renderer: '',
         main: '',
-      });
+      }, {filePath: fakePath});
     });
 
     it('runs it on IPC event', () => {
@@ -69,7 +71,12 @@ describe('FileManager', () => {
 
     it('does not do anything with incorrect inputs', async () => {
       await fm.openFiddle({} as any);
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledTimes(0);
+      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not do anything if cancelled', async () => {
+      (window.ElectronFiddle.app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      await fm.openFiddle('/fake/path');
     });
   });
 
@@ -149,16 +156,17 @@ describe('FileManager', () => {
 
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
-      fm.setFiddle = jest.fn();
       await fm.openTemplate('test');
-      expect(fm.setFiddle).toHaveBeenCalledWith({
-        templateName: 'test',
-        values: {
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith(
+        {
           html: '',
           main: '',
           renderer: ''
+        },
+        {
+          templateName: 'test'
         }
-      });
+      );
     });
 
     it('runs openTemplate on IPC event', () => {

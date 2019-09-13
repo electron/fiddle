@@ -71,7 +71,7 @@ export class PublishButton extends React.Component<PublishButtonProps> {
     const octo = await getOctokit(this.props.appState);
     const { gitHubPublishAsPublic } = this.props.appState;
     const options = { includeDependencies: true, includeElectron: true };
-    const values = await window.ElectronFiddle.app.getValues(options);
+    const values = await window.ElectronFiddle.app.getEditorValues(options);
 
     try {
       const gist = await octo.gists.create({

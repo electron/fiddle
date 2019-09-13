@@ -4,8 +4,9 @@ import { RunnerMock } from './runner';
 
 export class AppMock {
   public setupUnsavedOnChangeListener = jest.fn();
-  public setValues = jest.fn();
-  public getValues = jest.fn(() => ({
+  public replaceFiddle = jest.fn();
+  public setEditorValues = jest.fn();
+  public getEditorValues = jest.fn(() => ({
     main: 'main-content',
     renderer: 'renderer-content',
     html: 'html-content'

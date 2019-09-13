@@ -1,11 +1,10 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { EditorValues, Files, FileTransform, SetFiddleOptions } from '../interfaces';
+import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
-import { getTitle } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
@@ -38,13 +37,12 @@ export class FileManager {
   /**
    * Opens a template.
    *
-   * @param {string} name
+   * @param {string} templateName
    * @memberof FileManager
    */
-  public async openTemplate(name: string) {
-    const values = await getTemplateValues(name);
-
-    this.setFiddle({ values, templateName: name });
+  public async openTemplate(templateName: string) {
+    const editorValues = await getTemplateValues(templateName);
+    await window.ElectronFiddle.app.replaceFiddle(editorValues, {templateName});
   }
 
   /**
@@ -60,34 +58,14 @@ export class FileManager {
 
     // We'll do our best and will likely have to
     // rewrite this once we support multiple files
-    const values: EditorValues = {
+    const editorValues: EditorValues = {
       html: await this.readFile(path.join(filePath, INDEX_HTML_NAME)),
       main: await this.readFile(path.join(filePath, MAIN_JS_NAME)),
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
     };
 
-    this.setFiddle({ values, filePath });
-  }
 
-  /**
-   * Got values? This method will load them.
-   *
-   * @param {SetFiddleOptions} options
-   * @memberof FileManager
-   */
-  public async setFiddle({ values, filePath, templateName }: SetFiddleOptions) {
-    this.appState.gistId = '';
-    this.appState.isMyGist = false;
-    this.appState.localPath = filePath;
-    this.appState.templateName = templateName;
-
-    this.appState.setWarningDialogTexts({
-      label: `Opening this fiddle will replace your unsaved changes. Do you want to proceed?`,
-      ok: 'Yes'
-    });
-
-    await window.ElectronFiddle.app.setValues(values);
-    document.title = getTitle(this.appState);
+    window.ElectronFiddle.app.replaceFiddle(editorValues, {filePath});
   }
 
   /**
@@ -132,7 +110,7 @@ export class FileManager {
    */
   public async getFiles(options?: PackageJsonOptions, ...transforms: Array<FileTransform>): Promise<Files> {
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
-    const values = await window.ElectronFiddle.app.getValues(pOptions);
+    const values = await window.ElectronFiddle.app.getEditorValues(pOptions);
     let output: Files = new Map();
 
     output.set(RENDERER_JS_NAME, values.renderer);

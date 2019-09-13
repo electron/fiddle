@@ -85,7 +85,6 @@ export class AppState {
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
-  @observable public isMyGist: boolean = false;
   @observable public isPublishing: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
@@ -405,7 +404,7 @@ export class AppState {
     // Should we update the editor?
     if (await isContentUnchanged(EditorId.main)) {
       const main = await getContent(EditorId.main, version);
-      window.ElectronFiddle.app.setValues({ main }, false);
+      window.ElectronFiddle.app.setEditorValues({ main });
     }
 
     // Update TypeScript definitions
@@ -475,7 +474,7 @@ export class AppState {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
-    // Todo: This drops the first part of the buffer... is that fully expected?
+    // TODO: This drops the first part of the buffer... is that fully expected?
     if (process.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;

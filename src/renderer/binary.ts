@@ -107,7 +107,7 @@ export class BinaryManager {
     } catch (error) {
       console.warn(`Failure while unzipping ${version}`, error);
 
-      // Todo: Handle this case
+      // TODO: Handle this case
     }
 
     this.state[version] = 'ready';

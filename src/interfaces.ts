@@ -33,9 +33,9 @@ export interface ElectronVersion extends NpmVersion {
 }
 
 export interface SetFiddleOptions {
-  values: EditorValues;
   filePath?: string;
   templateName?: string;
+  gistId?: string;
 }
 
 export interface OutputEntry {
