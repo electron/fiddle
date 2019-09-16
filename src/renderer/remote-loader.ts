@@ -1,7 +1,6 @@
 import { when } from 'mobx';
 import { EditorId, EditorValues } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
-import { getTitle } from '../utils/get-title';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -189,17 +188,7 @@ export class RemoteLoader {
    * @returns {boolean}
    */
   private async handleLoadingSuccess(values: Partial<EditorValues>, gistId: string): Promise<boolean> {
-    this.appState.setWarningDialogTexts({
-      label: 'Loading the fiddle will replace your current unsaved changes. Do you want to discard them?'
-    });
-
-    await window.ElectronFiddle.app.setValues(values);
-
-    document.title = getTitle(this.appState);
-    this.appState.gistId = gistId;
-    this.appState.localPath = undefined;
-    this.appState.templateName = undefined;
-
+    await window.ElectronFiddle.app.replaceFiddle(values, {gistId});
     return true;
   }
 

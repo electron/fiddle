@@ -22,7 +22,7 @@ export async function getContent(
 
   if (name === EditorId.main) {
     // We currently only distinguish between loadFile
-    // and loadURL. Todo: Properly version the quick-start.
+    // and loadURL. TODO: Properly version the quick-start.
     if (version && version.startsWith('1.')) {
       return (await import('../content/main-1-x-x')).main;
     }
@@ -42,7 +42,7 @@ export async function getContent(
 export async function isContentUnchanged(name: EditorId): Promise<boolean> {
   if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
 
-  const values = await window.ElectronFiddle.app.getValues({ include: false });
+  const values = await window.ElectronFiddle.app.getEditorValues({ include: false });
 
   // Handle main case, which needs to check both possible versions
   if (name === EditorId.main) {

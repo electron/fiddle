@@ -91,13 +91,13 @@ describe('RemoteLoader', () => {
       store.gistId = 'abcdtestid';
 
       const result = await instance.fetchGistAndLoad('abcdtestid');
+
       expect(result).toBe(true);
-      expect(window.ElectronFiddle.app.setValues).toBeCalledWith({
+      expect(window.ElectronFiddle.app.replaceFiddle).toBeCalledWith({
         html: mockGistFiles[INDEX_HTML_NAME].content,
         main: mockGistFiles[MAIN_JS_NAME].content,
         renderer: mockGistFiles[RENDERER_JS_NAME].content,
-      });
-      expect(document.title).toBe(`Electron Fiddle - gist.github.com/${store.gistId}`);
+      }, {gistId: 'abcdtestid'});
     });
 
     it('handles an error', async () => {
@@ -130,15 +130,14 @@ describe('RemoteLoader', () => {
 
       await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
-      expect(document.title).toBe('Electron Fiddle - Unsaved');
-      const { calls } = (window.ElectronFiddle.app.setValues as any).mock;
+      const { calls } = (window.ElectronFiddle.app.replaceFiddle as jest.Mock).mock;
 
       expect(calls).toHaveLength(1);
-      expect(calls[0]).toEqual([{
+      expect(calls[0]).toMatchObject(expect.arrayContaining([{
         html: 'index',
         main: 'main',
         renderer: 'renderer'
-      }]);
+      }]));
     });
 
     it('handles an error', async () => {

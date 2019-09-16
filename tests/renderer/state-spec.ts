@@ -296,7 +296,7 @@ describe('AppState', () => {
       await appState.setVersion('v1.0.0');
 
       expect(getContent).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledTimes(1);
+    expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(1);
     });
   });
 

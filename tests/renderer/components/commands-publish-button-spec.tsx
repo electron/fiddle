@@ -1,20 +1,20 @@
-import { shallow } from 'enzyme';
-import * as React from 'react';
+import { shallow } from "enzyme";
+import * as React from "react";
 
-import { PublishButton } from '../../../src/renderer/components/commands-publish-button';
-import { getOctokit } from '../../../src/utils/octokit';
+import { PublishButton } from "../../../src/renderer/components/commands-publish-button";
+import { getOctokit } from "../../../src/utils/octokit";
 
-jest.mock('../../../src/utils/octokit');
+jest.mock("../../../src/utils/octokit");
 
-describe('Publish button component', () => {
+describe("Publish button component", () => {
   let store: any;
 
   const expectedGistCreateOpts = {
-    description: 'Electron Fiddle Gist',
+    description: "Electron Fiddle Gist",
     files: {
-      'index.html': { content: 'html-content' },
-      'renderer.js': { content: 'renderer-content' },
-      'main.js': { content: 'main-content' },
+      "index.html": { content: "html-content" },
+      "renderer.js": { content: "renderer-content" },
+      "main.js": { content: "main-content" }
     },
     public: true
   };
@@ -25,12 +25,12 @@ describe('Publish button component', () => {
     };
   });
 
-  it('renders', () => {
+  it("renders", () => {
     const wrapper = shallow(<PublishButton appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('toggles the auth dialog on click if not authed', async () => {
+  it("toggles the auth dialog on click if not authed", async () => {
     store.toggleAuthDialog = jest.fn();
 
     const wrapper = shallow(<PublishButton appState={store} />);
@@ -40,8 +40,8 @@ describe('Publish button component', () => {
     expect(store.toggleAuthDialog).toHaveBeenCalled();
   });
 
-  it('toggles the publish method on click if authed', async () => {
-    store.gitHubToken = 'github-token';
+  it("toggles the publish method on click if authed", async () => {
+    store.gitHubToken = "github-token";
 
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
@@ -51,11 +51,11 @@ describe('Publish button component', () => {
     expect(instance.publishFiddle).toHaveBeenCalled();
   });
 
-  it('attempts to publish to Gist', async () => {
+  it("attempts to publish to Gist", async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
-        create: jest.fn(async () => ({ data: { id: '123' } }))
+        create: jest.fn(async () => ({ data: { id: "123" } }))
       }
     };
 
@@ -67,21 +67,21 @@ describe('Publish button component', () => {
     await instance.publishFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
-      description: 'Electron Fiddle Gist',
+      description: "Electron Fiddle Gist",
       files: {
-        'index.html': { content: 'html-content' },
-        'renderer.js': { content: 'renderer-content' },
-        'main.js': { content: 'main-content' },
+        "index.html": { content: "html-content" },
+        "renderer.js": { content: "renderer-content" },
+        "main.js": { content: "main-content" }
       },
       public: true
     });
   });
 
-  it('handles missing content', async () => {
+  it("handles missing content", async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
-        create: jest.fn(async () => ({ data: { id: '123' } }))
+        create: jest.fn(async () => ({ data: { id: "123" } }))
       }
     };
 
@@ -90,27 +90,27 @@ describe('Publish button component', () => {
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
-    (window as any).ElectronFiddle.app.getValues.mockReturnValueOnce({});
+    (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce({});
 
     await instance.publishFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
-      description: 'Electron Fiddle Gist',
+      description: "Electron Fiddle Gist",
       files: {
-        'index.html': { content: '<!-- Empty -->' },
-        'renderer.js': { content: '// Empty' },
-        'main.js': { content: '// Empty' },
+        "index.html": { content: "<!-- Empty -->" },
+        "renderer.js": { content: "// Empty" },
+        "main.js": { content: "// Empty" }
       },
       public: true
     });
   });
 
-  it('handles an error in Gist publishing', async () => {
+  it("handles an error in Gist publishing", async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
         create: jest.fn(() => {
-          throw new Error('bwap bwap');
+          throw new Error("bwap bwap");
         })
       }
     };
@@ -125,12 +125,12 @@ describe('Publish button component', () => {
     expect(store.isPublishing).toBe(false);
   });
 
-  it('uses the privacy setting correctly', async () => {
+  it("uses the privacy setting correctly", async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
         create: jest.fn(() => {
-          throw new Error('bwap bwap');
+          throw new Error("bwap bwap");
         })
       }
     };
@@ -145,7 +145,7 @@ describe('Publish button component', () => {
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
-      public: false,
+      public: false
     });
 
     instance.setPublic();
@@ -153,24 +153,24 @@ describe('Publish button component', () => {
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
-      public: true,
+      public: true
     });
   });
 
-  it('disables during gist publishing', async () => {
+  it("disables during gist publishing", async () => {
     store.isPublishing = false;
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
-    expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+    expect(wrapper.find("fieldset").prop("disabled")).toBe(false);
 
     instance.publishFiddle = jest.fn().mockImplementationOnce(() => {
-      return new Promise((resolve) => {
-        wrapper.setProps({appState: {store, isPublishing: true}}, () => {
-          expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+      return new Promise(resolve => {
+        wrapper.setProps({ appState: { store, isPublishing: true } }, () => {
+          expect(wrapper.find("fieldset").prop("disabled")).toBe(true);
         });
-        wrapper.setProps({appState: {store, isPublishing: false}}, () => {
-          expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+        wrapper.setProps({ appState: { store, isPublishing: false } }, () => {
+          expect(wrapper.find("fieldset").prop("disabled")).toBe(false);
         });
         resolve();
       });
@@ -179,8 +179,8 @@ describe('Publish button component', () => {
     await instance.publishFiddle();
   });
 
-  describe('privacy menu', () => {
-    it('toggles the privacy setting', () => {
+  describe("privacy menu", () => {
+    it("toggles the privacy setting", () => {
       const wrapper = shallow(<PublishButton appState={store} />);
       const instance: PublishButton = wrapper.instance() as any;
 

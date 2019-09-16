@@ -2,11 +2,17 @@ import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
-import { ALL_EDITORS, EditorId, EditorValues } from '../interfaces';
+import {
+  ALL_EDITORS,
+  EditorId,
+  EditorValues,
+  SetFiddleOptions
+} from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
+import { getTitle } from '../utils/get-title';
 import { isEditorBackup } from '../utils/type-checks';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -31,12 +37,45 @@ export class App {
   public touchBarManager: TouchBarManager | undefined;
 
   constructor() {
-    this.getValues = this.getValues.bind(this);
-    this.setValues = this.setValues.bind(this);
+    this.getEditorValues = this.getEditorValues.bind(this);
+    this.setEditorValues = this.setEditorValues.bind(this);
 
     if (process.platform === 'darwin') {
       this.touchBarManager = new TouchBarManager(appState);
     }
+  }
+
+  public async replaceFiddle(
+    editorValues: Partial<EditorValues>,
+    { filePath, gistId, templateName }: Partial<SetFiddleOptions>
+  ) {
+    // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
+    if (this.state.isUnsaved) {
+      this.state.setWarningDialogTexts({
+        label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
+        ok: 'Yes'
+      });
+      this.state.isWarningDialogShowing = true;
+      await when(() => !this.state.isWarningDialogShowing);
+
+      if (!this.state.warningDialogLastResult) {
+        return false;
+      }
+    }
+
+    // set values once prompt approves
+    await this.setEditorValues(editorValues);
+
+    document.title = getTitle(this.state);
+    this.state.gistId = gistId || '';
+    this.state.localPath = filePath;
+    this.state.templateName = templateName;
+
+    // once loaded, we have a "saved" state
+    this.state.isUnsaved = false;
+    this.setupUnsavedOnChangeListener();
+
+    return true;
   }
 
   /**
@@ -45,20 +84,11 @@ export class App {
    * @param {EditorValues} values
    * @param {warn} warn - Should we warn before overwriting unsaved data?
    */
-  public async setValues(values: Partial<EditorValues>, warn: boolean = true): Promise<boolean> {
+  public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
       throw new Error('Fiddle not ready');
-    }
-
-    if (this.state.isUnsaved && warn) {
-      this.state.isWarningDialogShowing = true;
-      await when(() => !this.state.isWarningDialogShowing);
-
-      if (!this.state.warningDialogLastResult) {
-        return false;
-      }
     }
 
     for (const name of ALL_EDITORS) {
@@ -75,11 +105,6 @@ export class App {
         }
       }
     }
-
-    this.state.isUnsaved = false;
-    this.setupUnsavedOnChangeListener();
-
-    return true;
   }
 
   /**
@@ -87,7 +112,9 @@ export class App {
    *
    * @returns {EditorValues}
    */
-  public async getValues(options?: PackageJsonOptions): Promise<EditorValues> {
+  public async getEditorValues(
+    options?: PackageJsonOptions
+  ): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
@@ -97,10 +124,10 @@ export class App {
     const values: EditorValues = {
       html: getEditorValue(EditorId.html),
       main: getEditorValue(EditorId.main),
-      renderer: getEditorValue(EditorId.renderer),
+      renderer: getEditorValue(EditorId.renderer)
     };
 
-    if (options && options.include !==  false) {
+    if (options && options.include !== false) {
       values.package = await getPackageJson(this.state, values, options);
     }
 
@@ -117,7 +144,9 @@ export class App {
     const React = await import('react');
     const { render } = await import('react-dom');
     const { Dialogs } = await import('./components/dialogs');
-    const { OutputEditorsWrapper } = await import('./components/output-editors-wrapper');
+    const { OutputEditorsWrapper } = await import(
+      './components/output-editors-wrapper'
+    );
     const { Header } = await import('./components/header');
 
     const className = `${process.platform} container`;
@@ -135,7 +164,7 @@ export class App {
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
-    // Todo: A timer here is terrible. Let's fix this
+    // TODO: A timer here is terrible. Let's fix this
     // and ensure we actually do it once Editors have mounted.
     setTimeout(() => {
       this.setupUnsavedOnChangeListener();
@@ -165,7 +194,9 @@ export class App {
    * @returns {Promise<void>}
    */
   public async setupTheme(): Promise<void> {
-    const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
+    const tag: HTMLStyleElement | null = document.querySelector(
+      'style#fiddle-theme'
+    );
     const theme = await getTheme(this.state.theme);
 
     if (tag && theme.css) {
@@ -189,6 +220,7 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners = window.ElectronFiddle.contentChangeListeners || [];
+window.ElectronFiddle.contentChangeListeners =
+  window.ElectronFiddle.contentChangeListeners || [];
 window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
 window.ElectronFiddle.app.setup();
