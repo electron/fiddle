@@ -1,4 +1,4 @@
-import { ALL_EDITORS, EditorId } from '../../src/interfaces';
+import {  EditorId } from '../../src/interfaces';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { createMosaicArrangement, getVisibleMosaics } from '../../src/utils/editors-mosaic-arrangement';
 

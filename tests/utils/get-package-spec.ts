@@ -15,7 +15,8 @@ describe('get-package', () => {
     } as any, {
       main: 'app.goDoTheThing()',
       renderer: `const say = require('say')`,
-      html: '<html />'
+      html: '<html />',
+      preload: 'preload'
     });
 
     expect(result).toEqual(JSON.stringify({
@@ -43,7 +44,8 @@ describe('get-package', () => {
     } as any, {
       main: 'app.goDoTheThing()',
       renderer: `const say = require('say')`,
-      html: '<html />'
+      html: '<html />',
+      preload: 'preload'
     }, {
       includeElectron: true,
       includeDependencies: true
