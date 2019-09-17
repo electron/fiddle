@@ -59,6 +59,7 @@ describe('FileManager', () => {
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({
         html: '',
         renderer: '',
+        preload: '',
         main: '',
       }, {filePath: fakePath});
     });
@@ -86,7 +87,7 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(3);
     });
 
     it('handles an error', async () => {
@@ -97,8 +98,8 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(3);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(3);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {
@@ -129,7 +130,7 @@ describe('FileManager', () => {
 
       await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 

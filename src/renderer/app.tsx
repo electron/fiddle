@@ -124,6 +124,7 @@ export class App {
     const values: EditorValues = {
       html: getEditorValue(EditorId.html),
       main: getEditorValue(EditorId.main),
+      preload: getEditorValue(EditorId.preload),
       renderer: getEditorValue(EditorId.renderer)
     };
 

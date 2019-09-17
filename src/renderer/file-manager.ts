@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
@@ -62,6 +62,7 @@ export class FileManager {
       html: await this.readFile(path.join(filePath, INDEX_HTML_NAME)),
       main: await this.readFile(path.join(filePath, MAIN_JS_NAME)),
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
+      preload: await this.readFile(path.join(filePath, PRELOAD_JS_NAME)),
     };
 
 
@@ -87,7 +88,9 @@ export class FileManager {
       const files = await this.getFiles(undefined, ...transforms);
 
       for (const [fileName, content] of files) {
-        await this.saveFile(path.join(pathToSave, fileName), content);
+        if (content) {
+          await this.saveFile(path.join(pathToSave, fileName), content);
+        }
       }
 
       if (pathToSave !== localPath) {
@@ -116,6 +119,7 @@ export class FileManager {
     output.set(RENDERER_JS_NAME, values.renderer);
     output.set(MAIN_JS_NAME, values.main);
     output.set(INDEX_HTML_NAME, values.html);
+    output.set(PRELOAD_JS_NAME, values.preload);
     output.set(PACKAGE_NAME, values.package!);
 
     for (const transform of transforms) {

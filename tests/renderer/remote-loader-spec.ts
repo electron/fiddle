@@ -2,7 +2,7 @@ import { observable } from 'mobx';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { ElectronReleaseChannel } from '../../src/renderer/versions';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../../src/shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME, PRELOAD_JS_NAME } from '../../src/shared-constants';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
@@ -17,6 +17,9 @@ const mockGistFiles = {
     },
     [INDEX_HTML_NAME]: {
       content: 'html'
+    },
+    [PRELOAD_JS_NAME]: {
+      content: 'preload'
     }
 };
 
@@ -97,6 +100,7 @@ describe('RemoteLoader', () => {
         html: mockGistFiles[INDEX_HTML_NAME].content,
         main: mockGistFiles[MAIN_JS_NAME].content,
         renderer: mockGistFiles[RENDERER_JS_NAME].content,
+        preload: mockGistFiles[PRELOAD_JS_NAME].content,
       }, {gistId: 'abcdtestid'});
     });
 
@@ -136,7 +140,8 @@ describe('RemoteLoader', () => {
       expect(calls[0]).toMatchObject(expect.arrayContaining([{
         html: 'index',
         main: 'main',
-        renderer: 'renderer'
+        renderer: 'renderer',
+        preload: ''
       }]));
     });
 

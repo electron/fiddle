@@ -29,6 +29,16 @@ exports[`EditorDropdown component renders 1`] = `
         />
         <Blueprint3.MenuItem
           disabled={false}
+          icon="eye-off"
+          id="preload"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Preload (preload.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
           icon="eye-open"
           id="html"
           multiline={false}
@@ -97,6 +107,16 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Renderer Process (renderer.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-off"
+          id="preload"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Preload (preload.js)"
         />
         <Blueprint3.MenuItem
           disabled={false}

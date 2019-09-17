@@ -53,7 +53,7 @@ describe('Mosaic Arrangement Utilities', () => {
     it('returns the correct array for three visible panels', () => {
       const result = getVisibleMosaics(DEFAULT_MOSAIC_ARRANGEMENT);
 
-      expect(result).toEqual(ALL_EDITORS);
+      expect(result).toEqual([ 'main', 'renderer', 'html' ]);
     });
   });
 });
