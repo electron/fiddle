@@ -88,8 +88,14 @@ export class FileManager {
       const files = await this.getFiles(undefined, ...transforms);
 
       for (const [fileName, content] of files) {
+        const savePath = path.join(pathToSave, fileName);
+
+        // If the file has content, save it to disk. If there's no
+        // content in the file, remove a file that possibly exists.
         if (content) {
-          await this.saveFile(path.join(pathToSave, fileName), content);
+          await this.saveFile(savePath, content);
+        } else {
+          await this.removeFile(savePath);
         }
       }
 
@@ -219,6 +225,24 @@ export class FileManager {
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
+      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
+    }
+  }
+
+  /**
+   * Safely attempts to remove a file, doesn't crash the app if
+   * it fails.
+   *
+   * @param {string} filePath
+   * @returns {string}
+   * @memberof FileManager
+   */
+  private async removeFile(filePath: string): Promise<void> {
+    try {
+      const fs = await fancyImport<typeof fsType>('fs-extra');
+      return await fs.remove(filePath);
+    } catch (error) {
+      console.log(`FileManager: Could not remove ${filePath}`, error);
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
