@@ -6,7 +6,7 @@
 // the result.
 //
 // For more info, see:
-// https://electronjs.org/docs/api/contentTracing
+// https://electronjs.org/docs/api/content-tracing
 
 const { app, contentTracing } = require('electron')
 
