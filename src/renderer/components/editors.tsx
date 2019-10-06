@@ -30,8 +30,9 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 export const TITLE_MAP: Record<MosaicId, string> = {
   main: 'Main Process (main.js)',
   renderer: 'Renderer Process (renderer.js)',
+  preload: 'Preload (preload.js)',
   html: 'HTML (index.html)',
-  docsDemo: 'Docs & Demos'
+  docsDemo: 'Docs & Demos',
 };
 
 export interface EditorsProps {

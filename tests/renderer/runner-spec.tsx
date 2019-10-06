@@ -261,7 +261,8 @@ describe('Runner component', () => {
       await instance.installModulesForEditor({
         html: '',
         main: `const a = require('say')`,
-        renderer: ''
+        renderer: '',
+        preload: ''
       }, '/fake/path');
 
       expect(installModules).toHaveBeenCalledTimes(0);
@@ -274,7 +275,8 @@ describe('Runner component', () => {
       await instance.installModulesForEditor({
         html: '',
         main: `const a = require('say')`,
-        renderer: ''
+        renderer: '',
+        preload: ''
       }, '/fake/path');
 
       expect(installModules).toHaveBeenCalledTimes(1);

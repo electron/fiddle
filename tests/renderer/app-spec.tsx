@@ -118,7 +118,8 @@ describe('Editors component', () => {
       const editorValues = {
         html: 'html-value',
         main: 'main-value',
-        renderer: 'renderer-value'
+        renderer: 'renderer-value',
+        preload: ''
       };
 
       app.replaceFiddle(editorValues, {
@@ -286,7 +287,7 @@ describe('Editors component', () => {
       app.setEditorValues({
         html: 'html-value',
         main: 'main-value',
-        renderer: 'renderer-value'
+        renderer: 'renderer-value',
       });
 
       expect(

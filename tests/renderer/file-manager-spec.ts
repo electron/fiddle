@@ -59,6 +59,7 @@ describe('FileManager', () => {
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({
         html: '',
         renderer: '',
+        preload: '',
         main: '',
       }, {filePath: fakePath});
     });
@@ -86,10 +87,18 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(3);
     });
 
-    it('handles an error', async () => {
+    it('removes a file that is newly empty', async () => {
+      const fs = require('fs-extra');
+
+      await fm.saveFiddle('/fake/path');
+
+      expect(fs.remove).toHaveBeenCalledTimes(2);
+    });
+
+    it('handles an error (output)', async () => {
       const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
@@ -97,8 +106,20 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(3);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(3);
+    });
+
+    it('handles an error (remove)', async () => {
+      const fs = require('fs-extra');
+      (fs.remove as jest.Mock).mockImplementation(() => {
+        throw new Error('bwap');
+      });
+
+      await fm.saveFiddle('/fake/path');
+
+      expect(fs.remove).toHaveBeenCalledTimes(2);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(2);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {
@@ -129,7 +150,7 @@ describe('FileManager', () => {
 
       await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 

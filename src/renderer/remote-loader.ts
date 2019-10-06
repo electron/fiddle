@@ -1,6 +1,7 @@
+import * as Octokit from '@octokit/rest';
 import { when } from 'mobx';
 import { EditorId, EditorValues } from '../interfaces';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -55,6 +56,7 @@ export class RemoteLoader {
         html: await getContent(EditorId.html, this.appState.version),
         renderer: await getContent(EditorId.renderer, this.appState.version),
         main: await getContent(EditorId.main, this.appState.version),
+        preload: await getContent(EditorId.preload, this.appState.version),
       };
 
       const loaders: Array<Promise<void>> = [];
@@ -82,6 +84,13 @@ export class RemoteLoader {
             );
 
             break;
+
+          case PRELOAD_JS_NAME:
+            loaders.push(fetch(child.download_url)
+              .then((r) => r.text()).then((t) => { values.preload = t; })
+            );
+
+            break;
           default:
             break;
         }
@@ -96,10 +105,26 @@ export class RemoteLoader {
   }
 
   /**
+   * Get data from a gist. If it doesn't exist, return an empty string.
+   *
+   * @param {Octokit.Response<Octokit.GistsGetResponse>} gist
+   * @param {string} name
+   * @returns {string}
+   * @memberof RemoteLoader
+   */
+  public getContentOrEmpty(gist: Octokit.Response<Octokit.GistsGetResponse>, name: string): string {
+    try {
+      return gist.data.files[name].content;
+    } catch (error) {
+      return '';
+    }
+  }
+
+  /**
    * Load a fiddle
    *
    * @returns {Promise<boolean>}
-   * @memberof AddressBar
+   * @memberof RemoteLoader
    */
   public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
@@ -107,9 +132,10 @@ export class RemoteLoader {
       const gist = await octo.gists.get({ gist_id: gistId });
 
       return this.handleLoadingSuccess({
-        html: gist.data.files[INDEX_HTML_NAME].content,
-        main: gist.data.files[MAIN_JS_NAME].content,
-        renderer: gist.data.files[RENDERER_JS_NAME].content,
+        html: this.getContentOrEmpty(gist, INDEX_HTML_NAME),
+        main: this.getContentOrEmpty(gist, MAIN_JS_NAME),
+        renderer: this.getContentOrEmpty(gist, RENDERER_JS_NAME),
+        preload: this.getContentOrEmpty(gist, PRELOAD_JS_NAME)
       }, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);

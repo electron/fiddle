@@ -24,6 +24,7 @@ export interface EditorValues {
   main: string;
   renderer: string;
   html: string;
+  preload: string;
   package?: string;
 }
 
@@ -63,7 +64,8 @@ export interface Templates {
 export const enum EditorId {
   'main' = 'main',
   'renderer' = 'renderer',
-  'html' = 'html'
+  'html' = 'html',
+  'preload' = 'preload'
 }
 
 // Panels that can show up as a mosaic
@@ -73,7 +75,7 @@ export const enum PanelId {
 
 export type MosaicId = EditorId | PanelId;
 
-export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.html ];
+export const ALL_EDITORS =  [ EditorId.main, EditorId.renderer, EditorId.preload, EditorId.html ];
 export const ALL_PANELS = [ PanelId.docsDemo ];
 export const ALL_MOSAICS = [ ...ALL_EDITORS, ...ALL_PANELS ];
 

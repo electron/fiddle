@@ -85,7 +85,8 @@ describe('npm', () => {
       const result = await findModulesInEditors({
         html: '',
         main: mockMain,
-        renderer: ''
+        renderer: '',
+        preload: ''
       });
 
       expect(result).toEqual(['say']);
