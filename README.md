@@ -56,6 +56,13 @@ fiddle has grown up, export it as a project with or without
 [electron-forge][electron-forge]. Then, use your favorite editor and take on
 the world!
 
+### Running Fiddle
+
+1. Clone this repository: `git clone https://github.com/electron/fiddle.git`.
+2. Change current directory to fiddle: `cd ./fiddle`
+3. Run `npm install`
+4. Run `npm start`
+
 ## License
 
 [MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE.md).
