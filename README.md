@@ -56,12 +56,16 @@ fiddle has grown up, export it as a project with or without
 [electron-forge][electron-forge]. Then, use your favorite editor and take on
 the world!
 
-### Running Fiddle
+### Building Fiddle
 
 1. Clone this repository: `git clone https://github.com/electron/fiddle.git`.
 2. Change current directory to fiddle: `cd ./fiddle`
 3. Run `npm install`
 4. Run `npm start`
+
+### Running Fiddle
+
+Download and run the latest binary from the electron [releases page](https://electronjs.org/releases/stable).
 
 ## License
 
