@@ -157,7 +157,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
           </p>
           <p>
             By the way: If you want to use an <code>npm</code> module here, just
-            <code>require</code> it. Electron Fiddle will automatically detect that you
+          &nbsp;<code>require</code> it. Electron Fiddle will automatically detect that you
             requested a module and install it as soon as you run your fiddle.
           </p>
         </>
