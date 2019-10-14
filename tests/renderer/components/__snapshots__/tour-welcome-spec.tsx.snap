@@ -151,7 +151,7 @@ exports[`Header component renders the tour once started 1`] = `
           <code>
             BrowserWindow
           </code>
-          . Any HTML, CSS, or JavaScript that works in a browser will work here, too. In addition, Electron allows you to execute Node.js code. Take a close look at the
+          . Any HTML, CSS, or JavaScript that works in a browser will work here, too. In addition, Electron allows you to execute Node.js code. Take a close look at the  
           <code>
             &lt;script /&gt;
           </code>
@@ -179,7 +179,7 @@ exports[`Header component renders the tour once started 1`] = `
             <code>
               npm
             </code>
-             module here, just
+             module here, just  
             <code>
               require
             </code>
