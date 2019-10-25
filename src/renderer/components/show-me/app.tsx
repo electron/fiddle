@@ -60,7 +60,7 @@ export function ShowMeApp(_props: any): JSX.Element {
 
     let result = '';
     pathsToQuery.forEach((item) => {
-      result += `${item}: ${remote.app.getPath(item)}\n`;
+      result += `${item}: ${remote.app.getPath(item as any)}\n`;
     });
 
     setPaths(result);

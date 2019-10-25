@@ -30,7 +30,7 @@ export interface AddVersionDialogState {
 export class AddVersionDialog extends React.Component<AddVersionDialogProps, AddVersionDialogState> {
   constructor(props: AddVersionDialogProps) {
     super(props);
-    
+
     this.state = {
       isValidVersion: false,
       isValidElectron: false,
