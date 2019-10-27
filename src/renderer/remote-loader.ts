@@ -179,10 +179,17 @@ export class RemoteLoader {
       path: 'package.json'
     });
 
-    // This is bug in Octokit's typing
-    const packageJsonString = Buffer.from((packageJsonData as any).content, 'base64').toString('utf8');
-    const { version } = JSON.parse(packageJsonString);
-    return version;
+    if (!Array.isArray(packageJsonData) && !!packageJsonData.content) {
+      const packageJsonString = Buffer.from(packageJsonData.content, 'base64').toString('utf8');
+      const { version } = JSON.parse(packageJsonString);
+      return version;
+    } else {
+      console.error(`getPackageVersionFromRef: Received unexpected response from GitHub, could not parse version`, {
+        packageJsonData
+      });
+
+      return '0.0.0';
+    }
   }
 
   /**
