@@ -65,6 +65,11 @@ export class RemoteLoader {
       }
 
       for (const child of folder.data) {
+        if (!child.download_url) {
+          console.warn(`Could not find download_url for ${child.name}`);
+          continue;
+        }
+
         switch (child.name) {
           case MAIN_JS_NAME:
             loaders.push(fetch(child.download_url)
@@ -174,9 +179,17 @@ export class RemoteLoader {
       path: 'package.json'
     });
 
-    const packageJsonString = Buffer.from(packageJsonData.content, 'base64').toString('utf8');
-    const { version } = JSON.parse(packageJsonString);
-    return version;
+    if (!Array.isArray(packageJsonData) && !!packageJsonData.content) {
+      const packageJsonString = Buffer.from(packageJsonData.content, 'base64').toString('utf8');
+      const { version } = JSON.parse(packageJsonString);
+      return version;
+    } else {
+      console.error(`getPackageVersionFromRef: Received unexpected response from GitHub, could not parse version`, {
+        packageJsonData
+      });
+
+      return '0.0.0';
+    }
   }
 
   /**

@@ -30,7 +30,7 @@ describe('first-run', () => {
   });
 
   afterEach(() => {
-    process.defaultApp = oldDefaultApp;
+    (process as any).defaultApp = oldDefaultApp;
   });
 
   describe('onFirstRunMaybe()', () => {
@@ -50,7 +50,7 @@ describe('first-run', () => {
 
     it(`doesn't run unless required (dev mode)`, () => {
       (isFirstRun as jest.Mock).mockReturnValueOnce(true);
-      process.defaultApp = true;
+      (process as any).defaultApp = true;
       (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
 
       onFirstRunMaybe();

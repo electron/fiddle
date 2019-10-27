@@ -26,7 +26,7 @@ export interface AddThemeDialogState {
  */
 @observer
 export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThemeDialogState> {
-  resetState = { file: undefined }
+  public resetState = { file: undefined };
 
   constructor(props: AddThemeDialogProps) {
     super(props);
@@ -68,7 +68,7 @@ export class AddThemeDialog extends React.Component<AddThemeDialogProps, AddThem
       const name = editor.name ? editor.name : file.name;
       await this.createNewThemeFromMonaco(name, newTheme);
     } catch (error) {
-      this.props.appState.setWarningDialogTexts({'label': `Error: ${error}, please pick a different file.`});
+      this.props.appState.setWarningDialogTexts({label: `Error: ${error}, please pick a different file.`});
       this.props.appState.isWarningDialogShowing = true;
       return;
     }
