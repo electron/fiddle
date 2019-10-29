@@ -1,7 +1,6 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { getOfflineTypeDefinitionPath } from './fetch-types';
@@ -24,7 +23,6 @@ export class BinaryManager {
    */
   public async remove(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     let isDeleted = false;
 
     // utility to re-run removal functions upon failure
@@ -74,7 +72,6 @@ export class BinaryManager {
    */
   public async setup(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const { promisify } = await import('util');
     const eDownload = promisify(require('electron-download'));
 
@@ -143,7 +140,6 @@ export class BinaryManager {
    * @returns {Promise<Array<string>>}
    */
   public async getDownloadedVersions(): Promise<Array<string>> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
     console.log(`BinaryManager: Checking for downloaded versions`);
 
@@ -173,13 +169,11 @@ export class BinaryManager {
    */
   public async getIsDownloaded(version: string, dir?: string): Promise<boolean> {
     const expectedPath = this.getElectronBinaryPath(version, dir);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
 
     return fs.existsSync(expectedPath);
   }
 
   public async removeTypeDefsForVersion(version: string) {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const _version = normalizeVersion(version);
     const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
 
@@ -212,7 +206,7 @@ export class BinaryManager {
    */
   private unzip(zipPath: string, extractPath: string): Promise<void> {
     return new Promise(async (resolve, reject) => {
-      const extract = (await fancyImport<any>('extract-zip')).default;
+      const extract = require('extract-zip');
 
       process.noAsar = true;
 

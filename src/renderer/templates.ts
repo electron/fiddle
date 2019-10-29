@@ -1,9 +1,8 @@
-import * as fsExtraType from 'fs-extra';
-import * as pathType from 'path';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 
 import { EditorValues } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
-import { fancyImport } from '../utils/import';
 
 /**
  * Returns expected content for a given name.
@@ -12,8 +11,6 @@ import { fancyImport } from '../utils/import';
  * @returns {Promise<EditorValues>}
  */
 export async function getTemplateValues(name: string): Promise<EditorValues> {
-  const path = await fancyImport<typeof pathType>('path');
-  const fs = await fancyImport<typeof fsExtraType>('fs-extra');
   const templatesPath = path.join(__dirname, '../../static/show-me');
   const templatePath = path.join(templatesPath, name.toLowerCase());
 

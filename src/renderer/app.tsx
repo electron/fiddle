@@ -21,6 +21,9 @@ import { appState } from './state';
 import { getTheme } from './themes';
 import { TouchBarManager } from './touch-bar-manager';
 
+// Import style
+require('../less/root.less');
+
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
  * but it does eventually render all components.

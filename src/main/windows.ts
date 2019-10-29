@@ -16,6 +16,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     height: 900,
     minHeight: 600,
     minWidth: 600,
+    show: true,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
@@ -36,7 +37,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
 export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
   const browserWindow = new BrowserWindow(getMainWindowOptions());
-  browserWindow.loadFile('./dist/static/index.html');
+  browserWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   browserWindow.webContents.once('dom-ready', () => {
     browserWindow.show();

@@ -1,11 +1,10 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
-import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
 import { getTemplateValues } from './templates';
@@ -149,8 +148,6 @@ export class FileManager {
    */
   public async cleanup(dir?: string): Promise<boolean> {
     if (dir) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
-
       if (fs.existsSync(dir)) {
         try {
           await fs.remove(dir);
@@ -175,7 +172,6 @@ export class FileManager {
   public async saveToTemp(
     options: PackageJsonOptions, ...transforms: Array<FileTransform>
   ): Promise<string> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const tmp = await import('tmp');
     const files = await this.getFiles(options, ...transforms);
     const dir = tmp.dirSync();
@@ -203,7 +199,6 @@ export class FileManager {
    */
   private async readFile(filePath: string): Promise<string> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.readFile(filePath, 'utf-8');
     } catch (error) {
       console.log(`FileManager: Could not read ${filePath}`, error);
@@ -221,7 +216,6 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
@@ -239,7 +233,6 @@ export class FileManager {
    */
   private async removeFile(filePath: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);

@@ -27,6 +27,7 @@ compile_commands.json
 .cache
 yarn-error.log
 .DS_Store
+.webpack
 
 # Coverage
 coverage

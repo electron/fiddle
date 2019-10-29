@@ -1,10 +1,9 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 
 import { ElectronVersion, ElectronVersionSource } from '../interfaces';
 import { callIn } from '../utils/call-in';
-import { fancyImport } from '../utils/import';
 import { USER_DATA_PATH } from './constants';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
@@ -53,7 +52,6 @@ export function getOfflineTypeDefinitionPath(version: string): string {
  * @returns {boolean}
  */
 export async function getOfflineTypeDefinitions(version: string): Promise<boolean> {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
   return fs.existsSync(getOfflineTypeDefinitionPath(version));
 }
 
@@ -65,7 +63,6 @@ export async function getOfflineTypeDefinitions(version: string): Promise<boolea
  * @returns {void}
  */
 export async function getDownloadedVersionTypeDefs(version: ElectronVersion): Promise<string | null> {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
     await fs.mkdirp(definitionPath);
     const offlinePath = getOfflineTypeDefinitionPath(version.version);
 
@@ -93,7 +90,6 @@ export async function getDownloadedVersionTypeDefs(version: ElectronVersion): Pr
 
 export async function getLocalVersionTypeDefs(version: ElectronVersion) {
   if (version.source === ElectronVersionSource.local && !!version.localPath) {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const typesPath = getLocalTypePathForVersion(version);
     if (!!typesPath && fs.existsSync(typesPath)) {
       return fs.readFile(typesPath, 'utf-8');

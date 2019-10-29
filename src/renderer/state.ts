@@ -1,4 +1,4 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -20,7 +20,6 @@ import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
-import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
@@ -416,7 +415,6 @@ export class AppState {
     const versionObject = this.versions[version];
 
     if (versionObject.source === ElectronVersionSource.local) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       const typePath = getLocalTypePathForVersion(versionObject);
       console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
       this.localTypeWatcher = fs.watch(typePath!, async () => {

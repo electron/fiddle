@@ -1,7 +1,7 @@
 import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -113,7 +113,6 @@ export class AppearanceSettings extends React.Component<
    */
   public async createNewThemeFromCurrent(): Promise<boolean> {
     const { appState } = this.props;
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const theme = await getTheme(appState.theme);
 
     try {
@@ -147,8 +146,6 @@ export class AppearanceSettings extends React.Component<
    * @returns {Promise<boolean>}
    */
   public async openThemeFolder(): Promise<boolean> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-
     try {
       await fs.ensureDir(THEMES_PATH);
       await shell.showItemInFolder(THEMES_PATH);

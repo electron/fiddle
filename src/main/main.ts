@@ -1,6 +1,5 @@
 import { app } from 'electron';
 
-import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from '../utils/set-about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
@@ -16,7 +15,6 @@ import { getOrCreateMainWindow } from './windows';
  */
 export async function onReady() {
   await onFirstRunMaybe();
-  if (!isDevMode()) process.env.NODE_ENV = 'production';
 
   getOrCreateMainWindow();
   setupAboutPanel();
@@ -60,6 +58,8 @@ export function onWindowsAllClosed() {
  * Exported for testing purposes.
  */
 export function main() {
+  console.log(`Welcome to Fiddle ${app.getVersion()}`);
+
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
   if (shouldQuit()) {
@@ -68,7 +68,7 @@ export function main() {
   }
 
   // Set the app's name
-  app.setName('Electron Fiddle');
+  app.name = 'Electron Fiddle';
 
   // Ensure that there's only ever one Fiddle running
   listenForProtocolHandler();
