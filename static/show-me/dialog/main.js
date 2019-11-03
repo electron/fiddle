@@ -16,7 +16,7 @@ app.on('ready', () => {
     properties: ['openFile']
   }).then(result => {
     if (result.canceled) {
-      console.log('Dialog was cancelled')
+      console.log('Dialog was canceled')
     } else {
       const file = result.filePaths[0]
       mainWindow.loadURL(`file://${file}`)
