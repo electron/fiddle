@@ -1,15 +1,16 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
+import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { overridePlatform, resetPlatform } from '../../utils';
+jest.mock('../../../src/renderer/ipc');
 
 describe('AddVersionDialog component', () => {
   let store: any;
 
-  const mockFile = {
-    path: '/test/file'
-  };
+  const mockFile = '/test/file';
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -37,7 +38,7 @@ describe('AddVersionDialog component', () => {
     wrapper.setState({
       isValidVersion: true,
       isValidElectron: true,
-      file: mockFile
+      folderPath: mockFile
     });
 
     expect(wrapper).toMatchSnapshot();
@@ -45,35 +46,32 @@ describe('AddVersionDialog component', () => {
     wrapper.setState({
       isValidVersion: false,
       isValidElectron: true,
-      file: mockFile
+      folderPath: mockFile
     });
 
     expect(wrapper).toMatchSnapshot();
   });
 
-  describe('onChangeFile()', () => {
-    it('handles the change event', async () => {
+  it('overrides default input with Electron dialog', () => {
+    const preventDefault = jest.fn();
+
+    const wrapper = shallow(<AddVersionDialog appState={store} />);
+    const inp = wrapper.find('#custom-electron-version');
+    inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
+
+    expect(ipcRendererManager.send as jest.Mock)
+      .toHaveBeenCalledWith(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+    expect(preventDefault).toHaveBeenCalled();
+  });
+
+  describe('setFolderPath()', () => {
+    it('does something', async () => {
+      store.binaryManager.getIsDownloaded.mockResolvedValue(true);
       const wrapper = shallow(<AddVersionDialog appState={store} />);
+      await (wrapper.instance() as any).setFolderPath('/test/');
 
-      await (wrapper.instance() as any).onChangeFile({ target: { files: [ mockFile ] } });
-      expect(wrapper.state('file')).toBe(mockFile);
-    });
-
-    it('handles invalid input', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
-
-      await (wrapper.instance() as any).onChangeFile({ target: { files: [] } });
-      expect(wrapper.state('file')).toBe(undefined);
-    });
-
-    it('handles the change event and checks for Electron', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
-
-      store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
-
-      await (wrapper.instance() as any).onChangeFile({ target: { files: [ mockFile ] } });
-      expect(wrapper.state('file')).toBe(mockFile);
-      expect(wrapper.state('isValidElectron')).toBe(false);
+      expect(wrapper.state('isValidElectron')).toBe(true);
+      expect(wrapper.state('folderPath')).toBe('/test/');
     });
   });
 
@@ -93,7 +91,7 @@ describe('AddVersionDialog component', () => {
       expect(wrapper.state('isValidVersion')).toBe(false);
       expect(wrapper.state('version')).toBe('foo');
 
-      (wrapper.instance() as any).onChangeVersion({ target: { } });
+      (wrapper.instance() as any).onChangeVersion({ target: {} });
       expect(wrapper.state('isValidVersion')).toBe(false);
       expect(wrapper.state('version')).toBe('');
     });
@@ -113,9 +111,7 @@ describe('AddVersionDialog component', () => {
 
       wrapper.setState({
         version: '3.3.3',
-        file: {
-          path: '/test/path'
-        }
+        folderPath: '/test/path'
       });
 
       await (wrapper.instance() as any).onSubmit();

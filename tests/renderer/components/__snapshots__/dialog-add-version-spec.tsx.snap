@@ -16,10 +16,9 @@ exports[`AddVersionDialog component renders 1`] = `
       id="custom-electron-version"
       inputProps={
         Object {
-          "webkitdirectory": "true",
+          "onClick": [Function],
         }
       }
-      onInputChange={[Function]}
       text="/test/file"
     />
     <br />
@@ -79,10 +78,9 @@ exports[`AddVersionDialog component renders 2`] = `
       id="custom-electron-version"
       inputProps={
         Object {
-          "webkitdirectory": "true",
+          "onClick": [Function],
         }
       }
-      onInputChange={[Function]}
       text="/test/file"
     />
     <br />

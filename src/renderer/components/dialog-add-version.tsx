@@ -6,7 +6,9 @@ import * as React from 'react';
 import * as semver from 'semver';
 
 import { NpmVersion } from '../../interfaces';
+import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
+import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 export interface AddVersionDialogProps {
@@ -16,7 +18,7 @@ export interface AddVersionDialogProps {
 export interface AddVersionDialogState {
   isValidElectron: boolean;
   isValidVersion: boolean;
-  file?: File;
+  folderPath?: string;
   version: string;
 }
 
@@ -39,8 +41,15 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
-    this.onChangeFile = this.onChangeFile.bind(this);
     this.onChangeVersion = this.onChangeVersion.bind(this);
+
+    ipcRendererManager.on(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, (_event, [file]) => {
+      this.setFolderPath(file);
+    });
+  }
+
+  public componentWillUnmount() {
+    ipcRendererManager.removeAllListeners(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
   }
 
   /**
@@ -48,16 +57,11 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
-    const { files } = event.target as any;
+  public async setFolderPath(folderPath: string) {
     const { binaryManager } = this.props.appState;
-    const file = files && files[0] ? files[0] : undefined;
+    const isValidElectron = !!await binaryManager.getIsDownloaded('custom', folderPath);
 
-    const isValidElectron = !!(file
-      && file.path
-      && await binaryManager.getIsDownloaded('custom', file.path));
-
-    this.setState({ file, isValidElectron });
+    this.setState({ folderPath, isValidElectron });
   }
 
   public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
@@ -67,7 +71,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     this.setState({
       version,
       isValidVersion,
-     });
+    });
   }
 
   /**
@@ -76,18 +80,18 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    * @returns {Promise<void>}
    */
   public async onSubmit(): Promise<void> {
-    const { file, version } = this.state;
+    const { folderPath, version } = this.state;
 
-    if (!file) return;
+    if (!folderPath) return;
 
-    const name = file.path
+    const name = folderPath
       .slice(-20)
       .split(path.sep)
       .slice(1)
       .join(path.sep);
 
     const toAdd: NpmVersion = {
-      localPath: file.path,
+      localPath: folderPath,
       version,
       name
     };
@@ -129,12 +133,16 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
 
   public render() {
     const { isAddVersionDialogShowing } = this.props.appState;
-    const inputProps = { webkitdirectory: 'true' };
-    const { file } = this.state;
+    const inputProps = {
+      onClick: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+        e.preventDefault();
+        ipcRendererManager.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+      }
+    };
+    const { folderPath } = this.state;
 
-    const text = file && file.path
-      ? file.path
-      : `Select the folder containing ${getElectronNameForPlatform()}...`;
+    const text = folderPath ||
+      `Select the folder containing ${getElectronNameForPlatform()}...`;
 
     return (
       <Dialog
@@ -145,7 +153,6 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       >
         <div className='bp3-dialog-body'>
           <FileInput
-            onInputChange={this.onChangeFile}
             id='custom-electron-version'
             inputProps={inputProps as any}
             text={text}
@@ -163,9 +170,9 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
   }
 
   private renderPath(): JSX.Element | null {
-    const { file, isValidElectron } = this.state;
+    const { folderPath, isValidElectron } = this.state;
 
-    if (!file || !file.path) return null;
+    if (!folderPath) return null;
 
     const info = isValidElectron
       ? `We found an ${getElectronNameForPlatform()} in this folder.`
@@ -208,7 +215,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       isValidElectron: false,
       isValidVersion: false,
       version: '',
-      file: undefined
+      folderPath: undefined
     });
   }
 }

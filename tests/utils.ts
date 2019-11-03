@@ -13,3 +13,7 @@ export function resetPlatform() {
     writable: true
   });
 }
+
+export function flushPromises() {
+  return new Promise((resolve) => setImmediate(resolve));
+}
