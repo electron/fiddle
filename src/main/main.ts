@@ -68,7 +68,7 @@ export function main() {
   }
 
   // Set the app's name
-  app.setName('Electron Fiddle');
+  app.name = 'Electron Fiddle';
 
   // Ensure that there's only ever one Fiddle running
   listenForProtocolHandler();
