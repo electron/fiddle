@@ -17,8 +17,8 @@ export function setupDialogs() {
     showConfirmationDialog(args);
   });
 
-  ipcMainManager.on(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, async (_event) => {
-    await showOpenDialog(_event);
+  ipcMainManager.on(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, async (event) => {
+    await showOpenDialog(event);
   });
 
 }
