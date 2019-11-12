@@ -7,7 +7,7 @@ import { isDevMode } from '../utils/devmode';
  * @returns {Promise<void>}
  */
 export async function setupDevTools(): Promise<void> {
-  if (!isDevMode) return;
+  if (!isDevMode()) return;
 
   const {
     default: installExtension,
