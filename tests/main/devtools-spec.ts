@@ -35,4 +35,20 @@ describe('devtools', () => {
 
     expect(devtools.default).toHaveBeenCalledTimes(1);
   });
+
+  it('catch error in setting up developer tools', async (done) => {
+    const devtools = require('electron-devtools-installer');
+    // throw devtool erros
+    devtools.default.mockRejectedValue(new Error('devtool error'));
+    Object.defineProperty(process, 'defaultApp', {
+      value: true,
+      writable: true
+    });
+    try {
+      await setupDevTools();
+      done();
+    } catch (e) {
+      expect(e).toMatch('error');
+    }
+  });
 });
