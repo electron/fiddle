@@ -7,7 +7,7 @@ jest.mock('electron-devtools-installer', () => ({
 }));
 
 describe('devtools', () => {
-  const old = (process as any).defaultApp;
+  const old = (process as any).defaultApp; // for tsconfig error
 
   afterEach(() => {
     Object.defineProperty(process, 'defaultApp', { value: old });
