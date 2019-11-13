@@ -1,13 +1,5 @@
 import { setupDevTools } from '../../src/main/devtools';
 
-let mockIsDevMode = false;
-
-jest.mock('../../src/utils/devmode', () => ({
-  get isDevMode() {
-    return mockIsDevMode;
-  }
-}));
-
 jest.mock('electron-devtools-installer', () => ({
   default: jest.fn(),
   REACT_DEVELOPER_TOOLS: 'REACT_DEVELOPER_TOOLS',
@@ -15,18 +7,30 @@ jest.mock('electron-devtools-installer', () => ({
 }));
 
 describe('devtools', () => {
+  const old = (process as any).defaultApp;
+
+  afterEach(() => {
+    Object.defineProperty(process, 'defaultApp', { value: old });
+  });
+
   it('does not set up developer tools if not in dev mode', () => {
     const devtools = require('electron-devtools-installer');
-
+    Object.defineProperty(process, 'defaultApp', {
+      value: undefined,
+      writable: true
+    });
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(0);
   });
 
-  it('sets up developer tools if not in dev mode', () => {
+  it('sets up developer tools if in dev mode', () => {
     const devtools = require('electron-devtools-installer');
 
-    mockIsDevMode = true;
+    Object.defineProperty(process, 'defaultApp', {
+      value: true,
+      writable: true
+    });
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(1);
