@@ -1,4 +1,6 @@
 import { setupDevTools } from '../../src/main/devtools';
+import { isDevMode } from '../../src/utils/devmode';
+jest.mock('../../src/utils/devmode');
 
 jest.mock('electron-devtools-installer', () => ({
   default: jest.fn(),
@@ -7,18 +9,9 @@ jest.mock('electron-devtools-installer', () => ({
 }));
 
 describe('devtools', () => {
-  const old = (process as any).defaultApp; // for tsconfig error
-
-  afterEach(() => {
-    Object.defineProperty(process, 'defaultApp', { value: old });
-  });
-
   it('does not set up developer tools if not in dev mode', () => {
     const devtools = require('electron-devtools-installer');
-    Object.defineProperty(process, 'defaultApp', {
-      value: undefined,
-      writable: true
-    });
+    (isDevMode as jest.Mock).mockReturnValue(false);
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(0);
@@ -26,11 +19,7 @@ describe('devtools', () => {
 
   it('sets up developer tools if in dev mode', () => {
     const devtools = require('electron-devtools-installer');
-
-    Object.defineProperty(process, 'defaultApp', {
-      value: true,
-      writable: true
-    });
+    (isDevMode as jest.Mock).mockReturnValue(true);
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(1);
@@ -38,12 +27,10 @@ describe('devtools', () => {
 
   it('catch error in setting up developer tools', async (done) => {
     const devtools = require('electron-devtools-installer');
-    // throw devtool erros
+    // throw devtool error
     devtools.default.mockRejectedValue(new Error('devtool error'));
-    Object.defineProperty(process, 'defaultApp', {
-      value: true,
-      writable: true
-    });
+    (isDevMode as jest.Mock).mockReturnValue(true);
+
     try {
       await setupDevTools();
       done();
