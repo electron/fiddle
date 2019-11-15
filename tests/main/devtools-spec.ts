@@ -1,12 +1,6 @@
 import { setupDevTools } from '../../src/main/devtools';
-
-let mockIsDevMode = false;
-
-jest.mock('../../src/utils/devmode', () => ({
-  get isDevMode() {
-    return mockIsDevMode;
-  }
-}));
+import { isDevMode } from '../../src/utils/devmode';
+jest.mock('../../src/utils/devmode');
 
 jest.mock('electron-devtools-installer', () => ({
   default: jest.fn(),
@@ -17,18 +11,31 @@ jest.mock('electron-devtools-installer', () => ({
 describe('devtools', () => {
   it('does not set up developer tools if not in dev mode', () => {
     const devtools = require('electron-devtools-installer');
-
+    (isDevMode as jest.Mock).mockReturnValue(false);
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(0);
   });
 
-  it('sets up developer tools if not in dev mode', () => {
+  it('sets up developer tools if in dev mode', () => {
     const devtools = require('electron-devtools-installer');
-
-    mockIsDevMode = true;
+    (isDevMode as jest.Mock).mockReturnValue(true);
     setupDevTools();
 
     expect(devtools.default).toHaveBeenCalledTimes(1);
+  });
+
+  it('catch error in setting up developer tools', async (done) => {
+    const devtools = require('electron-devtools-installer');
+    // throw devtool error
+    devtools.default.mockRejectedValue(new Error('devtool error'));
+    (isDevMode as jest.Mock).mockReturnValue(true);
+
+    try {
+      await setupDevTools();
+      done();
+    } catch (e) {
+      expect(e).toMatch('error');
+    }
   });
 });
