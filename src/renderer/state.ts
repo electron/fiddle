@@ -24,6 +24,7 @@ import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
+import { Bisector } from './bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
 import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
@@ -66,7 +67,6 @@ export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
-  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
@@ -74,39 +74,43 @@ export class AppState {
   @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
-      || [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ];
+    || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
   @observable public statesToShow: Array<ElectronVersionState> =
-      this.retrieve('statesToShow') as Array<ElectronVersionState>
-      || [ ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown ];
+    this.retrieve('statesToShow') as Array<ElectronVersionState>
+    || [ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown];
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
-
-  @observable public binaryManager: BinaryManager = new BinaryManager();
+  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
-  @observable public isPublishing: boolean = false;
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
-  @observable public isUpdatingElectronVersions = false;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public confirmationDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
   @observable public confirmationPromptLastResult: boolean | null = null;
-  @observable public isRunning = false;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
+  @observable public binaryManager: BinaryManager = new BinaryManager();
+  @observable public Bisector: Bisector | undefined;
+
+  @observable public isPublishing: boolean = false;
+  @observable public isRunning: boolean = false;
+  @observable public isUnsaved: boolean = false;
+  @observable public isUpdatingElectronVersions: boolean = false;
 
   // -- Various "isShowing" settings ------------------
+  @observable public isBisectCommandShowing: boolean;
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
   @observable public isWarningDialogShowing: boolean = false;
   @observable public isConfirmationPromptShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
-  @observable public isUnsaved: boolean = false;
+  @observable public isBisectDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
@@ -128,15 +132,18 @@ export class AppState {
     this.setVersion = this.setVersion.bind(this);
     this.showTour = this.showTour.bind(this);
     this.signOutGitHub = this.signOutGitHub.bind(this);
+    this.toggleBisectCommands = this.toggleBisectCommands.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.toggleConsole = this.toggleConsole.bind(this);
     this.clearConsole = this.clearConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
+    this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
+    ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -242,6 +249,13 @@ export class AppState {
     this.output = [];
   }
 
+  @action public toggleBisectCommands() {
+    // guard against hiding the commands when executing a bisect
+    if (!this.Bisector && !this.isBisectDialogShowing) {
+      this.isBisectCommandShowing = !this.isBisectCommandShowing;
+    }
+  }
+
   @action public toggleAddVersionDialog() {
     this.isAddVersionDialogShowing = !this.isAddVersionDialogShowing;
   }
@@ -260,6 +274,10 @@ export class AppState {
     if (this.isWarningDialogShowing) {
       this.warningDialogLastResult = null;
     }
+  }
+
+  @action public toggleBisectDialog() {
+    this.isBisectDialogShowing = !this.isBisectDialogShowing;
   }
 
   @action public toggleConfirmationPromptDialog() {
@@ -318,12 +336,12 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
- /**
-  * Remove a version of Electron
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Remove a version of Electron
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async removeVersion(input: string) {
     const version = normalizeVersion(input);
     const release = this.versions[version];
@@ -357,12 +375,12 @@ export class AppState {
     this.updateDownloadedVersionState();
   }
 
- /**
-  * Download a version of Electron.
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Download a version of Electron.
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async downloadVersion(input: string) {
     const version = normalizeVersion(input);
     console.log(`State: Downloading Electron ${version}`);
@@ -386,12 +404,12 @@ export class AppState {
     }
   }
 
- /**
-  * Select a version of Electron (and download it if necessary).
-  *
-  * @param {string} input
-  * @returns {Promise<void>}
-  */
+  /**
+   * Select a version of Electron (and download it if necessary).
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
 
@@ -436,11 +454,11 @@ export class AppState {
     await this.downloadVersion(version);
   }
 
- /**
-  * Go and check which versions have already been downloaded.
-  *
-  * @returns {Promise<void>}
-  */
+  /**
+   * Go and check which versions have already been downloaded.
+   *
+   * @returns {Promise<void>}
+   */
   @action public async updateDownloadedVersionState(): Promise<void> {
     const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     const updatedVersions = { ...this.versions };
@@ -577,7 +595,7 @@ export class AppState {
    */
   @action public showMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics([ ...currentlyVisible, id ]);
+    this.setVisibleMosaics([...currentlyVisible, id]);
   }
 
   /**

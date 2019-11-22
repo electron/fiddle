@@ -1,0 +1,413 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BisectDialog component renders 1`] = `
+<Blueprint3.Dialog
+  canOutsideClickClose={true}
+  className="dialog-add-version"
+  isOpen={false}
+  onClose={[Function]}
+  title="Start a bisect session"
+>
+  <div
+    className="bp3-dialog-body"
+  >
+    <Component>
+      Earliest Version
+      <Blueprint3.Select
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "4.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "5.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          fill={true}
+          icon="saved"
+          text="v4.0.0"
+        />
+      </Blueprint3.Select>
+    </Component>
+    <Component>
+      Latest Version
+      <Blueprint3.Select
+        disabled={false}
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          disabled={false}
+          fill={true}
+          icon="small-minus"
+          text=""
+        />
+      </Blueprint3.Select>
+    </Component>
+  </div>
+  <div
+    className="bp3-dialog-footer"
+  >
+    <div
+      className="bp3-dialog-footer-actions"
+    >
+      <Blueprint3.Button
+        disabled={true}
+        icon="play"
+        key="submit"
+        onClick={[Function]}
+        text="Begin"
+      />
+      <Blueprint3.Button
+        icon="cross"
+        key="cancel"
+        onClick={[Function]}
+        text="Cancel"
+      />
+    </div>
+  </div>
+</Blueprint3.Dialog>
+`;
+
+exports[`BisectDialog component renders 2`] = `
+<Blueprint3.Dialog
+  canOutsideClickClose={true}
+  className="dialog-add-version"
+  isOpen={false}
+  onClose={[Function]}
+  title="Start a bisect session"
+>
+  <div
+    className="bp3-dialog-body"
+  >
+    <Component>
+      Earliest Version
+      <Blueprint3.Select
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "4.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "5.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          fill={true}
+          icon="small-minus"
+          text=""
+        />
+      </Blueprint3.Select>
+    </Component>
+    <Component>
+      Latest Version
+      <Blueprint3.Select
+        disabled={true}
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "4.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "5.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          disabled={true}
+          fill={true}
+          icon="small-minus"
+          text=""
+        />
+      </Blueprint3.Select>
+    </Component>
+  </div>
+  <div
+    className="bp3-dialog-footer"
+  >
+    <div
+      className="bp3-dialog-footer-actions"
+    >
+      <Blueprint3.Button
+        disabled={true}
+        icon="play"
+        key="submit"
+        onClick={[Function]}
+        text="Begin"
+      />
+      <Blueprint3.Button
+        icon="cross"
+        key="cancel"
+        onClick={[Function]}
+        text="Cancel"
+      />
+    </div>
+  </div>
+</Blueprint3.Dialog>
+`;
+
+exports[`BisectDialog component renders 3`] = `
+<Blueprint3.Dialog
+  canOutsideClickClose={true}
+  className="dialog-add-version"
+  isOpen={false}
+  onClose={[Function]}
+  title="Start a bisect session"
+>
+  <div
+    className="bp3-dialog-body"
+  >
+    <Component>
+      Earliest Version
+      <Blueprint3.Select
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "4.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "5.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          fill={true}
+          icon="saved"
+          text="v4.0.0"
+        />
+      </Blueprint3.Select>
+    </Component>
+    <Component>
+      Latest Version
+      <Blueprint3.Select
+        disabled={false}
+        filterable={true}
+        itemPredicate={[Function]}
+        itemRenderer={[Function]}
+        items={
+          Array [
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "1.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "2.0.0",
+            },
+            Object {
+              "source": "local",
+              "state": "ready",
+              "version": "3.0.0",
+            },
+          ]
+        }
+        noResults={
+          <Blueprint3.MenuItem
+            disabled={true}
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="No results."
+          />
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          disabled={false}
+          fill={true}
+          icon="small-minus"
+          text=""
+        />
+      </Blueprint3.Select>
+    </Component>
+  </div>
+  <div
+    className="bp3-dialog-footer"
+  >
+    <div
+      className="bp3-dialog-footer-actions"
+    >
+      <Blueprint3.Button
+        disabled={true}
+        icon="play"
+        key="submit"
+        onClick={[Function]}
+        text="Begin"
+      />
+      <Blueprint3.Button
+        icon="cross"
+        key="cancel"
+        onClick={[Function]}
+        text="Cancel"
+      />
+    </div>
+  </div>
+</Blueprint3.Dialog>
+`;

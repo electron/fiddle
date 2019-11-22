@@ -144,7 +144,7 @@ function getShowMeMenuItem(key: string, item: string | Templates): MenuItemConst
   if (typeof item === 'string') {
     return {
       label: key,
-      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [ key ])
+      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key])
     };
   }
 
@@ -160,10 +160,10 @@ function getShowMeMenu(): MenuItemConstructorOptions {
   const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(SHOW_ME_TEMPLATES)
     .map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
 
-    return {
-      label: 'Show Me',
-      submenu: showMeMenu
-    };
+  return {
+    label: 'Show Me',
+    submenu: showMeMenu
+  };
 }
 
 /**
@@ -251,11 +251,16 @@ export function setupMenu() {
         item.submenu.push({ type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }); // Add zooming actions
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Soft Wrap',
-          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'wordWrap' ]),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, ['wordWrap']),
         });
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Mini Map',
-          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, [ 'minimap.enabled' ]),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, ['minimap.enabled']),
+        });
+        item.submenu.push({ type: 'separator' }, {
+          label: 'Toggle Bisect Helper',
+          click: () => ipcMainManager.send(IpcEvents.BISECT_COMMANDS_TOGGLE),
+          accelerator: 'CommandorControl+Shift+B',
         });
       }
 

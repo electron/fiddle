@@ -14,12 +14,19 @@ header {
   padding: 10px;
   box-sizing: border-box;
   font-family: @fonts-common;
+  overflow-x: scroll;
+  overflow-y: hidden;
+
+  &::-webkit-scrollbar {
+    height: 5px;
+  }
 
   button,
   input,
   select {
     -webkit-app-region: no-drag;
     margin-bottom: 0;
+    white-space: nowrap;
   }
 
   select {

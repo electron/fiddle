@@ -1,4 +1,4 @@
-import { Button, MenuItem } from '@blueprintjs/core';
+import { Button, ButtonGroup, MenuItem } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -71,7 +71,7 @@ export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) =
  */
 export const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
-      return null;
+    return null;
   }
 
   return (
@@ -94,6 +94,30 @@ export interface VersionChooserState {
 export interface VersionChooserProps {
   appState: AppState;
 }
+
+
+export const getVersionsFromAppState = (appState: AppState) => {
+  const { versions, versionsToShow, statesToShow } = appState;
+
+  return sortedElectronMap<ElectronVersion>(versions, (_key, item) => item)
+    .filter((item) => {
+      if (!item) {
+        return false;
+      }
+
+      // Check if we want to show the version
+      if (!versionsToShow.includes(getReleaseChannel(item))) {
+        return false;
+      }
+
+      // Check if we want to show the state
+      if (!statesToShow.includes(item.state)) {
+        return false;
+      }
+
+      return true;
+    });
+};
 
 /**
  * A dropdown allowing the selection of Electron versions. The actual
@@ -120,48 +144,29 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
     this.props.appState.setVersion(version);
   }
 
-  public getItems(): Array<ElectronVersion> {
-    const { versions, versionsToShow, statesToShow } = this.props.appState;
-
-    return sortedElectronMap<ElectronVersion>(versions, (_key, item) => item)
-      .filter((item) => {
-        if (!item) {
-          return false;
-        }
-
-        // Check if we want to show the version
-        if (!versionsToShow.includes(getReleaseChannel(item))) {
-          return false;
-        }
-
-        // Check if we want to show the state
-        if (!statesToShow.includes(item.state)) {
-          return false;
-        }
-
-        return true;
-      });
-  }
-
   public render() {
-    const { currentElectronVersion } = this.props.appState;
+    const { currentElectronVersion, Bisector } = this.props.appState;
     const { version } = currentElectronVersion;
 
     return (
-      <ElectronVersionSelect
-        filterable={true}
-        items={this.getItems()}
-        itemRenderer={renderItem}
-        itemPredicate={filterItem}
-        onItemSelect={this.onItemSelect}
-        noResults={<MenuItem disabled={true} text='No results.' />}
-      >
-        <Button
-          className='version-chooser'
-          text={`Electron v${version}`}
-          icon={getItemIcon(currentElectronVersion)}
-        />
-      </ElectronVersionSelect>
+      <ButtonGroup>
+        <ElectronVersionSelect
+          filterable={true}
+          items={getVersionsFromAppState(this.props.appState)}
+          itemRenderer={renderItem}
+          itemPredicate={filterItem}
+          onItemSelect={this.onItemSelect}
+          noResults={<MenuItem disabled={true} text='No results.' />}
+          disabled={!!Bisector}
+        >
+          <Button
+            className='version-chooser'
+            text={`Electron v${version}`}
+            icon={getItemIcon(currentElectronVersion)}
+            disabled={!!Bisector}
+          />
+        </ElectronVersionSelect>
+      </ButtonGroup>
     );
   }
 }
