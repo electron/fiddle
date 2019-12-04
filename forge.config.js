@@ -7,10 +7,9 @@ const packageJson = require('./package.json')
 const { version } = packageJson
 const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
-module.exports = {
+const config = {
   hooks: {
-    generateAssets: require('./tools/generateAssets'),
-    postPackage: require('./tools/notarize')
+    generateAssets: require('./tools/generateAssets')
   },
   packagerConfig: {
     name: 'Electron Fiddle',
@@ -101,3 +100,31 @@ module.exports = {
     }
   ]
 }
+
+function notarizeMaybe() {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
+  if (!process.env.CI) {
+    console.log(`Not in CI, skipping notarization`);
+    return;
+  }
+
+  if (!process.env.APPLE_ID || !process.env.APPLE_ID_PASSWORD) {
+    console.warn('Should be notarizing, but environment variables APPLE_ID or APPLE_ID_PASSWORD are missing!');
+    return;
+  }
+
+  config.packagerConfig.osxNotarize = {
+    appBundleId: 'com.electron.fiddle',
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_ID_PASSWORD,
+    ascProvider: 'LT94ZKYDCJ'
+  }
+}
+
+notarizeMaybe()
+
+// Finally, export it
+module.exports = config
