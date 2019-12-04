@@ -83,6 +83,7 @@
     "chokidar": "^3.2.2",
     "coveralls": "^3.0.7",
     "electron": "7.0.0",
+    "electron-notarize": "^0.2.1",
     "enzyme": "^3.10.0",
     "enzyme-adapter-react-16": "^1.15.1",
     "enzyme-to-json": "^3.4.3",

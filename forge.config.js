@@ -9,7 +9,8 @@ const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
 module.exports = {
   hooks: {
-    generateAssets: require('./tools/generateAssets')
+    generateAssets: require('./tools/generateAssets'),
+    postPackage: require('./tools/notarize')
   },
   packagerConfig: {
     name: 'Electron Fiddle',
@@ -32,7 +33,12 @@ module.exports = {
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
-      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)'
+      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
+      'hardened-runtime': true,
+      'gatekeeper-assess': false,
+      'entitlements': 'static/entitlements.plist',
+      'entitlements-inherit': 'static/entitlements.plist',
+      'signature-flags': 'library'
     }
   },
   makers: [
