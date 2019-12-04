@@ -7,7 +7,7 @@ const packageJson = require('./package.json')
 const { version } = packageJson
 const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
-module.exports = {
+const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets')
   },
@@ -32,7 +32,12 @@ module.exports = {
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
-      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)'
+      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
+      'hardened-runtime': true,
+      'gatekeeper-assess': false,
+      'entitlements': 'static/entitlements.plist',
+      'entitlements-inherit': 'static/entitlements.plist',
+      'signature-flags': 'library'
     }
   },
   makers: [
@@ -95,3 +100,31 @@ module.exports = {
     }
   ]
 }
+
+function notarizeMaybe() {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
+  if (!process.env.CI) {
+    console.log(`Not in CI, skipping notarization`);
+    return;
+  }
+
+  if (!process.env.APPLE_ID || !process.env.APPLE_ID_PASSWORD) {
+    console.warn('Should be notarizing, but environment variables APPLE_ID or APPLE_ID_PASSWORD are missing!');
+    return;
+  }
+
+  config.packagerConfig.osxNotarize = {
+    appBundleId: 'com.electron.fiddle',
+    appleId: process.env.APPLE_ID,
+    appleIdPassword: process.env.APPLE_ID_PASSWORD,
+    ascProvider: 'LT94ZKYDCJ'
+  }
+}
+
+notarizeMaybe()
+
+// Finally, export it
+module.exports = config
