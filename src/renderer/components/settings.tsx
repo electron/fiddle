@@ -7,11 +7,13 @@ import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
 import { ExecutionSettings } from './settings-execution';
 import { GeneralSettings } from './settings-general';
+import { NodeSettings } from './settings-node';
 
 enum SettingsSections {
   General = 'General',
   Electron = 'Electron',
   Execution = 'Execution',
+  Node = 'Node',
   Credits = 'Credits'
 }
 
@@ -19,6 +21,7 @@ const settingsSections = [
   SettingsSections.General,
   SettingsSections.Electron,
   SettingsSections.Execution,
+  SettingsSections.Node,
   SettingsSections.Credits
 ];
 
@@ -76,6 +79,10 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     if (section === SettingsSections.Execution) {
       return <ExecutionSettings appState={appState} />;
+    }
+
+    if (section === SettingsSections.Node) {
+      return <NodeSettings appState={appState} />;
     }
 
     if (section === SettingsSections.Credits) {
@@ -144,6 +151,8 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
       return 'floppy-disk';
     } else if (section === SettingsSections.Execution) {
       return 'play';
+    } else if (section === SettingsSections.Node) {
+      return 'ninja';
     }
 
     return 'cog';

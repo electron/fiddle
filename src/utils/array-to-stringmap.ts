@@ -1,4 +1,4 @@
-import { ElectronVersion } from '../interfaces';
+import { ElectronVersion, NodeVersion } from '../interfaces';
 import { normalizeVersion } from './normalize-version';
 
 /**
@@ -8,9 +8,9 @@ import { normalizeVersion } from './normalize-version';
  * @param {Array<ElectronVersion>} input
  * @returns {Record<string, ElectronVersion>}
  */
-export function arrayToStringMap(
-  input: Array<ElectronVersion>
-): Record<string, ElectronVersion> {
+export function arrayToStringMap<T>(
+  input: Array<ElectronVersion | NodeVersion>
+): Record<string, T> {
   const output = {};
 
   input.forEach((version) => {

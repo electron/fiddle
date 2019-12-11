@@ -54,6 +54,12 @@ export class Commands extends React.Component<CommandsProps, {}> {
               text='Console'
               onClick={appState.toggleConsole}
             />
+            <Button
+              active={appState.isNodeMode}
+              icon='ninja'
+              text='Node.js'
+              onClick={() => (appState.isNodeMode = !appState.isNodeMode)}
+            />
             <EditorDropdown appState={appState} />
           </ControlGroup>
         </div>
@@ -63,5 +69,15 @@ export class Commands extends React.Component<CommandsProps, {}> {
         </div>
       </div>
     );
+  }
+
+  public getVersionChooser() {
+    const { appState } = this.props;
+
+    if (appState.isNodeMode) {
+      return <VersionChooser appState={appState} />;
+    } else {
+      return <VersionChooser appState={appState} />;
+    }
   }
 }
