@@ -6,7 +6,7 @@ import * as React from 'react';
 import { ElectronVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
 import { AppState } from '../state';
-import { filterItem, getItemIcon, getVersionsFromAppState, renderItem } from './commands-version-chooser';
+import { filterItem, getItemIcon, getVersionsFromAppState, renderItem } from './commands-electron-chooser';
 
 const ElectronVersionSelect = Select.ofType<ElectronVersion>();
 

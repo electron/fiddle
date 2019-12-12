@@ -4,7 +4,7 @@ export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
 
-export enum ElectronVersionState {
+export enum VersionState {
   ready = 'ready',
   downloading = 'downloading',
   unknown = 'unknown'
@@ -20,6 +20,11 @@ export interface NpmVersion {
   localPath?: string;
 }
 
+export interface NodeVersion {
+  version: string;
+  state: VersionState;
+}
+
 export interface EditorValues {
   main: string;
   renderer: string;
@@ -29,7 +34,7 @@ export interface EditorValues {
 }
 
 export interface ElectronVersion extends NpmVersion {
-  state: ElectronVersionState;
+  state: VersionState;
   source: ElectronVersionSource;
 }
 

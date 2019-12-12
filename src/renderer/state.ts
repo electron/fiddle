@@ -8,7 +8,7 @@ import {
   EditorId,
   ElectronVersion,
   ElectronVersionSource,
-  ElectronVersionState,
+  VersionState,
   MosaicId,
   NpmVersion,
   OutputEntry,
@@ -42,6 +42,7 @@ import {
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
+const defaultNodeVersion = '12.0.0';
 
 /**
  * Editors exist outside of React's world. To make things *a lot*
@@ -66,6 +67,7 @@ window.ElectronFiddle = window.ElectronFiddle || {
 export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
+  @observable public nodeVersion: string = defaultNodeVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
   @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
@@ -75,9 +77,9 @@ export class AppState {
   @observable public versionsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
     || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
-  @observable public statesToShow: Array<ElectronVersionState> =
-    this.retrieve('statesToShow') as Array<ElectronVersionState>
-    || [ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown];
+  @observable public statesToShow: Array<VersionState> =
+    this.retrieve('statesToShow') as Array<VersionState>
+    || [VersionState.downloading, VersionState.ready, VersionState.unknown];
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
@@ -210,6 +212,18 @@ export class AppState {
       return this.versions[this.version];
     } else {
       return this.versions[defaultVersion];
+    }
+  }
+
+  /**
+   * Returns the current NodeVersion or the first
+   * one that can be found.
+   */
+  @computed get currentNodeVersion(): NodeVersion {
+    if (this.nodeVersions[this.nodeVersion]) {
+      return this.nodeVersions[this.nodeVersion];
+    } else {
+      return this.nodeVersions[defaultNodeVersion];
     }
   }
 
@@ -368,7 +382,7 @@ export class AppState {
       saveLocalVersions(versionsAsArray);
     } else {
       await this.binaryManager.remove(version);
-      updatedVersions[version].state = ElectronVersionState.unknown;
+      updatedVersions[version].state = VersionState.unknown;
     }
 
     this.versions = updatedVersions;
@@ -394,7 +408,7 @@ export class AppState {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
-      updatedVersions[version].state = ElectronVersionState.downloading;
+      updatedVersions[version].state = VersionState.downloading;
       this.versions = updatedVersions;
 
       await this.binaryManager.setup(version);
@@ -402,6 +416,27 @@ export class AppState {
     } else {
       console.log(`State: Version ${version} already downloaded, doing nothing.`);
     }
+  }
+
+  /**
+   * Select a version of Node.js (and download fi necessary)
+   *
+   * @param {string} input
+   * @returns {Promise<void>}
+   */
+  @action public async setNodeVersion(input: string) {
+    const version = normalizeVersion(input);
+
+    if (!this.nodeVersion[version]) {
+      console.warn(`State: Called setNodeVersion() with ${version}, which does not exist.`);
+      this.setVersion(this.nodeVersions[0].version);
+
+      return;
+    }
+
+    console.log(`State: Switching to Node ${version}`);
+
+    this.nodeVersion = version;
   }
 
   /**
@@ -465,7 +500,7 @@ export class AppState {
 
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = ElectronVersionState.ready;
+        updatedVersions[version].state = VersionState.ready;
       }
     });
     console.log(`State: Updated version state`, updatedVersions);

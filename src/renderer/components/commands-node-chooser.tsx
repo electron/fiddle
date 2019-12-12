@@ -3,13 +3,12 @@ import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../interfaces';
+import { ElectronVersion, NodeVersion, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
-import { sortedElectronMap } from '../../utils/sorted-electron-map';
+import { sortedNodeMap } from '../../utils/sorted-map';
 import { AppState } from '../state';
-import { getReleaseChannel } from '../versions';
 
-const ElectronVersionSelect = Select.ofType<ElectronVersion>();
+const ElectronVersionSelect = Select.ofType<NodeVersion>();
 
 /**
  * Helper method: Returns the <Select /> label for an Electron
@@ -18,19 +17,15 @@ const ElectronVersionSelect = Select.ofType<ElectronVersion>();
  * @param {ElectronVersion} { source, state }
  * @returns {string}
  */
-export function getItemLabel({ source, state, name }: ElectronVersion): string {
+export function getItemLabel({ state }: NodeVersion): string {
   let label = '';
 
-  if (source === ElectronVersionSource.local) {
-    label = name || 'Local';
-  } else {
-    if (state === ElectronVersionState.unknown) {
-      label = `Not downloaded`;
-    } else if (state === ElectronVersionState.ready) {
-      label = `Downloaded`;
-    } else if (state === ElectronVersionState.downloading) {
-      label = `Downloading`;
-    }
+  if (state === VersionState.unknown) {
+    label = `Not downloaded`;
+  } else if (state === VersionState.ready) {
+    label = `Downloaded`;
+  } else if (state === VersionState.downloading) {
+    label = `Downloading`;
   }
 
   return label;
@@ -43,7 +38,7 @@ export function getItemLabel({ source, state, name }: ElectronVersion): string {
  * @param {ElectronVersion} { state }
  * @returns
  */
-export function getItemIcon({ state }: ElectronVersion) {
+export function getItemIcon({ state }: NodeVersion) {
   return state === 'ready'
     ? 'saved'
     : state === 'downloading' ? 'cloud-download' : 'cloud';
@@ -57,7 +52,7 @@ export function getItemIcon({ state }: ElectronVersion) {
  * @param {ElectronVersion} { version }
  * @returns
  */
-export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
+export const filterItem: ItemPredicate<NodeVersion> = (query, { version }) => {
   return version.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -69,7 +64,7 @@ export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) =
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-export const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<NodeVersion> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
     return null;
   }
@@ -97,26 +92,10 @@ export interface VersionChooserProps {
 
 
 export const getVersionsFromAppState = (appState: AppState) => {
-  const { versions, versionsToShow, statesToShow } = appState;
+  const { nodeVersions } = appState;
 
-  return sortedElectronMap<ElectronVersion>(versions, (_key, item) => item)
-    .filter((item) => {
-      if (!item) {
-        return false;
-      }
-
-      // Check if we want to show the version
-      if (!versionsToShow.includes(getReleaseChannel(item))) {
-        return false;
-      }
-
-      // Check if we want to show the state
-      if (!statesToShow.includes(item.state)) {
-        return false;
-      }
-
-      return true;
-    });
+  return sortedNodeMap<NodeVersion>(nodeVersions, (_key, item) => item)
+    .filter((item) => !!item);
 };
 
 /**
@@ -127,7 +106,7 @@ export const getVersionsFromAppState = (appState: AppState) => {
  * @extends {React.Component<VersionChooserProps, VersionChooserState>}
  */
 @observer
-export class VersionChooser extends React.Component<VersionChooserProps, VersionChooserState> {
+export class NodeVersionChooser extends React.Component<VersionChooserProps, VersionChooserState> {
   constructor(props: VersionChooserProps) {
     super(props);
 
@@ -141,12 +120,12 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
    * @param {React.ChangeEvent<HTMLSelectElement>} event
    */
   public onItemSelect({ version }: ElectronVersion) {
-    this.props.appState.setVersion(version);
+    this.props.appState.setNodeVersion(version);
   }
 
   public render() {
-    const { currentElectronVersion, Bisector } = this.props.appState;
-    const { version } = currentElectronVersion;
+    const { currentNodeVersion, Bisector } = this.props.appState;
+    const { version } = currentNodeVersion;
 
     return (
       <ButtonGroup>
@@ -161,8 +140,8 @@ export class VersionChooser extends React.Component<VersionChooserProps, Version
         >
           <Button
             className='version-chooser'
-            text={`Electron v${version}`}
-            icon={getItemIcon(currentElectronVersion)}
+            text={`Node v${version}`}
+            icon={getItemIcon(currentNodeVersion)}
             disabled={!!Bisector}
           />
         </ElectronVersionSelect>

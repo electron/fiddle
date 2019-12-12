@@ -1,4 +1,4 @@
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, NpmVersion, VersionState } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
@@ -132,7 +132,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     return {
       ...version,
       source: ElectronVersionSource.remote,
-      state: ElectronVersionState.unknown
+      state: VersionState.unknown
     };
   });
 
@@ -140,7 +140,7 @@ export function getElectronVersions(): Array<ElectronVersion> {
     return {
       ...version,
       source: ElectronVersionSource.local,
-      state: ElectronVersionState.ready
+      state: VersionState.ready
     };
   });
 

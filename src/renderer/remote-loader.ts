@@ -3,7 +3,7 @@ import { when } from 'mobx';
 import { EditorId, EditorValues } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
-import { sortedElectronMap } from '../utils/sorted-electron-map';
+import { sortedElectronMap } from '../utils/sorted-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getContent } from './content';
 import { AppState } from './state';

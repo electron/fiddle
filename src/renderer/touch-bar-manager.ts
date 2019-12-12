@@ -5,9 +5,9 @@ import {
 } from 'electron';
 import { autorun } from 'mobx';
 
-import { ElectronVersion, ElectronVersionState } from '../interfaces';
+import { ElectronVersion, VersionState } from '../interfaces';
 import { getNiceGreeting } from '../utils/nice-greeting';
-import { sortedElectronMap } from '../utils/sorted-electron-map';
+import { sortedElectronMap } from '../utils/sorted-map';
 import { AppState } from './state';
 
 const { TouchBar } = remote;
@@ -26,7 +26,7 @@ const {
  * @returns {string}
  */
 export function getItemIcon(
-  { state }: Partial<ElectronVersion> = { state: ElectronVersionState.unknown }
+  { state }: Partial<ElectronVersion> = { state: VersionState.unknown }
 ) {
   return state === 'ready'
     ? '💾'

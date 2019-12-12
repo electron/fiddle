@@ -6,9 +6,10 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { EditorDropdown } from './commands-editors';
+import { ElectronVersionChooser } from './commands-electron-chooser';
+import { NodeVersionChooser } from './commands-node-chooser';
 import { PublishButton } from './commands-publish-button';
 import { Runner } from './commands-runner';
-import { VersionChooser } from './commands-version-chooser';
 
 export interface CommandsProps {
   appState: AppState;
@@ -35,7 +36,7 @@ export class Commands extends React.Component<CommandsProps, {}> {
       <div className='commands'>
         <div>
           <ControlGroup fill={true} vertical={false}>
-            <VersionChooser appState={appState} />
+            {this.getVersionChooser()}
             <Runner appState={appState} />
           </ControlGroup>
           {
@@ -63,5 +64,15 @@ export class Commands extends React.Component<CommandsProps, {}> {
         </div>
       </div>
     );
+  }
+
+  public getVersionChooser() {
+    const { appState } = this.props;
+
+    if (appState.isNodeMode) {
+      return <NodeVersionChooser appState={appState} />;
+    } else {
+      return <ElectronVersionChooser appState={appState} />;
+    }
   }
 }
