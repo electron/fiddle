@@ -10,7 +10,6 @@ import {
   ElectronVersionSource,
   ElectronVersionState,
   MosaicId,
-  NodeVersion,
   NpmVersion,
   OutputEntry,
   OutputOptions,
@@ -35,14 +34,13 @@ import { activateTheme } from './themes';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
-  getAllElectronVersions,
   getDefaultVersion,
+  getElectronVersions,
   getUpdatedElectronVersions,
-  getUpdatedNodeVersions,
   saveLocalVersions
 } from './versions';
 
-const knownVersions = getAllElectronVersions();
+const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
 
 /**
@@ -83,12 +81,10 @@ export class AppState {
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
-  @observable public isShowingNodeVersions: boolean = !!this.retrieve('isShowingNodeisShowingNode');
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
-  @observable public nodeVersions: Record<string, NodeVersion> = arrayToStringMap([]);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
@@ -118,7 +114,6 @@ export class AppState {
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
-  @observable public isNodeMode: boolean = false;
 
   // -- Editor Values stored when we close the editor ------------------
   @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
@@ -201,7 +196,6 @@ export class AppState {
 
     // Update our known versions
     this.updateElectronVersions();
-    this.updateNodeVersions();
 
     // Make sure the console isn't all empty and sad
     this.pushOutput('Console ready 🔬');
@@ -237,15 +231,6 @@ export class AppState {
     }
 
     this.isUpdatingElectronVersions = false;
-  }
-
-  @action public async updateNodeVersions() {
-    try {
-      const nodeVersions = await getUpdatedNodeVersions();
-      this.nodeVersions = arrayToStringMap(nodeVersions);
-    } catch (error) {
-      console.warn(`State: Could not update Node.js versions`, error);
-    }
   }
 
   @action public async getName() {
@@ -347,7 +332,7 @@ export class AppState {
   @action public addLocalVersion(input: NpmVersion) {
     addLocalVersion(input);
 
-    this.versions = arrayToStringMap(getAllElectronVersions());
+    this.versions = arrayToStringMap(getElectronVersions());
     this.updateDownloadedVersionState();
   }
 

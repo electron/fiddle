@@ -1,4 +1,4 @@
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NodeVersion, NpmVersion } from '../interfaces';
+import { ElectronVersion, ElectronVersionSource, ElectronVersionState, NpmVersion } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
@@ -82,7 +82,7 @@ export const enum VersionKeys {
  * @param {() => Array<NpmVersion>} fallbackMethod
  * @returns {Array<NpmVersion>}
  */
-function getElectronVersions(
+function getVersions(
   key: VersionKeys, fallbackMethod: () => Array<NpmVersion>
 ): Array<NpmVersion> {
   const fromLs = window.localStorage.getItem(key);
@@ -117,7 +117,7 @@ function getElectronVersions(
  * @param {VersionKeys} key
  * @param {Array<NpmVersion} versions
  */
-function saveElectronVersions(key: VersionKeys, versions: Array<NpmVersion>) {
+function saveVersions(key: VersionKeys, versions: Array<NpmVersion>) {
   const stringified = JSON.stringify(versions);
   window.localStorage.setItem(key, stringified);
 }
@@ -127,7 +127,7 @@ function saveElectronVersions(key: VersionKeys, versions: Array<NpmVersion>) {
  *
  * @returns {Array<NpmVersion>}
  */
-export function getAllElectronVersions(): Array<ElectronVersion> {
+export function getElectronVersions(): Array<ElectronVersion> {
   const known: Array<ElectronVersion> = getKnownVersions().map((version) => {
     return {
       ...version,
@@ -171,7 +171,7 @@ export function addLocalVersion(input: NpmVersion): Array<NpmVersion> {
  * @returns {Array<NpmVersion>}
  */
 export function getLocalVersions(): Array<NpmVersion> {
-  const versions = getElectronVersions(VersionKeys.local, () => []);
+  const versions = getVersions(VersionKeys.local, () => []);
 
   return versions;
 }
@@ -190,7 +190,7 @@ export function saveLocalVersions(versions: Array<NpmVersion | ElectronVersion>)
     return true;
   });
 
-  return saveElectronVersions(VersionKeys.local, filteredVersions);
+  return saveVersions(VersionKeys.local, filteredVersions);
 }
 
 /**
@@ -200,7 +200,7 @@ export function saveLocalVersions(versions: Array<NpmVersion | ElectronVersion>)
  * @returns {Array<NpmVersion>}
  */
 export function getKnownVersions(): Array<NpmVersion> {
-  return getElectronVersions(VersionKeys.known, () => require('../../static/releases.json'));
+  return getVersions(VersionKeys.known, () => require('../../static/releases.json'));
 }
 
 /**
@@ -209,7 +209,7 @@ export function getKnownVersions(): Array<NpmVersion> {
  * @param {Array<NpmVersion>} versions
  */
 export function saveKnownVersions(versions: Array<NpmVersion>) {
-  return saveElectronVersions(VersionKeys.known, versions);
+  return saveVersions(VersionKeys.known, versions);
 }
 
 /**
@@ -222,68 +222,20 @@ export function saveKnownVersions(versions: Array<NpmVersion>) {
 export async function getUpdatedElectronVersions(
 ): Promise<Array<ElectronVersion>> {
   try {
-    await fetchElectronVersions();
+    await fetchVersions();
   } catch (error) {
-    console.warn(`Versions: Failed to fetch Electron versions`, { error });
+    console.warn(`Versions: Failed to fetch versions`, { error });
   }
 
-  return getAllElectronVersions();
-}
-
-export async function getUpdatedNodeVersions(): Promise<Array<NodeVersion>> {
-  try {
-    return await fetchNodeVersions();
-  } catch (error) {
-    console.warn(`Versions: Failed to fetch Node.js versions`, { error });
-  }
-
-  return [];
+  return getElectronVersions();
 }
 
 /**
- * Fetch the latest known Node.js versions directly from Node.js.
- *
- * @returns {Promise<Array<NpmVersion>>}
- *
- * let entry = {
- *  "headers": 1,
- *  "linux-arm64": 2,
- *  "linux-x64": 6,
- *  "osx-x64-tar": 8,
- *  "win-x64-zip": 14,
- *  "win-x86-zip": 18
- * }
- *
- *  nodejs.org/dist/${version}/node-${version}-${files[entry]}.file-ext
- * ^ for windows, take the plat and extend with the file extension in the identifier above
- */
-export async function fetchNodeVersions() {
-  const channels = [
-    `https://nodejs.org/dist/index.json`
-  ];
-
-  let output: Array<NodeVersion> = [];
-
-  for (const channelUrl of channels) {
-    const response = await window.fetch(channelUrl);
-
-    output = await response.json();
-  }
-
-  if (output && output.length > 0 && isExpectedFormat(output)) {
-    console.log(`Fetched new Node.js versions (Count: ${output.length})`);
-    saveKnownVersions(output);
-  }
-
-  return output;
-}
-
-/**
- * Fetch the latest known Electron versions directly from npm.
+ * Fetch the latest known versions directly from npm.
  *
  * @returns {Promise<Array<NpmVersion>>}
  */
-export async function fetchElectronVersions() {
+export async function fetchVersions() {
   const channels = [
     `https://registry.npmjs.org/electron`,        // stable, beta
     `https://registry.npmjs.org/electron-nightly` // nightly

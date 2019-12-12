@@ -20,10 +20,6 @@ export interface NpmVersion {
   localPath?: string;
 }
 
-export interface NodeVersion {
-  version: string;
-}
-
 export interface EditorValues {
   main: string;
   renderer: string;
