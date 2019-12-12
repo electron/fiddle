@@ -55,6 +55,12 @@ export class Commands extends React.Component<CommandsProps, {}> {
               text='Console'
               onClick={appState.toggleConsole}
             />
+            <Button
+              active={appState.isNodeMode}
+              icon='ninja'
+              text='Node.js Mode'
+              onClick={appState.toggleNodeMode}
+            />
             <EditorDropdown appState={appState} />
           </ControlGroup>
         </div>

@@ -8,11 +8,12 @@ import {
   EditorId,
   ElectronVersion,
   ElectronVersionSource,
-  VersionState,
   MosaicId,
+  NodeVersion,
   NpmVersion,
   OutputEntry,
   OutputOptions,
+  VersionState,
   WarningDialogTexts
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -34,13 +35,14 @@ import { activateTheme } from './themes';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
+  getAllElectronVersions,
   getDefaultVersion,
-  getElectronVersions,
   getUpdatedElectronVersions,
+  getUpdatedNodeVersions,
   saveLocalVersions
 } from './versions';
 
-const knownVersions = getElectronVersions();
+const knownVersions = getAllElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
 const defaultNodeVersion = '12.0.0';
 
@@ -87,6 +89,7 @@ export class AppState {
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public nodeVersions: Record<string, NodeVersion> = arrayToStringMap([] as Array<NodeVersion>);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
@@ -115,6 +118,7 @@ export class AppState {
   @observable public isBisectDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
+  @observable public isNodeMode: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
@@ -132,11 +136,13 @@ export class AppState {
     this.pushOutput = this.pushOutput.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
     this.setVersion = this.setVersion.bind(this);
+    this.setNodeVersion = this.setNodeVersion.bind(this);
     this.showTour = this.showTour.bind(this);
     this.signOutGitHub = this.signOutGitHub.bind(this);
     this.toggleBisectCommands = this.toggleBisectCommands.bind(this);
     this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
     this.toggleConsole = this.toggleConsole.bind(this);
+    this.toggleNodeMode = this.toggleNodeMode.bind(this);
     this.clearConsole = this.clearConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
@@ -198,6 +204,7 @@ export class AppState {
 
     // Update our known versions
     this.updateElectronVersions();
+    this.updateNodeVersions();
 
     // Make sure the console isn't all empty and sad
     this.pushOutput('Console ready 🔬');
@@ -247,6 +254,21 @@ export class AppState {
     this.isUpdatingElectronVersions = false;
   }
 
+  /**
+   * Update the Node versions: First, fetch them from Node.js,
+   * then update their respective downloaded state.
+   *
+   * Fails silently.
+   */
+  @action public async updateNodeVersions() {
+    try {
+      const nodeVersions = await getUpdatedNodeVersions();
+      this.nodeVersions = arrayToStringMap(nodeVersions);
+    } catch (error) {
+      console.warn(`State: Could not update Node.js versions`, error);
+    }
+  }
+
   @action public async getName() {
     if (!this.name) {
       this.name = await getName(this);
@@ -257,6 +279,10 @@ export class AppState {
 
   @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
+  }
+
+  @action public toggleNodeMode() {
+    this.isNodeMode = !this.isNodeMode;
   }
 
   @action public clearConsole() {
@@ -346,7 +372,7 @@ export class AppState {
   @action public addLocalVersion(input: NpmVersion) {
     addLocalVersion(input);
 
-    this.versions = arrayToStringMap(getElectronVersions());
+    this.versions = arrayToStringMap(getAllElectronVersions());
     this.updateDownloadedVersionState();
   }
 
@@ -427,7 +453,7 @@ export class AppState {
   @action public async setNodeVersion(input: string) {
     const version = normalizeVersion(input);
 
-    if (!this.nodeVersion[version]) {
+    if (!this.nodeVersions[version]) {
       console.warn(`State: Called setNodeVersion() with ${version}, which does not exist.`);
       this.setVersion(this.nodeVersions[0].version);
 

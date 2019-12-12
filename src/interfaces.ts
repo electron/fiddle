@@ -14,14 +14,17 @@ export enum ElectronVersionSource {
   remote = 'remote',
   local = 'local'
 }
-export interface NpmVersion {
+
+export interface Version {
   version: string;
+}
+
+export interface NpmVersion extends Version {
   name?: string;
   localPath?: string;
 }
 
-export interface NodeVersion {
-  version: string;
+export interface NodeVersion extends Version {
   state: VersionState;
 }
 
