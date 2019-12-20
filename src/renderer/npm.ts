@@ -1,6 +1,8 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
+const { builtinModules } =  require('module');
+
 export interface NpmOperationOptions {
   dir: string;
 }
@@ -11,8 +13,7 @@ export let isInstalled: boolean | null = null;
 /* perhaps we can expose this to the settings module?*/
 const ignoredModules: Array<string> = [
   'electron',
-  // tslint:disable-next-line:no-submodule-imports
-  ...require('builtin-modules/static')
+  ...builtinModules
 ];
 
 /* regular expression to both match and extract module names */
