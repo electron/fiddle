@@ -1,6 +1,6 @@
 {
   "transform": {
-    ".(js|jsx|ts|tsx)": "ts-jest"
+    "\\.(js|jsx|ts|tsx)$": "ts-jest"
   },
   "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
