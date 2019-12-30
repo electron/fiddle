@@ -8,6 +8,7 @@ export class AppMock {
   public setEditorValues = jest.fn();
   public getEditorValues = jest.fn(() => ({
     main: 'main-content',
+    preload: 'preload-content',
     renderer: 'renderer-content',
     html: 'html-content'
   }));

@@ -87,7 +87,7 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(3);
+      expect(fs.outputFile).toHaveBeenCalledTimes(4);
     });
 
     it('removes a file that is newly empty', async () => {
@@ -95,7 +95,7 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.remove).toHaveBeenCalledTimes(2);
+      expect(fs.remove).toHaveBeenCalledTimes(1);
     });
 
     it('handles an error (output)', async () => {
@@ -106,8 +106,8 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(3);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(3);
+      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
     });
 
     it('handles an error (remove)', async () => {
@@ -118,8 +118,8 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.remove).toHaveBeenCalledTimes(2);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(2);
+      expect(fs.remove).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {
