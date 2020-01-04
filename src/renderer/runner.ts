@@ -193,10 +193,10 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
-    this.child = spawn(binaryPath, [ dir, '--inspect' ], {
-      cwd: dir,
-      env,
-    });
+    // Add user-specified cli flags if any have been set.
+    const options = [ dir, '--inspect' ].concat(this.appState.executionFlags);
+
+    this.child = spawn(binaryPath, options, { cwd: dir, env });
     this.appState.isRunning = true;
     pushOutput(`Electron v${version} started.`);
 
