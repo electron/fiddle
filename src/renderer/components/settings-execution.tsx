@@ -58,7 +58,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
     event: React.FormEvent<HTMLInputElement>
   ) {
     const { value } = event.currentTarget;
-    const flags = value.split(',');
+    const flags = value.split('|');
     this.props.appState.executionFlags = flags;
   }
 
