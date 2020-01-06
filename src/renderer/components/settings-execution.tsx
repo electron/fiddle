@@ -66,7 +66,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
     const {
       isKeepingUserDataDirs,
       isEnablingElectronLogging,
-      executionFlags
+      executionFlags = []
     } = this.props.appState;
 
     const deleteUserDirLabel = `

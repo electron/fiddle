@@ -57,8 +57,8 @@ describe('ExecutionSettings component', () => {
     });
   });
 
-  describe('handleElectronLoggingChange()', () => {
-    it('handles a new selection', async () => {
+  describe('handleExecutionFlagChange()', () => {
+    it('handles new flags', async () => {
       const wrapper = shallow(
         <ExecutionSettings appState={store} />
       );
@@ -67,13 +67,13 @@ describe('ExecutionSettings component', () => {
         currentTarget: { value: '--lang=es' }
       });
 
-      expect(store.executionFlags).toBe(['--lang=es']);
+      expect(store.executionFlags).toEqual(['--lang=es']);
 
       await instance.handleExecutionFlagChange({
         currentTarget: { value: '--lang=es|--js-flags=--expose-gc' }
       });
 
-      expect(store.executionFlags).toBe([
+      expect(store.executionFlags).toEqual([
         '--lang=es',
         '--js-flags=--expose-gc'
       ]);
