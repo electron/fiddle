@@ -34,5 +34,25 @@ exports[`ExecutionSettings component renders 1`] = `
       />
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <p>
+        Electron allows starting the executable with 
+        <a
+          href="https://electronjs.org/docs/api/chrome-command-line-switches"
+        >
+          user-provided flags
+        </a>
+        , such as '--js-flags=--expose-gc'. Those can be added here as bar-separated (|) flags to run when you start your Fiddles.
+      </p>
+      <br />
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        placeholder="--js-flags=--expose-gc|--lang=es"
+        value=""
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
 </div>
 `;
