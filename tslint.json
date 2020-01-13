@@ -25,10 +25,8 @@
     "no-reference": true,
     "no-trailing-whitespace": true,
     "no-unused-expression": true,
-    "no-use-before-declare": true,
     "no-var-keyword": true,
     "no-var-requires": false,
-    "prefer-const": true,
     "interface-name": [
       false
     ],
