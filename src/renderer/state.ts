@@ -81,6 +81,9 @@ export class AppState {
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
+  @observable public executionFlags: Array<string> =
+    this.retrieve('executionFlags') as Array<string> === null ?
+    [] : this.retrieve('executionFlags') as Array<string>;
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
@@ -155,6 +158,7 @@ export class AppState {
     autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
     autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
     autorun(() => this.save('isEnablingElectronLogging', this.isEnablingElectronLogging));
+    autorun(() => this.save('executionFlags', this.executionFlags));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('versionsToShow', this.versionsToShow));
     autorun(() => this.save('statesToShow', this.statesToShow));

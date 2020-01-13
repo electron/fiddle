@@ -56,4 +56,27 @@ describe('ExecutionSettings component', () => {
       expect(store.isEnablingElectronLogging).toBe(true);
     });
   });
+
+  describe('handleExecutionFlagChange()', () => {
+    it('handles new flags', async () => {
+      const wrapper = shallow(
+        <ExecutionSettings appState={store} />
+      );
+      const instance = wrapper.instance() as any;
+      await instance.handleExecutionFlagChange({
+        currentTarget: { value: '--lang=es' }
+      });
+
+      expect(store.executionFlags).toEqual(['--lang=es']);
+
+      await instance.handleExecutionFlagChange({
+        currentTarget: { value: '--lang=es|--js-flags=--expose-gc' }
+      });
+
+      expect(store.executionFlags).toEqual([
+        '--lang=es',
+        '--js-flags=--expose-gc'
+      ]);
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
+import { Callout, Checkbox, FormGroup, InputGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -21,6 +21,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
 
     this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
     this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(this);
+    this.handleExecutionFlagChange = this.handleExecutionFlagChange.bind(this);
   }
 
   /**
@@ -48,8 +49,25 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
     this.props.appState.isEnablingElectronLogging = checked;
   }
 
+  /**
+   * Handles a change in the execution flags run with the Electron executable
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleExecutionFlagChange(
+    event: React.FormEvent<HTMLInputElement>
+  ) {
+    const { value } = event.currentTarget;
+    const flags = value.split('|');
+    this.props.appState.executionFlags = flags;
+  }
+
   public render() {
-    const { isKeepingUserDataDirs, isEnablingElectronLogging } = this.props.appState;
+    const {
+      isKeepingUserDataDirs,
+      isEnablingElectronLogging,
+      executionFlags = []
+    } = this.props.appState;
 
     const deleteUserDirLabel = `
       Whenever Electron runs, it creates a user data directory for cookies, the cache,
@@ -84,6 +102,26 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
               checked={isEnablingElectronLogging}
               label='Enable advanced Electron logging.'
               onChange={this.handleElectronLoggingChange}
+            />
+          </FormGroup>
+        </Callout>
+        <br />
+        <Callout>
+          <FormGroup>
+          <p>
+            Electron allows starting the executable with <a
+              href='https://electronjs.org/docs/api/chrome-command-line-switches'
+            >
+              user-provided flags
+            </a>
+            , such as '--js-flags=--expose-gc'. Those can be added here as bar-separated (|)
+            flags to run when you start your Fiddles.
+          </p>
+            <br />
+            <InputGroup
+              placeholder='--js-flags=--expose-gc|--lang=es'
+              value={executionFlags.join('|')}
+              onChange={this.handleExecutionFlagChange}
             />
           </FormGroup>
         </Callout>
