@@ -178,13 +178,13 @@ describe('versions', () => {
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(201);
+      expect(getKnownVersions().length).toBe(299);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "garbage": "true" }]`);
 
-      expect(getKnownVersions().length).toBe(201);
+      expect(getKnownVersions().length).toBe(299);
     });
   });
 
