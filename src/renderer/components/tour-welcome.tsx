@@ -29,8 +29,8 @@ export function getWelcomeTour(): Set<TourScriptStep> {
         <>
           <p>
             Electron Fiddle allows you to build little experiments and mini-apps with
-            Electron. Each Fiddle has three files: A main script, a renderer script,
-            and an HTML file.
+            Electron. Each Fiddle has at least three of these files: A main script, a
+            renderer script, a preload script, and an HTML file.
           </p>
           <p>
             If you <code>require()</code> a module, Fiddle will install

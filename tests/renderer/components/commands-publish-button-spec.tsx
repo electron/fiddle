@@ -14,7 +14,8 @@ describe("Publish button component", () => {
     files: {
       "index.html": { content: "html-content" },
       "renderer.js": { content: "renderer-content" },
-      "main.js": { content: "main-content" }
+      "main.js": { content: "main-content" },
+      "preload.js": { content: "preload-content" },
     },
     public: true
   };
@@ -71,7 +72,8 @@ describe("Publish button component", () => {
       files: {
         "index.html": { content: "html-content" },
         "renderer.js": { content: "renderer-content" },
-        "main.js": { content: "main-content" }
+        "main.js": { content: "main-content" },
+        "preload.js": { content: "preload-content" },
       },
       public: true
     });
@@ -99,7 +101,8 @@ describe("Publish button component", () => {
       files: {
         "index.html": { content: "<!-- Empty -->" },
         "renderer.js": { content: "// Empty" },
-        "main.js": { content: "// Empty" }
+        "main.js": { content: "// Empty" },
+        "preload.js": { content: "// Empty" }
       },
       public: true
     });

@@ -79,10 +79,9 @@ export class App {
   }
 
   /**
-   * Sets the values on all three editors.
+   * Sets the contents of all editor panes.
    *
    * @param {EditorValues} values
-   * @param {warn} warn - Should we warn before overwriting unsaved data?
    */
   public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
     const { ElectronFiddle: fiddle } = window;
@@ -108,7 +107,7 @@ export class App {
   }
 
   /**
-   * Gets the values on all three editors.
+   * Retrieves the contents of all editor panes.
    *
    * @returns {EditorValues}
    */
