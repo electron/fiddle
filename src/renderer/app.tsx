@@ -95,9 +95,16 @@ export class App {
       const backup = this.state.closedPanels[name];
 
       if (typeof values[name] !== 'undefined') {
-        if (isEditorBackup(backup) && backup.model) {
-          // The editor does not exist, attempt to set it on the backup
-          backup.model.setValue(values[name]!);
+        if (isEditorBackup(backup)) {
+          // The editor does not exist, attempt to set it on the backup.
+          // If there's a model, we'll do it on the model. Else, we'll
+          // set the value.
+
+          if (backup.model) {
+            backup.model.setValue(values[name]!);
+          } else {
+            backup.value = values[name]!;
+          }
         } else if (editor && editor.setValue) {
           // The editor exists, set the value directly
           editor.setValue(values[name]!);

@@ -25,7 +25,7 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { BinaryManager } from './binary';
 import { Bisector } from './bisect';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
+import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
 import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
@@ -119,9 +119,7 @@ export class AppState {
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = {
-    docsDemo: true // Closed by default
-  };
+  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = DEFAULT_CLOSED_PANELS;
 
   private outputBuffer: string = '';
   private name: string;
