@@ -115,6 +115,30 @@ describe('Editor component', () => {
       expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
     });
 
+    it('attempts to restore a backup value if available', async () => {
+      store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+        value: 'hello'
+      });
+
+      const wrapper = shallow(
+        <Editor
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          id={EditorId.main}
+          editorDidMount={() => undefined}
+        />
+      );
+      const instance: any = wrapper.instance();
+
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
+
+      expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(0);
+      expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
+      expect(monaco.editor.createModel).toHaveBeenCalledWith('hello', 'javascript');
+    });
+
     it('initializes with a fixed tab size', async () => {
       const didMount = jest.fn();
       const wrapper = shallow(
