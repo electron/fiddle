@@ -283,16 +283,22 @@ describe('Editors component', () => {
       delete window.ElectronFiddle.editors.main;
 
       const app = new App();
-      (app.state.closedPanels as any).main = { model: { setValue: jest.fn() } };
+      (app.state.closedPanels as any).main = {
+        model: { setValue: jest.fn() }
+      };
+      app.state.closedPanels.preload = {};
+
       app.setEditorValues({
         html: 'html-value',
         main: 'main-value',
         renderer: 'renderer-value',
+        preload: 'preload-value'
       });
 
       expect(
         (app.state.closedPanels.main as EditorBackup)!.model!.setValue
       ).toHaveBeenCalledWith('main-value');
+      expect(app.state.closedPanels.preload).toEqual({ value: 'preload-value' });
 
       window.ElectronFiddle.editors.main = oldMainEditor;
     });

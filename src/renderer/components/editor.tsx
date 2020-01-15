@@ -99,33 +99,52 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   /**
+   * Create a model and attach it to the editor
+   *
+   * @private
+   * @param {string} value
+   */
+  private async createModel(value: string) {
+    const { monaco } = this.props;
+
+    const model = monaco.editor.createModel(value, this.language);
+    model.updateOptions({
+      tabSize: 2
+    });
+
+    this.editor.setModel(model);
+  }
+
+  /**
    * Sets the content on the editor, including the model and the view state.
    *
    * @private
    * @memberof Editor
    */
   private async setContent() {
-    const { appState, id, monaco } = this.props;
+    const { appState, id } = this.props;
     const { version } = appState;
 
     const backup = appState.getAndRemoveEditorValueBackup(id);
 
-    if (backup && backup.model) {
+    console.log(id);
+
+    if (backup) {
       console.log(`Editor: Backup found, restoring state`);
 
       if (backup.viewState) {
         this.editor.restoreViewState(backup.viewState);
       }
 
-      this.editor.setModel(backup.model);
+      // If there's a model, use the model. No model? Use the value
+      if (backup.model) {
+        this.editor.setModel(backup.model);
+      } else if (typeof backup.value !== 'undefined') {
+        this.createModel(backup.value);
+      }
     } else {
       const value = await getContent(id, version);
-      const model = monaco.editor.createModel(value, this.language);
-      model.updateOptions({
-        tabSize: 2
-      });
-
-      this.editor.setModel(model);
+      await this.createModel(value);
     }
   }
 }
