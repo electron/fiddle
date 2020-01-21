@@ -2,7 +2,7 @@
 
 exports[`Editors component renders 1`] = `
 <div
-  className="mosaic-blueprint-theme mosaic mosaic-drop-target"
+  className="focused__undefined mosaic mosaic-drop-target"
 >
   <div
     className="mosaic-root"
