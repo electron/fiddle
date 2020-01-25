@@ -93,6 +93,7 @@ export class AppState {
   @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public confirmationDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public warningDialogLastResult: boolean | null = null;
+  @observable public lastBisectResult: [string, string] = ['', ''];
   @observable public confirmationPromptLastResult: boolean | null = null;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
@@ -114,6 +115,7 @@ export class AppState {
   @observable public isConfirmationPromptShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isBisectDialogShowing: boolean = false;
+  @observable public isBisectCompleteDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
   @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
@@ -280,6 +282,14 @@ export class AppState {
 
   @action public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
+  }
+
+  @action public toggleBisectCompleteDialog() {
+    this.isBisectCompleteDialogShowing = !this.isBisectCompleteDialogShowing;
+
+    if (!this.isBisectCompleteDialogShowing) {
+      this.lastBisectResult = ['', ''];
+    }
   }
 
   @action public toggleConfirmationPromptDialog() {

@@ -13,7 +13,9 @@ describe('Bisect commands component', () => {
       },
       setVersion: jest.fn(),
       version: '1.0.0',
-      pushOutput: jest.fn()
+      pushOutput: jest.fn(),
+      lastBisectResult: ['', ''],
+      toggleBisectCompleteDialog: jest.fn(),
     };
   });
 
@@ -66,11 +68,13 @@ describe('Bisect commands component', () => {
       instance.terminateBisect = jest.fn();
 
       // same value is only returned when there is only 1 version left
-      store.Bisector.continue.mockReturnValue(['minRev', 'maxRev']);
+      store.Bisector.continue.mockReturnValue([{version: 'minVer'}, {version: 'maxVer'}]);
       instance.continueBisect(true);
       expect(store.setVersion).not.toHaveBeenCalled();
       expect(instance.terminateBisect).toHaveBeenCalled();
       expect(store.pushOutput).toHaveBeenCalled();
+      expect(store.toggleBisectCompleteDialog).toHaveBeenCalled();
+      expect(store.lastBisectResult).toEqual(['minVer', 'maxVer']);
     });
   });
 

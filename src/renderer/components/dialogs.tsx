@@ -5,6 +5,7 @@ import { AppState } from '../state';
 import { AddThemeDialog } from './dialog-add-theme';
 import { AddVersionDialog } from './dialog-add-version';
 import { BisectDialog } from './dialog-bisect';
+import { BisectCompleteDialog } from './dialog-bisect-complete';
 import { ConfirmDialog } from './dialog-confirm';
 import { TokenDialog } from './dialog-token';
 import { WarningDialog } from './dialog-warning';
@@ -25,6 +26,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
   public render() {
     const { appState } = this.props;
     const {
+      isBisectCompleteDialogShowing,
       isTokenDialogShowing,
       isSettingsShowing,
       isAddVersionDialogShowing,
@@ -45,6 +47,9 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
     const maybeBisect = isBisectDialogShowing
       ? <BisectDialog key='bisect-dialog' appState={appState} />
       : null;
+    const maybeBisectComplete = isBisectCompleteDialogShowing
+      ? <BisectCompleteDialog key='bisect-complete-dialog' appState={appState} />
+      : null;
     const eitherWarningOrPrompt = appState.isWarningDialogShowing
       ? <WarningDialog appState={appState} />
       : <ConfirmDialog appState={appState} />;
@@ -56,6 +61,7 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
         {maybeAddLocalVersion}
         {maybeMonaco}
         {maybeBisect}
+        {maybeBisectComplete}
         {eitherWarningOrPrompt}
       </div>
     );

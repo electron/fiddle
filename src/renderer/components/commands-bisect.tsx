@@ -23,7 +23,10 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
     if (Array.isArray(response)) {
       this.terminateBisect();
       const [minRev, maxRev] = response;
-      appState.pushOutput(`[BISECT] Complete: Check between versions ${minRev.version} and ${maxRev.version}.`);
+      const [minVer, maxVer] = [minRev.version, maxRev.version]
+      appState.pushOutput(`[BISECT] Complete: Check between versions ${minVer} and ${maxVer}.`);
+      appState.lastBisectResult = [minVer, maxVer];
+      appState.toggleBisectCompleteDialog();
     } else {
       appState.setVersion(response.version);
     }
