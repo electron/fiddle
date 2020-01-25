@@ -20,6 +20,7 @@ describe('npm', () => {
 
     function hello() {
       const electron = require('electron');
+      const originalFs = require('original-fs');
       const fs = require('fs');
       const privateModule = require('./hi');
     }
@@ -81,7 +82,7 @@ describe('npm', () => {
   });
 
   describe('findModulesInEditors()', () => {
-    it('finds modules', async () => {
+    it('finds modules, ignoring node and electron builtins', async () => {
       const result = await findModulesInEditors({
         html: '',
         main: mockMain,

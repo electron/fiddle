@@ -13,6 +13,7 @@ export let isInstalled: boolean | null = null;
 /* perhaps we can expose this to the settings module?*/
 const ignoredModules: Array<string> = [
   'electron',
+  'original-fs',
   ...builtinModules
 ];
 
