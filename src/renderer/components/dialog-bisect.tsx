@@ -23,7 +23,7 @@ export interface BisectDialogState {
 /**
  * The "add version" dialog allows users to add custom builds of Electron.
  *
- * @class AddVersionDialog
+ * @class BisectDialog
  * @extends {React.Component<BisectDialogProps, BisectDialogState>}
  */
 @observer
