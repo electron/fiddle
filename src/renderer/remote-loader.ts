@@ -25,17 +25,20 @@ export class RemoteLoader {
 
   public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
     console.log(`Loading fiddle from Electron example`, _, exampleInfo);
-    const ok = await this.verifyRemoteLoad('example from the Electron docs', exampleInfo.ref);
+    const {path, ref} = exampleInfo;
+    const prettyName = path.replace('docs/fiddles/', '');
+    const ok = await this.verifyRemoteLoad(`'${prettyName}' example from the Electron docs for version ${ref}`);
     if (!ok) return;
 
-    this.fetchExampleAndLoad(exampleInfo.ref, exampleInfo.path);
+    this.fetchExampleAndLoad(ref, path);
   }
 
   public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
-    const ok = await this.verifyRemoteLoad('gist');
+    const {id} = gistInfo;
+    const ok = await this.verifyRemoteLoad(`gist`);
     if (!ok) return;
 
-    this.fetchGistAndLoad(gistInfo.id);
+    this.fetchGistAndLoad(id);
   }
 
   public async fetchExampleAndLoad(ref: string, path: string): Promise<boolean> {
@@ -197,9 +200,9 @@ export class RemoteLoader {
    *
    * @param what What are we loading from (gist, example, etc.)
    */
-  public async verifyRemoteLoad(what: string, fiddlePath?: string): Promise<boolean> {
+  public async verifyRemoteLoad(what: string): Promise<boolean> {
     this.appState.setConfirmationPromptTexts({
-      label: `Are you sure you sure you want to load this '${what}' from fiddle path '${fiddlePath}'? Only load and run it if you trust the source.`
+      label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`
     });
     this.appState.isConfirmationPromptShowing = true;
     await when(() => !this.appState.isConfirmationPromptShowing);
