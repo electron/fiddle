@@ -26,10 +26,6 @@ app.on('ready', () => {
   })
 
   autoUpdater.on('update-available', () => {
-    console.log('The autoUpdater has found an update!')
-  })
-
-  autoUpdater.on('update-available', () => {
     console.log('The autoUpdater has found an update and is now downloading it!')
   })
 
