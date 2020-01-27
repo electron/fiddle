@@ -48,7 +48,7 @@ export class GenericDialog extends React.Component<GenericDialogProps, GenericDi
         intent = Intent.PRIMARY;
         icon = 'help';
         break;
-      case GenericDialogType.message:
+      case GenericDialogType.success:
         intent = Intent.SUCCESS;
         icon = 'info-sign';
         break;

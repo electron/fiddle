@@ -64,7 +64,7 @@ export interface Templates {
 export const enum GenericDialogType {
   'confirm' = 'confirm',
   'warning' = 'warning',
-  'message' = 'message',
+  'success' = 'success',
 }
 
 // Editors

@@ -76,8 +76,8 @@ describe('Bisect commands component', () => {
       expect(store.isGenericDialogShowing).toEqual(true);
       expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
         cancel: undefined,
-        label: 'Check between versions minVer and maxVer.',
-        type: 'warning'
+        label: 'Bisect complete. Check between versions minVer and maxVer.',
+        type: 'success'
       });
     });
   });
