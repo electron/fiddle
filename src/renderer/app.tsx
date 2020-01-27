@@ -6,6 +6,7 @@ import {
   ALL_EDITORS,
   EditorId,
   EditorValues,
+  GenericDialogType,
   SetFiddleOptions
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
@@ -51,14 +52,15 @@ export class App {
   ) {
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
     if (this.state.isUnsaved) {
-      this.state.setWarningDialogTexts({
+      this.state.setGenericDialogOptions({
+        type: GenericDialogType.warning,
         label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
         ok: 'Yes'
       });
-      this.state.isWarningDialogShowing = true;
-      await when(() => !this.state.isWarningDialogShowing);
+      this.state.isGenericDialogShowing = true;
+      await when(() => !this.state.isGenericDialogShowing);
 
-      if (!this.state.warningDialogLastResult) {
+      if (!this.state.genericDialogLastResult) {
         return false;
       }
     }

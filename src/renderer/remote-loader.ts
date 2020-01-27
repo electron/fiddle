@@ -1,6 +1,6 @@
 import * as Octokit from '@octokit/rest';
 import { when } from 'mobx';
-import { EditorId, EditorValues } from '../interfaces';
+import { EditorId, EditorValues, GenericDialogType } from '../interfaces';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
@@ -198,25 +198,27 @@ export class RemoteLoader {
    * @param what What are we loading from (gist, example, etc.)
    */
   public async verifyRemoteLoad(what: string, fiddlePath?: string): Promise<boolean> {
-    this.appState.setConfirmationPromptTexts({
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
       label: `Are you sure you sure you want to load this '${what}' from fiddle path '${fiddlePath}'? Only load and run it if you trust the source.`
     });
-    this.appState.isConfirmationPromptShowing = true;
-    await when(() => !this.appState.isConfirmationPromptShowing);
+    this.appState.isGenericDialogShowing = true;
+    await when(() => !this.appState.isGenericDialogShowing);
 
-    return !!this.appState.confirmationPromptLastResult;
+    return !!this.appState.genericDialogLastResult;
   }
 
   public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
-    this.appState.setWarningDialogTexts({
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.warning,
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
               version of Electron from the example?`
     });
-    this.appState.isWarningDialogShowing = true;
-    await when(() => !this.appState.isWarningDialogShowing);
+    this.appState.isGenericDialogShowing = true;
+    await when(() => !this.appState.isGenericDialogShowing);
 
-    return !!this.appState.warningDialogLastResult;
+    return !!this.appState.genericDialogLastResult;
   }
 
   /**
@@ -240,18 +242,20 @@ export class RemoteLoader {
    */
   private handleLoadingFailed(error: Error): false {
     if (navigator.onLine) {
-      this.appState.setWarningDialogTexts({
+      this.appState.setGenericDialogOptions({
+        type: GenericDialogType.warning,
         label: `Loading the fiddle failed: ${error}`,
         cancel: undefined
       });
     } else {
-      this.appState.setWarningDialogTexts({
+      this.appState.setGenericDialogOptions({
+        type: GenericDialogType.warning,
         label: `Loading the fiddle failed. Your computer seems to be offline. Error: ${error}`,
         cancel: undefined
       });
     }
 
-    this.appState.toggleWarningDialog();
+    this.appState.toggleGenericDialog();
 
     console.warn(`Loading Fiddle failed`, error);
     return false;

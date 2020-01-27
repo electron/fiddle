@@ -1,4 +1,4 @@
-import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, PanelId } from '../../src/interfaces';
+import { ALL_MOSAICS, EditorId, ElectronVersionSource, ElectronVersionState, GenericDialogType, PanelId } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
@@ -57,10 +57,10 @@ describe('AppState', () => {
 
       const result = window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
-      expect(appState.isWarningDialogShowing).toBe(true);
+      expect(appState.isGenericDialogShowing).toBe(true);
 
-      appState.warningDialogLastResult = true;
-      appState.isWarningDialogShowing = false;
+      appState.genericDialogLastResult = true;
+      appState.isGenericDialogShowing = false;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalled();
         done();
@@ -76,10 +76,10 @@ describe('AppState', () => {
 
       const result = window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
-      expect(appState.isWarningDialogShowing).toBe(true);
+      expect(appState.isGenericDialogShowing).toBe(true);
 
-      appState.warningDialogLastResult = true;
-      appState.isWarningDialogShowing = false;
+      appState.genericDialogLastResult = true;
+      appState.isGenericDialogShowing = false;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
         expect(remote.app.quit).toHaveBeenCalledTimes(1);
@@ -94,10 +94,10 @@ describe('AppState', () => {
 
       const result = window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
-      expect(appState.isWarningDialogShowing).toBe(true);
+      expect(appState.isGenericDialogShowing).toBe(true);
 
-      appState.warningDialogLastResult = false;
-      appState.isWarningDialogShowing = false;
+      appState.genericDialogLastResult = false;
+      appState.isGenericDialogShowing = false;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
         done();
@@ -216,16 +216,16 @@ describe('AppState', () => {
     });
   });
 
-  describe('toggleWarningDialog()', () => {
+  describe('toggleGenericDialog()', () => {
     it('toggles the warnign dialog', () => {
-      appState.warningDialogLastResult = true;
+      appState.genericDialogLastResult = true;
 
-      appState.toggleWarningDialog();
-      expect(appState.isWarningDialogShowing).toBe(true);
-      expect(appState.warningDialogLastResult).toBe(null);
+      appState.toggleGenericDialog();
+      expect(appState.isGenericDialogShowing).toBe(true);
+      expect(appState.genericDialogLastResult).toBe(null);
 
-      appState.toggleWarningDialog();
-      expect(appState.isWarningDialogShowing).toBe(false);
+      appState.toggleGenericDialog();
+      expect(appState.isGenericDialogShowing).toBe(false);
     });
   });
 
@@ -344,10 +344,11 @@ describe('AppState', () => {
     });
   });
 
-  describe('setWarningDialogTexts()', () => {
-    it('sets the warning dialog texts', () => {
-      appState.setWarningDialogTexts({ label: 'foo' });
-      expect(appState.warningDialogTexts).toEqual({
+  describe('setGenericDialogOptions()', () => {
+    it('sets the warning dialog options', () => {
+      appState.setGenericDialogOptions({ type: GenericDialogType.warning, label: 'foo' });
+      expect(appState.genericDialogOptions).toEqual({
+        type: GenericDialogType.warning,
         label: 'foo',
         ok: 'Okay',
         cancel: 'Cancel'

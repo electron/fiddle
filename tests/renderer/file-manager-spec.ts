@@ -32,7 +32,7 @@ describe('FileManager', () => {
     ipcRendererManager.send = jest.fn();
 
     fm = new FileManager({
-      setWarningDialogTexts: jest.fn()
+      setGenericDialogOptions: jest.fn()
     } as any);
   });
 
