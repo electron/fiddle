@@ -248,7 +248,8 @@ describe('RemoteLoader', () => {
         { path: 'test/path', ref: '4.0.0' }
       );
 
-      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.verifyRemoteLoad)
+        .toHaveBeenCalledWith(`'test/path' example from the Electron docs for version 4.0.0`);
       expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith('4.0.0', 'test/path');
     });
 
@@ -275,7 +276,7 @@ describe('RemoteLoader', () => {
         { id: 'gist' }
       );
 
-      expect(instance.verifyRemoteLoad).toHaveBeenCalled();
+      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith('gist');
       expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
     });
 
