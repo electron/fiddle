@@ -1,12 +1,14 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
-import { overridePlatform, resetPlatform } from '../../utils';
-import { AppState } from '../../../src/renderer/state';
 import { GenericDialogType } from '../../../src/interfaces';
+import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
+import { AppState } from '../../../src/renderer/state';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('TokenDialog component', () => {
+  // tslint isn't able to parse the casted use below and thinks this is unused
+  // tslint:disable-next-line: prefer-const
   let store: AppState;
 
   beforeAll(() => {
@@ -18,7 +20,7 @@ describe('TokenDialog component', () => {
   beforeEach(() => {
     (store as Partial<AppState>) = {
       isGenericDialogShowing: false,
-      genericDialogOptions: { type: GenericDialogType.warning,label: '', ok: '', cancel: '' },
+      genericDialogOptions: { type: GenericDialogType.warning, label: '', ok: '', cancel: '' },
       toggleGenericDialog: jest.fn()
     };
   });

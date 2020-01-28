@@ -1,12 +1,14 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { Dialogs } from '../../../src/renderer/components/dialogs';
-import { overridePlatform, resetPlatform } from '../../utils';
 import { GenericDialogType } from '../../../src/interfaces';
+import { Dialogs } from '../../../src/renderer/components/dialogs';
 import { AppState } from '../../../src/renderer/state';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Dialogs component', () => {
+  // tslint isn't able to parse the casted use below and thinks this is unused
+  // tslint:disable-next-line: prefer-const
   let store: AppState;
 
   beforeAll(() => {

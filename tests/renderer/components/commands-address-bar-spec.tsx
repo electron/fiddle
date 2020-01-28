@@ -16,7 +16,7 @@ describe('AddressBar component', () => {
     @observable public gistId: string | null = null;
     @observable public isWarningDialogShowing: boolean = false;
     @observable public isConfirmationPromptShowing: boolean = false;
-    public setGenericDialogOptions = jest.fn();;
+    public setGenericDialogOptions = jest.fn();
     public toggleWarningDialog = jest.fn();
   }
 
