@@ -171,6 +171,9 @@ export class AppState {
 
           this.isWarningDialogShowing = true;
 
+          const remote = require('electron').remote;
+          remote.getCurrentWindow().showInactive();
+
           // We'll wait until the warning dialog was closed
           when(() => !this.isWarningDialogShowing).then(() => {
             // The user confirmed, let's close for real.
@@ -178,7 +181,6 @@ export class AppState {
               window.onbeforeunload = null;
 
               // Should we just close or quit?
-              const remote = require('electron').remote;
               const isQuitting = remote.getGlobal('isQuitting');
 
               if (isQuitting) {
