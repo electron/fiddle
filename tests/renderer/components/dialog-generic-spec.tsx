@@ -6,7 +6,7 @@ import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
 import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-describe('TokenDialog component', () => {
+describe('GenericDialog component', () => {
   // tslint isn't able to parse the casted use below and thinks this is unused
   // tslint:disable-next-line: prefer-const
   let store: AppState;
@@ -20,7 +20,12 @@ describe('TokenDialog component', () => {
   beforeEach(() => {
     (store as Partial<AppState>) = {
       isGenericDialogShowing: false,
-      genericDialogOptions: { type: GenericDialogType.warning, label: '', ok: '', cancel: '' },
+      genericDialogOptions: {
+        type: GenericDialogType.warning,
+        label: 'Some message',
+        ok: 'Ok',
+        cancel: ''
+      },
       toggleGenericDialog: jest.fn()
     };
   });
@@ -29,7 +34,21 @@ describe('TokenDialog component', () => {
     resetPlatform();
   });
 
-  it('renders', () => {
+  it('renders a warning', () => {
+    store.isGenericDialogShowing = true;
+    const wrapper = shallow(<GenericDialog appState={store} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders a confirmation', () => {
+    store.genericDialogOptions.type = GenericDialogType.confirm;
+    store.isGenericDialogShowing = true;
+    const wrapper = shallow(<GenericDialog appState={store} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders a success message', () => {
+    store.genericDialogOptions.type = GenericDialogType.success;
     store.isGenericDialogShowing = true;
     const wrapper = shallow(<GenericDialog appState={store} />);
     expect(wrapper).toMatchSnapshot();
