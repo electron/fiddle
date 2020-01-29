@@ -17,7 +17,7 @@ This project is a part of the Electron ecosystem. As such, all contributions to 
 [Electron's code of conduct](https://github.com/electron/electron/blob/master/CODE_OF_CONDUCT.md)
 where appropriate.
 
-## Contribution suggestions
+## Contribution Suggestions
 
 We use the label [`good first issue`](https://github.com/electron/fiddle/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) in the issue tracker to denote fairly-well-scoped-out bugs or feature requests that the community can pick up and work on. If any of those labeled issues do not have enough information, please feel free to ask constructive questions. (This applies to any open issue.)
 
@@ -65,7 +65,7 @@ However, rebasing is encouraged when practical, particularly when there's a merg
 If you are continuing the work of another person's PR and need to rebase/squash, please retain the
 attribution of the original author(s) and continue the work in subsequent commits.
 
-### Running Fiddle from source
+### Running Fiddle From Source
 
 ```sh
 git clone https://github.com/electron/fiddle
@@ -74,12 +74,12 @@ npm install
 npm start
 ```
 
-### Running tests
+### Running Tests
 
 ```sh
 npm test
 ```
 
-## Release process
+## Release Process
 
 <!-- TODO @felix add your release process here 😁 -->
