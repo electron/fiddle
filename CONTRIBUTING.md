@@ -36,34 +36,6 @@ Here are some things to keep in mind as you file pull requests to fix bugs, add 
 * Please **do not** bump the version number in your pull requests, the maintainers will do that.
   Feel free to indicate whether the changes require a major, minor, or patch version bump, as
   prescribed by the [semantic versioning specification](http://semver.org/).
-* Once your pull request is approved, please make sure your commits are rebased onto the latest
-  commit in the master branch, and that you limit/squash the number of commits created to a
-  "feature"-level. For instance:
-
-bad:
-
-```
-commit 1: add foo option
-commit 2: standardize code
-commit 3: add test
-commit 4: add docs
-commit 5: add bar option
-commit 6: add test + docs
-```
-
-good:
-
-```
-commit 1: add foo option
-commit 2: add bar option
-```
-
-Squashing commits during discussion of the pull request is almost always unnecessary, and makes it
-more difficult for both the submitters and reviewers to understand what changed in between comments.
-However, rebasing is encouraged when practical, particularly when there's a merge conflict.
-
-If you are continuing the work of another person's PR and need to rebase/squash, please retain the
-attribution of the original author(s) and continue the work in subsequent commits.
 
 ### Running Fiddle From Source
 
