@@ -36,7 +36,7 @@ describe('Editors component', () => {
     store = {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
-      setWarningDialogTexts: () => ({}),
+      setGenericDialogOptions: () => ({}),
       mosaicArrangement: createMosaicArrangement(ALL_MOSAICS),
       currentDocsDemoPage: DocsDemoPage.DEFAULT
     };

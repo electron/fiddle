@@ -50,7 +50,8 @@ export interface OutputOptions {
   isNotPre?: boolean;
 }
 
-export interface WarningDialogTexts {
+export interface GenericDialogOptions {
+  type: GenericDialogType;
   ok?: string;
   cancel?: string;
   label: string;
@@ -58,6 +59,12 @@ export interface WarningDialogTexts {
 
 export interface Templates {
   [index: string]: string | Templates;
+}
+
+export const enum GenericDialogType {
+  'confirm' = 'confirm',
+  'warning' = 'warning',
+  'success' = 'success',
 }
 
 // Editors

@@ -1,4 +1,5 @@
 import { observable } from 'mobx';
+import { GenericDialogType } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { ElectronReleaseChannel } from '../../src/renderer/versions';
@@ -54,12 +55,9 @@ const mockGetRepos = {
 };
 
 class MockStore {
-  @observable public isWarningDialogShowing: boolean = false;
-  @observable public isConfirmationPromptShowing: boolean = false;
-  public setWarningDialogTexts = jest.fn();
-  public toggleWarningDialog = jest.fn();
-  public setConfirmationDialogTexts = jest.fn();
-  public setConfirmationPromptTexts = jest.fn();
+  @observable public isGenericDialogShowing: boolean = false;
+  public setGenericDialogOptions = jest.fn();
+  public toggleGenericDialog = jest.fn();
   public versions = {
     '4.0.0': {
       version: '4.0.0'
@@ -169,7 +167,7 @@ describe('RemoteLoader', () => {
 
       const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
       expect(result).toBe(false);
-      expect(store.setWarningDialogTexts.mock.calls[0][0].label).toEqual(
+      expect(store.setGenericDialogOptions.mock.calls[0][0].label).toEqual(
         'Loading the fiddle failed: Error: The example Fiddle tried to launch is not a valid Electron example'
       );
     });
@@ -198,7 +196,8 @@ describe('RemoteLoader', () => {
 
       const result = await instance.setElectronVersionWithRef('5.0.0');
       expect(result).toBe(false);
-      expect(store.setWarningDialogTexts).toBeCalledWith({
+      expect(store.setGenericDialogOptions).toBeCalledWith({
+        type: GenericDialogType.warning,
         label: 'Loading the fiddle failed: Error: Version of Electron in example not supported',
         cancel: undefined
       });
@@ -226,16 +225,16 @@ describe('RemoteLoader', () => {
   describe('verifyRemoteLoad()', () => {
     it('asks the user if they want to load remote content', (done) => {
       instance.verifyRemoteLoad('test').then(done);
-      expect(store.isConfirmationPromptShowing).toBe(true);
-      store.isConfirmationPromptShowing = false;
+      expect(store.isGenericDialogShowing).toBe(true);
+      store.isGenericDialogShowing = false;
     });
   });
 
   describe('verifyReleaseChannelEnabled', () => {
     it('asks the user if they want to enable a release channel', (done) => {
       instance.verifyReleaseChannelEnabled(ElectronReleaseChannel.beta).then(done);
-      expect(store.isWarningDialogShowing).toBe(true);
-      store.isWarningDialogShowing = false;
+      expect(store.isGenericDialogShowing).toBe(true);
+      store.isGenericDialogShowing = false;
     });
   });
 

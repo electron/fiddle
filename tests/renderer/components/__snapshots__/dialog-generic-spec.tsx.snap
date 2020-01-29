@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`GenericDialog component renders a confirmation 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  cancelButtonText=""
+  confirmButtonText="Ok"
+  icon="help"
+  intent="primary"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p>
+    Some message
+  </p>
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders a success message 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  cancelButtonText=""
+  confirmButtonText="Ok"
+  icon="info-sign"
+  intent="success"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p>
+    Some message
+  </p>
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders a warning 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  cancelButtonText=""
+  confirmButtonText="Ok"
+  icon="warning-sign"
+  intent="danger"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p>
+    Some message
+  </p>
+</Blueprint3.Alert>
+`;

@@ -1,11 +1,15 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
+import { GenericDialogType } from '../../../src/interfaces';
 import { Dialogs } from '../../../src/renderer/components/dialogs';
+import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Dialogs component', () => {
-  let store: any = {};
+  // tslint isn't able to parse the casted use below and thinks this is unused
+  // tslint:disable-next-line: prefer-const
+  let store: AppState;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -14,11 +18,12 @@ describe('Dialogs component', () => {
   });
 
   beforeEach(() => {
-    store = {
+    (store as Partial<AppState>) = {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       isAddVersionDialogShowing: false,
-      warningDialogTexts: { label: '', ok: '', cancel: '' }
+      genericDialogOptions: { type: GenericDialogType.confirm, label: '', ok: '', cancel: '' },
+      isGenericDialogShowing: true
     };
   });
 
@@ -29,18 +34,18 @@ describe('Dialogs component', () => {
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<TokenDialog /><ConfirmDialog />');
+    expect(wrapper.text()).toBe('<TokenDialog /><GenericDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<Settings /><ConfirmDialog />');
+    expect(wrapper.text()).toBe('<Settings /><GenericDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isAddVersionDialogShowing = true;
     const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<AddVersionDialog /><ConfirmDialog />');
+    expect(wrapper.text()).toBe('<AddVersionDialog /><GenericDialog />');
   });
 });

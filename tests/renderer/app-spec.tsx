@@ -26,13 +26,16 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 }));
 
 describe('Editors component', () => {
+  beforeAll(() => {
+    document.body.innerHTML = '<div id="app" />';
+  });
+
   beforeEach(() => {
     (window as any).ElectronFiddle = new ElectronFiddleMock();
   });
 
   describe('setup()', () => {
     it('renders the app', async () => {
-      document.body.innerHTML = '<div id="app" />';
       jest.useFakeTimers();
 
       const app = new App();
@@ -141,7 +144,7 @@ describe('Editors component', () => {
       (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = true;
       app.state.localPath = '/fake/path';
-      app.state.setWarningDialogTexts = jest.fn();
+      app.state.setGenericDialogOptions = jest.fn();
       app.setEditorValues = jest.fn();
 
       const editorValues = {
@@ -161,9 +164,9 @@ describe('Editors component', () => {
         });
 
       setTimeout(() => {
-        expect(app.state.isWarningDialogShowing).toBe(true);
-        app.state.warningDialogLastResult = true;
-        app.state.isWarningDialogShowing = false;
+        expect(app.state.isGenericDialogShowing).toBe(true);
+        app.state.genericDialogLastResult = true;
+        app.state.isGenericDialogShowing = false;
       });
     });
 
@@ -196,7 +199,7 @@ describe('Editors component', () => {
         const app = new App();
         (app.state as Partial<AppState>) = new MockState();
         app.state.isUnsaved = true;
-        app.state.setWarningDialogTexts = jest.fn();
+        app.state.setGenericDialogOptions = jest.fn();
         app.setEditorValues = jest.fn();
 
         expect(app.state.localPath).toBeUndefined();
@@ -217,9 +220,9 @@ describe('Editors component', () => {
           });
 
         setTimeout(() => {
-          expect(app.state.isWarningDialogShowing).toBe(true);
-          app.state.warningDialogLastResult = false;
-          app.state.isWarningDialogShowing = false;
+          expect(app.state.isGenericDialogShowing).toBe(true);
+          app.state.genericDialogLastResult = false;
+          app.state.isGenericDialogShowing = false;
         });
       });
 
@@ -227,7 +230,7 @@ describe('Editors component', () => {
         const app = new App();
         (app.state as Partial<AppState>) = new MockState();
         app.state.isUnsaved = true;
-        app.state.setWarningDialogTexts = jest.fn();
+        app.state.setGenericDialogOptions = jest.fn();
         app.setEditorValues = jest.fn();
 
         const editorValues = {
@@ -250,9 +253,9 @@ describe('Editors component', () => {
           });
 
         setTimeout(() => {
-          expect(app.state.isWarningDialogShowing).toBe(true);
-          app.state.warningDialogLastResult = true;
-          app.state.isWarningDialogShowing = false;
+          expect(app.state.isGenericDialogShowing).toBe(true);
+          app.state.genericDialogLastResult = true;
+          app.state.isGenericDialogShowing = false;
         });
       });
     });

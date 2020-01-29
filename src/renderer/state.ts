@@ -9,11 +9,12 @@ import {
   ElectronVersion,
   ElectronVersionSource,
   ElectronVersionState,
+  GenericDialogOptions,
+  GenericDialogType,
   MosaicId,
   NpmVersion,
   OutputEntry,
-  OutputOptions,
-  WarningDialogTexts
+  OutputOptions
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -90,10 +91,8 @@ export class AppState {
   @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
-  @observable public warningDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
-  @observable public confirmationDialogTexts = { label: '', ok: 'Okay', cancel: 'Cancel' };
-  @observable public warningDialogLastResult: boolean | null = null;
-  @observable public confirmationPromptLastResult: boolean | null = null;
+  @observable public genericDialogOptions = { type: GenericDialogType.warning, label: '', ok: 'Okay', cancel: 'Cancel' };
+  @observable public genericDialogLastResult: boolean | null = null;
   @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
@@ -110,8 +109,7 @@ export class AppState {
   @observable public isBisectCommandShowing: boolean;
   @observable public isConsoleShowing: boolean = false;
   @observable public isTokenDialogShowing: boolean = false;
-  @observable public isWarningDialogShowing: boolean = false;
-  @observable public isConfirmationPromptShowing: boolean = false;
+  @observable public isGenericDialogShowing: boolean = false;
   @observable public isSettingsShowing: boolean = false;
   @observable public isBisectDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
@@ -164,17 +162,18 @@ export class AppState {
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
-          this.setWarningDialogTexts({
+          this.setGenericDialogOptions({
+            type: GenericDialogType.warning,
             label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
             ok: 'Quit'
           });
 
-          this.isWarningDialogShowing = true;
+          this.isGenericDialogShowing = true;
 
           // We'll wait until the warning dialog was closed
-          when(() => !this.isWarningDialogShowing).then(() => {
+          when(() => !this.isGenericDialogShowing).then(() => {
             // The user confirmed, let's close for real.
-            if (this.warningDialogLastResult) {
+            if (this.genericDialogLastResult) {
               window.onbeforeunload = null;
 
               // Should we just close or quit?
@@ -270,24 +269,16 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toggleWarningDialog() {
-    this.isWarningDialogShowing = !this.isWarningDialogShowing;
+  @action public toggleGenericDialog() {
+    this.isGenericDialogShowing = !this.isGenericDialogShowing;
 
-    if (this.isWarningDialogShowing) {
-      this.warningDialogLastResult = null;
+    if (this.isGenericDialogShowing) {
+      this.genericDialogLastResult = null;
     }
   }
 
   @action public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
-  }
-
-  @action public toggleConfirmationPromptDialog() {
-    this.isConfirmationPromptShowing = !this.isConfirmationPromptShowing;
-
-    if (this.isConfirmationPromptShowing) {
-      this.confirmationPromptLastResult = null;
-    }
   }
 
   @action public toggleSettings() {
@@ -315,19 +306,12 @@ export class AppState {
     window.ElectronFiddle.app.setupTheme();
   }
 
-  @action public setWarningDialogTexts(input: WarningDialogTexts) {
-    this.warningDialogTexts = {
+  @action public setGenericDialogOptions(opts: GenericDialogOptions) {
+    this.genericDialogOptions = {
+      type: GenericDialogType.warning,
       ok: 'Okay',
       cancel: 'Cancel',
-      ...input
-    };
-  }
-
-  @action public setConfirmationPromptTexts(input: WarningDialogTexts) {
-    this.confirmationDialogTexts = {
-      ok: 'Okay',
-      cancel: 'Cancel',
-      ...input
+      ...opts
     };
   }
 
