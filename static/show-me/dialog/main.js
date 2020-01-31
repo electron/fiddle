@@ -5,10 +5,8 @@
 
 const { app, BrowserWindow, dialog } = require('electron')
 
-let mainWindow = null
-
 app.on('ready', () => {
-  mainWindow = new BrowserWindow({ height: 600, width: 600 })
+  const mainWindow = new BrowserWindow({ height: 600, width: 600 })
 
   // Show an "Open File" dialog and attempt to open
   // the chosen file in our window.

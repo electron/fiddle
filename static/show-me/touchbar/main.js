@@ -6,11 +6,8 @@
 const { app, BrowserWindow, TouchBar } = require('electron')
 const { TouchBarLabel, TouchBarButton, TouchBarSpacer } = TouchBar
 
-let mainWindow = null
-
 app.on('ready', () => {
-  mainWindow = new BrowserWindow({ height: 600, width: 600 })
-  mainWindow.loadFile('index.html')
+  const mainWindow.loadFile('index.html')
 
   // This API only works on macOS devices with a TouchBar.
   if (process.platform !== 'darwin') return
