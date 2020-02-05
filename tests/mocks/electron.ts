@@ -155,7 +155,7 @@ const electronMock = {
     writeText: jest.fn(),
     writeImage: jest.fn()
   },
-  crashReporters: {
+  crashReporter: {
     start: jest.fn(),
   },
   dialog: {
