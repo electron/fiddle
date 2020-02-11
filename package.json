@@ -68,6 +68,7 @@
     "@electron-forge/maker-squirrel": "^6.0.0-beta.47",
     "@electron-forge/maker-zip": "^6.0.0-beta.47",
     "@electron-forge/publisher-github": "^6.0.0-beta.47",
+    "@sentry/electron": "^1.2.0",
     "@types/classnames": "^2.2.9",
     "@types/enzyme": "^3.10.4",
     "@types/fs-extra": "^8.0.1",
