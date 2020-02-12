@@ -18,9 +18,12 @@ describe('BisectDialog component', () => {
     }));
 
   beforeEach(() => {
+    const versions = generateVersionRange(5);
+
     store = {
-      versions: generateVersionRange(5),
-      versionsToShow: [ElectronReleaseChannel.stable],
+      versions,
+      versionsToShow: versions,
+      channelsToShow: [ElectronReleaseChannel.stable],
       statesToShow: [ElectronVersionState.ready],
       setVersion: jest.fn()
     };
@@ -58,7 +61,7 @@ describe('BisectDialog component', () => {
       const wrapper = shallow(<BisectDialog appState={store} />);
       const instance: BisectDialog = wrapper.instance() as any;
 
-      expect(instance.state.startIndex).toBeUndefined();
+      expect(instance.state.startIndex).toBe(0);
       instance.onBeginSelect(store.versions[2]);
       expect(instance.state.startIndex).toBe(2);
     });
@@ -69,7 +72,7 @@ describe('BisectDialog component', () => {
       const wrapper = shallow(<BisectDialog appState={store} />);
       const instance: BisectDialog = wrapper.instance() as any;
 
-      expect(instance.state.endIndex).toBeUndefined();
+      expect(instance.state.endIndex).toBe(0);
       instance.onEndSelect(store.versions[2]);
       expect(instance.state.endIndex).toBe(2);
     });

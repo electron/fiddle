@@ -1,22 +1,19 @@
-import { Button, Dialog, Label, MenuItem } from '@blueprintjs/core';
-import { Select } from '@blueprintjs/select';
+import { Button, ButtonGroup, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { ElectronVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
 import { AppState } from '../state';
-import { filterItem, getItemIcon, getVersionsFromAppState, renderItem } from './commands-version-chooser';
-
-const ElectronVersionSelect = Select.ofType<ElectronVersion>();
+import { VersionSelect } from './version-select';
 
 export interface BisectDialogProps {
   appState: AppState;
 }
 
 export interface BisectDialogState {
-  startIndex?: number;
-  endIndex?: number;
+  startIndex: number;
+  endIndex: number;
   allVersions: Array<ElectronVersion>;
 }
 
@@ -36,8 +33,11 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
     this.onBeginSelect = this.onBeginSelect.bind(this);
     this.onEndSelect = this.onEndSelect.bind(this);
 
-    const allVersions = getVersionsFromAppState(this.props.appState);
-    this.state = { allVersions };
+    this.state = {
+      allVersions: this.props.appState.versionsToShow,
+      startIndex: 0,
+      endIndex: 0
+    };
   }
 
   public onBeginSelect(version: ElectronVersion) {
@@ -118,39 +118,23 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
         <div className='bp3-dialog-body'>
           <Label>
             Earliest Version
-            <ElectronVersionSelect
-              filterable={true}
-              items={allVersions}
-              itemRenderer={renderItem}
-              itemPredicate={filterItem}
-              onItemSelect={this.onBeginSelect}
-              noResults={<MenuItem disabled={true} text='No results.' />}
-            >
-              <Button
-                text={startIndex ? `v${allVersions[startIndex].version}` : ``}
-                icon={startIndex ? getItemIcon(allVersions[startIndex]) : 'small-minus'}
-                fill={true}
+            <ButtonGroup fill={true}>
+              <VersionSelect
+                currentVersion={allVersions[startIndex]}
+                appState={this.props.appState}
+                onVersionSelect={this.onBeginSelect}
               />
-            </ElectronVersionSelect>
+            </ButtonGroup>
           </Label>
           <Label>
             Latest Version
-            <ElectronVersionSelect
-              filterable={true}
-              items={allVersions.slice(0, startIndex!)}
-              itemRenderer={renderItem}
-              itemPredicate={filterItem}
-              onItemSelect={this.onEndSelect}
-              noResults={<MenuItem disabled={true} text='No results.' />}
-              disabled={!startIndex}
-            >
-              <Button
-                text={endIndex ? `v${allVersions[endIndex].version}` : ``}
-                icon={endIndex ? getItemIcon(allVersions[endIndex]) : 'small-minus'}
-                fill={true}
-                disabled={!startIndex}
+            <ButtonGroup fill={true}>
+              <VersionSelect
+                currentVersion={allVersions[endIndex]}
+                appState={this.props.appState}
+                onVersionSelect={this.onEndSelect}
               />
-            </ElectronVersionSelect>
+            </ButtonGroup>
           </Label>
         </div>
         <div className='bp3-dialog-footer'>

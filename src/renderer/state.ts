@@ -32,11 +32,13 @@ import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
+import { sortedElectronMap } from '../utils/sorted-electron-map';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
   getDefaultVersion,
   getElectronVersions,
+  getReleaseChannel,
   getUpdatedElectronVersions,
   saveLocalVersions
 } from './versions';
@@ -73,8 +75,8 @@ export class AppState {
   @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
   @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
   @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
-  @observable public versionsToShow: Array<ElectronReleaseChannel> =
-    this.retrieve('versionsToShow') as Array<ElectronReleaseChannel>
+  @observable public channelsToShow: Array<ElectronReleaseChannel> =
+    this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>
     || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
   @observable public statesToShow: Array<ElectronVersionState> =
     this.retrieve('statesToShow') as Array<ElectronVersionState>
@@ -156,7 +158,7 @@ export class AppState {
     autorun(() => this.save('isEnablingElectronLogging', this.isEnablingElectronLogging));
     autorun(() => this.save('executionFlags', this.executionFlags));
     autorun(() => this.save('version', this.version));
-    autorun(() => this.save('versionsToShow', this.versionsToShow));
+    autorun(() => this.save('channelsToShow', this.channelsToShow));
     autorun(() => this.save('statesToShow', this.statesToShow));
 
     autorun(() => {
@@ -212,6 +214,31 @@ export class AppState {
     } else {
       return this.versions[defaultVersion];
     }
+  }
+
+  /**
+   * Returns an array of Electron versions to show given the
+   * current settings for states and channels to display
+   */
+  @computed get versionsToShow(): Array<ElectronVersion> {
+    return sortedElectronMap<ElectronVersion>(this.versions, (_key, item) => item)
+      .filter((item) => {
+        if (!item) {
+          return false;
+        }
+
+        // Check if we want to show the version
+        if (!this.channelsToShow.includes(getReleaseChannel(item))) {
+          return false;
+        }
+
+        // Check if we want to show the state
+        if (!this.statesToShow.includes(item.state)) {
+          return false;
+        }
+
+        return true;
+      });
   }
 
   /**
