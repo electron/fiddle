@@ -54,6 +54,14 @@ describe('BisectDialog component', () => {
       allVersions: generateVersionRange(5)
     });
     expect(wrapper).toMatchSnapshot();
+
+    // Incorrect order
+    wrapper.setState({
+      startIndex: 3,
+      endIndex: 4,
+      allVersions: generateVersionRange(5)
+    });
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('onBeginSelect()', () => {

@@ -1,4 +1,4 @@
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import { ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
@@ -6,8 +6,8 @@ import { VersionChooser } from '../../../src/renderer/components/commands-versio
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
-const { ready, unknown, downloading } = ElectronVersionState;
-const { remote, local } = ElectronVersionSource;
+const { unknown } = ElectronVersionState;
+const { remote } = ElectronVersionSource;
 
 describe('VersionSelect component', () => {
   let store: any;
@@ -25,14 +25,17 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
+    const versions = {
+      ...mockVersions,
+      '3.1.3': undefined,
+      '1.0.0': { ...mockVersion1 },
+      '3.0.0-unsupported': { ...mockVersion2 }
+    };
+
     store = {
       version: '2.0.2',
-      versions: {
-        ...mockVersions,
-        '3.1.3': undefined,
-        '1.0.0': { ...mockVersion1 },
-        '3.0.0-unsupported': { ...mockVersion2 }
-      },
+      versionsToShow: Object.values(versions).filter((v) => !!v),
+      versions,
       channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       setVersion: jest.fn(),
@@ -47,5 +50,15 @@ describe('VersionSelect component', () => {
       <VersionChooser appState={store} />
     );
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('selects a new version', () => {
+    const wrapper = mount(
+      <VersionChooser appState={store} />
+    );
+
+    const onVersionSelect: any = wrapper.find('VersionSelect').prop('onVersionSelect');
+    onVersionSelect(mockVersion1);
+    expect(store.setVersion).toHaveBeenCalledWith(mockVersion1.version);
   });
 });

@@ -1,31 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`VersionSelect component handles corrupt data 1`] = `
-<Blueprint3.Select
-  disabled={false}
-  filterable={true}
-  itemPredicate={[Function]}
-  itemRenderer={[Function]}
-  noResults={
-    <Blueprint3.MenuItem
-      disabled={true}
-      multiline={false}
-      popoverProps={Object {}}
-      shouldDismissPopover={true}
-      text="No results."
-    />
-  }
-  onItemSelect={[Function]}
->
-  <Blueprint3.Button
-    className="version-chooser"
-    disabled={false}
-    icon="cloud"
-    text="Electron v1.0.0"
-  />
-</Blueprint3.Select>
-`;
-
 exports[`VersionSelect component renderItem() renders an item 1`] = `
 <Blueprint3.MenuItem
   active={true}
