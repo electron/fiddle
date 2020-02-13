@@ -16,6 +16,7 @@ export interface EditorProps {
   options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   onChange?: (value: string, event: MonacoType.editor.IModelContentChangedEvent) => void;
+  setFocused: (id: EditorId) => void;
 }
 
 export class Editor extends React.Component<EditorProps> {
@@ -27,7 +28,6 @@ export class Editor extends React.Component<EditorProps> {
 
   constructor(props: EditorProps) {
     super(props);
-
     this.language = props.id === 'html' ? 'html' : 'javascript';
   }
 
@@ -78,6 +78,12 @@ export class Editor extends React.Component<EditorProps> {
         contextmenu: false,
         model: null,
         ...monacoOptions
+      });
+
+      // mark this editor as focused whenever it is
+      this.editor.onDidFocusEditorText(() => {
+        const { id, setFocused } = this.props;
+        setFocused(id);
       });
 
       await this.editorDidMount(this.editor);

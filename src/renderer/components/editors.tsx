@@ -43,6 +43,7 @@ export interface EditorsState {
   monaco?: typeof MonacoType;
   isMounted?: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
+  focused?: EditorId;
 }
 
 @observer
@@ -61,6 +62,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.renderEditor = this.renderEditor.bind(this);
     this.renderTile = this.renderTile.bind(this);
     this.renderGenericPanel = this.renderGenericPanel.bind(this);
+    this.setFocused = this.setFocused.bind(this);
 
     this.state = { monacoOptions: defaultMonacoOptions };
 
@@ -237,6 +239,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         monaco={monaco!}
         appState={appState}
         monacoOptions={defaultMonacoOptions}
+        setFocused={this.setFocused}
       />
     );
   }
@@ -249,6 +252,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     return (
       <Mosaic<EditorId | PanelId>
+        className={`focused__${this.state.focused}`}
         onChange={this.onChange}
         value={appState.mosaicArrangement}
         zeroStateView={renderNonIdealState(appState)}
@@ -290,5 +294,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
 
     activateTheme(monaco, undefined, this.props.appState.theme);
+  }
+
+  /**
+   * Sets the currently-focused editor. This will impact the editor's
+   * z-index, ensuring that its intellisense menus don't get clipped
+   * by the other editor windows.
+   * @param id Editor ID
+   */
+  public setFocused(id: EditorId): void {
+    this.setState({ focused: id });
   }
 }

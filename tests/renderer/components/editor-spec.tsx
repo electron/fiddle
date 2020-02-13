@@ -9,6 +9,7 @@ describe('Editor component', () => {
   let monaco: any;
   const editorDispose = jest.fn();
   const updateOptions = jest.fn();
+  const onDidFocusEditorText = jest.fn();
 
   beforeEach(() => {
     store = {
@@ -24,8 +25,9 @@ describe('Editor component', () => {
       editor: {
         create: jest.fn(() => ({
           dispose: editorDispose,
+          onDidFocusEditorText,
           setModel: jest.fn(),
-          restoreViewState: jest.fn()
+          restoreViewState: jest.fn(),
         })),
         createModel: jest.fn(() => ({
           updateOptions
@@ -38,7 +40,7 @@ describe('Editor component', () => {
 
   it('renders the editor container', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} setFocused={() => undefined} />
     );
 
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
@@ -46,13 +48,13 @@ describe('Editor component', () => {
 
   it('correctly sets the language', () => {
     let wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} setFocused={() => undefined} />
     );
 
     expect((wrapper.instance() as any).language).toBe('javascript');
 
     wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.html} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.html} setFocused={() => undefined} />
     );
 
     expect((wrapper.instance() as any).language).toBe('html');
@@ -60,7 +62,7 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const wrapper = shallow(
-      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} />
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.main} setFocused={() => undefined} />
     );
 
     expect((wrapper as any)
@@ -79,6 +81,7 @@ describe('Editor component', () => {
           monacoOptions={{}}
           id={EditorId.main}
           editorDidMount={didMount}
+          setFocused={() => undefined}
         />
       );
       const instance: any = wrapper.instance();
@@ -104,6 +107,7 @@ describe('Editor component', () => {
           monacoOptions={{}}
           id={EditorId.main}
           editorDidMount={() => undefined}
+          setFocused={() => undefined}
         />
       );
       const instance: any = wrapper.instance();
@@ -127,6 +131,7 @@ describe('Editor component', () => {
           monacoOptions={{}}
           id={EditorId.main}
           editorDidMount={() => undefined}
+          setFocused={() => undefined}
         />
       );
       const instance: any = wrapper.instance();
@@ -148,6 +153,7 @@ describe('Editor component', () => {
           monacoOptions={{}}
           id={EditorId.main}
           editorDidMount={didMount}
+          setFocused={() => undefined}
         />
       );
       const instance: any = wrapper.instance();
@@ -158,6 +164,24 @@ describe('Editor component', () => {
       expect(updateOptions).toHaveBeenCalledWith(expect.objectContaining({
         tabSize: 2
       }));
+    });
+
+    it('sets up a listener on focused text editor', async () => {
+      const wrapper = shallow(
+        <Editor
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          id={EditorId.main}
+          editorDidMount={() => undefined}
+          setFocused={() => undefined}
+        />
+      );
+      const instance: any = wrapper.instance();
+
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
+      expect(onDidFocusEditorText).toHaveBeenCalled();
     });
   });
 
@@ -170,6 +194,7 @@ describe('Editor component', () => {
         monacoOptions={{}}
         id={EditorId.main}
         editorDidMount={didMount}
+        setFocused={() => undefined}
       />
     );
     const instance: any = wrapper.instance();

@@ -24,6 +24,21 @@
   }
 }
 
+// update if list of Editor ID changes
+@editor-ids: main, renderer, html, preload;
+
+// takes each editor ID and increase its z-index if the parent Mosiac root
+// has focused__id class for that specific id.
+each(@editor-ids, {
+  .focused__@{value}.mosaic .mosaic-window.@{value} {
+    z-index: 2;
+  }
+});
+
+.mosaic-window {
+  z-index: 1;
+}
+
 @keyframes fadein {
   from { opacity: 0; }
   to { opacity: 1; }
