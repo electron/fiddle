@@ -21,11 +21,14 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
   public continueBisect(isGood: boolean) {
     const { appState } = this.props;
     const response = appState.Bisector!.continue(isGood);
+
     if (Array.isArray(response)) {
       this.terminateBisect();
+
       const [minRev, maxRev] = response;
       const [minVer, maxVer] = [minRev.version, maxRev.version];
       const message = `Check between versions ${minVer} and ${maxVer}.`;
+
       appState.pushOutput(`[BISECT] Complete: ${message}`);
       appState.setGenericDialogOptions({
         type: GenericDialogType.success,

@@ -10,6 +10,7 @@ import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
+
 jest.mock('../../src/renderer/content', () => ({
   isContentUnchanged: jest.fn(),
   getContent: jest.fn()
@@ -20,19 +21,24 @@ jest.mock('../../src/renderer/binary', () => ({
 jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn()
 }));
-jest.mock('../../src/renderer/versions', () => ({
-  getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
-    return require('../mocks/electron-versions').mockVersionsArray;
-  }),
-  getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
-  getDefaultVersion: () => '2.0.2',
-  ElectronReleaseChannel: {
-    stable: 'Stable',
-    beta: 'Beta'
-  },
-  addLocalVersion: jest.fn(),
-  saveLocalVersions: jest.fn()
-}));
+jest.mock('../../src/renderer/versions', () => {
+  const { getReleaseChannel } = jest.requireActual('../../src/renderer/versions');
+
+  return {
+    getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
+      return require('../mocks/electron-versions').mockVersionsArray;
+    }),
+    getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+    getDefaultVersion: () => '2.0.2',
+    ElectronReleaseChannel: {
+      stable: 'Stable',
+      beta: 'Beta'
+    },
+    addLocalVersion: jest.fn(),
+    saveLocalVersions: jest.fn(),
+    getReleaseChannel
+  };
+});
 jest.mock('../../src/utils/get-title', () => ({
   getName: jest.fn()
 }));
@@ -242,6 +248,33 @@ describe('AppState', () => {
       appState.isTourShowing = true;
       appState.showTour();
       expect(appState.isTourShowing).toBe(true);
+    });
+  });
+
+  describe('versionsToShow()', () => {
+    it('returns all versions for no filters', () => {
+      expect(appState.versionsToShow.length).toEqual(Object.keys(appState.versions).length);
+    });
+
+    it('handles empty items', () => {
+      const originalLength = Object.keys(appState.versions).length;
+      appState.versions.foo = undefined as any;
+
+      expect(appState.versionsToShow.length).toEqual(originalLength);
+    });
+
+    it('excludes channels', () => {
+      appState.channelsToShow = [ 'Unsupported' as any ];
+      expect(appState.versionsToShow.length).toEqual(0);
+      appState.channelsToShow = [ 'Stable' as any ];
+      expect(appState.versionsToShow.length).toEqual(3);
+    });
+
+    it('excludes states', () => {
+      appState.statesToShow = [ ElectronVersionState.downloading ];
+      expect(appState.versionsToShow.length).toEqual(0);
+      appState.statesToShow = [ ElectronVersionState.ready ];
+      expect(appState.versionsToShow.length).toEqual(3);
     });
   });
 

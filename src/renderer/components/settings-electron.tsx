@@ -85,9 +85,9 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     const { appState } = this.props;
 
     if (!checked) {
-      appState.versionsToShow = appState.versionsToShow.filter((c) => c !== id);
+      appState.channelsToShow = appState.channelsToShow.filter((c) => c !== id);
     } else {
-      appState.versionsToShow.push(id as ElectronReleaseChannel);
+      appState.channelsToShow.push(id as ElectronReleaseChannel);
     }
   }
 
@@ -244,7 +244,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
   private renderVersionChannelOptions(): JSX.Element {
     const { appState } = this.props;
     const getIsChecked = (channel: ElectronReleaseChannel) => {
-      return appState.versionsToShow.includes(channel);
+      return appState.channelsToShow.includes(channel);
     };
 
     return (
@@ -316,11 +316,11 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @returns {Array<JSX.Element>}
    */
   private renderTableRows(): Array<JSX.Element | null> {
-    const { versions, versionsToShow, statesToShow } = this.props.appState;
+    const { versions, channelsToShow, statesToShow } = this.props.appState;
 
     return sortedElectronMap<JSX.Element | null>(versions, (key, item) => {
       // Check if we want to show the version
-      if (!versionsToShow.includes(getReleaseChannel(item))) {
+      if (!channelsToShow.includes(getReleaseChannel(item))) {
         return null;
       }
 

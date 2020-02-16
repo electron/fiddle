@@ -162,11 +162,11 @@ export class RemoteLoader {
     // check if version is part of release channel
     const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(version);
 
-    if (!this.appState.versionsToShow.includes(versionReleaseChannel)) {
+    if (!this.appState.channelsToShow.includes(versionReleaseChannel)) {
       const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
       if (!ok) return false;
 
-      this.appState.versionsToShow.push(versionReleaseChannel);
+      this.appState.channelsToShow.push(versionReleaseChannel);
     }
 
     this.appState.setVersion(version);

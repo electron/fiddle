@@ -13,7 +13,7 @@ describe('ElectronSettings component', () => {
     store = {
       version: '2.0.1',
       versions: { ...mockVersions },
-      versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
       statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
@@ -178,7 +178,7 @@ describe('ElectronSettings component', () => {
         }
       });
 
-      expect(store.versionsToShow).toEqual([
+      expect(store.channelsToShow).toEqual([
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly
       ]);

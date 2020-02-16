@@ -66,7 +66,7 @@ class MockStore {
       version: '4.0.0-beta'
     }
   };
-  public versionsToShow = [ElectronReleaseChannel.stable];
+  public channelsToShow = [ElectronReleaseChannel.stable];
   public setVersion = jest.fn();
 }
 
@@ -188,7 +188,7 @@ describe('RemoteLoader', () => {
 
       const result = await instance.setElectronVersionWithRef('4.0.0-beta');
       expect(result).toBe(true);
-      expect(store.versionsToShow).toContain(ElectronReleaseChannel.beta);
+      expect(store.channelsToShow).toContain(ElectronReleaseChannel.beta);
     });
 
     it('does not load unsupported versions of Fiddle', async () => {
