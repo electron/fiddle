@@ -141,6 +141,11 @@ export class AppState {
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
 
+    ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
+    ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
+    ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
+
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);

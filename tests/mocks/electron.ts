@@ -118,7 +118,9 @@ const app = {
   setJumpList: jest.fn(),
   requestSingleInstanceLock: jest.fn(),
   on: jest.fn(),
-  once: jest.fn()
+  off: jest.fn(),
+  once: jest.fn(),
+  removeAllListeners: jest.fn(),
 };
 
 const mainWindowStub = CreateWindowStub();

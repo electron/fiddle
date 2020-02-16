@@ -20,6 +20,7 @@ export class IpcMainManager extends EventEmitter {
     super();
 
     ipcMainEvents.forEach((name) => {
+      ipcMain.removeAllListeners(name);
       ipcMain.on(name, (...args: Array<any>) => this.emit(name, ...args));
     });
 

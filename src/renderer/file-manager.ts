@@ -17,6 +17,11 @@ export class FileManager {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_TEMPLATE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+
     ipcRendererManager.on(IpcEvents.FS_OPEN_FIDDLE, (_event, filePath) => {
       this.openFiddle(filePath);
     });

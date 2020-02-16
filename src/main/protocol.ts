@@ -76,6 +76,7 @@ export const listenForProtocolHandler = () => {
   const gotTheLock = app.requestSingleInstanceLock();
   if (!gotTheLock) app.quit();
 
+  app.removeAllListeners('open-url');
   app.on('open-url', (_, url) => {
     if (url.startsWith(`${PROTOCOL}://`)) {
       handlePotentialProtocolLaunch(url);
