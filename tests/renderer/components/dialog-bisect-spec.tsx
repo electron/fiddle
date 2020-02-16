@@ -62,6 +62,10 @@ describe('BisectDialog component', () => {
       allVersions: generateVersionRange(5)
     });
     expect(wrapper).toMatchSnapshot();
+
+    // Help displayed
+    (wrapper.instance() as any).showHelp();
+    expect(wrapper).toMatchSnapshot();
   });
 
   describe('onBeginSelect()', () => {
@@ -69,7 +73,7 @@ describe('BisectDialog component', () => {
       const wrapper = shallow(<BisectDialog appState={store} />);
       const instance: BisectDialog = wrapper.instance() as any;
 
-      expect(instance.state.startIndex).toBe(0);
+      expect(instance.state.startIndex).toBe(10);
       instance.onBeginSelect(store.versions[2]);
       expect(instance.state.startIndex).toBe(2);
     });
@@ -106,7 +110,7 @@ describe('BisectDialog component', () => {
 
       const instance: BisectDialog = wrapper.instance() as any;
       await instance.onSubmit();
-      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5).reverse());
+      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5));
       expect(store.Bisector).toBeDefined();
       expect(store.setVersion).toHaveBeenCalledWith(version);
     });
@@ -126,10 +130,51 @@ describe('BisectDialog component', () => {
         startIndex: 4,
         endIndex: undefined
       });
+
       const instance2: BisectDialog = wrapper.instance() as any;
       await instance2.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
+    });
+  });
 
+  describe('items disabled', () => {
+    let instance: BisectDialog;
+
+    beforeEach(() => {
+      const wrapper = shallow(<BisectDialog appState={store} />);
+      instance = wrapper.instance() as any;
+    });
+
+    describe('isEarliestItemDisabled', () => {
+      it('enables a version older than the "latest version"', () => {
+        instance.setState({ endIndex: 2 });
+
+        const result = instance.isEarliestItemDisabled(store.versions[3]);
+        expect(result).toBeFalsy();
+      });
+
+      it('disables a version newer than the "latest version"', () => {
+        instance.setState({ endIndex: 2 });
+
+        const result = instance.isEarliestItemDisabled(store.versions[1]);
+        expect(result).toBeTruthy();
+      });
+    });
+
+    describe('isLatestItemDisabled', () => {
+      it('enables a version newer than the "earliest version"', () => {
+        instance.setState({ startIndex: 2 });
+
+        const result = instance.isLatestItemDisabled(store.versions[1]);
+        expect(result).toBeFalsy();
+      });
+
+      it('disables a version older than the "earliest version"', () => {
+        instance.setState({ startIndex: 2 });
+
+        const result = instance.isLatestItemDisabled(store.versions[4]);
+        expect(result).toBeTruthy();
+      });
     });
   });
 });
