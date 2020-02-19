@@ -92,7 +92,6 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
    * Can we get this show on the road?
    */
   get canSubmit(): boolean {
-    console.log(`Calculating cansubmit`);
     return this.state.startIndex > this.state.endIndex;
   }
 
@@ -220,7 +219,7 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
     // 1: 4.0.0
     // 2: 3.0.0
     // ...
-    return allVersions.indexOf(version) < endIndex;
+    return allVersions.indexOf(version) < endIndex + 1;
   }
 
   /**
@@ -232,6 +231,6 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
   public isLatestItemDisabled(version: ElectronVersion): boolean {
     const { allVersions, startIndex } = this.state;
 
-    return allVersions.indexOf(version) > startIndex;
+    return allVersions.indexOf(version) > startIndex - 1;
   }
 }
