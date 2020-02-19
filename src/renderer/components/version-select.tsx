@@ -95,6 +95,7 @@ export interface VersionSelectProps {
   currentVersion: ElectronVersion;
   onVersionSelect: (version: ElectronVersion) => void;
   buttonGroupProps?: IButtonGroupProps;
+  itemDisabled?: keyof ElectronVersion | ((item: ElectronVersion, index: number) => boolean);
 }
 
 /**
@@ -107,7 +108,7 @@ export interface VersionSelectProps {
 @observer
 export class VersionSelect extends React.Component<VersionSelectProps, VersionSelectState> {
   public render() {
-    const { currentVersion } = this.props;
+    const { currentVersion, itemDisabled } = this.props;
     const { version } = currentVersion;
 
     return (
@@ -116,6 +117,7 @@ export class VersionSelect extends React.Component<VersionSelectProps, VersionSe
         items={this.props.appState.versionsToShow}
         itemRenderer={renderItem}
         itemPredicate={filterItem}
+        itemDisabled={itemDisabled}
         onItemSelect={this.props.onVersionSelect}
         noResults={<MenuItem disabled={true} text='No results.' />}
         disabled={!!this.props.disabled}
