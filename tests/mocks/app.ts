@@ -10,7 +10,8 @@ export class AppMock {
     main: 'main-content',
     preload: 'preload-content',
     renderer: 'renderer-content',
-    html: 'html-content'
+    html: 'html-content',
+    css: 'css-content'
   }));
 
   public setupTheme = jest.fn();

@@ -2,7 +2,7 @@ import * as fsExtraType from 'fs-extra';
 import * as pathType from 'path';
 
 import { EditorValues } from '../interfaces';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../shared-constants';
 import { fancyImport } from '../utils/import';
 
 /**
@@ -41,6 +41,7 @@ export async function getTemplateValues(name: string): Promise<EditorValues> {
     renderer: await getFile(RENDERER_JS_NAME),
     main: await getFile(MAIN_JS_NAME),
     html: await getFile(INDEX_HTML_NAME),
-    preload: await getFile(PRELOAD_JS_NAME)
+    preload: await getFile(PRELOAD_JS_NAME),
+    css: await getFile(STYLES_CSS_NAME)
   };
 }

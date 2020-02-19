@@ -44,8 +44,8 @@ describe('templates', () => {
       fs.existsSync.mockReturnValue(true);
 
       await getTemplateValues('test');
-      expect(fs.existsSync).toHaveBeenCalledTimes(4);
-      expect(fs.readdirSync).toHaveBeenCalledTimes(4);
+      expect(fs.existsSync).toHaveBeenCalledTimes(5);
+      expect(fs.readdirSync).toHaveBeenCalledTimes(5);
     });
   });
 });

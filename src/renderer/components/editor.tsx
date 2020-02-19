@@ -28,7 +28,17 @@ export class Editor extends React.Component<EditorProps> {
 
   constructor(props: EditorProps) {
     super(props);
-    this.language = props.id === 'html' ? 'html' : 'javascript';
+
+    switch(props.id) {
+      case 'html':
+        this.language = 'html';
+        break;
+      case 'css':
+        this.language = 'css';
+        break;
+      default:
+        this.language = 'javascript';
+    }
   }
 
   public shouldComponentUpdate() {
