@@ -247,7 +247,9 @@ export function setupMenu() {
 
       // Tweak "View" menu
       if (label === 'View' && isSubmenu(item.submenu)) {
-        item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools'); // Remove "Toggle Developer Tools"
+        // remove "Reload" (has weird behaviour) and "Toggle Developer Tools"
+        item.submenu = item.submenu
+          .filter((subItem) => subItem.label !== 'Toggle Developer Tools' && subItem.label !== 'Reload');
         item.submenu.push({ type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }); // Add zooming actions
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Soft Wrap',
