@@ -1,7 +1,7 @@
 import * as Octokit from '@octokit/rest';
 import { when } from 'mobx';
 import { EditorId, EditorValues, GenericDialogType } from '../interfaces';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -25,7 +25,7 @@ export class RemoteLoader {
 
   public async loadFiddleFromElectronExample(_: any, exampleInfo: { path: string; ref: string }) {
     console.log(`Loading fiddle from Electron example`, _, exampleInfo);
-    const {path, ref} = exampleInfo;
+    const { path, ref } = exampleInfo;
     const prettyName = path.replace('docs/fiddles/', '');
     const ok = await this.verifyRemoteLoad(`'${prettyName}' example from the Electron docs for version ${ref}`);
     if (!ok) return;
@@ -34,7 +34,7 @@ export class RemoteLoader {
   }
 
   public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
-    const {id} = gistInfo;
+    const { id } = gistInfo;
     const ok = await this.verifyRemoteLoad(`gist`);
     if (!ok) return;
 
@@ -60,6 +60,7 @@ export class RemoteLoader {
         renderer: await getContent(EditorId.renderer, this.appState.version),
         main: await getContent(EditorId.main, this.appState.version),
         preload: await getContent(EditorId.preload, this.appState.version),
+        css: await getContent(EditorId.css, this.appState.version)
       };
 
       const loaders: Array<Promise<void>> = [];
@@ -96,6 +97,11 @@ export class RemoteLoader {
           case PRELOAD_JS_NAME:
             loaders.push(fetch(child.download_url)
               .then((r) => r.text()).then((t) => { values.preload = t; })
+            );
+
+          case STYLES_CSS_NAME:
+            loaders.push(fetch(child.download_url)
+              .then((r) => r.text()).then((t) => { values.css = t; })
             );
 
             break;
@@ -143,7 +149,8 @@ export class RemoteLoader {
         html: this.getContentOrEmpty(gist, INDEX_HTML_NAME),
         main: this.getContentOrEmpty(gist, MAIN_JS_NAME),
         renderer: this.getContentOrEmpty(gist, RENDERER_JS_NAME),
-        preload: this.getContentOrEmpty(gist, PRELOAD_JS_NAME)
+        preload: this.getContentOrEmpty(gist, PRELOAD_JS_NAME),
+        css: this.getContentOrEmpty(gist, STYLES_CSS_NAME)
       }, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
@@ -232,7 +239,7 @@ export class RemoteLoader {
    * @returns {boolean}
    */
   private async handleLoadingSuccess(values: Partial<EditorValues>, gistId: string): Promise<boolean> {
-    await window.ElectronFiddle.app.replaceFiddle(values, {gistId});
+    await window.ElectronFiddle.app.replaceFiddle(values, { gistId });
     return true;
   }
 

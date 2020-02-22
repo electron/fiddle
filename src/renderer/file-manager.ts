@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, STYLES_CSS_NAME, RENDERER_JS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
@@ -63,6 +63,7 @@ export class FileManager {
       main: await this.readFile(path.join(filePath, MAIN_JS_NAME)),
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
       preload: await this.readFile(path.join(filePath, PRELOAD_JS_NAME)),
+      css: await this.readFile(path.join(filePath, STYLES_CSS_NAME))
     };
 
 
@@ -126,6 +127,7 @@ export class FileManager {
     output.set(MAIN_JS_NAME, values.main);
     output.set(INDEX_HTML_NAME, values.html);
     output.set(PRELOAD_JS_NAME, values.preload);
+    output.set(STYLES_CSS_NAME, values.css);
     output.set(PACKAGE_NAME, values.package!);
 
     for (const transform of transforms) {

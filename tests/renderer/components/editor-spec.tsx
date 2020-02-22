@@ -58,6 +58,13 @@ describe('Editor component', () => {
     );
 
     expect((wrapper.instance() as any).language).toBe('html');
+
+    wrapper = shallow(
+      <Editor appState={store} monaco={monaco} monacoOptions={{}} id={EditorId.css} setFocused={() => undefined} />
+    );
+
+    expect((wrapper.instance() as any).language).toBe('css');
+
   });
 
   it('denies updates', () => {

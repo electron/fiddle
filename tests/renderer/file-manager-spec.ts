@@ -61,6 +61,7 @@ describe('FileManager', () => {
         renderer: '',
         preload: '',
         main: '',
+        css: ''
       }, {filePath: fakePath});
     });
 
@@ -82,12 +83,12 @@ describe('FileManager', () => {
   });
 
   describe('saveFiddle()', () => {
-    it('saves as a local fiddle', async () => {
+    it('saves all non-empty files in Fiddle', async () => {
       const fs = require('fs-extra');
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
     });
 
     it('removes a file that is newly empty', async () => {
@@ -106,8 +107,8 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(5);
     });
 
     it('handles an error (remove)', async () => {
@@ -150,7 +151,7 @@ describe('FileManager', () => {
 
       await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(5);
+      expect(fs.outputFile).toHaveBeenCalledTimes(6);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 

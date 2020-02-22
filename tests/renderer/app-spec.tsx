@@ -290,18 +290,21 @@ describe('Editors component', () => {
         model: { setValue: jest.fn() }
       };
       app.state.closedPanels.preload = {};
+      app.state.closedPanels.css = {};
 
       app.setEditorValues({
         html: 'html-value',
         main: 'main-value',
         renderer: 'renderer-value',
-        preload: 'preload-value'
+        preload: 'preload-value',
+        css: 'css-value'
       });
 
       expect(
         (app.state.closedPanels.main as EditorBackup)!.model!.setValue
       ).toHaveBeenCalledWith('main-value');
       expect(app.state.closedPanels.preload).toEqual({ value: 'preload-value' });
+      expect(app.state.closedPanels.css).toEqual({ value: 'css-value' });
 
       window.ElectronFiddle.editors.main = oldMainEditor;
     });

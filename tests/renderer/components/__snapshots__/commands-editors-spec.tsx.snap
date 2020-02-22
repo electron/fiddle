@@ -47,6 +47,16 @@ exports[`EditorDropdown component renders 1`] = `
           shouldDismissPopover={true}
           text="HTML (index.html)"
         />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-off"
+          id="css"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Stylesheet (styles.css)"
+        />
       </Blueprint3.Menu>
     }
     defaultIsOpen={false}
@@ -127,6 +137,16 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="HTML (index.html)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-off"
+          id="css"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Stylesheet (styles.css)"
         />
       </Blueprint3.Menu>
     }

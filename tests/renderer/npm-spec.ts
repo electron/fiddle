@@ -87,7 +87,8 @@ describe('npm', () => {
         html: '',
         main: mockMain,
         renderer: '',
-        preload: ''
+        preload: '',
+        css: ''
       });
 
       expect(result).toEqual(['say']);

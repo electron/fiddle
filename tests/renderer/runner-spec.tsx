@@ -262,7 +262,8 @@ describe('Runner component', () => {
         html: '',
         main: `const a = require('say')`,
         renderer: '',
-        preload: ''
+        preload: '',
+        css: ''
       }, '/fake/path');
 
       expect(installModules).toHaveBeenCalledTimes(0);
@@ -276,7 +277,8 @@ describe('Runner component', () => {
         html: '',
         main: `const a = require('say')`,
         renderer: '',
-        preload: ''
+        preload: '',
+        css: ''
       }, '/fake/path');
 
       expect(installModules).toHaveBeenCalledTimes(1);

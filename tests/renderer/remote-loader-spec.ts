@@ -3,25 +3,28 @@ import { GenericDialogType } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { ElectronReleaseChannel } from '../../src/renderer/versions';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../../src/shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../src/shared-constants';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('../../src/utils/octokit');
 
 const mockGistFiles = {
-    [RENDERER_JS_NAME]: {
-      content: 'renderer-content'
-    },
-    [MAIN_JS_NAME]: {
-      content: 'main-content'
-    },
-    [INDEX_HTML_NAME]: {
-      content: 'html'
-    },
-    [PRELOAD_JS_NAME]: {
-      content: 'preload'
-    }
+  [RENDERER_JS_NAME]: {
+    content: 'renderer-content'
+  },
+  [MAIN_JS_NAME]: {
+    content: 'main-content'
+  },
+  [INDEX_HTML_NAME]: {
+    content: 'html'
+  },
+  [PRELOAD_JS_NAME]: {
+    content: 'preload'
+  },
+  [STYLES_CSS_NAME]: {
+    content: 'css'
+  }
 };
 
 const mockGetGists = {
@@ -42,6 +45,9 @@ const mockRepos = [
   }, {
     name: INDEX_HTML_NAME,
     download_url: 'https://html'
+  }, {
+    name: STYLES_CSS_NAME,
+    download_url: 'https://css'
   }, {
     name: 'other_stuff',
     download_url: 'https://google.com'
@@ -99,7 +105,8 @@ describe('RemoteLoader', () => {
         main: mockGistFiles[MAIN_JS_NAME].content,
         renderer: mockGistFiles[RENDERER_JS_NAME].content,
         preload: mockGistFiles[PRELOAD_JS_NAME].content,
-      }, {gistId: 'abcdtestid'});
+        css: mockGistFiles[STYLES_CSS_NAME].content
+      }, { gistId: 'abcdtestid' });
     });
 
     it('handles an error', async () => {
@@ -121,9 +128,10 @@ describe('RemoteLoader', () => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
       // Setup the mock
       (fetch as any).mockResponses(
-        [ 'main' ],
-        [ 'renderer' ],
-        [ 'index' ]
+        ['main'],
+        ['renderer'],
+        ['index'],
+        ['css']
       );
     });
 
@@ -135,12 +143,12 @@ describe('RemoteLoader', () => {
       const { calls } = (window.ElectronFiddle.app.replaceFiddle as jest.Mock).mock;
 
       expect(calls).toHaveLength(1);
-      expect(calls[0]).toMatchObject(expect.arrayContaining([{
+      expect(calls[0]).toMatchObject(expect.arrayContaining([expect.objectContaining({
         html: 'index',
         main: 'main',
         renderer: 'renderer',
-        preload: ''
-      }]));
+        css: 'css'
+      })]));
     });
 
     it('handles an error', async () => {

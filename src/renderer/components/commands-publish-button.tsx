@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { when } from 'mobx';
 import { IpcEvents } from '../../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME } from '../../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -89,6 +89,9 @@ export class PublishButton extends React.Component<PublishButtonProps> {
           },
           [PRELOAD_JS_NAME]: {
             content: values.preload || '// Empty',
+          },
+          [STYLES_CSS_NAME]: {
+            content: values.css || '/* Empty */',
           },
         },
       } as any); // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
