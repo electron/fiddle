@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 jest.useFakeTimers();
 
 const mockUpdateApp = jest.fn();

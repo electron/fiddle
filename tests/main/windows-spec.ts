@@ -1,6 +1,10 @@
+/**
+ * @jest-environment node
+ */
+
 import { createContextMenu } from '../../src/main/context-menu';
 import {
-  getMainWindowOptions, getOrCreateMainWindow
+  browserWindows, getMainWindowOptions, getOrCreateMainWindow
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 

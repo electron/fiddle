@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { app } from 'electron';
 import * as fs from 'fs';
 

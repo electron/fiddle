@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';

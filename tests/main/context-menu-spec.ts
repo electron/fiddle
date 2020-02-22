@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { createContextMenu, getInspectItems, getMonacoItems, getRunItems } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';

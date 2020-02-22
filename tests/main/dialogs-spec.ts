@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
