@@ -1,6 +1,6 @@
 import { createContextMenu } from '../../src/main/context-menu';
 import {
-  browserWindows, getMainWindowOptions, getOrCreateMainWindow
+  getMainWindowOptions, getOrCreateMainWindow
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
