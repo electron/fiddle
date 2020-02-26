@@ -22,6 +22,11 @@ export class Runner {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
 
+    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_RUN);
+    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_MAKE);
+
+
     ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
     ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, () => {
       this.performForgeOperation(ForgeCommands.PACKAGE);

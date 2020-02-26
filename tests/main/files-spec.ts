@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { IpcEvents } from '../../src/ipc-events';
 import {
   setupFileListeners,

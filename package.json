@@ -19,7 +19,7 @@
     "parcel:watch": "node ./tools/parcel-watch.js",
     "publish": "electron-forge publish",
     "start": "rimraf ./dist && electron-forge start",
-    "test": "jest --config=jest.json --coverage",
+    "test": "jest --config=jest.json",
     "test:ci": "jest --config=jest.json --coverage --runInBand",
     "test:coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "tsc": "node ./tools/tsc.js",

@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { app, dialog } from 'electron';
 
 import { onFirstRunMaybe } from '../../src/main/first-run';

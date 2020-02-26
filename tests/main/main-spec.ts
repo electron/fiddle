@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { app } from 'electron';
 
 import { main, onBeforeQuit, onReady, onWindowsAllClosed } from '../../src/main/main';

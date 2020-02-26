@@ -34,6 +34,10 @@ export class PublishButton extends React.Component<PublishButtonProps> {
     ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
   }
 
+  public componentWillUnmount() {
+    ipcRendererManager.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+  }
+
   /**
    * When the user clicks the publish button, we either show the
    * authentication dialog or publish right away.

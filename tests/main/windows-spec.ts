@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import { createContextMenu } from '../../src/main/context-menu';
 import {
   browserWindows, getMainWindowOptions, getOrCreateMainWindow

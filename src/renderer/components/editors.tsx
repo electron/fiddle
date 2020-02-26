@@ -99,6 +99,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public componentWillUnmount() {
     this.disposeLayoutAutorun();
+
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
   }
 
   /**

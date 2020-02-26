@@ -15,6 +15,13 @@ jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
 jest.mock('electron-download');
 
+// We want to detect jest sometimes
+global.__JEST__ = global.__JEST__ || {};
+
+// Setup for main tests
+global.window = global.window || {};
+global.document = global.document || { body: {} };
+
 delete window.localStorage;
 // We'll do this twice.
 window.localStorage = {};
