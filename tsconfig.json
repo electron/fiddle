@@ -2,6 +2,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "allowJs": true,
+    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "removeComments": false,
@@ -34,7 +35,7 @@
     "src/**/*"
   ],
   "exclude": [
-    "node_modules"
+    "node_modules/**/*"
   ],
   "formatCodeOptions": {
     "indentSize": 2,
