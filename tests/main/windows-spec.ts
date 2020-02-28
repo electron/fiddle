@@ -63,14 +63,14 @@ describe('windows', () => {
     it('updates "browserWindows" on "close"', () => {
       getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().emit('closed');
+      (getOrCreateMainWindow() as any).emit('closed');
       expect(browserWindows.length).toBe(0);
     });
 
     it('creates the context menu on "dom-ready"', () => {
       getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('dom-ready');
+      (getOrCreateMainWindow().webContents as any).emit('dom-ready');
       expect(createContextMenu).toHaveBeenCalled();
     });
 
@@ -81,7 +81,7 @@ describe('windows', () => {
 
       getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('new-window', e);
+      (getOrCreateMainWindow().webContents as any).emit('new-window', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
 
@@ -92,7 +92,7 @@ describe('windows', () => {
 
       getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('will-navigate', e);
+      (getOrCreateMainWindow().webContents as any).emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
   });

@@ -29,7 +29,7 @@ export class Editor extends React.Component<EditorProps> {
   constructor(props: EditorProps) {
     super(props);
 
-    switch(props.id) {
+    switch (props.id) {
       case 'html':
         this.language = 'html';
         break;
