@@ -33,17 +33,19 @@ jest.mock('../../src/utils/import', () => ({
   }
 }));
 
+const fetchMock = require('fetch-mock-jest');
+
 describe('fetch-types', () => {
   describe('fetchTypeDefinitions()', () => {
     it('fetches type definitions', async () => {
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      fetchMock.mock('*', `it's me, the type definition`);
       const result = await fetchTypeDefinitions('v3.0.0');
 
       expect(result).toBe(`it's me, the type definition`);
     });
 
     it('handles errors by returning an empty string', async () => {
-      (fetch as any).mockReject();
+      fetchMock.mock('*', 404);
       const result = await fetchTypeDefinitions('v3.0.0');
 
       expect(result).toBe('');
