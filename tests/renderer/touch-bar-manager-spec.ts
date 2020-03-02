@@ -86,9 +86,9 @@ describe('TouchBarManager', () => {
     const { click } = touchBarMgr.getVersionSelectorEscButtonOptions();
 
     touchBarMgr.selectedVersion = '3.3.3';
-    expect(appState.version).toBe('7.1.8');
+    expect(appState.version).toBe('8.0.2');
     click!();
-    expect(appState.version).toBe('7.1.8');
+    expect(appState.version).toBe('8.0.2');
   });
 
   it('version scrubber "select" method goes from index to version', () => {

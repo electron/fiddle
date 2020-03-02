@@ -13,6 +13,7 @@ import {
   saveLocalVersions,
   VersionKeys
 } from '../../src/renderer/versions';
+import { mockFetchOnce } from '../utils';
 
 const mockVersions: Array<Partial<ElectronVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
@@ -152,7 +153,8 @@ describe('versions', () => {
     const mockResponseNightlies = fs.readFileSync(path.join(__dirname, '../mocks/npm-response-nightlies.json'));
 
     it('fetches versions', async () => {
-      (fetch as any).mockResponses([mockResponseMain], [mockResponseNightlies]);
+      mockFetchOnce(mockResponseMain.toString());
+      mockFetchOnce(mockResponseNightlies.toString());
 
       const result = await fetchVersions();
       const expected = [
@@ -178,13 +180,13 @@ describe('versions', () => {
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(299);
+      expect(getKnownVersions().length).toBe(315);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "garbage": "true" }]`);
 
-      expect(getKnownVersions().length).toBe(299);
+      expect(getKnownVersions().length).toBe(315);
     });
   });
 
@@ -192,7 +194,7 @@ describe('versions', () => {
     it('gets known versions', async () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "version": "3.0.5" }]`);
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "version": "3.0.5" }]`);
-      (fetch as any).mockResponse('');
+      mockFetchOnce('');
 
       const result = await getUpdatedElectronVersions();
       const expectedVersion = { version: '3.0.5', state: 'unknown' };

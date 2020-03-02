@@ -1,8 +1,8 @@
-import * as GitHubType from '@octokit/rest';
+import { Octokit } from '@octokit/rest';
 import { AppState } from '../renderer/state';
 
-let _Octokit: typeof GitHubType;
-let _octo: GitHubType;
+let _Octokit: typeof Octokit;
+let _octo: Octokit;
 
 /**
  * Returns a loaded Octokit. If state is passed and authentication
@@ -13,7 +13,7 @@ let _octo: GitHubType;
  */
 export async function getOctokit(
   appState?: AppState
-): Promise<GitHubType> {
+): Promise<Octokit> {
   _Octokit = _Octokit || (await import('@octokit/rest') as any).default;
   _octo = _octo || new _Octokit();
 

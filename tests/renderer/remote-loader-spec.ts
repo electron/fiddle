@@ -6,6 +6,7 @@ import { ElectronReleaseChannel } from '../../src/renderer/versions';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../src/shared-constants';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { mockFetchOnce } from '../utils';
 
 jest.mock('../../src/utils/octokit');
 
@@ -126,13 +127,11 @@ describe('RemoteLoader', () => {
   describe('fetchExampleAndLoad()', () => {
     beforeEach(() => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
-      // Setup the mock
-      (fetch as any).mockResponses(
-        ['main'],
-        ['renderer'],
-        ['index'],
-        ['css']
-      );
+
+      mockFetchOnce('main');
+      mockFetchOnce('renderer');
+      mockFetchOnce('index');
+      mockFetchOnce('css');
     });
 
     it('loads an Electron example', async () => {

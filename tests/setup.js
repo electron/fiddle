@@ -4,10 +4,8 @@ const { ElectronFiddleMock } = require('./mocks/electron-fiddle');
 const { createSerializer } = require('enzyme-to-json');
 
 configure({ adapter: new Adapter() });
-expect.addSnapshotSerializer(createSerializer({mode: 'deep'}));
 
 global.confirm = jest.fn();
-global.fetch = require('jest-fetch-mock');
 
 jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
 jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
@@ -15,12 +13,15 @@ jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
 jest.mock('electron-download');
 
+expect.addSnapshotSerializer(createSerializer({mode: 'deep'}));
+
 // We want to detect jest sometimes
 global.__JEST__ = global.__JEST__ || {};
 
 // Setup for main tests
 global.window = global.window || {};
 global.document = global.document || { body: {} };
+global.fetch = window.fetch = jest.fn();
 
 delete window.localStorage;
 // We'll do this twice.

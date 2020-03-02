@@ -7,6 +7,9 @@
   "bail": true,
   "resetMocks": true,
   "resetModules": true,
+  "snapshotSerializers": [
+    "enzyme-to-json/serializer"
+  ],
   "setupFilesAfterEnv": [
     "<rootDir>/tests/setup.js"
   ],

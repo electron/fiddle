@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { EditorValues, Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, STYLES_CSS_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { fancyImport } from '../utils/import';
 import { ipcRendererManager } from './ipc';
