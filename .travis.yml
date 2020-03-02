@@ -3,7 +3,7 @@ node_js: "12"
 os:
 - linux
 - osx
-dist: trusty
+dist: bionic
 osx_image: xcode10
 sudo: false
 
