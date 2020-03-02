@@ -5,11 +5,10 @@ os:
 - osx
 dist: bionic
 osx_image: xcode10
-sudo: false
 
 cache:
+  npm: true
   directories:
-  - node_modules
   - $HOME/.cache/electron
 
 addons:
@@ -24,7 +23,7 @@ branches:
   - /^v\d+\.\d+\.\d+/
 
 install:
-- npm install
+- npm ci
 - |
   if [[ "$TRAVIS_OS_NAME" == "osx" && "$TRAVIS_SECURE_ENV_VARS" == "true" ]]; then
     export CERTIFICATE_P12=cert.p12;
