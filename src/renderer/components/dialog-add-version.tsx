@@ -5,7 +5,7 @@ import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
 
-import { NpmVersion } from '../../interfaces';
+import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { ipcRendererManager } from '../ipc';
@@ -90,7 +90,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       .slice(1)
       .join(path.sep);
 
-    const toAdd: NpmVersion = {
+    const toAdd: Version = {
       localPath: folderPath,
       version,
       name
