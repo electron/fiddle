@@ -4,7 +4,6 @@
   },
   "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
-  "bail": true,
   "resetMocks": true,
   "resetModules": true,
   "snapshotSerializers": [
