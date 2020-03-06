@@ -15,6 +15,8 @@ import {
 } from '../../src/renderer/versions';
 import { mockFetchOnce } from '../utils';
 
+const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
+
 const mockVersions: Array<Partial<ElectronVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
   { version: 'test-1', localPath: '/test/path/1' },
@@ -180,13 +182,13 @@ describe('versions', () => {
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(315);
+      expect(getKnownVersions().length).toBe(expectedVersionCount);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "garbage": "true" }]`);
 
-      expect(getKnownVersions().length).toBe(315);
+      expect(getKnownVersions().length).toBe(expectedVersionCount);
     });
   });
 
