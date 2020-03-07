@@ -4,6 +4,8 @@ import { TouchBarManager } from '../../src/renderer/touch-bar-manager';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
+const { lastElectronVersion } = require('../fixtures/releases-metadata.json');
+
 describe('TouchBarManager', () => {
   const appState = new AppState();
 
@@ -86,9 +88,9 @@ describe('TouchBarManager', () => {
     const { click } = touchBarMgr.getVersionSelectorEscButtonOptions();
 
     touchBarMgr.selectedVersion = '3.3.3';
-    expect(appState.version).toBe('8.0.2');
+    expect(appState.version).toBe(lastElectronVersion);
     click!();
-    expect(appState.version).toBe('8.0.2');
+    expect(appState.version).toBe(lastElectronVersion);
   });
 
   it('version scrubber "select" method goes from index to version', () => {

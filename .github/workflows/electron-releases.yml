@@ -1,12 +1,14 @@
 name: Auto-update Releases JSON file
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 1'
 jobs:
   autoupdate:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - name: Fetch git branches
+      run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
@@ -21,6 +23,13 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-node-
     - run: npm ci
+    - name: Switch to release update branch
+      run: |
+        if git branch --remotes | grep -q origin/update-releases; then
+          git checkout update-releases
+        else
+          git checkout -b update-releases
+        fi
     - name: Update Releases JSON
       run: npm run electron-releases
     - name: Commit Changes to Releases JSON
@@ -29,13 +38,14 @@ jobs:
       run: |
         echo "machine github.com login $GITHUB_ACTOR password $GITHUB_TOKEN" > ~/.netrc
         chmod 600 ~/.netrc
-        git add static/releases.json
+        git add static/releases.json tests/fixtures/releases-metadata.json
         if test -n "$(git status -s)"; then
           git config user.name "$GITHUB_ACTOR"
           git config user.email "electron-bot@users.noreply.github.com"
           git diff --cached
           git commit -m "build: update Electron releases JSON"
-          git push origin HEAD:$GITHUB_REF
+          git push origin update-releases
+          node --unhandled-rejections=strict .github/actions/create_releases_pr.js
         else
           echo No update needed
         fi
