@@ -12,7 +12,7 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
-  NpmVersion,
+  Version,
   OutputEntry,
   OutputOptions
 } from '../interfaces';
@@ -347,7 +347,7 @@ export class AppState {
     };
   }
 
-  @action public addLocalVersion(input: NpmVersion) {
+  @action public addLocalVersion(input: Version) {
     addLocalVersion(input);
 
     this.versions = arrayToStringMap(getElectronVersions());

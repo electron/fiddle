@@ -14,6 +14,7 @@ import {
   VersionKeys
 } from '../../src/renderer/versions';
 import { mockFetchOnce } from '../utils';
+import semver from 'semver';
 
 const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
 
@@ -23,29 +24,35 @@ const mockVersions: Array<Partial<ElectronVersion>> = [
   { version: 'test-2', localPath: '/test/path/2' },
 ];
 
+jest.mock('semver', () => ({
+  default: {
+    gte: jest.fn()
+  }
+}));
+
 describe('versions', () => {
   describe('getDefaultVersion()', () => {
     it('handles a stored version', () => {
       (localStorage.getItem as any).mockReturnValue('2.0.2');
-      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');
     });
 
     it('handles a v-prefixed version', () => {
       (localStorage.getItem as any).mockReturnValue('v2.0.2');
-      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');
     });
 
     it('handles garbage data', () => {
       (localStorage.getItem as any).mockReturnValue('v3.0.0');
-      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');
     });
 
     it('handles if no version is set', () => {
       (localStorage.getItem as any).mockReturnValue(null);
-      const output = getDefaultVersion([ { version: '2.0.2' } ] as any);
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');
     });
 
@@ -96,11 +103,11 @@ describe('versions', () => {
     });
 
     it('adds a local version', () => {
-      expect(addLocalVersion(mockVersions[1] as any)).toEqual([ mockVersions[0], mockVersions[1] ]);
+      expect(addLocalVersion(mockVersions[1] as any)).toEqual([mockVersions[0], mockVersions[1]]);
     });
 
     it('does not add duplicates', () => {
-      expect(addLocalVersion(mockVersions[0] as any)).toEqual([ mockVersions[0] ]);
+      expect(addLocalVersion(mockVersions[0] as any)).toEqual([mockVersions[0]]);
     });
   });
 
@@ -151,20 +158,21 @@ describe('versions', () => {
   });
 
   describe('fetchVersions()', () => {
-    const mockResponseMain = fs.readFileSync(path.join(__dirname, '../mocks/npm-response-main.json'));
-    const mockResponseNightlies = fs.readFileSync(path.join(__dirname, '../mocks/npm-response-nightlies.json'));
+    it('fetches versions >= 0.24.0', async () => {
+      const mockUnpkgResponse = fs.readFileSync(path.join(__dirname, '../mocks/unpkg-mock.json'));
+      mockFetchOnce(mockUnpkgResponse.toString());
 
-    it('fetches versions', async () => {
-      mockFetchOnce(mockResponseMain.toString());
-      mockFetchOnce(mockResponseNightlies.toString());
+      // return whether or not version in JSON is >=0.24.0
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(false);
 
       const result = await fetchVersions();
       const expected = [
-        { version: '3.0.1' },
-        { version: '3.0.2' },
-        { version: '4.0.0-nightly.20181006' },
-        { version: '7.0.0-nightly.20190529' },
-        { version: '7.0.0-nightly.20190704' }
+        { version: '10.0.0-nightly.20200303' },
+        { version: '9.0.0-beta.5' },
+        { version: '4.2.0' }
       ];
 
       expect(result).toEqual(expected);
