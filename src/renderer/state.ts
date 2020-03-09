@@ -12,9 +12,9 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
-  Version,
   OutputEntry,
-  OutputOptions
+  OutputOptions,
+  Version
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
