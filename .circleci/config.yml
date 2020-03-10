@@ -20,8 +20,8 @@ steps-test: &steps-test
     - *step-install
     - *step-save-cache
     - *step-install-electron
-    - run: npm run lint
-    - run: npm run test -- --maxWorkers=4
+    - run: yarn lint
+    - run: yarn test --maxWorkers=4
 
 steps-build: &steps-build
   steps:
@@ -55,7 +55,7 @@ steps-build: &steps-build
                   [IO.File]::WriteAllBytes($filename, $bytes)
                 }
               shell: powershell.exe
-    - run: npm run publish -- --dry-run --arch=$TARGET_ARCH
+    - run: yarn publish -- --dry-run --arch=$TARGET_ARCH
     - store_artifacts:
         path: out/make
         destination: dist
@@ -177,7 +177,7 @@ jobs:
       - *step-install
       - attach_workspace:
           at: .
-      - run: npm run publish -- --from-dry-run
+      - run: yarn publish -- --from-dry-run
 
 workflows:
   version: 2
