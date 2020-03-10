@@ -77,7 +77,7 @@ jobs:
     <<: *steps-test
   build-linux:
     docker:
-      - image: circleci/node:10
+      - image: circleci/node:10-buster
     environment:
       TARGET_ARCH: x64
     parameters:
