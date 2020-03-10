@@ -57,9 +57,7 @@ steps-build: &steps-build
               shell: powershell.exe
     - run:
         name: Publish dry run
-        command: yarn publish --dry-run --arch=$TARGET_ARCH
-        environment:
-          GITHUB_TOKEN: fake
+        command: yarn run publish --dry-run --arch=$TARGET_ARCH
     - store_artifacts:
         path: out/make
         destination: dist
