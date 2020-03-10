@@ -416,6 +416,13 @@ describe('AppState', () => {
 
       expect(appState.versions['2.0.2'].state).toBe(ElectronVersionState.ready);
     });
+
+    it('keeps downloading state intact', async () => {
+      (appState.binaryManager.getDownloadingVersions as jest.Mock).mockReturnValueOnce(['2.0.2']);
+      await appState.updateDownloadedVersionState();
+
+      expect(appState.versions['2.0.2'].state).toBe(ElectronVersionState.downloading);
+    });
   });
 
   describe('signOutGitHub()', () => {

@@ -12,9 +12,9 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
-  Version,
   OutputEntry,
-  OutputOptions
+  OutputOptions,
+  Version
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -478,14 +478,23 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async updateDownloadedVersionState(): Promise<void> {
-    const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     const updatedVersions = { ...this.versions };
 
+    // Keep state of currently downloading binaries first
+    const downloadingVersions = this.binaryManager.getDownloadingVersions();
+    (downloadingVersions || []).forEach((version) => {
+      if (updatedVersions[version]) {
+        updatedVersions[version].state = ElectronVersionState.downloading;
+      }
+    });
+
+    const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = ElectronVersionState.ready;
       }
     });
+
     console.log(`State: Updated version state`, updatedVersions);
 
     this.versions = updatedVersions;

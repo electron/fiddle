@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import semver from 'semver';
 import { ElectronVersion, ElectronVersionSource } from '../../src/interfaces';
 import {
   addLocalVersion,
@@ -14,7 +15,6 @@ import {
   VersionKeys
 } from '../../src/renderer/versions';
 import { mockFetchOnce } from '../utils';
-import semver from 'semver';
 
 const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
 
