@@ -101,55 +101,58 @@ describe('Editor component', () => {
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
 
-    it('attempts to restore a backup if available', async () => {
-      store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
-        model: true,
-        viewState: true
+    describe('backups', async () => {
+      it('attempts to restore a backup if contains a model', async () => {
+        store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+          model: true,
+          viewState: true
+        });
+
+        const wrapper = shallow(
+          <Editor
+            appState={store}
+            monaco={monaco}
+            monacoOptions={{}}
+            id={EditorId.main}
+            editorDidMount={() => undefined}
+            setFocused={() => undefined}
+          />
+        );
+        const instance: any = wrapper.instance();
+
+        instance.containerRef.current = 'ref';
+        await instance.initMonaco();
+
+        expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
+        expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
       });
 
-      const wrapper = shallow(
-        <Editor
-          appState={store}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={EditorId.main}
-          editorDidMount={() => undefined}
-          setFocused={() => undefined}
-        />
-      );
-      const instance: any = wrapper.instance();
+      it('attempts to restore a backup if contains a string value', async () => {
+        store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+          value: 'hello'
+        });
 
-      instance.containerRef.current = 'ref';
-      await instance.initMonaco();
+        const wrapper = shallow(
+          <Editor
+            appState={store}
+            monaco={monaco}
+            monacoOptions={{}}
+            id={EditorId.main}
+            editorDidMount={() => undefined}
+            setFocused={() => undefined}
+          />
+        );
+        const instance: any = wrapper.instance();
 
-      expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
-      expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
-    });
+        instance.containerRef.current = 'ref';
+        await instance.initMonaco();
 
-    it('attempts to restore a backup value if available', async () => {
-      store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
-        value: 'hello'
+        expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(0);
+        expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
+        expect(monaco.editor.createModel).toHaveBeenCalledWith('hello', 'javascript');
       });
-
-      const wrapper = shallow(
-        <Editor
-          appState={store}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={EditorId.main}
-          editorDidMount={() => undefined}
-          setFocused={() => undefined}
-        />
-      );
-      const instance: any = wrapper.instance();
-
-      instance.containerRef.current = 'ref';
-      await instance.initMonaco();
-
-      expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(0);
-      expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
-      expect(monaco.editor.createModel).toHaveBeenCalledWith('hello', 'javascript');
     });
+
 
     it('initializes with a fixed tab size', async () => {
       const didMount = jest.fn();
