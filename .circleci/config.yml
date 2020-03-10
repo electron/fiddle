@@ -55,9 +55,11 @@ steps-build: &steps-build
                   [IO.File]::WriteAllBytes($filename, $bytes)
                 }
               shell: powershell.exe
-    - run: yarn publish --dry-run --arch=$TARGET_ARCH
-      environment:
-        GITHUB_TOKEN: fake
+    - run:
+        name: Publish dry run
+        command: yarn publish --dry-run --arch=$TARGET_ARCH
+        environment:
+          GITHUB_TOKEN: fake
     - store_artifacts:
         path: out/make
         destination: dist
