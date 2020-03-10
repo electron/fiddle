@@ -122,6 +122,18 @@ describe('Editors component', () => {
     expect(toolbar).toMatchSnapshot();
   });
 
+  it('does not render toolbar controls if only one editor exists', () => {
+    store.mosaicArrangement = EditorId.main;
+    const wrapper = shallow(<Editors appState={store} />);
+    const instance: Editors = wrapper.instance() as any;
+    const toolbar = instance.renderToolbar(
+      { title: TITLE_MAP[EditorId.main] } as any,
+      EditorId.main
+    );
+
+    expect(toolbar).toMatchSnapshot();
+  });
+
   it('componentWillUnmount() unsubscribes the layout reaction', () => {
     const wrapper = shallow(<Editors appState={store} />);
     const instance: Editors = wrapper.instance() as any;

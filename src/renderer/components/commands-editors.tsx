@@ -77,6 +77,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
           text={TITLE_MAP[id]}
           id={id}
           onClick={this.onItemClick}
+          disabled={appState.mosaicArrangement === id} // can't hide last editor panel
         />
       );
     }
