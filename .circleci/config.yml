@@ -67,10 +67,6 @@ steps-build: &steps-build
             - out/make
             - out/publish-dry-run
 
-steps-publish: &steps-publish
-  steps:
-    - run: echo 123
-
 version: 2.1
 orbs:
   win: circleci/windows@1.0.0
