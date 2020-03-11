@@ -102,7 +102,6 @@ describe('windows', () => {
       const w = getOrCreateMainWindow();
       ipcMainManager.emit(IpcEvents.SHOW_INACTIVE);
       expect(w.showInactive).toHaveBeenCalled();
-
     });
   });
 });
