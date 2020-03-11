@@ -167,9 +167,21 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   public renderToolbar(
     { title }: MosaicWindowProps<MosaicId>, id: MosaicId
   ): JSX.Element {
+    const { appState } = this.props;
     const docsDemoGoHomeMaybe = id === PanelId.docsDemo
-      ? <DocsDemoGoHomeButton id={id} appState={this.props.appState} />
+      ? <DocsDemoGoHomeButton id={id} appState={appState} />
       : null;
+
+    // only show toolbar controls if we have more than 1 visible editor
+    // Mosaic arrangement is type string if 1 editor, object otherwise
+    const toolbarControlsMaybe =
+      (typeof appState.mosaicArrangement !== 'string') &&
+      (
+        <>
+          <MaximizeButton id={id} appState={appState} />
+          <RemoveButton id={id} appState={appState} />
+        </>
+      );
 
     return (
       <div>
@@ -184,8 +196,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {/* Right */}
         <div className='mosaic-controls'>
           {docsDemoGoHomeMaybe}
-          <MaximizeButton id={id} appState={this.props.appState} />
-          <RemoveButton id={id} appState={this.props.appState} />
+          {toolbarControlsMaybe}
         </div>
       </div>
     );
