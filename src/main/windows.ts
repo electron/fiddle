@@ -64,7 +64,6 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
-    console.info('erick was here');
     browserWindow.showInactive();
   });
 
