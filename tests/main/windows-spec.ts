@@ -2,7 +2,9 @@
  * @jest-environment node
  */
 
+import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
+import { ipcMainManager } from '../../src/main/ipc';
 import {
   browserWindows, getMainWindowOptions, getOrCreateMainWindow
 } from '../../src/main/windows';
@@ -94,6 +96,13 @@ describe('windows', () => {
       expect(browserWindows[0]).toBeTruthy();
       (getOrCreateMainWindow().webContents as any).emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
+    });
+
+    it('shows the window on IPC event', () => {
+      const w = getOrCreateMainWindow();
+      ipcMainManager.emit(IpcEvents.SHOW_INACTIVE);
+      expect(w.showInactive).toHaveBeenCalled();
+
     });
   });
 });

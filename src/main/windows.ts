@@ -1,5 +1,7 @@
 import { BrowserWindow, shell } from 'electron';
+import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
+import { ipcMainManager } from './ipc';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -59,6 +61,11 @@ export function createMainWindow(): Electron.BrowserWindow {
   browserWindow.webContents.on('will-navigate', (event, url) => {
     event.preventDefault();
     shell.openExternal(url);
+  });
+
+  ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
+    console.info('erick was here');
+    browserWindow.showInactive();
   });
 
   browserWindows.push(browserWindow);
