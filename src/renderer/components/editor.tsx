@@ -143,8 +143,6 @@ export class Editor extends React.Component<EditorProps> {
 
     const backup = appState.getAndRemoveEditorValueBackup(id);
 
-    console.log(id);
-
     if (backup) {
       console.log(`Editor: Backup found, restoring state`);
 
@@ -155,8 +153,8 @@ export class Editor extends React.Component<EditorProps> {
       // If there's a model, use the model. No model? Use the value
       if (backup.model) {
         this.editor.setModel(backup.model);
-      } else if (typeof backup.value !== 'undefined') {
-        this.createModel(backup.value);
+      } else {
+        this.createModel(backup.value ?? '');
       }
     } else {
       const value = await getContent(id, version);
