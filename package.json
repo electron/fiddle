@@ -22,7 +22,7 @@
     "test": "jest --config=jest.json",
     "test:ci": "jest --config=jest.json --coverage --runInBand",
     "test:coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
-    "test:report": "jest --config=jest.json --json --outputFile=report.json | exit 0",
+    "test:report": "jest --config=jest.json --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict ./tools/fetch-releases.js"
   },
