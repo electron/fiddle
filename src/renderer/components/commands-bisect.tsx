@@ -2,7 +2,7 @@ import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { GenericDialogType } from '../../../src/interfaces';
+import { ElectronVersionState, GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';
 
 interface BisectHandlerProps {
@@ -19,6 +19,8 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
   }
 
   public continueBisect(isGood: boolean) {
+    window.ElectronFiddle.app.runner.stop();
+
     const { appState } = this.props;
     const response = appState.Bisector!.continue(isGood);
 
@@ -49,15 +51,18 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
   public render() {
     const { appState } = this.props;
     if (!!appState.Bisector) {
+      const isDownloading = appState.currentElectronVersion.state === ElectronVersionState.downloading;
       return (
         <>
           <Button
             icon={'thumbs-up'}
             onClick={() => this.continueBisect(true)}
+            disabled={isDownloading}
           />
           <Button
             icon={'thumbs-down'}
             onClick={() => this.continueBisect(false)}
+            disabled={isDownloading}
           />
           <Button
             icon={'cross'}

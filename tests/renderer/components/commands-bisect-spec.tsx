@@ -1,5 +1,6 @@
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
+import { ElectronVersionState } from '../../../src/interfaces';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 
 describe('Bisect commands component', () => {
@@ -11,6 +12,9 @@ describe('Bisect commands component', () => {
         continue: jest.fn(),
         getCurrentVersion: jest.fn()
       },
+      currentElectronVersion: {
+        state: ElectronVersionState.ready
+      },
       setVersion: jest.fn(),
       version: '1.0.0',
       pushOutput: jest.fn(),
@@ -20,6 +24,12 @@ describe('Bisect commands component', () => {
   });
 
   it('renders helper buttons if bisect instance is active', () => {
+    const wrapper = shallow(<BisectHandler appState={store} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('disables helper buttons if Electron binary is downloading', () => {
+    store.currentElectronVersion.state = ElectronVersionState.downloading;
     const wrapper = shallow(<BisectHandler appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
@@ -51,6 +61,20 @@ describe('Bisect commands component', () => {
   });
 
   describe('continueBisect()', () => {
+    it('closes the currently running app', () => {
+      const wrapper = shallow(<BisectHandler appState={store} />);
+      const instance: BisectHandler = wrapper.instance() as any;
+
+      store.Bisector.continue.mockReturnValue({
+        version: '2.0.0'
+      });
+      const mockStop = jest.fn();
+      window.ElectronFiddle.app.runner.stop = mockStop;
+      instance.continueBisect(true);
+
+      expect(mockStop).toHaveBeenCalled();
+    });
+
     it('sets version assigned by bisect algorithm', () => {
       const wrapper = shallow(<BisectHandler appState={store} />);
       const instance: BisectHandler = wrapper.instance() as any;
@@ -68,7 +92,7 @@ describe('Bisect commands component', () => {
       instance.terminateBisect = jest.fn();
 
       // same value is only returned when there is only 1 version left
-      store.Bisector.continue.mockReturnValue([{version: 'minVer'}, {version: 'maxVer'}]);
+      store.Bisector.continue.mockReturnValue([{ version: 'minVer' }, { version: 'maxVer' }]);
       instance.continueBisect(true);
       expect(store.setVersion).not.toHaveBeenCalled();
       expect(instance.terminateBisect).toHaveBeenCalled();
