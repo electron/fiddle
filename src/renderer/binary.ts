@@ -164,6 +164,12 @@ export class BinaryManager {
     }
   }
 
+  public getDownloadingVersions() {
+    return Object.entries(this.state)
+      .filter(([_, state]) => state === 'downloading')
+      .map(([version, _]) => version);
+  }
+
   /**
    * Did we already download a given version?
    *

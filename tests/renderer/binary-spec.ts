@@ -140,6 +140,15 @@ describe('binary', () => {
     });
   });
 
+  describe('getDownloadingVersions()', () => {
+    it('returns currently downloading versions', () => {
+      binaryManager.state['3.0.0'] = 'downloading';
+
+      const result = binaryManager.getDownloadingVersions();
+      expect(result).toEqual(['3.0.0']);
+    });
+  });
+
   describe('getDownloadPath()', () => {
     it('returns the correct path on Windows', () => {
       overridePlatform('win32');

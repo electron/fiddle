@@ -1,6 +1,6 @@
+import semver from 'semver';
 import { ElectronVersion, ElectronVersionSource, ElectronVersionState, Version } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
-import semver from 'semver';
 
 export const enum ElectronReleaseChannel {
   stable = 'Stable',
