@@ -12,9 +12,9 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
-  Version,
   OutputEntry,
-  OutputOptions
+  OutputOptions,
+  Version
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -86,7 +86,7 @@ export class AppState {
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
   @observable public executionFlags: Array<string> =
     this.retrieve('executionFlags') as Array<string> === null ?
-    [] : this.retrieve('executionFlags') as Array<string>;
+      [] : this.retrieve('executionFlags') as Array<string>;
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
@@ -169,6 +169,7 @@ export class AppState {
     autorun(() => {
       if (this.isUnsaved) {
         window.onbeforeunload = () => {
+          ipcRendererManager.send(IpcEvents.SHOW_INACTIVE);
           this.setGenericDialogOptions({
             type: GenericDialogType.warning,
             label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
