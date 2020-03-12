@@ -78,7 +78,6 @@ export class App {
 
     // once loaded, we have a "saved" state
     this.state.isUnsaved = false;
-    this.setupUnsavedOnChangeListener();
 
     return true;
   }
@@ -177,28 +176,7 @@ export class App {
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
-    // TODO: A timer here is terrible. Let's fix this
-    // and ensure we actually do it once Editors have mounted.
-    setTimeout(() => {
-      this.setupUnsavedOnChangeListener();
-    }, 1500);
-
     return rendered;
-  }
-
-  /**
-   * If the editor is changed for the first time, we'll
-   * set `isUnsaved` to true. That way, the app can warn you
-   * if you're about to throw things away.
-   */
-  public setupUnsavedOnChangeListener() {
-    Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-      const editor = window.ElectronFiddle.editors[key];
-      const disposable = editor.onDidChangeModelContent(() => {
-        this.state.isUnsaved = true;
-        disposable.dispose();
-      });
-    });
   }
 
   /**

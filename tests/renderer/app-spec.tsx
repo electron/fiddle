@@ -40,11 +40,9 @@ describe('Editors component', () => {
 
       const app = new App();
       const result = (await app.setup()) as HTMLDivElement;
-      app.setupUnsavedOnChangeListener = jest.fn();
       jest.runAllTimers();
 
       expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
-      expect(app.setupUnsavedOnChangeListener).toHaveBeenCalled();
 
       jest.useRealTimers();
     });
@@ -174,7 +172,6 @@ describe('Editors component', () => {
       const app = new App();
       (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = false;
-      app.setupUnsavedOnChangeListener = jest.fn();
       app.setEditorValues = jest.fn();
 
       const editorValues = {
@@ -190,7 +187,6 @@ describe('Editors component', () => {
       })
         .then(() => {
           expect(app.state.isUnsaved).toBe(false);
-          expect(app.setupUnsavedOnChangeListener).toHaveBeenCalled();
           done();
         });
     });
@@ -333,23 +329,6 @@ describe('Editors component', () => {
       expect(
         (window as any).ElectronFiddle.editors.renderer.setValue
       ).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('setupUnsavedOnChangeListener()', () => {
-    it('listens for model change events', async () => {
-      const app = new App();
-
-      app.setupUnsavedOnChangeListener();
-
-      const fn = window.ElectronFiddle.editors!.renderer!
-        .onDidChangeModelContent;
-      const call = (fn as jest.Mock<any>).mock.calls[0];
-      const cb = call[0];
-
-      cb();
-
-      expect(app.state.isUnsaved).toBe(true);
     });
   });
 
