@@ -7,7 +7,8 @@ import {
   HTMLTable,
   IButtonProps,
   Icon,
-  IconName
+  IconName,
+  Tooltip
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -210,17 +211,24 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       <FormGroup
         label='Include Electron versions that are:'
       >
+        <Tooltip
+          content='Always enabled'
+          position='bottom'
+          intent='primary'
+        >
+          <Checkbox
+            checked={getIsChecked(ElectronVersionState.ready)}
+            label='Ready'
+            id='ready'
+            onChange={this.handleStateChange}
+            inline={true}
+            disabled={true}
+          />
+        </Tooltip>
         <Checkbox
           checked={getIsChecked(ElectronVersionState.downloading)}
           label='Downloading'
           id='downloading'
-          onChange={this.handleStateChange}
-          inline={true}
-        />
-        <Checkbox
-          checked={getIsChecked(ElectronVersionState.ready)}
-          label='Downloaded'
-          id='ready'
           onChange={this.handleStateChange}
           inline={true}
         />
@@ -243,42 +251,47 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderVersionChannelOptions(): JSX.Element {
     const { appState } = this.props;
+
     const getIsChecked = (channel: ElectronReleaseChannel) => {
       return appState.channelsToShow.includes(channel);
+    };
+
+    const getIsCurrentVersionReleaseChannel = (channel: ElectronReleaseChannel) => {
+      return getReleaseChannel(appState.version) === channel;
+    };
+
+    const channels = {
+      stable: ElectronReleaseChannel.stable,
+      beta: ElectronReleaseChannel.beta,
+      nightly: ElectronReleaseChannel.nightly,
+      unsupported: ElectronReleaseChannel.unsupported
     };
 
     return (
       <FormGroup
         label='Include Electron versions from these release channels:'
       >
-        <Checkbox
-          checked={getIsChecked(ElectronReleaseChannel.stable)}
-          label='Stable'
-          id='Stable'
-          onChange={this.handleChannelChange}
-          inline={true}
-        />
-        <Checkbox
-          checked={getIsChecked(ElectronReleaseChannel.beta)}
-          label='Beta'
-          id='Beta'
-          onChange={this.handleChannelChange}
-          inline={true}
-        />
-        <Checkbox
-          checked={getIsChecked(ElectronReleaseChannel.nightly)}
-          label='Nightly'
-          id='Nightly'
-          onChange={this.handleChannelChange}
-          inline={true}
-        />
-        <Checkbox
-          checked={getIsChecked(ElectronReleaseChannel.unsupported)}
-          label='Unsupported'
-          id='Unsupported'
-          onChange={this.handleChannelChange}
-          inline={true}
-        />
+        {
+          // tslint:disable-next-line:jsx-no-multiline-js
+          Object.entries(channels).map(([_, channel]) => (
+            <Tooltip
+              content={`Can't disable channel of selected version (${appState.version})`}
+              disabled={!getIsCurrentVersionReleaseChannel(channel)}
+              position='bottom'
+              intent='primary'
+              key={channel}
+            >
+              <Checkbox
+                checked={getIsChecked(channel)}
+                label={channel}
+                id={channel}
+                onChange={this.handleChannelChange}
+                disabled={getIsCurrentVersionReleaseChannel(channel)}
+                inline={true}
+              />
+            </Tooltip>
+          ))
+        }
       </FormGroup>
     );
   }
