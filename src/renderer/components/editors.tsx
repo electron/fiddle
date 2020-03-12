@@ -66,8 +66,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.setFocused = this.setFocused.bind(this);
 
     this.state = { monacoOptions: defaultMonacoOptions };
-
-    this.loadMonaco();
   }
 
   /**
@@ -75,7 +73,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    *
    * @memberof Editors
    */
-  public componentDidMount() {
+  public async componentDidMount() {
     ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
       this.executeCommand(cmd);
     });
@@ -95,6 +93,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     });
 
     this.setState({ isMounted: true });
+    await this.loadMonaco();
+    this.props.appState.isUnsaved = false;
   }
 
   public componentWillUnmount() {
@@ -280,7 +280,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * We're doing things a bit roundabout to ensure that we're not overloading the
    * mobx state with a gigantic Monaco tree.
    */
-  public async loadMonaco(): Promise<void> {
+  public async loadMonaco() {
     const { app } = window.ElectronFiddle;
     const loader = require('monaco-loader');
     const monaco = app.monaco || await loader();
@@ -298,7 +298,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       this.setState({ monaco });
     }
 
-    activateTheme(monaco, undefined, this.props.appState.theme);
+    await activateTheme(monaco, undefined, this.props.appState.theme);
   }
 
   /**

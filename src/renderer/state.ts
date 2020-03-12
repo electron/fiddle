@@ -104,7 +104,7 @@ export class AppState {
 
   @observable public isPublishing: boolean = false;
   @observable public isRunning: boolean = false;
-  @observable public isUnsaved: boolean = false;
+  @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions: boolean = false;
 
   // -- Various "isShowing" settings ------------------
@@ -167,7 +167,9 @@ export class AppState {
     autorun(() => this.save('statesToShow', this.statesToShow));
 
     autorun(() => {
-      if (this.isUnsaved) {
+      if (typeof this.isUnsaved === 'undefined') return;
+
+      if (!!this.isUnsaved) {
         window.onbeforeunload = () => {
           this.setGenericDialogOptions({
             type: GenericDialogType.warning,
@@ -199,6 +201,15 @@ export class AppState {
         };
       } else {
         window.onbeforeunload = null;
+
+        // set up editor listeners to verify if unsaved
+        Object.keys(window.ElectronFiddle.editors).forEach((key) => {
+          const editor = window.ElectronFiddle.editors[key];
+          const disposable = editor.onDidChangeModelContent(() => {
+            this.isUnsaved = true;
+            disposable.dispose();
+          });
+        });
       }
     });
 

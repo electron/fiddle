@@ -55,8 +55,8 @@ describe('AppState', () => {
     expect(appState).toBeTruthy();
   });
 
-  describe('onbeforeunload handler', () => {
-    it('closes the window', (done) => {
+  describe('isUnsaved autorun handler', () => {
+    it('can close the window if user accepts the dialog', (done) => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -73,7 +73,7 @@ describe('AppState', () => {
       });
     });
 
-    it('closes the app', (done) => {
+    it('can close the app after user accepts dialog', (done) => {
       const { remote } = require('electron');
       window.close = jest.fn();
       appState.isUnsaved = true;
@@ -93,7 +93,7 @@ describe('AppState', () => {
       });
     });
 
-    it('does not close the window', (done) => {
+    it('takes no action if user cancels the dialog', (done) => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -108,6 +108,21 @@ describe('AppState', () => {
         expect(window.close).toHaveBeenCalledTimes(0);
         done();
       });
+    });
+
+    it('sets the onDidChangeModelContent handler if saved', () => {
+      appState.isUnsaved = false;
+
+      expect(window.onbeforeunload).toBe(null);
+
+      const fn = window.ElectronFiddle.editors!.renderer!
+        .onDidChangeModelContent;
+      const call = (fn as jest.Mock<any>).mock.calls[0];
+      const cb = call[0];
+
+      cb();
+
+      expect(appState.isUnsaved).toBe(true);
     });
   });
 

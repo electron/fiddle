@@ -110,7 +110,6 @@ export class FileManager {
       }
 
       this.appState.isUnsaved = false;
-      window.ElectronFiddle.app.setupUnsavedOnChangeListener();
     }
   }
 
