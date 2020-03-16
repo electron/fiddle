@@ -7,6 +7,10 @@ const packageJson = require('./package.json')
 const { version } = packageJson
 const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
+console.log(process.env)
+process.exit()
+
+
 const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets')
@@ -106,8 +110,18 @@ function notarizeMaybe() {
     return;
   }
 
+  if (process.env.npm_lifecycle_event !== 'make') {
+    console.log(`Not in "make" mode, skipping notarization`);
+    return;
+  }
+
   if (!process.env.CI) {
     console.log(`Not in CI, skipping notarization`);
+    return;
+  }
+
+  if (!process.env.TRAVIS_TAG && !process.env.NOTARIZE_WITHOUT_TAG) {
+    console.log(`Not a tag, not notarizing`);
     return;
   }
 
