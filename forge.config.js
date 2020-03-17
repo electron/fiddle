@@ -106,8 +106,8 @@ function notarizeMaybe() {
     return;
   }
 
-  if (process.env.npm_lifecycle_event !== 'make') {
-    console.log(`Not in "make" mode, skipping notarization`);
+  if (process.env.npm_lifecycle_event !== 'publish') {
+    console.log(`Not in "publish" mode, skipping notarization`);
     return;
   }
 
