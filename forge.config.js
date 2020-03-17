@@ -7,10 +7,6 @@ const packageJson = require('./package.json')
 const { version } = packageJson
 const iconDir = path.resolve(__dirname, 'assets', 'icons')
 
-console.log(process.env)
-process.exit()
-
-
 const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets')
