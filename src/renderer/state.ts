@@ -6,15 +6,15 @@ import {
   ALL_MOSAICS,
   DocsDemoPage,
   EditorId,
-  ElectronVersion,
-  ElectronVersionSource,
-  ElectronVersionState,
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
   OutputEntry,
   OutputOptions,
-  Version
+  RunnableVersion,
+  Version,
+  VersionSource,
+  VersionState
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -78,9 +78,9 @@ export class AppState {
   @observable public channelsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>
     || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
-  @observable public statesToShow: Array<ElectronVersionState> =
-    this.retrieve('statesToShow') as Array<ElectronVersionState>
-    || [ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown];
+  @observable public statesToShow: Array<VersionState> =
+    this.retrieve('statesToShow') as Array<VersionState>
+    || [VersionState.downloading, VersionState.ready, VersionState.unknown];
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
@@ -90,7 +90,7 @@ export class AppState {
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
-  @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public versions: Record<string, RunnableVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions = { type: GenericDialogType.warning, label: '', ok: 'Okay', cancel: 'Cancel' };
@@ -225,7 +225,7 @@ export class AppState {
    * Returns the current ElectronVersion or the first
    * one that can be found.
    */
-  @computed get currentElectronVersion(): ElectronVersion {
+  @computed get currentElectronVersion(): RunnableVersion {
     if (this.versions[this.version]) {
       return this.versions[this.version];
     } else {
@@ -237,8 +237,8 @@ export class AppState {
    * Returns an array of Electron versions to show given the
    * current settings for states and channels to display
    */
-  @computed get versionsToShow(): Array<ElectronVersion> {
-    return sortedElectronMap<ElectronVersion>(this.versions, (_key, item) => item)
+  @computed get versionsToShow(): Array<RunnableVersion> {
+    return sortedElectronMap<RunnableVersion>(this.versions, (_key, item) => item)
       .filter((item) => {
         if (!item) {
           return false;
@@ -388,7 +388,7 @@ export class AppState {
     const updatedVersions = { ...this.versions };
 
     // Actually remove
-    if (release && release.source === ElectronVersionSource.local) {
+    if (release && release.source === VersionSource.local) {
       delete updatedVersions[version];
 
       const versionsAsArray = Object
@@ -398,7 +398,7 @@ export class AppState {
       saveLocalVersions(versionsAsArray);
     } else {
       await this.binaryManager.remove(version);
-      updatedVersions[version].state = ElectronVersionState.unknown;
+      updatedVersions[version].state = VersionState.unknown;
     }
 
     this.versions = updatedVersions;
@@ -416,7 +416,7 @@ export class AppState {
     console.log(`State: Downloading Electron ${version}`);
 
     const release = this.versions[version] || { state: '', source: '' };
-    const isLocal = release.source === ElectronVersionSource.local;
+    const isLocal = release.source === VersionSource.local;
     const isReady = release.state === 'ready';
 
     // Fetch new binaries, maybe?
@@ -424,7 +424,7 @@ export class AppState {
       console.log(`State: Instructing BinaryManager to fetch v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
-      updatedVersions[version].state = ElectronVersionState.downloading;
+      updatedVersions[version].state = VersionState.downloading;
       this.versions = updatedVersions;
 
       await this.binaryManager.setup(version);
@@ -463,7 +463,7 @@ export class AppState {
     // Update TypeScript definitions
     const versionObject = this.versions[version];
 
-    if (versionObject.source === ElectronVersionSource.local) {
+    if (versionObject.source === VersionSource.local) {
       const fs = await fancyImport<typeof fsType>('fs-extra');
       const typePath = getLocalTypePathForVersion(versionObject);
       console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
@@ -496,14 +496,14 @@ export class AppState {
     const downloadingVersions = this.binaryManager.getDownloadingVersions();
     (downloadingVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = ElectronVersionState.downloading;
+        updatedVersions[version].state = VersionState.downloading;
       }
     });
 
     const downloadedVersions = await this.binaryManager.getDownloadedVersions();
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = ElectronVersionState.ready;
+        updatedVersions[version].state = VersionState.ready;
       }
     });
 

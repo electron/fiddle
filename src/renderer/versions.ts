@@ -1,5 +1,5 @@
 import semver from 'semver';
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState, Version } from '../interfaces';
+import { RunnableVersion, Version, VersionSource, VersionState } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
@@ -12,11 +12,11 @@ export const enum ElectronReleaseChannel {
 /**
  * Returns a sensible default version string.
  *
- * @param {Array<ElectronVersion>} knownVersions
+ * @param {Array<RunnableVersion>} knownVersions
  * @returns {string}
  */
 export function getDefaultVersion(
-  knownVersions: Array<ElectronVersion> = []
+  knownVersions: Array<RunnableVersion> = []
 ): string {
   const ls = localStorage.getItem('version');
 
@@ -52,7 +52,6 @@ export function getDefaultVersion(
 export function getReleaseChannel(
   input: Version | string
 ): ElectronReleaseChannel {
-
   const tag = (typeof input === 'string') ? input : (input.version || '');
 
   if (tag.includes('beta')) {
@@ -128,20 +127,20 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
  *
  * @returns {Array<Version>}
  */
-export function getElectronVersions(): Array<ElectronVersion> {
-  const known: Array<ElectronVersion> = getKnownVersions().map((version) => {
+export function getElectronVersions(): Array<RunnableVersion> {
+  const known: Array<RunnableVersion> = getKnownVersions().map((version) => {
     return {
       ...version,
-      source: ElectronVersionSource.remote,
-      state: ElectronVersionState.unknown
+      source: VersionSource.remote,
+      state: VersionState.unknown
     };
   });
 
-  const local: Array<ElectronVersion> = getLocalVersions().map((version) => {
+  const local: Array<RunnableVersion> = getLocalVersions().map((version) => {
     return {
       ...version,
-      source: ElectronVersionSource.local,
-      state: ElectronVersionState.ready
+      source: VersionSource.local,
+      state: VersionState.ready
     };
   });
 
@@ -182,10 +181,10 @@ export function getLocalVersions(): Array<Version> {
  *
  * @param {Array<Version>} versions
  */
-export function saveLocalVersions(versions: Array<Version | ElectronVersion>) {
+export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
   const filteredVersions = versions.filter((v) => {
     if (isElectronVersion(v)) {
-      return v.source === ElectronVersionSource.local;
+      return v.source === VersionSource.local;
     }
 
     return true;
@@ -218,10 +217,10 @@ export function saveKnownVersions(versions: Array<Version>) {
  * saved after.
  *
  * @export
- * @returns {Promise<Array<ElectronVersion>>}
+ * @returns {Promise<Array<RunnableVersion>>}
  */
 export async function getUpdatedElectronVersions(
-): Promise<Array<ElectronVersion>> {
+): Promise<Array<RunnableVersion>> {
   try {
     await fetchVersions();
   } catch (error) {
@@ -290,7 +289,7 @@ export function migrateVersions(input: Array<any> = []): Array<Version> {
 }
 
 export function isElectronVersion(
-  input: Version | ElectronVersion
-): input is ElectronVersion {
-  return (input as ElectronVersion).source !== undefined;
+  input: Version | RunnableVersion
+): input is RunnableVersion {
+  return (input as RunnableVersion).source !== undefined;
 }

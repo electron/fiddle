@@ -4,13 +4,13 @@ export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
 
-export enum ElectronVersionState {
+export enum VersionState {
   ready = 'ready',
   downloading = 'downloading',
   unknown = 'unknown'
 }
 
-export enum ElectronVersionSource {
+export enum VersionSource {
   remote = 'remote',
   local = 'local'
 }
@@ -29,9 +29,9 @@ export interface EditorValues {
   package?: string;
 }
 
-export interface ElectronVersion extends Version {
-  state: ElectronVersionState;
-  source: ElectronVersionSource;
+export interface RunnableVersion extends Version {
+  state: VersionState;
+  source: VersionSource;
 }
 
 export interface SetFiddleOptions {

@@ -2,7 +2,7 @@ import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion } from '../../interfaces';
+import { RunnableVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
 import { AppState } from '../state';
 import { VersionSelect } from './version-select';
@@ -14,7 +14,7 @@ export interface BisectDialogProps {
 export interface BisectDialogState {
   startIndex: number;
   endIndex: number;
-  allVersions: Array<ElectronVersion>;
+  allVersions: Array<RunnableVersion>;
   showHelp?: boolean;
 }
 
@@ -44,11 +44,11 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
     };
   }
 
-  public onBeginSelect(version: ElectronVersion) {
+  public onBeginSelect(version: RunnableVersion) {
     this.setState({ startIndex: this.state.allVersions.indexOf(version) });
   }
 
-  public onEndSelect(version: ElectronVersion) {
+  public onEndSelect(version: RunnableVersion) {
     this.setState({ endIndex: this.state.allVersions.indexOf(version) });
   }
 
@@ -208,10 +208,10 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
   /**
    * Should an item in the "earliest version" dropdown be disabled?
    *
-   * @param {ElectronVersion} version
+   * @param {RunnableVersion} version
    * @returns {boolean}
    */
-  public isEarliestItemDisabled(version: ElectronVersion): boolean {
+  public isEarliestItemDisabled(version: RunnableVersion): boolean {
     const { allVersions, endIndex } = this.state;
 
     // In the array, "newer" versions will have a lower index.
@@ -225,10 +225,10 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
   /**
    * Should an item in the "latest version" dropdown be disabled?
    *
-   * @param {ElectronVersion} version
+   * @param {RunnableVersion} version
    * @returns {boolean}
    */
-  public isLatestItemDisabled(version: ElectronVersion): boolean {
+  public isLatestItemDisabled(version: RunnableVersion): boolean {
     const { allVersions, startIndex } = this.state;
 
     return allVersions.indexOf(version) > startIndex - 1;

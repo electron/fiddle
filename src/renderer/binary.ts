@@ -75,8 +75,6 @@ export class BinaryManager {
   public async setup(iVersion: string): Promise<void> {
     const version = normalizeVersion(iVersion);
     const fs = await fancyImport<typeof fsType>('fs-extra');
-    const { promisify } = await import('util');
-    const eDownload = promisify(require('electron-download'));
 
     await fs.mkdirp(this.getDownloadPath(version));
 
@@ -94,7 +92,7 @@ export class BinaryManager {
     console.log(`BinaryManager: Electron ${version} not present, downloading`);
     this.state[version] = 'downloading';
 
-    const zipPath = await eDownload({ version });
+    const zipPath = await this.download({ version });
     const extractPath = this.getDownloadPath(version);
     console.log(`BinaryManager: Electron ${version} downloaded, now unpacking to ${extractPath}`);
 
@@ -238,5 +236,9 @@ export class BinaryManager {
         resolve();
       });
     });
+  }
+
+  private download({ version }: { version: string }): Promise<string> {
+
   }
 }

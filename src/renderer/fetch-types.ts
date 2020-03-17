@@ -2,7 +2,7 @@ import * as fsType from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 
-import { ElectronVersion, ElectronVersionSource } from '../interfaces';
+import { RunnableVersion, VersionSource } from '../interfaces';
 import { callIn } from '../utils/call-in';
 import { fancyImport } from '../utils/import';
 import { USER_DATA_PATH } from './constants';
@@ -64,7 +64,7 @@ export async function getOfflineTypeDefinitions(version: string): Promise<boolea
  * @param {string} version
  * @returns {void}
  */
-export async function getDownloadedVersionTypeDefs(version: ElectronVersion): Promise<string | null> {
+export async function getDownloadedVersionTypeDefs(version: RunnableVersion): Promise<string | null> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
     await fs.mkdirp(definitionPath);
     const offlinePath = getOfflineTypeDefinitionPath(version.version);
@@ -91,8 +91,8 @@ export async function getDownloadedVersionTypeDefs(version: ElectronVersion): Pr
   }
 }
 
-export async function getLocalVersionTypeDefs(version: ElectronVersion) {
-  if (version.source === ElectronVersionSource.local && !!version.localPath) {
+export async function getLocalVersionTypeDefs(version: RunnableVersion) {
+  if (version.source === VersionSource.local && !!version.localPath) {
     const fs = await fancyImport<typeof fsType>('fs-extra');
     const typesPath = getLocalTypePathForVersion(version);
     if (!!typesPath && fs.existsSync(typesPath)) {
@@ -107,7 +107,7 @@ export async function getLocalVersionTypeDefs(version: ElectronVersion) {
  *
  * @param {string} version
  */
-export async function updateEditorTypeDefinitions(version: ElectronVersion, i: number = 0): Promise<void> {
+export async function updateEditorTypeDefinitions(version: RunnableVersion, i: number = 0): Promise<void> {
   const defer = async (): Promise<void> => {
     if (i > 10) {
       console.warn(`Fetch Types: Failed, dependencies do not exist`);
@@ -125,7 +125,7 @@ export async function updateEditorTypeDefinitions(version: ElectronVersion, i: n
   const monaco: typeof MonacoType = app.monaco!;
   const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
 
-  const getTypeDefs = (version.source === ElectronVersionSource.local) ?
+  const getTypeDefs = (version.source === VersionSource.local) ?
     getLocalVersionTypeDefs : getDownloadedVersionTypeDefs;
 
   const typeDefs = await getTypeDefs(version);
@@ -143,7 +143,7 @@ export async function updateEditorTypeDefinitions(version: ElectronVersion, i: n
   }
 }
 
-export function getLocalTypePathForVersion(version: ElectronVersion) {
+export function getLocalTypePathForVersion(version: RunnableVersion) {
   if (version.localPath) {
     return path.join(
       version.localPath,
