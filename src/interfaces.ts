@@ -7,6 +7,7 @@ export type FileTransform = (files: Files) => Promise<Files>;
 export enum VersionState {
   ready = 'ready',
   downloading = 'downloading',
+  unzipping = 'unzipping',
   unknown = 'unknown'
 }
 

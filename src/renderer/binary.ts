@@ -21,7 +21,8 @@ export async function setupBinary(appState: AppState, iVersion: string): Promise
 
   await fs.mkdirp(getDownloadPath(version));
 
-  if (appState.versions[version].state === VersionState.downloading) {
+  const { state } = appState.versions[version];
+  if (state === VersionState.downloading || state === VersionState.unzipping) {
     console.log(`Binary: Electron ${version} already downloading.`);
     return;
   }
@@ -40,6 +41,8 @@ export async function setupBinary(appState: AppState, iVersion: string): Promise
   console.log(`Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`);
 
   try {
+    appState.versions[version].state = VersionState.unzipping;
+
     // Ensure the target path is empty
     await fs.emptyDir(extractPath);
 
@@ -47,8 +50,9 @@ export async function setupBinary(appState: AppState, iVersion: string): Promise
     console.log(`Unzipped ${version}`, electronFiles);
   } catch (error) {
     console.warn(`Failure while unzipping ${version}`, error);
+    appState.versions[version].state = VersionState.unknown;
 
-    // TODO: Handle this case
+    return;
   }
 
   appState.versions[version].state = VersionState.ready;
