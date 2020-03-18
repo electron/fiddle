@@ -5,6 +5,7 @@ import * as path from 'path';
 import { RunnableVersion, VersionSource } from '../interfaces';
 import { callIn } from '../utils/call-in';
 import { fancyImport } from '../utils/import';
+import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
@@ -35,6 +36,26 @@ export async function fetchTypeDefinitions(version: string): Promise<string> {
     return text;
   }
 }
+
+/**
+ * Removes the type definition for a given version
+ *
+ * @param version
+ */
+export async function removeTypeDefsForVersion(version: string) {
+  const fs = await fancyImport<typeof fsType>('fs-extra');
+  const _version = normalizeVersion(version);
+  const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
+
+  if (fs.existsSync(typeDefsDir)) {
+    try {
+      await fs.remove(typeDefsDir);
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
 
 /**
  * Get the path for offline TypeScript definitions

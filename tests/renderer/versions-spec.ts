@@ -1,7 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import semver from 'semver';
-import { ElectronVersion, ElectronVersionSource } from '../../src/interfaces';
+import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
@@ -18,7 +18,7 @@ import { mockFetchOnce } from '../utils';
 
 const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
 
-const mockVersions: Array<Partial<ElectronVersion>> = [
+const mockVersions: Array<Partial<RunnableVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
   { version: 'test-1', localPath: '/test/path/1' },
   { version: 'test-2', localPath: '/test/path/2' },
@@ -114,11 +114,11 @@ describe('versions', () => {
   describe('saveLocalVersions()', () => {
     it('saves local versions', () => {
       const mockLocalVersions = mockVersions.map((v) => {
-        v.source = ElectronVersionSource.local;
+        v.source = VersionSource.local;
         return v;
       });
 
-      saveLocalVersions(mockLocalVersions as Array<ElectronVersion>);
+      saveLocalVersions(mockLocalVersions as Array<RunnableVersion>);
 
       const key = (window.localStorage.setItem as jest.Mock).mock.calls[0][0];
       const value = (window.localStorage.setItem as jest.Mock).mock.calls[0][1];

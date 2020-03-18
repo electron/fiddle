@@ -19,7 +19,7 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
  * version.
  *
  * @param {string} query
- * @param {ElectronVersion} { version }
+ * @param {RunnableVersion} { version }
  * @returns
  */
 export const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
@@ -31,7 +31,7 @@ export const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) =>
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
  *
- * @param {ElectronVersion} item
+ * @param {RunnableVersion} item
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */

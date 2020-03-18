@@ -5,7 +5,7 @@ import { VersionState } from '../interfaces';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
-import { getOfflineTypeDefinitionPath } from './fetch-types';
+import { removeTypeDefsForVersion } from './fetch-types';
 import { AppState } from './state';
 
 /**
@@ -147,24 +147,6 @@ export function getDownloadingVersions(appState: AppState) {
     .map(([version, _]) => version);
 }
 
-/**
- * Removes the type definition for a given version
- *
- * @param version
- */
-export async function removeTypeDefsForVersion(version: string) {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
-  const _version = normalizeVersion(version);
-  const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
-
-  if (fs.existsSync(typeDefsDir)) {
-    try {
-      await fs.remove(typeDefsDir);
-    } catch (error) {
-      throw error;
-    }
-  }
-}
 
 /**
  * Returns an array of all versions downloaded to disk

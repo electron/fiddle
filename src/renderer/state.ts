@@ -221,7 +221,7 @@ export class AppState {
   }
 
   /**
-   * Returns the current ElectronVersion or the first
+   * Returns the current RunnableVersion or the first
    * one that can be found.
    */
   @computed get currentElectronVersion(): RunnableVersion {

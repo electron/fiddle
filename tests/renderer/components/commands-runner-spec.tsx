@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ElectronVersionState } from '../../../src/interfaces';
+import { VersionState } from '../../../src/interfaces';
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
@@ -42,13 +42,13 @@ describe('Runner component', () => {
   });
 
   it('renders downloading', () => {
-    store.versions['2.0.2'].state = ElectronVersionState.downloading;
+    store.versions['2.0.2'].state = VersionState.downloading;
     const wrapper = shallow(<Runner appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders "checking status"', () => {
-    store.versions['2.0.2'].state = ElectronVersionState.unknown;
+    store.versions['2.0.2'].state = VersionState.unknown;
     const wrapper = shallow(<Runner appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });

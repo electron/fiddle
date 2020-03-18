@@ -240,7 +240,7 @@ export async function fetchVersions() {
   const data = await response.json();
 
   // pre-0.24.0 versions were technically 'atom-shell' and cannot
-  // be downloaded with electron-download
+  // be downloaded with @electron/get
   const MIN_DOWNLOAD_VERSION = '0.24.0';
 
   const output = data
