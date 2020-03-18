@@ -24,7 +24,7 @@ import { getName } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import { BinaryManager } from './binary';
+import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
@@ -99,7 +99,6 @@ export class AppState {
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
-  @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public Bisector: Bisector | undefined;
 
   @observable public isPublishing: boolean = false;
@@ -397,7 +396,7 @@ export class AppState {
 
       saveLocalVersions(versionsAsArray);
     } else {
-      await this.binaryManager.remove(version);
+      await removeBinary(version);
       updatedVersions[version].state = VersionState.unknown;
     }
 
@@ -421,13 +420,12 @@ export class AppState {
 
     // Fetch new binaries, maybe?
     if (!isLocal && !isReady) {
-      console.log(`State: Instructing BinaryManager to fetch v${version}`);
+      console.log(`State: Fetching v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
-      updatedVersions[version].state = VersionState.downloading;
       this.versions = updatedVersions;
 
-      await this.binaryManager.setup(version);
+      await setupBinary(this, version);
       this.updateDownloadedVersionState();
     } else {
       console.log(`State: Version ${version} already downloaded, doing nothing.`);
@@ -493,14 +491,14 @@ export class AppState {
     const updatedVersions = { ...this.versions };
 
     // Keep state of currently downloading binaries first
-    const downloadingVersions = this.binaryManager.getDownloadingVersions();
+    const downloadingVersions = getDownloadingVersions(this);
     (downloadingVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = VersionState.downloading;
       }
     });
 
-    const downloadedVersions = await this.binaryManager.getDownloadedVersions();
+    const downloadedVersions = await getDownloadedVersions();
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = VersionState.ready;

@@ -32,6 +32,7 @@ export interface EditorValues {
 export interface RunnableVersion extends Version {
   state: VersionState;
   source: VersionSource;
+  downloadProgress?: number;
 }
 
 export interface SetFiddleOptions {

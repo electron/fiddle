@@ -1,6 +1,4 @@
-export class MockBinaryManager {
-  public remove = jest.fn();
-  public setup = jest.fn();
-  public getDownloadedVersions = jest.fn();
-  public getDownloadingVersions = jest.fn();
-}
+export const removeBinary = jest.fn();
+export const setupBinary = jest.fn();
+export const getDownloadedVersions = jest.fn();
+export const getDownloadingVersions = jest.fn();
