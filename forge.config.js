@@ -106,8 +106,18 @@ function notarizeMaybe() {
     return;
   }
 
+  if (process.env.npm_lifecycle_event !== 'publish') {
+    console.log(`Not in "publish" mode, skipping notarization`);
+    return;
+  }
+
   if (!process.env.CI) {
     console.log(`Not in CI, skipping notarization`);
+    return;
+  }
+
+  if (!process.env.TRAVIS_TAG && !process.env.NOTARIZE_WITHOUT_TAG) {
+    console.log(`Not a tag, not notarizing`);
     return;
   }
 
