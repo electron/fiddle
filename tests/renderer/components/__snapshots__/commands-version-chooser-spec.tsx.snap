@@ -26,6 +26,11 @@ exports[`VersionSelect component renders 1`] = `
             "state": "unknown",
             "version": "1.0.0",
           },
+          "1.8.6": Object {
+            "source": "remote",
+            "state": "ready",
+            "version": "1.8.6",
+          },
           "1.8.7": Object {
             "source": "remote",
             "state": "ready",
@@ -63,6 +68,11 @@ exports[`VersionSelect component renders 1`] = `
             "source": "remote",
             "state": "ready",
             "version": "1.8.7",
+          },
+          Object {
+            "source": "remote",
+            "state": "ready",
+            "version": "1.8.6",
           },
           Object {
             "source": "remote",

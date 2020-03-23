@@ -1,7 +1,7 @@
 import { VersionSource, VersionState } from '../../src/interfaces';
 import { AppState } from '../../src/renderer/state';
 import { TouchBarManager } from '../../src/renderer/touch-bar-manager';
-import { mockVersions } from '../mocks/electron-versions';
+import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 const { lastElectronVersion } = require('../fixtures/releases-metadata.json');
@@ -27,7 +27,8 @@ describe('TouchBarManager', () => {
   it('creates a touch bar with versions', () => {
     const touchBarMgr = new TouchBarManager(appState);
 
-    expect(touchBarMgr.versionSelector.items).toHaveLength(3);
+    const expectedLength = Object.keys(appState.versions).length;
+    expect(touchBarMgr.versionSelector.items).toHaveLength(expectedLength);
 
     const [ item ] = touchBarMgr.versionSelector.items;
 
@@ -43,7 +44,8 @@ describe('TouchBarManager', () => {
       version: '3.3.3'
     };
 
-    expect(touchBarMgr.versionSelector.items).toHaveLength(4);
+    const expectedLength = Object.keys(appState.versions).length;
+    expect(touchBarMgr.versionSelector.items).toHaveLength(expectedLength);
 
     const [ item ] = touchBarMgr.versionSelector.items;
 

@@ -8,7 +8,8 @@ import {
   IButtonProps,
   Icon,
   IconName,
-  Tooltip
+  Tooltip,
+  ProgressBar
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -360,20 +361,20 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderHumanState(item: RunnableVersion): JSX.Element {
     const { state } = item;
-    let icon: IconName = 'box';
+
+    if (state === VersionState.downloading || state === VersionState.unzipping) {
+      return <ProgressBar value={item.downloadProgress} />;
+    }
+
     let humanState = 'Downloaded';
 
-    if (state === VersionState.downloading) {
-      icon = 'cloud-download';
-      humanState = 'Downloading';
-    } else if (state === VersionState.unknown) {
-      icon = 'cloud';
+    if (state === VersionState.unknown) {
       humanState = 'Not downloaded';
     }
 
     return (
       <span>
-        <Icon icon={icon} /> {humanState}
+        {humanState}
       </span>
     );
   }
@@ -395,16 +396,22 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     };
 
     // Already downloaded
-    if (state === 'ready') {
+    if (state === VersionState.ready) {
+      buttonProps.disabled = false;
       buttonProps.onClick = () => appState.removeVersion(key);
       buttonProps.icon = 'trash';
       buttonProps.text = source === VersionSource.local
         ? 'Remove'
         : 'Delete';
-    } else if (state === 'downloading') {
+    } else if (state === VersionState.downloading) {
       buttonProps.disabled = true;
       buttonProps.loading = true;
       buttonProps.text = 'Downloading';
+      buttonProps.icon = 'cloud-download';
+    } else if (state === VersionState.unzipping) {
+      buttonProps.disabled = true;
+      buttonProps.loading = true;
+      buttonProps.text = 'Unzipping';
       buttonProps.icon = 'cloud-download';
     } else {
       buttonProps.disabled = false;

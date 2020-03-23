@@ -14,6 +14,10 @@ export const mockVersionsArray = [
     state: VersionState.ready,
     version: '1.8.7',
     source: VersionSource.remote
+  }, {
+    state: VersionState.ready,
+    version: '1.8.6',
+    source: VersionSource.remote
   }
 ];
 

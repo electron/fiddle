@@ -25,6 +25,7 @@ describe('ElectronSettings component', () => {
     store.versions['2.0.2'].state = 'downloading';
     store.versions['2.0.1'].state = 'ready';
     store.versions['1.8.7'].state = 'unknown';
+    store.versions['1.8.6'].state = 'unzipping';
   });
 
   it('renders', () => {
@@ -94,7 +95,7 @@ describe('ElectronSettings component', () => {
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
-    expect(store.removeVersion).toHaveBeenCalledTimes(2);
+    expect(store.removeVersion).toHaveBeenCalledTimes(3);
   });
 
   it('handles the downloadAll()', async () => {

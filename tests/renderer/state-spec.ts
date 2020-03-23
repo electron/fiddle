@@ -283,17 +283,21 @@ describe('AppState', () => {
     });
 
     it('excludes channels', () => {
+      const expectedLength = Object.keys(appState.versions).length;
+
       appState.channelsToShow = [ 'Unsupported' as any ];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.channelsToShow = [ 'Stable' as any ];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(expectedLength);
     });
 
     it('excludes states', () => {
+      const expectedLength = Object.keys(appState.versions).length;
+
       appState.statesToShow = [ VersionState.downloading ];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.statesToShow = [ VersionState.ready ];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(expectedLength);
     });
   });
 
@@ -422,7 +426,7 @@ describe('AppState', () => {
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
       expect(Object.keys(appState.versions)).toEqual(
-        ['2.0.2', '2.0.1', '1.8.7']
+        ['2.0.2', '2.0.1', '1.8.7', '1.8.6']
       );
     });
   });

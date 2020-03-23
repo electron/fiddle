@@ -180,10 +180,6 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
               Downloaded
             </span>
           </td>
@@ -191,6 +187,7 @@ exports[`ElectronSettings component renders 1`] = `
             className="action"
           >
             <Blueprint3.Button
+              disabled={false}
               fill={true}
               icon="trash"
               onClick={[Function]}
@@ -206,13 +203,7 @@ exports[`ElectronSettings component renders 1`] = `
             2.0.2
           </td>
           <td>
-            <span>
-              <Blueprint3.Icon
-                icon="cloud-download"
-              />
-               
-              Downloading
-            </span>
+            <Blueprint3.ProgressBar />
           </td>
           <td
             className="action"
@@ -235,10 +226,6 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
               Downloaded
             </span>
           </td>
@@ -246,6 +233,7 @@ exports[`ElectronSettings component renders 1`] = `
             className="action"
           >
             <Blueprint3.Button
+              disabled={false}
               fill={true}
               icon="trash"
               onClick={[Function]}
