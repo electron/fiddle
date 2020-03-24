@@ -1,10 +1,10 @@
 
 import {
-  ElectronVersion,
-  ElectronVersionSource,
-  ElectronVersionState
+  RunnableVersion,
+  VersionSource,
+  VersionState
 } from '../../src/interfaces';
-
+import { USER_DATA_PATH } from '../../src/renderer/constants';
 import {
   fetchTypeDefinitions,
   getDownloadedVersionTypeDefs,
@@ -12,12 +12,12 @@ import {
   getLocalVersionTypeDefs,
   getOfflineTypeDefinitionPath,
   getOfflineTypeDefinitions,
+  removeTypeDefsForVersion,
   updateEditorTypeDefinitions
 } from '../../src/renderer/fetch-types';
-
-import * as path from 'path';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
+import * as path from 'path';
 jest.mock('fs-extra');
 jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
@@ -92,8 +92,8 @@ describe('fetch-types', () => {
 
   describe('getDownloadedVersionTypeDefs()', () => {
     const version = {
-      state: ElectronVersionState.ready,
-      source: ElectronVersionSource.remote,
+      state: VersionState.ready,
+      source: VersionSource.remote,
       version: '3.0.0'
     };
 
@@ -178,11 +178,11 @@ describe('fetch-types', () => {
   });
 
   describe('getLocalVersionTypeDefs()', () => {
-    let version: ElectronVersion;
+    let version: RunnableVersion;
     beforeEach(() => {
       version = {
-        state: ElectronVersionState.ready,
-        source: ElectronVersionSource.local,
+        state: VersionState.ready,
+        source: VersionSource.local,
         version: '3.0.0',
         localPath: 'somePath'
       };
@@ -198,7 +198,7 @@ describe('fetch-types', () => {
     });
 
     it('returns null for remote path',  async () => {
-      version.source = ElectronVersionSource.remote;
+      version.source = VersionSource.remote;
       const result = await getLocalVersionTypeDefs(version);
       expect(result).toBeNull();
     });
@@ -211,11 +211,11 @@ describe('fetch-types', () => {
   });
 
   describe('getLocalTypePathForVersion()', () => {
-    let version: ElectronVersion;
+    let version: RunnableVersion;
     beforeEach(() => {
       version = {
-        state: ElectronVersionState.ready,
-        source: ElectronVersionSource.local,
+        state: VersionState.ready,
+        source: VersionSource.local,
         version: '3.0.0',
         localPath: 'somePath'
       };
@@ -241,13 +241,13 @@ describe('fetch-types', () => {
   });
 
   describe('updateEditorTypeDefinitions()', () => {
-    let version: ElectronVersion;
+    let version: RunnableVersion;
     beforeEach(() => {
       (global as any).window = window || {};
       (window as any).ElectronFiddle = new ElectronFiddleMock();
       version = {
-        state: ElectronVersionState.ready,
-        source: ElectronVersionSource.remote,
+        state: VersionState.ready,
+        source: VersionSource.remote,
         version: '3.0.0'
       };
     });
@@ -300,6 +300,31 @@ describe('fetch-types', () => {
       }
 
       expect(errored).toBe(false);
+    });
+  });
+
+  describe('removeTypeDefsForVersion()', () => {
+    it('removes a version\'s typedefs', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      await removeTypeDefsForVersion('v3.0.0');
+      expect(fs.remove).toHaveBeenCalledWith(path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'));
+    });
+
+    it('throws upon fs failure', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (fs.remove as jest.Mock<any>).mockImplementation(() => {
+        throw new Error('Bwap bwap');
+      });
+
+      expect.assertions(1);
+
+      try {
+        await removeTypeDefsForVersion('v3.0.0');
+      } catch (e) {
+        expect(e).toEqual(new Error('Bwap bwap'));
+      }
     });
   });
 });

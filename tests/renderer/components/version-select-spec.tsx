@@ -1,13 +1,13 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
+import { RunnableVersion, VersionSource, VersionState } from '../../../src/interfaces';
 import { filterItem, getItemIcon, getItemLabel, renderItem, VersionSelect } from '../../../src/renderer/components/version-select';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
-const { ready, unknown, downloading } = ElectronVersionState;
-const { remote, local } = ElectronVersionSource;
+const { ready, unknown, downloading } = VersionState;
+const { remote, local } = VersionSource;
 
 describe('VersionSelect component', () => {
   let store: any;
@@ -34,15 +34,15 @@ describe('VersionSelect component', () => {
         '3.0.0-unsupported': { ...mockVersion2 }
       },
       channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
-      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
+      statesToShow: [ VersionState.ready, VersionState.downloading ],
       setVersion: jest.fn(),
-      get currentElectronVersion() {
+      get currentRunnableVersion() {
         return mockVersions['2.0.2'];
       }
     };
   });
 
-  const onVersionSelect = () => ({});
+const onVersionSelect = () => ({});
 
   it('renders', () => {
     const wrapper = shallow(
@@ -77,7 +77,7 @@ describe('VersionSelect component', () => {
 
   describe('getItemLabel()', () => {
     it('returns the correct label for a local version', () => {
-      const input: ElectronVersion = {
+      const input: RunnableVersion = {
         ...mockVersion1,
         source: local,
       };
@@ -87,7 +87,7 @@ describe('VersionSelect component', () => {
     });
 
     it('returns the correct label for a version not downloaded', () => {
-      const input: ElectronVersion = {
+      const input: RunnableVersion = {
         ...mockVersion1,
         state: unknown
       };
@@ -96,7 +96,7 @@ describe('VersionSelect component', () => {
     });
 
     it('returns the correct label for a version downloaded', () => {
-      const input: ElectronVersion = {
+      const input: RunnableVersion = {
         ...mockVersion1,
         state: ready
       };
@@ -105,7 +105,7 @@ describe('VersionSelect component', () => {
     });
 
     it('returns the correct label for a version downloading', () => {
-      const input: ElectronVersion = {
+      const input: RunnableVersion = {
         ...mockVersion1,
         state: downloading
       };

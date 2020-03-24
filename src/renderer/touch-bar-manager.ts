@@ -5,7 +5,7 @@ import {
 } from 'electron';
 import { autorun } from 'mobx';
 
-import { ElectronVersion, ElectronVersionState } from '../interfaces';
+import { RunnableVersion, VersionState } from '../interfaces';
 import { getNiceGreeting } from '../utils/nice-greeting';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { AppState } from './state';
@@ -22,11 +22,11 @@ const {
  * Helper method: Returns an icon (emoji, lol) for an Electron
  * version.
  *
- * @param {Partial<ElectronVersion>} { state }
+ * @param {Partial<RunnableVersion>} { state }
  * @returns {string}
  */
 export function getItemIcon(
-  { state }: Partial<ElectronVersion> = { state: ElectronVersionState.unknown }
+  { state }: Partial<RunnableVersion> = { state: VersionState.unknown }
 ) {
   return state === 'ready'
     ? '💾'

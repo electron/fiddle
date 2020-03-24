@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
+import { VersionSource, VersionState } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
@@ -14,7 +14,7 @@ describe('ElectronSettings component', () => {
       version: '2.0.1',
       versions: { ...mockVersions },
       channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
-      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
+      statesToShow: [ VersionState.ready, VersionState.downloading ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
@@ -29,15 +29,15 @@ describe('ElectronSettings component', () => {
 
   it('renders', () => {
     store.versions['3.0.0-nightly.1'] = {
-      state: ElectronVersionState.ready,
+      state: VersionState.ready,
       version: '3.0.0-nightly.1',
-      source: ElectronVersionSource.local
+      source: VersionSource.local
     };
 
     store.versions['3.0.0'] = {
-      state: ElectronVersionState.ready,
+      state: VersionState.ready,
       version: '3.0.0',
-      source: ElectronVersionSource.local
+      source: VersionSource.local
     };
 
     const wrapper = shallow(<ElectronSettings appState={store} />);
@@ -47,15 +47,15 @@ describe('ElectronSettings component', () => {
 
   it('handles removing a version', async () => {
     store.versions['3.0.0-nightly.1'] = {
-      state: ElectronVersionState.ready,
+      state: VersionState.ready,
       version: '3.0.0-nightly.1',
-      source: ElectronVersionSource.local
+      source: VersionSource.local
     };
 
     store.versions['3.0.0'] = {
-      state: ElectronVersionState.ready,
+      state: VersionState.ready,
       version: '3.0.0',
-      source: ElectronVersionSource.local
+      source: VersionSource.local
     };
 
     const wrapper = mount(<ElectronSettings appState={store} />);
@@ -71,13 +71,13 @@ describe('ElectronSettings component', () => {
   it('handles downloading a version', async () => {
     store.versions = {
       '3.0.0': {
-        state: ElectronVersionState.unknown,
+        state: VersionState.unknown,
         version: '3.0.0',
-        source: ElectronVersionSource.remote
+        source: VersionSource.remote
       }
     };
 
-    store.statesToShow.push(ElectronVersionState.unknown);
+    store.statesToShow.push(VersionState.unknown);
 
     const wrapper = mount(<ElectronSettings appState={store} />);
 
@@ -139,21 +139,21 @@ describe('ElectronSettings component', () => {
       const instance = wrapper.instance() as any;
       await instance.handleStateChange({
         currentTarget: {
-          id: ElectronVersionState.ready,
+          id: VersionState.ready,
           checked: false
         }
       });
 
       await instance.handleStateChange({
         currentTarget: {
-          id: ElectronVersionState.unknown,
+          id: VersionState.unknown,
           checked: true
         }
       });
 
       expect(store.statesToShow).toEqual([
-        ElectronVersionState.downloading,
-        ElectronVersionState.unknown
+        VersionState.downloading,
+        VersionState.unknown
       ]);
     });
   });

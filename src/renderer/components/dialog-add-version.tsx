@@ -8,6 +8,7 @@ import * as semver from 'semver';
 import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
+import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -58,8 +59,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
   public async setFolderPath(folderPath: string) {
-    const { binaryManager } = this.props.appState;
-    const isValidElectron = !!await binaryManager.getIsDownloaded('custom', folderPath);
+    const isValidElectron = !!await getIsDownloaded('custom', folderPath);
 
     this.setState({ folderPath, isValidElectron });
   }

@@ -2,6 +2,7 @@ import { spawn } from 'child_process';
 import * as path from 'path';
 
 import { IpcEvents } from '../../src/ipc-events';
+import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
   findModulesInEditors,
@@ -17,6 +18,10 @@ import { mockVersions } from '../mocks/electron-versions';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
+jest.mock('../../src/renderer/binary', () => ({
+  getIsDownloaded: jest.fn(),
+  getElectronBinaryPath: jest.fn()
+}));
 jest.mock('fs-extra');
 jest.mock('child_process');
 
@@ -39,10 +44,6 @@ describe('Runner component', () => {
       pushOutput: jest.fn(),
       clearConsole: jest.fn(),
       pushError: jest.fn(),
-      binaryManager: {
-        getIsDownloaded: jest.fn(() => true),
-        getElectronBinaryPath: jest.fn((version: string) => `/fake/path/${version}/electron`)
-      },
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
       },
@@ -50,6 +51,7 @@ describe('Runner component', () => {
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();
+    (getIsDownloaded as jest.Mock).mockReturnValue(true);
 
     instance = new Runner(store as AppState);
   });
@@ -59,7 +61,7 @@ describe('Runner component', () => {
     (spawn as any).mockReturnValueOnce(mockChild);
 
     expect(await instance.run()).toBe(true);
-    expect(store.binaryManager.getIsDownloaded).toHaveBeenCalled();
+    expect(getIsDownloaded).toHaveBeenCalled();
     expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
     expect(installModules).toHaveBeenCalled();
     expect(store.isRunning).toBe(true);
@@ -75,7 +77,7 @@ describe('Runner component', () => {
     });
 
     expect(await instance.run()).toBe(true);
-    expect(store.binaryManager.getIsDownloaded).toHaveBeenCalled();
+    expect(getIsDownloaded).toHaveBeenCalled();
     expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
     expect(installModules).toHaveBeenCalled();
     expect(store.isRunning).toBe(true);
@@ -161,7 +163,7 @@ describe('Runner component', () => {
     });
 
     it('does not run version not yet downloaded', async () => {
-      store.binaryManager.getIsDownloaded.mockReturnValueOnce(false);
+      (getIsDownloaded as jest.Mock).mockReturnValueOnce(false);
 
       expect(await instance.run()).toBe(false);
     });

@@ -1,20 +1,20 @@
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { RunnableVersion, VersionSource, VersionState } from '../../src/interfaces';
 import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 
 export const mockVersionsArray = [
   {
-    state: ElectronVersionState.ready,
+    state: VersionState.ready,
     version: '2.0.2',
-    source: ElectronVersionSource.remote
+    source: VersionSource.remote
   }, {
-    state: ElectronVersionState.ready,
+    state: VersionState.ready,
     version: '2.0.1',
-    source: ElectronVersionSource.remote
+    source: VersionSource.remote
   }, {
-    state: ElectronVersionState.ready,
+    state: VersionState.ready,
     version: '1.8.7',
-    source: ElectronVersionSource.remote
+    source: VersionSource.remote
   }
 ];
 
-export const mockVersions: Record<string, ElectronVersion> = arrayToStringMap(mockVersionsArray);
+export const mockVersions: Record<string, RunnableVersion> = arrayToStringMap(mockVersionsArray);

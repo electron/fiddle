@@ -1,13 +1,13 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
+import { VersionSource, VersionState } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
-const { unknown } = ElectronVersionState;
-const { remote } = ElectronVersionSource;
+const { unknown } = VersionState;
+const { remote } = VersionSource;
 
 describe('VersionSelect component', () => {
   let store: any;
@@ -37,7 +37,7 @@ describe('VersionSelect component', () => {
       versionsToShow: Object.values(versions).filter((v) => !!v),
       versions,
       channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
-      statesToShow: [ ElectronVersionState.ready, ElectronVersionState.downloading ],
+      statesToShow: [ VersionState.ready, VersionState.downloading ],
       setVersion: jest.fn(),
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
