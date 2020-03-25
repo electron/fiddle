@@ -15,7 +15,7 @@
 
 const { app, globalShortcut } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // Register a 'CommandOrControl+Y' shortcut listener.
   //
   // On Linux and Windows, the Command key does not have any effect, so use

@@ -10,7 +10,7 @@
 
 const { app, contentTracing } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const options = {
     categoryFilter: '*',
     traceOptions: 'record-until-full,enable-sampling'

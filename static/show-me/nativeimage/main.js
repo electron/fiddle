@@ -7,7 +7,7 @@ const { app, Tray, nativeImage } = require('electron')
 
 let trayIcon = null
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // Let's first read an image.
   let icon = null
 

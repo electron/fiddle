@@ -7,7 +7,7 @@
 
 const { app } = require('electron')
 
-app.on('ready', () => console.log('The app is now ready for action'))
+app.whenReady().then(() => console.log('The app is now ready for action'))
 
 app.on('browser-window-created', () => console.log('A window was created!'))
 app.on('browser-window-focus', () => console.log('...and focused!'))

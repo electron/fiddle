@@ -7,7 +7,7 @@
 
 const { app, BrowserWindow, ipcMain } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 600,
