@@ -1,28 +1,24 @@
+import { reaction } from 'mobx';
+import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
-import { Mosaic, MosaicWindow } from 'react-mosaic-component';
+import { Mosaic, MosaicBranch, MosaicNode, MosaicWindow, MosaicWindowProps } from 'react-mosaic-component';
 
-import { EditorId } from '../../interfaces';
+import { EditorId, MosaicId, PanelId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
-import { ContentNames, getContent } from '../content';
+import { isEditorId } from '../../utils/type-checks';
+import { getContent } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
-
-const options: any = {
-  direction: 'row',
-  first: 'main',
-  second: {
-    direction: 'column',
-    first: 'renderer',
-    second: 'html',
-  },
-};
+import { renderNonIdealState } from './editors-non-ideal-state';
+import { DocsDemoGoHomeButton, MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { ShowMe } from './show-me';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -31,13 +27,13 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   wordWrap: 'on'
 };
 
-const ViewIdMosaic = Mosaic.ofType<EditorId>();
-const ViewIdMosaicWindow = MosaicWindow.ofType<EditorId>();
-
-const TITLE_MAP: Record<EditorId, string> = {
-  main: 'Main Process',
-  renderer: 'Renderer Process',
-  html: 'HTML'
+export const TITLE_MAP: Record<MosaicId, string> = {
+  main: 'Main Process (main.js)',
+  renderer: 'Renderer Process (renderer.js)',
+  preload: 'Preload (preload.js)',
+  html: 'HTML (index.html)',
+  css: 'Stylesheet (styles.css)',
+  docsDemo: 'Docs & Demos',
 };
 
 export interface EditorsProps {
@@ -48,16 +44,36 @@ export interface EditorsState {
   monaco?: typeof MonacoType;
   isMounted?: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
+  focused?: EditorId;
 }
 
+@observer
 export class Editors extends React.Component<EditorsProps, EditorsState> {
+  // A reaction: Each time mosaicArrangement is changed, we'll update
+  // the editor layout. That method is itself debounced.
+  public disposeLayoutAutorun = reaction(
+    () => this.props.appState.mosaicArrangement,
+    () => updateEditorLayout()
+  );
+
   constructor(props: EditorsProps) {
     super(props);
+
+    this.onChange = this.onChange.bind(this);
+    this.renderEditor = this.renderEditor.bind(this);
+    this.renderTile = this.renderTile.bind(this);
+    this.renderGenericPanel = this.renderGenericPanel.bind(this);
+    this.setFocused = this.setFocused.bind(this);
+
     this.state = { monacoOptions: defaultMonacoOptions };
-    this.loadMonaco();
   }
 
-  public componentDidMount() {
+  /**
+   * Executed right after the component mounts. We'll setup the IPC listeners here.
+   *
+   * @memberof Editors
+   */
+  public async componentDidMount() {
     ipcRendererManager.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
       this.executeCommand(cmd);
     });
@@ -65,22 +81,28 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
 
-      window.ElectronFiddle.app.setValues({
-        html: await getContent(ContentNames.HTML, version),
-        renderer: await getContent(ContentNames.RENDERER, version),
-        main: await getContent(ContentNames.MAIN, version)
-      });
+      await window.ElectronFiddle.app.replaceFiddle({
+        html: await getContent(EditorId.html, version),
+        renderer: await getContent(EditorId.renderer, version),
+        main: await getContent(EditorId.main, version),
+      }, {});
     });
 
-    ipcRendererManager.on(IpcEvents.TOGGLE_SOFT_WRAP, async (_event) => {
-      this.toggleEditorOption('wordWrap');
-    });
-
-    ipcRendererManager.on(IpcEvents.TOGGLE_MINI_MAP, async (_event) => {
-      this.toggleEditorOption('minimap.enabled');
+    ipcRendererManager.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {
+      this.toggleEditorOption(cmd);
     });
 
     this.setState({ isMounted: true });
+    await this.loadMonaco();
+    this.props.appState.isUnsaved = false;
+  }
+
+  public componentWillUnmount() {
+    this.disposeLayoutAutorun();
+
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
   }
 
   /**
@@ -103,9 +125,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
   }
 
-  public toggleEditorOption(path: string) {
-    if (!window || !window.ElectronFiddle || !window.ElectronFiddle.editors) {
-      return;
+  public toggleEditorOption(path: string): boolean {
+    if (!window.ElectronFiddle.editors) {
+      return false;
     }
 
     try {
@@ -116,19 +138,126 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       setAtPath(path, newOptions, toggleMonaco(currentSetting));
 
       Object.keys(window.ElectronFiddle.editors)
-      .forEach((key) => {
-        const editor: MonacoType.editor.IStandaloneCodeEditor | null
-          = window.ElectronFiddle.editors[key];
+        .forEach((key) => {
+          const editor: MonacoType.editor.IStandaloneCodeEditor | null
+            = window.ElectronFiddle.editors[key];
 
-        if (editor) {
-          editor.updateOptions(newOptions);
-        }
-      });
+          if (editor) {
+            editor.updateOptions(newOptions);
+          }
+        });
 
       this.setState({ monacoOptions: newOptions });
+
+      return true;
     } catch (error) {
       console.warn(`Editors: Could not toggle property ${path}`, error);
+
+      return false;
     }
+  }
+
+  /**
+   * Renders the little tool bar on top of each panel
+   *
+   * @param {MosaicWindowProps<MosaicId>} { title }
+   * @param {MosaicId} id
+   * @returns {JSX.Element}
+   */
+  public renderToolbar(
+    { title }: MosaicWindowProps<MosaicId>, id: MosaicId
+  ): JSX.Element {
+    const { appState } = this.props;
+    const docsDemoGoHomeMaybe = id === PanelId.docsDemo
+      ? <DocsDemoGoHomeButton id={id} appState={appState} />
+      : null;
+
+    // only show toolbar controls if we have more than 1 visible editor
+    // Mosaic arrangement is type string if 1 editor, object otherwise
+    const toolbarControlsMaybe =
+      (typeof appState.mosaicArrangement !== 'string') &&
+      (
+        <>
+          <MaximizeButton id={id} appState={appState} />
+          <RemoveButton id={id} appState={appState} />
+        </>
+      );
+
+    return (
+      <div>
+        {/* Left */}
+        <div>
+          <h5>
+            {title}
+          </h5>
+        </div>
+        {/* Middle */}
+        <div />
+        {/* Right */}
+        <div className='mosaic-controls'>
+          {docsDemoGoHomeMaybe}
+          {toolbarControlsMaybe}
+        </div>
+      </div>
+    );
+  }
+
+  /**
+   * Renders a Mosaic tile
+   *
+   * @param {string} id
+   * @param {string} path
+   * @returns {JSX.Element | null}
+   */
+  public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
+    const { appState } = this.props;
+    const content = isEditorId(id)
+      ? this.renderEditor(id)
+      : this.renderGenericPanel(id, appState);
+
+    return (
+      <MosaicWindow<EditorId>
+        className={id}
+        path={path}
+        title={TITLE_MAP[id]}
+        renderToolbar={(props: MosaicWindowProps<MosaicId>) => this.renderToolbar(props, id)}
+      >
+        {content}
+      </MosaicWindow>
+    );
+  }
+
+  /**
+   * Renders a generic panel – so not an editor, but something else
+   *
+   * @param {PanelId} _id
+   * @param {AppState} _appState
+   * @returns {JSX.Element}
+   */
+  public renderGenericPanel(_id: PanelId, appState: AppState): JSX.Element {
+    return <ShowMe appState={appState} />;
+  }
+
+  /**
+   * Render an editor
+   *
+   * @param {EditorId} id
+   * @returns {(JSX.Element | null)}
+   * @memberof Editors
+   */
+  public renderEditor(id: EditorId): JSX.Element | null {
+    const { appState } = this.props;
+    const { monaco } = this.state;
+
+    return (
+      <Editor
+        id={id}
+        monaco={monaco!}
+        appState={appState}
+        monacoOptions={defaultMonacoOptions}
+        setFocused={this.setFocused}
+      />
+    );
   }
 
   public render() {
@@ -138,27 +267,31 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     if (!monaco) return null;
 
     return (
-      <ViewIdMosaic
-        onChange={updateEditorLayout}
-        // tslint:disable-next-line:jsx-no-multiline-js
-        renderTile={(id, path) => (
-          <ViewIdMosaicWindow className={id} path={path} title={TITLE_MAP[id]} toolbarControls={<div />}>
-            <Editor id={id} monaco={monaco} appState={appState} monoacoOptions={defaultMonacoOptions} />
-          </ViewIdMosaicWindow>
-        )}
-        initialValue={options}
+      <Mosaic<EditorId | PanelId>
+        className={`focused__${this.state.focused}`}
+        onChange={this.onChange}
+        value={appState.mosaicArrangement}
+        zeroStateView={renderNonIdealState(appState)}
+        renderTile={this.renderTile}
       />
     );
+  }
+
+  /**
+   * Handles a change in the visible nodes
+   *
+   * @param {(MosaicNode<EditorId> | null)} currentNode
+   */
+  public onChange(currentNode: MosaicNode<EditorId> | null) {
+    this.props.appState.mosaicArrangement = currentNode;
   }
 
   /**
    * Loads monaco. If it's already loaded, it'll just set it on the current state.
    * We're doing things a bit roundabout to ensure that we're not overloading the
    * mobx state with a gigantic Monaco tree.
-   *
-   * @private
    */
-  private async loadMonaco(): Promise<void> {
+  public async loadMonaco() {
     const { app } = window.ElectronFiddle;
     const loader = require('monaco-loader');
     const monaco = app.monaco || await loader();
@@ -168,11 +301,24 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
 
     if (!this.state || !this.state.isMounted) {
-      this.state = { monaco, monacoOptions: defaultMonacoOptions };
+      this.state = {
+        monaco,
+        monacoOptions: defaultMonacoOptions
+      };
     } else {
       this.setState({ monaco });
     }
 
-    activateTheme(monaco, undefined, this.props.appState.theme);
+    await activateTheme(monaco, undefined, this.props.appState.theme);
+  }
+
+  /**
+   * Sets the currently-focused editor. This will impact the editor's
+   * z-index, ensuring that its intellisense menus don't get clipped
+   * by the other editor windows.
+   * @param id Editor ID
+   */
+  public setFocused(id: EditorId): void {
+    this.setState({ focused: id });
   }
 }

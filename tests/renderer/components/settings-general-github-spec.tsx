@@ -29,15 +29,12 @@ describe('GitHubSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('handles a click on the signout button', () => {
-    store.gitHubToken = '123';
-    store.gitHubLogin = 'Test User';
-
+  it('opens the token dialog on click', () => {
     const wrapper = shallow(
       <GitHubSettings appState={store} />
     );
 
-    wrapper.find('button').simulate('click');
-    expect(store.signOutGitHub).toHaveBeenCalled();
+    wrapper.childAt(1).childAt(1).simulate('click');
+    expect(store.isTokenDialogShowing).toBe(true);
   });
 });

@@ -15,6 +15,7 @@ export class IpcRendererManager extends EventEmitter {
     super();
 
     ipcRendererEvents.forEach((name) => {
+      ipcRenderer.removeAllListeners(name);
       ipcRenderer.on(name, (...args: Array<any>) => this.emit(name, ...args));
     });
   }

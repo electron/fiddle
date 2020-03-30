@@ -1,6 +1,8 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
+const { builtinModules } =  require('module');
+
 export interface NpmOperationOptions {
   dir: string;
 }
@@ -11,14 +13,12 @@ export let isInstalled: boolean | null = null;
 /* perhaps we can expose this to the settings module?*/
 const ignoredModules: Array<string> = [
   'electron',
-  // tslint:disable-next-line:no-submodule-imports
-  ...require('builtin-modules/static')
+  'original-fs',
+  ...builtinModules
 ];
 
-console.log(ignoredModules);
-
 /* regular expression to both match and extract module names */
-const requiregx = /require\(['"](.*?)['"]\)/gm;
+const requiregx = /^.*require\(['"](.*?)['"]\)/gm;
 
 
 /*
@@ -93,8 +93,11 @@ export function findModules(input: string): Array<string> {
   /* grab all global require matches in the text */
   // tslint:disable-next-line:no-conditional-assignment
   while (match = (requiregx.exec(input) || null)) {
-    const mod = match[1];
-    modules.push(mod);
+    // ensure commented-out requires aren't downloaded
+    if (!match[0].startsWith('//')) {
+      const mod = match[1];
+      modules.push(mod);
+    }
   }
 
   /* map and reduce */

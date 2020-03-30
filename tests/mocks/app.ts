@@ -1,19 +1,28 @@
 import { FileManager } from './file-manager';
+import { RemoteLoader } from './remote-loader';
+import { RunnerMock } from './runner';
 
 export class AppMock {
   public setupUnsavedOnChangeListener = jest.fn();
-  public setValues = jest.fn();
-  public getValues = jest.fn(() => ({
+  public replaceFiddle = jest.fn();
+  public setEditorValues = jest.fn();
+  public getEditorValues = jest.fn(() => ({
     main: 'main-content',
+    preload: 'preload-content',
     renderer: 'renderer-content',
-    html: 'html-content'
+    html: 'html-content',
+    css: 'css-content'
   }));
+
+  public setupTheme = jest.fn();
 
   public typeDefDisposable = {
     dispose: jest.fn()
   };
 
   public fileManager = new FileManager();
+  public runner = new RunnerMock();
+  public remoteLoader = new RemoteLoader();
 
   public monaco = {
     editor: {

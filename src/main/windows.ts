@@ -1,5 +1,7 @@
 import { BrowserWindow, shell } from 'electron';
+import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
+import { ipcMainManager } from './ipc';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -20,7 +22,8 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
     webPreferences: {
-      webviewTag: false
+      webviewTag: false,
+      nodeIntegration: true
     }
   };
 }
@@ -33,10 +36,13 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
  * @returns {Electron.BrowserWindow}
  */
 export function createMainWindow(): Electron.BrowserWindow {
+  console.log(`Creating main window`);
   const browserWindow = new BrowserWindow(getMainWindowOptions());
-  browserWindow.loadFile('./dist/index.html');
+  browserWindow.loadFile('./dist/static/index.html');
 
   browserWindow.webContents.once('dom-ready', () => {
+    browserWindow.show();
+
     if (browserWindow) {
       createContextMenu(browserWindow);
     }
@@ -55,6 +61,10 @@ export function createMainWindow(): Electron.BrowserWindow {
   browserWindow.webContents.on('will-navigate', (event, url) => {
     event.preventDefault();
     shell.openExternal(url);
+  });
+
+  ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
+    browserWindow.showInactive();
   });
 
   browserWindows.push(browserWindow);

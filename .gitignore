@@ -31,6 +31,9 @@ yarn-error.log
 # Coverage
 coverage
 
+# Test report
+report.json
+
 # npm package
 /npm/dist
 /npm/path.txt

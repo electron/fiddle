@@ -1,6 +1,8 @@
+import { Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { RENDERER_JS_NAME } from '../../src/shared-constants';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('fs-extra');
@@ -17,7 +19,7 @@ jest.mock('../../src/renderer/templates', () => ({
     renderer: ''
   })
 }));
-jest.mock('../../src/renderer/state');
+
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p)
 }));
@@ -29,7 +31,9 @@ describe('FileManager', () => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
 
-    fm = new FileManager({} as any);
+    fm = new FileManager({
+      setGenericDialogOptions: jest.fn()
+    } as any);
   });
 
   afterEach(() => {
@@ -38,23 +42,27 @@ describe('FileManager', () => {
 
   describe('openFiddle()', () => {
     it('opens a local fiddle', async () => {
-      await fm.openFiddle('/fake/path');
+      const fakePath = '/fake/path';
+      await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({});
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({}, {filePath: fakePath});
     });
 
-    it('handles an error', async () => {
+    it('writes empty strings if readFile throws an error', async () => {
       const fs = require('fs-extra');
       (fs.readFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
-      await fm.openFiddle('/fake/path');
+      const fakePath = '/fake/path';
+      await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.setValues).toHaveBeenCalledWith({
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith({
         html: '',
         renderer: '',
-        main: ''
-      });
+        preload: '',
+        main: '',
+        css: ''
+      }, {filePath: fakePath});
     });
 
     it('runs it on IPC event', () => {
@@ -62,18 +70,36 @@ describe('FileManager', () => {
       ipcRendererManager.emit(IpcEvents.FS_OPEN_FIDDLE);
       expect(fm.openFiddle).toHaveBeenCalled();
     });
+
+    it('does not do anything with incorrect inputs', async () => {
+      await fm.openFiddle({} as any);
+      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(0);
+    });
+
+    it('does not do anything if cancelled', async () => {
+      (window.ElectronFiddle.app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      await fm.openFiddle('/fake/path');
+    });
   });
 
   describe('saveFiddle()', () => {
-    it('saves as a local fiddle', async () => {
+    it('saves all non-empty files in Fiddle', async () => {
       const fs = require('fs-extra');
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
     });
 
-    it('handles an error', async () => {
+    it('removes a file that is newly empty', async () => {
+      const fs = require('fs-extra');
+
+      await fm.saveFiddle('/fake/path');
+
+      expect(fs.remove).toHaveBeenCalledTimes(1);
+    });
+
+    it('handles an error (output)', async () => {
       const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
@@ -81,8 +107,20 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(5);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(5);
+    });
+
+    it('handles an error (remove)', async () => {
+      const fs = require('fs-extra');
+      (fs.remove as jest.Mock).mockImplementation(() => {
+        throw new Error('bwap');
+      });
+
+      await fm.saveFiddle('/fake/path');
+
+      expect(fs.remove).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {
@@ -96,6 +134,14 @@ describe('FileManager', () => {
       ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
+
+    it('asks for a path via IPC if none can  be found', async () => {
+      await fm.saveFiddle();
+
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FS_SAVE_FIDDLE_DIALOG
+      );
+    });
   });
 
   describe('saveToTemp()', () => {
@@ -105,32 +151,50 @@ describe('FileManager', () => {
 
       await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
+      expect(fs.outputFile).toHaveBeenCalledTimes(6);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 
-    it('handles an error', async () => {
+    it('throws an error', async () => {
       const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
 
-      await fm.saveFiddle('/fake/path');
+      const testFn = async () => {
+        await fm.saveToTemp({ includeDependencies: false, includeElectron: false });
+      };
+      let errored = false;
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(4);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(4);
+      try {
+        await testFn();
+      } catch (error) {
+        errored = true;
+      }
+
+      expect(errored).toBe(true);
     });
   });
 
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
-      fm.setFiddle = jest.fn();
       await fm.openTemplate('test');
-      expect(fm.setFiddle).toHaveBeenCalledWith({
-        html: '',
-        main: '',
-        renderer: ''
-      });
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith(
+        {
+          html: '',
+          main: '',
+          renderer: ''
+        },
+        {
+          templateName: 'test'
+        }
+      );
+    });
+
+    it('runs openTemplate on IPC event', () => {
+      fm.openTemplate = jest.fn();
+      ipcRendererManager.emit(IpcEvents.FS_OPEN_TEMPLATE);
+      expect(fm.openTemplate).toHaveBeenCalled();
     });
   });
 
@@ -163,6 +227,25 @@ describe('FileManager', () => {
       const result = await fm.cleanup('/fake/dir');
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('getFiles()', () => {
+    it('applies transforms', async () => {
+      const result = await fm.getFiles(undefined, async (files: Files) => {
+        files.set(RENDERER_JS_NAME, 'hi');
+        return files;
+      });
+
+      expect(result.get(RENDERER_JS_NAME)).toBe('hi');
+    });
+
+    it('handles transform error', async () => {
+      const result = await fm.getFiles(undefined, async () => {
+        throw new Error('bwap bwap');
+      });
+
+      expect(result.get(RENDERER_JS_NAME)).toBe('renderer-content');
     });
   });
 });

@@ -3,6 +3,7 @@
 exports[`Chrome-Mac component renders 1`] = `
 <div
   className="chrome drag"
+  onDoubleClick={[Function]}
 >
   <small>
     Electron Fiddle - Unsaved

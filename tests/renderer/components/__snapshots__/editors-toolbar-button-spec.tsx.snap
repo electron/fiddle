@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Editor toolbar button component MaximizeButton renders 1`] = `
+<Component>
+  <Component />
+</Component>
+`;
+
+exports[`Editor toolbar button component RemoveButton renders 1`] = `
+<Component>
+  <Component />
+</Component>
+`;

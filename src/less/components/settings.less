@@ -1,0 +1,189 @@
+@import "../variables.less";
+
+.settings {
+  background: @background-3;
+  z-index: 10;
+  position: absolute;
+  height: 100%;
+  width: 100vw;
+  display: flex;
+  user-select: none;
+  cursor: initial;
+
+  a:hover {
+    cursor: pointer;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5 {
+    color: @text-color-1;
+    cursor: initial;
+  }
+
+  h4 {
+    margin-bottom: 5px;
+  }
+
+  label {
+    font-weight: 200;
+  }
+
+  select {
+    width: 250px;
+  }
+
+  .bp3-divider {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .bp3-callout {
+    max-width: 850px;
+  }
+
+  .electron-versions-table {
+    width: 100%;
+
+    .action {
+      text-align: right;
+    }
+  }
+
+  .settings-content {
+    height: 100%;
+    width: 100%;
+    padding: 20px;
+    overflow: scroll;
+    color: @text-color-3;
+    box-sizing: border-box;
+  }
+
+  .settings-electron {
+    .advanced-options-buttons {
+      display: flex;
+      flex-flow: row wrap;
+
+      > div {
+        margin-right: 1rem;
+
+        button {
+          width: 100%;
+        }
+      }
+
+      > div:last-of-type {
+        margin-right: 0;
+      }
+    }
+
+    .versions-to-show {
+      margin-bottom: 2rem;
+      border-bottom: 1px solid @border-color-1;
+      padding-bottom: 1.5rem;
+
+      p {
+        margin-bottom: 1rem;
+      }
+
+      label {
+        display: inline;
+        margin-right: 10px;
+      }
+    }
+  }
+
+  .settings-section {
+    margin-bottom: 20px;
+
+    &:last-of-type {
+      margin: 0;
+    }
+  }
+
+  .settings-close {
+    position: fixed;
+    right: 30px;
+    height: 25px;
+    width: 25px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 15px;
+    color: var(--text-color-3);
+
+    &:hover {
+      color: @text-color-1;
+    }
+
+    svg {
+      background: @background-3;
+      box-shadow: 0 0 12px 6px @background-3;
+    }
+  }
+
+  .contributors {
+    display: flex;
+    flex-wrap: wrap;
+
+    .contributor {
+      width: 320px;
+      height: 120px;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      margin: 0 10px 10px 0;
+      display: flex;
+      justify-content: flex-start;
+      cursor: pointer;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.15);
+      }
+
+      h5,
+      p {
+        margin-bottom: 0;
+      }
+
+      .avatar {
+        height: 100px;
+        width: 100px;
+        background-size: contain;
+        margin-right: 10px;
+      }
+
+      .details {
+        max-width: 190px;
+        overflow: scroll;
+      }
+    }
+  }
+
+  .settings-menu {
+    height: 100%;
+    width: 250px;
+    background-color: @background-1;
+    user-select: none;
+
+    ul {
+      list-style: none;
+      padding: 20px;
+    }
+
+    li {
+      font-size: 1rem;
+      padding-top: 10px;
+      padding-bottom: 10px;
+      border-bottom: @border;
+      color: var(--text-color-1);
+      opacity: 0.8;
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+  }
+}

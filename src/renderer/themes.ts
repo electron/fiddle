@@ -2,8 +2,8 @@ import * as fsType from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 
-import { CONFIG_PATH } from '../constants';
 import { fancyImport } from '../utils/import';
+import { CONFIG_PATH } from './constants';
 import { defaultDark, defaultLight, DefaultThemes, FiddleTheme, LoadedFiddleTheme } from './themes-defaults';
 
 export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
@@ -20,7 +20,7 @@ export async function activateTheme(
   const _monaco = monaco || window.ElectronFiddle.app.monaco;
   const _theme = theme || await getTheme(name);
 
-  if (!_monaco) return;
+  if (!_monaco || !_monaco.editor) return;
 
   _monaco.editor.defineTheme('main', _theme.editor as any);
   _monaco.editor.setTheme('main');

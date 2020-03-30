@@ -15,7 +15,7 @@ jest.mock('../../../src/renderer/components/settings-credits', () => ({
   CreditsSettings: 'settings-credits'
 }));
 
-describe('CreditsSettings component', () => {
+describe('Settings component', () => {
   let store: any;
 
   beforeEach(() => {
@@ -56,7 +56,7 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.General').simulate('click');
+    wrapper.find('#settings-link-General').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -65,7 +65,16 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.Electron').simulate('click');
+    wrapper.find('#settings-link-Electron').simulate('click');
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders the Execution page after a click', () => {
+    const wrapper = shallow(
+      <Settings appState={store} />
+    );
+
+    wrapper.find('#settings-link-Execution').simulate('click');
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -74,7 +83,33 @@ describe('CreditsSettings component', () => {
       <Settings appState={store} />
     );
 
-    wrapper.find('.Credits').simulate('click');
+    wrapper.find('#settings-link-Credits').simulate('click');
     expect(wrapper).toMatchSnapshot();
+  });
+
+  it('closes upon pressing Escape key', () => {
+    expect(store.isSettingsShowing).toBe(true);
+    // mock event listener API
+    const map: any = {};
+    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+      map[event] = cb;
+    });
+
+    window.removeEventListener = jest.fn().mockImplementation((event) => {
+      delete map[event];
+    });
+
+    const wrapper = shallow(
+      <Settings appState={store} />
+    );
+
+    // trigger mock 'keyup' event
+    map.keyup({code: 'Escape'});
+    expect(Object.keys(map)).toHaveLength(1);
+    expect(store.isSettingsShowing).toBe(false);
+
+    // check if event listener is removed upon unmount
+    wrapper.unmount();
+    expect(Object.keys(map)).toHaveLength(0);
   });
 });

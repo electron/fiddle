@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Publish button component renders 1`] = `
+<fieldset>
+  <Blueprint3.ButtonGroup
+    className="button-publish"
+  >
+    <Blueprint3.Popover
+      boundary="scrollParent"
+      captureDismiss={false}
+      content={
+        <Blueprint3.Menu>
+          <Blueprint3.MenuItem
+            active={false}
+            disabled={false}
+            icon="lock"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Private"
+          />
+          <Blueprint3.MenuItem
+            active={true}
+            disabled={false}
+            icon="unlock"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Public"
+          />
+        </Blueprint3.Menu>
+      }
+      defaultIsOpen={false}
+      disabled={false}
+      fill={false}
+      hasBackdrop={false}
+      hoverCloseDelay={300}
+      hoverOpenDelay={150}
+      inheritDarkTheme={true}
+      interactionKind="click"
+      minimal={false}
+      modifiers={Object {}}
+      openOnTargetFocus={true}
+      position="bottom"
+      targetTagName="span"
+      transitionDuration={300}
+      usePortal={true}
+      wrapperTagName="span"
+    >
+      <Blueprint3.Button
+        icon="unlock"
+      />
+    </Blueprint3.Popover>
+    <Blueprint3.Button
+      icon="upload"
+      onClick={[Function]}
+      text="Publish"
+    />
+  </Blueprint3.ButtonGroup>
+</fieldset>
+`;

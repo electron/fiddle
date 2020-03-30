@@ -13,3 +13,15 @@ export function resetPlatform() {
     writable: true
   });
 }
+
+export function flushPromises() {
+  return new Promise((resolve) => setImmediate(resolve));
+}
+
+export function mockFetchOnce(text: string) {
+  (window.fetch as jest.Mock).mockResolvedValueOnce({
+    text: () => text,
+    json: () => JSON.parse(text)
+  });
+}
+

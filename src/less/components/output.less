@@ -1,0 +1,25 @@
+@import "../variables.less";
+
+.output {
+  font-size: 12px;
+  font-family: @fonts-common;
+  font-weight: 600;
+  color: var(--text-color-1);
+  background: var(--background-2);
+  box-shadow: inset 0 0 100px 100px rgba(0, 0, 0, 0.15);
+  border-top: @border;
+  top: 10vh;
+  padding: 0;
+  padding-top: 10px;
+  padding-left: 10px;
+  height: 100%;
+  overflow-y: scroll;
+  -webkit-app-region: no-drag;
+
+  p {
+    margin-bottom: 0;
+    white-space: pre;
+    padding-left: 5.6em;
+    text-indent: -5.6em;
+  }
+}

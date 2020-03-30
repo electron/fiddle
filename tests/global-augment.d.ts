@@ -10,3 +10,10 @@ declare global {
     };
   }
 }
+
+interface Window {
+  ElectronFiddle: {
+    app: AppType;
+    editors: Record<EditorId, EditorMock>;
+  };
+}

@@ -1,5 +1,5 @@
-import { PACKAGE_NAME } from '../../constants';
 import { Files } from '../../interfaces';
+import { PACKAGE_NAME } from '../../shared-constants';
 
 /**
  * This transform turns the files into an electron-forge
@@ -15,11 +15,11 @@ export async function forgeTransform(files: Files): Promise<Files> {
 
       // devDependencies
       parsed.devDependencies = parsed.devDependencies || {};
-      parsed.devDependencies['@electron-forge/cli'] = '6.0.0-beta.22';
-      parsed.devDependencies['@electron-forge/maker-deb'] = '6.0.0-beta.22';
-      parsed.devDependencies['@electron-forge/maker-rpm'] = '6.0.0-beta.22';
-      parsed.devDependencies['@electron-forge/maker-squirrel'] = '6.0.0-beta.22';
-      parsed.devDependencies['@electron-forge/maker-zip'] = '6.0.0-beta.22';
+      parsed.devDependencies['@electron-forge/cli'] = '6.0.0-beta.34';
+      parsed.devDependencies['@electron-forge/maker-deb'] = '6.0.0-beta.34';
+      parsed.devDependencies['@electron-forge/maker-rpm'] = '6.0.0-beta.34';
+      parsed.devDependencies['@electron-forge/maker-squirrel'] = '6.0.0-beta.34';
+      parsed.devDependencies['@electron-forge/maker-zip'] = '6.0.0-beta.34';
 
       // Scripts
       parsed.scripts = parsed.scripts || {};

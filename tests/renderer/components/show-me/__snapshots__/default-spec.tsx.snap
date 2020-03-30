@@ -1,0 +1,107 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getSubsetOnly() renders 1`] = `
+Array [
+  <span
+    className="bp3-icon bp3-icon-help"
+    icon="help"
+    style={
+      Object {
+        "float": "left",
+        "margin": "0 10px 0 0",
+      }
+    }
+  >
+    <svg
+      data-icon="help"
+      height={40}
+      viewBox="0 0 20 20"
+      width={40}
+    >
+      <desc>
+        help
+      </desc>
+      <path
+        d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0zM7.41 4.62c.65-.54 1.51-.82 2.56-.82.54 0 1.03.08 1.48.25.44.17.83.39 1.14.68.32.29.56.63.74 1.02.17.39.26.82.26 1.27s-.08.87-.24 1.23c-.16.37-.4.73-.71 1.11l-1.21 1.58c-.14.17-.28.33-.32.48-.05.15-.11.35-.11.6v.97H9v-2s.06-.58.24-.81l1.21-1.64c.25-.3.41-.56.51-.77s.14-.44.14-.67c0-.35-.11-.63-.32-.85s-.5-.33-.88-.33c-.37 0-.67.11-.89.33-.22.23-.37.54-.46.94-.03.12-.11.17-.23.16l-1.95-.29c-.12-.01-.16-.08-.14-.22.13-.93.52-1.67 1.18-2.22zM9 14h2.02L11 16H9v-2z"
+        fillRule="evenodd"
+        key="0"
+      />
+    </svg>
+  </span>,
+  <p
+    className="bp3r-running-text"
+  >
+    This panel offers useful information about Electron APIs – and easy way to try some of the methods it offers. Fiddle has an example fiddle for every module available in Electron.
+  </p>,
+  <p>
+    Clicking on any of the modules below will open up a fiddle showcasing that particular module.
+  </p>,
+  <ul
+    className="show-me-list"
+  >
+    <li
+      key="DEMO_APP"
+    >
+      <button
+        className="bp3-button bp3-minimal"
+        onClick={[Function]}
+        onKeyDown={[Function]}
+        onKeyUp={[Function]}
+        type="button"
+      >
+        <span
+          className="bp3-icon bp3-icon-play"
+          icon="play"
+        >
+          <svg
+            data-icon="play"
+            height={16}
+            viewBox="0 0 16 16"
+            width={16}
+          >
+            <desc>
+              play
+            </desc>
+            <path
+              d="M12 8c0-.35-.19-.64-.46-.82l.01-.02-6-4-.01.02A.969.969 0 005 3c-.55 0-1 .45-1 1v8c0 .55.45 1 1 1 .21 0 .39-.08.54-.18l.01.02 6-4-.01-.02c.27-.18.46-.47.46-.82z"
+              fillRule="evenodd"
+              key="0"
+            />
+          </svg>
+        </span>
+        <span
+          className="bp3-button-text"
+          key="text"
+        >
+          App Demos
+        </span>
+      </button>
+    </li>
+  </ul>,
+  <br />,
+  <p
+    className="b3-running-text"
+  >
+    For more documentation, visit 
+    <a
+      id="open-url"
+      onClick={[Function]}
+    >
+      electronjs.org/docs
+    </a>
+    , where you can find the full documentation for Electron.
+  </p>,
+  <p
+    className="bp3-text-muted"
+  >
+    By the way, Electron Fiddle and the documentation you see here is entirely open source. If you have ideas on how to improve it, we'd love to have your contributions! You can find the repository on 
+    <a
+      id="open-github"
+      onClick={[Function]}
+    >
+      GitHub
+    </a>
+    .
+  </p>,
+]
+`;

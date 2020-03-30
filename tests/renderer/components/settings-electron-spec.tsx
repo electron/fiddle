@@ -1,6 +1,7 @@
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
+import { VersionSource, VersionState } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
@@ -11,9 +12,9 @@ describe('ElectronSettings component', () => {
   beforeEach(() => {
     store = {
       version: '2.0.1',
-      versions: mockVersions,
-      versionPagesToFetch: 2,
-      versionsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      versions: { ...mockVersions },
+      channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
+      statesToShow: [ VersionState.ready, VersionState.downloading ],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
@@ -27,16 +28,69 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    store.versions['3.0.0-nightly.1'] = {
+      state: VersionState.ready,
+      version: '3.0.0-nightly.1',
+      source: VersionSource.local
+    };
+
+    store.versions['3.0.0'] = {
+      state: VersionState.ready,
+      version: '3.0.0',
+      source: VersionSource.local
+    };
+
+    const wrapper = shallow(<ElectronSettings appState={store} />);
+
     expect(wrapper).toMatchSnapshot();
   });
 
+  it('handles removing a version', async () => {
+    store.versions['3.0.0-nightly.1'] = {
+      state: VersionState.ready,
+      version: '3.0.0-nightly.1',
+      source: VersionSource.local
+    };
+
+    store.versions['3.0.0'] = {
+      state: VersionState.ready,
+      version: '3.0.0',
+      source: VersionSource.local
+    };
+
+    const wrapper = mount(<ElectronSettings appState={store} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.removeVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles downloading a version', async () => {
+    store.versions = {
+      '3.0.0': {
+        state: VersionState.unknown,
+        version: '3.0.0',
+        source: VersionSource.remote
+      }
+    };
+
+    store.statesToShow.push(VersionState.unknown);
+
+    const wrapper = mount(<ElectronSettings appState={store} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.downloadVersion).toHaveBeenCalledTimes(1);
+  });
+
   it('handles the deleteAll()', async () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    const wrapper = shallow(<ElectronSettings appState={store} />);
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
@@ -77,19 +131,30 @@ describe('ElectronSettings component', () => {
     });
   });
 
-  describe('handlePagesChange()', () => {
+  describe('handleVersionChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(
         <ElectronSettings appState={store} />
       );
       const instance = wrapper.instance() as any;
-      await instance.handlePagesChange({
+      await instance.handleStateChange({
         currentTarget: {
-          value: '120'
+          id: VersionState.ready,
+          checked: false
         }
       });
 
-      expect(store.versionPagesToFetch).toBe(4);
+      await instance.handleStateChange({
+        currentTarget: {
+          id: VersionState.unknown,
+          checked: true
+        }
+      });
+
+      expect(store.statesToShow).toEqual([
+        VersionState.downloading,
+        VersionState.unknown
+      ]);
     });
   });
 
@@ -113,7 +178,7 @@ describe('ElectronSettings component', () => {
         }
       });
 
-      expect(store.versionsToShow).toEqual([
+      expect(store.channelsToShow).toEqual([
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly
       ]);

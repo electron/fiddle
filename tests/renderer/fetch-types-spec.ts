@@ -1,19 +1,28 @@
+
+import {
+  RunnableVersion,
+  VersionSource,
+  VersionState
+} from '../../src/interfaces';
+import { USER_DATA_PATH } from '../../src/renderer/constants';
 import {
   fetchTypeDefinitions,
+  getDownloadedVersionTypeDefs,
+  getLocalTypePathForVersion,
+  getLocalVersionTypeDefs,
   getOfflineTypeDefinitionPath,
   getOfflineTypeDefinitions,
-  getTypeDefinitions,
+  removeTypeDefsForVersion,
   updateEditorTypeDefinitions
 } from '../../src/renderer/fetch-types';
-
-import * as path from 'path';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
+import * as path from 'path';
 jest.mock('fs-extra');
 jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
 });
-jest.mock('../../src/constants', () => ({
+jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/'
 }));
 jest.mock('../../src/utils/import', () => ({
@@ -25,16 +34,25 @@ jest.mock('../../src/utils/import', () => ({
 }));
 
 describe('fetch-types', () => {
+  const getMockResponse = (text: string) => ({
+    text: () => text
+  });
+
+  const mockFetch = (text: string = `it's me, the type definition`) => {
+    (window.fetch as jest.Mock).
+      mockResolvedValue(getMockResponse(text));
+  };
+
   describe('fetchTypeDefinitions()', () => {
     it('fetches type definitions', async () => {
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
+
       const result = await fetchTypeDefinitions('v3.0.0');
 
       expect(result).toBe(`it's me, the type definition`);
     });
 
     it('handles errors by returning an empty string', async () => {
-      (fetch as any).mockReject();
       const result = await fetchTypeDefinitions('v3.0.0');
 
       expect(result).toBe('');
@@ -48,7 +66,7 @@ describe('fetch-types', () => {
     });
   });
 
-  describe('getOfflineTypeDefinition()', () => {
+  describe('getOfflineTypeDefinitions()', () => {
     it('returns true if they exist', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(true);
@@ -72,13 +90,19 @@ describe('fetch-types', () => {
     });
   });
 
-  describe('getTypeDefinitions()', () => {
+  describe('getDownloadedVersionTypeDefs()', () => {
+    const version = {
+      state: VersionState.ready,
+      source: VersionSource.remote,
+      version: '3.0.0'
+    };
+
     it('returns type definitions (and goes online if they do not exist)', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(false);
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
-      const result = await getTypeDefinitions('3.0.0');
+      const result = await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(result).toBe(`it's me, the type definition`);
@@ -89,9 +113,10 @@ describe('fetch-types', () => {
     it('returns null if going online failed', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(false);
-      (fetch as any).mockReject();
+      (window.fetch as jest.Mock).
+        mockRejectedValue({});
 
-      const result = await getTypeDefinitions('3.0.0');
+      const result = await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(result).toBe(null);
@@ -102,9 +127,9 @@ describe('fetch-types', () => {
     it('tries to save them to disk if downloaded', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(false);
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
-      await getTypeDefinitions('3.0.0');
+      await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(fs.outputFile).toHaveBeenCalledWith(expected, `it's me, the type definition`);
@@ -115,9 +140,9 @@ describe('fetch-types', () => {
       const def = `it's me, the type definition`;
       fs.existsSync.mockReturnValueOnce(false);
       fs.outputFile.mockImplementationOnce(() => Promise.reject());
-      (fetch as any).mockResponse(def);
+      mockFetch();
 
-      const result = await getTypeDefinitions('3.0.0');
+      const result = await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(fs.outputFile).toHaveBeenCalledWith(expected, def);
@@ -129,9 +154,9 @@ describe('fetch-types', () => {
       const def = `it's me, the type definition`;
       fs.existsSync.mockReturnValueOnce(true);
       fs.readFile.mockImplementationOnce(() => Promise.resolve(def));
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
-      const result = await getTypeDefinitions('3.0.0');
+      const result = await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(result).toBe(def);
@@ -142,9 +167,9 @@ describe('fetch-types', () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(true);
       fs.readFile.mockImplementationOnce(() => Promise.reject());
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
-      const result = await getTypeDefinitions('3.0.0');
+      const result = await getDownloadedVersionTypeDefs(version);
       const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
 
       expect(result).toBe(null);
@@ -152,16 +177,85 @@ describe('fetch-types', () => {
     });
   });
 
+  describe('getLocalVersionTypeDefs()', () => {
+    let version: RunnableVersion;
+    beforeEach(() => {
+      version = {
+        state: VersionState.ready,
+        source: VersionSource.local,
+        version: '3.0.0',
+        localPath: 'somePath'
+      };
+    });
+
+    it('fetches a local path if localPath exists',  async () => {
+      const fs = require('fs-extra');
+      const def = `it's me, the type definition`;
+      fs.existsSync.mockReturnValueOnce(true);
+      fs.readFile.mockImplementationOnce(() => Promise.resolve(def));
+      const result = await getLocalVersionTypeDefs(version);
+      expect(result).toEqual(def);
+    });
+
+    it('returns null for remote path',  async () => {
+      version.source = VersionSource.remote;
+      const result = await getLocalVersionTypeDefs(version);
+      expect(result).toBeNull();
+    });
+
+    it('returns null if localPath does not exist',  async () => {
+      version.localPath = undefined;
+      const result = await getLocalVersionTypeDefs(version);
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('getLocalTypePathForVersion()', () => {
+    let version: RunnableVersion;
+    beforeEach(() => {
+      version = {
+        state: VersionState.ready,
+        source: VersionSource.local,
+        version: '3.0.0',
+        localPath: 'somePath'
+      };
+    });
+
+    it('appends the path to the debug folder', () => {
+      const result = getLocalTypePathForVersion(version);
+      expect(result).toBe(path.join(
+        'somePath',
+        'gen',
+        'electron',
+        'tsc',
+        'typings',
+        'electron.d.ts'
+      ));
+    });
+
+    it('returns null if no localPath', () => {
+      delete version.localPath;
+      const result = getLocalTypePathForVersion(version);
+      expect(result).toBeNull();
+    });
+  });
+
   describe('updateEditorTypeDefinitions()', () => {
+    let version: RunnableVersion;
     beforeEach(() => {
       (global as any).window = window || {};
       (window as any).ElectronFiddle = new ElectronFiddleMock();
+      version = {
+        state: VersionState.ready,
+        source: VersionSource.remote,
+        version: '3.0.0'
+      };
     });
 
     it('tries to update the editor type definitions', async () => {
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
-      await updateEditorTypeDefinitions('3.0.0');
+      await updateEditorTypeDefinitions(version);
 
       const { app } = (window as any).ElectronFiddle;
       const { monaco } = app;
@@ -171,7 +265,7 @@ describe('fetch-types', () => {
     });
 
     it('it waits for Monaco to show up', async () => {
-      (fetch as any).mockResponse(`it's me, the type definition`);
+      mockFetch();
 
       const { app } = (window as any).ElectronFiddle;
       const { monaco } = app;
@@ -180,9 +274,9 @@ describe('fetch-types', () => {
 
       setTimeout(() => {
         window.ElectronFiddle.app = app;
-      }, 200);
+      }, 300);
 
-      await updateEditorTypeDefinitions('3.0.0');
+      await updateEditorTypeDefinitions(version);
 
       expect(monaco.languages.typescript.javascriptDefaults.addExtraLib)
         .toHaveBeenCalled();
@@ -191,21 +285,46 @@ describe('fetch-types', () => {
     it('it does not wait forever', async () => {
       (window as any).ElectronFiddle = {};
 
-      await updateEditorTypeDefinitions('3.0.0', 11);
+      await updateEditorTypeDefinitions(version, 11);
     });
 
     it('handles definitions not existing', async () => {
-      (fetch as any).mockResponse(null);
+      (window.fetch as jest.Mock).mockResolvedValue(null);
 
       let errored = false;
 
       try {
-        await updateEditorTypeDefinitions('3.0.0', 11);
+        await updateEditorTypeDefinitions(version, 11);
       } catch (error) {
         errored = true;
       }
 
       expect(errored).toBe(false);
+    });
+  });
+
+  describe('removeTypeDefsForVersion()', () => {
+    it('removes a version\'s typedefs', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      await removeTypeDefsForVersion('v3.0.0');
+      expect(fs.remove).toHaveBeenCalledWith(path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'));
+    });
+
+    it('throws upon fs failure', async () => {
+      const fs = require('fs-extra');
+      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (fs.remove as jest.Mock<any>).mockImplementation(() => {
+        throw new Error('Bwap bwap');
+      });
+
+      expect.assertions(1);
+
+      try {
+        await removeTypeDefsForVersion('v3.0.0');
+      } catch (e) {
+        expect(e).toEqual(new Error('Bwap bwap'));
+      }
     });
   });
 });

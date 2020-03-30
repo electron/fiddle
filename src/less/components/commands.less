@@ -1,0 +1,73 @@
+@import "../variables.less";
+
+header {
+  box-shadow: 0 0 0 1px rgba(16, 22, 26, 0.2), 0 0 0 rgba(16, 22, 26, 0), 0 1px 1px rgba(16, 22, 26, 0.4);
+  background-color: @background-3;
+  -webkit-app-region: drag;
+}
+
+.commands {
+  display: flex;
+  justify-content: space-between;
+  height: 50px;
+  padding: 10px;
+  box-sizing: border-box;
+  font-family: @fonts-common;
+
+  button,
+  input,
+  select {
+    -webkit-app-region: no-drag;
+    margin-bottom: 0;
+    white-space: nowrap;
+  }
+
+  select {
+    width: 100px;
+    margin-left: 5px;
+  }
+
+  fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+  }
+
+  & > div {
+    display: flex;
+
+    &:last-of-type {
+      margin-right: 10px;
+
+      .bp3-button-group {
+        margin-left: 5px;
+      }
+    }
+  }
+
+  .bp3-control-group {
+    margin-right: 0.5rem;
+  }
+
+  .address-bar {
+    width: 420px;
+    transition: width 0.4s;
+
+    input,
+    span {
+      -webkit-app-region: no-drag;
+    }
+
+    &.empty {
+      width: 300px;
+    }
+
+    &:focus-within {
+      span,
+      input {
+        border-color: @foreground-2;
+      }
+    }
+  }
+}

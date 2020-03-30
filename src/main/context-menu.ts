@@ -16,6 +16,11 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
     },
     {
+      id: 'clear_console',
+      label: 'Clear Console',
+      click: () => ipcMainManager.send(IpcEvents.CLEAR_CONSOLE)
+    },
+    {
       type: 'separator'
     }
   ];
@@ -136,17 +141,17 @@ export function createContextMenu(browserWindow: BrowserWindow) {
       {
         id: 'cut',
         label: 'Cut',
-        role: editFlags.canCut ? 'cut' : '',
+        role: 'cut',
         enabled: editFlags.canCut
       }, {
         id: 'copy',
         label: 'Copy',
-        role: editFlags.canCopy ? 'copy' : '',
+        role: 'copy',
         enabled: editFlags.canCopy
       }, {
         id: 'paste',
         label: 'Paste',
-        role: editFlags.canPaste ? 'paste' : '',
+        role: 'paste',
         enabled: editFlags.canPaste
       }, {
         type: 'separator'

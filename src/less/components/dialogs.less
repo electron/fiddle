@@ -1,0 +1,213 @@
+@import "../variables.less";
+
+.dialogs {
+  z-index: 10;
+  position: fixed;
+  height: 100vh;
+  width: 100vw;
+  pointer-events: none;
+
+  * {
+    pointer-events: all;
+  }
+}
+
+.darwin {
+  .dialogs {
+    padding-top: 23px;
+  }
+}
+
+.dialog {
+  background-color: @background-3;
+  border: @border;
+  color: @text-color-1;
+  border-radius: 6px;
+  padding: 10px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  animation: slide-up 0.4s ease;
+
+  p {
+    margin-bottom: 1.25rem;
+    font-size: 1.25rem;
+  }
+
+  code {
+    font-size: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px;
+    line-height: 12px;
+  }
+
+  &-buttons {
+    margin-top: 1.25rem;
+  }
+
+  &.centered {
+    position: absolute;
+    width: 300px;
+    left: calc(50% - (300px / 2));
+    top: 100px;
+  }
+
+  &.arrow::after,
+  &.arrow::before {
+    border: solid transparent;
+    content: " ";
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+  }
+
+  &.arrow::after {
+    border-color: rgba(136, 183, 213, 0);
+    border-width: 9px;
+  }
+
+  &.arrow::before {
+    border-color: rgba(194, 225, 245, 0);
+    border-width: 10px;
+  }
+
+  &.arrow-top::after,
+  &.arrow-top::before {
+    bottom: 100%;
+    left: 50%;
+  }
+
+  &.arrow-top::after {
+    border-bottom-color: @background-3;
+    margin-left: -9px;
+  }
+
+  &.arrow-top::before {
+    border-bottom-color: @border-color-1;
+    margin-left: -10px;
+  }
+
+  &.arrow-bottom::after,
+  &.arrow-bottom::before {
+    top: 100%;
+    left: 50%;
+  }
+
+  &.arrow-bottom::after {
+    border-top-color: @background-3;
+    margin-left: -9px;
+  }
+
+  &.arrow-bottom::before {
+    border-top-color: @border-color-1;
+    margin-left: -10px;
+  }
+
+  &.arrow-left::after,
+  &.arrow-left::before {
+    right: 100%;
+    top: 20px;
+  }
+
+  &.arrow-left::after {
+    border-right-color: @background-3;
+    margin-top: -9px;
+  }
+
+  &.arrow-left::before {
+    border-right-color: @border-color-1;
+    margin-top: -10px;
+  }
+
+  &.arrow-right::after,
+  &.arrow-right::before {
+    left: 100%;
+    top: 20px;
+  }
+
+  &.arrow-right::after {
+    border-left-color: @background-3;
+    margin-top: -9px;
+  }
+
+  &.arrow-right::before {
+    border-left-color: @border-color-1;
+    margin-top: -10px;
+  }
+
+  button {
+    color: #1e2527;
+    float: right;
+    margin-left: 9px;
+    margin-bottom: 0;
+  }
+
+  a {
+    cursor: pointer;
+  }
+
+  h4 {
+    margin-bottom: 0;
+  }
+
+  p:last-of-type {
+    margin-bottom: 0;
+  }
+
+  input {
+    color: rgba(159, 234, 249, 0.5);
+    height: 28px;
+    margin-top: 10px;
+    background-color: @background-1;
+    border: 1px solid @border-color-2;
+    outline: 0 solid transparent;
+
+    &:focus {
+      border-color: @foreground-2;
+    }
+  }
+}
+
+.dialogDrop {
+  position: fixed;
+  z-index: 100;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: black;
+  transition: opacity 0.4s ease-in-out;
+  pointer-events: all;
+  opacity: 0.5;
+}
+
+.dialog-add-version {
+  .bp3-file-input {
+    width: 100%;
+  }
+
+  .bp3-callout {
+    margin-top: 1rem;
+  }
+}
+
+select {
+  font-size: 12px;
+  height: 28px;
+  background-color: white;
+  line-height: 15px;
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Bisect commands component disables helper buttons if Electron binary is downloading 1`] = `
+<Fragment>
+  <Blueprint3.Button
+    disabled={true}
+    icon="thumbs-up"
+    onClick={[Function]}
+  />
+  <Blueprint3.Button
+    disabled={true}
+    icon="thumbs-down"
+    onClick={[Function]}
+  />
+  <Blueprint3.Button
+    icon="cross"
+    onClick={[Function]}
+  >
+    Cancel Bisect
+  </Blueprint3.Button>
+</Fragment>
+`;
+
+exports[`Bisect commands component renders bisect dialog button if no bisect instance 1`] = `
+<Blueprint3.Button
+  icon="git-branch"
+  text="Bisect"
+/>
+`;
+
+exports[`Bisect commands component renders helper buttons if bisect instance is active 1`] = `
+<Fragment>
+  <Blueprint3.Button
+    disabled={false}
+    icon="thumbs-up"
+    onClick={[Function]}
+  />
+  <Blueprint3.Button
+    disabled={false}
+    icon="thumbs-down"
+    onClick={[Function]}
+  />
+  <Blueprint3.Button
+    icon="cross"
+    onClick={[Function]}
+  >
+    Cancel Bisect
+  </Blueprint3.Button>
+</Fragment>
+`;

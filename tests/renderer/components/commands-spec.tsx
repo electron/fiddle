@@ -3,19 +3,19 @@ import * as React from 'react';
 
 import { Commands } from '../../../src/renderer/components/commands';
 
-jest.mock('../../../src/renderer/components/runner', () => ({
+jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner'
 }));
 
-jest.mock('../../../src/renderer/components/version-chooser', () => ({
+jest.mock('../../../src/renderer/components/commands-version-chooser', () => ({
   VersionChooser: 'version-chooser'
 }));
 
-jest.mock('../../../src/renderer/components/address-bar', () => ({
+jest.mock('../../../src/renderer/components/commands-address-bar', () => ({
   AddressBar: 'address-bar'
 }));
 
-jest.mock('../../../src/renderer/components/publish-button', () => ({
+jest.mock('../../../src/renderer/components/commands-publish-button', () => ({
   PublishButton: 'publish-button'
 }));
 
@@ -31,13 +31,5 @@ describe('Commands component', () => {
   it('renders', () => {
     const wrapper = shallow(<Commands appState={store} />);
     expect(wrapper).toMatchSnapshot();
-  });
-
-  it('opens the console on console click', () => {
-    store.toggleConsole = jest.fn();
-
-    const wrapper = shallow(<Commands appState={store} />);
-    wrapper.find('button').simulate('click');
-    expect(store.toggleConsole).toHaveBeenCalled();
   });
 });

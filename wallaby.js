@@ -21,12 +21,10 @@ module.exports = (wallaby) => ({
 
   testFramework: 'jest',
 
-  // Enable mock hoisting as same as ts-jest does
-  // (https://github.com/kulshekhar/ts-jest#supports-automatic-of-jestmock-calls)
   preprocessors: {
-    '**/*.js?(x)': (file) => require('babel-core').transform(
+    '**/*.js?(x)': file => require('@babel/core').transform(
       file.content,
-      { sourceMaps: true, filename: file.path, presets: ['babel-preset-jest'] })
+      {sourceMap: true, filename: file.path, presets: [require('babel-preset-jest')]})
   },
 
   workers: {

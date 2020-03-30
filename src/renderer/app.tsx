@@ -1,37 +1,29 @@
-import { library } from '@fortawesome/fontawesome-svg-core';
-import {
-  faClipboardList,
-  faCloudDownloadAlt,
-  faKey,
-  faSignInAlt,
-  faSignOutAlt,
-  faSpinner,
-  faTerminal,
-  faTimesCircle,
-  faTrash,
-  faUpload
-} from '@fortawesome/free-solid-svg-icons';
+import { initSentry } from '../sentry';
+initSentry();
+
+import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
-import { EditorValues } from '../interfaces';
+import { ipcRenderer } from 'electron';
+import {
+  ALL_EDITORS,
+  EditorId,
+  EditorValues,
+  GenericDialogType,
+  SetFiddleOptions
+} from '../interfaces';
+import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
+import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
+import { getTitle } from '../utils/get-title';
+import { isEditorBackup } from '../utils/type-checks';
 import { FileManager } from './file-manager';
+import { RemoteLoader } from './remote-loader';
+import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
-
-library.add(
-  faClipboardList,
-  faCloudDownloadAlt,
-  faKey,
-  faSignInAlt,
-  faSignOutAlt,
-  faSpinner,
-  faTerminal,
-  faTimesCircle,
-  faTrash,
-  faUpload
-);
+import { TouchBarManager } from './touch-bar-manager';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -44,70 +36,111 @@ export class App {
   public monaco: typeof MonacoType | null = null;
   public state = appState;
   public fileManager = new FileManager(appState);
+  public remoteLoader = new RemoteLoader(appState);
+  public runner = new Runner(appState);
+  public touchBarManager: TouchBarManager | undefined;
 
   constructor() {
-    this.getValues = this.getValues.bind(this);
-    this.setValues = this.setValues.bind(this);
+    this.getEditorValues = this.getEditorValues.bind(this);
+    this.setEditorValues = this.setEditorValues.bind(this);
+
+    if (process.platform === 'darwin') {
+      this.touchBarManager = new TouchBarManager(appState);
+    }
   }
 
-  /**
-   * Sets the values on all three editors.
-   *
-   * @param {EditorValues} values
-   */
-  public async setValues(values: Partial<EditorValues>): Promise<boolean> {
-    const { ElectronFiddle: fiddle } = window;
+  public async replaceFiddle(
+    editorValues: Partial<EditorValues>,
+    { filePath, gistId, templateName }: Partial<SetFiddleOptions>
+  ) {
+    // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
+    if (this.state.isUnsaved) {
+      this.state.setGenericDialogOptions({
+        type: GenericDialogType.warning,
+        label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
+        ok: 'Yes'
+      });
+      this.state.isGenericDialogShowing = true;
+      await when(() => !this.state.isGenericDialogShowing);
 
-    if (!fiddle) {
-      throw new Error('Fiddle not ready');
+      if (!this.state.genericDialogLastResult) {
+        return false;
+      }
     }
 
-    if (appState.isUnsaved) {
-      const isUserSure = confirm('Your current fiddle is unsaved. Are you sure you want to overwrite it?');
-      if (!isUserSure) return false;
-    }
+    // set values once prompt approves
+    await this.setEditorValues(editorValues);
 
-    const { main, html, renderer } = fiddle.editors;
+    document.title = getTitle(this.state);
+    this.state.gistId = gistId || '';
+    this.state.localPath = filePath;
+    this.state.templateName = templateName;
 
-    if (html && html.setValue && values.html) {
-      html.setValue(values.html);
-    }
-
-    if (main && main.setValue && values.main) {
-      main.setValue(values.main);
-    }
-
-    if (renderer && renderer.setValue && values.renderer) {
-      renderer.setValue(values.renderer);
-    }
-
-    appState.isUnsaved = false;
-    this.setupUnsavedOnChangeListener();
+    // once loaded, we have a "saved" state
+    this.state.isUnsaved = false;
 
     return true;
   }
 
   /**
-   * Gets the values on all three editors.
+   * Sets the contents of all editor panes.
    *
-   * @returns {EditorValues}
+   * @param {EditorValues} values
    */
-  public async getValues(options?: PackageJsonOptions): Promise<EditorValues> {
+  public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle) {
       throw new Error('Fiddle not ready');
     }
 
-    const { main, html, renderer } = fiddle.editors;
+    for (const name of ALL_EDITORS) {
+      const editor = fiddle.editors[name];
+      const backup = this.state.closedPanels[name];
+
+      if (typeof values[name] !== 'undefined') {
+        if (isEditorBackup(backup)) {
+          // The editor does not exist, attempt to set it on the backup.
+          // If there's a model, we'll do it on the model. Else, we'll
+          // set the value.
+
+          if (backup.model) {
+            backup.model.setValue(values[name]!);
+          } else {
+            backup.value = values[name]!;
+          }
+        } else if (editor && editor.setValue) {
+          // The editor exists, set the value directly
+          editor.setValue(values[name]!);
+        }
+      }
+    }
+  }
+
+  /**
+   * Retrieves the contents of all editor panes.
+   *
+   * @returns {EditorValues}
+   */
+  public async getEditorValues(
+    options?: PackageJsonOptions
+  ): Promise<EditorValues> {
+    const { ElectronFiddle: fiddle } = window;
+
+    if (!fiddle) {
+      throw new Error('Fiddle not ready');
+    }
+
     const values: EditorValues = {
-      html: html && html.getValue() ? html.getValue() : '',
-      main: main && main.getValue() ? main.getValue() : '',
-      renderer: renderer && renderer.getValue() ? renderer.getValue() : '',
+      css: getEditorValue(EditorId.css),
+      html: getEditorValue(EditorId.html),
+      main: getEditorValue(EditorId.main),
+      preload: getEditorValue(EditorId.preload),
+      renderer: getEditorValue(EditorId.renderer)
     };
 
-    if (options && options.include !==  false) {
-      values.package = await getPackageJson(appState, values, options);
+    if (options && options.include !== false) {
+      values.package = await getPackageJson(this.state, values, options);
     }
 
     return values;
@@ -117,48 +150,33 @@ export class App {
    * Initial setup call, loading Monaco and kicking off the React
    * render process.
    */
-  public async setup(): Promise<void> {
+  public async setup(): Promise<void | Element | React.Component> {
     this.setupTheme();
 
     const React = await import('react');
     const { render } = await import('react-dom');
-    const { Header } = await import('./components/header');
     const { Dialogs } = await import('./components/dialogs');
-    const { Editors } = await import('./components/editors');
+    const { OutputEditorsWrapper } = await import(
+      './components/output-editors-wrapper'
+    );
+    const { Header } = await import('./components/header');
 
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Header appState={appState} />
-        <Dialogs appState={appState} />
-        <Editors appState={appState} />
+        <Dialogs appState={this.state} />
+        <Header appState={this.state} />
+        <OutputEditorsWrapper appState={this.state} />
       </div>
     );
 
-    render(app, document.getElementById('app'));
+    const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
 
-    // Todo: A timer here is terrible. Let's fix this
-    // and ensure we actually do it once Editors have mounted.
-    setTimeout(() => {
-      this.setupUnsavedOnChangeListener();
-    }, 1500);
-  }
+    ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
-  /**
-   * If the editor is changed for the first time, we'll
-   * set `isUnsaved` to true. That way, the app can warn you
-   * if you're about to throw things away.
-   */
-  public setupUnsavedOnChangeListener() {
-    Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-      const editor = window.ElectronFiddle.editors[key];
-      const disposable = editor.onDidChangeModelContent(() => {
-        appState.isUnsaved = true;
-        disposable.dispose();
-      });
-    });
+    return rendered;
   }
 
   /**
@@ -167,11 +185,19 @@ export class App {
    * @returns {Promise<void>}
    */
   public async setupTheme(): Promise<void> {
-    const tag: HTMLStyleElement | null = document.querySelector('style#fiddle-theme');
-    const theme = await getTheme(appState.theme);
+    const tag: HTMLStyleElement | null = document.querySelector(
+      'style#fiddle-theme'
+    );
+    const theme = await getTheme(this.state.theme);
 
     if (tag && theme.css) {
       tag.innerHTML = theme.css;
+    }
+
+    if (theme.isDark || theme.name.includes('dark')) {
+      document.body.classList.add('bp3-dark');
+    } else {
+      document.body.classList.remove('bp3-dark');
     }
   }
 
@@ -184,10 +210,8 @@ export class App {
   }
 }
 
-// tslint:disable-next-line:no-string-literal
-if (!process.env.TEST && !process.env.JEST_WORKER_ID) {
-  window.ElectronFiddle.contentChangeListeners = [];
-  window.ElectronFiddle.app = new App();
-  window.ElectronFiddle.app.setup()
-    .catch((error) => console.error(error));
-}
+window.ElectronFiddle = window.ElectronFiddle || {};
+window.ElectronFiddle.contentChangeListeners =
+  window.ElectronFiddle.contentChangeListeners || [];
+window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
+window.ElectronFiddle.app.setup();

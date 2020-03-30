@@ -1,6 +1,6 @@
 import { forgeTransform} from '../../src/renderer/transforms/forge';
 
-jest.mock('../../src/constants', () => ({
+jest.mock('../../src/shared-constants', () => ({
   PACKAGE_NAME: 'package.json'
 }));
 
@@ -12,11 +12,11 @@ describe('forgeTransform()', () => {
     const files = await forgeTransform(filesBefore);
     expect(JSON.parse(files.get('package.json')!)).toEqual({
       devDependencies: {
-        '@electron-forge/cli': '6.0.0-beta.22',
-        '@electron-forge/maker-deb': '6.0.0-beta.22',
-        '@electron-forge/maker-rpm': '6.0.0-beta.22',
-        '@electron-forge/maker-squirrel': '6.0.0-beta.22',
-        '@electron-forge/maker-zip': '6.0.0-beta.22'
+        '@electron-forge/cli': '6.0.0-beta.34',
+        '@electron-forge/maker-deb': '6.0.0-beta.34',
+        '@electron-forge/maker-rpm': '6.0.0-beta.34',
+        '@electron-forge/maker-squirrel': '6.0.0-beta.34',
+        '@electron-forge/maker-zip': '6.0.0-beta.34'
       },
       scripts: {
         start: 'electron-forge start',

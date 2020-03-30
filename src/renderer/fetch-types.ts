@@ -2,12 +2,13 @@ import * as fsType from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 
-import { USER_DATA_PATH } from '../constants';
+import { RunnableVersion, VersionSource } from '../interfaces';
 import { callIn } from '../utils/call-in';
 import { fancyImport } from '../utils/import';
+import { normalizeVersion } from '../utils/normalize-version';
+import { USER_DATA_PATH } from './constants';
 
 const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
-
 
 /**
  * Fetch TypeScript definitions for the current version of Electron (online)
@@ -15,16 +16,46 @@ const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
  * @param {string} version
  * @returns {Promise<string>}
  */
-export function fetchTypeDefinitions(version: string): Promise<string> {
+export async function fetchTypeDefinitions(version: string): Promise<string> {
   const url = `https://unpkg.com/electron@${version}/electron.d.ts`;
 
-  return window.fetch(url)
-    .then((response) => response.text())
-    .catch((error) => {
-      console.warn(`Fetch Types: Could not fetch definitions`, error);
-      return '';
-    });
+  let text: string;
+  try {
+    const response = await window.fetch(url);
+    text = await response.text();
+  } catch (error) {
+    console.warn(`Fetch Types: Could not fetch definitions`, error);
+    return '';
+  }
+
+  // for invalid packa
+  if (text.includes('Cannot find package')) {
+    console.warn(`Fetch Types: ${text}`);
+    return '';
+  } else {
+    return text;
+  }
 }
+
+/**
+ * Removes the type definition for a given version
+ *
+ * @param version
+ */
+export async function removeTypeDefsForVersion(version: string) {
+  const fs = await fancyImport<typeof fsType>('fs-extra');
+  const _version = normalizeVersion(version);
+  const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
+
+  if (fs.existsSync(typeDefsDir)) {
+    try {
+      await fs.remove(typeDefsDir);
+    } catch (error) {
+      throw error;
+    }
+  }
+}
+
 
 /**
  * Get the path for offline TypeScript definitions
@@ -48,27 +79,25 @@ export async function getOfflineTypeDefinitions(version: string): Promise<boolea
 }
 
 /**
- * Get TypeScript defintions for a version of Electron. If none can't be
+ * Get TypeScript definitions for a version of Electron. If none can be
  * found, returns null.
  *
  * @param {string} version
  * @returns {void}
  */
-export async function getTypeDefinitions(version: string): Promise<string | null> {
+export async function getDownloadedVersionTypeDefs(version: RunnableVersion): Promise<string | null> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
-  await fs.mkdirp(definitionPath);
+    await fs.mkdirp(definitionPath);
+    const offlinePath = getOfflineTypeDefinitionPath(version.version);
 
-  const offlinePath = getOfflineTypeDefinitionPath(version);
-
-  if (await getOfflineTypeDefinitions(version)) {
+  if (await getOfflineTypeDefinitions(version.version)) {
     try {
       return await fs.readFile(offlinePath, 'utf-8');
     } catch (error) {
       return null;
     }
   } else {
-    const typeDefs = await fetchTypeDefinitions(version);
-
+    const typeDefs = await fetchTypeDefinitions(version.version);
     if (typeDefs && typeDefs.length > 0) {
       try {
         await fs.outputFile(offlinePath, typeDefs);
@@ -79,9 +108,19 @@ export async function getTypeDefinitions(version: string): Promise<string | null
         return typeDefs;
       }
     }
-
     return null;
   }
+}
+
+export async function getLocalVersionTypeDefs(version: RunnableVersion) {
+  if (version.source === VersionSource.local && !!version.localPath) {
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    const typesPath = getLocalTypePathForVersion(version);
+    if (!!typesPath && fs.existsSync(typesPath)) {
+      return fs.readFile(typesPath, 'utf-8');
+    }
+  }
+  return null;
 }
 
 /**
@@ -89,7 +128,7 @@ export async function getTypeDefinitions(version: string): Promise<string | null
  *
  * @param {string} version
  */
-export async function updateEditorTypeDefinitions(version: string, i: number = 0): Promise<void> {
+export async function updateEditorTypeDefinitions(version: RunnableVersion, i: number = 0): Promise<void> {
   const defer = async (): Promise<void> => {
     if (i > 10) {
       console.warn(`Fetch Types: Failed, dependencies do not exist`);
@@ -106,17 +145,36 @@ export async function updateEditorTypeDefinitions(version: string, i: number = 0
   const { app } = window.ElectronFiddle;
   const monaco: typeof MonacoType = app.monaco!;
   const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
-  const typeDefs = await getTypeDefinitions(version);
+
+  const getTypeDefs = (version.source === VersionSource.local) ?
+    getLocalVersionTypeDefs : getDownloadedVersionTypeDefs;
+
+  const typeDefs = await getTypeDefs(version);
 
   if (typeDefDisposable) {
     typeDefDisposable.dispose();
   }
 
   if (typeDefs) {
-    console.log(`Fetch Types: Updating Monaco types with electron.d.ts@${version}`);
+    console.log(`Fetch Types: Updating Monaco types with electron.d.ts@${version.version}`);
     const disposable = monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs);
     window.ElectronFiddle.app.typeDefDisposable = disposable;
   } else {
-    console.log(`Fetch Types: No type definitions for ${version} 😢`);
+    console.log(`Fetch Types: No type definitions for ${version.version} 😢`);
+  }
+}
+
+export function getLocalTypePathForVersion(version: RunnableVersion) {
+  if (version.localPath) {
+    return path.join(
+      version.localPath,
+      'gen',
+      'electron',
+      'tsc',
+      'typings',
+      'electron.d.ts'
+    );
+  } else {
+    return null;
   }
 }

@@ -20,6 +20,7 @@ describe('npm', () => {
 
     function hello() {
       const electron = require('electron');
+      const originalFs = require('original-fs');
       const fs = require('fs');
       const privateModule = require('./hi');
     }
@@ -66,14 +67,28 @@ describe('npm', () => {
       expect(result).toBe(false);
       expect((exec as jest.Mock).mock.calls[0][1]).toBe('which npm');
     });
+
+    it('uses the cache', async () => {
+      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+
+      const one = await getIsNpmInstalled(true);
+      expect(one).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+
+      const two = await getIsNpmInstalled();
+      expect(two).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('findModulesInEditors()', () => {
-    it('finds modules', async () => {
+    it('finds modules, ignoring node and electron builtins', async () => {
       const result = await findModulesInEditors({
         html: '',
         main: mockMain,
-        renderer: ''
+        renderer: '',
+        preload: '',
+        css: ''
       });
 
       expect(result).toEqual(['say']);
@@ -85,6 +100,12 @@ describe('npm', () => {
       installModules({ dir: '/my/directory' }, 'say', 'thing');
 
       expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
+    });
+
+    it('attempts to installs all modules', async () => {
+      installModules({ dir: '/my/directory' });
+
+      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
     });
   });
 

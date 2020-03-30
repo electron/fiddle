@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TokenDialog component renders 1`] = `
+<Blueprint3.Dialog
+  canOutsideClickClose={true}
+  isOpen={true}
+  onClose={[Function]}
+  title="GitHub Token"
+>
+  <div
+    className="bp3-dialog-body"
+  >
+    <p>
+      Generate a 
+      <a
+        onClick={[Function]}
+      >
+        GitHub Personal Access Token
+      </a>
+       and paste it here:
+    </p>
+    <Blueprint3.InputGroup
+      onChange={[Function]}
+      onFocus={[Function]}
+      value=""
+    />
+  </div>
+  <div
+    className="bp3-dialog-footer"
+  >
+    <div
+      className="bp3-dialog-footer-actions"
+    >
+      <Blueprint3.Button
+        disabled={true}
+        icon="log-in"
+        key="done"
+        loading={false}
+        onClick={[Function]}
+        text="Done"
+      />
+      <Blueprint3.Button
+        icon="log-out"
+        key="cancel"
+        onClick={[Function]}
+        text="Cancel"
+      />
+    </div>
+  </div>
+</Blueprint3.Dialog>
+`;

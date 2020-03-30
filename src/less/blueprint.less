@@ -1,0 +1,45 @@
+@import (inline) "../../node_modules/@blueprintjs/core/lib/css/blueprint.css";
+@import (inline) "../../node_modules/@blueprintjs/select/lib/css/blueprint-select.css";
+@import (inline) "../../node_modules/@blueprintjs/icons/lib/css/blueprint-icons.css";
+@import (inline) "../../node_modules/@blueprintjs/core/lib/less/variables.less";
+
+// Override some of the colors
+.fiddle.bp3-dark {
+  .bp3-menu,
+  .bp3-popover .bp3-popover-content {
+    background-color: @background-1;
+  }
+
+  .bp3-popover .bp3-popover-arrow-fill {
+    fill: @background-1;
+  }
+
+  .bp3-button:not([class*="bp3-intent-"]) {
+    background-color: @background-1;
+  }
+
+  .bp3-button.bp3-minimal {
+    background-color: unset;
+  }
+
+  .bp3-button:hover,
+  .bp3-button.bp3-minimal:hover {
+    background-color: rgba(138, 155, 168, 0.15);
+  }
+
+  .bp3-menu-item.bp3-active.bp3-intent-primary {
+    background-color: @foreground-3;
+  }
+
+  .bp3-dialog {
+    background-color: @background-4;
+
+    .bp3-dialog-header {
+      background-color: @background-3;
+    }
+  }
+
+  .bp3-running-text {
+    font-size: 14px;
+  }
+}

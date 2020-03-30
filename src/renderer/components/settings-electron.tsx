@@ -1,8 +1,19 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  Button,
+  ButtonGroup,
+  Callout,
+  Checkbox,
+  FormGroup,
+  HTMLTable,
+  IButtonProps,
+  Icon,
+  IconName,
+  Tooltip
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion, ElectronVersionSource } from '../../interfaces';
+import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
@@ -31,7 +42,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     this.handleDownloadAll = this.handleDownloadAll.bind(this);
     this.handleDeleteAll = this.handleDeleteAll.bind(this);
     this.handleChannelChange = this.handleChannelChange.bind(this);
-    this.handlePagesChange = this.handlePagesChange.bind(this);
+    this.handleStateChange = this.handleStateChange.bind(this);
     this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handleAddVersion = this.handleAddVersion.bind(this);
 
@@ -46,15 +57,21 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
   }
 
   /**
-   * Handles a change in how many pages should be displayed.
+   * Handles a change in which channels should be displayed.
    *
-   * @param {React.ChangeEvent<HTMLSelectElement>} event
+   * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handlePagesChange(
-    event: React.ChangeEvent<HTMLSelectElement>
+  public handleStateChange(
+    event: React.FormEvent<HTMLInputElement>
   ) {
-    const { value } = event.currentTarget;
-    this.props.appState.versionPagesToFetch = parseInt(value, 10) / 30;
+    const { id, checked } = event.currentTarget;
+    const { appState } = this.props;
+
+    if (!checked) {
+      appState.statesToShow = appState.statesToShow.filter((s) => s !== id);
+    } else {
+      appState.statesToShow.push(id as VersionState);
+    }
   }
 
   /**
@@ -63,15 +80,15 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
   public handleChannelChange(
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.FormEvent<HTMLInputElement>
   ) {
     const { id, checked } = event.currentTarget;
     const { appState } = this.props;
 
     if (!checked) {
-      appState.versionsToShow = appState.versionsToShow.filter((c) => c !== id);
+      appState.channelsToShow = appState.channelsToShow.filter((c) => c !== id);
     } else {
-      appState.versionsToShow.push(id as ElectronReleaseChannel);
+      appState.channelsToShow.push(id as ElectronReleaseChannel);
     }
   }
 
@@ -123,14 +140,15 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     return (
       <div className='settings-electron'>
         <h2>Electron Settings</h2>
-        <div className='advanced-options settings-section'>
-          {this.renderVersionOptions()}
+        <Callout>
+          {this.renderVersionChannelOptions()}
+          {this.renderVersionStateOptions()}
+        </Callout>
+        <br />
+        <Callout>
           {this.renderAdvancedButtons()}
-        </div>
-        <div>
-          <h2>Versions</h2>
           {this.renderTable()}
-        </div>
+        </Callout>
       </div>
     );
   }
@@ -143,46 +161,85 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderAdvancedButtons(): JSX.Element {
     const { isDownloadingAll, isDeletingAll } = this.state;
+    const { isUpdatingElectronVersions } = this.props.appState;
     const isWorking = isDownloadingAll || isDeletingAll;
-    const downloadFontAwesomeIcon = isDownloadingAll
-      ? <FontAwesomeIcon icon='spinner' spin={true} />
-      : <FontAwesomeIcon icon='cloud-download-alt' />;
-    const deleteFontAwesomeIcon = isDeletingAll
-      ? <FontAwesomeIcon icon='spinner' spin={true} />
-      : <FontAwesomeIcon icon='trash' />;
 
     return (
-      <div className='advanced-options-buttons'>
-        <div>
-          <label>Download all versions of Electron.</label>
-          <button
-            className='button btn-download-all'
-            disabled={isWorking}
-            onClick={this.handleDownloadAll}
-          >
-            {downloadFontAwesomeIcon} Download All Versions
-          </button>
-        </div>
-        <div>
-          <label>Remove all downloaded versions.</label>
-          <button
-            className='button btn-delete-all'
-            disabled={isWorking}
-            onClick={this.handleDeleteAll}
-          >
-            {deleteFontAwesomeIcon} Delete All Downloads
-          </button>
-        </div>
-        <div>
-          <label>Add a local build of Electron.</label>
-          <button
-            className='button btn-add-version'
-            onClick={this.handleAddVersion}
-          >
-            <FontAwesomeIcon icon='file' /> Add Local Electron Build
-          </button>
-        </div>
-      </div>
+      <ButtonGroup fill={true}>
+        <Button
+          disabled={isUpdatingElectronVersions}
+          onClick={this.handleDownloadClick}
+          loading={isUpdatingElectronVersions}
+          icon='numbered-list'
+          text='Update Electron Release List'
+        />
+        <Button
+          disabled={isWorking}
+          icon='download'
+          onClick={this.handleDownloadAll}
+          text='Download All Versions'
+        />
+        <Button
+          disabled={isWorking}
+          icon='trash'
+          onClick={this.handleDeleteAll}
+          text='Delete All Downloads'
+        />
+        <Button
+          icon='document-open'
+          onClick={this.handleAddVersion}
+          text='Add Local Electron Build'
+        />
+      </ButtonGroup>
+    );
+  }
+
+  /**
+   * Renders the various options for which versions should be displayed
+   * in the small dropdown.
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
+  private renderVersionStateOptions(): JSX.Element {
+    const { appState } = this.props;
+    const getIsChecked = (state: VersionState) => {
+      return appState.statesToShow.includes(state);
+    };
+
+    return (
+      <FormGroup
+        label='Include Electron versions that are:'
+      >
+        <Tooltip
+          content='Always enabled'
+          position='bottom'
+          intent='primary'
+        >
+          <Checkbox
+            checked={getIsChecked(VersionState.ready)}
+            label='Ready'
+            id='ready'
+            onChange={this.handleStateChange}
+            inline={true}
+            disabled={true}
+          />
+        </Tooltip>
+        <Checkbox
+          checked={getIsChecked(VersionState.downloading)}
+          label='Downloading'
+          id='downloading'
+          onChange={this.handleStateChange}
+          inline={true}
+        />
+        <Checkbox
+          checked={getIsChecked(VersionState.unknown)}
+          label='Not Downloaded'
+          id='unknown'
+          onChange={this.handleStateChange}
+          inline={true}
+        />
+      </FormGroup>
     );
   }
 
@@ -192,91 +249,50 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @private
    * @returns {JSX.Element}
    */
-  private renderVersionOptions(): JSX.Element {
+  private renderVersionChannelOptions(): JSX.Element {
     const { appState } = this.props;
+
     const getIsChecked = (channel: ElectronReleaseChannel) => {
-      return appState.versionsToShow.includes(channel);
+      return appState.channelsToShow.includes(channel);
+    };
+
+    const getIsCurrentVersionReleaseChannel = (channel: ElectronReleaseChannel) => {
+      return getReleaseChannel(appState.version) === channel;
+    };
+
+    const channels = {
+      stable: ElectronReleaseChannel.stable,
+      beta: ElectronReleaseChannel.beta,
+      nightly: ElectronReleaseChannel.nightly,
+      unsupported: ElectronReleaseChannel.unsupported
     };
 
     return (
-      <div className='versions-to-show'>
-        <p>Include Electron versions from these release channels:</p>
-        <label>
-          <input
-            checked={getIsChecked(ElectronReleaseChannel.stable)}
-            id={ElectronReleaseChannel.stable}
-            type='checkbox'
-            onChange={this.handleChannelChange}
-          />
-          Stable
-        </label>
-        <label>
-          <input
-            checked={getIsChecked(ElectronReleaseChannel.beta)}
-            id={ElectronReleaseChannel.beta}
-            type='checkbox'
-            onChange={this.handleChannelChange}
-          />
-          Beta
-        </label>
-        <label>
-          <input
-            checked={getIsChecked(ElectronReleaseChannel.nightly)}
-            id={ElectronReleaseChannel.nightly}
-            type='checkbox'
-            onChange={this.handleChannelChange}
-          />
-          Nightly
-        </label>
-        <label>
-          <input
-            checked={getIsChecked(ElectronReleaseChannel.unsupported)}
-            id={ElectronReleaseChannel.unsupported}
-            type='checkbox'
-            onChange={this.handleChannelChange}
-          />
-          Unsupported
-        </label>
-        <p>Number of recent Electron releases to include:</p>
-        <select onChange={this.handlePagesChange}>
-          <option value='1'>30</option>
-          <option value='2'>60</option>
-          <option value='3'>90</option>
-          <option value='4'>120</option>
-          <option value='5'>150</option>
-          <option value='6'>180</option>
-          <option value='7'>210</option>
-          <option value='8'>240</option>
-          <option value='9'>270</option>
-          <option value='10'>300</option>
-        </select>
-        <br />
-        {this.renderUpdateVersionsButton()}
-      </div>
-    );
-  }
-
-  /**
-   * Renders the "Update Electron Release List" button
-   *
-   * @private
-   * @returns {JSX.Element}
-   */
-  private renderUpdateVersionsButton(): JSX.Element {
-    const { appState } = this.props;
-    const { isUpdatingElectronVersions } = appState;
-    const icon = isUpdatingElectronVersions
-      ? <FontAwesomeIcon icon='spinner' spin={true}/>
-      : <FontAwesomeIcon icon='clipboard-list' />;
-
-    return (
-      <button
-        className='button'
-        disabled={isUpdatingElectronVersions}
-        onClick={this.handleDownloadClick}
+      <FormGroup
+        label='Include Electron versions from these release channels:'
       >
-        {icon} Update Electron Release List
-      </button>
+        {
+          // tslint:disable-next-line:jsx-no-multiline-js
+          Object.entries(channels).map(([_, channel]) => (
+            <Tooltip
+              content={`Can't disable channel of selected version (${appState.version})`}
+              disabled={!getIsCurrentVersionReleaseChannel(channel)}
+              position='bottom'
+              intent='primary'
+              key={channel}
+            >
+              <Checkbox
+                checked={getIsChecked(channel)}
+                label={channel}
+                id={channel}
+                onChange={this.handleChannelChange}
+                disabled={getIsCurrentVersionReleaseChannel(channel)}
+                inline={true}
+              />
+            </Tooltip>
+          ))
+        }
+      </FormGroup>
     );
   }
 
@@ -288,7 +304,10 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderTable(): JSX.Element {
     return (
-      <table className='electron-versions-table'>
+      <HTMLTable
+        className='electron-versions-table'
+        striped={true}
+      >
         <thead>
           <tr>
             <th>Version</th>
@@ -299,7 +318,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
         <tbody>
           {this.renderTableRows()}
         </tbody>
-      </table>
+      </HTMLTable>
     );
   }
 
@@ -310,27 +329,53 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    * @returns {Array<JSX.Element>}
    */
   private renderTableRows(): Array<JSX.Element | null> {
-    const { versions, versionsToShow } = this.props.appState;
+    const { versions, channelsToShow, statesToShow } = this.props.appState;
 
     return sortedElectronMap<JSX.Element | null>(versions, (key, item) => {
       // Check if we want to show the version
-      if (!versionsToShow.includes(getReleaseChannel(item))) {
+      if (!channelsToShow.includes(getReleaseChannel(item))) {
         return null;
       }
 
-      const { tag_name, state } = item;
-      const humanState = state === 'ready'
-        ? '✅ Downloaded'
-        : state === 'downloading' ? '⏬ Downloading' : '⏹ Not downloaded';
+      // Check if we want to show the state
+      if (!statesToShow.includes(item.state)) {
+        return null;
+      }
 
       return (
-        <tr key={tag_name}>
-          <td>{tag_name}</td>
-          <td>{humanState}</td>
-          <td>{this.renderAction(key, item)}</td>
+        <tr key={item.version}>
+          <td>{item.version}</td>
+          <td>{this.renderHumanState(item)}</td>
+          <td className='action'>{this.renderAction(key, item)}</td>
         </tr>
       );
     });
+  }
+
+  /**
+   * Returns a human-readable state indicator for an Electron version
+   *
+   * @param {RunnableVersion} item
+   * @returns {JSX.Element}
+   */
+  private renderHumanState(item: RunnableVersion): JSX.Element {
+    const { state } = item;
+    let icon: IconName = 'box';
+    let humanState = 'Downloaded';
+
+    if (state === VersionState.downloading) {
+      icon = 'cloud-download';
+      humanState = 'Downloading';
+    } else if (state === VersionState.unknown) {
+      icon = 'cloud';
+      humanState = 'Not downloaded';
+    }
+
+    return (
+      <span>
+        <Icon icon={icon} /> {humanState}
+      </span>
+    );
   }
 
   /**
@@ -338,43 +383,37 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    *
    * @private
    * @param {string} key
-   * @param {ElectronVersion} item
+   * @param {RunnableVersion} item
    * @returns {JSX.Element}
    */
-  private renderAction(key: string, item: ElectronVersion): JSX.Element {
+  private renderAction(key: string, item: RunnableVersion): JSX.Element {
     const { state, source } = item;
     const { appState } = this.props;
+    const buttonProps: IButtonProps = {
+      fill: true,
+      small: true
+    };
 
     // Already downloaded
     if (state === 'ready') {
-      const remove = () => appState.removeVersion(key);
-      const label = source === ElectronVersionSource.local
+      buttonProps.onClick = () => appState.removeVersion(key);
+      buttonProps.icon = 'trash';
+      buttonProps.text = source === VersionSource.local
         ? 'Remove'
         : 'Delete';
-
-      return (
-        <button className='button' onClick={remove}>
-          <FontAwesomeIcon icon='trash' /> {label}
-        </button>
-      );
+    } else if (state === 'downloading') {
+      buttonProps.disabled = true;
+      buttonProps.loading = true;
+      buttonProps.text = 'Downloading';
+      buttonProps.icon = 'cloud-download';
+    } else {
+      buttonProps.disabled = false;
+      buttonProps.loading = false;
+      buttonProps.text = 'Download';
+      buttonProps.icon = 'cloud-download';
+      buttonProps.onClick = () => appState.downloadVersion(key);
     }
 
-    // Downloading
-    if (state === 'downloading') {
-      return (
-        <button className='button' disabled={true}>
-          <FontAwesomeIcon icon='spinner' spin={true}/> Downloading
-        </button>
-      );
-    }
-
-    // Unknown
-    const download = () => appState.setVersion(key);
-
-    return (
-      <button className='button' onClick={download}>
-        <FontAwesomeIcon icon='cloud-download-alt' /> Download
-      </button>
-    );
+    return <Button {...buttonProps} type={undefined} />;
   }
 }

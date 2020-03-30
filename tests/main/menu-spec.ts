@@ -1,3 +1,7 @@
+/**
+ * @jest-environment node
+ */
+
 import * as electron from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
@@ -7,10 +11,12 @@ import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/windows');
+jest.mock('../../src/main/ipc');
 
 describe('menu', () => {
   beforeEach(() => {
     (electron.app.getName as any).mockReturnValue('Electron Fiddle');
+    (electron.dialog.showOpenDialog as any).mockReturnValue(Promise.resolve({}));
   });
 
   afterEach(() => {
@@ -59,6 +65,37 @@ describe('menu', () => {
         expect(submenu).toBeTruthy();
       });
     });
+
+    it('adds Monaco toggle options', () => {
+      overridePlatform('linux');
+
+      setupMenu();
+
+      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+
+      const toggleSoftWrap = submenu.find(({ label }) => label === 'Toggle Soft Wrap');
+      (toggleSoftWrap as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(1);
+
+      const toggleMap = submenu.find(({ label }) => label === 'Toggle Mini Map');
+      (toggleMap as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledTimes(2);
+    });
+
+    it('adds Bisect toggle', () => {
+      overridePlatform('linux');
+
+      setupMenu();
+
+      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+
+      const toggleSoftWrap = submenu.find(({ label }) => label === 'Toggle Bisect Helper');
+      (toggleSoftWrap as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BISECT_COMMANDS_TOGGLE);
+
+    });
   });
 
   describe('menu groups', () => {
@@ -78,7 +115,7 @@ describe('menu', () => {
         help = menu[menu.length - 1];
       });
 
-      it('hows the welcome tour', () => {
+      it('shows the welcome tour', () => {
         help.submenu[1].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.SHOW_WELCOME_TOUR);
       });
@@ -155,7 +192,7 @@ describe('menu', () => {
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
         expect(ipcMainManager.send)
-          .toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, [ 'App' ]);
+          .toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, ['App']);
       });
     });
 
@@ -163,7 +200,7 @@ describe('menu', () => {
       let tasks: any;
 
       beforeEach(() => {
-      const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as any).mock;
         const menu = mock.calls[0][0];
         tasks = menu[menu.length - 3];
       });

@@ -14,6 +14,6 @@ export function getFocusedEditor(
   });
 
   return focusedKey
-    ? window.ElectronFiddle.editors[focusedKey] || null
+    ? window.ElectronFiddle.editors[focusedKey]
     : null;
 }

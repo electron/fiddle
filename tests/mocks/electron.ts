@@ -79,29 +79,48 @@ function CreateWindowStub() {
     setIgnoreMouseEvents: jest.fn(),
     setTitle: jest.fn(),
     reload: jest.fn(),
-    isDestroyed: jest.fn(() => false)
+    isDestroyed: jest.fn(() => false),
+    setTouchBar: jest.fn()
   };
+}
+
+class MockTouchBar {
+  public static TouchBarButton = jest.fn();
+  public static TouchBarScrubber = jest.fn();
+  public static TouchBarSpacer = jest.fn();
+  public static TouchBarLabel = jest.fn();
 }
 
 const app = {
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
+  hide: jest.fn(),
+  show: jest.fn(),
   isDefaultProtocolClient: jest.fn().mockReturnValue(true),
   setAsDefaultProtocolClient: jest.fn(),
   isReady: jest.fn().mockReturnValue(true),
-  getAppMetrics: jest.fn(),
+  isInApplicationsFolder: jest.fn().mockReturnValue(true),
+  moveToApplicationsFolder: jest.fn(),
+  getAppMetrics: jest.fn().mockReturnValue({ metrics: 123 }),
   getGPUFeatureStatus: jest.fn(),
   getJumpListSettings: jest.fn(() => ({
     removedItems: []
   })),
   getLoginItemSettings: jest.fn(),
-  getPath: jest.fn(),
+  getPath: (name: string) => {
+    if (name === 'userData') return '/Users/fake-user';
+    if (name === 'home') return `~`;
+    return '/test-path';
+  },
+  focus: jest.fn(),
   quit: jest.fn(),
   relaunch: jest.fn(),
   setJumpList: jest.fn(),
   requestSingleInstanceLock: jest.fn(),
   on: jest.fn(),
-  once: jest.fn()
+  off: jest.fn(),
+  once: jest.fn(),
+  removeAllListeners: jest.fn(),
 };
 
 const mainWindowStub = CreateWindowStub();
@@ -124,6 +143,10 @@ const shell = {
   showItemInFolder: jest.fn()
 };
 
+const systemPreferences = {
+  getUserDefault: jest.fn()
+};
+
 const electronMock = {
   app,
   autoUpdater,
@@ -134,9 +157,12 @@ const electronMock = {
     writeText: jest.fn(),
     writeImage: jest.fn()
   },
+  crashReporter: {
+    start: jest.fn(),
+  },
   dialog: {
-    showOpenDialog: jest.fn(),
-    showMessageBox: jest.fn()
+    showOpenDialog: jest.fn(() => Promise.resolve({})),
+    showMessageBox: jest.fn(() => Promise.resolve({}))
   },
   ipcMain: new MockIPC(),
   ipcRenderer: new MockIPC(),
@@ -174,18 +200,23 @@ const electronMock = {
     session,
     BrowserWindow: MockBrowserWindow,
     getCurrentWindow: jest.fn(),
+    getGlobal: jest.fn(),
     Menu: MockMenu,
     MenuItem: MockMenuItem,
     process: {
       argv: [ '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle' ]
     },
     shell,
-    require: jest.fn()
+    require: jest.fn(),
+    TouchBar: MockTouchBar,
+    systemPreferences,
   },
   require: jest.fn(),
   screen: new Screen(),
   session,
   shell,
+  systemPreferences,
+  TouchBar: MockTouchBar,
   webContents: MockWebContents
 };
 

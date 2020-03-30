@@ -1,0 +1,14 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderNonIdealState() renders a non-ideal state 1`] = `
+<Blueprint3.NonIdealState
+  action={
+    <Blueprint3.Button
+      onClick={[Function]}
+      text="Open all editors"
+    />
+  }
+  description="You have closed all editors. You can open them again with the button below or the \\"Editors\\" button above!"
+  icon="applications"
+/>
+`;

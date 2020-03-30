@@ -1,12 +1,12 @@
 # <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
-[![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle)
+[![Build Status](https://travis-ci.org/electron/fiddle.svg?branch=master)](https://travis-ci.org/electron/fiddle) [![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=master)](https://coveralls.io/github/electron/fiddle?branch=master)
 
 Electron Fiddle lets you create and play with small Electron experiments. It
 greets you with a quick-start template after opening – change a few things,
 choose the version of Electron you want to run it with, and play around. Then,
-save your Fiddle either as a GitHub Gist or to a local folder. Once pushed to
-GitHub, anyone can quickly try your Fiddle out by just entering it in the
+save your Fiddle either as a GitHub Gist or to a local folder. Once published
+on GitHub, anyone can quickly try your Fiddle out by just entering it in the
 address bar.
 
 <h3 align="center">
@@ -15,13 +15,13 @@ address bar.
   </a>
 </h3>
 
-<img src="https://user-images.githubusercontent.com/378023/49716908-7d2b0500-fc98-11e8-8f52-def504802509.png" width="880px" alt="Electron Fiddle screenshot">
+<img src="https://user-images.githubusercontent.com/1426799/52155868-d3357c80-2639-11e9-9496-fa97b1dc7897.jpg" width="880px" alt="Electron Fiddle screenshot">
 
 # Features
 
 ### Explore Electron
 
-![Screenshot: Electron App running](https://user-images.githubusercontent.com/1426799/43873856-5f66e56e-9b3d-11e8-8472-3a14d6a08c62.png)
+![Screenshot: Electron App running](https://user-images.githubusercontent.com/1426799/52155856-c0bb4300-2639-11e9-9962-a6354d08dc5a.jpg)
 
 Try Electron without installing any dependencies: Fiddle includes everything
 you'll need to explore the platform. It also includes examples for every API
@@ -40,7 +40,7 @@ all Electron APIs only a few keystrokes away.
 
 ### Compile and Package
 
-![Screenshot: Fiddle's Tasks Menu](https://user-images.githubusercontent.com/1426799/43874349-3f5abd74-9b40-11e8-9225-ddd1f1087a47.png)
+![Screenshot: Fiddle's Tasks Menu](https://user-images.githubusercontent.com/1426799/52155857-c0bb4300-2639-11e9-8776-e05dc528439c.png)
 
 Fiddle can automatically turn your experiment into binaries you can share with
 your friends, coworkers, or grandparents. It does so thanks to

@@ -2,20 +2,43 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Output } from '../../../src/renderer/components/output';
+import { MockState } from '../../mocks/state';
+
+let mockContext: any = {};
+
+jest.mock('react-mosaic-component', () => {
+  const { MosaicContext, MosaicRootActions } = jest.requireActual('react-mosaic-component');
+
+  return {
+    MosaicContext,
+    MosaicRootActions
+  };
+});
+
+beforeAll(() => {
+  mockContext = {
+    mosaicActions: {
+      expand: jest.fn(),
+      remove: jest.fn(),
+      hide: jest.fn(),
+      replaceWith: jest.fn(),
+      updateTree: jest.fn(),
+      getRoot: jest.fn()
+    },
+    mosaicId: 'output'
+  };
+});
 
 describe('Output component', () => {
   let store: any;
 
   beforeEach(() => {
-    store = {
-      isConsoleShowing: true,
-      output: []
-    };
+    store = new MockState();
   });
 
   it('renders', () => {
     const wrapper = shallow(<Output appState={store} />);
-    expect(wrapper.html()).toBe('<div class="output showing"></div>');
+    expect(wrapper.html()).toBe('<div class="output"></div>');
   });
 
   it('renders with output', () => {
@@ -27,6 +50,11 @@ describe('Output component', () => {
       {
         timestamp: 1532704073130,
         text: 'Hi!'
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+        isNotPre: true
       }
     ];
 
@@ -38,14 +66,36 @@ describe('Output component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('hides the console via class', () => {
+  it('calculates a timestamp', () => {
+    const wrapper = shallow(<Output appState={store} />);
+    const instance: Output = wrapper.instance() as any;
+
+    const result = instance.renderTimestamp(1546834508111);
+
+    // Depends on the server, we just want to verify that we
+    // get _something_
+    expect(result).toBeTruthy();
+  });
+
+  it('hides the console with react-mosaic-component', () => {
+    // manually trigger lifecycle methods so that
+    // context can be set before mounting method
+    const wrapper = shallow(<Output appState={store} />, {
+      context: mockContext,
+      disableLifecycleMethods: true
+    });
+
+    wrapper.instance().context = mockContext;
+    wrapper.instance().componentDidMount!();
+
+    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 25);
+
     store.isConsoleShowing = false;
 
-    const wrapper = shallow(
-      <Output appState={store} />
-    );
-
-    expect(wrapper.html().includes('showing')).toBe(false);
+    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
+    // the context is {}. That's never the case in production.
+    // expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 0);
+    expect(wrapper.html()).toBe(null);
   });
 
   it('handles componentDidUpdate', () => {

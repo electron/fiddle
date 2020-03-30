@@ -1,22 +1,24 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { classNames } from '../../utils/classnames';
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
+import { ExecutionSettings } from './settings-execution';
 import { GeneralSettings } from './settings-general';
 
 enum SettingsSections {
   General = 'General',
   Electron = 'Electron',
+  Execution = 'Execution',
   Credits = 'Credits'
 }
 
 const settingsSections = [
   SettingsSections.General,
   SettingsSections.Electron,
+  SettingsSections.Execution,
   SettingsSections.Credits
 ];
 
@@ -42,6 +44,16 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     this.state = {
       section: SettingsSections.General
     };
+
+    this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
+  }
+
+  public componentDidMount() {
+    window.addEventListener('keyup', this.closeSettingsPanel, true);
+  }
+
+  public componentWillUnmount() {
+    window.removeEventListener('keyup', this.closeSettingsPanel);
   }
 
   /**
@@ -62,6 +74,10 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
       return <ElectronSettings appState={appState} />;
     }
 
+    if (section === SettingsSections.Execution) {
+      return <ExecutionSettings appState={appState} />;
+    }
+
     if (section === SettingsSections.Credits) {
       return <CreditsSettings appState={appState} />;
     }
@@ -79,11 +95,17 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     return settingsSections.map((name) => {
       const isSelected = section === name;
-      const className = classNames({ selected: isSelected }, name);
       const onClick = () => this.setState({ section: name });
 
       return (
-        <li onClick={onClick} key={name} className={className}>{name}</li>
+        <MenuItem
+          onClick={onClick}
+          active={isSelected}
+          key={name}
+          id={`settings-link-${name}`}
+          text={name}
+          icon={this.getIconForSection(name)}
+        />
       );
     });
   }
@@ -101,11 +123,39 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className='settings-content'>
           <div className='settings-close' onClick={appState.toggleSettings}>
-            <FontAwesomeIcon icon='times-circle' />
+            <Icon icon='cross' />
           </div>
           {this.renderContent()}
         </div>
       </div>
     );
+  }
+
+  /**
+   * Get the settings icons
+   *
+   * @param {SettingsSections} section
+   * @memberof Settings
+   */
+  private getIconForSection(section: SettingsSections): IconName {
+    if (section === SettingsSections.Credits) {
+      return 'heart';
+    } else if (section === SettingsSections.Electron) {
+      return 'floppy-disk';
+    } else if (section === SettingsSections.Execution) {
+      return 'play';
+    }
+
+    return 'cog';
+  }
+
+  /**
+   * Trigger closing of the settings panel upon Esc
+   */
+  private closeSettingsPanel(event: KeyboardEvent) {
+    const { appState } = this.props;
+    if (event.code === 'Escape') {
+      appState.isSettingsShowing = false;
+    }
   }
 }

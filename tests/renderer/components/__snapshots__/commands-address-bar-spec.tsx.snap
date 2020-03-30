@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AddressBar component renders 1`] = `
+<form
+  className="address-bar empty"
+  onSubmit={[Function]}
+>
+  <fieldset>
+    <Blueprint3.InputGroup
+      key="addressbar"
+      leftIcon="geosearch"
+      onChange={[Function]}
+      placeholder="https://gist.github.com/..."
+      rightElement={
+        <Blueprint3.Button
+          disabled={true}
+          icon="cloud-download"
+          onClick={[Function]}
+          text="Load Fiddle"
+        />
+      }
+      value=""
+    />
+  </fieldset>
+</form>
+`;

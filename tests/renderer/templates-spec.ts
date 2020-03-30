@@ -2,7 +2,7 @@ import { getTemplateValues } from '../../src/renderer/templates';
 
 jest.mock('fs-extra');
 jest.mock('path');
-jest.mock('../../src/constants', () => ({
+jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/'
 }));
 jest.mock('../../src/utils/import', () => ({
@@ -35,6 +35,17 @@ describe('templates', () => {
       expect(values.html).toBe('');
       expect(values.main).toBe('');
       expect(values.renderer).toBe('');
+    });
+
+    it('handles errors and reports the templates content', async () => {
+      const fs = require('fs-extra');
+
+      fs.readFile.mockReturnValue(Promise.reject('bwap'));
+      fs.existsSync.mockReturnValue(true);
+
+      await getTemplateValues('test');
+      expect(fs.existsSync).toHaveBeenCalledTimes(5);
+      expect(fs.readdirSync).toHaveBeenCalledTimes(5);
     });
   });
 });

@@ -7,6 +7,10 @@ jest.mock('../../../src/renderer/components/settings-general-github', () => ({
   GitHubSettings: 'settings-github'
 }));
 
+jest.mock('../../../src/renderer/components/settings-general-console', () => ({
+  ConsoleSettings: 'settings-console'
+}));
+
 jest.mock('../../../src/renderer/components/settings-general-appearance', () => ({
   AppearanceSettings: 'settings-appearance'
 }));

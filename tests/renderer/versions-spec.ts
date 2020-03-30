@@ -1,8 +1,12 @@
-import { ElectronVersion, ElectronVersionSource } from '../../src/interfaces';
+import * as fs from 'fs';
+import * as path from 'path';
+import semver from 'semver';
+import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import {
   addLocalVersion,
   ElectronReleaseChannel,
   fetchVersions,
+  getDefaultVersion,
   getKnownVersions,
   getLocalVersions,
   getReleaseChannel,
@@ -10,36 +14,79 @@ import {
   saveLocalVersions,
   VersionKeys
 } from '../../src/renderer/versions';
+import { mockFetchOnce } from '../utils';
 
-const mockVersions: Array<Partial<ElectronVersion>> = [
-  { tag_name: 'test-0', url: '/test/path/0' },
-  { tag_name: 'test-1', url: '/test/path/1' },
-  { tag_name: 'test-2', url: '/test/path/2' },
+const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
+
+const mockVersions: Array<Partial<RunnableVersion>> = [
+  { version: 'test-0', localPath: '/test/path/0' },
+  { version: 'test-1', localPath: '/test/path/1' },
+  { version: 'test-2', localPath: '/test/path/2' },
 ];
 
+jest.mock('semver', () => ({
+  default: {
+    gte: jest.fn()
+  }
+}));
+
 describe('versions', () => {
+  describe('getDefaultVersion()', () => {
+    it('handles a stored version', () => {
+      (localStorage.getItem as any).mockReturnValue('2.0.2');
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('handles a v-prefixed version', () => {
+      (localStorage.getItem as any).mockReturnValue('v2.0.2');
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('handles garbage data', () => {
+      (localStorage.getItem as any).mockReturnValue('v3.0.0');
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('handles if no version is set', () => {
+      (localStorage.getItem as any).mockReturnValue(null);
+      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
+      expect(output).toBe('2.0.2');
+    });
+
+    it('throws if everything goes wrong', () => {
+      const testFn = () => {
+        return getDefaultVersion(null as any);
+      };
+
+      expect(testFn).toThrow();
+    });
+  });
+
   describe('getReleaseChannel()', () => {
     it('identifies a nightly release', () => {
       expect(getReleaseChannel({
-        tag_name: 'v4.0.0-nightly.20180817'
+        version: 'v4.0.0-nightly.20180817'
       } as any)).toBe(ElectronReleaseChannel.nightly);
     });
 
     it('identifies a beta release', () => {
       expect(getReleaseChannel({
-        tag_name: 'v3.0.0-beta.4'
+        version: 'v3.0.0-beta.4'
       } as any)).toBe(ElectronReleaseChannel.beta);
     });
 
     it('identifies an unsupported release', () => {
       expect(getReleaseChannel({
-        tag_name: 'v2.1.0-unsupported.20180809'
+        version: 'v2.1.0-unsupported.20180809'
       } as any)).toBe(ElectronReleaseChannel.unsupported);
     });
 
     it('identifies a stable release', () => {
       expect(getReleaseChannel({
-        tag_name: 'v3.0.0'
+        version: 'v3.0.0'
       } as any)).toBe(ElectronReleaseChannel.stable);
     });
 
@@ -56,22 +103,22 @@ describe('versions', () => {
     });
 
     it('adds a local version', () => {
-      expect(addLocalVersion(mockVersions[1] as any)).toEqual([ mockVersions[0], mockVersions[1] ]);
+      expect(addLocalVersion(mockVersions[1] as any)).toEqual([mockVersions[0], mockVersions[1]]);
     });
 
     it('does not add duplicates', () => {
-      expect(addLocalVersion(mockVersions[0] as any)).toEqual([ mockVersions[0] ]);
+      expect(addLocalVersion(mockVersions[0] as any)).toEqual([mockVersions[0]]);
     });
   });
 
   describe('saveLocalVersions()', () => {
     it('saves local versions', () => {
       const mockLocalVersions = mockVersions.map((v) => {
-        v.source = ElectronVersionSource.local;
+        v.source = VersionSource.local;
         return v;
       });
 
-      saveLocalVersions(mockLocalVersions as Array<ElectronVersion>);
+      saveLocalVersions(mockLocalVersions as Array<RunnableVersion>);
 
       const key = (window.localStorage.setItem as jest.Mock).mock.calls[0][0];
       const value = (window.localStorage.setItem as jest.Mock).mock.calls[0][1];
@@ -85,64 +132,47 @@ describe('versions', () => {
     it('returns an empty array if none can be found', () => {
       expect(getLocalVersions()).toEqual([]);
     });
+
+    it('migrates an old format if necessary', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce(`
+        [{
+          "url": "/Users/felixr/Code/electron/src/out/Debug",
+          "assets_url": "/Users/felixr/Code/electron/src/out/Debug",
+          "body": "Local version, added at 1538771049442",
+          "created_at": "1538771049442",
+          "name": "src/out/Debug 4.0.0",
+          "html_url": "",
+          "prerelease": true,
+          "published_at": "1538771049442",
+          "tag_name": "4.0.0",
+          "target_commitish": ""
+        }, { "garbage": "true" }]
+      `.trim());
+
+      expect(getLocalVersions()).toEqual([{
+        localPath: '/Users/felixr/Code/electron/src/out/Debug',
+        version: '4.0.0',
+        name: 'src/out/Debug 4.0.0'
+      }]);
+    });
   });
 
   describe('fetchVersions()', () => {
-    const mockResponseOne = `[{
-        "url": "https://api.github.com/repos/electron/electron/releases/11120972",
-        "assets_url": "https://api.github.com/repos/electron/electron/releases/11120972/assets",
-        "html_url": "https://github.com/electron/electron/releases/tag/v2.0.2",
-        "tag_name": "v2.0.2",
-        "target_commitish": "2-0-x",
-        "name": "electron v2.0.2",
-        "prerelease": false,
-        "created_at": "2018-05-22T18:52:16Z",
-        "published_at": "2018-05-22T20:14:35Z",
-        "body": "## Bug Fixes*"
-      }, {
-        "url": "https://api.github.com/repos/electron/electron/releases/11032425",
-        "assets_url": "https://api.github.com/repos/electron/electron/releases/11032425/assets",
-        "html_url": "https://github.com/electron/electron/releases/tag/v2.0.1",
-        "tag_name": "v2.0.1",
-        "target_commitish": "2-0-x",
-        "name": "electron v2.0.1",
-        "prerelease": false,
-        "created_at": "2018-05-16T17:30:26Z",
-        "published_at": "2018-05-16T18:40:54Z",
-        "body": "## Bug Fixes* Fixed flaky"
-      }]`.trim();
-    const mockResponseTwo = `[{
-        "url": "https://api.github.com/repos/electron/electron/releases/11120972",
-        "assets_url": "https://api.github.com/repos/electron/electron/releases/11120972/assets",
-        "html_url": "https://github.com/electron/electron/releases/tag/v2.0.2",
-        "tag_name": "v2.0.3",
-        "target_commitish": "2-0-x",
-        "name": "electron v2.0.3",
-        "prerelease": false,
-        "created_at": "2018-05-22T18:52:16Z",
-        "published_at": "2018-05-22T20:14:35Z",
-        "body": "## Bug Fixes*"
-      }, {
-        "url": "https://api.github.com/repos/electron/electron/releases/11032425",
-        "assets_url": "https://api.github.com/repos/electron/electron/releases/11032425/assets",
-        "html_url": "https://github.com/electron/electron/releases/tag/v2.0.1",
-        "tag_name": "v2.0.4",
-        "target_commitish": "2-0-x",
-        "name": "electron v2.0.4",
-        "prerelease": false,
-        "created_at": "2018-05-16T17:30:26Z",
-        "published_at": "2018-05-16T18:40:54Z",
-        "body": "## Bug Fixes* Fixed flaky"
-      }]`.trim();
+    it('fetches versions >= 0.24.0', async () => {
+      const mockUnpkgResponse = fs.readFileSync(path.join(__dirname, '../mocks/unpkg-mock.json'));
+      mockFetchOnce(mockUnpkgResponse.toString());
 
-    it('fetches versions', async () => {
-      (fetch as any).mockResponseOnce(mockResponseOne);
-      (fetch as any).mockResponseOnce(mockResponseTwo);
+      // return whether or not version in JSON is >=0.24.0
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(true);
+      (semver.gte as jest.Mock).mockReturnValueOnce(false);
 
-      const result = await fetchVersions(2);
+      const result = await fetchVersions();
       const expected = [
-        ...JSON.parse(mockResponseOne),
-        ...JSON.parse(mockResponseTwo)
+        { version: '10.0.0-nightly.20200303' },
+        { version: '9.0.0-beta.5' },
+        { version: '4.2.0' }
       ];
 
       expect(result).toEqual(expected);
@@ -152,25 +182,32 @@ describe('versions', () => {
 
   describe('getKnownVersions()', () => {
     it('tries to get versions from localStorage', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(`[{"test":"hi"}]`);
+      (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "version": "3.0.5" }]`);
 
-      expect(getKnownVersions()).toEqual([{ test: 'hi' }]);
+      expect(getKnownVersions()).toEqual([{ version: '3.0.5' }]);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(29);
+      expect(getKnownVersions().length).toBe(expectedVersionCount);
+    });
+
+    it('falls back to a local require', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "garbage": "true" }]`);
+
+      expect(getKnownVersions().length).toBe(expectedVersionCount);
     });
   });
 
   describe('getUpdatedElectronVersions()', () => {
     it('gets known versions', async () => {
-      (window as any).localStorage.getItem.mockReturnValue(`[{"test":"two"}]`);
-      (fetch as any).mockResponse('');
+      (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "version": "3.0.5" }]`);
+      (window as any).localStorage.getItem.mockReturnValueOnce(`[{ "version": "3.0.5" }]`);
+      mockFetchOnce('');
 
-      const result = await getUpdatedElectronVersions(1);
-      const expectedVersion = { test: 'two', state: 'unknown' };
+      const result = await getUpdatedElectronVersions();
+      const expectedVersion = { version: '3.0.5', state: 'unknown' };
 
       expect(result).toEqual([{ ...expectedVersion, source: 'remote' }, { ...expectedVersion, source: 'local', state: 'ready' }]);
     });

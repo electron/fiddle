@@ -1,11 +1,16 @@
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import { MosaicContext } from 'react-mosaic-component';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
+import { WrapperMosaicId } from './output-editors-wrapper';
+
 
 export interface CommandsProps {
   appState: AppState;
+  // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }
 
@@ -18,6 +23,8 @@ export interface CommandsProps {
  */
 @observer
 export class Output extends React.Component<CommandsProps, {}> {
+  public static contextType = MosaicContext;
+  public context: MosaicContext<WrapperMosaicId>;
   private outputRef = React.createRef<HTMLDivElement>();
 
   constructor(props: CommandsProps) {
@@ -25,6 +32,23 @@ export class Output extends React.Component<CommandsProps, {}> {
 
     this.renderTimestamp = this.renderTimestamp.bind(this);
     this.renderEntry = this.renderEntry.bind(this);
+  }
+
+
+  public componentDidMount() {
+    autorun(() => {
+      const { isConsoleShowing } = this.props.appState;
+
+      // this context should always exist, but mocking context in enzyme
+      // is not fully supported, so this condition makes the tests pass
+      if (this.context.mosaicActions && this.context.mosaicActions.expand) {
+        if (!isConsoleShowing) {
+          this.context.mosaicActions.expand(['first'], 0);
+        } else {
+          this.context.mosaicActions.expand(['first'], 25);
+        }
+      }
+    });
   }
 
   public componentDidUpdate() {
@@ -70,9 +94,12 @@ export class Output extends React.Component<CommandsProps, {}> {
     ));
   }
 
-  public render() {
-    const { isConsoleShowing, output } = this.props.appState;
-    const className = isConsoleShowing ? 'output showing' : 'output';
+  public render(): JSX.Element | null {
+    const { output, isConsoleShowing } = this.props.appState;
+
+    if (!isConsoleShowing) {
+      return null;
+    }
 
     // The last 1000 lines
     const lines = output
@@ -80,7 +107,7 @@ export class Output extends React.Component<CommandsProps, {}> {
       .map(this.renderEntry);
 
     return (
-      <div className={className} ref={this.outputRef}>
+      <div className='output' ref={this.outputRef}>
         {lines}
       </div>
     );

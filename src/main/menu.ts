@@ -121,6 +121,7 @@ function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
     {
       label: 'Run Fiddle...',
+      accelerator: 'F5',
       click: () => ipcMainManager.send(IpcEvents.FIDDLE_RUN)
     },
     {
@@ -143,7 +144,7 @@ function getShowMeMenuItem(key: string, item: string | Templates): MenuItemConst
   if (typeof item === 'string') {
     return {
       label: key,
-      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [ key ])
+      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key])
     };
   }
 
@@ -159,10 +160,10 @@ function getShowMeMenu(): MenuItemConstructorOptions {
   const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(SHOW_ME_TEMPLATES)
     .map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
 
-    return {
-      label: 'Show Me',
-      submenu: showMeMenu
-    };
+  return {
+    label: 'Show Me',
+    submenu: showMeMenu
+  };
 }
 
 /**
@@ -205,7 +206,7 @@ function getFileMenu(): MenuItemConstructorOptions {
       type: 'separator'
     },
     {
-      label: 'Save to Gist',
+      label: 'Publish to Gist',
       click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE_GIST),
     },
     {
@@ -246,15 +247,22 @@ export function setupMenu() {
 
       // Tweak "View" menu
       if (label === 'View' && isSubmenu(item.submenu)) {
-        item.submenu = item.submenu.filter((subItem) => subItem.label !== 'Toggle Developer Tools'); // Remove "Toggle Developer Tools"
-        item.submenu.push({ type: 'separator' }, { role: 'resetzoom' }, { role: 'zoomin' }, { role: 'zoomout' }); // Add zooming actions
+        // remove "Reload" (has weird behaviour) and "Toggle Developer Tools"
+        item.submenu = item.submenu
+          .filter((subItem) => subItem.label !== 'Toggle Developer Tools' && subItem.label !== 'Reload');
+        item.submenu.push({ type: 'separator' }, { role: 'resetZoom' }, { role: 'zoomIn' }, { role: 'zoomOut' }); // Add zooming actions
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Soft Wrap',
-          click: () => ipcMainManager.send(IpcEvents.TOGGLE_SOFT_WRAP),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, ['wordWrap']),
         });
         item.submenu.push({ type: 'separator' }, {
           label: 'Toggle Mini Map',
-          click: () => ipcMainManager.send(IpcEvents.TOGGLE_MINI_MAP),
+          click: () => ipcMainManager.send(IpcEvents.MONACO_TOGGLE_OPTION, ['minimap.enabled']),
+        });
+        item.submenu.push({ type: 'separator' }, {
+          label: 'Toggle Bisect Helper',
+          click: () => ipcMainManager.send(IpcEvents.BISECT_COMMANDS_TOGGLE),
+          accelerator: 'CommandorControl+Shift+B',
         });
       }
 

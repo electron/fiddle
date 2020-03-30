@@ -1,0 +1,77 @@
+[
+    {
+        "node_id": "MDc6UmVsZWFzZTI0MTc1NzU0",
+        "tag_name": "v10.0.0-nightly.20200303",
+        "name": "electron v10.0.0-nightly.20200303",
+        "prerelease": true,
+        "published_at": "2020-03-03T18:06:05Z",
+        "version": "10.0.0-nightly.20200303",
+        "npm_package_name": "electron-nightly",
+        "deps": {
+            "node": "12.16.1",
+            "v8": "8.2.8-electron.0",
+            "uv": "1.34.0",
+            "zlib": "1.2.11",
+            "openssl": "1.1.0",
+            "modules": "82",
+            "chrome": "82.0.4050.0"
+        },
+        "npm_dist_tags": [
+            "nightly"
+        ],
+        "total_downloads": 6
+    },
+    {
+        "node_id": "MDc6UmVsZWFzZTI0MTM1NzIw",
+        "tag_name": "v9.0.0-beta.5",
+        "name": "electron v9.0.0-beta.5",
+        "prerelease": true,
+        "published_at": "2020-03-02T18:05:08Z",
+        "version": "9.0.0-beta.5",
+        "npm_package_name": "electron",
+        "deps": {
+            "node": "12.14.1",
+            "v8": "8.2.1-electron.0",
+            "uv": "1.33.1",
+            "zlib": "1.2.11",
+            "openssl": "1.1.0",
+            "modules": "80",
+            "chrome": "82.0.4048.0"
+        },
+        "npm_dist_tags": [
+            "beta",
+            "beta-9-x-y"
+        ],
+        "total_downloads": 110
+    },
+    {
+        "node_id": "MDc6UmVsZWFzZTE3MTIxODMx",
+        "tag_name": "v4.2.0",
+        "name": "electron v4.2.0",
+        "prerelease": false,
+        "published_at": "2019-05-03T03:16:59Z",
+        "version": "4.2.0",
+        "npm_package_name": "electron",
+        "deps": {
+            "node": "10.11.0",
+            "v8": "6.9.427.31-electron.0",
+            "uv": "1.23.0",
+            "zlib": "1.2.11",
+            "openssl": "1.1.0",
+            "modules": "69",
+            "chrome": "69.0.3497.128"
+        },
+        "npm_dist_tags": [],
+        "total_downloads": 21041
+    },
+    {
+        "node_id": "MDc6UmVsZWFzZTI0ODk2",
+        "tag_name": "v0.3.1",
+        "name": "atom-shell v0.3.1",
+        "prerelease": false,
+        "published_at": "2013-08-12T09:20:23Z",
+        "version": "0.3.1",
+        "npm_dist_tags": [],
+        "total_downloads": 0
+    }
+]

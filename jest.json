@@ -1,13 +1,18 @@
 {
   "transform": {
-    ".(js|jsx|ts|tsx)": "ts-jest"
+    "\\.(js|jsx|ts|tsx)$": "ts-jest"
   },
   "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
-  "bail": true,
   "resetMocks": true,
+  "bail": true,
   "resetModules": true,
-  "setupTestFrameworkScriptFile": "<rootDir>/tests/setup.js",
+  "snapshotSerializers": [
+    "enzyme-to-json/serializer"
+  ],
+  "setupFilesAfterEnv": [
+    "<rootDir>/tests/setup.js"
+  ],
   "moduleFileExtensions": [
     "js",
     "jsx",
@@ -20,11 +25,13 @@
   ],
   "coverageReporters": [
     "json",
-    "html"
+    "html",
+    "lcov"
   ],
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
-    "!**/*.d.ts"
+    "!**/*.d.ts",
+    "!**/*constants.ts"
   ],
   "coveragePathIgnorePatterns": [
     "/node_modules/",

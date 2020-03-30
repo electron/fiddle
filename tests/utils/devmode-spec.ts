@@ -1,7 +1,7 @@
 import { isDevMode } from '../../src/utils/devmode';
 
 describe('devMode', () => {
-  const old = process.defaultApp;
+  const old = (process as any).defaultApp; // for tsconfig error
 
   afterEach(() => {
     Object.defineProperty(process, 'defaultApp', { value: old });

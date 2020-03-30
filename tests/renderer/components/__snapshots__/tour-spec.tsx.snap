@@ -4,28 +4,18 @@ exports[`VersionChooser component renders 1`] = `
 <div
   className="tour"
 >
-  <Dialog
-    arrow="left"
-    buttons={
-      Array [
-        <button
-          className="btn-stop"
-          onClick={[Function]}
-        >
-          Stop Tour
-        </button>,
-        <button
-          className="btn-adv"
-          onClick={[Function]}
-        >
-          Continue
-        </button>,
-      ]
+  <Blueprint3.Dialog
+    backdropProps={
+      Object {
+        "style": Object {
+          "visibility": "hidden",
+        },
+      }
     }
-    isCentered={false}
-    isShowing={true}
-    isShowingBackdrop={false}
+    canOutsideClickClose={true}
+    isOpen={true}
     key="mock-step-1"
+    portalClassName="tour-portal"
     style={
       Object {
         "left": 165,
@@ -33,15 +23,49 @@ exports[`VersionChooser component renders 1`] = `
         "position": "absolute",
         "top": 5,
         "width": 390,
+        "zIndex": 1000,
       }
     }
   >
-    <span
-      key="1"
+    <div
+      className="bp3-dialog-header"
     >
-      mock-step-1
-    </span>
-  </Dialog>
+      <h4
+        className="bp3-heading"
+      >
+        Step 1
+      </h4>
+    </div>
+    <div
+      className="bp3-dialog-body"
+    >
+      <span
+        key="1"
+      >
+        mock-step-1
+      </span>
+    </div>
+    <div
+      className="bp3-dialog-footer"
+    >
+      <div
+        className="bp3-dialog-footer-actions"
+      >
+        <Blueprint3.Button
+          icon="stop"
+          key="btn-stop"
+          onClick={[Function]}
+          text="Stop Tour"
+        />
+        <Blueprint3.Button
+          icon="step-forward"
+          key="btn-adv"
+          onClick={[Function]}
+          text="Continue"
+        />
+      </div>
+    </div>
+  </Blueprint3.Dialog>
   <svg
     height="100%"
     width="100%"
