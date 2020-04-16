@@ -54,12 +54,12 @@ export class Commands extends React.Component<CommandsProps, {}> {
               onClick={appState.toggleConsole}
             />
             <EditorDropdown appState={appState} />
-            <Button
-              icon="grid-view"
-              text="Reset Layout"
-              onClick={appState.resetEditorLayout}
-            />
           </ControlGroup>
+          <Button
+            icon="grid-view"
+            text="Reset Layout"
+            onClick={appState.resetEditorLayout}
+          />
         </div>
         <div>
           <AddressBar appState={appState} />
