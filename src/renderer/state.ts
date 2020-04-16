@@ -1,6 +1,6 @@
-import * as fsType from 'fs-extra';
-import { action, autorun, computed, observable, when } from 'mobx';
-import { MosaicNode } from 'react-mosaic-component';
+import * as fsType from "fs-extra";
+import { action, autorun, computed, observable, when } from "mobx";
+import { MosaicNode } from "react-mosaic-component";
 
 import {
   ALL_MOSAICS,
@@ -14,25 +14,36 @@ import {
   RunnableVersion,
   Version,
   VersionSource,
-  VersionState
-} from '../interfaces';
-import { IpcEvents } from '../ipc-events';
-import { arrayToStringMap } from '../utils/array-to-stringmap';
-import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
-import { getName } from '../utils/get-title';
-import { fancyImport } from '../utils/import';
-import { normalizeVersion } from '../utils/normalize-version';
-import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from './binary';
-import { Bisector } from './bisect';
-import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
-import { getContent, isContentUnchanged } from './content';
-import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
-import { ipcRendererManager } from './ipc';
-import { activateTheme } from './themes';
+  VersionState,
+} from "../interfaces";
+import { IpcEvents } from "../ipc-events";
+import { arrayToStringMap } from "../utils/array-to-stringmap";
+import { EditorBackup, getEditorBackup } from "../utils/editor-backup";
+import {
+  createMosaicArrangement,
+  getVisibleMosaics,
+} from "../utils/editors-mosaic-arrangement";
+import { getName } from "../utils/get-title";
+import { fancyImport } from "../utils/import";
+import { normalizeVersion } from "../utils/normalize-version";
+import { isEditorBackup, isEditorId, isPanelId } from "../utils/type-checks";
+import {
+  getDownloadedVersions,
+  getDownloadingVersions,
+  removeBinary,
+  setupBinary,
+} from "./binary";
+import { Bisector } from "./bisect";
+import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from "./constants";
+import { getContent, isContentUnchanged } from "./content";
+import {
+  getLocalTypePathForVersion,
+  updateEditorTypeDefinitions,
+} from "./fetch-types";
+import { ipcRendererManager } from "./ipc";
+import { activateTheme } from "./themes";
 
-import { sortedElectronMap } from '../utils/sorted-electron-map';
+import { sortedElectronMap } from "../utils/sorted-electron-map";
 import {
   addLocalVersion,
   ElectronReleaseChannel,
@@ -40,8 +51,8 @@ import {
   getElectronVersions,
   getReleaseChannel,
   getUpdatedElectronVersions,
-  saveLocalVersions
-} from './versions';
+  saveLocalVersions,
+} from "./versions";
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
@@ -51,14 +62,16 @@ const defaultVersion = getDefaultVersion(knownVersions);
  * easier, we keep them around in a global object. Don't judge us,
  * we're really only doing that for the editors.
  */
-window.ElectronFiddle = window.ElectronFiddle || {
-  editors: {
-    main: null,
-    renderer: null,
-    html: null
-  },
-  app: null
-} as any;
+window.ElectronFiddle =
+  window.ElectronFiddle ||
+  ({
+    editors: {
+      main: null,
+      renderer: null,
+      html: null,
+    },
+    app: null,
+  } as any);
 
 /**
  * The application's state. Exported as a singleton below.
@@ -69,33 +82,66 @@ window.ElectronFiddle = window.ElectronFiddle || {
 export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
-  @observable public theme: string | null = localStorage.getItem('theme');
-  @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
-  @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
-  @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
-  @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
-  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
-  @observable public channelsToShow: Array<ElectronReleaseChannel> =
-    this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>
-    || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
-  @observable public statesToShow: Array<VersionState> =
-    this.retrieve('statesToShow') as Array<VersionState>
-    || [VersionState.downloading, VersionState.ready, VersionState.unknown];
-  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
-  @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
-  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
+  @observable public theme: string | null = localStorage.getItem("theme");
+  @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
+    "gitHubAvatarUrl"
+  );
+  @observable public gitHubName: string | null = localStorage.getItem(
+    "gitHubName"
+  );
+  @observable public gitHubLogin: string | null = localStorage.getItem(
+    "gitHubLogin"
+  );
+  @observable public gitHubToken: string | null =
+    localStorage.getItem("gitHubToken") || null;
+  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve(
+    "gitHubPublishAsPublic"
+  );
+  @observable public channelsToShow: Array<
+    ElectronReleaseChannel
+  > = (this.retrieve("channelsToShow") as Array<ElectronReleaseChannel>) || [
+    ElectronReleaseChannel.stable,
+    ElectronReleaseChannel.beta,
+  ];
+  @observable public statesToShow: Array<VersionState> = (this.retrieve(
+    "statesToShow"
+  ) as Array<VersionState>) || [
+    VersionState.downloading,
+    VersionState.ready,
+    VersionState.unknown,
+  ];
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve(
+    "isKeepingUserDataDirs"
+  );
+  @observable public isEnablingElectronLogging: boolean = !!this.retrieve(
+    "isEnablingElectronLogging"
+  );
+  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve(
+    "isClearingConsoleOnRun"
+  );
   @observable public executionFlags: Array<string> =
-    this.retrieve('executionFlags') as Array<string> === null ?
-      [] : this.retrieve('executionFlags') as Array<string>;
+    (this.retrieve("executionFlags") as Array<string>) === null
+      ? []
+      : (this.retrieve("executionFlags") as Array<string>);
 
   // -- Various session-only state ------------------
-  @observable public gistId: string = '';
-  @observable public versions: Record<string, RunnableVersion> = arrayToStringMap(knownVersions);
+  @observable public gistId: string = "";
+  @observable public versions: Record<
+    string,
+    RunnableVersion
+  > = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
-  @observable public genericDialogOptions = { type: GenericDialogType.warning, label: '', ok: 'Okay', cancel: 'Cancel' };
+  @observable public genericDialogOptions = {
+    type: GenericDialogType.warning,
+    label: "",
+    ok: "Okay",
+    cancel: "Cancel",
+  };
   @observable public genericDialogLastResult: boolean | null = null;
-  @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public mosaicArrangement: MosaicNode<
+    MosaicId
+  > | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
@@ -115,12 +161,16 @@ export class AppState {
   @observable public isBisectDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
-  @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
+  @observable public isTourShowing: boolean = !localStorage.getItem(
+    "hasShownTour"
+  );
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = DEFAULT_CLOSED_PANELS;
+  @observable public closedPanels: Partial<
+    Record<MosaicId, EditorBackup | true>
+  > = DEFAULT_CLOSED_PANELS;
 
-  private outputBuffer: string = '';
+  private outputBuffer: string = "";
   private name: string;
 
   constructor() {
@@ -139,6 +189,7 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
+    this.resetEditorLayout = this.resetEditorLayout.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -148,25 +199,36 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
-    ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRendererManager.on(
+      IpcEvents.BISECT_COMMANDS_TOGGLE,
+      this.toggleBisectCommands
+    );
 
     // Setup auto-runs
-    autorun(() => this.save('theme', this.theme));
-    autorun(() => this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun));
-    autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
-    autorun(() => this.save('gitHubLogin', this.gitHubLogin));
-    autorun(() => this.save('gitHubName', this.gitHubName));
-    autorun(() => this.save('gitHubToken', this.gitHubToken));
-    autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
-    autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
-    autorun(() => this.save('isEnablingElectronLogging', this.isEnablingElectronLogging));
-    autorun(() => this.save('executionFlags', this.executionFlags));
-    autorun(() => this.save('version', this.version));
-    autorun(() => this.save('channelsToShow', this.channelsToShow));
-    autorun(() => this.save('statesToShow', this.statesToShow));
+    autorun(() => this.save("theme", this.theme));
+    autorun(() =>
+      this.save("isClearingConsoleOnRun", this.isClearingConsoleOnRun)
+    );
+    autorun(() => this.save("gitHubAvatarUrl", this.gitHubAvatarUrl));
+    autorun(() => this.save("gitHubLogin", this.gitHubLogin));
+    autorun(() => this.save("gitHubName", this.gitHubName));
+    autorun(() => this.save("gitHubToken", this.gitHubToken));
+    autorun(() =>
+      this.save("gitHubPublishAsPublic", this.gitHubPublishAsPublic)
+    );
+    autorun(() =>
+      this.save("isKeepingUserDataDirs", this.isKeepingUserDataDirs)
+    );
+    autorun(() =>
+      this.save("isEnablingElectronLogging", this.isEnablingElectronLogging)
+    );
+    autorun(() => this.save("executionFlags", this.executionFlags));
+    autorun(() => this.save("version", this.version));
+    autorun(() => this.save("channelsToShow", this.channelsToShow));
+    autorun(() => this.save("statesToShow", this.statesToShow));
 
     autorun(() => {
-      if (typeof this.isUnsaved === 'undefined') return;
+      if (typeof this.isUnsaved === "undefined") return;
 
       if (!!this.isUnsaved) {
         window.onbeforeunload = () => {
@@ -174,7 +236,7 @@ export class AppState {
           this.setGenericDialogOptions({
             type: GenericDialogType.warning,
             label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
-            ok: 'Quit'
+            ok: "Quit",
           });
 
           this.isGenericDialogShowing = true;
@@ -186,8 +248,8 @@ export class AppState {
               window.onbeforeunload = null;
 
               // Should we just close or quit?
-              const remote = require('electron').remote;
-              const isQuitting = remote.getGlobal('isQuitting');
+              const remote = require("electron").remote;
+              const isQuitting = remote.getGlobal("isQuitting");
 
               if (isQuitting) {
                 remote.app.quit();
@@ -217,7 +279,7 @@ export class AppState {
     this.updateElectronVersions();
 
     // Make sure the console isn't all empty and sad
-    this.pushOutput('Console ready 🔬');
+    this.pushOutput("Console ready 🔬");
   }
 
   /**
@@ -237,24 +299,26 @@ export class AppState {
    * current settings for states and channels to display
    */
   @computed get versionsToShow(): Array<RunnableVersion> {
-    return sortedElectronMap<RunnableVersion>(this.versions, (_key, item) => item)
-      .filter((item) => {
-        if (!item) {
-          return false;
-        }
+    return sortedElectronMap<RunnableVersion>(
+      this.versions,
+      (_key, item) => item
+    ).filter((item) => {
+      if (!item) {
+        return false;
+      }
 
-        // Check if we want to show the version
-        if (!this.channelsToShow.includes(getReleaseChannel(item))) {
-          return false;
-        }
+      // Check if we want to show the version
+      if (!this.channelsToShow.includes(getReleaseChannel(item))) {
+        return false;
+      }
 
-        // Check if we want to show the state
-        if (!this.statesToShow.includes(item.state)) {
-          return false;
-        }
+      // Check if we want to show the state
+      if (!this.statesToShow.includes(item.state)) {
+        return false;
+      }
 
-        return true;
-      });
+      return true;
+    });
   }
 
   /**
@@ -336,7 +400,7 @@ export class AppState {
 
   @action public disableTour() {
     this.resetView({ isTourShowing: false });
-    localStorage.setItem('hasShownTour', 'true');
+    localStorage.setItem("hasShownTour", "true");
   }
 
   @action public showTour() {
@@ -344,7 +408,7 @@ export class AppState {
   }
 
   @action public setTheme(fileName?: string) {
-    this.theme = fileName || '';
+    this.theme = fileName || "";
     activateTheme(undefined, undefined, fileName);
     window.ElectronFiddle.app.setupTheme();
   }
@@ -352,9 +416,9 @@ export class AppState {
   @action public setGenericDialogOptions(opts: GenericDialogOptions) {
     this.genericDialogOptions = {
       type: GenericDialogType.warning,
-      ok: 'Okay',
-      cancel: 'Cancel',
-      ...opts
+      ok: "Okay",
+      cancel: "Cancel",
+      ...opts,
     };
   }
 
@@ -378,7 +442,7 @@ export class AppState {
     console.log(`State: Removing Electron ${version}`);
 
     // Already not present?
-    if ((this.versions[version] || { state: '' }).state !== 'ready') {
+    if ((this.versions[version] || { state: "" }).state !== "ready") {
       console.log(`State: Version already removed, doing nothing`);
       return;
     }
@@ -390,9 +454,9 @@ export class AppState {
     if (release && release.source === VersionSource.local) {
       delete updatedVersions[version];
 
-      const versionsAsArray = Object
-        .keys(updatedVersions)
-        .map((k) => updatedVersions[k]);
+      const versionsAsArray = Object.keys(updatedVersions).map(
+        (k) => updatedVersions[k]
+      );
 
       saveLocalVersions(versionsAsArray);
     } else {
@@ -414,9 +478,9 @@ export class AppState {
     const version = normalizeVersion(input);
     console.log(`State: Downloading Electron ${version}`);
 
-    const release = this.versions[version] || { state: '', source: '' };
+    const release = this.versions[version] || { state: "", source: "" };
     const isLocal = release.source === VersionSource.local;
-    const isReady = release.state === 'ready';
+    const isReady = release.state === "ready";
 
     // Fetch new binaries, maybe?
     if (!isLocal && !isReady) {
@@ -428,7 +492,9 @@ export class AppState {
       await setupBinary(this, version);
       this.updateDownloadedVersionState();
     } else {
-      console.log(`State: Version ${version} already downloaded, doing nothing.`);
+      console.log(
+        `State: Version ${version} already downloaded, doing nothing.`
+      );
     }
   }
 
@@ -442,7 +508,9 @@ export class AppState {
     const version = normalizeVersion(input);
 
     if (!this.versions[version]) {
-      console.warn(`State: Called setVersion() with ${version}, which does not exist.`);
+      console.warn(
+        `State: Called setVersion() with ${version}, which does not exist.`
+      );
       this.setVersion(knownVersions[0].version);
 
       return;
@@ -462,16 +530,22 @@ export class AppState {
     const versionObject = this.versions[version];
 
     if (versionObject.source === VersionSource.local) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
+      const fs = await fancyImport<typeof fsType>("fs-extra");
       const typePath = getLocalTypePathForVersion(versionObject);
-      console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
+      console.info(
+        `TypeDefs: Watching file for local version ${version} at path ${typePath}`
+      );
       this.localTypeWatcher = fs.watch(typePath!, async () => {
-        console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
+        console.info(
+          `TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`
+        );
         await updateEditorTypeDefinitions(versionObject);
       });
     } else {
       if (!!this.localTypeWatcher) {
-        console.info(`TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`);
+        console.info(
+          `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`
+        );
         this.localTypeWatcher.close();
         this.localTypeWatcher = undefined;
       }
@@ -529,16 +603,17 @@ export class AppState {
    * @param {(string | Buffer)} data
    */
   @action public pushOutput(
-    data: string | Buffer, options: OutputOptions = { isNotPre: false, bypassBuffer: true }
+    data: string | Buffer,
+    options: OutputOptions = { isNotPre: false, bypassBuffer: true }
   ) {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
     // TODO: This drops the first part of the buffer... is that fully expected?
-    if (process.platform === 'win32' && bypassBuffer === false) {
+    if (process.platform === "win32" && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
-      const parts = strData.split('\r\n');
+      const parts = strData.split("\r\n");
 
       for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
         const part = parts[partIndex];
@@ -553,13 +628,13 @@ export class AppState {
       return;
     }
 
-    if (strData.startsWith('Debugger listening on ws://')) return;
-    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
+    if (strData.startsWith("Debugger listening on ws://")) return;
+    if (strData === "For help see https://nodejs.org/en/docs/inspector") return;
 
     this.output.push({
       timestamp: Date.now(),
       text: strData.trim(),
-      isNotPre
+      isNotPre,
     });
   }
 
@@ -581,7 +656,9 @@ export class AppState {
    *
    * @param {EditorId} id
    */
-  @action public getAndRemoveEditorValueBackup(id: EditorId): EditorBackup | null {
+  @action public getAndRemoveEditorValueBackup(
+    id: EditorId
+  ): EditorBackup | null {
     const value = this.closedPanels[id];
 
     if (isEditorBackup(value)) {
@@ -597,20 +674,26 @@ export class AppState {
 
     for (const id of ALL_MOSAICS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = isEditorId(id)
-          ? getEditorBackup(id)
-          : true;
+        this.closedPanels[id] = isEditorId(id) ? getEditorBackup(id) : true;
       }
 
       // Remove the backup for panels now. Editors will remove their
       // backup once the data has been loaded.
-      if (isPanelId(id) && visible.includes(id) && !currentlyVisible.includes(id)) {
+      if (
+        isPanelId(id) &&
+        visible.includes(id) &&
+        !currentlyVisible.includes(id)
+      ) {
         delete this.closedPanels[id];
       }
     }
 
     const updatedArrangement = createMosaicArrangement(visible);
-    console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
+    console.log(
+      `State: Setting visible mosaic panels`,
+      visible,
+      updatedArrangement
+    );
 
     this.mosaicArrangement = updatedArrangement;
   }
@@ -633,6 +716,15 @@ export class AppState {
   @action public showMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
     this.setVisibleMosaics([...currentlyVisible, id]);
+  }
+
+  /**
+   * Resets editor view to default layout
+   *
+   *
+   */
+  @action public resetEditorLayout() {
+    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
   /**
@@ -668,10 +760,10 @@ export class AppState {
    * @memberof AppState
    */
   @action private setPageHash() {
-    let hash = '';
+    let hash = "";
 
     if (this.isSettingsShowing) {
-      hash = 'settings';
+      hash = "settings";
     }
 
     window.location.hash = hash;
@@ -685,9 +777,8 @@ export class AppState {
    */
   private save(key: string, value?: string | number | object | null | boolean) {
     if (value) {
-      const _value = typeof value === 'object'
-        ? JSON.stringify(value)
-        : value.toString();
+      const _value =
+        typeof value === "object" ? JSON.stringify(value) : value.toString();
 
       localStorage.setItem(key, _value);
     } else {
@@ -705,7 +796,7 @@ export class AppState {
   private retrieve<T>(key: string): T | string | null {
     const value = localStorage.getItem(key);
 
-    return JSON.parse(value || 'null') as T;
+    return JSON.parse(value || "null") as T;
   }
 }
 
