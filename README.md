@@ -56,33 +56,9 @@ fiddle has grown up, export it as a project with or without
 [electron-forge][electron-forge]. Then, use your favorite editor and take on
 the world!
 
-## Get Started
+## Contributing
 
-1. Clone the Electron Fiddle repository locally.
-
-```
-git clone https://github.com/electron/fiddle.git
-```
-
-2. Change directory to where Fiddle has been cloned.
-
-```
-cd fiddle
-```
-
-3. Install dependencies.
-
-```
-npm install
-```
-
-4. Open Fiddle and Start Coding!
-
-```
-npm start
-```
-
-Fiddle opens up with a quick-start template. Get a tour with the welcome guide or play around and make a few changes before clicking `Run` to start your app!
+Electron Fiddle is a community-driven project that welcomes all sorts of contributions. Please check out our [Contributing Guide](https://github.com/electron/fiddle/blob/master/CONTRIBUTING.md) for more details.
 
 ## License
 
