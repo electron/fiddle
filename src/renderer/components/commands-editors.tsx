@@ -1,11 +1,11 @@
-import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
-import { observer } from 'mobx-react';
-import * as React from 'react';
+import { Button, Menu, MenuItem, Popover, Position } from "@blueprintjs/core";
+import { observer } from "mobx-react";
+import * as React from "react";
 
-import { ALL_EDITORS, MosaicId, PanelId } from '../../interfaces';
-import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
-import { AppState } from '../state';
-import { TITLE_MAP } from './editors';
+import { ALL_EDITORS, MosaicId, PanelId } from "../../interfaces";
+import { getVisibleMosaics } from "../../utils/editors-mosaic-arrangement";
+import { AppState } from "../state";
+import { TITLE_MAP } from "./editors";
 
 export interface EditorDropdownState {
   value: string;
@@ -22,7 +22,10 @@ export interface EditorDropdownProps {
  * @extends {React.Component<EditorDropdownProps, EditorDropdownState>}
  */
 @observer
-export class EditorDropdown extends React.Component<EditorDropdownProps, EditorDropdownState> {
+export class EditorDropdown extends React.Component<
+  EditorDropdownProps,
+  EditorDropdownState
+> {
   constructor(props: EditorDropdownProps) {
     super(props);
 
@@ -33,7 +36,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
     return (
       <>
         <Popover content={this.renderMenu()} position={Position.BOTTOM}>
-          <Button icon='applications' text='Editors' />
+          <Button icon="applications" text="Editors" />
         </Popover>
         {this.renderDocsDemos()}
       </>
@@ -47,8 +50,8 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
 
     return (
       <Button
-        icon='help'
-        text='Docs & Demos'
+        icon="help"
+        text="Docs & Demos"
         id={PanelId.docsDemo}
         onClick={this.onItemClick}
         active={!this.props.appState.closedPanels.docsDemo}
@@ -57,11 +60,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
   }
 
   public renderMenu() {
-    return (
-      <Menu>
-        {...this.renderMenuItems()}
-      </Menu>
-    );
+    return <Menu>{...this.renderMenuItems()}</Menu>;
   }
 
   public renderMenuItems() {
@@ -72,7 +71,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
     for (const id of ALL_EDITORS) {
       result.push(
         <MenuItem
-          icon={visibleMosaics.includes(id) ? 'eye-open' : 'eye-off'}
+          icon={visibleMosaics.includes(id) ? "eye-open" : "eye-off"}
           key={id}
           text={TITLE_MAP[id]}
           id={id}
@@ -81,6 +80,14 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
         />
       );
     }
+
+    result.push(
+      <Button
+        icon="grid-view"
+        text="Reset Layout"
+        onClick={appState.resetEditorLayout}
+      />
+    );
 
     return result;
   }

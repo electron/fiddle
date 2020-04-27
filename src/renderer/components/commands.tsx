@@ -55,11 +55,6 @@ export class Commands extends React.Component<CommandsProps, {}> {
             />
             <EditorDropdown appState={appState} />
           </ControlGroup>
-          <Button
-            icon="grid-view"
-            text="Reset Layout"
-            onClick={appState.resetEditorLayout}
-          />
         </div>
         <div>
           <AddressBar appState={appState} />
