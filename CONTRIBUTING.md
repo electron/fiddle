@@ -63,8 +63,6 @@ npm install
 npm start
 ```
 
-Fiddle opens up with a quick-start template. Get a tour with the welcome guide or play around and make a few changes before clicking `Run` to start your app!
-
 ### Running Tests
 
 ```sh
