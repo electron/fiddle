@@ -22,10 +22,7 @@ export interface EditorDropdownProps {
  * @extends {React.Component<EditorDropdownProps, EditorDropdownState>}
  */
 @observer
-export class EditorDropdown extends React.Component<
-  EditorDropdownProps,
-  EditorDropdownState
-> {
+export class EditorDropdown extends React.Component<EditorDropdownProps, EditorDropdownState> {
   constructor(props: EditorDropdownProps) {
     super(props);
 

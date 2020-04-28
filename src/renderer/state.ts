@@ -14,32 +14,21 @@ import {
   RunnableVersion,
   Version,
   VersionSource,
-  VersionState,
+  VersionState
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import {
-  createMosaicArrangement,
-  getVisibleMosaics,
-} from '../utils/editors-mosaic-arrangement';
+import { createMosaicArrangement, getVisibleMosaics } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import {
-  getDownloadedVersions,
-  getDownloadingVersions,
-  removeBinary,
-  setupBinary,
-} from './binary';
+import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
-import {
-  getLocalTypePathForVersion,
-  updateEditorTypeDefinitions,
-} from './fetch-types';
+import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
@@ -51,7 +40,7 @@ import {
   getElectronVersions,
   getReleaseChannel,
   getUpdatedElectronVersions,
-  saveLocalVersions,
+  saveLocalVersions
 } from './versions';
 
 const knownVersions = getElectronVersions();
@@ -81,65 +70,32 @@ export class AppState {
   // -- Persisted settings ------------------
   @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
-  @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
-    'gitHubAvatarUrl'
-  );
-  @observable public gitHubName: string | null = localStorage.getItem(
-    'gitHubName'
-  );
-  @observable public gitHubLogin: string | null = localStorage.getItem(
-    'gitHubLogin'
-  );
-  @observable public gitHubToken: string | null =
-    localStorage.getItem('gitHubToken') || null;
-  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve(
-    'gitHubPublishAsPublic'
-  );
-  @observable public channelsToShow: Array<
-    ElectronReleaseChannel
-  > = (this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>) || [
-    ElectronReleaseChannel.stable,
-    ElectronReleaseChannel.beta,
-  ];
-  @observable public statesToShow: Array<VersionState> = (this.retrieve(
-    'statesToShow'
-  ) as Array<VersionState>) || [
-    VersionState.downloading,
-    VersionState.ready,
-    VersionState.unknown,
-  ];
-  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve(
-    'isKeepingUserDataDirs'
-  );
-  @observable public isEnablingElectronLogging: boolean = !!this.retrieve(
-    'isEnablingElectronLogging'
-  );
-  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve(
-    'isClearingConsoleOnRun'
-  );
+  @observable public gitHubAvatarUrl: string | null = localStorage.getItem('gitHubAvatarUrl');
+  @observable public gitHubName: string | null = localStorage.getItem('gitHubName');
+  @observable public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
+  @observable public gitHubToken: string | null = localStorage.getItem('gitHubToken') || null;
+  @observable public gitHubPublishAsPublic: boolean = !!this.retrieve('gitHubPublishAsPublic');
+  @observable public channelsToShow: Array<ElectronReleaseChannel> =
+    this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>
+    || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
+  @observable public statesToShow: Array<VersionState> =
+    this.retrieve('statesToShow') as Array<VersionState>
+    || [VersionState.downloading, VersionState.ready, VersionState.unknown];
+  @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
+  @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
+  @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
   @observable public executionFlags: Array<string> =
-    (this.retrieve('executionFlags') as Array<string>) === null
-      ? []
-      : (this.retrieve('executionFlags') as Array<string>);
+    this.retrieve('executionFlags') as Array<string> === null ?
+      [] : this.retrieve('executionFlags') as Array<string>;
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
-  @observable public versions: Record<
-    string,
-    RunnableVersion
-  > = arrayToStringMap(knownVersions);
+  @observable public versions: Record<string, RunnableVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
-  @observable public genericDialogOptions = {
-    type: GenericDialogType.warning,
-    label: '',
-    ok: 'Okay',
-    cancel: 'Cancel',
-  };
+  @observable public genericDialogOptions = { type: GenericDialogType.warning, label: '', ok: 'Okay', cancel: 'Cancel' };
   @observable public genericDialogLastResult: boolean | null = null;
-  @observable public mosaicArrangement: MosaicNode<
-    MosaicId
-  > | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
@@ -159,14 +115,10 @@ export class AppState {
   @observable public isBisectDialogShowing: boolean = false;
   @observable public isAddVersionDialogShowing: boolean = false;
   @observable public isThemeDialogShowing: boolean = false;
-  @observable public isTourShowing: boolean = !localStorage.getItem(
-    'hasShownTour'
-  );
+  @observable public isTourShowing: boolean = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<
-    Record<MosaicId, EditorBackup | true>
-  > = DEFAULT_CLOSED_PANELS;
+  @observable public closedPanels: Partial<Record<MosaicId, EditorBackup | true>> = DEFAULT_CLOSED_PANELS;
 
   private outputBuffer: string = '';
   private name: string;
@@ -201,22 +153,14 @@ export class AppState {
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
-    autorun(() =>
-      this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun)
-    );
+    autorun(() => this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun));
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
     autorun(() => this.save('gitHubToken', this.gitHubToken));
-    autorun(() =>
-      this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic)
-    );
-    autorun(() =>
-      this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs)
-    );
-    autorun(() =>
-      this.save('isEnablingElectronLogging', this.isEnablingElectronLogging)
-    );
+    autorun(() => this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic));
+    autorun(() => this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs));
+    autorun(() => this.save('isEnablingElectronLogging', this.isEnablingElectronLogging));
     autorun(() => this.save('executionFlags', this.executionFlags));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('channelsToShow', this.channelsToShow));
@@ -231,7 +175,7 @@ export class AppState {
           this.setGenericDialogOptions({
             type: GenericDialogType.warning,
             label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
-            ok: 'Quit',
+            ok: 'Quit'
           });
 
           this.isGenericDialogShowing = true;
@@ -411,7 +355,7 @@ export class AppState {
       type: GenericDialogType.warning,
       ok: 'Okay',
       cancel: 'Cancel',
-      ...opts,
+      ...opts
     };
   }
 
