@@ -560,4 +560,11 @@ describe('AppState', () => {
       });
     });
   });
+
+  describe('resetEditorLayout()', () => {
+    it('Puts editors in default arrangement', () => {
+      appState.resetEditorLayout();
+      expect(appState.mosaicArrangement).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
+    });
+  });
 });

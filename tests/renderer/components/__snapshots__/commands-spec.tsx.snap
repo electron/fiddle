@@ -40,10 +40,6 @@ exports[`Commands component renders 1`] = `
         }
       />
     </Blueprint3.ControlGroup>
-    <Blueprint3.Button
-      icon="grid-view"
-      text="Reset Layout"
-    />
   </div>
   <div>
     <address-bar

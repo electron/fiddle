@@ -52,6 +52,10 @@ Array [
     shouldDismissPopover={true}
     text="Stylesheet (styles.css)"
   />,
+  <Blueprint3.Button
+    icon="grid-view"
+    text="Reset Layout"
+  />,
 ]
 `;
 
@@ -111,6 +115,10 @@ exports[`EditorDropdown component renders 1`] = `
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
+        />
+        <Blueprint3.Button
+          icon="grid-view"
+          text="Reset Layout"
         />
       </Blueprint3.Menu>
     }
@@ -202,6 +210,10 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
+        />
+        <Blueprint3.Button
+          icon="grid-view"
+          text="Reset Layout"
         />
       </Blueprint3.Menu>
     }
