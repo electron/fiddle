@@ -301,10 +301,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     }
 
     if (!this.state || !this.state.isMounted) {
-      this.state = {
+      this.setState({
         monaco,
         monacoOptions: defaultMonacoOptions
-      };
+      });
     } else {
       this.setState({ monaco });
     }
