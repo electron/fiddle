@@ -52,10 +52,17 @@ Array [
     shouldDismissPopover={true}
     text="Stylesheet (styles.css)"
   />,
-  <Blueprint3.Button
-    icon="grid-view"
-    text="Reset Layout"
-  />,
+  <React.Fragment>
+    <Blueprint3.MenuDivider />
+    <Blueprint3.MenuItem
+      disabled={false}
+      icon="grid-view"
+      multiline={false}
+      popoverProps={Object {}}
+      shouldDismissPopover={true}
+      text="Reset Layout"
+    />
+  </React.Fragment>,
 ]
 `;
 
@@ -116,10 +123,17 @@ exports[`EditorDropdown component renders 1`] = `
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
         />
-        <Blueprint3.Button
-          icon="grid-view"
-          text="Reset Layout"
-        />
+        <React.Fragment>
+          <Blueprint3.MenuDivider />
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="grid-view"
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Reset Layout"
+          />
+        </React.Fragment>
       </Blueprint3.Menu>
     }
     defaultIsOpen={false}
@@ -211,10 +225,17 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
         />
-        <Blueprint3.Button
-          icon="grid-view"
-          text="Reset Layout"
-        />
+        <React.Fragment>
+          <Blueprint3.MenuDivider />
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="grid-view"
+            multiline={false}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Reset Layout"
+          />
+        </React.Fragment>
       </Blueprint3.Menu>
     }
     defaultIsOpen={false}
