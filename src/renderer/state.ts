@@ -139,6 +139,7 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
+    this.resetEditorLayout = this.resetEditorLayout.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -539,7 +540,6 @@ export class AppState {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split('\r\n');
-
       for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
         const part = parts[partIndex];
         if (partIndex === parts.length - 1) {
@@ -633,6 +633,15 @@ export class AppState {
   @action public showMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
     this.setVisibleMosaics([...currentlyVisible, id]);
+  }
+
+  /**
+   * Resets editor view to default layout
+   *
+   *
+   */
+  @action public resetEditorLayout() {
+    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
   /**
