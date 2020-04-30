@@ -69,6 +69,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     } catch (error) {
       console.warn(`Authenticating against GitHub failed`, error);
       this.setState({ verifying: false, error: true });
+      this.props.appState.gitHubToken = null;
       return;
     }
 
