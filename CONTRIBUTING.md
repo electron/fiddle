@@ -39,10 +39,27 @@ Here are some things to keep in mind as you file pull requests to fix bugs, add 
 
 ### Running Fiddle From Source
 
+1. Clone the Electron Fiddle repository locally.
+
 ```sh
-git clone https://github.com/electron/fiddle
+git clone https://github.com/electron/fiddle.git
+```
+
+2. Change directory to where Fiddle has been cloned.
+
+```sh
 cd fiddle
+```
+
+3. Install dependencies.
+
+```sh
 npm install
+```
+
+4. Start Fiddle and Explore!
+
+```sh
 npm start
 ```
 
