@@ -466,10 +466,14 @@ export class AppState {
       const fs = await fancyImport<typeof fsType>('fs-extra');
       const typePath = getLocalTypePathForVersion(versionObject);
       console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
-      this.localTypeWatcher = fs.watch(typePath!, async () => {
-        console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
-        await updateEditorTypeDefinitions(versionObject);
-      });
+      try {
+        this.localTypeWatcher = fs.watch(typePath!, async () => {
+          console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
+          await updateEditorTypeDefinitions(versionObject);
+        });
+      } catch (err) {
+        console.info('TypeDefs: Unable to start watching.')
+      }
     } else {
       if (!!this.localTypeWatcher) {
         console.info(`TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`);
