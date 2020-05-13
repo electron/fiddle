@@ -37,7 +37,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
  */
 export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
-  let browserWindow: BrowserWindow | null
+  let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
   browserWindow.loadFile('./dist/static/index.html');
 
@@ -53,7 +53,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindows = browserWindows
       .filter((bw) => browserWindow !== bw);
 
-    browserWindow = null
+    browserWindow = null;
   });
 
   browserWindow.webContents.on('new-window', (event, url) => {
