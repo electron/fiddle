@@ -472,7 +472,7 @@ export class AppState {
           await updateEditorTypeDefinitions(versionObject);
         });
       } catch (err) {
-        console.info('TypeDefs: Unable to start watching.')
+        console.info('TypeDefs: Unable to start watching.');
       }
     } else {
       if (!!this.localTypeWatcher) {

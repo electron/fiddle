@@ -5,7 +5,7 @@ import { ipcMainManager } from './ipc';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-export let browserWindows: Array<BrowserWindow> = [];
+export let browserWindows: Array<BrowserWindow | null> = [];
 
 /**
  * Gets default options for the main window
@@ -37,13 +37,14 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
  */
 export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
-  const browserWindow = new BrowserWindow(getMainWindowOptions());
+  let browserWindow: BrowserWindow | null;
+  browserWindow = new BrowserWindow(getMainWindowOptions());
   browserWindow.loadFile('./dist/static/index.html');
 
   browserWindow.webContents.once('dom-ready', () => {
-    browserWindow.show();
-
     if (browserWindow) {
+      browserWindow.show();
+
       createContextMenu(browserWindow);
     }
   });
@@ -51,6 +52,8 @@ export function createMainWindow(): Electron.BrowserWindow {
   browserWindow.on('closed', () => {
     browserWindows = browserWindows
       .filter((bw) => browserWindow !== bw);
+
+    browserWindow = null;
   });
 
   browserWindow.webContents.on('new-window', (event, url) => {
@@ -64,7 +67,9 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
-    browserWindow.showInactive();
+    if (browserWindow) {
+      browserWindow.showInactive();
+    }
   });
 
   browserWindows.push(browserWindow);
