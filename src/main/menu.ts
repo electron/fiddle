@@ -105,9 +105,7 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
     {
       type: 'separator'
     }, {
-      label: 'Exit',
-      accelerator: 'Ctrl+Q,',
-      click: app.quit
+      role: 'quit'
     }
   ];
 }
