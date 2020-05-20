@@ -47,10 +47,10 @@ describe('Publish button component', () => {
 
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
-    instance.publishFiddle = jest.fn();
+    instance.publishOrUpdateFiddle = jest.fn();
     await instance.handleClick();
 
-    expect(instance.publishFiddle).toHaveBeenCalled();
+    expect(instance.publishOrUpdateFiddle).toHaveBeenCalled();
   });
 
   it('attempts to publish to Gist', async () => {
@@ -66,7 +66,7 @@ describe('Publish button component', () => {
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
@@ -96,7 +96,7 @@ describe('Publish button component', () => {
 
     (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce({});
 
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
@@ -126,7 +126,7 @@ describe('Publish button component', () => {
     const wrapper = shallow(<PublishButton appState={store} />);
     const instance: PublishButton = wrapper.instance() as any;
 
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
 
     expect(store.isPublishing).toBe(false);
   });
@@ -147,7 +147,7 @@ describe('Publish button component', () => {
     const instance: PublishButton = wrapper.instance() as any;
 
     instance.setPrivate();
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
@@ -155,7 +155,7 @@ describe('Publish button component', () => {
     });
 
     instance.setPublic();
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
@@ -170,7 +170,7 @@ describe('Publish button component', () => {
 
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
-    instance.publishFiddle = jest.fn().mockImplementationOnce(() => {
+    instance.publishOrUpdateFiddle = jest.fn().mockImplementationOnce(() => {
       return new Promise((resolve) => {
         wrapper.setProps({ appState: { store, isPublishing: true } }, () => {
           expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
@@ -182,7 +182,7 @@ describe('Publish button component', () => {
       });
     });
 
-    await instance.publishFiddle();
+    await instance.publishOrUpdateFiddle();
   });
 
   describe('privacy menu', () => {
