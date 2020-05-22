@@ -110,7 +110,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
           <FormGroup>
           <p>
             Electron allows starting the executable with <a
-              href='https://electronjs.org/docs/api/chrome-command-line-switches'
+              href='https://www.electronjs.org/docs/api/command-line-switches'
             >
               user-provided flags
             </a>
