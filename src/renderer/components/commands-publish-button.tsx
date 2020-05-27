@@ -9,6 +9,7 @@ import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLE
 import { getOctokit } from '../../utils/octokit';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { EMPTY_EDITOR_CONTENT } from '../constants';
 
 export interface PublishButtonProps {
   appState: AppState;
@@ -228,19 +229,19 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
   private gistFilesList = (values: EditorValues) => {
     return {
       [INDEX_HTML_NAME]: {
-        content: values.html || '<!-- Empty -->',
+        content: values.html || EMPTY_EDITOR_CONTENT.html,
       },
       [MAIN_JS_NAME]: {
-        content: values.main || '// Empty',
+        content: values.main || EMPTY_EDITOR_CONTENT.js,
       },
       [RENDERER_JS_NAME]: {
-        content: values.renderer || '// Empty',
+        content: values.renderer || EMPTY_EDITOR_CONTENT.js,
       },
       [PRELOAD_JS_NAME]: {
-        content: values.preload || '// Empty',
+        content: values.preload || EMPTY_EDITOR_CONTENT.js,
       },
       [STYLES_CSS_NAME]: {
-        content: values.css || '/* Empty */',
+        content: values.css || EMPTY_EDITOR_CONTENT.css,
       },
     };
   }

@@ -596,7 +596,7 @@ export class AppState {
     return null;
   }
 
-  @action public setVisibleMosaics(visible: Array<MosaicId>) {
+  @action public async setVisibleMosaics(visible: Array<MosaicId>) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
     for (const id of ALL_MOSAICS) {
@@ -617,6 +617,31 @@ export class AppState {
     console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
 
     this.mosaicArrangement = updatedArrangement;
+
+    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
+    // mount to ensure that we can load content into the editors as soon as they're
+    // declared visible.
+
+    const waitForEditorsToMount = () => {
+      let time = 0;
+      const maxTime = 10000;
+      const interval = 100;
+      return new Promise(function (resolve, reject) {
+        (function checkMountedEditors() {
+          const allMounted = visible.every(v => !!window.ElectronFiddle.editors[v]);
+          if (allMounted) {
+            return resolve();
+          }
+          time += interval;
+          if (time > maxTime) {
+            return reject();
+          }
+          setTimeout(checkMountedEditors, 100);
+        })();
+      });
+    }
+
+    await waitForEditorsToMount();
   }
 
   /**

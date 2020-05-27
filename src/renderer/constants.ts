@@ -3,7 +3,7 @@ import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
 import { EditorId, MosaicId } from '../interfaces';
-import { EditorBackup } from '../utils/editor-backup';
+import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 // Reminder: When testing, this file is mocked in tests/setup.js
 
@@ -21,8 +21,16 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
 };
 
 export const DEFAULT_CLOSED_PANELS: Partial<Record<MosaicId, EditorBackup | true>> = {
-  docsDemo: true
+  docsDemo: true,
+  preload: getEditorBackup(EditorId.preload),
+  css: getEditorBackup(EditorId.css),
 };
+
+export const EMPTY_EDITOR_CONTENT = {
+  html: '<!-- Empty -->',
+  js: '// Empty',
+  css: '/* Empty */'
+}
 
 export const ELECTRON_ORG = 'electron';
 export const ELECTRON_REPO = 'electron';

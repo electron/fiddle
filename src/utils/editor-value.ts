@@ -10,7 +10,7 @@ export function getEditorValue(id: EditorId): string {
   const { ElectronFiddle: fiddle } = window;
 
   if (!fiddle) {
-    throw new Error('Fiddle not ready');
+    return '';
   }
 
   if (fiddle.editors[id] && fiddle.editors[id]!.getValue) {
