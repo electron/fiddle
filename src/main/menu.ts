@@ -237,7 +237,7 @@ export function setupMenu() {
       // Append the "Settings" item
       if (
         process.platform === 'darwin'
-        && label === app.getName()
+        && label === app.name
         && isSubmenu(item.submenu)
       ) {
         item.submenu.splice(2, 0, ...getPreferencesItems());
