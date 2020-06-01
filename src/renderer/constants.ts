@@ -30,7 +30,7 @@ export const EMPTY_EDITOR_CONTENT = {
   html: '<!-- Empty -->',
   js: '// Empty',
   css: '/* Empty */'
-}
+};
 
 export const ELECTRON_ORG = 'electron';
 export const ELECTRON_REPO = 'electron';

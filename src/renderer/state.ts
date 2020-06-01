@@ -629,9 +629,9 @@ export class AppState {
       let time = 0;
       const maxTime = 10000;
       const interval = 100;
-      return new Promise(function (resolve, reject) {
+      return new Promise((resolve, reject) => {
         (function checkMountedEditors() {
-          const allMounted = visible.every(v => !!window.ElectronFiddle.editors[v]);
+          const allMounted = visible.every((v) => !!window.ElectronFiddle.editors[v]);
           if (allMounted) {
             return resolve();
           }
@@ -642,7 +642,7 @@ export class AppState {
           setTimeout(checkMountedEditors, 100);
         })();
       });
-    }
+    };
 
     await waitForEditorsToMount();
   }

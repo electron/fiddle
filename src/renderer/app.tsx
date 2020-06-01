@@ -18,13 +18,13 @@ import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { isEditorBackup } from '../utils/type-checks';
+import { EMPTY_EDITOR_CONTENT } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { TouchBarManager } from './touch-bar-manager';
-import { EMPTY_EDITOR_CONTENT } from './constants';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,

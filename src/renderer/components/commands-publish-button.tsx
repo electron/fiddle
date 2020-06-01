@@ -7,9 +7,9 @@ import { EditorValues } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
+import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { EMPTY_EDITOR_CONTENT } from '../constants';
 
 export interface PublishButtonProps {
   appState: AppState;

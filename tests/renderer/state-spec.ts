@@ -518,6 +518,8 @@ describe('AppState', () => {
       appState.closedPanels = {};
       await appState.setVisibleMosaics([EditorId.main]);
 
+      // we just need to mock something truthy here
+      // tslint:disable-next-line:no-object-literal-type-assertion
       window.ElectronFiddle.editors[EditorId.main] = ({} as MonacoType.editor.IStandaloneCodeEditor);
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
