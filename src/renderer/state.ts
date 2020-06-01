@@ -604,6 +604,9 @@ export class AppState {
         this.closedPanels[id] = isEditorId(id)
           ? getEditorBackup(id)
           : true;
+
+        // if we have backup, remove active editor
+        delete window.ElectronFiddle.editors[id];
       }
 
       // Remove the backup for panels now. Editors will remove their
