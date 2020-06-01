@@ -531,6 +531,11 @@ describe('AppState', () => {
     it('removes the backup for a non-editor right away', async () => {
       appState.closedPanels = {};
       appState.closedPanels[PanelId.docsDemo] = true;
+
+      for (const mosaic of ALL_MOSAICS) {
+        window.ElectronFiddle.editors[mosaic] = ({} as MonacoType.editor.IStandaloneCodeEditor);
+      }
+
       await appState.setVisibleMosaics(ALL_MOSAICS);
 
       expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();

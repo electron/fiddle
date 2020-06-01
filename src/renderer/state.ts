@@ -627,7 +627,7 @@ export class AppState {
 
     const waitForEditorsToMount = () => {
       let time = 0;
-      const maxTime = 10000;
+      const maxTime = 5000;
       const interval = 100;
       return new Promise((resolve, reject) => {
         (function checkMountedEditors() {
