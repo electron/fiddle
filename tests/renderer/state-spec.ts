@@ -533,6 +533,8 @@ describe('AppState', () => {
       appState.closedPanels[PanelId.docsDemo] = true;
 
       for (const mosaic of ALL_MOSAICS) {
+        // we just need to mock something truthy here
+        // tslint:disable-next-line:no-object-literal-type-assertion
         window.ElectronFiddle.editors[mosaic] = ({} as MonacoType.editor.IStandaloneCodeEditor);
       }
 
