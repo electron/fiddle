@@ -15,7 +15,7 @@ export function getEditorValue(id: EditorId): string {
   }
 
   const editor = fiddle.editors[id];
-  const backup = fiddle.app.state.closedPanels[id] as EditorBackup;
+  const backup = fiddle.app?.state?.closedPanels[id] as EditorBackup;
 
   if (editor?.getValue) {
     return fiddle.editors[id]!.getValue();

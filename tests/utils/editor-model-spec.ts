@@ -16,11 +16,11 @@ describe('getEditorModel()', () => {
     fiddle.editors[EditorId.html] = oldEditor;
   });
 
-  it('throws if window.Fiddle is not ready', () => {
+  it('returns null if window.Fiddle is not ready', () => {
     const { ElectronFiddle: fiddle } = window as any;
     (window as any).ElectronFiddle = undefined;
 
-    expect(() => getEditorModel(EditorId.html)).toThrow('Fiddle not ready');
+    expect(getEditorModel(EditorId.html)).toEqual(null);
 
     window.ElectronFiddle = fiddle;
   });

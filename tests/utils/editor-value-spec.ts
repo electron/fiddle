@@ -6,11 +6,11 @@ describe('getEditorValue()', () => {
     expect(getEditorValue(EditorId.html)).toBe('editor-value');
   });
 
-  it('throws if window.Fiddle is not ready', () => {
+  it('returns an empty string if window.Fiddle is not ready', () => {
     const oldFiddle = window.ElectronFiddle;
     (window as any).ElectronFiddle = undefined;
 
-    expect(() => getEditorValue(EditorId.html)).toThrow('Fiddle not ready');
+    expect(getEditorValue(EditorId.html)).toBe('');
 
     window.ElectronFiddle = oldFiddle;
   });
