@@ -513,7 +513,7 @@ describe('AppState', () => {
   });
 
   describe('setVisibleMosaics()', () => {
-    it.only('updates the visible editors and creates a backup', async () => {
+    it('updates the visible editors and creates a backup', async () => {
       appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
       appState.closedPanels = {};
       await appState.setVisibleMosaics([EditorId.main]);
