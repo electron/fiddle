@@ -1,10 +1,33 @@
 import { EditorId } from '../../src/interfaces';
 import { getEditorValue } from '../../src/utils/editor-value';
+import { MockState } from '../mocks/state';
 
 describe('getEditorValue()', () => {
-  it('returns the value for an editor', () => {
+  it('returns the value for an editor if it exists', () => {
     expect(getEditorValue(EditorId.html)).toBe('editor-value');
   });
+
+  it('returns the value for the editor backup if it exists', () => {
+    // set up mock state that has the editor deleted and a backup
+    const oldEditor = window.ElectronFiddle.editors[EditorId.html];
+    window.ElectronFiddle.editors[EditorId.html] = null;
+
+    window.ElectronFiddle.app.state = (new MockState() as any);
+    const mockState = window.ElectronFiddle.app.state;
+
+    mockState.closedPanels = {
+      [EditorId.html]: {
+        value: 'editor-backup-value'
+      }
+    }
+  
+    // assert
+    expect(getEditorValue(EditorId.html)).toBe('editor-backup-value');
+    
+    // revert to initial state
+    delete window.ElectronFiddle.app.state;
+    window.ElectronFiddle.editors[EditorId.html] = oldEditor;
+  })
 
   it('returns an empty string if window.Fiddle is not ready', () => {
     const oldFiddle = window.ElectronFiddle;
