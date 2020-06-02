@@ -542,6 +542,16 @@ describe('AppState', () => {
 
       expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();
     });
+
+    it('times out if editors never get set on the visible mosaics', async () => {
+      delete window.ElectronFiddle.editors[EditorId.main];
+
+      try {
+        await appState.setVisibleMosaics([EditorId.main]);
+      } catch(e) {
+        expect(e).toMatch('Timed out')
+      }
+    })
   });
 
   describe('hideAndBackupMosaic()', () => {

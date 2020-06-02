@@ -627,7 +627,7 @@ export class AppState {
 
     const waitForEditorsToMount = () => {
       let time = 0;
-      const maxTime = 5000;
+      const maxTime = 4000;
       const interval = 100;
       return new Promise((resolve, reject) => {
         (function checkMountedEditors() {
@@ -637,7 +637,7 @@ export class AppState {
           }
           time += interval;
           if (time > maxTime) {
-            return reject();
+            return reject(`Timed out after ${maxTime}ms: can't mount editors onto mosaics.`);
           }
           setTimeout(checkMountedEditors, 100);
         })();
