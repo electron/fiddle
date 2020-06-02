@@ -548,10 +548,10 @@ describe('AppState', () => {
 
       try {
         await appState.setVisibleMosaics([EditorId.main]);
-      } catch(e) {
-        expect(e).toMatch('Timed out')
+      } catch (e) {
+        expect(e).toMatch('Timed out');
       }
-    })
+    });
   });
 
   describe('hideAndBackupMosaic()', () => {

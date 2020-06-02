@@ -19,15 +19,15 @@ describe('getEditorValue()', () => {
       [EditorId.html]: {
         value: 'editor-backup-value'
       }
-    }
-  
+    };
+
     // assert
     expect(getEditorValue(EditorId.html)).toBe('editor-backup-value');
-    
+
     // revert to initial state
     delete window.ElectronFiddle.app.state;
     window.ElectronFiddle.editors[EditorId.html] = oldEditor;
-  })
+  });
 
   it('returns an empty string if window.Fiddle is not ready', () => {
     const oldFiddle = window.ElectronFiddle;
