@@ -56,12 +56,12 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
         <>
           <Button
             icon={'thumbs-up'}
-            onClick={() => this.continueBisect(true)}
+            onClick={() => this.continueBisect(false)}
             disabled={isDownloading}
           />
           <Button
             icon={'thumbs-down'}
-            onClick={() => this.continueBisect(false)}
+            onClick={() => this.continueBisect(true)}
             disabled={isDownloading}
           />
           <Button
