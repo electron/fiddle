@@ -66,7 +66,8 @@ export class BisectDialog extends React.Component<BisectDialogProps, BisectDialo
     }
 
     const bisectRange = allVersions
-      .slice(endIndex, startIndex + 1);
+      .slice(endIndex, startIndex + 1)
+      .reverse();
 
     appState.Bisector = new Bisector(bisectRange);
     const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
