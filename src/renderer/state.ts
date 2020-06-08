@@ -32,6 +32,7 @@ import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
+import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import {
   addLocalVersion,
@@ -625,26 +626,7 @@ export class AppState {
     // mount to ensure that we can load content into the editors as soon as they're
     // declared visible.
 
-    const waitForEditorsToMount = () => {
-      let time = 0;
-      const maxTime = 4000;
-      const interval = 100;
-      return new Promise((resolve, reject) => {
-        (function checkMountedEditors() {
-          const allMounted = visible.every((v) => !!window.ElectronFiddle.editors[v]);
-          if (allMounted) {
-            return resolve();
-          }
-          time += interval;
-          if (time > maxTime) {
-            return reject(`Timed out after ${maxTime}ms: can't mount editors onto mosaics.`);
-          }
-          setTimeout(checkMountedEditors, 100);
-        })();
-      });
-    };
-
-    await waitForEditorsToMount();
+    await waitForEditorsToMount(visible);
   }
 
   /**
