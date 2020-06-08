@@ -20,4 +20,4 @@ describe('waitforEditorsToMount', () => {
       expect(error).toMatch('Timed out');
     }
   });
-})
+});
