@@ -18,6 +18,7 @@ import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { getTitle } from '../utils/get-title';
 import { isEditorBackup } from '../utils/type-checks';
+import { EMPTY_EDITOR_CONTENT } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -68,8 +69,17 @@ export class App {
       }
     }
 
-    // set values once prompt approves
-    await this.setEditorValues(editorValues);
+    // display all editors that have content
+    const visibleEditors = [];
+    for (const id of Object.keys(editorValues)) {
+      const content = editorValues[id];
+
+      // if the gist content matches the empty file output, don't show it
+      if (!Object.values(EMPTY_EDITOR_CONTENT).includes(content)) {
+        visibleEditors.push(id as EditorId);
+      }
+    }
+
 
     document.title = getTitle(this.state);
     this.state.gistId = gistId || '';
@@ -77,6 +87,8 @@ export class App {
     this.state.templateName = templateName;
 
     // once loaded, we have a "saved" state
+    await this.state.setVisibleMosaics(visibleEditors);
+    await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
 
     return true;

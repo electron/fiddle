@@ -20,7 +20,7 @@ describe('getEditorViewState()', () => {
     const { ElectronFiddle: fiddle } = window as any;
     (window as any).ElectronFiddle = undefined;
 
-    expect(() => getEditorViewState(EditorId.html)).toThrow('Fiddle not ready');
+    expect(getEditorViewState(EditorId.html)).toBeNull();
 
     window.ElectronFiddle = fiddle;
   });

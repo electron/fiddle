@@ -1,3 +1,5 @@
+import * as MonacoType from 'monaco-editor';
+
 import { ALL_MOSAICS, EditorId, GenericDialogType, PanelId, VersionSource, VersionState } from '../../src/interfaces';
 import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
@@ -511,10 +513,14 @@ describe('AppState', () => {
   });
 
   describe('setVisibleMosaics()', () => {
-    it('updates the visible editors and creates a backup', () => {
+    it('updates the visible editors and creates a backup', async () => {
       appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
       appState.closedPanels = {};
-      appState.setVisibleMosaics([EditorId.main]);
+      await appState.setVisibleMosaics([EditorId.main]);
+
+      // we just need to mock something truthy here
+      // tslint:disable-next-line:no-object-literal-type-assertion
+      window.ElectronFiddle.editors[EditorId.main] = ({} as MonacoType.editor.IStandaloneCodeEditor);
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
       expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();
@@ -522,10 +528,17 @@ describe('AppState', () => {
       expect(appState.closedPanels[EditorId.main]).toBeUndefined();
     });
 
-    it('removes the backup for a non-editor right away', () => {
+    it('removes the backup for a non-editor right away', async () => {
       appState.closedPanels = {};
       appState.closedPanels[PanelId.docsDemo] = true;
-      appState.setVisibleMosaics(ALL_MOSAICS);
+
+      for (const mosaic of ALL_MOSAICS) {
+        // we just need to mock something truthy here
+        // tslint:disable-next-line:no-object-literal-type-assertion
+        window.ElectronFiddle.editors[mosaic] = ({} as MonacoType.editor.IStandaloneCodeEditor);
+      }
+
+      await appState.setVisibleMosaics(ALL_MOSAICS);
 
       expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();
     });

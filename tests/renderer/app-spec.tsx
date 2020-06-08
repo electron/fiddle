@@ -114,6 +114,7 @@ describe('Editors component', () => {
       const app = new App();
       (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = false;
+      app.state.setVisibleMosaics = jest.fn();
       app.setEditorValues = jest.fn();
 
       const editorValues = {
@@ -143,6 +144,7 @@ describe('Editors component', () => {
       app.state.isUnsaved = true;
       app.state.localPath = '/fake/path';
       app.state.setGenericDialogOptions = jest.fn();
+      app.state.setVisibleMosaics = jest.fn();
       app.setEditorValues = jest.fn();
 
       const editorValues = {
@@ -172,6 +174,7 @@ describe('Editors component', () => {
       const app = new App();
       (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = false;
+      app.state.setVisibleMosaics = jest.fn();
       app.setEditorValues = jest.fn();
 
       const editorValues = {
@@ -195,6 +198,7 @@ describe('Editors component', () => {
         const app = new App();
         (app.state as Partial<AppState>) = new MockState();
         app.state.isUnsaved = true;
+        app.state.setVisibleMosaics = jest.fn();
         app.state.setGenericDialogOptions = jest.fn();
         app.setEditorValues = jest.fn();
 
@@ -226,6 +230,7 @@ describe('Editors component', () => {
         const app = new App();
         (app.state as Partial<AppState>) = new MockState();
         app.state.isUnsaved = true;
+        app.state.setVisibleMosaics = jest.fn();
         app.state.setGenericDialogOptions = jest.fn();
         app.setEditorValues = jest.fn();
 

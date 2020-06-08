@@ -32,6 +32,7 @@ import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
+import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import {
   addLocalVersion,
@@ -596,7 +597,7 @@ export class AppState {
     return null;
   }
 
-  @action public setVisibleMosaics(visible: Array<MosaicId>) {
+  @action public async setVisibleMosaics(visible: Array<MosaicId>) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
     for (const id of ALL_MOSAICS) {
@@ -604,6 +605,9 @@ export class AppState {
         this.closedPanels[id] = isEditorId(id)
           ? getEditorBackup(id)
           : true;
+
+        // if we have backup, remove active editor
+        delete window.ElectronFiddle.editors[id];
       }
 
       // Remove the backup for panels now. Editors will remove their
@@ -617,6 +621,12 @@ export class AppState {
     console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
 
     this.mosaicArrangement = updatedArrangement;
+
+    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
+    // mount to ensure that we can load content into the editors as soon as they're
+    // declared visible.
+
+    await waitForEditorsToMount(visible);
   }
 
   /**
