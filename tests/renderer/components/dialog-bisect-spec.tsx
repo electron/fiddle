@@ -110,7 +110,7 @@ describe('BisectDialog component', () => {
 
       const instance: BisectDialog = wrapper.instance() as any;
       await instance.onSubmit();
-      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5));
+      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5).reverse());
       expect(store.Bisector).toBeDefined();
       expect(store.setVersion).toHaveBeenCalledWith(version);
     });
