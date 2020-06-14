@@ -17,6 +17,7 @@ export interface PublishButtonProps {
 
 interface IPublishButtonState {
   readonly isUpdating: boolean;
+  readonly wouldPublish: boolean;
 }
 
 /**
@@ -36,7 +37,8 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     this.setPublic = this.setPublic.bind(this);
 
     this.state = {
-      isUpdating: false
+      isUpdating: false,
+      wouldPublish: false,
     };
   }
 
@@ -85,6 +87,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
    */
   public async publishOrUpdateFiddle(): Promise<void> {
     const { appState } = this.props;
+    const { wouldPublish } = this.state;
     appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
@@ -92,7 +95,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    if (gistId) {
+    if (gistId && !wouldPublish) {
       this.setState({
         isUpdating: true
       });
@@ -153,9 +156,9 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
 
   public render() {
     const { isPublishing, gistId } = this.props.appState;
-    const { isUpdating } = this.state;
+    const { isUpdating, wouldPublish } = this.state;
 
-    const getTextForButton = gistId
+    const getTextForButton = gistId && !wouldPublish
       ? 'Update'
       : isUpdating
       ? 'Updating...'
@@ -174,10 +177,46 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
                 icon='upload'
                 text={getTextForButton}
               />
+              {this.renderMaybePublishMenu()}
           </ButtonGroup>
         </fieldset>
         <Toaster position={Position.BOTTOM_RIGHT} ref={this.refHandlers.toaster} />
       </>
+    );
+  }
+
+  private renderMaybePublishMenu = () => {
+    const { gistId } = this.props.appState;
+    const { wouldPublish } = this.state;
+
+    if (!gistId) {
+      return null;
+    }
+
+    const menu = (
+      <Menu>
+        <MenuItem
+          text='Publish'
+          active={wouldPublish}
+          onClick={() => this.setWouldPublish(true)}
+        />
+        <MenuItem
+          text='Update'
+          active={!wouldPublish}
+          onClick={() => this.setWouldPublish(false)}
+        />
+      </Menu>
+    );
+
+    return (
+      <Popover
+        content={menu}
+        position={Position.BOTTOM}
+      >
+        <Button
+          icon='wrench'
+        />
+      </Popover>
     );
   }
 
@@ -216,6 +255,12 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
         />
       </Popover>
     );
+  }
+
+  private setWouldPublish = (wouldPublish: boolean) => {
+    this.setState({
+      wouldPublish,
+    });
   }
 
   private setPrivacy(publishAsPublic: boolean) {
