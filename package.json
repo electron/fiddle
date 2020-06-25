@@ -84,6 +84,7 @@
     "chokidar": "^3.3.1",
     "coveralls": "^3.0.9",
     "electron": "8.0.2",
+    "electron-rebuild": "^1.11.0",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
