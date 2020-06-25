@@ -193,9 +193,11 @@ export class Runner {
     const env = { ...process.env };
     if (this.appState.isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
+      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
       env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
     } else {
       delete env.ELECTRON_ENABLE_LOGGING;
+      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
