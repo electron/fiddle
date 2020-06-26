@@ -1,6 +1,7 @@
 import * as MonacoType from 'monaco-editor';
 
 import { ALL_MOSAICS, EditorId, GenericDialogType, PanelId, VersionSource, VersionState } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
 import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
@@ -48,6 +49,7 @@ jest.mock('../../src/renderer/versions', () => {
 jest.mock('../../src/utils/get-title', () => ({
   getName: jest.fn()
 }));
+jest.mock('../../src/renderer/ipc');
 
 describe('AppState', () => {
   let appState = new AppState();
@@ -80,10 +82,8 @@ describe('AppState', () => {
     });
 
     it('can close the app after user accepts dialog', (done) => {
-      const { remote } = require('electron');
       window.close = jest.fn();
       appState.isUnsaved = true;
-      (remote.getGlobal as jest.Mock).mockReturnValueOnce(true);
       expect(window.onbeforeunload).toBeTruthy();
 
       const result = window.onbeforeunload!(undefined as any);
@@ -92,9 +92,10 @@ describe('AppState', () => {
 
       appState.genericDialogLastResult = true;
       appState.isGenericDialogShowing = false;
+      appState.isQuitting = true;
       process.nextTick(() => {
-        expect(window.close).toHaveBeenCalledTimes(0);
-        expect(remote.app.quit).toHaveBeenCalledTimes(1);
+        expect(window.close).toHaveBeenCalledTimes(1);
+        expect(ipcRendererManager.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, true);
         done();
       });
     });
@@ -110,8 +111,10 @@ describe('AppState', () => {
 
       appState.genericDialogLastResult = false;
       appState.isGenericDialogShowing = false;
+      appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
+        expect(ipcRendererManager.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, false);
         done();
       });
     });

@@ -44,11 +44,13 @@ export async function onReady() {
  */
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);
-  ipcMain.once(IpcEvents.CONFIRM_QUIT, (_, quitConfirmed) => {
-    if (quitConfirmed) {
-      app.quit();
-    }
-  });
+  ipcMain.once(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+}
+
+export function quitAppIfConfirmed(_: Electron.IpcMainEvent, quitConfirmed: boolean) {
+  if (quitConfirmed) {
+    app.quit();
+  }
 }
 
 /**
