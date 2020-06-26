@@ -259,6 +259,13 @@ describe('AppState', () => {
     });
   });
 
+  describe('setIsQuitting()', () => {
+    it('sets isQuitting variable as true', () => {
+      appState.setIsQuitting();
+      expect(appState.isQuitting).toBe(true);
+    });
+  });
+
   describe('disableTour()', () => {
     it('disables the tour', () => {
       appState.isTourShowing = false;
