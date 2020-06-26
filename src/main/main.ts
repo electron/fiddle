@@ -1,7 +1,7 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { app, ipcMain } from 'electron';
+import { app } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
@@ -44,7 +44,7 @@ export async function onReady() {
  */
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);
-  ipcMain.once(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+  ipcMainManager.on(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
 }
 
 export function quitAppIfConfirmed(_: Electron.IpcMainEvent, quitConfirmed: boolean) {

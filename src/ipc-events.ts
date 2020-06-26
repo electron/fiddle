@@ -34,7 +34,8 @@ export const ipcMainEvents = [
   IpcEvents.SHOW_WARNING_DIALOG,
   IpcEvents.SHOW_CONFIRMATION_DIALOG,
   IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
-  IpcEvents.SHOW_INACTIVE
+  IpcEvents.SHOW_INACTIVE,
+  IpcEvents.CONFIRM_QUIT
 ];
 
 export const ipcRendererEvents = [
@@ -58,7 +59,6 @@ export const ipcRendererEvents = [
   IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
   IpcEvents.BISECT_COMMANDS_TOGGLE,
   IpcEvents.BEFORE_QUIT,
-  IpcEvents.CONFIRM_QUIT
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL = 'WEBCONTENTS_READY_FOR_IPC_SIGNAL';

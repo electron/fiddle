@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { app, ipcMain } from 'electron';
+import { app } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -67,11 +67,9 @@ describe('main', () => {
 
   describe('onBeforeQuit()', () => {
     it('sets up IPC so app can quit if dialog confirmed', () => {
-      ipcMain.once = jest.fn();
-
       onBeforeQuit();
       expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BEFORE_QUIT);
-      expect(ipcMain.once).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+      expect(ipcMainManager.on).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
     });
   });
 
