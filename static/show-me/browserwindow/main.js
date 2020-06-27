@@ -23,27 +23,18 @@ app.on('ready', () => {
       y: 200
     })
   )
-  
-  // A transparent window. On Windows OS, a transparent window must be frameless
-  if (process.platform != 'win32') {
-    windows.push(
-      new BrowserWindow({
-        transparent: true,
-        x: 300,
-        y: 300
-      })
-    )  
+
+  // A transparent window.
+  const windowOptions = {
+    transparent: true,
+    x: 300,
+    y: 300
   }
-  else {
-    windows.push(
-      new BrowserWindow({
-        transparent: true,
-        frame: false,
-        x: 300,
-        y: 300
-      })
-    )
+  // On Windows OS, a transparent window must be frameless
+  if (process.platform === 'win32') {
+    windowOptions.frame = false
   }
+  windows.push(new BrowserWindow(windowOptions))
 
   // A window that's fixed and always on top
   windows.push(
