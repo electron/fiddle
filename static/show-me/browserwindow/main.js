@@ -30,7 +30,7 @@ app.on('ready', () => {
     x: 300,
     y: 300
   }
-  // On Windows OS, a transparent window must be frameless
+  // On Windows platforms, a transparent window must be frameless
   if (process.platform === 'win32') {
     windowOptions.frame = false
   }
