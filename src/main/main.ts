@@ -3,13 +3,11 @@ initSentry();
 
 import { app } from 'electron';
 
-import { IpcEvents } from '../../src/ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from '../utils/set-about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
-import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
@@ -35,9 +33,6 @@ export async function onReady() {
   setupUpdates();
   setupDialogs();
   setupDevTools();
-
-  const appDataDir = app.getPath('appData');
-  ipcMainManager.send(IpcEvents.SET_APPDATA_DIR, [appDataDir]);
 }
 
 /**

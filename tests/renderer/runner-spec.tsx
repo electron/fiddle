@@ -47,7 +47,8 @@ describe('Runner component', () => {
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
       },
-      getName: async () => 'test-app-name'
+      getName: async () => 'test-app-name',
+      getAppDataDir: () => path.join('/test-path/test-app-name')
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();

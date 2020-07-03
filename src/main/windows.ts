@@ -1,4 +1,4 @@
-import { BrowserWindow, shell } from 'electron';
+import { BrowserWindow, app, shell } from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
@@ -71,6 +71,9 @@ export function createMainWindow(): Electron.BrowserWindow {
       browserWindow.showInactive();
     }
   });
+
+  const appData = app.getPath('appData')
+  ipcMainManager.send(IpcEvents.SET_APPDATA_DIR, [appData], browserWindow.webContents);
 
   browserWindows.push(browserWindow);
 
