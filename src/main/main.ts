@@ -4,7 +4,7 @@ initSentry();
 import { app } from 'electron';
 
 import { isDevMode } from '../utils/devmode';
-import { setupAboutPanel } from '../utils/set-about-panel';
+import { setupAboutPanel } from './about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
