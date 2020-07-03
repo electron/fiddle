@@ -3,7 +3,6 @@ import * as path from 'path';
 
 import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
@@ -281,7 +280,7 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = getAppDataDir(name);
+    const appData = this.appState.getAppDataDir(name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
     await window.ElectronFiddle.app.fileManager.cleanup(appData);

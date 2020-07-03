@@ -1,5 +1,6 @@
 import * as fsType from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
+import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
@@ -123,6 +124,7 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
+  private appData: string;
 
   constructor() {
     // Bind all actions
@@ -151,6 +153,7 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
     ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => { this.appData = dir; });
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -365,6 +368,16 @@ export class AppState {
 
     this.versions = arrayToStringMap(getElectronVersions());
     this.updateDownloadedVersionState();
+  }
+
+  /**
+   * Returns an appData path for a given input
+   *
+   * @param input {string}
+   * @returns {string}
+   */
+  @action getAppDataDir(name: string): string {
+    return path.join(this.appData, name);
   }
 
   /**
