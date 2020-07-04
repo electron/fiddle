@@ -24,6 +24,7 @@ jest.mock('../../src/renderer/binary', () => ({
 }));
 jest.mock('fs-extra');
 jest.mock('child_process');
+jest.mock('path');
 
 describe('Runner component', () => {
   let mockChild: MockChildProcess;
@@ -48,7 +49,6 @@ describe('Runner component', () => {
         return mockVersions['2.0.2'];
       },
       getName: async () => 'test-app-name',
-      getAppDataDir: () => path.join('/test-path/test-app-name')
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();

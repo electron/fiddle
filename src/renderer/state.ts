@@ -1,6 +1,5 @@
 import * as fsType from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
-import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
@@ -124,7 +123,7 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
-  private appData: string;
+  public appData: string;
 
   constructor() {
     // Bind all actions
@@ -368,16 +367,6 @@ export class AppState {
 
     this.versions = arrayToStringMap(getElectronVersions());
     this.updateDownloadedVersionState();
-  }
-
-  /**
-   * Returns an appData path for a given input
-   *
-   * @param input {string}
-   * @returns {string}
-   */
-  @action getAppDataDir(name: string): string {
-    return path.join(this.appData, name);
   }
 
   /**

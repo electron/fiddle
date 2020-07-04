@@ -280,7 +280,7 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = this.appState.getAppDataDir(name);
+    const appData = path.join(this.appState.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
     await window.ElectronFiddle.app.fileManager.cleanup(appData);
