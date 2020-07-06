@@ -123,6 +123,7 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
+  public appData: string;
 
   constructor() {
     // Bind all actions
@@ -151,6 +152,7 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
     ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => { this.appData = dir; });
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
