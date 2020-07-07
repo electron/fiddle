@@ -106,6 +106,7 @@ export class AppState {
   @observable public isRunning: boolean = false;
   @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions: boolean = false;
+  @observable public isQuitting: boolean = false;
 
   // -- Various "isShowing" settings ------------------
   @observable public isBisectCommandShowing: boolean;
@@ -142,6 +143,7 @@ export class AppState {
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.resetEditorLayout = this.resetEditorLayout.bind(this);
+    this.setIsQuitting = this.setIsQuitting.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -152,6 +154,7 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
     ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
     ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => { this.appData = dir; });
 
     // Setup auto-runs
@@ -185,22 +188,23 @@ export class AppState {
 
           // We'll wait until the warning dialog was closed
           when(() => !this.isGenericDialogShowing).then(() => {
+            const quitConfirmed = this.genericDialogLastResult;
             // The user confirmed, let's close for real.
-            if (this.genericDialogLastResult) {
+            if (quitConfirmed) {
               window.onbeforeunload = null;
+              window.close();
+            }
 
-              // Should we just close or quit?
-              const remote = require('electron').remote;
-              const isQuitting = remote.getGlobal('isQuitting');
-
-              if (isQuitting) {
-                remote.app.quit();
-              } else {
-                window.close();
-              }
+            // isQuitting checks if we're trying to quit the app
+            // or just close the window
+            if (this.isQuitting) {
+              ipcRendererManager.send(IpcEvents.CONFIRM_QUIT, quitConfirmed);
+              this.isQuitting = false;
             }
           });
 
+
+          // return value doesn't matter, we just want to cancel the event
           return false;
         };
       } else {
@@ -336,6 +340,10 @@ export class AppState {
     }
 
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
+  }
+
+  @action public setIsQuitting() {
+    this.isQuitting = true;
   }
 
   @action public disableTour() {

@@ -3,11 +3,13 @@ initSentry();
 
 import { app } from 'electron';
 
+import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from '../utils/set-about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
+import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
@@ -41,7 +43,14 @@ export async function onReady() {
  * @export
  */
 export function onBeforeQuit() {
-  (global as any).isQuitting = true;
+  ipcMainManager.send(IpcEvents.BEFORE_QUIT);
+  ipcMainManager.on(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+}
+
+export function quitAppIfConfirmed(_: Electron.IpcMainEvent, quitConfirmed: boolean) {
+  if (quitConfirmed) {
+    app.quit();
+  }
 }
 
 /**
