@@ -25,7 +25,8 @@ export enum IpcEvents {
   BISECT_COMMANDS_TOGGLE = 'BISECT_COMMANDS_TOGGLE',
   SHOW_INACTIVE = 'SHOW_INACTIVE',
   BEFORE_QUIT = 'BEFORE_QUIT',
-  CONFIRM_QUIT = 'CONFIRM_QUIT'
+  CONFIRM_QUIT = 'CONFIRM_QUIT',
+  SET_APPDATA_DIR = 'SET_APPDATA_DIR',
 }
 
 export const ipcMainEvents = [
@@ -35,7 +36,7 @@ export const ipcMainEvents = [
   IpcEvents.SHOW_CONFIRMATION_DIALOG,
   IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
   IpcEvents.SHOW_INACTIVE,
-  IpcEvents.CONFIRM_QUIT
+  IpcEvents.CONFIRM_QUIT,
 ];
 
 export const ipcRendererEvents = [
@@ -59,6 +60,7 @@ export const ipcRendererEvents = [
   IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
   IpcEvents.BISECT_COMMANDS_TOGGLE,
   IpcEvents.BEFORE_QUIT,
+  IpcEvents.SET_APPDATA_DIR,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL = 'WEBCONTENTS_READY_FOR_IPC_SIGNAL';

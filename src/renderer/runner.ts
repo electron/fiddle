@@ -3,7 +3,6 @@ import * as path from 'path';
 
 import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
@@ -193,9 +192,11 @@ export class Runner {
     const env = { ...process.env };
     if (this.appState.isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
+      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
       env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
     } else {
       delete env.ELECTRON_ENABLE_LOGGING;
+      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
@@ -279,7 +280,7 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = getAppDataDir(name);
+    const appData = path.join(this.appState.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
     await window.ElectronFiddle.app.fileManager.cleanup(appData);
