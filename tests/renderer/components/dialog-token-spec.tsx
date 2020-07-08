@@ -181,6 +181,7 @@ describe('TokenDialog component', () => {
       await instance.onSubmitToken();
 
       expect(wrapper.state('error')).toBe(true);
+      expect(store.gitHubToken).toEqual(null);
     });
   });
 });

@@ -3,9 +3,9 @@ import * as path from 'path';
 
 import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { getAppDataDir } from '../utils/app-data-dir';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
+import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { ipcRendererManager } from './ipc';
 import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun } from './npm';
 import { AppState } from './state';
@@ -44,7 +44,7 @@ export class Runner {
   public async run(): Promise<boolean> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
-    const { binaryManager, currentElectronVersion } = this.appState;
+    const { currentElectronVersion } = this.appState;
     const { version, localPath } = currentElectronVersion;
 
     if (this.appState.isClearingConsoleOnRun) {
@@ -65,7 +65,7 @@ export class Runner {
       return false;
     }
 
-    const isReady = await binaryManager.getIsDownloaded(version, localPath);
+    const isReady = await getIsDownloaded(version, localPath);
 
     if (!isReady) {
       console.warn(`Runner: Binary ${version} not ready`);
@@ -184,17 +184,19 @@ export class Runner {
    * @memberof Runner
    */
   public async execute(dir: string): Promise<void> {
-    const { currentElectronVersion, pushOutput, binaryManager } = this.appState;
+    const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
-    const binaryPath = binaryManager.getElectronBinaryPath(version, localPath);
+    const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     const env = { ...process.env };
     if (this.appState.isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
+      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
       env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
     } else {
       delete env.ELECTRON_ENABLE_LOGGING;
+      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
@@ -278,7 +280,7 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = getAppDataDir(name);
+    const appData = path.join(this.appState.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
     await window.ElectronFiddle.app.fileManager.cleanup(appData);

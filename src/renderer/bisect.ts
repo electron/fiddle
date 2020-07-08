@@ -1,12 +1,12 @@
-import { ElectronVersion } from '../interfaces';
+import { RunnableVersion } from '../interfaces';
 
 export class Bisector {
-  public revList: Array<ElectronVersion>;
+  public revList: Array<RunnableVersion>;
   public minRev: number;
   public maxRev: number;
   private pivot: number;
 
-  constructor(revList: Array<ElectronVersion>) {
+  constructor(revList: Array<RunnableVersion>) {
     this.getCurrentVersion = this.getCurrentVersion.bind(this);
     this.continue = this.continue.bind(this);
     this.calculatePivot = this.calculatePivot.bind(this);

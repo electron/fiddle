@@ -2,7 +2,7 @@ import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersionState, GenericDialogType } from '../../../src/interfaces';
+import { GenericDialogType, VersionState } from '../../../src/interfaces';
 import { AppState } from '../state';
 
 interface BisectHandlerProps {
@@ -51,7 +51,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
   public render() {
     const { appState } = this.props;
     if (!!appState.Bisector) {
-      const isDownloading = appState.currentElectronVersion.state === ElectronVersionState.downloading;
+      const isDownloading = appState.currentElectronVersion.state === VersionState.downloading;
       return (
         <>
           <Button

@@ -4,7 +4,9 @@
 
 import { app } from 'electron';
 
-import { main, onBeforeQuit, onReady, onWindowsAllClosed } from '../../src/main/main';
+import { IpcEvents } from '../../src/ipc-events';
+import { ipcMainManager } from '../../src/main/ipc';
+import { main, onBeforeQuit, onReady, onWindowsAllClosed, quitAppIfConfirmed } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
@@ -25,6 +27,8 @@ jest.mock('../../src/main/update', () => ({
 jest.mock('../../src/main/squirrel', () => ({
   shouldQuit: jest.fn(() => false)
 }));
+
+jest.mock('../../src/main/ipc');
 
 /**
  * This test is very basic and some might say that it's
@@ -62,11 +66,22 @@ describe('main', () => {
   });
 
   describe('onBeforeQuit()', () => {
-    it('sets a global', () => {
+    it('sets up IPC so app can quit if dialog confirmed', () => {
       onBeforeQuit();
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BEFORE_QUIT);
+      expect(ipcMainManager.on).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+    });
+  });
 
-      expect((global as any).isQuitting).toBe(true);
-      (global as any).isQuitting = false;
+  describe('quitAppIfConfirmed()', () => {
+    it('quits app if passed a truthy value', () => {
+      quitAppIfConfirmed({} as any, true);
+      expect(app.quit).toHaveBeenCalledTimes(1);
+    });
+
+    it('does nothing if passed a value', () => {
+      quitAppIfConfirmed({} as any, false);
+      expect(app.quit).toHaveBeenCalledTimes(0);
     });
   });
 

@@ -2,10 +2,13 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { IpcEvents } from '../../../src/ipc-events';
+import { getIsDownloaded } from '../../../src/renderer/binary';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { overridePlatform, resetPlatform } from '../../utils';
+
 jest.mock('../../../src/renderer/ipc');
+jest.mock('../../../src/renderer/binary');
 
 describe('AddVersionDialog component', () => {
   let store: any;
@@ -66,7 +69,7 @@ describe('AddVersionDialog component', () => {
 
   describe('setFolderPath()', () => {
     it('does something', async () => {
-      store.binaryManager.getIsDownloaded.mockResolvedValue(true);
+      (getIsDownloaded as jest.Mock).mockResolvedValue(true);
       const wrapper = shallow(<AddVersionDialog appState={store} />);
       await (wrapper.instance() as any).setFolderPath('/test/');
 

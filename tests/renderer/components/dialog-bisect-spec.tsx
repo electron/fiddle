@@ -1,6 +1,6 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { ElectronVersionSource, ElectronVersionState } from '../../../src/interfaces';
+import { VersionSource, VersionState } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
@@ -12,9 +12,9 @@ describe('BisectDialog component', () => {
 
   const generateVersionRange = (rangeLength: number) =>
     (new Array(rangeLength)).fill(0).map((_, i) => ({
-      state: ElectronVersionState.ready,
+      state: VersionState.ready,
       version: `${i + 1}.0.0`,
-      source: ElectronVersionSource.local
+      source: VersionSource.local
     }));
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('BisectDialog component', () => {
       versions,
       versionsToShow: versions,
       channelsToShow: [ElectronReleaseChannel.stable],
-      statesToShow: [ElectronVersionState.ready],
+      statesToShow: [VersionState.ready],
       setVersion: jest.fn()
     };
   });
@@ -110,7 +110,7 @@ describe('BisectDialog component', () => {
 
       const instance: BisectDialog = wrapper.instance() as any;
       await instance.onSubmit();
-      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5));
+      expect(Bisector).toHaveBeenCalledWith(versions.slice(0, 5).reverse());
       expect(store.Bisector).toBeDefined();
       expect(store.setVersion).toHaveBeenCalledWith(version);
     });

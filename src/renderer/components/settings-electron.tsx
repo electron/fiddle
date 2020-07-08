@@ -13,7 +13,7 @@ import {
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../interfaces';
+import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
@@ -70,7 +70,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     if (!checked) {
       appState.statesToShow = appState.statesToShow.filter((s) => s !== id);
     } else {
-      appState.statesToShow.push(id as ElectronVersionState);
+      appState.statesToShow.push(id as VersionState);
     }
   }
 
@@ -203,7 +203,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderVersionStateOptions(): JSX.Element {
     const { appState } = this.props;
-    const getIsChecked = (state: ElectronVersionState) => {
+    const getIsChecked = (state: VersionState) => {
       return appState.statesToShow.includes(state);
     };
 
@@ -217,7 +217,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
           intent='primary'
         >
           <Checkbox
-            checked={getIsChecked(ElectronVersionState.ready)}
+            checked={getIsChecked(VersionState.ready)}
             label='Ready'
             id='ready'
             onChange={this.handleStateChange}
@@ -226,14 +226,14 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
           />
         </Tooltip>
         <Checkbox
-          checked={getIsChecked(ElectronVersionState.downloading)}
+          checked={getIsChecked(VersionState.downloading)}
           label='Downloading'
           id='downloading'
           onChange={this.handleStateChange}
           inline={true}
         />
         <Checkbox
-          checked={getIsChecked(ElectronVersionState.unknown)}
+          checked={getIsChecked(VersionState.unknown)}
           label='Not Downloaded'
           id='unknown'
           onChange={this.handleStateChange}
@@ -355,18 +355,18 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
   /**
    * Returns a human-readable state indicator for an Electron version
    *
-   * @param {ElectronVersion} item
+   * @param {RunnableVersion} item
    * @returns {JSX.Element}
    */
-  private renderHumanState(item: ElectronVersion): JSX.Element {
+  private renderHumanState(item: RunnableVersion): JSX.Element {
     const { state } = item;
     let icon: IconName = 'box';
     let humanState = 'Downloaded';
 
-    if (state === ElectronVersionState.downloading) {
+    if (state === VersionState.downloading) {
       icon = 'cloud-download';
       humanState = 'Downloading';
-    } else if (state === ElectronVersionState.unknown) {
+    } else if (state === VersionState.unknown) {
       icon = 'cloud';
       humanState = 'Not downloaded';
     }
@@ -383,10 +383,10 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    *
    * @private
    * @param {string} key
-   * @param {ElectronVersion} item
+   * @param {RunnableVersion} item
    * @returns {JSX.Element}
    */
-  private renderAction(key: string, item: ElectronVersion): JSX.Element {
+  private renderAction(key: string, item: RunnableVersion): JSX.Element {
     const { state, source } = item;
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
@@ -398,7 +398,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     if (state === 'ready') {
       buttonProps.onClick = () => appState.removeVersion(key);
       buttonProps.icon = 'trash';
-      buttonProps.text = source === ElectronVersionSource.local
+      buttonProps.text = source === VersionSource.local
         ? 'Remove'
         : 'Delete';
     } else if (state === 'downloading') {

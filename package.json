@@ -1,7 +1,7 @@
 {
   "name": "electron-fiddle",
   "productName": "Electron Fiddle",
-  "version": "0.13.1",
+  "version": "0.15.1",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "main": "./dist/src/main/main",
@@ -39,12 +39,12 @@
   "dependencies": {
     "@blueprintjs/core": "^3.24.0",
     "@blueprintjs/select": "^3.12.0",
+    "@electron/get": "^1.9.0",
     "@octokit/rest": "^16.43.1",
     "@sentry/electron": "^1.2.1",
     "classnames": "^2.2.6",
     "electron-default-menu": "^1.0.1",
     "electron-devtools-installer": "^2.2.4",
-    "electron-download": "^4.1.1",
     "electron-squirrel-startup": "^1.0.0",
     "extract-zip": "^1.6.7",
     "fix-path": "^3.0.0",

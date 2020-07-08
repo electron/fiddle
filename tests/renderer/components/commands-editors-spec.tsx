@@ -54,7 +54,7 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store} />);
     const instance = wrapper.instance() as EditorDropdown;
     const menu = instance.renderMenuItems();
-  
+
     expect(menu).toMatchSnapshot();
   });
 });

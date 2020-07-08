@@ -16,12 +16,11 @@ const config = {
     executableName: 'electron-fiddle',
     asar: true,
     icon: path.resolve(__dirname, 'assets', 'icons', 'fiddle'),
-    // TODO: FIXME?
-    // ignore: [
-    //   /^\/\.vscode\//,
-    //   /^\/tools\//
-    // ],
     appBundleId: 'com.electron.fiddle',
+    usageDescription: {
+      Camera: 'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Camera',
+      Microphone: 'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Microphone'
+    },
     appCategoryType: 'public.app-category.developer-tools',
     protocols: [{
       name: 'Electron Fiddle Launch Protocol',

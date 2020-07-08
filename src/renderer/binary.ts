@@ -1,242 +1,259 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
+import { VersionState } from '../interfaces';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
-import { getOfflineTypeDefinitionPath } from './fetch-types';
+import { removeTypeDefsForVersion } from './fetch-types';
+import { AppState } from './state';
 
 /**
- * The binary manager takes care of downloading Electron versions
+ * General setup, called with a version. Is called during construction
+ * to ensure that we always have or download at least one version.
  *
- * @export
- * @class BinaryManager
+ * @param {string} iVersion
+ * @returns {Promise<void>}
  */
-export class BinaryManager {
-  public state: Record<string, 'ready' | 'downloading'> = {};
+export async function setupBinary(appState: AppState, iVersion: string): Promise<void> {
+  const version = normalizeVersion(iVersion);
+  const fs = await fancyImport<typeof fsType>('fs-extra');
 
-  /**
-   * Remove a version from disk. Does not update state. We'll try up to
-   * four times before giving up if an error occurs.
-   *
-   * @param {string} iVersion
-   * @returns {Promise<void>}
-   */
-  public async remove(iVersion: string): Promise<void> {
-    const version = normalizeVersion(iVersion);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    let isDeleted = false;
+  await fs.mkdirp(getDownloadPath(version));
 
-    // utility to re-run removal functions upon failure
-    // due to windows filesystem lockfile jank
-    const rerunner = async (func: () => Promise<void>, counter: number = 1) => {
-      try {
-        await func();
-      } catch (error) {
-        console.warn(`Binary Manager: failed to run ${func.name} for ${version}, but failed`, error);
-        if (counter < 4) {
-          console.log(`Binary Manager: Trying again to run ${func.name}`);
-          await rerunner(func, counter + 1);
-        }
-      }
-    };
-
-    const binaryCleaner = async () => {
-      if (await this.getIsDownloaded(version)) {
-        // This is necessary since we're messing with .asar files inside
-        // the Electron binaries. Electron, powering Fiddle, will try to
-        // "correct" our calls, but we don't want that right here.
-        process.noAsar = true;
-        await fs.remove(this.getDownloadPath(version));
-        process.noAsar = false;
-
-        isDeleted = true;
-      }
-    };
-
-    const typeDefsCleaner = async () => {
-      await this.removeTypeDefsForVersion(version);
-    };
-
-    await rerunner(binaryCleaner);
-
-    if (isDeleted) {
-      await rerunner(typeDefsCleaner);
-    }
+  const { state } = appState.versions[version];
+  if (state === VersionState.downloading || state === VersionState.unzipping) {
+    console.log(`Binary: Electron ${version} already downloading.`);
+    return;
   }
 
-  /**
-   * General setup, called with a version. Is called during construction
-   * to ensure that we always have or download at least one version.
-   *
-   * @param {string} iVersion
-   * @returns {Promise<void>}
-   */
-  public async setup(iVersion: string): Promise<void> {
-    const version = normalizeVersion(iVersion);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    const { promisify } = await import('util');
-    const eDownload = promisify(require('electron-download'));
+  if (await getIsDownloaded(version)) {
+    console.log(`Binary: Electron ${version} already downloaded.`);
+    appState.versions[version].state = VersionState.ready;
+    return;
+  }
 
-    await fs.mkdirp(this.getDownloadPath(version));
+  console.log(`Binary: Electron ${version} not present, downloading`);
+  appState.versions[version].state = VersionState.downloading;
 
-    if (this.state[version] === 'downloading') {
-      console.log(`BinaryManager: Electron ${version} already downloading.`);
-      return;
-    }
+  const zipPath = await download(appState, version);
+  const extractPath = getDownloadPath(version);
+  console.log(`Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`);
 
-    if (await this.getIsDownloaded(version)) {
-      console.log(`BinaryManager: Electron ${version} already downloaded.`);
-      this.state[version] = 'ready';
-      return;
-    }
+  try {
+    appState.versions[version].state = VersionState.unzipping;
 
-    console.log(`BinaryManager: Electron ${version} not present, downloading`);
-    this.state[version] = 'downloading';
+    // Ensure the target path is empty
+    await fs.emptyDir(extractPath);
 
-    const zipPath = await eDownload({ version });
-    const extractPath = this.getDownloadPath(version);
-    console.log(`BinaryManager: Electron ${version} downloaded, now unpacking to ${extractPath}`);
+    const electronFiles = await unzip(zipPath, extractPath);
+    console.log(`Unzipped ${version}`, electronFiles);
+  } catch (error) {
+    console.warn(`Failure while unzipping ${version}`, error);
+    appState.versions[version].state = VersionState.unknown;
 
+    return;
+  }
+
+  appState.versions[version].state = VersionState.ready;
+}
+
+/**
+ * Remove a version from disk. Does not update state. We'll try up to
+ * four times before giving up if an error occurs.
+ *
+ * @param {string} iVersion
+ * @returns {Promise<void>}
+ */
+export async function removeBinary(iVersion: string) {
+  const version = normalizeVersion(iVersion);
+  const fs = await fancyImport<typeof fsType>('fs-extra');
+  let isDeleted = false;
+
+  // utility to re-run removal functions upon failure
+  // due to windows filesystem lockfile jank
+  const rerunner = async (func: () => Promise<void>, counter: number = 1) => {
     try {
-      // Ensure the target path is empty
-      await fs.emptyDir(extractPath);
-
-      const electronFiles = await this.unzip(zipPath, extractPath);
-      console.log(`Unzipped ${version}`, electronFiles);
+      await func();
     } catch (error) {
-      console.warn(`Failure while unzipping ${version}`, error);
-
-      // TODO: Handle this case
-    }
-
-    this.state[version] = 'ready';
-  }
-
-  /**
-   * Gets the expected path for the binary of a given Electron version
-   *
-   * @param {string} version
-   * @param {string} dir
-   * @returns {string}
-   */
-  public getElectronBinaryPath(
-    version: string,
-    dir: string = this.getDownloadPath(version),
-  ): string {
-    switch (process.platform) {
-      case 'darwin':
-        return path.join(dir, 'Electron.app/Contents/MacOS/Electron');
-      case 'freebsd':
-      case 'linux':
-        return path.join(dir, 'electron');
-      case 'win32':
-        return path.join(dir, 'electron.exe');
-      default:
-        throw new Error(`Electron builds are not available for ${process.platform}`);
-    }
-  }
-
-  /**
-   * Returns an array of all versions downloaded to disk
-   *
-   * @returns {Promise<Array<string>>}
-   */
-  public async getDownloadedVersions(): Promise<Array<string>> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
-    console.log(`BinaryManager: Checking for downloaded versions`);
-
-    try {
-      const directories = await fs.readdir(downloadPath);
-      const knownVersions: Array<string> = [];
-
-      for (const directory of directories) {
-        if (await this.getIsDownloaded(directory)) {
-          knownVersions.push(directory);
-        }
-      }
-
-      return knownVersions;
-    } catch (error) {
-      console.warn(`Could not read known Electron versions`);
-      return [];
-    }
-  }
-
-  public getDownloadingVersions() {
-    return Object.entries(this.state)
-      .filter(([_, state]) => state === 'downloading')
-      .map(([version, _]) => version);
-  }
-
-  /**
-   * Did we already download a given version?
-   *
-   * @param {string} version
-   * @param {string} dir
-   * @returns {boolean}
-   */
-  public async getIsDownloaded(version: string, dir?: string): Promise<boolean> {
-    const expectedPath = this.getElectronBinaryPath(version, dir);
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-
-    return fs.existsSync(expectedPath);
-  }
-
-  public async removeTypeDefsForVersion(version: string) {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-    const _version = normalizeVersion(version);
-    const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
-
-    if (fs.existsSync(typeDefsDir)) {
-      try {
-        await fs.remove(typeDefsDir);
-      } catch (error) {
-        throw error;
+      console.warn(`Binary Manager: failed to run ${func.name} for ${version}, but failed`, error);
+      if (counter < 4) {
+        console.log(`Binary Manager: Trying again to run ${func.name}`);
+        await rerunner(func, counter + 1);
       }
     }
-  }
+  };
 
-  /**
-   * Gets the expected path for a given Electron version
-   *
-   * @param {string} version
-   * @returns {string}
-   */
-  private getDownloadPath(version: string): string {
-    return path.join(USER_DATA_PATH, 'electron-bin', version);
-  }
-
-
-  /**
-   * Unzips an electron package so that we can actually use it.
-   *
-   * @param {string} zipPath
-   * @param {string} extractPath
-   * @returns {Promise<void>}
-   */
-  private unzip(zipPath: string, extractPath: string): Promise<void> {
-    return new Promise(async (resolve, reject) => {
-      const extract = (await fancyImport<any>('extract-zip')).default;
-
+  const binaryCleaner = async () => {
+    if (await getIsDownloaded(version)) {
+      // This is necessary since we're messing with .asar files inside
+      // the Electron binaries. Electron, powering Fiddle, will try to
+      // "correct" our calls, but we don't want that right here.
       process.noAsar = true;
+      await fs.remove(getDownloadPath(version));
+      process.noAsar = false;
 
-      const options = {
-        dir: extractPath,
-      };
+      isDeleted = true;
+    }
+  };
 
-      extract(zipPath, options, (error: Error) => {
-        if (error) {
-          reject(error);
-          return;
-        }
+  const typeDefsCleaner = async () => {
+    await removeTypeDefsForVersion(version);
+  };
 
-        console.log(`BinaryManager: Unpacked!`);
-        process.noAsar = false;
+  await rerunner(binaryCleaner);
 
-        resolve();
-      });
-    });
+  if (isDeleted) {
+    await rerunner(typeDefsCleaner);
   }
+}
+
+/* Did we already download a given version?
+*
+* @param {string} version
+* @param {string} dir
+* @returns {boolean}
+*/
+export async function getIsDownloaded(version: string, dir?: string): Promise<boolean> {
+ const expectedPath = getElectronBinaryPath(version, dir);
+ const fs = await fancyImport<typeof fsType>('fs-extra');
+
+ return fs.existsSync(expectedPath);
+}
+
+/**
+ * Gets the expected path for the binary of a given Electron version
+ *
+ * @param {string} version
+ * @param {string} dir
+ * @returns {string}
+ */
+export function getElectronBinaryPath(
+  version: string,
+  dir: string = getDownloadPath(version),
+): string {
+  switch (process.platform) {
+    case 'darwin':
+      return path.join(dir, 'Electron.app/Contents/MacOS/Electron');
+    case 'freebsd':
+    case 'linux':
+      return path.join(dir, 'electron');
+    case 'win32':
+      return path.join(dir, 'electron.exe');
+    default:
+      throw new Error(`Electron builds are not available for ${process.platform}`);
+  }
+}
+
+export function getDownloadingVersions(appState: AppState) {
+  return Object.entries(appState.versions)
+    .filter(([_, { state }]) => state === 'downloading')
+    .map(([version, _]) => version);
+}
+
+
+/**
+ * Returns an array of all versions downloaded to disk
+ *
+ * @returns {Promise<Array<string>>}
+ */
+export async function getDownloadedVersions(): Promise<Array<string>> {
+  const fs = await fancyImport<typeof fsType>('fs-extra');
+  const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
+  console.log(`Binary: Checking for downloaded versions`);
+
+  try {
+    const directories = await fs.readdir(downloadPath);
+    const knownVersions: Array<string> = [];
+
+    for (const directory of directories) {
+      if (await getIsDownloaded(directory)) {
+        knownVersions.push(directory);
+      }
+    }
+
+    return knownVersions;
+  } catch (error) {
+    console.warn(`Could not read known Electron versions`);
+    return [];
+  }
+}
+
+/**
+ * Download an Electron version.
+ *
+ * @param {AppState} appState
+ * @param {string} version
+ * @returns {Promise<string>}
+ */
+async function download(appState: AppState, version: string): Promise<string> {
+  const { download: electronDownload } = await import('@electron/get');
+  const getProgressCallback = (progress: Progress) => {
+    const roundedProgress = Math.round(progress.percent * 100) / 100;
+
+    if (roundedProgress !== appState.versions[version].downloadProgress) {
+      console.debug(`Binary: Version ${version} download progress: ${progress.percent}`);
+      appState.versions[version].downloadProgress = roundedProgress;
+    }
+  };
+
+  if (!appState.versions[version]) {
+    throw new Error(`Version ${version} does not exist in state, cannot download`);
+  }
+
+  const zipFilePath = await electronDownload(version, {
+    downloadOptions: {
+      quiet: true,
+      getProgressCallback
+    }
+  });
+
+  return zipFilePath;
+}
+
+/**
+ * Gets the expected path for a given Electron version
+ *
+ * @param {string} version
+ * @returns {string}
+ */
+function getDownloadPath(version: string): string {
+  return path.join(USER_DATA_PATH, 'electron-bin', version);
+}
+
+/**
+ * Unzips an electron package so that we can actually use it.
+ *
+ * @param {string} zipPath
+ * @param {string} extractPath
+ * @returns {Promise<void>}
+ */
+function unzip(zipPath: string, extractPath: string): Promise<void> {
+  return new Promise(async (resolve, reject) => {
+    const extract = (await fancyImport<any>('extract-zip')).default;
+
+    process.noAsar = true;
+
+    const options = {
+      dir: extractPath,
+    };
+
+    extract(zipPath, options, (error: Error) => {
+      if (error) {
+        reject(error);
+        return;
+      }
+
+      console.log(`Binary: Unpacked!`);
+      process.noAsar = false;
+
+      resolve();
+    });
+  });
+}
+
+interface Progress {
+  percent: number;
+  transferred: number;
+  total: number;
 }

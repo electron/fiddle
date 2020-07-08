@@ -56,6 +56,10 @@ fiddle has grown up, export it as a project with or without
 [electron-forge][electron-forge]. Then, use your favorite editor and take on
 the world!
 
+## Contributing
+
+Electron Fiddle is a community-driven project that welcomes all sorts of contributions. Please check out our [Contributing Guide](https://github.com/electron/fiddle/blob/master/CONTRIBUTING.md) for more details.
+
 ## License
 
 [MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE.md).

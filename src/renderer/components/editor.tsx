@@ -45,8 +45,8 @@ export class Editor extends React.Component<EditorProps> {
     return false;
   }
 
-  public componentDidMount() {
-    this.initMonaco();
+  public async componentDidMount() {
+    await this.initMonaco();
   }
 
   public componentWillUnmount() {
@@ -120,7 +120,7 @@ export class Editor extends React.Component<EditorProps> {
    * @private
    * @param {string} value
    */
-  private async createModel(value: string) {
+  private createModel(value: string) {
     const { monaco } = this.props;
 
     const model = monaco.editor.createModel(value, this.language);
@@ -158,7 +158,7 @@ export class Editor extends React.Component<EditorProps> {
       }
     } else {
       const value = await getContent(id, version);
-      await this.createModel(value);
+      this.createModel(value);
     }
   }
 }

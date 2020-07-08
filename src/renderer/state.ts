@@ -6,15 +6,15 @@ import {
   ALL_MOSAICS,
   DocsDemoPage,
   EditorId,
-  ElectronVersion,
-  ElectronVersionSource,
-  ElectronVersionState,
   GenericDialogOptions,
   GenericDialogType,
   MosaicId,
   OutputEntry,
   OutputOptions,
-  Version
+  RunnableVersion,
+  Version,
+  VersionSource,
+  VersionState
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
@@ -24,7 +24,7 @@ import { getName } from '../utils/get-title';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import { BinaryManager } from './binary';
+import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getContent, isContentUnchanged } from './content';
@@ -32,6 +32,7 @@ import { getLocalTypePathForVersion, updateEditorTypeDefinitions } from './fetch
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
+import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import {
   addLocalVersion,
@@ -78,9 +79,9 @@ export class AppState {
   @observable public channelsToShow: Array<ElectronReleaseChannel> =
     this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>
     || [ElectronReleaseChannel.stable, ElectronReleaseChannel.beta];
-  @observable public statesToShow: Array<ElectronVersionState> =
-    this.retrieve('statesToShow') as Array<ElectronVersionState>
-    || [ElectronVersionState.downloading, ElectronVersionState.ready, ElectronVersionState.unknown];
+  @observable public statesToShow: Array<VersionState> =
+    this.retrieve('statesToShow') as Array<VersionState>
+    || [VersionState.downloading, VersionState.ready, VersionState.unknown];
   @observable public isKeepingUserDataDirs: boolean = !!this.retrieve('isKeepingUserDataDirs');
   @observable public isEnablingElectronLogging: boolean = !!this.retrieve('isEnablingElectronLogging');
   @observable public isClearingConsoleOnRun: boolean = !!this.retrieve('isClearingConsoleOnRun');
@@ -90,7 +91,7 @@ export class AppState {
 
   // -- Various session-only state ------------------
   @observable public gistId: string = '';
-  @observable public versions: Record<string, ElectronVersion> = arrayToStringMap(knownVersions);
+  @observable public versions: Record<string, RunnableVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions = { type: GenericDialogType.warning, label: '', ok: 'Okay', cancel: 'Cancel' };
@@ -99,13 +100,13 @@ export class AppState {
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
-  @observable public binaryManager: BinaryManager = new BinaryManager();
   @observable public Bisector: Bisector | undefined;
 
   @observable public isPublishing: boolean = false;
   @observable public isRunning: boolean = false;
   @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions: boolean = false;
+  @observable public isQuitting: boolean = false;
 
   // -- Various "isShowing" settings ------------------
   @observable public isBisectCommandShowing: boolean;
@@ -123,6 +124,7 @@ export class AppState {
 
   private outputBuffer: string = '';
   private name: string;
+  public appData: string;
 
   constructor() {
     // Bind all actions
@@ -140,6 +142,8 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
+    this.resetEditorLayout = this.resetEditorLayout.bind(this);
+    this.setIsQuitting = this.setIsQuitting.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -150,6 +154,8 @@ export class AppState {
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
     ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
     ipcRendererManager.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
+    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => { this.appData = dir; });
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -182,22 +188,23 @@ export class AppState {
 
           // We'll wait until the warning dialog was closed
           when(() => !this.isGenericDialogShowing).then(() => {
+            const quitConfirmed = this.genericDialogLastResult;
             // The user confirmed, let's close for real.
-            if (this.genericDialogLastResult) {
+            if (quitConfirmed) {
               window.onbeforeunload = null;
+              window.close();
+            }
 
-              // Should we just close or quit?
-              const remote = require('electron').remote;
-              const isQuitting = remote.getGlobal('isQuitting');
-
-              if (isQuitting) {
-                remote.app.quit();
-              } else {
-                window.close();
-              }
+            // isQuitting checks if we're trying to quit the app
+            // or just close the window
+            if (this.isQuitting) {
+              ipcRendererManager.send(IpcEvents.CONFIRM_QUIT, quitConfirmed);
+              this.isQuitting = false;
             }
           });
 
+
+          // return value doesn't matter, we just want to cancel the event
           return false;
         };
       } else {
@@ -222,10 +229,10 @@ export class AppState {
   }
 
   /**
-   * Returns the current ElectronVersion or the first
+   * Returns the current RunnableVersion or the first
    * one that can be found.
    */
-  @computed get currentElectronVersion(): ElectronVersion {
+  @computed get currentElectronVersion(): RunnableVersion {
     if (this.versions[this.version]) {
       return this.versions[this.version];
     } else {
@@ -237,8 +244,8 @@ export class AppState {
    * Returns an array of Electron versions to show given the
    * current settings for states and channels to display
    */
-  @computed get versionsToShow(): Array<ElectronVersion> {
-    return sortedElectronMap<ElectronVersion>(this.versions, (_key, item) => item)
+  @computed get versionsToShow(): Array<RunnableVersion> {
+    return sortedElectronMap<RunnableVersion>(this.versions, (_key, item) => item)
       .filter((item) => {
         if (!item) {
           return false;
@@ -335,6 +342,10 @@ export class AppState {
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
 
+  @action public setIsQuitting() {
+    this.isQuitting = true;
+  }
+
   @action public disableTour() {
     this.resetView({ isTourShowing: false });
     localStorage.setItem('hasShownTour', 'true');
@@ -388,7 +399,7 @@ export class AppState {
     const updatedVersions = { ...this.versions };
 
     // Actually remove
-    if (release && release.source === ElectronVersionSource.local) {
+    if (release && release.source === VersionSource.local) {
       delete updatedVersions[version];
 
       const versionsAsArray = Object
@@ -397,8 +408,8 @@ export class AppState {
 
       saveLocalVersions(versionsAsArray);
     } else {
-      await this.binaryManager.remove(version);
-      updatedVersions[version].state = ElectronVersionState.unknown;
+      await removeBinary(version);
+      updatedVersions[version].state = VersionState.unknown;
     }
 
     this.versions = updatedVersions;
@@ -416,18 +427,17 @@ export class AppState {
     console.log(`State: Downloading Electron ${version}`);
 
     const release = this.versions[version] || { state: '', source: '' };
-    const isLocal = release.source === ElectronVersionSource.local;
+    const isLocal = release.source === VersionSource.local;
     const isReady = release.state === 'ready';
 
     // Fetch new binaries, maybe?
     if (!isLocal && !isReady) {
-      console.log(`State: Instructing BinaryManager to fetch v${version}`);
+      console.log(`State: Fetching v${version}`);
       const updatedVersions = { ...this.versions };
       updatedVersions[version] = updatedVersions[version] || {};
-      updatedVersions[version].state = ElectronVersionState.downloading;
       this.versions = updatedVersions;
 
-      await this.binaryManager.setup(version);
+      await setupBinary(this, version);
       this.updateDownloadedVersionState();
     } else {
       console.log(`State: Version ${version} already downloaded, doing nothing.`);
@@ -463,14 +473,18 @@ export class AppState {
     // Update TypeScript definitions
     const versionObject = this.versions[version];
 
-    if (versionObject.source === ElectronVersionSource.local) {
+    if (versionObject.source === VersionSource.local) {
       const fs = await fancyImport<typeof fsType>('fs-extra');
       const typePath = getLocalTypePathForVersion(versionObject);
       console.info(`TypeDefs: Watching file for local version ${version} at path ${typePath}`);
-      this.localTypeWatcher = fs.watch(typePath!, async () => {
-        console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
-        await updateEditorTypeDefinitions(versionObject);
-      });
+      try {
+        this.localTypeWatcher = fs.watch(typePath!, async () => {
+          console.info(`TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`);
+          await updateEditorTypeDefinitions(versionObject);
+        });
+      } catch (err) {
+        console.info('TypeDefs: Unable to start watching.');
+      }
     } else {
       if (!!this.localTypeWatcher) {
         console.info(`TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`);
@@ -493,17 +507,17 @@ export class AppState {
     const updatedVersions = { ...this.versions };
 
     // Keep state of currently downloading binaries first
-    const downloadingVersions = this.binaryManager.getDownloadingVersions();
+    const downloadingVersions = getDownloadingVersions(this);
     (downloadingVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = ElectronVersionState.downloading;
+        updatedVersions[version].state = VersionState.downloading;
       }
     });
 
-    const downloadedVersions = await this.binaryManager.getDownloadedVersions();
+    const downloadedVersions = await getDownloadedVersions();
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
-        updatedVersions[version].state = ElectronVersionState.ready;
+        updatedVersions[version].state = VersionState.ready;
       }
     });
 
@@ -541,7 +555,6 @@ export class AppState {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split('\r\n');
-
       for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
         const part = parts[partIndex];
         if (partIndex === parts.length - 1) {
@@ -594,7 +607,7 @@ export class AppState {
     return null;
   }
 
-  @action public setVisibleMosaics(visible: Array<MosaicId>) {
+  @action public async setVisibleMosaics(visible: Array<MosaicId>) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
     for (const id of ALL_MOSAICS) {
@@ -602,6 +615,9 @@ export class AppState {
         this.closedPanels[id] = isEditorId(id)
           ? getEditorBackup(id)
           : true;
+
+        // if we have backup, remove active editor
+        delete window.ElectronFiddle.editors[id];
       }
 
       // Remove the backup for panels now. Editors will remove their
@@ -615,6 +631,12 @@ export class AppState {
     console.log(`State: Setting visible mosaic panels`, visible, updatedArrangement);
 
     this.mosaicArrangement = updatedArrangement;
+
+    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
+    // mount to ensure that we can load content into the editors as soon as they're
+    // declared visible.
+
+    await waitForEditorsToMount(visible);
   }
 
   /**
@@ -635,6 +657,15 @@ export class AppState {
   @action public showMosaic(id: MosaicId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
     this.setVisibleMosaics([...currentlyVisible, id]);
+  }
+
+  /**
+   * Resets editor view to default layout
+   *
+   *
+   */
+  @action public resetEditorLayout() {
+    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
   /**

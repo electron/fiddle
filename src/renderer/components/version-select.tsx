@@ -3,30 +3,30 @@ import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ElectronVersion, ElectronVersionSource, ElectronVersionState } from '../../interfaces';
+import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 
-const ElectronVersionSelect = Select.ofType<ElectronVersion>();
+const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
 /**
  * Helper method: Returns the <Select /> label for an Electron
  * version.
  *
- * @param {ElectronVersion} { source, state }
+ * @param {RunnableVersion} { source, state }
  * @returns {string}
  */
-export function getItemLabel({ source, state, name }: ElectronVersion): string {
+export function getItemLabel({ source, state, name }: RunnableVersion): string {
   let label = '';
 
-  if (source === ElectronVersionSource.local) {
+  if (source === VersionSource.local) {
     label = name || 'Local';
   } else {
-    if (state === ElectronVersionState.unknown) {
+    if (state === VersionState.unknown) {
       label = `Not downloaded`;
-    } else if (state === ElectronVersionState.ready) {
+    } else if (state === VersionState.ready) {
       label = `Downloaded`;
-    } else if (state === ElectronVersionState.downloading) {
+    } else if (state === VersionState.downloading) {
       label = `Downloading`;
     }
   }
@@ -38,10 +38,10 @@ export function getItemLabel({ source, state, name }: ElectronVersion): string {
  * Helper method: Returns the <Select /> icon for an Electron
  * version.
  *
- * @param {ElectronVersion} { state }
+ * @param {RunnableVersion} { state }
  * @returns
  */
-export function getItemIcon({ state }: ElectronVersion) {
+export function getItemIcon({ state }: RunnableVersion) {
   return state === 'ready'
     ? 'saved'
     : state === 'downloading' ? 'cloud-download' : 'cloud';
@@ -52,10 +52,10 @@ export function getItemIcon({ state }: ElectronVersion) {
  * version.
  *
  * @param {string} query
- * @param {ElectronVersion} { version }
+ * @param {RunnableVersion} { version }
  * @returns
  */
-export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) => {
+export const filterItem: ItemPredicate<RunnableVersion> = (query, { version }) => {
   return version.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -63,11 +63,11 @@ export const filterItem: ItemPredicate<ElectronVersion> = (query, { version }) =
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
  *
- * @param {ElectronVersion} item
+ * @param {RunnableVersion} item
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-export const renderItem: ItemRenderer<ElectronVersion> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<RunnableVersion> = (item, { handleClick, modifiers, query }) => {
   if (!modifiers.matchesPredicate) {
     return null;
   }
@@ -92,10 +92,10 @@ export interface VersionSelectState {
 export interface VersionSelectProps {
   appState: AppState;
   disabled?: boolean;
-  currentVersion: ElectronVersion;
-  onVersionSelect: (version: ElectronVersion) => void;
+  currentVersion: RunnableVersion;
+  onVersionSelect: (version: RunnableVersion) => void;
   buttonGroupProps?: IButtonGroupProps;
-  itemDisabled?: keyof ElectronVersion | ((item: ElectronVersion, index: number) => boolean);
+  itemDisabled?: keyof RunnableVersion | ((item: RunnableVersion, index: number) => boolean);
 }
 
 /**

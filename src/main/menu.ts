@@ -105,9 +105,7 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
     {
       type: 'separator'
     }, {
-      label: 'Exit',
-      accelerator: 'Ctrl+Q,',
-      click: app.quit
+      role: 'quit'
     }
   ];
 }
@@ -239,7 +237,7 @@ export function setupMenu() {
       // Append the "Settings" item
       if (
         process.platform === 'darwin'
-        && label === app.getName()
+        && label === app.name
         && isSubmenu(item.submenu)
       ) {
         item.submenu.splice(2, 0, ...getPreferencesItems());

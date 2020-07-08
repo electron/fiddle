@@ -1,4 +1,4 @@
-import { Button, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
+import { Button, Menu, MenuDivider, MenuItem, Popover, Position } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -81,6 +81,18 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
         />
       );
     }
+
+    result.push(
+      <React.Fragment key={'fragment-reset-layout'}>
+      <MenuDivider />
+        <MenuItem
+          icon='grid-view'
+          key='reset-layout'
+          text='Reset Layout'
+          onClick={appState.resetEditorLayout}
+        />
+      </React.Fragment>
+    );
 
     return result;
   }

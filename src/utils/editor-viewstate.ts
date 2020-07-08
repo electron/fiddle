@@ -13,7 +13,7 @@ export function getEditorViewState(id: EditorId): editor.ICodeEditorViewState | 
   const { ElectronFiddle: fiddle } = window;
 
   if (!fiddle) {
-    throw new Error('Fiddle not ready');
+    return null;
   }
 
   if (fiddle.editors[id] && fiddle.editors[id]!.saveViewState) {

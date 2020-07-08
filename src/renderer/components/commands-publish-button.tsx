@@ -1,16 +1,23 @@
-import { Button, ButtonGroup, Menu, MenuItem, Popover, Position } from '@blueprintjs/core';
+import { Button, ButtonGroup, IToastProps, Menu, MenuItem, Popover, Position, Toaster } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
+import { EditorValues } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
+import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 export interface PublishButtonProps {
   appState: AppState;
+}
+
+interface IPublishButtonState {
+  readonly isUpdating: boolean;
+  readonly wouldPublish: boolean;
 }
 
 /**
@@ -21,14 +28,24 @@ export interface PublishButtonProps {
  * @extends {React.Component<PublishButtonProps, PublishButtonState>}
  */
 @observer
-export class PublishButton extends React.Component<PublishButtonProps> {
-  constructor(props: PublishButtonProps) {
+export class PublishButton extends React.Component<PublishButtonProps, IPublishButtonState> {
+  public constructor(props: PublishButtonProps) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
-    this.publishFiddle = this.publishFiddle.bind(this);
+    this.publishOrUpdateFiddle = this.publishOrUpdateFiddle.bind(this);
     this.setPrivate = this.setPrivate.bind(this);
     this.setPublic = this.setPublic.bind(this);
+
+    this.state = {
+      isUpdating: false,
+      wouldPublish: false,
+    };
   }
+
+  private toaster: Toaster;
+  private refHandlers = {
+    toaster: (ref: Toaster) => this.toaster = ref,
+  };
 
   public componentDidMount() {
     ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
@@ -60,7 +77,7 @@ export class PublishButton extends React.Component<PublishButtonProps> {
     await when(() => !!appState.gitHubToken || !appState.isTokenDialogShowing);
 
     if (appState.gitHubToken) {
-      return this.publishFiddle();
+      return this.publishOrUpdateFiddle();
     }
   }
 
@@ -68,50 +85,52 @@ export class PublishButton extends React.Component<PublishButtonProps> {
    * Connect with GitHub, publish the current Fiddle as a gist,
    * and update all related properties in the app state.
    */
-  public async publishFiddle(): Promise<void> {
+  public async publishOrUpdateFiddle(): Promise<void> {
     const { appState } = this.props;
+    const { wouldPublish } = this.state;
     appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
-    const { gitHubPublishAsPublic } = this.props.appState;
+    const { gitHubPublishAsPublic, gistId } = this.props.appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    try {
-      const gist = await octo.gists.create({
-        public: !!gitHubPublishAsPublic,
-        description: 'Electron Fiddle Gist',
-        files: {
-          [INDEX_HTML_NAME]: {
-            content: values.html || '<!-- Empty -->',
-          },
-          [MAIN_JS_NAME]: {
-            content: values.main || '// Empty',
-          },
-          [RENDERER_JS_NAME]: {
-            content: values.renderer || '// Empty',
-          },
-          [PRELOAD_JS_NAME]: {
-            content: values.preload || '// Empty',
-          },
-          [STYLES_CSS_NAME]: {
-            content: values.css || '/* Empty */',
-          },
-        },
-      } as any); // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+    if (gistId && !wouldPublish) {
+      this.setState({
+        isUpdating: true
+      });
+      const gist = await octo.gists.update({
+        gist_id: appState.gistId,
+        files: this.gistFilesList(values) as any,
+      });
 
-      appState.gistId = gist.data.id;
+      console.log('Updating: Updating done', { gist });
+      this.renderToast({ message: 'Successfully updated gist!' });
+      this.setState({
+        isUpdating: false
+      });
+    } else {
+      try {
+        const gist = await octo.gists.create({
+          public: !!gitHubPublishAsPublic,
+          description: 'Electron Fiddle Gist',
+          files: this.gistFilesList(values) as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+        });
 
-      console.log(`Publish Button: Publishing done`, { gist });
-    } catch (error) {
-      console.warn(`Could not publish gist`, { error });
+        appState.gistId = gist.data.id;
 
-      const messageBoxOptions: Electron.MessageBoxOptions = {
-        message: 'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-        detail: `GitHub encountered the following error: ${error.message}`
-      };
+        console.log(`Publish Button: Publishing done`, { gist });
+        this.renderToast({ message: 'Publishing done successfully!' });
+      } catch (error) {
+        console.warn(`Could not publish gist`, { error });
 
-      ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+        const messageBoxOptions: Electron.MessageBoxOptions = {
+          message: 'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
+          detail: `GitHub encountered the following error: ${error.message}`
+        };
+
+        ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+      }
     }
 
     appState.isPublishing = false;
@@ -136,8 +155,77 @@ export class PublishButton extends React.Component<PublishButtonProps> {
   }
 
   public render() {
-    const { gitHubPublishAsPublic } = this.props.appState;
-    const { isPublishing } = this.props.appState;
+    const { isPublishing, gistId } = this.props.appState;
+    const { isUpdating, wouldPublish } = this.state;
+
+    const getTextForButton = gistId && !wouldPublish
+      ? 'Update'
+      : isUpdating
+      ? 'Updating...'
+      : isPublishing
+      ? 'Publishing...'
+      : 'Publish';
+
+    return (
+      <>
+        <fieldset disabled={isPublishing}>
+          <ButtonGroup className='button-publish'>
+              {this.renderPrivaryMenu()}
+              <Button
+                onClick={this.handleClick}
+                loading={isPublishing}
+                icon='upload'
+                text={getTextForButton}
+              />
+              {this.renderMaybePublishMenu()}
+          </ButtonGroup>
+        </fieldset>
+        <Toaster position={Position.BOTTOM_RIGHT} ref={this.refHandlers.toaster} />
+      </>
+    );
+  }
+
+  private renderMaybePublishMenu = () => {
+    const { gistId } = this.props.appState;
+    const { wouldPublish } = this.state;
+
+    if (!gistId) {
+      return null;
+    }
+
+    const menu = (
+      <Menu>
+        <MenuItem
+          text='Publish'
+          active={wouldPublish}
+          onClick={() => this.setWouldPublish(true)}
+        />
+        <MenuItem
+          text='Update'
+          active={!wouldPublish}
+          onClick={() => this.setWouldPublish(false)}
+        />
+      </Menu>
+    );
+
+    return (
+      <Popover
+        content={menu}
+        position={Position.BOTTOM}
+      >
+        <Button
+          icon='wrench'
+        />
+      </Popover>
+    );
+  }
+
+  private renderPrivaryMenu = () => {
+    const { gitHubPublishAsPublic, gistId } = this.props.appState;
+
+    if (gistId) {
+      return null;
+    }
 
     const privacyIcon = gitHubPublishAsPublic ? 'unlock' : 'lock';
     const privacyMenu = (
@@ -158,28 +246,48 @@ export class PublishButton extends React.Component<PublishButtonProps> {
     );
 
     return (
-      <fieldset disabled={isPublishing}>
-        <ButtonGroup className='button-publish'>
-            <Popover
-              content={privacyMenu}
-              position={Position.BOTTOM}
-            >
-              <Button
-                icon={privacyIcon}
-              />
-            </Popover>
-            <Button
-              onClick={this.handleClick}
-              loading={isPublishing}
-              icon='upload'
-              text={isPublishing ? 'Publishing...' : 'Publish'}
-            />
-        </ButtonGroup>
-      </fieldset>
+      <Popover
+        content={privacyMenu}
+        position={Position.BOTTOM}
+      >
+        <Button
+          icon={privacyIcon}
+        />
+      </Popover>
     );
+  }
+
+  private setWouldPublish = (wouldPublish: boolean) => {
+    this.setState({
+      wouldPublish,
+    });
   }
 
   private setPrivacy(publishAsPublic: boolean) {
     this.props.appState.gitHubPublishAsPublic = publishAsPublic;
+  }
+
+  private renderToast = (toast: IToastProps) => {
+    this.toaster.show(toast);
+  }
+
+  private gistFilesList = (values: EditorValues) => {
+    return {
+      [INDEX_HTML_NAME]: {
+        content: values.html || EMPTY_EDITOR_CONTENT.html,
+      },
+      [MAIN_JS_NAME]: {
+        content: values.main || EMPTY_EDITOR_CONTENT.js,
+      },
+      [RENDERER_JS_NAME]: {
+        content: values.renderer || EMPTY_EDITOR_CONTENT.js,
+      },
+      [PRELOAD_JS_NAME]: {
+        content: values.preload || EMPTY_EDITOR_CONTENT.js,
+      },
+      [STYLES_CSS_NAME]: {
+        content: values.css || EMPTY_EDITOR_CONTENT.css,
+      },
+    };
   }
 }

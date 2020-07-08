@@ -1,4 +1,4 @@
-import { ElectronVersionSource, ElectronVersionState } from '../../src/interfaces';
+import { VersionSource, VersionState } from '../../src/interfaces';
 import { AppState } from '../../src/renderer/state';
 import { TouchBarManager } from '../../src/renderer/touch-bar-manager';
 import { mockVersions } from '../mocks/electron-versions';
@@ -21,7 +21,7 @@ describe('TouchBarManager', () => {
     appState.versions = mockVersions;
     appState.isRunning = false;
 
-    appState.versions['2.0.1'].state = ElectronVersionState.unknown;
+    appState.versions['2.0.1'].state = VersionState.unknown;
   });
 
   it('creates a touch bar with versions', () => {
@@ -38,8 +38,8 @@ describe('TouchBarManager', () => {
   it('updates the versions when the versions change', () => {
     const touchBarMgr = new TouchBarManager(appState);
     appState.versions['3.3.3'] = {
-      state: ElectronVersionState.downloading,
-      source: ElectronVersionSource.remote,
+      state: VersionState.downloading,
+      source: VersionSource.remote,
       version: '3.3.3'
     };
 
