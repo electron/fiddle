@@ -91,7 +91,7 @@
     "jest": "^25.1.0",
     "less": "^3.11.1",
     "log-symbols": "^3.0.0",
-    "node-abi": "^2.15.0",
+    "node-abi": "^2.18.0",
     "node-fetch": "^2.6.0",
     "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.12.4",
