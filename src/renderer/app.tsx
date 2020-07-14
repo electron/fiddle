@@ -54,6 +54,7 @@ export class App {
     editorValues: Partial<EditorValues>,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>
   ) {
+    console.warn('@@@@@', filePath, gistId, templateName)
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
     if (this.state.isUnsaved) {
       this.state.setGenericDialogOptions({
@@ -81,7 +82,6 @@ export class App {
     }
 
 
-    document.title = getTitle(this.state);
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
     this.state.templateName = templateName;
@@ -90,6 +90,9 @@ export class App {
     await this.state.setVisibleMosaics(visibleEditors);
     await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
+
+
+    document.title = getTitle(this.state);
 
     return true;
   }

@@ -100,7 +100,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
         isUpdating: true
       });
       const gist = await octo.gists.update({
-        gist_id: appState.gistId,
+        gist_id: appState.gistId!,
         files: this.gistFilesList(values) as any,
       });
 
@@ -118,6 +118,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
         });
 
         appState.gistId = gist.data.id;
+        appState.localPath = undefined;
 
         console.log(`Publish Button: Publishing done`, { gist });
         this.renderToast({ message: 'Publishing done successfully!' });
