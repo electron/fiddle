@@ -21,6 +21,6 @@ export function idFromUrl(input: string): string | null {
  * @param {string} input
  * @returns {string}
  */
-export function urlFromId(input: string | undefined): string {
+export function urlFromId(input?: string): string {
   return input ? `https://gist.github.com/${input}` : '';
 }
