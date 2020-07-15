@@ -103,7 +103,8 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+      // use find here because the index is platform-specific
+      const submenu = result.find((r: any) => r.label === 'Edit').submenu as Array<Electron.MenuItemConstructorOptions>;
 
       const selectAll = submenu.find(({ label }) => label === 'Select All');
       (selectAll as any).click();
