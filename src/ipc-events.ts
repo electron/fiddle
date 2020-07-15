@@ -27,6 +27,7 @@ export enum IpcEvents {
   BEFORE_QUIT = 'BEFORE_QUIT',
   CONFIRM_QUIT = 'CONFIRM_QUIT',
   SET_APPDATA_DIR = 'SET_APPDATA_DIR',
+  SELECT_ALL_IN_EDITOR = 'SELECT_ALL_IN_EDITOR'
 }
 
 export const ipcMainEvents = [
@@ -61,6 +62,7 @@ export const ipcRendererEvents = [
   IpcEvents.BISECT_COMMANDS_TOGGLE,
   IpcEvents.BEFORE_QUIT,
   IpcEvents.SET_APPDATA_DIR,
+  IpcEvents.SELECT_ALL_IN_EDITOR
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL = 'WEBCONTENTS_READY_FOR_IPC_SIGNAL';

@@ -92,6 +92,16 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       this.toggleEditorOption(cmd);
     });
 
+    ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
+      // programmatically fetch all editor contents and set as selection
+      const editor = getFocusedEditor();
+      const range = editor?.getModel()?.getFullModelRange();
+
+      if (!!range) {
+        editor?.setSelection(range);
+      }
+    });
+
     this.setState({ isMounted: true });
     await this.loadMonaco();
     this.props.appState.isUnsaved = false;
@@ -103,6 +113,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
+    ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
   }
 
   /**

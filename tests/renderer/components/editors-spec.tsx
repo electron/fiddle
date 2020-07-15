@@ -138,8 +138,8 @@ describe('Editors component', () => {
     const wrapper = shallow(<Editors appState={store} />);
     const instance: Editors = wrapper.instance() as any;
     (instance as any).disposeLayoutAutorun = jest.fn();
-
-    instance.componentWillUnmount();
+    
+    wrapper.unmount();
 
     expect(instance.disposeLayoutAutorun).toHaveBeenCalledTimes(1);
   });
@@ -154,7 +154,7 @@ describe('Editors component', () => {
   });
 
   describe('IPC commands', () => {
-    it('handles an MONACO_EXECUTE_COMMAND command', () => {
+    it('handles a MONACO_EXECUTE_COMMAND command', () => {
       shallow(<Editors appState={store} />);
 
       const mockAction = {
@@ -182,6 +182,22 @@ describe('Editors component', () => {
         done();
       });
     });
+
+    it('handles a SELECT_ALL_IN_EDITOR command', (done) => {
+      shallow(<Editors appState={store} />);
+      const mockEditor = {
+        getModel: () => ({
+          getFullModelRange: jest.fn().mockReturnValue('range')
+        }),
+        setSelection: jest.fn()
+      };
+      (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+      ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+      process.nextTick(() => {
+        expect(mockEditor.setSelection).toHaveBeenCalledWith('range');
+        done();
+      });
+    })
 
     it('handles the monaco editor option commands', () => {
       shallow(<Editors appState={store} />);
