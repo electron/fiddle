@@ -30,7 +30,7 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     this.submit = this.submit.bind(this);
 
     const { gistId } = this.props.appState;
-    const value = gistId ? urlFromId(gistId) : '';
+    const value = urlFromId(gistId);
 
     const { remoteLoader } = window.ElectronFiddle.app;
 

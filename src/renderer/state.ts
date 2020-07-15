@@ -90,7 +90,7 @@ export class AppState {
       [] : this.retrieve('executionFlags') as Array<string>;
 
   // -- Various session-only state ------------------
-  @observable public gistId: string = '';
+  @observable public gistId: string | undefined;
   @observable public versions: Record<string, RunnableVersion> = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;

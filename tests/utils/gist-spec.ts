@@ -31,5 +31,10 @@ describe('gist', () => {
       const result = urlFromId(mockId);
       expect(result).toBe(`https://gist.github.com/${mockId}`);
     });
+
+    it('returns an empty string if id is undefined', () => {
+      const result = urlFromId();
+      expect(result).toBe('');
+    });
   });
 });

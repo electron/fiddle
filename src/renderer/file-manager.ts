@@ -107,6 +107,7 @@ export class FileManager {
 
       if (pathToSave !== localPath) {
         this.appState.localPath = pathToSave;
+        this.appState.gistId = undefined;
       }
 
       this.appState.isUnsaved = false;

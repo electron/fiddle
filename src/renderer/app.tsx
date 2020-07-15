@@ -81,7 +81,6 @@ export class App {
     }
 
 
-    document.title = getTitle(this.state);
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
     this.state.templateName = templateName;
@@ -90,6 +89,9 @@ export class App {
     await this.state.setVisibleMosaics(visibleEditors);
     await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
+
+
+    document.title = getTitle(this.state);
 
     return true;
   }
