@@ -33,7 +33,7 @@ describe('gist', () => {
     });
 
     it('returns an empty string if id is undefined', () => {
-      const result = urlFromId(undefined);
+      const result = urlFromId();
       expect(result).toBe('');
     });
   });
