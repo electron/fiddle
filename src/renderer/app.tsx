@@ -54,7 +54,6 @@ export class App {
     editorValues: Partial<EditorValues>,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>
   ) {
-    console.warn('@@@@@', filePath, gistId, templateName)
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
     if (this.state.isUnsaved) {
       this.state.setGenericDialogOptions({
