@@ -45,7 +45,7 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
         const browserWindow = BrowserWindow.getFocusedWindow();
 
         if (browserWindow && !browserWindow.isDestroyed()) {
-          browserWindow.webContents.openDevTools({ mode: 'bottom' });
+          browserWindow.webContents.toggleDevTools();
         }
       }
     },
