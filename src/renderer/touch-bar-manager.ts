@@ -42,17 +42,6 @@ export class TouchBarManager {
   public versionSelectorBtn: Electron.TouchBarButton;
   public selectedVersion: string = '';
   public versionSelectorSelectBtn: Electron.TouchBarButton;
-  // Lol have mercy, TS
-  public items: Array<Electron.TouchBarButton
-    | Electron.TouchBarColorPicker
-    | Electron.TouchBarGroup
-    | Electron.TouchBarLabel
-    | Electron.TouchBarPopover
-    | Electron.TouchBarScrubber
-    | Electron.TouchBarSegmentedControl
-    | Electron.TouchBarSlider
-    | Electron.TouchBarSpacer>
-    | undefined;
 
   constructor(public readonly appState: AppState) {
     this.selectVersion = this.selectVersion.bind(this);
@@ -125,7 +114,6 @@ export class TouchBarManager {
    */
   public setTouchBar(options: Partial<Electron.TouchBarConstructorOptions>) {
     try {
-      this.items = options.items;
       this.touchBar = new TouchBar(options as Electron.TouchBarConstructorOptions);
       this.browserWindow = this.browserWindow || remote.getCurrentWindow();
       this.browserWindow.setTouchBar(this.touchBar);
