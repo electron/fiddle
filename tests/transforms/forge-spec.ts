@@ -12,11 +12,11 @@ describe('forgeTransform()', () => {
     const files = await forgeTransform(filesBefore);
     expect(JSON.parse(files.get('package.json')!)).toEqual({
       devDependencies: {
-        '@electron-forge/cli': '6.0.0-beta.34',
-        '@electron-forge/maker-deb': '6.0.0-beta.34',
-        '@electron-forge/maker-rpm': '6.0.0-beta.34',
-        '@electron-forge/maker-squirrel': '6.0.0-beta.34',
-        '@electron-forge/maker-zip': '6.0.0-beta.34'
+        '@electron-forge/cli': '6.0.0-beta.52',
+        '@electron-forge/maker-deb': '6.0.0-beta.52',
+        '@electron-forge/maker-rpm': '6.0.0-beta.52',
+        '@electron-forge/maker-squirrel': '6.0.0-beta.52',
+        '@electron-forge/maker-zip': '6.0.0-beta.52'
       },
       scripts: {
         start: 'electron-forge start',
