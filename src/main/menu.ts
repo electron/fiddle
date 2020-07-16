@@ -243,6 +243,15 @@ export function setupMenu() {
         item.submenu.splice(2, 0, ...getPreferencesItems());
       }
 
+      // Custom handler for "Select All" for Monaco
+      if (label === 'Edit' && isSubmenu(item.submenu)) {
+        const selectAll = item.submenu.find(i => i.label === 'Select All')!;
+        delete selectAll.role; // override default role
+        selectAll.click = () => {
+          ipcMainManager.send(IpcEvents.SELECT_ALL_IN_EDITOR);
+        }
+      }
+
       // Tweak "View" menu
       if (label === 'View' && isSubmenu(item.submenu)) {
         // remove "Reload" (has weird behaviour) and "Toggle Developer Tools"

@@ -98,6 +98,18 @@ describe('menu', () => {
       expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BISECT_COMMANDS_TOGGLE);
 
     });
+
+    it('overwrites Select All command', () => {
+      setupMenu();
+
+      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      // use find here because the index is platform-specific
+      const submenu = result.find((r: any) => r.label === 'Edit').submenu as Array<Electron.MenuItemConstructorOptions>;
+
+      const selectAll = submenu.find(({ label }) => label === 'Select All');
+      (selectAll as any).click();
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.SELECT_ALL_IN_EDITOR);
+    })
   });
 
   describe('menu groups', () => {
