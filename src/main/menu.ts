@@ -45,12 +45,7 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
         const browserWindow = BrowserWindow.getFocusedWindow();
 
         if (browserWindow && !browserWindow.isDestroyed()) {
-          const { webContents } = browserWindow;
-          if (webContents.isDevToolsOpened()) {
-            browserWindow.webContents.closeDevTools();
-          } else {
-            browserWindow.webContents.openDevTools();
-          }
+          browserWindow.webContents.toggleDevTools();
         }
       }
     },

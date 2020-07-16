@@ -123,11 +123,8 @@ describe('menu', () => {
       });
 
       it('toggles developer tools', () => {
-
         const mocks = {
-          openDevTools: jest.fn(),
-          closeDevTools: jest.fn(),
-          isDevToolsOpened: jest.fn()
+          toggleDevTools: jest.fn(),
         };
 
         (electron.BrowserWindow.getFocusedWindow as any).mockReturnValue({
@@ -135,15 +132,8 @@ describe('menu', () => {
           webContents: mocks
         });
 
-        mocks.isDevToolsOpened.mockReturnValueOnce(false);
-
         help.submenu[3].click();
-        expect(mocks.openDevTools).toHaveBeenCalled();
-
-        mocks.isDevToolsOpened.mockReturnValueOnce(true);
-
-        help.submenu[3].click();
-        expect(mocks.closeDevTools).toHaveBeenCalled();
+        expect(mocks.toggleDevTools).toHaveBeenCalled();
       });
 
       it('opens the Fiddle repo', () => {
