@@ -10,13 +10,13 @@ import { main, onBeforeQuit, onReady, onWindowsAllClosed, quitAppIfConfirmed } f
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
-import { setupAboutPanel } from '../../src/utils/set-about-panel';
+import { setupAboutPanel } from '../../src/main/about-panel';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn()
 }));
 
-jest.mock('../../src/utils/set-about-panel', () => ({
+jest.mock('../../src/main/about-panel', () => ({
   setupAboutPanel: jest.fn()
 }));
 
