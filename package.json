@@ -43,7 +43,7 @@
     "@octokit/rest": "^16.43.1",
     "@sentry/electron": "^1.2.1",
     "classnames": "^2.2.6",
-    "electron-default-menu": "^1.0.1",
+    "electron-default-menu": "1.0.2",
     "electron-devtools-installer": "^2.2.4",
     "electron-squirrel-startup": "^1.0.0",
     "extract-zip": "^1.6.7",
