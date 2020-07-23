@@ -43,11 +43,13 @@ Array [
   <p
     className="bp3-running-text"
   >
-    The following demos display only a subset of what the 
+    The following demos display only a subset of what the
+     
     <code>
       app
     </code>
-    module is capable of. If you want to see its full abilities, check out the documentation on 
+    module is capable of. If you want to see its full abilities, check out the documentation on
+     
     <a
       id="open-url"
       onClick={[Function]}
@@ -262,7 +264,8 @@ Array [
       Process & Device Information
     </h4>
     <p>
-      Need to query information about the process or system? The 
+      Need to query information about the process or system? The
+       
       <code>
         app
       </code>
@@ -311,7 +314,8 @@ Array [
   <p
     className="b3-running-text"
   >
-    For more documentation, visit 
+    For more documentation, visit
+     
     <a
       id="open-url"
       onClick={[Function]}
@@ -323,7 +327,8 @@ Array [
   <p
     className="bp3-text-muted"
   >
-    By the way, Electron Fiddle and the documentation you see here is entirely open source. If you have ideas on how to improve it, we'd love to have your contributions! You can find the repository on 
+    By the way, Electron Fiddle and the documentation you see here is entirely open source. If you have ideas on how to improve it, we'd love to have your contributions! You can find the repository on
+     
     <a
       id="open-github"
       onClick={[Function]}

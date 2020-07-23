@@ -799,7 +799,13 @@ export class AppState {
    */
   private save(
     key: string,
-    value?: string | number | Record<string, unknown> | null | boolean,
+    value?:
+      | string
+      | number
+      | Array<any>
+      | Record<string, unknown>
+      | null
+      | boolean,
   ) {
     if (value) {
       const _value =

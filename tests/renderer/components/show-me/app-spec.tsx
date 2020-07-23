@@ -27,16 +27,14 @@ describe('getSubsetOnly()', () => {
   });
 
   it('renders', () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('does not render the show/hide on non-darwin', async () => {
     overridePlatform('win32');
 
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
     const element = wrapper.find('button#show-hide');
 
     expect(element.length).toBe(0);
@@ -45,8 +43,7 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the show/hide example', async () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#show-hide').simulate('click');
 
@@ -61,8 +58,7 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the focus example', async () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#focus').simulate('click');
 
@@ -76,8 +72,7 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the paths example', () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#special-paths').simulate('click');
     const specialPaths = wrapper
@@ -101,8 +96,7 @@ desktop: /test-path`.trim(),
       metrics: 123,
     });
 
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#process-metrics').simulate('click');
     const specialPaths = wrapper
