@@ -15,7 +15,7 @@ describe('update', () => {
     setupUpdates();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    (setTimeout as unknown as jest.Mock).mock.calls[0][0]();
+    ((setTimeout as unknown) as jest.Mock).mock.calls[0][0]();
 
     expect(updateElectronApp).toHaveBeenCalled();
   });

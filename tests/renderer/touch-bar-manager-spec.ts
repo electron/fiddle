@@ -29,7 +29,7 @@ describe('TouchBarManager', () => {
 
     expect(touchBarMgr.versionSelector.items).toHaveLength(3);
 
-    const [ item ] = touchBarMgr.versionSelector.items;
+    const [item] = touchBarMgr.versionSelector.items;
 
     expect(item.icon).toBe(undefined);
     expect(item.label).toBe(`💾 2.0.2`);
@@ -40,12 +40,12 @@ describe('TouchBarManager', () => {
     appState.versions['3.3.3'] = {
       state: VersionState.downloading,
       source: VersionSource.remote,
-      version: '3.3.3'
+      version: '3.3.3',
     };
 
     expect(touchBarMgr.versionSelector.items).toHaveLength(4);
 
-    const [ item ] = touchBarMgr.versionSelector.items;
+    const [item] = touchBarMgr.versionSelector.items;
 
     expect(item.icon).toBe(undefined);
     expect(item.label).toBe(`⏬ 3.3.3`);

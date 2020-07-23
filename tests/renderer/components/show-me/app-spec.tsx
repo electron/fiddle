@@ -16,7 +16,9 @@ describe('getSubsetOnly()', () => {
     jest.useFakeTimers();
     overridePlatform('darwin');
 
-    ({ ShowMeApp } = require('../../../../src/renderer/components/show-me/app'));
+    ({
+      ShowMeApp,
+    } = require('../../../../src/renderer/components/show-me/app'));
   });
 
   afterAll(() => {
@@ -50,7 +52,7 @@ describe('getSubsetOnly()', () => {
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
 
-    for (const [ method ] of (setTimeout as any).mock.calls) {
+    for (const [method] of (setTimeout as any).mock.calls) {
       act(method);
     }
 
@@ -66,7 +68,7 @@ describe('getSubsetOnly()', () => {
 
     expect(setTimeout).toHaveBeenCalledTimes(3);
 
-    for (const [ method ] of (setTimeout as any).mock.calls) {
+    for (const [method] of (setTimeout as any).mock.calls) {
       act(method);
     }
 
@@ -78,28 +80,35 @@ describe('getSubsetOnly()', () => {
     const wrapper = mount(<ShowMeApp appState={mockState} />);
 
     wrapper.find('button#special-paths').simulate('click');
-    const specialPaths = wrapper.find('pre#special-paths-content').text().trim();
+    const specialPaths = wrapper
+      .find('pre#special-paths-content')
+      .text()
+      .trim();
 
-    expect(specialPaths).toEqual(`
+    expect(specialPaths).toEqual(
+      `
 home: ~
 appData: /test-path
 userData: /Users/fake-user
 temp: /test-path
 downloads: /test-path
-desktop: /test-path`.trim()
+desktop: /test-path`.trim(),
     );
   });
 
   it('handles the metrics example', () => {
-    (electron.remote.app.getAppMetrics as jest.Mock).mockReturnValue(
-      { metrics: 123 }
-    );
+    (electron.remote.app.getAppMetrics as jest.Mock).mockReturnValue({
+      metrics: 123,
+    });
 
     const mockState = {};
     const wrapper = mount(<ShowMeApp appState={mockState} />);
 
     wrapper.find('button#process-metrics').simulate('click');
-    const specialPaths = wrapper.find('pre#process-metrics-content').text().trim();
+    const specialPaths = wrapper
+      .find('pre#process-metrics-content')
+      .text()
+      .trim();
 
     expect(JSON.parse(specialPaths)).toEqual({ metrics: 123 });
   });

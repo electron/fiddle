@@ -12,14 +12,14 @@ enum SettingsSections {
   General = 'General',
   Electron = 'Electron',
   Execution = 'Execution',
-  Credits = 'Credits'
+  Credits = 'Credits',
 }
 
 const settingsSections = [
   SettingsSections.General,
   SettingsSections.Electron,
   SettingsSections.Execution,
-  SettingsSections.Credits
+  SettingsSections.Credits,
 ];
 
 export interface SettingsProps {
@@ -42,7 +42,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     super(props);
 
     this.state = {
-      section: SettingsSections.General
+      section: SettingsSections.General,
     };
 
     this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
@@ -117,13 +117,13 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     if (!isSettingsShowing) return null;
 
     return (
-      <div className='settings'>
-        <div className='settings-menu'>
+      <div className="settings">
+        <div className="settings-menu">
           <ul>{this.renderOptions()}</ul>
         </div>
-        <div className='settings-content'>
-          <div className='settings-close' onClick={appState.toggleSettings}>
-            <Icon icon='cross' />
+        <div className="settings-content">
+          <div className="settings-close" onClick={appState.toggleSettings}>
+            <Icon icon="cross" />
           </div>
           {this.renderContent()}
         </div>

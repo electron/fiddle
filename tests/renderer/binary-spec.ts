@@ -3,7 +3,7 @@ import {
   getDownloadingVersions,
   getElectronBinaryPath,
   removeBinary,
-  setupBinary
+  setupBinary,
 } from '../../src/renderer/binary';
 import { removeTypeDefsForVersion } from '../../src/renderer/fetch-types';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -16,7 +16,7 @@ jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
 });
 jest.mock('../../src/renderer/constants', () => ({
-  USER_DATA_PATH: 'user/data/'
+  USER_DATA_PATH: 'user/data/',
 }));
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => {
@@ -26,15 +26,14 @@ jest.mock('../../src/utils/import', () => ({
     if (p === 'extract-zip') {
       return { default: require('extract-zip') };
     }
-  }
+  },
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
-  removeTypeDefsForVersion: jest.fn()
+  removeTypeDefsForVersion: jest.fn(),
 }));
 jest.mock('@electron/get', () => ({
-  download: jest.fn()
+  download: jest.fn(),
 }));
-
 
 describe('binary', () => {
   let mockState: any = {};
@@ -43,9 +42,9 @@ describe('binary', () => {
     mockState = {
       versions: {
         '3.0.0': {
-          state: 'downloading'
-        }
-      }
+          state: 'downloading',
+        },
+      },
     };
   });
 
@@ -75,7 +74,7 @@ describe('binary', () => {
       expect(fs.remove).toHaveBeenCalledTimes(4);
     });
 
-    it('attempts to clean up the version\'s associated typedefs', async () => {
+    it("attempts to clean up the version's associated typedefs", async () => {
       const fs = require('fs-extra');
 
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
@@ -95,7 +94,6 @@ describe('binary', () => {
 
       await removeBinary('v3.0.0');
       expect(removeTypeDefsForVersion).toHaveBeenCalledTimes(4);
-
     });
   });
 
@@ -142,7 +140,9 @@ describe('binary', () => {
       overridePlatform('win32');
 
       const result = getElectronBinaryPath('v3.0.0');
-      expect(result).toBe(path.join('user/data/electron-bin/v3.0.0/electron.exe'));
+      expect(result).toBe(
+        path.join('user/data/electron-bin/v3.0.0/electron.exe'),
+      );
     });
 
     it('returns the correct path on Linux', () => {
@@ -156,15 +156,15 @@ describe('binary', () => {
       overridePlatform('darwin');
 
       const result = getElectronBinaryPath('v3.0.0');
-      const expected = 'user/data/electron-bin/v3.0.0/Electron.app/Contents/MacOS/Electron';
+      const expected =
+        'user/data/electron-bin/v3.0.0/Electron.app/Contents/MacOS/Electron';
       expect(result).toBe(path.join(expected));
     });
 
     it('throws on other platforms', () => {
       overridePlatform('bleepbloop');
 
-      expect(() => getElectronBinaryPath('v3.0.0'))
-        .toThrow();
+      expect(() => getElectronBinaryPath('v3.0.0')).toThrow();
     });
   });
 
@@ -210,7 +210,9 @@ describe('binary', () => {
       download.mockReturnValue('/fake/path');
 
       const mockZip = require('extract-zip');
-      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) => c(new Error('bwap-bwap')));
+      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) =>
+        c(new Error('bwap-bwap')),
+      );
 
       await setupBinary(mockState, 'v3.0.0');
     });

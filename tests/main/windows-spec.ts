@@ -6,7 +6,9 @@ import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import {
-  browserWindows, getMainWindowOptions, getOrCreateMainWindow
+  browserWindows,
+  getMainWindowOptions,
+  getOrCreateMainWindow,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -31,8 +33,8 @@ describe('windows', () => {
       backgroundColor: '#1d2427',
       webPreferences: {
         webviewTag: false,
-        nodeIntegration: true
-      }
+        nodeIntegration: true,
+      },
     };
 
     afterEach(() => {
@@ -51,7 +53,10 @@ describe('windows', () => {
 
     it('returns the expected output on macOS', () => {
       overridePlatform('darwin');
-      expect(getMainWindowOptions()).toEqual({ ...expectedBase, titleBarStyle: 'hidden' });
+      expect(getMainWindowOptions()).toEqual({
+        ...expectedBase,
+        titleBarStyle: 'hidden',
+      });
     });
   });
 
@@ -78,7 +83,7 @@ describe('windows', () => {
 
     it('prevents new-window"', () => {
       const e = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       };
 
       getOrCreateMainWindow();
@@ -89,7 +94,7 @@ describe('windows', () => {
 
     it('prevents will-navigate"', () => {
       const e = {
-        preventDefault: jest.fn()
+        preventDefault: jest.fn(),
       };
 
       getOrCreateMainWindow();

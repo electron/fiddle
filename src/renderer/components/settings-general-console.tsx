@@ -12,10 +12,10 @@ export interface ConsoleSettingsProps {
  * Settings content to manage console-related preferences.
  *
  * @class ConsoleSettings
- * @extends {React.Component<ConsoleSettingsProps, {}>}
+ * @extends {React.Component<ConsoleSettingsProps>}
  */
 @observer
-export class ConsoleSettings extends React.Component<ConsoleSettingsProps, {}> {
+export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
   constructor(props: ConsoleSettingsProps) {
     super(props);
 
@@ -28,9 +28,7 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps, {}> {
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleClearOnRunChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleClearOnRunChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isClearingConsoleOnRun = checked;
   }
@@ -49,7 +47,7 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps, {}> {
           <FormGroup label={clearOnRunLabel}>
             <Checkbox
               checked={isClearingConsoleOnRun}
-              label='Clear on run.'
+              label="Clear on run."
               onChange={this.handleClearOnRunChange}
             />
           </FormGroup>

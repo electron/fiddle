@@ -7,7 +7,7 @@ describe('getDocsUrlForModule()', () => {
     expect(result).toEqual({
       full: `https://electronjs.org/docs/api/app`,
       repo: `https://github.com/electron/electron/blob/master/docs/api/app.md`,
-      short: `electronjs.org/docs/api/app`
+      short: `electronjs.org/docs/api/app`,
     });
   });
 });

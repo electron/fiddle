@@ -17,10 +17,12 @@ export function setupDialogs() {
     showConfirmationDialog(args);
   });
 
-  ipcMainManager.on(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, async (event) => {
-    await showOpenDialog(event);
-  });
-
+  ipcMainManager.on(
+    IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
+    async (event) => {
+      await showOpenDialog(event);
+    },
+  );
 }
 
 /**
@@ -31,7 +33,7 @@ export function setupDialogs() {
 function showWarningDialog(args: Electron.MessageBoxOptions) {
   dialog.showMessageBox(getOrCreateMainWindow(), {
     type: 'warning',
-    ...args
+    ...args,
   });
 }
 
@@ -43,14 +45,14 @@ function showWarningDialog(args: Electron.MessageBoxOptions) {
 function showConfirmationDialog(args: Electron.MessageBoxOptions) {
   dialog.showMessageBox(getOrCreateMainWindow(), {
     type: 'warning',
-    ...args
+    ...args,
   });
 }
 
 async function showOpenDialog(event: IpcMainEvent) {
   const { filePaths } = await dialog.showOpenDialog({
     title: 'Open Folder',
-    properties: ['openDirectory']
+    properties: ['openDirectory'],
   });
 
   if (!filePaths || filePaths.length < 1) {

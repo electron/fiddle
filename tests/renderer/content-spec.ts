@@ -33,7 +33,7 @@ describe('content', () => {
         (window.ElectronFiddle.app.getEditorValues as jest.Mock<
           any
         >).mockReturnValueOnce({
-          main: 'hi'
+          main: 'hi',
         });
 
         const isUnchanged = await isContentUnchanged(EditorId.main);
@@ -44,7 +44,7 @@ describe('content', () => {
         (window.ElectronFiddle.app.getEditorValues as jest.Mock<
           any
         >).mockReturnValueOnce({
-          main: require('../../src/content/main').main
+          main: require('../../src/content/main').main,
         });
 
         const isUnchanged = await isContentUnchanged(EditorId.main);
@@ -55,7 +55,7 @@ describe('content', () => {
         (window.ElectronFiddle.app.getEditorValues as jest.Mock<
           any
         >).mockReturnValueOnce({
-          main: require('../../src/content/main-1-x-x').main
+          main: require('../../src/content/main-1-x-x').main,
         });
 
         const isUnchanged = await isContentUnchanged(EditorId.main);
@@ -68,7 +68,7 @@ describe('content', () => {
         (window.ElectronFiddle.app.getEditorValues as jest.Mock<
           any
         >).mockReturnValueOnce({
-          renderer: 'hi'
+          renderer: 'hi',
         });
 
         const isUnchanged = await isContentUnchanged(EditorId.renderer);
@@ -79,7 +79,7 @@ describe('content', () => {
         (window.ElectronFiddle.app.getEditorValues as jest.Mock<
           any
         >).mockReturnValueOnce({
-          renderer: require('../../src/content/renderer').renderer
+          renderer: require('../../src/content/renderer').renderer,
         });
 
         const isUnchanged = await isContentUnchanged(EditorId.renderer);

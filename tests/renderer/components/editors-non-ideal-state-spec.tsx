@@ -15,4 +15,3 @@ describe('renderNonIdealState()', () => {
     expect(mockState.setVisibleMosaics).toHaveBeenCalledTimes(1);
   });
 });
-

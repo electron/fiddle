@@ -10,16 +10,16 @@ describe('Bisect commands component', () => {
     store = {
       Bisector: {
         continue: jest.fn(),
-        getCurrentVersion: jest.fn()
+        getCurrentVersion: jest.fn(),
       },
       currentElectronVersion: {
-        state: VersionState.ready
+        state: VersionState.ready,
       },
       setVersion: jest.fn(),
       version: '1.0.0',
       pushOutput: jest.fn(),
       setGenericDialogOptions: jest.fn(),
-      isGenericDialogShowing: false
+      isGenericDialogShowing: false,
     };
   });
 
@@ -66,7 +66,7 @@ describe('Bisect commands component', () => {
       const instance: BisectHandler = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
-        version: '2.0.0'
+        version: '2.0.0',
       });
       const mockStop = jest.fn();
       window.ElectronFiddle.app.runner.stop = mockStop;
@@ -80,7 +80,7 @@ describe('Bisect commands component', () => {
       const instance: BisectHandler = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
-        version: '2.0.0'
+        version: '2.0.0',
       });
       instance.continueBisect(true);
       expect(store.setVersion).toHaveBeenCalledWith('2.0.0');
@@ -92,7 +92,10 @@ describe('Bisect commands component', () => {
       instance.terminateBisect = jest.fn();
 
       // same value is only returned when there is only 1 version left
-      store.Bisector.continue.mockReturnValue([{ version: 'minVer' }, { version: 'maxVer' }]);
+      store.Bisector.continue.mockReturnValue([
+        { version: 'minVer' },
+        { version: 'maxVer' },
+      ]);
       instance.continueBisect(true);
       expect(store.setVersion).not.toHaveBeenCalled();
       expect(instance.terminateBisect).toHaveBeenCalled();
@@ -101,7 +104,7 @@ describe('Bisect commands component', () => {
       expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
         cancel: undefined,
         label: 'Bisect complete. Check between versions minVer and maxVer.',
-        type: 'success'
+        type: 'success',
       });
     });
   });

@@ -30,12 +30,17 @@ describe('Chrome-Mac component', () => {
       const wrapper = mount(<ChromeMac appState={store} />);
       const chrome = wrapper.instance() as ChromeMac;
       const fakeWindow = new MockBrowserWindow();
-      (electron.remote.systemPreferences.getUserDefault as jest.Mock).mockReturnValue('Minimize');
-      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(fakeWindow);
+      (electron.remote.systemPreferences
+        .getUserDefault as jest.Mock).mockReturnValue('Minimize');
+      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(
+        fakeWindow,
+      );
 
       chrome.handleDoubleClick();
 
-      expect(electron.remote.systemPreferences.getUserDefault).toHaveBeenCalled();
+      expect(
+        electron.remote.systemPreferences.getUserDefault,
+      ).toHaveBeenCalled();
       expect(fakeWindow.minimize).toHaveBeenCalled();
       expect(fakeWindow.maximize).not.toHaveBeenCalled();
       expect(fakeWindow.unmaximize).not.toHaveBeenCalled();
@@ -45,13 +50,18 @@ describe('Chrome-Mac component', () => {
       const wrapper = mount(<ChromeMac appState={store} />);
       const chrome = wrapper.instance() as ChromeMac;
       const fakeWindow = new MockBrowserWindow();
-      (electron.remote.systemPreferences.getUserDefault as jest.Mock).mockReturnValue('Maximize');
-      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(fakeWindow);
+      (electron.remote.systemPreferences
+        .getUserDefault as jest.Mock).mockReturnValue('Maximize');
+      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(
+        fakeWindow,
+      );
       fakeWindow.isMaximized.mockReturnValue(false);
 
       chrome.handleDoubleClick();
 
-      expect(electron.remote.systemPreferences.getUserDefault).toHaveBeenCalled();
+      expect(
+        electron.remote.systemPreferences.getUserDefault,
+      ).toHaveBeenCalled();
       expect(fakeWindow.minimize).not.toHaveBeenCalled();
       expect(fakeWindow.maximize).toHaveBeenCalled();
       expect(fakeWindow.unmaximize).not.toHaveBeenCalled();
@@ -61,13 +71,18 @@ describe('Chrome-Mac component', () => {
       const wrapper = mount(<ChromeMac appState={store} />);
       const chrome = wrapper.instance() as ChromeMac;
       const fakeWindow = new MockBrowserWindow();
-      (electron.remote.systemPreferences.getUserDefault as jest.Mock).mockReturnValue('Maximize');
-      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(fakeWindow);
+      (electron.remote.systemPreferences
+        .getUserDefault as jest.Mock).mockReturnValue('Maximize');
+      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(
+        fakeWindow,
+      );
       fakeWindow.isMaximized.mockReturnValue(true);
 
       chrome.handleDoubleClick();
 
-      expect(electron.remote.systemPreferences.getUserDefault).toHaveBeenCalled();
+      expect(
+        electron.remote.systemPreferences.getUserDefault,
+      ).toHaveBeenCalled();
       expect(fakeWindow.minimize).not.toHaveBeenCalled();
       expect(fakeWindow.maximize).not.toHaveBeenCalled();
       expect(fakeWindow.unmaximize).toHaveBeenCalled();
@@ -77,12 +92,17 @@ describe('Chrome-Mac component', () => {
       const wrapper = mount(<ChromeMac appState={store} />);
       const chrome = wrapper.instance() as ChromeMac;
       const fakeWindow = new MockBrowserWindow();
-      (electron.remote.systemPreferences.getUserDefault as jest.Mock).mockReturnValue('Nonsense');
-      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(fakeWindow);
+      (electron.remote.systemPreferences
+        .getUserDefault as jest.Mock).mockReturnValue('Nonsense');
+      (electron.remote.getCurrentWindow as jest.Mock).mockReturnValue(
+        fakeWindow,
+      );
 
       chrome.handleDoubleClick();
 
-      expect(electron.remote.systemPreferences.getUserDefault).toHaveBeenCalled();
+      expect(
+        electron.remote.systemPreferences.getUserDefault,
+      ).toHaveBeenCalled();
       expect(fakeWindow.minimize).not.toHaveBeenCalled();
       expect(fakeWindow.maximize).not.toHaveBeenCalled();
       expect(fakeWindow.unmaximize).not.toHaveBeenCalled();

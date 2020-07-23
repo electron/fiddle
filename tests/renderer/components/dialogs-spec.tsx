@@ -22,8 +22,13 @@ describe('Dialogs component', () => {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       isAddVersionDialogShowing: false,
-      genericDialogOptions: { type: GenericDialogType.confirm, label: '', ok: '', cancel: '' },
-      isGenericDialogShowing: true
+      genericDialogOptions: {
+        type: GenericDialogType.confirm,
+        label: '',
+        ok: '',
+        cancel: '',
+      },
+      isGenericDialogShowing: true,
     };
   });
 

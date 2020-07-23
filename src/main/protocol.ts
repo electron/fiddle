@@ -8,7 +8,11 @@ import { isDevMode } from '../utils/devmode';
 import { ipcMainManager } from './ipc';
 
 const PROTOCOL = 'electron-fiddle';
-const squirrelPath = path.resolve(path.dirname(process.execPath), '..', 'electron-fiddle.exe');
+const squirrelPath = path.resolve(
+  path.dirname(process.execPath),
+  '..',
+  'electron-fiddle.exe',
+);
 
 const handlePotentialProtocolLaunch = (url: string) => {
   if (!app.isReady()) {
@@ -26,14 +30,18 @@ const handlePotentialProtocolLaunch = (url: string) => {
     case 'gist':
       if (pathParts.length === 1) {
         // We only have a gist ID
-        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [{
-          id: pathParts[0],
-        }]);
+        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [
+          {
+            id: pathParts[0],
+          },
+        ]);
       } else if (pathParts.length === 2) {
         // We have a gist owner and gist ID, we can ignore the owner
-        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [{
-          id: pathParts[1],
-        }]);
+        ipcMainManager.send(IpcEvents.LOAD_GIST_REQUEST, [
+          {
+            id: pathParts[1],
+          },
+        ]);
       } else {
         // This is a super invalid gist launch
         return;
@@ -44,10 +52,12 @@ const handlePotentialProtocolLaunch = (url: string) => {
       if (pathParts.length > 1) {
         // First part of the commit HASH / ref / branch
         // Rest is the path to the example
-        ipcMainManager.send(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [{
-          ref: pathParts[0],
-          path: pathParts.slice(1).join('/'),
-        }]);
+        ipcMainManager.send(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [
+          {
+            ref: pathParts[0],
+            path: pathParts.slice(1).join('/'),
+          },
+        ]);
       } else {
         // This is an invalid electron launch
         return;

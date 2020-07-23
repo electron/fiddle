@@ -1,5 +1,9 @@
 import { EditorId, PanelId } from '../../src/interfaces';
-import { isEditorBackup, isEditorId, isPanelId } from '../../src/utils/type-checks';
+import {
+  isEditorBackup,
+  isEditorId,
+  isPanelId,
+} from '../../src/utils/type-checks';
 
 describe('Type checks', () => {
   describe('isEditorId()', () => {

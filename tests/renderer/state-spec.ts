@@ -1,53 +1,70 @@
 import * as MonacoType from 'monaco-editor';
 
-import { ALL_MOSAICS, EditorId, GenericDialogType, PanelId, VersionSource, VersionState } from '../../src/interfaces';
+import {
+  ALL_MOSAICS,
+  EditorId,
+  GenericDialogType,
+  PanelId,
+  VersionSource,
+  VersionState,
+} from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
-import { getDownloadedVersions, getDownloadingVersions, removeBinary, setupBinary } from '../../src/renderer/binary';
+import {
+  getDownloadedVersions,
+  getDownloadingVersions,
+  removeBinary,
+  setupBinary,
+} from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { getUpdatedElectronVersions, saveLocalVersions } from '../../src/renderer/versions';
+import {
+  getUpdatedElectronVersions,
+  saveLocalVersions,
+} from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
-
 jest.mock('../../src/renderer/content', () => ({
   isContentUnchanged: jest.fn(),
-  getContent: jest.fn()
+  getContent: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
   setupBinary: jest.fn(),
   getDownloadedVersions: jest.fn(),
-  getDownloadingVersions: jest.fn()
+  getDownloadingVersions: jest.fn(),
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
-  updateEditorTypeDefinitions: jest.fn()
+  updateEditorTypeDefinitions: jest.fn(),
 }));
 jest.mock('../../src/renderer/versions', () => {
-  const { getReleaseChannel } = jest.requireActual('../../src/renderer/versions');
+  const { getReleaseChannel } = jest.requireActual(
+    '../../src/renderer/versions',
+  );
 
   return {
     getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
       return require('../mocks/electron-versions').mockVersionsArray;
     }),
-    getElectronVersions: () => require('../mocks/electron-versions').mockVersionsArray,
+    getElectronVersions: () =>
+      require('../mocks/electron-versions').mockVersionsArray,
     getDefaultVersion: () => '2.0.2',
     ElectronReleaseChannel: {
       stable: 'Stable',
-      beta: 'Beta'
+      beta: 'Beta',
     },
     addLocalVersion: jest.fn(),
     saveLocalVersions: jest.fn(),
-    getReleaseChannel
+    getReleaseChannel,
   };
 });
 jest.mock('../../src/utils/get-title', () => ({
-  getName: jest.fn()
+  getName: jest.fn(),
 }));
 jest.mock('../../src/renderer/ipc');
 
@@ -95,7 +112,10 @@ describe('AppState', () => {
       appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(1);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, true);
+        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+          IpcEvents.CONFIRM_QUIT,
+          true,
+        );
         done();
       });
     });
@@ -114,7 +134,10 @@ describe('AppState', () => {
       appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, false);
+        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+          IpcEvents.CONFIRM_QUIT,
+          false,
+        );
         done();
       });
     });
@@ -137,10 +160,11 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock)
-        .mockImplementationOnce(async () => {
+      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
+        async () => {
           throw new Error('Bwap-bwap');
-        });
+        },
+      );
 
       await appState.updateDownloadedVersionState();
     });
@@ -284,7 +308,9 @@ describe('AppState', () => {
 
   describe('versionsToShow()', () => {
     it('returns all versions for no filters', () => {
-      expect(appState.versionsToShow.length).toEqual(Object.keys(appState.versions).length);
+      expect(appState.versionsToShow.length).toEqual(
+        Object.keys(appState.versions).length,
+      );
     });
 
     it('handles empty items', () => {
@@ -295,16 +321,16 @@ describe('AppState', () => {
     });
 
     it('excludes channels', () => {
-      appState.channelsToShow = [ 'Unsupported' as any ];
+      appState.channelsToShow = ['Unsupported' as any];
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.channelsToShow = [ 'Stable' as any ];
+      appState.channelsToShow = ['Stable' as any];
       expect(appState.versionsToShow.length).toEqual(3);
     });
 
     it('excludes states', () => {
-      appState.statesToShow = [ VersionState.downloading ];
+      appState.statesToShow = [VersionState.downloading];
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.statesToShow = [ VersionState.ready ];
+      appState.statesToShow = [VersionState.ready];
       expect(appState.versionsToShow.length).toEqual(3);
     });
   });
@@ -335,7 +361,7 @@ describe('AppState', () => {
         name: 'local-foo',
         source: VersionSource.local,
         state: VersionState.ready,
-        version: '4.0.0'
+        version: '4.0.0',
       };
 
       await appState.removeVersion('/local/path');
@@ -388,7 +414,9 @@ describe('AppState', () => {
       await appState.setVersion('v1.0.0');
 
       expect(getContent).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(
+        1,
+      );
     });
   });
 
@@ -410,12 +438,15 @@ describe('AppState', () => {
 
   describe('setGenericDialogOptions()', () => {
     it('sets the warning dialog options', () => {
-      appState.setGenericDialogOptions({ type: GenericDialogType.warning, label: 'foo' });
+      appState.setGenericDialogOptions({
+        type: GenericDialogType.warning,
+        label: 'foo',
+      });
       expect(appState.genericDialogOptions).toEqual({
         type: GenericDialogType.warning,
         label: 'foo',
         ok: 'Okay',
-        cancel: 'Cancel'
+        cancel: 'Cancel',
       });
     });
   });
@@ -427,15 +458,17 @@ describe('AppState', () => {
       await appState.addLocalVersion({
         localPath: '/fake/path',
         name: 'local-foo',
-        version: '4.0.0'
+        version: '4.0.0',
       });
 
       // We just want to verify that the version state was
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual(
-        ['2.0.2', '2.0.1', '1.8.7']
-      );
+      expect(Object.keys(appState.versions)).toEqual([
+        '2.0.2',
+        '2.0.1',
+        '1.8.7',
+      ]);
     });
   });
 
@@ -492,7 +525,9 @@ describe('AppState', () => {
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
-      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), { bypassBuffer: false });
+      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), {
+        bypassBuffer: false,
+      });
       expect(appState.output[1].text).toBe('Buffer');
 
       resetPlatform();
@@ -530,7 +565,9 @@ describe('AppState', () => {
 
       // we just need to mock something truthy here
       // tslint:disable-next-line:no-object-literal-type-assertion
-      window.ElectronFiddle.editors[EditorId.main] = ({} as MonacoType.editor.IStandaloneCodeEditor);
+      window.ElectronFiddle.editors[
+        EditorId.main
+      ] = {} as MonacoType.editor.IStandaloneCodeEditor;
 
       expect(appState.mosaicArrangement).toEqual(EditorId.main);
       expect(appState.closedPanels[EditorId.renderer]).toBeTruthy();
@@ -545,7 +582,9 @@ describe('AppState', () => {
       for (const mosaic of ALL_MOSAICS) {
         // we just need to mock something truthy here
         // tslint:disable-next-line:no-object-literal-type-assertion
-        window.ElectronFiddle.editors[mosaic] = ({} as MonacoType.editor.IStandaloneCodeEditor);
+        window.ElectronFiddle.editors[
+          mosaic
+        ] = {} as MonacoType.editor.IStandaloneCodeEditor;
       }
 
       await appState.setVisibleMosaics(ALL_MOSAICS);
@@ -563,7 +602,7 @@ describe('AppState', () => {
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
         first: EditorId.renderer,
-        second: EditorId.html
+        second: EditorId.html,
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
       expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
@@ -579,7 +618,7 @@ describe('AppState', () => {
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
         first: EditorId.main,
-        second: EditorId.html
+        second: EditorId.html,
       });
     });
   });
@@ -591,7 +630,7 @@ describe('AppState', () => {
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
         first: EditorId.renderer,
-        second: EditorId.html
+        second: EditorId.html,
       });
 
       appState.resetEditorLayout();

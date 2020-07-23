@@ -18,7 +18,10 @@ describe('get-title', () => {
     });
 
     it('returns a title for a local & gist fiddle', () => {
-      const result = getTitle({ localPath: 'a/b/fiddle', gistId: '123' } as any);
+      const result = getTitle({
+        localPath: 'a/b/fiddle',
+        gistId: '123',
+      } as any);
       expect(result).toBe('Electron Fiddle - gist.github.com/123 a/b/fiddle');
     });
   });

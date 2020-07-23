@@ -12,7 +12,7 @@ import { RunnableVersion } from '../interfaces';
  */
 export function sortedElectronMap<T>(
   versions: Record<string, RunnableVersion>,
-  mapFn: (key: string, version: RunnableVersion) => T
+  mapFn: (key: string, version: RunnableVersion) => T,
 ) {
   return Object.keys(versions)
     .sort((a, b) => {

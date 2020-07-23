@@ -6,26 +6,32 @@ import { app } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
-import { main, onBeforeQuit, onReady, onWindowsAllClosed, quitAppIfConfirmed } from '../../src/main/main';
+import {
+  main,
+  onBeforeQuit,
+  onReady,
+  onWindowsAllClosed,
+  quitAppIfConfirmed,
+} from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { setupAboutPanel } from '../../src/main/about-panel';
 
 jest.mock('../../src/main/windows', () => ({
-  getOrCreateMainWindow: jest.fn()
+  getOrCreateMainWindow: jest.fn(),
 }));
 
 jest.mock('../../src/main/about-panel', () => ({
-  setupAboutPanel: jest.fn()
+  setupAboutPanel: jest.fn(),
 }));
 
 jest.mock('../../src/main/update', () => ({
-  setupUpdates: jest.fn()
+  setupUpdates: jest.fn(),
 }));
 
 jest.mock('../../src/main/squirrel', () => ({
-  shouldQuit: jest.fn(() => false)
+  shouldQuit: jest.fn(() => false),
 }));
 
 jest.mock('../../src/main/ipc');
@@ -41,13 +47,13 @@ describe('main', () => {
 
   beforeAll(() => {
     Object.defineProperty(process, 'platform', {
-      value: 'win32'
+      value: 'win32',
     });
   });
 
   afterAll(() => {
     Object.defineProperty(process, 'platform', {
-      value: oldPlatform
+      value: oldPlatform,
     });
   });
 
@@ -69,7 +75,10 @@ describe('main', () => {
     it('sets up IPC so app can quit if dialog confirmed', () => {
       onBeforeQuit();
       expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BEFORE_QUIT);
-      expect(ipcMainManager.on).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
+      expect(ipcMainManager.on).toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+        quitAppIfConfirmed,
+      );
     });
   });
 
@@ -104,7 +113,7 @@ describe('main', () => {
 
     it('does not quit the app on macOS', () => {
       Object.defineProperty(process, 'platform', {
-        value: 'darwin'
+        value: 'darwin',
       });
 
       onWindowsAllClosed();

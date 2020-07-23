@@ -2,7 +2,7 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  npmRun
+  npmRun,
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -11,7 +11,7 @@ jest.mock('../../src/utils/exec');
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (_p: string) => {
     return { default: require('builtin-modules') };
-  }
+  },
 }));
 
 describe('npm', () => {
@@ -36,7 +36,9 @@ describe('npm', () => {
     it('returns true if npm installed', async () => {
       overridePlatform('darwin');
 
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm'),
+      );
 
       const result = await getIsNpmInstalled();
 
@@ -47,7 +49,9 @@ describe('npm', () => {
     it('returns true if npm installed', async () => {
       overridePlatform('win32');
 
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm'),
+      );
 
       const result = await getIsNpmInstalled(true);
 
@@ -59,7 +63,7 @@ describe('npm', () => {
       overridePlatform('darwin');
 
       (exec as jest.Mock).mockReturnValueOnce(
-        Promise.reject('/usr/bin/fake-npm')
+        Promise.reject('/usr/bin/fake-npm'),
       );
 
       const result = await getIsNpmInstalled(true);
@@ -69,7 +73,9 @@ describe('npm', () => {
     });
 
     it('uses the cache', async () => {
-      (exec as jest.Mock).mockReturnValueOnce(Promise.resolve('/usr/bin/fake-npm'));
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-npm'),
+      );
 
       const one = await getIsNpmInstalled(true);
       expect(one).toBe(true);
@@ -88,7 +94,7 @@ describe('npm', () => {
         main: mockMain,
         renderer: '',
         preload: '',
-        css: ''
+        css: '',
       });
 
       expect(result).toEqual(['say']);
@@ -99,13 +105,19 @@ describe('npm', () => {
     it('attempts to install a single module', async () => {
       installModules({ dir: '/my/directory' }, 'say', 'thing');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
+      expect(exec).toHaveBeenCalledWith(
+        '/my/directory',
+        'npm install -S say thing',
+      );
     });
 
     it('attempts to installs all modules', async () => {
       installModules({ dir: '/my/directory' });
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
+      expect(exec).toHaveBeenCalledWith(
+        '/my/directory',
+        'npm install --dev --prod',
+      );
     });
   });
 

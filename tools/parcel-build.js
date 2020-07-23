@@ -1,13 +1,13 @@
 /* tslint:disable */
 
-const Bundler = require('parcel-bundler')
-const path = require('path')
+const Bundler = require('parcel-bundler');
+const path = require('path');
 
-async function compileParcel (options = {}) {
+async function compileParcel(options = {}) {
   const entryFiles = [
     path.join(__dirname, '../static/index.html'),
-    path.join(__dirname, '../src/main/main.ts')
-  ]
+    path.join(__dirname, '../src/main/main.ts'),
+  ];
 
   const bundlerOptions = {
     outDir: './dist', // The out directory to put the build files in, defaults to dist
@@ -30,18 +30,18 @@ async function compileParcel (options = {}) {
     sourceMaps: true, // Enable or disable sourcemaps, defaults to enabled (minified builds currently always create sourcemaps)
     hmrHostname: '', // A hostname for hot module reload, default to ''
     detailedReport: false, // Prints a detailed report of the bundles, assets, filesizes and times, defaults to false, reports are only printed if watch is disabled,
-    ...options
-  }
+    ...options,
+  };
 
-  const bundler = new Bundler(entryFiles, bundlerOptions)
+  const bundler = new Bundler(entryFiles, bundlerOptions);
 
   // Run the bundler, this returns the main bundle
   // Use the events if you're using watch mode as this promise will only trigger once and not for every rebuild
-  await bundler.bundle()
+  await bundler.bundle();
 }
 
 module.exports = {
-  compileParcel
-}
+  compileParcel,
+};
 
-if (require.main === module) compileParcel()
+if (require.main === module) compileParcel();

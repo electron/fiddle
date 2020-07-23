@@ -13,16 +13,17 @@ export interface ShowMeProps {
  * panel.
  *
  * @class ShowMe
- * @extends {React.Component<ShowMeProps, ShowMeState>}
+ * @extends {React.Component<ShowMeProps>}
  */
 @observer
-export class ShowMe extends React.Component<ShowMeProps, {}> {
+export class ShowMe extends React.Component<ShowMeProps> {
   public render() {
     const { currentDocsDemoPage: showMeName } = this.props.appState;
-    const Content = DOCS_DEMO_COMPONENTS[showMeName] || DOCS_DEMO_COMPONENTS.DEFAULT;
+    const Content =
+      DOCS_DEMO_COMPONENTS[showMeName] || DOCS_DEMO_COMPONENTS.DEFAULT;
 
     return (
-      <div className='show-me-panel'>
+      <div className="show-me-panel">
         <Content appState={this.props.appState} />
       </div>
     );

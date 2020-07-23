@@ -18,7 +18,9 @@ describe('menu', () => {
     electron.app.name = 'Electron Fiddle';
     // need to keep this deprecated API for electron-default-menu mock as well
     (electron.app.getName as any).mockReturnValue('Electron Fiddle');
-    (electron.dialog.showOpenDialog as any).mockReturnValue(Promise.resolve({}));
+    (electron.dialog.showOpenDialog as any).mockReturnValue(
+      Promise.resolve({}),
+    );
   });
 
   afterEach(() => {
@@ -35,7 +37,9 @@ describe('menu', () => {
       expect(result.length).toBe(8);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
+        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+          true,
+        );
         expect(submenu).toBeTruthy();
       });
     });
@@ -49,7 +53,9 @@ describe('menu', () => {
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
+        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+          true,
+        );
         expect(submenu).toBeTruthy();
       });
     });
@@ -63,7 +69,9 @@ describe('menu', () => {
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(true);
+        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+          true,
+        );
         expect(submenu).toBeTruthy();
       });
     });
@@ -74,13 +82,19 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+      const submenu = result[2].submenu as Array<
+        Electron.MenuItemConstructorOptions
+      >;
 
-      const toggleSoftWrap = submenu.find(({ label }) => label === 'Toggle Soft Wrap');
+      const toggleSoftWrap = submenu.find(
+        ({ label }) => label === 'Toggle Soft Wrap',
+      );
       (toggleSoftWrap as any).click();
       expect(ipcMainManager.send).toHaveBeenCalledTimes(1);
 
-      const toggleMap = submenu.find(({ label }) => label === 'Toggle Mini Map');
+      const toggleMap = submenu.find(
+        ({ label }) => label === 'Toggle Mini Map',
+      );
       (toggleMap as any).click();
       expect(ipcMainManager.send).toHaveBeenCalledTimes(2);
     });
@@ -91,12 +105,17 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      const submenu = result[2].submenu as Array<Electron.MenuItemConstructorOptions>;
+      const submenu = result[2].submenu as Array<
+        Electron.MenuItemConstructorOptions
+      >;
 
-      const toggleSoftWrap = submenu.find(({ label }) => label === 'Toggle Bisect Helper');
+      const toggleSoftWrap = submenu.find(
+        ({ label }) => label === 'Toggle Bisect Helper',
+      );
       (toggleSoftWrap as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BISECT_COMMANDS_TOGGLE);
-
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
+        IpcEvents.BISECT_COMMANDS_TOGGLE,
+      );
     });
 
     it('overwrites Select All command', () => {
@@ -104,12 +123,15 @@ describe('menu', () => {
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       // use find here because the index is platform-specific
-      const submenu = result.find((r: any) => r.label === 'Edit').submenu as Array<Electron.MenuItemConstructorOptions>;
+      const submenu = result.find((r: any) => r.label === 'Edit')
+        .submenu as Array<Electron.MenuItemConstructorOptions>;
 
       const selectAll = submenu.find(({ label }) => label === 'Select All');
       (selectAll as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.SELECT_ALL_IN_EDITOR);
-    })
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
+        IpcEvents.SELECT_ALL_IN_EDITOR,
+      );
+    });
   });
 
   describe('menu groups', () => {
@@ -131,7 +153,9 @@ describe('menu', () => {
 
       it('shows the welcome tour', () => {
         help.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.SHOW_WELCOME_TOUR);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.SHOW_WELCOME_TOUR,
+        );
       });
 
       it('toggles developer tools', () => {
@@ -141,7 +165,7 @@ describe('menu', () => {
 
         (electron.BrowserWindow.getFocusedWindow as any).mockReturnValue({
           isDestroyed: () => false,
-          webContents: mocks
+          webContents: mocks,
         });
 
         help.submenu[3].click();
@@ -150,17 +174,23 @@ describe('menu', () => {
 
       it('opens the Fiddle repo', () => {
         help.submenu[5].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith('https://github.com/electron/fiddle');
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+          'https://github.com/electron/fiddle',
+        );
       });
 
       it('opens the Electron repo', () => {
         help.submenu[6].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith('https://github.com/electron/electron');
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+          'https://github.com/electron/electron',
+        );
       });
 
       it('opens the Electron issues', () => {
         help.submenu[7].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith('https://github.com/electron/electron/issues');
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+          'https://github.com/electron/electron/issues',
+        );
       });
     });
 
@@ -175,7 +205,9 @@ describe('menu', () => {
 
       it('shows the preferences', () => {
         preferences.submenu[3].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.OPEN_SETTINGS);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.OPEN_SETTINGS,
+        );
       });
     });
 
@@ -205,8 +237,9 @@ describe('menu', () => {
 
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
-        expect(ipcMainManager.send)
-          .toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, ['App']);
+        expect(
+          ipcMainManager.send,
+        ).toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, ['App']);
       });
     });
 
@@ -226,7 +259,9 @@ describe('menu', () => {
 
       it('packages the fiddle', () => {
         tasks.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_PACKAGE);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.FIDDLE_PACKAGE,
+        );
       });
 
       it('makes the fiddle', () => {
@@ -246,7 +281,9 @@ describe('menu', () => {
 
       it('creates a new fiddle', () => {
         file.submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_NEW_FIDDLE);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.FS_NEW_FIDDLE,
+        );
       });
 
       it('creates a new window', () => {
@@ -262,7 +299,9 @@ describe('menu', () => {
 
       it('saves a Fiddle', () => {
         file.submenu[5].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.FS_SAVE_FIDDLE,
+        );
       });
 
       it('saves a Fiddle as', () => {
@@ -272,7 +311,9 @@ describe('menu', () => {
 
       it('saves a Fiddle as a gist', () => {
         file.submenu[8].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_SAVE_FIDDLE_GIST);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.FS_SAVE_FIDDLE_GIST,
+        );
       });
 
       it('saves a Fiddle as a forge project', () => {

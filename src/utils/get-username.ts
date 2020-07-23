@@ -1,6 +1,6 @@
 import * as os from 'os';
 
-let username: string = '';
+let username = '';
 
 /**
  * Returns the curren username
@@ -9,5 +9,5 @@ let username: string = '';
  * @returns {string}
  */
 export function getUsername(): string {
-  return username = username || os.userInfo().username;
+  return (username = username || os.userInfo().username);
 }

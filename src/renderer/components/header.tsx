@@ -13,15 +13,15 @@ export interface HeaderProps {
  * Everything above the editors, so buttons and the address bar.
  *
  * @class Header
- * @extends {React.Component<HeaderProps, HeaderState>}
+ * @extends {React.Component<HeaderProps>}
  */
-export class Header extends React.Component<HeaderProps, {}> {
+export class Header extends React.Component<HeaderProps> {
   public render() {
     return (
       <>
         <ChromeMac appState={this.props.appState} />
-        <header id='header'>
-          <Commands key='commands' appState={this.props.appState} />
+        <header id="header">
+          <Commands key="commands" appState={this.props.appState} />
         </header>
         <WelcomeTour appState={this.props.appState} />
       </>

@@ -32,11 +32,11 @@ export function invertPosition(input: ArrowPosition): ArrowPosition {
  */
 export function positionForRect(
   target: ClientRect,
-  size: { width: number, height: number },
-  margin: number = 10
+  size: { width: number; height: number },
+  margin = 10,
 ): PositionResult {
   const result: PositionResult = { left: 0, top: 0, type: 'top' };
-  const middle = target.left + (target.width / 2) - (size.width / 2);
+  const middle = target.left + target.width / 2 - size.width / 2;
   const darwinTop = process.platform === 'darwin' ? margin * 1.5 : 0;
   const topPlusMargin = target.top - darwinTop;
 
@@ -86,7 +86,7 @@ export function positionForRect(
 
 function isResultOkay(
   input: PositionResult,
-  size: { width: number, height: number }
+  size: { width: number; height: number },
 ): boolean {
   return !!(
     !isTooFarRight(input, size) &&
@@ -102,9 +102,7 @@ function isResultOkay(
  * @param {PositionResult} input
  * @returns {boolean}
  */
-function isTooFarUp(
-  input: PositionResult,
-): boolean {
+function isTooFarUp(input: PositionResult): boolean {
   return input.top < 0;
 }
 
@@ -117,14 +115,13 @@ function isTooFarUp(
  */
 function isTooFarBelow(
   input: PositionResult,
-  size: { width: number, height: number }
+  size: { width: number; height: number },
 ): boolean {
   const { innerHeight } = window;
   const tolerance = size.height * 0.3;
 
-  return ((input.top + size.height) > innerHeight + tolerance);
+  return input.top + size.height > innerHeight + tolerance;
 }
-
 
 /**
  * Is the position too far right?
@@ -135,12 +132,12 @@ function isTooFarBelow(
  */
 function isTooFarRight(
   input: PositionResult,
-  size: { width: number, height: number }
+  size: { width: number; height: number },
 ): boolean {
   const { innerWidth } = window;
   const tolerance = size.width * 0.3;
 
-  return ((input.left + size.width) > innerWidth + tolerance);
+  return input.left + size.width > innerWidth + tolerance;
 }
 
 /**
@@ -149,8 +146,6 @@ function isTooFarRight(
  * @param {PositionResult} input
  * @returns {boolean}
  */
-function isTooFarLeft(
-  input: PositionResult,
-): boolean {
+function isTooFarLeft(input: PositionResult): boolean {
   return input.left < 0;
 }

@@ -1,5 +1,11 @@
-
-import { Button, Callout, Dialog, FileInput, InputGroup, Intent } from '@blueprintjs/core';
+import {
+  Button,
+  Callout,
+  Dialog,
+  FileInput,
+  InputGroup,
+  Intent,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -30,23 +36,29 @@ export interface AddVersionDialogState {
  * @extends {React.Component<AddVersionDialogProps, AddVersionDialogState>}
  */
 @observer
-export class AddVersionDialog extends React.Component<AddVersionDialogProps, AddVersionDialogState> {
+export class AddVersionDialog extends React.Component<
+  AddVersionDialogProps,
+  AddVersionDialogState
+> {
   constructor(props: AddVersionDialogProps) {
     super(props);
 
     this.state = {
       isValidVersion: false,
       isValidElectron: false,
-      version: ''
+      version: '',
     };
 
     this.onSubmit = this.onSubmit.bind(this);
     this.onClose = this.onClose.bind(this);
     this.onChangeVersion = this.onChangeVersion.bind(this);
 
-    ipcRendererManager.on(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, (_event, [file]) => {
-      this.setFolderPath(file);
-    });
+    ipcRendererManager.on(
+      IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
+      (_event, [file]) => {
+        this.setFolderPath(file);
+      },
+    );
   }
 
   public componentWillUnmount() {
@@ -59,7 +71,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
   public async setFolderPath(folderPath: string) {
-    const isValidElectron = !!await getIsDownloaded('custom', folderPath);
+    const isValidElectron = !!(await getIsDownloaded('custom', folderPath));
 
     this.setState({ folderPath, isValidElectron });
   }
@@ -84,16 +96,12 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
 
     if (!folderPath) return;
 
-    const name = folderPath
-      .slice(-20)
-      .split(path.sep)
-      .slice(1)
-      .join(path.sep);
+    const name = folderPath.slice(-20).split(path.sep).slice(1).join(path.sep);
 
     const toAdd: Version = {
       localPath: folderPath,
       version,
-      name
+      name,
     };
 
     this.props.appState.addLocalVersion(toAdd);
@@ -112,22 +120,14 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
 
     return [
-      (
-        <Button
-          icon='add'
-          key='submit'
-          disabled={!canSubmit}
-          onClick={this.onSubmit}
-          text='Add'
-        />
-      ), (
-        <Button
-          icon='cross'
-          key='cancel'
-          onClick={this.onClose}
-          text='Cancel'
-        />
-      )
+      <Button
+        icon="add"
+        key="submit"
+        disabled={!canSubmit}
+        onClick={this.onSubmit}
+        text="Add"
+      />,
+      <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
   }
 
@@ -137,33 +137,32 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       onClick: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
         e.preventDefault();
         ipcRendererManager.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
-      }
+      },
     };
     const { folderPath } = this.state;
 
-    const text = folderPath ||
+    const text =
+      folderPath ||
       `Select the folder containing ${getElectronNameForPlatform()}...`;
 
     return (
       <Dialog
         isOpen={isAddVersionDialogShowing}
         onClose={this.onClose}
-        title='Add local Electron build'
-        className='dialog-add-version'
+        title="Add local Electron build"
+        className="dialog-add-version"
       >
-        <div className='bp3-dialog-body'>
+        <div className="bp3-dialog-body">
           <FileInput
-            id='custom-electron-version'
+            id="custom-electron-version"
             inputProps={inputProps as any}
             text={text}
           />
           <br />
           {this.renderPath()}
         </div>
-        <div className='bp3-dialog-footer'>
-          <div className='bp3-dialog-footer-actions'>
-            {this.buttons}
-          </div>
+        <div className="bp3-dialog-footer">
+          <div className="bp3-dialog-footer-actions">{this.buttons}</div>
         </div>
       </Dialog>
     );
@@ -194,14 +193,14 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
     return (
       <>
         <p>
-          Please specify a version, used for typings and the name.
-          Must be <code>semver</code> compliant.
+          Please specify a version, used for typings and the name. Must be{' '}
+          <code>semver</code> compliant.
         </p>
         <InputGroup
           intent={isValidVersion ? undefined : Intent.DANGER}
           value={version}
           onChange={this.onChangeVersion}
-          placeholder='4.0.0'
+          placeholder="4.0.0"
         />
       </>
     );
@@ -215,7 +214,7 @@ export class AddVersionDialog extends React.Component<AddVersionDialogProps, Add
       isValidElectron: false,
       isValidVersion: false,
       version: '',
-      folderPath: undefined
+      folderPath: undefined,
     });
   }
 }

@@ -2,8 +2,8 @@ import { idFromUrl, urlFromId } from '../../src/utils/gist';
 
 jest.mock('os', () => ({
   userInfo: () => ({
-    username: 'test-user'
-  })
+    username: 'test-user',
+  }),
 }));
 
 describe('gist', () => {

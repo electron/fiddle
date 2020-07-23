@@ -20,7 +20,7 @@ export interface DialogsProps {
  * @extends {React.Component<DialogsProps, {}>}
  */
 @observer
-export class Dialogs extends React.Component<DialogsProps, {}> {
+export class Dialogs extends React.Component<DialogsProps> {
   public render() {
     const { appState } = this.props;
     const {
@@ -29,28 +29,29 @@ export class Dialogs extends React.Component<DialogsProps, {}> {
       isAddVersionDialogShowing,
       isThemeDialogShowing,
       isBisectDialogShowing,
-      isGenericDialogShowing
+      isGenericDialogShowing,
     } = appState;
-    const maybeToken = isTokenDialogShowing
-      ? <TokenDialog key='dialogs' appState={appState} />
-      : null;
-    const maybeSettings = isSettingsShowing
-      ? <Settings key='settings' appState={appState} />
-      : null;
-    const maybeAddLocalVersion = isAddVersionDialogShowing
-      ? <AddVersionDialog key='add-version-dialog' appState={appState} />
-      : null;
-    const maybeMonaco = isThemeDialogShowing ? <AddThemeDialog appState={appState} />
-      : null;
-    const maybeBisect = isBisectDialogShowing
-      ? <BisectDialog key='bisect-dialog' appState={appState} />
-      : null;
-    const genericDialog = isGenericDialogShowing
-      ? <GenericDialog appState={appState} />
-      : null;
+    const maybeToken = isTokenDialogShowing ? (
+      <TokenDialog key="dialogs" appState={appState} />
+    ) : null;
+    const maybeSettings = isSettingsShowing ? (
+      <Settings key="settings" appState={appState} />
+    ) : null;
+    const maybeAddLocalVersion = isAddVersionDialogShowing ? (
+      <AddVersionDialog key="add-version-dialog" appState={appState} />
+    ) : null;
+    const maybeMonaco = isThemeDialogShowing ? (
+      <AddThemeDialog appState={appState} />
+    ) : null;
+    const maybeBisect = isBisectDialogShowing ? (
+      <BisectDialog key="bisect-dialog" appState={appState} />
+    ) : null;
+    const genericDialog = isGenericDialogShowing ? (
+      <GenericDialog appState={appState} />
+    ) : null;
 
     return (
-      <div key='dialogs' className='dialogs'>
+      <div key="dialogs" className="dialogs">
         {maybeToken}
         {maybeSettings}
         {maybeAddLocalVersion}

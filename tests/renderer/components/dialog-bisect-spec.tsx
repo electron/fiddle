@@ -11,10 +11,10 @@ describe('BisectDialog component', () => {
   let store: any;
 
   const generateVersionRange = (rangeLength: number) =>
-    (new Array(rangeLength)).fill(0).map((_, i) => ({
+    new Array(rangeLength).fill(0).map((_, i) => ({
       state: VersionState.ready,
       version: `${i + 1}.0.0`,
-      source: VersionSource.local
+      source: VersionSource.local,
     }));
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('BisectDialog component', () => {
       versionsToShow: versions,
       channelsToShow: [ElectronReleaseChannel.stable],
       statesToShow: [VersionState.ready],
-      setVersion: jest.fn()
+      setVersion: jest.fn(),
     };
   });
 
@@ -35,7 +35,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: 0,
-      allVersions: generateVersionRange(5)
+      allVersions: generateVersionRange(5),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -43,7 +43,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: undefined,
       endIndex: undefined,
-      allVersions: generateVersionRange(5)
+      allVersions: generateVersionRange(5),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -51,7 +51,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: undefined,
-      allVersions: generateVersionRange(5)
+      allVersions: generateVersionRange(5),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -59,7 +59,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: 4,
-      allVersions: generateVersionRange(5)
+      allVersions: generateVersionRange(5),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -95,7 +95,7 @@ describe('BisectDialog component', () => {
       const version = '1.0.0';
       (Bisector as jest.Mock).mockImplementation(() => {
         return {
-          getCurrentVersion: () => ({ version })
+          getCurrentVersion: () => ({ version }),
         };
       });
 
@@ -105,7 +105,7 @@ describe('BisectDialog component', () => {
       wrapper.setState({
         startIndex: 4,
         endIndex: 0,
-        allVersions: versions
+        allVersions: versions,
       });
 
       const instance: BisectDialog = wrapper.instance() as any;
@@ -120,7 +120,7 @@ describe('BisectDialog component', () => {
 
       wrapper.setState({
         startIndex: undefined,
-        endIndex: 0
+        endIndex: 0,
       });
       const instance1: BisectDialog = wrapper.instance() as any;
       await instance1.onSubmit();
@@ -128,7 +128,7 @@ describe('BisectDialog component', () => {
 
       wrapper.setState({
         startIndex: 4,
-        endIndex: undefined
+        endIndex: undefined,
       });
 
       const instance2: BisectDialog = wrapper.instance() as any;

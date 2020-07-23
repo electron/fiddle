@@ -8,7 +8,7 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  npmRun
+  npmRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
@@ -20,7 +20,7 @@ jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
 jest.mock('../../src/renderer/binary', () => ({
   getIsDownloaded: jest.fn(),
-  getElectronBinaryPath: jest.fn()
+  getElectronBinaryPath: jest.fn(),
 }));
 jest.mock('fs-extra');
 jest.mock('child_process');
@@ -58,7 +58,7 @@ describe('Runner component', () => {
   });
 
   it('runs', async () => {
-    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
     expect(await instance.run()).toBe(true);
@@ -70,7 +70,7 @@ describe('Runner component', () => {
 
   it('runs with logging when enabled', async () => {
     store.isEnablingElectronLogging = true;
-    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as jest.Mock).mockImplementationOnce((_, __, opts) => {
       expect(opts.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
       expect(opts.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
@@ -85,7 +85,7 @@ describe('Runner component', () => {
   });
 
   it('emits output', async () => {
-    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
     // Output
@@ -96,7 +96,9 @@ describe('Runner component', () => {
 
     // Stop (with code)
     mockChild.emit('close', 0);
-    expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited with code 0.');
+    expect(store.pushOutput).toHaveBeenLastCalledWith(
+      'Electron exited with code 0.',
+    );
 
     // Stop (without code)
     mockChild.emit('close');
@@ -106,7 +108,7 @@ describe('Runner component', () => {
   });
 
   it('stops on close', async () => {
-    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
     // Stop
@@ -117,7 +119,7 @@ describe('Runner component', () => {
   });
 
   it('stops on stop()', async () => {
-    (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
     // Stop
@@ -133,10 +135,12 @@ describe('Runner component', () => {
       mockChild.emit('close', 0);
 
       process.nextTick(() => {
-        expect(window.ElectronFiddle.app.fileManager.cleanup)
-        .toHaveBeenCalledTimes(2);
-        expect(window.ElectronFiddle.app.fileManager.cleanup)
-          .toHaveBeenLastCalledWith(path.join(`/test-path/test-app-name`));
+        expect(
+          window.ElectronFiddle.app.fileManager.cleanup,
+        ).toHaveBeenCalledTimes(2);
+        expect(
+          window.ElectronFiddle.app.fileManager.cleanup,
+        ).toHaveBeenLastCalledWith(path.join(`/test-path/test-app-name`));
         done();
       });
     });
@@ -148,15 +152,16 @@ describe('Runner component', () => {
       mockChild.emit('close', 0);
 
       process.nextTick(() => {
-        expect(window.ElectronFiddle.app.fileManager.cleanup)
-          .toHaveBeenCalledTimes(1);
+        expect(
+          window.ElectronFiddle.app.fileManager.cleanup,
+        ).toHaveBeenCalledTimes(1);
         done();
       });
     });
 
     it('automatically cleans the console when enabled', async () => {
       store.isClearingConsoleOnRun = true;
-      (findModulesInEditors as any).mockReturnValueOnce([ 'fake-module' ]);
+      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
       expect(await instance.run()).toBe(true);
       expect(store.clearConsole).toHaveBeenCalled();
@@ -170,10 +175,10 @@ describe('Runner component', () => {
     });
 
     it('does not run if writing files fails', async () => {
-      (window.ElectronFiddle.app.fileManager.saveToTemp as jest.Mock)
-        .mockImplementationOnce(() => {
-          throw new Error('bwap bwap');
-        });
+      (window.ElectronFiddle.app.fileManager
+        .saveToTemp as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('bwap bwap');
+      });
 
       expect(await instance.run()).toBe(false);
     });
@@ -182,7 +187,8 @@ describe('Runner component', () => {
       const oldError = console.error;
       console.error = jest.fn();
 
-      instance.installModulesForEditor = jest.fn()
+      instance.installModulesForEditor = jest
+        .fn()
         .mockImplementationOnce(async () => {
           throw new Error('Bwap-bwap');
         });
@@ -220,17 +226,23 @@ describe('Runner component', () => {
     });
 
     it('performs a package operation', async () => {
-      expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(true);
+      expect(await instance.performForgeOperation(ForgeCommands.PACKAGE)).toBe(
+        true,
+      );
     });
 
     it('performs a make operation', async () => {
-      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(true);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
+        true,
+      );
     });
 
     it('handles an error in saveToTemp()', async () => {
       (instance as any).saveToTemp = jest.fn();
 
-      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
+        false,
+      );
     });
 
     it('handles an error in npmInstall()', async () => {
@@ -238,7 +250,9 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
+        false,
+      );
     });
 
     it('handles an error in npmRun()', async () => {
@@ -246,43 +260,53 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
+        false,
+      );
     });
 
     it('does attempt a forge operation if npm is not installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
 
-      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(false);
+      expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
+        false,
+      );
     });
   });
 
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
-      await instance.installModulesForEditor({
-        html: '',
-        main: `const a = require('say')`,
-        renderer: '',
-        preload: '',
-        css: ''
-      }, '/fake/path');
+      await instance.installModulesForEditor(
+        {
+          html: '',
+          main: `const a = require('say')`,
+          renderer: '',
+          preload: '',
+          css: '',
+        },
+        '/fake/path',
+      );
 
       expect(installModules).toHaveBeenCalledTimes(0);
     });
 
     it('does attempt installation if npm is installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
-      await instance.installModulesForEditor({
-        html: '',
-        main: `const a = require('say')`,
-        renderer: '',
-        preload: '',
-        css: ''
-      }, '/fake/path');
+      await instance.installModulesForEditor(
+        {
+          html: '',
+          main: `const a = require('say')`,
+          renderer: '',
+          preload: '',
+          css: '',
+        },
+        '/fake/path',
+      );
 
       expect(installModules).toHaveBeenCalledTimes(1);
     });

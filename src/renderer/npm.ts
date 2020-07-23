@@ -1,7 +1,7 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
-const { builtinModules } =  require('module');
+const { builtinModules } = require('module');
 
 export interface NpmOperationOptions {
   dir: string;
@@ -14,40 +14,38 @@ export let isInstalled: boolean | null = null;
 const ignoredModules: Array<string> = [
   'electron',
   'original-fs',
-  ...builtinModules
+  ...builtinModules,
 ];
 
 /* regular expression to both match and extract module names */
 const requiregx = /^.*require\(['"](.*?)['"]\)/gm;
 
-
 /*
  Quick and dirty filter functions for filtering module names
 */
 const isIgnored = (str: string): boolean => ignoredModules.includes(str);
-const isLocalModule = (str: string): boolean => (/^[,/~\.]/.test(str));
+const isLocalModule = (str: string): boolean => /^[,/~\.]/.test(str);
 const isUnique = (item: any, idx: number, arr: Array<any>): boolean => {
   return arr.lastIndexOf(item) === idx;
 };
-
 
 /**
  * Checks if npm is installed by checking if a binary
  * with that name can be found.
  */
-export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean> {
+export async function getIsNpmInstalled(
+  ignoreCache?: boolean,
+): Promise<boolean> {
   if (isInstalled !== null && !ignoreCache) return isInstalled;
 
-  const command = process.platform === 'win32'
-    ? 'where.exe npm'
-    : 'which npm';
+  const command = process.platform === 'win32' ? 'where.exe npm' : 'which npm';
 
   try {
     await exec(process.cwd(), command);
-    return isInstalled = true;
+    return (isInstalled = true);
   } catch (error) {
     console.warn(`getIsNpmInstalled: "${command}" failed.`, error);
-    return isInstalled = false;
+    return (isInstalled = false);
   }
 }
 
@@ -58,13 +56,10 @@ export async function getIsNpmInstalled(ignoreCache?: boolean): Promise<boolean>
  * @returns {Array<string>}
  */
 export function findModulesInEditors(values: EditorValues) {
-  const files = [ values.main, values.renderer ];
+  const files = [values.main, values.renderer];
   const modules = files.reduce(
-    (agg, file) => [
-      ...agg,
-      ...findModules(file)
-    ],
-    []
+    (agg, file) => [...agg, ...findModules(file)],
+    [],
   );
 
   console.log('Modules Found:', modules);
@@ -92,7 +87,7 @@ export function findModules(input: string): Array<string> {
 
   /* grab all global require matches in the text */
   // tslint:disable-next-line:no-conditional-assignment
-  while (match = (requiregx.exec(input) || null)) {
+  while ((match = requiregx.exec(input) || null)) {
     // ensure commented-out requires aren't downloaded
     if (!match[0].startsWith('//')) {
       const mod = match[1];
@@ -103,9 +98,7 @@ export function findModules(input: string): Array<string> {
   /* map and reduce */
   return modules
     .map((mod) =>
-      mod.includes('/') && !mod.startsWith('@') ?
-      mod.split('/')[0] :
-      mod
+      mod.includes('/') && !mod.startsWith('@') ? mod.split('/')[0] : mod,
     )
     .filter((m) => !isIgnored(m))
     .filter((m) => !isLocalModule(m))
@@ -119,12 +112,13 @@ export function findModules(input: string): Array<string> {
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export async function installModules({ dir }: NpmOperationOptions, ...names: Array<string>): Promise<string> {
-  const nameArgs = names.length > 0
-    ? [ '-S', ...names ]
-    : ['--dev --prod'];
+export async function installModules(
+  { dir }: NpmOperationOptions,
+  ...names: Array<string>
+): Promise<string> {
+  const nameArgs = names.length > 0 ? ['-S', ...names] : ['--dev --prod'];
 
-  return exec(dir, [ `npm install` ].concat(nameArgs).join(' '));
+  return exec(dir, [`npm install`].concat(nameArgs).join(' '));
 }
 
 /**
@@ -134,6 +128,9 @@ export async function installModules({ dir }: NpmOperationOptions, ...names: Arr
  * @param {string} command
  * @returns {Promise<string>}
  */
-export function npmRun({ dir }: NpmOperationOptions, command: string): Promise<string> {
+export function npmRun(
+  { dir }: NpmOperationOptions,
+  command: string,
+): Promise<string> {
   return exec(dir, `npm run ${command}`);
 }

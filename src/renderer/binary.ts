@@ -15,7 +15,10 @@ import { AppState } from './state';
  * @param {string} iVersion
  * @returns {Promise<void>}
  */
-export async function setupBinary(appState: AppState, iVersion: string): Promise<void> {
+export async function setupBinary(
+  appState: AppState,
+  iVersion: string,
+): Promise<void> {
   const version = normalizeVersion(iVersion);
   const fs = await fancyImport<typeof fsType>('fs-extra');
 
@@ -38,7 +41,9 @@ export async function setupBinary(appState: AppState, iVersion: string): Promise
 
   const zipPath = await download(appState, version);
   const extractPath = getDownloadPath(version);
-  console.log(`Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`);
+  console.log(
+    `Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`,
+  );
 
   try {
     appState.versions[version].state = VersionState.unzipping;
@@ -72,11 +77,14 @@ export async function removeBinary(iVersion: string) {
 
   // utility to re-run removal functions upon failure
   // due to windows filesystem lockfile jank
-  const rerunner = async (func: () => Promise<void>, counter: number = 1) => {
+  const rerunner = async (func: () => Promise<void>, counter = 1) => {
     try {
       await func();
     } catch (error) {
-      console.warn(`Binary Manager: failed to run ${func.name} for ${version}, but failed`, error);
+      console.warn(
+        `Binary Manager: failed to run ${func.name} for ${version}, but failed`,
+        error,
+      );
       if (counter < 4) {
         console.log(`Binary Manager: Trying again to run ${func.name}`);
         await rerunner(func, counter + 1);
@@ -109,16 +117,19 @@ export async function removeBinary(iVersion: string) {
 }
 
 /* Did we already download a given version?
-*
-* @param {string} version
-* @param {string} dir
-* @returns {boolean}
-*/
-export async function getIsDownloaded(version: string, dir?: string): Promise<boolean> {
- const expectedPath = getElectronBinaryPath(version, dir);
- const fs = await fancyImport<typeof fsType>('fs-extra');
+ *
+ * @param {string} version
+ * @param {string} dir
+ * @returns {boolean}
+ */
+export async function getIsDownloaded(
+  version: string,
+  dir?: string,
+): Promise<boolean> {
+  const expectedPath = getElectronBinaryPath(version, dir);
+  const fs = await fancyImport<typeof fsType>('fs-extra');
 
- return fs.existsSync(expectedPath);
+  return fs.existsSync(expectedPath);
 }
 
 /**
@@ -141,7 +152,9 @@ export function getElectronBinaryPath(
     case 'win32':
       return path.join(dir, 'electron.exe');
     default:
-      throw new Error(`Electron builds are not available for ${process.platform}`);
+      throw new Error(
+        `Electron builds are not available for ${process.platform}`,
+      );
   }
 }
 
@@ -150,7 +163,6 @@ export function getDownloadingVersions(appState: AppState) {
     .filter(([_, { state }]) => state === 'downloading')
     .map(([version, _]) => version);
 }
-
 
 /**
  * Returns an array of all versions downloaded to disk
@@ -192,20 +204,24 @@ async function download(appState: AppState, version: string): Promise<string> {
     const roundedProgress = Math.round(progress.percent * 100) / 100;
 
     if (roundedProgress !== appState.versions[version].downloadProgress) {
-      console.debug(`Binary: Version ${version} download progress: ${progress.percent}`);
+      console.debug(
+        `Binary: Version ${version} download progress: ${progress.percent}`,
+      );
       appState.versions[version].downloadProgress = roundedProgress;
     }
   };
 
   if (!appState.versions[version]) {
-    throw new Error(`Version ${version} does not exist in state, cannot download`);
+    throw new Error(
+      `Version ${version} does not exist in state, cannot download`,
+    );
   }
 
   const zipFilePath = await electronDownload(version, {
     downloadOptions: {
       quiet: true,
-      getProgressCallback
-    }
+      getProgressCallback,
+    },
   });
 
   return zipFilePath;

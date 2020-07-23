@@ -24,9 +24,9 @@ describe('GenericDialog component', () => {
         type: GenericDialogType.warning,
         label: 'Some message',
         ok: 'Ok',
-        cancel: ''
+        cancel: '',
       },
-      toggleGenericDialog: jest.fn()
+      toggleGenericDialog: jest.fn(),
     };
   });
 

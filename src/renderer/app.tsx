@@ -10,7 +10,7 @@ import {
   EditorId,
   EditorValues,
   GenericDialogType,
-  SetFiddleOptions
+  SetFiddleOptions,
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
@@ -52,14 +52,14 @@ export class App {
 
   public async replaceFiddle(
     editorValues: Partial<EditorValues>,
-    { filePath, gistId, templateName }: Partial<SetFiddleOptions>
+    { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
     if (this.state.isUnsaved) {
       this.state.setGenericDialogOptions({
         type: GenericDialogType.warning,
         label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
-        ok: 'Yes'
+        ok: 'Yes',
       });
       this.state.isGenericDialogShowing = true;
       await when(() => !this.state.isGenericDialogShowing);
@@ -80,7 +80,6 @@ export class App {
       }
     }
 
-
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
     this.state.templateName = templateName;
@@ -89,7 +88,6 @@ export class App {
     await this.state.setVisibleMosaics(visibleEditors);
     await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
-
 
     document.title = getTitle(this.state);
 
@@ -137,7 +135,7 @@ export class App {
    * @returns {EditorValues}
    */
   public async getEditorValues(
-    options?: PackageJsonOptions
+    options?: PackageJsonOptions,
   ): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
 
@@ -150,7 +148,7 @@ export class App {
       html: getEditorValue(EditorId.html),
       main: getEditorValue(EditorId.main),
       preload: getEditorValue(EditorId.preload),
-      renderer: getEditorValue(EditorId.renderer)
+      renderer: getEditorValue(EditorId.renderer),
     };
 
     if (options && options.include !== false) {
@@ -200,7 +198,7 @@ export class App {
    */
   public async setupTheme(): Promise<void> {
     const tag: HTMLStyleElement | null = document.querySelector(
-      'style#fiddle-theme'
+      'style#fiddle-theme',
     );
     const theme = await getTheme(this.state.theme);
 

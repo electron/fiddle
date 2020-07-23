@@ -4,19 +4,19 @@ import * as React from 'react';
 import { Header } from '../../../src/renderer/components/header';
 
 jest.mock('../../../src/renderer/components/chrome-mac', () => ({
-  ChromeMac: 'chrome-mac'
+  ChromeMac: 'chrome-mac',
 }));
 
 jest.mock('../../../src/renderer/components/commands', () => ({
-  Commands: 'commands'
+  Commands: 'commands',
 }));
 
 jest.mock('../../../src/renderer/components/output', () => ({
-  Output: 'output'
+  Output: 'output',
 }));
 
 jest.mock('../../../src/renderer/components/tour-welcome', () => ({
-  WelcomeTour: 'welcome-tour'
+  WelcomeTour: 'welcome-tour',
 }));
 
 describe('Header component', () => {

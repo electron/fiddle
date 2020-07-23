@@ -13,12 +13,15 @@ describe('ElectronSettings component', () => {
     store = {
       version: '2.0.1',
       versions: { ...mockVersions },
-      channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
-      statesToShow: [ VersionState.ready, VersionState.downloading ],
+      channelsToShow: [
+        ElectronReleaseChannel.stable,
+        ElectronReleaseChannel.beta,
+      ],
+      statesToShow: [VersionState.ready, VersionState.downloading],
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
-      toggleAddVersionDialog: jest.fn()
+      toggleAddVersionDialog: jest.fn(),
     };
 
     // Render all the states
@@ -31,13 +34,13 @@ describe('ElectronSettings component', () => {
     store.versions['3.0.0-nightly.1'] = {
       state: VersionState.ready,
       version: '3.0.0-nightly.1',
-      source: VersionSource.local
+      source: VersionSource.local,
     };
 
     store.versions['3.0.0'] = {
       state: VersionState.ready,
       version: '3.0.0',
-      source: VersionSource.local
+      source: VersionSource.local,
     };
 
     const wrapper = shallow(<ElectronSettings appState={store} />);
@@ -49,13 +52,13 @@ describe('ElectronSettings component', () => {
     store.versions['3.0.0-nightly.1'] = {
       state: VersionState.ready,
       version: '3.0.0-nightly.1',
-      source: VersionSource.local
+      source: VersionSource.local,
     };
 
     store.versions['3.0.0'] = {
       state: VersionState.ready,
       version: '3.0.0',
-      source: VersionSource.local
+      source: VersionSource.local,
     };
 
     const wrapper = mount(<ElectronSettings appState={store} />);
@@ -73,8 +76,8 @@ describe('ElectronSettings component', () => {
       '3.0.0': {
         state: VersionState.unknown,
         version: '3.0.0',
-        source: VersionSource.remote
-      }
+        source: VersionSource.remote,
+      },
     };
 
     store.statesToShow.push(VersionState.unknown);
@@ -98,9 +101,7 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles the downloadAll()', async () => {
-    const wrapper = shallow(
-      <ElectronSettings appState={store} />
-    );
+    const wrapper = shallow(<ElectronSettings appState={store} />);
     const instance = wrapper.instance() as any;
     await instance.handleDownloadAll();
 
@@ -109,9 +110,7 @@ describe('ElectronSettings component', () => {
 
   describe('handleDownloadClick()', () => {
     it('kicks off an update of Electron versions', async () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={store} />
-      );
+      const wrapper = shallow(<ElectronSettings appState={store} />);
       const instance = wrapper.instance() as any;
       await instance.handleDownloadClick();
 
@@ -121,9 +120,7 @@ describe('ElectronSettings component', () => {
 
   describe('handleAddVersion()', () => {
     it('toggles the add version dialog', () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={store} />
-      );
+      const wrapper = shallow(<ElectronSettings appState={store} />);
       const instance = wrapper.instance() as any;
       instance.handleAddVersion();
 
@@ -133,54 +130,50 @@ describe('ElectronSettings component', () => {
 
   describe('handleVersionChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={store} />
-      );
+      const wrapper = shallow(<ElectronSettings appState={store} />);
       const instance = wrapper.instance() as any;
       await instance.handleStateChange({
         currentTarget: {
           id: VersionState.ready,
-          checked: false
-        }
+          checked: false,
+        },
       });
 
       await instance.handleStateChange({
         currentTarget: {
           id: VersionState.unknown,
-          checked: true
-        }
+          checked: true,
+        },
       });
 
       expect(store.statesToShow).toEqual([
         VersionState.downloading,
-        VersionState.unknown
+        VersionState.unknown,
       ]);
     });
   });
 
   describe('handleChannelChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={store} />
-      );
+      const wrapper = shallow(<ElectronSettings appState={store} />);
       const instance = wrapper.instance() as any;
       await instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.stable,
-          checked: false
-        }
+          checked: false,
+        },
       });
 
       await instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.nightly,
-          checked: true
-        }
+          checked: true,
+        },
       });
 
       expect(store.channelsToShow).toEqual([
         ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.nightly
+        ElectronReleaseChannel.nightly,
       ]);
     });
   });

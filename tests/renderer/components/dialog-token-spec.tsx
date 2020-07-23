@@ -25,7 +25,7 @@ describe('TokenDialog component', () => {
 
   beforeEach(() => {
     store = {
-      isTokenDialogShowing: true
+      isTokenDialogShowing: true,
     };
   });
 
@@ -61,7 +61,9 @@ describe('TokenDialog component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: TokenDialog = wrapper.instance() as any;
 
-    (electron as any).clipboard.readText.mockReturnValueOnce('String with the right length not a token');
+    (electron as any).clipboard.readText.mockReturnValueOnce(
+      'String with the right length not a token',
+    );
     instance.onTokenInputFocused();
 
     expect((electron as any).clipboard.readText).toHaveBeenCalled();
@@ -89,7 +91,7 @@ describe('TokenDialog component', () => {
     expect(wrapper.state()).toEqual({
       verifying: false,
       error: false,
-      tokenInput: ''
+      tokenInput: '',
     });
   });
 
@@ -103,7 +105,7 @@ describe('TokenDialog component', () => {
     expect(wrapper.state()).toEqual({
       verifying: false,
       error: false,
-      tokenInput: ''
+      tokenInput: '',
     });
   });
 
@@ -135,14 +137,14 @@ describe('TokenDialog component', () => {
       mockUser = {
         avatar_url: 'https://avatars.fake/hi',
         login: 'test-login',
-        name: 'Test User'
+        name: 'Test User',
       };
 
       mockOctokit = {
         authenticate: jest.fn(),
         users: {
-          getAuthenticated: jest.fn(async () => ({ data: mockUser }))
-        }
+          getAuthenticated: jest.fn(async () => ({ data: mockUser })),
+        },
       };
 
       (getOctokit as any).mockReturnValue(mockOctokit);

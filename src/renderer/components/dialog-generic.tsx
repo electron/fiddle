@@ -1,5 +1,4 @@
-
-import { Alert, IconName, Intent} from '@blueprintjs/core';
+import { Alert, IconName, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -10,9 +9,6 @@ export interface GenericDialogProps {
   appState: AppState;
 }
 
-export interface GenericDialogState {
-}
-
 /**
  * The token dialog prompts the user to either continue or cancel the operation.
  *
@@ -21,7 +17,7 @@ export interface GenericDialogState {
  * @extends {React.Component<GenericDialogProps, GenericDialogState>}
  */
 @observer
-export class GenericDialog extends React.Component<GenericDialogProps, GenericDialogState> {
+export class GenericDialog extends React.Component<GenericDialogProps> {
   constructor(props: GenericDialogProps) {
     super(props);
 
@@ -34,8 +30,11 @@ export class GenericDialog extends React.Component<GenericDialogProps, GenericDi
   }
 
   public render() {
-    const { isGenericDialogShowing, genericDialogOptions } = this.props.appState;
-    const {type, ok, cancel, label} = genericDialogOptions;
+    const {
+      isGenericDialogShowing,
+      genericDialogOptions,
+    } = this.props.appState;
+    const { type, ok, cancel, label } = genericDialogOptions;
 
     let intent: Intent;
     let icon: IconName;

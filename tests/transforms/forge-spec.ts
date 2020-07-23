@@ -1,7 +1,7 @@
-import { forgeTransform} from '../../src/renderer/transforms/forge';
+import { forgeTransform } from '../../src/renderer/transforms/forge';
 
 jest.mock('../../src/shared-constants', () => ({
-  PACKAGE_NAME: 'package.json'
+  PACKAGE_NAME: 'package.json',
 }));
 
 describe('forgeTransform()', () => {
@@ -16,14 +16,14 @@ describe('forgeTransform()', () => {
         '@electron-forge/maker-deb': '6.0.0-beta.52',
         '@electron-forge/maker-rpm': '6.0.0-beta.52',
         '@electron-forge/maker-squirrel': '6.0.0-beta.52',
-        '@electron-forge/maker-zip': '6.0.0-beta.52'
+        '@electron-forge/maker-zip': '6.0.0-beta.52',
       },
       scripts: {
         start: 'electron-forge start',
         package: 'electron-forge package',
         make: 'electron-forge make',
         publish: 'electron-forge publish',
-        lint: 'echo "No linting configured"'
+        lint: 'echo "No linting configured"',
       },
       config: {
         forge: {
@@ -34,21 +34,19 @@ describe('forgeTransform()', () => {
             },
             {
               name: '@electron-forge/maker-zip',
-              platforms: [
-                'darwin'
-              ]
+              platforms: ['darwin'],
             },
             {
               name: '@electron-forge/maker-deb',
-              config: {}
+              config: {},
             },
             {
               name: '@electron-forge/maker-rpm',
-              config: {}
-            }
-          ]
-        }
-      }
+              config: {},
+            },
+          ],
+        },
+      },
     });
   });
 

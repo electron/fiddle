@@ -29,6 +29,6 @@ export const SHOW_ME_TEMPLATES: Templates = {
     TouchBar: 'TouchBar',
     Tray: 'Tray',
     WebContents: 'WebContents',
-    WebFrame: 'WebFrame'
-  }
+    WebFrame: 'WebFrame',
+  },
 };

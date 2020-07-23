@@ -4,14 +4,14 @@ describe('sorted-eletron-map', () => {
   it('sorts a record of electron versions', () => {
     const map: any = {
       '1.0.0': {
-        version: 'v1.0.0'
+        version: 'v1.0.0',
       },
       '3.0.0': {
-        version: 'v3.0.0'
+        version: 'v3.0.0',
       },
       '2.0.0': {
-        version: 'v2.0.0'
-      }
+        version: 'v2.0.0',
+      },
     };
     const result = sortedElectronMap(map, (_k, e) => e);
 
@@ -23,17 +23,17 @@ describe('sorted-eletron-map', () => {
   it('handles invalid versions', () => {
     const map: any = {
       moreGarbage: {
-        version: 'moreGarbage'
+        version: 'moreGarbage',
       },
       '1.0.0': {
-        version: 'v1.0.0'
+        version: 'v1.0.0',
       },
       '3.0.0': {
-        version: 'v3.0.0'
+        version: 'v3.0.0',
       },
       garbage: {
-        version: 'garbage'
-      }
+        version: 'garbage',
+      },
     };
     const result = sortedElectronMap(map, (_k, e) => e);
 

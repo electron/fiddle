@@ -12,13 +12,13 @@ describe('getEditorValue()', () => {
     const oldEditor = window.ElectronFiddle.editors[EditorId.html];
     window.ElectronFiddle.editors[EditorId.html] = null;
 
-    window.ElectronFiddle.app.state = (new MockState() as any);
+    window.ElectronFiddle.app.state = new MockState() as any;
     const mockState = window.ElectronFiddle.app.state;
 
     mockState.closedPanels = {
       [EditorId.html]: {
-        value: 'editor-backup-value'
-      }
+        value: 'editor-backup-value',
+      },
     };
 
     // assert

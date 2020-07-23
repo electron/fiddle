@@ -20,7 +20,10 @@ describe('ipcRendererManager', () => {
   describe('send()', () => {
     it('sends an event', () => {
       ipcRendererManager.send(IpcEvents.FIDDLE_RUN, 'hello');
-      expect(electron.ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN, 'hello');
+      expect(electron.ipcRenderer.send).toHaveBeenCalledWith(
+        IpcEvents.FIDDLE_RUN,
+        'hello',
+      );
     });
   });
 });

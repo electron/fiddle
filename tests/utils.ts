@@ -3,14 +3,14 @@ const platform = process.platform;
 export function overridePlatform(value: string) {
   Object.defineProperty(process, 'platform', {
     value,
-    writable: true
+    writable: true,
   });
 }
 
 export function resetPlatform() {
   Object.defineProperty(process, 'platform', {
     value: platform,
-    writable: true
+    writable: true,
   });
 }
 
@@ -21,7 +21,6 @@ export function flushPromises() {
 export function mockFetchOnce(text: string) {
   (window.fetch as jest.Mock).mockResolvedValueOnce({
     text: () => text,
-    json: () => JSON.parse(text)
+    json: () => JSON.parse(text),
   });
 }
-

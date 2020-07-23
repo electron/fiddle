@@ -2,8 +2,8 @@ import { getUsername } from '../../src/utils/get-username';
 
 jest.mock('os', () => ({
   userInfo: () => ({
-    username: 'test-user'
-  })
+    username: 'test-user',
+  }),
 }));
 
 describe('get-username', () => {

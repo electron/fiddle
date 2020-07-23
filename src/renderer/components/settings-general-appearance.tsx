@@ -22,10 +22,12 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
  * @param {RunnableVersion} { version }
  * @returns
  */
-export const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) => {
+export const filterItem: ItemPredicate<LoadedFiddleTheme> = (
+  query,
+  { name },
+) => {
   return name.toLowerCase().includes(query.toLowerCase());
 };
-
 
 /**
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
@@ -35,7 +37,10 @@ export const filterItem: ItemPredicate<LoadedFiddleTheme> = (query, { name }) =>
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-export const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<LoadedFiddleTheme> = (
+  item,
+  { handleClick, modifiers, query },
+) => {
   if (!modifiers.matchesPredicate) {
     return null;
   }
@@ -47,7 +52,7 @@ export const renderItem: ItemRenderer<LoadedFiddleTheme> = (item, { handleClick,
       text={highlightText(item.name, query)}
       key={item.name}
       onClick={handleClick}
-      icon='media'
+      icon="media"
     />
   );
 };
@@ -69,7 +74,8 @@ export interface AppearanceSettingsState {
  */
 @observer
 export class AppearanceSettings extends React.Component<
-  AppearanceSettingsProps, AppearanceSettingsState
+  AppearanceSettingsProps,
+  AppearanceSettingsState
 > {
   public constructor(props: AppearanceSettingsProps) {
     super(props);
@@ -79,13 +85,13 @@ export class AppearanceSettings extends React.Component<
     this.handleAddTheme = this.handleAddTheme.bind(this);
 
     this.state = {
-      themes: []
+      themes: [],
     };
 
     getAvailableThemes().then((themes) => {
       const { theme } = this.props.appState;
-      const selectedTheme = theme &&
-        themes.find(({ file }) => file === theme) || themes[0];
+      const selectedTheme =
+        (theme && themes.find(({ file }) => file === theme)) || themes[0];
 
       this.setState({ themes, selectedTheme });
     });
@@ -121,16 +127,20 @@ export class AppearanceSettings extends React.Component<
       const name = namor.generate({ words: 2, numbers: 0 });
       const themePath = path.join(THEMES_PATH, `${name}.json`);
 
-      await fs.outputJSON(themePath, {
-        ...theme,
-        name,
-        file: undefined,
-        css: undefined
-      }, { spaces: 2 });
+      await fs.outputJSON(
+        themePath,
+        {
+          ...theme,
+          name,
+          file: undefined,
+          css: undefined,
+        },
+        { spaces: 2 },
+      );
 
       shell.showItemInFolder(themePath);
 
-      this.setState({themes: await getAvailableThemes()});
+      this.setState({ themes: await getAvailableThemes() });
 
       return true;
     } catch (error) {
@@ -161,51 +171,46 @@ export class AppearanceSettings extends React.Component<
 
   public render() {
     const { selectedTheme } = this.state;
-    const selectedName = selectedTheme && selectedTheme.name || 'Select a theme';
+    const selectedName =
+      (selectedTheme && selectedTheme.name) || 'Select a theme';
 
     return (
-      <div className='settings-appearance'>
+      <div className="settings-appearance">
         <h4>Appearance</h4>
-        <FormGroup
-          label='Choose your theme'
-          inline={true}
-        >
+        <FormGroup label="Choose your theme" inline={true}>
           <ThemeSelect
             filterable={true}
             items={this.state.themes}
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
-            noResults={<MenuItem disabled={true} text='No results.' />}
+            noResults={<MenuItem disabled={true} text="No results." />}
           >
-            <Button
-              text={selectedName}
-              icon='tint'
-            />
+            <Button text={selectedName} icon="tint" />
           </ThemeSelect>
         </FormGroup>
         <Callout>
           <p>
-            To add themes, add JSON theme files to <a
-              id='open-theme-folder'
-              onClick={this.openThemeFolder}
-            >
+            To add themes, add JSON theme files to{' '}
+            <a id="open-theme-folder" onClick={this.openThemeFolder}>
               <code>{THEMES_PATH}</code>
-            </a>. The easiest way to get started is to clone one of the two existing
+            </a>
+            . The easiest way to get started is to clone one of the two existing
             themes and to add your own colors.
           </p>
           <p>
-            Additionally, if you wish to import a Monaco Editor theme, pick your JSON file and Fiddle will attempt to import it.
+            Additionally, if you wish to import a Monaco Editor theme, pick your
+            JSON file and Fiddle will attempt to import it.
           </p>
           <Button
             onClick={this.createNewThemeFromCurrent}
-            text='Create theme from current selection'
-            icon='duplicate'
+            text="Create theme from current selection"
+            icon="duplicate"
           />
           <Button
-            icon='document-open'
+            icon="document-open"
             onClick={this.handleAddTheme}
-            text='Add a Monaco Editor theme'
+            text="Add a Monaco Editor theme"
           />
         </Callout>
       </div>
@@ -218,5 +223,4 @@ export class AppearanceSettings extends React.Component<
   public handleAddTheme(): void {
     this.props.appState.toggleAddMonacoThemeDialog();
   }
-
 }

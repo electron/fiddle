@@ -6,23 +6,23 @@ import { MockState } from '../mocks/state';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/file-manager', () =>
-  require('../mocks/file-manager')
+  require('../mocks/file-manager'),
 );
 jest.mock('../../src/renderer/state', () => ({
   appState: {
     theme: 'defaultDark',
     getName: () => 'Test',
-    closedPanels: {}
-  }
+    closedPanels: {},
+  },
 }));
 jest.mock('../../src/renderer/components/header', () => ({
-  Header: () => 'Header;'
+  Header: () => 'Header;',
 }));
 jest.mock('../../src/renderer/components/dialogs', () => ({
-  Dialogs: () => 'Dialogs;'
+  Dialogs: () => 'Dialogs;',
 }));
 jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
-  OutputEditorsWrapper: () => 'OutputEditorsWrapper;'
+  OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
 describe('Editors component', () => {
@@ -121,14 +121,15 @@ describe('Editors component', () => {
         html: 'html-value',
         main: 'main-value',
         renderer: 'renderer-value',
-        preload: ''
+        preload: '',
       };
 
-      app.replaceFiddle(editorValues, {
-        gistId: 'gistId',
-        templateName: 'templateName',
-        filePath: 'localPath'
-      })
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+          templateName: 'templateName',
+          filePath: 'localPath',
+        })
         .then(() => {
           expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
           expect(app.state.gistId).toBe('gistId');
@@ -150,14 +151,15 @@ describe('Editors component', () => {
       const editorValues = {
         html: 'html-value',
         main: 'main-value',
-        renderer: 'renderer-value'
+        renderer: 'renderer-value',
       };
 
       expect(app.state.localPath).toBe('/fake/path');
 
-      app.replaceFiddle(editorValues, {
-        gistId: 'gistId',
-      })
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+        })
         .then(() => {
           expect(app.state.localPath).toBeUndefined();
           done();
@@ -180,14 +182,15 @@ describe('Editors component', () => {
       const editorValues = {
         html: 'html-value',
         main: 'main-value',
-        renderer: 'renderer-value'
+        renderer: 'renderer-value',
       };
 
-      app.replaceFiddle(editorValues, {
-        gistId: 'gistId',
-        templateName: 'templateName',
-        filePath: 'localPath'
-      })
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+          templateName: 'templateName',
+          filePath: 'localPath',
+        })
         .then(() => {
           expect(app.state.isUnsaved).toBe(false);
           done();
@@ -206,11 +209,15 @@ describe('Editors component', () => {
         expect(app.state.gistId).toBe('');
         expect(app.state.templateName).toBeUndefined();
 
-        app.replaceFiddle({}, {
-          gistId: 'gistId',
-          templateName: 'templateName',
-          filePath: 'localPath'
-        })
+        app
+          .replaceFiddle(
+            {},
+            {
+              gistId: 'gistId',
+              templateName: 'templateName',
+              filePath: 'localPath',
+            },
+          )
           .then(() => {
             expect(app.setEditorValues).not.toHaveBeenCalled();
             expect(app.state.localPath).toBeUndefined();
@@ -237,14 +244,15 @@ describe('Editors component', () => {
         const editorValues = {
           html: 'html-value',
           main: 'main-value',
-          renderer: 'renderer-value'
+          renderer: 'renderer-value',
         };
 
-        app.replaceFiddle(editorValues, {
-          gistId: 'gistId',
-          templateName: 'templateName',
-          filePath: 'localPath'
-        })
+        app
+          .replaceFiddle(editorValues, {
+            gistId: 'gistId',
+            templateName: 'templateName',
+            filePath: 'localPath',
+          })
           .then(() => {
             expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
             expect(app.state.gistId).toBe('gistId');
@@ -268,17 +276,17 @@ describe('Editors component', () => {
       app.setEditorValues({
         html: 'html-value',
         main: 'main-value',
-        renderer: 'renderer-value'
+        renderer: 'renderer-value',
       });
 
       expect(
-        (window as any).ElectronFiddle.editors.html.setValue
+        (window as any).ElectronFiddle.editors.html.setValue,
       ).toHaveBeenCalledWith('html-value');
       expect(
-        (window as any).ElectronFiddle.editors.main.setValue
+        (window as any).ElectronFiddle.editors.main.setValue,
       ).toHaveBeenCalledWith('main-value');
       expect(
-        (window as any).ElectronFiddle.editors.renderer.setValue
+        (window as any).ElectronFiddle.editors.renderer.setValue,
       ).toHaveBeenCalledWith('renderer-value');
     });
 
@@ -288,7 +296,7 @@ describe('Editors component', () => {
 
       const app = new App();
       (app.state.closedPanels as any).main = {
-        model: { setValue: jest.fn() }
+        model: { setValue: jest.fn() },
       };
       app.state.closedPanels.preload = {};
       app.state.closedPanels.css = {};
@@ -298,13 +306,15 @@ describe('Editors component', () => {
         main: 'main-value',
         renderer: 'renderer-value',
         preload: 'preload-value',
-        css: 'css-value'
+        css: 'css-value',
       });
 
       expect(
-        (app.state.closedPanels.main as EditorBackup)!.model!.setValue
+        (app.state.closedPanels.main as EditorBackup)!.model!.setValue,
       ).toHaveBeenCalledWith('main-value');
-      expect(app.state.closedPanels.preload).toEqual({ value: 'preload-value' });
+      expect(app.state.closedPanels.preload).toEqual({
+        value: 'preload-value',
+      });
       expect(app.state.closedPanels.css).toEqual({ value: 'css-value' });
 
       window.ElectronFiddle.editors.main = oldMainEditor;
@@ -328,11 +338,11 @@ describe('Editors component', () => {
       const app = new App();
       await app.setEditorValues({
         html: 'html-value',
-        main: 'main-value'
+        main: 'main-value',
       });
 
       expect(
-        (window as any).ElectronFiddle.editors.renderer.setValue
+        (window as any).ElectronFiddle.editors.renderer.setValue,
       ).not.toHaveBeenCalled();
     });
   });
@@ -346,7 +356,7 @@ describe('Editors component', () => {
 
       expect(window.addEventListener).toHaveBeenCalled();
       expect((window.addEventListener as jest.Mock).mock.calls[0][0]).toBe(
-        'resize'
+        'resize',
       );
     });
   });
@@ -379,7 +389,7 @@ describe('Editors component', () => {
             --error-color: #df3434;
             --fonts-common: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
           }
-        </style>`.replace(/        /gm, '')
+        </style>`.replace(/        /gm, ''),
       );
       // tslint:enable:max-line-length
     });

@@ -7,7 +7,7 @@ import { Files } from '../../interfaces';
  * @returns {Promise<Files>}
  */
 export async function dotfilesTransform(files: Files): Promise<Files> {
-  files.set('.gitignore',  'node_modules\nout');
+  files.set('.gitignore', 'node_modules\nout');
 
   return files;
 }

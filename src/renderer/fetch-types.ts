@@ -56,7 +56,6 @@ export async function removeTypeDefsForVersion(version: string) {
   }
 }
 
-
 /**
  * Get the path for offline TypeScript definitions
  *
@@ -73,7 +72,9 @@ export function getOfflineTypeDefinitionPath(version: string): string {
  * @param {string} version
  * @returns {boolean}
  */
-export async function getOfflineTypeDefinitions(version: string): Promise<boolean> {
+export async function getOfflineTypeDefinitions(
+  version: string,
+): Promise<boolean> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
   return fs.existsSync(getOfflineTypeDefinitionPath(version));
 }
@@ -85,10 +86,12 @@ export async function getOfflineTypeDefinitions(version: string): Promise<boolea
  * @param {string} version
  * @returns {void}
  */
-export async function getDownloadedVersionTypeDefs(version: RunnableVersion): Promise<string | null> {
+export async function getDownloadedVersionTypeDefs(
+  version: RunnableVersion,
+): Promise<string | null> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
-    await fs.mkdirp(definitionPath);
-    const offlinePath = getOfflineTypeDefinitionPath(version.version);
+  await fs.mkdirp(definitionPath);
+  const offlinePath = getOfflineTypeDefinitionPath(version.version);
 
   if (await getOfflineTypeDefinitions(version.version)) {
     try {
@@ -128,7 +131,10 @@ export async function getLocalVersionTypeDefs(version: RunnableVersion) {
  *
  * @param {string} version
  */
-export async function updateEditorTypeDefinitions(version: RunnableVersion, i: number = 0): Promise<void> {
+export async function updateEditorTypeDefinitions(
+  version: RunnableVersion,
+  i = 0,
+): Promise<void> {
   const defer = async (): Promise<void> => {
     if (i > 10) {
       console.warn(`Fetch Types: Failed, dependencies do not exist`);
@@ -136,18 +142,23 @@ export async function updateEditorTypeDefinitions(version: RunnableVersion, i: n
     }
 
     console.warn(`Fetch Types: Called too soon, deferring`);
-    return callIn(i * 100 + 200, () => updateEditorTypeDefinitions(version, i + 1));
+    return callIn(i * 100 + 200, () =>
+      updateEditorTypeDefinitions(version, i + 1),
+    );
   };
 
   // If this method is called before we're ready, we'll delay this work a bit
-  if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco) return defer();
+  if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco)
+    return defer();
 
   const { app } = window.ElectronFiddle;
   const monaco: typeof MonacoType = app.monaco!;
   const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
 
-  const getTypeDefs = (version.source === VersionSource.local) ?
-    getLocalVersionTypeDefs : getDownloadedVersionTypeDefs;
+  const getTypeDefs =
+    version.source === VersionSource.local
+      ? getLocalVersionTypeDefs
+      : getDownloadedVersionTypeDefs;
 
   const typeDefs = await getTypeDefs(version);
 
@@ -156,8 +167,12 @@ export async function updateEditorTypeDefinitions(version: RunnableVersion, i: n
   }
 
   if (typeDefs) {
-    console.log(`Fetch Types: Updating Monaco types with electron.d.ts@${version.version}`);
-    const disposable = monaco.languages.typescript.javascriptDefaults.addExtraLib(typeDefs);
+    console.log(
+      `Fetch Types: Updating Monaco types with electron.d.ts@${version.version}`,
+    );
+    const disposable = monaco.languages.typescript.javascriptDefaults.addExtraLib(
+      typeDefs,
+    );
     window.ElectronFiddle.app.typeDefDisposable = disposable;
   } else {
     console.log(`Fetch Types: No type definitions for ${version.version} 😢`);
@@ -172,7 +187,7 @@ export function getLocalTypePathForVersion(version: RunnableVersion) {
       'electron',
       'tsc',
       'typings',
-      'electron.d.ts'
+      'electron.d.ts',
     );
   } else {
     return null;

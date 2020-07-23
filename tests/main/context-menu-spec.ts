@@ -2,7 +2,12 @@
  * @jest-environment node
  */
 
-import { createContextMenu, getInspectItems, getMonacoItems, getRunItems } from '../../src/main/context-menu';
+import {
+  createContextMenu,
+  getInspectItems,
+  getMonacoItems,
+  getRunItems,
+} from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';
 import { MockBrowserWindow } from '../mocks/browser-window';
@@ -19,10 +24,10 @@ describe('context-menu', () => {
     editFlags: {
       canCopy: false,
       canCut: false,
-      canPaste: false
+      canPaste: false,
     },
     selectionText: null,
-    isEditable: false
+    isEditable: false,
   };
 
   beforeEach(() => {
@@ -34,12 +39,12 @@ describe('context-menu', () => {
   describe('getContextMenu()', () => {
     it('attaches to the context-menu', () => {
       const eventNames = mockWindow.webContents.eventNames();
-      expect(eventNames).toEqual([ 'context-menu' ]);
+      expect(eventNames).toEqual(['context-menu']);
     });
 
     it('creates a default context-menu with inspect for dev mode', () => {
       (Menu as any).buildFromTemplate.mockReturnValue({
-        popup: jest.fn()
+        popup: jest.fn(),
       });
       (isDevMode as any).mockReturnValueOnce(true);
 
@@ -60,7 +65,7 @@ describe('context-menu', () => {
 
     it('creates a default context-menu without inspect in production', () => {
       (Menu as any).buildFromTemplate.mockReturnValue({
-        popup: jest.fn()
+        popup: jest.fn(),
       });
       (isDevMode as any).mockReturnValueOnce(false);
 
@@ -72,7 +77,7 @@ describe('context-menu', () => {
 
     it('disables cut/copy/paste if not in editFlags', () => {
       (Menu as any).buildFromTemplate.mockReturnValue({
-        popup: jest.fn()
+        popup: jest.fn(),
       });
       (isDevMode as any).mockReturnValueOnce(true);
 
@@ -90,7 +95,7 @@ describe('context-menu', () => {
 
     it('enables cut/copy/paste if in editFlags', () => {
       (Menu as any).buildFromTemplate.mockReturnValue({
-        popup: jest.fn()
+        popup: jest.fn(),
       });
       (isDevMode as any).mockReturnValueOnce(true);
 
@@ -99,8 +104,8 @@ describe('context-menu', () => {
         editFlags: {
           canCopy: true,
           canPaste: true,
-          canCut: true
-        }
+          canCut: true,
+        },
       });
 
       const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
@@ -143,7 +148,9 @@ describe('context-menu', () => {
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
-      expect(mockWindow.webContents.devToolsWebContents.focus).toHaveBeenCalled();
+      expect(
+        mockWindow.webContents.devToolsWebContents.focus,
+      ).toHaveBeenCalled();
     });
 
     it('catches an error', () => {
@@ -151,10 +158,11 @@ describe('context-menu', () => {
       const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
       mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
       mockWindow.webContents.devToolsWebContents = new MockWebContents();
-      mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(() => {
-        throw new Error('💩');
-      });
-
+      mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(
+        () => {
+          throw new Error('💩');
+        },
+      );
 
       (result[0] as any).click();
     });
@@ -162,23 +170,24 @@ describe('context-menu', () => {
 
   describe('getMonacoItems()', () => {
     it('returns an empty array if canPaste is false', () => {
-      const result = getMonacoItems({ editFlags: { canPaste: false }} as any);
+      const result = getMonacoItems({ editFlags: { canPaste: false } } as any);
       expect(result).toHaveLength(0);
     });
 
     it('returns an array if the page url suggest the editor is up', () => {
       const result = getMonacoItems({
         editFlags: { canPaste: true },
-        pageURL: 'index.html'} as any
-      );
+        pageURL: 'index.html',
+      } as any);
       expect(result).toHaveLength(9);
     });
 
     it('executes an IPC send() for each element', () => {
       const result = getMonacoItems({
         editFlags: { canPaste: true },
-        pageURL: 'index.html'} as any
-      );      let i = 0;
+        pageURL: 'index.html',
+      } as any);
+      let i = 0;
 
       result.forEach((item) => {
         if (item.click) {

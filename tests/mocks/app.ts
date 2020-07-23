@@ -11,13 +11,13 @@ export class AppMock {
     preload: 'preload-content',
     renderer: 'renderer-content',
     html: 'html-content',
-    css: 'css-content'
+    css: 'css-content',
   }));
 
   public setupTheme = jest.fn();
 
   public typeDefDisposable = {
-    dispose: jest.fn()
+    dispose: jest.fn(),
   };
 
   public fileManager = new FileManager();
@@ -27,14 +27,14 @@ export class AppMock {
   public monaco = {
     editor: {
       setTheme: jest.fn(),
-      defineTheme: jest.fn()
+      defineTheme: jest.fn(),
     },
     languages: {
       typescript: {
         javascriptDefaults: {
-          addExtraLib: jest.fn()
-        }
-      }
-    }
+          addExtraLib: jest.fn(),
+        },
+      },
+    },
   };
 }

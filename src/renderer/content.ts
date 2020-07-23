@@ -42,15 +42,18 @@ export async function getContent(
 export async function isContentUnchanged(name: EditorId): Promise<boolean> {
   if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
 
-  const values = await window.ElectronFiddle.app.getEditorValues({ include: false });
+  const values = await window.ElectronFiddle.app.getEditorValues({
+    include: false,
+  });
 
   // Handle main case, which needs to check both possible versions
   if (name === EditorId.main) {
-    const isChanged1x = await getContent(EditorId.main, '1.0') === values.main;
-    const isChangedOther = await getContent(EditorId.main) === values.main;
+    const isChanged1x =
+      (await getContent(EditorId.main, '1.0')) === values.main;
+    const isChangedOther = (await getContent(EditorId.main)) === values.main;
 
     return isChanged1x || isChangedOther;
   } else {
-    return values[name] === await getContent(name);
+    return values[name] === (await getContent(name));
   }
 }

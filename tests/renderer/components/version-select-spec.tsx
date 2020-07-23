@@ -1,8 +1,18 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { RunnableVersion, VersionSource, VersionState } from '../../../src/interfaces';
-import { filterItem, getItemIcon, getItemLabel, renderItem, VersionSelect } from '../../../src/renderer/components/version-select';
+import {
+  RunnableVersion,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
+import {
+  filterItem,
+  getItemIcon,
+  getItemLabel,
+  renderItem,
+  VersionSelect,
+} from '../../../src/renderer/components/version-select';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
@@ -15,13 +25,13 @@ describe('VersionSelect component', () => {
   const mockVersion1 = {
     source: remote,
     state: unknown,
-    version: '1.0.0'
+    version: '1.0.0',
   };
 
   const mockVersion2 = {
     source: remote,
     state: unknown,
-    version: '3.0.0-unsupported'
+    version: '3.0.0-unsupported',
   };
 
   beforeEach(() => {
@@ -31,22 +41,29 @@ describe('VersionSelect component', () => {
         ...mockVersions,
         '3.1.3': undefined,
         '1.0.0': { ...mockVersion1 },
-        '3.0.0-unsupported': { ...mockVersion2 }
+        '3.0.0-unsupported': { ...mockVersion2 },
       },
-      channelsToShow: [ ElectronReleaseChannel.stable, ElectronReleaseChannel.beta ],
-      statesToShow: [ VersionState.ready, VersionState.downloading ],
+      channelsToShow: [
+        ElectronReleaseChannel.stable,
+        ElectronReleaseChannel.beta,
+      ],
+      statesToShow: [VersionState.ready, VersionState.downloading],
       setVersion: jest.fn(),
       get currentRunnableVersion() {
         return mockVersions['2.0.2'];
-      }
+      },
     };
   });
 
-const onVersionSelect = () => ({});
+  const onVersionSelect = () => ({});
 
   it('renders', () => {
     const wrapper = shallow(
-      <VersionSelect appState={store} currentVersion={mockVersion1} onVersionSelect={onVersionSelect} />
+      <VersionSelect
+        appState={store}
+        currentVersion={mockVersion1}
+        onVersionSelect={onVersionSelect}
+      />,
     );
     expect(wrapper).toMatchSnapshot();
   });
@@ -57,7 +74,7 @@ const onVersionSelect = () => ({});
         handleClick: () => ({}),
         index: 0,
         modifiers: { active: true, disabled: false, matchesPredicate: true },
-        query: ''
+        query: '',
       });
 
       expect(item).toMatchSnapshot();
@@ -68,7 +85,7 @@ const onVersionSelect = () => ({});
         handleClick: () => ({}),
         index: 0,
         modifiers: { active: true, disabled: false, matchesPredicate: false },
-        query: ''
+        query: '',
       });
 
       expect(item).toBe(null);
@@ -89,7 +106,7 @@ const onVersionSelect = () => ({});
     it('returns the correct label for a version not downloaded', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: unknown
+        state: unknown,
       };
 
       expect(getItemLabel(input)).toBe('Not downloaded');
@@ -98,7 +115,7 @@ const onVersionSelect = () => ({});
     it('returns the correct label for a version downloaded', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: ready
+        state: ready,
       };
 
       expect(getItemLabel(input)).toBe('Downloaded');
@@ -107,7 +124,7 @@ const onVersionSelect = () => ({});
     it('returns the correct label for a version downloading', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: downloading
+        state: downloading,
       };
 
       expect(getItemLabel(input)).toBe('Downloading');

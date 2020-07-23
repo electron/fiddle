@@ -21,6 +21,6 @@ export function getEditorBackup(id: EditorId): EditorBackup {
   return {
     value: getEditorValue(id),
     model: getEditorModel(id),
-    viewState: getEditorViewState(id)
+    viewState: getEditorViewState(id),
   };
 }

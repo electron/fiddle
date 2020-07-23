@@ -15,10 +15,10 @@ export interface GeneralSettingsProps {
  * Settings content to manage GitHub-related preferences.
  *
  * @class GitHubSettings
- * @extends {React.Component<GeneralSettingsProps, {}>}
+ * @extends {React.Component<GeneralSettingsProps>}
  */
 @observer
-export class GeneralSettings extends React.Component<GeneralSettingsProps, {}> {
+export class GeneralSettings extends React.Component<GeneralSettingsProps> {
   public render() {
     return (
       <div>

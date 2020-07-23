@@ -6,7 +6,7 @@ describe('getEditorBackup()', () => {
     expect(getEditorBackup(EditorId.html)).toEqual({
       value: 'editor-value',
       model: { testModel: true },
-      viewState: { testViewState: true }
+      viewState: { testViewState: true },
     });
   });
 });

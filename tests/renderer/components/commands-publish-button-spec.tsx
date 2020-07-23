@@ -18,12 +18,12 @@ describe('Publish button component', () => {
       'preload.js': { content: 'preload-content' },
       'styles.css': { content: 'css-content' },
     },
-    public: true
+    public: true,
   };
 
   beforeEach(() => {
     store = {
-      gitHubPublishAsPublic: true
+      gitHubPublishAsPublic: true,
     };
   });
 
@@ -57,8 +57,8 @@ describe('Publish button component', () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
-        create: jest.fn(async () => ({ data: { id: '123' } }))
-      }
+        create: jest.fn(async () => ({ data: { id: '123' } })),
+      },
     };
 
     (getOctokit as any).mockReturnValue(mockOctokit);
@@ -77,7 +77,7 @@ describe('Publish button component', () => {
         'preload.js': { content: 'preload-content' },
         'styles.css': { content: 'css-content' },
       },
-      public: true
+      public: true,
     });
   });
 
@@ -85,8 +85,8 @@ describe('Publish button component', () => {
     const mockOctokit = {
       authenticate: jest.fn(),
       gists: {
-        create: jest.fn(async () => ({ data: { id: '123' } }))
-      }
+        create: jest.fn(async () => ({ data: { id: '123' } })),
+      },
     };
 
     (getOctokit as any).mockReturnValue(mockOctokit);
@@ -107,7 +107,7 @@ describe('Publish button component', () => {
         'preload.js': { content: '// Empty' },
         'styles.css': { content: '/* Empty */' },
       },
-      public: true
+      public: true,
     });
   });
 
@@ -117,8 +117,8 @@ describe('Publish button component', () => {
       gists: {
         create: jest.fn(() => {
           throw new Error('bwap bwap');
-        })
-      }
+        }),
+      },
     };
 
     (getOctokit as any).mockReturnValue(mockOctokit);
@@ -137,8 +137,8 @@ describe('Publish button component', () => {
       gists: {
         create: jest.fn(() => {
           throw new Error('bwap bwap');
-        })
-      }
+        }),
+      },
     };
 
     (getOctokit as any).mockReturnValue(mockOctokit);
@@ -151,7 +151,7 @@ describe('Publish button component', () => {
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
-      public: false
+      public: false,
     });
 
     instance.setPublic();
@@ -159,7 +159,7 @@ describe('Publish button component', () => {
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
-      public: true
+      public: true,
     });
   });
 
