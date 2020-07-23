@@ -52,7 +52,8 @@ exports[`AppearanceSettings component renders 1`] = `
   </Blueprint3.FormGroup>
   <Blueprint3.Callout>
     <p>
-      To add themes, add JSON theme files to 
+      To add themes, add JSON theme files to
+       
       <a
         id="open-theme-folder"
         onClick={[Function]}

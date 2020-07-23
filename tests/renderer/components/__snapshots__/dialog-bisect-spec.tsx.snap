@@ -20,9 +20,11 @@ exports[`BisectDialog component renders 1`] = `
       }
     >
       <p>
-        A "bisect" is a popular method 
+        A "bisect" is a popular method
+         
         <a
           href="https://git-scm.com/docs/git-bisect"
+          rel="noreferrer"
           target="_blank"
         >
           borrowed from 
@@ -30,7 +32,8 @@ exports[`BisectDialog component renders 1`] = `
             git
           </code>
         </a>
-         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
+         
+        for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
       <Blueprint3.Button
         icon="help"
@@ -249,9 +252,11 @@ exports[`BisectDialog component renders 2`] = `
       }
     >
       <p>
-        A "bisect" is a popular method 
+        A "bisect" is a popular method
+         
         <a
           href="https://git-scm.com/docs/git-bisect"
+          rel="noreferrer"
           target="_blank"
         >
           borrowed from 
@@ -259,7 +264,8 @@ exports[`BisectDialog component renders 2`] = `
             git
           </code>
         </a>
-         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
+         
+        for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
       <Blueprint3.Button
         icon="help"
@@ -464,9 +470,11 @@ exports[`BisectDialog component renders 3`] = `
       }
     >
       <p>
-        A "bisect" is a popular method 
+        A "bisect" is a popular method
+         
         <a
           href="https://git-scm.com/docs/git-bisect"
+          rel="noreferrer"
           target="_blank"
         >
           borrowed from 
@@ -474,7 +482,8 @@ exports[`BisectDialog component renders 3`] = `
             git
           </code>
         </a>
-         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
+         
+        for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
       <Blueprint3.Button
         icon="help"
@@ -686,9 +695,11 @@ exports[`BisectDialog component renders 4`] = `
       }
     >
       <p>
-        A "bisect" is a popular method 
+        A "bisect" is a popular method
+         
         <a
           href="https://git-scm.com/docs/git-bisect"
+          rel="noreferrer"
           target="_blank"
         >
           borrowed from 
@@ -696,7 +707,8 @@ exports[`BisectDialog component renders 4`] = `
             git
           </code>
         </a>
-         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
+         
+        for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
       <Blueprint3.Button
         icon="help"
@@ -915,9 +927,11 @@ exports[`BisectDialog component renders 5`] = `
       }
     >
       <p>
-        A "bisect" is a popular method 
+        A "bisect" is a popular method
+         
         <a
           href="https://git-scm.com/docs/git-bisect"
+          rel="noreferrer"
           target="_blank"
         >
           borrowed from 
@@ -925,7 +939,8 @@ exports[`BisectDialog component renders 5`] = `
             git
           </code>
         </a>
-         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
+         
+        for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
       <p>
         First, write a fiddle that reproduces a bug or an issue. Then, select the earliest version to start your search with. Typically, that's the "last known good" version that did not have the bug. Then, select that latest version to end the search with, usually the "first known bad" version.
