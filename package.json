@@ -93,8 +93,10 @@
     "eslint-plugin-prettier": "^3.1.4",
     "eslint-plugin-react": "^7.20.3",
     "fetch-mock-jest": "^1.1.0-beta.3",
+    "husky": "^4.2.5",
     "jest": "^25.1.0",
     "less": "^3.11.1",
+    "lint-staged": "^10.2.11",
     "log-symbols": "^3.0.0",
     "node-abi": "^2.18.0",
     "node-fetch": "^2.6.0",
@@ -108,5 +110,21 @@
     "stylelint-config-standard": "^20.0.0",
     "ts-jest": "^25.2.1",
     "typescript": "^3.8.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "./**/*.{js,ts,tsx}": [
+      "npm run lint:ts"
+    ],
+    "./static/show-me/**/*.js": [
+      "npm run lint:templates"
+    ],
+    "./src/less/*.less": [
+      "npm run lint:style"
+    ]
   }
 }
