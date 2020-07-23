@@ -38,14 +38,11 @@ export class Commands extends React.Component<CommandsProps> {
             <VersionChooser appState={appState} />
             <Runner appState={appState} />
           </ControlGroup>
-          {
-            // tslint:disable-next-line jsx-no-multiline-js
-            isBisectCommandShowing && (
-              <ControlGroup fill={true} vertical={false}>
-                <BisectHandler appState={appState} />
-              </ControlGroup>
-            )
-          }
+          {isBisectCommandShowing && (
+            <ControlGroup fill={true} vertical={false}>
+              <BisectHandler appState={appState} />
+            </ControlGroup>
+          )}
           <ControlGroup fill={true} vertical={false}>
             <Button
               active={appState.isConsoleShowing}

@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 const { maybeFetchContributors } = require('./contributors');
 const { compileParcel } = require('./parcel-build');
 

@@ -86,7 +86,6 @@ export function findModules(input: string): Array<string> {
   let match: RegExpMatchArray | null;
 
   /* grab all global require matches in the text */
-  // tslint:disable-next-line:no-conditional-assignment
   while ((match = requiregx.exec(input) || null)) {
     // ensure commented-out requires aren't downloaded
     if (!match[0].startsWith('//')) {

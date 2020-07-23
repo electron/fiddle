@@ -369,7 +369,6 @@ describe('Editors component', () => {
       await app.setupTheme();
 
       expect(document.head!.innerHTML).toEqual(
-        // tslint:disable:max-line-length
         `<style id="fiddle-theme">
           html, body {
             --foreground-1: #9feafa;
@@ -391,7 +390,6 @@ describe('Editors component', () => {
           }
         </style>`.replace(/        /gm, ''),
       );
-      // tslint:enable:max-line-length
     });
 
     it('removes the dark theme option if required', async () => {

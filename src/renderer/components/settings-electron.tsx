@@ -264,27 +264,24 @@ export class ElectronSettings extends React.Component<
 
     return (
       <FormGroup label="Include Electron versions from these release channels:">
-        {
-          // tslint:disable-next-line:jsx-no-multiline-js
-          Object.entries(channels).map(([_, channel]) => (
-            <Tooltip
-              content={`Can't disable channel of selected version (${appState.version})`}
-              disabled={!getIsCurrentVersionReleaseChannel(channel)}
-              position="bottom"
-              intent="primary"
-              key={channel}
-            >
-              <Checkbox
-                checked={getIsChecked(channel)}
-                label={channel}
-                id={channel}
-                onChange={this.handleChannelChange}
-                disabled={getIsCurrentVersionReleaseChannel(channel)}
-                inline={true}
-              />
-            </Tooltip>
-          ))
-        }
+        {Object.entries(channels).map(([_, channel]) => (
+          <Tooltip
+            content={`Can't disable channel of selected version (${appState.version})`}
+            disabled={!getIsCurrentVersionReleaseChannel(channel)}
+            position="bottom"
+            intent="primary"
+            key={channel}
+          >
+            <Checkbox
+              checked={getIsChecked(channel)}
+              label={channel}
+              id={channel}
+              onChange={this.handleChannelChange}
+              disabled={getIsCurrentVersionReleaseChannel(channel)}
+              inline={true}
+            />
+          </Tooltip>
+        ))}
       </FormGroup>
     );
   }

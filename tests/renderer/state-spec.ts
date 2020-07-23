@@ -564,7 +564,6 @@ describe('AppState', () => {
       await appState.setVisibleMosaics([EditorId.main]);
 
       // we just need to mock something truthy here
-      // tslint:disable-next-line:no-object-literal-type-assertion
       window.ElectronFiddle.editors[
         EditorId.main
       ] = {} as MonacoType.editor.IStandaloneCodeEditor;
@@ -581,7 +580,6 @@ describe('AppState', () => {
 
       for (const mosaic of ALL_MOSAICS) {
         // we just need to mock something truthy here
-        // tslint:disable-next-line:no-object-literal-type-assertion
         window.ElectronFiddle.editors[
           mosaic
         ] = {} as MonacoType.editor.IStandaloneCodeEditor;

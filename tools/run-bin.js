@@ -1,5 +1,3 @@
-/* tslint:disable */
-
 const childProcess = require('child_process');
 const path = require('path');
 const logSymbols = require('log-symbols');

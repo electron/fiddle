@@ -7,8 +7,6 @@ import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('GenericDialog component', () => {
-  // tslint isn't able to parse the casted use below and thinks this is unused
-  // tslint:disable-next-line: prefer-const
   let store: AppState;
 
   beforeAll(() => {
