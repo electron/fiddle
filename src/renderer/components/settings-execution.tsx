@@ -1,8 +1,36 @@
-import { Callout, Checkbox, FormGroup, InputGroup } from '@blueprintjs/core';
+import {
+  Button,
+  Callout,
+  Checkbox,
+  FormGroup,
+  InputGroup,
+  MenuItem,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { ItemRenderer, Select } from '@blueprintjs/select';
 import { AppState } from '../state';
+
+const PMSelect = Select.ofType<'npm' | 'yarn'>();
+
+export const renderItem: ItemRenderer<'npm' | 'yarn'> = (
+  item,
+  { handleClick, modifiers },
+) => {
+  if (!modifiers.matchesPredicate) {
+    return null;
+  }
+
+  return (
+    <MenuItem
+      active={modifiers.active}
+      text={item}
+      key={item}
+      onClick={handleClick}
+    />
+  );
+};
 
 export interface ExecutionSettingsProps {
   appState: AppState;
@@ -122,7 +150,27 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
             />
           </FormGroup>
         </Callout>
+        <br />
+        <Callout>
+          <FormGroup>
+            <span style={{ marginRight: 4 }}>
+              You can change the default package manager to 'npm' or 'yarn'. The
+              choice is not big, but you have a choice:
+            </span>
+            <PMSelect
+              items={['npm', 'yarn']}
+              itemRenderer={renderItem}
+              onItemSelect={this.handlePMChange}
+            >
+              <Button text={this.props.appState.packageManager} icon="box" />
+            </PMSelect>
+          </FormGroup>
+        </Callout>
       </div>
     );
   }
+
+  private handlePMChange = (item: 'npm' | 'yarn') => {
+    this.props.appState.packageManager = item;
+  };
 }

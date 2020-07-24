@@ -201,7 +201,7 @@ describe('Runner component', () => {
 
   describe('installModules()', () => {
     it('installs modules', async () => {
-      expect(await instance.npmInstall('')).toBe(true);
+      expect(await instance.npmInstall({ dir: '', package_manager: 'npm' })).toBe(true);
       expect(installModules).toHaveBeenCalled();
     });
 
@@ -210,7 +210,7 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.npmInstall('')).toBe(false);
+      expect(await instance.npmInstall({ dir: '', package_manager: 'npm' })).toBe(false);
       expect(installModules).toHaveBeenCalled();
     });
   });
@@ -277,36 +277,30 @@ describe('Runner component', () => {
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
 
-      await instance.installModulesForEditor(
-        {
-          html: '',
-          main: `const a = require('say')`,
-          renderer: '',
-          preload: '',
-          css: '',
-        },
-        '/fake/path',
-      );
+      await instance.installModulesForEditor({
+        html: '',
+        main: `const a = require('say')`,
+        renderer: '',
+        preload: '',
+        css: ''
+      }, { dir: '/fake/path', package_manager: 'npm' });
 
       expect(installModules).toHaveBeenCalledTimes(0);
     });
 
     it('does attempt installation if npm is installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
 
-      await instance.installModulesForEditor(
-        {
-          html: '',
-          main: `const a = require('say')`,
-          renderer: '',
-          preload: '',
-          css: '',
-        },
-        '/fake/path',
-      );
+      await instance.installModulesForEditor({
+        html: '',
+        main: `const a = require('say')`,
+        renderer: '',
+        preload: '',
+        css: ''
+      }, { dir: '/fake/path', package_manager: 'npm' });
 
       expect(installModules).toHaveBeenCalledTimes(1);
     });

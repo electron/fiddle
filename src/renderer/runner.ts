@@ -7,12 +7,7 @@ import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { ipcRendererManager } from './ipc';
-import {
-  findModulesInEditors,
-  getIsNpmInstalled,
-  installModules,
-  npmRun,
-} from './npm';
+import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun, PMOperationOptions } from './npm';
 import { AppState } from './state';
 
 export enum ForgeCommands {
@@ -58,11 +53,12 @@ export class Runner {
 
     const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
+    const package_manager = this.appState.packageManager;
 
     if (!dir) return false;
 
     try {
-      await this.installModulesForEditor(values, dir);
+      await this.installModulesForEditor(values, { dir, package_manager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
       fileManager.cleanup(dir);
@@ -139,13 +135,15 @@ export class Runner {
     );
     if (!dir) return false;
 
+    const package_manager = this.appState.packageManager;
+
     // Files are now saved to temp, let's install Forge and dependencies
-    if (!(await this.npmInstall(dir))) return false;
+    if (!(await this.npmInstall({ dir, package_manager }))) return false;
 
     // Cool, let's run "package"
     try {
       console.log(`Now creating ${strings[1].toLowerCase()}...`);
-      pushOutput(await npmRun({ dir }, operation));
+      pushOutput(await npmRun({ dir, package_manager }, operation));
       pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
     } catch (error) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
@@ -165,11 +163,8 @@ export class Runner {
    * @param {string} dir
    * @returns {Promise<void>}
    */
-  public async installModulesForEditor(
-    values: EditorValues,
-    dir: string,
-  ): Promise<void> {
-    const modules = await findModulesInEditors(values);
+  public async installModulesForEditor(values: EditorValues, pmOptions: PMOperationOptions): Promise<void> {
+    const modules = findModulesInEditors(values);
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
@@ -186,10 +181,8 @@ export class Runner {
         return;
       }
 
-      pushOutput(`Installing npm modules: ${modules.join(', ')}...`, {
-        isNotPre: true,
-      });
-      pushOutput(await installModules({ dir }, ...modules));
+      pushOutput(`Installing node modules using ${pmOptions.package_manager}: ${modules.join(', ')}...`, { isNotPre: true });
+      pushOutput(await installModules(pmOptions, ...modules));
     }
   }
 
@@ -280,10 +273,10 @@ export class Runner {
    * @returns
    * @memberof Runner
    */
-  public async npmInstall(dir: string): Promise<boolean> {
+  public async npmInstall(options: PMOperationOptions): Promise<boolean> {
     try {
       this.appState.pushOutput(`Now running "npm install..."`);
-      this.appState.pushOutput(await installModules({ dir }));
+      this.appState.pushOutput(await installModules(options));
       return true;
     } catch (error) {
       this.appState.pushError('Failed to run "npm install".', error);

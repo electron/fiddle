@@ -55,5 +55,33 @@ exports[`ExecutionSettings component renders 1`] = `
       />
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <span
+        style={
+          Object {
+            "marginRight": 4,
+          }
+        }
+      >
+        You can change the default package manager to 'npm' or 'yarn'. The choice is not big, but you have a choice:
+      </span>
+      <Blueprint3.Select
+        itemRenderer={[Function]}
+        items={
+          Array [
+            "npm",
+            "yarn",
+          ]
+        }
+        onItemSelect={[Function]}
+      >
+        <Blueprint3.Button
+          icon="box"
+        />
+      </Blueprint3.Select>
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
 </div>
 `;
