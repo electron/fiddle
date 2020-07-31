@@ -10,7 +10,7 @@
     "less": "node ./tools/lessc.js",
     "lint:style": "stylelint  \"./src/less/*.less\" --fix",
     "lint:ts": "eslint \"./**/*.{js,ts,tsx}\" --fix",
-    "lint:templates": "standard \"./static/show-me/**/*.js\"",
+    "lint:templates": "standard \"./static/show-me/**/*.js\" --fix",
     "lint": "npm-run-all \"lint:*\"",
     "make": "electron-forge make",
     "package": "electron-forge package",
@@ -118,13 +118,13 @@
   },
   "lint-staged": {
     "./**/*.{js,ts,tsx}": [
-      "npm run lint:ts"
+      "eslint --fix"
     ],
     "./static/show-me/**/*.js": [
-      "npm run lint:templates"
+      "standard --fix"
     ],
     "./src/less/*.less": [
-      "npm run lint:style"
+      "stylelint --fix"
     ]
   }
 }
