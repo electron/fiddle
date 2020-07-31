@@ -3,9 +3,11 @@ import { exec } from '../utils/exec';
 
 const { builtinModules } = require('module');
 
+export type IPackageManager = 'npm' | 'yarn';
+
 export interface PMOperationOptions {
   dir: string;
-  package_manager: 'npm' | 'yarn';
+  packageManager: IPackageManager;
 }
 
 export let isInstalled: boolean | null = null;
@@ -108,14 +110,14 @@ export function findModules(input: string): Array<string> {
 /**
  * Installs given modules to a given folder.
  *
- * @param {PMOperationOptions} { dir, package_manager }
+ * @param {PMOperationOptions} { dir, packageManager }
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export async function installModules({ dir, package_manager }: PMOperationOptions, ...names: Array<string>): Promise<string> {
+export async function installModules({ dir, packageManager }: PMOperationOptions, ...names: Array<string>): Promise<string> {
   let nameArgs: Array<string> = [];
 
-  if (package_manager === 'npm') {
+  if (packageManager === 'npm') {
     nameArgs = names.length > 0
       ? [ '-S', ...names ]
       : ['--dev --prod'];
@@ -123,18 +125,18 @@ export async function installModules({ dir, package_manager }: PMOperationOption
     nameArgs = [...names];
   }
 
-  const installCommand = package_manager === 'npm' ? 'npm install' : 'yarn add';
+  const installCommand = packageManager === 'npm' ? 'npm install' : 'yarn add';
 
   return exec(dir, [ installCommand ].concat(nameArgs).join(' '));
 }
 
 /**
- * Execute an "npm run" command
+ * Execute an "{packageManager} run" command
  *
- * @param {PMOperationOptions} { dir, package_manager }
+ * @param {PMOperationOptions} { dir, packageManager }
  * @param {string} command
  * @returns {Promise<string>}
  */
-export function npmRun({ dir, package_manager }: PMOperationOptions, command: string): Promise<string> {
-  return exec(dir, `${package_manager} run ${command}`);
+export function packageRun({ dir, packageManager }: PMOperationOptions, command: string): Promise<string> {
+  return exec(dir, `${packageManager} run ${command}`);
 }

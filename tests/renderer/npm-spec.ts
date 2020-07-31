@@ -2,7 +2,7 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  npmRun,
+  packageRun,
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -104,13 +104,13 @@ describe('npm', () => {
   describe('installModules()', () => {
     describe('npm', () => {
       it('attempts to install a single module', async () => {
-        installModules({ dir: '/my/directory', package_manager: 'npm' }, 'say', 'thing');
+        installModules({ dir: '/my/directory', packageManager: 'npm' }, 'say', 'thing');
 
         expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
       });
 
       it('attempts to installs all modules', async () => {
-        installModules({ dir: '/my/directory', package_manager: 'npm' });
+        installModules({ dir: '/my/directory', packageManager: 'npm' });
 
         expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
       });
@@ -118,24 +118,30 @@ describe('npm', () => {
 
     describe('yarn', () => {
       it('attempts to install a single module', async () => {
-        installModules({ dir: '/my/directory', package_manager: 'yarn' }, 'say', 'thing');
+        installModules({ dir: '/my/directory', packageManager: 'yarn' }, 'say', 'thing');
 
         expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn add say thing');
       });
 
       it('attempts to installs all modules', async () => {
-        installModules({ dir: '/my/directory', package_manager: 'yarn' });
+        installModules({ dir: '/my/directory', packageManager: 'yarn' });
 
         expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn add');
       });
     })
   });
 
-  describe('npmRun()', () => {
-    it('attempts to run a command', async () => {
-      npmRun({ dir: '/my/directory', package_manager: 'npm' }, 'package');
+  describe('packageRun()', () => {
+    it('attempts to run a command via npm', async () => {
+      packageRun({ dir: '/my/directory', packageManager: 'npm' }, 'package');
 
       expect(exec).toHaveBeenCalledWith('/my/directory', 'npm run package');
+    });
+
+    it('attempts to run a command via yarn', async () => {
+      packageRun({ dir: '/my/directory', packageManager: 'yarn' }, 'package');
+
+      expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn run package');
     });
   });
 });

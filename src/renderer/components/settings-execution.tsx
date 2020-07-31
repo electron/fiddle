@@ -1,36 +1,16 @@
 import {
-  Button,
   Callout,
   Checkbox,
   FormGroup,
   InputGroup,
-  MenuItem,
+  Radio,
+  RadioGroup,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ItemRenderer, Select } from '@blueprintjs/select';
+import { IPackageManager } from '../npm';
 import { AppState } from '../state';
-
-const PMSelect = Select.ofType<'npm' | 'yarn'>();
-
-export const renderItem: ItemRenderer<'npm' | 'yarn'> = (
-  item,
-  { handleClick, modifiers },
-) => {
-  if (!modifiers.matchesPredicate) {
-    return null;
-  }
-
-  return (
-    <MenuItem
-      active={modifiers.active}
-      text={item}
-      key={item}
-      onClick={handleClick}
-    />
-  );
-};
 
 export interface ExecutionSettingsProps {
   appState: AppState;
@@ -43,13 +23,20 @@ export interface ExecutionSettingsProps {
  * @extends {React.Component<ExecutionSettingsProps, {}>}
  */
 @observer
-export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
+export class ExecutionSettings extends React.Component<
+  ExecutionSettingsProps,
+  {}
+> {
   constructor(props: ExecutionSettingsProps) {
     super(props);
 
     this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
     this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
+<<<<<<< HEAD
       this,
+=======
+      this
+>>>>>>> c81f781... chore: address reviewing
     );
     this.handleExecutionFlagChange = this.handleExecutionFlagChange.bind(this);
   }
@@ -135,12 +122,11 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
           <FormGroup>
             <p>
               Electron allows starting the executable with{' '}
-              <a href="https://www.electronjs.org/docs/api/command-line-switches">
+              <a href='https://www.electronjs.org/docs/api/command-line-switches'>
                 user-provided flags
               </a>
-              , such as &apos;--js-flags=--expose-gc&apos;. Those can be added
-              here as bar-separated (|) flags to run when you start your
-              Fiddles.
+              , such as '--js-flags=--expose-gc'. Those can be added here as
+              bar-separated (|) flags to run when you start your Fiddles.
             </p>
             <br />
             <InputGroup
@@ -154,23 +140,32 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
         <Callout>
           <FormGroup>
             <span style={{ marginRight: 4 }}>
-              You can change the default package manager to 'npm' or 'yarn'. The
-              choice is not big, but you have a choice:
+              Electron Fiddle will install packages on runtime if they are
+              imported within your fiddle with <code>require</code>. It uses{' '}
+              <a href='https://www.npmjs.com/' target='_blank'>
+                npm
+              </a>{' '}
+              as its package manager by default, but{' '}
+              <a href='https://classic.yarnpkg.com/lang/en/' target='_blank'>
+                Yarn
+              </a>{' '}
+              is also available.
             </span>
-            <PMSelect
-              items={['npm', 'yarn']}
-              itemRenderer={renderItem}
-              onItemSelect={this.handlePMChange}
+            <RadioGroup
+              onChange={this.handlePMChange}
+              selectedValue={this.props.appState.packageManager}
+              inline={true}
             >
-              <Button text={this.props.appState.packageManager} icon="box" />
-            </PMSelect>
+              <Radio label='npm' value='npm' />
+              <Radio label='yarn' value='yarn' />
+            </RadioGroup>
           </FormGroup>
         </Callout>
       </div>
     );
   }
 
-  private handlePMChange = (item: 'npm' | 'yarn') => {
-    this.props.appState.packageManager = item;
-  };
+  private handlePMChange = (event: React.FormEvent<HTMLInputElement>) => {
+    this.props.appState.packageManager = event.currentTarget.value as IPackageManager;
+  }
 }

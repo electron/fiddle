@@ -8,7 +8,7 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  npmRun,
+  packageRun
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
@@ -201,7 +201,7 @@ describe('Runner component', () => {
 
   describe('installModules()', () => {
     it('installs modules', async () => {
-      expect(await instance.npmInstall({ dir: '', package_manager: 'npm' })).toBe(true);
+      expect(await instance.packageInstall({ dir: '', packageManager: 'npm' })).toBe(true);
       expect(installModules).toHaveBeenCalled();
     });
 
@@ -210,7 +210,7 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.npmInstall({ dir: '', package_manager: 'npm' })).toBe(false);
+      expect(await instance.packageInstall({ dir: '', packageManager: 'npm' })).toBe(false);
       expect(installModules).toHaveBeenCalled();
     });
   });
@@ -245,7 +245,7 @@ describe('Runner component', () => {
       );
     });
 
-    it('handles an error in npmInstall()', async () => {
+    it('handles an error in packageInstall()', async () => {
       (installModules as jest.Mock).mockImplementationOnce(() => {
         throw new Error('bwap bwap');
       });
@@ -255,8 +255,8 @@ describe('Runner component', () => {
       );
     });
 
-    it('handles an error in npmRun()', async () => {
-      (npmRun as jest.Mock).mockImplementationOnce(() => {
+    it('handles an error in packageRun()', async () => {
+      (packageRun as jest.Mock).mockImplementationOnce(() => {
         throw new Error('bwap bwap');
       });
 
@@ -285,7 +285,7 @@ describe('Runner component', () => {
         renderer: '',
         preload: '',
         css: ''
-      }, { dir: '/fake/path', package_manager: 'npm' });
+      }, { dir: '/fake/path', packageManager: 'npm' });
 
       expect(installModules).toHaveBeenCalledTimes(0);
     });
@@ -300,7 +300,7 @@ describe('Runner component', () => {
         renderer: '',
         preload: '',
         css: ''
-      }, { dir: '/fake/path', package_manager: 'npm' });
+      }, { dir: '/fake/path', packageManager: 'npm' });
 
       expect(installModules).toHaveBeenCalledTimes(1);
     });

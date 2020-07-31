@@ -65,22 +65,43 @@ exports[`ExecutionSettings component renders 1`] = `
           }
         }
       >
-        You can change the default package manager to 'npm' or 'yarn'. The choice is not big, but you have a choice:
+        Electron Fiddle will install packages on runtime if they are imported within your fiddle with 
+        <code>
+          require
+        </code>
+        . It uses
+         
+        <a
+          href="https://www.npmjs.com/"
+          target="_blank"
+        >
+          npm
+        </a>
+         
+        as its package manager by default, but
+         
+        <a
+          href="https://classic.yarnpkg.com/lang/en/"
+          target="_blank"
+        >
+          Yarn
+        </a>
+         
+        is also available.
       </span>
-      <Blueprint3.Select
-        itemRenderer={[Function]}
-        items={
-          Array [
-            "npm",
-            "yarn",
-          ]
-        }
-        onItemSelect={[Function]}
+      <Blueprint3.RadioGroup
+        inline={true}
+        onChange={[Function]}
       >
-        <Blueprint3.Button
-          icon="box"
+        <Blueprint3.Radio
+          label="npm"
+          value="npm"
         />
-      </Blueprint3.Select>
+        <Blueprint3.Radio
+          label="yarn"
+          value="yarn"
+        />
+      </Blueprint3.RadioGroup>
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
 </div>
