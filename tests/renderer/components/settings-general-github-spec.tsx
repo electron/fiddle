@@ -8,14 +8,12 @@ describe('GitHubSettings component', () => {
 
   beforeEach(() => {
     store = {
-      signOutGitHub: jest.fn()
+      signOutGitHub: jest.fn(),
     };
   });
 
   it('renders when not signed in', () => {
-    const wrapper = shallow(
-      <GitHubSettings appState={store} />
-    );
+    const wrapper = shallow(<GitHubSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -23,16 +21,12 @@ describe('GitHubSettings component', () => {
     store.gitHubToken = '123';
     store.gitHubLogin = 'Test User';
 
-    const wrapper = shallow(
-      <GitHubSettings appState={store} />
-    );
+    const wrapper = shallow(<GitHubSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('opens the token dialog on click', () => {
-    const wrapper = shallow(
-      <GitHubSettings appState={store} />
-    );
+    const wrapper = shallow(<GitHubSettings appState={store} />);
 
     wrapper.childAt(1).childAt(1).simulate('click');
     expect(store.isTokenDialogShowing).toBe(true);

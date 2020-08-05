@@ -7,7 +7,7 @@ export class EditorMock {
   public setValue = jest.fn();
   public getValue = jest.fn().mockReturnValue('editor-value');
   public onDidChangeModelContent = jest.fn().mockReturnValue({
-    dispose: jest.fn()
+    dispose: jest.fn(),
   });
   public updateOptions = jest.fn();
 

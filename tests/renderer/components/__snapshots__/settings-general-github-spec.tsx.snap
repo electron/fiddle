@@ -25,7 +25,8 @@ exports[`GitHubSettings component renders when signed in 1`] = `
   </h4>
   <Blueprint3.Callout>
     <p>
-      Your fiddles can be published as public GitHub Gists. Using the personal access token you gave us, we logged you into GitHub as 
+      Your fiddles can be published as public GitHub Gists. Using the personal access token you gave us, we logged you into GitHub as
+       
       <code>
         Test User
       </code>

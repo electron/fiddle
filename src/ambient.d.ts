@@ -8,7 +8,7 @@ declare global {
   interface Window {
     ElectronFiddle: {
       app: AppType;
-      contentChangeListeners: Array<any>,
+      contentChangeListeners: Array<any>;
       editors: Record<EditorId, MonacoType.editor.IStandaloneCodeEditor | null>;
     };
   }

@@ -1,11 +1,26 @@
-import { Button, ButtonGroup, IToastProps, Menu, MenuItem, Popover, Position, Toaster } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroup,
+  IToastProps,
+  Menu,
+  MenuItem,
+  Popover,
+  Position,
+  Toaster,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
 import { EditorValues } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PRELOAD_JS_NAME, RENDERER_JS_NAME, STYLES_CSS_NAME } from '../../shared-constants';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PRELOAD_JS_NAME,
+  RENDERER_JS_NAME,
+  STYLES_CSS_NAME,
+} from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
@@ -28,7 +43,10 @@ interface IPublishButtonState {
  * @extends {React.Component<PublishButtonProps, PublishButtonState>}
  */
 @observer
-export class PublishButton extends React.Component<PublishButtonProps, IPublishButtonState> {
+export class PublishButton extends React.Component<
+  PublishButtonProps,
+  IPublishButtonState
+> {
   public constructor(props: PublishButtonProps) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
@@ -44,7 +62,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
 
   private toaster: Toaster;
   private refHandlers = {
-    toaster: (ref: Toaster) => this.toaster = ref,
+    toaster: (ref: Toaster) => (this.toaster = ref),
   };
 
   public componentDidMount() {
@@ -97,7 +115,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
 
     if (gistId && !wouldPublish) {
       this.setState({
-        isUpdating: true
+        isUpdating: true,
       });
       const gist = await octo.gists.update({
         gist_id: appState.gistId!,
@@ -107,7 +125,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
       console.log('Updating: Updating done', { gist });
       this.renderToast({ message: 'Successfully updated gist!' });
       this.setState({
-        isUpdating: false
+        isUpdating: false,
       });
     } else {
       try {
@@ -126,11 +144,15 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
         console.warn(`Could not publish gist`, { error });
 
         const messageBoxOptions: Electron.MessageBoxOptions = {
-          message: 'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`
+          message:
+            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
+          detail: `GitHub encountered the following error: ${error.message}`,
         };
 
-        ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+        ipcRendererManager.send(
+          IpcEvents.SHOW_WARNING_DIALOG,
+          messageBoxOptions,
+        );
       }
     }
 
@@ -159,29 +181,33 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     const { isPublishing, gistId } = this.props.appState;
     const { isUpdating, wouldPublish } = this.state;
 
-    const getTextForButton = gistId && !wouldPublish
-      ? 'Update'
-      : isUpdating
-      ? 'Updating...'
-      : isPublishing
-      ? 'Publishing...'
-      : 'Publish';
+    const getTextForButton =
+      gistId && !wouldPublish
+        ? 'Update'
+        : isUpdating
+        ? 'Updating...'
+        : isPublishing
+        ? 'Publishing...'
+        : 'Publish';
 
     return (
       <>
         <fieldset disabled={isPublishing}>
-          <ButtonGroup className='button-publish'>
-              {this.renderPrivaryMenu()}
-              <Button
-                onClick={this.handleClick}
-                loading={isPublishing}
-                icon='upload'
-                text={getTextForButton}
-              />
-              {this.renderMaybePublishMenu()}
+          <ButtonGroup className="button-publish">
+            {this.renderPrivaryMenu()}
+            <Button
+              onClick={this.handleClick}
+              loading={isPublishing}
+              icon="upload"
+              text={getTextForButton}
+            />
+            {this.renderMaybePublishMenu()}
           </ButtonGroup>
         </fieldset>
-        <Toaster position={Position.BOTTOM_RIGHT} ref={this.refHandlers.toaster} />
+        <Toaster
+          position={Position.BOTTOM_RIGHT}
+          ref={this.refHandlers.toaster}
+        />
       </>
     );
   }
@@ -197,12 +223,12 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     const menu = (
       <Menu>
         <MenuItem
-          text='Publish'
+          text="Publish"
           active={wouldPublish}
           onClick={() => this.setWouldPublish(true)}
         />
         <MenuItem
-          text='Update'
+          text="Update"
           active={!wouldPublish}
           onClick={() => this.setWouldPublish(false)}
         />
@@ -210,16 +236,11 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     );
 
     return (
-      <Popover
-        content={menu}
-        position={Position.BOTTOM}
-      >
-        <Button
-          icon='wrench'
-        />
+      <Popover content={menu} position={Position.BOTTOM}>
+        <Button icon="wrench" />
       </Popover>
     );
-  }
+  };
 
   private renderPrivaryMenu = () => {
     const { gitHubPublishAsPublic, gistId } = this.props.appState;
@@ -232,14 +253,14 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     const privacyMenu = (
       <Menu>
         <MenuItem
-          text='Private'
-          icon='lock'
+          text="Private"
+          icon="lock"
           active={!gitHubPublishAsPublic}
           onClick={this.setPrivate}
         />
         <MenuItem
-          text='Public'
-          icon='unlock'
+          text="Public"
+          icon="unlock"
           active={gitHubPublishAsPublic}
           onClick={this.setPublic}
         />
@@ -247,22 +268,17 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
     );
 
     return (
-      <Popover
-        content={privacyMenu}
-        position={Position.BOTTOM}
-      >
-        <Button
-          icon={privacyIcon}
-        />
+      <Popover content={privacyMenu} position={Position.BOTTOM}>
+        <Button icon={privacyIcon} />
       </Popover>
     );
-  }
+  };
 
   private setWouldPublish = (wouldPublish: boolean) => {
     this.setState({
       wouldPublish,
     });
-  }
+  };
 
   private setPrivacy(publishAsPublic: boolean) {
     this.props.appState.gitHubPublishAsPublic = publishAsPublic;
@@ -270,7 +286,7 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
 
   private renderToast = (toast: IToastProps) => {
     this.toaster.show(toast);
-  }
+  };
 
   private gistFilesList = (values: EditorValues) => {
     return {
@@ -290,5 +306,5 @@ export class PublishButton extends React.Component<PublishButtonProps, IPublishB
         content: values.css || EMPTY_EDITOR_CONTENT.css,
       },
     };
-  }
+  };
 }

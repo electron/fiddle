@@ -1,12 +1,17 @@
 import semver from 'semver';
-import { RunnableVersion, Version, VersionSource, VersionState } from '../interfaces';
+import {
+  RunnableVersion,
+  Version,
+  VersionSource,
+  VersionState,
+} from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 export const enum ElectronReleaseChannel {
   stable = 'Stable',
   beta = 'Beta',
   nightly = 'Nightly',
-  unsupported = 'Unsupported'
+  unsupported = 'Unsupported',
 }
 
 /**
@@ -16,18 +21,25 @@ export const enum ElectronReleaseChannel {
  * @returns {string}
  */
 export function getDefaultVersion(
-  knownVersions: Array<RunnableVersion> = []
+  knownVersions: Array<RunnableVersion> = [],
 ): string {
   const ls = localStorage.getItem('version');
 
-  if (ls && knownVersions && knownVersions.find(({ version }) => version === ls)) {
+  if (
+    ls &&
+    knownVersions &&
+    knownVersions.find(({ version }) => version === ls)
+  ) {
     return ls;
   }
 
   // Self-heal: Version not formated correctly
   const normalized = ls && normalizeVersion(ls);
   if (normalized) {
-    if (knownVersions && knownVersions.find(({ version }) => version === normalized)) {
+    if (
+      knownVersions &&
+      knownVersions.find(({ version }) => version === normalized)
+    ) {
       return normalized;
     }
   }
@@ -50,9 +62,9 @@ export function getDefaultVersion(
  * @returns {ElectronReleaseChannel}
  */
 export function getReleaseChannel(
-  input: Version | string
+  input: Version | string,
 ): ElectronReleaseChannel {
-  const tag = (typeof input === 'string') ? input : (input.version || '');
+  const tag = typeof input === 'string' ? input : input.version || '';
 
   if (tag.includes('beta')) {
     return ElectronReleaseChannel.beta;
@@ -72,7 +84,7 @@ export function getReleaseChannel(
 
 export const enum VersionKeys {
   local = 'local-electron-versions',
-  known = 'known-electron-versions'
+  known = 'known-electron-versions',
 }
 
 /**
@@ -83,7 +95,8 @@ export const enum VersionKeys {
  * @returns {Array<Version>}
  */
 function getVersions(
-  key: VersionKeys, fallbackMethod: () => Array<Version>
+  key: VersionKeys,
+  fallbackMethod: () => Array<Version>,
 ): Array<Version> {
   const fromLs = window.localStorage.getItem(key);
 
@@ -94,7 +107,9 @@ function getVersions(
       if (!isExpectedFormat(result)) {
         // Known versions can just be downloaded again.
         if (key === VersionKeys.known) {
-          throw new Error(`Electron versions in LS does not match expected format`);
+          throw new Error(
+            `Electron versions in LS does not match expected format`,
+          );
         }
 
         // Local versions are a bit more tricky and might be in an old format (pre 0.5)
@@ -104,7 +119,9 @@ function getVersions(
 
       return result;
     } catch (error) {
-      console.warn(`Parsing local Electron versions failed, returning fallback method.`);
+      console.warn(
+        `Parsing local Electron versions failed, returning fallback method.`,
+      );
     }
   }
 
@@ -132,7 +149,7 @@ export function getElectronVersions(): Array<RunnableVersion> {
     return {
       ...version,
       source: VersionSource.remote,
-      state: VersionState.unknown
+      state: VersionState.unknown,
     };
   });
 
@@ -140,7 +157,7 @@ export function getElectronVersions(): Array<RunnableVersion> {
     return {
       ...version,
       source: VersionSource.local,
-      state: VersionState.ready
+      state: VersionState.ready,
     };
   });
 
@@ -200,7 +217,9 @@ export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
  * @returns {Array<Version>}
  */
 export function getKnownVersions(): Array<Version> {
-  return getVersions(VersionKeys.known, () => require('../../static/releases.json'));
+  return getVersions(VersionKeys.known, () =>
+    require('../../static/releases.json'),
+  );
 }
 
 /**
@@ -219,8 +238,9 @@ export function saveKnownVersions(versions: Array<Version>) {
  * @export
  * @returns {Promise<Array<RunnableVersion>>}
  */
-export async function getUpdatedElectronVersions(
-): Promise<Array<RunnableVersion>> {
+export async function getUpdatedElectronVersions(): Promise<
+  Array<RunnableVersion>
+> {
   try {
     await fetchVersions();
   } catch (error) {
@@ -236,7 +256,9 @@ export async function getUpdatedElectronVersions(
  * @returns {Promise<Array<Version>>}
  */
 export async function fetchVersions() {
-  const response = await window.fetch('https://unpkg.com/electron-releases/lite.json');
+  const response = await window.fetch(
+    'https://unpkg.com/electron-releases/lite.json',
+  );
   const data = await response.json();
 
   // pre-0.24.0 versions were technically 'atom-shell' and cannot
@@ -282,14 +304,14 @@ export function migrateVersions(input: Array<any> = []): Array<Version> {
       return {
         version: tag_name,
         name,
-        localPath: url
+        localPath: url,
       };
     })
     .filter((item) => !!item) as Array<Version>;
 }
 
 export function isElectronVersion(
-  input: Version | RunnableVersion
+  input: Version | RunnableVersion,
 ): input is RunnableVersion {
   return (input as RunnableVersion).source !== undefined;
 }

@@ -8,11 +8,11 @@ import { onFirstRunMaybe } from '../../src/main/first-run';
 import { isFirstRun } from '../../src/utils/check-first-run';
 
 jest.mock('../../src/utils/check-first-run', () => ({
-  isFirstRun: jest.fn()
+  isFirstRun: jest.fn(),
 }));
 
 const mockDialogResponse = {
-  response: 1
+  response: 1,
 };
 
 describe('first-run', () => {
@@ -21,15 +21,17 @@ describe('first-run', () => {
 
   beforeEach(() => {
     Object.defineProperty(process, 'platform', {
-      value: 'darwin'
+      value: 'darwin',
     });
 
-    (dialog.showMessageBox as jest.Mock<any>).mockResolvedValue(mockDialogResponse);
+    (dialog.showMessageBox as jest.Mock<any>).mockResolvedValue(
+      mockDialogResponse,
+    );
   });
 
   afterEach(() => {
     Object.defineProperty(process, 'platform', {
-      value: oldPlatform
+      value: oldPlatform,
     });
   });
 
@@ -64,7 +66,7 @@ describe('first-run', () => {
 
     it(`doesn't run unless required (Windows, Linux)`, () => {
       Object.defineProperty(process, 'platform', {
-        value: 'win32'
+        value: 'win32',
       });
 
       (isFirstRun as jest.Mock).mockReturnValueOnce(true);

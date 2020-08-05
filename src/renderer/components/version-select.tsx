@@ -44,7 +44,9 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
 export function getItemIcon({ state }: RunnableVersion) {
   return state === 'ready'
     ? 'saved'
-    : state === 'downloading' ? 'cloud-download' : 'cloud';
+    : state === 'downloading'
+    ? 'cloud-download'
+    : 'cloud';
 }
 
 /**
@@ -55,7 +57,10 @@ export function getItemIcon({ state }: RunnableVersion) {
  * @param {RunnableVersion} { version }
  * @returns
  */
-export const filterItem: ItemPredicate<RunnableVersion> = (query, { version }) => {
+export const filterItem: ItemPredicate<RunnableVersion> = (
+  query,
+  { version },
+) => {
   return version.toLowerCase().includes(query.toLowerCase());
 };
 
@@ -67,7 +72,10 @@ export const filterItem: ItemPredicate<RunnableVersion> = (query, { version }) =
  * @param {IItemRendererProps} { handleClick, modifiers, query }
  * @returns
  */
-export const renderItem: ItemRenderer<RunnableVersion> = (item, { handleClick, modifiers, query }) => {
+export const renderItem: ItemRenderer<RunnableVersion> = (
+  item,
+  { handleClick, modifiers, query },
+) => {
   if (!modifiers.matchesPredicate) {
     return null;
   }
@@ -95,7 +103,9 @@ export interface VersionSelectProps {
   currentVersion: RunnableVersion;
   onVersionSelect: (version: RunnableVersion) => void;
   buttonGroupProps?: IButtonGroupProps;
-  itemDisabled?: keyof RunnableVersion | ((item: RunnableVersion, index: number) => boolean);
+  itemDisabled?:
+    | keyof RunnableVersion
+    | ((item: RunnableVersion, index: number) => boolean);
 }
 
 /**
@@ -106,7 +116,10 @@ export interface VersionSelectProps {
  * @extends {React.Component<VersionSelectProps, VersionSelectState>}
  */
 @observer
-export class VersionSelect extends React.Component<VersionSelectProps, VersionSelectState> {
+export class VersionSelect extends React.Component<
+  VersionSelectProps,
+  VersionSelectState
+> {
   public render() {
     const { currentVersion, itemDisabled } = this.props;
     const { version } = currentVersion;
@@ -119,11 +132,11 @@ export class VersionSelect extends React.Component<VersionSelectProps, VersionSe
         itemPredicate={filterItem}
         itemDisabled={itemDisabled}
         onItemSelect={this.props.onVersionSelect}
-        noResults={<MenuItem disabled={true} text='No results.' />}
+        noResults={<MenuItem disabled={true} text="No results." />}
         disabled={!!this.props.disabled}
       >
         <Button
-          className='version-chooser'
+          className="version-chooser"
           text={`Electron v${version}`}
           icon={getItemIcon(currentVersion)}
           disabled={!!this.props.disabled}

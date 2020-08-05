@@ -2,10 +2,10 @@ import { VersionSource, VersionState } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';
 
 const generateVersionRange = (rangeLength: number) =>
-  (new Array(rangeLength)).fill(0).map((_, i) => ({
+  new Array(rangeLength).fill(0).map((_, i) => ({
     state: VersionState.ready,
     version: `${i + 1}.0.0`,
-    source: VersionSource.local
+    source: VersionSource.local,
   }));
 
 describe('bisect', () => {

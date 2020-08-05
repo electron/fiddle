@@ -9,7 +9,7 @@ import { normalizeVersion } from './normalize-version';
  * @returns {Record<string, RunnableVersion>}
  */
 export function arrayToStringMap(
-  input: Array<RunnableVersion>
+  input: Array<RunnableVersion>,
 ): Record<string, RunnableVersion> {
   const output = {};
 

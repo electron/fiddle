@@ -7,7 +7,6 @@ import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { WrapperMosaicId } from './output-editors-wrapper';
 
-
 export interface CommandsProps {
   appState: AppState;
   // Used to keep testing conform
@@ -19,10 +18,10 @@ export interface CommandsProps {
  * whenever a Fiddle is launched in Electron.
  *
  * @class Output
- * @extends {React.Component<CommandsProps, {}>}
+ * @extends {React.Component<CommandsProps>}
  */
 @observer
-export class Output extends React.Component<CommandsProps, {}> {
+export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperMosaicId>;
   private outputRef = React.createRef<HTMLDivElement>();
@@ -33,7 +32,6 @@ export class Output extends React.Component<CommandsProps, {}> {
     this.renderTimestamp = this.renderTimestamp.bind(this);
     this.renderEntry = this.renderEntry.bind(this);
   }
-
 
   public componentDidMount() {
     autorun(() => {
@@ -83,13 +81,16 @@ export class Output extends React.Component<CommandsProps, {}> {
    */
   public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
     const ts = this.renderTimestamp(entry.timestamp);
-    const timestamp = <span className='timestamp'>{ts}</span>;
+    const timestamp = <span className="timestamp">{ts}</span>;
     const lines = entry.text.split(/\r?\n/);
-    const style: React.CSSProperties = entry.isNotPre ? { whiteSpace: 'initial' } : {};
+    const style: React.CSSProperties = entry.isNotPre
+      ? { whiteSpace: 'initial' }
+      : {};
 
     return lines.map((text, lineIndex) => (
       <p style={style} key={`${entry.timestamp}--${index}--${lineIndex}`}>
-        {timestamp}{text}
+        {timestamp}
+        {text}
       </p>
     ));
   }
@@ -107,7 +108,7 @@ export class Output extends React.Component<CommandsProps, {}> {
       .map(this.renderEntry);
 
     return (
-      <div className='output' ref={this.outputRef}>
+      <div className="output" ref={this.outputRef}>
         {lines}
       </div>
     );

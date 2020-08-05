@@ -51,7 +51,11 @@ export class MockMenuItem {
   public visible: boolean;
   public label: string;
   public type: string;
-  public click: (menuItem: Electron.MenuItem, browserWindow: Electron.BrowserWindow, event: Electron.Event) => void;
+  public click: (
+    menuItem: Electron.MenuItem,
+    browserWindow: Electron.BrowserWindow,
+    event: Electron.Event,
+  ) => void;
 
   constructor(options: Electron.MenuItemConstructorOptions) {
     this.enabled = !!options.enabled;
@@ -80,7 +84,7 @@ function CreateWindowStub() {
     setTitle: jest.fn(),
     reload: jest.fn(),
     isDestroyed: jest.fn(() => false),
-    setTouchBar: jest.fn()
+    setTouchBar: jest.fn(),
   };
 }
 
@@ -104,7 +108,7 @@ const app = {
   getAppMetrics: jest.fn().mockReturnValue({ metrics: 123 }),
   getGPUFeatureStatus: jest.fn(),
   getJumpListSettings: jest.fn(() => ({
-    removedItems: []
+    removedItems: [],
   })),
   getLoginItemSettings: jest.fn(),
   getPath: (name: string) => {
@@ -132,19 +136,19 @@ const session = {
     clearCache: jest.fn((cb) => cb()),
     clearStorageData: jest.fn((_opts, cb) => cb()),
     cookies: {
-      get: jest.fn()
-    }
-  }
+      get: jest.fn(),
+    },
+  },
 };
 
 const shell = {
   openExternal: jest.fn(),
   openItem: jest.fn(),
-  showItemInFolder: jest.fn()
+  showItemInFolder: jest.fn(),
 };
 
 const systemPreferences = {
-  getUserDefault: jest.fn()
+  getUserDefault: jest.fn(),
 };
 
 const electronMock = {
@@ -155,21 +159,21 @@ const electronMock = {
     readText: jest.fn(),
     readImage: jest.fn(),
     writeText: jest.fn(),
-    writeImage: jest.fn()
+    writeImage: jest.fn(),
   },
   crashReporter: {
     start: jest.fn(),
   },
   dialog: {
     showOpenDialog: jest.fn(() => Promise.resolve({})),
-    showMessageBox: jest.fn(() => Promise.resolve({}))
+    showMessageBox: jest.fn(() => Promise.resolve({})),
   },
   ipcMain: new MockIPC(),
   ipcRenderer: new MockIPC(),
   nativeImage: {
     createFromPath: (...args: Array<any>) => new MockNativeImage(...args),
     createFromBuffer: jest.fn(),
-    createFromDataURL: jest.fn(function() {
+    createFromDataURL: jest.fn(function () {
       return { toPNG: jest.fn(() => 'content') };
     }),
     createEmpty: jest.fn(),
@@ -193,7 +197,7 @@ const electronMock = {
     interceptStringProtocol: jest.fn(),
     interceptBufferProtocol: jest.fn(),
     interceptHttpProtocol: jest.fn(),
-    uninterceptProtocol: jest.fn()
+    uninterceptProtocol: jest.fn(),
   },
   remote: {
     app,
@@ -204,7 +208,9 @@ const electronMock = {
     Menu: MockMenu,
     MenuItem: MockMenuItem,
     process: {
-      argv: [ '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle' ]
+      argv: [
+        '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle',
+      ],
     },
     shell,
     require: jest.fn(),
@@ -217,7 +223,7 @@ const electronMock = {
   shell,
   systemPreferences,
   TouchBar: MockTouchBar,
-  webContents: MockWebContents
+  webContents: MockWebContents,
 };
 
 electronMock.BrowserWindow.getAllWindows.mockReturnValue([]);

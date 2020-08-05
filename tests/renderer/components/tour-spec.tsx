@@ -4,7 +4,6 @@ import * as React from 'react';
 import { Tour } from '../../../src/renderer/components/tour';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
   const mockTour = new Set([
@@ -12,18 +11,14 @@ describe('VersionChooser component', () => {
       name: 'mock-step-1',
       selector: 'div.mock-1',
       title: 'Step 1',
-      content: (
-        <span key='1'>mock-step-1</span>
-      )
+      content: <span key="1">mock-step-1</span>,
     },
     {
       name: 'mock-step-2',
       selector: 'div.mock-2',
       title: 'Step 2',
-      content: (
-        <span key='2'>mock-step-2</span>
-      )
-    }
+      content: <span key="2">mock-step-2</span>,
+    },
   ]);
 
   beforeAll(() => {
@@ -37,8 +32,11 @@ describe('VersionChooser component', () => {
   beforeEach(() => {
     document.querySelector = jest.fn(() => ({
       getBoundingClientRect: jest.fn(() => ({
-        top: 20, left: 25, height: 120, width: 130
-      }))
+        top: 20,
+        left: 25,
+        height: 120,
+        width: 130,
+      })),
     }));
   });
 
@@ -55,9 +53,7 @@ describe('VersionChooser component', () => {
 
   it('renders supplied buttons', () => {
     mockTour.forEach((item) => {
-      (item as any).getButtons = () => (
-        [ <button key='hello'>Hello</button> ]
-      );
+      (item as any).getButtons = () => [<button key="hello">Hello</button>];
     });
 
     const mockStop = jest.fn();
@@ -67,14 +63,14 @@ describe('VersionChooser component', () => {
   });
 
   it('renders "Finish Tour" at the end', () => {
-    const singleItemTour = new Set([{
-      name: 'mock-step-1',
-      selector: 'div.mock-1',
-      title: 'Step 1',
-      content: (
-        <span key='1'>mock-step-1</span>
-      )
-    }]);
+    const singleItemTour = new Set([
+      {
+        name: 'mock-step-1',
+        selector: 'div.mock-1',
+        title: 'Step 1',
+        content: <span key="1">mock-step-1</span>,
+      },
+    ]);
 
     const mockStop = jest.fn();
     const wrapper = mount(<Tour tour={singleItemTour} onStop={mockStop} />);
@@ -122,7 +118,6 @@ describe('VersionChooser component', () => {
 
     instance.forceUpdate = jest.fn();
     instance.onResize();
-
 
     expect(instance.resizeHandle).toBeTruthy();
     jest.runAllTimers();

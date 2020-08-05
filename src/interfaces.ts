@@ -8,12 +8,12 @@ export enum VersionState {
   ready = 'ready',
   downloading = 'downloading',
   unzipping = 'unzipping',
-  unknown = 'unknown'
+  unknown = 'unknown',
 }
 
 export enum VersionSource {
   remote = 'remote',
-  local = 'local'
+  local = 'local',
 }
 export interface Version {
   version: string;
@@ -76,17 +76,23 @@ export const enum EditorId {
   'renderer' = 'renderer',
   'html' = 'html',
   'preload' = 'preload',
-  'css' = 'css'
+  'css' = 'css',
 }
 
 // Panels that can show up as a mosaic
 export const enum PanelId {
-  'docsDemo' = 'docsDemo'
+  'docsDemo' = 'docsDemo',
 }
 
 export type MosaicId = EditorId | PanelId;
 
-export const ALL_EDITORS = [EditorId.main, EditorId.renderer, EditorId.preload, EditorId.html, EditorId.css];
+export const ALL_EDITORS = [
+  EditorId.main,
+  EditorId.renderer,
+  EditorId.preload,
+  EditorId.html,
+  EditorId.css,
+];
 export const ALL_PANELS = [PanelId.docsDemo];
 export const ALL_MOSAICS = [...ALL_EDITORS, ...ALL_PANELS];
 
@@ -94,5 +100,5 @@ export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
 
 export const enum DocsDemoPage {
   DEFAULT = 'DEFAULT',
-  DEMO_APP = 'DEMO_APP'
+  DEMO_APP = 'DEMO_APP',
 }

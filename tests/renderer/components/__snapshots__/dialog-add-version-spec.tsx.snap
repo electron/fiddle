@@ -25,7 +25,8 @@ exports[`AddVersionDialog component renders 1`] = `
     <Blueprint3.Callout>
       We found an Electron.app in this folder.
       <p>
-        Please specify a version, used for typings and the name. Must be 
+        Please specify a version, used for typings and the name. Must be
+         
         <code>
           semver
         </code>
@@ -87,7 +88,8 @@ exports[`AddVersionDialog component renders 2`] = `
     <Blueprint3.Callout>
       We found an Electron.app in this folder.
       <p>
-        Please specify a version, used for typings and the name. Must be 
+        Please specify a version, used for typings and the name. Must be
+         
         <code>
           semver
         </code>

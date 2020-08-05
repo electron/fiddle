@@ -1,8 +1,7 @@
-
 import {
   RunnableVersion,
   VersionSource,
-  VersionState
+  VersionState,
 } from '../../src/interfaces';
 import { USER_DATA_PATH } from '../../src/renderer/constants';
 import {
@@ -13,7 +12,7 @@ import {
   getOfflineTypeDefinitionPath,
   getOfflineTypeDefinitions,
   removeTypeDefsForVersion,
-  updateEditorTypeDefinitions
+  updateEditorTypeDefinitions,
 } from '../../src/renderer/fetch-types';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
@@ -23,24 +22,23 @@ jest.mock('extract-zip', () => {
   return jest.fn((_a, _b, c) => c());
 });
 jest.mock('../../src/renderer/constants', () => ({
-  USER_DATA_PATH: 'user/data/'
+  USER_DATA_PATH: 'user/data/',
 }));
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => {
     if (p === 'fs-extra') {
       return require('fs-extra');
     }
-  }
+  },
 }));
 
 describe('fetch-types', () => {
   const getMockResponse = (text: string) => ({
-    text: () => text
+    text: () => text,
   });
 
-  const mockFetch = (text: string = `it's me, the type definition`) => {
-    (window.fetch as jest.Mock).
-      mockResolvedValue(getMockResponse(text));
+  const mockFetch = (text = `it's me, the type definition`) => {
+    (window.fetch as jest.Mock).mockResolvedValue(getMockResponse(text));
   };
 
   describe('fetchTypeDefinitions()', () => {
@@ -61,7 +59,9 @@ describe('fetch-types', () => {
 
   describe('getOfflineTypeDefinitionPath()', () => {
     it('returns a path', async () => {
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
       expect(getOfflineTypeDefinitionPath('3.0.0')).toBe(expected);
     });
   });
@@ -72,7 +72,9 @@ describe('fetch-types', () => {
       fs.existsSync.mockReturnValueOnce(true);
 
       const result = await getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(true);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -83,7 +85,9 @@ describe('fetch-types', () => {
       fs.existsSync.mockReturnValueOnce(false);
 
       const result = await getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(false);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -94,7 +98,7 @@ describe('fetch-types', () => {
     const version = {
       state: VersionState.ready,
       source: VersionSource.remote,
-      version: '3.0.0'
+      version: '3.0.0',
     };
 
     it('returns type definitions (and goes online if they do not exist)', async () => {
@@ -103,7 +107,9 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(`it's me, the type definition`);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -113,11 +119,12 @@ describe('fetch-types', () => {
     it('returns null if going online failed', async () => {
       const fs = require('fs-extra');
       fs.existsSync.mockReturnValueOnce(false);
-      (window.fetch as jest.Mock).
-        mockRejectedValue({});
+      (window.fetch as jest.Mock).mockRejectedValue({});
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(null);
       expect(fs.existsSync).toHaveBeenCalledWith(expected);
@@ -130,9 +137,14 @@ describe('fetch-types', () => {
       mockFetch();
 
       await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
-      expect(fs.outputFile).toHaveBeenCalledWith(expected, `it's me, the type definition`);
+      expect(fs.outputFile).toHaveBeenCalledWith(
+        expected,
+        `it's me, the type definition`,
+      );
     });
 
     it('returns them even if saving them failed', async () => {
@@ -143,7 +155,9 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(fs.outputFile).toHaveBeenCalledWith(expected, def);
       expect(result).toBe(def);
@@ -157,7 +171,9 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(def);
       expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
@@ -170,7 +186,9 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join('user/data/electron-typedef/3.0.0/electron.d.ts');
+      const expected = path.join(
+        'user/data/electron-typedef/3.0.0/electron.d.ts',
+      );
 
       expect(result).toBe(null);
       expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
@@ -184,11 +202,11 @@ describe('fetch-types', () => {
         state: VersionState.ready,
         source: VersionSource.local,
         version: '3.0.0',
-        localPath: 'somePath'
+        localPath: 'somePath',
       };
     });
 
-    it('fetches a local path if localPath exists',  async () => {
+    it('fetches a local path if localPath exists', async () => {
       const fs = require('fs-extra');
       const def = `it's me, the type definition`;
       fs.existsSync.mockReturnValueOnce(true);
@@ -197,13 +215,13 @@ describe('fetch-types', () => {
       expect(result).toEqual(def);
     });
 
-    it('returns null for remote path',  async () => {
+    it('returns null for remote path', async () => {
       version.source = VersionSource.remote;
       const result = await getLocalVersionTypeDefs(version);
       expect(result).toBeNull();
     });
 
-    it('returns null if localPath does not exist',  async () => {
+    it('returns null if localPath does not exist', async () => {
       version.localPath = undefined;
       const result = await getLocalVersionTypeDefs(version);
       expect(result).toBeNull();
@@ -217,20 +235,22 @@ describe('fetch-types', () => {
         state: VersionState.ready,
         source: VersionSource.local,
         version: '3.0.0',
-        localPath: 'somePath'
+        localPath: 'somePath',
       };
     });
 
     it('appends the path to the debug folder', () => {
       const result = getLocalTypePathForVersion(version);
-      expect(result).toBe(path.join(
-        'somePath',
-        'gen',
-        'electron',
-        'tsc',
-        'typings',
-        'electron.d.ts'
-      ));
+      expect(result).toBe(
+        path.join(
+          'somePath',
+          'gen',
+          'electron',
+          'tsc',
+          'typings',
+          'electron.d.ts',
+        ),
+      );
     });
 
     it('returns null if no localPath', () => {
@@ -248,7 +268,7 @@ describe('fetch-types', () => {
       version = {
         state: VersionState.ready,
         source: VersionSource.remote,
-        version: '3.0.0'
+        version: '3.0.0',
       };
     });
 
@@ -260,8 +280,9 @@ describe('fetch-types', () => {
       const { app } = (window as any).ElectronFiddle;
       const { monaco } = app;
 
-      expect(monaco.languages.typescript.javascriptDefaults.addExtraLib)
-        .toHaveBeenCalled();
+      expect(
+        monaco.languages.typescript.javascriptDefaults.addExtraLib,
+      ).toHaveBeenCalled();
     });
 
     it('it waits for Monaco to show up', async () => {
@@ -278,8 +299,9 @@ describe('fetch-types', () => {
 
       await updateEditorTypeDefinitions(version);
 
-      expect(monaco.languages.typescript.javascriptDefaults.addExtraLib)
-        .toHaveBeenCalled();
+      expect(
+        monaco.languages.typescript.javascriptDefaults.addExtraLib,
+      ).toHaveBeenCalled();
     });
 
     it('it does not wait forever', async () => {
@@ -304,11 +326,13 @@ describe('fetch-types', () => {
   });
 
   describe('removeTypeDefsForVersion()', () => {
-    it('removes a version\'s typedefs', async () => {
+    it("removes a version's typedefs", async () => {
       const fs = require('fs-extra');
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       await removeTypeDefsForVersion('v3.0.0');
-      expect(fs.remove).toHaveBeenCalledWith(path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'));
+      expect(fs.remove).toHaveBeenCalledWith(
+        path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'),
+      );
     });
 
     it('throws upon fs failure', async () => {

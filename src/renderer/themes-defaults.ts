@@ -53,17 +53,16 @@ export const defaultDark: LoadedFiddleTheme = {
     'text-color-2': '#1e2527',
     'text-color-3': '#dcdcdc',
     'error-color': '#df3434',
-    // tslint:disable-next-line:max-line-length
-    'fonts-common': `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+    'fonts-common': `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
   },
   editor: {
     base: 'vs-dark',
     inherit: true,
     rules: [],
     colors: {
-      'editor.background': '#2f3241'
-    }
-  }
+      'editor.background': '#2f3241',
+    },
+  },
 };
 
 export const defaultLight: LoadedFiddleTheme = {
@@ -86,18 +85,17 @@ export const defaultLight: LoadedFiddleTheme = {
     'text-color-2': '#1e2527',
     'text-color-3': '#0e0e0e',
     'error-color': '#df3434',
-    // tslint:disable-next-line:max-line-length
-    'fonts-common': `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`
+    'fonts-common': `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
   },
   editor: {
     base: 'vs',
     inherit: true,
     rules: [],
-    colors: {}
-  }
+    colors: {},
+  },
 };
 
 export enum DefaultThemes {
   DARK = 'defaultDark',
-  LIGHT = 'defaultLight'
+  LIGHT = 'defaultLight',
 }

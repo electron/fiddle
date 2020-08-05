@@ -14,29 +14,33 @@ export function ShowMeDefault(props: { appState: AppState }): JSX.Element {
         <li key={key}>
           <Button
             minimal={true}
-            icon='play'
+            icon="play"
             text={DOCS_DEMO_NAMES[key]}
-            onClick={() => (props.appState.currentDocsDemoPage = key as DocsDemoPage)}
+            onClick={() =>
+              (props.appState.currentDocsDemoPage = key as DocsDemoPage)
+            }
           />
         </li>
       );
-  });
+    });
 
   return (
     <>
-      <Icon icon='help' iconSize={40} style={{ float: 'left', margin: '0 10px 0 0' }} />
-      <p className='bp3r-running-text'>
-        This panel offers useful information about Electron APIs – and
-        easy way to try some of the methods it offers. Fiddle has an example fiddle
-        for every module available in Electron.
+      <Icon
+        icon="help"
+        iconSize={40}
+        style={{ float: 'left', margin: '0 10px 0 0' }}
+      />
+      <p className="bp3r-running-text">
+        This panel offers useful information about Electron APIs – and easy way
+        to try some of the methods it offers. Fiddle has an example fiddle for
+        every module available in Electron.
       </p>
       <p>
         Clicking on any of the modules below will open up a fiddle showcasing
         that particular module.
       </p>
-      <ul className='show-me-list'>
-        {...showMeMenu}
-      </ul>
+      <ul className="show-me-list">{...showMeMenu}</ul>
       {renderMoreDocumentation()}
     </>
   );

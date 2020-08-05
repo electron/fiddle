@@ -7,13 +7,16 @@ import * as fs from 'fs';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
-import { listenForProtocolHandler, setupProtocolHandler } from '../../src/main/protocol';
+import {
+  listenForProtocolHandler,
+  setupProtocolHandler,
+} from '../../src/main/protocol';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('fs');
 
 describe('protocol', () => {
-  const oldArgv = [ ...process.argv ];
+  const oldArgv = [...process.argv];
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
@@ -46,7 +49,9 @@ describe('protocol', () => {
       const handler = (app.on as any).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/hi');
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi' }]);
+      expect(
+        ipcMainManager.send,
+      ).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi' }]);
     });
 
     it('handles a Fiddle url with a username (open-url)', () => {
@@ -57,7 +62,9 @@ describe('protocol', () => {
       const handler = (app.on as any).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/username/gistID');
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'gistID' }]);
+      expect(
+        ipcMainManager.send,
+      ).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'gistID' }]);
     });
 
     it('handles a non-fiddle url (open-url)', () => {
@@ -79,7 +86,9 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-arg' }]);
+      expect(
+        ipcMainManager.send,
+      ).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-arg' }]);
     });
 
     it('waits for the app to be ready', () => {
@@ -99,7 +108,9 @@ describe('protocol', () => {
 
       cb();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-ready' }]);
+      expect(
+        ipcMainManager.send,
+      ).toHaveBeenCalledWith(IpcEvents.LOAD_GIST_REQUEST, [{ id: 'hi-ready' }]);
     });
 
     it('handles an electron path url', () => {
@@ -110,12 +121,15 @@ describe('protocol', () => {
 
       handler({}, 'electron-fiddle://electron/4.0.0/test/path');
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [
-        {
-          ref: '4.0.0',
-          path: 'test/path'
-        }
-      ]);
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
+        IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
+        [
+          {
+            ref: '4.0.0',
+            path: 'test/path',
+          },
+        ],
+      );
     });
 
     it('handles a flawed electron path url', () => {

@@ -7,12 +7,17 @@ import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { ipcRendererManager } from './ipc';
-import { findModulesInEditors, getIsNpmInstalled, installModules, npmRun } from './npm';
+import {
+  findModulesInEditors,
+  getIsNpmInstalled,
+  installModules,
+  npmRun,
+} from './npm';
 import { AppState } from './state';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
-  MAKE = 'make'
+  MAKE = 'make',
 }
 
 export class Runner {
@@ -25,7 +30,6 @@ export class Runner {
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_RUN);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_MAKE);
-
 
     ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
     ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, () => {
@@ -102,15 +106,18 @@ export class Runner {
    * @returns {Promise<boolean>}
    * @memberof Runner
    */
-  public async performForgeOperation(operation: ForgeCommands): Promise<boolean> {
+  public async performForgeOperation(
+    operation: ForgeCommands,
+  ): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
     const { dotfilesTransform } = await import('./transforms/dotfiles');
     const { forgeTransform } = await import('./transforms/forge');
     const { pushError, pushOutput } = this.appState;
 
-    const strings = operation === ForgeCommands.MAKE
-      ? [ 'Creating installers for', 'Binary' ]
-      : [ 'Packaging', 'Installers' ];
+    const strings =
+      operation === ForgeCommands.MAKE
+        ? ['Creating installers for', 'Binary']
+        : ['Packaging', 'Installers'];
 
     this.appState.isConsoleShowing = true;
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
@@ -125,7 +132,11 @@ export class Runner {
     }
 
     // Save files to temp
-    const dir = await this.saveToTemp(options, dotfilesTransform, forgeTransform);
+    const dir = await this.saveToTemp(
+      options,
+      dotfilesTransform,
+      forgeTransform,
+    );
     if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
@@ -154,13 +165,18 @@ export class Runner {
    * @param {string} dir
    * @returns {Promise<void>}
    */
-  public async installModulesForEditor(values: EditorValues, dir: string): Promise<void> {
+  public async installModulesForEditor(
+    values: EditorValues,
+    dir: string,
+  ): Promise<void> {
     const modules = await findModulesInEditors(values);
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
       if (!(await getIsNpmInstalled())) {
-        let message = `The ${maybePlural(`module`, modules)} ${modules.join(', ')} need to be installed, `;
+        let message = `The ${maybePlural(`module`, modules)} ${modules.join(
+          ', ',
+        )} need to be installed, `;
         message += `but we could not find npm. Fiddle requires Node.js and npm `;
         message += `to support the installation of modules not included in `;
         message += `Electron. Please visit https://nodejs.org to install Node.js `;
@@ -170,7 +186,9 @@ export class Runner {
         return;
       }
 
-      pushOutput(`Installing npm modules: ${modules.join(', ')}...`, { isNotPre: true });
+      pushOutput(`Installing npm modules: ${modules.join(', ')}...`, {
+        isNotPre: true,
+      });
       pushOutput(await installModules({ dir }, ...modules));
     }
   }
@@ -201,18 +219,21 @@ export class Runner {
     }
 
     // Add user-specified cli flags if any have been set.
-    const options = [ dir, '--inspect' ].concat(this.appState.executionFlags);
+    const options = [dir, '--inspect'].concat(this.appState.executionFlags);
 
     this.child = spawn(binaryPath, options, { cwd: dir, env });
     this.appState.isRunning = true;
     pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout!.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
-    this.child.stderr!.on('data', (data) => pushOutput(data, { bypassBuffer: false }));
+    this.child.stdout!.on('data', (data) =>
+      pushOutput(data, { bypassBuffer: false }),
+    );
+    this.child.stderr!.on('data', (data) =>
+      pushOutput(data, { bypassBuffer: false }),
+    );
     this.child.on('close', async (code) => {
-      const withCode = typeof code === 'number'
-        ? ` with code ${code.toString()}.`
-        : `.`;
+      const withCode =
+        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
 
       pushOutput(`Electron exited${withCode}`);
       this.appState.isRunning = false;
@@ -233,7 +254,8 @@ export class Runner {
    * @memberof Runner
    */
   public async saveToTemp(
-    options: PackageJsonOptions, ...transforms: Array<FileTransform>
+    options: PackageJsonOptions,
+    ...transforms: Array<FileTransform>
   ): Promise<string | null> {
     const { fileManager } = window.ElectronFiddle.app;
     const { pushOutput, pushError } = this.appState;
@@ -275,7 +297,9 @@ export class Runner {
    */
   private async deleteUserData() {
     if (this.appState.isKeepingUserDataDirs) {
-      console.log(`Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`);
+      console.log(
+        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
+      );
       return;
     }
 

@@ -22,7 +22,10 @@ export interface AddressBarState {
 }
 
 @observer
-export class AddressBar extends React.Component<AddressBarProps, AddressBarState> {
+export class AddressBar extends React.Component<
+  AddressBarProps,
+  AddressBarState
+> {
   constructor(props: AddressBarProps) {
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -38,8 +41,8 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       value,
       loaders: {
         gist: remoteLoader.loadFiddleFromGist.bind(remoteLoader),
-        example: remoteLoader.loadFiddleFromElectronExample.bind(remoteLoader)
-      }
+        example: remoteLoader.loadFiddleFromElectronExample.bind(remoteLoader),
+      },
     };
   }
 
@@ -62,7 +65,9 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
   public submit() {
     const { remoteLoader } = window.ElectronFiddle.app;
     if (this.state.value) {
-      remoteLoader.fetchGistAndLoad(idFromUrl(this.state.value) || this.state.value);
+      remoteLoader.fetchGistAndLoad(
+        idFromUrl(this.state.value) || this.state.value,
+      );
     }
   }
 
@@ -74,16 +79,25 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     const { loaders } = this.state;
     reaction(
       () => appState.gistId,
-      (gistId: string) => this.setState({ value: urlFromId(gistId) })
+      (gistId: string) => this.setState({ value: urlFromId(gistId) }),
     );
     ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
-    ipcRendererManager.on(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, loaders.example);
+    ipcRendererManager.on(
+      IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
+      loaders.example,
+    );
   }
 
   public componentWillUnmount() {
     const { loaders } = this.state;
-    ipcRendererManager.removeListener(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
-    ipcRendererManager.removeListener(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, loaders.example);
+    ipcRendererManager.removeListener(
+      IpcEvents.LOAD_GIST_REQUEST,
+      loaders.gist,
+    );
+    ipcRendererManager.removeListener(
+      IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
+      loaders.example,
+    );
   }
 
   /**
@@ -99,8 +113,8 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
     return (
       <Button
         disabled={!isValueCorrect}
-        icon='cloud-download'
-        text='Load Fiddle'
+        icon="cloud-download"
+        text="Load Fiddle"
         onClick={this.submit}
       />
     );
@@ -116,11 +130,11 @@ export class AddressBar extends React.Component<AddressBarProps, AddressBarState
       <form className={className} onSubmit={this.handleSubmit}>
         <fieldset disabled={isPublishing}>
           <InputGroup
-            key='addressbar'
-            leftIcon='geosearch'
+            key="addressbar"
+            leftIcon="geosearch"
             intent={isCorrect || !value ? undefined : Intent.DANGER}
             onChange={this.handleChange}
-            placeholder='https://gist.github.com/...'
+            placeholder="https://gist.github.com/..."
             value={value}
             rightElement={this.renderLoadButton(isCorrect)}
           />

@@ -155,7 +155,8 @@ exports[`Header component renders the tour once started 1`] = `
           <code>
             &lt;script /&gt;
           </code>
-           tag and notice how we can call 
+           tag and notice how we can call
+           
           <code>
             require()
           </code>

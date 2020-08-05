@@ -10,7 +10,7 @@ jest.mock('../../src/utils/devmode');
 jest.mock('electron-devtools-installer', () => ({
   default: jest.fn(),
   REACT_DEVELOPER_TOOLS: 'REACT_DEVELOPER_TOOLS',
-  REACT_PERF: 'REACT_PERF'
+  REACT_PERF: 'REACT_PERF',
 }));
 
 describe('devtools', () => {

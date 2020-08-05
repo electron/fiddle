@@ -8,7 +8,7 @@ import {
   IButtonProps,
   Icon,
   IconName,
-  Tooltip
+  Tooltip,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -35,7 +35,10 @@ export interface ElectronSettingsState {
  * @extends {React.Component<ElectronSettingsProps, {}>}
  */
 @observer
-export class ElectronSettings extends React.Component<ElectronSettingsProps, ElectronSettingsState> {
+export class ElectronSettings extends React.Component<
+  ElectronSettingsProps,
+  ElectronSettingsState
+> {
   constructor(props: ElectronSettingsProps) {
     super(props);
 
@@ -48,7 +51,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
     this.state = {
       isDownloadingAll: false,
-      isDeletingAll: false
+      isDeletingAll: false,
     };
   }
 
@@ -61,9 +64,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleStateChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
     const { id, checked } = event.currentTarget;
     const { appState } = this.props;
 
@@ -79,9 +80,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleChannelChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
     const { id, checked } = event.currentTarget;
     const { appState } = this.props;
 
@@ -138,7 +137,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
 
   public render() {
     return (
-      <div className='settings-electron'>
+      <div className="settings-electron">
         <h2>Electron Settings</h2>
         <Callout>
           {this.renderVersionChannelOptions()}
@@ -170,25 +169,25 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
           disabled={isUpdatingElectronVersions}
           onClick={this.handleDownloadClick}
           loading={isUpdatingElectronVersions}
-          icon='numbered-list'
-          text='Update Electron Release List'
+          icon="numbered-list"
+          text="Update Electron Release List"
         />
         <Button
           disabled={isWorking}
-          icon='download'
+          icon="download"
           onClick={this.handleDownloadAll}
-          text='Download All Versions'
+          text="Download All Versions"
         />
         <Button
           disabled={isWorking}
-          icon='trash'
+          icon="trash"
           onClick={this.handleDeleteAll}
-          text='Delete All Downloads'
+          text="Delete All Downloads"
         />
         <Button
-          icon='document-open'
+          icon="document-open"
           onClick={this.handleAddVersion}
-          text='Add Local Electron Build'
+          text="Add Local Electron Build"
         />
       </ButtonGroup>
     );
@@ -208,18 +207,12 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     };
 
     return (
-      <FormGroup
-        label='Include Electron versions that are:'
-      >
-        <Tooltip
-          content='Always enabled'
-          position='bottom'
-          intent='primary'
-        >
+      <FormGroup label="Include Electron versions that are:">
+        <Tooltip content="Always enabled" position="bottom" intent="primary">
           <Checkbox
             checked={getIsChecked(VersionState.ready)}
-            label='Ready'
-            id='ready'
+            label="Ready"
+            id="ready"
             onChange={this.handleStateChange}
             inline={true}
             disabled={true}
@@ -227,15 +220,15 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
         </Tooltip>
         <Checkbox
           checked={getIsChecked(VersionState.downloading)}
-          label='Downloading'
-          id='downloading'
+          label="Downloading"
+          id="downloading"
           onChange={this.handleStateChange}
           inline={true}
         />
         <Checkbox
           checked={getIsChecked(VersionState.unknown)}
-          label='Not Downloaded'
-          id='unknown'
+          label="Not Downloaded"
+          id="unknown"
           onChange={this.handleStateChange}
           inline={true}
         />
@@ -256,7 +249,9 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       return appState.channelsToShow.includes(channel);
     };
 
-    const getIsCurrentVersionReleaseChannel = (channel: ElectronReleaseChannel) => {
+    const getIsCurrentVersionReleaseChannel = (
+      channel: ElectronReleaseChannel,
+    ) => {
       return getReleaseChannel(appState.version) === channel;
     };
 
@@ -264,34 +259,29 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
       stable: ElectronReleaseChannel.stable,
       beta: ElectronReleaseChannel.beta,
       nightly: ElectronReleaseChannel.nightly,
-      unsupported: ElectronReleaseChannel.unsupported
+      unsupported: ElectronReleaseChannel.unsupported,
     };
 
     return (
-      <FormGroup
-        label='Include Electron versions from these release channels:'
-      >
-        {
-          // tslint:disable-next-line:jsx-no-multiline-js
-          Object.entries(channels).map(([_, channel]) => (
-            <Tooltip
-              content={`Can't disable channel of selected version (${appState.version})`}
-              disabled={!getIsCurrentVersionReleaseChannel(channel)}
-              position='bottom'
-              intent='primary'
-              key={channel}
-            >
-              <Checkbox
-                checked={getIsChecked(channel)}
-                label={channel}
-                id={channel}
-                onChange={this.handleChannelChange}
-                disabled={getIsCurrentVersionReleaseChannel(channel)}
-                inline={true}
-              />
-            </Tooltip>
-          ))
-        }
+      <FormGroup label="Include Electron versions from these release channels:">
+        {Object.entries(channels).map(([_, channel]) => (
+          <Tooltip
+            content={`Can't disable channel of selected version (${appState.version})`}
+            disabled={!getIsCurrentVersionReleaseChannel(channel)}
+            position="bottom"
+            intent="primary"
+            key={channel}
+          >
+            <Checkbox
+              checked={getIsChecked(channel)}
+              label={channel}
+              id={channel}
+              onChange={this.handleChannelChange}
+              disabled={getIsCurrentVersionReleaseChannel(channel)}
+              inline={true}
+            />
+          </Tooltip>
+        ))}
       </FormGroup>
     );
   }
@@ -304,20 +294,15 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
    */
   private renderTable(): JSX.Element {
     return (
-      <HTMLTable
-        className='electron-versions-table'
-        striped={true}
-      >
+      <HTMLTable className="electron-versions-table" striped={true}>
         <thead>
           <tr>
             <th>Version</th>
             <th>Status</th>
-            <th className='action'>Action</th>
+            <th className="action">Action</th>
           </tr>
         </thead>
-        <tbody>
-          {this.renderTableRows()}
-        </tbody>
+        <tbody>{this.renderTableRows()}</tbody>
       </HTMLTable>
     );
   }
@@ -346,7 +331,7 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
         <tr key={item.version}>
           <td>{item.version}</td>
           <td>{this.renderHumanState(item)}</td>
-          <td className='action'>{this.renderAction(key, item)}</td>
+          <td className="action">{this.renderAction(key, item)}</td>
         </tr>
       );
     });
@@ -391,16 +376,14 @@ export class ElectronSettings extends React.Component<ElectronSettingsProps, Ele
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
       fill: true,
-      small: true
+      small: true,
     };
 
     // Already downloaded
     if (state === 'ready') {
       buttonProps.onClick = () => appState.removeVersion(key);
       buttonProps.icon = 'trash';
-      buttonProps.text = source === VersionSource.local
-        ? 'Remove'
-        : 'Delete';
+      buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
     } else if (state === 'downloading') {
       buttonProps.disabled = true;
       buttonProps.loading = true;

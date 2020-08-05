@@ -14,8 +14,8 @@ describe('AddressBar component', () => {
 
   class MockStore {
     @observable public gistId: string | null = null;
-    @observable public isWarningDialogShowing: boolean = false;
-    @observable public isConfirmationPromptShowing: boolean = false;
+    @observable public isWarningDialogShowing = false;
+    @observable public isConfirmationPromptShowing = false;
     public setGenericDialogOptions = jest.fn();
     public toggleWarningDialog = jest.fn();
   }
@@ -68,11 +68,11 @@ describe('AddressBar component', () => {
   it('disables during gist publishing', async () => {
     const wrapper = shallow(<AddressBar appState={store} />);
 
-    wrapper.setProps({appState: {...store, isPublishing: true}}, () => {
+    wrapper.setProps({ appState: { ...store, isPublishing: true } }, () => {
       expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
     });
 
-    wrapper.setProps({appState: {...store, isPublishing: false}}, () => {
+    wrapper.setProps({ appState: { ...store, isPublishing: false } }, () => {
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
     });
   });

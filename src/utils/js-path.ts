@@ -6,9 +6,7 @@
  * @returns {any}
  */
 export function getAtPath(input: string, obj: any): any {
-  return input
-    .split('.')
-    .reduce((o, s) => o[s], obj);
+  return input.split('.').reduce((o, s) => o[s], obj);
 }
 
 /**

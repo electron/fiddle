@@ -1,7 +1,7 @@
 import {
   remote,
   TouchBarButtonConstructorOptions,
-  TouchBarScrubberConstructorOptions
+  TouchBarScrubberConstructorOptions,
 } from 'electron';
 import { autorun } from 'mobx';
 
@@ -15,7 +15,7 @@ const {
   TouchBarButton,
   TouchBarScrubber,
   TouchBarSpacer,
-  TouchBarLabel
+  TouchBarLabel,
 } = TouchBar;
 
 /**
@@ -26,11 +26,9 @@ const {
  * @returns {string}
  */
 export function getItemIcon(
-  { state }: Partial<RunnableVersion> = { state: VersionState.unknown }
+  { state }: Partial<RunnableVersion> = { state: VersionState.unknown },
 ) {
-  return state === 'ready'
-    ? '💾'
-    : state === 'downloading' ? '⏬' : '☁';
+  return state === 'ready' ? '💾' : state === 'downloading' ? '⏬' : '☁';
 }
 
 export class TouchBarManager {
@@ -40,20 +38,28 @@ export class TouchBarManager {
   public touchBar: Electron.TouchBar;
   public versionSelector: Electron.TouchBarScrubber;
   public versionSelectorBtn: Electron.TouchBarButton;
-  public selectedVersion: string = '';
+  public selectedVersion = '';
   public versionSelectorSelectBtn: Electron.TouchBarButton;
 
   constructor(public readonly appState: AppState) {
     this.selectVersion = this.selectVersion.bind(this);
     this.updateStartStopBtn = this.updateStartStopBtn.bind(this);
-    this.updateVersionSelectorItems = this.updateVersionSelectorItems.bind(this);
+    this.updateVersionSelectorItems = this.updateVersionSelectorItems.bind(
+      this,
+    );
     this.updateVersionButton = this.updateVersionButton.bind(this);
 
     this.startStopBtn = new TouchBarButton(this.getStartStopButtonOptions());
     this.consoleBtn = new TouchBarButton(this.getConsoleButtonOptions());
-    this.versionSelectorBtn = new TouchBarButton(this.getVersionButtonOptions());
-    this.versionSelectorSelectBtn = new TouchBarButton(this.getVersionSelectorSelectButtonOptions());
-    this.versionSelector = new TouchBarScrubber(this.getVersionSelectorOptions());
+    this.versionSelectorBtn = new TouchBarButton(
+      this.getVersionButtonOptions(),
+    );
+    this.versionSelectorSelectBtn = new TouchBarButton(
+      this.getVersionSelectorSelectButtonOptions(),
+    );
+    this.versionSelector = new TouchBarScrubber(
+      this.getVersionSelectorOptions(),
+    );
 
     this.setupTouchBar();
   }
@@ -114,7 +120,9 @@ export class TouchBarManager {
    */
   public setTouchBar(options: Partial<Electron.TouchBarConstructorOptions>) {
     try {
-      this.touchBar = new TouchBar(options as Electron.TouchBarConstructorOptions);
+      this.touchBar = new TouchBar(
+        options as Electron.TouchBarConstructorOptions,
+      );
       this.browserWindow = this.browserWindow || remote.getCurrentWindow();
       this.browserWindow.setTouchBar(this.touchBar);
     } catch (error) {
@@ -130,8 +138,8 @@ export class TouchBarManager {
       items: [
         new TouchBarSpacer({ size: 'flexible' }),
         new TouchBarLabel({ label: getNiceGreeting() }),
-        new TouchBarSpacer({ size: 'flexible' })
-      ]
+        new TouchBarSpacer({ size: 'flexible' }),
+      ],
     });
   }
 
@@ -145,8 +153,8 @@ export class TouchBarManager {
         this.consoleBtn,
         new TouchBarSpacer({ size: 'flexible' }),
         this.versionSelectorBtn,
-        new TouchBarSpacer({ size: 'flexible' })
-      ]
+        new TouchBarSpacer({ size: 'flexible' }),
+      ],
     });
   }
 
@@ -155,13 +163,8 @@ export class TouchBarManager {
    */
   public setVersionSelectorItems() {
     this.setTouchBar({
-      items: [
-        this.versionSelector,
-        this.versionSelectorSelectBtn,
-      ],
-      escapeItem: new TouchBarButton(
-        this.getVersionSelectorEscButtonOptions()
-      )
+      items: [this.versionSelector, this.versionSelectorSelectBtn],
+      escapeItem: new TouchBarButton(this.getVersionSelectorEscButtonOptions()),
     });
   }
 
@@ -174,7 +177,7 @@ export class TouchBarManager {
       label: `Back`,
       click: () => {
         this.setDefaultItems();
-      }
+      },
     };
   }
 
@@ -191,7 +194,7 @@ export class TouchBarManager {
         }
 
         this.setDefaultItems();
-      }
+      },
     };
   }
 
@@ -202,13 +205,12 @@ export class TouchBarManager {
    * @returns {TouchBarButtonConstructorOptions}
    */
   public getStartStopButtonOptions(): TouchBarButtonConstructorOptions {
-    const label = this.appState.isRunning
-      ? '🛑 Stop'
-      : '🚀 Run';
+    const label = this.appState.isRunning ? '🛑 Stop' : '🚀 Run';
 
-    const click = () => this.appState.isRunning
-      ? window.ElectronFiddle.app.runner.stop()
-      : window.ElectronFiddle.app.runner.run();
+    const click = () =>
+      this.appState.isRunning
+        ? window.ElectronFiddle.app.runner.stop()
+        : window.ElectronFiddle.app.runner.run();
 
     return { label, click };
   }
@@ -243,8 +245,7 @@ export class TouchBarManager {
    *
    * @returns {TouchBarScrubberConstructorOptions}
    */
-  public getVersionSelectorOptions(
-  ): TouchBarScrubberConstructorOptions {
+  public getVersionSelectorOptions(): TouchBarScrubberConstructorOptions {
     return {
       select: this.selectVersion,
       highlight: this.selectVersion,
@@ -253,7 +254,7 @@ export class TouchBarManager {
       overlayStyle: 'outline',
       mode: 'free',
       continuous: true,
-      showArrowButtons: false
+      showArrowButtons: false,
     };
   }
 

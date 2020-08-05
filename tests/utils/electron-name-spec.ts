@@ -10,7 +10,7 @@ describe('electron-name', () => {
     [
       { platform: 'win32', expected: 'electron.exe' },
       { platform: 'darwin', expected: 'Electron.app' },
-      { platform: 'linux', expected: 'electron' }
+      { platform: 'linux', expected: 'electron' },
     ].forEach(({ platform, expected }) => {
       overridePlatform(platform);
       expect(getElectronNameForPlatform()).toBe(expected);

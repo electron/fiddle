@@ -10,13 +10,17 @@ export function waitForEditorsToMount(editors: Array<MosaicId>) {
   const interval = 100;
   return new Promise((resolve, reject) => {
     (function checkMountedEditors() {
-      const allMounted = editors.every((id) => !!window.ElectronFiddle.editors[id]);
+      const allMounted = editors.every(
+        (id) => !!window.ElectronFiddle.editors[id],
+      );
       if (allMounted) {
         return resolve();
       }
       time += interval;
       if (time > maxTime) {
-        return reject(`Timed out after ${maxTime}ms: can't mount editors onto mosaics.`);
+        return reject(
+          `Timed out after ${maxTime}ms: can't mount editors onto mosaics.`,
+        );
       }
       setTimeout(checkMountedEditors, 100);
     })();

@@ -12,7 +12,7 @@ export async function setupDevTools(): Promise<void> {
   const {
     default: installExtension,
     REACT_DEVELOPER_TOOLS,
-    REACT_PERF
+    REACT_PERF,
   } = require('electron-devtools-installer');
 
   try {

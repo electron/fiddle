@@ -7,11 +7,13 @@ import { MockState } from '../../mocks/state';
 let mockContext: any = {};
 
 jest.mock('react-mosaic-component', () => {
-  const { MosaicContext, MosaicRootActions } = jest.requireActual('react-mosaic-component');
+  const { MosaicContext, MosaicRootActions } = jest.requireActual(
+    'react-mosaic-component',
+  );
 
   return {
     MosaicContext,
-    MosaicRootActions
+    MosaicRootActions,
   };
 });
 
@@ -23,9 +25,9 @@ beforeAll(() => {
       hide: jest.fn(),
       replaceWith: jest.fn(),
       updateTree: jest.fn(),
-      getRoot: jest.fn()
+      getRoot: jest.fn(),
     },
-    mosaicId: 'output'
+    mosaicId: 'output',
   };
 });
 
@@ -45,22 +47,22 @@ describe('Output component', () => {
     store.output = [
       {
         timestamp: 1532704072127,
-        text: 'Hello!'
-      },
-      {
-        timestamp: 1532704073130,
-        text: 'Hi!'
+        text: 'Hello!',
       },
       {
         timestamp: 1532704073130,
         text: 'Hi!',
-        isNotPre: true
-      }
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+        isNotPre: true,
+      },
     ];
 
     const renderTimestamp = (i: number) => i.toString();
     const wrapper = shallow(
-      <Output appState={store} renderTimestamp={renderTimestamp} />
+      <Output appState={store} renderTimestamp={renderTimestamp} />,
     );
 
     expect(wrapper).toMatchSnapshot();
@@ -82,13 +84,16 @@ describe('Output component', () => {
     // context can be set before mounting method
     const wrapper = shallow(<Output appState={store} />, {
       context: mockContext,
-      disableLifecycleMethods: true
+      disableLifecycleMethods: true,
     });
 
     wrapper.instance().context = mockContext;
     wrapper.instance().componentDidMount!();
 
-    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 25);
+    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(
+      ['first'],
+      25,
+    );
 
     store.isConsoleShowing = false;
 

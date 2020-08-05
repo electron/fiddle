@@ -19,7 +19,10 @@ describe('EditorDropdown component', () => {
       closedPanels: {},
     };
 
-    (getVisibleMosaics as jest.Mock).mockReturnValue([ EditorId.html, EditorId.renderer ]);
+    (getVisibleMosaics as jest.Mock).mockReturnValue([
+      EditorId.html,
+      EditorId.renderer,
+    ]);
   });
 
   it('renders', () => {
@@ -49,7 +52,7 @@ describe('EditorDropdown component', () => {
 
   it('disables hide button if only one editor open', () => {
     store.mosaicArrangement = 'html';
-    (getVisibleMosaics as jest.Mock).mockReturnValue([ EditorId.html ]);
+    (getVisibleMosaics as jest.Mock).mockReturnValue([EditorId.html]);
 
     const wrapper = mount(<EditorDropdown appState={store} />);
     const instance = wrapper.instance() as EditorDropdown;

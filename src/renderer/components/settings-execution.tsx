@@ -15,12 +15,14 @@ export interface ExecutionSettingsProps {
  * @extends {React.Component<ExecutionSettingsProps, {}>}
  */
 @observer
-export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {}> {
+export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
   constructor(props: ExecutionSettingsProps) {
     super(props);
 
     this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
-    this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(this);
+    this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
+      this,
+    );
     this.handleExecutionFlagChange = this.handleExecutionFlagChange.bind(this);
   }
 
@@ -30,9 +32,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleDeleteDataChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleDeleteDataChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isKeepingUserDataDirs = checked;
   }
@@ -42,9 +42,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleElectronLoggingChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleElectronLoggingChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isEnablingElectronLogging = checked;
   }
@@ -54,9 +52,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleExecutionFlagChange(
-    event: React.FormEvent<HTMLInputElement>
-  ) {
+  public handleExecutionFlagChange(event: React.FormEvent<HTMLInputElement>) {
     const { value } = event.currentTarget;
     const flags = value.split('|');
     this.props.appState.executionFlags = flags;
@@ -66,7 +62,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
     const {
       isKeepingUserDataDirs,
       isEnablingElectronLogging,
-      executionFlags = []
+      executionFlags = [],
     } = this.props.appState;
 
     const deleteUserDirLabel = `
@@ -83,14 +79,15 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
       <div>
         <h2>Execution</h2>
         <Callout>
-          These advanced settings control how Electron Fiddle executes your fiddles.
+          These advanced settings control how Electron Fiddle executes your
+          fiddles.
         </Callout>
         <br />
         <Callout>
           <FormGroup label={deleteUserDirLabel}>
             <Checkbox
               checked={isKeepingUserDataDirs}
-              label='Do not delete user data directories.'
+              label="Do not delete user data directories."
               onChange={this.handleDeleteDataChange}
             />
           </FormGroup>
@@ -100,7 +97,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
           <FormGroup label={electronLoggingLabel}>
             <Checkbox
               checked={isEnablingElectronLogging}
-              label='Enable advanced Electron logging.'
+              label="Enable advanced Electron logging."
               onChange={this.handleElectronLoggingChange}
             />
           </FormGroup>
@@ -108,18 +105,18 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps, {
         <br />
         <Callout>
           <FormGroup>
-          <p>
-            Electron allows starting the executable with <a
-              href='https://www.electronjs.org/docs/api/command-line-switches'
-            >
-              user-provided flags
-            </a>
-            , such as '--js-flags=--expose-gc'. Those can be added here as bar-separated (|)
-            flags to run when you start your Fiddles.
-          </p>
+            <p>
+              Electron allows starting the executable with{' '}
+              <a href="https://www.electronjs.org/docs/api/command-line-switches">
+                user-provided flags
+              </a>
+              , such as &apos;--js-flags=--expose-gc&apos;. Those can be added
+              here as bar-separated (|) flags to run when you start your
+              Fiddles.
+            </p>
             <br />
             <InputGroup
-              placeholder='--js-flags=--expose-gc|--lang=es'
+              placeholder="--js-flags=--expose-gc|--lang=es"
               value={executionFlags.join('|')}
               onChange={this.handleExecutionFlagChange}
             />

@@ -1,13 +1,11 @@
-/* tslint:disable */
+const { run } = require('./run-bin');
 
-const { run } = require('./run-bin')
-
-async function compileTypeScript () {
-  await run('TypeScript', 'tsc', ['-p', 'tsconfig.json'])
-};
-
-module.exports = {
-  compileTypeScript
+async function compileTypeScript() {
+  await run('TypeScript', 'tsc', ['-p', 'tsconfig.json']);
 }
 
-if (require.main === module) compileTypeScript()
+module.exports = {
+  compileTypeScript,
+};
+
+if (require.main === module) compileTypeScript();

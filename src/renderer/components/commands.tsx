@@ -19,10 +19,10 @@ export interface CommandsProps {
  * all the things
  *
  * @class Commands
- * @extends {React.Component<CommandsProps, {}>}
+ * @extends {React.Component<CommandsProps>}
  */
 @observer
-export class Commands extends React.Component<CommandsProps, {}> {
+export class Commands extends React.Component<CommandsProps> {
   constructor(props: CommandsProps) {
     super(props);
   }
@@ -32,26 +32,22 @@ export class Commands extends React.Component<CommandsProps, {}> {
     const { isBisectCommandShowing: isBisectCommandShowing } = appState;
 
     return (
-      <div className='commands'>
+      <div className="commands">
         <div>
           <ControlGroup fill={true} vertical={false}>
             <VersionChooser appState={appState} />
             <Runner appState={appState} />
           </ControlGroup>
-          {
-            // tslint:disable-next-line jsx-no-multiline-js
-            isBisectCommandShowing &&
-            (
-              <ControlGroup fill={true} vertical={false}>
-                <BisectHandler appState={appState} />
-              </ControlGroup>
-            )
-          }
+          {isBisectCommandShowing && (
+            <ControlGroup fill={true} vertical={false}>
+              <BisectHandler appState={appState} />
+            </ControlGroup>
+          )}
           <ControlGroup fill={true} vertical={false}>
             <Button
               active={appState.isConsoleShowing}
-              icon='console'
-              text='Console'
+              icon="console"
+              text="Console"
               onClick={appState.toggleConsole}
             />
             <EditorDropdown appState={appState} />

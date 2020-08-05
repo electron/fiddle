@@ -4,7 +4,7 @@ import { isFirstRun } from '../../src/utils/check-first-run';
 
 jest.mock('fs-extra', () => ({
   existsSync: jest.fn(),
-  outputFileSync: jest.fn()
+  outputFileSync: jest.fn(),
 }));
 
 describe('isFirstRun', () => {

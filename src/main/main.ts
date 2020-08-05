@@ -47,7 +47,10 @@ export function onBeforeQuit() {
   ipcMainManager.on(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
 }
 
-export function quitAppIfConfirmed(_: Electron.IpcMainEvent, quitConfirmed: boolean) {
+export function quitAppIfConfirmed(
+  _: Electron.IpcMainEvent,
+  quitConfirmed: boolean,
+) {
   if (quitConfirmed) {
     app.quit();
   }

@@ -5,9 +5,6 @@ import * as React from 'react';
 import { VersionState } from '../../interfaces';
 import { AppState } from '../state';
 
-export interface RunnerState {
-}
-
 export interface RunnerProps {
   appState: AppState;
 }
@@ -17,10 +14,10 @@ export interface RunnerProps {
  * with Electron. It also renders the button that does so.
  *
  * @class Runner
- * @extends {React.Component<RunnerProps, RunnerState>}
+ * @extends {React.Component<RunnerProps>}
  */
 @observer
-export class Runner extends React.Component<RunnerProps, RunnerState> {
+export class Runner extends React.Component<RunnerProps> {
   public render() {
     const { isRunning, currentElectronVersion } = this.props.appState;
 
@@ -29,7 +26,9 @@ export class Runner extends React.Component<RunnerProps, RunnerState> {
 
     if (state === VersionState.downloading) {
       props.text = 'Downloading';
-      props.icon = <Spinner size={16} value={currentElectronVersion?.downloadProgress} />;
+      props.icon = (
+        <Spinner size={16} value={currentElectronVersion?.downloadProgress} />
+      );
     } else if (state === VersionState.unzipping) {
       props.text = 'Unzipping';
       props.icon = <Spinner size={16} />;

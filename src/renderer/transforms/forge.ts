@@ -18,7 +18,8 @@ export async function forgeTransform(files: Files): Promise<Files> {
       parsed.devDependencies['@electron-forge/cli'] = '6.0.0-beta.52';
       parsed.devDependencies['@electron-forge/maker-deb'] = '6.0.0-beta.52';
       parsed.devDependencies['@electron-forge/maker-rpm'] = '6.0.0-beta.52';
-      parsed.devDependencies['@electron-forge/maker-squirrel'] = '6.0.0-beta.52';
+      parsed.devDependencies['@electron-forge/maker-squirrel'] =
+        '6.0.0-beta.52';
       parsed.devDependencies['@electron-forge/maker-zip'] = '6.0.0-beta.52';
 
       // Scripts
@@ -41,18 +42,16 @@ export async function forgeTransform(files: Files): Promise<Files> {
         },
         {
           name: '@electron-forge/maker-zip',
-          platforms: [
-            'darwin'
-          ]
+          platforms: ['darwin'],
         },
         {
           name: '@electron-forge/maker-deb',
-          config: {}
+          config: {},
         },
         {
           name: '@electron-forge/maker-rpm',
-          config: {}
-        }
+          config: {},
+        },
       ];
 
       files.set(PACKAGE_NAME, JSON.stringify(parsed, undefined, 2));

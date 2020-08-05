@@ -12,7 +12,10 @@ export interface ChromeMacProps {
 @observer
 export class ChromeMac extends React.Component<ChromeMacProps> {
   public handleDoubleClick = () => {
-    const doubleClickAction = remote.systemPreferences.getUserDefault('AppleActionOnDoubleClick', 'string');
+    const doubleClickAction = remote.systemPreferences.getUserDefault(
+      'AppleActionOnDoubleClick',
+      'string',
+    );
     const win = remote.getCurrentWindow();
     if (doubleClickAction === 'Minimize') {
       win.minimize();
@@ -23,13 +26,13 @@ export class ChromeMac extends React.Component<ChromeMacProps> {
         win.unmaximize();
       }
     }
-  }
+  };
 
   public render() {
     if (process.platform !== 'darwin') return null;
 
     return (
-      <div className='chrome drag' onDoubleClick={this.handleDoubleClick}>
+      <div className="chrome drag" onDoubleClick={this.handleDoubleClick}>
         <small>{getTitle(this.props.appState)}</small>
       </div>
     );

@@ -30,8 +30,8 @@ describe('AddVersionDialog component', () => {
       isAddVersionDialogShowing: true,
       addLocalVersion: jest.fn(),
       binaryManager: {
-        getIsDownloaded: jest.fn()
-      }
+        getIsDownloaded: jest.fn(),
+      },
     };
   });
 
@@ -41,7 +41,7 @@ describe('AddVersionDialog component', () => {
     wrapper.setState({
       isValidVersion: true,
       isValidElectron: true,
-      folderPath: mockFile
+      folderPath: mockFile,
     });
 
     expect(wrapper).toMatchSnapshot();
@@ -49,7 +49,7 @@ describe('AddVersionDialog component', () => {
     wrapper.setState({
       isValidVersion: false,
       isValidElectron: true,
-      folderPath: mockFile
+      folderPath: mockFile,
     });
 
     expect(wrapper).toMatchSnapshot();
@@ -62,8 +62,9 @@ describe('AddVersionDialog component', () => {
     const inp = wrapper.find('#custom-electron-version');
     inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
 
-    expect(ipcRendererManager.send as jest.Mock)
-      .toHaveBeenCalledWith(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+    expect(ipcRendererManager.send as jest.Mock).toHaveBeenCalledWith(
+      IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
+    );
     expect(preventDefault).toHaveBeenCalled();
   });
 
@@ -82,7 +83,9 @@ describe('AddVersionDialog component', () => {
     it('handles valid input', () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
 
-      (wrapper.instance() as any).onChangeVersion({ target: { value: '3.3.3' } });
+      (wrapper.instance() as any).onChangeVersion({
+        target: { value: '3.3.3' },
+      });
       expect(wrapper.state('isValidVersion')).toBe(true);
       expect(wrapper.state('version')).toBe('3.3.3');
     });
@@ -114,7 +117,7 @@ describe('AddVersionDialog component', () => {
 
       wrapper.setState({
         version: '3.3.3',
-        folderPath: '/test/path'
+        folderPath: '/test/path',
       });
 
       await (wrapper.instance() as any).onSubmit();

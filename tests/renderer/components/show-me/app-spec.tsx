@@ -1,7 +1,6 @@
 import * as electron from 'electron';
 import * as React from 'react';
 
-// tslint:disable-next-line:no-submodule-imports
 import { act } from 'react-dom/test-utils';
 
 import { mount } from 'enzyme';
@@ -16,7 +15,9 @@ describe('getSubsetOnly()', () => {
     jest.useFakeTimers();
     overridePlatform('darwin');
 
-    ({ ShowMeApp } = require('../../../../src/renderer/components/show-me/app'));
+    ({
+      ShowMeApp,
+    } = require('../../../../src/renderer/components/show-me/app'));
   });
 
   afterAll(() => {
@@ -25,16 +26,14 @@ describe('getSubsetOnly()', () => {
   });
 
   it('renders', () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('does not render the show/hide on non-darwin', async () => {
     overridePlatform('win32');
 
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
     const element = wrapper.find('button#show-hide');
 
     expect(element.length).toBe(0);
@@ -43,14 +42,13 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the show/hide example', async () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#show-hide').simulate('click');
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
 
-    for (const [ method ] of (setTimeout as any).mock.calls) {
+    for (const [method] of (setTimeout as any).mock.calls) {
       act(method);
     }
 
@@ -59,14 +57,13 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the focus example', async () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#focus').simulate('click');
 
     expect(setTimeout).toHaveBeenCalledTimes(3);
 
-    for (const [ method ] of (setTimeout as any).mock.calls) {
+    for (const [method] of (setTimeout as any).mock.calls) {
       act(method);
     }
 
@@ -74,32 +71,37 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the paths example', () => {
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#special-paths').simulate('click');
-    const specialPaths = wrapper.find('pre#special-paths-content').text().trim();
+    const specialPaths = wrapper
+      .find('pre#special-paths-content')
+      .text()
+      .trim();
 
-    expect(specialPaths).toEqual(`
+    expect(specialPaths).toEqual(
+      `
 home: ~
 appData: /test-path
 userData: /Users/fake-user
 temp: /test-path
 downloads: /test-path
-desktop: /test-path`.trim()
+desktop: /test-path`.trim(),
     );
   });
 
   it('handles the metrics example', () => {
-    (electron.remote.app.getAppMetrics as jest.Mock).mockReturnValue(
-      { metrics: 123 }
-    );
+    (electron.remote.app.getAppMetrics as jest.Mock).mockReturnValue({
+      metrics: 123,
+    });
 
-    const mockState = {};
-    const wrapper = mount(<ShowMeApp appState={mockState} />);
+    const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#process-metrics').simulate('click');
-    const specialPaths = wrapper.find('pre#process-metrics-content').text().trim();
+    const specialPaths = wrapper
+      .find('pre#process-metrics-content')
+      .text()
+      .trim();
 
     expect(JSON.parse(specialPaths)).toEqual({ metrics: 123 });
   });

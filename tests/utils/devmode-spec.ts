@@ -10,7 +10,7 @@ describe('devMode', () => {
   it('correctly returns true if defaultApp', () => {
     Object.defineProperty(process, 'defaultApp', {
       value: true,
-      writable: true
+      writable: true,
     });
 
     expect(isDevMode()).toBe(true);
@@ -19,7 +19,7 @@ describe('devMode', () => {
   it('correctly returns false if not defaultApp', () => {
     Object.defineProperty(process, 'defaultApp', {
       value: undefined,
-      writable: true
+      writable: true,
     });
 
     expect(isDevMode()).toBe(false);

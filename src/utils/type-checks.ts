@@ -8,7 +8,9 @@ import { EditorBackup } from './editor-backup';
  * @param {(EditorId | PanelId | MosaicId)} input
  * @returns {input is EditorId}
  */
-export function isEditorId(input: EditorId | PanelId | MosaicId): input is EditorId {
+export function isEditorId(
+  input: EditorId | PanelId | MosaicId,
+): input is EditorId {
   return (ALL_EDITORS as any).includes(input);
 }
 
@@ -19,7 +21,9 @@ export function isEditorId(input: EditorId | PanelId | MosaicId): input is Edito
  * @param {(EditorId | PanelId | MosaicId)} input
  * @returns {input is MosaicId}
  */
-export function isPanelId(input: EditorId | PanelId | MosaicId): input is PanelId {
+export function isPanelId(
+  input: EditorId | PanelId | MosaicId,
+): input is PanelId {
   return !(ALL_EDITORS as any).includes(input);
 }
 
@@ -30,6 +34,8 @@ export function isPanelId(input: EditorId | PanelId | MosaicId): input is PanelI
  * @param {(EditorBackup | true)} input
  * @returns {input is EditorBackup}
  */
-export function isEditorBackup(input?: EditorBackup | true | null): input is EditorBackup {
+export function isEditorBackup(
+  input?: EditorBackup | true | null,
+): input is EditorBackup {
   return !!(input && input !== true);
 }

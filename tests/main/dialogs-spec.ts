@@ -12,7 +12,6 @@ import { flushPromises } from '../utils';
 jest.mock('../../src/main/windows');
 
 describe('dialogs', () => {
-
   beforeEach(() => {
     setupDialogs();
   });
@@ -21,7 +20,7 @@ describe('dialogs', () => {
     expect(ipcMainManager.eventNames()).toEqual([
       IpcEvents.SHOW_WARNING_DIALOG,
       IpcEvents.SHOW_CONFIRMATION_DIALOG,
-      IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG
+      IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
     ]);
   });
 
@@ -30,17 +29,21 @@ describe('dialogs', () => {
       ipcMainManager.emit(IpcEvents.SHOW_WARNING_DIALOG, {}, { hi: 'hello' });
       expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
         type: 'warning',
-        hi: 'hello'
+        hi: 'hello',
       });
     });
   });
 
   describe('confirmation dialog', () => {
     it('shows dialog when triggering IPC event', () => {
-      ipcMainManager.emit(IpcEvents.SHOW_CONFIRMATION_DIALOG, {}, { hi: 'hello' });
+      ipcMainManager.emit(
+        IpcEvents.SHOW_CONFIRMATION_DIALOG,
+        {},
+        { hi: 'hello' },
+      );
       expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
         type: 'warning',
-        hi: 'hello'
+        hi: 'hello',
       });
     });
   });
@@ -48,15 +51,17 @@ describe('dialogs', () => {
   describe('local version folder dialog', () => {
     it('shows dialog when triggering IPC event', () => {
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
-        filePaths: []
+        filePaths: [],
       });
 
       ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: jest.fn()
+        reply: jest.fn(),
       });
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith(expect.objectContaining({
-        properties: ['openDirectory']
-      }));
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          properties: ['openDirectory'],
+        }),
+      );
     });
 
     it('triggers IPC load local version event', async () => {
@@ -64,15 +69,18 @@ describe('dialogs', () => {
       const paths = ['/test/path/'];
 
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
-        filePaths: paths
+        filePaths: paths,
       });
 
       ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn
+        reply: replyFn,
       });
 
       await flushPromises();
-      expect(replyFn).toHaveBeenCalledWith(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, paths);
+      expect(replyFn).toHaveBeenCalledWith(
+        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
+        paths,
+      );
     });
 
     it('does nothing if not given a path', async () => {
@@ -80,10 +88,10 @@ describe('dialogs', () => {
 
       // empty array
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
-        filePaths: []
+        filePaths: [],
       });
       ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn
+        reply: replyFn,
       });
 
       await flushPromises();
@@ -92,7 +100,7 @@ describe('dialogs', () => {
       // nothing in response
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
       ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn
+        reply: replyFn,
       });
 
       await flushPromises();

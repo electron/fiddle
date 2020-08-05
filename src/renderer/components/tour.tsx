@@ -40,7 +40,7 @@ export class Tour extends React.Component<TourProps, TourState> {
     this.state = {
       tour: props.tour.entries(),
       step: null,
-      i: 0
+      i: 0,
     };
   }
 
@@ -92,11 +92,7 @@ export class Tour extends React.Component<TourProps, TourState> {
 
     if (!step) return null;
 
-    return (
-      <div className='tour'>
-        {this.getStep(step)}
-      </div>
-    );
+    return <div className="tour">{this.getStep(step)}</div>;
   }
 
   /**
@@ -112,36 +108,34 @@ export class Tour extends React.Component<TourProps, TourState> {
     if (getButtons) {
       return getButtons({
         stop: this.stop,
-        advance: this.advance
+        advance: this.advance,
       });
     }
 
     // No? Fine! Are we at the end of the tour?
     return this.props.tour.size === this.state.i
-      ? [(
-        <Button
-          icon='tick-circle'
-          onClick={this.stop}
-          key='btn-stop'
-          text='Finish Tour'
-        />
-      )] : [
-        (
+      ? [
           <Button
-            icon='stop'
-            key='btn-stop'
+            icon="tick-circle"
             onClick={this.stop}
-            text='Stop Tour'
-          />
-        ), (
+            key="btn-stop"
+            text="Finish Tour"
+          />,
+        ]
+      : [
           <Button
-            icon='step-forward'
-            key='btn-adv'
+            icon="stop"
+            key="btn-stop"
+            onClick={this.stop}
+            text="Stop Tour"
+          />,
+          <Button
+            icon="step-forward"
+            key="btn-adv"
             onClick={this.advance}
-            text='Continue'
-          />
-        )
-      ];
+            text="Continue"
+          />,
+        ];
   }
 
   /**
@@ -151,7 +145,10 @@ export class Tour extends React.Component<TourProps, TourState> {
    * @param {ClientRect} rect
    * @returns {JSX.Element}
    */
-  private getDialogForStep(step: TourScriptStep, rect: ClientRect): JSX.Element {
+  private getDialogForStep(
+    step: TourScriptStep,
+    rect: ClientRect,
+  ): JSX.Element {
     const buttons = this.getButtons(step);
     const size = { width: 400, height: 300 };
     const margin = 10;
@@ -170,21 +167,15 @@ export class Tour extends React.Component<TourProps, TourState> {
         key={step.name}
         isOpen={true}
         style={style}
-        portalClassName='tour-portal'
-        backdropProps={{ style: { visibility: 'hidden' }}}
+        portalClassName="tour-portal"
+        backdropProps={{ style: { visibility: 'hidden' } }}
       >
         <div className={Classes.DIALOG_HEADER}>
-          <h4 className={Classes.HEADING}>
-            {step.title}
-          </h4>
+          <h4 className={Classes.HEADING}>{step.title}</h4>
         </div>
-        <div className={Classes.DIALOG_BODY}>
-          {step.content}
-        </div>
+        <div className={Classes.DIALOG_BODY}>{step.content}</div>
         <div className={Classes.DIALOG_FOOTER}>
-          <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-            {buttons}
-          </div>
+          <div className={Classes.DIALOG_FOOTER_ACTIONS}>{buttons}</div>
         </div>
       </Dialog>
     );
@@ -205,20 +196,38 @@ export class Tour extends React.Component<TourProps, TourState> {
     return (
       <>
         {this.getDialogForStep(step, rect)}
-        <svg height='100%' width='100%'>
-          <rect fill='rgba(0, 0, 0, 0.65)' x='0' y='0' mask='url(#mask)' height='100%' width='100%'/>
-          <mask id='mask' maskUnits='userSpaceOnUse' maskContentUnits='userSpaceOnUse'>
-            <rect className='bg' x='0' y='0' fill='white' height='100%' width='100%' />
+        <svg height="100%" width="100%">
+          <rect
+            fill="rgba(0, 0, 0, 0.65)"
+            x="0"
+            y="0"
+            mask="url(#mask)"
+            height="100%"
+            width="100%"
+          />
+          <mask
+            id="mask"
+            maskUnits="userSpaceOnUse"
+            maskContentUnits="userSpaceOnUse"
+          >
+            <rect
+              className="bg"
+              x="0"
+              y="0"
+              fill="white"
+              height="100%"
+              width="100%"
+            />
             <rect
               x={left}
               y={top}
               width={width}
               height={height}
-              fill='black'
-              rx='5'
-              ry='5'
-              strokeWidth='5'
-              stroke='black'
+              fill="black"
+              rx="5"
+              ry="5"
+              strokeWidth="5"
+              stroke="black"
             />
           </mask>
         </svg>

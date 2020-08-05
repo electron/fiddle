@@ -6,11 +6,11 @@ import * as React from 'react';
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 
 jest.mock('fs-extra', () => ({
-  readJSON: jest.fn()
+  readJSON: jest.fn(),
 }));
 
 jest.mock('../../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p)
+  fancyImport: async (p: string) => require(p),
 }));
 
 describe('CreditsSettings component', () => {
@@ -22,8 +22,8 @@ describe('CreditsSettings component', () => {
       avatar: 'https://avatars3.githubusercontent.com/u/1426799?v=4',
       name: 'Felix Rieseberg',
       bio: '🙇 ✨🌳 ',
-      location: 'San Francisco'
-    }
+      location: 'San Francisco',
+    },
   ];
 
   const mockContributorsBroken = [
@@ -34,8 +34,8 @@ describe('CreditsSettings component', () => {
       avatar: 'https://avatars3.githubusercontent.com/u/1426799?v=4',
       name: null,
       bio: null,
-      location: null
-    }
+      location: null,
+    },
   ];
 
   let store: any;

@@ -9,9 +9,8 @@
     "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
     "lint:style": "stylelint  \"./src/less/*.less\" --fix",
-    "lint:ts": "tslint -c tslint.json -p tsconfig.json -e \"node_modules/**/*.ts\" --fix",
-    "lint:tests": "tslint \"./tests/**/*.ts{,x}\" -c tslint.json --fix",
-    "lint:templates": "standard \"./static/show-me/**/*.js\"",
+    "lint:ts": "eslint \"./**/*.{js,ts,tsx}\" --fix",
+    "lint:templates": "standard \"./static/show-me/**/*.js\" --fix",
     "lint": "npm-run-all \"lint:*\"",
     "make": "electron-forge make",
     "package": "electron-forge package",
@@ -81,29 +80,51 @@
     "@types/react-dom": "^16.9.5",
     "@types/semver": "^7.1.0",
     "@types/tmp": "0.1.0",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0",
     "chokidar": "^3.3.1",
     "coveralls": "^3.0.9",
     "electron": "^9.1.1",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",
     "enzyme-to-json": "^3.4.4",
+    "eslint": "^7.5.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "eslint-plugin-react": "^7.20.3",
     "fetch-mock-jest": "^1.1.0-beta.3",
+    "husky": "^4.2.5",
     "jest": "^25.1.0",
     "less": "^3.11.1",
+    "lint-staged": "^10.2.11",
     "log-symbols": "^3.0.0",
     "node-abi": "^2.18.0",
     "node-fetch": "^2.6.0",
     "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.12.4",
+    "prettier": "^2.0.5",
     "react-test-renderer": "^16.13.0",
     "rimraf": "^3.0.0",
     "standard": "^14.3.1",
     "stylelint": "^13.2.0",
     "stylelint-config-standard": "^20.0.0",
     "ts-jest": "^25.2.1",
-    "tslint": "^6.0.0",
-    "tslint-microsoft-contrib": "^6.2.0",
-    "tslint-react": "^4.2.0",
     "typescript": "^3.8.2"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "./**/*.{js,ts,tsx}": [
+      "eslint --fix"
+    ],
+    "./static/show-me/**/*.js": [
+      "standard --fix"
+    ],
+    "./src/less/*.less": [
+      "stylelint --fix"
+    ]
   }
 }

@@ -13,7 +13,7 @@ jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
 jest.mock('@electron/get');
 
-expect.addSnapshotSerializer(createSerializer({mode: 'deep'}));
+expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
 // We want to detect jest sometimes
 global.__JEST__ = global.__JEST__ || {};

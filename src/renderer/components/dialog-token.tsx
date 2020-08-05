@@ -1,4 +1,3 @@
-
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { clipboard, shell } from 'electron';
 import { observer } from 'mobx-react';
@@ -17,7 +16,7 @@ export interface TokenDialogState {
   error: boolean;
 }
 
-const TOKEN_SCOPES = [ 'gist' ].join();
+const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
 
@@ -30,14 +29,17 @@ const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKE
  * @extends {React.Component<TokenDialogProps, TokenDialogState>}
  */
 @observer
-export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogState> {
+export class TokenDialog extends React.Component<
+  TokenDialogProps,
+  TokenDialogState
+> {
   constructor(props: TokenDialogProps) {
     super(props);
 
     this.state = {
       verifying: false,
       error: false,
-      tokenInput: ''
+      tokenInput: '',
     };
 
     this.onSubmitToken = this.onSubmitToken.bind(this);
@@ -91,7 +93,7 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     this.setState({
       verifying: false,
       error: false,
-      tokenInput: ''
+      tokenInput: '',
     });
   }
 
@@ -134,23 +136,20 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
     const canSubmit = !!this.state.tokenInput;
 
     return [
-      (
-        <Button
-          key='done'
-          disabled={!canSubmit}
-          onClick={this.onSubmitToken}
-          loading={this.state.verifying}
-          text='Done'
-          icon='log-in'
-        />
-      ), (
-        <Button
-          key='cancel'
-          text='Cancel'
-          icon='log-out'
-          onClick={this.onClose}
-        />
-      )
+      <Button
+        key="done"
+        disabled={!canSubmit}
+        onClick={this.onSubmitToken}
+        loading={this.state.verifying}
+        text="Done"
+        icon="log-in"
+      />,
+      <Button
+        key="cancel"
+        text="Cancel"
+        icon="log-out"
+        onClick={this.onClose}
+      />,
     ];
   }
 
@@ -172,11 +171,15 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
       <Dialog
         isOpen={isTokenDialogShowing}
         onClose={this.onClose}
-        title='GitHub Token'
+        title="GitHub Token"
       >
-        <div className='bp3-dialog-body'>
+        <div className="bp3-dialog-body">
           <p>
-            Generate a <a onClick={this.openGenerateTokenExternal}>GitHub Personal Access Token</a> and paste it here:
+            Generate a{' '}
+            <a onClick={this.openGenerateTokenExternal}>
+              GitHub Personal Access Token
+            </a>{' '}
+            and paste it here:
           </p>
 
           {this.state.error ? this.invalidWarning : null}
@@ -187,10 +190,8 @@ export class TokenDialog extends React.Component<TokenDialogProps, TokenDialogSt
             onChange={this.handleChange}
           />
         </div>
-        <div className='bp3-dialog-footer'>
-          <div className='bp3-dialog-footer-actions'>
-            {this.buttons}
-          </div>
+        <div className="bp3-dialog-footer">
+          <div className="bp3-dialog-footer-actions">{this.buttons}</div>
         </div>
       </Dialog>
     );

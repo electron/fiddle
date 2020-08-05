@@ -24,7 +24,7 @@ describe('Runner component', () => {
       isRunning: false,
       get currentElectronVersion() {
         return mockVersions[this.version];
-      }
+      },
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();

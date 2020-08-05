@@ -3,7 +3,12 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { IpcEvents } from '../ipc-events';
-import { INDEX_HTML_NAME, MAIN_JS_NAME, PACKAGE_NAME, RENDERER_JS_NAME } from '../shared-constants';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PACKAGE_NAME,
+  RENDERER_JS_NAME,
+} from '../shared-constants';
 import { ipcMainManager } from './ipc';
 
 /**
@@ -22,14 +27,14 @@ export function setupFileListeners() {
 export async function showOpenDialog() {
   const { filePaths } = await dialog.showOpenDialog({
     title: 'Open Fiddle',
-    properties: ['openDirectory']
+    properties: ['openDirectory'],
   });
 
   if (!filePaths || filePaths.length < 1) {
     return;
   }
 
-  ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [ filePaths[0] ]);
+  ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [filePaths[0]]);
 }
 
 /**
@@ -41,7 +46,7 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
   const { filePaths } = await dialog.showOpenDialog({
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory'],
-    title: `Save Fiddle${as ? ` as ${as}` : ''}`
+    title: `Save Fiddle${as ? ` as ${as}` : ''}`,
   });
 
   if (!filePaths || filePaths.length < 1) {
@@ -52,7 +57,7 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
 
   // Let's confirm real quick if we want this
   if (await ensureSaveTargetEmpty(filePaths[0])) {
-    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [ filePaths[0] ]);
+    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
   }
 }
 
@@ -67,7 +72,7 @@ async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
     path.join(filePath, INDEX_HTML_NAME),
     path.join(filePath, RENDERER_JS_NAME),
     path.join(filePath, MAIN_JS_NAME),
-    path.join(filePath, PACKAGE_NAME)
+    path.join(filePath, PACKAGE_NAME),
   ];
 
   let noFilesOrOverwriteGranted = true;
@@ -92,7 +97,7 @@ async function confirmFileOverwrite(filePath: string): Promise<boolean> {
   try {
     const result = await dialog.showMessageBox({
       type: 'warning',
-      buttons: [ 'Cancel', 'Yes' ],
+      buttons: ['Cancel', 'Yes'],
       message: 'Overwrite files?',
       detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
     });

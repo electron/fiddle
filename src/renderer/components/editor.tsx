@@ -15,14 +15,17 @@ export interface EditorProps {
   id: EditorId;
   options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
-  onChange?: (value: string, event: MonacoType.editor.IModelContentChangedEvent) => void;
+  onChange?: (
+    value: string,
+    event: MonacoType.editor.IModelContentChangedEvent,
+  ) => void;
   setFocused: (id: EditorId) => void;
 }
 
 export class Editor extends React.Component<EditorProps> {
   public editor: MonacoType.editor.IStandaloneCodeEditor;
-  public language: string = 'javascript';
-  public value: string = '';
+  public language = 'javascript';
+  public value = '';
 
   private containerRef = React.createRef<HTMLDivElement>();
 
@@ -87,7 +90,7 @@ export class Editor extends React.Component<EditorProps> {
         theme: 'main',
         contextmenu: false,
         model: null,
-        ...monacoOptions
+        ...monacoOptions,
       });
 
       // mark this editor as focused whenever it is
@@ -111,7 +114,7 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   public render() {
-    return <div className='editorContainer' ref={this.containerRef} />;
+    return <div className="editorContainer" ref={this.containerRef} />;
   }
 
   /**
@@ -125,7 +128,7 @@ export class Editor extends React.Component<EditorProps> {
 
     const model = monaco.editor.createModel(value, this.language);
     model.updateOptions({
-      tabSize: 2
+      tabSize: 2,
     });
 
     this.editor.setModel(model);

@@ -6,7 +6,7 @@ import { IpcEvents } from '../../src/ipc-events';
 import {
   setupFileListeners,
   showOpenDialog,
-  showSaveDialog
+  showSaveDialog,
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 
@@ -16,19 +16,19 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 
 jest.mock('../../src/main/windows');
 jest.mock('fs-extra', () => ({
-  existsSync: jest.fn()
+  existsSync: jest.fn(),
 }));
 
 const mockTarget = {
   webContents: {
-    send: jest.fn()
-  }
+    send: jest.fn(),
+  },
 };
 
 describe('files', () => {
   beforeEach(() => {
     (dialog.showOpenDialog as jest.Mock<any>).mockResolvedValue({
-      filePaths: [ 'my/fake/path' ]
+      filePaths: ['my/fake/path'],
     });
     (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
 
@@ -36,12 +36,11 @@ describe('files', () => {
   });
 
   describe('setupFileListeners()', () => {
-
     it('sets up the listener', () => {
       setupFileListeners();
 
       expect(ipcMainManager.eventNames()).toEqual([
-        IpcEvents.FS_SAVE_FIDDLE_DIALOG
+        IpcEvents.FS_SAVE_FIDDLE_DIALOG,
       ]);
 
       ipcMainManager.emit(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
@@ -58,7 +57,7 @@ describe('files', () => {
       expect(dialog.showOpenDialog).toHaveBeenCalled();
       expect(call[0]).toEqual({
         title: 'Open Fiddle',
-        properties: ['openDirectory']
+        properties: ['openDirectory'],
       });
     });
 
@@ -81,7 +80,7 @@ describe('files', () => {
       expect(call[0]).toEqual({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
-        title: 'Save Fiddle'
+        title: 'Save Fiddle',
       });
     });
 
@@ -94,13 +93,13 @@ describe('files', () => {
       expect(call[0]).toEqual({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
-        title: 'Save Fiddle as hello'
+        title: 'Save Fiddle as hello',
       });
     });
 
     it('handles not getting a path returned', async (done) => {
       (dialog.showOpenDialog as jest.Mock<any>).mockResolvedValueOnce({
-        filePaths: []
+        filePaths: [],
       });
 
       await showSaveDialog();
@@ -112,7 +111,9 @@ describe('files', () => {
     });
 
     it('ensures that the target is empty on save', async () => {
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => true);
+      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
+        async () => true,
+      );
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
@@ -123,7 +124,9 @@ describe('files', () => {
     });
 
     it('does not overwrite files without consent', async () => {
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => false);
+      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
+        async () => false,
+      );
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
@@ -139,7 +142,6 @@ describe('files', () => {
       });
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
-
 
       let errored = false;
 

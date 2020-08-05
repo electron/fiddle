@@ -35,7 +35,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
       appState.setGenericDialogOptions({
         type: GenericDialogType.success,
         label: `Bisect complete. ${message}`,
-        cancel: undefined
+        cancel: undefined,
       });
       appState.isGenericDialogShowing = true;
     } else {
@@ -51,7 +51,8 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
   public render() {
     const { appState } = this.props;
     if (!!appState.Bisector) {
-      const isDownloading = appState.currentElectronVersion.state === VersionState.downloading;
+      const isDownloading =
+        appState.currentElectronVersion.state === VersionState.downloading;
       return (
         <>
           <Button
@@ -64,10 +65,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
             onClick={() => this.continueBisect(false)}
             disabled={isDownloading}
           />
-          <Button
-            icon={'cross'}
-            onClick={this.terminateBisect}
-          >
+          <Button icon={'cross'} onClick={this.terminateBisect}>
             Cancel Bisect
           </Button>
         </>
@@ -75,8 +73,8 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
     } else {
       return (
         <Button
-          icon='git-branch'
-          text='Bisect'
+          icon="git-branch"
+          text="Bisect"
           onClick={appState.toggleBisectDialog}
         />
       );

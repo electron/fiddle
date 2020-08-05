@@ -1,7 +1,10 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { getWelcomeTour, WelcomeTour } from '../../../src/renderer/components/tour-welcome';
+import {
+  getWelcomeTour,
+  WelcomeTour,
+} from '../../../src/renderer/components/tour-welcome';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 describe('Header component', () => {
@@ -10,7 +13,7 @@ describe('Header component', () => {
   beforeEach(() => {
     store = {
       isTourShowing: true,
-      disableTour: jest.fn()
+      disableTour: jest.fn(),
     };
 
     ipcRendererManager.removeAllListeners();
@@ -50,8 +53,10 @@ describe('Header component', () => {
 
   describe('getWelcomeTour()', () => {
     it('offers custom buttons for the Electron step', () => {
-      const tourSteps = [ ...getWelcomeTour() ];
-      const electronStep = tourSteps.find(({ name }) => name === 'first-time-electron');
+      const tourSteps = [...getWelcomeTour()];
+      const electronStep = tourSteps.find(
+        ({ name }) => name === 'first-time-electron',
+      );
       const mockParam = { stop: jest.fn(), advance: jest.fn() };
       const buttons = electronStep!.getButtons!(mockParam);
 

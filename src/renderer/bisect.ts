@@ -36,7 +36,8 @@ export class Bisector {
         isBisectOver = true;
       }
     } else {
-      const downPivot = Math.floor((this.pivot - this.minRev) / 2) + this.minRev;
+      const downPivot =
+        Math.floor((this.pivot - this.minRev) / 2) + this.minRev;
       this.maxRev = this.pivot;
       if (downPivot !== this.minRev && downPivot !== this.pivot) {
         this.pivot = downPivot;

@@ -23,11 +23,10 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     backgroundColor: '#1d2427',
     webPreferences: {
       webviewTag: false,
-      nodeIntegration: true
-    }
+      nodeIntegration: true,
+    },
   };
 }
-
 
 /**
  * Creates a new main window.
@@ -50,8 +49,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   browserWindow.on('closed', () => {
-    browserWindows = browserWindows
-      .filter((bw) => browserWindow !== bw);
+    browserWindows = browserWindows.filter((bw) => browserWindow !== bw);
 
     browserWindow = null;
   });
@@ -73,7 +71,11 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   const appData = app.getPath('appData');
-  ipcMainManager.send(IpcEvents.SET_APPDATA_DIR, [appData], browserWindow.webContents);
+  ipcMainManager.send(
+    IpcEvents.SET_APPDATA_DIR,
+    [appData],
+    browserWindow.webContents,
+  );
 
   browserWindows.push(browserWindow);
 
@@ -86,5 +88,7 @@ export function createMainWindow(): Electron.BrowserWindow {
  * @returns {Electron.BrowserWindow}
  */
 export function getOrCreateMainWindow(): Electron.BrowserWindow {
-  return BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow();
+  return (
+    BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow()
+  );
 }

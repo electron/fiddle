@@ -38,7 +38,8 @@ exports[`ExecutionSettings component renders 1`] = `
   <Blueprint3.Callout>
     <Blueprint3.FormGroup>
       <p>
-        Electron allows starting the executable with 
+        Electron allows starting the executable with
+         
         <a
           href="https://www.electronjs.org/docs/api/command-line-switches"
         >

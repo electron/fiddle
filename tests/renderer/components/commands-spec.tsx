@@ -4,19 +4,19 @@ import * as React from 'react';
 import { Commands } from '../../../src/renderer/components/commands';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
-  Runner: 'runner'
+  Runner: 'runner',
 }));
 
 jest.mock('../../../src/renderer/components/commands-version-chooser', () => ({
-  VersionChooser: 'version-chooser'
+  VersionChooser: 'version-chooser',
 }));
 
 jest.mock('../../../src/renderer/components/commands-address-bar', () => ({
-  AddressBar: 'address-bar'
+  AddressBar: 'address-bar',
 }));
 
 jest.mock('../../../src/renderer/components/commands-publish-button', () => ({
-  PublishButton: 'publish-button'
+  PublishButton: 'publish-button',
 }));
 
 describe('Commands component', () => {
@@ -24,7 +24,7 @@ describe('Commands component', () => {
 
   beforeEach(() => {
     store = {
-      gistId: null
+      gistId: null,
     };
   });
 

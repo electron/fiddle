@@ -1,4 +1,11 @@
-import { Button, Menu, MenuDivider, MenuItem, Popover, Position } from '@blueprintjs/core';
+import {
+  Button,
+  Menu,
+  MenuDivider,
+  MenuItem,
+  Popover,
+  Position,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -22,7 +29,10 @@ export interface EditorDropdownProps {
  * @extends {React.Component<EditorDropdownProps, EditorDropdownState>}
  */
 @observer
-export class EditorDropdown extends React.Component<EditorDropdownProps, EditorDropdownState> {
+export class EditorDropdown extends React.Component<
+  EditorDropdownProps,
+  EditorDropdownState
+> {
   constructor(props: EditorDropdownProps) {
     super(props);
 
@@ -33,7 +43,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
     return (
       <>
         <Popover content={this.renderMenu()} position={Position.BOTTOM}>
-          <Button icon='applications' text='Editors' />
+          <Button icon="applications" text="Editors" />
         </Popover>
         {this.renderDocsDemos()}
       </>
@@ -47,8 +57,8 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
 
     return (
       <Button
-        icon='help'
-        text='Docs & Demos'
+        icon="help"
+        text="Docs & Demos"
         id={PanelId.docsDemo}
         onClick={this.onItemClick}
         active={!this.props.appState.closedPanels.docsDemo}
@@ -57,11 +67,7 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
   }
 
   public renderMenu() {
-    return (
-      <Menu>
-        {...this.renderMenuItems()}
-      </Menu>
-    );
+    return <Menu>{...this.renderMenuItems()}</Menu>;
   }
 
   public renderMenuItems() {
@@ -78,20 +84,20 @@ export class EditorDropdown extends React.Component<EditorDropdownProps, EditorD
           id={id}
           onClick={this.onItemClick}
           disabled={appState.mosaicArrangement === id} // can't hide last editor panel
-        />
+        />,
       );
     }
 
     result.push(
       <React.Fragment key={'fragment-reset-layout'}>
-      <MenuDivider />
+        <MenuDivider />
         <MenuItem
-          icon='grid-view'
-          key='reset-layout'
-          text='Reset Layout'
+          icon="grid-view"
+          key="reset-layout"
+          text="Reset Layout"
           onClick={appState.resetEditorLayout}
         />
-      </React.Fragment>
+      </React.Fragment>,
     );
 
     return result;

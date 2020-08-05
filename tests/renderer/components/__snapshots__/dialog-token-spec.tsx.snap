@@ -11,13 +11,15 @@ exports[`TokenDialog component renders 1`] = `
     className="bp3-dialog-body"
   >
     <p>
-      Generate a 
+      Generate a
+       
       <a
         onClick={[Function]}
       >
         GitHub Personal Access Token
       </a>
-       and paste it here:
+       
+      and paste it here:
     </p>
     <Blueprint3.InputGroup
       onChange={[Function]}

@@ -1,4 +1,4 @@
-import {  AppMock } from './app';
+import { AppMock } from './app';
 import { EditorsMock } from './editors';
 
 export class ElectronFiddleMock {
