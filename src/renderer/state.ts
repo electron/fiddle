@@ -397,9 +397,7 @@ export class AppState {
   @action public toggleSettings() {
     // We usually don't lose editor focus,
     // so you can still type. Let's force-blur.
-    if ((document.activeElement as HTMLInputElement).blur) {
-      (document.activeElement as HTMLInputElement).blur();
-    }
+    (document.activeElement as HTMLInputElement).blur();
 
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
@@ -425,7 +423,6 @@ export class AppState {
 
   @action public setGenericDialogOptions(opts: GenericDialogOptions) {
     this.genericDialogOptions = {
-      type: GenericDialogType.warning,
       ok: 'Okay',
       cancel: 'Cancel',
       ...opts,
