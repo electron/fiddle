@@ -9,8 +9,7 @@ import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
-  getIsNpmInstalled,
-  getIsYarnInstalled,
+  getIsPackageManagerInstalled,
   installModules,
   packageRun,
   PMOperationOptions,
@@ -126,12 +125,7 @@ export class Runner {
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     const packageManager = this.appState.packageManager;
-    let pmInstalled = false;
-    if (packageManager === 'npm') {
-      pmInstalled = await getIsNpmInstalled();
-    } else {
-      pmInstalled = await getIsYarnInstalled();
-    }
+    const pmInstalled = await getIsPackageManagerInstalled(packageManager);
     if (!pmInstalled) {
       let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
@@ -185,12 +179,7 @@ export class Runner {
 
     if (modules && modules.length > 0) {
       const packageManager = pmOptions.packageManager;
-      let pmInstalled = false;
-      if (packageManager === 'npm') {
-        pmInstalled = await getIsNpmInstalled();
-      } else {
-        pmInstalled = await getIsYarnInstalled();
-      }
+      const pmInstalled = await getIsPackageManagerInstalled(packageManager);
       if (!pmInstalled) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(
           ', ',

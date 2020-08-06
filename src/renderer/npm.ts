@@ -34,43 +34,37 @@ const isUnique = (item: any, idx: number, arr: Array<any>): boolean => {
 };
 
 /**
- * Checks if yarn is installed by checking if a binary
+ * Checks if package manager is installed by checking if a binary
  * with that name can be found.
  */
-export async function getIsYarnInstalled(
+export async function getIsPackageManagerInstalled(
+  packageManager: IPackageManager,
   ignoreCache?: boolean,
 ): Promise<boolean> {
-  if (isYarnInstalled !== null && !ignoreCache) return isYarnInstalled;
+  if (packageManager === 'npm' && isNpmInstalled !== null && !ignoreCache)
+    return isNpmInstalled;
+  if (packageManager === 'yarn' && isYarnInstalled !== null && !ignoreCache)
+    return isYarnInstalled;
 
   const command =
-    process.platform === 'win32' ? 'where.exe yarn' : 'which yarn';
+    process.platform === 'win32'
+      ? `where.exe ${packageManager}`
+      : `which ${packageManager}`;
 
   try {
     await exec(process.cwd(), command);
-    return (isYarnInstalled = true);
+    if (packageManager === 'npm') {
+      return (isNpmInstalled = true);
+    } else {
+      return (isYarnInstalled = true);
+    }
   } catch (error) {
-    console.warn(`getIsYarnInstalled: "${command}" failed.`, error);
-    return (isYarnInstalled = false);
-  }
-}
-
-/**
- * Checks if npm is installed by checking if a binary
- * with that name can be found.
- */
-export async function getIsNpmInstalled(
-  ignoreCache?: boolean,
-): Promise<boolean> {
-  if (isNpmInstalled !== null && !ignoreCache) return isNpmInstalled;
-
-  const command = process.platform === 'win32' ? 'where.exe npm' : 'which npm';
-
-  try {
-    await exec(process.cwd(), command);
-    return (isNpmInstalled = true);
-  } catch (error) {
-    console.warn(`getIsNpmInstalled: "${command}" failed.`, error);
-    return (isNpmInstalled = false);
+    console.warn(`getIsPackageManagerInstalled: "${command}" failed.`, error);
+    if (packageManager === 'npm') {
+      return (isNpmInstalled = false);
+    } else {
+      return (isYarnInstalled = false);
+    }
   }
 }
 
