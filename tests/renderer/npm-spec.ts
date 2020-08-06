@@ -1,6 +1,7 @@
 import {
   findModulesInEditors,
   getIsNpmInstalled,
+  getIsYarnInstalled,
   installModules,
   packageRun,
 } from '../../src/renderer/npm';
@@ -82,6 +83,67 @@ describe('npm', () => {
       expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
 
       const two = await getIsNpmInstalled();
+      expect(two).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getIsYarnInstalled()', () => {
+    beforeEach(() => {
+      jest.resetModuleRegistry();
+    });
+
+    afterEach(() => resetPlatform());
+
+    it('returns true if yarn installed', async () => {
+      overridePlatform('darwin');
+
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-yarn'),
+      );
+
+      const result = await getIsYarnInstalled();
+
+      expect(result).toBe(true);
+      expect((exec as jest.Mock).mock.calls[0][1]).toBe('which yarn');
+    });
+
+    it('returns true if yarn installed', async () => {
+      overridePlatform('win32');
+
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-yarn'),
+      );
+
+      const result = await getIsYarnInstalled(true);
+
+      expect(result).toBe(true);
+      expect((exec as jest.Mock).mock.calls[0][1]).toBe('where.exe yarn');
+    });
+
+    it('returns false if yarn not installed', async () => {
+      overridePlatform('darwin');
+
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.reject('/usr/bin/fake-yarn'),
+      );
+
+      const result = await getIsYarnInstalled(true);
+
+      expect(result).toBe(false);
+      expect((exec as jest.Mock).mock.calls[0][1]).toBe('which yarn');
+    });
+
+    it('uses the cache', async () => {
+      (exec as jest.Mock).mockReturnValueOnce(
+        Promise.resolve('/usr/bin/fake-yarn'),
+      );
+
+      const one = await getIsYarnInstalled(true);
+      expect(one).toBe(true);
+      expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+
+      const two = await getIsYarnInstalled();
       expect(two).toBe(true);
       expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
     });

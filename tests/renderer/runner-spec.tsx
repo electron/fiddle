@@ -45,6 +45,7 @@ describe('Runner component', () => {
       pushOutput: jest.fn(),
       clearConsole: jest.fn(),
       pushError: jest.fn(),
+      packageManager: 'npm',
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
       },

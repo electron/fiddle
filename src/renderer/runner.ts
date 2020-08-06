@@ -10,6 +10,7 @@ import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
   getIsNpmInstalled,
+  getIsYarnInstalled,
   installModules,
   packageRun,
   PMOperationOptions,
@@ -124,10 +125,18 @@ export class Runner {
     this.appState.isConsoleShowing = true;
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
-    if (!(await getIsNpmInstalled())) {
-      let message = `Error: Could not find npm. Fiddle requires Node.js and npm `;
+    const packageManager = this.appState.packageManager;
+    let pmInstalled = false;
+    if (packageManager === 'npm') {
+      pmInstalled = await getIsNpmInstalled();
+    } else {
+      pmInstalled = await getIsYarnInstalled();
+    }
+    if (!pmInstalled) {
+      let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
-      message += `Node.js and npm.`;
+      message += `Node.js and npm, or https://classic.yarnpkg.com/lang/en/ `;
+      message += `to install Yarn`;
 
       this.appState.pushOutput(message, { isNotPre: true });
       return false;
@@ -140,8 +149,6 @@ export class Runner {
       forgeTransform,
     );
     if (!dir) return false;
-
-    const packageManager = this.appState.packageManager;
 
     // Files are now saved to temp, let's install Forge and dependencies
     if (!(await this.packageInstall({ dir, packageManager }))) return false;
@@ -177,14 +184,21 @@ export class Runner {
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
-      if (!(await getIsNpmInstalled())) {
+      const packageManager = pmOptions.packageManager;
+      let pmInstalled = false;
+      if (packageManager === 'npm') {
+        pmInstalled = await getIsNpmInstalled();
+      } else {
+        pmInstalled = await getIsYarnInstalled();
+      }
+      if (!pmInstalled) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(
           ', ',
         )} need to be installed, `;
-        message += `but we could not find npm. Fiddle requires Node.js and npm `;
+        message += `but we could not find ${packageManager}. Fiddle requires Node.js and npm `;
         message += `to support the installation of modules not included in `;
         message += `Electron. Please visit https://nodejs.org to install Node.js `;
-        message += `and npm.`;
+        message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
 
         pushOutput(message, { isNotPre: true });
         return;
