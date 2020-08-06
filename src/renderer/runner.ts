@@ -7,7 +7,13 @@ import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { ipcRendererManager } from './ipc';
-import { findModulesInEditors, getIsNpmInstalled, installModules, packageRun, PMOperationOptions } from './npm';
+import {
+  findModulesInEditors,
+  getIsNpmInstalled,
+  installModules,
+  packageRun,
+  PMOperationOptions,
+} from './npm';
 import { AppState } from './state';
 
 export enum ForgeCommands {
@@ -163,7 +169,10 @@ export class Runner {
    * @param {string} dir
    * @returns {Promise<void>}
    */
-  public async installModulesForEditor(values: EditorValues, pmOptions: PMOperationOptions): Promise<void> {
+  public async installModulesForEditor(
+    values: EditorValues,
+    pmOptions: PMOperationOptions,
+  ): Promise<void> {
     const modules = findModulesInEditors(values);
     const { pushOutput } = this.appState;
 
@@ -181,7 +190,12 @@ export class Runner {
         return;
       }
 
-      pushOutput(`Installing node modules using ${pmOptions.packageManager}: ${modules.join(', ')}...`, { isNotPre: true });
+      pushOutput(
+        `Installing node modules using ${
+          pmOptions.packageManager
+        }: ${modules.join(', ')}...`,
+        { isNotPre: true },
+      );
       pushOutput(await installModules(pmOptions, ...modules));
     }
   }

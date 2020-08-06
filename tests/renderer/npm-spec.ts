@@ -104,23 +104,40 @@ describe('npm', () => {
   describe('installModules()', () => {
     describe('npm', () => {
       it('attempts to install a single module', async () => {
-        installModules({ dir: '/my/directory', packageManager: 'npm' }, 'say', 'thing');
+        installModules(
+          { dir: '/my/directory', packageManager: 'npm' },
+          'say',
+          'thing',
+        );
 
-        expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install -S say thing');
+        expect(exec).toHaveBeenCalledWith(
+          '/my/directory',
+          'npm install -S say thing',
+        );
       });
 
       it('attempts to installs all modules', async () => {
         installModules({ dir: '/my/directory', packageManager: 'npm' });
 
-        expect(exec).toHaveBeenCalledWith('/my/directory', 'npm install --dev --prod');
+        expect(exec).toHaveBeenCalledWith(
+          '/my/directory',
+          'npm install --dev --prod',
+        );
       });
-    })
+    });
 
     describe('yarn', () => {
       it('attempts to install a single module', async () => {
-        installModules({ dir: '/my/directory', packageManager: 'yarn' }, 'say', 'thing');
+        installModules(
+          { dir: '/my/directory', packageManager: 'yarn' },
+          'say',
+          'thing',
+        );
 
-        expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn add say thing');
+        expect(exec).toHaveBeenCalledWith(
+          '/my/directory',
+          'yarn add say thing',
+        );
       });
 
       it('attempts to installs all modules', async () => {
@@ -128,7 +145,7 @@ describe('npm', () => {
 
         expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn add');
       });
-    })
+    });
   });
 
   describe('packageRun()', () => {

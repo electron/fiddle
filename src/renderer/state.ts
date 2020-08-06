@@ -122,9 +122,11 @@ export class AppState {
     'isClearingConsoleOnRun',
   );
   @observable public executionFlags: Array<string> =
-    this.retrieve('executionFlags') as Array<string> === null ?
-      [] : this.retrieve('executionFlags') as Array<string>;
-  @observable public packageManager: IPackageManager = localStorage.getItem('packageManager') as IPackageManager || 'npm';
+    (this.retrieve('executionFlags') as Array<string>) === null
+      ? []
+      : (this.retrieve('executionFlags') as Array<string>);
+  @observable public packageManager: IPackageManager =
+    (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
 
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;

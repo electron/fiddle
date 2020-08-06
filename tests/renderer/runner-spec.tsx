@@ -8,7 +8,7 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  packageRun
+  packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
@@ -201,7 +201,9 @@ describe('Runner component', () => {
 
   describe('installModules()', () => {
     it('installs modules', async () => {
-      expect(await instance.packageInstall({ dir: '', packageManager: 'npm' })).toBe(true);
+      expect(
+        await instance.packageInstall({ dir: '', packageManager: 'npm' }),
+      ).toBe(true);
       expect(installModules).toHaveBeenCalled();
     });
 
@@ -210,7 +212,9 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.packageInstall({ dir: '', packageManager: 'npm' })).toBe(false);
+      expect(
+        await instance.packageInstall({ dir: '', packageManager: 'npm' }),
+      ).toBe(false);
       expect(installModules).toHaveBeenCalled();
     });
   });
@@ -277,30 +281,36 @@ describe('Runner component', () => {
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
-      await instance.installModulesForEditor({
-        html: '',
-        main: `const a = require('say')`,
-        renderer: '',
-        preload: '',
-        css: ''
-      }, { dir: '/fake/path', packageManager: 'npm' });
+      await instance.installModulesForEditor(
+        {
+          html: '',
+          main: `const a = require('say')`,
+          renderer: '',
+          preload: '',
+          css: '',
+        },
+        { dir: '/fake/path', packageManager: 'npm' },
+      );
 
       expect(installModules).toHaveBeenCalledTimes(0);
     });
 
     it('does attempt installation if npm is installed', async () => {
       (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce([ 'fake-module' ]);
+      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
-      await instance.installModulesForEditor({
-        html: '',
-        main: `const a = require('say')`,
-        renderer: '',
-        preload: '',
-        css: ''
-      }, { dir: '/fake/path', packageManager: 'npm' });
+      await instance.installModulesForEditor(
+        {
+          html: '',
+          main: `const a = require('say')`,
+          renderer: '',
+          preload: '',
+          css: '',
+        },
+        { dir: '/fake/path', packageManager: 'npm' },
+      );
 
       expect(installModules).toHaveBeenCalledTimes(1);
     });

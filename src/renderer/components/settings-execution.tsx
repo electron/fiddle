@@ -23,20 +23,13 @@ export interface ExecutionSettingsProps {
  * @extends {React.Component<ExecutionSettingsProps, {}>}
  */
 @observer
-export class ExecutionSettings extends React.Component<
-  ExecutionSettingsProps,
-  {}
-> {
+export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
   constructor(props: ExecutionSettingsProps) {
     super(props);
 
     this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
     this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
-<<<<<<< HEAD
       this,
-=======
-      this
->>>>>>> c81f781... chore: address reviewing
     );
     this.handleExecutionFlagChange = this.handleExecutionFlagChange.bind(this);
   }
@@ -122,11 +115,12 @@ export class ExecutionSettings extends React.Component<
           <FormGroup>
             <p>
               Electron allows starting the executable with{' '}
-              <a href='https://www.electronjs.org/docs/api/command-line-switches'>
+              <a href="https://www.electronjs.org/docs/api/command-line-switches">
                 user-provided flags
               </a>
-              , such as '--js-flags=--expose-gc'. Those can be added here as
-              bar-separated (|) flags to run when you start your Fiddles.
+              , such as &apos;--js-flags=--expose-gc&apos;. Those can be added
+              here as bar-separated (|) flags to run when you start your
+              Fiddles.
             </p>
             <br />
             <InputGroup
@@ -142,11 +136,15 @@ export class ExecutionSettings extends React.Component<
             <span style={{ marginRight: 4 }}>
               Electron Fiddle will install packages on runtime if they are
               imported within your fiddle with <code>require</code>. It uses{' '}
-              <a href='https://www.npmjs.com/' target='_blank'>
+              <a href="https://www.npmjs.com/" target="_blank" rel="noreferrer">
                 npm
               </a>{' '}
               as its package manager by default, but{' '}
-              <a href='https://classic.yarnpkg.com/lang/en/' target='_blank'>
+              <a
+                href="https://classic.yarnpkg.com/lang/en/"
+                target="_blank"
+                rel="noreferrer"
+              >
                 Yarn
               </a>{' '}
               is also available.
@@ -156,8 +154,8 @@ export class ExecutionSettings extends React.Component<
               selectedValue={this.props.appState.packageManager}
               inline={true}
             >
-              <Radio label='npm' value='npm' />
-              <Radio label='yarn' value='yarn' />
+              <Radio label="npm" value="npm" />
+              <Radio label="yarn" value="yarn" />
             </RadioGroup>
           </FormGroup>
         </Callout>
@@ -166,6 +164,7 @@ export class ExecutionSettings extends React.Component<
   }
 
   private handlePMChange = (event: React.FormEvent<HTMLInputElement>) => {
-    this.props.appState.packageManager = event.currentTarget.value as IPackageManager;
-  }
+    this.props.appState.packageManager = event.currentTarget
+      .value as IPackageManager;
+  };
 }

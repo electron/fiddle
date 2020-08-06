@@ -114,20 +114,21 @@ export function findModules(input: string): Array<string> {
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export async function installModules({ dir, packageManager }: PMOperationOptions, ...names: Array<string>): Promise<string> {
+export async function installModules(
+  { dir, packageManager }: PMOperationOptions,
+  ...names: Array<string>
+): Promise<string> {
   let nameArgs: Array<string> = [];
 
   if (packageManager === 'npm') {
-    nameArgs = names.length > 0
-      ? [ '-S', ...names ]
-      : ['--dev --prod'];
+    nameArgs = names.length > 0 ? ['-S', ...names] : ['--dev --prod'];
   } else {
     nameArgs = [...names];
   }
 
   const installCommand = packageManager === 'npm' ? 'npm install' : 'yarn add';
 
-  return exec(dir, [ installCommand ].concat(nameArgs).join(' '));
+  return exec(dir, [installCommand].concat(nameArgs).join(' '));
 }
 
 /**
@@ -137,6 +138,9 @@ export async function installModules({ dir, packageManager }: PMOperationOptions
  * @param {string} command
  * @returns {Promise<string>}
  */
-export function packageRun({ dir, packageManager }: PMOperationOptions, command: string): Promise<string> {
+export function packageRun(
+  { dir, packageManager }: PMOperationOptions,
+  command: string,
+): Promise<string> {
   return exec(dir, `${packageManager} run ${command}`);
 }
