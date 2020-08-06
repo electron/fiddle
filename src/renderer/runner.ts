@@ -11,7 +11,8 @@ import {
   findModulesInEditors,
   getIsNpmInstalled,
   installModules,
-  npmRun,
+  packageRun,
+  PMOperationOptions,
 } from './npm';
 import { AppState } from './state';
 
@@ -58,11 +59,12 @@ export class Runner {
 
     const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
+    const packageManager = this.appState.packageManager;
 
     if (!dir) return false;
 
     try {
-      await this.installModulesForEditor(values, dir);
+      await this.installModulesForEditor(values, { dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
       fileManager.cleanup(dir);
@@ -139,13 +141,15 @@ export class Runner {
     );
     if (!dir) return false;
 
+    const packageManager = this.appState.packageManager;
+
     // Files are now saved to temp, let's install Forge and dependencies
-    if (!(await this.npmInstall(dir))) return false;
+    if (!(await this.packageInstall({ dir, packageManager }))) return false;
 
     // Cool, let's run "package"
     try {
       console.log(`Now creating ${strings[1].toLowerCase()}...`);
-      pushOutput(await npmRun({ dir }, operation));
+      pushOutput(await packageRun({ dir, packageManager }, operation));
       pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
     } catch (error) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
@@ -167,9 +171,9 @@ export class Runner {
    */
   public async installModulesForEditor(
     values: EditorValues,
-    dir: string,
+    pmOptions: PMOperationOptions,
   ): Promise<void> {
-    const modules = await findModulesInEditors(values);
+    const modules = findModulesInEditors(values);
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
@@ -186,10 +190,13 @@ export class Runner {
         return;
       }
 
-      pushOutput(`Installing npm modules: ${modules.join(', ')}...`, {
-        isNotPre: true,
-      });
-      pushOutput(await installModules({ dir }, ...modules));
+      pushOutput(
+        `Installing node modules using ${
+          pmOptions.packageManager
+        }: ${modules.join(', ')}...`,
+        { isNotPre: true },
+      );
+      pushOutput(await installModules(pmOptions, ...modules));
     }
   }
 
@@ -274,16 +281,16 @@ export class Runner {
 
   /**
    * Installs modules in a given directory (we're basically
-   * just running "npm install")
+   * just running "{packageManager} install")
    *
-   * @param {string} dir
+   * @param {PMOperationOptions} options
    * @returns
    * @memberof Runner
    */
-  public async npmInstall(dir: string): Promise<boolean> {
+  public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     try {
       this.appState.pushOutput(`Now running "npm install..."`);
-      this.appState.pushOutput(await installModules({ dir }));
+      this.appState.pushOutput(await installModules(options));
       return true;
     } catch (error) {
       this.appState.pushError('Failed to run "npm install".', error);

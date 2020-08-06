@@ -55,5 +55,56 @@ exports[`ExecutionSettings component renders 1`] = `
       />
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <span
+        style={
+          Object {
+            "marginRight": 4,
+          }
+        }
+      >
+        Electron Fiddle will install packages on runtime if they are imported within your fiddle with 
+        <code>
+          require
+        </code>
+        . It uses
+         
+        <a
+          href="https://www.npmjs.com/"
+          rel="noreferrer"
+          target="_blank"
+        >
+          npm
+        </a>
+         
+        as its package manager by default, but
+         
+        <a
+          href="https://classic.yarnpkg.com/lang/en/"
+          rel="noreferrer"
+          target="_blank"
+        >
+          Yarn
+        </a>
+         
+        is also available.
+      </span>
+      <Blueprint3.RadioGroup
+        inline={true}
+        onChange={[Function]}
+      >
+        <Blueprint3.Radio
+          label="npm"
+          value="npm"
+        />
+        <Blueprint3.Radio
+          label="yarn"
+          value="yarn"
+        />
+      </Blueprint3.RadioGroup>
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
 </div>
 `;

@@ -1,7 +1,15 @@
-import { Callout, Checkbox, FormGroup, InputGroup } from '@blueprintjs/core';
+import {
+  Callout,
+  Checkbox,
+  FormGroup,
+  InputGroup,
+  Radio,
+  RadioGroup,
+} from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { IPackageManager } from '../npm';
 import { AppState } from '../state';
 
 export interface ExecutionSettingsProps {
@@ -122,7 +130,41 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
             />
           </FormGroup>
         </Callout>
+        <br />
+        <Callout>
+          <FormGroup>
+            <span style={{ marginRight: 4 }}>
+              Electron Fiddle will install packages on runtime if they are
+              imported within your fiddle with <code>require</code>. It uses{' '}
+              <a href="https://www.npmjs.com/" target="_blank" rel="noreferrer">
+                npm
+              </a>{' '}
+              as its package manager by default, but{' '}
+              <a
+                href="https://classic.yarnpkg.com/lang/en/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Yarn
+              </a>{' '}
+              is also available.
+            </span>
+            <RadioGroup
+              onChange={this.handlePMChange}
+              selectedValue={this.props.appState.packageManager}
+              inline={true}
+            >
+              <Radio label="npm" value="npm" />
+              <Radio label="yarn" value="yarn" />
+            </RadioGroup>
+          </FormGroup>
+        </Callout>
       </div>
     );
   }
+
+  private handlePMChange = (event: React.FormEvent<HTMLInputElement>) => {
+    this.props.appState.packageManager = event.currentTarget
+      .value as IPackageManager;
+  };
 }

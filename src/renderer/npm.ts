@@ -3,8 +3,11 @@ import { exec } from '../utils/exec';
 
 const { builtinModules } = require('module');
 
-export interface NpmOperationOptions {
+export type IPackageManager = 'npm' | 'yarn';
+
+export interface PMOperationOptions {
   dir: string;
+  packageManager: IPackageManager;
 }
 
 export let isInstalled: boolean | null = null;
@@ -107,29 +110,37 @@ export function findModules(input: string): Array<string> {
 /**
  * Installs given modules to a given folder.
  *
- * @param {NpmOperationOptions} { dir }
+ * @param {PMOperationOptions} { dir, packageManager }
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
 export async function installModules(
-  { dir }: NpmOperationOptions,
+  { dir, packageManager }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
-  const nameArgs = names.length > 0 ? ['-S', ...names] : ['--dev --prod'];
+  let nameArgs: Array<string> = [];
 
-  return exec(dir, [`npm install`].concat(nameArgs).join(' '));
+  if (packageManager === 'npm') {
+    nameArgs = names.length > 0 ? ['-S', ...names] : ['--dev --prod'];
+  } else {
+    nameArgs = [...names];
+  }
+
+  const installCommand = packageManager === 'npm' ? 'npm install' : 'yarn add';
+
+  return exec(dir, [installCommand].concat(nameArgs).join(' '));
 }
 
 /**
- * Execute an "npm run" command
+ * Execute an "{packageManager} run" command
  *
- * @param {NpmOperationOptions} { dir }
+ * @param {PMOperationOptions} { dir, packageManager }
  * @param {string} command
  * @returns {Promise<string>}
  */
-export function npmRun(
-  { dir }: NpmOperationOptions,
+export function packageRun(
+  { dir, packageManager }: PMOperationOptions,
   command: string,
 ): Promise<string> {
-  return exec(dir, `npm run ${command}`);
+  return exec(dir, `${packageManager} run ${command}`);
 }
