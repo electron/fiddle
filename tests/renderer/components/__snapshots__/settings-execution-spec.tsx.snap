@@ -73,6 +73,7 @@ exports[`ExecutionSettings component renders 1`] = `
          
         <a
           href="https://www.npmjs.com/"
+          rel="noreferrer"
           target="_blank"
         >
           npm
@@ -82,6 +83,7 @@ exports[`ExecutionSettings component renders 1`] = `
          
         <a
           href="https://classic.yarnpkg.com/lang/en/"
+          rel="noreferrer"
           target="_blank"
         >
           Yarn
