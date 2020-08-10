@@ -1,6 +1,12 @@
-import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
+import {
+  Button,
+  Callout,
+  FormGroup,
+  MenuItem,
+  Checkbox,
+} from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { shell } from 'electron';
+import { shell, remote } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
@@ -10,7 +16,14 @@ import { highlightText } from '../../utils/highlight-text';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
-import { LoadedFiddleTheme } from '../themes-defaults';
+import {
+  LoadedFiddleTheme,
+  defaultDark,
+  defaultLight,
+} from '../themes-defaults';
+import { ipcRendererManager } from '../ipc';
+import { IpcEvents } from '../../ipc-events';
+import { IPC_EVENT } from '@sentry/electron/dist/common';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
@@ -83,6 +96,7 @@ export class AppearanceSettings extends React.Component<
     this.handleChange = this.handleChange.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
     this.handleAddTheme = this.handleAddTheme.bind(this);
+    this.handleSystemTheme = this.handleSystemTheme.bind(this);
 
     this.state = {
       themes: [],
@@ -98,6 +112,10 @@ export class AppearanceSettings extends React.Component<
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
+
+    ipcRendererManager.on(IpcEvents.ERICK, (...args) => {
+      console.log(args);
+    });
   }
 
   /**
@@ -170,26 +188,42 @@ export class AppearanceSettings extends React.Component<
   }
 
   public render() {
-    const { selectedTheme } = this.state;
+    const { selectedTheme, themes } = this.state;
+    const { isUsingSystemTheme } = this.props.appState;
     const selectedName =
       (selectedTheme && selectedTheme.name) || 'Select a theme';
 
     return (
       <div className="settings-appearance">
-        <h4>Appearance</h4>
-        <FormGroup label="Choose your theme" inline={true}>
+        <h4>Theme</h4>
+        <Checkbox
+          label="Use system theme"
+          checked={isUsingSystemTheme}
+          onChange={this.handleSystemTheme}
+        />
+        <FormGroup
+          label="Choose your theme"
+          disabled={isUsingSystemTheme}
+          inline={true}
+        >
           <ThemeSelect
             filterable={true}
-            items={this.state.themes}
+            disabled={isUsingSystemTheme}
+            items={themes}
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
             noResults={<MenuItem disabled={true} text="No results." />}
           >
-            <Button text={selectedName} icon="tint" />
+            <Button
+              text={selectedName}
+              icon="tint"
+              disabled={isUsingSystemTheme}
+            />
           </ThemeSelect>
         </FormGroup>
-        <Callout>
+
+        <Callout hidden={isUsingSystemTheme}>
           <p>
             To add themes, add JSON theme files to{' '}
             <a id="open-theme-folder" onClick={this.openThemeFolder}>
@@ -222,5 +256,30 @@ export class AppearanceSettings extends React.Component<
    */
   public handleAddTheme(): void {
     this.props.appState.toggleAddMonacoThemeDialog();
+  }
+
+  public handleSystemTheme(event: React.FormEvent<HTMLInputElement>): void {
+    // work for friday erick:
+    // set up nativeTheme onUpdated
+    // replace remote with IPC
+    const { appState } = this.props;
+    const { selectedTheme } = this.state;
+    const { checked } = event.currentTarget;
+
+    let themeSource: 'dark' | 'light' | 'system';
+
+    if (checked) {
+      themeSource = 'system';
+    } else {
+      themeSource = selectedTheme?.isDark ? 'dark' : 'light';
+    }
+
+    ipcRendererManager.send(IpcEvents.ERICK, [themeSource]);
+    // send IPC event to set
+
+    // appState.setTheme(selectedTheme?.file);
+    // this.setState({ selectedTheme });
+
+    appState.isUsingSystemTheme = checked;
   }
 }

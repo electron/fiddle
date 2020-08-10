@@ -28,6 +28,7 @@ export enum IpcEvents {
   CONFIRM_QUIT = 'CONFIRM_QUIT',
   SET_APPDATA_DIR = 'SET_APPDATA_DIR',
   SELECT_ALL_IN_EDITOR = 'SELECT_ALL_IN_EDITOR',
+  ERICK = 'ERICK',
 }
 
 export const ipcMainEvents = [
@@ -38,6 +39,7 @@ export const ipcMainEvents = [
   IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
   IpcEvents.SHOW_INACTIVE,
   IpcEvents.CONFIRM_QUIT,
+  IpcEvents.ERICK,
 ];
 
 export const ipcRendererEvents = [
@@ -63,6 +65,7 @@ export const ipcRendererEvents = [
   IpcEvents.BEFORE_QUIT,
   IpcEvents.SET_APPDATA_DIR,
   IpcEvents.SELECT_ALL_IN_EDITOR,
+  IpcEvents.ERICK,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

@@ -14,6 +14,7 @@ import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
+import { setupSystemTheme } from './system-theme';
 
 /**
  * Handle the app's "ready" event. This is essentially
@@ -35,6 +36,7 @@ export async function onReady() {
   setupUpdates();
   setupDialogs();
   setupDevTools();
+  setupSystemTheme();
 }
 
 /**
