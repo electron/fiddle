@@ -114,19 +114,34 @@ export class PublishButton extends React.Component<
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
     if (gistId && !wouldPublish) {
-      this.setState({
-        isUpdating: true,
-      });
-      const gist = await octo.gists.update({
-        gist_id: appState.gistId!,
-        files: this.gistFilesList(values) as any,
-      });
+      try {
+        this.setState({
+          isUpdating: true,
+        });
+        const gist = await octo.gists.update({
+          gist_id: appState.gistId!,
+          files: this.gistFilesList(values) as any,
+        });
 
-      console.log('Updating: Updating done', { gist });
-      this.renderToast({ message: 'Successfully updated gist!' });
-      this.setState({
-        isUpdating: false,
-      });
+        console.log('Updating: Updating done', { gist });
+        this.renderToast({ message: 'Successfully updated gist!' });
+        this.setState({
+          isUpdating: false,
+        });
+      } catch (error) {
+        console.warn(`Could not update gist`, { error });
+
+        const messageBoxOptions: Electron.MessageBoxOptions = {
+          message:
+            'Updating Fiddle failed. Are you connected to the Internet and is this your Fiddle?',
+          detail: `GitHub encountered the following error: ${error.message}`,
+        };
+
+        ipcRendererManager.send(
+          IpcEvents.SHOW_WARNING_DIALOG,
+          messageBoxOptions,
+        );
+      }
     } else {
       try {
         const gist = await octo.gists.create({
@@ -138,8 +153,8 @@ export class PublishButton extends React.Component<
         appState.gistId = gist.data.id;
         appState.localPath = undefined;
 
-        console.log(`Publish Button: Publishing done`, { gist });
-        this.renderToast({ message: 'Publishing done successfully!' });
+        console.log(`Publish Button: Publishing complete`, { gist });
+        this.renderToast({ message: 'Publishing completed successfully!' });
       } catch (error) {
         console.warn(`Could not publish gist`, { error });
 
