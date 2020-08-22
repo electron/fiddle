@@ -32,7 +32,7 @@ export interface PublishButtonProps {
 
 interface IPublishButtonState {
   readonly isUpdating: boolean;
-  readonly wouldPublish: boolean;
+  readonly shouldPublish: boolean;
 }
 
 /**
@@ -56,7 +56,7 @@ export class PublishButton extends React.Component<
 
     this.state = {
       isUpdating: false,
-      wouldPublish: false,
+      shouldPublish: false,
     };
   }
 
@@ -104,8 +104,9 @@ export class PublishButton extends React.Component<
    * and update all related properties in the app state.
    */
   public async publishOrUpdateFiddle(): Promise<void> {
+    console.log('publishOrUpdateFiddle()');
     const { appState } = this.props;
-    const { wouldPublish } = this.state;
+    const { shouldPublish } = this.state;
     appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
@@ -113,11 +114,9 @@ export class PublishButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    if (gistId && !wouldPublish) {
+    if (gistId && !shouldPublish) {
+      this.setState({ isUpdating: true });
       try {
-        this.setState({
-          isUpdating: true,
-        });
         const gist = await octo.gists.update({
           gist_id: appState.gistId!,
           files: this.gistFilesList(values) as any,
@@ -125,9 +124,6 @@ export class PublishButton extends React.Component<
 
         console.log('Updating: Updating done', { gist });
         this.renderToast({ message: 'Successfully updated gist!' });
-        this.setState({
-          isUpdating: false,
-        });
       } catch (error) {
         console.warn(`Could not update gist`, { error });
 
@@ -142,6 +138,7 @@ export class PublishButton extends React.Component<
           messageBoxOptions,
         );
       }
+      this.setState({ isUpdating: false });
     } else {
       try {
         const gist = await octo.gists.create({
@@ -194,10 +191,10 @@ export class PublishButton extends React.Component<
 
   public render() {
     const { isPublishing, gistId } = this.props.appState;
-    const { isUpdating, wouldPublish } = this.state;
+    const { isUpdating, shouldPublish } = this.state;
 
     const getTextForButton =
-      gistId && !wouldPublish
+      gistId && !shouldPublish
         ? 'Update'
         : isUpdating
         ? 'Updating...'
@@ -209,7 +206,7 @@ export class PublishButton extends React.Component<
       <>
         <fieldset disabled={isPublishing}>
           <ButtonGroup className="button-publish">
-            {this.renderPrivaryMenu()}
+            {this.renderPrivacyMenu()}
             <Button
               onClick={this.handleClick}
               loading={isPublishing}
@@ -229,7 +226,7 @@ export class PublishButton extends React.Component<
 
   private renderMaybePublishMenu = () => {
     const { gistId } = this.props.appState;
-    const { wouldPublish } = this.state;
+    const { shouldPublish } = this.state;
 
     if (!gistId) {
       return null;
@@ -239,13 +236,13 @@ export class PublishButton extends React.Component<
       <Menu>
         <MenuItem
           text="Publish"
-          active={wouldPublish}
-          onClick={() => this.setWouldPublish(true)}
+          active={shouldPublish}
+          onClick={() => this.setShouldPublish(true)}
         />
         <MenuItem
           text="Update"
-          active={!wouldPublish}
-          onClick={() => this.setWouldPublish(false)}
+          active={!shouldPublish}
+          onClick={() => this.setShouldPublish(false)}
         />
       </Menu>
     );
@@ -257,7 +254,7 @@ export class PublishButton extends React.Component<
     );
   };
 
-  private renderPrivaryMenu = () => {
+  private renderPrivacyMenu = () => {
     const { gitHubPublishAsPublic, gistId } = this.props.appState;
 
     if (gistId) {
@@ -289,9 +286,9 @@ export class PublishButton extends React.Component<
     );
   };
 
-  private setWouldPublish = (wouldPublish: boolean) => {
+  private setShouldPublish = (shouldPublish: boolean) => {
     this.setState({
-      wouldPublish,
+      shouldPublish: shouldPublish,
     });
   };
 
