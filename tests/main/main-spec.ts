@@ -30,6 +30,10 @@ jest.mock('../../src/main/update', () => ({
   setupUpdates: jest.fn(),
 }));
 
+jest.mock('../../src/main/system-theme', () => ({
+  setupSystemTheme: jest.fn(),
+}));
+
 jest.mock('../../src/main/squirrel', () => ({
   shouldQuit: jest.fn(() => false),
 }));
@@ -98,8 +102,9 @@ describe('main', () => {
     it('opens a BrowserWindow, sets up updates', async () => {
       await onReady();
 
-      expect(setupAboutPanel).toHaveBeenCalledTimes(1);
       expect(getOrCreateMainWindow).toHaveBeenCalledTimes(1);
+
+      expect(setupAboutPanel).toHaveBeenCalledTimes(1);
       expect(setupUpdates).toHaveBeenCalledTimes(1);
     });
   });
