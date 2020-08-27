@@ -6,7 +6,7 @@ import {
   Checkbox,
 } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { shell, remote } from 'electron';
+import { shell } from 'electron';
 import * as fsType from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as path from 'path';
@@ -16,11 +16,7 @@ import { highlightText } from '../../utils/highlight-text';
 import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
-import {
-  LoadedFiddleTheme,
-  defaultDark,
-  defaultLight,
-} from '../themes-defaults';
+import { LoadedFiddleTheme } from '../themes-defaults';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
 
@@ -254,9 +250,6 @@ export class AppearanceSettings extends React.Component<
   }
 
   public handleSystemTheme(event: React.FormEvent<HTMLInputElement>): void {
-    // work for friday erick:
-    // set up nativeTheme onUpdated
-    // replace remote with IPC
     const { appState } = this.props;
     const { selectedTheme } = this.state;
     const { checked } = event.currentTarget;
@@ -270,11 +263,6 @@ export class AppearanceSettings extends React.Component<
     }
 
     ipcRendererManager.send(IpcEvents.ERICK, [themeSource]);
-    // send IPC event to set
-
-    // appState.setTheme(selectedTheme?.file);
-    // this.setState({ selectedTheme });
-
     appState.isUsingSystemTheme = checked;
   }
 }

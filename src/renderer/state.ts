@@ -203,6 +203,8 @@ export class AppState {
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
     ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
     ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.BEFORE_QUIT);
+    ipcRendererManager.removeAllListeners(IpcEvents.ERICK);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
@@ -212,10 +214,6 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
-      this.appData = dir;
-    });
-
     ipcRendererManager.on(
       IpcEvents.ERICK,
       (_event, shouldUseDark: boolean, isSystem: boolean) => {
@@ -228,6 +226,9 @@ export class AppState {
         }
       },
     );
+    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
+      this.appData = dir;
+    });
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));

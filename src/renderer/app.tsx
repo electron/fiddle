@@ -4,7 +4,7 @@ initSentry();
 import { when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
-import { ipcRenderer, remote } from 'electron';
+import { ipcRenderer } from 'electron';
 import {
   ALL_EDITORS,
   EditorId,
