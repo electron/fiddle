@@ -55,6 +55,7 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from './versions';
+import { defaultDark, defaultLight } from './themes-defaults';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
@@ -214,6 +215,19 @@ export class AppState {
     ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
       this.appData = dir;
     });
+
+    ipcRendererManager.on(
+      IpcEvents.ERICK,
+      (_event, shouldUseDark: boolean, isSystem: boolean) => {
+        if (!!isSystem) {
+          if (!!shouldUseDark) {
+            this.setTheme(defaultDark.file);
+          } else {
+            this.setTheme(defaultLight.file);
+          }
+        }
+      },
+    );
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));

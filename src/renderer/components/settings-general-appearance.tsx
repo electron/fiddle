@@ -23,7 +23,6 @@ import {
 } from '../themes-defaults';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
-import { IPC_EVENT } from '@sentry/electron/dist/common';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
@@ -112,10 +111,6 @@ export class AppearanceSettings extends React.Component<
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
-
-    ipcRendererManager.on(IpcEvents.ERICK, (...args) => {
-      console.log(args);
-    });
   }
 
   /**
