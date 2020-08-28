@@ -28,6 +28,7 @@ import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangem
 import { getName } from '../../src/utils/get-title';
 import { mockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
+import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
 jest.mock('../../src/renderer/content', () => ({
   isContentUnchanged: jest.fn(),
@@ -634,6 +635,33 @@ describe('AppState', () => {
       appState.resetEditorLayout();
 
       expect(appState.mosaicArrangement).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
+    });
+  });
+
+  describe('setSystemTheme()', () => {
+    const setTheme = appState.setTheme;
+
+    beforeEach(() => {
+      appState.setTheme = jest.fn();
+    });
+
+    afterAll(() => {
+      appState.setTheme = setTheme;
+    });
+
+    it('sets dark theme if should use dark colours', () => {
+      appState.setSystemTheme(() => {
+        /** */
+      }, true);
+      console.log(setTheme);
+      expect(appState.setTheme).toHaveBeenCalledWith(defaultDark.file);
+    });
+
+    it('sets light theme if should use light colours', () => {
+      appState.setSystemTheme(() => {
+        /** */
+      }, false);
+      expect(appState.setTheme).toHaveBeenCalledWith(defaultLight.file);
     });
   });
 });
