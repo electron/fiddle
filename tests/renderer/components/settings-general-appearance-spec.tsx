@@ -7,6 +7,7 @@ import {
   AppearanceSettings,
   filterItem,
   renderItem,
+  ThemeSelect,
 } from '../../../src/renderer/components/settings-general-appearance';
 import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
@@ -66,6 +67,16 @@ describe('AppearanceSettings component', () => {
     instance.handleChange({ file: 'defaultLight' } as any);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
+  });
+
+  it('disables Theme Select if using System Theme', () => {
+    store.isUsingSystemTheme = true;
+
+    const wrapper = shallow(<AppearanceSettings appState={store} />);
+    const themeSelect = wrapper.find(ThemeSelect);
+    expect(themeSelect).toMatchSnapshot();
+
+    store.isUsingSystemTheme = false;
   });
 
   describe('openThemeFolder()', () => {

@@ -1,5 +1,31 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`AppearanceSettings component disables Theme Select if using System Theme 1`] = `
+<Blueprint3.Select
+  disabled={true}
+  filterable={true}
+  itemPredicate={[Function]}
+  itemRenderer={[Function]}
+  items={Array []}
+  noResults={
+    <Blueprint3.MenuItem
+      disabled={true}
+      multiline={false}
+      popoverProps={Object {}}
+      shouldDismissPopover={true}
+      text="No results."
+    />
+  }
+  onItemSelect={[Function]}
+>
+  <Blueprint3.Button
+    disabled={true}
+    icon="tint"
+    text="Select a theme"
+  />
+</Blueprint3.Select>
+`;
+
 exports[`AppearanceSettings component renderItem() returns a MenuItem for matching 1`] = `
 <Blueprint3.MenuItem
   active={false}

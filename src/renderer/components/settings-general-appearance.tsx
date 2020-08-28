@@ -21,7 +21,7 @@ import { LoadedFiddleTheme } from '../themes-defaults';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
 
-const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
+export const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
 /**
  * Helper method: Returns the <Select /> predicate for an Electron
