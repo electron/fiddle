@@ -193,7 +193,7 @@ export class AppearanceSettings extends React.Component<
       <div className="settings-appearance">
         <h4>Theme</h4>
         <Checkbox
-          label="Use system theme"
+          label="Sync theme with system setting"
           checked={isUsingSystemTheme}
           onChange={this.handleThemeSource}
         />
