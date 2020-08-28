@@ -31,37 +31,13 @@ describe('system theme', () => {
     });
 
     describe('sends info about system theme to renderer on load and on update event', () => {
-      it('light theme', (done) => {
-        (ipcMainManager.send as jest.Mock).mockClear();
-        nativeTheme.themeSource = 'light';
-        // cast to make property read-only
-        (nativeTheme.shouldUseDarkColors as boolean) = false;
-
-        setupSystemTheme();
-
-        nativeTheme.emit('updated');
-        process.nextTick(() => {
-          expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [false, false]],
-            [IpcEvents.ERICK, [false, false]],
-          ]);
-          done();
-        });
-      });
-
-      it('dark theme', (done) => {
+      it('no-op if not system', (done) => {
         nativeTheme.themeSource = 'dark';
-        // cast to make property read-only
-        (nativeTheme.shouldUseDarkColors as boolean) = true;
 
         setupSystemTheme();
-
         nativeTheme.emit('updated');
         process.nextTick(() => {
-          expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [true, false]],
-            [IpcEvents.ERICK, [true, false]],
-          ]);
+          expect((ipcMainManager.send as jest.Mock).mock.calls).toHaveLength(0);
           done();
         });
       });
@@ -76,8 +52,8 @@ describe('system theme', () => {
         nativeTheme.emit('updated');
         process.nextTick(() => {
           expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [true, true]],
-            [IpcEvents.ERICK, [true, true]],
+            [IpcEvents.ERICK, [true]],
+            [IpcEvents.ERICK, [true]],
           ]);
           done();
         });
@@ -93,8 +69,8 @@ describe('system theme', () => {
         nativeTheme.emit('updated');
         process.nextTick(() => {
           expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [false, true]],
-            [IpcEvents.ERICK, [false, true]],
+            [IpcEvents.ERICK, [false]],
+            [IpcEvents.ERICK, [false]],
           ]);
           done();
         });

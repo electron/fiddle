@@ -198,6 +198,7 @@ export class AppState {
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.resetEditorLayout = this.resetEditorLayout.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
+    this.setSystemTheme = this.setSystemTheme.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -214,18 +215,7 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.on(
-      IpcEvents.ERICK,
-      (_event, shouldUseDark: boolean, isSystem: boolean) => {
-        if (!!isSystem) {
-          if (!!shouldUseDark) {
-            this.setTheme(defaultDark.file);
-          } else {
-            this.setTheme(defaultLight.file);
-          }
-        }
-      },
-    );
+    ipcRendererManager.on(IpcEvents.ERICK, this.setSystemTheme);
     ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
       this.appData = dir;
     });
@@ -791,6 +781,22 @@ export class AppState {
     }
 
     this.setPageHash();
+  }
+
+  /**
+   *
+   * @param _event IPC event
+   * @param shouldUseDark Whether or not we should use a dark theme
+   */
+  @action public setSystemTheme(
+    _event: (...args: any[]) => void,
+    shouldUseDark: boolean,
+  ) {
+    if (!!shouldUseDark) {
+      this.setTheme(defaultDark.file);
+    } else {
+      this.setTheme(defaultLight.file);
+    }
   }
 
   /**
