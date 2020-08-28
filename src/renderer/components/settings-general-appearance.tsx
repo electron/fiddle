@@ -92,7 +92,7 @@ export class AppearanceSettings extends React.Component<
     this.handleChange = this.handleChange.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
     this.handleAddTheme = this.handleAddTheme.bind(this);
-    this.handleSystemTheme = this.handleSystemTheme.bind(this);
+    this.handleThemeSource = this.handleThemeSource.bind(this);
 
     this.state = {
       themes: [],
@@ -195,7 +195,7 @@ export class AppearanceSettings extends React.Component<
         <Checkbox
           label="Use system theme"
           checked={isUsingSystemTheme}
-          onChange={this.handleSystemTheme}
+          onChange={this.handleThemeSource}
         />
         <FormGroup
           label="Choose your theme"
@@ -255,7 +255,7 @@ export class AppearanceSettings extends React.Component<
     this.props.appState.toggleAddMonacoThemeDialog();
   }
 
-  public handleSystemTheme(event: React.FormEvent<HTMLInputElement>): void {
+  public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
     const { appState } = this.props;
     const { selectedTheme } = this.state;
     const { checked } = event.currentTarget;

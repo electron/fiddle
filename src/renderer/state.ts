@@ -122,7 +122,9 @@ export class AppState {
   @observable public isClearingConsoleOnRun = !!this.retrieve(
     'isClearingConsoleOnRun',
   );
-  @observable public isUsingSystemTheme = !!this.retrieve('isUsingSystemTheme');
+  @observable public isUsingSystemTheme = !!(
+    this.retrieve('isUsingSystemTheme') ?? true
+  );
 
   @observable public executionFlags: Array<string> =
     (this.retrieve('executionFlags') as Array<string>) === null
@@ -832,7 +834,8 @@ export class AppState {
       | null
       | boolean,
   ) {
-    if (value) {
+    // null or undefined
+    if (value != null) {
       const _value =
         typeof value === 'object' ? JSON.stringify(value) : value.toString();
 
