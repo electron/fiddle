@@ -10,7 +10,11 @@ import {
   ThemeSelect,
 } from '../../../src/renderer/components/settings-general-appearance';
 import { getAvailableThemes } from '../../../src/renderer/themes';
-import { FiddleTheme } from '../../../src/renderer/themes-defaults';
+import {
+  FiddleTheme,
+  LoadedFiddleTheme,
+  defaultDark,
+} from '../../../src/renderer/themes-defaults';
 import { when } from 'mobx';
 
 const mockThemes = [
@@ -28,10 +32,7 @@ jest.mock('../../../src/utils/import', () => ({
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
   getAvailableThemes: jest.fn(),
-  getTheme: () =>
-    Promise.resolve({
-      common: {},
-    }),
+  getTheme: () => Promise.resolve(defaultDark),
 }));
 
 describe('AppearanceSettings component', () => {
@@ -77,6 +78,18 @@ describe('AppearanceSettings component', () => {
     expect(themeSelect).toMatchSnapshot();
 
     store.isUsingSystemTheme = false;
+  });
+
+  it('updates theme in selector when app state changes', (done) => {
+    const wrapper = shallow(<AppearanceSettings appState={store} />);
+    store.theme = defaultDark.name;
+    when(
+      () => {
+        const theme: LoadedFiddleTheme = wrapper.state('selectedTheme');
+        return theme?.name === defaultDark.name;
+      },
+      () => done(),
+    );
   });
 
   describe('openThemeFolder()', () => {
