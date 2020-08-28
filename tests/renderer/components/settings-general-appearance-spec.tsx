@@ -14,8 +14,11 @@ import {
   FiddleTheme,
   LoadedFiddleTheme,
   defaultDark,
+  defaultLight,
 } from '../../../src/renderer/themes-defaults';
 import { when } from 'mobx';
+import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { IpcEvents } from '../../../src/ipc-events';
 
 const mockThemes = [
   {
@@ -198,6 +201,47 @@ describe('AppearanceSettings component', () => {
       });
 
       expect(result).toMatchSnapshot();
+    });
+  });
+
+  describe('handleThemeSource()', () => {
+    beforeEach(() => {
+      ipcRendererManager.send = jest.fn();
+    });
+
+    it('sets system theme source if checked', () => {
+      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const instance: AppearanceSettings = wrapper.instance() as any;
+      instance.handleThemeSource({ currentTarget: { checked: true } } as any);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.SET_THEME_SOURCE,
+        'system',
+      );
+      expect(store.isUsingSystemTheme).toBe(true);
+    });
+
+    it('sets theme source to dark if unchecking while dark theme', () => {
+      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const instance: AppearanceSettings = wrapper.instance() as any;
+      instance.setState({ selectedTheme: defaultDark });
+      instance.handleThemeSource({ currentTarget: { checked: false } } as any);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.SET_THEME_SOURCE,
+        'dark',
+      );
+      expect(store.isUsingSystemTheme).toBe(false);
+    });
+
+    it('sets theme source to light if unchecking while light theme', () => {
+      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const instance: AppearanceSettings = wrapper.instance() as any;
+      instance.setState({ selectedTheme: defaultLight });
+      instance.handleThemeSource({ currentTarget: { checked: false } } as any);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.SET_THEME_SOURCE,
+        'light',
+      );
+      expect(store.isUsingSystemTheme).toBe(false);
     });
   });
 });
