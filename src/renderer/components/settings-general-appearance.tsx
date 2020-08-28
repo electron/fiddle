@@ -19,6 +19,7 @@ import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
+import { observe } from 'mobx';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
@@ -105,6 +106,11 @@ export class AppearanceSettings extends React.Component<
       this.setState({ themes, selectedTheme });
     });
 
+    observe(this.props.appState, 'theme', async (change) => {
+      const selectedTheme = await getTheme(change.newValue);
+      this.setState({ selectedTheme });
+    });
+
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
   }
@@ -116,7 +122,6 @@ export class AppearanceSettings extends React.Component<
    * @param {LoadedFiddleTheme} theme
    */
   public handleChange(theme: LoadedFiddleTheme) {
-    this.setState({ selectedTheme: theme });
     this.props.appState.setTheme(theme.file);
   }
 
@@ -201,6 +206,7 @@ export class AppearanceSettings extends React.Component<
             filterable={true}
             disabled={isUsingSystemTheme}
             items={themes}
+            activeItem={selectedTheme}
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
@@ -262,7 +268,7 @@ export class AppearanceSettings extends React.Component<
       themeSource = selectedTheme?.isDark ? 'dark' : 'light';
     }
 
-    ipcRendererManager.send(IpcEvents.ERICK, [themeSource]);
+    ipcRendererManager.send(IpcEvents.ERICK, themeSource);
     appState.isUsingSystemTheme = checked;
   }
 }

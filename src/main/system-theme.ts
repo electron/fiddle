@@ -15,7 +15,7 @@ export function setupSystemTheme() {
     ]);
   });
 
-  ipcMainManager.on(IpcEvents.ERICK, (_event, [source]) => {
+  ipcMainManager.on(IpcEvents.ERICK, (_event, source) => {
     nativeTheme.themeSource = source;
   });
 }
