@@ -268,7 +268,7 @@ export class AppearanceSettings extends React.Component<
       themeSource = selectedTheme?.isDark ? 'dark' : 'light';
     }
 
-    ipcRendererManager.send(IpcEvents.ERICK, themeSource);
+    ipcRendererManager.send(IpcEvents.SET_THEME_SOURCE, themeSource);
     appState.isUsingSystemTheme = checked;
   }
 }

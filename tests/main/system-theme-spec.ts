@@ -15,13 +15,13 @@ describe('system theme', () => {
 
     it('sets the themeSource on IPC', (done) => {
       setupSystemTheme();
-      ipcMainManager.emit(IpcEvents.ERICK, undefined, 'dark');
+      ipcMainManager.emit(IpcEvents.SET_THEME_SOURCE, undefined, 'dark');
       process.nextTick(() => {
         expect(nativeTheme.themeSource).toBe('dark');
-        ipcMainManager.emit(IpcEvents.ERICK, undefined, 'light');
+        ipcMainManager.emit(IpcEvents.SET_THEME_SOURCE, undefined, 'light');
         process.nextTick(() => {
           expect(nativeTheme.themeSource).toBe('light');
-          ipcMainManager.emit(IpcEvents.ERICK, undefined, 'system');
+          ipcMainManager.emit(IpcEvents.SET_THEME_SOURCE, undefined, 'system');
           process.nextTick(() => {
             expect(nativeTheme.themeSource).toBe('system');
             done();
@@ -52,8 +52,8 @@ describe('system theme', () => {
         nativeTheme.emit('updated');
         process.nextTick(() => {
           expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [true]],
-            [IpcEvents.ERICK, [true]],
+            [IpcEvents.SET_SYSTEM_THEME, [true]],
+            [IpcEvents.SET_SYSTEM_THEME, [true]],
           ]);
           done();
         });
@@ -69,8 +69,8 @@ describe('system theme', () => {
         nativeTheme.emit('updated');
         process.nextTick(() => {
           expect((ipcMainManager.send as jest.Mock).mock.calls).toEqual([
-            [IpcEvents.ERICK, [false]],
-            [IpcEvents.ERICK, [false]],
+            [IpcEvents.SET_SYSTEM_THEME, [false]],
+            [IpcEvents.SET_SYSTEM_THEME, [false]],
           ]);
           done();
         });

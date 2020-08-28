@@ -205,7 +205,7 @@ export class AppState {
     ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
     ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
     ipcRendererManager.removeAllListeners(IpcEvents.BEFORE_QUIT);
-    ipcRendererManager.removeAllListeners(IpcEvents.ERICK);
+    ipcRendererManager.removeAllListeners(IpcEvents.SET_SYSTEM_THEME);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
@@ -215,7 +215,7 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.on(IpcEvents.ERICK, this.setSystemTheme);
+    ipcRendererManager.on(IpcEvents.SET_SYSTEM_THEME, this.setSystemTheme);
     ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
       this.appData = dir;
     });

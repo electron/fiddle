@@ -9,13 +9,15 @@ export function setupSystemTheme() {
     maybeUpdateTheme();
   });
 
-  ipcMainManager.on(IpcEvents.ERICK, (_event, source) => {
+  ipcMainManager.on(IpcEvents.SET_THEME_SOURCE, (_event, source) => {
     nativeTheme.themeSource = source;
   });
 }
 
 export function maybeUpdateTheme() {
   if (nativeTheme.themeSource === 'system') {
-    ipcMainManager.send(IpcEvents.ERICK, [nativeTheme.shouldUseDarkColors]);
+    ipcMainManager.send(IpcEvents.SET_SYSTEM_THEME, [
+      nativeTheme.shouldUseDarkColors,
+    ]);
   }
 }
