@@ -17,6 +17,7 @@ import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { setupAboutPanel } from '../../src/main/about-panel';
+import { setupSystemTheme } from '../../src/main/system-theme';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
@@ -99,12 +100,13 @@ describe('main', () => {
   });
 
   describe('onReady()', () => {
-    it('opens a BrowserWindow, sets up updates', async () => {
+    it('opens a BrowserWindow and performs setup', async () => {
       await onReady();
 
       expect(getOrCreateMainWindow).toHaveBeenCalledTimes(1);
 
       expect(setupAboutPanel).toHaveBeenCalledTimes(1);
+      expect(setupSystemTheme).toHaveBeenCalledTimes(1);
       expect(setupUpdates).toHaveBeenCalledTimes(1);
     });
   });

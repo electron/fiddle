@@ -95,6 +95,11 @@ class MockTouchBar {
   public static TouchBarLabel = jest.fn();
 }
 
+class MockNativeTheme extends EventEmitter {
+  public shouldUseDarkColors: boolean;
+  public themeSource = 'system';
+}
+
 const app = {
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
@@ -170,6 +175,9 @@ const electronMock = {
   },
   ipcMain: new MockIPC(),
   ipcRenderer: new MockIPC(),
+  match: jest.fn(),
+  Menu: MockMenu,
+  MenuItem: MockMenuItem,
   nativeImage: {
     createFromPath: (...args: Array<any>) => new MockNativeImage(...args),
     createFromBuffer: jest.fn(),
@@ -178,9 +186,7 @@ const electronMock = {
     }),
     createEmpty: jest.fn(),
   },
-  match: jest.fn(),
-  Menu: MockMenu,
-  MenuItem: MockMenuItem,
+  nativeTheme: new MockNativeTheme(),
   Notification: MockNotification,
   _notifications: createdNotifications,
   protocol: {
