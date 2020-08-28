@@ -10,6 +10,7 @@ import {
 } from '../../../src/renderer/components/settings-general-appearance';
 import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
+import { when } from 'mobx';
 
 const mockThemes = [
   {
@@ -53,10 +54,10 @@ describe('AppearanceSettings component', () => {
     store.theme = 'defaultDark';
     const wrapper = shallow(<AppearanceSettings appState={store} />);
 
-    process.nextTick(() => {
-      expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
-      done();
-    });
+    when(
+      () => (wrapper.state() as any)?.selectedTheme?.name === 'defaultDark',
+      () => done(),
+    );
   });
 
   it('handles a theme change', () => {

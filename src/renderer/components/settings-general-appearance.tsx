@@ -8,6 +8,7 @@ import {
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fsType from 'fs-extra';
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -19,7 +20,6 @@ import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
-import { observe } from 'mobx';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
@@ -106,8 +106,8 @@ export class AppearanceSettings extends React.Component<
       this.setState({ themes, selectedTheme });
     });
 
-    observe(this.props.appState, 'theme', async (change) => {
-      const selectedTheme = await getTheme(change.newValue);
+    autorun(async () => {
+      const selectedTheme = await getTheme(this.props.appState.theme);
       this.setState({ selectedTheme });
     });
 
