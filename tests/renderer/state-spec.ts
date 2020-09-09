@@ -653,7 +653,6 @@ describe('AppState', () => {
       appState.setSystemTheme(() => {
         /** */
       }, true);
-      console.log(setTheme);
       expect(appState.setTheme).toHaveBeenCalledWith(defaultDark.file);
     });
 
