@@ -29,12 +29,24 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
 
       const [minRev, maxRev] = response;
       const [minVer, maxVer] = [minRev.version, maxRev.version];
-      const message = `Check between versions ${minVer} and ${maxVer}.`;
+      const message = (
+        <>
+          Check the range{' '}
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href={`https://github.com/electron/electron/compare/v${minVer}...v${maxVer}`}
+          >
+            {minVer}...{maxVer}
+          </a>
+          .
+        </>
+      );
 
       appState.pushOutput(`[BISECT] Complete: ${message}`);
       appState.setGenericDialogOptions({
         type: GenericDialogType.success,
-        label: `Bisect complete. ${message}`,
+        label: <>Bisect complete. {message}</>,
         cancel: undefined,
       });
       appState.isGenericDialogShowing = true;
