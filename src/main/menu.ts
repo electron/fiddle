@@ -271,6 +271,11 @@ export function setupMenu() {
       delete selectAll.role; // override default role
       selectAll.click = () => {
         ipcMainManager.send(IpcEvents.SELECT_ALL_IN_EDITOR);
+
+        // Allow selection to occur in text fields outside the editors.
+        if (process.platform === 'darwin') {
+          Menu.sendActionToFirstResponder('selectAll:');
+        }
       };
     }
 
