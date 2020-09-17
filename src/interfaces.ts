@@ -15,6 +15,13 @@ export enum VersionSource {
   remote = 'remote',
   local = 'local',
 }
+
+export enum GistActionType {
+  publish = 'Publish',
+  update = 'Update',
+  delete = 'Delete',
+}
+
 export interface Version {
   version: string;
   name?: string;

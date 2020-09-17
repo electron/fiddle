@@ -6,7 +6,7 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { EditorDropdown } from './commands-editors';
-import { PublishButton } from './commands-publish-button';
+import { GistActionButton } from './commands-publish-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 
@@ -55,7 +55,7 @@ export class Commands extends React.Component<CommandsProps> {
         </div>
         <div>
           <AddressBar appState={appState} />
-          <PublishButton appState={appState} />
+          <GistActionButton appState={appState} />
         </div>
       </div>
     );
