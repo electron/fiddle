@@ -1,7 +1,8 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { GistActionType } from '../../../src/interfaces';
 
-import { PublishButton } from '../../../src/renderer/components/commands-publish-button';
+import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
 
 jest.mock('../../../src/utils/octokit');
@@ -28,15 +29,15 @@ describe('Publish button component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<PublishButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('toggles the auth dialog on click if not authed', async () => {
     store.toggleAuthDialog = jest.fn();
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
     await instance.handleClick();
 
     expect(store.toggleAuthDialog).toHaveBeenCalled();
@@ -45,12 +46,12 @@ describe('Publish button component', () => {
   it('toggles the publish method on click if authed', async () => {
     store.gitHubToken = 'github-token';
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
-    instance.publishOrUpdateFiddle = jest.fn();
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+    instance.performGistAction = jest.fn();
     await instance.handleClick();
 
-    expect(instance.publishOrUpdateFiddle).toHaveBeenCalled();
+    expect(instance.performGistAction).toHaveBeenCalled();
   });
 
   it('attempts to publish to Gist', async () => {
@@ -63,10 +64,10 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
 
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
@@ -81,6 +82,59 @@ describe('Publish button component', () => {
     });
   });
 
+  it('attempts to update an existing Gist', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        update: jest.fn(),
+      },
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    wrapper.setProps({ appState: { gistId: 123 } });
+    instance.setState({ actionType: GistActionType.update });
+
+    await instance.performGistAction();
+
+    expect(mockOctokit.gists.update).toHaveBeenCalledWith({
+      gist_id: 123,
+      files: {
+        'index.html': { content: 'html-content' },
+        'renderer.js': { content: 'renderer-content' },
+        'main.js': { content: 'main-content' },
+        'preload.js': { content: 'preload-content' },
+        'styles.css': { content: 'css-content' },
+      },
+    });
+  });
+
+  it('attempts to delete an existing Gist', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        delete: jest.fn(),
+      },
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    wrapper.setProps({ appState: { gistId: 123 } });
+    instance.setState({ actionType: GistActionType.delete });
+
+    await instance.performGistAction();
+
+    expect(mockOctokit.gists.delete).toHaveBeenCalledWith({
+      gist_id: 123,
+    });
+  });
+
   it('handles missing content', async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
@@ -91,12 +145,12 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
 
     (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce({});
 
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
@@ -123,10 +177,10 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
 
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
 
     expect(store.isPublishing).toBe(false);
   });
@@ -143,11 +197,11 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
 
     instance.setPrivate();
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
@@ -155,7 +209,7 @@ describe('Publish button component', () => {
     });
 
     instance.setPublic();
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       ...expectedGistCreateOpts,
@@ -165,12 +219,12 @@ describe('Publish button component', () => {
 
   it('disables during gist publishing', async () => {
     store.isPublishing = false;
-    const wrapper = shallow(<PublishButton appState={store} />);
-    const instance: PublishButton = wrapper.instance() as any;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
 
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
-    instance.publishOrUpdateFiddle = jest.fn().mockImplementationOnce(() => {
+    instance.performGistAction = jest.fn().mockImplementationOnce(() => {
       return new Promise((resolve) => {
         wrapper.setProps({ appState: { store, isPublishing: true } }, () => {
           expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
@@ -182,13 +236,13 @@ describe('Publish button component', () => {
       });
     });
 
-    await instance.publishOrUpdateFiddle();
+    await instance.performGistAction();
   });
 
   describe('privacy menu', () => {
     it('toggles the privacy setting', () => {
-      const wrapper = shallow(<PublishButton appState={store} />);
-      const instance: PublishButton = wrapper.instance() as any;
+      const wrapper = shallow(<GistActionButton appState={store} />);
+      const instance: GistActionButton = wrapper.instance() as any;
 
       instance.setPublic();
       expect(store.gitHubPublishAsPublic).toBe(true);

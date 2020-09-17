@@ -12,7 +12,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
-import { EditorValues } from '../../interfaces';
+import { EditorValues, GistActionType } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import {
   INDEX_HTML_NAME,
@@ -26,37 +26,39 @@ import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface PublishButtonProps {
+export interface GistActionButtonProps {
   appState: AppState;
 }
 
-interface IPublishButtonState {
+interface IGistActionButtonState {
   readonly isUpdating: boolean;
-  readonly shouldPublish: boolean;
+  readonly isDeleting: boolean;
+  readonly actionType: GistActionType;
 }
 
 /**
  * The "publish" button takes care of logging you in.
  *
  * @export
- * @class PublishButton
- * @extends {React.Component<PublishButtonProps, PublishButtonState>}
+ * @class GistActionButton
+ * @extends {React.Component<GistActionButtonProps, GistActionButtonState>}
  */
 @observer
-export class PublishButton extends React.Component<
-  PublishButtonProps,
-  IPublishButtonState
+export class GistActionButton extends React.Component<
+  GistActionButtonProps,
+  IGistActionButtonState
 > {
-  public constructor(props: PublishButtonProps) {
+  public constructor(props: GistActionButtonProps) {
     super(props);
     this.handleClick = this.handleClick.bind(this);
-    this.publishOrUpdateFiddle = this.publishOrUpdateFiddle.bind(this);
+    this.performGistAction = this.performGistAction.bind(this);
     this.setPrivate = this.setPrivate.bind(this);
     this.setPublic = this.setPublic.bind(this);
 
     this.state = {
       isUpdating: false,
-      shouldPublish: false,
+      isDeleting: false,
+      actionType: GistActionType.publish,
     };
   }
 
@@ -82,7 +84,7 @@ export class PublishButton extends React.Component<
    * we publish
    *
    * @returns {Promise<void>}
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public async handleClick(): Promise<void> {
     const { appState } = this.props;
@@ -95,7 +97,7 @@ export class PublishButton extends React.Component<
     await when(() => !!appState.gitHubToken || !appState.isTokenDialogShowing);
 
     if (appState.gitHubToken) {
-      return this.publishOrUpdateFiddle();
+      return this.performGistAction();
     }
   }
 
@@ -103,10 +105,10 @@ export class PublishButton extends React.Component<
    * Connect with GitHub, publish the current Fiddle as a gist,
    * and update all related properties in the app state.
    */
-  public async publishOrUpdateFiddle(): Promise<void> {
+  public async performGistAction(): Promise<void> {
     console.log('publishOrUpdateFiddle()');
     const { appState } = this.props;
-    const { shouldPublish } = this.state;
+    const { actionType } = this.state;
     appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
@@ -114,31 +116,60 @@ export class PublishButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    if (gistId && !shouldPublish) {
-      this.setState({ isUpdating: true });
-      try {
-        const gist = await octo.gists.update({
-          gist_id: appState.gistId!,
-          files: this.gistFilesList(values) as any,
-        });
+    if (gistId) {
+      if (actionType === GistActionType.update) {
+        this.setState({ isUpdating: true });
+        try {
+          const gist = await octo.gists.update({
+            gist_id: appState.gistId!,
+            files: this.gistFilesList(values) as any,
+          });
 
-        console.log('Updating: Updating done', { gist });
-        this.renderToast({ message: 'Successfully updated gist!' });
-      } catch (error) {
-        console.warn(`Could not update gist`, { error });
+          console.log('Updating: Updating done', { gist });
+          this.renderToast({ message: 'Successfully updated gist!' });
+        } catch (error) {
+          console.warn(`Could not update gist`, { error });
 
-        const messageBoxOptions: Electron.MessageBoxOptions = {
-          message:
-            'Updating Fiddle failed. Are you connected to the Internet and is this your Fiddle?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        };
+          const messageBoxOptions: Electron.MessageBoxOptions = {
+            message:
+              'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
+            detail: `GitHub encountered the following error: ${error.message}`,
+          };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+          ipcRendererManager.send(
+            IpcEvents.SHOW_WARNING_DIALOG,
+            messageBoxOptions,
+          );
+        }
+        this.setState({ isUpdating: false });
+      } else {
+        this.setState({ isDeleting: true });
+        try {
+          const gist = await octo.gists.delete({
+            gist_id: appState.gistId!,
+          });
+
+          console.log('Deleting: Deleting done', { gist });
+          this.renderToast({ message: 'Successfully deleted gist!' });
+        } catch (error) {
+          console.warn(`Could not delete gist`, { error });
+
+          const messageBoxOptions: Electron.MessageBoxOptions = {
+            message:
+              'Deleting Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
+            detail: `GitHub encountered the following error: ${error.message}`,
+          };
+
+          ipcRendererManager.send(
+            IpcEvents.SHOW_WARNING_DIALOG,
+            messageBoxOptions,
+          );
+        }
+
+        appState.gistId = undefined;
+        this.setState({ isDeleting: false });
+        this.setActionType(GistActionType.publish);
       }
-      this.setState({ isUpdating: false });
     } else {
       try {
         const gist = await octo.gists.create({
@@ -169,12 +200,13 @@ export class PublishButton extends React.Component<
     }
 
     appState.isPublishing = false;
+    this.setActionType(GistActionType.update);
   }
 
   /**
    * Publish fiddles as private.
    *
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public setPrivate() {
     this.setPrivacy(false);
@@ -183,7 +215,7 @@ export class PublishButton extends React.Component<
   /**
    * Publish fiddles as public.
    *
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public setPublic() {
     this.setPrivacy(true);
@@ -191,16 +223,27 @@ export class PublishButton extends React.Component<
 
   public render() {
     const { isPublishing, gistId } = this.props.appState;
-    const { isUpdating, shouldPublish } = this.state;
+    const { isDeleting, isUpdating, actionType } = this.state;
 
-    const getTextForButton =
-      gistId && !shouldPublish
-        ? 'Update'
-        : isUpdating
-        ? 'Updating...'
-        : isPublishing
-        ? 'Publishing...'
-        : 'Publish';
+    const getTextForButton = () => {
+      let text;
+      if (gistId) {
+        if (actionType === GistActionType.delete) {
+          text = 'Delete';
+        } else {
+          text = 'Update';
+        }
+      } else if (isUpdating) {
+        text = 'Updating...';
+      } else if (isPublishing) {
+        text = 'Publishing...';
+      } else if (isDeleting) {
+        text = 'Deleting...';
+      } else {
+        text = 'Publish';
+      }
+      return text;
+    };
 
     return (
       <>
@@ -211,7 +254,7 @@ export class PublishButton extends React.Component<
               onClick={this.handleClick}
               loading={isPublishing}
               icon="upload"
-              text={getTextForButton}
+              text={getTextForButton()}
             />
             {this.renderMaybePublishMenu()}
           </ButtonGroup>
@@ -226,7 +269,7 @@ export class PublishButton extends React.Component<
 
   private renderMaybePublishMenu = () => {
     const { gistId } = this.props.appState;
-    const { shouldPublish } = this.state;
+    const { actionType } = this.state;
 
     if (!gistId) {
       return null;
@@ -236,13 +279,18 @@ export class PublishButton extends React.Component<
       <Menu>
         <MenuItem
           text="Publish"
-          active={shouldPublish}
-          onClick={() => this.setShouldPublish(true)}
+          active={actionType === GistActionType.publish}
+          onClick={() => this.setActionType(GistActionType.publish)}
         />
         <MenuItem
           text="Update"
-          active={!shouldPublish}
-          onClick={() => this.setShouldPublish(false)}
+          active={actionType === GistActionType.update}
+          onClick={() => this.setActionType(GistActionType.update)}
+        />
+        <MenuItem
+          text="Delete"
+          active={actionType === GistActionType.delete}
+          onClick={() => this.setActionType(GistActionType.delete)}
         />
       </Menu>
     );
@@ -286,10 +334,8 @@ export class PublishButton extends React.Component<
     );
   };
 
-  private setShouldPublish = (shouldPublish: boolean) => {
-    this.setState({
-      shouldPublish: shouldPublish,
-    });
+  private setActionType = (actionType: GistActionType) => {
+    this.setState({ actionType });
   };
 
   private setPrivacy(publishAsPublic: boolean) {

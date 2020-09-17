@@ -15,8 +15,8 @@ jest.mock('../../../src/renderer/components/commands-address-bar', () => ({
   AddressBar: 'address-bar',
 }));
 
-jest.mock('../../../src/renderer/components/commands-publish-button', () => ({
-  PublishButton: 'publish-button',
+jest.mock('../../../src/renderer/components/commands-action-button', () => ({
+  GistActionButton: 'action-button',
 }));
 
 describe('Commands component', () => {
