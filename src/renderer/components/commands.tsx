@@ -6,7 +6,7 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { EditorDropdown } from './commands-editors';
-import { GistActionButton } from './commands-publish-button';
+import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 

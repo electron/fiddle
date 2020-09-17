@@ -25,7 +25,6 @@ import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { GitHubSettings } from './settings-general-github';
 
 export interface GistActionButtonProps {
   appState: AppState;
@@ -41,7 +40,7 @@ interface IGistActionButtonState {
  * The "publish" button takes care of logging you in.
  *
  * @export
- * @class PublishButton
+ * @class GistActionButton
  * @extends {React.Component<GistActionButtonProps, GistActionButtonState>}
  */
 @observer
@@ -85,7 +84,7 @@ export class GistActionButton extends React.Component<
    * we publish
    *
    * @returns {Promise<void>}
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public async handleClick(): Promise<void> {
     const { appState } = this.props;
@@ -207,7 +206,7 @@ export class GistActionButton extends React.Component<
   /**
    * Publish fiddles as private.
    *
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public setPrivate() {
     this.setPrivacy(false);
@@ -216,7 +215,7 @@ export class GistActionButton extends React.Component<
   /**
    * Publish fiddles as public.
    *
-   * @memberof PublishButton
+   * @memberof GistActionButton
    */
   public setPublic() {
     this.setPrivacy(true);

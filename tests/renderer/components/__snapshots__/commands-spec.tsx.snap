@@ -49,7 +49,7 @@ exports[`Commands component renders 1`] = `
         }
       }
     />
-    <publish-button
+    <action-button
       appState={
         Object {
           "gistId": null,
