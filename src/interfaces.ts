@@ -64,7 +64,7 @@ export interface GenericDialogOptions {
   type: GenericDialogType;
   ok?: string;
   cancel?: string;
-  label: string;
+  label: string | JSX.Element;
 }
 
 export interface Templates {
