@@ -138,7 +138,7 @@ export class AppState {
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions = {
     type: GenericDialogType.warning,
-    label: '',
+    label: '' as string | JSX.Element,
     ok: 'Okay',
     cancel: 'Cancel',
   };

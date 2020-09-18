@@ -104,9 +104,9 @@ describe('Bisect commands component', () => {
       expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
         cancel: undefined,
         label: (
+          /* eslint-disable */
           <>
-            Bisect complete.{' '}
-            <>
+            Bisect complete. <>
               Check the range{' '}
               <a
                 target="_blank"
@@ -118,6 +118,7 @@ describe('Bisect commands component', () => {
               .
             </>
           </>
+          /* eslint-enable */
         ),
         type: 'success',
       });
