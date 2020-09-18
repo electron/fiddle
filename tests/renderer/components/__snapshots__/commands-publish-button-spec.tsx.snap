@@ -4,7 +4,7 @@ exports[`Publish button component renders 1`] = `
 <Fragment>
   <fieldset>
     <Blueprint3.ButtonGroup
-      className="button-publish"
+      className="button-gist-action"
     >
       <Blueprint3.Popover
         boundary="scrollParent"
