@@ -26,6 +26,7 @@ class MockAutoUpdater extends EventEmitter {
 
 export class MockMenu {
   public static readonly setApplicationMenu = jest.fn();
+  public static readonly sendActionToFirstResponder = jest.fn();
   public static readonly getApplicationMenu = jest.fn();
   public static readonly buildFromTemplate = jest.fn();
   public readonly popup = jest.fn();
