@@ -245,18 +245,29 @@ export class GistActionButton extends React.Component<
       return text;
     };
 
+    const getActionIcon = () => {
+      switch (actionType) {
+        case GistActionType.publish:
+          return 'upload';
+        case GistActionType.update:
+          return 'refresh';
+        case GistActionType.delete:
+          return 'delete';
+      }
+    };
+
     return (
       <>
         <fieldset disabled={isPublishing}>
-          <ButtonGroup className="button-publish">
+          <ButtonGroup className="button-gist-action">
             {this.renderPrivacyMenu()}
             <Button
               onClick={this.handleClick}
               loading={isPublishing}
-              icon="upload"
+              icon={getActionIcon()}
               text={getTextForButton()}
             />
-            {this.renderMaybePublishMenu()}
+            {this.renderGistActionMenu()}
           </ButtonGroup>
         </fieldset>
         <Toaster
@@ -267,7 +278,7 @@ export class GistActionButton extends React.Component<
     );
   }
 
-  private renderMaybePublishMenu = () => {
+  private renderGistActionMenu = () => {
     const { gistId } = this.props.appState;
     const { actionType } = this.state;
 
