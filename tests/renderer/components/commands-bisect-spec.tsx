@@ -104,21 +104,17 @@ describe('Bisect commands component', () => {
       expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
         cancel: undefined,
         label: (
-          /* eslint-disable */
           <>
-            Bisect complete. <>
-              Check the range{' '}
-              <a
-                target="_blank"
-                rel="noreferrer"
-                href={`https://github.com/electron/electron/compare/vminVer...vmaxVer`}
-              >
-                {'minVer'}...{'maxVer'}
-              </a>
-              .
-            </>
+            Bisect complete. Check the range{' '}
+            <a
+              target="_blank"
+              rel="noreferrer"
+              href={`https://github.com/electron/electron/compare/vminVer...vmaxVer`}
+            >
+              {'minVer'}...{'maxVer'}
+            </a>
+            .
           </>
-          /* eslint-enable */
         ),
         type: 'success',
       });

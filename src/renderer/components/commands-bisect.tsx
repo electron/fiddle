@@ -29,9 +29,9 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
 
       const [minRev, maxRev] = response;
       const [minVer, maxVer] = [minRev.version, maxRev.version];
-      const message = (
+      const label = (
         <>
-          Check the range{' '}
+          Bisect complete. Check the range{' '}
           <a
             target="_blank"
             rel="noreferrer"
@@ -43,10 +43,10 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
         </>
       );
 
-      appState.pushOutput(`[BISECT] Complete: ${message}`);
+      appState.pushOutput(`[BISECT] Complete: ${minVer}...${maxVer}`);
       appState.setGenericDialogOptions({
         type: GenericDialogType.success,
-        label: <>Bisect complete. {message}</>,
+        label,
         cancel: undefined,
       });
       appState.isGenericDialogShowing = true;
