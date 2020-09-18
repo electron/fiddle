@@ -103,7 +103,22 @@ describe('Bisect commands component', () => {
       expect(store.isGenericDialogShowing).toEqual(true);
       expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
         cancel: undefined,
-        label: 'Bisect complete. Check between versions minVer and maxVer.',
+        label: (
+          <>
+            Bisect complete.{' '}
+            <>
+              Check the range{' '}
+              <a
+                target="_blank"
+                rel="noreferrer"
+                href={`https://github.com/electron/electron/compare/vminVer...vmaxVer`}
+              >
+                {'minVer'}...{'maxVer'}
+              </a>
+              .
+            </>
+          </>
+        ),
         type: 'success',
       });
     });
