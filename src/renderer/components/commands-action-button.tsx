@@ -102,105 +102,136 @@ export class GistActionButton extends React.Component<
   }
 
   /**
-   * Connect with GitHub, publish the current Fiddle as a gist,
-   * and update all related properties in the app state.
+   * Publish a new GitHub gist.
    */
-  public async performGistAction(): Promise<void> {
-    console.log('publishOrUpdateFiddle()');
+  public async handlePublish() {
     const { appState } = this.props;
-    const { actionType } = this.state;
-    appState.isPublishing = true;
 
     const octo = await getOctokit(this.props.appState);
-    const { gitHubPublishAsPublic, gistId } = this.props.appState;
+    const { gitHubPublishAsPublic } = this.props.appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    if (gistId) {
-      if (actionType === GistActionType.update) {
-        this.setState({ isUpdating: true });
-        try {
-          const gist = await octo.gists.update({
-            gist_id: appState.gistId!,
-            files: this.gistFilesList(values) as any,
-          });
+    appState.isPublishing = true;
 
-          console.log('Updating: Updating done', { gist });
-          this.renderToast({ message: 'Successfully updated gist!' });
-        } catch (error) {
-          console.warn(`Could not update gist`, { error });
+    try {
+      const gist = await octo.gists.create({
+        public: !!gitHubPublishAsPublic,
+        description: 'Electron Fiddle Gist',
+        files: this.gistFilesList(values) as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+      });
 
-          const messageBoxOptions: Electron.MessageBoxOptions = {
-            message:
-              'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
-            detail: `GitHub encountered the following error: ${error.message}`,
-          };
+      appState.gistId = gist.data.id;
+      appState.localPath = undefined;
 
-          ipcRendererManager.send(
-            IpcEvents.SHOW_WARNING_DIALOG,
-            messageBoxOptions,
-          );
-        }
-        this.setState({ isUpdating: false });
-      } else {
-        this.setState({ isDeleting: true });
-        try {
-          const gist = await octo.gists.delete({
-            gist_id: appState.gistId!,
-          });
+      console.log(`Publish Button: Publishing complete`, { gist });
+      this.renderToast({ message: 'Publishing completed successfully!' });
+    } catch (error) {
+      console.warn(`Could not publish gist`, { error });
 
-          console.log('Deleting: Deleting done', { gist });
-          this.renderToast({ message: 'Successfully deleted gist!' });
-        } catch (error) {
-          console.warn(`Could not delete gist`, { error });
+      const messageBoxOptions: Electron.MessageBoxOptions = {
+        message:
+          'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
+        detail: `GitHub encountered the following error: ${error.message}`,
+      };
 
-          const messageBoxOptions: Electron.MessageBoxOptions = {
-            message:
-              'Deleting Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
-            detail: `GitHub encountered the following error: ${error.message}`,
-          };
-
-          ipcRendererManager.send(
-            IpcEvents.SHOW_WARNING_DIALOG,
-            messageBoxOptions,
-          );
-        }
-
-        appState.gistId = undefined;
-        this.setState({ isDeleting: false });
-        this.setActionType(GistActionType.publish);
-      }
-    } else {
-      try {
-        const gist = await octo.gists.create({
-          public: !!gitHubPublishAsPublic,
-          description: 'Electron Fiddle Gist',
-          files: this.gistFilesList(values) as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
-        });
-
-        appState.gistId = gist.data.id;
-        appState.localPath = undefined;
-
-        console.log(`Publish Button: Publishing complete`, { gist });
-        this.renderToast({ message: 'Publishing completed successfully!' });
-      } catch (error) {
-        console.warn(`Could not publish gist`, { error });
-
-        const messageBoxOptions: Electron.MessageBoxOptions = {
-          message:
-            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        };
-
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
-      }
+      ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
     appState.isPublishing = false;
     this.setActionType(GistActionType.update);
+  }
+
+  /**
+   * Update an existing GitHub gist.
+   */
+  public async handleUpdate() {
+    const { appState } = this.props;
+    const octo = await getOctokit(this.props.appState);
+    const options = { includeDependencies: true, includeElectron: true };
+    const values = await window.ElectronFiddle.app.getEditorValues(options);
+
+    this.setState({ isUpdating: true });
+
+    try {
+      const gist = await octo.gists.update({
+        gist_id: appState.gistId!,
+        files: this.gistFilesList(values) as any,
+      });
+
+      console.log('Updating: Updating done', { gist });
+      this.renderToast({ message: 'Successfully updated gist!' });
+    } catch (error) {
+      console.warn(`Could not update gist`, { error });
+
+      const messageBoxOptions: Electron.MessageBoxOptions = {
+        message:
+          'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
+        detail: `GitHub encountered the following error: ${error.message}`,
+      };
+
+      ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+    }
+
+    this.setState({ isUpdating: false });
+    this.setActionType(GistActionType.update);
+  }
+
+  /**
+   * Delete an existing GitHub gist.
+   */
+  public async handleDelete() {
+    const { appState } = this.props;
+    const octo = await getOctokit(this.props.appState);
+
+    this.setState({ isDeleting: true });
+    try {
+      const gist = await octo.gists.delete({
+        gist_id: appState.gistId!,
+      });
+
+      console.log('Deleting: Deleting done', { gist });
+      this.renderToast({ message: 'Successfully deleted gist!' });
+    } catch (error) {
+      console.warn(`Could not delete gist`, { error });
+
+      const messageBoxOptions: Electron.MessageBoxOptions = {
+        message:
+          'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
+        detail: `GitHub encountered the following error: ${error.message}`,
+      };
+
+      ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+    }
+
+    appState.gistId = undefined;
+    this.setState({ isDeleting: false });
+    this.setActionType(GistActionType.publish);
+  }
+
+  /**
+   * Connect with GitHub, perform a publish/update/delete action,
+   * and update all related properties in the app state.
+   */
+  public async performGistAction(): Promise<void> {
+    const { gistId } = this.props.appState;
+    const { actionType } = this.state;
+
+    if (gistId) {
+      switch (actionType) {
+        case GistActionType.publish:
+          await this.handlePublish();
+          break;
+        case GistActionType.update:
+          await this.handleUpdate();
+          break;
+        case GistActionType.delete:
+          await this.handleDelete();
+          break;
+      }
+    } else {
+      await this.handlePublish();
+    }
   }
 
   /**
@@ -228,11 +259,7 @@ export class GistActionButton extends React.Component<
     const getTextForButton = () => {
       let text;
       if (gistId) {
-        if (actionType === GistActionType.delete) {
-          text = 'Delete';
-        } else {
-          text = 'Update';
-        }
+        text = actionType;
       } else if (isUpdating) {
         text = 'Updating...';
       } else if (isPublishing) {
@@ -256,14 +283,15 @@ export class GistActionButton extends React.Component<
       }
     };
 
+    const isPerformingAction = isPublishing || isUpdating || isDeleting;
     return (
       <>
-        <fieldset disabled={isPublishing}>
+        <fieldset disabled={isPerformingAction}>
           <ButtonGroup className="button-gist-action">
             {this.renderPrivacyMenu()}
             <Button
               onClick={this.handleClick}
-              loading={isPublishing}
+              loading={isPerformingAction}
               icon={getActionIcon()}
               text={getTextForButton()}
             />
