@@ -5,7 +5,9 @@ exports[`AddressBar component renders 1`] = `
   className="address-bar empty"
   onSubmit={[Function]}
 >
-  <fieldset>
+  <fieldset
+    disabled={true}
+  >
     <Blueprint3.InputGroup
       key="addressbar"
       leftIcon="geosearch"

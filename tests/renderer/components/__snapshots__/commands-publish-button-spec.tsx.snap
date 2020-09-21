@@ -3,7 +3,7 @@
 exports[`Publish button component renders 1`] = `
 <Fragment>
   <fieldset
-    disabled={false}
+    disabled={true}
   >
     <Blueprint3.ButtonGroup
       className="button-gist-action"
@@ -58,7 +58,7 @@ exports[`Publish button component renders 1`] = `
       </Blueprint3.Popover>
       <Blueprint3.Button
         icon="upload"
-        loading={false}
+        loading={true}
         onClick={[Function]}
         text="Publish"
       />

@@ -12,7 +12,11 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { when } from 'mobx';
-import { EditorValues, GistActionType } from '../../interfaces';
+import {
+  EditorValues,
+  GistActionState,
+  GistActionType,
+} from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import {
   INDEX_HTML_NAME,
@@ -112,7 +116,7 @@ export class GistActionButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    appState.isPublishing = true;
+    appState.activeGistAction = GistActionState.publishing;
 
     try {
       const gist = await octo.gists.create({
@@ -138,7 +142,7 @@ export class GistActionButton extends React.Component<
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
-    appState.isPublishing = false;
+    appState.activeGistAction = GistActionState.none;
     this.setActionType(GistActionType.update);
   }
 
@@ -151,7 +155,7 @@ export class GistActionButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    this.setState({ isUpdating: true });
+    appState.activeGistAction = GistActionState.updating;
 
     try {
       const gist = await octo.gists.update({
@@ -173,7 +177,7 @@ export class GistActionButton extends React.Component<
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
-    this.setState({ isUpdating: false });
+    appState.activeGistAction = GistActionState.none;
     this.setActionType(GistActionType.update);
   }
 
@@ -184,7 +188,8 @@ export class GistActionButton extends React.Component<
     const { appState } = this.props;
     const octo = await getOctokit(this.props.appState);
 
-    this.setState({ isDeleting: true });
+    appState.activeGistAction = GistActionState.deleting;
+
     try {
       const gist = await octo.gists.delete({
         gist_id: appState.gistId!,
@@ -205,7 +210,7 @@ export class GistActionButton extends React.Component<
     }
 
     appState.gistId = undefined;
-    this.setState({ isDeleting: false });
+    appState.activeGistAction = GistActionState.none;
     this.setActionType(GistActionType.publish);
   }
 
@@ -253,18 +258,18 @@ export class GistActionButton extends React.Component<
   }
 
   public render() {
-    const { isPublishing, gistId } = this.props.appState;
-    const { isDeleting, isUpdating, actionType } = this.state;
+    const { gistId, activeGistAction } = this.props.appState;
+    const { actionType } = this.state;
 
     const getTextForButton = () => {
       let text;
       if (gistId) {
         text = actionType;
-      } else if (isUpdating) {
+      } else if (activeGistAction === GistActionState.updating) {
         text = 'Updating...';
-      } else if (isPublishing) {
+      } else if (activeGistAction === GistActionState.publishing) {
         text = 'Publishing...';
-      } else if (isDeleting) {
+      } else if (activeGistAction === GistActionState.deleting) {
         text = 'Deleting...';
       } else {
         text = 'Publish';
@@ -283,7 +288,7 @@ export class GistActionButton extends React.Component<
       }
     };
 
-    const isPerformingAction = isPublishing || isUpdating || isDeleting;
+    const isPerformingAction = activeGistAction !== GistActionState.none;
     return (
       <>
         <fieldset disabled={isPerformingAction}>
