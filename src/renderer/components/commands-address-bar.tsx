@@ -5,6 +5,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { IpcEvents } from '../../ipc-events';
+import { GistActionState } from '../../interfaces';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -121,14 +122,15 @@ export class AddressBar extends React.Component<
   }
 
   public render() {
-    const { isUnsaved, isPublishing } = this.props.appState;
+    const { isUnsaved, activeGistAction } = this.props.appState;
     const { value } = this.state;
     const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
     const className = classnames('address-bar', isUnsaved, { empty: !value });
 
+    const isPerformingAction = activeGistAction !== GistActionState.none;
     return (
       <form className={className} onSubmit={this.handleSubmit}>
-        <fieldset disabled={isPublishing}>
+        <fieldset disabled={isPerformingAction}>
           <InputGroup
             key="addressbar"
             leftIcon="geosearch"

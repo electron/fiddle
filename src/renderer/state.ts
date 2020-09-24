@@ -8,6 +8,7 @@ import {
   EditorId,
   GenericDialogOptions,
   GenericDialogType,
+  GistActionState,
   MosaicId,
   OutputEntry,
   OutputOptions,
@@ -151,7 +152,7 @@ export class AppState {
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
 
-  @observable public isPublishing = false;
+  @observable public activeGistAction: GistActionState = GistActionState.none;
   @observable public isRunning = false;
   @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions = false;

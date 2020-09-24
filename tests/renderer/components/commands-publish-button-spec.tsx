@@ -1,6 +1,6 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { GistActionType } from '../../../src/interfaces';
+import { GistActionState, GistActionType } from '../../../src/interfaces';
 
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
@@ -182,7 +182,7 @@ describe('Publish button component', () => {
 
     await instance.performGistAction();
 
-    expect(store.isPublishing).toBe(false);
+    expect(store.activeGistAction).toBe(GistActionState.none);
   });
 
   it('uses the privacy setting correctly', async () => {
@@ -218,7 +218,7 @@ describe('Publish button component', () => {
   });
 
   it('disables during gist publishing', async () => {
-    store.isPublishing = false;
+    store.activeGistAction = GistActionState.none;
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
@@ -226,12 +226,74 @@ describe('Publish button component', () => {
 
     instance.performGistAction = jest.fn().mockImplementationOnce(() => {
       return new Promise((resolve) => {
-        wrapper.setProps({ appState: { store, isPublishing: true } }, () => {
-          expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
-        });
-        wrapper.setProps({ appState: { store, isPublishing: false } }, () => {
-          expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
-        });
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.publishing } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+          },
+        );
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.none } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+          },
+        );
+        resolve();
+      });
+    });
+
+    await instance.performGistAction();
+  });
+
+  it('disables during gist updating', async () => {
+    store.activeGistAction = GistActionState.none;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+
+    instance.performGistAction = jest.fn().mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.updating } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+          },
+        );
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.none } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+          },
+        );
+        resolve();
+      });
+    });
+
+    await instance.performGistAction();
+  });
+
+  it('disables during gist deleting', async () => {
+    store.activeGistAction = GistActionState.none;
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+
+    instance.performGistAction = jest.fn().mockImplementationOnce(() => {
+      return new Promise((resolve) => {
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.deleting } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+          },
+        );
+        wrapper.setProps(
+          { appState: { store, activeGistAction: GistActionState.none } },
+          () => {
+            expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+          },
+        );
         resolve();
       });
     });

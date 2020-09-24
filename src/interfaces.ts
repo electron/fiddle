@@ -22,6 +22,13 @@ export enum GistActionType {
   delete = 'Delete',
 }
 
+export enum GistActionState {
+  publishing = 'publishing',
+  updating = 'updating',
+  deleting = 'deleting',
+  none = 'none',
+}
+
 export interface Version {
   version: string;
   name?: string;
