@@ -130,6 +130,9 @@ export class GistActionButton extends React.Component<
 
       console.log(`Publish Button: Publishing complete`, { gist });
       this.renderToast({ message: 'Publishing completed successfully!' });
+
+      // Only set action type to update if publish completed successfully.
+      this.setActionType(GistActionType.update);
     } catch (error) {
       console.warn(`Could not publish gist`, { error });
 
@@ -143,7 +146,6 @@ export class GistActionButton extends React.Component<
     }
 
     appState.activeGistAction = GistActionState.none;
-    this.setActionType(GistActionType.update);
   }
 
   /**
