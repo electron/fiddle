@@ -14,6 +14,7 @@ import * as React from 'react';
 import { when } from 'mobx';
 import {
   EditorValues,
+  GenericDialogType,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
@@ -105,6 +106,26 @@ export class GistActionButton extends React.Component<
     }
   }
 
+  public async getFiddleDescriptionFromUser(): Promise<string> {
+    const { appState } = this.props;
+
+    // Reset potentially non-null last description.
+    appState.genericDialogLastInput = null;
+
+    appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
+      label: 'Please provide a brief description for your Fiddle Gist',
+      cancel: 'Skip',
+      wantsInput: true,
+      placeholder: 'Electron Fiddle Gist',
+    });
+
+    appState.isGenericDialogShowing = true;
+    await when(() => !appState.isGenericDialogShowing);
+
+    return appState.genericDialogLastInput ?? 'Electron Fiddle Gist';
+  }
+
   /**
    * Publish a new GitHub gist.
    */
@@ -119,9 +140,11 @@ export class GistActionButton extends React.Component<
     appState.activeGistAction = GistActionState.publishing;
 
     try {
+      const description = await this.getFiddleDescriptionFromUser();
+
       const gist = await octo.gists.create({
         public: !!gitHubPublishAsPublic,
-        description: 'Electron Fiddle Gist',
+        description,
         files: this.gistFilesList(values) as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
       });
 
@@ -145,6 +168,8 @@ export class GistActionButton extends React.Component<
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
+    // Ensure any previous input is reset.
+    appState.genericDialogLastInput = null;
     appState.activeGistAction = GistActionState.none;
   }
 
