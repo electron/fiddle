@@ -5,7 +5,7 @@
 
 const { app, autoUpdater } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const server = 'https://your-deployment-url.com'
   const feed = `${server}/update/${process.platform}/${app.getVersion()}`
 

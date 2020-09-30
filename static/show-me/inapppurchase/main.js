@@ -8,7 +8,7 @@
 
 const { app, inAppPurchase } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // Can the user can make a payment?
   if (inAppPurchase.canMakePayments()) {
     const productID = 'myProductId'

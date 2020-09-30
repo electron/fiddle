@@ -5,7 +5,7 @@
 
 const { app, powerSaveBlocker } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const id = powerSaveBlocker.start('prevent-display-sleep')
 
   console.log(powerSaveBlocker.isStarted(id))

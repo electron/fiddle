@@ -5,7 +5,7 @@
 
 const { app, systemPreferences } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // This module let's us access various system preferences.
   // Let's start with macOS:
 

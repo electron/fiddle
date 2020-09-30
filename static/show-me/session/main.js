@@ -5,7 +5,7 @@
 
 const { app, session } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const { defaultSession } = session
 
   // There are quite a few methods available

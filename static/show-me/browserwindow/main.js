@@ -8,7 +8,7 @@ const { app, BrowserWindow } = require('electron')
 
 const windows = []
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // BrowserWindows can be created in plenty of shapes, sizes, and forms.
   // Check out the editor's auto-completion for all the configuration
   // options available in the current version.

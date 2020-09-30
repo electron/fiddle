@@ -125,6 +125,7 @@ const app = {
   on: jest.fn(),
   off: jest.fn(),
   once: jest.fn(),
+  whenReady: () => Promise.resolve(),
   removeAllListeners: jest.fn(),
 };
 

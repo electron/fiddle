@@ -89,7 +89,7 @@ export function main() {
   listenForProtocolHandler();
 
   // Launch
-  app.on('ready', onReady);
+  app.whenReady().then(onReady);
   app.on('before-quit', onBeforeQuit);
   app.on('window-all-closed', onWindowsAllClosed);
   app.on('activate', getOrCreateMainWindow);

@@ -8,7 +8,7 @@
 // In the main process.
 const { BrowserView, BrowserWindow, app } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   let win = new BrowserWindow({ width: 800, height: 600 })
   win.on('closed', () => {
     win = null

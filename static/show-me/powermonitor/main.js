@@ -5,7 +5,7 @@
 
 const { app } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   // We cannot require the "ready" module until
   // the app is ready
   const { powerMonitor } = require('electron')

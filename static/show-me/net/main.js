@@ -10,7 +10,7 @@
 
 const { app, net } = require('electron')
 
-app.on('ready', () => {
+app.whenReady().then(() => {
   const request = net.request('https://github.com')
 
   request.on('response', (response) => {
