@@ -126,6 +126,25 @@ exports[`ElectronSettings component renders 1`] = `
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <p>
+        You can setup the download directory for Electron binary files.
+      </p>
+      <Blueprint3.InputGroup
+        readOnly={true}
+        rightElement={
+          <Blueprint3.Button
+            icon="folder-open"
+            onClick={[Function]}
+          >
+            Select
+          </Blueprint3.Button>
+        }
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+  <br />
+  <Blueprint3.Callout>
     <Blueprint3.ButtonGroup
       fill={true}
     >

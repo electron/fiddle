@@ -49,7 +49,7 @@ export class Runner {
   public async run(): Promise<boolean> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
-    const { currentElectronVersion } = this.appState;
+    const { currentElectronVersion, downloadBinaryPath } = this.appState;
     const { version, localPath } = currentElectronVersion;
 
     if (this.appState.isClearingConsoleOnRun) {
@@ -71,7 +71,11 @@ export class Runner {
       return false;
     }
 
-    const isReady = await getIsDownloaded(version, localPath);
+    const isReady = await getIsDownloaded(
+      downloadBinaryPath,
+      version,
+      localPath,
+    );
 
     if (!isReady) {
       console.warn(`Runner: Binary ${version} not ready`);
@@ -209,9 +213,17 @@ export class Runner {
    * @memberof Runner
    */
   public async execute(dir: string): Promise<void> {
-    const { currentElectronVersion, pushOutput } = this.appState;
+    const {
+      currentElectronVersion,
+      pushOutput,
+      downloadBinaryPath,
+    } = this.appState;
     const { version, localPath } = currentElectronVersion;
-    const binaryPath = getElectronBinaryPath(version, localPath);
+    const binaryPath = getElectronBinaryPath(
+      downloadBinaryPath,
+      version,
+      localPath,
+    );
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     const env = { ...process.env };

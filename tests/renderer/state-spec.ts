@@ -340,7 +340,7 @@ describe('AppState', () => {
       appState.versions['2.0.2'].state = VersionState.ready;
       await appState.removeVersion('v2.0.2');
 
-      expect(removeBinary).toHaveBeenCalledWith('2.0.2');
+      expect(removeBinary).toHaveBeenCalledWith(expect.any(String), '2.0.2');
     });
 
     it('does not remove it if not necessary', async () => {

@@ -4,7 +4,6 @@ import * as path from 'path';
 import { VersionState } from '../interfaces';
 import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
-import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { AppState } from './state';
 
@@ -22,7 +21,7 @@ export async function setupBinary(
   const version = normalizeVersion(iVersion);
   const fs = await fancyImport<typeof fsType>('fs-extra');
 
-  await fs.mkdirp(getDownloadPath(version));
+  await fs.mkdirp(getDownloadPath(appState.downloadBinaryPath, version));
 
   const { state } = appState.versions[version];
   if (state === VersionState.downloading || state === VersionState.unzipping) {
@@ -30,7 +29,7 @@ export async function setupBinary(
     return;
   }
 
-  if (await getIsDownloaded(version)) {
+  if (await getIsDownloaded(appState.downloadBinaryPath, version)) {
     console.log(`Binary: Electron ${version} already downloaded.`);
     appState.versions[version].state = VersionState.ready;
     return;
@@ -40,7 +39,7 @@ export async function setupBinary(
   appState.versions[version].state = VersionState.downloading;
 
   const zipPath = await download(appState, version);
-  const extractPath = getDownloadPath(version);
+  const extractPath = getDownloadPath(appState.downloadBinaryPath, version);
   console.log(
     `Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`,
   );
@@ -70,7 +69,7 @@ export async function setupBinary(
  * @param {string} iVersion
  * @returns {Promise<void>}
  */
-export async function removeBinary(iVersion: string) {
+export async function removeBinary(downloadPath: string, iVersion: string) {
   const version = normalizeVersion(iVersion);
   const fs = await fancyImport<typeof fsType>('fs-extra');
   let isDeleted = false;
@@ -93,12 +92,12 @@ export async function removeBinary(iVersion: string) {
   };
 
   const binaryCleaner = async () => {
-    if (await getIsDownloaded(version)) {
+    if (await getIsDownloaded(downloadPath, version)) {
       // This is necessary since we're messing with .asar files inside
       // the Electron binaries. Electron, powering Fiddle, will try to
       // "correct" our calls, but we don't want that right here.
       process.noAsar = true;
-      await fs.remove(getDownloadPath(version));
+      await fs.remove(getDownloadPath(downloadPath, version));
       process.noAsar = false;
 
       isDeleted = true;
@@ -123,10 +122,11 @@ export async function removeBinary(iVersion: string) {
  * @returns {boolean}
  */
 export async function getIsDownloaded(
+  downloadPath: string,
   version: string,
   dir?: string,
 ): Promise<boolean> {
-  const expectedPath = getElectronBinaryPath(version, dir);
+  const expectedPath = getElectronBinaryPath(downloadPath, version, dir);
   const fs = await fancyImport<typeof fsType>('fs-extra');
 
   return fs.existsSync(expectedPath);
@@ -140,8 +140,9 @@ export async function getIsDownloaded(
  * @returns {string}
  */
 export function getElectronBinaryPath(
+  downloadPath: string,
   version: string,
-  dir: string = getDownloadPath(version),
+  dir: string = getDownloadPath(downloadPath, version),
 ): string {
   switch (process.platform) {
     case 'darwin':
@@ -169,9 +170,10 @@ export function getDownloadingVersions(appState: AppState) {
  *
  * @returns {Promise<Array<string>>}
  */
-export async function getDownloadedVersions(): Promise<Array<string>> {
+export async function getDownloadedVersions(
+  downloadPath: string,
+): Promise<Array<string>> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
-  const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
   console.log(`Binary: Checking for downloaded versions`);
 
   try {
@@ -179,7 +181,7 @@ export async function getDownloadedVersions(): Promise<Array<string>> {
     const knownVersions: Array<string> = [];
 
     for (const directory of directories) {
-      if (await getIsDownloaded(directory)) {
+      if (await getIsDownloaded(downloadPath, directory)) {
         knownVersions.push(directory);
       }
     }
@@ -233,8 +235,8 @@ async function download(appState: AppState, version: string): Promise<string> {
  * @param {string} version
  * @returns {string}
  */
-function getDownloadPath(version: string): string {
-  return path.join(USER_DATA_PATH, 'electron-bin', version);
+function getDownloadPath(downloadPath: string, version: string): string {
+  return path.join(downloadPath, version);
 }
 
 /**

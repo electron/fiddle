@@ -1,6 +1,7 @@
 import * as fsType from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
+import * as path from 'path';
 
 import {
   ALL_MOSAICS,
@@ -19,6 +20,7 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { arrayToStringMap } from '../utils/array-to-stringmap';
+import { USER_DATA_PATH } from './constants';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import {
   createMosaicArrangement,
@@ -174,6 +176,11 @@ export class AppState {
     Record<MosaicId, EditorBackup | true>
   > = DEFAULT_CLOSED_PANELS;
 
+  @observable public downloadBinaryPath =
+    (localStorage.getItem('download-binary-path') &&
+      path.join(localStorage.getItem('download-binary-path') as string)) ||
+    path.join(USER_DATA_PATH, 'electron-bin');
+
   private outputBuffer = '';
   private name: string;
   public appData: string;
@@ -237,6 +244,12 @@ export class AppState {
     autorun(() => this.save('channelsToShow', this.channelsToShow));
     autorun(() => this.save('statesToShow', this.statesToShow));
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
+    autorun(() =>
+      this.save(
+        'download-binary-path',
+        this.downloadBinaryPath ?? path.join(USER_DATA_PATH, 'electron-bin'),
+      ),
+    );
 
     autorun(() => {
       if (typeof this.isUnsaved === 'undefined') return;
@@ -472,7 +485,7 @@ export class AppState {
 
       saveLocalVersions(versionsAsArray);
     } else {
-      await removeBinary(version);
+      await removeBinary(this.downloadBinaryPath, version);
       updatedVersions[version].state = VersionState.unknown;
     }
 
@@ -588,7 +601,9 @@ export class AppState {
       }
     });
 
-    const downloadedVersions = await getDownloadedVersions();
+    const downloadedVersions = await getDownloadedVersions(
+      this.downloadBinaryPath,
+    );
     (downloadedVersions || []).forEach((version) => {
       if (updatedVersions[version]) {
         updatedVersions[version].state = VersionState.ready;

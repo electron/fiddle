@@ -8,9 +8,12 @@ import {
   IButtonProps,
   Icon,
   IconName,
+  InputGroup,
   Tooltip,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
+import { remote } from 'electron';
+import * as path from 'path';
 import * as React from 'react';
 
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
@@ -144,6 +147,8 @@ export class ElectronSettings extends React.Component<
           {this.renderVersionStateOptions()}
         </Callout>
         <br />
+        <Callout>{this.renderDownloadBinaryOptions()}</Callout>
+        <br />
         <Callout>
           {this.renderAdvancedButtons()}
           {this.renderTable()}
@@ -151,6 +156,43 @@ export class ElectronSettings extends React.Component<
       </div>
     );
   }
+
+  private renderDownloadBinaryOptions = () => {
+    const { downloadBinaryPath } = this.props.appState;
+
+    return (
+      <FormGroup>
+        <p>You can setup the download directory for Electron binary files.</p>
+        <InputGroup
+          readOnly={true}
+          value={downloadBinaryPath}
+          rightElement={
+            <Button
+              icon="folder-open"
+              onClick={this.handleDownloadBinaryChanging}
+            >
+              Select
+            </Button>
+          }
+        />
+      </FormGroup>
+    );
+  };
+
+  private handleDownloadBinaryChanging = async () => {
+    const { filePaths } = await remote.dialog.showOpenDialog({
+      title: 'Select Folder',
+      properties: ['openDirectory'],
+    });
+
+    if (!filePaths || filePaths.length < 1 || filePaths.length > 1) {
+      return;
+    }
+
+    this.props.appState.downloadBinaryPath = path.join(filePaths[0]);
+    this.props.appState.updateDownloadedVersionState();
+    this.props.appState.updateElectronVersions();
+  };
 
   /**
    * Renders the various buttons for advanced operations
