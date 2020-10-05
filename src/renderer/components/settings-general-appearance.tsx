@@ -232,7 +232,7 @@ export class AppearanceSettings extends React.Component<
   }
 
   /**
-   * Toggles checking if the theme selector popover is visible or not
+   * Toggles the state to update if the theme selector is visible
    */
   public toggleThemeSelectorOpened(): void {
     this.props.appState.toggleThemeSelector();
