@@ -184,9 +184,16 @@ export class AppearanceSettings extends React.Component<
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
+            popoverProps={{
+              onClosed: () => this.toggleThemeSelectorOpened(),
+            }}
             noResults={<MenuItem disabled={true} text="No results." />}
           >
-            <Button text={selectedName} icon="tint" />
+            <Button
+              text={selectedName}
+              icon="tint"
+              onClick={() => this.toggleThemeSelectorOpened()}
+            />
           </ThemeSelect>
         </FormGroup>
         <Callout>
@@ -222,5 +229,12 @@ export class AppearanceSettings extends React.Component<
    */
   public handleAddTheme(): void {
     this.props.appState.toggleAddMonacoThemeDialog();
+  }
+
+  /**
+   * Toggles checking if the theme selector popover is visible or not
+   */
+  public toggleThemeSelectorOpened(): void {
+    this.props.appState.toggleThemeSelector();
   }
 }

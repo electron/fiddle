@@ -43,9 +43,15 @@ exports[`AppearanceSettings component renders 1`] = `
         />
       }
       onItemSelect={[Function]}
+      popoverProps={
+        Object {
+          "onClosed": [Function],
+        }
+      }
     >
       <Blueprint3.Button
         icon="tint"
+        onClick={[Function]}
         text="Select a theme"
       />
     </Blueprint3.Select>

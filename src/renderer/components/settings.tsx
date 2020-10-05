@@ -154,7 +154,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
    */
   private closeSettingsPanel(event: KeyboardEvent) {
     const { appState } = this.props;
-    if (event.code === 'Escape') {
+    if (event.code === 'Escape' && !appState.isThemeSelectorShowing) {
       appState.isSettingsShowing = false;
     }
   }
