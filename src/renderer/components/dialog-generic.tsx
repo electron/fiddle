@@ -47,7 +47,6 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
       placeholder,
     } = genericDialogOptions;
 
-    const shouldShowInput = wantsInput && placeholder;
     let intent: Intent;
     let icon: IconName;
     switch (type) {
@@ -69,6 +68,15 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
         break;
     }
 
+    let dialogInput;
+    if (wantsInput) {
+      dialogInput = placeholder ? (
+        <InputGroup id="input" placeholder={placeholder} />
+      ) : (
+        <InputGroup id="input" />
+      );
+    }
+
     return (
       <Alert
         isOpen={isGenericDialogShowing}
@@ -79,7 +87,7 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
         intent={intent}
       >
         <p>{label}</p>
-        {shouldShowInput && <InputGroup id="input" placeholder={placeholder} />}
+        {wantsInput && dialogInput}
       </Alert>
     );
   }

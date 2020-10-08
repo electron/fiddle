@@ -115,8 +115,9 @@ export class GistActionButton extends React.Component<
     appState.setGenericDialogOptions({
       type: GenericDialogType.confirm,
       label: 'Please provide a brief description for your Fiddle Gist',
-      cancel: 'Skip',
       wantsInput: true,
+      ok: 'Publish',
+      cancel: undefined,
       placeholder: 'Electron Fiddle Gist',
     });
 
