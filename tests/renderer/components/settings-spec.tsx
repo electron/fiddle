@@ -110,16 +110,19 @@ describe('Settings component', () => {
     });
 
     // Set the theme selector showing to true
-    store.isThemeSelectorShowing = true;
     const wrapper = shallow(<Settings appState={store} />);
+    const instance = wrapper.instance() as Settings;
+
+    // Toggle the state of the variable
+    instance.toggleHasPopoverOpen();
 
     // trigger mock 'keyup' event
     map.keyup({ code: 'Escape' });
     expect(Object.keys(map)).toHaveLength(1);
     expect(store.isSettingsShowing).toBe(true);
 
-    // Set the theme selector showing to false
-    store.isThemeSelectorShowing = false;
+    // Toggle the setting again as if it was closed
+    instance.toggleHasPopoverOpen();
 
     // trigger mock 'keyup' event
     map.keyup({ code: 'Escape' });

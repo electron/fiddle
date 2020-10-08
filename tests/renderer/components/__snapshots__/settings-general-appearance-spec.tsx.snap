@@ -51,6 +51,7 @@ exports[`AppearanceSettings component renders 1`] = `
     >
       <Blueprint3.Button
         icon="tint"
+        id="open-theme-selector"
         onClick={[Function]}
         text="Select a theme"
       />
