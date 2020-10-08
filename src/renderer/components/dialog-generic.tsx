@@ -1,4 +1,4 @@
-import { Alert, IconName, Intent } from '@blueprintjs/core';
+import { Alert, IconName, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -25,6 +25,10 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
   }
 
   public onClose(result: boolean) {
+    const input = document.getElementById('input') as HTMLInputElement;
+
+    this.props.appState.genericDialogLastInput =
+      input && input.value !== '' ? input.value : null;
     this.props.appState.genericDialogLastResult = result;
     this.props.appState.toggleGenericDialog();
   }
@@ -34,7 +38,14 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
       isGenericDialogShowing,
       genericDialogOptions,
     } = this.props.appState;
-    const { type, ok, cancel, label } = genericDialogOptions;
+    const {
+      type,
+      ok,
+      cancel,
+      label,
+      wantsInput,
+      placeholder,
+    } = genericDialogOptions;
 
     let intent: Intent;
     let icon: IconName;
@@ -56,6 +67,16 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
         icon = 'help';
         break;
     }
+
+    let dialogInput;
+    if (wantsInput) {
+      dialogInput = placeholder ? (
+        <InputGroup id="input" placeholder={placeholder} />
+      ) : (
+        <InputGroup id="input" />
+      );
+    }
+
     return (
       <Alert
         isOpen={isGenericDialogShowing}
@@ -66,6 +87,7 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
         intent={intent}
       >
         <p>{label}</p>
+        {wantsInput && dialogInput}
       </Alert>
     );
   }

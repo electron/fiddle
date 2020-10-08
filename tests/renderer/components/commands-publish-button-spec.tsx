@@ -67,6 +67,9 @@ describe('Publish button component', () => {
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
+    instance.getFiddleDescriptionFromUser = jest
+      .fn()
+      .mockReturnValue('Electron Fiddle Gist');
     await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
@@ -148,12 +151,48 @@ describe('Publish button component', () => {
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
+    instance.getFiddleDescriptionFromUser = jest
+      .fn()
+      .mockReturnValue('Electron Fiddle Gist');
     (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce({});
 
     await instance.performGistAction();
 
     expect(mockOctokit.gists.create).toHaveBeenCalledWith({
       description: 'Electron Fiddle Gist',
+      files: {
+        'index.html': { content: '<!-- Empty -->' },
+        'renderer.js': { content: '// Empty' },
+        'main.js': { content: '// Empty' },
+        'preload.js': { content: '// Empty' },
+        'styles.css': { content: '/* Empty */' },
+      },
+      public: true,
+    });
+  });
+
+  it('handles a custom description', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        create: jest.fn(async () => ({ data: { id: '123' } })),
+      },
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    instance.getFiddleDescriptionFromUser = jest
+      .fn()
+      .mockReturnValue('My Custom Description');
+    (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce({});
+
+    await instance.performGistAction();
+
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+      description: 'My Custom Description',
       files: {
         'index.html': { content: '<!-- Empty -->' },
         'renderer.js': { content: '// Empty' },
@@ -179,6 +218,9 @@ describe('Publish button component', () => {
 
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
+    instance.getFiddleDescriptionFromUser = jest
+      .fn()
+      .mockReturnValue('Electron Fiddle Gist');
 
     await instance.performGistAction();
 
@@ -199,6 +241,10 @@ describe('Publish button component', () => {
 
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
+
+    instance.getFiddleDescriptionFromUser = jest
+      .fn()
+      .mockReturnValue('Electron Fiddle Gist');
 
     instance.setPrivate();
     await instance.performGistAction();

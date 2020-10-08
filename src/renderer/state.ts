@@ -137,13 +137,16 @@ export class AppState {
   > = arrayToStringMap(knownVersions);
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
-  @observable public genericDialogOptions = {
+  @observable public genericDialogOptions: GenericDialogOptions = {
     type: GenericDialogType.warning,
     label: '' as string | JSX.Element,
     ok: 'Okay',
     cancel: 'Cancel',
+    wantsInput: false,
+    placeholder: '',
   };
   @observable public genericDialogLastResult: boolean | null = null;
+  @observable public genericDialogLastInput: string | null = null;
   @observable public mosaicArrangement: MosaicNode<
     MosaicId
   > | null = DEFAULT_MOSAIC_ARRANGEMENT;
@@ -430,6 +433,8 @@ export class AppState {
     this.genericDialogOptions = {
       ok: 'Okay',
       cancel: 'Cancel',
+      wantsInput: false,
+      placeholder: '',
       ...opts,
     };
   }
