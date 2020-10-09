@@ -3,6 +3,10 @@ import * as React from 'react';
 
 import { GeneralSettings } from '../../../src/renderer/components/settings-general';
 
+const doNothingFunc = () => {
+  // Do Nothing
+};
+
 jest.mock('../../../src/renderer/components/settings-general-github', () => ({
   GitHubSettings: 'settings-github',
 }));
@@ -22,7 +26,9 @@ describe('GeneralSettings component', () => {
   const store: any = {};
 
   it('renders', () => {
-    const wrapper = shallow(<GeneralSettings appState={store} />);
+    const wrapper = shallow(
+      <GeneralSettings appState={store} toggleHasPopoverOpen={doNothingFunc} />,
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
