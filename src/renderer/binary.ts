@@ -1,5 +1,6 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
+import * as extractZipType from 'extract-zip';
 
 import { VersionState } from '../interfaces';
 import { fancyImport } from '../utils/import';
@@ -241,31 +242,21 @@ function getDownloadPath(version: string): string {
  * Unzips an electron package so that we can actually use it.
  *
  * @param {string} zipPath
- * @param {string} extractPath
+ * @param {string} dir
  * @returns {Promise<void>}
  */
-function unzip(zipPath: string, extractPath: string): Promise<void> {
-  return new Promise(async (resolve, reject) => {
-    const extract = (await fancyImport<any>('extract-zip')).default;
+async function unzip(zipPath: string, dir: string): Promise<void> {
+  const extract: typeof extractZipType = (await fancyImport<any>('extract-zip'))
+    .default;
 
-    process.noAsar = true;
+  process.noAsar = true;
 
-    const options = {
-      dir: extractPath,
-    };
-
-    extract(zipPath, options, (error: Error) => {
-      if (error) {
-        reject(error);
-        return;
-      }
-
-      console.log(`Binary: Unpacked!`);
-      process.noAsar = false;
-
-      resolve();
-    });
-  });
+  try {
+    await extract(zipPath, { dir });
+    console.log(`Binary: Unpacked!`);
+  } finally {
+    process.noAsar = false;
+  }
 }
 
 interface Progress {
