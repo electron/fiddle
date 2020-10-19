@@ -32,7 +32,7 @@ jobs:
       - name: lint
         run: yarn lint
       - name: test
-        run: yarn test
+        run: yarn test:ci
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
