@@ -54,21 +54,29 @@ cd fiddle
 3. Install dependencies.
 
 ```sh
-npm install
+yarn
 ```
 
 4. Start Fiddle and Explore!
 
 ```sh
-npm start
+yarn start
 ```
 
 ### Running Tests
 
 ```sh
-npm test
+yarn test
 ```
 
 ## Release Process
 
-<!-- TODO @felix add your release process here 😁 -->
+First, bump the version number and create a new `git` tag:
+
+```sh
+yarn version
+```
+
+Then, push that tag to the GitHub repository. CI will automatically draft a new
+release. Check that all the expected files are present, that installers work,
+and then publish the release.
