@@ -44,6 +44,7 @@ Array [
     >
       <button
         className="bp3-button bp3-minimal"
+        onBlur={[Function]}
         onClick={[Function]}
         onKeyDown={[Function]}
         onKeyUp={[Function]}
