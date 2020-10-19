@@ -77,8 +77,6 @@ jobs:
           encodedString: ${{ secrets.WINDOWS_CODESIGN_P12 }}
       - name: Install
         run: yarn
-      - name: Git Submodules
-        run: git submodule update --init --recursive
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn make
