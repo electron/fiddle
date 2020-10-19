@@ -9,7 +9,7 @@ on:
   pull_request:
 
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -31,8 +31,14 @@ jobs:
         run: yarn
       - name: lint
         run: yarn lint
+      - name: test
+        run: yarn test
+      - name: Coveralls
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
   build:
-    needs: lint
+    needs: test
     name: Build (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     strategy:
