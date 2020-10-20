@@ -5,6 +5,15 @@ const packageJson = require('./package.json');
 const { version } = packageJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
 
+if (process.env['WINDOWS_CODESIGN_FILE']) {
+  const certPath = path.join(__dirname, 'win-certificate.pfx');
+  const certExists = fs.existsSync(certPath);
+
+  if (certExists) {
+    process.env['WINDOWS_CODESIGN_FILE'] = certPath;
+  }
+}
+
 const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets'),
@@ -34,7 +43,7 @@ const config = {
     },
     osxSign: {
       identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
-      'hardened-runtime': true,
+      hardenedRuntime: true,
       'gatekeeper-assess': false,
       entitlements: 'static/entitlements.plist',
       'entitlements-inherit': 'static/entitlements.plist',
@@ -64,11 +73,11 @@ const config = {
             'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
           loadingGif: './assets/loading.gif',
           noMsi: true,
-          remoteReleases: '',
+          remoteReleases: 'https://github.com/electron/fiddle',
           setupExe: `electron-fiddle-${version}-${arch}-setup.exe`,
           setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-          certificatePassword: process.env.WINDOWS_CERTIFICATE_PASSWORD,
-          certificateFile,
+          certificateFile: process.env['WINDOWS_CODESIGN_FILE'],
+          certificatePassword: process.env['WINDOWS_CODESIGN_PASSWORD'],
         };
       },
     },
@@ -117,11 +126,6 @@ function notarizeMaybe() {
 
   if (!process.env.CI) {
     console.log(`Not in CI, skipping notarization`);
-    return;
-  }
-
-  if (!process.env.TRAVIS_TAG && !process.env.NOTARIZE_WITHOUT_TAG) {
-    console.log(`Not a tag, not notarizing`);
     return;
   }
 

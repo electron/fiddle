@@ -6,7 +6,7 @@ import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
   findModulesInEditors,
-  getIsNpmInstalled,
+  getIsPackageManagerInstalled,
   installModules,
   packageRun,
 } from '../../src/renderer/npm';
@@ -35,7 +35,7 @@ describe('Runner component', () => {
     mockChild = new MockChildProcess();
     ipcRendererManager.removeAllListeners();
 
-    (getIsNpmInstalled as jest.Mock).mockReturnValue(true);
+    (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
 
     store = {
       version: '2.0.2',
@@ -45,6 +45,7 @@ describe('Runner component', () => {
       pushOutput: jest.fn(),
       clearConsole: jest.fn(),
       pushError: jest.fn(),
+      packageManager: 'npm',
       get currentElectronVersion() {
         return mockVersions['2.0.2'];
       },
@@ -270,7 +271,7 @@ describe('Runner component', () => {
     });
 
     it('does attempt a forge operation if npm is not installed', async () => {
-      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -280,7 +281,7 @@ describe('Runner component', () => {
 
   describe('installModulesForEditor()', () => {
     it('does not attempt installation if npm is not installed', async () => {
-      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(false);
+      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
       (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
       await instance.installModulesForEditor(
@@ -298,7 +299,7 @@ describe('Runner component', () => {
     });
 
     it('does attempt installation if npm is installed', async () => {
-      (getIsNpmInstalled as jest.Mock).mockReturnValueOnce(true);
+      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(true);
       (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
 
       await instance.installModulesForEditor(

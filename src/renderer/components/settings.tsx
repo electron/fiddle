@@ -28,6 +28,7 @@ export interface SettingsProps {
 
 export interface SettingsState {
   section: SettingsSections;
+  hasPopoverOpen: boolean;
 }
 
 /**
@@ -43,6 +44,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
     this.state = {
       section: SettingsSections.General,
+      hasPopoverOpen: false,
     };
 
     this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
@@ -67,7 +69,12 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
     const { appState } = this.props;
 
     if (section === SettingsSections.General) {
-      return <GeneralSettings appState={appState} />;
+      return (
+        <GeneralSettings
+          appState={appState}
+          toggleHasPopoverOpen={() => this.toggleHasPopoverOpen()}
+        />
+      );
     }
 
     if (section === SettingsSections.Electron) {
@@ -151,11 +158,22 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
 
   /**
    * Trigger closing of the settings panel upon Esc
+   * If hasPopoverOpen is set to true, settings will not close as only the popover should close
    */
   private closeSettingsPanel(event: KeyboardEvent) {
     const { appState } = this.props;
-    if (event.code === 'Escape') {
+    if (event.code === 'Escape' && !this.state.hasPopoverOpen) {
       appState.isSettingsShowing = false;
     }
+  }
+
+  /**
+   * Toggles whether there is a popover open
+   */
+  public toggleHasPopoverOpen(): void {
+    this.setState({
+      ...this.state,
+      hasPopoverOpen: !this.state.hasPopoverOpen,
+    });
   }
 }

@@ -9,6 +9,7 @@ import { GitHubSettings } from './settings-general-github';
 
 export interface GeneralSettingsProps {
   appState: AppState;
+  toggleHasPopoverOpen: () => void;
 }
 
 /**
@@ -23,7 +24,10 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps> {
     return (
       <div>
         <h2>General Settings</h2>
-        <AppearanceSettings appState={this.props.appState} />
+        <AppearanceSettings
+          appState={this.props.appState}
+          toggleHasPopoverOpen={() => this.props.toggleHasPopoverOpen()}
+        />
         <Divider />
         <ConsoleSettings appState={this.props.appState} />
         <Divider />

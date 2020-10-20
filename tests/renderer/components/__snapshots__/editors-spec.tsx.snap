@@ -51,6 +51,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -79,6 +80,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -224,6 +226,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -252,6 +255,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -397,6 +401,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -425,6 +430,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -570,6 +576,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -598,6 +605,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -743,6 +751,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -771,6 +780,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -916,6 +926,7 @@ exports[`Editors component renders 1`] = `
             >
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -950,6 +961,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -978,6 +990,7 @@ exports[`Editors component renders 1`] = `
               </button>
               <button
                 className="bp3-button bp3-small"
+                onBlur={[Function]}
                 onClick={[Function]}
                 onKeyDown={[Function]}
                 onKeyUp={[Function]}
@@ -1056,6 +1069,7 @@ exports[`Editors component renders 1`] = `
                 >
                   <button
                     className="bp3-button bp3-minimal"
+                    onBlur={[Function]}
                     onClick={[Function]}
                     onKeyDown={[Function]}
                     onKeyUp={[Function]}

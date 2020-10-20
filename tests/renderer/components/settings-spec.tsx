@@ -96,4 +96,41 @@ describe('Settings component', () => {
     wrapper.unmount();
     expect(Object.keys(map)).toHaveLength(0);
   });
+
+  it('does not close when Escape key is pressed when theme selector is open', () => {
+    expect(store.isSettingsShowing).toBe(true);
+    // mock event listener API
+    const map: any = {};
+    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+      map[event] = cb;
+    });
+
+    window.removeEventListener = jest.fn().mockImplementation((event) => {
+      delete map[event];
+    });
+
+    // Set the theme selector showing to true
+    const wrapper = shallow(<Settings appState={store} />);
+    const instance = wrapper.instance() as Settings;
+
+    // Toggle the state of the variable
+    instance.toggleHasPopoverOpen();
+
+    // trigger mock 'keyup' event
+    map.keyup({ code: 'Escape' });
+    expect(Object.keys(map)).toHaveLength(1);
+    expect(store.isSettingsShowing).toBe(true);
+
+    // Toggle the setting again as if it was closed
+    instance.toggleHasPopoverOpen();
+
+    // trigger mock 'keyup' event
+    map.keyup({ code: 'Escape' });
+    expect(Object.keys(map)).toHaveLength(1);
+    expect(store.isSettingsShowing).toBe(false);
+
+    // check if event listener is removed upon unmount
+    wrapper.unmount();
+    expect(Object.keys(map)).toHaveLength(0);
+  });
 });

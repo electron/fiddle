@@ -71,7 +71,9 @@ export interface GenericDialogOptions {
   type: GenericDialogType;
   ok?: string;
   cancel?: string;
+  wantsInput?: boolean;
   label: string | JSX.Element;
+  placeholder?: string;
 }
 
 export interface Templates {

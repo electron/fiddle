@@ -59,6 +59,7 @@ export const renderItem: ItemRenderer<LoadedFiddleTheme> = (
 
 export interface AppearanceSettingsProps {
   appState: AppState;
+  toggleHasPopoverOpen: () => void;
 }
 
 export interface AppearanceSettingsState {
@@ -184,9 +185,17 @@ export class AppearanceSettings extends React.Component<
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
+            popoverProps={{
+              onClosed: () => this.props.toggleHasPopoverOpen(),
+            }}
             noResults={<MenuItem disabled={true} text="No results." />}
           >
-            <Button text={selectedName} icon="tint" />
+            <Button
+              id="open-theme-selector"
+              text={selectedName}
+              icon="tint"
+              onClick={() => this.props.toggleHasPopoverOpen()}
+            />
           </ThemeSelect>
         </FormGroup>
         <Callout>

@@ -92,6 +92,7 @@ Array [
     <button
       className="bp3-button"
       id="focus"
+      onBlur={[Function]}
       onClick={[Function]}
       onKeyDown={[Function]}
       onKeyUp={[Function]}
@@ -131,6 +132,7 @@ Array [
       <button
         className="bp3-button"
         id="show-hide"
+        onBlur={[Function]}
         onClick={[Function]}
         onKeyDown={[Function]}
         onKeyUp={[Function]}
@@ -199,6 +201,7 @@ Array [
     <button
       className="bp3-button"
       id="special-paths"
+      onBlur={[Function]}
       onClick={[Function]}
       onKeyDown={[Function]}
       onKeyUp={[Function]}
@@ -274,6 +277,7 @@ Array [
     <button
       className="bp3-button"
       id="process-metrics"
+      onBlur={[Function]}
       onClick={[Function]}
       onKeyDown={[Function]}
       onKeyUp={[Function]}

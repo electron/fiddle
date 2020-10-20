@@ -10,7 +10,8 @@ export interface PMOperationOptions {
   packageManager: IPackageManager;
 }
 
-export let isInstalled: boolean | null = null;
+export let isNpmInstalled: boolean | null = null;
+export let isYarnInstalled: boolean | null = null;
 
 /* add other modules to automatically ignore here */
 /* perhaps we can expose this to the settings module?*/
@@ -33,22 +34,37 @@ const isUnique = (item: any, idx: number, arr: Array<any>): boolean => {
 };
 
 /**
- * Checks if npm is installed by checking if a binary
+ * Checks if package manager is installed by checking if a binary
  * with that name can be found.
  */
-export async function getIsNpmInstalled(
+export async function getIsPackageManagerInstalled(
+  packageManager: IPackageManager,
   ignoreCache?: boolean,
 ): Promise<boolean> {
-  if (isInstalled !== null && !ignoreCache) return isInstalled;
+  if (packageManager === 'npm' && isNpmInstalled !== null && !ignoreCache)
+    return isNpmInstalled;
+  if (packageManager === 'yarn' && isYarnInstalled !== null && !ignoreCache)
+    return isYarnInstalled;
 
-  const command = process.platform === 'win32' ? 'where.exe npm' : 'which npm';
+  const command =
+    process.platform === 'win32'
+      ? `where.exe ${packageManager}`
+      : `which ${packageManager}`;
 
   try {
     await exec(process.cwd(), command);
-    return (isInstalled = true);
+    if (packageManager === 'npm') {
+      return (isNpmInstalled = true);
+    } else {
+      return (isYarnInstalled = true);
+    }
   } catch (error) {
-    console.warn(`getIsNpmInstalled: "${command}" failed.`, error);
-    return (isInstalled = false);
+    console.warn(`getIsPackageManagerInstalled: "${command}" failed.`, error);
+    if (packageManager === 'npm') {
+      return (isNpmInstalled = false);
+    } else {
+      return (isYarnInstalled = false);
+    }
   }
 }
 

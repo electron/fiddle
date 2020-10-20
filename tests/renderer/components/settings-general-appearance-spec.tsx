@@ -17,6 +17,9 @@ const mockThemes = [
     file: 'defaultDark',
   },
 ];
+const doNothingFunc = () => {
+  // Do Nothing
+};
 
 jest.mock('fs-extra');
 jest.mock('../../../src/utils/import', () => ({
@@ -44,14 +47,24 @@ describe('AppearanceSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<AppearanceSettings appState={store} />);
+    const wrapper = shallow(
+      <AppearanceSettings
+        appState={store}
+        toggleHasPopoverOpen={doNothingFunc}
+      />,
+    );
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders the correct selected theme', (done) => {
     store.theme = 'defaultDark';
-    const wrapper = shallow(<AppearanceSettings appState={store} />);
+    const wrapper = shallow(
+      <AppearanceSettings
+        appState={store}
+        toggleHasPopoverOpen={doNothingFunc}
+      />,
+    );
 
     process.nextTick(() => {
       expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
@@ -60,16 +73,44 @@ describe('AppearanceSettings component', () => {
   });
 
   it('handles a theme change', () => {
-    const wrapper = shallow(<AppearanceSettings appState={store} />);
+    const wrapper = shallow(
+      <AppearanceSettings
+        appState={store}
+        toggleHasPopoverOpen={doNothingFunc}
+      />,
+    );
     const instance: AppearanceSettings = wrapper.instance() as any;
     instance.handleChange({ file: 'defaultLight' } as any);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
+  it('toggles popover toggle event', () => {
+    const toggleFunc = jest.fn();
+    const wrapper = shallow(
+      <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
+    );
+
+    // Find the button
+    const button = wrapper.find('#open-theme-selector');
+
+    // Simulate opening the theme selector
+    button.simulate('click');
+    expect(toggleFunc).toHaveBeenCalledTimes(1);
+
+    // Simulate closing the theme selector
+    button.simulate('click');
+    expect(toggleFunc).toHaveBeenCalledTimes(2);
+  });
+
   describe('openThemeFolder()', () => {
     it('attempts to open the folder', async () => {
-      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.openThemeFolder();
 
@@ -77,7 +118,12 @@ describe('AppearanceSettings component', () => {
     });
 
     it('handles an error', async () => {
-      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
       const instance: AppearanceSettings = wrapper.instance() as any;
       (shell as any).showItemInFolder.mockImplementationOnce(() => {
         throw new Error('Bwap');
@@ -90,7 +136,12 @@ describe('AppearanceSettings component', () => {
   describe('createNewThemeFromCurrent()', () => {
     it('creates a new file from the current theme', async () => {
       const fs = require('fs-extra');
-      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
 
@@ -114,7 +165,12 @@ describe('AppearanceSettings component', () => {
           arr.push(theme);
         },
       );
-      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
       expect(wrapper.state('themes')).toHaveLength(0);
       const instance: AppearanceSettings = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
@@ -122,7 +178,12 @@ describe('AppearanceSettings component', () => {
     });
 
     it('handles an error', async () => {
-      const wrapper = shallow(<AppearanceSettings appState={store} />);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
       const instance: AppearanceSettings = wrapper.instance() as any;
       (shell as any).showItemInFolder.mockImplementationOnce(() => {
         throw new Error('Bwap');

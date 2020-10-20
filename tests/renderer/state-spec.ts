@@ -446,7 +446,9 @@ describe('AppState', () => {
         type: GenericDialogType.warning,
         label: 'foo',
         ok: 'Okay',
+        placeholder: '',
         cancel: 'Cancel',
+        wantsInput: false,
       });
     });
   });

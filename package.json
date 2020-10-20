@@ -20,7 +20,6 @@
     "start": "rimraf ./dist && electron-forge start",
     "test": "jest --config=jest.json",
     "test:ci": "jest --config=jest.json --coverage --runInBand",
-    "test:coverage": "cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js",
     "test:report": "jest --config=jest.json --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict ./tools/fetch-releases.js"
@@ -83,7 +82,6 @@
     "@typescript-eslint/eslint-plugin": "^3.7.0",
     "@typescript-eslint/parser": "^3.7.0",
     "chokidar": "^3.3.1",
-    "coveralls": "^3.0.9",
     "electron": "^9.3.1",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.2",

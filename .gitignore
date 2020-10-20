@@ -21,7 +21,6 @@
 /out/
 node_modules/
 SHASUMS256.txt
-**/yarn.lock
 compile_commands.json
 .envrc
 .cache
