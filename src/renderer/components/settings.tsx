@@ -53,7 +53,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
   }
 
   public componentWillUnmount() {
-    window.removeEventListener('keyup', this.closeSettingsPanel, true);
+    window.removeEventListener('keyup', this.closeSettingsPanel, false);
   }
 
   /**
