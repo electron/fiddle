@@ -72,9 +72,6 @@ export async function getIsPackageManagerInstalled(
 
 /**
  * Finds npm modules in editor values, returning an array of modules.
- *
- * @param {EditorValues} values
- * @returns {Array<string>}
  */
 export function findModulesInEditors(values: EditorValues) {
   const files = [values.main, values.renderer, values.preload];
@@ -85,7 +82,7 @@ export function findModulesInEditors(values: EditorValues) {
 
   console.log('Modules Found:', modules);
 
-  return modules;
+  return Array.from(new Set(modules));
 }
 
 /**
