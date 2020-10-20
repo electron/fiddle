@@ -77,7 +77,7 @@ export async function getIsPackageManagerInstalled(
  * @returns {Array<string>}
  */
 export function findModulesInEditors(values: EditorValues) {
-  const files = [values.main, values.renderer];
+  const files = [values.main, values.renderer, values.preload];
   const modules = files.reduce(
     (agg, file) => [...agg, ...findModules(file)],
     [],
