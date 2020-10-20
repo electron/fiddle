@@ -24,6 +24,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     webPreferences: {
       webviewTag: false,
       nodeIntegration: true,
+      enableRemoteModule: true,
     },
   };
 }

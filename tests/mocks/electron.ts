@@ -145,7 +145,7 @@ const session = {
 
 const shell = {
   openExternal: jest.fn(),
-  openItem: jest.fn(),
+  openPath: jest.fn(),
   showItemInFolder: jest.fn(),
 };
 
