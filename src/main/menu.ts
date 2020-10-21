@@ -153,6 +153,7 @@ function getShowMeMenuItem(
 ): MenuItemConstructorOptions {
   if (typeof item === 'string') {
     return {
+      type: 'radio',
       label: key,
       click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key]),
     };
