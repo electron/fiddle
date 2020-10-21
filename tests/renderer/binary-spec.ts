@@ -13,7 +13,7 @@ import * as path from 'path';
 jest.mock('fs-extra');
 jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('extract-zip', () => {
-  return jest.fn((_a, _b, c) => c());
+  return jest.fn((_a, _b) => Promise.resolve());
 });
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',

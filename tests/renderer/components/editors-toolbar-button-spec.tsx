@@ -14,7 +14,7 @@ jest.mock('react-mosaic-component', () => {
     MosaicContext,
     MosaicRootActions,
     MosaicWindowContext,
-  } = require.requireActual('react-mosaic-component');
+  } = jest.requireActual('react-mosaic-component');
 
   MosaicContext.Consumer = (props: any) => props.children(mockContext);
 

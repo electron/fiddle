@@ -33,6 +33,7 @@ describe('windows', () => {
       backgroundColor: '#1d2427',
       webPreferences: {
         webviewTag: false,
+        enableRemoteModule: true,
         nodeIntegration: true,
       },
     };
