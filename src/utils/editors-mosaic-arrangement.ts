@@ -43,14 +43,14 @@ export function getVisibleMosaics(
 
   // Handle the case where only one editor is visible
   if (typeof input === 'string') {
-    return [input];
+    return [input as MosaicId];
   }
 
   // Handle the other cases (2 - 4)
-  const result = [];
+  const result: Array<MosaicId> = [];
   for (const node of [input.first, input.second]) {
     if (typeof node === 'string') {
-      result.push(node);
+      result.push(node as MosaicId);
     } else {
       result.push(...getVisibleMosaics(node));
     }

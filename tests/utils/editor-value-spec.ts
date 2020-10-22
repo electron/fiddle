@@ -25,7 +25,7 @@ describe('getEditorValue()', () => {
     expect(getEditorValue(EditorId.html)).toBe('editor-backup-value');
 
     // revert to initial state
-    delete window.ElectronFiddle.app.state;
+    window.ElectronFiddle.app.state = new MockState() as any;
     window.ElectronFiddle.editors[EditorId.html] = oldEditor;
   });
 
