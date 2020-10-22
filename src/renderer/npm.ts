@@ -161,13 +161,13 @@ export function packageRun(
   return exec(dir, `${packageManager} run ${command}`);
 }
 
-function decommentWithWorker(input: string): Promise<string> {
+export function decommentWithWorker(input: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const worker = new Worker('../utils/decomment.ts');
-    worker.postMessage(input);
     worker.onmessage = function (event: MessageEvent<string>) {
       resolve(event.data);
     };
+    worker.postMessage(input);
     worker.onerror = function (e) {
       reject(e);
     };

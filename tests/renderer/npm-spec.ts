@@ -1,4 +1,8 @@
+import { mocked } from 'ts-jest/utils';
+import * as decomment from 'decomment';
+
 import {
+  findModules,
   findModulesInEditors,
   getIsPackageManagerInstalled,
   installModules,
@@ -6,7 +10,8 @@ import {
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-
+import MockDecommentWorker from '../mocks/worker';
+jest.mock('decomment');
 jest.mock('../../src/utils/exec');
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (_p: string) => {
@@ -14,16 +19,30 @@ jest.mock('../../src/utils/import', () => ({
   },
 }));
 
-describe('npm', () => {
-  const mockMain = `
-    const say = require('say');
+window.Worker = MockDecommentWorker;
 
+describe('npm', () => {
+  const mockBuiltins = `
     function hello() {
       const electron = require('electron');
       const originalFs = require('original-fs');
       const fs = require('fs');
       const privateModule = require('./hi');
     }
+  `;
+
+  const mockPackages = `
+    const cow = require('cow');
+    const say = require('say');
+  `;
+
+  const mockComments = `
+    // const cow = require('cow');
+    /* const say = require('say'); */
+    /**
+     * const hello = require('hello'); 
+     * const world = require('world'); 
+    */
   `;
 
   describe('getIsPackageManagerInstalled()', () => {
@@ -150,17 +169,39 @@ describe('npm', () => {
     });
   });
 
+  describe('findModules()', () => {
+    it('returns required modules in a JS file', async () => {
+      mocked(decomment).mockReturnValue(mockPackages);
+      const modules = await findModules(mockPackages);
+      expect(modules).toEqual(['cow', 'say']);
+    });
+
+    it('ignores node and electron builtins', async () => {
+      mocked(decomment).mockReturnValue(mockBuiltins);
+      const modules = await findModules(mockBuiltins);
+      expect(modules).toHaveLength(0);
+    });
+
+    it('ignores commented modules', async () => {
+      mocked(decomment).mockReturnValue('');
+      const modules = await findModules(mockComments);
+      expect(modules).toHaveLength(0);
+    });
+  });
+
   describe('findModulesInEditors()', () => {
-    it('finds modules, ignoring node and electron builtins', async () => {
+    it('installs modules across all JavaScript files only once', async () => {
+      mocked(decomment).mockReturnValue(mockPackages);
       const result = await findModulesInEditors({
         html: '',
-        main: mockMain,
-        renderer: '',
-        preload: '',
+        main: mockPackages,
+        renderer: mockPackages,
+        preload: mockPackages,
         css: '',
       });
 
-      expect(result).toEqual(['say']);
+      expect(result).toHaveLength(2);
+      expect(result).toEqual(['cow', 'say']);
     });
   });
 
