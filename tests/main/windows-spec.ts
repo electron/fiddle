@@ -35,6 +35,7 @@ describe('windows', () => {
         webviewTag: false,
         enableRemoteModule: true,
         nodeIntegration: true,
+        nodeIntegrationInWorker: true,
       },
     };
 
