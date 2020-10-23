@@ -83,6 +83,7 @@ jobs:
         env:
           WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
           WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn run publish
@@ -91,6 +92,7 @@ jobs:
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
           WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       # - name: Archive production artifacts
       #   uses: actions/upload-artifact@v2
       #   with:
