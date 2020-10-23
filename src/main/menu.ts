@@ -6,7 +6,7 @@ import {
   shell,
 } from 'electron';
 
-import { Templates } from '../interfaces';
+import { BlockableAccelerator, Templates } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { SHOW_ME_TEMPLATES } from '../templates';
 import { showOpenDialog, showSaveDialog } from './files';
@@ -182,7 +182,9 @@ function getShowMeMenu(): MenuItemConstructorOptions {
  *
  * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
-function getFileMenu(): MenuItemConstructorOptions {
+function getFileMenu(
+  acceleratorsToBlock: BlockableAccelerator[] = [],
+): MenuItemConstructorOptions {
   const fileMenu: Array<MenuItemConstructorOptions> = [
     {
       label: 'New Fiddle',
@@ -208,12 +210,16 @@ function getFileMenu(): MenuItemConstructorOptions {
     {
       label: 'Save',
       click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE),
-      accelerator: 'CmdOrCtrl+S',
+      accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.save)
+        ? 'CmdOrCtrl+S'
+        : undefined,
     },
     {
       label: 'Save as',
       click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE),
-      accelerator: 'CmdOrCtrl+Shift+S',
+      accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.saveAs)
+        ? 'CmdOrCtrl+Shift+S'
+        : undefined,
     },
     {
       type: 'separator',
@@ -248,7 +254,7 @@ function getFileMenu(): MenuItemConstructorOptions {
 /**
  * Creates the app's window menu.
  */
-export function setupMenu() {
+export function setupMenu(acceleratorsToBlock: BlockableAccelerator[] = []) {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(app, shell) as Array<
@@ -329,7 +335,11 @@ export function setupMenu() {
     return item;
   });
 
-  menu.splice(process.platform === 'darwin' ? 1 : 0, 0, getFileMenu());
+  menu.splice(
+    process.platform === 'darwin' ? 1 : 0,
+    0,
+    getFileMenu(acceleratorsToBlock),
+  );
 
   menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu());
 

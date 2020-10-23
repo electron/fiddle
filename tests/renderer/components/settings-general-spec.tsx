@@ -22,6 +22,13 @@ jest.mock(
   }),
 );
 
+jest.mock(
+  '../../../src/renderer/components/settings-general-block-accelerators',
+  () => ({
+    BlockAcceleratorsSettings: 'settings-block-accelerators',
+  }),
+);
+
 describe('GeneralSettings component', () => {
   const store: any = {};
 

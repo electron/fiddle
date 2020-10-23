@@ -118,3 +118,8 @@ export const enum DocsDemoPage {
   DEFAULT = 'DEFAULT',
   DEMO_APP = 'DEMO_APP',
 }
+
+export const enum BlockableAccelerator {
+  save = 'save',
+  saveAs = 'saveAs',
+}

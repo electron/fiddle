@@ -2,6 +2,7 @@ import * as MonacoType from 'monaco-editor';
 
 import {
   ALL_MOSAICS,
+  BlockableAccelerator,
   EditorId,
   GenericDialogType,
   PanelId,
@@ -636,6 +637,22 @@ describe('AppState', () => {
       appState.resetEditorLayout();
 
       expect(appState.mosaicArrangement).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
+    });
+  });
+
+  describe('blockAccelerators()', () => {
+    it('Add an accelerator to be blocked', () => {
+      appState.addAcceleratorToBlock(BlockableAccelerator.save);
+
+      expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
+    });
+
+    it('Remove an accelerator to be blocked', () => {
+      appState.acceleratorsToBlock = [BlockableAccelerator.save];
+
+      appState.removeAcceleratorToBlock(BlockableAccelerator.save);
+
+      expect(appState.acceleratorsToBlock).toEqual([]);
     });
   });
 });
