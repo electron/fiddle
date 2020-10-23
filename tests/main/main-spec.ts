@@ -12,6 +12,7 @@ import {
   onReady,
   onWindowsAllClosed,
   quitAppIfConfirmed,
+  setupMenuHandler,
 } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
@@ -119,6 +120,17 @@ describe('main', () => {
       onWindowsAllClosed();
 
       expect(app.quit).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('setupMenuHandler()', () => {
+    it('check if listening on BLOCK_ACCELERATORS', () => {
+      setupMenuHandler();
+
+      expect(ipcMainManager.on).toHaveBeenCalledWith(
+        IpcEvents.BLOCK_ACCELERATORS,
+        jasmine.anything(),
+      );
     });
   });
 });

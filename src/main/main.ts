@@ -30,7 +30,7 @@ export async function onReady() {
   const { setupFileListeners } = await import('./files');
 
   setupMenu();
-  setupMenuHadler();
+  setupMenuHandler();
   setupProtocolHandler();
   setupFileListeners();
   setupUpdates();
@@ -57,7 +57,7 @@ export function quitAppIfConfirmed(
   }
 }
 
-export function setupMenuHadler() {
+export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.BLOCK_ACCELERATORS,
     async (_, acceleratorsToBlock) => {
