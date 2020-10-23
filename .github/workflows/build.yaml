@@ -79,13 +79,13 @@ jobs:
         run: yarn
       - name: Make (ia32)
         if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
-        run: yarn make -- --arch=ia32
+        run: yarn run publish -- --arch=ia32
         env:
           WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
           WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
-        run: yarn make
+        run: yarn run publish
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
@@ -96,8 +96,3 @@ jobs:
       #   with:
       #     name: ${{ matrix.os }}
       #     path: out/make/**/*
-      - name: Release
-        if: startsWith(github.ref, 'refs/tags/')
-        run: yarn run publish
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
