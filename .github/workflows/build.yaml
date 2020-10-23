@@ -110,3 +110,4 @@ jobs:
             out/**/*.nupkg
             out/**/*.rpm
             out/**/*.zip
+            out/**/RELEASES
