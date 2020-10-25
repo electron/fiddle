@@ -61,7 +61,7 @@ export function createMainWindow(): Electron.BrowserWindow {
 
   // Show menu for respective window taking into consideration an entry in
   // "Show Me" may be selected
-  ipcMain.on(IpcEvents.MENU_IPC_MAIN, (e, result) => {
+  ipcMain.on(IpcEvents.MENU_IPC_MAIN, (_, result) => {
     if (browserWindow?.isFocused()) {
       setupMenu(result);
     }
