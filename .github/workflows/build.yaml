@@ -43,7 +43,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macOS-latest, ubuntu-latest, windows-latest ]
+        os: [macOS-latest, ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v2
       - name: Setup Node.js
@@ -77,19 +77,19 @@ jobs:
           encodedString: ${{ secrets.WINDOWS_CODESIGN_P12 }}
       - name: Install
         run: yarn
-      - name: Make (ia32)
-        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
-        run: yarn run publish -- --arch=ia32
-        env:
-          WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
-          WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn run publish
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
+          WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Make (ia32)
+        if: matrix.os == 'windows-latest' && startsWith(github.ref, 'refs/tags/')
+        run: yarn run publish -- --arch=ia32
+        env:
           WINDOWS_CODESIGN_FILE: ${{ steps.write_file.outputs.filePath }}
           WINDOWS_CODESIGN_PASSWORD: ${{ secrets.WINDOWS_CODESIGN_PASSWORD }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
