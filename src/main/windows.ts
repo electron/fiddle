@@ -1,8 +1,8 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
-
+import { setupMenu } from './menu';
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 export let browserWindows: Array<BrowserWindow | null> = [];
@@ -52,6 +52,19 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindows = browserWindows.filter((bw) => browserWindow !== bw);
 
     browserWindow = null;
+  });
+
+  // Focusing on new window loads the possibly clicked "Show Me" fiddle
+  browserWindow.on('focus', () => {
+    browserWindow?.webContents.send(IpcEvents.MENU_IPC_RENDER);
+  });
+
+  // Show menu for respective window taking into consideration an entry in
+  // "Show Me" may be selected
+  ipcMain.on(IpcEvents.MENU_IPC_MAIN, (e, result) => {
+    if (browserWindow?.isFocused()) {
+      setupMenu(result);
+    }
   });
 
   browserWindow.webContents.on('new-window', (event, url) => {
