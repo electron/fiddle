@@ -150,12 +150,12 @@ function getTasksMenu(): MenuItemConstructorOptions {
 function getShowMeMenuItem(
   key: string,
   item: string | Templates,
-  active_key: string | null,
+  activeKey: string | null,
 ): MenuItemConstructorOptions {
   if (typeof item === 'string') {
     return {
       type: 'checkbox',
-      checked: key == active_key,
+      checked: key == activeKey,
       label: key,
       click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key]),
     };
@@ -164,15 +164,15 @@ function getShowMeMenuItem(
   return {
     label: key,
     submenu: Object.keys(item).map((subkey) => {
-      return getShowMeMenuItem(subkey, item[subkey], active_key);
+      return getShowMeMenuItem(subkey, item[subkey], activeKey);
     }),
   };
 }
 
-function getShowMeMenu(active_key: string | null): MenuItemConstructorOptions {
+function getShowMeMenu(activeKey: string | null): MenuItemConstructorOptions {
   const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(
     SHOW_ME_TEMPLATES,
-  ).map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key], active_key));
+  ).map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key], activeKey));
 
   return {
     label: 'Show Me',
@@ -251,7 +251,7 @@ function getFileMenu(): MenuItemConstructorOptions {
 /**
  * Creates the app's window menu.
  */
-export function setupMenu(active_key: string | null = null) {
+export function setupMenu(activeKey: string | null = null) {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(app, shell) as Array<
@@ -334,7 +334,7 @@ export function setupMenu(active_key: string | null = null) {
 
   menu.splice(process.platform === 'darwin' ? 1 : 0, 0, getFileMenu());
 
-  menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu(active_key));
+  menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu(activeKey));
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }
