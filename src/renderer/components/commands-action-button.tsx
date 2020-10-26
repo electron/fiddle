@@ -376,8 +376,9 @@ export class GistActionButton extends React.Component<
 
   private renderPrivacyMenu = () => {
     const { gitHubPublishAsPublic, gistId } = this.props.appState;
+    const { actionType } = this.state;
 
-    if (gistId) {
+    if (gistId && actionType !== GistActionType.publish) {
       return null;
     }
 
