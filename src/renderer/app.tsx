@@ -12,7 +12,7 @@ import {
   GenericDialogType,
   SetFiddleOptions,
 } from '../interfaces';
-import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
+import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
@@ -90,6 +90,9 @@ export class App {
     this.state.isUnsaved = false;
 
     document.title = getTitle(this.state);
+
+    // Update the menu each time a new Fiddle is loaded
+    ipcRenderer.send(IpcEvents.MENU_IPC_MAIN, this.state.templateName);
 
     return true;
   }
@@ -187,6 +190,12 @@ export class App {
     this.setupResizeListener();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
+
+    // Send template name in "Show Me" to main process for menu to render
+    // proper selection under "Show Me"
+    ipcRenderer.on(IpcEvents.MENU_IPC_RENDER, () => {
+      ipcRenderer.send(IpcEvents.MENU_IPC_MAIN, this.state.templateName);
+    });
 
     return rendered;
   }
