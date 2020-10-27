@@ -12,17 +12,17 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: '12.x'
-    - name: Get npm cache directory
-      id: npm-cache
-      run: |
-        echo "::set-output name=dir::$(npm config get cache)"
-    - uses: actions/cache@v1
+    - name: Get yarn cache directory path
+      id: yarn-cache-dir-path
+      run: echo "::set-output name=dir::$(yarn cache dir)"
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
-        path: ${{ steps.npm-cache.outputs.dir }}
-        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
         restore-keys: |
-          ${{ runner.os }}-node-
-    - run: npm ci
+          ${{ runner.os }}-yarn-
+    - run: yarn
     - name: Switch to release update branch
       run: |
         if git branch --remotes | grep -q origin/update-releases; then
@@ -31,7 +31,7 @@ jobs:
           git checkout -b update-releases
         fi
     - name: Update Releases JSON
-      run: npm run electron-releases
+      run: yarn electron-releases
     - name: Commit Changes to Releases JSON
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
         chmod 600 ~/.netrc
         git add static/releases.json tests/fixtures/releases-metadata.json
         if test -n "$(git status -s)"; then
-          git config user.name "$GITHUB_ACTOR"
+          git config user.name "Electron Bot"
           git config user.email "electron-bot@users.noreply.github.com"
           git diff --cached
           git commit -m "build: update Electron releases JSON"
