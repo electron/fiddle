@@ -166,7 +166,7 @@ describe('AppState', () => {
         },
       );
 
-      await appState.updateDownloadedVersionState();
+      await appState.updateElectronVersions();
     });
   });
 
@@ -475,19 +475,23 @@ describe('AppState', () => {
   });
 
   describe('updateDownloadedVersionState()', () => {
+    beforeEach(() => {
+      (getDownloadingVersions as jest.Mock).mockReturnValue(['2.0.1']);
+      (getDownloadedVersions as jest.Mock).mockReturnValue(
+        Promise.resolve(['2.0.2']),
+      );
+    });
+
     it('downloads a version if necessary', async () => {
-      const mockResult = Promise.resolve(['2.0.2']);
-      (getDownloadedVersions as jest.Mock).mockReturnValueOnce(mockResult);
       await appState.updateDownloadedVersionState();
 
       expect(appState.versions['2.0.2'].state).toBe(VersionState.ready);
     });
 
     it('keeps downloading state intact', async () => {
-      (getDownloadingVersions as jest.Mock).mockReturnValueOnce(['2.0.2']);
       await appState.updateDownloadedVersionState();
 
-      expect(appState.versions['2.0.2'].state).toBe(VersionState.downloading);
+      expect(appState.versions['2.0.1'].state).toBe(VersionState.downloading);
     });
   });
 
