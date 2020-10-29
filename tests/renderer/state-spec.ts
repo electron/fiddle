@@ -641,13 +641,13 @@ describe('AppState', () => {
   });
 
   describe('blockAccelerators()', () => {
-    it('Add an accelerator to be blocked', () => {
+    it('adds an accelerator to be blocked', () => {
       appState.addAcceleratorToBlock(BlockableAccelerator.save);
 
       expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
     });
 
-    it('Remove an accelerator to be blocked', () => {
+    it('removes an accelerator to be blocked', () => {
       appState.acceleratorsToBlock = [BlockableAccelerator.save];
 
       appState.removeAcceleratorToBlock(BlockableAccelerator.save);

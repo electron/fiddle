@@ -50,7 +50,7 @@ export class BlockAcceleratorsSettings extends React.Component<
     const { acceleratorsToBlock } = this.props.appState;
 
     const blockAcceleratorsLabel = `
-      Select keyboard shortcuts to block`.trim();
+      Any keyboard shortcuts checked below will be disabled.`.trim();
 
     return (
       <div>
@@ -59,7 +59,7 @@ export class BlockAcceleratorsSettings extends React.Component<
           <FormGroup label={blockAcceleratorsLabel}>
             <Checkbox
               checked={acceleratorsToBlock.includes(BlockableAccelerator.save)}
-              label="Block save"
+              label="Save"
               value={BlockableAccelerator.save}
               onChange={this.handleBlockAcceleratorChange}
             />
@@ -67,7 +67,7 @@ export class BlockAcceleratorsSettings extends React.Component<
               checked={acceleratorsToBlock.includes(
                 BlockableAccelerator.saveAs,
               )}
-              label="Block save as"
+              label="Save as"
               value={BlockableAccelerator.saveAs}
               onChange={this.handleBlockAcceleratorChange}
             />

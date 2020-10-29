@@ -129,7 +129,7 @@ describe('main', () => {
 
       expect(ipcMainManager.on).toHaveBeenCalledWith(
         IpcEvents.BLOCK_ACCELERATORS,
-        jasmine.anything(),
+        expect.anything(),
       );
     });
   });
