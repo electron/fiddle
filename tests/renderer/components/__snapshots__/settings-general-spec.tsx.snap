@@ -17,5 +17,9 @@ exports[`GeneralSettings component renders 1`] = `
   <settings-github
     appState={Object {}}
   />
+  <Blueprint3.Divider />
+  <settings-block-accelerators
+    appState={Object {}}
+  />
 </div>
 `;

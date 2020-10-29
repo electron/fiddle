@@ -28,6 +28,7 @@ export enum IpcEvents {
   CONFIRM_QUIT = 'CONFIRM_QUIT',
   SET_APPDATA_DIR = 'SET_APPDATA_DIR',
   SELECT_ALL_IN_EDITOR = 'SELECT_ALL_IN_EDITOR',
+  BLOCK_ACCELERATORS = 'BLOCK_ACCELERATORS',
 }
 
 export const ipcMainEvents = [
@@ -38,6 +39,7 @@ export const ipcMainEvents = [
   IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
   IpcEvents.SHOW_INACTIVE,
   IpcEvents.CONFIRM_QUIT,
+  IpcEvents.BLOCK_ACCELERATORS,
 ];
 
 export const ipcRendererEvents = [

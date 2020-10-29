@@ -4,6 +4,7 @@ import { MosaicNode } from 'react-mosaic-component';
 
 import {
   ALL_MOSAICS,
+  BlockableAccelerator,
   DocsDemoPage,
   EditorId,
   GenericDialogOptions,
@@ -128,7 +129,8 @@ export class AppState {
       : (this.retrieve('executionFlags') as Array<string>);
   @observable public packageManager: IPackageManager =
     (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
-
+  @observable public acceleratorsToBlock: Array<BlockableAccelerator> =
+    (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
   @observable public versions: Record<
@@ -199,6 +201,8 @@ export class AppState {
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.resetEditorLayout = this.resetEditorLayout.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
+    this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
+    this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -240,6 +244,7 @@ export class AppState {
     autorun(() => this.save('channelsToShow', this.channelsToShow));
     autorun(() => this.save('statesToShow', this.statesToShow));
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
+    autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
     autorun(() => {
       if (typeof this.isUnsaved === 'undefined') return;
@@ -294,6 +299,11 @@ export class AppState {
 
     // Make sure the console isn't all empty and sad
     this.pushOutput('Console ready 🔬');
+
+    // set blocked shortcuts
+    ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+      ...this.acceleratorsToBlock,
+    ]);
   }
 
   /**
@@ -756,6 +766,25 @@ export class AppState {
     this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
+  @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {
+    if (!this.acceleratorsToBlock.includes(acc)) {
+      this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
+      ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+        ...this.acceleratorsToBlock,
+      ]);
+    }
+  }
+
+  @action public async removeAcceleratorToBlock(acc: BlockableAccelerator) {
+    if (this.acceleratorsToBlock.includes(acc)) {
+      this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
+        (a) => a !== acc,
+      );
+      ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+        ...this.acceleratorsToBlock,
+      ]);
+    }
+  }
   /**
    * Resets the view, optionally with certain view flags enabled.
    *

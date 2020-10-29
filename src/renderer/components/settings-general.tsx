@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AppearanceSettings } from './settings-general-appearance';
+import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
 import { GitHubSettings } from './settings-general-github';
 
@@ -32,6 +33,8 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps> {
         <ConsoleSettings appState={this.props.appState} />
         <Divider />
         <GitHubSettings appState={this.props.appState} />
+        <Divider />
+        <BlockAcceleratorsSettings appState={this.props.appState} />
       </div>
     );
   }
