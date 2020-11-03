@@ -106,7 +106,7 @@ export class GistActionButton extends React.Component<
     }
   }
 
-  public async getFiddleDescriptionFromUser(): Promise<string> {
+  public async getFiddleDescriptionFromUser(): Promise<string | null> {
     const { appState } = this.props;
 
     // Reset potentially non-null last description.
@@ -117,20 +117,19 @@ export class GistActionButton extends React.Component<
       label: 'Please provide a brief description for your Fiddle Gist',
       wantsInput: true,
       ok: 'Publish',
-      cancel: undefined,
+      cancel: 'Cancel',
       placeholder: 'Electron Fiddle Gist',
     });
-
     appState.isGenericDialogShowing = true;
     await when(() => !appState.isGenericDialogShowing);
 
-    return appState.genericDialogLastInput ?? 'Electron Fiddle Gist';
+    const cancelled = !appState.genericDialogLastResult;
+    return cancelled
+      ? null
+      : appState.genericDialogLastInput ?? 'Electron Fiddle Gist';
   }
 
-  /**
-   * Publish a new GitHub gist.
-   */
-  public async handlePublish() {
+  private async publishGist(description: string) {
     const { appState } = this.props;
 
     const octo = await getOctokit(this.props.appState);
@@ -138,11 +137,7 @@ export class GistActionButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    appState.activeGistAction = GistActionState.publishing;
-
     try {
-      const description = await this.getFiddleDescriptionFromUser();
-
       const gist = await octo.gists.create({
         public: !!gitHubPublishAsPublic,
         description,
@@ -168,8 +163,21 @@ export class GistActionButton extends React.Component<
 
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
+  }
 
-    // Ensure any previous input is reset.
+  /**
+   * Publish a new GitHub gist.
+   */
+  public async handlePublish() {
+    const { appState } = this.props;
+    appState.activeGistAction = GistActionState.publishing;
+
+    const description = await this.getFiddleDescriptionFromUser();
+
+    if (description) {
+      await this.publishGist(description);
+    }
+
     appState.genericDialogLastInput = null;
     appState.activeGistAction = GistActionState.none;
   }

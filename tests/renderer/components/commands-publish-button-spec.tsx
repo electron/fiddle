@@ -85,6 +85,25 @@ describe('Publish button component', () => {
     });
   });
 
+  it('can cancel publishing to Gist', async () => {
+    const mockOctokit = {
+      authenticate: jest.fn(),
+      gists: {
+        create: jest.fn(async () => ({ data: { id: '123' } })),
+      },
+    };
+
+    (getOctokit as any).mockReturnValue(mockOctokit);
+
+    const wrapper = shallow(<GistActionButton appState={store} />);
+    const instance: GistActionButton = wrapper.instance() as any;
+
+    instance.getFiddleDescriptionFromUser = jest.fn().mockReturnValue(null);
+    await instance.performGistAction();
+
+    expect(mockOctokit.gists.create).not.toHaveBeenCalled();
+  });
+
   it('attempts to update an existing Gist', async () => {
     const mockOctokit = {
       authenticate: jest.fn(),
