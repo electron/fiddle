@@ -88,10 +88,12 @@ export class Output extends React.Component<CommandsProps> {
       : {};
 
     return lines.map((text, lineIndex) => (
-      <p style={style} key={`${entry.timestamp}--${index}--${lineIndex}`}>
-        {timestamp}
-        {text}
-      </p>
+      <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+        <span style={style} className="output-message">
+          {timestamp}
+          {text}
+        </span>
+      </div>
     ));
   }
 
