@@ -178,6 +178,7 @@ export class Runner {
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
+      this.appState.isInstallingModules = true;
       const packageManager = pmOptions.packageManager;
       const pmInstalled = await getIsPackageManagerInstalled(packageManager);
       if (!pmInstalled) {
@@ -190,6 +191,7 @@ export class Runner {
         message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
 
         pushOutput(message, { isNotPre: true });
+        this.appState.isInstallingModules = false;
         return;
       }
 
@@ -200,6 +202,7 @@ export class Runner {
         { isNotPre: true },
       );
       pushOutput(await installModules(pmOptions, ...modules));
+      this.appState.isInstallingModules = false;
     }
   }
 

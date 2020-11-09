@@ -19,7 +19,7 @@ export interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps> {
   public render() {
-    const { isRunning, currentElectronVersion } = this.props.appState;
+    const { isRunning, isInstallingModules, currentElectronVersion } = this.props.appState;
 
     const state = currentElectronVersion && currentElectronVersion.state;
     const props: IButtonProps = { className: 'button-run', disabled: true };
@@ -40,6 +40,9 @@ export class Runner extends React.Component<RunnerProps> {
         props.text = 'Stop';
         props.onClick = window.ElectronFiddle.app.runner.stop;
         props.icon = 'stop';
+      } else if (isInstallingModules) {
+        props.text = 'Installing modules';
+        props.icon = <Spinner size={16} />;
       } else {
         props.text = 'Run';
         props.onClick = window.ElectronFiddle.app.runner.run;
