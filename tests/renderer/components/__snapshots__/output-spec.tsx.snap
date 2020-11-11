@@ -4,31 +4,39 @@ exports[`Output component renders with output 1`] = `
 <div
   className="output"
 >
-  <p
+  <div
     key="1532704073130--0--0"
-    style={Object {}}
   >
     <span
-      className="timestamp"
+      className="output-message"
+      style={Object {}}
     >
-      1532704073130
+      <span
+        className="timestamp"
+      >
+        1532704073130
+      </span>
+      Hi!
     </span>
-    Hi!
-  </p>
-  <p
+  </div>
+  <div
     key="1532704073130--1--0"
-    style={
-      Object {
-        "whiteSpace": "initial",
-      }
-    }
   >
     <span
-      className="timestamp"
+      className="output-message"
+      style={
+        Object {
+          "whiteSpace": "initial",
+        }
+      }
     >
-      1532704073130
+      <span
+        className="timestamp"
+      >
+        1532704073130
+      </span>
+      Hi!
     </span>
-    Hi!
-  </p>
+  </div>
 </div>
 `;
