@@ -54,17 +54,19 @@ export async function getIsPackageManagerInstalled(
   try {
     await exec(process.cwd(), command);
     if (packageManager === 'npm') {
-      return (isNpmInstalled = true);
+      isNpmInstalled = true;
     } else {
-      return (isYarnInstalled = true);
+      isYarnInstalled = true;
     }
+    return true;
   } catch (error) {
     console.warn(`getIsPackageManagerInstalled: "${command}" failed.`, error);
     if (packageManager === 'npm') {
-      return (isNpmInstalled = false);
+      isNpmInstalled = false;
     } else {
-      return (isYarnInstalled = false);
+      isYarnInstalled = false;
     }
+    return false;
   }
 }
 
