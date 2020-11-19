@@ -74,7 +74,7 @@ const config = {
           loadingGif: './assets/loading.gif',
           noMsi: true,
           remoteReleases: 'https://github.com/electron/fiddle',
-          setupExe: `electron-fiddle-${version}-${arch}-setup.exe`,
+          setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
           setupIcon: path.resolve(iconDir, 'fiddle.ico'),
           certificateFile: process.env['WINDOWS_CODESIGN_FILE'],
           certificatePassword: process.env['WINDOWS_CODESIGN_PASSWORD'],
