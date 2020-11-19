@@ -73,7 +73,6 @@ const config = {
             'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
           loadingGif: './assets/loading.gif',
           noMsi: true,
-          remoteReleases: 'https://github.com/electron/fiddle',
           setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
           setupIcon: path.resolve(iconDir, 'fiddle.ico'),
           certificateFile: process.env['WINDOWS_CODESIGN_FILE'],
