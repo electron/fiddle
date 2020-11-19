@@ -1,5 +1,5 @@
 import * as fsType from 'fs-extra';
-import { action, autorun, computed, observable, when } from 'mobx';
+import { action, autorun, computed, observable, toJS, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
@@ -594,22 +594,23 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async updateDownloadedVersionState(): Promise<void> {
-    const updatedVersions = { ...this.versions };
+    const updatedVersions = toJS(this.versions);
 
     // Keep state of currently downloading binaries first
     const downloadingVersions = getDownloadingVersions(this);
-    (downloadingVersions || []).forEach((version) => {
+    for (const version of downloadingVersions) {
       if (updatedVersions[version]) {
         updatedVersions[version].state = VersionState.downloading;
       }
-    });
+    }
 
     const downloadedVersions = await getDownloadedVersions();
-    (downloadedVersions || []).forEach((version) => {
+
+    for (const version of downloadedVersions) {
       if (updatedVersions[version]) {
         updatedVersions[version].state = VersionState.ready;
       }
-    });
+    }
 
     console.log(`State: Updated version state`, updatedVersions);
 
