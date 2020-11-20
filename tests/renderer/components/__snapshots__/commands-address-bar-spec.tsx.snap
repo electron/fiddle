@@ -11,6 +11,7 @@ exports[`AddressBar component renders 1`] = `
     <Blueprint3.InputGroup
       key="addressbar"
       leftIcon="geosearch"
+      onBlur={[Function]}
       onChange={[Function]}
       placeholder="https://gist.github.com/..."
       rightElement={

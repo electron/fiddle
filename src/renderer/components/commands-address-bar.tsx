@@ -31,6 +31,7 @@ export class AddressBar extends React.Component<
     super(props);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.handleBlur = this.handleBlur.bind(this);
     this.submit = this.submit.bind(this);
 
     const { gistId } = this.props.appState;
@@ -110,6 +111,15 @@ export class AddressBar extends React.Component<
     this.setState({ value: event.target.value });
   }
 
+  public handleBlur(_event: React.FocusEvent<HTMLInputElement>) {
+    const { gistId } = this.props.appState;
+    const url = urlFromId(gistId);
+
+    if (url) {
+      this.setState({ value: url });
+    }
+  }
+
   public renderLoadButton(isValueCorrect: boolean): JSX.Element {
     return (
       <Button
@@ -136,6 +146,7 @@ export class AddressBar extends React.Component<
             leftIcon="geosearch"
             intent={isCorrect || !value ? undefined : Intent.DANGER}
             onChange={this.handleChange}
+            onBlur={this.handleBlur}
             placeholder="https://gist.github.com/..."
             value={value}
             rightElement={this.renderLoadButton(isCorrect)}
