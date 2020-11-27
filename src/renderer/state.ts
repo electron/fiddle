@@ -250,31 +250,29 @@ export class AppState {
     autorun(() => {
       if (typeof this.isUnsaved === 'undefined') return;
 
-      if (!!this.isUnsaved) {
+      if (this.isUnsaved) {
         window.onbeforeunload = () => {
           ipcRendererManager.send(IpcEvents.SHOW_INACTIVE);
           this.setGenericDialogOptions({
             type: GenericDialogType.warning,
             label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
-            ok: 'Quit',
+            ok: 'Exit',
           });
 
           this.isGenericDialogShowing = true;
 
           // We'll wait until the warning dialog was closed
           when(() => !this.isGenericDialogShowing).then(() => {
-            const quitConfirmed = this.genericDialogLastResult;
+            const closeConfirmed = this.genericDialogLastResult;
             // The user confirmed, let's close for real.
-            if (quitConfirmed) {
+            if (closeConfirmed) {
+              // isQuitting checks if we're trying to quit the app
+              // or just close the window
+              if (this.isQuitting) {
+                ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
+              }
               window.onbeforeunload = null;
               window.close();
-            }
-
-            // isQuitting checks if we're trying to quit the app
-            // or just close the window
-            if (this.isQuitting) {
-              ipcRendererManager.send(IpcEvents.CONFIRM_QUIT, quitConfirmed);
-              this.isQuitting = false;
             }
           });
 

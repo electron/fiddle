@@ -45,16 +45,7 @@ export async function onReady() {
  */
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);
-  ipcMainManager.on(IpcEvents.CONFIRM_QUIT, quitAppIfConfirmed);
-}
-
-export function quitAppIfConfirmed(
-  _: Electron.IpcMainEvent,
-  quitConfirmed: boolean,
-) {
-  if (quitConfirmed) {
-    app.quit();
-  }
+  ipcMainManager.on(IpcEvents.CONFIRM_QUIT, app.quit);
 }
 
 export function setupMenuHandler() {
