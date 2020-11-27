@@ -4,7 +4,7 @@ const util = require('util');
 const path = require('path');
 const logSymbols = require('log-symbols');
 
-const { GITHUB_TOKEN, GITHUB_USERNAME } = process.env;
+const { GITHUB_TOKEN, GH_TOKEN } = process.env;
 const CONTRIBUTORS_FILE_PATH = path.join(
   __dirname,
   '../static/contributors.json',
@@ -12,11 +12,9 @@ const CONTRIBUTORS_FILE_PATH = path.join(
 const CONTRIBUTORS_URL =
   'https://api.github.com/repos/electron/fiddle/contributors';
 const HEADERS =
-  GITHUB_TOKEN && GITHUB_USERNAME
+  GITHUB_TOKEN || GH_TOKEN
     ? {
-        Authorization: `Basic ${Buffer.from(
-          GITHUB_USERNAME + ':' + GITHUB_TOKEN,
-        ).toString('base64')}`,
+        Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
       }
     : {};
 
