@@ -115,7 +115,6 @@ describe('AppState', () => {
         expect(window.close).toHaveBeenCalledTimes(1);
         expect(ipcRendererManager.send).toHaveBeenCalledWith(
           IpcEvents.CONFIRM_QUIT,
-          true,
         );
         done();
       });
@@ -135,9 +134,8 @@ describe('AppState', () => {
       appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        expect(ipcRendererManager.send).not.toHaveBeenCalledWith(
           IpcEvents.CONFIRM_QUIT,
-          false,
         );
         done();
       });

@@ -11,7 +11,6 @@ import {
   onBeforeQuit,
   onReady,
   onWindowsAllClosed,
-  quitAppIfConfirmed,
   setupMenuHandler,
 } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
@@ -78,20 +77,8 @@ describe('main', () => {
       expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BEFORE_QUIT);
       expect(ipcMainManager.on).toHaveBeenCalledWith(
         IpcEvents.CONFIRM_QUIT,
-        quitAppIfConfirmed,
+        app.quit,
       );
-    });
-  });
-
-  describe('quitAppIfConfirmed()', () => {
-    it('quits app if passed a truthy value', () => {
-      quitAppIfConfirmed({} as any, true);
-      expect(app.quit).toHaveBeenCalledTimes(1);
-    });
-
-    it('does nothing if passed a value', () => {
-      quitAppIfConfirmed({} as any, false);
-      expect(app.quit).toHaveBeenCalledTimes(0);
     });
   });
 
