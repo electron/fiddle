@@ -74,6 +74,7 @@ describe('AppState', () => {
 
   beforeEach(() => {
     appState = new AppState();
+    appState.updateDownloadedVersionState = jest.fn();
     ipcRendererManager.removeAllListeners();
   });
 
@@ -475,6 +476,8 @@ describe('AppState', () => {
 
   describe('updateDownloadedVersionState()', () => {
     beforeEach(() => {
+      appState = new AppState();
+      ipcRendererManager.removeAllListeners();
       (getDownloadingVersions as jest.Mock).mockReturnValue(['2.0.1']);
       (getDownloadedVersions as jest.Mock).mockReturnValue(
         Promise.resolve(['2.0.2']),
