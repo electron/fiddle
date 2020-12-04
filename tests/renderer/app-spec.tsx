@@ -4,6 +4,7 @@ import { EditorBackup } from '../../src/utils/editor-backup';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
 import { overridePlatform, resetPlatform } from '../utils';
+import { EditorId } from '../../src/interfaces';
 
 jest.mock('../../src/renderer/file-manager', () =>
   require('../mocks/file-manager'),
@@ -110,18 +111,24 @@ describe('Editors component', () => {
   });
 
   describe('replaceFiddle()', () => {
-    it('sets editor values and source info', (done) => {
-      const app = new App();
+    let app: App;
+
+    beforeEach(() => {
+      app = new App();
       (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = false;
+      app.state.setGenericDialogOptions = jest.fn();
       app.state.setVisibleMosaics = jest.fn();
       app.setEditorValues = jest.fn();
+    });
 
+    it('sets editor values and source info', (done) => {
       const editorValues = {
         html: 'html-value',
         main: 'main-value',
         renderer: 'renderer-value',
         preload: '',
+        css: '',
       };
 
       app
@@ -139,14 +146,55 @@ describe('Editors component', () => {
         });
     });
 
+    it('only shows mosaic for non-empty editor contents', (done) => {
+      const editorValues = {
+        main: 'main-value',
+        renderer: 'renderer-value',
+        html: 'html-value',
+        preload: '',
+        css: '/* Empty */',
+      };
+
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+        })
+        .then(() => {
+          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+            EditorId.main,
+            EditorId.renderer,
+            EditorId.html,
+          ]);
+          done();
+        });
+    });
+
+    it('shows visible mosaics in the correct pre-defined order', (done) => {
+      // this order is defined inside the replaceFiddle() function
+      const editorValues = {
+        css: 'css-value',
+        html: 'html-value',
+        renderer: 'renderer-value',
+        main: 'main-value',
+      };
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+        })
+        .then(() => {
+          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+            EditorId.main,
+            EditorId.renderer,
+            EditorId.html,
+            EditorId.css,
+          ]);
+          done();
+        });
+    });
+
     it('unsets state of previous source when called', (done) => {
-      const app = new App();
-      (app.state as Partial<AppState>) = new MockState();
       app.state.isUnsaved = true;
       app.state.localPath = '/fake/path';
-      app.state.setGenericDialogOptions = jest.fn();
-      app.state.setVisibleMosaics = jest.fn();
-      app.setEditorValues = jest.fn();
 
       const editorValues = {
         html: 'html-value',
@@ -173,12 +221,6 @@ describe('Editors component', () => {
     });
 
     it('marks the new Fiddle as Saved', (done) => {
-      const app = new App();
-      (app.state as Partial<AppState>) = new MockState();
-      app.state.isUnsaved = false;
-      app.state.setVisibleMosaics = jest.fn();
-      app.setEditorValues = jest.fn();
-
       const editorValues = {
         html: 'html-value',
         main: 'main-value',
@@ -196,15 +238,10 @@ describe('Editors component', () => {
           done();
         });
     });
+
     describe('when current Fiddle is unsaved and prompt appears', () => {
       it('takes no action if prompt is rejected', (done) => {
-        const app = new App();
-        (app.state as Partial<AppState>) = new MockState();
         app.state.isUnsaved = true;
-        app.state.setVisibleMosaics = jest.fn();
-        app.state.setGenericDialogOptions = jest.fn();
-        app.setEditorValues = jest.fn();
-
         expect(app.state.localPath).toBeUndefined();
         expect(app.state.gistId).toBe('');
         expect(app.state.templateName).toBeUndefined();

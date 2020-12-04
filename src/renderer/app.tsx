@@ -71,11 +71,28 @@ export class App {
 
     // display all editors that have content
     const visibleEditors = [];
-    for (const id of Object.keys(editorValues)) {
+
+    // ensure consistent sorting of mosaics
+    const sortedEditors = Object.keys(editorValues).sort((a, b) => {
+      const order: Array<string> = [
+        'main',
+        'renderer',
+        'html',
+        'preload',
+        'css',
+      ];
+
+      return order.indexOf(a) - order.indexOf(b);
+    });
+
+    for (const id of sortedEditors) {
       const content = editorValues[id];
 
-      // if the gist content matches the empty file output, don't show it
-      if (!Object.values(EMPTY_EDITOR_CONTENT).includes(content)) {
+      // if the gist content is empty or matches the empty file output, don't show it
+      if (
+        content.length > 0 &&
+        !Object.values(EMPTY_EDITOR_CONTENT).includes(content)
+      ) {
         visibleEditors.push(id as EditorId);
       }
     }
