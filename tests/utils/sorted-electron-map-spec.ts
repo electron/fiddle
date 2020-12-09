@@ -15,7 +15,7 @@ describe('sorted-electron-map', () => {
     };
 
     const result = sortedElectronMap(map, (_k, e) => e);
-    expect(result).toStrictEqual([
+    expect(result).toStrictEqual<any>([
       { version: 'v3.0.0' },
       { version: 'v2.0.0' },
       { version: 'v1.0.0' },
@@ -54,7 +54,7 @@ describe('sorted-electron-map', () => {
     };
 
     const result = sortedElectronMap(map, (_k, e) => e);
-    expect(result).toStrictEqual([
+    expect(result).toStrictEqual<any>([
       { version: 'v3.0.0' },
       { version: 'v3.0.0-beta.1' },
       { version: 'v3.0.0-nightly.20200105' },
@@ -84,7 +84,7 @@ describe('sorted-electron-map', () => {
     };
 
     const result = sortedElectronMap(map, (_k, e) => e);
-    expect(result).toStrictEqual([
+    expect(result).toStrictEqual<any>([
       { version: 'garbage' },
       { version: 'moreGarbage' },
       { version: 'v3.0.0' },

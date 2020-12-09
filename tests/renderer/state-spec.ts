@@ -114,7 +114,7 @@ describe('AppState', () => {
       appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(1);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.CONFIRM_QUIT,
         );
         done();
@@ -135,7 +135,7 @@ describe('AppState', () => {
       appState.isQuitting = true;
       process.nextTick(() => {
         expect(window.close).toHaveBeenCalledTimes(0);
-        expect(ipcRendererManager.send).not.toHaveBeenCalledWith(
+        expect(ipcRendererManager.send).not.toHaveBeenCalledWith<any>(
           IpcEvents.CONFIRM_QUIT,
         );
         done();
@@ -340,7 +340,7 @@ describe('AppState', () => {
       appState.versions['2.0.2'].state = VersionState.ready;
       await appState.removeVersion('v2.0.2');
 
-      expect(removeBinary).toHaveBeenCalledWith('2.0.2');
+      expect(removeBinary).toHaveBeenCalledWith<any>('2.0.2');
     });
 
     it('does not remove it if not necessary', async () => {
@@ -377,12 +377,12 @@ describe('AppState', () => {
       appState.versions['2.0.2'].state = VersionState.unknown;
 
       await appState.downloadVersion('v2.0.2');
-      expect(setupBinary).toHaveBeenCalledWith(appState, '2.0.2');
+      expect(setupBinary).toHaveBeenCalledWith<any>(appState, '2.0.2');
     });
 
     it('downloads an unknown version', async () => {
       await appState.downloadVersion('v3.5');
-      expect(setupBinary).toHaveBeenCalledWith(appState, '3.5');
+      expect(setupBinary).toHaveBeenCalledWith<any>(appState, '3.5');
     });
 
     it('does not download a version if already ready', async () => {

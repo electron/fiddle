@@ -281,10 +281,10 @@ describe('RemoteLoader', () => {
         { path: 'test/path', ref: '4.0.0' },
       );
 
-      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith(
+      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>(
         `'test/path' example from the Electron docs for version 4.0.0`,
       );
-      expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith(
+      expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith<any>(
         '4.0.0',
         'test/path',
       );
@@ -310,8 +310,8 @@ describe('RemoteLoader', () => {
       instance.fetchGistAndLoad = jest.fn();
       await instance.loadFiddleFromGist({}, { id: 'gist' });
 
-      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith('gist');
-      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
+      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>('gist');
+      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith<any>('gist');
     });
 
     it('does not load the example without confirmation', async () => {

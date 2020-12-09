@@ -72,7 +72,7 @@ describe('Publish button component', () => {
       .mockReturnValue('Electron Fiddle Gist');
     await instance.performGistAction();
 
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'Electron Fiddle Gist',
       files: {
         'index.html': { content: 'html-content' },
@@ -177,7 +177,7 @@ describe('Publish button component', () => {
 
     await instance.performGistAction();
 
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'Electron Fiddle Gist',
       files: {
         'index.html': { content: '<!-- Empty -->' },
@@ -210,7 +210,7 @@ describe('Publish button component', () => {
 
     await instance.performGistAction();
 
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'My Custom Description',
       files: {
         'index.html': { content: '<!-- Empty -->' },
@@ -268,7 +268,7 @@ describe('Publish button component', () => {
     instance.setPrivate();
     await instance.performGistAction();
 
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       ...expectedGistCreateOpts,
       public: false,
     });
@@ -276,7 +276,7 @@ describe('Publish button component', () => {
     instance.setPublic();
     await instance.performGistAction();
 
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith({
+    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       ...expectedGistCreateOpts,
       public: true,
     });

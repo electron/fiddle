@@ -40,8 +40,8 @@ describe('npm', () => {
     // const cow = require('cow');
     /* const say = require('say'); */
     /**
-     * const hello = require('hello'); 
-     * const world = require('world'); 
+     * const hello = require('hello');
+     * const world = require('world');
     */
   `;
 
@@ -214,7 +214,7 @@ describe('npm', () => {
           'thing',
         );
 
-        expect(exec).toHaveBeenCalledWith(
+        expect(exec).toHaveBeenCalledWith<any>(
           '/my/directory',
           'npm install -S say thing',
         );
@@ -223,7 +223,7 @@ describe('npm', () => {
       it('attempts to installs all modules', async () => {
         installModules({ dir: '/my/directory', packageManager: 'npm' });
 
-        expect(exec).toHaveBeenCalledWith(
+        expect(exec).toHaveBeenCalledWith<any>(
           '/my/directory',
           'npm install --dev --prod',
         );
@@ -238,7 +238,7 @@ describe('npm', () => {
           'thing',
         );
 
-        expect(exec).toHaveBeenCalledWith(
+        expect(exec).toHaveBeenCalledWith<any>(
           '/my/directory',
           'yarn add say thing',
         );
@@ -247,7 +247,7 @@ describe('npm', () => {
       it('attempts to installs all modules', async () => {
         installModules({ dir: '/my/directory', packageManager: 'yarn' });
 
-        expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn add');
+        expect(exec).toHaveBeenCalledWith<any>('/my/directory', 'yarn add');
       });
     });
   });
@@ -256,13 +256,19 @@ describe('npm', () => {
     it('attempts to run a command via npm', async () => {
       packageRun({ dir: '/my/directory', packageManager: 'npm' }, 'package');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'npm run package');
+      expect(exec).toHaveBeenCalledWith<any>(
+        '/my/directory',
+        'npm run package',
+      );
     });
 
     it('attempts to run a command via yarn', async () => {
       packageRun({ dir: '/my/directory', packageManager: 'yarn' }, 'package');
 
-      expect(exec).toHaveBeenCalledWith('/my/directory', 'yarn run package');
+      expect(exec).toHaveBeenCalledWith<any>(
+        '/my/directory',
+        'yarn run package',
+      );
     });
   });
 });

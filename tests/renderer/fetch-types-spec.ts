@@ -77,7 +77,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(true);
-      expect(fs.existsSync).toHaveBeenCalledWith(expected);
+      expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
     });
 
     it('returns false if they exist', async () => {
@@ -90,7 +90,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(false);
-      expect(fs.existsSync).toHaveBeenCalledWith(expected);
+      expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
     });
   });
 
@@ -112,7 +112,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(`it's me, the type definition`);
-      expect(fs.existsSync).toHaveBeenCalledWith(expected);
+      expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
       expect(fetch).toHaveBeenCalled();
     });
 
@@ -127,7 +127,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(null);
-      expect(fs.existsSync).toHaveBeenCalledWith(expected);
+      expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
       expect(fetch).toHaveBeenCalled();
     });
 
@@ -141,7 +141,7 @@ describe('fetch-types', () => {
         'user/data/electron-typedef/3.0.0/electron.d.ts',
       );
 
-      expect(fs.outputFile).toHaveBeenCalledWith(
+      expect(fs.outputFile).toHaveBeenCalledWith<any>(
         expected,
         `it's me, the type definition`,
       );
@@ -159,7 +159,7 @@ describe('fetch-types', () => {
         'user/data/electron-typedef/3.0.0/electron.d.ts',
       );
 
-      expect(fs.outputFile).toHaveBeenCalledWith(expected, def);
+      expect(fs.outputFile).toHaveBeenCalledWith<any>(expected, def);
       expect(result).toBe(def);
     });
 
@@ -176,7 +176,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(def);
-      expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
+      expect(fs.readFile).toHaveBeenCalledWith<any>(expected, 'utf-8');
     });
 
     it('returns null if downloaded but not readable', async () => {
@@ -191,7 +191,7 @@ describe('fetch-types', () => {
       );
 
       expect(result).toBe(null);
-      expect(fs.readFile).toHaveBeenCalledWith(expected, 'utf-8');
+      expect(fs.readFile).toHaveBeenCalledWith<any>(expected, 'utf-8');
     });
   });
 
@@ -330,7 +330,7 @@ describe('fetch-types', () => {
       const fs = require('fs-extra');
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       await removeTypeDefsForVersion('v3.0.0');
-      expect(fs.remove).toHaveBeenCalledWith(
+      expect(fs.remove).toHaveBeenCalledWith<any>(
         path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'),
       );
     });
