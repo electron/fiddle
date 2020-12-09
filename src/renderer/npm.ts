@@ -1,7 +1,8 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
-import { builtinModules } from 'module';
+// Making TypeScript happy and avoiding "esModuleInterop" issues
+const { builtinModules } = require('module');
 
 export type IPackageManager = 'npm' | 'yarn';
 
