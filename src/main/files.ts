@@ -43,13 +43,13 @@ export async function showOpenDialog() {
  */
 export async function showSaveDialog(event?: IpcEvents, as?: string) {
   // We want to save to a folder, so we'll use an open dialog here
-  const { filePaths } = await dialog.showOpenDialog({
+  const filePaths = dialog.showOpenDialogSync({
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory'],
     title: `Save Fiddle${as ? ` as ${as}` : ''}`,
   });
 
-  if (!filePaths || filePaths.length < 1) {
+  if (!Array.isArray(filePaths) || filePaths.length === 0) {
     return;
   }
 
