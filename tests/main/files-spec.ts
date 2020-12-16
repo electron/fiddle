@@ -27,10 +27,10 @@ const mockTarget = {
 
 describe('files', () => {
   beforeEach(() => {
-    (dialog.showOpenDialog as jest.Mock<any>).mockResolvedValue({
+    (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
       filePaths: ['my/fake/path'],
     });
-    (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
+    (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
 
     ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
   });
@@ -52,7 +52,7 @@ describe('files', () => {
     it('tries to open an "open" dialog', async () => {
       await showOpenDialog();
 
-      const call = (dialog.showOpenDialog as jest.Mock<any>).mock.calls[0];
+      const call = (dialog.showOpenDialog as jest.Mock).mock.calls[0];
 
       expect(dialog.showOpenDialog).toHaveBeenCalled();
       expect(call[0]).toEqual({
@@ -62,7 +62,7 @@ describe('files', () => {
     });
 
     it('notifies the main window of the event', async () => {
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
 
       await showOpenDialog();
 
@@ -111,10 +111,7 @@ describe('files', () => {
     });
 
     it('ensures that the target is empty on save', async () => {
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
-        async () => true,
-      );
-      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await showSaveDialog();
@@ -124,11 +121,8 @@ describe('files', () => {
     });
 
     it('does not overwrite files without consent', async () => {
-      (dialog.showMessageBox as jest.Mock<any>).mockImplementation(
-        async () => false,
-      );
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
-      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       await showSaveDialog();
 
@@ -140,8 +134,8 @@ describe('files', () => {
       (dialog.showMessageBox as jest.Mock<any>).mockImplementation(async () => {
         throw new Error('Nope');
       });
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
-      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       let errored = false;
 
