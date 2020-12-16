@@ -167,8 +167,9 @@ const electronMock = {
     start: jest.fn(),
   },
   dialog: {
-    showOpenDialog: jest.fn(() => Promise.resolve({})),
-    showMessageBox: jest.fn(() => Promise.resolve({})),
+    showOpenDialog: jest.fn().mockResolvedValue({}),
+    showOpenDialogSync: jest.fn().mockReturnValue(['path']),
+    showMessageBox: jest.fn().mockResolvedValue({}),
   },
   ipcMain: new MockIPC(),
   ipcRenderer: new MockIPC(),
