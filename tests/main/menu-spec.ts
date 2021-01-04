@@ -17,11 +17,7 @@ jest.mock('../../src/main/ipc');
 describe('menu', () => {
   beforeEach(() => {
     electron.app.name = 'Electron Fiddle';
-    // need to keep this deprecated API for electron-default-menu mock as well
-    (electron.app.getName as any).mockReturnValue('Electron Fiddle');
-    (electron.dialog.showOpenDialog as any).mockReturnValue(
-      Promise.resolve({}),
-    );
+    (electron.dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
   });
 
   afterEach(() => {
@@ -307,7 +303,7 @@ describe('menu', () => {
 
       it('saves a Fiddle as', () => {
         file.submenu[6].click();
-        expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
+        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as a gist', () => {
@@ -319,7 +315,7 @@ describe('menu', () => {
 
       it('saves a Fiddle as a forge project', () => {
         file.submenu[9].click();
-        expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
+        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
@@ -333,7 +329,7 @@ describe('menu', () => {
       it('saves as a Fiddle with blocked accelerator', () => {
         setupMenu([BlockableAccelerator.saveAs]);
         file.submenu[6].click();
-        expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
+        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
     });
   });
