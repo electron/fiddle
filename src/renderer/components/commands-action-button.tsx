@@ -65,6 +65,8 @@ export class GistActionButton extends React.Component<
       isDeleting: false,
       actionType: GistActionType.publish,
     };
+
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
   }
 
   private toaster: Toaster;
