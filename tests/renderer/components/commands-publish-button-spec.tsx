@@ -290,7 +290,7 @@ describe('Publish button component', () => {
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
     instance.performGistAction = jest.fn().mockImplementationOnce(() => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         wrapper.setProps(
           { appState: { store, activeGistAction: GistActionState.publishing } },
           () => {
@@ -318,7 +318,7 @@ describe('Publish button component', () => {
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
     instance.performGistAction = jest.fn().mockImplementationOnce(() => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         wrapper.setProps(
           { appState: { store, activeGistAction: GistActionState.updating } },
           () => {
@@ -346,7 +346,7 @@ describe('Publish button component', () => {
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
     instance.performGistAction = jest.fn().mockImplementationOnce(() => {
-      return new Promise((resolve) => {
+      return new Promise<void>((resolve) => {
         wrapper.setProps(
           { appState: { store, activeGistAction: GistActionState.deleting } },
           () => {
