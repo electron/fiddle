@@ -45,7 +45,7 @@ describe('FileManager', () => {
       const fakePath = '/fake/path';
       await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {},
         { filePath: fakePath },
       );
@@ -59,7 +59,7 @@ describe('FileManager', () => {
       const fakePath = '/fake/path';
       await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           html: '',
           renderer: '',
@@ -147,7 +147,7 @@ describe('FileManager', () => {
     it('asks for a path via IPC if none can  be found', async () => {
       await fm.saveFiddle();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+      expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
         IpcEvents.FS_SAVE_FIDDLE_DIALOG,
       );
     });
@@ -194,7 +194,7 @@ describe('FileManager', () => {
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
       await fm.openTemplate('test');
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           html: '',
           main: '',

@@ -108,6 +108,6 @@ describe('TouchBarManager', () => {
 
     touchBarMgr.selectedVersion = '2.0.1';
     click();
-    expect(appState.setVersion).toHaveBeenCalledWith('2.0.1');
+    expect(appState.setVersion).toHaveBeenCalledWith<any>('2.0.1');
   });
 });

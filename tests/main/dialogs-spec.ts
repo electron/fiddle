@@ -27,7 +27,7 @@ describe('dialogs', () => {
   describe('warning dialog', () => {
     it('shows dialog when triggering IPC event', () => {
       ipcMainManager.emit(IpcEvents.SHOW_WARNING_DIALOG, {}, { hi: 'hello' });
-      expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
+      expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
         type: 'warning',
         hi: 'hello',
       });
@@ -41,7 +41,7 @@ describe('dialogs', () => {
         {},
         { hi: 'hello' },
       );
-      expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
+      expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
         type: 'warning',
         hi: 'hello',
       });
@@ -57,7 +57,7 @@ describe('dialogs', () => {
       ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
         reply: jest.fn(),
       });
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith(
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith<any>(
         expect.objectContaining({
           properties: ['openDirectory'],
         }),
@@ -77,7 +77,7 @@ describe('dialogs', () => {
       });
 
       await flushPromises();
-      expect(replyFn).toHaveBeenCalledWith(
+      expect(replyFn).toHaveBeenCalledWith<any>(
         IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
         paths,
       );

@@ -36,6 +36,7 @@ describe('windows', () => {
         enableRemoteModule: true,
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
+        contextIsolation: false,
       },
     };
 

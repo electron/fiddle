@@ -110,7 +110,7 @@ describe('menu', () => {
         ({ label }) => label === 'Toggle Bisect Helper',
       );
       (toggleSoftWrap as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith(
+      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
         IpcEvents.BISECT_COMMANDS_TOGGLE,
       );
     });
@@ -125,7 +125,7 @@ describe('menu', () => {
 
       const selectAll = submenu.find(({ label }) => label === 'Select All');
       (selectAll as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith(
+      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
         IpcEvents.SELECT_ALL_IN_EDITOR,
       );
     });
@@ -150,7 +150,7 @@ describe('menu', () => {
 
       it('shows the welcome tour', () => {
         help.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.SHOW_WELCOME_TOUR,
         );
       });
@@ -171,21 +171,21 @@ describe('menu', () => {
 
       it('opens the Fiddle repo', () => {
         help.submenu[5].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
           'https://github.com/electron/fiddle',
         );
       });
 
       it('opens the Electron repo', () => {
         help.submenu[6].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
           'https://github.com/electron/electron',
         );
       });
 
       it('opens the Electron issues', () => {
         help.submenu[7].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
           'https://github.com/electron/electron/issues',
         );
       });
@@ -202,7 +202,7 @@ describe('menu', () => {
 
       it('shows the preferences', () => {
         preferences.submenu[3].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.OPEN_SETTINGS,
         );
       });
@@ -234,9 +234,10 @@ describe('menu', () => {
 
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
-        expect(
-          ipcMainManager.send,
-        ).toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, ['App']);
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.FS_OPEN_TEMPLATE,
+          ['App'],
+        );
       });
     });
 
@@ -251,19 +252,23 @@ describe('menu', () => {
 
       it('runs the fiddle', () => {
         tasks.submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.FIDDLE_RUN,
+        );
       });
 
       it('packages the fiddle', () => {
         tasks.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FIDDLE_PACKAGE,
         );
       });
 
       it('makes the fiddle', () => {
         tasks.submenu[2].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_MAKE);
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.FIDDLE_MAKE,
+        );
       });
     });
 
@@ -278,7 +283,7 @@ describe('menu', () => {
 
       it('creates a new fiddle', () => {
         file.submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_NEW_FIDDLE,
         );
       });
@@ -296,7 +301,7 @@ describe('menu', () => {
 
       it('saves a Fiddle', () => {
         file.submenu[5].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
         );
       });
@@ -308,7 +313,7 @@ describe('menu', () => {
 
       it('saves a Fiddle as a gist', () => {
         file.submenu[8].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE_GIST,
         );
       });
@@ -321,7 +326,7 @@ describe('menu', () => {
       it('saves a Fiddle with blocked accelerator', () => {
         setupMenu([BlockableAccelerator.save]);
         file.submenu[5].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
         );
       });

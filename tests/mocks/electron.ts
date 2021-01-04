@@ -54,8 +54,8 @@ export class MockMenuItem {
   public type: string;
   public click: (
     menuItem: Electron.MenuItem,
-    browserWindow: Electron.BrowserWindow,
-    event: Electron.Event,
+    browserWindow: Electron.BrowserWindow | undefined,
+    event: KeyboardEvent,
   ) => void;
 
   constructor(options: Electron.MenuItemConstructorOptions) {

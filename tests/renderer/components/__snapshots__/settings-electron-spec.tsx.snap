@@ -18,6 +18,7 @@ exports[`ElectronSettings component renders 1`] = `
         hoverOpenDelay={100}
         intent="primary"
         key="Stable"
+        minimal={false}
         position="bottom"
         transitionDuration={100}
       >
@@ -37,6 +38,7 @@ exports[`ElectronSettings component renders 1`] = `
         hoverOpenDelay={100}
         intent="primary"
         key="Beta"
+        minimal={false}
         position="bottom"
         transitionDuration={100}
       >
@@ -56,6 +58,7 @@ exports[`ElectronSettings component renders 1`] = `
         hoverOpenDelay={100}
         intent="primary"
         key="Nightly"
+        minimal={false}
         position="bottom"
         transitionDuration={100}
       >
@@ -75,6 +78,7 @@ exports[`ElectronSettings component renders 1`] = `
         hoverOpenDelay={100}
         intent="primary"
         key="Unsupported"
+        minimal={false}
         position="bottom"
         transitionDuration={100}
       >
@@ -96,6 +100,7 @@ exports[`ElectronSettings component renders 1`] = `
         hoverCloseDelay={0}
         hoverOpenDelay={100}
         intent="primary"
+        minimal={false}
         position="bottom"
         transitionDuration={100}
       >

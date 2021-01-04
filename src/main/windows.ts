@@ -26,6 +26,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       nodeIntegration: true,
       enableRemoteModule: true,
       nodeIntegrationInWorker: true,
+      contextIsolation: false,
     },
   };
 }
