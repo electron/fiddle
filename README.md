@@ -73,7 +73,7 @@ address bar.
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle_0.19.0_i386.deb">
         💿 deb
       </a><br />
-      <span>32-bit</span>
+      <span>64-bit</span>
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-1.x86_64.rpm">
         💿 rpm
       </a> |
