@@ -31,6 +31,7 @@ address bar.
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-win32-x64-setup.exe">
         💿 Installer
       </a>
+      <br />
       <span>ARM64</span>
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-win32-arm64-setup.exe">
         💿 Installer
