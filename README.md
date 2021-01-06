@@ -13,7 +13,6 @@ address bar.
 # Download
 
 <table class="is-fullwidth">
-</thead>
 <tbody>
 </tbody>
   <tr>
@@ -51,7 +50,7 @@ address bar.
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/Electron.Fiddle-darwin-arm64-0.19.0.zip">
         📦 Standalone Zip
       </a><br />
-      <span>Apple M1 Processor</span>
+      <span>Apple Silicon Processor</span>
       <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/Electron.Fiddle-darwin-x64-0.19.0.zip">
         📦 Standalone Zip
       </a><br />
