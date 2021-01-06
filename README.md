@@ -12,7 +12,7 @@ address bar.
 
 # Download
 
-<table class="is-fullwidth">
+<table>
 <tbody>
 </tbody>
   <tr>
