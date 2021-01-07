@@ -57,6 +57,7 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from './versions';
+import { defaultDark, defaultLight } from './themes-defaults';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
@@ -101,9 +102,10 @@ export class AppState {
   @observable public gitHubPublishAsPublic = !!this.retrieve(
     'gitHubPublishAsPublic',
   );
-  @observable public channelsToShow: Array<
-    ElectronReleaseChannel
-  > = (this.retrieve('channelsToShow') as Array<ElectronReleaseChannel>) || [
+  @observable
+  public channelsToShow: Array<ElectronReleaseChannel> = (this.retrieve(
+    'channelsToShow',
+  ) as Array<ElectronReleaseChannel>) || [
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
@@ -122,6 +124,9 @@ export class AppState {
   );
   @observable public isClearingConsoleOnRun = !!this.retrieve(
     'isClearingConsoleOnRun',
+  );
+  @observable public isUsingSystemTheme = !!(
+    this.retrieve('isUsingSystemTheme') ?? true
   );
   @observable public executionFlags: Array<string> =
     (this.retrieve('executionFlags') as Array<string>) === null
@@ -149,9 +154,8 @@ export class AppState {
   };
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
-  @observable public mosaicArrangement: MosaicNode<
-    MosaicId
-  > | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable
+  public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fsType.FSWatcher | undefined;
@@ -227,6 +231,7 @@ export class AppState {
     autorun(() =>
       this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun),
     );
+    autorun(() => this.save('isUsingSystemTheme', this.isUsingSystemTheme));
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
@@ -435,7 +440,7 @@ export class AppState {
   @action public setTheme(fileName?: string) {
     this.theme = fileName || '';
     activateTheme(undefined, undefined, fileName);
-    window.ElectronFiddle.app.setupTheme();
+    window.ElectronFiddle.app.loadTheme();
   }
 
   @action public setGenericDialogOptions(opts: GenericDialogOptions) {
@@ -843,7 +848,7 @@ export class AppState {
       | null
       | boolean,
   ) {
-    if (value) {
+    if (value !== null && value !== undefined) {
       const _value =
         typeof value === 'object' ? JSON.stringify(value) : value.toString();
 
