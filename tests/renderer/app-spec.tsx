@@ -1,3 +1,5 @@
+// import '../mocks/match-media';
+
 import { App } from '../../src/renderer/app';
 import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
@@ -26,7 +28,7 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
-describe('Editors component', () => {
+describe('App component', () => {
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
   });
@@ -403,7 +405,7 @@ describe('Editors component', () => {
       document.head!.innerHTML = "<style id='fiddle-theme'></style>";
 
       const app = new App();
-      await app.setupTheme();
+      await app.loadTheme();
 
       expect(document.head!.innerHTML).toEqual(
         `<style id="fiddle-theme">
@@ -435,7 +437,7 @@ describe('Editors component', () => {
       const app = new App();
       app.state.theme = 'defaultLight';
 
-      await app.setupTheme();
+      await app.loadTheme();
 
       expect(document.body.classList.value).toBe('');
     });
@@ -444,7 +446,7 @@ describe('Editors component', () => {
       const app = new App();
       app.state.theme = 'custom-dark';
 
-      await app.setupTheme();
+      await app.loadTheme();
 
       expect(document.body.classList.value).toBe('bp3-dark');
     });

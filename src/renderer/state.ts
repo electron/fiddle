@@ -57,7 +57,6 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from './versions';
-import { defaultDark, defaultLight } from './themes-defaults';
 
 const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);

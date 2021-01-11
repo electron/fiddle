@@ -1,7 +1,7 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { autorun, when } from 'mobx';
+import { reaction, when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
@@ -220,21 +220,26 @@ export class App {
     };
 
     // match theme to system when box is ticked
-    autorun(() => {
-      if (this.state.isUsingSystemTheme) {
-        const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
-        setSystemTheme(matches);
-      }
-    });
-
-    // change theme when system theme changes
-    window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', ({ matches }) => {
-        if (this.state.isUsingSystemTheme) {
+    reaction(
+      () => this.state.isUsingSystemTheme,
+      () => {
+        if (this.state.isUsingSystemTheme && !!window.matchMedia) {
+          const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
           setSystemTheme(matches);
         }
-      });
+      },
+    );
+
+    // change theme when system theme changes
+    if (!!window.matchMedia) {
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', ({ matches }) => {
+          if (this.state.isUsingSystemTheme) {
+            setSystemTheme(matches);
+          }
+        });
+    }
   }
 
   /**

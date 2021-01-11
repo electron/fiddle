@@ -24,6 +24,10 @@ exports[`AppearanceSettings component renders 1`] = `
   <h4>
     Appearance
   </h4>
+  <Blueprint3.Checkbox
+    label="Sync theme with system setting"
+    onChange={[Function]}
+  />
   <Blueprint3.FormGroup
     inline={true}
     label="Choose your theme"
