@@ -8,7 +8,7 @@ import {
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fsType from 'fs-extra';
-import { autorun } from 'mobx';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -103,15 +103,19 @@ export class AppearanceSettings extends React.Component<
         (theme && themes.find(({ file }) => file === theme)) || themes[0];
 
       this.setState({ themes, selectedTheme });
+
+      // set up mobx so that changes from system sync are reflected in picker
+      reaction(
+        () => this.props.appState.theme,
+        async () => {
+          const selectedTheme = await getTheme(this.props.appState.theme);
+          this.setState({ selectedTheme });
+        },
+      );
     });
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
-
-    autorun(async () => {
-      const selectedTheme = await getTheme(this.props.appState.theme);
-      this.setState({ selectedTheme });
-    });
   }
 
   /**
