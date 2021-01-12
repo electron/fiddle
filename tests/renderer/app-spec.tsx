@@ -1,5 +1,3 @@
-// import '../mocks/match-media';
-
 import { App } from '../../src/renderer/app';
 import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
@@ -7,6 +5,7 @@ import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
 import { overridePlatform, resetPlatform } from '../utils';
 import { EditorId } from '../../src/interfaces';
+import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
 jest.mock('../../src/renderer/file-manager', () =>
   require('../mocks/file-manager'),
@@ -400,7 +399,7 @@ describe('App component', () => {
     });
   });
 
-  describe('setupTheme()', () => {
+  describe('loadTheme()', () => {
     it(`adds the current theme's css to the document`, async () => {
       document.head!.innerHTML = "<style id='fiddle-theme'></style>";
 
@@ -449,6 +448,65 @@ describe('App component', () => {
       await app.loadTheme();
 
       expect(document.body.classList.value).toBe('bp3-dark');
+    });
+  });
+
+  describe('setupThemeListeners()', () => {
+    let app: App;
+    beforeEach(() => {
+      // matchMedia mock
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: jest.fn().mockImplementation((query) => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: jest.fn(), // Deprecated
+          removeListener: jest.fn(), // Deprecated
+          addEventListener: jest.fn(),
+          removeEventListener: jest.fn(),
+          dispatchEvent: jest.fn(),
+        })),
+      });
+
+      // app mock
+      app = new App();
+      (app.state as Partial<AppState>) = new MockState();
+      app.state.isUsingSystemTheme = true;
+      app.state.setTheme = jest.fn();
+    });
+
+    describe('when value of isUsingSystemTheme changes', () => {
+      it('ignores system theme when not isUsingSystemTheme', () => {
+        app.state.isUsingSystemTheme = true;
+        app.setupThemeListeners();
+        app.state.isUsingSystemTheme = false;
+        expect(app.state.setTheme).not.toHaveBeenCalled();
+      });
+
+      it('sets theme according to system when isUsingSystemTheme', () => {
+        app.setupThemeListeners();
+
+        // isUsingSystemTheme and prefersDark
+        app.state.isUsingSystemTheme = false;
+        (window.matchMedia as jest.Mock).mockReturnValue({
+          matches: true,
+        });
+        app.state.isUsingSystemTheme = true;
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+
+        // isUsingSystemTheme and not prefersDark
+        app.state.isUsingSystemTheme = false;
+        (window.matchMedia as jest.Mock).mockReturnValue({
+          matches: false,
+        });
+        app.state.isUsingSystemTheme = true;
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
+    });
+
+    it('when value of prefers-color-scheme changes', () => {
+      // app.setupThemeListeners();
     });
   });
 });
