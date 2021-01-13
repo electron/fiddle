@@ -453,6 +453,7 @@ describe('App component', () => {
 
   describe('setupThemeListeners()', () => {
     let app: App;
+    const addEventListenerMock = jest.fn();
     beforeEach(() => {
       // matchMedia mock
       Object.defineProperty(window, 'matchMedia', {
@@ -463,7 +464,7 @@ describe('App component', () => {
           onchange: null,
           addListener: jest.fn(), // Deprecated
           removeListener: jest.fn(), // Deprecated
-          addEventListener: jest.fn(),
+          addEventListener: addEventListenerMock,
           removeEventListener: jest.fn(),
           dispatchEvent: jest.fn(),
         })),
@@ -476,8 +477,8 @@ describe('App component', () => {
       app.state.setTheme = jest.fn();
     });
 
-    describe('when value of isUsingSystemTheme changes', () => {
-      it('ignores system theme when not isUsingSystemTheme', () => {
+    describe('isUsingSystemTheme reaction', () => {
+      it('ignores system theme changes when not isUsingSystemTheme', () => {
         app.state.isUsingSystemTheme = true;
         app.setupThemeListeners();
         app.state.isUsingSystemTheme = false;
@@ -505,8 +506,37 @@ describe('App component', () => {
       });
     });
 
-    it('when value of prefers-color-scheme changes', () => {
-      // app.setupThemeListeners();
+    describe('prefers-color-scheme event listener', () => {
+      it('adds an event listener to the "change" event', () => {
+        app.setupThemeListeners();
+        expect(addEventListenerMock).toHaveBeenCalled();
+        const event = addEventListenerMock.mock.calls[0][0];
+        expect(event).toBe('change');
+      });
+
+      it('does nothing if not isUsingSystemTheme', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = false;
+        callback({ matches: true });
+        expect(app.state.setTheme).not.toHaveBeenCalled();
+      });
+
+      it('sets dark theme if isUsingSystemTheme and prefers dark', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = true;
+        callback({ matches: true });
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+      });
+
+      it('sets light theme if isUsingSystemTheme and not prefers dark', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = true;
+        callback({ matches: false });
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
     });
   });
 });
