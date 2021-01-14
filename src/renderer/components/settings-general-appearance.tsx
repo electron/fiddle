@@ -1,7 +1,14 @@
-import { Button, Callout, FormGroup, MenuItem } from '@blueprintjs/core';
+import {
+  Button,
+  Callout,
+  Checkbox,
+  FormGroup,
+  MenuItem,
+} from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fsType from 'fs-extra';
+import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
@@ -84,6 +91,7 @@ export class AppearanceSettings extends React.Component<
     this.handleChange = this.handleChange.bind(this);
     this.openThemeFolder = this.openThemeFolder.bind(this);
     this.handleAddTheme = this.handleAddTheme.bind(this);
+    this.handleThemeSource = this.handleThemeSource.bind(this);
 
     this.state = {
       themes: [],
@@ -95,6 +103,15 @@ export class AppearanceSettings extends React.Component<
         (theme && themes.find(({ file }) => file === theme)) || themes[0];
 
       this.setState({ themes, selectedTheme });
+
+      // set up mobx so that changes from system sync are reflected in picker
+      reaction(
+        () => this.props.appState.theme,
+        async () => {
+          const selectedTheme = await getTheme(this.props.appState.theme);
+          this.setState({ selectedTheme });
+        },
+      );
     });
 
     this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
@@ -172,16 +189,28 @@ export class AppearanceSettings extends React.Component<
 
   public render() {
     const { selectedTheme } = this.state;
+    const { isUsingSystemTheme } = this.props.appState;
     const selectedName =
       (selectedTheme && selectedTheme.name) || 'Select a theme';
 
     return (
       <div className="settings-appearance">
         <h4>Appearance</h4>
-        <FormGroup label="Choose your theme" inline={true}>
+        <Checkbox
+          label="Sync theme with system setting"
+          checked={isUsingSystemTheme}
+          onChange={this.handleThemeSource}
+        />
+        <FormGroup
+          label="Choose your theme"
+          disabled={isUsingSystemTheme}
+          inline={true}
+        >
           <ThemeSelect
             filterable={true}
+            disabled={isUsingSystemTheme}
             items={this.state.themes}
+            activeItem={selectedTheme}
             itemRenderer={renderItem}
             itemPredicate={filterItem}
             onItemSelect={this.handleChange}
@@ -195,10 +224,11 @@ export class AppearanceSettings extends React.Component<
               text={selectedName}
               icon="tint"
               onClick={() => this.props.toggleHasPopoverOpen()}
+              disabled={isUsingSystemTheme}
             />
           </ThemeSelect>
         </FormGroup>
-        <Callout>
+        <Callout hidden={isUsingSystemTheme}>
           <p>
             To add themes, add JSON theme files to{' '}
             <a id="open-theme-folder" onClick={this.openThemeFolder}>
@@ -231,5 +261,11 @@ export class AppearanceSettings extends React.Component<
    */
   public handleAddTheme(): void {
     this.props.appState.toggleAddMonacoThemeDialog();
+  }
+
+  public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
+    const { appState } = this.props;
+    const { checked } = event.currentTarget;
+    appState.isUsingSystemTheme = checked;
   }
 }

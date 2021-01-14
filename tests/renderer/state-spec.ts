@@ -421,18 +421,18 @@ describe('AppState', () => {
   });
 
   describe('setTheme()', () => {
-    it('calls setupTheme()', () => {
+    it('calls loadTheme()', () => {
       appState.setTheme('custom');
 
       expect(appState.theme).toBe('custom');
-      expect(window.ElectronFiddle.app.setupTheme).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
     });
 
     it('handles a missing theme name', () => {
       appState.setTheme();
 
       expect(appState.theme).toBe('');
-      expect(window.ElectronFiddle.app.setupTheme).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
     });
   });
 

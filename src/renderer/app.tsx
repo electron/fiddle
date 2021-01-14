@@ -1,7 +1,7 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { when } from 'mobx';
+import { reaction, when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
@@ -24,6 +24,7 @@ import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
+import { defaultDark, defaultLight } from './themes-defaults';
 import { TouchBarManager } from './touch-bar-manager';
 
 /**
@@ -180,7 +181,7 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void | Element | React.Component> {
-    this.setupTheme();
+    this.loadTheme();
 
     const React = await import('react');
     const { render } = await import('react-dom');
@@ -202,10 +203,43 @@ export class App {
     const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
+    this.setupThemeListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
     return rendered;
+  }
+
+  public async setupThemeListeners() {
+    const setSystemTheme = (prefersDark: boolean) => {
+      if (prefersDark) {
+        this.state.setTheme(defaultDark.file);
+      } else {
+        this.state.setTheme(defaultLight.file);
+      }
+    };
+
+    // match theme to system when box is ticked
+    reaction(
+      () => this.state.isUsingSystemTheme,
+      () => {
+        if (this.state.isUsingSystemTheme && !!window.matchMedia) {
+          const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
+          setSystemTheme(matches);
+        }
+      },
+    );
+
+    // change theme when system theme changes
+    if (!!window.matchMedia) {
+      window
+        .matchMedia('(prefers-color-scheme: dark)')
+        .addEventListener('change', ({ matches }) => {
+          if (this.state.isUsingSystemTheme) {
+            setSystemTheme(matches);
+          }
+        });
+    }
   }
 
   /**
@@ -213,7 +247,7 @@ export class App {
    *
    * @returns {Promise<void>}
    */
-  public async setupTheme(): Promise<void> {
+  public async loadTheme(): Promise<void> {
     const tag: HTMLStyleElement | null = document.querySelector(
       'style#fiddle-theme',
     );
