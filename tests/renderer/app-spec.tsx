@@ -3,7 +3,6 @@ import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
-import { overridePlatform, resetPlatform } from '../utils';
 import { EditorId } from '../../src/interfaces';
 
 jest.mock('../../src/renderer/file-manager', () =>
