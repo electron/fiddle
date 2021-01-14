@@ -105,7 +105,6 @@ export class MockBrowserWindow extends EventEmitter {
   public setThumbnailClip = jest.fn();
   public setThumbnailToolTip = jest.fn();
   public setTitle = jest.fn();
-  public setTouchBar = jest.fn();
   public setVibrancy = jest.fn();
   public setVisibleOnAllWorkspaces = jest.fn();
   public show = jest.fn();

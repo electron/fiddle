@@ -47,25 +47,6 @@ describe('Editors component', () => {
 
       jest.useRealTimers();
     });
-
-    it('creates a touch bar manager on macOS', () => {
-      overridePlatform('darwin');
-
-      const app = new App();
-      expect(app.touchBarManager).toBeTruthy();
-
-      resetPlatform();
-    });
-
-    it('does not create a touch bar manager on Windows and Linux', () => {
-      overridePlatform('win32');
-      expect(new App().touchBarManager).toBeFalsy();
-
-      overridePlatform('linux');
-      expect(new App().touchBarManager).toBeFalsy();
-
-      resetPlatform();
-    });
   });
 
   describe('getEditorValues()', () => {
