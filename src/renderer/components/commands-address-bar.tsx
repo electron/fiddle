@@ -111,11 +111,13 @@ export class AddressBar extends React.Component<
     this.setState({ value: event.target.value });
   }
 
-  public handleBlur(_event: React.FocusEvent<HTMLInputElement>) {
+  public handleBlur(event: React.FocusEvent<HTMLInputElement>) {
     const { gistId } = this.props.appState;
     const url = urlFromId(gistId);
 
-    if (url) {
+    const shouldResetURL =
+      url === event.target.value || event.target.value === '';
+    if (url && shouldResetURL) {
       this.setState({ value: url });
     }
   }
