@@ -279,7 +279,7 @@ export class Runner {
       pushOutput(`Saved files to ${dir}`);
       return dir;
     } catch (error) {
-      pushError('Failed to save files.', error);
+      pushError('Failed to save files.', error.message);
     }
 
     return null;
