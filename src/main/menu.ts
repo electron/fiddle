@@ -188,7 +188,10 @@ function getFileMenu(
   const fileMenu: Array<MenuItemConstructorOptions> = [
     {
       label: 'New Fiddle',
-      click: () => ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE),
+      click: () => {
+        ipcMainManager.send(IpcEvents.CLEAR_CONSOLE);
+        return ipcMainManager.send(IpcEvents.FS_NEW_FIDDLE);
+      },
       accelerator: 'CmdOrCtrl+N',
     },
     {
