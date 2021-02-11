@@ -3,7 +3,6 @@ import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
-import { overridePlatform, resetPlatform } from '../utils';
 import { EditorId } from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
@@ -47,25 +46,6 @@ describe('App component', () => {
       expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
 
       jest.useRealTimers();
-    });
-
-    it('creates a touch bar manager on macOS', () => {
-      overridePlatform('darwin');
-
-      const app = new App();
-      expect(app.touchBarManager).toBeTruthy();
-
-      resetPlatform();
-    });
-
-    it('does not create a touch bar manager on Windows and Linux', () => {
-      overridePlatform('win32');
-      expect(new App().touchBarManager).toBeFalsy();
-
-      overridePlatform('linux');
-      expect(new App().touchBarManager).toBeFalsy();
-
-      resetPlatform();
     });
   });
 

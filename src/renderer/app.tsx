@@ -25,7 +25,6 @@ import { Runner } from './runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
-import { TouchBarManager } from './touch-bar-manager';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -40,15 +39,10 @@ export class App {
   public fileManager = new FileManager(appState);
   public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
-  public touchBarManager: TouchBarManager | undefined;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
     this.setEditorValues = this.setEditorValues.bind(this);
-
-    if (process.platform === 'darwin') {
-      this.touchBarManager = new TouchBarManager(appState);
-    }
   }
 
   public async replaceFiddle(
