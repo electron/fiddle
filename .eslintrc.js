@@ -1,4 +1,4 @@
-module.exports = {
+const config = {
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   parserOptions: {
     ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
@@ -26,4 +26,13 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
+  ignorePatterns: [
+    '/out',
+    '/dist',
+    '/coverage',
+  ],
 };
+
+console.log(process.argv);
+
+module.exports = config;
