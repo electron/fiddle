@@ -57,9 +57,6 @@ cd fiddle
 yarn
 ```
 
-Optional: Install [`husky`](https://typicode.github.io/husky) and enable
-automatic linting of staged files before committing.
-
 4. Start Fiddle and Explore!
 
 ```sh

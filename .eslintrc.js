@@ -33,6 +33,4 @@ const config = {
   ],
 };
 
-console.log(process.argv);
-
 module.exports = config;
