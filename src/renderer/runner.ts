@@ -92,7 +92,7 @@ export class Runner {
       return false;
     }
 
-    this.execute(dir);
+    this.playwright(dir);
 
     return true;
   }
@@ -212,6 +212,35 @@ export class Runner {
     }
   }
 
+  public async playwright(dir: string) {
+    const { currentElectronVersion, pushOutput } = this.appState;
+    const { version, localPath } = currentElectronVersion;
+    const binaryPath = getElectronBinaryPath(version, localPath);
+    console.log(`Runner: Binary ${binaryPath} ready, launching Playwright tests`);
+
+    this.child = spawn('jest');
+    this.appState.isRunning = true;
+
+    this.child.stdout!.on('data', (data) =>
+      pushOutput(data, { bypassBuffer: false }),
+    );
+    this.child.stderr!.on('data', (data) =>
+      pushOutput(data, { bypassBuffer: false }),
+    );
+    this.child.on('close', async (code) => {
+      const withCode =
+        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+
+      pushOutput(`Electron exited${withCode}`);
+      this.appState.isRunning = false;
+      this.child = null;
+
+      // Clean older folders
+      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await this.deleteUserData();
+    });
+  }
+
   /**
    * Execute Electron.
    *
@@ -226,8 +255,6 @@ export class Runner {
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
-    console.log(binaryPath)
-
     const env = { ...process.env };
     if (this.appState.isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
@@ -239,7 +266,12 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
-    this.child = spawn('jest');
+    // Add user-specified cli flags if any have been set.
+    const options = [dir, '--inspect'].concat(this.appState.executionFlags);
+
+    this.child = spawn(binaryPath, options, { cwd: dir, env });
+    this.appState.isRunning = true;
+    pushOutput(`Electron v${version} started.`);
 
     this.child.stdout!.on('data', (data) =>
       pushOutput(data, { bypassBuffer: false }),
@@ -247,33 +279,18 @@ export class Runner {
     this.child.stderr!.on('data', (data) =>
       pushOutput(data, { bypassBuffer: false }),
     );
-    // console.log(result);
+    this.child.on('close', async (code) => {
+      const withCode =
+        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
 
-    // Add user-specified cli flags if any have been set.
-    // const options = [dir, '--inspect'].concat(this.appState.executionFlags);
+      pushOutput(`Electron exited${withCode}`);
+      this.appState.isRunning = false;
+      this.child = null;
 
-    // this.child = spawn(binaryPath, options, { cwd: dir, env });
-    // this.appState.isRunning = true;
-    // pushOutput(`Electron v${version} started.`);
-
-    // this.child.stdout!.on('data', (data) =>
-    //   pushOutput(data, { bypassBuffer: false }),
-    // );
-    // this.child.stderr!.on('data', (data) =>
-    //   pushOutput(data, { bypassBuffer: false }),
-    // );
-    // this.child.on('close', async (code) => {
-    //   const withCode =
-    //     typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
-
-    //   pushOutput(`Electron exited${withCode}`);
-    //   this.appState.isRunning = false;
-    //   this.child = null;
-
-    //   // Clean older folders
-    //   await window.ElectronFiddle.app.fileManager.cleanup(dir);
-    //   await this.deleteUserData();
-    // });
+      // Clean older folders
+      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await this.deleteUserData();
+    });
   }
 
   /**
