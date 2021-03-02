@@ -1,6 +1,9 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
+import * as jestCLI from 'jest-cli';
+import * as jest from 'jest';
+
 import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
@@ -15,6 +18,9 @@ import {
   PMOperationOptions,
 } from './npm';
 import { AppState } from './state';
+
+import type { Config } from '@jest/types';
+
 
 export enum ForgeCommands {
   PACKAGE = 'package',
@@ -220,6 +226,8 @@ export class Runner {
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
+    console.log(binaryPath)
+
     const env = { ...process.env };
     if (this.appState.isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
@@ -231,12 +239,7 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
-    // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(this.appState.executionFlags);
-
-    this.child = spawn(binaryPath, options, { cwd: dir, env });
-    this.appState.isRunning = true;
-    pushOutput(`Electron v${version} started.`);
+    this.child = spawn('jest');
 
     this.child.stdout!.on('data', (data) =>
       pushOutput(data, { bypassBuffer: false }),
@@ -244,18 +247,33 @@ export class Runner {
     this.child.stderr!.on('data', (data) =>
       pushOutput(data, { bypassBuffer: false }),
     );
-    this.child.on('close', async (code) => {
-      const withCode =
-        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+    // console.log(result);
 
-      pushOutput(`Electron exited${withCode}`);
-      this.appState.isRunning = false;
-      this.child = null;
+    // Add user-specified cli flags if any have been set.
+    // const options = [dir, '--inspect'].concat(this.appState.executionFlags);
 
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
-    });
+    // this.child = spawn(binaryPath, options, { cwd: dir, env });
+    // this.appState.isRunning = true;
+    // pushOutput(`Electron v${version} started.`);
+
+    // this.child.stdout!.on('data', (data) =>
+    //   pushOutput(data, { bypassBuffer: false }),
+    // );
+    // this.child.stderr!.on('data', (data) =>
+    //   pushOutput(data, { bypassBuffer: false }),
+    // );
+    // this.child.on('close', async (code) => {
+    //   const withCode =
+    //     typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+
+    //   pushOutput(`Electron exited${withCode}`);
+    //   this.appState.isRunning = false;
+    //   this.child = null;
+
+    //   // Clean older folders
+    //   await window.ElectronFiddle.app.fileManager.cleanup(dir);
+    //   await this.deleteUserData();
+    // });
   }
 
   /**
