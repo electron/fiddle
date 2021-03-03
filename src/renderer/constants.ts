@@ -30,6 +30,7 @@ export const DEFAULT_CLOSED_PANELS: Partial<Record<
   docsDemo: true,
   preload: getEditorBackup(EditorId.preload),
   css: getEditorBackup(EditorId.css),
+  test: getEditorBackup(EditorId.test)
 };
 
 export const EMPTY_EDITOR_CONTENT = {

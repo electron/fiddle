@@ -8,6 +8,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  TEST_JS_NAME,
 } from '../shared-constants';
 import { fancyImport } from '../utils/import';
 
@@ -52,5 +53,6 @@ export async function getTemplateValues(name: string): Promise<EditorValues> {
     html: await getFile(INDEX_HTML_NAME),
     preload: await getFile(PRELOAD_JS_NAME),
     css: await getFile(STYLES_CSS_NAME),
+    test: await getFile(TEST_JS_NAME),
   };
 }

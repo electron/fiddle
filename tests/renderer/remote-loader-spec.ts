@@ -9,6 +9,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  TEST_JS_NAME,
 } from '../../src/shared-constants';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
@@ -32,6 +33,9 @@ const mockGistFiles = {
   [STYLES_CSS_NAME]: {
     content: 'css',
   },
+  [TEST_JS_NAME]: {
+    content: 'test',
+  }
 };
 
 const mockGetGists = {
@@ -118,6 +122,7 @@ describe('RemoteLoader', () => {
           renderer: mockGistFiles[RENDERER_JS_NAME].content,
           preload: mockGistFiles[PRELOAD_JS_NAME].content,
           css: mockGistFiles[STYLES_CSS_NAME].content,
+          test: mockGistFiles[TEST_JS_NAME].content,
         },
         { gistId: 'abcdtestid' },
       );

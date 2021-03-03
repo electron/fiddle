@@ -10,6 +10,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  TEST_JS_NAME,
 } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { fancyImport } from '../utils/import';
@@ -81,6 +82,7 @@ export class FileManager {
       renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
       preload: await this.readFile(path.join(filePath, PRELOAD_JS_NAME)),
       css: await this.readFile(path.join(filePath, STYLES_CSS_NAME)),
+      test: await this.readFile(path.join(filePath, TEST_JS_NAME))
     };
 
     window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
@@ -149,6 +151,7 @@ export class FileManager {
     output.set(INDEX_HTML_NAME, values.html);
     output.set(PRELOAD_JS_NAME, values.preload);
     output.set(STYLES_CSS_NAME, values.css);
+    output.set(TEST_JS_NAME, values.test);
     output.set(PACKAGE_NAME, values.package!);
 
     for (const transform of transforms) {

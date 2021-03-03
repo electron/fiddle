@@ -66,6 +66,7 @@ describe('FileManager', () => {
           preload: '',
           main: '',
           css: '',
+          test: '',
         },
         { filePath: fakePath },
       );
