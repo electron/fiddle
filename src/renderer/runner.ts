@@ -206,32 +206,37 @@ export class Runner {
     }
   }
 
-  public async playwright(dir: string) {
+  public async playwright(dir: string): Promise<boolean> {
     const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching Playwright tests`);
 
-    this.child = spawn('jest');
-    this.appState.isRunning = true;
+    return new Promise((resolve, _reject) => {
+      this.child = spawn('jest');
+      this.appState.isRunning = true;
 
-    this.child.stdout!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.stderr!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.on('close', async (code) => {
-      const withCode =
-        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+      this.child.stdout!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.stderr!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.on('close', async (code) => {
+        const withCode =
+          typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
 
-      pushOutput(`Electron exited${withCode}`);
-      this.appState.isRunning = false;
-      this.child = null;
+        pushOutput(`Electron exited${withCode}`);
+        this.appState.isRunning = false;
+        this.child = null;
 
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
+        // Clean older folders
+        await window.ElectronFiddle.app.fileManager.cleanup(dir);
+        await this.deleteUserData();
+
+        // Resolve this promise with `true` if the test ran without failure
+        resolve(code === 0);
+      });
     });
   }
 
