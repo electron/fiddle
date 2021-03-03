@@ -18,4 +18,5 @@ export class EditorsMock {
   public main = new EditorMock('main');
   public renderer = new EditorMock('renderer');
   public html = new EditorMock('html');
+  public preload = new EditorMock('preload');
 }

@@ -6,7 +6,7 @@ import { MosaicId } from '../interfaces';
  */
 export function waitForEditorsToMount(editors: Array<MosaicId>) {
   let time = 0;
-  const maxTime = 5000;
+  const maxTime = 3000;
   const interval = 100;
   return new Promise<void>((resolve, reject) => {
     (function checkMountedEditors() {
