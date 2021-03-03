@@ -1,4 +1,4 @@
-import { Button, IButtonProps, Spinner } from '@blueprintjs/core';
+import { Button, ButtonGroup, IButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -45,7 +45,7 @@ export class Runner extends React.Component<RunnerProps> {
         props.icon = <Spinner size={16} />;
       } else {
         props.text = 'Run';
-        props.onClick = window.ElectronFiddle.app.runner.run;
+        props.onClick = () => window.ElectronFiddle.app.runner.run();
         props.icon = 'play';
       }
     } else {
@@ -53,6 +53,17 @@ export class Runner extends React.Component<RunnerProps> {
       props.icon = <Spinner size={16} />;
     }
 
-    return <Button {...props} type={undefined} />;
+    return (
+      <ButtonGroup>
+        <Button {...props} type={'button'} />
+        <Button
+          text={'Test'}
+          disabled={props.disabled}
+          icon={'lab-test'}
+          onClick={() => window.ElectronFiddle.app.runner.run(true)}
+          type={'button'}
+        />
+      </ButtonGroup>
+    );
   }
 }
