@@ -2,19 +2,18 @@ export const html = `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
     <title>Hello World!</title>
-    <link rel="stylesheet" type="text/css" href="./styles.css">
   </head>
   <body>
     <h1>Hello World!</h1>
-    <!-- All of the Node.js APIs are available in this renderer process. -->
-    We are using Node.js <script>document.write(process.versions.node)</script>,
-    Chromium <script>document.write(process.versions.chrome)</script>,
-    and Electron <script>document.write(process.versions.electron)</script>.
+    We are using Node.js <span id="node-version"></span>,
+    Chromium <span id="chrome-version"></span>,
+    and Electron <span id="electron-version"></span>.
 
-    <script>
-      // You can also require other files to run in this process
-      require('./renderer.js')
-    </script>
+    <!-- You can also require other files to run in this process -->
+    <script src="./renderer.js"></script>
   </body>
 </html>`;

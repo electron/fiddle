@@ -73,6 +73,7 @@ window.ElectronFiddle =
       main: null,
       renderer: null,
       html: null,
+      preload: null,
     },
     app: null,
   } as any);

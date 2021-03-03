@@ -15,10 +15,14 @@ export const CONFIG_PATH = path.join(
 
 export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
   direction: 'row',
-  first: EditorId.main,
+  first: {
+    direction: 'column',
+    first: EditorId.main,
+    second: EditorId.renderer,
+  },
   second: {
     direction: 'column',
-    first: EditorId.renderer,
+    first: EditorId.preload,
     second: EditorId.html,
   },
 };
@@ -28,7 +32,6 @@ export const DEFAULT_CLOSED_PANELS: Partial<Record<
   EditorBackup | true
 >> = {
   docsDemo: true,
-  preload: getEditorBackup(EditorId.preload),
   css: getEditorBackup(EditorId.css),
 };
 

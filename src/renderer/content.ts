@@ -20,6 +20,10 @@ export async function getContent(
     return (await import('../content/renderer')).renderer;
   }
 
+  if (name === EditorId.preload) {
+    return (await import('../content/preload')).preload;
+  }
+
   if (name === EditorId.main) {
     // We currently only distinguish between loadFile
     // and loadURL. TODO: Properly version the quick-start.
