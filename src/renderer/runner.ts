@@ -46,7 +46,7 @@ export class Runner {
    *
    * @returns {Promise<boolean>}
    */
-  public async run(): Promise<boolean> {
+  public async run(test?: boolean): Promise<boolean> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { currentElectronVersion } = this.appState;
@@ -86,7 +86,8 @@ export class Runner {
       return false;
     }
 
-    this.playwright(dir);
+    const executor = test ? this.playwright : this.execute;
+    await executor.call(this, dir);
 
     return true;
   }
