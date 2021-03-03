@@ -1,9 +1,6 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import * as jestCLI from 'jest-cli';
-import * as jest from 'jest';
-
 import { EditorValues, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
@@ -18,9 +15,6 @@ import {
   PMOperationOptions,
 } from './npm';
 import { AppState } from './state';
-
-import type { Config } from '@jest/types';
-
 
 export enum ForgeCommands {
   PACKAGE = 'package',
