@@ -43,6 +43,7 @@ export const TITLE_MAP: Record<MosaicId, string> = {
   preload: 'Preload (preload.js)',
   html: 'HTML (index.html)',
   css: 'Stylesheet (styles.css)',
+  test: 'Playwright Tests (test.spec.js)',
   docsDemo: 'Docs & Demos',
 };
 

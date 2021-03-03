@@ -29,6 +29,7 @@ export const DEFAULT_CLOSED_PANELS: Partial<
 > = {
   docsDemo: true,
   css: getEditorBackup(EditorId.css),
+  test: getEditorBackup(EditorId.test)
 };
 
 export const EMPTY_EDITOR_CONTENT = {

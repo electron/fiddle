@@ -110,6 +110,7 @@ describe('App component', () => {
         renderer: 'renderer-value',
         preload: '',
         css: '',
+        test: '',
       };
 
       app
@@ -134,6 +135,7 @@ describe('App component', () => {
         html: 'html-value',
         preload: '',
         css: '/* Empty */',
+        test: '',
       };
 
       app
@@ -325,6 +327,7 @@ describe('App component', () => {
         renderer: 'renderer-value',
         preload: 'preload-value',
         css: 'css-value',
+        test: 'test-value',
       });
 
       expect(
@@ -334,6 +337,7 @@ describe('App component', () => {
         value: 'preload-value',
       });
       expect(app.state.closedPanels.css).toEqual({ value: 'css-value' });
+      expect(app.state.closedPanels.test).toEqual({ value: 'test-value' });
 
       window.ElectronFiddle.editors.main = oldMainEditor;
     });

@@ -5,6 +5,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  TEST_CSS_NAME,
 } from '../shared-constants';
 import { fancyImport } from './import';
 
@@ -17,6 +18,7 @@ const FILENAME_KEYS = Object.freeze({
   [PRELOAD_JS_NAME]: 'preload',
   [RENDERER_JS_NAME]: 'renderer',
   [STYLES_CSS_NAME]: 'css',
+  [TEST_CSS_NAME]: 'test',
 });
 
 /**
@@ -32,6 +34,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     main: '',
     preload: '',
     renderer: '',
+    test: '',
   };
 
   const hits: string[] = [];

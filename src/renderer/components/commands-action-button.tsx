@@ -25,6 +25,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  TEST_JS_NAME,
 } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
@@ -449,6 +450,9 @@ export class GistActionButton extends React.Component<
       [STYLES_CSS_NAME]: {
         content: values.css || EMPTY_EDITOR_CONTENT.css,
       },
+      [TEST_JS_NAME]: {
+        content: values.test || EMPTY_EDITOR_CONTENT.js,
+      }
     };
   };
 }
