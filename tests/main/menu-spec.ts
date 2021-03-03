@@ -79,9 +79,8 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      const submenu = result[2].submenu as Array<
-        Electron.MenuItemConstructorOptions
-      >;
+      const submenu = result[2]
+        .submenu as Array<Electron.MenuItemConstructorOptions>;
 
       const toggleSoftWrap = submenu.find(
         ({ label }) => label === 'Toggle Soft Wrap',
@@ -102,9 +101,8 @@ describe('menu', () => {
       setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
-      const submenu = result[2].submenu as Array<
-        Electron.MenuItemConstructorOptions
-      >;
+      const submenu = result[2]
+        .submenu as Array<Electron.MenuItemConstructorOptions>;
 
       const toggleSoftWrap = submenu.find(
         ({ label }) => label === 'Toggle Bisect Helper',

@@ -23,10 +23,9 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
   },
 };
 
-export const DEFAULT_CLOSED_PANELS: Partial<Record<
-  MosaicId,
-  EditorBackup | true
->> = {
+export const DEFAULT_CLOSED_PANELS: Partial<
+  Record<MosaicId, EditorBackup | true>
+> = {
   docsDemo: true,
   preload: getEditorBackup(EditorId.preload),
   css: getEditorBackup(EditorId.css),

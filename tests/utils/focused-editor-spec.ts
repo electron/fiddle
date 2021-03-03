@@ -7,16 +7,14 @@ describe('focused-editor', () => {
   });
 
   it('getFocusedEditor() returns the focused editor', () => {
-    (window.ElectronFiddle.editors.main!.hasTextFocus as jest.Mock<
-      any
-    >).mockReturnValue(true);
+    (window.ElectronFiddle.editors.main!
+      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
     expect((getFocusedEditor() as any).name).toBe('main');
   });
 
   it('getFocusedEditor() returns the focused editor', () => {
-    (window.ElectronFiddle.editors.renderer!.hasTextFocus as jest.Mock<
-      any
-    >).mockReturnValue(true);
+    (window.ElectronFiddle.editors.renderer!
+      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
     expect((getFocusedEditor() as any).name).toBe('renderer');
   });
 

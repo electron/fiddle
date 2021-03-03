@@ -70,9 +70,7 @@ export class AddThemeDialog extends React.Component<
       const editor = fsType.readJSONSync(file.path);
       if (!editor.base && !editor.rules)
         throw Error('File does not match specifications'); // has to have these attributes
-      defaultTheme.editor = editor as Partial<
-        MonacoType.editor.IStandaloneThemeData
-      >;
+      defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
       const newTheme = defaultTheme;
       const name = editor.name ? editor.name : file.name;
       await this.createNewThemeFromMonaco(name, newTheme);
