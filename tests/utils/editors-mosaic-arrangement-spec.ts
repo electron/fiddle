@@ -30,6 +30,7 @@ describe('Mosaic Arrangement Utilities', () => {
       const result = createMosaicArrangement([
         EditorId.main,
         EditorId.renderer,
+        EditorId.preload,
         EditorId.html,
       ]);
 
@@ -63,7 +64,7 @@ describe('Mosaic Arrangement Utilities', () => {
     it('returns the correct array for three visible panels', () => {
       const result = getVisibleMosaics(DEFAULT_MOSAIC_ARRANGEMENT);
 
-      expect(result).toEqual(['main', 'renderer', 'html']);
+      expect(result).toEqual(['main', 'renderer', 'preload', 'html']);
     });
   });
 });
