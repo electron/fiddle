@@ -26,7 +26,7 @@ describe('Mosaic Arrangement Utilities', () => {
       });
     });
 
-    it('creates the correct arrangement for three visible panels', () => {
+    it('creates the correct arrangement for the default visible panels', () => {
       const result = createMosaicArrangement([
         EditorId.main,
         EditorId.renderer,
@@ -61,7 +61,7 @@ describe('Mosaic Arrangement Utilities', () => {
       expect(result).toEqual([EditorId.main, EditorId.renderer]);
     });
 
-    it('returns the correct array for three visible panels', () => {
+    it('returns the correct array for the default mosaic', () => {
       const result = getVisibleMosaics(DEFAULT_MOSAIC_ARRANGEMENT);
 
       expect(result).toEqual(['main', 'renderer', 'preload', 'html']);
