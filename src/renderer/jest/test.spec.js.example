@@ -1,0 +1,10 @@
+describe('erick testing', function() {
+  it('succeeds', async () => {
+    const appVersion = await global.app.evaluate(async ({ app }) => {
+      // This runs in the main Electron process, first parameter is
+      // the result of the require('electron') in the main app script.
+      return app.getVersion();
+    });
+    expect(typeof appVersion).toBe('string');
+  });
+});

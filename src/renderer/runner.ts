@@ -212,8 +212,19 @@ export class Runner {
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching Playwright tests`);
 
+    const globalsString = JSON.stringify({
+      binaryPath,
+      dir
+    });
+
     return new Promise((resolve, _reject) => {
-      this.child = spawn('jest');
+
+      this.child = spawn('jest', [
+        '--setupFilesAfterEnv', './src/renderer/jest/playwright-setup',
+        '--globals', globalsString,
+        '--roots', dir,
+        '--no-watchman'
+      ]);
       this.appState.isRunning = true;
 
       this.child.stdout!.on('data', (data) =>
