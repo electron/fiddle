@@ -98,6 +98,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {
           main: await getContent(EditorId.main, version),
           renderer: await getContent(EditorId.renderer, version),
+          preload: await getContent(EditorId.preload, version),
           html: await getContent(EditorId.html, version),
         },
         {},

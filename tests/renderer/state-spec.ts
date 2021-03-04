@@ -608,7 +608,11 @@ describe('AppState', () => {
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
         first: EditorId.renderer,
-        second: EditorId.html,
+        second: {
+          direction: 'column',
+          first: EditorId.preload,
+          second: EditorId.html,
+        }
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
       expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
@@ -636,7 +640,11 @@ describe('AppState', () => {
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
         first: EditorId.renderer,
-        second: EditorId.html,
+        second: {
+          direction: 'column',
+          first: EditorId.preload,
+          second: EditorId.html,
+        }
       });
 
       appState.resetEditorLayout();
