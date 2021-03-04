@@ -22,17 +22,17 @@ address bar.
     </td>
     <td>
       <span>32-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-win32-ia32-setup.exe">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-ia32-setup.exe">
         💿 Installer
       </a>
       <br />
       <span>64-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-win32-x64-setup.exe">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-x64-setup.exe">
         💿 Installer
       </a>
       <br />
       <span>ARM64</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-win32-arm64-setup.exe">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-arm64-setup.exe">
         💿 Installer
       </a>
       <span>
@@ -47,11 +47,11 @@ address bar.
     </td>
     <td>
       <span>Intel Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/Electron.Fiddle-darwin-arm64-0.19.0.zip">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-arm64-0.20.0.zip">
         📦 Standalone Zip
       </a><br />
       <span>Apple Silicon Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/Electron.Fiddle-darwin-x64-0.19.0.zip">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-x64-0.20.0.zip">
         📦 Standalone Zip
       </a><br />
       <span>
@@ -66,31 +66,31 @@ address bar.
     </td>
     <td>
       <span>32-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-1.i386.rpm">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.i386.rpm">
         💿 rpm
       </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle_0.19.0_i386.deb">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_i386.deb">
         💿 deb
       </a><br />
       <span>64-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-1.x86_64.rpm">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.x86_64.rpm">
         💿 rpm
       </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle_0.19.0_amd64.deb">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_amd64.deb">
         💿 deb
       </a><br />
       <span>ARM64</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-1.arm64.rpm">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.arm64.rpm">
         💿 rpm
       </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle_0.19.0_arm64.deb">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_arm64.deb">
         💿 deb
       </a><br />
       <span>ARMv7 (armhf)</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle-0.19.0-1.arm64.rpm">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.arm64.rpm">
         💿 rpm
       </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.19.0/electron-fiddle_0.19.0_armhf.deb">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_armhf.deb">
         💿 deb
       </a>
     </td>
