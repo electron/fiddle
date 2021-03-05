@@ -13,6 +13,7 @@ import {
 } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { fancyImport } from '../utils/import';
+import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
 import { getTemplateValues } from './templates';
@@ -72,17 +73,7 @@ export class FileManager {
     if (!filePath || typeof filePath !== 'string') return;
 
     console.log(`FileManager: Asked to open`, filePath);
-
-    // We'll do our best and will likely have to
-    // rewrite this once we support multiple files
-    const editorValues: EditorValues = {
-      html: await this.readFile(path.join(filePath, INDEX_HTML_NAME)),
-      main: await this.readFile(path.join(filePath, MAIN_JS_NAME)),
-      renderer: await this.readFile(path.join(filePath, RENDERER_JS_NAME)),
-      preload: await this.readFile(path.join(filePath, PRELOAD_JS_NAME)),
-      css: await this.readFile(path.join(filePath, STYLES_CSS_NAME)),
-    };
-
+    const editorValues = await readFiddle(filePath);
     window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
   }
 
