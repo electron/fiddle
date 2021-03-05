@@ -28,6 +28,19 @@ export enum RunResult {
   INVALID = 'invalid', // could not run
 }
 
+function getResultEmoji(
+  result: RunResult
+): string {
+  switch (result) {
+    case RunResult.SUCCESS: return '✅';
+    case RunResult.FAILURE: return '❌';
+    default: return '❓';
+  }
+}
+
+// FIXME: this is a temporary hack for proof-of-concept bisect & should be removed
+const TEMP_REVLIST = [ '10.0.0', '10.1.0', '10.4.0', '11.0.0', '11.0.1', '11.0.2', '11.0.3' ];
+
 export class Runner {
   public child: ChildProcess | null = null;
 
@@ -48,9 +61,27 @@ export class Runner {
     });
   }
 
-  public async autobisect(): Promise<void> {
-    const TEMP_REVLIST = ['10.0.0', '10.1.0', '10.4.0', '11.0.0', '11.0.1', '11.0.2', '11.0.3'];
-    const bisector = new Bisector(this.appState.versionsToShow.filter(v => TEMP_REVLIST.includes(v.version)).reverse());
+  /**
+   * Run the current test on a set of Electron versions and return the results
+   *
+   * @param {Array<string>} versions to test
+   * @returns {Promise<Record<string,RunResult>>} The per-version test results
+   * @memberof Runner
+   */
+  public async batchtest(versions: Array<string> = TEMP_REVLIST): Promise<Record<string,RunResult>> {
+    const results : Record<string,RunResult> = {};
+    for (const version of versions) {
+      await this.appState.setVersion(version);
+      const result = await this.run(true);
+      results[version] = result;
+      this.appState.pushOutput(`Batch Test: ${getResultEmoji(result)} ${result} - Electron ${version}`);
+    }
+    this.appState.pushOutput('Batch Test: Finished batch testing');
+    return results;
+  }
+
+  public async autobisect(versions: Array<string> = TEMP_REVLIST): Promise<void> {
+    const bisector = new Bisector(this.appState.versionsToShow.filter(v => versions.includes(v.version)).reverse());
     console.log(bisector.revList.map(v => v.version));
     let targetVersion = bisector.getCurrentVersion();
 
