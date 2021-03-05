@@ -211,24 +211,6 @@ export class FileManager {
   }
 
   /**
-   * Safely attempts to read a file, doesn't crash the app if
-   * it fails.
-   *
-   * @param {string} filePath
-   * @returns {string}
-   * @memberof FileManager
-   */
-  private async readFile(filePath: string): Promise<string> {
-    try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
-      return await fs.readFile(filePath, 'utf-8');
-    } catch (error) {
-      console.log(`FileManager: Could not read ${filePath}`, error);
-      return '';
-    }
-  }
-
-  /**
    * Safely attempts to save a file, doesn't crash the app if
    * it fails.
    *
