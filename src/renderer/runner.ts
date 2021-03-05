@@ -6,6 +6,7 @@ import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
+import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
@@ -19,6 +20,12 @@ import { AppState } from './state';
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
+}
+
+export enum RunResult {
+  SUCCESS = 'success', // exit code === 0
+  FAILURE = 'failure', // ran, but exit code !== 0
+  INVALID = 'invalid', // could not run
 }
 
 export class Runner {
@@ -41,12 +48,41 @@ export class Runner {
     });
   }
 
+  public async autobisect(): Promise<void> {
+    const TEMP_REVLIST = ['10.0.0', '10.1.0', '10.4.0', '11.0.0', '11.0.1', '11.0.2', '11.0.3'];
+    const bisector = new Bisector(this.appState.versionsToShow.filter(v => TEMP_REVLIST.includes(v.version)).reverse());
+    console.log(bisector.revList.map(v => v.version));
+    let targetVersion = bisector.getCurrentVersion();
+
+    while (true) {
+      // TODO: assumes that the version is already installed
+      this.appState.pushOutput(`Testing ${targetVersion.version}`, { isNotPre: true });
+      await this.appState.setVersion(targetVersion.version);
+      const result = await this.run(true);
+
+      if (result === RunResult.INVALID) {
+        throw new Error('autobisect failed to run a version of electrion. make sure all versions you want to test are already installed.');
+      }
+
+      const next = bisector.continue(result === RunResult.SUCCESS);
+
+      if (Array.isArray(next)) {
+        console.log('finished autobisect', next);
+        this.appState.pushOutput(`Finished autobisect: ${next[0].version} ~ ${next[1].version}`, { isNotPre: true });
+
+        break;
+      } else {
+        targetVersion = next;
+      }
+    }
+  }
+
   /**
    * Actually run the fiddle.
    *
    * @returns {Promise<boolean>}
    */
-  public async run(test?: boolean): Promise<boolean> {
+  public async run(test?: boolean): Promise<RunResult> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { currentElectronVersion } = this.appState;
@@ -61,14 +97,14 @@ export class Runner {
     const dir = await this.saveToTemp(options);
     const packageManager = this.appState.packageManager;
 
-    if (!dir) return false;
+    if (!dir) return RunResult.INVALID;
 
     try {
       await this.installModulesForEditor(values, { dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
     const isReady = await getIsDownloaded(version, localPath);
@@ -83,13 +119,11 @@ export class Runner {
 
       this.appState.pushOutput(message, { isNotPre: true });
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
     const executor = test ? this.playwright : this.execute;
-    await executor.call(this, dir);
-
-    return true;
+    return await executor.call(this, dir);
   }
 
   /**
@@ -207,7 +241,7 @@ export class Runner {
     }
   }
 
-  public async playwright(dir: string): Promise<boolean> {
+  public async playwright(dir: string): Promise<RunResult> {
     const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
@@ -219,7 +253,6 @@ export class Runner {
     });
 
     return new Promise((resolve, _reject) => {
-
       this.child = spawn('jest', [
         '--setupFilesAfterEnv', './src/renderer/jest/playwright-setup',
         '--globals', globalsString,
@@ -247,7 +280,7 @@ export class Runner {
         await this.deleteUserData();
 
         // Resolve this promise with `true` if the test ran without failure
-        resolve(code === 0);
+        resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
       });
     });
   }
@@ -260,7 +293,7 @@ export class Runner {
    * @returns {Promise<void>}
    * @memberof Runner
    */
-  public async execute(dir: string): Promise<void> {
+  public async execute(dir: string): Promise<RunResult> {
     const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
@@ -280,27 +313,31 @@ export class Runner {
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(this.appState.executionFlags);
 
-    this.child = spawn(binaryPath, options, { cwd: dir, env });
-    this.appState.isRunning = true;
-    pushOutput(`Electron v${version} started.`);
+    return new Promise((resolve, _reject) => {
+      this.child = spawn(binaryPath, options, { cwd: dir, env });
+      this.appState.isRunning = true;
+      pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.stderr!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.on('close', async (code) => {
-      const withCode =
-        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+      this.child.stdout!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.stderr!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.on('close', async (code) => {
+        const withCode =
+          typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
 
-      pushOutput(`Electron exited${withCode}`);
-      this.appState.isRunning = false;
-      this.child = null;
+        pushOutput(`Electron exited${withCode}`);
+        this.appState.isRunning = false;
+        this.child = null;
 
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
+        // Clean older folders
+        await window.ElectronFiddle.app.fileManager.cleanup(dir);
+        await this.deleteUserData();
+
+        resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
+      });
     });
   }
 

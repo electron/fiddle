@@ -64,7 +64,7 @@ export class Runner extends React.Component<RunnerProps> {
           text={'Test'}
           disabled={props.disabled}
           icon={'lab-test'}
-          onClick={() => window.ElectronFiddle.app.runner.run(true)}
+          onClick={() => window.ElectronFiddle.app.runner.autobisect()}
           type={'button'}
         />
       </ButtonGroup>
