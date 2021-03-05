@@ -15,9 +15,7 @@ export interface ToolbarButtonProps {
   id: MosaicId;
 }
 
-export abstract class ToolbarButton extends React.PureComponent<
-  ToolbarButtonProps
-> {
+export abstract class ToolbarButton extends React.PureComponent<ToolbarButtonProps> {
   public static contextType = MosaicWindowContext;
   public context: MosaicWindowContext;
 

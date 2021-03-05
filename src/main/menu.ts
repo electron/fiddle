@@ -260,9 +260,10 @@ function getFileMenu(
 export function setupMenu(acceleratorsToBlock: BlockableAccelerator[] = []) {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
-  const menu = (defaultMenu(app, shell) as Array<
-    MenuItemConstructorOptions
-  >).map((item) => {
+  const menu = (defaultMenu(
+    app,
+    shell,
+  ) as Array<MenuItemConstructorOptions>).map((item) => {
     const { label } = item;
 
     // Append the "Settings" item
