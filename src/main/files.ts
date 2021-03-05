@@ -7,6 +7,7 @@ import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,
   PACKAGE_NAME,
+  PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
 } from '../shared-constants';
 import { ipcMainManager } from './ipc';
@@ -70,9 +71,10 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
 async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
   const targetPaths = [
     path.join(filePath, INDEX_HTML_NAME),
-    path.join(filePath, RENDERER_JS_NAME),
     path.join(filePath, MAIN_JS_NAME),
     path.join(filePath, PACKAGE_NAME),
+    path.join(filePath, PRELOAD_JS_NAME),
+    path.join(filePath, RENDERER_JS_NAME),
   ];
 
   let noFilesOrOverwriteGranted = true;
