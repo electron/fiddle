@@ -21,7 +21,6 @@ export const SHOW_ME_TEMPLATES: Templates = {
     Notification: 'Notification',
     PowerMonitor: 'PowerMonitor',
     PowerSaveBlocker: 'PowerSaveBlocker',
-    Remote: 'Remote',
     Screen: 'Screen',
     Session: 'Session',
     Shell: 'Shell',
