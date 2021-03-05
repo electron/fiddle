@@ -26,6 +26,7 @@ const mockVersions: Array<Partial<RunnableVersion>> = [
 
 jest.mock('semver', () => ({
   default: {
+    clean: jest.fn(),
     gte: jest.fn(),
   },
 }));
@@ -39,6 +40,7 @@ describe('versions', () => {
     });
 
     it('handles a v-prefixed version', () => {
+      (semver.clean as jest.Mock).mockReturnValue('2.0.2');
       (localStorage.getItem as any).mockReturnValue('v2.0.2');
       const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');

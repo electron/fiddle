@@ -382,7 +382,7 @@ describe('AppState', () => {
 
     it('downloads an unknown version', async () => {
       await appState.downloadVersion('v3.5');
-      expect(setupBinary).toHaveBeenCalledWith<any>(appState, '3.5');
+      expect(setupBinary).toHaveBeenCalledWith<any>(appState, 'v3.5');
     });
 
     it('does not download a version if already ready', async () => {
@@ -612,7 +612,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
       expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
@@ -644,7 +644,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
 
       appState.resetEditorLayout();
