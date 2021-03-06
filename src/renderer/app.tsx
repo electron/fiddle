@@ -114,7 +114,7 @@ export class App {
   public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
     const { ElectronFiddle: fiddle } = window;
 
-    if (!fiddle) {
+    if (!fiddle?.app) {
       throw new Error('Fiddle not ready');
     }
 
@@ -151,7 +151,7 @@ export class App {
   ): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
 
-    if (!fiddle) {
+    if (!fiddle?.app) {
       throw new Error('Fiddle not ready');
     }
 

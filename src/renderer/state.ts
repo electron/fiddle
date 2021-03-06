@@ -62,23 +62,6 @@ const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
 
 /**
- * Editors exist outside of React's world. To make things *a lot*
- * easier, we keep them around in a global object. Don't judge us,
- * we're really only doing that for the editors.
- */
-window.ElectronFiddle =
-  window.ElectronFiddle ||
-  ({
-    editors: {
-      main: null,
-      renderer: null,
-      html: null,
-      preload: null,
-    },
-    app: null,
-  } as any);
-
-/**
  * The application's state. Exported as a singleton below.
  *
  * @export

@@ -1,7 +1,8 @@
-import { app, BrowserWindow, shell } from 'electron';
+import { app, BrowserWindow, ipcMain, shell } from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
+import path from 'path';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -27,6 +28,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       enableRemoteModule: true,
       nodeIntegrationInWorker: true,
       contextIsolation: false,
+      preload: path.join(__dirname, '..', 'preload', 'preload'),
     },
   };
 }
@@ -73,12 +75,21 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  const appData = app.getPath('appData');
-  ipcMainManager.send(
-    IpcEvents.SET_APPDATA_DIR,
-    [appData],
-    browserWindow.webContents,
-  );
+  ipcMain.handleOnce(IpcEvents.SET_APPDATA_DIR, () => {
+    const paths = {};
+    const pathsToQuery = [
+      'home',
+      'appData',
+      'userData',
+      'temp',
+      'downloads',
+      'desktop',
+    ];
+    for (const path of pathsToQuery) {
+      paths[path] = app.getPath(path as any);
+    }
+    return paths;
+  });
 
   browserWindows.push(browserWindow);
 

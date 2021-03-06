@@ -5,6 +5,7 @@ async function compileParcel(options = {}) {
   const entryFiles = [
     path.join(__dirname, '../static/index.html'),
     path.join(__dirname, '../src/main/main.ts'),
+    path.join(__dirname, '../src/preload/preload.ts'),
   ];
 
   const lifecycle = process.env.npm_lifecycle_event;

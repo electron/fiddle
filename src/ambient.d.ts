@@ -7,6 +7,7 @@ import { EditorId } from './interfaces';
 declare global {
   interface Window {
     ElectronFiddle: {
+      appPaths: Record<string, string>;
       app: AppType;
       contentChangeListeners: Array<any>;
       editors: Record<
