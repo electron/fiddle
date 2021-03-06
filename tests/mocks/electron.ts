@@ -221,6 +221,7 @@ const electronMock = {
 
 electronMock.BrowserWindow.getAllWindows.mockReturnValue([]);
 electronMock.BrowserWindow.fromId.mockReturnValue(mainWindowStub);
+electronMock.BrowserWindow.fromWebContents.mockReturnValue(mainWindowStub);
 electronMock.BrowserWindow.getFocusedWindow.mockReturnValue(focusedWindowStub);
 electronMock.remote.getCurrentWindow.mockReturnValue(mainWindowStub);
 

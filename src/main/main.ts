@@ -1,7 +1,7 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { app } from 'electron';
+import { app, BrowserWindow, systemPreferences } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
@@ -14,6 +14,7 @@ import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
+import { IpcMainEvent } from 'electron/main';
 
 /**
  * Handle the app's "ready" event. This is essentially
@@ -36,6 +37,7 @@ export async function onReady() {
   setupUpdates();
   setupDialogs();
   setupDevTools();
+  setupTitleBarClickMac();
 }
 
 /**
@@ -55,6 +57,34 @@ export function setupMenuHandler() {
       (await import('./menu')).setupMenu(acceleratorsToBlock);
     },
   );
+}
+
+/**
+ * On macOS, set up the custom titlebar click handler.
+ */
+export function setupTitleBarClickMac() {
+  if (process.platform !== 'darwin') {
+    return;
+  }
+
+  ipcMainManager.on(IpcEvents.CLICK_TITLEBAR_MAC, (event: IpcMainEvent) => {
+    const doubleClickAction = systemPreferences.getUserDefault(
+      'AppleActionOnDoubleClick',
+      'string',
+    );
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      if (doubleClickAction === 'Minimize') {
+        win.minimize();
+      } else if (doubleClickAction === 'Maximize') {
+        if (!win.isMaximized()) {
+          win.maximize();
+        } else {
+          win.unmaximize();
+        }
+      }
+    }
+  });
 }
 
 /**
