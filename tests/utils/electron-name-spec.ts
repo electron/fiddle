@@ -7,11 +7,13 @@ describe('electron-name', () => {
   });
 
   it('returns the right name for each platform', () => {
-    [
+    const platforms: Array<{ platform: NodeJS.Platform; expected: string }> = [
       { platform: 'win32', expected: 'electron.exe' },
       { platform: 'darwin', expected: 'Electron.app' },
       { platform: 'linux', expected: 'electron' },
-    ].forEach(({ platform, expected }) => {
+    ];
+
+    platforms.forEach(({ platform, expected }) => {
       overridePlatform(platform);
       expect(getElectronNameForPlatform()).toBe(expected);
     });

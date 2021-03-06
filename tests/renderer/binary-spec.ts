@@ -162,7 +162,7 @@ describe('binary', () => {
     });
 
     it('throws on other platforms', () => {
-      overridePlatform('bleepbloop');
+      overridePlatform('android');
 
       expect(() => getElectronBinaryPath('v3.0.0')).toThrow();
     });
