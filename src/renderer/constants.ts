@@ -1,4 +1,3 @@
-import { remote } from 'electron';
 import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -7,9 +6,9 @@ import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 // Reminder: When testing, this file is mocked in tests/setup.js
 
-export const USER_DATA_PATH = remote.app.getPath('userData');
+export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
 export const CONFIG_PATH = path.join(
-  remote.app.getPath('home'),
+  window.ElectronFiddle.appPaths.home,
   '.electron-fiddle',
 );
 

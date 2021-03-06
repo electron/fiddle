@@ -32,6 +32,10 @@ export class IpcRendererManager extends EventEmitter {
   public send(channel: IpcEvents, ...args: Array<any>) {
     ipcRenderer.send(channel, ...args);
   }
+
+  public invoke(channel: IpcEvents, ...args: Array<any>) {
+    return ipcRenderer.invoke(channel, ...args);
+  }
 }
 
 export const ipcRendererManager = new IpcRendererManager();
