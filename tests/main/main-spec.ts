@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { app } from 'electron';
+import { app, BrowserWindow, systemPreferences } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -12,11 +12,14 @@ import {
   onReady,
   onWindowsAllClosed,
   setupMenuHandler,
+  setupTitleBarClickMac,
 } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { setupAboutPanel } from '../../src/main/about-panel';
+import { overridePlatform } from '../utils';
+import { MockBrowserWindow } from '../mocks/browser-window';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
@@ -120,6 +123,109 @@ describe('main', () => {
         IpcEvents.BLOCK_ACCELERATORS,
         expect.anything(),
       );
+    });
+  });
+
+  describe('setupTitleBarClickMac()', () => {
+    it('should do nothing on non-macOS platforms', () => {
+      overridePlatform('win32');
+      setupTitleBarClickMac();
+
+      expect(ipcMainManager.on).not.toHaveBeenCalled();
+    });
+
+    describe('on macOS', () => {
+      beforeEach(() => {
+        overridePlatform('darwin');
+        // Since ipcMainManager is mocked, we can't just .emit to trigger
+        // the event. Instead, call the callback as soon as the listener
+        // is instantiated.
+        (ipcMainManager.on as jest.Mock).mockImplementationOnce(
+          (channel, callback) => {
+            if (channel === IpcEvents.CLICK_TITLEBAR_MAC) {
+              callback({});
+            }
+          },
+        );
+      });
+
+      it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
+        const mockWindow = new MockBrowserWindow();
+        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
+          mockWindow,
+        );
+        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
+          'Minimize',
+        );
+
+        setupTitleBarClickMac();
+
+        expect(mockWindow.minimize).toHaveBeenCalled();
+      });
+
+      it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
+        const mockWindow = new MockBrowserWindow();
+        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
+          mockWindow,
+        );
+        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
+          'Minimize',
+        );
+
+        setupTitleBarClickMac();
+
+        expect(mockWindow.minimize).toHaveBeenCalled();
+        expect(mockWindow.maximize).not.toHaveBeenCalled();
+        expect(mockWindow.unmaximize).not.toHaveBeenCalled();
+      });
+
+      it('should maximize the window if AppleActionOnDoubleClick is maximize and the window is not maximized', () => {
+        const mockWindow = new MockBrowserWindow();
+        mockWindow.isMaximized.mockReturnValue(false);
+        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
+          mockWindow,
+        );
+        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
+          'Maximize',
+        );
+
+        setupTitleBarClickMac();
+
+        expect(mockWindow.minimize).not.toHaveBeenCalled();
+        expect(mockWindow.maximize).toHaveBeenCalled();
+        expect(mockWindow.unmaximize).not.toHaveBeenCalled();
+      });
+
+      it('should unmaximize the window if AppleActionOnDoubleClick is maximize and the window is maximized', () => {
+        const mockWindow = new MockBrowserWindow();
+        mockWindow.isMaximized.mockReturnValue(true);
+        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
+          mockWindow,
+        );
+        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
+          'Maximize',
+        );
+
+        setupTitleBarClickMac();
+
+        expect(mockWindow.minimize).not.toHaveBeenCalled();
+        expect(mockWindow.maximize).not.toHaveBeenCalled();
+        expect(mockWindow.unmaximize).toHaveBeenCalled();
+      });
+
+      it('should do nothing if AppleActionOnDoubleClick is an unknown value', () => {
+        const mockWindow = new MockBrowserWindow();
+        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
+          mockWindow,
+        );
+        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
+          undefined,
+        );
+        setupTitleBarClickMac();
+        expect(mockWindow.minimize).not.toHaveBeenCalled();
+        expect(mockWindow.maximize).not.toHaveBeenCalled();
+        expect(mockWindow.unmaximize).not.toHaveBeenCalled();
+      });
     });
   });
 });

@@ -1,8 +1,9 @@
-import { remote } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import { IpcEvents } from '../../ipc-events';
 
 import { getTitle } from '../../utils/get-title';
+import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 export interface ChromeMacProps {
@@ -12,20 +13,7 @@ export interface ChromeMacProps {
 @observer
 export class ChromeMac extends React.Component<ChromeMacProps> {
   public handleDoubleClick = () => {
-    const doubleClickAction = remote.systemPreferences.getUserDefault(
-      'AppleActionOnDoubleClick',
-      'string',
-    );
-    const win = remote.getCurrentWindow();
-    if (doubleClickAction === 'Minimize') {
-      win.minimize();
-    } else if (doubleClickAction === 'Maximize') {
-      if (!win.isMaximized()) {
-        win.maximize();
-      } else {
-        win.unmaximize();
-      }
-    }
+    ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
   };
 
   public render() {
