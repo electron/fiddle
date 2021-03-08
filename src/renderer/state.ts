@@ -627,10 +627,10 @@ export class AppState {
    */
   @action public pushOutput(
     data: string | Buffer,
-    options: OutputOptions = { isURL: false, isNotPre: false, bypassBuffer: true },
+    options: OutputOptions = { isNotPre: false, bypassBuffer: true },
   ) {
     let strData = data.toString();
-    const { isURL, isNotPre, bypassBuffer } = options;
+    const { isNotPre, bypassBuffer } = options;
 
     // TODO: This drops the first part of the buffer... is that fully expected?
     if (process.platform === 'win32' && bypassBuffer === false) {
@@ -644,11 +644,7 @@ export class AppState {
           continue;
         }
 
-        this.pushOutput(part, {
-          bypassBuffer: true,
-          isNotPre,
-          isURL,
-        });
+        this.pushOutput(part, { isNotPre, bypassBuffer: true });
       }
 
       return;
@@ -658,10 +654,9 @@ export class AppState {
     if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
 
     this.output.push({
-      isNotPre,
-      isURL,
-      text: strData.trim(),
       timestamp: Date.now(),
+      text: strData.trim(),
+      isNotPre,
     });
   }
 
