@@ -98,8 +98,12 @@ export class Runner {
       if (Array.isArray(next)) {
         console.log('finished autobisect', next);
         const [ good, bad ] = next.map(v => `v${v.version}`);
-        this.appState.pushOutput(`Finished autobisect: last success is ${getResultEmoji(RunResult.SUCCESS)} ${good}, first failure is ${getResultEmoji(RunResult.FAILURE)} ${bad}`, { isNotPre: true });
-        this.appState.pushOutput(`https://github.com/electron/electron/compare/${good}...${bad}`);
+        const url = `https://github.com/electron/electron/compare/${good}...${bad}`;
+        this.appState.pushOutput('autobisect finished.');
+        this.appState.pushOutput(`${good} ${getResultEmoji(RunResult.SUCCESS)} passed`);
+        this.appState.pushOutput(`${bad} ${getResultEmoji(RunResult.FAILURE)} failed`);
+        this.appState.pushOutput('Commits between versions:');
+        this.appState.pushOutput(url);
         break;
       } else {
         targetVersion = next;
@@ -163,7 +167,7 @@ export class Runner {
     }
 
     const executor = test ? this.playwright : this.execute;
-    return await executor.call(this, dir);
+    return executor.call(this, dir);
   }
 
   /**
