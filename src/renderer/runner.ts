@@ -97,7 +97,9 @@ export class Runner {
 
       if (Array.isArray(next)) {
         console.log('finished autobisect', next);
-        this.appState.pushOutput(`Finished autobisect: last success is ${getResultEmoji(RunResult.SUCCESS)} ${next[0].version}, first failure is ${getResultEmoji(RunResult.FAILURE)} ${next[1].version}`, { isNotPre: true });
+        const [ good, bad ] = next.map(v => `v${v.version}`);
+        this.appState.pushOutput(`Finished autobisect: last success is ${getResultEmoji(RunResult.SUCCESS)} ${good}, first failure is ${getResultEmoji(RunResult.FAILURE)} ${bad}`, { isNotPre: true });
+        this.appState.pushOutput(`https://github.com/electron/electron/compare/${good}...${bad}`);
         break;
       } else {
         targetVersion = next;
