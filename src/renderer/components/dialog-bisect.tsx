@@ -60,19 +60,22 @@ export class BisectDialog extends React.Component<
    *
    * @returns {Promise<void>}
    */
+    // FIXME: hijacking the bisect UI to demo the autobisect feature.
+    // This must be reverted before pushing to master!
   public async onSubmit(): Promise<void> {
     const { endIndex, startIndex, allVersions } = this.state;
-    const { appState } = this.props;
+    // const { appState } = this.props;
 
     if (endIndex === undefined || startIndex === undefined) {
       return;
     }
 
     const bisectRange = allVersions.slice(endIndex, startIndex + 1).reverse();
-
-    appState.Bisector = new Bisector(bisectRange);
-    const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
-    appState.setVersion(initialBisectPivot);
+    console.log(JSON.stringify(bisectRange));
+    window.ElectronFiddle.app.runner.autobisect(bisectRange.map(v => v.version));
+    // appState.Bisector = new Bisector(bisectRange);
+    // const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
+    // appState.setVersion(initialBisectPivot);
     this.onClose();
   }
 

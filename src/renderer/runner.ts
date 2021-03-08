@@ -38,9 +38,6 @@ function getResultEmoji(
   }
 }
 
-// FIXME: this is a temporary hack for proof-of-concept bisect & should be removed
-const TEMP_REVLIST = [ '10.0.0', '10.1.0', '10.4.0', '11.0.0', '11.0.1', '11.0.2', '11.0.3' ];
-
 export class Runner {
   public child: ChildProcess | null = null;
 
@@ -68,7 +65,7 @@ export class Runner {
    * @returns {Promise<Record<string,RunResult>>} The per-version test results
    * @memberof Runner
    */
-  public async batchtest(versions: Array<string> = TEMP_REVLIST): Promise<Record<string,RunResult>> {
+  public async batchtest(versions: Array<string>): Promise<Record<string,RunResult>> {
     const results : Record<string,RunResult> = {};
     for (const version of versions) {
       await this.appState.setVersion(version);
@@ -80,16 +77,18 @@ export class Runner {
     return results;
   }
 
-  public async autobisect(versions: Array<string> = TEMP_REVLIST): Promise<void> {
+  public async autobisect(versions: Array<string>): Promise<void> {
     const bisector = new Bisector(this.appState.versionsToShow.filter(v => versions.includes(v.version)).reverse());
     console.log(bisector.revList.map(v => v.version));
     let targetVersion = bisector.getCurrentVersion();
 
     while (true) {
       // TODO: assumes that the version is already installed
-      this.appState.pushOutput(`Testing ${targetVersion.version}`, { isNotPre: true });
-      await this.appState.setVersion(targetVersion.version);
+      const { version } = targetVersion;
+      this.appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+      await this.appState.setVersion(version);
       const result = await this.run(true);
+      this.appState.pushOutput(`Bisect Test: ${getResultEmoji(result)} ${result} - Electron ${version}`);
 
       if (result === RunResult.INVALID) {
         throw new Error('autobisect failed to run a version of electrion. make sure all versions you want to test are already installed.');
@@ -99,8 +98,7 @@ export class Runner {
 
       if (Array.isArray(next)) {
         console.log('finished autobisect', next);
-        this.appState.pushOutput(`Finished autobisect: ${next[0].version} ~ ${next[1].version}`, { isNotPre: true });
-
+        this.appState.pushOutput(`Finished autobisect: last success is ${getResultEmoji(RunResult.SUCCESS)} ${next[0].version}, first failure is ${getResultEmoji(RunResult.FAILURE)} ${next[1].version}`, { isNotPre: true });
         break;
       } else {
         targetVersion = next;
@@ -109,9 +107,19 @@ export class Runner {
   }
 
   /**
+   * Run the current fiddle as a test.
+   *
+   * @returns {Promise<RunResult>}
+   */
+  public async test(): Promise<RunResult> {
+    // just a readability wrapper around run(true)
+    return this.run(true);
+  }
+
+  /**
    * Actually run the fiddle.
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<RunResult>}
    */
   public async run(test?: boolean): Promise<RunResult> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
