@@ -72,7 +72,7 @@ export class BisectDialog extends React.Component<
 
     const bisectRange = allVersions.slice(endIndex, startIndex + 1).reverse();
     console.log(JSON.stringify(bisectRange));
-    window.ElectronFiddle.app.runner.autobisect(bisectRange.map(v => v.version));
+    window.ElectronFiddle.app.runner.autobisect(bisectRange);
     // appState.Bisector = new Bisector(bisectRange);
     // const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
     // appState.setVersion(initialBisectPivot);
