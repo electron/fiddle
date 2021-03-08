@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, FileTransform } from '../interfaces';
+import { EditorValues, FileTransform, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -77,9 +77,8 @@ export class Runner {
     return results;
   }
 
-  public async autobisect(versions: Array<string>): Promise<void> {
-    const bisector = new Bisector(this.appState.versionsToShow.filter(v => versions.includes(v.version)).reverse());
-    console.log(bisector.revList.map(v => v.version));
+  public async autobisect(versions: Array<RunnableVersion>): Promise<void> {
+    const bisector = new Bisector(versions);
     let targetVersion = bisector.getCurrentVersion();
 
     while (true) {
