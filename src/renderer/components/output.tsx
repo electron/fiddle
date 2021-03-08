@@ -82,19 +82,31 @@ export class Output extends React.Component<CommandsProps> {
   public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
     const ts = this.renderTimestamp(entry.timestamp);
     const timestamp = <span className="timestamp">{ts}</span>;
+    console.log(entry.text);
     const lines = entry.text.split(/\r?\n/);
     const style: React.CSSProperties = entry.isNotPre
       ? { whiteSpace: 'initial' }
       : {};
 
-    return lines.map((text, lineIndex) => (
-      <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-        <span style={style} className="output-message">
-          {timestamp}
-          {text}
-        </span>
-      </div>
-    ));
+    if (entry.isURL) {
+      return lines.map((text, lineIndex) => (
+        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+          <span style={style} className="output-message">
+            {timestamp}
+            <a href={text}>{text}</a>
+          </span>
+        </div>
+      ));
+    } else {
+      return lines.map((text, lineIndex) => (
+        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+          <span style={style} className="output-message">
+            {timestamp}
+            {text}
+          </span>
+        </div>
+      ));
+    }
   }
 
   public render(): JSX.Element | null {
