@@ -29,6 +29,16 @@ describe('content', () => {
       const content = await getContent(EditorId.main, '999.0.0-beta.1');
       expect(content).toBeTruthy();
     });
+
+    it('returns the same content when called multiple times', async () => {
+      const id = EditorId.main;
+      const numTries = 3;
+      const expected = await getContent(id);
+      for (let i = 0; i < numTries; ++i) {
+        const content = await getContent(EditorId.main);
+        expect(content).toEqual(expected);
+      }
+    });
   });
 
   describe('isContentUnchanged()', () => {

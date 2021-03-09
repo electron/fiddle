@@ -9,7 +9,10 @@ import * as path from 'path';
 import * as fetchType from 'node-fetch';
 import * as semver from 'semver';
 
+// parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
+
+// location of the fallback template fiddle used iff downloading failed
 const STATIC_TEMPLATE_DIR = path.resolve(
   __dirname,
   '../../static/electron-quick-start',
