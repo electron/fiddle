@@ -8,6 +8,8 @@ import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 
+const decompress = require('decompress');
+
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
 
@@ -36,15 +38,15 @@ async function prepareTemplate(branch: string): Promise<string> {
       console.log(`Content: Downloading template for ${branch}`);
       const fetch = (await fancyImport<any>('node-fetch')).default;
       const response: fetchType.Response = await fetch(url);
+      const buffer: Buffer = await response.buffer();
 
       console.log(`Content: Unzipping template for ${branch}`);
-      const decompress = (await fancyImport<any>('decompress')).default;
       await fs.ensureDir(TEMPLATES_DIR);
-      await decompress(await response.buffer(), TEMPLATES_DIR);
+      await decompress(buffer, TEMPLATES_DIR);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
-    console.log(`Content: Unable to get template; using ${folder}: ${err}`);
+    console.log(`Content: Unable to get template; using ${folder}`, err);
   }
 
   return folder;

@@ -3,6 +3,26 @@ import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
+const fs = require('fs-extra');
+const path = require('path');
+
+// instead of downloading fixtures,
+// pull the files from tests/fixtures/templates/
+jest.mock('node-fetch', () => ({
+  default: (url: string) => ({
+    buffer: () => {
+      console.log('!!fetching from fixtures');
+      const filename = path.join(
+        __dirname,
+        '../fixtures/templates',
+        path.basename(new URL(url).pathname),
+      );
+      const opts = { encoding: null };
+      return fs.readFile(filename, opts);
+    },
+  }),
+}));
+
 describe('content', () => {
   describe('getContent()', () => {
     it('returns content for HTML editor', async () => {
