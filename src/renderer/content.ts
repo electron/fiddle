@@ -3,10 +3,9 @@ import { EditorId, EditorValues } from '../interfaces';
 import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 
-import * as extractZipType from 'extract-zip';
+import * as fetchType from 'node-fetch';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
-import * as fetchType from 'node-fetch';
 import * as semver from 'semver';
 
 // parent directory of all the downloaded template fiddles
@@ -33,27 +32,19 @@ async function prepareTemplate(branch: string): Promise<string> {
     const fs = await fancyImport<typeof fsType>('fs-extra');
     if (!fs.existsSync(folder)) {
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
-      console.log(`Content: Downloading ${url}`);
+
+      console.log(`Content: Downloading template for ${branch}`);
       const fetch = (await fancyImport<any>('node-fetch')).default;
       const response: fetchType.Response = await fetch(url);
-      const buf: Buffer = await response.buffer();
-      const tmpfile = `${folder}.zip`;
 
-      // save the zip as a tmpfile
-      await fs.outputFile(tmpfile, buf);
-
-      // unzip it
-      const extract: typeof extractZipType = (
-        await fancyImport<any>('extract-zip')
-      ).default;
-      await extract(tmpfile, { dir: TEMPLATES_DIR });
-
-      // remove the tmpfile
-      await fs.unlink(tmpfile);
+      console.log(`Content: Unzipping template for ${branch}`);
+      const decompress = (await fancyImport<any>('decompress')).default;
+      await fs.ensureDir(TEMPLATES_DIR);
+      await decompress(await response.buffer(), TEMPLATES_DIR);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
-    console.log(`Content: Unable to download fiddle; using ${folder}: ${err}`);
+    console.log(`Content: Unable to get template; using ${folder}: ${err}`);
   }
 
   return folder;
@@ -67,7 +58,7 @@ async function prepareTemplate(branch: string): Promise<string> {
  */
 async function readTemplate(branch: string): Promise<EditorValues> {
   const folder = await prepareTemplate(branch);
-  console.log(`Content: Loading fiddle for Electron ${branch} from ${folder}`);
+  console.log(`Content: Loading fiddle for Electron ${branch}`);
   return readFiddle(folder);
 }
 
