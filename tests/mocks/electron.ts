@@ -67,12 +67,27 @@ export class MockMenuItem {
   }
 }
 
-export class MockIPC extends EventEmitter {
+export class MockIPCMain extends EventEmitter {
   public send: any;
+  public handle: any;
+  public handleOnce: any;
 
   constructor() {
     super();
     this.send = jest.fn();
+    this.handle = jest.fn();
+    this.handleOnce = jest.fn();
+  }
+}
+
+export class MockIPCRenderer extends EventEmitter {
+  public send: any;
+  public invoke: any;
+
+  constructor() {
+    super();
+    this.send = jest.fn();
+    this.invoke = jest.fn();
   }
 }
 
@@ -163,8 +178,8 @@ const electronMock = {
     showOpenDialogSync: jest.fn().mockReturnValue(['path']),
     showMessageBox: jest.fn().mockResolvedValue({}),
   },
-  ipcMain: new MockIPC(),
-  ipcRenderer: new MockIPC(),
+  ipcMain: new MockIPCMain(),
+  ipcRenderer: new MockIPCRenderer(),
   nativeImage: {
     createFromPath: (...args: Array<any>) => new MockNativeImage(...args),
     createFromBuffer: jest.fn(),
