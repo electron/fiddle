@@ -93,8 +93,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
-      const template = await getTemplate(version);
-      await window.ElectronFiddle.app.replaceFiddle(template, {});
+      const fiddle = await getTemplate(version);
+      await window.ElectronFiddle.app.replaceFiddle(fiddle, {});
     });
 
     ipcRendererManager.on(
