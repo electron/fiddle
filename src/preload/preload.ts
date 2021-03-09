@@ -21,7 +21,7 @@ export async function preload() {
 }
 
 export async function setupPaths() {
-  const appPaths = await ipcRenderer.invoke(IpcEvents.SET_APPDATA_DIR);
+  const appPaths = await ipcRendererManager.invoke(IpcEvents.SET_APPDATA_DIR);
   window.ElectronFiddle.appPaths = appPaths;
 }
 

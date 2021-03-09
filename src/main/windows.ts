@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, shell } from 'electron';
+import { app, BrowserWindow, shell } from 'electron';
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
@@ -75,7 +75,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  ipcMain.handleOnce(IpcEvents.SET_APPDATA_DIR, () => {
+  ipcMainManager.handleOnce(IpcEvents.SET_APPDATA_DIR, () => {
     const paths = {};
     const pathsToQuery = [
       'home',
