@@ -103,12 +103,7 @@ export async function getContent(
   name: EditorId,
   version?: string,
 ): Promise<string> {
-  try {
-    return (await getTemplate(version))[name];
-  } catch (err) {
-    console.warn(err);
-    return '';
-  }
+  return (await getTemplate(version))[name];
 }
 
 /**
