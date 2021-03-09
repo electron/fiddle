@@ -18,13 +18,22 @@ import * as path from 'path';
  * @returns {string}
  */
 async function readFile(
-  filePath: string
+  filePath: string,
+  logFolderOnError = false
 ): Promise<string> {
+  const fs = await fancyImport<typeof fsType>('fs-extra');
   try {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     return await fs.readFile(filePath, 'utf-8');
   } catch (error) {
-    console.log(`Could not read ${filePath}`, error);
+    console.warn(`Could not read template file:`, error);
+    if (logFolderOnError) {
+      const folder = path.dirname(filePath);
+      if (fs.existsSync(folder)) {
+        console.log(`readFiddle(): ${folder} contains`, fs.readdirSync(folder));
+      } else {
+        console.log(`readFiddle(): ${folder} does not exist`);
+      }
+    }
     return '';
   }
 }
@@ -36,14 +45,15 @@ async function readFile(
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(
-  filePath: string
+  filePath: string,
+  logFolderOnError = false
 ): Promise<EditorValues> {
-   const editorValues: EditorValues = {
-      html: await readFile(path.join(filePath, INDEX_HTML_NAME)),
-      main: await readFile(path.join(filePath, MAIN_JS_NAME)),
-      renderer: await readFile(path.join(filePath, RENDERER_JS_NAME)),
-      preload: await readFile(path.join(filePath, PRELOAD_JS_NAME)),
-      css: await readFile(path.join(filePath, STYLES_CSS_NAME)),
-    };
-    return editorValues;
+  const read = (basename: string) => readFile(path.join(filePath, basename), logFolderOnError);
+  return {
+    html: await read(INDEX_HTML_NAME),
+    main: await read(MAIN_JS_NAME),
+    renderer: await read(RENDERER_JS_NAME),
+    preload: await read(PRELOAD_JS_NAME),
+    css: await read(STYLES_CSS_NAME),
+  };
 }

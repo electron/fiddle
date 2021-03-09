@@ -17,7 +17,7 @@ import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
 import { isEditorId } from '../../utils/type-checks';
-import { getContent } from '../content';
+import { getTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { activateTheme } from '../themes';
@@ -93,16 +93,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
-
-      await window.ElectronFiddle.app.replaceFiddle(
-        {
-          main: await getContent(EditorId.main, version),
-          renderer: await getContent(EditorId.renderer, version),
-          preload: await getContent(EditorId.preload, version),
-          html: await getContent(EditorId.html, version),
-        },
-        {},
-      );
+      const template = await getTemplate(version);
+      await window.ElectronFiddle.app.replaceFiddle(template, {});
     });
 
     ipcRendererManager.on(

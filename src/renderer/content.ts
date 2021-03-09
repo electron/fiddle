@@ -71,16 +71,22 @@ const templateCache : Record<string, Promise<EditorValues>> = {};
 /**
  * Return a cached copy of the specified branch's default fiddle
  *
- * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} [version]
  * @returns {Promise<EditorValues>}
  */
-async function getTemplate(
-  branch: string
+export async function getTemplate(
+  version?: string
 ): Promise<EditorValues> {
+  // get the branch
+  const parsed = semver.parse(version);
+  const branch : string = parsed && parsed.major ? `${parsed.major}-x-y` : 'master';
+
+  // load the template for that branch
   let pending = templateCache[branch];
   if (!pending) {
     pending = templateCache[branch] = readTemplate(branch);
   }
+
   return pending;
 }
 
@@ -97,10 +103,7 @@ export async function getContent(
   version?: string,
 ): Promise<string> {
   try {
-    const parsed = semver.parse(version);
-    const branch : string = parsed && parsed.major ? `${parsed.major}-x-y` : 'master';
-    const values : EditorValues = await getTemplate(branch);
-    return values[name];
+    return (await getTemplate(version))[name];
   } catch (err) {
     console.log(err);
     return '';

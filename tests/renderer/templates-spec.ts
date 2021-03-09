@@ -14,9 +14,11 @@ describe('templates', () => {
     it('attempts to load template values', async () => {
       const fs = require('fs-extra');
 
-      fs.readFile.mockReturnValueOnce('renderer');
-      fs.readFile.mockReturnValueOnce('main');
+      // FIXME: this test is kind of dumb;
+      // it makes assumptions about the order in which the files are read
       fs.readFile.mockReturnValueOnce('html');
+      fs.readFile.mockReturnValueOnce('main');
+      fs.readFile.mockReturnValueOnce('renderer');
 
       const values = await getTemplateValues('test');
 

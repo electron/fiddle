@@ -1,7 +1,7 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 
-import { EditorValues, Files, FileTransform } from '../interfaces';
+import { Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import {
   INDEX_HTML_NAME,
