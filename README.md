@@ -47,11 +47,11 @@ address bar.
     </td>
     <td>
       <span>Intel Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-arm64-0.20.0.zip">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-x64-0.20.0.zip">
         📦 Standalone Zip
       </a><br />
       <span>Apple Silicon Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-x64-0.20.0.zip">
+      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-arm64-0.20.0.zip">
         📦 Standalone Zip
       </a><br />
       <span>
