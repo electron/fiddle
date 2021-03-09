@@ -88,24 +88,14 @@ export class Output extends React.Component<CommandsProps> {
       ? { whiteSpace: 'initial' }
       : {};
 
-    const renderLine = (text: string, lineIndex: number): JSX.Element =>
-      isWebUri(text) ? (
-        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-          <span style={style} className="output-message">
-            {timestamp}
-            <a href={text}>{text}</a>
-          </span>
-        </div>
-      ) : (
-        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-          <span style={style} className="output-message">
-            {timestamp}
-            {text}
-          </span>
-        </div>
-      );
-
-    return lines.map(renderLine);
+    return lines.map((text, lineIndex) => (
+      <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+        <span style={style} className="output-message">
+          {timestamp}
+          {isWebUri(text) ?  <a href={text}>{text}</a> : text}
+        </span>
+      </div>
+    ));
   }
 
   public render(): JSX.Element | null {
