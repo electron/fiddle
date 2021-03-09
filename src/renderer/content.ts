@@ -20,7 +20,7 @@ const STATIC_TEMPLATE_DIR = path.resolve(
  * If we don't have it already, download it from electron-quick-start.
  *
  * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
- * @returns {Promise<folder>} Location of the fiddle's files
+ * @returns {Promise<string>} Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
   let folder = path.join(TEMPLATES_DIR, `electron-quick-start-${branch}`);
@@ -71,7 +71,7 @@ async function readTemplate(branch: string): Promise<EditorValues> {
 const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
- * Return a cached copy of the specified branch's default fiddle
+ * Get a cached copy of the fiddle for the specified Electron version.
  *
  * @param {string} [version]
  * @returns {Promise<EditorValues>}

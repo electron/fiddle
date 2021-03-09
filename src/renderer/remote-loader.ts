@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
-import { EditorId, EditorValues, GenericDialogType } from '../interfaces';
+import { EditorValues, GenericDialogType } from '../interfaces';
 import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,
@@ -11,7 +11,7 @@ import {
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
-import { getContent } from './content';
+import { getTemplate } from './content';
 import { AppState } from './state';
 import { ElectronReleaseChannel, getReleaseChannel } from './versions';
 
@@ -69,13 +69,7 @@ export class RemoteLoader {
       const ok = await this.setElectronVersionWithRef(ref);
       if (!ok) return false;
 
-      const values = {
-        html: await getContent(EditorId.html, this.appState.version),
-        renderer: await getContent(EditorId.renderer, this.appState.version),
-        main: await getContent(EditorId.main, this.appState.version),
-        preload: await getContent(EditorId.preload, this.appState.version),
-        css: await getContent(EditorId.css, this.appState.version),
-      };
+      const values = await getTemplate(this.appState.version);
 
       const loaders: Array<Promise<void>> = [];
       if (!Array.isArray(folder.data)) {
