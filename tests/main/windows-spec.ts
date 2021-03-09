@@ -11,8 +11,10 @@ import {
   getOrCreateMainWindow,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
+import * as path from 'path';
 
 jest.mock('../../src/main/context-menu');
+jest.mock('path');
 
 describe('windows', () => {
   beforeAll(() => {
@@ -31,14 +33,20 @@ describe('windows', () => {
       minWidth: 600,
       acceptFirstMouse: true,
       backgroundColor: '#1d2427',
+      titleBarStyle: undefined,
       webPreferences: {
         webviewTag: false,
         enableRemoteModule: true,
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
         contextIsolation: false,
+        preload: '/fake/path',
       },
     };
+
+    beforeEach(() => {
+      (path.join as jest.Mock).mockReturnValue('/fake/path');
+    });
 
     afterEach(() => {
       resetPlatform();

@@ -24,19 +24,24 @@ global.document = global.document || { body: {} };
 global.fetch = window.fetch = jest.fn();
 
 delete window.localStorage;
-// We'll do this twice.
 window.localStorage = {};
+
+/**
+ * Mock these properties twice so that they're available
+ * both at the top-level of files and also within the
+ * code called in individual tests.
+ */
+window.ElectronFiddle = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
 
 beforeEach(() => {
-  document.body.innerHTML = '<div id="app" />';
-
-  global.ElectronFiddle = new ElectronFiddleMock();
   process.env.JEST = true;
   process.env.TEST = true;
+  document.body.innerHTML = '<div id="app" />';
 
+  window.ElectronFiddle = new ElectronFiddleMock();
   window.localStorage.setItem.mockReset();
   window.localStorage.getItem.mockReset();
   window.localStorage.removeItem.mockReset();

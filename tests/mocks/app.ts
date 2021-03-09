@@ -3,16 +3,17 @@ import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
 
 export class AppMock {
+  public setup = jest.fn();
   public setupUnsavedOnChangeListener = jest.fn();
   public replaceFiddle = jest.fn();
   public setEditorValues = jest.fn();
-  public getEditorValues = jest.fn(() => ({
+  public getEditorValues = jest.fn().mockResolvedValue({
     main: 'main-content',
     preload: 'preload-content',
     renderer: 'renderer-content',
     html: 'html-content',
     css: 'css-content',
-  }));
+  });
 
   public loadTheme = jest.fn();
 
