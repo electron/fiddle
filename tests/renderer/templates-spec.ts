@@ -14,8 +14,8 @@ describe('templates', () => {
     it('attempts to load template values', async () => {
       const fs = require('fs-extra');
 
-      // FIXME: this test is kind of dumb;
-      // it makes assumptions about the order in which the files are read
+      // FIXME: this test makes makes assumptions about
+      // the order in which the files are read
       fs.readFile.mockReturnValueOnce('html');
       fs.readFile.mockReturnValueOnce('main');
       fs.readFile.mockReturnValueOnce('renderer');

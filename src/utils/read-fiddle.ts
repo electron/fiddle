@@ -10,16 +10,17 @@ import {
 
 import * as fsType from 'fs-extra';
 import * as path from 'path';
+
 /**
- * Safely attempts to read a file, doesn't crash the app if
- * it fails.
+ * Safely attempts to read a file.
+ * Don't crash the app if reading fails.
  *
  * @param {string} filePath
  * @returns {string}
  */
 async function readFile(
   filePath: string,
-  logFolderOnError = false
+  logFolderOnError = false,
 ): Promise<string> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
   try {
@@ -46,9 +47,10 @@ async function readFile(
  */
 export async function readFiddle(
   filePath: string,
-  logFolderOnError = false
+  logFolderOnError = false,
 ): Promise<EditorValues> {
-  const read = (basename: string) => readFile(path.join(filePath, basename), logFolderOnError);
+  const read = (basename: string) =>
+    readFile(path.join(filePath, basename), logFolderOnError);
   return {
     html: await read(INDEX_HTML_NAME),
     main: await read(MAIN_JS_NAME),

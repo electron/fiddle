@@ -10,35 +10,39 @@ import * as fetchType from 'node-fetch';
 import * as semver from 'semver';
 
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
-const STATIC_TEMPLATE_DIR = path.resolve(__dirname, '../../static/electron-quick-start');
+const STATIC_TEMPLATE_DIR = path.resolve(
+  __dirname,
+  '../../static/electron-quick-start',
+);
 
 /**
- * Ensure the Electron branch's default fiddle exists; downloading it if necessary
+ * Ensure we have a fiddle for the specified Electron branch.
+ * If we don't have it already, download it from electron-quick-start.
  *
  * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
- * @returns {folder} Location of the fiddle's files
+ * @returns {Promise<folder>} Location of the fiddle's files
  */
-async function prepareTemplate(
-  branch: string
-): Promise<string> {
+async function prepareTemplate(branch: string): Promise<string> {
   let folder = path.join(TEMPLATES_DIR, `electron-quick-start-${branch}`);
 
   try {
     // if we don't have it, download it
-    const fs = await fancyImport<typeof fsType>('fs-extra')
+    const fs = await fancyImport<typeof fsType>('fs-extra');
     if (!fs.existsSync(folder)) {
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
       console.log(`Content: Downloading ${url}`);
       const fetch = (await fancyImport<any>('node-fetch')).default;
-      const response : fetchType.Response = await fetch(url);
-      const buf : Buffer = await response.buffer();
+      const response: fetchType.Response = await fetch(url);
+      const buf: Buffer = await response.buffer();
       const tmpfile = `${folder}.zip`;
 
       // save the zip as a tmpfile
       await fs.outputFile(tmpfile, buf);
 
       // unzip it
-      const extract: typeof extractZipType = (await fancyImport<any>('extract-zip')) .default;
+      const extract: typeof extractZipType = (
+        await fancyImport<any>('extract-zip')
+      ).default;
       await extract(tmpfile, { dir: TEMPLATES_DIR });
 
       // remove the tmpfile
@@ -53,20 +57,18 @@ async function prepareTemplate(
 }
 
 /**
- * Read the specified branch's default fiddle from disk
+ * Read from disk the fiddle for the specified Electron branch.
  *
  * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<EditorValues>}
  */
-async function readTemplate(
-  branch: string
-): Promise<EditorValues> {
+async function readTemplate(branch: string): Promise<EditorValues> {
   const folder = await prepareTemplate(branch);
   console.log(`Content: Loading fiddle for Electron ${branch} from ${folder}`);
   return readFiddle(folder);
 }
 
-const templateCache : Record<string, Promise<EditorValues>> = {};
+const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
  * Return a cached copy of the specified branch's default fiddle
@@ -74,12 +76,11 @@ const templateCache : Record<string, Promise<EditorValues>> = {};
  * @param {string} [version]
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplate(
-  version?: string
-): Promise<EditorValues> {
+export async function getTemplate(version?: string): Promise<EditorValues> {
   // get the branch
   const parsed = semver.parse(version);
-  const branch : string = parsed && parsed.major ? `${parsed.major}-x-y` : 'master';
+  const branch: string =
+    parsed && parsed.major ? `${parsed.major}-x-y` : 'master';
 
   // load the template for that branch
   let pending = templateCache[branch];
@@ -105,7 +106,7 @@ export async function getContent(
   try {
     return (await getTemplate(version))[name];
   } catch (err) {
-    console.log(err);
+    console.warn(err);
     return '';
   }
 }

@@ -16,9 +16,7 @@ export interface BlockAcceleratorsSettingsProps {
  * @extends {React.Component<BlockAcceleratorsSettingsProps>}
  */
 @observer
-export class BlockAcceleratorsSettings extends React.Component<
-  BlockAcceleratorsSettingsProps
-> {
+export class BlockAcceleratorsSettings extends React.Component<BlockAcceleratorsSettingsProps> {
   constructor(props: BlockAcceleratorsSettingsProps) {
     super(props);
 

@@ -19,7 +19,11 @@ export interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps> {
   public render() {
-    const { isRunning, isInstallingModules, currentElectronVersion } = this.props.appState;
+    const {
+      isRunning,
+      isInstallingModules,
+      currentElectronVersion,
+    } = this.props.appState;
 
     const state = currentElectronVersion && currentElectronVersion.state;
     const props: IButtonProps = { className: 'button-run', disabled: true };
