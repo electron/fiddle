@@ -46,7 +46,13 @@ describe('FileManager', () => {
       await fm.openFiddle(fakePath);
 
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {},
+        {
+          html: '',
+          renderer: '',
+          preload: '',
+          main: '',
+          css: '',
+        },
         { filePath: fakePath },
       );
     });

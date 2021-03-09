@@ -24,9 +24,10 @@ async function readFile(
 ): Promise<string> {
   const fs = await fancyImport<typeof fsType>('fs-extra');
   try {
-    return await fs.readFile(filePath, 'utf-8');
+    const content = await fs.readFile(filePath, 'utf-8');
+    return content ? content : '';
   } catch (error) {
-    console.warn(`Could not read template file:`, error);
+    console.log(`Could not read template file:`, error);
     if (logFolderOnError) {
       const folder = path.dirname(filePath);
       if (fs.existsSync(folder)) {

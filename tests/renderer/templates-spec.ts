@@ -2,9 +2,6 @@ import { getTemplateValues } from '../../src/renderer/templates';
 
 jest.mock('fs-extra');
 jest.mock('path');
-jest.mock('../../src/renderer/constants', () => ({
-  USER_DATA_PATH: 'user/data/',
-}));
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p),
 }));

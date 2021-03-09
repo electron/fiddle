@@ -1,22 +1,33 @@
 import { EditorId } from '../../src/interfaces';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
+jest.unmock('fs-extra');
+
 describe('content', () => {
   describe('getContent()', () => {
-    it('returns content for HTML editor', () => {
-      expect(getContent(EditorId.html)).toBeTruthy();
+    it('returns content for HTML editor', async () => {
+      const content = await getContent(EditorId.html);
+      expect(content).toBeTruthy();
     });
 
-    it('returns content for the renderer editor', () => {
-      expect(getContent(EditorId.renderer)).toBeTruthy();
+    it('returns content for the renderer editor', async () => {
+      const content = await getContent(EditorId.renderer);
+      expect(content).toBeTruthy();
     });
 
-    it('returns content for the main editor', () => {
-      expect(getContent(EditorId.main)).toBeTruthy();
+    it('returns content for the main editor', async () => {
+      const content = await getContent(EditorId.main);
+      expect(content).toBeTruthy();
     });
 
-    it('returns an empty string for an unknown request', () => {
-      expect(getContent('beep' as any)).toBeTruthy();
+    it('returns fallback content for an unparsable version', async () => {
+      const content = await getContent(EditorId.main, 'beep');
+      expect(content).toBeTruthy();
+    });
+
+    it('returns fallback content for an non-existent version', async () => {
+      const content = await getContent(EditorId.main, '999.0.0-beta.1');
+      expect(content).toBeTruthy();
     });
   });
 

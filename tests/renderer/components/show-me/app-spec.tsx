@@ -83,7 +83,7 @@ describe('getSubsetOnly()', () => {
       `
 home: ~
 appData: /test-path
-userData: /Users/fake-user
+userData: ${electron.app.getPath('userData')}
 temp: /test-path
 downloads: /test-path
 desktop: /test-path`.trim(),
