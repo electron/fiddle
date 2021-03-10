@@ -75,7 +75,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  ipcMainManager.handleOnce(IpcEvents.SET_APPDATA_DIR, () => {
+  ipcMainManager.handleOnce(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};
     const pathsToQuery = [
       'home',

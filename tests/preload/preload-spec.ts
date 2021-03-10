@@ -43,7 +43,7 @@ describe('preload', () => {
       await setupPaths();
 
       expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
-        IpcEvents.SET_APPDATA_DIR,
+        IpcEvents.GET_APP_PATHS,
       );
       expect((window as any).ElectronFiddle.appPaths).toBe(obj);
     });
