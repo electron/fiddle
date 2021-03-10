@@ -205,7 +205,7 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
+    ipcRendererManager.once(IpcEvents.GET_APP_PATHS, (_event, dir) => {
       this.appData = dir;
     });
 

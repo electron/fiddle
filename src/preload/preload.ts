@@ -25,7 +25,7 @@ export function setupGlobalWindow() {
 }
 
 export async function setupPaths() {
-  const appPaths = await ipcRendererManager.invoke(IpcEvents.SET_APPDATA_DIR);
+  const appPaths = await ipcRendererManager.invoke(IpcEvents.GET_APP_PATHS);
   window.ElectronFiddle.appPaths = appPaths;
 }
 
