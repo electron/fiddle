@@ -78,7 +78,6 @@
     "@types/decomment": "^0.9.0",
     "@types/decompress": "^4.2.3",
     "@types/enzyme": "^3.10.8",
-    "@types/extract-zip": "^1.6.2",
     "@types/fs-extra": "^9.0.7",
     "@types/jest": "^26.0.20",
     "@types/log-symbols": "^3.0.0",

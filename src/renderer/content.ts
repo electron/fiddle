@@ -33,9 +33,8 @@ async function prepareTemplate(branch: string): Promise<string> {
     // if we don't have it, download it
     const fs = await fancyImport<typeof fsType>('fs-extra');
     if (!fs.existsSync(folder)) {
-      const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
-
       console.log(`Content: Downloading template for ${branch}`);
+      const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
       const fetch = (await fancyImport<any>('node-fetch')).default;
       const response: fetchType.Response = await fetch(url);
       const buffer: Buffer = await response.buffer();
@@ -46,7 +45,10 @@ async function prepareTemplate(branch: string): Promise<string> {
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
-    console.log(`Content: Unable to get template; using ${folder}`, err);
+    console.log(
+      `Content: Unable to get template for ${branch}; using ${folder}`,
+      err,
+    );
   }
 
   return folder;

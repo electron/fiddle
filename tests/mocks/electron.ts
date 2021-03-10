@@ -96,7 +96,7 @@ function getFakeUserDataPath() {
     tmp.setGracefulCleanup();
     const tmpdir = tmp.dirSync({
       template: 'electron-fiddle-tests--user-data-XXXXXX',
-      unsafeCleanup: true,
+      unsafeCleanup: true, // remove everything
     });
     fakeUserDataPath = tmpdir.name;
   }

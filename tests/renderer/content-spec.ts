@@ -26,28 +26,23 @@ jest.mock('node-fetch', () => ({
 describe('content', () => {
   describe('getContent()', () => {
     it('returns content for HTML editor', async () => {
-      const content = await getContent(EditorId.html);
-      expect(content).toBeTruthy();
+      expect(await getContent(EditorId.html)).toBeTruthy();
     });
 
     it('returns content for the renderer editor', async () => {
-      const content = await getContent(EditorId.renderer);
-      expect(content).toBeTruthy();
+      expect(await getContent(EditorId.renderer)).toBeTruthy();
     });
 
     it('returns content for the main editor', async () => {
-      const content = await getContent(EditorId.main);
-      expect(content).toBeTruthy();
+      expect(await getContent(EditorId.main)).toBeTruthy();
     });
 
     it('returns fallback content for an unparsable version', async () => {
-      const content = await getContent(EditorId.main, 'beep');
-      expect(content).toBeTruthy();
+      expect(await getContent(EditorId.main, 'beep')).toBeTruthy();
     });
 
     it('returns fallback content for an non-existent version', async () => {
-      const content = await getContent(EditorId.main, '999.0.0-beta.1');
-      expect(content).toBeTruthy();
+      expect(await getContent(EditorId.main, '999.0.0-beta.1')).toBeTruthy();
     });
 
     it('returns the same content when called multiple times', async () => {
