@@ -60,6 +60,10 @@ describe('main', () => {
     });
   });
 
+  beforeEach(() => {
+    (app.getPath as jest.Mock).mockImplementation((name) => name);
+  });
+
   describe('main()', () => {
     it('quits during Squirrel events', () => {
       (shouldQuit as jest.Mock).mockReturnValueOnce(true);
@@ -90,7 +94,6 @@ describe('main', () => {
   describe('onReady()', () => {
     it('opens a BrowserWindow, sets up updates', async () => {
       await onReady();
-
       expect(setupAboutPanel).toHaveBeenCalledTimes(1);
       expect(getOrCreateMainWindow).toHaveBeenCalledTimes(1);
       expect(setupUpdates).toHaveBeenCalledTimes(1);
