@@ -12,6 +12,7 @@ import {
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 import * as path from 'path';
+import * as electron from 'electron';
 
 jest.mock('../../src/main/context-menu');
 jest.mock('path');
@@ -118,6 +119,28 @@ describe('windows', () => {
       const w = getOrCreateMainWindow();
       ipcMainManager.emit(IpcEvents.SHOW_INACTIVE);
       expect(w.showInactive).toHaveBeenCalled();
+    });
+
+    it('returns app.getPath() values on IPC event', () => {
+      // we want to remove the effects of previous calls
+      browserWindows.length = 0;
+
+      // can't .emit() to trigger .handleOnce() so instead we mock
+      // to instantly call the listener.
+      let result: any;
+      (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
+      (electron.ipcMain.handleOnce as jest.Mock).mockImplementation(
+        (event, listener) => {
+          if (event === IpcEvents.SET_APPDATA_DIR) {
+            result = listener();
+          }
+        },
+      );
+      getOrCreateMainWindow();
+      expect(Object.values(result).length).toBeGreaterThan(0);
+      for (const prop in result) {
+        expect(prop).toBe(result[prop]);
+      }
     });
   });
 });

@@ -119,11 +119,11 @@ const app = {
     removedItems: [],
   })),
   getLoginItemSettings: jest.fn(),
-  getPath: (name: string) => {
+  getPath: jest.fn((name: string) => {
     if (name === 'userData') return '/Users/fake-user';
     if (name === 'home') return `~`;
     return '/test-path';
-  },
+  }),
   focus: jest.fn(),
   quit: jest.fn(),
   relaunch: jest.fn(),
