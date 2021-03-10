@@ -1,7 +1,14 @@
 import { getTemplateValues } from '../../src/renderer/templates';
+import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PRELOAD_JS_NAME,
+  RENDERER_JS_NAME,
+} from '../../src/shared-constants';
+
+import * as path from 'path';
 
 jest.mock('fs-extra');
-jest.mock('path');
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => require(p),
 }));
@@ -10,18 +17,12 @@ describe('templates', () => {
   describe('getTemplateValues()', () => {
     it('attempts to load template values', async () => {
       const fs = require('fs-extra');
-
-      // FIXME: this test makes makes assumptions about
-      // the order in which the files are read
-      fs.readFile.mockReturnValueOnce('html');
-      fs.readFile.mockReturnValueOnce('main');
-      fs.readFile.mockReturnValueOnce('renderer');
-
+      fs.readFile.mockImplementation((dir: string) => path.basename(dir));
       const values = await getTemplateValues('test');
-
-      expect(values.html).toBe('html');
-      expect(values.main).toBe('main');
-      expect(values.renderer).toBe('renderer');
+      expect(values.html).toBe(INDEX_HTML_NAME);
+      expect(values.main).toBe(MAIN_JS_NAME);
+      expect(values.preload).toBe(PRELOAD_JS_NAME);
+      expect(values.renderer).toBe(RENDERER_JS_NAME);
     });
 
     it('handles errors', async () => {
