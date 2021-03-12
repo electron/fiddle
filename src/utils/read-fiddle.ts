@@ -16,6 +16,7 @@ import * as path from 'path';
  * Don't crash the app if reading fails.
  *
  * @param {string} filePath
+ * @param {boolean} [logFolderOnError=false] More verbose error logging
  * @returns {string}
  */
 async function readFile(
@@ -44,6 +45,7 @@ async function readFile(
  * Reads a Fiddle from a directory.
  *
  * @param {string} filePath
+ * @param {boolean} [logFolderOnError=false] More verbose error logging
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(
