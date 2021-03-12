@@ -13,8 +13,7 @@ import * as fetchType from 'node-fetch';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
-
-const decompress = require('decompress');
+import decompress from 'decompress';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
