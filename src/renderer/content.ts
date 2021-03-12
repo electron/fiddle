@@ -1,5 +1,11 @@
+import { appState } from './state';
 import { USER_DATA_PATH } from './constants';
-import { EditorId, EditorValues } from '../interfaces';
+import {
+  EditorId,
+  EditorValues,
+  RunnableVersion,
+  VersionSource,
+} from '../interfaces';
 import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 
@@ -57,19 +63,27 @@ async function prepareTemplate(branch: string): Promise<string> {
   return folder;
 }
 
-/**
- * Read from disk the fiddle for the specified Electron branch.
- *
- * @param {string} branch Electron branchname, e.g. `12-x-y` or `master`
- * @returns {Promise<EditorValues>}
- */
-async function readTemplate(branch: string): Promise<EditorValues> {
-  const folder = await prepareTemplate(branch);
-  console.log(`Content: Loading fiddle for Electron ${branch}`);
-  return readFiddle(folder);
-}
-
 const templateCache: Record<string, Promise<EditorValues>> = {};
+
+/**
+ * Helper to check if this version is from a released major branch.
+ *
+ * This way when we have a local version of Electron like '999.0.0'
+ * we'll know to not try & download 999-x-y.zip from GitHub :D
+ *
+ * @param {string} [version]
+ * @returns {boolean} true if major version is a known release
+ */
+function isReleasedMajor(version?: string) {
+  const newestRelease = Object.values(appState.versions)
+    .filter((version) => version.source === VersionSource.remote)
+    .map((version) => semver.parse(version.version))
+    .filter((version) => !!version)
+    .sort((a: semver.SemVer, b: semver.SemVer) => semver.compare(a, b))
+    .pop();
+  const parsed = semver.parse(version);
+  return parsed && newestRelease && parsed.major <= newestRelease.major;
+}
 
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
@@ -85,7 +99,11 @@ export async function getTemplate(version?: string): Promise<EditorValues> {
   // load the template for that branch
   let pending = templateCache[branch];
   if (!pending) {
-    pending = templateCache[branch] = readTemplate(branch);
+    const folder = isReleasedMajor(version)
+      ? await prepareTemplate(branch)
+      : STATIC_TEMPLATE_DIR;
+    console.log(`Content: Loading fiddle for Electron ${branch}`);
+    pending = templateCache[branch] = readFiddle(folder);
   }
 
   return pending;
