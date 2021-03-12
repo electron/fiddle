@@ -117,14 +117,5 @@ export async function isContentUnchanged(name: EditorId): Promise<boolean> {
     include: false,
   });
 
-  // Handle main case, which needs to check both possible versions
-  if (name === EditorId.main) {
-    const isChanged1x =
-      (await getContent(EditorId.main, '1.0')) === values.main;
-    const isChangedOther = (await getContent(EditorId.main)) === values.main;
-
-    return isChanged1x || isChangedOther;
-  } else {
-    return values[name] === (await getContent(name));
-  }
+  return values[name] === (await getContent(name));
 }
