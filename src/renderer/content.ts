@@ -78,7 +78,7 @@ export async function getTemplate(version?: string): Promise<EditorValues> {
   // get the branch
   const parsed = semver.parse(version);
   const branch: string =
-    parsed && parsed.major ? `${parsed.major}-x-y` : 'master';
+    parsed?.major ? `${parsed.major}-x-y` : 'master';
 
   // load the template for that branch
   let pending = templateCache[branch];
