@@ -23,7 +23,7 @@ const STATIC_TEMPLATE_DIR = path.resolve(
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
  *
- * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} branch Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<string>} Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
