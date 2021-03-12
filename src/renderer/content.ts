@@ -57,7 +57,7 @@ async function prepareTemplate(branch: string): Promise<string> {
 /**
  * Read from disk the fiddle for the specified Electron branch.
  *
- * @param {branch} Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} branch Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<EditorValues>}
  */
 async function readTemplate(branch: string): Promise<EditorValues> {
