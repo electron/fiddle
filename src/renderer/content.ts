@@ -37,9 +37,12 @@ async function prepareTemplate(branch: string): Promise<string> {
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
       const fetch = (await fancyImport<any>('node-fetch')).default;
       const response: fetchType.Response = await fetch(url);
-      const buffer: Buffer = await response.buffer();
+      if (!response.ok) {
+        throw new Error(`${url} ${response.status} ${response.statusText}`);
+      }
 
       console.log(`Content: Unzipping template for ${branch}`);
+      const buffer: Buffer = await response.buffer();
       await fs.ensureDir(TEMPLATES_DIR);
       await decompress(buffer, TEMPLATES_DIR);
     }
@@ -77,8 +80,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
 export async function getTemplate(version?: string): Promise<EditorValues> {
   // get the branch
   const parsed = semver.parse(version);
-  const branch: string =
-    parsed?.major ? `${parsed.major}-x-y` : 'master';
+  const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
 
   // load the template for that branch
   let pending = templateCache[branch];
