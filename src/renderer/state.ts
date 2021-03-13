@@ -3,6 +3,7 @@ import { action, autorun, computed, observable, toJS, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
+  ALL_EDITORS,
   ALL_MOSAICS,
   BlockableAccelerator,
   DocsDemoPage,
@@ -252,7 +253,7 @@ export class AppState {
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
-    autorun(() => {
+    autorun(async () => {
       if (typeof this.isUnsaved === 'undefined') return;
 
       if (this.isUnsaved) {
@@ -288,13 +289,17 @@ export class AppState {
         window.onbeforeunload = null;
 
         // set up editor listeners to verify if unsaved
-        Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-          const editor = window.ElectronFiddle.editors[key];
+        const ids = ALL_EDITORS.filter(
+          (id) => id in window.ElectronFiddle.editors,
+        );
+        await waitForEditorsToMount(ids);
+        for (const id of ids) {
+          const editor = window.ElectronFiddle.editors[id];
           const disposable = editor.onDidChangeModelContent(() => {
             this.isUnsaved = true;
             disposable.dispose();
           });
-        });
+        }
       }
     });
 
