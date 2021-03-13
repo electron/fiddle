@@ -11,6 +11,10 @@ import { readFiddle } from '../utils/read-fiddle';
  */
 export async function getTemplateValues(name: string): Promise<EditorValues> {
   const path = await fancyImport<typeof pathType>('path');
-  const folder = path.join(__dirname, '../../static/show-me', name.toLowerCase());
-  return readFiddle(folder, true);
+  const folder = path.join(
+    __dirname,
+    '../../static/show-me',
+    name.toLowerCase(),
+  );
+  return readFiddle(folder);
 }
