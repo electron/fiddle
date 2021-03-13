@@ -1,51 +1,39 @@
 import { getTemplateValues } from '../../src/renderer/templates';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-} from '../../src/shared-constants';
 
-import * as path from 'path';
-
-jest.mock('fs-extra');
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
-}));
+jest.unmock('fs-extra');
 
 describe('templates', () => {
+  const KNOWN_GOOD_TEMPLATE = 'clipboard';
+  const KNOWN_BAD_TEMPLATE = 'not-a-real-show-me';
+
   describe('getTemplateValues()', () => {
-    it('attempts to load template values', async () => {
-      const fs = require('fs-extra');
-      fs.readFile.mockImplementation((dir: string) => path.basename(dir));
-      const values = await getTemplateValues('test');
-      expect(values.html).toBe(INDEX_HTML_NAME);
-      expect(values.main).toBe(MAIN_JS_NAME);
-      expect(values.preload).toBe(PRELOAD_JS_NAME);
-      expect(values.renderer).toBe(RENDERER_JS_NAME);
+    it('loads templates', async () => {
+      const values = await getTemplateValues(KNOWN_GOOD_TEMPLATE);
+
+      expect(values.html).toMatch(/^<!DOCTYPE html>/);
+      expect(values.main.length).toBeGreaterThan(0);
+      expect(values.renderer.length).toBeGreaterThan(0);
     });
 
     it('handles errors', async () => {
-      const fs = require('fs-extra');
-
-      fs.readFile.mockReturnValue(Promise.reject('bwap'));
-
-      const values = await getTemplateValues('test');
+      const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
       expect(values.html).toBe('');
       expect(values.main).toBe('');
       expect(values.renderer).toBe('');
     });
 
-    it('handles errors and reports the templates content', async () => {
-      const fs = require('fs-extra');
+    it('reports missing files', async () => {
+      console.log = jest.fn();
 
-      fs.readFile.mockReturnValue(Promise.reject('bwap'));
-      fs.existsSync.mockReturnValue(true);
+      await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
-      await getTemplateValues('test');
-      expect(fs.existsSync).toHaveBeenCalledTimes(5);
-      expect(fs.readdirSync).toHaveBeenCalledTimes(5);
+      expect(console.log).toHaveBeenCalledTimes(1);
+      expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
+        'Missed: index.html, main.js, package.json, preload.js, renderer.js, styles.css',
+      );
+
+      (console.log as jest.Mock).mockClear();
     });
   });
 });
