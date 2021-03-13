@@ -1,12 +1,7 @@
-import { appState } from './state';
+import { EditorId, EditorValues, VersionSource } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import {
-  EditorId,
-  EditorValues,
-  RunnableVersion,
-  VersionSource,
-} from '../interfaces';
 import { fancyImport } from '../utils/import';
+import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fsType from 'fs-extra';
@@ -72,7 +67,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
  * @returns {boolean} true if major version is a known release
  */
 function isReleasedMajor(version?: string) {
-  const newestRelease = Object.values(appState.versions)
+  const newestRelease = getElectronVersions()
     .filter((version) => version.source === VersionSource.remote)
     .map((version) => semver.parse(version.version))
     .filter((version) => !!version)
