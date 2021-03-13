@@ -1,4 +1,5 @@
 import * as MonacoType from 'monaco-editor';
+import { when } from 'mobx';
 
 import {
   ALL_MOSAICS,
@@ -142,8 +143,9 @@ describe('AppState', () => {
       });
     });
 
-    it('sets the onDidChangeModelContent handler if saved', () => {
+    it('sets the onDidChangeModelContent handler if saved', async (done) => {
       appState.isUnsaved = false;
+      await when(() => appState.isUnsaved === false);
 
       expect(window.onbeforeunload).toBe(null);
 
@@ -155,6 +157,7 @@ describe('AppState', () => {
       cb();
 
       expect(appState.isUnsaved).toBe(true);
+      done();
     });
   });
 
@@ -612,7 +615,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
       expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
@@ -644,7 +647,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
 
       appState.resetEditorLayout();

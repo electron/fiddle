@@ -295,10 +295,14 @@ export class AppState {
         await waitForEditorsToMount(ids);
         for (const id of ids) {
           const editor = window.ElectronFiddle.editors[id];
-          const disposable = editor.onDidChangeModelContent(() => {
-            this.isUnsaved = true;
-            disposable.dispose();
-          });
+          if (editor) {
+            const disposable = editor.onDidChangeModelContent(() => {
+              this.isUnsaved = true;
+              disposable.dispose();
+            });
+          } else {
+            throw new Error(`no editor for ${id}`);
+          }
         }
       }
     });
