@@ -88,14 +88,15 @@ export async function getTemplate(version?: string): Promise<EditorValues> {
   const parsed = semver.parse(version);
   const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
 
-  // load the template for that branch
+  // Load the template for that branch.
+  // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
   if (!pending) {
-    const folder = isReleasedMajor(version)
-      ? await prepareTemplate(branch)
-      : STATIC_TEMPLATE_DIR;
     console.log(`Content: Loading fiddle for Electron ${branch}`);
-    pending = templateCache[branch] = readFiddle(folder);
+    pending = isReleasedMajor(version)
+      ? prepareTemplate(branch).then(readFiddle)
+      : readFiddle(STATIC_TEMPLATE_DIR);
+    templateCache[branch] = pending;
   }
 
   return pending;
