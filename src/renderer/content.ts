@@ -9,7 +9,6 @@ import {
 import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 
-import * as fetchType from 'node-fetch';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
@@ -40,16 +39,15 @@ async function prepareTemplate(branch: string): Promise<string> {
     if (!fs.existsSync(folder)) {
       console.log(`Content: Downloading template for ${branch}`);
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
-      const fetch = (await fancyImport<any>('node-fetch')).default;
-      const response: fetchType.Response = await fetch(url);
+      const response: Response = await fetch(url);
       if (!response.ok) {
         throw new Error(`${url} ${response.status} ${response.statusText}`);
       }
 
       console.log(`Content: Unzipping template for ${branch}`);
-      const buffer: Buffer = await response.buffer();
+      const arrayBuffer = await response.arrayBuffer();
       await fs.ensureDir(TEMPLATES_DIR);
-      await decompress(buffer, TEMPLATES_DIR);
+      await decompress(Buffer.from(arrayBuffer), TEMPLATES_DIR);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
