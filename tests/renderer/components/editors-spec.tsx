@@ -174,9 +174,12 @@ describe('Editors component', () => {
     });
 
     it('handles an FS_NEW_FIDDLE command', async (done) => {
-      let resolve : any;
-      const replacePromise = new Promise((r) => { resolve = r; });
-      (window.ElectronFiddle.app.replaceFiddle as jest.Mock<any>).mockImplementation(resolve);
+      let resolve: any;
+      const replacePromise = new Promise((r) => {
+        resolve = r;
+      });
+      (window.ElectronFiddle.app
+        .replaceFiddle as jest.Mock<any>).mockImplementation(resolve);
 
       ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
       await replacePromise;

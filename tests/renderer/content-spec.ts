@@ -7,7 +7,10 @@ import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
-let lastResponse = new Response(null, { status: 418 });
+let lastResponse = new Response(null, {
+  status: 503,
+  statusText: 'Service Unavailable',
+});
 
 // instead of downloading fixtures,
 // pull the files from tests/fixtures/templates/

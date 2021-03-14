@@ -6,7 +6,12 @@ import { EditorId } from '../../interfaces';
 import { AppState } from '../state';
 
 export function renderNonIdealState(appState: AppState) {
-  const allEditors = [EditorId.html, EditorId.main, EditorId.renderer, EditorId.preload];
+  const allEditors = [
+    EditorId.html,
+    EditorId.main,
+    EditorId.renderer,
+    EditorId.preload,
+  ];
   const resolveButton = (
     <Button
       text="Open all editors"
