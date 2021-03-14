@@ -26,4 +26,20 @@ describe('ipcRendererManager', () => {
       );
     });
   });
+
+  describe('invoke()', () => {
+    it('returns the value of ipcRenderer.invoke', async () => {
+      (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(1);
+      const result = await ipcRendererManager.invoke(
+        IpcEvents.FIDDLE_RUN,
+        'hello',
+      );
+
+      expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
+        IpcEvents.FIDDLE_RUN,
+        'hello',
+      );
+      expect(result).toBe(1);
+    });
+  });
 });

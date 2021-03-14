@@ -68,4 +68,26 @@ describe('IpcMainManager', () => {
       expect(mockTarget.send).toHaveBeenCalledTimes(0);
     });
   });
+
+  describe('handle()', () => {
+    it('calls ipcMain.handle', () => {
+      const noop = () => ({});
+      ipcMainManager.handle(IpcEvents.FIDDLE_RUN, noop);
+      expect(electron.ipcMain.handle).toHaveBeenCalledWith(
+        IpcEvents.FIDDLE_RUN,
+        noop,
+      );
+    });
+  });
+
+  describe('handleOnce()', () => {
+    it('calls ipcMain.handleOnce', () => {
+      const noop = () => ({});
+      ipcMainManager.handleOnce(IpcEvents.FIDDLE_RUN, noop);
+      expect(electron.ipcMain.handleOnce).toHaveBeenCalledWith(
+        IpcEvents.FIDDLE_RUN,
+        noop,
+      );
+    });
+  });
 });

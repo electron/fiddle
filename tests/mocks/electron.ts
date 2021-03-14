@@ -67,12 +67,27 @@ export class MockMenuItem {
   }
 }
 
-export class MockIPC extends EventEmitter {
+export class MockIPCMain extends EventEmitter {
   public send: any;
+  public handle: any;
+  public handleOnce: any;
 
   constructor() {
     super();
     this.send = jest.fn();
+    this.handle = jest.fn();
+    this.handleOnce = jest.fn();
+  }
+}
+
+export class MockIPCRenderer extends EventEmitter {
+  public send: any;
+  public invoke: any;
+
+  constructor() {
+    super();
+    this.send = jest.fn();
+    this.invoke = jest.fn();
   }
 }
 
@@ -119,11 +134,11 @@ const app = {
     removedItems: [],
   })),
   getLoginItemSettings: jest.fn(),
-  getPath: (name: string) => {
+  getPath: jest.fn((name: string) => {
     if (name === 'userData') return getFakeUserDataPath();
     if (name === 'home') return `~`;
     return '/test-path';
-  },
+  }),
   focus: jest.fn(),
   quit: jest.fn(),
   relaunch: jest.fn(),
@@ -178,8 +193,8 @@ const electronMock = {
     showOpenDialogSync: jest.fn().mockReturnValue(['path']),
     showMessageBox: jest.fn().mockResolvedValue({}),
   },
-  ipcMain: new MockIPC(),
-  ipcRenderer: new MockIPC(),
+  ipcMain: new MockIPCMain(),
+  ipcRenderer: new MockIPCRenderer(),
   nativeImage: {
     createFromPath: (...args: Array<any>) => new MockNativeImage(...args),
     createFromBuffer: jest.fn(),
@@ -236,6 +251,7 @@ const electronMock = {
 
 electronMock.BrowserWindow.getAllWindows.mockReturnValue([]);
 electronMock.BrowserWindow.fromId.mockReturnValue(mainWindowStub);
+electronMock.BrowserWindow.fromWebContents.mockReturnValue(mainWindowStub);
 electronMock.BrowserWindow.getFocusedWindow.mockReturnValue(focusedWindowStub);
 electronMock.remote.getCurrentWindow.mockReturnValue(mainWindowStub);
 

@@ -10,7 +10,7 @@ import { EditorBackup } from './editor-backup';
 export function getEditorValue(id: EditorId): string {
   const { ElectronFiddle: fiddle } = window;
 
-  if (!fiddle) {
+  if (!fiddle?.editors) {
     return '';
   }
 

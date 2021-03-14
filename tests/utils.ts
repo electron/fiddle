@@ -1,6 +1,6 @@
 const platform = process.platform;
 
-export function overridePlatform(value: string) {
+export function overridePlatform(value: NodeJS.Platform) {
   Object.defineProperty(process, 'platform', {
     value,
     writable: true,

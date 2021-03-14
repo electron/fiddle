@@ -69,6 +69,20 @@ export class IpcMainManager extends EventEmitter {
 
     _target.send(channel, ..._args);
   }
+
+  public handle(
+    channel: IpcEvents,
+    listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any,
+  ) {
+    ipcMain.handle(channel, listener);
+  }
+
+  public handleOnce(
+    channel: IpcEvents,
+    listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any,
+  ) {
+    ipcMain.handleOnce(channel, listener);
+  }
 }
 
 export const ipcMainManager = new IpcMainManager();

@@ -11,7 +11,7 @@ import { EditorId } from '../interfaces';
 export function getEditorModel(id: EditorId): editor.ITextModel | null {
   const { ElectronFiddle: fiddle } = window;
 
-  if (!fiddle) {
+  if (!fiddle?.editors) {
     return null;
   }
 

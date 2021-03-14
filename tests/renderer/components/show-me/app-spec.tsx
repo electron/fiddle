@@ -71,6 +71,9 @@ describe('getSubsetOnly()', () => {
   });
 
   it('handles the paths example', () => {
+    (electron.remote.app.getPath as jest.Mock).mockImplementation(
+      (name) => name,
+    );
     const wrapper = mount(<ShowMeApp />);
 
     wrapper.find('button#special-paths').simulate('click');
@@ -81,12 +84,12 @@ describe('getSubsetOnly()', () => {
 
     expect(specialPaths).toEqual(
       `
-home: ~
-appData: /test-path
+home: home
+appData: appData
 userData: ${electron.app.getPath('userData')}
-temp: /test-path
-downloads: /test-path
-desktop: /test-path`.trim(),
+temp: temp
+downloads: downloads
+desktop: desktop`.trim(),
     );
   });
 

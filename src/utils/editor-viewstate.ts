@@ -14,7 +14,7 @@ export function getEditorViewState(
 ): editor.ICodeEditorViewState | null {
   const { ElectronFiddle: fiddle } = window;
 
-  if (!fiddle) {
+  if (!fiddle?.editors) {
     return null;
   }
 

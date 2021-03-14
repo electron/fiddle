@@ -26,9 +26,10 @@ export enum IpcEvents {
   SHOW_INACTIVE = 'SHOW_INACTIVE',
   BEFORE_QUIT = 'BEFORE_QUIT',
   CONFIRM_QUIT = 'CONFIRM_QUIT',
-  SET_APPDATA_DIR = 'SET_APPDATA_DIR',
+  GET_APP_PATHS = 'GET_APP_PATHS',
   SELECT_ALL_IN_EDITOR = 'SELECT_ALL_IN_EDITOR',
   BLOCK_ACCELERATORS = 'BLOCK_ACCELERATORS',
+  CLICK_TITLEBAR_MAC = 'CLICK_TITLEBAR_MAC',
 }
 
 export const ipcMainEvents = [
@@ -40,6 +41,7 @@ export const ipcMainEvents = [
   IpcEvents.SHOW_INACTIVE,
   IpcEvents.CONFIRM_QUIT,
   IpcEvents.BLOCK_ACCELERATORS,
+  IpcEvents.CLICK_TITLEBAR_MAC,
 ];
 
 export const ipcRendererEvents = [
@@ -63,7 +65,7 @@ export const ipcRendererEvents = [
   IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
   IpcEvents.BISECT_COMMANDS_TOGGLE,
   IpcEvents.BEFORE_QUIT,
-  IpcEvents.SET_APPDATA_DIR,
+  IpcEvents.GET_APP_PATHS,
   IpcEvents.SELECT_ALL_IN_EDITOR,
 ];
 

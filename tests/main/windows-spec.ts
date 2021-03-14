@@ -11,8 +11,11 @@ import {
   getOrCreateMainWindow,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
+import * as path from 'path';
+import * as electron from 'electron';
 
 jest.mock('../../src/main/context-menu');
+jest.mock('path');
 
 describe('windows', () => {
   beforeAll(() => {
@@ -31,14 +34,20 @@ describe('windows', () => {
       minWidth: 600,
       acceptFirstMouse: true,
       backgroundColor: '#1d2427',
+      titleBarStyle: undefined,
       webPreferences: {
         webviewTag: false,
         enableRemoteModule: true,
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
         contextIsolation: false,
+        preload: '/fake/path',
       },
     };
+
+    beforeEach(() => {
+      (path.join as jest.Mock).mockReturnValue('/fake/path');
+    });
 
     afterEach(() => {
       resetPlatform();
@@ -110,6 +119,28 @@ describe('windows', () => {
       const w = getOrCreateMainWindow();
       ipcMainManager.emit(IpcEvents.SHOW_INACTIVE);
       expect(w.showInactive).toHaveBeenCalled();
+    });
+
+    it('returns app.getPath() values on IPC event', () => {
+      // we want to remove the effects of previous calls
+      browserWindows.length = 0;
+
+      // can't .emit() to trigger .handleOnce() so instead we mock
+      // to instantly call the listener.
+      let result: any;
+      (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
+      (electron.ipcMain.handleOnce as jest.Mock).mockImplementation(
+        (event, listener) => {
+          if (event === IpcEvents.GET_APP_PATHS) {
+            result = listener();
+          }
+        },
+      );
+      getOrCreateMainWindow();
+      expect(Object.values(result).length).toBeGreaterThan(0);
+      for (const prop in result) {
+        expect(prop).toBe(result[prop]);
+      }
     });
   });
 });

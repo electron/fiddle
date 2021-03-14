@@ -63,23 +63,6 @@ const knownVersions = getElectronVersions();
 const defaultVersion = getDefaultVersion(knownVersions);
 
 /**
- * Editors exist outside of React's world. To make things *a lot*
- * easier, we keep them around in a global object. Don't judge us,
- * we're really only doing that for the editors.
- */
-window.ElectronFiddle =
-  window.ElectronFiddle ||
-  ({
-    editors: {
-      main: null,
-      renderer: null,
-      html: null,
-      preload: null,
-    },
-    app: null,
-  } as any);
-
-/**
  * The application's state. Exported as a singleton below.
  *
  * @export
@@ -223,7 +206,7 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.once(IpcEvents.SET_APPDATA_DIR, (_event, dir) => {
+    ipcRendererManager.once(IpcEvents.GET_APP_PATHS, (_event, dir) => {
       this.appData = dir;
     });
 
