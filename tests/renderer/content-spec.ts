@@ -1,30 +1,46 @@
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import { Response } from 'cross-fetch';
+
 import { EditorId } from '../../src/interfaces';
 import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
-const fs = require('fs-extra');
-const path = require('path');
-
 // instead of downloading fixtures,
 // pull the files from tests/fixtures/templates/
-jest.mock('node-fetch', () => ({
-  default: (url: string) => ({
-    buffer: () => {
-      console.log('!!fetching from fixtures');
-      const filename = path.join(
-        __dirname,
-        '../fixtures/templates',
-        path.basename(new URL(url).pathname),
-      );
-      const opts = { encoding: null };
-      return fs.readFile(filename, opts);
-    },
-  }),
-}));
+const fetchFromFilesystem = (url: string) => {
+  let arrayBuffer = null;
+  let status = 404;
+  let statusText = 'Not Found';
+  try {
+    const filename = path.join(
+      __dirname,
+      '../fixtures/templates',
+      path.basename(new URL(url).pathname),
+    );
+    console.log(`Fetching ${url} from ${filename}`);
+    const opts = { encoding: null };
+    const buffer = fs.readFileSync(filename, opts);
+    arrayBuffer = Uint8Array.from(buffer).buffer;
+    status = 200;
+    statusText = 'OK';
+  } catch (err) {
+    console.log(err);
+  }
+  return Promise.resolve(new Response(arrayBuffer, { status, statusText }));
+};
 
 describe('content', () => {
   describe('getContent()', () => {
+    beforeEach(() => {
+      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
+      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
+    });
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+
     it('returns content for HTML editor', async () => {
       expect(await getContent(EditorId.html)).toBeTruthy();
     });
@@ -43,6 +59,11 @@ describe('content', () => {
 
     it('returns fallback content for an non-existent version', async () => {
       expect(await getContent(EditorId.main, '999.0.0-beta.1')).toBeTruthy();
+    });
+
+    it('returns downloads and returns content for known versions', async () => {
+      const content = await getContent(EditorId.html, '11.0.0');
+      expect(content).toMatch(/^<!DOCTYPE html>/);
     });
 
     it('returns the same content when called multiple times', async () => {

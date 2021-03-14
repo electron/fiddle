@@ -7,7 +7,7 @@ import { readFiddle } from '../utils/read-fiddle';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
-import decompress from 'decompress';
+const decompress = require('decompress');
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
@@ -34,7 +34,7 @@ async function prepareTemplate(branch: string): Promise<string> {
     if (!fs.existsSync(folder)) {
       console.log(`Content: Downloading template for ${branch}`);
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
-      const response: Response = await fetch(url);
+      const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`${url} ${response.status} ${response.statusText}`);
       }
