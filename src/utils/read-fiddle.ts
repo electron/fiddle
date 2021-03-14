@@ -6,8 +6,9 @@ import {
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
 } from '../shared-constants';
+import { fancyImport } from './import';
 
-import * as fs from 'fs-extra';
+import * as fsType from 'fs-extra';
 import * as path from 'path';
 
 const FILENAME_KEYS = Object.freeze({
@@ -35,6 +36,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
 
   const hits: string[] = [];
   const misses = new Set(Object.keys(FILENAME_KEYS));
+  const fs = await fancyImport<typeof fsType>('fs-extra');
 
   const tryRead = (basename: string) => {
     try {
