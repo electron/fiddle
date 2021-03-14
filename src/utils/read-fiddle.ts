@@ -2,7 +2,6 @@ import { EditorValues } from '../interfaces';
 import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,
-  PACKAGE_NAME,
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
@@ -14,7 +13,6 @@ import * as path from 'path';
 const FILENAME_KEYS = Object.freeze({
   [INDEX_HTML_NAME]: 'html',
   [MAIN_JS_NAME]: 'main',
-  [PACKAGE_NAME]: 'package',
   [PRELOAD_JS_NAME]: 'preload',
   [RENDERER_JS_NAME]: 'renderer',
   [STYLES_CSS_NAME]: 'css',

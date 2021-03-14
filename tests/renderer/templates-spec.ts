@@ -30,7 +30,7 @@ describe('templates', () => {
 
       expect(console.log).toHaveBeenCalledTimes(1);
       expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
-        'Missed: index.html, main.js, package.json, preload.js, renderer.js, styles.css',
+        'Missed: index.html, main.js, preload.js, renderer.js, styles.css',
       );
 
       (console.log as jest.Mock).mockClear();
