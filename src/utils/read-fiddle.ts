@@ -42,7 +42,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
       const content = fs.readFileSync(filename, 'utf-8');
       hits.push(basename);
       misses.delete(basename);
-      return content ? content : '';
+      return content || '';
     } catch (error) {
       console.warn(`Could not read template file ${basename}:`, error);
       return '';
@@ -60,11 +60,9 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     }
   }
 
-  if (misses.size > 0) {
-    console.log(`Got Fiddle from "${folder}".
+  console.log(`Got Fiddle from "${folder}".
 Found: ${hits.sort().join(', ')}
 Missed: ${[...misses].sort().join(', ')}`);
-  }
 
   return ret;
 }

@@ -7,6 +7,8 @@ import { getContent, isContentUnchanged } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
+let lastResponse = new Response(null, { status: 418 });
+
 // instead of downloading fixtures,
 // pull the files from tests/fixtures/templates/
 const fetchFromFilesystem = (url: string) => {
@@ -28,7 +30,8 @@ const fetchFromFilesystem = (url: string) => {
   } catch (err) {
     console.log(err);
   }
-  return Promise.resolve(new Response(arrayBuffer, { status, statusText }));
+  lastResponse = new Response(arrayBuffer, { status, statusText });
+  return Promise.resolve(lastResponse);
 };
 
 describe('content', () => {
@@ -61,8 +64,16 @@ describe('content', () => {
       expect(await getContent(EditorId.main, '999.0.0-beta.1')).toBeTruthy();
     });
 
-    it('returns downloads and returns content for known versions', async () => {
+    it('downloads and returns content for known versions', async () => {
       const content = await getContent(EditorId.html, '11.0.0');
+      expect(lastResponse).toMatchObject({ status: 200 });
+      expect(content).toMatch(/^<!DOCTYPE html>/);
+    });
+
+    it('provides fallback content if downloads fail', async () => {
+      const VERSION_NOT_IN_FIXTURES = '10.0.0';
+      const content = await getContent(EditorId.html, VERSION_NOT_IN_FIXTURES);
+      expect(lastResponse).toMatchObject({ status: 404 });
       expect(content).toMatch(/^<!DOCTYPE html>/);
     });
 

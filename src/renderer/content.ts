@@ -7,7 +7,7 @@ import { readFiddle } from '../utils/read-fiddle';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
-const decompress = require('decompress');
+import * as decompress from 'decompress';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
@@ -32,24 +32,23 @@ async function prepareTemplate(branch: string): Promise<string> {
     // if we don't have it, download it
     const fs = await fancyImport<typeof fsType>('fs-extra');
     if (!fs.existsSync(folder)) {
-      console.log(`Content: Downloading template for ${branch}`);
+      console.log(`Content: ${branch} downloading template`);
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`${url} ${response.status} ${response.statusText}`);
       }
 
-      console.log(`Content: Unzipping template for ${branch}`);
       const arrayBuffer = await response.arrayBuffer();
       await fs.ensureDir(TEMPLATES_DIR);
+      console.log(`Content: ${branch} unzipping template`);
       await decompress(Buffer.from(arrayBuffer), TEMPLATES_DIR);
+
+      console.log(`Content: ${branch} finished unzipping`);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
-    console.log(
-      `Content: Unable to get template for ${branch}; using ${folder}`,
-      err,
-    );
+    console.log(`Content: ${branch} failed; using ${folder}`, err);
   }
 
   return folder;
@@ -92,7 +91,7 @@ export async function getTemplate(version?: string): Promise<EditorValues> {
   // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
   if (!pending) {
-    console.log(`Content: Loading fiddle for Electron ${branch}`);
+    console.log(`Content: ${branch} template loading`);
     pending = isReleasedMajor(version)
       ? prepareTemplate(branch).then(readFiddle)
       : readFiddle(STATIC_TEMPLATE_DIR);
