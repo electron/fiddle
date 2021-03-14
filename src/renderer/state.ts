@@ -38,7 +38,7 @@ import {
 } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
-import { getContent, isContentUnchanged } from './content';
+import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
   updateEditorTypeDefinitions,
@@ -562,8 +562,8 @@ export class AppState {
 
     // Should we update the editor?
     if (await isContentUnchanged(EditorId.main)) {
-      const main = await getContent(EditorId.main, version);
-      window.ElectronFiddle.app.setEditorValues({ main });
+      const editorValues = await getTemplate(version);
+      await window.ElectronFiddle.app.replaceFiddle(editorValues, {});
     }
 
     // Update TypeScript definitions

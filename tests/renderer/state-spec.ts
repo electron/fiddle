@@ -19,7 +19,7 @@ import {
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
-import { getContent, isContentUnchanged } from '../../src/renderer/content';
+import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import {
@@ -33,7 +33,7 @@ import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
   isContentUnchanged: jest.fn(),
-  getContent: jest.fn(),
+  getTemplate: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
@@ -416,10 +416,8 @@ describe('AppState', () => {
 
       await appState.setVersion('v1.0.0');
 
-      expect(getContent).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(getTemplate).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
     });
   });
 
