@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
-import { idFromUrl, urlFromId } from '../../utils/gist';
+import { getGistId, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -66,10 +66,12 @@ export class AddressBar extends React.Component<
    */
   public submit() {
     const { remoteLoader } = window.ElectronFiddle.app;
-    if (this.state.value) {
-      remoteLoader.fetchGistAndLoad(
-        idFromUrl(this.state.value) || this.state.value,
-      );
+    const { value } = this.state;
+    if (value) {
+      const id = getGistId(value);
+      if (id) {
+        remoteLoader.fetchGistAndLoad(id);
+      }
     }
   }
 
@@ -83,7 +85,10 @@ export class AddressBar extends React.Component<
       () => appState.gistId,
       (gistId: string) => this.setState({ value: urlFromId(gistId) }),
     );
-    ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
+    ipcRendererManager.on(
+      IpcEvents.LOAD_GIST_REQUEST,
+      async (_, req: { id: string }) => loaders.gist(req.id)
+    );
     ipcRendererManager.on(
       IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
       loaders.example,

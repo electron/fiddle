@@ -1,7 +1,8 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, FileTransform, RunnableVersion } from '../interfaces';
+import { getVersionRange } from '../utils/get-version-range';
+import { EditorValues, FileTransform, RunResult, RunnableVersion, VersionState } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -22,12 +23,6 @@ export enum ForgeCommands {
   MAKE = 'make',
 }
 
-export enum RunResult {
-  SUCCESS = 'success', // exit code === 0
-  FAILURE = 'failure', // ran, but exit code !== 0
-  INVALID = 'invalid', // could not run
-}
-
 function getResultEmoji(
   result: RunResult
 ): string {
@@ -43,13 +38,14 @@ export class Runner {
 
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
+    this.test = this.test.bind(this);
     this.stop = this.stop.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_RUN);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_MAKE);
 
-    ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
+    ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.test);
     ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, () => {
       this.performForgeOperation(ForgeCommands.PACKAGE);
     });
@@ -58,57 +54,60 @@ export class Runner {
     });
   }
 
-  /**
-   * Run the current test on a set of Electron versions and return the results
-   *
-   * @param {Array<string>} versions to test
-   * @returns {Promise<Record<string,RunResult>>} The per-version test results
-   * @memberof Runner
-   */
-  public async batchtest(versions: Array<string>): Promise<Record<string,RunResult>> {
-    const results : Record<string,RunResult> = {};
-    for (const version of versions) {
-      await this.appState.setVersion(version);
-      const result = await this.run(true);
-      results[version] = result;
-      this.appState.pushOutput(`Batch Test: ${getResultEmoji(result)} ${result} - Electron ${version}`);
-    }
-    this.appState.pushOutput('Batch Test: Finished batch testing');
-    return results;
-  }
-
-  public async autobisect(versions: Array<RunnableVersion>): Promise<void> {
+  public async autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
     const bisector = new Bisector(versions);
     let targetVersion = bisector.getCurrentVersion();
 
     while (true) {
-      // TODO: assumes that the version is already installed
       const { version } = targetVersion;
       this.appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+
       await this.appState.setVersion(version);
       const result = await this.run(true);
       this.appState.pushOutput(`Bisect Test: ${getResultEmoji(result)} ${result} - Electron ${version}`);
 
       if (result === RunResult.INVALID) {
-        throw new Error('autobisect failed to run a version of electrion. make sure all versions you want to test are already installed.');
+        this.appState.pushOutput(`Bisect: failed to test with Electron ${version}`);
+        return result;
       }
 
       const next = bisector.continue(result === RunResult.SUCCESS);
 
       if (Array.isArray(next)) {
-        console.log('finished autobisect', next);
         const [ good, bad ] = next.map(v => `v${v.version}`);
         const url = `https://github.com/electron/electron/compare/${good}...${bad}`;
-        this.appState.pushOutput('autobisect finished.');
+        this.appState.pushOutput('Runner: Autobisect complete');
         this.appState.pushOutput(`${good} ${getResultEmoji(RunResult.SUCCESS)} passed`);
         this.appState.pushOutput(`${bad} ${getResultEmoji(RunResult.FAILURE)} failed`);
         this.appState.pushOutput('Commits between versions:');
         this.appState.pushOutput(url);
-        break;
-      } else {
-        targetVersion = next;
+        return RunResult.SUCCESS;
       }
+
+      targetVersion = next;
     }
+
+    return RunResult.FAILURE;
+  }
+
+  /**
+   * Runs an autobisect session using versions [oldVersion..newVersion].
+   *
+   * Returns RunResult.INVALID if either version is not present.
+   *
+   * @param {string} oldVersion
+   * @param {string} newVersion
+   * @returns {Promise<RunResult>}
+   */
+  public async autobisectRange(oldVersion: string, newVersion: string): Promise<RunResult> {
+    const versions = getVersionRange(
+      oldVersion,
+      newVersion,
+      this.appState.versionsToShow
+    );
+    return versions && versions.length
+      ? this.autobisect(versions)
+      : RunResult.INVALID;
   }
 
   /**
@@ -127,9 +126,12 @@ export class Runner {
    * @returns {Promise<RunResult>}
    */
   public async run(test?: boolean): Promise<RunResult> {
-    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
-    const options = { includeDependencies: false, includeElectron: false };
+    // if it's not ready, wait for it to download
     const { currentElectronVersion } = this.appState;
+    if (currentElectronVersion.state !== VersionState.ready) {
+      await this.appState.setVersion(currentElectronVersion.version);
+    };
+
     const { version, localPath } = currentElectronVersion;
 
     if (this.appState.isClearingConsoleOnRun) {
@@ -137,6 +139,8 @@ export class Runner {
     }
     this.appState.isConsoleShowing = true;
 
+    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
+    const options = { includeDependencies: false, includeElectron: false };
     const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
     const packageManager = this.appState.packageManager;

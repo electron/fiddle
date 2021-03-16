@@ -3,7 +3,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { RunnableVersion } from '../../interfaces';
-import { Bisector } from '../bisect';
+// import { Bisector } from '../bisect';
 import { AppState } from '../state';
 import { VersionSelect } from './version-select';
 

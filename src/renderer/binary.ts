@@ -9,34 +9,9 @@ import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { AppState } from './state';
 
-/**
- * General setup, called with a version. Is called during construction
- * to ensure that we always have or download at least one version.
- *
- * @param {string} iVersion
- * @returns {Promise<void>}
- */
-export async function setupBinary(
-  appState: AppState,
-  iVersion: string,
-): Promise<void> {
-  const version = normalizeVersion(iVersion);
-  const fs = await fancyImport<typeof fsType>('fs-extra');
+const pendingDownloads: Record<string, Promise<void>> = {};
 
-  await fs.mkdirp(getDownloadPath(version));
-
-  const { state } = appState.versions[version];
-  if (state === VersionState.downloading || state === VersionState.unzipping) {
-    console.log(`Binary: Electron ${version} already downloading.`);
-    return;
-  }
-
-  if (await getIsDownloaded(version)) {
-    console.log(`Binary: Electron ${version} already downloaded.`);
-    appState.versions[version].state = VersionState.ready;
-    return;
-  }
-
+async function downloadBinary(appState: AppState, version: string): Promise<void> {
   console.log(`Binary: Electron ${version} not present, downloading`);
   appState.versions[version].state = VersionState.downloading;
 
@@ -49,19 +24,49 @@ export async function setupBinary(
   try {
     appState.versions[version].state = VersionState.unzipping;
 
-    // Ensure the target path is empty
+    const fs = await fancyImport<typeof fsType>('fs-extra');
+    await fs.mkdirp(getDownloadPath(version));
     await fs.emptyDir(extractPath);
-
     const electronFiles = await unzip(zipPath, extractPath);
-    console.log(`Unzipped ${version}`, electronFiles);
+    console.log(`Binary: Unzipped ${version}`, electronFiles);
+    appState.versions[version].state = VersionState.ready;
   } catch (error) {
-    console.warn(`Failure while unzipping ${version}`, error);
+    console.warn(`Binary: Failure while unzipping ${version}`, error);
     appState.versions[version].state = VersionState.unknown;
+  } finally {
+    // This task is done, so remove it from the pending tasks list
+    delete pendingDownloads[version];
+  }
+}
 
+/**
+ * General setup, called with a version. Is called during construction
+ * to ensure that we always have or download at least one version.
+ *
+ * @param {string} iVersion
+ * @returns {Promise<void>}
+ */
+export async function setupBinary(
+  appState: AppState,
+  iVersion: string,
+): Promise<void> {
+  const version = normalizeVersion(iVersion);
+
+  // If we already have it, then we're done
+  if (await getIsDownloaded(version)) {
+    console.log(`Binary: Electron ${version} already downloaded.`);
+    appState.versions[version].state = VersionState.ready;
     return;
   }
 
-  appState.versions[version].state = VersionState.ready;
+  // Return a promise that resolves when the download completes
+  let pending = pendingDownloads[version];
+  if (pending) {
+    console.log(`Binary: Electron ${version} already downloading.`);
+  } else {
+    pending = pendingDownloads[version] = downloadBinary(appState, version);
+  }
+  return pending;
 }
 
 /**

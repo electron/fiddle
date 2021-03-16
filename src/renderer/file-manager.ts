@@ -85,7 +85,7 @@ export class FileManager {
       test: await this.readFile(path.join(filePath, TEST_JS_NAME))
     };
 
-    window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
+    await window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
   }
 
   /**

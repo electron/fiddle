@@ -22,6 +22,7 @@ import { EMPTY_EDITOR_CONTENT } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
+import { TaskRunner } from './task-runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
@@ -39,6 +40,7 @@ export class App {
   public fileManager = new FileManager(appState);
   public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
+  public taskRunner = new TaskRunner(appState);
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);

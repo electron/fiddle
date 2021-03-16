@@ -45,17 +45,47 @@ export interface EditorValues {
   package?: string;
 }
 
+export enum RunResult {
+  SUCCESS = 'success', // exit code === 0
+  FAILURE = 'failure', // ran, but exit code !== 0
+  INVALID = 'invalid', // could not run
+}
+
 export interface RunnableVersion extends Version {
   state: VersionState;
   source: VersionSource;
   downloadProgress?: number;
 }
 
+export const enum ElectronReleaseChannel {
+  stable = 'Stable',
+  beta = 'Beta',
+  nightly = 'Nightly',
+  unsupported = 'Unsupported',
+};
+
 export interface SetFiddleOptions {
   filePath?: string;
   templateName?: string;
   gistId?: string;
 }
+
+export interface SetupRequest {
+  fiddle?: SetFiddleOptions,
+  version?: string,
+  showChannels: ElectronReleaseChannel[],
+  hideChannels: ElectronReleaseChannel[],
+};
+
+export interface BisectRequest {
+  setup: SetupRequest,
+  goodVersion: string,
+  badVersion: string
+};
+
+export interface TestRequest {
+  setup: SetupRequest,
+};
 
 export interface OutputEntry {
   text: string;

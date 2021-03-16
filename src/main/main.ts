@@ -9,6 +9,7 @@ import { setupAboutPanel } from './about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
+import { processCommandLine } from './command-line';
 import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
@@ -36,6 +37,8 @@ export async function onReady() {
   setupUpdates();
   setupDialogs();
   setupDevTools();
+
+  processCommandLine();
 }
 
 /**

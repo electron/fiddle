@@ -313,7 +313,7 @@ describe('RemoteLoader', () => {
     it('loads the example with confirmation', async () => {
       instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
       instance.fetchGistAndLoad = jest.fn();
-      await instance.loadFiddleFromGist({}, { id: 'gist' });
+      await instance.loadFiddleFromGist('gist');
 
       expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>('gist');
       expect(instance.fetchGistAndLoad).toHaveBeenCalledWith<any>('gist');
@@ -322,7 +322,7 @@ describe('RemoteLoader', () => {
     it('does not load the example without confirmation', async () => {
       instance.verifyRemoteLoad = jest.fn().mockReturnValue(false);
       instance.fetchGistAndLoad = jest.fn();
-      await instance.loadFiddleFromGist({}, { id: 'gist' });
+      await instance.loadFiddleFromGist('gist');
 
       expect(instance.verifyRemoteLoad).toHaveBeenCalled();
       expect(instance.fetchGistAndLoad).toHaveBeenCalledTimes(0);

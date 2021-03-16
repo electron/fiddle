@@ -1,6 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
-import { EditorId, EditorValues, GenericDialogType } from '../interfaces';
+import { EditorId, EditorValues, ElectronReleaseChannel, GenericDialogType } from '../interfaces';
 import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,
@@ -14,7 +14,7 @@ import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getContent } from './content';
 import { AppState } from './state';
-import { ElectronReleaseChannel, getReleaseChannel } from './versions';
+import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -45,12 +45,9 @@ export class RemoteLoader {
     this.fetchExampleAndLoad(ref, path);
   }
 
-  public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
-    const { id } = gistInfo;
+  public async loadFiddleFromGist(id: string): Promise<boolean> {
     const ok = await this.verifyRemoteLoad(`gist`);
-    if (!ok) return;
-
-    this.fetchGistAndLoad(id);
+    return ok ? this.fetchGistAndLoad(id) : false;
   }
 
   public async fetchExampleAndLoad(
