@@ -3,6 +3,7 @@ import { action, autorun, computed, observable, toJS, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
+  ALL_EDITORS,
   ALL_MOSAICS,
   BlockableAccelerator,
   DocsDemoPage,
@@ -37,7 +38,7 @@ import {
 } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
-import { getContent, isContentUnchanged } from './content';
+import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
   updateEditorTypeDefinitions,
@@ -235,7 +236,7 @@ export class AppState {
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
-    autorun(() => {
+    autorun(async () => {
       if (typeof this.isUnsaved === 'undefined') return;
 
       if (this.isUnsaved) {
@@ -271,13 +272,16 @@ export class AppState {
         window.onbeforeunload = null;
 
         // set up editor listeners to verify if unsaved
-        Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-          const editor = window.ElectronFiddle.editors[key];
-          const disposable = editor.onDidChangeModelContent(() => {
+        const ids = ALL_EDITORS.filter(
+          (id) => id in window.ElectronFiddle.editors,
+        );
+        await waitForEditorsToMount(ids);
+        for (const editor of Object.values(window.ElectronFiddle.editors)) {
+          const disposable = editor!.onDidChangeModelContent(() => {
             this.isUnsaved = true;
             disposable.dispose();
           });
-        });
+        }
       }
     });
 
@@ -536,8 +540,8 @@ export class AppState {
 
     // Should we update the editor?
     if (await isContentUnchanged(EditorId.main)) {
-      const main = await getContent(EditorId.main, version);
-      window.ElectronFiddle.app.setEditorValues({ main });
+      const editorValues = await getTemplate(version);
+      await window.ElectronFiddle.app.replaceFiddle(editorValues, {});
     }
 
     // Update TypeScript definitions

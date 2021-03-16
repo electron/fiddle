@@ -1,4 +1,5 @@
 import * as MonacoType from 'monaco-editor';
+import { when } from 'mobx';
 
 import {
   ALL_MOSAICS,
@@ -18,7 +19,7 @@ import {
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
-import { getContent, isContentUnchanged } from '../../src/renderer/content';
+import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import {
@@ -32,7 +33,7 @@ import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
   isContentUnchanged: jest.fn(),
-  getContent: jest.fn(),
+  getTemplate: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
@@ -142,8 +143,9 @@ describe('AppState', () => {
       });
     });
 
-    it('sets the onDidChangeModelContent handler if saved', () => {
+    it('sets the onDidChangeModelContent handler if saved', async (done) => {
       appState.isUnsaved = false;
+      await when(() => appState.isUnsaved === false);
 
       expect(window.onbeforeunload).toBe(null);
 
@@ -155,6 +157,7 @@ describe('AppState', () => {
       cb();
 
       expect(appState.isUnsaved).toBe(true);
+      done();
     });
   });
 
@@ -413,10 +416,8 @@ describe('AppState', () => {
 
       await appState.setVersion('v1.0.0');
 
-      expect(getContent).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(getTemplate).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -612,7 +613,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
       expect(appState.closedPanels[EditorId.renderer]).toBeUndefined();
@@ -644,7 +645,7 @@ describe('AppState', () => {
           direction: 'column',
           first: EditorId.preload,
           second: EditorId.html,
-        }
+        },
       });
 
       appState.resetEditorLayout();

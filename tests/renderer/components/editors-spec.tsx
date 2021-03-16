@@ -173,14 +173,18 @@ describe('Editors component', () => {
       expect(mockAction.run).toHaveBeenCalled();
     });
 
-    it('handles an FS_NEW_FIDDLE command', (done) => {
-      shallow(<Editors appState={store} />);
+    it('handles an FS_NEW_FIDDLE command', async (done) => {
+      let resolve: any;
+      const replacePromise = new Promise((r) => {
+        resolve = r;
+      });
+      (window.ElectronFiddle.app
+        .replaceFiddle as jest.Mock<any>).mockImplementation(resolve);
 
       ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
-      process.nextTick(() => {
-        expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalled();
-        done();
-      });
+      await replacePromise;
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalled();
+      done();
     });
 
     it('handles a SELECT_ALL_IN_EDITOR command', (done) => {

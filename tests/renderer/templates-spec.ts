@@ -1,51 +1,39 @@
 import { getTemplateValues } from '../../src/renderer/templates';
 
-jest.mock('fs-extra');
-jest.mock('path');
-jest.mock('../../src/renderer/constants', () => ({
-  USER_DATA_PATH: 'user/data/',
-}));
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
-}));
+jest.unmock('fs-extra');
 
 describe('templates', () => {
+  const KNOWN_GOOD_TEMPLATE = 'clipboard';
+  const KNOWN_BAD_TEMPLATE = 'not-a-real-show-me';
+
   describe('getTemplateValues()', () => {
-    it('attempts to load template values', async () => {
-      const fs = require('fs-extra');
+    it('loads templates', async () => {
+      const values = await getTemplateValues(KNOWN_GOOD_TEMPLATE);
 
-      fs.readFile.mockReturnValueOnce('renderer');
-      fs.readFile.mockReturnValueOnce('main');
-      fs.readFile.mockReturnValueOnce('html');
-
-      const values = await getTemplateValues('test');
-
-      expect(values.html).toBe('html');
-      expect(values.main).toBe('main');
-      expect(values.renderer).toBe('renderer');
+      expect(values.html).toMatch(/^<!DOCTYPE html>/);
+      expect(values.main.length).toBeGreaterThan(0);
+      expect(values.renderer.length).toBeGreaterThan(0);
     });
 
     it('handles errors', async () => {
-      const fs = require('fs-extra');
-
-      fs.readFile.mockReturnValue(Promise.reject('bwap'));
-
-      const values = await getTemplateValues('test');
+      const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
       expect(values.html).toBe('');
       expect(values.main).toBe('');
       expect(values.renderer).toBe('');
     });
 
-    it('handles errors and reports the templates content', async () => {
-      const fs = require('fs-extra');
+    it('reports missing files', async () => {
+      console.log = jest.fn();
 
-      fs.readFile.mockReturnValue(Promise.reject('bwap'));
-      fs.existsSync.mockReturnValue(true);
+      await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
-      await getTemplateValues('test');
-      expect(fs.existsSync).toHaveBeenCalledTimes(5);
-      expect(fs.readdirSync).toHaveBeenCalledTimes(5);
+      expect(console.log).toHaveBeenCalledTimes(1);
+      expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
+        'Missed: index.html, main.js, preload.js, renderer.js, styles.css',
+      );
+
+      (console.log as jest.Mock).mockClear();
     });
   });
 });

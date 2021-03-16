@@ -40,6 +40,7 @@ const CONTRIBUTORS_WHITELIST = [
   'deermichel',
   'erickzhao',
   'issacgerges',
+  'ckerr',
 ];
 
 async function maybeFetchContributors() {

@@ -135,7 +135,10 @@ export class App {
           }
         } else if (editor && editor.setValue) {
           // The editor exists, set the value directly
-          editor.setValue(values[name]!);
+          const newValue = values[name]!;
+          if (!editor.getValue || editor.getValue() !== newValue) {
+            editor.setValue(newValue);
+          }
         }
       }
     }
