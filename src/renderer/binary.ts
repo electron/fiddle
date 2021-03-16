@@ -11,11 +11,41 @@ import { AppState } from './state';
 
 const pendingDownloads: Record<string, Promise<void>> = {};
 
+/**
+ * General setup, called with a version. Is called during construction
+ * to ensure that we always have or download at least one version.
+ *
+ * @param {string} iVersion
+ * @returns {Promise<void>}
+ */
+export async function setupBinary(
+  appState: AppState,
+  iVersion: string,
+): Promise<void> {
+  const version = normalizeVersion(iVersion);
+
+  // If we already have it, then we're done
+  if (await getIsDownloaded(version)) {
+    console.log(`Binary: Electron ${version} already downloaded.`);
+    appState.versions[version].state = VersionState.ready;
+    return;
+  }
+
+  // Return a promise that resolves when the download completes
+  let pending = pendingDownloads[version];
+  if (pending) {
+    console.log(`Binary: Electron ${version} already downloading.`);
+  } else {
+    console.log(`Binary: Electron ${version} not present, downloading`);
+    pending = pendingDownloads[version] = downloadBinary(appState, version);
+  }
+  return pending;
+}
+
 async function downloadBinary(
   appState: AppState,
   version: string,
 ): Promise<void> {
-  console.log(`Binary: Electron ${version} not present, downloading`);
   appState.versions[version].state = VersionState.downloading;
 
   const zipPath = await download(appState, version);
@@ -44,36 +74,6 @@ async function downloadBinary(
     // This task is done, so remove it from the pending tasks list
     delete pendingDownloads[version];
   }
-}
-
-/**
- * General setup, called with a version. Is called during construction
- * to ensure that we always have or download at least one version.
- *
- * @param {string} iVersion
- * @returns {Promise<void>}
- */
-export async function setupBinary(
-  appState: AppState,
-  iVersion: string,
-): Promise<void> {
-  const version = normalizeVersion(iVersion);
-
-  // If we already have it, then we're done
-  if (await getIsDownloaded(version)) {
-    console.log(`Binary: Electron ${version} already downloaded.`);
-    appState.versions[version].state = VersionState.ready;
-    return;
-  }
-
-  // Return a promise that resolves when the download completes
-  let pending = pendingDownloads[version];
-  if (pending) {
-    console.log(`Binary: Electron ${version} already downloading.`);
-  } else {
-    pending = pendingDownloads[version] = downloadBinary(appState, version);
-  }
-  return pending;
 }
 
 /**
