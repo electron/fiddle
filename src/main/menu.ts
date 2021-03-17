@@ -195,6 +195,14 @@ function getFileMenu(
       accelerator: 'CmdOrCtrl+N',
     },
     {
+      label: 'New Test',
+      click: () => {
+        ipcMainManager.send(IpcEvents.CLEAR_CONSOLE);
+        return ipcMainManager.send(IpcEvents.FS_NEW_TEST);
+      },
+      accelerator: 'CmdOrCtrl+T',
+    },
+    {
       label: 'New Window',
       click: () => createMainWindow(),
       accelerator: 'CmdOrCtrl+Shift+N',

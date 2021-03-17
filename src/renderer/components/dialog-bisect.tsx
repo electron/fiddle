@@ -33,6 +33,7 @@ export class BisectDialog extends React.Component<
     super(props);
 
     this.onSubmit = this.onSubmit.bind(this);
+    this.onAuto = this.onAuto.bind(this);
     this.onClose = this.onClose.bind(this);
     this.onBeginSelect = this.onBeginSelect.bind(this);
     this.onEndSelect = this.onEndSelect.bind(this);
@@ -55,27 +56,37 @@ export class BisectDialog extends React.Component<
     this.setState({ endIndex: this.state.allVersions.indexOf(version) });
   }
 
+  getBisectRange(): RunnableVersion[] {
+    const { endIndex, startIndex, allVersions } = this.state;
+
+    if (endIndex === undefined || startIndex === undefined) {
+      return [];
+    }
+
+    return allVersions.slice(endIndex, startIndex + 1).reverse();
+  }
+
   /**
    * Handles the submission of the dialog
    *
    * @returns {Promise<void>}
    */
-    // FIXME: hijacking the bisect UI to demo the autobisect feature.
-    // This must be reverted before pushing to master!
   public async onSubmit(): Promise<void> {
-    const { endIndex, startIndex, allVersions } = this.state;
-    // const { appState } = this.props;
-
-    if (endIndex === undefined || startIndex === undefined) {
-      return;
+    const range = this.getBisectRange();
+    if (range.length > 0) {
+      const { appState } = this.props;
+      appState.Bisector = new Bisector(range);
+      const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
+      appState.setVersion(initialBisectPivot);
     }
+    this.onClose();
+  }
 
-    const bisectRange = allVersions.slice(endIndex, startIndex + 1).reverse();
-    console.log(JSON.stringify(bisectRange));
-    window.ElectronFiddle.app.runner.autobisect(bisectRange);
-    // appState.Bisector = new Bisector(bisectRange);
-    // const initialBisectPivot = appState.Bisector.getCurrentVersion().version;
-    // appState.setVersion(initialBisectPivot);
+  public async onAuto(): Promise<void> {
+    const range = this.getBisectRange();
+    if (range.length > 0) {
+      window.ElectronFiddle.app.runner.autobisect(range);
+    }
     this.onClose();
   }
 
@@ -101,6 +112,15 @@ export class BisectDialog extends React.Component<
   }
 
   /**
+   * Can we autobisect?
+   */
+  get canAuto(): boolean {
+    // TODO(ckerr): do we want to check & see if the content is a test
+    // e.g. that main has a call to 'app.exit()' or 'process.exit()'
+    return this.canSubmit;
+  }
+
+  /**
    * Renders the buttons
    */
   get buttons() {
@@ -111,6 +131,13 @@ export class BisectDialog extends React.Component<
         disabled={!this.canSubmit}
         onClick={this.onSubmit}
         text="Begin"
+      />,
+      <Button
+        icon="lab-test"
+        key="auto"
+        disabled={!this.canAuto}
+        onClick={this.onAuto}
+        text="Auto"
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];

@@ -4,6 +4,7 @@ import * as path from 'path';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { RunResult } from '../../src/interfaces';
 import {
   findModulesInEditors,
   getIsPackageManagerInstalled,
@@ -25,6 +26,24 @@ jest.mock('../../src/renderer/binary', () => ({
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('path');
+
+async function eventually(test: () => boolean): Promise<void> {
+  let time = 0;
+  const maxTime = 3000;
+  const interval = 50;
+  return new Promise<void>((resolve, reject) => {
+    (function check() {
+      if (test()) {
+        return resolve();
+      }
+      time += interval;
+      if (time > maxTime) {
+        return reject(`Timeout: ${maxTime}ms`);
+      }
+      setTimeout(check, interval);
+    })();
+  });
+}
 
 describe('Runner component', () => {
   let mockChild: MockChildProcess;
@@ -62,11 +81,20 @@ describe('Runner component', () => {
     (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
-    expect(await instance.run()).toBe(true);
+    // start a session
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
+    expect(store.isRunning).toBe(true);
+
+    // have the session's electron process exit with success
+    mockChild.emit('close', 0);
+    expect(await runPromise).toBe(RunResult.SUCCESS);
+    expect(store.isRunning).toBe(false);
+
+    // inspect what happened
     expect(getIsDownloaded).toHaveBeenCalled();
     expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
     expect(installModules).toHaveBeenCalled();
-    expect(store.isRunning).toBe(true);
   });
 
   it('runs with logging when enabled', async () => {
@@ -78,44 +106,70 @@ describe('Runner component', () => {
       return mockChild;
     });
 
-    expect(await instance.run()).toBe(true);
+    // run a mock session that exits with sucess
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
+    mockChild.emit('close', 0);
+    expect(await runPromise).toBe(RunResult.SUCCESS);
+    expect(store.isRunning).toBe(false);
+
+    // inspect what happened
     expect(getIsDownloaded).toHaveBeenCalled();
     expect(window.ElectronFiddle.app.fileManager.saveToTemp).toHaveBeenCalled();
     expect(installModules).toHaveBeenCalled();
-    expect(store.isRunning).toBe(true);
   });
 
-  it('emits output', async () => {
+  it('emits output with exitCode', async () => {
     (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
 
-    // Output
-    expect(await instance.run()).toBe(true);
+    // run a mock session that says 'hi' twice, then exit(0)
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
     mockChild.stdout.emit('data', 'hi');
     mockChild.stderr.emit('data', 'hi');
-    expect(store.pushOutput).toHaveBeenCalledTimes(7);
-
-    // Stop (with code)
     mockChild.emit('close', 0);
+    expect(await runPromise).toBe(RunResult.SUCCESS);
+    expect(store.isRunning).toBe(false);
+
+    // check the output
+    expect(store.pushOutput).toHaveBeenCalledTimes(8);
     expect(store.pushOutput).toHaveBeenLastCalledWith(
       'Electron exited with code 0.',
     );
+  });
 
-    // Stop (without code)
+  it('emits output without exitCode', async () => {
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
+    (spawn as any).mockReturnValueOnce(mockChild);
+
+    // run a mock session that says 'hi' twice, then exits w/o code
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
+    mockChild.stdout.emit('data', 'hi');
+    mockChild.stderr.emit('data', 'hi');
     mockChild.emit('close');
-    expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
-
+    expect(await runPromise).toBe(RunResult.INVALID);
     expect(store.isRunning).toBe(false);
+
+    // check the output
+    expect(store.pushOutput).toHaveBeenCalledTimes(8);
+    expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
   });
 
   it('stops on close', async () => {
     (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
     (spawn as any).mockReturnValueOnce(mockChild);
+    mockChild.kill.mockImplementationOnce(() => mockChild.emit('close'));
 
-    // Stop
-    expect(await instance.run()).toBe(true);
+    // start
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
     expect(store.isRunning).toBe(true);
+
+    // stop while running
     instance.stop();
+    expect(await runPromise).toBe(RunResult.INVALID);
     expect(store.isRunning).toBe(false);
   });
 
@@ -124,16 +178,17 @@ describe('Runner component', () => {
     (spawn as any).mockReturnValueOnce(mockChild);
 
     // Stop
-    expect(await instance.run()).toBe(true);
-    mockChild.emit('close', 0);
+    setTimeout(() => mockChild.emit('close', 0));
+    expect(await instance.run()).toBe(RunResult.SUCCESS);
+
     expect(store.isRunning).toBe(false);
   });
 
   describe('run()', () => {
     it('cleans the app data dir after a run', async (done) => {
       (spawn as any).mockReturnValueOnce(mockChild);
-      expect(await instance.run()).toBe(true);
-      mockChild.emit('close', 0);
+      setTimeout(() => mockChild.emit('close', 0));
+      expect(await instance.run()).toBe(RunResult.SUCCESS);
 
       process.nextTick(() => {
         expect(
@@ -148,9 +203,10 @@ describe('Runner component', () => {
 
     it('does not clean the app data dir after a run if configured', async (done) => {
       (instance as any).appState.isKeepingUserDataDirs = true;
+
+      setTimeout(() => mockChild.emit('close', 0));
       (spawn as any).mockReturnValueOnce(mockChild);
-      expect(await instance.run()).toBe(true);
-      mockChild.emit('close', 0);
+      expect(await instance.run()).toBe(RunResult.SUCCESS);
 
       process.nextTick(() => {
         expect(
@@ -163,16 +219,18 @@ describe('Runner component', () => {
     it('automatically cleans the console when enabled', async () => {
       store.isClearingConsoleOnRun = true;
       (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
+
+      setTimeout(() => mockChild.emit('close', 0));
       (spawn as any).mockReturnValueOnce(mockChild);
-      expect(await instance.run()).toBe(true);
+      expect(await instance.run()).toBe(RunResult.SUCCESS);
+
       expect(store.clearConsole).toHaveBeenCalled();
-      mockChild.emit('close', 0);
     });
 
     it('does not run version not yet downloaded', async () => {
       (getIsDownloaded as jest.Mock).mockReturnValueOnce(false);
 
-      expect(await instance.run()).toBe(false);
+      expect(await instance.run()).toBe(RunResult.INVALID);
     });
 
     it('does not run if writing files fails', async () => {
@@ -181,7 +239,7 @@ describe('Runner component', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(await instance.run()).toBe(false);
+      expect(await instance.run()).toBe(RunResult.INVALID);
     });
 
     it('does not run if installing modules fails', async () => {
@@ -194,7 +252,7 @@ describe('Runner component', () => {
           throw new Error('Bwap-bwap');
         });
 
-      expect(await instance.run()).toBe(false);
+      expect(await instance.run()).toBe(RunResult.INVALID);
 
       console.error = oldError;
     });

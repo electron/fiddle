@@ -58,14 +58,16 @@ export class Runner {
     });
   }
 
-  public async autobisect(versions: Array<RunnableVersion>): Promise<void> {
+  public async autobisect(
+    versions: Array<RunnableVersion>,
+  ): Promise<RunResult> {
     const bisector = new Bisector(versions);
     let targetVersion = bisector.getCurrentVersion();
 
     while (true) {
-      // TODO: assumes that the version is already installed
       const { version } = targetVersion;
       this.appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+
       await this.appState.setVersion(version);
       const result = await this.run();
       this.appState.pushOutput(
@@ -75,18 +77,18 @@ export class Runner {
       );
 
       if (result === RunResult.INVALID) {
-        throw new Error(
-          'autobisect failed to run a version of electrion. make sure all versions you want to test are already installed.',
+        this.appState.pushOutput(
+          `Bisect: failed to test with Electron ${version}`,
         );
+        return result;
       }
 
       const next = bisector.continue(result === RunResult.SUCCESS);
 
       if (Array.isArray(next)) {
-        console.log('finished autobisect', next);
         const [good, bad] = next.map((v) => `v${v.version}`);
         const url = `https://github.com/electron/electron/compare/${good}...${bad}`;
-        this.appState.pushOutput('autobisect finished.');
+        this.appState.pushOutput('Runner: Autobisect complete');
         this.appState.pushOutput(
           `${good} ${getResultEmoji(RunResult.SUCCESS)} passed`,
         );
@@ -95,13 +97,14 @@ export class Runner {
         );
         this.appState.pushOutput('Commits between versions:');
         this.appState.pushOutput(url);
-        break;
-      } else {
-        targetVersion = next;
+        return RunResult.SUCCESS;
       }
-    }
-  }
 
+      targetVersion = next;
+    }
+
+    return RunResult.FAILURE;
+  }
   /**
    * Actually run the fiddle.
    *
@@ -305,10 +308,6 @@ export class Runner {
         pushOutput(data, { bypassBuffer: false }),
       );
       this.child.on('close', async (code) => {
-        const withCode =
-          typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
-
-        pushOutput(`Electron exited${withCode}`);
         this.appState.isRunning = false;
         this.child = null;
 
@@ -316,7 +315,16 @@ export class Runner {
         await window.ElectronFiddle.app.fileManager.cleanup(dir);
         await this.deleteUserData();
 
-        resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
+        if (typeof code !== 'number') {
+          pushOutput('Electron exited.');
+          resolve(RunResult.INVALID);
+        } else if (!code) {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.SUCCESS);
+        } else {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.FAILURE);
+        }
       });
     });
   }
@@ -380,7 +388,7 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = path.join(this.appState.appData, name);
+    const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
     await window.ElectronFiddle.app.fileManager.cleanup(appData);
