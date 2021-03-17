@@ -13,7 +13,6 @@ export class AppMock {
     renderer: 'renderer-content',
     html: 'html-content',
     css: 'css-content',
-    test: 'test-content',
   });
 
   public loadTheme = jest.fn();

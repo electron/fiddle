@@ -198,7 +198,6 @@ describe('npm', () => {
         renderer: mockPackages,
         preload: mockPackages,
         css: '',
-        test: mockPackages,
       });
 
       expect(result).toHaveLength(2);

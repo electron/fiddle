@@ -20,7 +20,6 @@ describe('get-package', () => {
         html: '<html />',
         preload: 'preload',
         css: 'body { color: black }',
-        test: '// Empty',
       },
     );
 
@@ -60,7 +59,6 @@ describe('get-package', () => {
         html: '<html />',
         preload: 'preload',
         css: 'body { color: black }',
-        test: '// Empty',
       },
       {
         includeElectron: true,

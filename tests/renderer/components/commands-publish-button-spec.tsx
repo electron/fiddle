@@ -18,7 +18,6 @@ describe('Publish button component', () => {
       'main.js': { content: 'main-content' },
       'preload.js': { content: 'preload-content' },
       'styles.css': { content: 'css-content' },
-      'test.spec.js': { content: 'test-content' },
     },
     public: true,
   };
@@ -81,7 +80,6 @@ describe('Publish button component', () => {
         'main.js': { content: 'main-content' },
         'preload.js': { content: 'preload-content' },
         'styles.css': { content: 'css-content' },
-        'test.spec.js': { content: 'test-content' },
       },
       public: true,
     });
@@ -132,7 +130,6 @@ describe('Publish button component', () => {
         'main.js': { content: 'main-content' },
         'preload.js': { content: 'preload-content' },
         'styles.css': { content: 'css-content' },
-        'test.spec.js': { content: 'test-content' },
       },
     });
   });
@@ -188,7 +185,6 @@ describe('Publish button component', () => {
         'main.js': { content: '// Empty' },
         'preload.js': { content: '// Empty' },
         'styles.css': { content: '/* Empty */' },
-        'test.spec.js': { content: '// Empty' },
       },
       public: true,
     });
@@ -222,7 +218,6 @@ describe('Publish button component', () => {
         'main.js': { content: '// Empty' },
         'preload.js': { content: '// Empty' },
         'styles.css': { content: '/* Empty */' },
-        'test.spec.js': { content: '// Empty' },
       },
       public: true,
     });

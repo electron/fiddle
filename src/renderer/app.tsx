@@ -75,7 +75,6 @@ export class App {
         'html',
         'preload',
         'css',
-        'test',
       ];
 
       return order.indexOf(a) - order.indexOf(b);
@@ -165,7 +164,6 @@ export class App {
       main: getEditorValue(EditorId.main),
       preload: getEditorValue(EditorId.preload),
       renderer: getEditorValue(EditorId.renderer),
-      test: getEditorValue(EditorId.test)
     };
 
     if (options && options.include !== false) {

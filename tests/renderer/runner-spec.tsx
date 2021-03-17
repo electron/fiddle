@@ -291,7 +291,6 @@ describe('Runner component', () => {
           renderer: '',
           preload: '',
           css: '',
-          test: '',
         },
         { dir: '/fake/path', packageManager: 'npm' },
       );
@@ -310,7 +309,6 @@ describe('Runner component', () => {
           renderer: '',
           preload: '',
           css: '',
-          test: '',
         },
         { dir: '/fake/path', packageManager: 'npm' },
       );
