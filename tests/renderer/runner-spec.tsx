@@ -89,8 +89,8 @@ describe('Runner component', () => {
       // check the results
       expect(result).toBe(RunResult.SUCCESS);
       expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(2);
-      expect((store.setVersion as jest.Mock).mock.calls[0][0]).toBe(LAST_GOOD);
-      expect((store.setVersion as jest.Mock).mock.calls[1][0]).toBe(FIRST_BAD);
+      expect(spy).toHaveBeenNthCalledWith(1, LAST_GOOD);
+      expect(spy).toHaveBeenNthCalledWith(2, FIRST_BAD);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `https://github.com/electron/electron/compare/v${LAST_GOOD}...v${FIRST_BAD}`,
       );
@@ -103,8 +103,6 @@ describe('Runner component', () => {
       // setup
       const spy = jest.spyOn(store, 'setVersion');
       const bisectRange = [...mockVersionsArray].reverse();
-      const expectedPivot =
-        bisectRange[Math.round((bisectRange.length - 1) / 2)].version;
 
       // setup: instance.run() should fail to run
       instance.run = jest.fn().mockImplementation(() => RunResult.INVALID);
@@ -114,13 +112,36 @@ describe('Runner component', () => {
 
       // check the results
       expect(result).toBe(RunResult.INVALID);
-      expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
-        `Bisect: failed to test with Electron ${expectedPivot}`,
+        'Bisect Test: ❓ - Electron 2.0.1',
       );
 
       // cleanup
       spy.mockRestore();
+    });
+
+    it('returns invalid if unable to find bisect point', async () => {
+      // what if there aren't enough versions to bisect?
+      let bisectRange = [mockVersions['2.0.1']];
+      expect(await instance.autobisect(bisectRange)).toBe(RunResult.INVALID);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        'Runner: autobisect needs at least two Electron versions',
+      );
+
+      // what if the test passes everywhere?
+      instance.run = jest.fn().mockImplementation(() => RunResult.SUCCESS);
+      bisectRange = [...mockVersionsArray].reverse();
+      expect(await instance.autobisect(bisectRange)).toBe(RunResult.INVALID);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        'Runner: in autobisect(versions), test must fail in last version',
+      );
+
+      // what if the test fails everywhere?
+      instance.run = jest.fn().mockImplementation(() => RunResult.FAILURE);
+      expect(await instance.autobisect(bisectRange)).toBe(RunResult.INVALID);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        'Runner: in autobisect(versions), test must pass in first version',
+      );
     });
   });
 

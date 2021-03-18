@@ -61,50 +61,78 @@ export class Runner {
   public async autobisect(
     versions: Array<RunnableVersion>,
   ): Promise<RunResult> {
+    const { appState } = this;
+
+    const runVersion = async (version: string) => {
+      await appState.setVersion(version);
+      const result = await this.run();
+      appState.pushOutput(
+        `Bisect Test: ${getResultEmoji(result)} - Electron ${appState.version}`,
+      );
+      return result;
+    };
+
+    // precondition: gotta have >1 version to bisect
+    if (versions.length < 2) {
+      appState.pushOutput(
+        'Runner: autobisect needs at least two Electron versions',
+      );
+      return RunResult.INVALID;
+    }
+
     const bisector = new Bisector(versions);
     let targetVersion = bisector.getCurrentVersion();
-
+    let next;
     while (true) {
       const { version } = targetVersion;
-      this.appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+      appState.pushOutput(`Testing ${version}`, { isNotPre: true });
 
-      await this.appState.setVersion(version);
-      const result = await this.run();
-      this.appState.pushOutput(
-        `Bisect Test: ${getResultEmoji(
-          result,
-        )} ${result} - Electron ${version}`,
-      );
-
+      const result = await runVersion(version);
       if (result === RunResult.INVALID) {
-        this.appState.pushOutput(
-          `Bisect: failed to test with Electron ${version}`,
-        );
         return result;
       }
 
-      const next = bisector.continue(result === RunResult.SUCCESS);
-
+      next = bisector.continue(result === RunResult.SUCCESS);
       if (Array.isArray(next)) {
-        const [good, bad] = next.map((v) => `v${v.version}`);
-        const url = `https://github.com/electron/electron/compare/${good}...${bad}`;
-        this.appState.pushOutput('Runner: Autobisect complete');
-        this.appState.pushOutput(
-          `${good} ${getResultEmoji(RunResult.SUCCESS)} passed`,
-        );
-        this.appState.pushOutput(
-          `${bad} ${getResultEmoji(RunResult.FAILURE)} failed`,
-        );
-        this.appState.pushOutput('Commits between versions:');
-        this.appState.pushOutput(url);
-        return RunResult.SUCCESS;
+        break;
       }
 
       targetVersion = next;
     }
 
-    return RunResult.FAILURE;
+    const [goodVer, badVer] = next;
+
+    if (
+      versions[0] === goodVer &&
+      (await runVersion(goodVer.version)) != RunResult.SUCCESS
+    ) {
+      appState.pushOutput(
+        'Runner: in autobisect(versions), test must pass in first version',
+      );
+      return RunResult.INVALID;
+    }
+    if (
+      versions[versions.length - 1] === badVer &&
+      (await runVersion(badVer.version)) != RunResult.FAILURE
+    ) {
+      appState.pushOutput(
+        'Runner: in autobisect(versions), test must fail in last version',
+      );
+      return RunResult.INVALID;
+    }
+
+    const [good, bad] = next.map((v) => `v${v.version}`);
+    const msgs = [
+      'Runner: Autobisect complete',
+      `${good} ${getResultEmoji(RunResult.SUCCESS)} passed`,
+      `${bad} ${getResultEmoji(RunResult.FAILURE)} failed`,
+      'Commits between versions:',
+      `https://github.com/electron/electron/compare/${good}...${bad}`,
+    ];
+    msgs.forEach((msg) => appState.pushOutput(msg));
+    return RunResult.SUCCESS;
   }
+
   /**
    * Actually run the fiddle.
    *
