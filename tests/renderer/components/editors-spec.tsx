@@ -2,13 +2,20 @@ import { mount, shallow } from 'enzyme';
 import { observable } from 'mobx';
 import * as React from 'react';
 
-import { ALL_MOSAICS, DocsDemoPage, EditorId } from '../../../src/interfaces';
+import {
+  ALL_MOSAICS,
+  DocsDemoPage,
+  EditorId,
+  EditorValues,
+} from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
+import { waitFor } from '../../../src/utils/wait-for';
+import * as content from '../../../src/renderer/content';
 
 jest.mock('monaco-loader', () =>
   jest.fn(async () => {
@@ -173,18 +180,60 @@ describe('Editors component', () => {
       expect(mockAction.run).toHaveBeenCalled();
     });
 
-    it('handles an FS_NEW_FIDDLE command', async (done) => {
-      let resolve: any;
-      const replacePromise = new Promise((r) => {
-        resolve = r;
-      });
-      (window.ElectronFiddle.app
-        .replaceFiddle as jest.Mock<any>).mockImplementation(resolve);
+    const fakeValues: EditorValues = Object.seal({
+      css: '',
+      html: '',
+      main: 'hi',
+      preload: '',
+      renderer: '',
+    });
 
+    it('handles an FS_NEW_FIDDLE command', async () => {
+      const { app } = window.ElectronFiddle;
+
+      // setup
+      const getTemplateSpy = jest
+        .spyOn(content, 'getTemplate')
+        .mockImplementation(() => Promise.resolve(fakeValues));
+      const replaceFiddleSpy = jest
+        .spyOn(app, 'replaceFiddle')
+        .mockImplementation(() => Promise.resolve(true));
+
+      // invoke the call
       ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
-      await replacePromise;
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalled();
-      done();
+      await waitFor(() => replaceFiddleSpy.mock.calls.length > 0);
+
+      // check the results
+      expect(getTemplateSpy).toHaveBeenCalledTimes(1);
+      expect(replaceFiddleSpy).toHaveBeenCalledTimes(1);
+
+      // cleanup
+      getTemplateSpy.mockRestore();
+      replaceFiddleSpy.mockRestore();
+    });
+
+    it('handles an FS_NEW_TEST command', async () => {
+      const { app } = window.ElectronFiddle;
+
+      // setup
+      const getTestTemplateSpy = jest
+        .spyOn(content, 'getTestTemplate')
+        .mockImplementation(() => Promise.resolve(fakeValues));
+      const replaceFiddleSpy = jest
+        .spyOn(app, 'replaceFiddle')
+        .mockImplementation(() => Promise.resolve(true));
+
+      // invoke the call
+      ipcRendererManager.emit(IpcEvents.FS_NEW_TEST);
+      await waitFor(() => replaceFiddleSpy.mock.calls.length > 0);
+
+      // check the results
+      expect(getTestTemplateSpy).toHaveBeenCalledTimes(1);
+      expect(replaceFiddleSpy).toHaveBeenCalledTimes(1);
+
+      // cleanup
+      getTestTemplateSpy.mockRestore();
+      replaceFiddleSpy.mockRestore();
     });
 
     it('handles a SELECT_ALL_IN_EDITOR command', (done) => {

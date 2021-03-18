@@ -13,6 +13,7 @@ import {
   packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
+import { waitFor } from '../../src/utils/wait-for';
 import { AppState } from '../../src/renderer/state';
 import { MockChildProcess } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
@@ -27,24 +28,6 @@ jest.mock('../../src/renderer/binary', () => ({
 jest.mock('fs-extra');
 jest.mock('child_process');
 jest.mock('path');
-
-async function eventually(test: () => boolean): Promise<void> {
-  let time = 0;
-  const maxTime = 3000;
-  const interval = 50;
-  return new Promise<void>((resolve, reject) => {
-    (function check() {
-      if (test()) {
-        return resolve();
-      }
-      time += interval;
-      if (time > maxTime) {
-        return reject(`Timeout: ${maxTime}ms`);
-      }
-      setTimeout(check, interval);
-    })();
-  });
-}
 
 describe('Runner component', () => {
   let mockChild: MockChildProcess;
@@ -112,7 +95,7 @@ describe('Runner component', () => {
 
     // start a session
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     expect(store.isRunning).toBe(true);
 
     // have the session's electron process exit with success
@@ -137,7 +120,7 @@ describe('Runner component', () => {
 
     // run a mock session that exits with sucess
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     mockChild.emit('close', 0);
     expect(await runPromise).toBe(RunResult.SUCCESS);
     expect(store.isRunning).toBe(false);
@@ -154,7 +137,7 @@ describe('Runner component', () => {
 
     // run a mock session that says 'hi' twice, then exit(0)
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     mockChild.stdout.emit('data', 'hi');
     mockChild.stderr.emit('data', 'hi');
     mockChild.emit('close', 0);
@@ -175,7 +158,7 @@ describe('Runner component', () => {
 
     // run a mock session that says 'hi' twice, then exits w/o code
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     mockChild.emit('close', ARBITRARY_FAIL_CODE);
     expect(await runPromise).toBe(RunResult.FAILURE);
     expect(store.isRunning).toBe(false);
@@ -192,7 +175,7 @@ describe('Runner component', () => {
 
     // run a mock session that says 'hi' twice, then exits w/o code
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     mockChild.stdout.emit('data', 'hi');
     mockChild.stderr.emit('data', 'hi');
     mockChild.emit('close');
@@ -211,7 +194,7 @@ describe('Runner component', () => {
 
     // start
     const runPromise = instance.run();
-    await eventually(() => store.isRunning);
+    await waitFor(() => store.isRunning);
     expect(store.isRunning).toBe(true);
 
     // stop while running

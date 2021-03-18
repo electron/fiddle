@@ -84,6 +84,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public async componentDidMount() {
+    this.stopListening();
+
     ipcRendererManager.on(
       IpcEvents.MONACO_EXECUTE_COMMAND,
       (_event, cmd: string) => {
@@ -124,14 +126,17 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.props.appState.isUnsaved = false;
   }
 
-  public componentWillUnmount() {
-    this.disposeLayoutAutorun();
-
+  private stopListening() {
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
     ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
+  }
+
+  public componentWillUnmount() {
+    this.disposeLayoutAutorun();
+    this.stopListening();
   }
 
   /**

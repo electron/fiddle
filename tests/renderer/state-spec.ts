@@ -1,5 +1,4 @@
 import * as MonacoType from 'monaco-editor';
-import { when } from 'mobx';
 
 import {
   ALL_MOSAICS,
@@ -27,6 +26,7 @@ import {
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
+import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-title';
 import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -144,19 +144,21 @@ describe('AppState', () => {
     });
 
     it('sets the onDidChangeModelContent handler if saved', async (done) => {
+      // confirm that setting appState.isUnsaved to false
+      // causes a new change-model-content callback to be installed
       appState.isUnsaved = false;
-      await when(() => appState.isUnsaved === false);
-
-      expect(window.onbeforeunload).toBe(null);
-
       const fn = window.ElectronFiddle.editors!.renderer!
         .onDidChangeModelContent;
-      const call = (fn as jest.Mock<any>).mock.calls[0];
-      const cb = call[0];
+      await waitFor(() => (fn as jest.Mock).mock.calls.length > 0);
+      expect(window.onbeforeunload).toBe(null);
+      expect(fn as jest.Mock).toHaveBeenCalledTimes(1);
 
-      cb();
-
+      // confirm that invoking the new callback sets appState.isUnsaved to true
+      const call = (fn as jest.Mock).mock.calls[0];
+      const callback = call[0];
+      callback();
       expect(appState.isUnsaved).toBe(true);
+
       done();
     });
   });
