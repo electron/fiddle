@@ -78,7 +78,7 @@ export class RemoteLoader {
         );
       }
 
-      const loaders: Array<Promise<any>> = [];
+      const loaders: Array<Promise<void>> = [];
 
       for (const child of folder.data) {
         if (!child.download_url) {
