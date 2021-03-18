@@ -1,23 +1,9 @@
 import { EditorValues } from '../interfaces';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../shared-constants';
+import { FILENAME_KEYS } from '../shared-constants';
 import { fancyImport } from './import';
 
 import * as fsType from 'fs-extra';
 import * as path from 'path';
-
-const FILENAME_KEYS = Object.freeze({
-  [INDEX_HTML_NAME]: 'html',
-  [MAIN_JS_NAME]: 'main',
-  [PRELOAD_JS_NAME]: 'preload',
-  [RENDERER_JS_NAME]: 'renderer',
-  [STYLES_CSS_NAME]: 'css',
-});
 
 /**
  * Reads a Fiddle from a directory.

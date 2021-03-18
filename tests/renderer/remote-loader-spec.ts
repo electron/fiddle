@@ -60,6 +60,10 @@ const mockRepos = [
     download_url: 'https://css',
   },
   {
+    name: PRELOAD_JS_NAME,
+    download_url: 'https://preload',
+  },
+  {
     name: 'other_stuff',
     download_url: 'https://google.com',
   },
@@ -145,6 +149,7 @@ describe('RemoteLoader', () => {
       mockFetchOnce('renderer');
       mockFetchOnce('index');
       mockFetchOnce('css');
+      mockFetchOnce('preload');
     });
 
     it('loads an Electron example', async () => {
@@ -163,6 +168,7 @@ describe('RemoteLoader', () => {
             main: 'main',
             renderer: 'renderer',
             css: 'css',
+            preload: 'preload',
           }),
         ]),
       );
