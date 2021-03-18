@@ -7,6 +7,7 @@ import {
   PRELOAD_JS_NAME,
   RENDERER_JS_NAME,
   STYLES_CSS_NAME,
+  FILENAME_KEYS,
 } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
@@ -71,12 +72,13 @@ export class RemoteLoader {
 
       const values = await getTemplate(this.appState.version);
 
-      const loaders: Array<Promise<void>> = [];
       if (!Array.isArray(folder.data)) {
         throw new Error(
           'The example Fiddle tried to launch is not a valid Electron example',
         );
       }
+
+      const loaders: Array<Promise<any>> = [];
 
       for (const child of folder.data) {
         if (!child.download_url) {
@@ -84,59 +86,15 @@ export class RemoteLoader {
           continue;
         }
 
-        switch (child.name) {
-          case MAIN_JS_NAME:
-            loaders.push(
-              fetch(child.download_url)
-                .then((r) => r.text())
-                .then((t) => {
-                  values.main = t;
-                }),
-            );
-
-            break;
-          case INDEX_HTML_NAME:
-            loaders.push(
-              fetch(child.download_url)
-                .then((r) => r.text())
-                .then((t) => {
-                  values.html = t;
-                }),
-            );
-
-            break;
-          case RENDERER_JS_NAME:
-            loaders.push(
-              fetch(child.download_url)
-                .then((r) => r.text())
-                .then((t) => {
-                  values.renderer = t;
-                }),
-            );
-
-            break;
-
-          case PRELOAD_JS_NAME:
-            loaders.push(
-              fetch(child.download_url)
-                .then((r) => r.text())
-                .then((t) => {
-                  values.preload = t;
-                }),
-            );
-
-          case STYLES_CSS_NAME:
-            loaders.push(
-              fetch(child.download_url)
-                .then((r) => r.text())
-                .then((t) => {
-                  values.css = t;
-                }),
-            );
-
-            break;
-          default:
-            break;
+        const valueKey = FILENAME_KEYS[child.name];
+        if (valueKey) {
+          loaders.push(
+            fetch(child.download_url)
+              .then((r) => r.text())
+              .then((t) => {
+                values[valueKey] = t;
+              }),
+          );
         }
       }
 
