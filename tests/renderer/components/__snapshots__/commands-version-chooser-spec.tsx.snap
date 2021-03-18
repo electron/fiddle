@@ -31,6 +31,11 @@ exports[`VersionSelect component renders 1`] = `
             "state": "ready",
             "version": "1.8.7",
           },
+          "2.0.0": Object {
+            "source": "remote",
+            "state": "ready",
+            "version": "2.0.0",
+          },
           "2.0.1": Object {
             "source": "remote",
             "state": "ready",
@@ -40,6 +45,11 @@ exports[`VersionSelect component renders 1`] = `
             "source": "remote",
             "state": "ready",
             "version": "2.0.2",
+          },
+          "2.0.3": Object {
+            "source": "remote",
+            "state": "ready",
+            "version": "2.0.3",
           },
           "3.0.0-unsupported": Object {
             "source": "remote",
@@ -52,12 +62,22 @@ exports[`VersionSelect component renders 1`] = `
           Object {
             "source": "remote",
             "state": "ready",
+            "version": "2.0.3",
+          },
+          Object {
+            "source": "remote",
+            "state": "ready",
             "version": "2.0.2",
           },
           Object {
             "source": "remote",
             "state": "ready",
             "version": "2.0.1",
+          },
+          Object {
+            "source": "remote",
+            "state": "ready",
+            "version": "2.0.0",
           },
           Object {
             "source": "remote",

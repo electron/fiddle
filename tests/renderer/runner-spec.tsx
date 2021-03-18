@@ -1,5 +1,6 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
+import * as semver from 'semver';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
@@ -15,7 +16,7 @@ import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
 import { MockChildProcess } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { mockVersions } from '../mocks/electron-versions';
+import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -69,12 +70,40 @@ describe('Runner component', () => {
         return mockVersions['2.0.2'];
       },
       getName: async () => 'test-app-name',
+      setVersion: (version: string) => {
+        store.version = version;
+        return true;
+      },
     };
 
     (window as any).ElectronFiddle = new ElectronFiddleMock();
     (getIsDownloaded as jest.Mock).mockReturnValue(true);
 
     instance = new Runner(store as AppState);
+  });
+
+  describe('autobisect', () => {
+    it('finds regressions', async () => {
+      const spy = jest.spyOn(store, 'setVersion');
+      const bisectRange = [...mockVersionsArray].reverse();
+      const LAST_GOOD = '2.0.1';
+      const FIRST_BAD = '2.0.2';
+      instance.run = jest.fn().mockImplementation(() => {
+        return semver.compare(store.version, LAST_GOOD) <= 0
+          ? RunResult.SUCCESS
+          : RunResult.FAILURE;
+      });
+      const runPromise = instance.autobisect(bisectRange);
+      const result = await runPromise;
+      expect(result).toBe(RunResult.SUCCESS);
+      expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(2);
+      expect((store.setVersion as jest.Mock).mock.calls[0][0]).toBe(LAST_GOOD);
+      expect((store.setVersion as jest.Mock).mock.calls[1][0]).toBe(FIRST_BAD);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        `https://github.com/electron/electron/compare/v${LAST_GOOD}...v${FIRST_BAD}`,
+      );
+      spy.mockRestore();
+    });
   });
 
   it('runs', async () => {
@@ -136,6 +165,24 @@ describe('Runner component', () => {
     expect(store.pushOutput).toHaveBeenCalledTimes(8);
     expect(store.pushOutput).toHaveBeenLastCalledWith(
       'Electron exited with code 0.',
+    );
+  });
+
+  it('returns failure when app exits nonzero', async () => {
+    (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
+    (spawn as any).mockReturnValueOnce(mockChild);
+    const ARBITRARY_FAIL_CODE = 50;
+
+    // run a mock session that says 'hi' twice, then exits w/o code
+    const runPromise = instance.run();
+    await eventually(() => store.isRunning);
+    mockChild.emit('close', ARBITRARY_FAIL_CODE);
+    expect(await runPromise).toBe(RunResult.FAILURE);
+    expect(store.isRunning).toBe(false);
+
+    // check the output
+    expect(store.pushOutput).toHaveBeenLastCalledWith(
+      `Electron exited with code ${ARBITRARY_FAIL_CODE}.`,
     );
   });
 

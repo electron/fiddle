@@ -4,7 +4,7 @@ import * as React from 'react';
 import { VersionSource, VersionState } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
-import { mockVersions } from '../../mocks/electron-versions';
+import { mockVersions, mockVersionsArray } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
   let store: any;
@@ -97,7 +97,9 @@ describe('ElectronSettings component', () => {
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
-    expect(store.removeVersion).toHaveBeenCalledTimes(2);
+    expect(store.removeVersion).toHaveBeenCalledTimes(
+      mockVersionsArray.length - 1,
+    );
   });
 
   it('handles the downloadAll()', async () => {

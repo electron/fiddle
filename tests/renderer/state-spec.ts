@@ -28,7 +28,7 @@ import {
 } from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { getName } from '../../src/utils/get-title';
-import { mockVersions } from '../mocks/electron-versions';
+import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -327,14 +327,14 @@ describe('AppState', () => {
       appState.channelsToShow = ['Unsupported' as any];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.channelsToShow = ['Stable' as any];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
     it('excludes states', () => {
       appState.statesToShow = [VersionState.downloading];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.statesToShow = [VersionState.ready];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
   });
 
@@ -400,7 +400,7 @@ describe('AppState', () => {
     it('falls back if a version does not exist', async () => {
       await appState.setVersion('v999.99.99');
 
-      expect(appState.version).toBe('2.0.2');
+      expect(appState.version).toBe('2.0.3');
     });
 
     it('downloads a version if necessary', async () => {
@@ -467,11 +467,9 @@ describe('AppState', () => {
       // We just want to verify that the version state was
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual([
-        '2.0.2',
-        '2.0.1',
-        '1.8.7',
-      ]);
+      expect(Object.keys(appState.versions)).toEqual(
+        mockVersionsArray.map((v) => v.version),
+      );
     });
   });
 

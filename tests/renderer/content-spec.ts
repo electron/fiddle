@@ -3,7 +3,11 @@ import * as path from 'path';
 import { Response } from 'cross-fetch';
 
 import { EditorId } from '../../src/interfaces';
-import { getContent, isContentUnchanged } from '../../src/renderer/content';
+import {
+  getContent,
+  getTestTemplate,
+  isContentUnchanged,
+} from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
@@ -38,6 +42,25 @@ const fetchFromFilesystem = (url: string) => {
 };
 
 describe('content', () => {
+  describe('getTestTemplate()', () => {
+    beforeEach(() => {
+      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
+      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
+    });
+
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+
+    it('loads a test template', async () => {
+      await getTestTemplate();
+      expect(global.fetch as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(global.fetch as jest.Mock).toHaveBeenLastCalledWith(
+        'https://github.com/electron/electron-quick-start/archive/populate-test-template.zip',
+      );
+    });
+  });
+
   describe('getContent()', () => {
     beforeEach(() => {
       // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
