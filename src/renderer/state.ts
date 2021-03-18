@@ -206,9 +206,6 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
-    ipcRendererManager.once(IpcEvents.GET_APP_PATHS, (_event, dir) => {
-      this.appData = dir;
-    });
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
