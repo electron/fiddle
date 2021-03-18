@@ -323,6 +323,18 @@ describe('Editors component', () => {
     });
   });
 
+  describe('setFocused()', () => {
+    it('sets the "focused" property', () => {
+      const wrapper = shallow(<Editors appState={store} />);
+      const instance: Editors = wrapper.instance() as any;
+      const spy = jest.spyOn(instance, 'setState');
+
+      const id = EditorId.html;
+      instance.setFocused(id);
+      expect(spy).toHaveBeenCalledWith({ focused: id });
+    });
+  });
+
   describe('disposeLayoutAutorun()', () => {
     it('automatically updates the layout when the mosaic arrangement changes', () => {
       class MockStore {
