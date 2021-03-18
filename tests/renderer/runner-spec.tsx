@@ -65,19 +65,28 @@ describe('Runner component', () => {
     instance = new Runner(store as AppState);
   });
 
-  describe('autobisect', () => {
-    it('finds regressions', async () => {
-      const spy = jest.spyOn(store, 'setVersion');
-      const bisectRange = [...mockVersionsArray].reverse();
+  describe('autobisect()', () => {
+    it('returns success if bisection succeeds', async () => {
+      // setup: make sure good, bad exist in our mock
       const LAST_GOOD = '2.0.1';
       const FIRST_BAD = '2.0.2';
+      expect(mockVersions[LAST_GOOD]).toEqual(expect.anything());
+      expect(mockVersions[FIRST_BAD]).toEqual(expect.anything());
+
+      // setup: the instance.run mock
+      const spy = jest.spyOn(store, 'setVersion');
       instance.run = jest.fn().mockImplementation(() => {
+        // test succeeds iff version <= LAST_GOOD
         return semver.compare(store.version, LAST_GOOD) <= 0
           ? RunResult.SUCCESS
           : RunResult.FAILURE;
       });
-      const runPromise = instance.autobisect(bisectRange);
-      const result = await runPromise;
+
+      // run it
+      const bisectRange = [...mockVersionsArray].reverse();
+      const result = await instance.autobisect(bisectRange);
+
+      // check the results
       expect(result).toBe(RunResult.SUCCESS);
       expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(2);
       expect((store.setVersion as jest.Mock).mock.calls[0][0]).toBe(LAST_GOOD);
@@ -85,6 +94,32 @@ describe('Runner component', () => {
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `https://github.com/electron/electron/compare/v${LAST_GOOD}...v${FIRST_BAD}`,
       );
+
+      // cleanup
+      spy.mockRestore();
+    });
+
+    it('returns invalid if unable to run', async () => {
+      // setup
+      const spy = jest.spyOn(store, 'setVersion');
+      const bisectRange = [...mockVersionsArray].reverse();
+      const expectedPivot =
+        bisectRange[Math.round((bisectRange.length - 1) / 2)].version;
+
+      // setup: instance.run() should fail to run
+      instance.run = jest.fn().mockImplementation(() => RunResult.INVALID);
+
+      // run it
+      const result = await instance.autobisect(bisectRange);
+
+      // check the results
+      expect(result).toBe(RunResult.INVALID);
+      expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(1);
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        `Bisect: failed to test with Electron ${expectedPivot}`,
+      );
+
+      // cleanup
       spy.mockRestore();
     });
   });
