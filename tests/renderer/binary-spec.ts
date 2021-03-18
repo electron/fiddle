@@ -192,7 +192,7 @@ describe('binary', () => {
       expect(mockState.versions['3.0.0'].state).toBe('ready');
     });
 
-    it(`does not download a version while already downloading`, async () => {
+    it(`waits if asked for a version is already downloading`, async () => {
       const fs = require('fs-extra');
       const { download } = require('@electron/get');
 
@@ -202,7 +202,7 @@ describe('binary', () => {
       await setupBinary(mockState, 'v3.0.0');
 
       expect(download).toHaveBeenCalledTimes(0);
-      expect(mockState.versions['3.0.0'].state).toBe('downloading');
+      expect(mockState.versions['3.0.0'].state).toBe('ready');
     });
 
     it('handles an error in the zip file', async () => {
