@@ -28,7 +28,6 @@ import {
   MaximizeButton,
   RemoveButton,
 } from './editors-toolbar-button';
-import { ShowMe } from './show-me';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -72,7 +71,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.onChange = this.onChange.bind(this);
     this.renderEditor = this.renderEditor.bind(this);
     this.renderTile = this.renderTile.bind(this);
-    this.renderGenericPanel = this.renderGenericPanel.bind(this);
     this.setFocused = this.setFocused.bind(this);
 
     this.state = { monacoOptions: defaultMonacoOptions };
@@ -233,10 +231,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @returns {JSX.Element | null}
    */
   public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
-    const { appState } = this.props;
-    const content = isEditorId(id)
-      ? this.renderEditor(id)
-      : this.renderGenericPanel(id, appState);
+    const content = isEditorId(id) && this.renderEditor(id);
 
     return (
       <MosaicWindow<EditorId>
@@ -250,17 +245,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {content}
       </MosaicWindow>
     );
-  }
-
-  /**
-   * Renders a generic panel – so not an editor, but something else
-   *
-   * @param {PanelId} _id
-   * @param {AppState} _appState
-   * @returns {JSX.Element}
-   */
-  public renderGenericPanel(_id: PanelId, appState: AppState): JSX.Element {
-    return <ShowMe appState={appState} />;
   }
 
   /**
