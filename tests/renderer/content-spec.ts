@@ -70,7 +70,8 @@ describe('content', () => {
     it('downloads and returns content for known versions', async () => {
       const content = await getContent(EditorId.html, '11.0.0');
       expect(lastResponse).toMatchObject({ status: 200 });
-      expect(content).toMatch(/^<!DOCTYPE html>/);
+      console.log('content', content);
+      expect(content).toMatch('This is the Test Fixture 11-x-y HTML');
     });
 
     it('provides fallback content if downloads fail', async () => {

@@ -7,7 +7,8 @@ import { readFiddle } from '../utils/read-fiddle';
 import * as fsType from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
-import * as decompress from 'decompress';
+
+const decompress = require('decompress');
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
