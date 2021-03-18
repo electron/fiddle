@@ -1,6 +1,10 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { VersionSource, VersionState } from '../../../src/interfaces';
+import {
+  RunResult,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
 import { ElectronReleaseChannel } from '../../../src/renderer/versions';
@@ -134,6 +138,33 @@ describe('BisectDialog component', () => {
       const instance2: BisectDialog = wrapper.instance() as any;
       await instance2.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('onAuto()', () => {
+    it('initiates autobisect', async () => {
+      // setup: dialog state
+      const wrapper = shallow(<BisectDialog appState={store} />);
+      wrapper.setState({
+        allVersions: generateVersionRange(5),
+        endIndex: 0,
+        startIndex: 4,
+      });
+
+      // setup: the spy
+      const spy = jest
+        .spyOn(window.ElectronFiddle.app.runner, 'autobisect')
+        .mockImplementation(() => Promise.resolve(RunResult.SUCCESS));
+
+      // click the 'auto' button
+      const instance1: BisectDialog = wrapper.instance() as any;
+      await instance1.onAuto();
+
+      // check the results
+      expect(spy).toHaveBeenCalled();
+
+      // cleanup
+      spy.mockRestore();
     });
   });
 
