@@ -236,6 +236,47 @@ describe('Editors component', () => {
       replaceFiddleSpy.mockRestore();
     });
 
+    describe('SELECT_ALL_IN_EDITOR handler', () => {
+      it('selects all in the focused editor', (done) => {
+        shallow(<Editors appState={store} />);
+        const mockEditor = {
+          getModel: () => ({
+            getFullModelRange: jest.fn().mockReturnValue('range'),
+          }),
+          setSelection: jest.fn(),
+        };
+        (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        process.nextTick(() => {
+          expect(mockEditor.setSelection).toHaveBeenCalledWith('range');
+          done();
+        });
+      });
+
+      it('does not change selection if the selected editor has no model', (done) => {
+        shallow(<Editors appState={store} />);
+        const mockEditor = {
+          getModel: jest.fn(() => null),
+          setSelection: jest.fn(),
+        };
+        (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+
+        process.nextTick(() => {
+          expect(mockEditor.getModel).toHaveBeenCalledTimes(1);
+          expect(mockEditor.setSelection).not.toHaveBeenCalled();
+          done();
+        });
+      });
+
+      it('does not crash if there is no selected editor', () => {
+        shallow(<Editors appState={store} />);
+        (getFocusedEditor as any).mockReturnValueOnce(null);
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+      });
+    });
+
     it('handles a SELECT_ALL_IN_EDITOR command', (done) => {
       shallow(<Editors appState={store} />);
       const mockEditor = {
