@@ -212,6 +212,7 @@ export class GistActionButton extends React.Component<
         message:
           'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
         detail: `GitHub encountered the following error: ${error.message}`,
+        buttons: ['Ok'],
       };
 
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
