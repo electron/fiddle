@@ -75,15 +75,18 @@ describe('content', () => {
     });
 
     it('returns content for HTML editor', async () => {
-      expect(await getContent(EditorId.html)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.html, curVer)).toBeTruthy();
     });
 
     it('returns content for the renderer editor', async () => {
-      expect(await getContent(EditorId.renderer)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.renderer, curVer)).toBeTruthy();
     });
 
     it('returns content for the main editor', async () => {
-      expect(await getContent(EditorId.main)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.main, curVer)).toBeTruthy();
     });
 
     it('returns fallback content for an unparsable version', async () => {
@@ -107,11 +110,13 @@ describe('content', () => {
     });
 
     it('returns the same content when called multiple times', async () => {
+      const curVer = VERSION_IN_FIXTURES;
       const id = EditorId.main;
+      const expected = await getContent(id, curVer);
+
       const numTries = 3;
-      const expected = await getContent(id);
       for (let i = 0; i < numTries; ++i) {
-        const content = await getContent(EditorId.main);
+        const content = await getContent(id, curVer);
         expect(content).toEqual(expected);
       }
     });
@@ -134,10 +139,11 @@ describe('content', () => {
   });
 
   describe('isContentUnchanged()', () => {
+    const curVer = VERSION_IN_FIXTURES;
+
     it('returns false if app is not available', async () => {
       (window.ElectronFiddle.app as any) = null;
-
-      const isUnchanged = await isContentUnchanged(EditorId.main);
+      const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
       expect(isUnchanged).toBe(false);
     });
 
@@ -148,27 +154,17 @@ describe('content', () => {
           main: 'hi',
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.main);
+        const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
         expect(isUnchanged).toBe(false);
       });
 
       it('returns true if it did not change', async () => {
         (window.ElectronFiddle.app
           .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          main: await getContent(EditorId.main),
+          main: await getContent(EditorId.main, curVer),
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.main);
-        expect(isUnchanged).toBe(true);
-      });
-
-      it('returns true if it did not change (1.0 version)', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          main: await getContent(EditorId.main, '1-x-y'),
-        });
-
-        const isUnchanged = await isContentUnchanged(EditorId.main);
+        const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
         expect(isUnchanged).toBe(true);
       });
     });
@@ -180,17 +176,17 @@ describe('content', () => {
           renderer: 'hi',
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.renderer);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer, curVer);
         expect(isUnchanged).toBe(false);
       });
 
       it('returns true if it did not change', async () => {
         (window.ElectronFiddle.app
           .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          renderer: await getContent(EditorId.renderer),
+          renderer: await getContent(EditorId.renderer, curVer),
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.renderer);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer, curVer);
         expect(isUnchanged).toBe(true);
       });
     });

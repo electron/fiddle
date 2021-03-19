@@ -536,7 +536,7 @@ export class AppState {
     this.version = version;
 
     // Should we update the editor?
-    if (await isContentUnchanged(EditorId.main)) {
+    if (await isContentUnchanged(EditorId.main, version)) {
       const editorValues = await getTemplate(version);
       await window.ElectronFiddle.app.replaceFiddle(editorValues, {});
     }

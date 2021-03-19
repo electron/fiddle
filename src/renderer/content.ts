@@ -92,10 +92,10 @@ export function getTestTemplate(): Promise<EditorValues> {
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {string} [version]
+ * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version?: string) {
+function isReleasedMajor(version: string) {
   const newestRelease = getElectronVersions()
     .filter((version) => version.source === VersionSource.remote)
     .map((version) => semver.parse(version.version))
@@ -109,10 +109,10 @@ function isReleasedMajor(version?: string) {
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
  *
- * @param {string} [version]
+ * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<EditorValues>}
  */
-export function getTemplate(version?: string): Promise<EditorValues> {
+export function getTemplate(version: string): Promise<EditorValues> {
   if (!isReleasedMajor(version)) {
     return readFiddle(STATIC_TEMPLATE_DIR);
   }
@@ -127,12 +127,12 @@ export function getTemplate(version?: string): Promise<EditorValues> {
  *
  * @export
  * @param {EditorId} name
- * @param {string} [version]
+ * @param {string} version
  * @returns {Promise<string>}
  */
 export async function getContent(
   name: EditorId,
-  version?: string,
+  version: string,
 ): Promise<string> {
   return (await getTemplate(version))[name];
 }
@@ -141,14 +141,18 @@ export async function getContent(
  * Did the content change?
  *
  * @param {EditorId} name
+ * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<boolean>}
  */
-export async function isContentUnchanged(name: EditorId): Promise<boolean> {
+export async function isContentUnchanged(
+  name: EditorId,
+  version: string,
+): Promise<boolean> {
   if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
 
   const values = await window.ElectronFiddle.app.getEditorValues({
     include: false,
   });
 
-  return values[name] === (await getContent(name));
+  return values[name] === (await getContent(name, version));
 }
