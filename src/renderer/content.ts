@@ -92,10 +92,10 @@ export function getTestTemplate(): Promise<EditorValues> {
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {string} version - Electron version, e.g. 12.0.0
+ * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version: string) {
+function isReleasedMajor(version: semver.SemVer) {
   const newestRelease = getElectronVersions()
     .filter((version) => version.source === VersionSource.remote)
     .map((version) => semver.parse(version.version))
@@ -113,13 +113,10 @@ function isReleasedMajor(version: string) {
  * @returns {Promise<EditorValues>}
  */
 export function getTemplate(version: string): Promise<EditorValues> {
-  if (!isReleasedMajor(version)) {
-    return readFiddle(STATIC_TEMPLATE_DIR);
-  }
-
-  const parsed = semver.parse(version);
-  const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
-  return getQuickStart(branch);
+  const sem = semver.parse(version);
+  return sem && isReleasedMajor(sem)
+    ? getQuickStart(`${sem.major}-x-y`)
+    : readFiddle(STATIC_TEMPLATE_DIR);
 }
 
 /**
