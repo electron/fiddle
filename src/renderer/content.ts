@@ -65,7 +65,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
  * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<EditorValues>}
  */
-async function getQuickStart(branch: string): Promise<EditorValues> {
+function getQuickStart(branch: string): Promise<EditorValues> {
   // Load the template for that branch.
   // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
@@ -82,7 +82,7 @@ async function getQuickStart(branch: string): Promise<EditorValues> {
  *
  * @returns {Promise<EditorValues>}
  */
-export async function getTestTemplate(): Promise<EditorValues> {
+export function getTestTemplate(): Promise<EditorValues> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
 }
 
@@ -112,7 +112,7 @@ function isReleasedMajor(version?: string) {
  * @param {string} [version]
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplate(version?: string): Promise<EditorValues> {
+export function getTemplate(version?: string): Promise<EditorValues> {
   if (!isReleasedMajor(version)) {
     return readFiddle(STATIC_TEMPLATE_DIR);
   }

@@ -5,6 +5,7 @@ import { Response } from 'cross-fetch';
 import { EditorId } from '../../src/interfaces';
 import {
   getContent,
+  getTemplate,
   getTestTemplate,
   isContentUnchanged,
 } from '../../src/renderer/content';
@@ -42,6 +43,9 @@ const fetchFromFilesystem = (url: string) => {
 };
 
 describe('content', () => {
+  const VERSION_IN_FIXTURES = '11.0.0';
+  const VERSION_NOT_IN_FIXTURES = '10.0.0';
+
   describe('getTestTemplate()', () => {
     beforeEach(() => {
       // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
@@ -91,13 +95,12 @@ describe('content', () => {
     });
 
     it('downloads and returns content for known versions', async () => {
-      const content = await getContent(EditorId.html, '11.0.0');
+      const content = await getContent(EditorId.html, VERSION_IN_FIXTURES);
       expect(lastResponse).toMatchObject({ status: 200 });
       expect(content).toMatch(/^<!DOCTYPE html>/);
     });
 
     it('provides fallback content if downloads fail', async () => {
-      const VERSION_NOT_IN_FIXTURES = '10.0.0';
       const content = await getContent(EditorId.html, VERSION_NOT_IN_FIXTURES);
       expect(lastResponse).toMatchObject({ status: 404 });
       expect(content).toMatch(/^<!DOCTYPE html>/);
@@ -111,6 +114,22 @@ describe('content', () => {
         const content = await getContent(EditorId.main);
         expect(content).toEqual(expected);
       }
+    });
+  });
+
+  describe('getTemplate()', () => {
+    beforeEach(() => {
+      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
+      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
+    });
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+
+    it('returns the same promise if the work is already pending', async () => {
+      const prom1 = getTemplate(VERSION_IN_FIXTURES);
+      const prom2 = getTemplate(VERSION_IN_FIXTURES);
+      expect(prom1).toEqual(prom2);
     });
   });
 
