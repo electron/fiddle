@@ -397,10 +397,9 @@ describe('AppState', () => {
   });
 
   describe('setVersion()', () => {
-    it('falls back if a version does not exist', async () => {
+    it('uses the newest version iff the specified version does not exist', async () => {
       await appState.setVersion('v999.99.99');
-
-      expect(appState.version).toBe('2.0.3');
+      expect(appState.version).toBe(mockVersionsArray[0].version);
     });
 
     it('downloads a version if necessary', async () => {
