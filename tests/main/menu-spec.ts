@@ -272,6 +272,15 @@ describe('menu', () => {
 
     describe('getFileMenu()', () => {
       let file: any;
+      enum Idx {
+        NEW_FIDDLE = 0,
+        NEW_WINDOW = 1,
+        OPEN = 3,
+        SAVE = 5,
+        SAVE_AS = 6,
+        PUBLISH = 8,
+        FORGE = 9,
+      }
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
@@ -280,50 +289,50 @@ describe('menu', () => {
       });
 
       it('creates a new fiddle', () => {
-        file.submenu[0].click();
+        file.submenu[Idx.NEW_FIDDLE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_NEW_FIDDLE,
         );
       });
 
       it('creates a new window', () => {
-        file.submenu[1].click();
-        file.submenu[1].click();
+        file.submenu[Idx.NEW_WINDOW].click();
+        file.submenu[Idx.NEW_WINDOW].click();
         expect(createMainWindow).toHaveBeenCalledTimes(2);
       });
 
       it('opens a Fiddle', () => {
-        file.submenu[3].click();
+        file.submenu[Idx.OPEN].click();
         expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
       });
 
       it('saves a Fiddle', () => {
-        file.submenu[5].click();
+        file.submenu[Idx.SAVE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
         );
       });
 
       it('saves a Fiddle as', () => {
-        file.submenu[6].click();
+        file.submenu[Idx.SAVE_AS].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as a gist', () => {
-        file.submenu[8].click();
+        file.submenu[Idx.PUBLISH].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE_GIST,
         );
       });
 
       it('saves a Fiddle as a forge project', () => {
-        file.submenu[9].click();
+        file.submenu[Idx.FORGE].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
         setupMenu([BlockableAccelerator.save]);
-        file.submenu[5].click();
+        file.submenu[Idx.SAVE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
         );
@@ -331,7 +340,7 @@ describe('menu', () => {
 
       it('saves as a Fiddle with blocked accelerator', () => {
         setupMenu([BlockableAccelerator.saveAs]);
-        file.submenu[6].click();
+        file.submenu[Idx.SAVE_AS].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
     });
