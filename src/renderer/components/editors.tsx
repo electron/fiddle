@@ -105,12 +105,12 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
-      // programmatically fetch all editor contents and set as selection
       const editor = getFocusedEditor();
-      const range = editor?.getModel()?.getFullModelRange();
-
-      if (!!range) {
-        editor?.setSelection(range);
+      if (editor) {
+        const model = editor.getModel();
+        if (model) {
+          editor.setSelection(model.getFullModelRange());
+        }
       }
     });
 
