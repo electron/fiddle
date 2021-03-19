@@ -18,6 +18,9 @@ const STATIC_TEMPLATE_DIR = path.resolve(
   '../../static/electron-quick-start',
 );
 
+// electron-quick-start branch that holds the test template
+const TEST_TEMPLATE_BRANCH = 'test-template';
+
 /**
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
@@ -57,6 +60,28 @@ async function prepareTemplate(branch: string): Promise<string> {
 const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
+ * Get a cached copy of the fiddle for the specified Electron version.
+ *
+ * @param {string} [version]
+ * @returns {Promise<EditorValues>}
+ */
+async function getQuickStart(branch: string): Promise<EditorValues> {
+  // Load the template for that branch.
+  // Cache the work in a Promise to prevent parallel downloads.
+  let pending = templateCache[branch];
+  if (!pending) {
+    console.log(`Content: ${branch} template loading`);
+    pending = prepareTemplate(branch).then(readFiddle);
+    templateCache[branch] = pending;
+  }
+  return pending;
+}
+
+export async function getTestTemplate(): Promise<EditorValues> {
+  return getQuickStart(TEST_TEMPLATE_BRANCH);
+}
+
+/**
  * Helper to check if this version is from a released major branch.
  *
  * This way when we have a local version of Electron like '999.0.0'
@@ -83,22 +108,13 @@ function isReleasedMajor(version?: string) {
  * @returns {Promise<EditorValues>}
  */
 export async function getTemplate(version?: string): Promise<EditorValues> {
-  // get the branch
-  const parsed = semver.parse(version);
-  const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
-
-  // Load the template for that branch.
-  // Cache the work in a Promise to prevent parallel downloads.
-  let pending = templateCache[branch];
-  if (!pending) {
-    console.log(`Content: ${branch} template loading`);
-    pending = isReleasedMajor(version)
-      ? prepareTemplate(branch).then(readFiddle)
-      : readFiddle(STATIC_TEMPLATE_DIR);
-    templateCache[branch] = pending;
+  if (!isReleasedMajor(version)) {
+    return readFiddle(STATIC_TEMPLATE_DIR);
   }
 
-  return pending;
+  const parsed = semver.parse(version);
+  const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
+  return getQuickStart(branch);
 }
 
 /**

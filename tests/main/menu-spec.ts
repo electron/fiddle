@@ -274,12 +274,13 @@ describe('menu', () => {
       let file: any;
       enum Idx {
         NEW_FIDDLE = 0,
-        NEW_WINDOW = 1,
-        OPEN = 3,
-        SAVE = 5,
-        SAVE_AS = 6,
-        PUBLISH = 8,
-        FORGE = 9,
+        NEW_TEST = 1,
+        NEW_WINDOW = 2,
+        OPEN = 4,
+        SAVE = 6,
+        SAVE_AS = 7,
+        PUBLISH = 9,
+        FORGE = 10,
       }
 
       beforeEach(() => {
@@ -292,6 +293,13 @@ describe('menu', () => {
         file.submenu[Idx.NEW_FIDDLE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_NEW_FIDDLE,
+        );
+      });
+
+      it('creates a new fiddle', () => {
+        file.submenu[Idx.NEW_TEST].click();
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.FS_NEW_TEST,
         );
       });
 
