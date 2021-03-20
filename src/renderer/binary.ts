@@ -1,13 +1,13 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import extract from 'extract-zip';
 
 import { VersionState } from '../interfaces';
-import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { AppState } from './state';
+import { download as electronDownload } from '@electron/get';
 
 const pendingDownloads: Record<string, Promise<void>> = {};
 
@@ -18,17 +18,17 @@ const pendingDownloads: Record<string, Promise<void>> = {};
  * @param {string} iVersion
  * @returns {Promise<void>}
  */
-export async function setupBinary(
+export function setupBinary(
   appState: AppState,
   iVersion: string,
 ): Promise<void> {
   const version = normalizeVersion(iVersion);
 
   // If we already have it, then we're done
-  if (await getIsDownloaded(version)) {
+  if (getIsDownloaded(version)) {
     console.log(`Binary: Electron ${version} already downloaded.`);
     appState.versions[version].state = VersionState.ready;
-    return;
+    return Promise.resolve();
   }
 
   // Return a promise that resolves when the download completes
@@ -58,7 +58,6 @@ async function downloadBinary(
     appState.versions[version].state = VersionState.unzipping;
 
     // Ensure the target path exists
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     await fs.mkdirp(extractPath);
 
     // Ensure the target path is empty
@@ -85,7 +84,6 @@ async function downloadBinary(
  */
 export async function removeBinary(iVersion: string) {
   const version = normalizeVersion(iVersion);
-  const fs = await fancyImport<typeof fsType>('fs-extra');
   let isDeleted = false;
 
   // utility to re-run removal functions upon failure
@@ -106,7 +104,7 @@ export async function removeBinary(iVersion: string) {
   };
 
   const binaryCleaner = async () => {
-    if (await getIsDownloaded(version)) {
+    if (getIsDownloaded(version)) {
       // This is necessary since we're messing with .asar files inside
       // the Electron binaries. Electron, powering Fiddle, will try to
       // "correct" our calls, but we don't want that right here.
@@ -135,13 +133,8 @@ export async function removeBinary(iVersion: string) {
  * @param {string} dir
  * @returns {boolean}
  */
-export async function getIsDownloaded(
-  version: string,
-  dir?: string,
-): Promise<boolean> {
+export function getIsDownloaded(version: string, dir?: string): boolean {
   const expectedPath = getElectronBinaryPath(version, dir);
-  const fs = await fancyImport<typeof fsType>('fs-extra');
-
   return fs.existsSync(expectedPath);
 }
 
@@ -183,23 +176,14 @@ export function getDownloadingVersions(appState: AppState) {
  * @returns {Promise<Array<string>>}
  */
 export async function getDownloadedVersions(): Promise<Array<string>> {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
   const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
   console.log(`Binary: Checking for downloaded versions`);
 
   try {
-    const directories = await fs.readdir(downloadPath);
-    const knownVersions: Array<string> = [];
-
-    for (const directory of directories) {
-      if (await getIsDownloaded(directory)) {
-        knownVersions.push(directory);
-      }
-    }
-
-    return knownVersions;
+    const dirs = await fs.readdir(downloadPath);
+    return dirs.filter((dir) => dir && getIsDownloaded(dir));
   } catch (error) {
-    console.warn(`Could not read known Electron versions`);
+    console.warn(`Could not read known Electron versions`, error);
     return [];
   }
 }
@@ -212,7 +196,6 @@ export async function getDownloadedVersions(): Promise<Array<string>> {
  * @returns {Promise<string>}
  */
 async function download(appState: AppState, version: string): Promise<string> {
-  const { download: electronDownload } = await import('@electron/get');
   const getProgressCallback = (progress: Progress) => {
     const roundedProgress = Math.round(progress.percent * 100) / 100;
 

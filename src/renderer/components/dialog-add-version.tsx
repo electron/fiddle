@@ -70,9 +70,8 @@ export class AddVersionDialog extends React.Component<
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public async setFolderPath(folderPath: string) {
-    const isValidElectron = !!(await getIsDownloaded('custom', folderPath));
-
+  public setFolderPath(folderPath: string) {
+    const isValidElectron = getIsDownloaded('custom', folderPath);
     this.setState({ folderPath, isValidElectron });
   }
 

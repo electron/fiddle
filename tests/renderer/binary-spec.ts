@@ -19,9 +19,10 @@ jest.mock('../../src/renderer/constants', () => ({
 }));
 jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => {
-    if (p === 'fs-extra') {
-      return require('fs-extra');
+    if (p === 'extract-zip') {
+      return { default: require('extract-zip') };
     }
+    throw new Error(`Unexpected module '${p}'`);
   },
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
@@ -33,6 +34,7 @@ jest.mock('@electron/get', () => ({
 
 describe('binary', () => {
   let mockState: any = {};
+  const fs = require('fs-extra');
 
   beforeEach(() => {
     mockState = {
@@ -50,8 +52,6 @@ describe('binary', () => {
 
   describe('remove()', () => {
     it('removes a version', async () => {
-      const fs = require('fs-extra');
-
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
       await removeBinary('v3.0.0');
@@ -59,8 +59,6 @@ describe('binary', () => {
     });
 
     it('retries on failure', async () => {
-      const fs = require('fs-extra');
-
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
       (fs.remove as jest.Mock<any>).mockImplementation(() => {
         throw new Error('Bwap bwap');
@@ -71,8 +69,6 @@ describe('binary', () => {
     });
 
     it("attempts to clean up the version's associated typedefs", async () => {
-      const fs = require('fs-extra');
-
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
       await removeBinary('v3.0.0');
@@ -81,7 +77,6 @@ describe('binary', () => {
     });
 
     it('retries typedef cleanup upon failure', async () => {
-      const fs = require('fs-extra');
       (removeTypeDefsForVersion as jest.Mock).mockImplementation(() => {
         throw new Error('Bwap bwap');
       });
@@ -95,30 +90,22 @@ describe('binary', () => {
 
   describe('getDownloadedVersions()', () => {
     it('finds downloaded versions', async () => {
-      const fs = require('fs-extra');
-
-      (fs.readdir as jest.Mock<any>).mockReturnValue(['v3.0.0']);
+      const versions = ['v3.0.0'];
+      (fs.readdir as jest.Mock<any>).mockResolvedValue(versions);
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
-
       const result = await getDownloadedVersions();
-
-      expect(result).toEqual(['v3.0.0']);
+      expect(result).toEqual(versions);
     });
 
     it('is okay without versions ', async () => {
-      const fs = require('fs-extra');
-
-      (fs.readdir as jest.Mock<any>).mockReturnValue([]);
+      const versions: string[] = [];
+      (fs.readdir as jest.Mock<any>).mockResolvedValue(versions);
       const result = await getDownloadedVersions();
-      expect(result).toEqual([]);
+      expect(result).toEqual(versions);
     });
 
     it('is okay without versions and with errors', async () => {
-      const fs = require('fs-extra');
-
-      (fs.readdir as jest.Mock<any>).mockImplementationOnce(() => {
-        throw new Error('💩');
-      });
+      (fs.readdir as jest.Mock<any>).mockRejectedValueOnce('💩');
       const result = await getDownloadedVersions();
       expect(result).toEqual([]);
     });
@@ -165,40 +152,43 @@ describe('binary', () => {
   });
 
   describe('setupBinary()', () => {
-    it(`downloads a version it hasn't seen before`, async () => {
-      const { download } = require('@electron/get');
-      download.mockReturnValue('/fake/path');
+    const { download } = require('@electron/get');
 
-      mockState.versions['3.0.0'] = { state: 'unknown' };
-      await setupBinary(mockState, 'v3.0.0');
+    it(`downloads a version it has not seen before`, async () => {
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+
+      const localPath = '/fake/path';
+      download.mockResolvedValue(localPath);
+
+      const version = '3.0.0';
+      mockState.versions[version] = { state: 'unknown' };
+      await setupBinary(mockState, version);
 
       expect(download).toHaveBeenCalled();
-      expect(mockState.versions['3.0.0'].state).toBe('ready');
+      expect(mockState.versions[version].state).toBe('ready');
     });
 
     it(`does not download a version again`, async () => {
-      const fs = require('fs-extra');
       (fs.existsSync as jest.Mock).mockReturnValue(true);
-      const { download } = require('@electron/get');
 
-      mockState.versions['3.0.0'] = { state: 'unknown' };
-      await setupBinary(mockState, 'v3.0.0');
+      const version = '3.0.0';
+      mockState.versions[version] = { state: 'unknown' };
 
-      expect(download).toHaveBeenCalledTimes(0);
-      expect(mockState.versions['3.0.0'].state).toBe('ready');
+      await setupBinary(mockState, version);
+
+      expect(download).not.toHaveBeenCalled();
+      expect(mockState.versions[version].state).toBe('ready');
     });
 
     it(`waits if asked for a version is already downloading`, async () => {
-      const fs = require('fs-extra');
-      const { download } = require('@electron/get');
-
       (fs.existsSync as jest.Mock).mockReturnValue(true);
-      mockState.versions['3.0.0'].state = 'downloading';
 
-      await setupBinary(mockState, 'v3.0.0');
+      const version = '3.0.0';
+      mockState.versions[version] = { state: 'downloading' };
+      await setupBinary(mockState, version);
 
-      expect(download).toHaveBeenCalledTimes(0);
-      expect(mockState.versions['3.0.0'].state).toBe('ready');
+      expect(download).not.toHaveBeenCalled();
+      expect(mockState.versions[version].state).toBe('ready');
     });
 
     it('handles an error in the zip file', async () => {
