@@ -12,7 +12,7 @@ function electronSemVerCompare(a: semver.SemVer, b: semver.SemVer) {
   return a.comparePre(b);
 }
 
-function sortByNew(a: semver.SemVer | string, b: semver.SemVer | string) {
+function compare(a: semver.SemVer | string, b: semver.SemVer | string) {
   // non-semver goes first, sorted lexicographically
   const astr = typeof a === 'string';
   const bstr = typeof b === 'string';
@@ -28,20 +28,20 @@ function sortByNew(a: semver.SemVer | string, b: semver.SemVer | string) {
  * Sorts Electron versions and returns the result of a map function.
  *
  * @param {Record<string, RunnableVersion?>} versions
- * @param {(key: string, version: RunnableVersion) => void} mapFn
+ * @param {(key: string, version: RunnableVersion?) => T} mapFn
  * @returns {Array<T>}
  */
 export function sortedElectronMap<T>(
   versions: Record<string, RunnableVersion>,
   mapFn: (key: string, version: RunnableVersion) => T,
 ) {
-  const map: Map<string | semver.SemVer, RunnableVersion> = new Map(
+  const map: Map<semver.SemVer | string, RunnableVersion> = new Map(
     Object.entries(versions).map(([key, val]) => [
       semver.parse(key) || key,
       val,
     ]),
   );
-  const keys = [...map.keys()].sort(sortByNew);
+  const keys = [...map.keys()].sort(compare);
   return keys.map((key) => {
     const ver = typeof key === 'string' ? key : key.version;
     const run = map.get(key);
