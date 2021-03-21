@@ -12,14 +12,14 @@ function electronSemVerCompare(a: semver.SemVer, b: semver.SemVer) {
   return a.comparePre(b);
 }
 
-interface SemRunnable {
+interface SemRun {
   sem: semver.SemVer | null;
   runnable: RunnableVersion;
 }
 
 // non-semver goes first, sorted lexicographically
-// semvers follow, sorted newest-to-oldest
-function compareByNew(a: SemRunnable, b: SemRunnable) {
+// then semver, sorted newest-to-oldest
+function compareSemRunByNew(a: SemRun, b: SemRun) {
   if (!a.sem && !b.sem)
     return a.runnable.version.localeCompare(b.runnable.version);
   if (!a.sem) return -1;
@@ -39,14 +39,14 @@ function sortByNew(versions: RunnableVersion[]): RunnableVersion[] {
       runnable,
       sem: semver.parse(runnable?.version),
     }))
-    .sort(compareByNew)
+    .sort(compareSemRunByNew)
     .map(({ runnable }) => runnable);
 }
 
 /**
  * Sorts Electron versions and returns the result of a map function.
  *
- * @param {Record<string, RunnableVersion>} versions
+ * @param {Record<string, RunnableVersion?>} versions
  * @param {(key: string, version: RunnableVersion) => void} mapFn
  * @returns {Array<T>}
  */
@@ -54,6 +54,7 @@ export function sortedElectronMap<T>(
   versions: Record<string, RunnableVersion>,
   mapFn: (key: string, version: RunnableVersion) => T,
 ) {
-  const sorted = sortByNew(Object.values(versions));
+  const runnables = Object.values(versions).filter((r) => r);
+  const sorted = sortByNew(runnables);
   return sorted.map((runnable) => mapFn(runnable.version, runnable));
 }
