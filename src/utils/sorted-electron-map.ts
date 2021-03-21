@@ -17,12 +17,14 @@ interface SemRunnable {
   runnable: RunnableVersion;
 }
 
-function compareSemRunnable(a: SemRunnable, b: SemRunnable) {
+// non-semver goes first, sorted lexicographically
+// semvers follow, sorted newest-to-oldest
+function compareByNew(a: SemRunnable, b: SemRunnable) {
   if (!a.sem && !b.sem)
     return a.runnable.version.localeCompare(b.runnable.version);
-  if (!a.sem) return 1;
-  if (!b.sem) return -1;
-  return electronSemVerCompare(a.sem!, b.sem!);
+  if (!a.sem) return -1;
+  if (!b.sem) return 1;
+  return -electronSemVerCompare(a.sem!, b.sem!);
 }
 
 /**
@@ -37,8 +39,7 @@ function sortByNew(versions: RunnableVersion[]): RunnableVersion[] {
       runnable,
       sem: semver.parse(runnable?.version),
     }))
-    .sort(compareSemRunnable)
-    .reverse() // newest to oldest
+    .sort(compareByNew)
     .map(({ runnable }) => runnable);
 }
 

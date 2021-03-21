@@ -85,8 +85,8 @@ describe('sorted-electron-map', () => {
 
     const result = sortedElectronMap(map, (_k, e) => e);
     expect(result).toStrictEqual<any>([
-      { version: 'moreGarbage' },
       { version: 'garbage' },
+      { version: 'moreGarbage' },
       { version: 'v3.0.0' },
       { version: 'v1.0.0' },
     ]);
