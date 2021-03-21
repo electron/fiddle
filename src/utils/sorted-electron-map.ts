@@ -2,45 +2,26 @@ import * as semver from 'semver';
 
 import { RunnableVersion } from '../interfaces';
 
-// Electron's approach is nightly -> beta -> stable,
-// so account for 'beta' coming before 'nightly' lexicographically
 function electronSemVerCompare(a: semver.SemVer, b: semver.SemVer) {
   const l = a.compareMain(b);
   if (l) return l;
+  // Electron's approach is nightly -> beta -> stable.
+  // Account for 'beta' coming before 'nightly' lexicographically
   if (a.prerelease[0] === 'nightly' && b.prerelease[0] === 'beta') return -1;
   if (a.prerelease[0] === 'beta' && b.prerelease[0] === 'nightly') return 1;
   return a.comparePre(b);
 }
 
-interface SemRun {
-  sem: semver.SemVer | null;
-  runnable: RunnableVersion;
-}
+function sortByNew(a: semver.SemVer | string, b: semver.SemVer | string) {
+  // non-semver goes first, sorted lexicographically
+  const astr = typeof a === 'string';
+  const bstr = typeof b === 'string';
+  if (astr && bstr) return (a as string).localeCompare(b as string);
+  if (astr) return -1;
+  if (bstr) return 1;
 
-// non-semver goes first, sorted lexicographically
-// then semver, sorted newest-to-oldest
-function compareSemRunByNew(a: SemRun, b: SemRun) {
-  if (!a.sem && !b.sem)
-    return a.runnable.version.localeCompare(b.runnable.version);
-  if (!a.sem) return -1;
-  if (!b.sem) return 1;
-  return -electronSemVerCompare(a.sem!, b.sem!);
-}
-
-/**
- * Returns a new sorted array of RunnableVersions
- *
- * @param {Array<RunnableVersion>} versions - unsorted
- * @returns {Array<RunnableVersion>}
- */
-function sortByNew(versions: RunnableVersion[]): RunnableVersion[] {
-  return versions
-    .map((runnable) => ({
-      runnable,
-      sem: semver.parse(runnable?.version),
-    }))
-    .sort(compareSemRunByNew)
-    .map(({ runnable }) => runnable);
+  // then semver, sorted newest-to-oldest
+  return -electronSemVerCompare(a as semver.SemVer, b as semver.SemVer);
 }
 
 /**
@@ -54,7 +35,16 @@ export function sortedElectronMap<T>(
   versions: Record<string, RunnableVersion>,
   mapFn: (key: string, version: RunnableVersion) => T,
 ) {
-  const runnables = Object.values(versions).filter((r) => r);
-  const sorted = sortByNew(runnables);
-  return sorted.map((runnable) => mapFn(runnable.version, runnable));
+  const map: Map<string | semver.SemVer, RunnableVersion> = new Map(
+    Object.entries(versions).map(([key, val]) => [
+      semver.parse(key) || key,
+      val,
+    ]),
+  );
+  const keys = [...map.keys()].sort(sortByNew);
+  return keys.map((key) => {
+    const ver = typeof key === 'string' ? key : key.version;
+    const run = map.get(key);
+    return mapFn(ver, run!);
+  });
 }
