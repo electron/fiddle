@@ -2,9 +2,48 @@ import * as semver from 'semver';
 
 import { RunnableVersion } from '../interfaces';
 
+// Electron's approach is nightly -> beta -> stable,
+// so account for 'beta' coming before 'nightly' lexicographically
+function electronSemVerCompare(a: semver.SemVer, b: semver.SemVer) {
+  const l = a.compareMain(b);
+  if (l) return l;
+  if (a.prerelease[0] === 'nightly' && b.prerelease[0] === 'beta') return -1;
+  if (a.prerelease[0] === 'beta' && b.prerelease[0] === 'nightly') return 1;
+  return a.comparePre(b);
+}
+
+interface SemRunnable {
+  sem: semver.SemVer | null;
+  runnable: RunnableVersion;
+}
+
+function compareSemRunnable(a: SemRunnable, b: SemRunnable) {
+  if (!a.sem && !b.sem)
+    return a.runnable.version.localeCompare(b.runnable.version);
+  if (!a.sem) return 1;
+  if (!b.sem) return -1;
+  return electronSemVerCompare(a.sem!, b.sem!);
+}
+
 /**
- * Sorts Electron versions and returns the result of a
- * map function.
+ * Returns a new sorted array of RunnableVersions
+ *
+ * @param {Array<RunnableVersion>} versions - unsorted
+ * @returns {Array<RunnableVersion>}
+ */
+function sortByNew(versions: RunnableVersion[]): RunnableVersion[] {
+  return versions
+    .map((runnable) => ({
+      runnable,
+      sem: semver.parse(runnable?.version),
+    }))
+    .sort(compareSemRunnable)
+    .reverse() // newest to oldest
+    .map(({ runnable }) => runnable);
+}
+
+/**
+ * Sorts Electron versions and returns the result of a map function.
  *
  * @param {Record<string, RunnableVersion>} versions
  * @param {(key: string, version: RunnableVersion) => void} mapFn
@@ -14,37 +53,6 @@ export function sortedElectronMap<T>(
   versions: Record<string, RunnableVersion>,
   mapFn: (key: string, version: RunnableVersion) => T,
 ) {
-  return Object.keys(versions)
-    .sort((a, b) => {
-      if (!semver.valid(a) && !semver.valid(b)) {
-        return a.localeCompare(b);
-      }
-
-      if (!semver.valid(a)) return -1;
-      if (!semver.valid(b)) return 1;
-
-      // Handle prerelease tag sorting - semver does not handle this.
-      // See https://www.npmjs.com/package/semver#prerelease-tags for more.
-      const bothPre = semver.prerelease(a) && semver.prerelease(b);
-      const sameCoerced =
-        semver.valid(semver.coerce(a)) === semver.valid(semver.coerce(b));
-      if (bothPre && sameCoerced) {
-        const [tagA, valueA] = semver.prerelease(a)!;
-        const [tagB, valueB] = semver.prerelease(b)!;
-
-        if (tagA === 'beta' && tagA === tagB) {
-          // Both are betas - compare beta number.
-          return valueA > valueB ? -1 : 1;
-        } else if (tagA === 'nightly' && tagA === tagB) {
-          // Both are nightlies - compare nightly dates strings.
-          return -`${valueA}`.localeCompare(`${valueB}`);
-        } else {
-          // beta > nightly for the same major version.
-          return tagA === 'beta' ? -1 : 1;
-        }
-      }
-
-      return semver.gt(a, b, true) ? -1 : 1;
-    })
-    .map((key) => mapFn(key, versions[key])) as Array<T>;
+  const sorted = sortByNew(Object.values(versions));
+  return sorted.map((runnable) => mapFn(runnable.version, runnable));
 }
