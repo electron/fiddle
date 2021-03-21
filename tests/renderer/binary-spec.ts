@@ -9,12 +9,11 @@ import { removeTypeDefsForVersion } from '../../src/renderer/fetch-types';
 import { overridePlatform, resetPlatform } from '../utils';
 
 import * as path from 'path';
+import extract from 'extract-zip';
 
 jest.mock('fs-extra');
+jest.mock('extract-zip');
 jest.mock('../../src/renderer/ipc', () => ({}));
-jest.mock('extract-zip', () => {
-  return jest.fn((_a, _b) => Promise.resolve());
-});
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',
 }));
@@ -22,9 +21,6 @@ jest.mock('../../src/utils/import', () => ({
   fancyImport: async (p: string) => {
     if (p === 'fs-extra') {
       return require('fs-extra');
-    }
-    if (p === 'extract-zip') {
-      return { default: require('extract-zip') };
     }
   },
 }));
@@ -207,14 +203,15 @@ describe('binary', () => {
 
     it('handles an error in the zip file', async () => {
       const { download } = require('@electron/get');
-      download.mockReturnValue('/fake/path');
 
-      const mockZip = require('extract-zip');
-      mockZip.mockImplementationOnce((_a: any, _b: any, c: any) =>
-        c(new Error('bwap-bwap')),
-      );
+      download.mockReturnValue('/fake/path');
+      mockState.versions['3.0.0'] = { state: 'unknown' };
+
+      (extract as jest.Mock).mockRejectedValue(new Error('bwap-bwap'));
 
       await setupBinary(mockState, 'v3.0.0');
+
+      expect(extract as jest.Mock).toHaveBeenCalledTimes(1);
     });
   });
 });

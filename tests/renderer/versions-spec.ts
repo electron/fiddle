@@ -1,6 +1,5 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import semver from 'semver';
 import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import {
   addLocalVersion,
@@ -23,12 +22,6 @@ const mockVersions: Array<Partial<RunnableVersion>> = [
   { version: 'test-1', localPath: '/test/path/1' },
   { version: 'test-2', localPath: '/test/path/2' },
 ];
-
-jest.mock('semver', () => ({
-  default: {
-    gte: jest.fn(),
-  },
-}));
 
 describe('versions', () => {
   describe('getDefaultVersion()', () => {
@@ -180,12 +173,6 @@ describe('versions', () => {
         path.join(__dirname, '../mocks/unpkg-mock.json'),
       );
       mockFetchOnce(mockUnpkgResponse.toString());
-
-      // return whether or not version in JSON is >=0.24.0
-      (semver.gte as jest.Mock).mockReturnValueOnce(true);
-      (semver.gte as jest.Mock).mockReturnValueOnce(true);
-      (semver.gte as jest.Mock).mockReturnValueOnce(true);
-      (semver.gte as jest.Mock).mockReturnValueOnce(false);
 
       const result = await fetchVersions();
       const expected = [

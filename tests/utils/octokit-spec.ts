@@ -1,30 +1,22 @@
 import { getOctokit } from '../../src/utils/octokit';
 
-let mockRequired = 0;
 let mockConstructed = 0;
 
 jest.mock('@octokit/rest', () => ({
-  get default() {
-    mockRequired++;
-
-    return class MockOctokit {
-      public authenticate = jest.fn();
-
-      constructor() {
-        mockConstructed++;
-      }
-    };
+  Octokit: class MockOctokit {
+    authenticate: jest.Mock;
+    constructor() {
+      ++mockConstructed;
+      this.authenticate = jest.fn();
+    }
   },
 }));
 
 describe('octokit', () => {
   describe('getOctokit()', () => {
-    it('requires the Octokit only once', async () => {
-      let octokit = await getOctokit();
-      octokit = await getOctokit();
-
-      expect(octokit).toBeTruthy();
-      expect(mockRequired).toBe(1);
+    it('constructs the Octokit only once', async () => {
+      await getOctokit();
+      await getOctokit();
       expect(mockConstructed).toBe(1);
     });
 

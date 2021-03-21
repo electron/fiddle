@@ -1,5 +1,5 @@
 import { mocked } from 'ts-jest/utils';
-import * as decomment from 'decomment';
+import decomment from 'decomment';
 
 import {
   findModules,

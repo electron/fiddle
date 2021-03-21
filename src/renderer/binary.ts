@@ -1,6 +1,6 @@
 import * as fsType from 'fs-extra';
 import * as path from 'path';
-import * as extractZipType from 'extract-zip';
+import extract from 'extract-zip';
 
 import { VersionState } from '../interfaces';
 import { fancyImport } from '../utils/import';
@@ -258,9 +258,6 @@ function getDownloadPath(version: string): string {
  * @returns {Promise<void>}
  */
 async function unzip(zipPath: string, dir: string): Promise<void> {
-  const extract: typeof extractZipType = (await fancyImport<any>('extract-zip'))
-    .default;
-
   process.noAsar = true;
 
   try {
