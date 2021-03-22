@@ -1,11 +1,17 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, FileTransform, RunResult } from '../interfaces';
+import {
+  EditorValues,
+  FileTransform,
+  RunResult,
+  RunnableVersion,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
+import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
@@ -20,6 +26,12 @@ export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
 }
+
+const resultString: Record<RunResult, string> = Object.seal({
+  [RunResult.FAILURE]: '❌ failed',
+  [RunResult.INVALID]: '❓ invalid',
+  [RunResult.SUCCESS]: '✅ passed',
+});
 
 export class Runner {
   public child: ChildProcess | null = null;
@@ -39,6 +51,81 @@ export class Runner {
     ipcRendererManager.on(IpcEvents.FIDDLE_MAKE, () => {
       this.performForgeOperation(ForgeCommands.MAKE);
     });
+  }
+
+  /**
+   * Bisect the current fiddle across the specified versions.
+   *
+   * @param {Array<RunnableVersion>} versions - versions to bisect
+   * @returns {Promise<RunResult>}
+   * @memberof Runner
+   */
+  public async autobisect(
+    versions: Array<RunnableVersion>,
+  ): Promise<RunResult> {
+    const { appState } = this;
+
+    // precondition: can't bisect unless we have >= 2 versions
+    if (versions.length < 2) {
+      appState.pushOutput(
+        'Runner: autobisect needs at least two Electron versions',
+      );
+      return RunResult.INVALID;
+    }
+
+    const results: Map<string, RunResult> = new Map();
+
+    const runVersion = async (version: string) => {
+      let result = results.get(version);
+      if (result === undefined) {
+        await appState.setVersion(version);
+        result = await this.run();
+        results.set(version, result);
+        const msg = `Runner: autobisect Electron ${version} - ${resultString[result]}`;
+        appState.pushOutput(msg);
+      }
+      return result;
+    };
+
+    const bisector = new Bisector(versions);
+    let targetVersion = bisector.getCurrentVersion();
+    let next;
+    while (true) {
+      const { version } = targetVersion;
+      appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+
+      const result = await runVersion(version);
+      if (result === RunResult.INVALID) {
+        return result;
+      }
+
+      next = bisector.continue(result === RunResult.SUCCESS);
+      if (Array.isArray(next)) {
+        break;
+      }
+
+      targetVersion = next;
+    }
+
+    const [good, bad] = next.map((v) => v.version);
+    const resultGood = await runVersion(good);
+    const resultBad = await runVersion(bad);
+    if (resultGood === resultBad) {
+      appState.pushOutput(
+        `Runner: autobisect 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
+      );
+      return RunResult.INVALID;
+    }
+
+    const msgs = [
+      'Runner: autobisect complete',
+      `${good} ${resultString[RunResult.SUCCESS]}`,
+      `${bad} ${resultString[RunResult.FAILURE]}`,
+      'Commits between versions:',
+      `https://github.com/electron/electron/compare/v${good}...v${bad}`,
+    ];
+    msgs.forEach((msg) => appState.pushOutput(msg));
+    return RunResult.SUCCESS;
   }
 
   /**
@@ -91,12 +178,14 @@ export class Runner {
 
   /**
    * Stop a currently running Electron fiddle.
+   *
+   * @returns {boolean} true if runner is now idle
+   * @memberof Runner
    */
-  public async stop() {
-    if (this.child) {
-      this.child.kill();
-      this.appState.isRunning = false;
-    }
+  public stop(): boolean {
+    this.appState.isRunning = !!this.child && !this.child.kill();
+    const isIdle = !this.appState.isRunning;
+    return isIdle;
   }
 
   /**
