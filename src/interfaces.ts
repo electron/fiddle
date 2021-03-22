@@ -44,6 +44,12 @@ export interface EditorValues {
   package?: string;
 }
 
+export enum RunResult {
+  SUCCESS = 'success', // exit code === 0
+  FAILURE = 'failure', // ran, but exit code !== 0
+  INVALID = 'invalid', // could not run
+}
+
 export interface RunnableVersion extends Version {
   state: VersionState;
   source: VersionSource;

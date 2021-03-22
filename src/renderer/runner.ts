@@ -1,7 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, FileTransform } from '../interfaces';
+import { EditorValues, FileTransform, RunResult } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -44,9 +44,9 @@ export class Runner {
   /**
    * Actually run the fiddle.
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<RunResult>}
    */
-  public async run(): Promise<boolean> {
+  public async run(): Promise<RunResult> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { currentElectronVersion } = this.appState;
@@ -61,14 +61,14 @@ export class Runner {
     const dir = await this.saveToTemp(options);
     const packageManager = this.appState.packageManager;
 
-    if (!dir) return false;
+    if (!dir) return RunResult.INVALID;
 
     try {
       await this.installModulesForEditor(values, { dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
     const isReady = getIsDownloaded(version, localPath);
@@ -83,12 +83,10 @@ export class Runner {
 
       this.appState.pushOutput(message, { isNotPre: true });
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
-    this.execute(dir);
-
-    return true;
+    return this.execute(dir);
   }
 
   /**
@@ -214,7 +212,7 @@ export class Runner {
    * @returns {Promise<void>}
    * @memberof Runner
    */
-  public async execute(dir: string): Promise<void> {
+  public async execute(dir: string): Promise<RunResult> {
     const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
@@ -234,27 +232,36 @@ export class Runner {
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(this.appState.executionFlags);
 
-    this.child = spawn(binaryPath, options, { cwd: dir, env });
-    this.appState.isRunning = true;
-    pushOutput(`Electron v${version} started.`);
+    return new Promise((resolve, _reject) => {
+      this.child = spawn(binaryPath, options, { cwd: dir, env });
+      this.appState.isRunning = true;
+      pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.stderr!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.on('close', async (code) => {
-      const withCode =
-        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+      this.child.stdout!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.stderr!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.on('close', async (code) => {
+        this.appState.isRunning = false;
+        this.child = null;
 
-      pushOutput(`Electron exited${withCode}`);
-      this.appState.isRunning = false;
-      this.child = null;
+        // Clean older folders
+        await window.ElectronFiddle.app.fileManager.cleanup(dir);
+        await this.deleteUserData();
 
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
+        if (typeof code !== 'number') {
+          pushOutput('Electron exited.');
+          resolve(RunResult.INVALID);
+        } else if (!code) {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.SUCCESS);
+        } else {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.FAILURE);
+        }
+      });
     });
   }
 
