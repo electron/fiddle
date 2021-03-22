@@ -160,14 +160,6 @@ describe('Editors component', () => {
   });
 
   describe('IPC commands', () => {
-    const fakeValues: EditorValues = Object.seal({
-      css: '',
-      html: '',
-      main: 'hi',
-      preload: '',
-      renderer: '',
-    });
-
     it('handles a MONACO_EXECUTE_COMMAND command', () => {
       shallow(<Editors appState={store} />);
 
