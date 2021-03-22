@@ -32,13 +32,13 @@ function compare(a: semver.SemVer | string, b: semver.SemVer | string) {
  * @returns {Array<T>}
  */
 export function sortedElectronMap<T>(
-  versions: Record<string, RunnableVersion | null>,
-  mapFn: (key: string, version: RunnableVersion | null) => T,
+  versions: Record<string, RunnableVersion>,
+  mapFn: (key: string, version: RunnableVersion) => T,
 ) {
   type VerSemRun = [
     ver: string,
     sem: semver.SemVer | null,
-    run: RunnableVersion | null,
+    run: RunnableVersion,
   ];
   return Object.entries(versions)
     .map(([ver, val]): VerSemRun => [ver, semver.parse(ver), val])
