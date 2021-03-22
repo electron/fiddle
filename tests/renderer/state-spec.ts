@@ -1,5 +1,4 @@
 import * as MonacoType from 'monaco-editor';
-import { when } from 'mobx';
 
 import {
   ALL_MOSAICS,
@@ -27,8 +26,9 @@ import {
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
+import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-title';
-import { mockVersions } from '../mocks/electron-versions';
+import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -144,19 +144,21 @@ describe('AppState', () => {
     });
 
     it('sets the onDidChangeModelContent handler if saved', async (done) => {
+      // confirm that setting appState.isUnsaved to false
+      // causes a new change-model-content callback to be installed
       appState.isUnsaved = false;
-      await when(() => appState.isUnsaved === false);
-
-      expect(window.onbeforeunload).toBe(null);
-
       const fn = window.ElectronFiddle.editors!.renderer!
         .onDidChangeModelContent;
-      const call = (fn as jest.Mock<any>).mock.calls[0];
-      const cb = call[0];
+      await waitFor(() => (fn as jest.Mock).mock.calls.length > 0);
+      expect(window.onbeforeunload).toBe(null);
+      expect(fn as jest.Mock).toHaveBeenCalledTimes(1);
 
-      cb();
-
+      // confirm that invoking the new callback sets appState.isUnsaved to true
+      const call = (fn as jest.Mock).mock.calls[0];
+      const callback = call[0];
+      callback();
       expect(appState.isUnsaved).toBe(true);
+
       done();
     });
   });
@@ -327,14 +329,14 @@ describe('AppState', () => {
       appState.channelsToShow = ['Unsupported' as any];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.channelsToShow = ['Stable' as any];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
     it('excludes states', () => {
       appState.statesToShow = [VersionState.downloading];
       expect(appState.versionsToShow.length).toEqual(0);
       appState.statesToShow = [VersionState.ready];
-      expect(appState.versionsToShow.length).toEqual(3);
+      expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
   });
 
@@ -397,10 +399,9 @@ describe('AppState', () => {
   });
 
   describe('setVersion()', () => {
-    it('falls back if a version does not exist', async () => {
+    it('uses the newest version iff the specified version does not exist', async () => {
       await appState.setVersion('v999.99.99');
-
-      expect(appState.version).toBe('2.0.2');
+      expect(appState.version).toBe(mockVersionsArray[0].version);
     });
 
     it('downloads a version if necessary', async () => {
@@ -467,11 +468,9 @@ describe('AppState', () => {
       // We just want to verify that the version state was
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual([
-        '2.0.2',
-        '2.0.1',
-        '1.8.7',
-      ]);
+      expect(Object.keys(appState.versions)).toEqual(
+        mockVersionsArray.map((v) => v.version),
+      );
     });
   });
 

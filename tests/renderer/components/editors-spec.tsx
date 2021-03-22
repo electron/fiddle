@@ -2,13 +2,19 @@ import { mount, shallow } from 'enzyme';
 import { observable } from 'mobx';
 import * as React from 'react';
 
-import { ALL_MOSAICS, DocsDemoPage, EditorId } from '../../../src/interfaces';
+import {
+  ALL_MOSAICS,
+  DocsDemoPage,
+  EditorId,
+  EditorValues,
+} from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
+import * as content from '../../../src/renderer/content';
 
 jest.mock('monaco-loader', () =>
   jest.fn(async () => {
@@ -173,18 +179,82 @@ describe('Editors component', () => {
       expect(mockAction.run).toHaveBeenCalled();
     });
 
-    it('handles an FS_NEW_FIDDLE command', async (done) => {
+    const fakeValues: EditorValues = Object.seal({
+      css: '',
+      html: '',
+      main: 'hi',
+      preload: '',
+      renderer: '',
+    });
+
+    it('handles an FS_NEW_FIDDLE command', async () => {
+      const { app } = window.ElectronFiddle;
+
       let resolve: any;
       const replacePromise = new Promise((r) => {
         resolve = r;
       });
-      (window.ElectronFiddle.app
-        .replaceFiddle as jest.Mock<any>).mockImplementation(resolve);
 
+      // setup
+      const getTemplateSpy = jest
+        .spyOn(content, 'getTemplate')
+        .mockImplementation(() => Promise.resolve(fakeValues));
+      const replaceFiddleSpy = jest
+        .spyOn(app, 'replaceFiddle')
+        .mockImplementation(() => resolve());
+
+      // invoke the call
       ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
       await replacePromise;
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalled();
-      done();
+
+      // check the results
+      expect(getTemplateSpy).toHaveBeenCalledTimes(1);
+      expect(replaceFiddleSpy).toHaveBeenCalledTimes(1);
+
+      // cleanup
+      getTemplateSpy.mockRestore();
+      replaceFiddleSpy.mockRestore();
+    });
+
+    describe('SELECT_ALL_IN_EDITOR handler', () => {
+      it('selects all in the focused editor', (done) => {
+        shallow(<Editors appState={store} />);
+        const mockEditor = {
+          getModel: () => ({
+            getFullModelRange: jest.fn().mockReturnValue('range'),
+          }),
+          setSelection: jest.fn(),
+        };
+        (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        process.nextTick(() => {
+          expect(mockEditor.setSelection).toHaveBeenCalledWith('range');
+          done();
+        });
+      });
+
+      it('does not change selection if the selected editor has no model', (done) => {
+        shallow(<Editors appState={store} />);
+        const mockEditor = {
+          getModel: jest.fn(() => null),
+          setSelection: jest.fn(),
+        };
+        (getFocusedEditor as any).mockReturnValueOnce(mockEditor);
+
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+
+        process.nextTick(() => {
+          expect(mockEditor.getModel).toHaveBeenCalledTimes(1);
+          expect(mockEditor.setSelection).not.toHaveBeenCalled();
+          done();
+        });
+      });
+
+      it('does not crash if there is no selected editor', () => {
+        shallow(<Editors appState={store} />);
+        (getFocusedEditor as any).mockReturnValueOnce(null);
+        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+      });
     });
 
     it('handles a SELECT_ALL_IN_EDITOR command', (done) => {
@@ -230,6 +300,18 @@ describe('Editors component', () => {
         expect(window.ElectronFiddle.app.monaco).toEqual({ monaco: true });
         done();
       });
+    });
+  });
+
+  describe('setFocused()', () => {
+    it('sets the "focused" property', () => {
+      const wrapper = shallow(<Editors appState={store} />);
+      const instance: Editors = wrapper.instance() as any;
+      const spy = jest.spyOn(instance, 'setState');
+
+      const id = EditorId.html;
+      instance.setFocused(id);
+      expect(spy).toHaveBeenCalledWith({ focused: id });
     });
   });
 

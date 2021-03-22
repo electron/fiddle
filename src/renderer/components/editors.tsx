@@ -82,6 +82,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public async componentDidMount() {
+    this.stopListening();
+
     ipcRendererManager.on(
       IpcEvents.MONACO_EXECUTE_COMMAND,
       (_event, cmd: string) => {
@@ -103,12 +105,12 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
-      // programmatically fetch all editor contents and set as selection
       const editor = getFocusedEditor();
-      const range = editor?.getModel()?.getFullModelRange();
-
-      if (!!range) {
-        editor?.setSelection(range);
+      if (editor) {
+        const model = editor.getModel();
+        if (model) {
+          editor.setSelection(model.getFullModelRange());
+        }
       }
     });
 
@@ -119,7 +121,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public componentWillUnmount() {
     this.disposeLayoutAutorun();
+    this.stopListening();
+  }
 
+  private stopListening() {
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
