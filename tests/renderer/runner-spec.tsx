@@ -187,6 +187,7 @@ describe('Runner component', () => {
       // get run() out of the way
       (spawn as any).mockReturnValueOnce(mockChild);
       setTimeout(() => mockChild.emit('close', 0));
+
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
