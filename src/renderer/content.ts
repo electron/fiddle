@@ -102,8 +102,7 @@ function isReleasedMajor(version: semver.SemVer) {
     .filter((version) => !!version)
     .sort((a: semver.SemVer, b: semver.SemVer) => semver.compare(a, b))
     .pop();
-  const parsed = semver.parse(version);
-  return parsed && newestRelease && parsed.major <= newestRelease.major;
+  return newestRelease && version.major <= newestRelease.major;
 }
 
 /**
