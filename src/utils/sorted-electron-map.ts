@@ -41,7 +41,7 @@ export function sortedElectronMap<T>(
     run: RunnableVersion,
   ];
   return Object.entries(versions)
-    .map(([ver, val]): VerSemRun => [ver, semver.parse(ver), val])
+    .map(([ver, run]): VerSemRun => [ver, semver.parse(ver), run])
     .sort(([vera, sema], [verb, semb]) => compare(sema || vera, semb || verb))
     .map(([ver, _, run]) => mapFn(ver, run));
 }
