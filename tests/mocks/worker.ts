@@ -1,4 +1,4 @@
-import * as decomment from 'decomment';
+import decomment from 'decomment';
 
 export default class MockWorker {
   public onmessage: (msg: any) => any;

@@ -1,7 +1,6 @@
 import { Octokit } from '@octokit/rest';
 import { AppState } from '../renderer/state';
 
-let _Octokit: typeof Octokit;
 let _octo: Octokit;
 
 /**
@@ -12,8 +11,7 @@ let _octo: Octokit;
  * @returns {Promise<typeof GitHubType>}
  */
 export async function getOctokit(appState?: AppState): Promise<Octokit> {
-  _Octokit = _Octokit || ((await import('@octokit/rest')) as any).default;
-  _octo = _octo || new _Octokit();
+  _octo = _octo || new Octokit();
 
   // You can load Gists without being authenticated,
   // but we get better rate limits when authenticated
