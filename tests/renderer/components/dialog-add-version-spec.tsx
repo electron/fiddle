@@ -29,9 +29,6 @@ describe('AddVersionDialog component', () => {
     store = {
       isAddVersionDialogShowing: true,
       addLocalVersion: jest.fn(),
-      binaryManager: {
-        getIsDownloaded: jest.fn(),
-      },
     };
   });
 
@@ -70,7 +67,7 @@ describe('AddVersionDialog component', () => {
 
   describe('setFolderPath()', () => {
     it('does something', async () => {
-      (getIsDownloaded as jest.Mock).mockResolvedValue(true);
+      (getIsDownloaded as jest.Mock).mockReturnValue(true);
       const wrapper = shallow(<AddVersionDialog appState={store} />);
       await (wrapper.instance() as any).setFolderPath('/test/');
 

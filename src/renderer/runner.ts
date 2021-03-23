@@ -71,7 +71,7 @@ export class Runner {
       return false;
     }
 
-    const isReady = await getIsDownloaded(version, localPath);
+    const isReady = getIsDownloaded(version, localPath);
 
     if (!isReady) {
       console.warn(`Runner: Binary ${version} not ready`);
