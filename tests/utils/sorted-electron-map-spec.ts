@@ -27,29 +27,29 @@ describe('sorted-electron-map', () => {
       '2.0.0-nightly.20200101': {
         version: 'v2.0.0-nightly.20200101',
       },
+      '2.0.0-beta.1': {
+        version: 'v2.0.0-beta.1',
+      },
       '2.0.0-nightly.20200102': {
         version: 'v2.0.0-nightly.20200102',
-      },
-      '2.0.0': {
-        version: 'v2.0.0',
-      },
-      '3.0.0-nightly.20200105': {
-        version: 'v3.0.0-nightly.20200105',
-      },
-      '3.0.0': {
-        version: 'v3.0.0',
       },
       '3.0.0-beta.1': {
         version: 'v3.0.0-beta.1',
       },
-      '2.0.0-beta.1': {
-        version: 'v2.0.0-beta.1',
+      '3.0.0-nightly.20200105': {
+        version: 'v3.0.0-nightly.20200105',
       },
       '2.0.0-beta.2': {
         version: 'v2.0.0-beta.2',
       },
       '2.0.0-beta.3': {
         version: 'v2.0.0-beta.3',
+      },
+      '2.0.0': {
+        version: 'v2.0.0',
+      },
+      '3.0.0': {
+        version: 'v3.0.0',
       },
     };
 
