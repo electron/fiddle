@@ -18,11 +18,14 @@ const STATIC_TEMPLATE_DIR = path.resolve(
   '../../static/electron-quick-start',
 );
 
+// electron-quick-start branch that holds the test template
+const TEST_TEMPLATE_BRANCH = 'test-template';
+
 /**
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
  *
- * @param {string} branch Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<string>} Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
@@ -57,48 +60,62 @@ async function prepareTemplate(branch: string): Promise<string> {
 const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
+ * Get a cached copy of the Electron branch's fiddle
+ *
+ * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
+ * @returns {Promise<EditorValues>}
+ */
+function getQuickStart(branch: string): Promise<EditorValues> {
+  // Load the template for that branch.
+  // Cache the work in a Promise to prevent parallel downloads.
+  let pending = templateCache[branch];
+  if (!pending) {
+    console.log(`Content: ${branch} template loading`);
+    pending = prepareTemplate(branch).then(readFiddle);
+    templateCache[branch] = pending;
+  }
+  return pending;
+}
+
+/**
+ * Get a cached copy of the Electron Test fiddle
+ *
+ * @returns {Promise<EditorValues>}
+ */
+export function getTestTemplate(): Promise<EditorValues> {
+  return getQuickStart(TEST_TEMPLATE_BRANCH);
+}
+
+/**
  * Helper to check if this version is from a released major branch.
  *
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {string} [version]
+ * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version?: string) {
+function isReleasedMajor(version: semver.SemVer) {
   const newestRelease = getElectronVersions()
     .filter((version) => version.source === VersionSource.remote)
     .map((version) => semver.parse(version.version))
     .filter((version) => !!version)
     .sort((a: semver.SemVer, b: semver.SemVer) => semver.compare(a, b))
     .pop();
-  const parsed = semver.parse(version);
-  return parsed && newestRelease && parsed.major <= newestRelease.major;
+  return newestRelease && version.major <= newestRelease.major;
 }
 
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
  *
- * @param {string} [version]
+ * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplate(version?: string): Promise<EditorValues> {
-  // get the branch
-  const parsed = semver.parse(version);
-  const branch: string = parsed?.major ? `${parsed.major}-x-y` : 'master';
-
-  // Load the template for that branch.
-  // Cache the work in a Promise to prevent parallel downloads.
-  let pending = templateCache[branch];
-  if (!pending) {
-    console.log(`Content: ${branch} template loading`);
-    pending = isReleasedMajor(version)
-      ? prepareTemplate(branch).then(readFiddle)
-      : readFiddle(STATIC_TEMPLATE_DIR);
-    templateCache[branch] = pending;
-  }
-
-  return pending;
+export function getTemplate(version: string): Promise<EditorValues> {
+  const sem = semver.parse(version);
+  return sem && isReleasedMajor(sem)
+    ? getQuickStart(`${sem.major}-x-y`)
+    : readFiddle(STATIC_TEMPLATE_DIR);
 }
 
 /**
@@ -106,12 +123,12 @@ export async function getTemplate(version?: string): Promise<EditorValues> {
  *
  * @export
  * @param {EditorId} name
- * @param {string} [version]
+ * @param {string} version
  * @returns {Promise<string>}
  */
 export async function getContent(
   name: EditorId,
-  version?: string,
+  version: string,
 ): Promise<string> {
   return (await getTemplate(version))[name];
 }
@@ -120,14 +137,18 @@ export async function getContent(
  * Did the content change?
  *
  * @param {EditorId} name
+ * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<boolean>}
  */
-export async function isContentUnchanged(name: EditorId): Promise<boolean> {
+export async function isContentUnchanged(
+  name: EditorId,
+  version: string,
+): Promise<boolean> {
   if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
 
   const values = await window.ElectronFiddle.app.getEditorValues({
     include: false,
   });
 
-  return values[name] === (await getContent(name));
+  return values[name] === (await getContent(name, version));
 }

@@ -3,7 +3,12 @@ import * as path from 'path';
 import { Response } from 'cross-fetch';
 
 import { EditorId } from '../../src/interfaces';
-import { getContent, isContentUnchanged } from '../../src/renderer/content';
+import {
+  getContent,
+  getTemplate,
+  getTestTemplate,
+  isContentUnchanged,
+} from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 
@@ -38,6 +43,28 @@ const fetchFromFilesystem = (url: string) => {
 };
 
 describe('content', () => {
+  const VERSION_IN_FIXTURES = '11.0.0';
+  const VERSION_NOT_IN_FIXTURES = '10.0.0';
+
+  describe('getTestTemplate()', () => {
+    beforeEach(() => {
+      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
+      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
+    });
+
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+
+    it('loads a test template', async () => {
+      await getTestTemplate();
+      expect(global.fetch as jest.Mock).toHaveBeenCalledTimes(1);
+      expect(global.fetch as jest.Mock).toHaveBeenLastCalledWith(
+        'https://github.com/electron/electron-quick-start/archive/test-template.zip',
+      );
+    });
+  });
+
   describe('getContent()', () => {
     beforeEach(() => {
       // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
@@ -48,15 +75,18 @@ describe('content', () => {
     });
 
     it('returns content for HTML editor', async () => {
-      expect(await getContent(EditorId.html)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.html, curVer)).toBeTruthy();
     });
 
     it('returns content for the renderer editor', async () => {
-      expect(await getContent(EditorId.renderer)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.renderer, curVer)).toBeTruthy();
     });
 
     it('returns content for the main editor', async () => {
-      expect(await getContent(EditorId.main)).toBeTruthy();
+      const curVer = VERSION_IN_FIXTURES;
+      expect(await getContent(EditorId.main, curVer)).toBeTruthy();
     });
 
     it('returns fallback content for an unparsable version', async () => {
@@ -68,34 +98,52 @@ describe('content', () => {
     });
 
     it('downloads and returns content for known versions', async () => {
-      const content = await getContent(EditorId.html, '11.0.0');
+      const content = await getContent(EditorId.html, VERSION_IN_FIXTURES);
       expect(lastResponse).toMatchObject({ status: 200 });
       expect(content).toMatch(/^<!DOCTYPE html>/);
     });
 
     it('provides fallback content if downloads fail', async () => {
-      const VERSION_NOT_IN_FIXTURES = '10.0.0';
       const content = await getContent(EditorId.html, VERSION_NOT_IN_FIXTURES);
       expect(lastResponse).toMatchObject({ status: 404 });
       expect(content).toMatch(/^<!DOCTYPE html>/);
     });
 
     it('returns the same content when called multiple times', async () => {
+      const curVer = VERSION_IN_FIXTURES;
       const id = EditorId.main;
+      const expected = await getContent(id, curVer);
+
       const numTries = 3;
-      const expected = await getContent(id);
       for (let i = 0; i < numTries; ++i) {
-        const content = await getContent(EditorId.main);
+        const content = await getContent(id, curVer);
         expect(content).toEqual(expected);
       }
     });
   });
 
+  describe('getTemplate()', () => {
+    beforeEach(() => {
+      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
+      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
+    });
+    afterEach(() => {
+      (global.fetch as jest.Mock).mockClear();
+    });
+
+    it('returns the same promise if the work is already pending', async () => {
+      const prom1 = getTemplate(VERSION_IN_FIXTURES);
+      const prom2 = getTemplate(VERSION_IN_FIXTURES);
+      expect(prom1).toEqual(prom2);
+    });
+  });
+
   describe('isContentUnchanged()', () => {
+    const curVer = VERSION_IN_FIXTURES;
+
     it('returns false if app is not available', async () => {
       (window.ElectronFiddle.app as any) = null;
-
-      const isUnchanged = await isContentUnchanged(EditorId.main);
+      const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
       expect(isUnchanged).toBe(false);
     });
 
@@ -106,27 +154,17 @@ describe('content', () => {
           main: 'hi',
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.main);
+        const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
         expect(isUnchanged).toBe(false);
       });
 
       it('returns true if it did not change', async () => {
         (window.ElectronFiddle.app
           .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          main: await getContent(EditorId.main),
+          main: await getContent(EditorId.main, curVer),
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.main);
-        expect(isUnchanged).toBe(true);
-      });
-
-      it('returns true if it did not change (1.0 version)', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          main: await getContent(EditorId.main, '1-x-y'),
-        });
-
-        const isUnchanged = await isContentUnchanged(EditorId.main);
+        const isUnchanged = await isContentUnchanged(EditorId.main, curVer);
         expect(isUnchanged).toBe(true);
       });
     });
@@ -138,17 +176,17 @@ describe('content', () => {
           renderer: 'hi',
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.renderer);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer, curVer);
         expect(isUnchanged).toBe(false);
       });
 
       it('returns true if it did not change', async () => {
         (window.ElectronFiddle.app
           .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          renderer: await getContent(EditorId.renderer),
+          renderer: await getContent(EditorId.renderer, curVer),
         });
 
-        const isUnchanged = await isContentUnchanged(EditorId.renderer);
+        const isUnchanged = await isContentUnchanged(EditorId.renderer, curVer);
         expect(isUnchanged).toBe(true);
       });
     });

@@ -533,13 +533,13 @@ export class AppState {
 
     console.log(`State: Switching to Electron ${version}`);
 
-    this.version = version;
-
     // Should we update the editor?
-    if (await isContentUnchanged(EditorId.main)) {
+    if (await isContentUnchanged(EditorId.main, this.version)) {
       const editorValues = await getTemplate(version);
       await window.ElectronFiddle.app.replaceFiddle(editorValues, {});
     }
+
+    this.version = version;
 
     // Update TypeScript definitions
     const versionObject = this.versions[version];

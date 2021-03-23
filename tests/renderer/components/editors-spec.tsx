@@ -257,6 +257,33 @@ describe('Editors component', () => {
       });
     });
 
+    it('handles an FS_NEW_TEST command', async () => {
+      const { app } = window.ElectronFiddle;
+
+      // setup
+      const getTestTemplateSpy = jest
+        .spyOn(content, 'getTestTemplate')
+        .mockImplementation(() => Promise.resolve(fakeValues));
+      let replaceResolve: any;
+      const replacePromise = new Promise((r) => {
+        replaceResolve = r;
+      });
+      const replaceFiddleSpy = jest
+        .spyOn(app, 'replaceFiddle')
+        .mockImplementation(() => replaceResolve());
+
+      // invoke the call
+      ipcRendererManager.emit(IpcEvents.FS_NEW_TEST);
+      await replacePromise;
+
+      // check the results
+      expect(getTestTemplateSpy).toHaveBeenCalled();
+      expect(replaceFiddleSpy).toHaveBeenCalled();
+
+      // cleanup
+      getTestTemplateSpy.mockRestore();
+      replaceFiddleSpy.mockRestore();
+    });
     it('handles a SELECT_ALL_IN_EDITOR command', (done) => {
       shallow(<Editors appState={store} />);
       const mockEditor = {

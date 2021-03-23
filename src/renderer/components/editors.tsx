@@ -17,7 +17,7 @@ import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
 import { isEditorId } from '../../utils/type-checks';
-import { getTemplate } from '../content';
+import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { activateTheme } from '../themes';
@@ -97,6 +97,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       await window.ElectronFiddle.app.replaceFiddle(fiddle, {});
     });
 
+    ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
+      const fiddle = await getTestTemplate();
+      await window.ElectronFiddle.app.replaceFiddle(fiddle, {});
+    });
+
     ipcRendererManager.on(
       IpcEvents.MONACO_TOGGLE_OPTION,
       (_event, cmd: string) => {
@@ -127,6 +132,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   private stopListening() {
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
     ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
     ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
   }
