@@ -103,21 +103,6 @@ function CreateWindowStub() {
   };
 }
 
-let fakeUserDataPath: string;
-
-function getFakeUserDataPath() {
-  if (!fakeUserDataPath) {
-    const tmp = require('tmp');
-    tmp.setGracefulCleanup();
-    const tmpdir = tmp.dirSync({
-      template: 'electron-fiddle-tests--user-data-XXXXXX',
-      unsafeCleanup: true, // remove everything
-    });
-    fakeUserDataPath = tmpdir.name;
-  }
-  return fakeUserDataPath;
-}
-
 const app = {
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
@@ -135,7 +120,7 @@ const app = {
   })),
   getLoginItemSettings: jest.fn(),
   getPath: jest.fn((name: string) => {
-    if (name === 'userData') return getFakeUserDataPath();
+    if (name === 'userData') return '/Users/fake-user';
     if (name === 'home') return `~`;
     return '/test-path';
   }),

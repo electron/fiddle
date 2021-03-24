@@ -1,6 +1,9 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import * as tmp from 'tmp';
 import { Response } from 'cross-fetch';
+
+let fakeUserData: tmp.DirResult | null;
 
 import { EditorId } from '../../src/interfaces';
 import {
@@ -11,6 +14,20 @@ import {
 } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
+jest.mock('../../src/renderer/constants', () => {
+  // when USER_DATA_PATH is imported,
+  // set it to be a newly-allocated tmpdir
+  if (!fakeUserData) {
+    tmp.setGracefulCleanup();
+    fakeUserData = tmp.dirSync({
+      template: 'electron-fiddle-tests--user-data-XXXXXX',
+      unsafeCleanup: true, // remove everything
+    });
+  }
+  return {
+    USER_DATA_PATH: fakeUserData.name,
+  };
+});
 
 let lastResponse = new Response(null, {
   status: 503,
@@ -45,6 +62,13 @@ const fetchFromFilesystem = (url: string) => {
 describe('content', () => {
   const VERSION_IN_FIXTURES = '11.0.0';
   const VERSION_NOT_IN_FIXTURES = '10.0.0';
+
+  afterEach(() => {
+    if (fakeUserData) {
+      fakeUserData.removeCallback();
+      fakeUserData = null;
+    }
+  });
 
   describe('getTestTemplate()', () => {
     beforeEach(() => {
