@@ -13,11 +13,16 @@ import {
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
+import {
+  ElectronReleaseChannel,
+  RunnableVersion,
+  VersionSource,
+  VersionState,
+} from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
-import { ElectronReleaseChannel, getReleaseChannel } from '../versions';
+import { getReleaseChannel } from '../versions';
 
 export interface ElectronSettingsProps {
   appState: AppState;

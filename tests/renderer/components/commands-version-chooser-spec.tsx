@@ -1,9 +1,12 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { VersionSource, VersionState } from '../../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
-import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
 const { unknown } = VersionState;

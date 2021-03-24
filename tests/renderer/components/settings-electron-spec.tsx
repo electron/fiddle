@@ -1,9 +1,12 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { VersionSource, VersionState } from '../../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
-import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions, mockVersionsArray } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {

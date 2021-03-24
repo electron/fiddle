@@ -1,9 +1,12 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { VersionSource, VersionState } from '../../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
-import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 
 jest.mock('../../../src/renderer/bisect');
 

@@ -56,10 +56,6 @@ jest.mock('../../src/renderer/versions', () => {
     getElectronVersions: () =>
       require('../mocks/electron-versions').mockVersionsArray,
     getDefaultVersion: () => '2.0.2',
-    ElectronReleaseChannel: {
-      stable: 'Stable',
-      beta: 'Beta',
-    },
     addLocalVersion: jest.fn(),
     saveLocalVersions: jest.fn(),
     getReleaseChannel,

@@ -1,6 +1,10 @@
 import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
-import { EditorValues, GenericDialogType } from '../interfaces';
+import {
+  EditorValues,
+  ElectronReleaseChannel,
+  GenericDialogType,
+} from '../interfaces';
 import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,
@@ -14,7 +18,7 @@ import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
 import { AppState } from './state';
-import { ElectronReleaseChannel, getReleaseChannel } from './versions';
+import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {

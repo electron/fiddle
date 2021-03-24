@@ -2,6 +2,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import {
+  ElectronReleaseChannel,
   RunnableVersion,
   VersionSource,
   VersionState,
@@ -13,7 +14,6 @@ import {
   renderItem,
   VersionSelect,
 } from '../../../src/renderer/components/version-select';
-import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions } from '../../mocks/electron-versions';
 
 const { ready, unknown, downloading } = VersionState;

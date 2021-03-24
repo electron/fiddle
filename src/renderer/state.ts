@@ -8,6 +8,7 @@ import {
   BlockableAccelerator,
   DocsDemoPage,
   EditorId,
+  ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
@@ -51,7 +52,6 @@ import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
-  ElectronReleaseChannel,
   getDefaultVersion,
   getElectronVersions,
   getReleaseChannel,
