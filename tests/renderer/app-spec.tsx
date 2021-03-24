@@ -11,9 +11,13 @@ jest.mock('../../src/renderer/file-manager', () =>
 );
 jest.mock('../../src/renderer/state', () => ({
   appState: {
-    theme: 'defaultDark',
-    getName: () => 'Test',
     closedPanels: {},
+    getName: () => 'Test',
+    hideChannels: jest.fn(),
+    pushOutput: jest.fn(),
+    setVersion: jest.fn(),
+    showChannels: jest.fn(),
+    theme: 'defaultDark',
   },
 }));
 jest.mock('../../src/renderer/components/header', () => ({
@@ -46,6 +50,27 @@ describe('App component', () => {
       expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
 
       jest.useRealTimers();
+    });
+  });
+
+  describe('openFiddle()', () => {
+    it('understands gists', async () => {
+      const app = new App();
+      const spy = jest.spyOn(app.remoteLoader, 'fetchGistAndLoad');
+      spy.mockResolvedValue(true);
+      const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+      await app.openFiddle({ gistId });
+      expect(spy).toHaveBeenCalledWith(gistId);
+      spy.mockRestore();
+    });
+
+    it('understands files', async () => {
+      const app = new App();
+      const openFiddle = app.fileManager.openFiddle as jest.Mock;
+      openFiddle.mockImplementationOnce(() => Promise.resolve());
+      const filePath = '/fake/path';
+      await app.openFiddle({ filePath });
+      expect(openFiddle).toHaveBeenCalledWith(filePath);
     });
   });
 

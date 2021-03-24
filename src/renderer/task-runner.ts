@@ -1,91 +1,118 @@
 import {
   BisectRequest,
-  TestRequest,
+  ElectronReleaseChannel,
   RunResult,
+  RunnableVersion,
+  SetFiddleOptions,
   SetupRequest,
+  TestRequest,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+
+import { App } from './app';
+import { AppState } from './state';
+import { IpcRendererManager } from './ipc';
+import { Runner } from './runner';
+
+import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
 
-import { ipcRendererManager } from './ipc';
-import { AppState } from './state';
-
 export class TaskRunner {
-  constructor(private readonly appState: AppState) {
+  private readonly autobisect: (v: RunnableVersion[]) => Promise<RunResult>;
+  private readonly done: (r: RunResult) => void;
+  private readonly hide: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly log: (message: string) => void;
+  private readonly open: (o: SetFiddleOptions) => Promise<void>;
+  private readonly run: () => Promise<RunResult>;
+  private readonly setVersion: (ver: string) => Promise<void>;
+  private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
+
+  constructor(
+    app: App,
+    private readonly appState: AppState,
+    runner: Runner,
+    ipc: IpcRendererManager,
+  ) {
+    this.autobisect = runner.autobisect.bind(runner);
+    this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
+    this.hide = this.appState.hideChannels.bind(this.appState);
+    this.log = this.appState.pushOutput.bind(this.appState);
+    this.open = app.openFiddle.bind(app);
+    this.run = runner.run.bind(runner);
+    this.setVersion = this.appState.setVersion.bind(this.appState);
+    this.show = this.appState.showChannels.bind(this.appState);
+
     this.bisect = this.bisect.bind(this);
-    this.test = this.test.bind(this);
-
     let event = IpcEvents.FIDDLE_BISECT;
-    ipcRendererManager.removeAllListeners(event);
-    ipcRendererManager.on(event, (_, req: BisectRequest) => this.bisect(req));
+    ipc.removeAllListeners(event);
+    ipc.on(event, (_, r: BisectRequest) => {
+      this.bisect(r);
+    });
 
+    this.test = this.test.bind(this);
     event = IpcEvents.FIDDLE_TEST;
-    ipcRendererManager.removeAllListeners(event);
-    ipcRendererManager.on(event, (_, req: TestRequest) => this.test(req));
+    ipc.removeAllListeners(event);
+    ipc.on(event, (_, r: TestRequest) => this.test(r));
   }
 
   private async bisect(req: BisectRequest) {
+    const prefix = 'Task: Bisect ';
+    const { appState, log } = this;
     let result = RunResult.INVALID;
+
     try {
       await this.setup(req.setup);
 
       const good = normalizeVersion(req.goodVersion);
       const bad = normalizeVersion(req.badVersion);
-      this.appState.pushOutput(`Task: Bisect [${good}..${bad}]`);
-      result = await window.ElectronFiddle.app.runner.autobisectRange(
-        good,
-        bad,
-      );
-      this.appState.pushOutput(`Task: Bisect ${result}`);
+      const range = getVersionRange(good, bad, appState.versionsToShow);
+      log(`${prefix} [${range.map((ver) => ver.version).join(', ')}]`);
+
+      result = await this.autobisect(range);
+      log(`${prefix} ${result}`);
     } catch (err) {
-      this.appState.pushOutput(err);
+      log(err);
     }
-    ipcRendererManager.send(IpcEvents.TASK_DONE, result);
+
+    this.done(result);
   }
 
   private async test(req: TestRequest) {
     let result = RunResult.INVALID;
+
     try {
       await this.setup(req.setup);
-
-      this.appState.pushOutput('Task: Test');
-      result = await window.ElectronFiddle.app.runner.test();
-      this.appState.pushOutput(`Task: Test ${result}`);
+      result = await this.run();
     } catch (err) {
-      this.appState.pushOutput(err);
+      this.log(err);
     }
-    ipcRendererManager.send(IpcEvents.TASK_DONE, result);
+
+    this.done(result);
   }
 
   private async setup(req: SetupRequest) {
-    const { showChannels, hideChannels, version } = req;
-    const { appState } = this;
+    const { log } = this;
+    const { fiddle, hideChannels, showChannels, version } = req;
 
     if (hideChannels.length > 0) {
-      appState.pushOutput(`Task: Hide channels ${hideChannels.join(', ')}`);
-      await appState.hideChannels(hideChannels);
+      log(`Task: Hide channels ${hideChannels.join(', ')}`);
+      await this.hide(hideChannels);
     }
 
     if (showChannels.length > 0) {
-      appState.pushOutput(`Task: Show channels ${showChannels.join(', ')}`);
-      await appState.showChannels(hideChannels);
+      log(`Task: Show channels ${showChannels.join(', ')}`);
+      await this.show(showChannels);
     }
 
     const normVersion = normalizeVersion(version);
     if (normVersion) {
-      appState.pushOutput(`Task: Use Electron version ${normVersion}`);
-      await appState.setVersion(normVersion, { strict: true });
+      log(`Task: Use Electron version ${normVersion}`);
+      await this.setVersion(normVersion);
     }
 
-    if (req.fiddle) {
-      const { filePath, gistId } = req.fiddle;
-      if (filePath) {
-        appState.pushOutput(`Task: Open fiddle \"${filePath}"`);
-        await window.ElectronFiddle.app.fileManager.openFiddle(filePath);
-      } else if (gistId) {
-        appState.pushOutput(`Task: Open Gist \"${gistId}"`);
-        await window.ElectronFiddle.app.remoteLoader.fetchGistAndLoad(gistId);
-      }
+    if (fiddle) {
+      log(`Task: Open fiddle \"${JSON.stringify(fiddle)}"`);
+      await this.open(fiddle);
     }
   }
 }

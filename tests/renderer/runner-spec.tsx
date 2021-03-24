@@ -187,7 +187,6 @@ describe('Runner component', () => {
       // get run() out of the way
       (spawn as any).mockReturnValueOnce(mockChild);
       setTimeout(() => mockChild.emit('close', 0));
-
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -342,7 +341,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.INVALID);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
-        'Runner: autobisect Electron 2.0.1 - ❓ invalid',
+        'Runner: autobisect Electron 2.0.1 - finished test ❓ invalid',
       );
 
       spy.mockRestore();
