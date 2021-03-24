@@ -93,7 +93,7 @@ async function test(opts: commander.OptionValues) {
   });
 }
 
-export async function processCommandLine() {
+export async function processCommandLine(argv: string[]) {
   program
     .command('bisect <goodVersion> <badVersion>')
     .description('Find where regressions were introduced')
@@ -124,7 +124,6 @@ Example calls:
 `,
   );
 
-  const { argv } = process;
   if (argv.length > 2) {
     program.parse(argv, { from: 'electron' });
   }

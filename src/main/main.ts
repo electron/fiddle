@@ -17,6 +17,8 @@ import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 import { IpcMainEvent } from 'electron/main';
 
+let argv: string[] = [];
+
 /**
  * Handle the app's "ready" event. This is essentially
  * the method that takes care of booting the application.
@@ -40,7 +42,7 @@ export async function onReady() {
   setupDevTools();
   setupTitleBarClickMac();
 
-  processCommandLine();
+  processCommandLine(argv);
 }
 
 /**
@@ -108,13 +110,15 @@ export function onWindowsAllClosed() {
  *
  * Exported for testing purposes.
  */
-export function main() {
+export function main(argv_in: string[]) {
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
   if (shouldQuit()) {
     app.quit();
     return;
   }
+
+  argv = argv_in;
 
   // Set the app's name
   app.name = 'Electron Fiddle';
@@ -129,4 +133,6 @@ export function main() {
   app.on('activate', getOrCreateMainWindow);
 }
 
-main();
+if (typeof module !== 'undefined' && !module.parent) {
+  main(process.argv);
+}
