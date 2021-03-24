@@ -2,6 +2,7 @@ import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import { MosaicContext } from 'react-mosaic-component';
+import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
@@ -87,14 +88,24 @@ export class Output extends React.Component<CommandsProps> {
       ? { whiteSpace: 'initial' }
       : {};
 
-    return lines.map((text, lineIndex) => (
-      <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-        <span style={style} className="output-message">
-          {timestamp}
-          {text}
-        </span>
-      </div>
-    ));
+    const renderLine = (text: string, lineIndex: number): JSX.Element =>
+      isWebUri(text) ? (
+        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+          <span style={style} className="output-message">
+            {timestamp}
+            <a href={text}>{text}</a>
+          </span>
+        </div>
+      ) : (
+        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
+          <span style={style} className="output-message">
+            {timestamp}
+            {text}
+          </span>
+        </div>
+      );
+
+    return lines.map(renderLine);
   }
 
   public render(): JSX.Element | null {

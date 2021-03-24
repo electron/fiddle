@@ -1,11 +1,17 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 
-import { EditorValues, FileTransform } from '../interfaces';
+import {
+  EditorValues,
+  FileTransform,
+  RunResult,
+  RunnableVersion,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
+import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
@@ -20,6 +26,12 @@ export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
 }
+
+const resultString: Record<RunResult, string> = Object.freeze({
+  [RunResult.FAILURE]: '❌ failed',
+  [RunResult.INVALID]: '❓ invalid',
+  [RunResult.SUCCESS]: '✅ passed',
+});
 
 export class Runner {
   public child: ChildProcess | null = null;
@@ -42,11 +54,86 @@ export class Runner {
   }
 
   /**
+   * Bisect the current fiddle across the specified versions.
+   *
+   * @param {Array<RunnableVersion>} versions - versions to bisect
+   * @returns {Promise<RunResult>}
+   * @memberof Runner
+   */
+  public async autobisect(
+    versions: Array<RunnableVersion>,
+  ): Promise<RunResult> {
+    const { appState } = this;
+
+    // precondition: can't bisect unless we have >= 2 versions
+    if (versions.length < 2) {
+      appState.pushOutput(
+        'Runner: autobisect needs at least two Electron versions',
+      );
+      return RunResult.INVALID;
+    }
+
+    const results: Map<string, RunResult> = new Map();
+
+    const runVersion = async (version: string) => {
+      let result = results.get(version);
+      if (result === undefined) {
+        await appState.setVersion(version);
+        result = await this.run();
+        results.set(version, result);
+        const msg = `Runner: autobisect Electron ${version} - ${resultString[result]}`;
+        appState.pushOutput(msg);
+      }
+      return result;
+    };
+
+    const bisector = new Bisector(versions);
+    let targetVersion = bisector.getCurrentVersion();
+    let next;
+    while (true) {
+      const { version } = targetVersion;
+      appState.pushOutput(`Testing ${version}`, { isNotPre: true });
+
+      const result = await runVersion(version);
+      if (result === RunResult.INVALID) {
+        return result;
+      }
+
+      next = bisector.continue(result === RunResult.SUCCESS);
+      if (Array.isArray(next)) {
+        break;
+      }
+
+      targetVersion = next;
+    }
+
+    const [good, bad] = next.map((v) => v.version);
+    const resultGood = await runVersion(good);
+    const resultBad = await runVersion(bad);
+    if (resultGood === resultBad) {
+      appState.pushOutput(
+        `Runner: autobisect 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
+      );
+      return RunResult.INVALID;
+    }
+
+    const msgs = [
+      'Runner: autobisect complete',
+      `${good} ${resultString[RunResult.SUCCESS]}`,
+      `${bad} ${resultString[RunResult.FAILURE]}`,
+      'Commits between versions:',
+      `https://github.com/electron/electron/compare/v${good}...v${bad}`,
+    ];
+    msgs.forEach((msg) => appState.pushOutput(msg));
+    return RunResult.SUCCESS;
+  }
+
+  /**
    * Actually run the fiddle.
    *
-   * @returns {Promise<boolean>}
+   * @returns {Promise<RunResult>}
    */
-  public async run(): Promise<boolean> {
+  public async run(): Promise<RunResult> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
     const { currentElectronVersion } = this.appState;
@@ -61,14 +148,14 @@ export class Runner {
     const dir = await this.saveToTemp(options);
     const packageManager = this.appState.packageManager;
 
-    if (!dir) return false;
+    if (!dir) return RunResult.INVALID;
 
     try {
       await this.installModulesForEditor(values, { dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
     const isReady = getIsDownloaded(version, localPath);
@@ -83,22 +170,22 @@ export class Runner {
 
       this.appState.pushOutput(message, { isNotPre: true });
       fileManager.cleanup(dir);
-      return false;
+      return RunResult.INVALID;
     }
 
-    this.execute(dir);
-
-    return true;
+    return this.execute(dir);
   }
 
   /**
    * Stop a currently running Electron fiddle.
+   *
+   * @returns {boolean} true if runner is now idle
+   * @memberof Runner
    */
-  public async stop() {
-    if (this.child) {
-      this.child.kill();
-      this.appState.isRunning = false;
-    }
+  public stop(): boolean {
+    this.appState.isRunning = !!this.child && !this.child.kill();
+    const isIdle = !this.appState.isRunning;
+    return isIdle;
   }
 
   /**
@@ -214,7 +301,7 @@ export class Runner {
    * @returns {Promise<void>}
    * @memberof Runner
    */
-  public async execute(dir: string): Promise<void> {
+  public async execute(dir: string): Promise<RunResult> {
     const { currentElectronVersion, pushOutput } = this.appState;
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
@@ -234,27 +321,36 @@ export class Runner {
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(this.appState.executionFlags);
 
-    this.child = spawn(binaryPath, options, { cwd: dir, env });
-    this.appState.isRunning = true;
-    pushOutput(`Electron v${version} started.`);
+    return new Promise((resolve, _reject) => {
+      this.child = spawn(binaryPath, options, { cwd: dir, env });
+      this.appState.isRunning = true;
+      pushOutput(`Electron v${version} started.`);
 
-    this.child.stdout!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.stderr!.on('data', (data) =>
-      pushOutput(data, { bypassBuffer: false }),
-    );
-    this.child.on('close', async (code) => {
-      const withCode =
-        typeof code === 'number' ? ` with code ${code.toString()}.` : `.`;
+      this.child.stdout!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.stderr!.on('data', (data) =>
+        pushOutput(data, { bypassBuffer: false }),
+      );
+      this.child.on('close', async (code) => {
+        this.appState.isRunning = false;
+        this.child = null;
 
-      pushOutput(`Electron exited${withCode}`);
-      this.appState.isRunning = false;
-      this.child = null;
+        // Clean older folders
+        await window.ElectronFiddle.app.fileManager.cleanup(dir);
+        await this.deleteUserData();
 
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
+        if (typeof code !== 'number') {
+          pushOutput('Electron exited.');
+          resolve(RunResult.INVALID);
+        } else if (!code) {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.SUCCESS);
+        } else {
+          pushOutput(`Electron exited with code ${code}.`);
+          resolve(RunResult.FAILURE);
+        }
+      });
     });
   }
 

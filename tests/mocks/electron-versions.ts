@@ -8,12 +8,22 @@ import { arrayToStringMap } from '../../src/utils/array-to-stringmap';
 export const mockVersionsArray = [
   {
     state: VersionState.ready,
+    version: '2.0.3',
+    source: VersionSource.remote,
+  },
+  {
+    state: VersionState.ready,
     version: '2.0.2',
     source: VersionSource.remote,
   },
   {
     state: VersionState.ready,
     version: '2.0.1',
+    source: VersionSource.remote,
+  },
+  {
+    state: VersionState.ready,
+    version: '2.0.0',
     source: VersionSource.remote,
   },
   {
