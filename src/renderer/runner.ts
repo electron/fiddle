@@ -27,7 +27,7 @@ export enum ForgeCommands {
   MAKE = 'make',
 }
 
-const resultString: Record<RunResult, string> = Object.seal({
+const resultString: Record<RunResult, string> = Object.freeze({
   [RunResult.FAILURE]: '❌ failed',
   [RunResult.INVALID]: '❓ invalid',
   [RunResult.SUCCESS]: '✅ passed',
