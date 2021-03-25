@@ -216,7 +216,7 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
-      return fs.outputFile(filePath, content, { encoding: 'utf-8' });
+      return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
@@ -233,7 +233,7 @@ export class FileManager {
    */
   private async removeFile(filePath: string): Promise<void> {
     try {
-      return fs.remove(filePath);
+      return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);
       ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
