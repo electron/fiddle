@@ -1,4 +1,4 @@
-import { idFromUrl, urlFromId } from '../../src/utils/gist';
+import { getGistId, idFromUrl, urlFromId } from '../../src/utils/gist';
 
 jest.mock('os', () => ({
   userInfo: () => ({
@@ -35,6 +35,45 @@ describe('gist', () => {
     it('returns an empty string if id is undefined', () => {
       const result = urlFromId();
       expect(result).toBe('');
+    });
+  });
+
+  describe('getGistId', () => {
+    const GIST_ID = 'af3e1a018f5dcce4a2ff40004ef5bab5';
+
+    it('recognizes lowercase gist ids', () => {
+      const expected = GIST_ID.toLowerCase();
+      const input = expected;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
+    });
+
+    it('recognizes uppercase gist ids', () => {
+      const expected = GIST_ID.toUpperCase();
+      const input = expected;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
+    });
+
+    it('recognizes gist URLs without usernames', () => {
+      const expected = GIST_ID;
+      const input = `https://gist.github.com/${expected}`;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
+    });
+
+    it('recognizes gist URLs with usernames', () => {
+      const expected = GIST_ID;
+      const input = `https://gist.github.com/ckerr/${expected}`;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
+    });
+
+    it('recognizes gist URLs with trailing `/`', () => {
+      const expected = GIST_ID;
+      const input = `https://gist.github.com/${expected}/`;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
     });
   });
 });
