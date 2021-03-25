@@ -6,14 +6,14 @@ import { getVersionRange } from '../../src/utils/get-version-range';
 
 describe('getVersionRange', () => {
   const knownVersions = [...mockVersionsArray].reverse();
+  const midpoint = Math.floor(knownVersions.length / 2);
 
   it('returns an empty array if the lower bound cannot be found', () => {
     const lowerBound = '1.0.0';
-    const upperBound =
-      knownVersions[Math.floor(knownVersions.length / 2)].version;
-    expect(
-      knownVersions.find((runnable) => runnable.version === lowerBound),
-    ).toBe(undefined);
+    const upperBound = knownVersions[midpoint].version;
+    // test setup: confirm that one bound is prsent and the other is not
+    expect(knownVersions.map((v) => v.version)).not.toContain(lowerBound);
+    expect(knownVersions.map((v) => v.version)).toContain(upperBound);
 
     const versions = getVersionRange(lowerBound, upperBound, knownVersions);
 
@@ -21,12 +21,11 @@ describe('getVersionRange', () => {
   });
 
   it('returns an empty array if the upper bound cannot be found', () => {
-    const lowerBound =
-      knownVersions[Math.floor(knownVersions.length / 2)].version;
-    const upperBound = '1000.0.0';
-    expect(
-      knownVersions.find((runnable) => runnable.version === upperBound),
-    ).toBe(undefined);
+    const lowerBound = knownVersions[midpoint].version;
+    const upperBound = '10000.0.0';
+    // test setup: confirm that one bound is prsent and the other is not
+    expect(knownVersions.map((v) => v.version)).toContain(lowerBound);
+    expect(knownVersions.map((v) => v.version)).not.toContain(upperBound);
 
     const versions = getVersionRange(lowerBound, upperBound, knownVersions);
 

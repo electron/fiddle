@@ -55,21 +55,28 @@ describe('App component', () => {
 
   describe('openFiddle()', () => {
     it('understands gists', async () => {
+      const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
       const app = new App();
+
       const spy = jest.spyOn(app.remoteLoader, 'fetchGistAndLoad');
       spy.mockResolvedValue(true);
-      const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+
       await app.openFiddle({ gistId });
+
       expect(spy).toHaveBeenCalledWith(gistId);
+
       spy.mockRestore();
     });
 
     it('understands files', async () => {
+      const filePath = '/fake/path';
       const app = new App();
+
       const openFiddle = app.fileManager.openFiddle as jest.Mock;
       openFiddle.mockImplementationOnce(() => Promise.resolve());
-      const filePath = '/fake/path';
+
       await app.openFiddle({ filePath });
+
       expect(openFiddle).toHaveBeenCalledWith(filePath);
     });
   });

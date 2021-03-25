@@ -1,8 +1,6 @@
-/**
- * @jest-environment node
- */
-
+// use a stable-sorting stringify for comparing expected & actual payloads
 import stringify from 'json-stable-stringify';
+import { app } from 'electron';
 
 import {
   ElectronReleaseChannel,
@@ -14,12 +12,10 @@ import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
 import { processCommandLine } from '../../src/main/command-line';
 
-import { app } from 'electron';
-
-jest.spyOn(global.console, 'error').mockImplementation(() => jest.fn());
 jest.unmock('fs-extra');
 
 describe('processCommandLine()', () => {
+  // when no fiddle specified, cwd is the default
   const DEFAULT_FIDDLE = `{"filePath":"${process.cwd()}"}`;
   const ARGV_PREFIX = process.defaultApp
     ? ['/path/to/electron', 'main.ts']
@@ -38,12 +34,12 @@ describe('processCommandLine()', () => {
   function expectSendCalledOnceWith(event: IpcEvents, payload: string) {
     const send = ipcMainManager.send as jest.Mock;
     expect(send).toHaveBeenCalledTimes(1);
-
-    const call = send.mock.calls.pop();
+    const [call] = send.mock.calls;
     expect(call.length).toEqual(2);
-    expect(call[0]).toBe(event);
-    expect(call[1].length).toBe(1);
-    const request = call[1][0];
+    const [ev, params] = call;
+    expect(ev).toBe(event);
+    expect(params.length).toBe(1);
+    const [request] = params;
     expect(stringify(request)).toBe(payload);
   }
 
@@ -51,17 +47,14 @@ describe('processCommandLine()', () => {
     const ARGV = [...ARGV_PREFIX, 'test'];
 
     function expectTestCalledOnceWith(payload: string) {
-      expectSendCalledOnceWith(IpcEvents.FIDDLE_TEST, payload);
+      expectSendCalledOnceWith(IpcEvents.TASK_TEST, payload);
     }
 
     it('uses cwd as the default fiddle location', async () => {
       const argv = ARGV;
-
+      const expected = `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[]}}`;
       await processCommandLine(argv);
-
-      expectTestCalledOnceWith(
-        `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[]}}`,
-      );
+      expectTestCalledOnceWith(expected);
     });
 
     it('handles a --fiddle that is a hex gist id', async () => {
@@ -73,15 +66,14 @@ describe('processCommandLine()', () => {
     });
 
     it('handles a --fiddle option that is unrecognizable', async () => {
-      const FIDDLE = '💩';
+      const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, '--fiddle', FIDDLE];
       const expected = `Unrecognized Fiddle "${FIDDLE}"`;
-
+      const spy = jest.spyOn(console, 'error').mockImplementation();
       await processCommandLine(argv);
-
       expect(ipcMainManager.send).not.toHaveBeenCalled();
-      expect(console.error).toHaveBeenCalledTimes(1);
-      expect(console.error).toHaveBeenCalledWith(expected);
+      expect(spy).toHaveBeenCalledWith(expected);
+      spy.mockReset();
     });
 
     it('handles a --version option', async () => {
@@ -99,7 +91,7 @@ describe('processCommandLine()', () => {
     const BAD = '11.2.0';
 
     function expectBisectCalledOnceWith(payload: string) {
-      expectSendCalledOnceWith(IpcEvents.FIDDLE_BISECT, payload);
+      expectSendCalledOnceWith(IpcEvents.TASK_BISECT, payload);
     }
 
     it('sends a bisect request', async () => {
@@ -137,21 +129,6 @@ describe('processCommandLine()', () => {
       expectBisectCalledOnceWith(expected);
     });
 
-    it(`exits if required arguments are missing`, async () => {
-      const GOOD = '10.0.0';
-      const argv = [...ARGV, GOOD];
-      const spy = jest
-        .spyOn(process, 'exit')
-        .mockImplementation((_: number) => null as never);
-
-      await processCommandLine(argv);
-
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(1);
-
-      spy.mockRestore();
-    });
-
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
       async function expectDoneCausesExit(result: RunResult, exitCode: number) {
         const argv = [...ARGV, GOOD, BAD];
@@ -179,12 +156,10 @@ describe('processCommandLine()', () => {
         const now = Date.now();
         const text = 'asieoniezi';
         const expected = `[${new Date(now).toLocaleTimeString()}] ${text}`;
-        // eslint-disable-next-line @typescript-eslint/no-empty-function
-        const spy = jest.spyOn(console, 'log').mockImplementation(() => {});
+        const spy = jest.spyOn(console, 'log').mockReturnValue();
 
         const fakeEvent = {};
         const entry: OutputEntry = { text, timestamp: now };
-
         (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
           ipcMainManager.emit(IpcEvents.OUTPUT_ENTRY, fakeEvent, entry);
         });

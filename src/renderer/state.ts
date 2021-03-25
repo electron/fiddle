@@ -176,6 +176,8 @@ export class AppState {
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
     this.pushOutput = this.pushOutput.bind(this);
+    this.getVersion = this.getVersion.bind(this);
+    this.hasVersion = this.hasVersion.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
     this.setVersion = this.setVersion.bind(this);
     this.showTour = this.showTour.bind(this);
@@ -528,24 +530,29 @@ export class AppState {
     }
   }
 
+  public hasVersion(input: string): boolean {
+    return !!this.getVersion(input);
+  }
+
+  public getVersion(input: string): RunnableVersion | null {
+    return this.versions[input];
+  }
+
   /**
    * Select a version of Electron (and download it if necessary).
    *
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async setVersion(input: string, opts = { strict: false }) {
+  @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
 
-    if (!this.versions[version]) {
-      if (opts.strict) {
-        throw new Error(
-          `State: Called setVersion() with ${version}, which does not exist.`,
-        );
-      } else {
-        await this.setVersion(knownVersions[0].version);
-        return;
-      }
+    if (!this.hasVersion(input)) {
+      console.warn(
+        `State: Called setVersion() with ${version}, which does not exist.`,
+      );
+      await this.setVersion(knownVersions[0].version);
+      return;
     }
 
     console.log(`State: Switching to Electron ${version}`);

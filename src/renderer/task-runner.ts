@@ -39,18 +39,27 @@ export class TaskRunner {
     this.log = this.appState.pushOutput.bind(this.appState);
     this.open = app.openFiddle.bind(app);
     this.run = runner.run.bind(runner);
-    this.setVersion = this.appState.setVersion.bind(this.appState);
+    this.setVersion = (ver) => {
+      console.log('setVersion', ver);
+      if (this.appState.hasVersion(ver)) {
+        console.log('calling appState.setVersion', ver);
+        return this.appState.setVersion(ver);
+      } else {
+        console.log('throwing not found');
+        throw new Error(`Version "${ver}" not found`);
+      }
+    };
     this.show = this.appState.showChannels.bind(this.appState);
 
     this.bisect = this.bisect.bind(this);
-    let event = IpcEvents.FIDDLE_BISECT;
+    let event = IpcEvents.TASK_BISECT;
     ipc.removeAllListeners(event);
     ipc.on(event, (_, r: BisectRequest) => {
       this.bisect(r);
     });
 
     this.test = this.test.bind(this);
-    event = IpcEvents.FIDDLE_TEST;
+    event = IpcEvents.TASK_TEST;
     ipc.removeAllListeners(event);
     ipc.on(event, (_, r: TestRequest) => this.test(r));
   }

@@ -111,14 +111,14 @@ export function onWindowsAllClosed() {
  * Exported for testing purposes.
  */
 export function main(argv_in: string[]) {
+  argv = argv_in;
+
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
   if (shouldQuit()) {
     app.quit();
     return;
   }
-
-  argv = argv_in;
 
   // Set the app's name
   app.name = 'Electron Fiddle';
@@ -133,6 +133,7 @@ export function main(argv_in: string[]) {
   app.on('activate', getOrCreateMainWindow);
 }
 
+// only call main() if this is the main module
 if (typeof module !== 'undefined' && !module.parent) {
   main(process.argv);
 }

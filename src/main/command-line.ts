@@ -52,34 +52,24 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
 }
 
 async function sendTask(type: IpcEvents, task: any) {
-  const onOutputEntry = (
-    _event: Electron.IpcMainEvent,
-    message: OutputEntry,
-  ) => {
+  const onOutputEntry = (_: any, msg: OutputEntry) => {
     console.log(
-      `[${new Date(message.timestamp).toLocaleTimeString()}] ${message.text}`,
+      `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
     );
   };
-  const onTaskDone = (_event: IpcEvents, result: RunResult) => {
-    switch (result) {
-      case RunResult.SUCCESS:
-        app.exit(0);
-        break;
-      case RunResult.FAILURE:
-        app.exit(1);
-        break;
-      case RunResult.INVALID:
-        app.exit(2);
-        break;
-    }
-  };
+  const exitCodes = Object.freeze({
+    [RunResult.SUCCESS]: 0,
+    [RunResult.FAILURE]: 1,
+    [RunResult.INVALID]: 2,
+  });
+  const onTaskDone = (_: any, r: RunResult) => app.exit(exitCodes[r]);
   ipcMainManager.on(IpcEvents.OUTPUT_ENTRY, onOutputEntry);
   ipcMainManager.once(IpcEvents.TASK_DONE, onTaskDone);
   ipcMainManager.send(type, [task]);
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
-  sendTask(IpcEvents.FIDDLE_BISECT, {
+  sendTask(IpcEvents.TASK_BISECT, {
     setup: getSetup(opts),
     goodVersion: good,
     badVersion: bad,
@@ -88,7 +78,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
 
 async function test(opts: commander.OptionValues) {
   try {
-    sendTask(IpcEvents.FIDDLE_TEST, {
+    sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
   } catch (err) {
@@ -124,11 +114,12 @@ Example calls:
   $ electron-fiddle bisect 10.0.0 11.2.0 --fiddle /path/to/fiddle
   $ electron-fiddle bisect 10.0.0 11.2.0 --fiddle /path/to/fiddle --betas --nightlies
   $ electron-fiddle test --version 11.2.0 --fiddle /path/to/fiddle
-  $ electron-fiddle test --version 11.2.0 --fiddle af3e1a018f5dcce4a2ff40004ef5bab5
-  $ electron-fiddle test --version 11.2.0 --fiddle https://gist.github.com/ckerr/af3e1a018f5dcce4a2ff40004ef5bab5
+  $ electron-fiddle test --version 11.2.0 --fiddle 8c5fc0c6a5153d49b5a4a56d3ed9da8f
+  $ electron-fiddle test --version 11.2.0 --fiddle https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f/
 `,
   );
 
+  // do nothing if argv holds no commands/options
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     program.parse(argv, { from: 'electron' });
   }

@@ -432,19 +432,22 @@ describe('AppState', () => {
     });
   });
 
-  describe('setVersion()', () => {
-    const BAD_VERSION = 'v999.99.99';
+  describe('hasVersion()', () => {
+    const UNKNOWN_VERSION = 'v999.99.99';
+    const KNOWN_VERSION = Object.keys(appState.versions).pop();
 
-    it('handles missing versions by falling back to the latest version', async () => {
-      await appState.setVersion(BAD_VERSION);
-      expect(appState.version).toBe(mockVersionsArray[0].version);
+    it('returns false if state does not have that version', () => {
+      expect(appState.hasVersion(UNKNOWN_VERSION)).toEqual(false);
     });
+    it('returns true if state has that version', () => {
+      expect(appState.hasVersion(KNOWN_VERSION!)).toBe(true);
+    });
+  });
 
-    it('handles missing versions by throwing iff in strict mode', async (done) => {
-      appState.setVersion(BAD_VERSION, { strict: true }).catch((err) => {
-        expect(err).toBeTruthy();
-        done();
-      });
+  describe('setVersion()', () => {
+    it('uses the newest version iff the specified version does not exist', async () => {
+      await appState.setVersion('v999.99.99');
+      expect(appState.version).toBe(mockVersionsArray[0].version);
     });
 
     it('downloads a version if necessary', async () => {
