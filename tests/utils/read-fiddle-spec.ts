@@ -1,13 +1,11 @@
 import * as path from 'path';
-import * as fsType from 'fs-extra';
-import { fancyImport } from '../../src/utils/import';
+import * as fs from 'fs-extra';
 import { MAIN_JS_NAME } from '../../src/shared-constants';
 
 import { readFiddle } from '../../src/utils/read-fiddle';
 
 describe('read-fiddle', () => {
   beforeEach(async () => {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
     (fs.readdirSync as jest.Mock).mockImplementationOnce(() => [
       'LICENSE.txt',
@@ -16,7 +14,6 @@ describe('read-fiddle', () => {
   });
 
   it('reads known content', async () => {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     (fs.readFileSync as jest.Mock).mockImplementation((filename) =>
       path.basename(filename),
     );
@@ -36,7 +33,6 @@ describe('read-fiddle', () => {
   });
 
   it('handles read errors gracefully', async () => {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     (fs.readFileSync as jest.Mock).mockImplementation(() => {
       throw new Error('bwap');
     });
@@ -56,7 +52,6 @@ describe('read-fiddle', () => {
   });
 
   it('ensures truty even when read returns null', async () => {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     (fs.readFileSync as jest.Mock).mockImplementation(() => null);
     console.warn = jest.fn();
     const folder = '/some/place';
