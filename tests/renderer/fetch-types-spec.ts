@@ -1,3 +1,4 @@
+import * as fs from 'fs-extra';
 import {
   RunnableVersion,
   VersionSource,
@@ -23,13 +24,6 @@ jest.mock('extract-zip', () => {
 });
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',
-}));
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => {
-    if (p === 'fs-extra') {
-      return require('fs-extra');
-    }
-  },
 }));
 
 describe('fetch-types', () => {
@@ -67,11 +61,10 @@ describe('fetch-types', () => {
   });
 
   describe('getOfflineTypeDefinitions()', () => {
-    it('returns true if they exist', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(true);
+    it('returns true if they exist', () => {
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
 
-      const result = await getOfflineTypeDefinitions('3.0.0');
+      const result = getOfflineTypeDefinitions('3.0.0');
       const expected = path.join(
         'user/data/electron-typedef/3.0.0/electron.d.ts',
       );
@@ -80,11 +73,10 @@ describe('fetch-types', () => {
       expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
     });
 
-    it('returns false if they exist', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(false);
+    it('returns false if they exist', () => {
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
 
-      const result = await getOfflineTypeDefinitions('3.0.0');
+      const result = getOfflineTypeDefinitions('3.0.0');
       const expected = path.join(
         'user/data/electron-typedef/3.0.0/electron.d.ts',
       );
@@ -102,8 +94,7 @@ describe('fetch-types', () => {
     };
 
     it('returns type definitions (and goes online if they do not exist)', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(false);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
@@ -117,8 +108,7 @@ describe('fetch-types', () => {
     });
 
     it('returns null if going online failed', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(false);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
       (window.fetch as jest.Mock).mockRejectedValue({});
 
       const result = await getDownloadedVersionTypeDefs(version);
@@ -132,8 +122,7 @@ describe('fetch-types', () => {
     });
 
     it('tries to save them to disk if downloaded', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(false);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
       mockFetch();
 
       await getDownloadedVersionTypeDefs(version);
@@ -148,10 +137,9 @@ describe('fetch-types', () => {
     });
 
     it('returns them even if saving them failed', async () => {
-      const fs = require('fs-extra');
       const def = `it's me, the type definition`;
-      fs.existsSync.mockReturnValueOnce(false);
-      fs.outputFile.mockImplementationOnce(() => Promise.reject());
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+      (fs.outputFile as jest.Mock).mockRejectedValue(0);
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
@@ -164,10 +152,9 @@ describe('fetch-types', () => {
     });
 
     it('tries to read them from disk if downloaded', async () => {
-      const fs = require('fs-extra');
       const def = `it's me, the type definition`;
-      fs.existsSync.mockReturnValueOnce(true);
-      fs.readFile.mockImplementationOnce(() => Promise.resolve(def));
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      (fs.readFile as jest.Mock).mockResolvedValue(def);
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
@@ -180,9 +167,8 @@ describe('fetch-types', () => {
     });
 
     it('returns null if downloaded but not readable', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(true);
-      fs.readFile.mockImplementationOnce(() => Promise.reject());
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      (fs.readFile as jest.Mock).mockRejectedValue(null);
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
@@ -207,10 +193,11 @@ describe('fetch-types', () => {
     });
 
     it('fetches a local path if localPath exists', async () => {
-      const fs = require('fs-extra');
       const def = `it's me, the type definition`;
-      fs.existsSync.mockReturnValueOnce(true);
-      fs.readFile.mockImplementationOnce(() => Promise.resolve(def));
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      (fs.readFile as jest.Mock).mockImplementationOnce(() =>
+        Promise.resolve(def),
+      );
       const result = await getLocalVersionTypeDefs(version);
       expect(result).toEqual(def);
     });
@@ -327,8 +314,7 @@ describe('fetch-types', () => {
 
   describe('removeTypeDefsForVersion()', () => {
     it("removes a version's typedefs", async () => {
-      const fs = require('fs-extra');
-      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
       await removeTypeDefsForVersion('v3.0.0');
       expect(fs.remove).toHaveBeenCalledWith<any>(
         path.join(USER_DATA_PATH, 'electron-typedef', '3.0.0'),
@@ -336,9 +322,8 @@ describe('fetch-types', () => {
     });
 
     it('throws upon fs failure', async () => {
-      const fs = require('fs-extra');
-      (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
-      (fs.remove as jest.Mock<any>).mockImplementation(() => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.remove as jest.Mock).mockImplementation(() => {
         throw new Error('Bwap bwap');
       });
 
