@@ -1,16 +1,12 @@
-import * as electron from 'electron';
-import { shallow } from 'enzyme';
-import * as fs from 'fs-extra';
 import * as React from 'react';
+import * as electron from 'electron';
+import * as fs from 'fs-extra';
+import { shallow } from 'enzyme';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 
 jest.mock('fs-extra', () => ({
   readJSON: jest.fn(),
-}));
-
-jest.mock('../../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
 }));
 
 describe('CreditsSettings component', () => {

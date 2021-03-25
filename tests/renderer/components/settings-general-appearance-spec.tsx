@@ -23,9 +23,6 @@ const doNothingFunc = () => {
 };
 
 jest.mock('fs-extra');
-jest.mock('../../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
-}));
 
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
