@@ -4,6 +4,7 @@ import {
   ALL_MOSAICS,
   BlockableAccelerator,
   EditorId,
+  ElectronReleaseChannel,
   GenericDialogType,
   PanelId,
   VersionSource,
@@ -336,6 +337,43 @@ describe('AppState', () => {
     });
   });
 
+  describe('showChannels()', () => {
+    it('adds channels from `channelsToShow`', () => {
+      appState.channelsToShow = [
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.stable,
+      ];
+      appState.showChannels([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+      ]);
+      expect([...appState.channelsToShow].sort()).toEqual([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+      ]);
+    });
+  });
+
+  describe('hideChannels()', () => {
+    it('removes channels from `channelsToShow`', () => {
+      appState.channelsToShow = [
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+        ElectronReleaseChannel.unsupported,
+      ];
+      appState.hideChannels([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.unsupported,
+      ]);
+      expect([...appState.channelsToShow].sort()).toEqual([
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+      ]);
+    });
+  });
+
   describe('removeVersion()', () => {
     it('removes a version', async () => {
       appState.versions['2.0.2'].state = VersionState.ready;
@@ -395,9 +433,18 @@ describe('AppState', () => {
   });
 
   describe('setVersion()', () => {
-    it('uses the newest version iff the specified version does not exist', async () => {
-      await appState.setVersion('v999.99.99');
+    const BAD_VERSION = 'v999.99.99';
+
+    it('handles missing versions by falling back to the latest version', async () => {
+      await appState.setVersion(BAD_VERSION);
       expect(appState.version).toBe(mockVersionsArray[0].version);
+    });
+
+    it('handles missing versions by throwing iff in strict mode', async (done) => {
+      appState.setVersion(BAD_VERSION, { strict: true }).catch((err) => {
+        expect(err).toBeTruthy();
+        done();
+      });
     });
 
     it('downloads a version if necessary', async () => {

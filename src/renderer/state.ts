@@ -1,4 +1,4 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import { action, autorun, computed, observable, toJS, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -28,7 +28,6 @@ import {
   getVisibleMosaics,
 } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-title';
-import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import {
@@ -142,7 +141,7 @@ export class AppState {
   public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
-  @observable public localTypeWatcher: fsType.FSWatcher | undefined;
+  @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
@@ -563,7 +562,6 @@ export class AppState {
     const versionObject = this.versions[version];
 
     if (versionObject.source === VersionSource.local) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       const typePath = getLocalTypePathForVersion(versionObject);
       console.info(
         `TypeDefs: Watching file for local version ${version} at path ${typePath}`,
