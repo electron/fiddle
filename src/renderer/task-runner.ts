@@ -88,12 +88,13 @@ export class TaskRunner {
 
   private async test(req: TestRequest) {
     let result = RunResult.INVALID;
+    const { log } = this;
 
     try {
       await this.setup(req.setup);
       result = await this.run();
     } catch (err) {
-      this.log(err);
+      log(err);
     }
 
     this.done(result);
