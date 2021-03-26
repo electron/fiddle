@@ -11,7 +11,7 @@ describe('getVersionRange', () => {
   it('returns an empty array if the lower bound cannot be found', () => {
     const lowerBound = '1.0.0';
     const upperBound = knownVersions[midpoint].version;
-    // test setup: confirm that one bound is prsent and the other is not
+    // test setup: confirm that one bound is present and the other is not
     expect(knownVersions.map((v) => v.version)).not.toContain(lowerBound);
     expect(knownVersions.map((v) => v.version)).toContain(upperBound);
 
@@ -23,7 +23,7 @@ describe('getVersionRange', () => {
   it('returns an empty array if the upper bound cannot be found', () => {
     const lowerBound = knownVersions[midpoint].version;
     const upperBound = '10000.0.0';
-    // test setup: confirm that one bound is prsent and the other is not
+    // test setup: confirm that one bound is present and the other is not
     expect(knownVersions.map((v) => v.version)).toContain(lowerBound);
     expect(knownVersions.map((v) => v.version)).not.toContain(upperBound);
 
