@@ -20,7 +20,6 @@ describe('Task Runner component', () => {
   let appState: Partial<AppState>;
   let runner: Partial<Runner>;
   let ipc: IpcRendererManager;
-  // let instance: TaskRunner;
 
   function makeRunnables(versions: string[]): RunnableVersion[] {
     return versions.map((version) => ({
