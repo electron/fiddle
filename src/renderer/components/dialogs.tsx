@@ -9,7 +9,7 @@ import { GenericDialog } from './dialog-generic';
 import { TokenDialog } from './dialog-token';
 import { Settings } from './settings';
 
-export interface DialogsProps {
+interface DialogsProps {
   appState: AppState;
 }
 

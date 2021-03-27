@@ -2,7 +2,7 @@
 import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from '../renderer/ipc';
 
-export async function preload() {
+async function preload() {
   setupGlobalWindow();
   await setupPaths();
 }

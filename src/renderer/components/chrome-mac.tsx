@@ -6,7 +6,7 @@ import { getTitle } from '../../utils/get-title';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface ChromeMacProps {
+interface ChromeMacProps {
   appState: AppState;
 }
 

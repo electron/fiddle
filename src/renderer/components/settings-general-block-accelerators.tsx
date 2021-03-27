@@ -5,7 +5,7 @@ import { BlockableAccelerator } from '../../interfaces';
 
 import { AppState } from '../state';
 
-export interface BlockAcceleratorsSettingsProps {
+interface BlockAcceleratorsSettingsProps {
   appState: AppState;
 }
 

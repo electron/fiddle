@@ -26,7 +26,7 @@ import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface GistActionButtonProps {
+interface GistActionButtonProps {
   appState: AppState;
 }
 

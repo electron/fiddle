@@ -8,7 +8,7 @@ import { BlockAcceleratorsSettings } from './settings-general-block-accelerators
 import { ConsoleSettings } from './settings-general-console';
 import { GitHubSettings } from './settings-general-github';
 
-export interface GeneralSettingsProps {
+interface GeneralSettingsProps {
   appState: AppState;
   toggleHasPopoverOpen: () => void;
 }

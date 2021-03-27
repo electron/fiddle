@@ -5,7 +5,7 @@ import { ChromeMac } from './chrome-mac';
 import { Commands } from './commands';
 import { WelcomeTour } from './tour-welcome';
 
-export interface HeaderProps {
+interface HeaderProps {
   appState: AppState;
 }
 

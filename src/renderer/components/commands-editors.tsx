@@ -14,11 +14,11 @@ import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
 
-export interface EditorDropdownState {
+interface EditorDropdownState {
   value: string;
 }
 
-export interface EditorDropdownProps {
+interface EditorDropdownProps {
   appState: AppState;
 }
 

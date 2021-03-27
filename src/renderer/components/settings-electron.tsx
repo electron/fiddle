@@ -19,11 +19,11 @@ import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
 import { ElectronReleaseChannel, getReleaseChannel } from '../versions';
 
-export interface ElectronSettingsProps {
+interface ElectronSettingsProps {
   appState: AppState;
 }
 
-export interface ElectronSettingsState {
+interface ElectronSettingsState {
   isDownloadingAll: boolean;
   isDeletingAll: boolean;
 }

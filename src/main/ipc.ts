@@ -16,7 +16,7 @@ import { getOrCreateMainWindow } from './windows';
  * @class IpcManager
  * @extends {EventEmitter}
  */
-export class IpcMainManager extends EventEmitter {
+class IpcMainManager extends EventEmitter {
   public readyWebContents = new WeakSet<Electron.WebContents>();
   private messageQueue = new WeakMap<
     Electron.WebContents,

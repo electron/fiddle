@@ -10,12 +10,12 @@ import {
 import { DocsDemoPage, MosaicId } from '../../interfaces';
 import { AppState } from '../state';
 
-export interface ToolbarButtonProps {
+interface ToolbarButtonProps {
   appState: AppState;
   id: MosaicId;
 }
 
-export abstract class ToolbarButton extends React.PureComponent<ToolbarButtonProps> {
+abstract class ToolbarButton extends React.PureComponent<ToolbarButtonProps> {
   public static contextType = MosaicWindowContext;
   public context: MosaicWindowContext;
 
