@@ -222,6 +222,13 @@ exports[`BisectDialog component renders 1`] = `
         text="Begin"
       />
       <Blueprint3.Button
+        disabled={false}
+        icon="lab-test"
+        key="auto"
+        onClick={[Function]}
+        text="Auto"
+      />
+      <Blueprint3.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -438,6 +445,13 @@ exports[`BisectDialog component renders 2`] = `
         key="submit"
         onClick={[Function]}
         text="Begin"
+      />
+      <Blueprint3.Button
+        disabled={true}
+        icon="lab-test"
+        key="auto"
+        onClick={[Function]}
+        text="Auto"
       />
       <Blueprint3.Button
         icon="cross"
@@ -663,6 +677,13 @@ exports[`BisectDialog component renders 3`] = `
         key="submit"
         onClick={[Function]}
         text="Begin"
+      />
+      <Blueprint3.Button
+        disabled={true}
+        icon="lab-test"
+        key="auto"
+        onClick={[Function]}
+        text="Auto"
       />
       <Blueprint3.Button
         icon="cross"
@@ -897,6 +918,13 @@ exports[`BisectDialog component renders 4`] = `
         text="Begin"
       />
       <Blueprint3.Button
+        disabled={true}
+        icon="lab-test"
+        key="auto"
+        onClick={[Function]}
+        text="Auto"
+      />
+      <Blueprint3.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -1128,6 +1156,13 @@ exports[`BisectDialog component renders 5`] = `
         key="submit"
         onClick={[Function]}
         text="Begin"
+      />
+      <Blueprint3.Button
+        disabled={true}
+        icon="lab-test"
+        key="auto"
+        onClick={[Function]}
+        text="Auto"
       />
       <Blueprint3.Button
         icon="cross"
