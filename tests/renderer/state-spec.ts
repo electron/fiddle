@@ -17,7 +17,10 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
+import {
+  DEFAULT_MOSAIC_ARRANGEMENT,
+  SORTED_EDITORS,
+} from '../../src/renderer/constants';
 import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
@@ -603,15 +606,15 @@ describe('AppState', () => {
     it('hides a given editor and creates a backup', () => {
       appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
       appState.closedPanels = {};
-      appState.hideAndBackupMosaic(EditorId.main);
+      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: EditorId.renderer,
+        first: SORTED_EDITORS[1],
         second: {
           direction: 'column',
-          first: EditorId.preload,
-          second: EditorId.html,
+          first: SORTED_EDITORS[2],
+          second: SORTED_EDITORS[3],
         },
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
@@ -635,15 +638,15 @@ describe('AppState', () => {
 
   describe('resetEditorLayout()', () => {
     it('Puts editors in default arrangement', () => {
-      appState.hideAndBackupMosaic(EditorId.main);
+      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: EditorId.renderer,
+        first: SORTED_EDITORS[1],
         second: {
           direction: 'column',
-          first: EditorId.preload,
-          second: EditorId.html,
+          first: SORTED_EDITORS[2],
+          second: SORTED_EDITORS[3],
         },
       });
 

@@ -66,12 +66,13 @@ export class App {
 
     // if the gist content is empty or matches the empty file output, don't show it
     const EMPTIES = Object.values(EMPTY_EDITOR_CONTENT);
-    const shouldBeVisible = (txt) => txt.length > 0 && !EMPTIES.includes(txt);
+    const shouldShowContent = (content?: string) =>
+      content && content.length > 0 && !EMPTIES.includes(content);
 
     // sort and display all editors that have content
-    const visibleEditors = Object.entries(editorValues)
-      .filter(([_id, content]) => shouldBeVisible(content))
-      .map(([id]) => id)
+    const visibleEditors: EditorId[] = Object.entries(editorValues)
+      .filter(([_id, content]) => shouldShowContent(content))
+      .map(([id]) => id as EditorId)
       .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
 
     this.state.gistId = gistId || '';
