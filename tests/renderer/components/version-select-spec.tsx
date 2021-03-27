@@ -16,7 +16,7 @@ import {
 } from '../../../src/renderer/components/version-select';
 import { mockVersions } from '../../mocks/electron-versions';
 
-const { ready, unknown, downloading } = VersionState;
+const { downloading, ready, unknown, unzipping } = VersionState;
 const { remote, local } = VersionSource;
 
 describe('VersionSelect component', () => {
@@ -133,14 +133,15 @@ describe('VersionSelect component', () => {
 
   describe('getItemIcon()', () => {
     it('returns the correct icon', () => {
-      const vDownloaded = { ...mockVersion1, state: ready };
-      expect(getItemIcon(vDownloaded)).toBe('saved');
-
-      const vDownloading = { ...mockVersion1, state: downloading };
-      expect(getItemIcon(vDownloading)).toBe('cloud-download');
-
-      const vUnknown = { ...mockVersion1, state: unknown };
-      expect(getItemIcon(vUnknown)).toBe('cloud');
+      const icons: Array<{ state: VersionState; expected: string }> = [
+        { state: downloading, expected: 'cloud-download' },
+        { state: ready, expected: 'saved' },
+        { state: unknown, expected: 'cloud' },
+        { state: unzipping, expected: 'compressed' },
+      ];
+      icons.forEach(({ state, expected }) => {
+        expect(getItemIcon({ ...mockVersion1, state })).toBe(expected);
+      });
     });
   });
 

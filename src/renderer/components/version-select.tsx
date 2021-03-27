@@ -42,11 +42,16 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  * @returns
  */
 export function getItemIcon({ state }: RunnableVersion) {
-  return state === 'ready'
-    ? 'saved'
-    : state === 'downloading'
-    ? 'cloud-download'
-    : 'cloud';
+  switch (state) {
+    case VersionState.unknown:
+      return 'cloud';
+    case VersionState.ready:
+      return 'saved';
+    case VersionState.downloading:
+      return 'cloud-download';
+    case VersionState.unzipping:
+      return 'compressed';
+  }
 }
 
 /**

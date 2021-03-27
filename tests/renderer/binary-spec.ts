@@ -17,14 +17,6 @@ jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',
 }));
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => {
-    if (p === 'extract-zip') {
-      return { default: require('extract-zip') };
-    }
-    throw new Error(`Unexpected module '${p}'`);
-  },
-}));
 jest.mock('../../src/renderer/fetch-types', () => ({
   removeTypeDefsForVersion: jest.fn(),
 }));

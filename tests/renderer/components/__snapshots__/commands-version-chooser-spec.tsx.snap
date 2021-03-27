@@ -104,7 +104,6 @@ exports[`VersionSelect component renders 1`] = `
         "version": "2.0.2",
       }
     }
-    disabled={false}
     onVersionSelect={[Function]}
   />
 </Blueprint3.ButtonGroup>

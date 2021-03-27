@@ -5,14 +5,7 @@ import {
   ElectronReleaseChannel,
   GenericDialogType,
 } from '../interfaces';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-  FILENAME_KEYS,
-} from '../shared-constants';
+import { FILENAME_KEYS } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -140,16 +133,11 @@ export class RemoteLoader {
       const octo = await getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
 
-      return this.handleLoadingSuccess(
-        {
-          html: this.getContentOrEmpty(gist, INDEX_HTML_NAME),
-          main: this.getContentOrEmpty(gist, MAIN_JS_NAME),
-          renderer: this.getContentOrEmpty(gist, RENDERER_JS_NAME),
-          preload: this.getContentOrEmpty(gist, PRELOAD_JS_NAME),
-          css: this.getContentOrEmpty(gist, STYLES_CSS_NAME),
-        },
-        gistId,
-      );
+      const values: Partial<EditorValues> = {};
+      for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
+        values[editorId] = this.getContentOrEmpty(gist, filename);
+      }
+      return this.handleLoadingSuccess(values, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
     }

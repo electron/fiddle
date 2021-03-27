@@ -146,6 +146,7 @@ export class AppState {
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
   @observable public isRunning = false;
+  @observable public isAutoBisecting = false;
   @observable public isInstallingModules = false;
   @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions = false;

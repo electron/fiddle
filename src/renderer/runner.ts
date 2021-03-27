@@ -60,7 +60,21 @@ export class Runner {
    * @returns {Promise<RunResult>}
    * @memberof Runner
    */
-  public async autobisect(
+  public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
+    const { appState } = this;
+    appState.isAutoBisecting = true;
+    const done = () => (appState.isAutoBisecting = false);
+    return this.autobisectImpl(versions).finally(done);
+  }
+
+  /**
+   * Bisect the current fiddle across the specified versions.
+   *
+   * @param {Array<RunnableVersion>} versions - versions to bisect
+   * @returns {Promise<RunResult>}
+   * @memberof Runner
+   */
+  public async autobisectImpl(
     versions: Array<RunnableVersion>,
   ): Promise<RunResult> {
     const prefix = `Runner: autobisect`;

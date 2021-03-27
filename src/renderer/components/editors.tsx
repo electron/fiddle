@@ -3,6 +3,13 @@ import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import {
+  INDEX_HTML_NAME,
+  MAIN_JS_NAME,
+  PRELOAD_JS_NAME,
+  RENDERER_JS_NAME,
+  STYLES_CSS_NAME,
+} from '../../shared-constants';
+import {
   Mosaic,
   MosaicBranch,
   MosaicNode,
@@ -37,12 +44,12 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 };
 
 export const TITLE_MAP: Record<MosaicId, string> = {
-  main: 'Main Process (main.js)',
-  renderer: 'Renderer Process (renderer.js)',
-  preload: 'Preload (preload.js)',
-  html: 'HTML (index.html)',
-  css: 'Stylesheet (styles.css)',
-  docsDemo: 'Docs & Demos',
+  [EditorId.main]: `Main Process (${MAIN_JS_NAME})`,
+  [EditorId.renderer]: `Renderer Process (${RENDERER_JS_NAME})`,
+  [EditorId.preload]: `Preload (${PRELOAD_JS_NAME})`,
+  [EditorId.html]: `HTML (${INDEX_HTML_NAME})`,
+  [EditorId.css]: `Stylesheet (${STYLES_CSS_NAME})`,
+  [PanelId.docsDemo]: 'Docs & Demos',
 };
 
 export interface EditorsProps {

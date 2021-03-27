@@ -2,6 +2,7 @@ import { IItemRendererProps } from '@blueprintjs/select';
 import { shell } from 'electron';
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import * as fs from 'fs-extra';
 
 import {
   AppearanceSettings,
@@ -22,9 +23,6 @@ const doNothingFunc = () => {
 };
 
 jest.mock('fs-extra');
-jest.mock('../../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
-}));
 
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
@@ -135,7 +133,6 @@ describe('AppearanceSettings component', () => {
 
   describe('createNewThemeFromCurrent()', () => {
     it('creates a new file from the current theme', async () => {
-      const fs = require('fs-extra');
       const wrapper = shallow(
         <AppearanceSettings
           appState={store}
@@ -148,7 +145,7 @@ describe('AppearanceSettings component', () => {
       expect(shell.showItemInFolder).toHaveBeenCalled();
       expect(fs.outputJSON).toHaveBeenCalled();
 
-      const args = fs.outputJSON.mock.calls[0];
+      const args = (fs.outputJSON as jest.Mock).mock.calls[0];
       expect(args[0].includes(`.electron-fiddle`)).toBe(true);
       expect(args[1].name).toBeDefined();
       expect(args[1].name === 'defaultDark').toBe(false);
@@ -157,7 +154,6 @@ describe('AppearanceSettings component', () => {
     });
 
     it('adds the newly created theme to the Themes dropdown', async () => {
-      const fs = require('fs-extra');
       const arr: Array<FiddleTheme> = [];
       (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
       (fs.outputJSON as jest.Mock).mockImplementation(

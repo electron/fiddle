@@ -87,6 +87,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
         <Button
           icon="git-branch"
           text="Bisect"
+          disabled={appState.isAutoBisecting}
           onClick={appState.toggleBisectDialog}
         />
       );

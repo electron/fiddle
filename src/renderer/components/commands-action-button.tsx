@@ -10,6 +10,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import * as path from 'path';
 
 import { when } from 'mobx';
 import {
@@ -19,13 +20,7 @@ import {
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../../shared-constants';
+import { FILENAME_KEYS } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
@@ -434,22 +429,13 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    return {
-      [INDEX_HTML_NAME]: {
-        content: values.html || EMPTY_EDITOR_CONTENT.html,
-      },
-      [MAIN_JS_NAME]: {
-        content: values.main || EMPTY_EDITOR_CONTENT.js,
-      },
-      [RENDERER_JS_NAME]: {
-        content: values.renderer || EMPTY_EDITOR_CONTENT.js,
-      },
-      [PRELOAD_JS_NAME]: {
-        content: values.preload || EMPTY_EDITOR_CONTENT.js,
-      },
-      [STYLES_CSS_NAME]: {
-        content: values.css || EMPTY_EDITOR_CONTENT.css,
-      },
-    };
+    const getSuffix = (name: string) => path.parse(name).ext.slice(1);
+    const filesList = {};
+    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
+      filesList[filename] = {
+        content: values[editorId] || EMPTY_EDITOR_CONTENT[getSuffix(filename)],
+      };
+    }
+    return filesList;
   };
 }

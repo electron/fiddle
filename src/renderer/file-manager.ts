@@ -1,18 +1,10 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PACKAGE_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../shared-constants';
+import { FILENAME_KEYS, PACKAGE_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
-import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
@@ -133,13 +125,11 @@ export class FileManager {
   ): Promise<Files> {
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await window.ElectronFiddle.app.getEditorValues(pOptions);
-    let output: Files = new Map();
 
-    output.set(RENDERER_JS_NAME, values.renderer);
-    output.set(MAIN_JS_NAME, values.main);
-    output.set(INDEX_HTML_NAME, values.html);
-    output.set(PRELOAD_JS_NAME, values.preload);
-    output.set(STYLES_CSS_NAME, values.css);
+    let output: Files = new Map();
+    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
+      output.set(filename, values[editorId]);
+    }
     output.set(PACKAGE_NAME, values.package!);
 
     for (const transform of transforms) {
@@ -165,8 +155,6 @@ export class FileManager {
    */
   public async cleanup(dir?: string): Promise<boolean> {
     if (dir) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
-
       if (fs.existsSync(dir)) {
         try {
           await fs.remove(dir);
@@ -192,7 +180,6 @@ export class FileManager {
     options: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<string> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const tmp = await import('tmp');
     const files = await this.getFiles(options, ...transforms);
     const dir = tmp.dirSync();
@@ -220,7 +207,6 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
@@ -238,7 +224,6 @@ export class FileManager {
    */
   private async removeFile(filePath: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);

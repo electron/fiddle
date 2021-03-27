@@ -1,6 +1,5 @@
-import * as pathType from 'path';
+import * as path from 'path';
 import { EditorValues } from '../interfaces';
-import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 
 /**
@@ -9,8 +8,7 @@ import { readFiddle } from '../utils/read-fiddle';
  * @param {string} name
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplateValues(name: string): Promise<EditorValues> {
-  const path = await fancyImport<typeof pathType>('path');
+export function getTemplateValues(name: string): Promise<EditorValues> {
   const folder = path.join(
     __dirname,
     '../../static/show-me',
