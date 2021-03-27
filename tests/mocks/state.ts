@@ -6,5 +6,6 @@ export class MockState {
   @observable public isConsoleShowing = true;
   @observable public isGenericDialogShowing = false;
   @observable public isUsingSystemTheme = true;
+  @observable public title = 'Electron Fiddle';
   @observable public output = [];
 }

@@ -17,7 +17,12 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import { EditorId, MosaicId, PanelId } from '../../interfaces';
+import {
+  EditorId,
+  MosaicId,
+  PanelId,
+  SetFiddleOptions,
+} from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
@@ -101,12 +106,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
       const fiddle = await getTemplate(version);
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, {});
+      const options: SetFiddleOptions = { templateName: version };
+      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
     });
 
     ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
       const fiddle = await getTestTemplate();
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, {});
+      const options: SetFiddleOptions = { templateName: 'Test' };
+      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
     });
 
     ipcRendererManager.on(

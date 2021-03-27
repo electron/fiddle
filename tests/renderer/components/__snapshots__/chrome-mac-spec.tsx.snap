@@ -6,7 +6,7 @@ exports[`Chrome-Mac component renders 1`] = `
   onDoubleClick={[Function]}
 >
   <small>
-    Electron Fiddle - Unsaved
+    Electron Fiddle
   </small>
 </div>
 `;

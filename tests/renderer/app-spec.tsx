@@ -1,6 +1,7 @@
 import { App } from '../../src/renderer/app';
 import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
+import { waitFor } from '../../src/utils/wait-for';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
 import { EditorId } from '../../src/interfaces';
@@ -517,6 +518,23 @@ describe('App component', () => {
         callback({ matches: false });
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
       });
+    });
+  });
+
+  describe('setupTitleListeners()', () => {
+    let app: App;
+
+    beforeEach(() => {
+      app = new App();
+      (app.state as Partial<AppState>) = new MockState();
+    });
+
+    it('updates the document title when state.title changes', async () => {
+      const title = 'Hello, World!';
+      app.setupTitleListeners();
+      (app.state.title as any) = title;
+      await waitFor(() => document.title?.length > 0);
+      expect(document.title).toMatch(title);
     });
   });
 });

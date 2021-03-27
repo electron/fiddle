@@ -16,7 +16,6 @@ import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import { getTitle } from '../utils/get-title';
 import { isEditorBackup } from '../utils/type-checks';
 import { EMPTY_EDITOR_CONTENT } from './constants';
 import { FileManager } from './file-manager';
@@ -100,8 +99,6 @@ export class App {
     await this.state.setVisibleMosaics(visibleEditors);
     await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
-
-    document.title = getTitle(this.state);
 
     return true;
   }
@@ -201,6 +198,7 @@ export class App {
 
     this.setupResizeListener();
     this.setupThemeListeners();
+    this.setupTitleListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
@@ -267,6 +265,25 @@ export class App {
    */
   public setupResizeListener(): void {
     window.addEventListener('resize', updateEditorLayout);
+  }
+
+  /**
+   * Have document.title track state.title
+   */
+  public setupTitleListeners() {
+    // the observables used for the title usually change in a batch,
+    // so when setting document title, wait a tick to avoid flicker.
+    let titleIdle: any;
+    reaction(
+      () => this.state.title,
+      (title) => {
+        clearTimeout(titleIdle);
+        titleIdle = setTimeout(() => {
+          document.title = title;
+          titleIdle = null;
+        });
+      },
+    );
   }
 }
 
