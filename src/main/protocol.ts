@@ -68,7 +68,7 @@ const handlePotentialProtocolLaunch = (url: string) => {
   }
 };
 
-export const scanArgv = (argv: Array<string>) => {
+const scanArgv = (argv: Array<string>) => {
   const protocolArg = argv.find((arg) => arg.startsWith(`${PROTOCOL}://`));
   if (protocolArg) {
     console.info('Found protocol arg in argv:', protocolArg);
@@ -76,7 +76,7 @@ export const scanArgv = (argv: Array<string>) => {
   }
 };
 
-export const scanNpmArgv = (argv: string) => {
+const scanNpmArgv = (argv: string) => {
   const parsedArgv = JSON.parse(argv);
   const { original: args } = parsedArgv;
   scanArgv(args);

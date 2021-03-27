@@ -1,5 +1,3 @@
-export type WindowNames = 'main';
-
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;

@@ -117,9 +117,7 @@ export async function getTheme(
  * @param {FiddleTheme} theme
  * @returns {string}
  */
-export async function getCssStringForTheme(
-  theme: FiddleTheme,
-): Promise<string> {
+async function getCssStringForTheme(theme: FiddleTheme): Promise<string> {
   let cssContent = '';
 
   Object.keys(theme.common).forEach((key) => {
