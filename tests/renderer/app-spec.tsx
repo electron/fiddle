@@ -109,9 +109,9 @@ describe('App component', () => {
     });
 
     it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-
       const app = new App();
+
+      (window as any).ElectronFiddle = null;
       let threw = false;
       try {
         await app.getEditorValues({});
@@ -371,9 +371,9 @@ describe('App component', () => {
     });
 
     it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-
       const app = new App();
+
+      (window as any).ElectronFiddle = null;
       let threw = false;
       try {
         await app.setEditorValues({ html: '', main: '', renderer: '' });

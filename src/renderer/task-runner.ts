@@ -9,13 +9,12 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
-import { App } from './app';
 import { AppState } from './state';
-import { IpcRendererManager } from './ipc';
-import { Runner } from './runner';
 
 import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
+
+import { ipcRendererManager } from './ipc';
 
 export class TaskRunner {
   private readonly autobisect: (v: RunnableVersion[]) => Promise<RunResult>;
@@ -27,12 +26,11 @@ export class TaskRunner {
   private readonly setVersion: (ver: string) => Promise<void>;
   private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
 
-  constructor(
-    app: App,
-    private readonly appState: AppState,
-    runner: Runner,
-    ipc: IpcRendererManager,
-  ) {
+  constructor(private readonly appState: AppState) {
+    const { app } = window.ElectronFiddle;
+    const { runner } = app;
+    const ipc = ipcRendererManager;
+
     this.autobisect = runner.autobisect.bind(runner);
     this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
     this.hide = this.appState.hideChannels.bind(this.appState);
@@ -106,12 +104,12 @@ export class TaskRunner {
 
     if (hideChannels.length > 0) {
       log(`Task: Hide channels ${hideChannels.join(', ')}`);
-      await this.hide(hideChannels);
+      this.hide(hideChannels);
     }
 
     if (showChannels.length > 0) {
       log(`Task: Show channels ${showChannels.join(', ')}`);
-      await this.show(showChannels);
+      this.show(showChannels);
     }
 
     const normVersion = normalizeVersion(version);

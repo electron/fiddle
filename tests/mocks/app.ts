@@ -16,6 +16,7 @@ export class AppMock {
   });
 
   public loadTheme = jest.fn();
+  public openFiddle = jest.fn();
 
   public typeDefDisposable = {
     dispose: jest.fn(),
@@ -24,6 +25,8 @@ export class AppMock {
   public fileManager = new FileManager();
   public runner = new RunnerMock();
   public remoteLoader = new RemoteLoader();
+
+  public taskRunner = {};
 
   public monaco = {
     editor: {

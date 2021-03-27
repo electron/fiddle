@@ -9,16 +9,16 @@ import {
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 
-import { App } from '../../src/renderer/app';
-import { Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
 import { TaskRunner } from '../../src/renderer/task-runner';
-import { IpcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager, IpcRendererManager } from '../../src/renderer/ipc';
+import { AppMock } from '../mocks/app';
+import { MockState } from '../mocks/state';
 
 describe('Task Runner component', () => {
-  let app: Partial<App>;
-  let appState: Partial<AppState>;
-  let runner: Partial<Runner>;
+  let app: AppMock;
+  let appState: MockState;
+  let runner: any;
   let ipc: IpcRendererManager;
 
   function makeRunnables(versions: string[]): RunnableVersion[] {
@@ -30,23 +30,12 @@ describe('Task Runner component', () => {
   }
 
   beforeEach(() => {
-    app = {
-      openFiddle: jest.fn(),
-    };
-    appState = {
-      hasVersion: jest.fn(),
-      hideChannels: jest.fn(),
-      pushOutput: jest.fn(),
-      setVersion: jest.fn(),
-      showChannels: jest.fn(),
-      versionsToShow: [],
-    };
-    runner = {
-      autobisect: jest.fn(),
-      run: jest.fn(),
-    };
-    ipc = new IpcRendererManager();
-    new TaskRunner(app as App, appState as AppState, runner as Runner, ipc);
+    app = (window.ElectronFiddle.app as unknown) as AppMock; // App; // new AppMock();
+    appState = new MockState();
+    runner = app.runner;
+    runner.autobisect.foo = 'a';
+    ipc = ipcRendererManager;
+    app.taskRunner = new TaskRunner((appState as unknown) as AppState);
   });
 
   async function requestAndWait(ipcEvent: IpcEvents, req: any) {

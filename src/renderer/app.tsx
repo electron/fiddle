@@ -23,7 +23,6 @@ import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { TaskRunner } from './task-runner';
-import { ipcRendererManager } from './ipc';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
@@ -41,18 +40,13 @@ export class App {
   public fileManager = new FileManager(appState);
   public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
-  public taskRunner: TaskRunner;
+  public readonly taskRunner: TaskRunner;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
     this.setEditorValues = this.setEditorValues.bind(this);
 
-    this.taskRunner = new TaskRunner(
-      this,
-      appState,
-      this.runner,
-      ipcRendererManager,
-    );
+    this.taskRunner = new TaskRunner(appState);
   }
 
   public async replaceFiddle(

@@ -7,4 +7,11 @@ export class MockState {
   @observable public isGenericDialogShowing = false;
   @observable public isUsingSystemTheme = true;
   @observable public output = [];
+  @observable public versionsToShow = [];
+
+  public hasVersion = jest.fn();
+  public hideChannels = jest.fn();
+  public pushOutput = jest.fn();
+  public setVersion = jest.fn();
+  public showChannels = jest.fn();
 }
