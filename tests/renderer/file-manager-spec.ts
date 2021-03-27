@@ -1,3 +1,5 @@
+import * as fs from 'fs-extra';
+
 import { Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
@@ -18,10 +20,6 @@ jest.mock('../../src/renderer/templates', () => ({
     main: '',
     renderer: '',
   }),
-}));
-
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (p: string) => require(p),
 }));
 
 describe('FileManager', () => {
@@ -58,7 +56,6 @@ describe('FileManager', () => {
     });
 
     it('writes empty strings if readFile throws an error', async () => {
-      const fs = require('fs-extra');
       (fs.readFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
@@ -99,23 +96,18 @@ describe('FileManager', () => {
 
   describe('saveFiddle()', () => {
     it('saves all non-empty files in Fiddle', async () => {
-      const fs = require('fs-extra');
-
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(5);
     });
 
     it('removes a file that is newly empty', async () => {
-      const fs = require('fs-extra');
-
       await fm.saveFiddle('/fake/path');
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
     });
 
     it('handles an error (output)', async () => {
-      const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
@@ -127,7 +119,6 @@ describe('FileManager', () => {
     });
 
     it('handles an error (remove)', async () => {
-      const fs = require('fs-extra');
       (fs.remove as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
@@ -161,7 +152,6 @@ describe('FileManager', () => {
 
   describe('saveToTemp()', () => {
     it('saves as a local fiddle', async () => {
-      const fs = require('fs-extra');
       const tmp = require('tmp');
 
       await fm.saveToTemp({
@@ -174,7 +164,6 @@ describe('FileManager', () => {
     });
 
     it('throws an error', async () => {
-      const fs = require('fs-extra');
       (fs.outputFile as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
@@ -221,8 +210,7 @@ describe('FileManager', () => {
 
   describe('cleanup()', () => {
     it('attempts to remove a directory if it exists', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(true);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
 
       const result = await fm.cleanup('/fake/dir');
 
@@ -231,8 +219,7 @@ describe('FileManager', () => {
     });
 
     it('does not attempt to remove a directory if it does not exists', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(false);
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
 
       const result = await fm.cleanup('/fake/dir');
 
@@ -241,9 +228,8 @@ describe('FileManager', () => {
     });
 
     it('handles an error', async () => {
-      const fs = require('fs-extra');
-      fs.existsSync.mockReturnValueOnce(true);
-      fs.remove.mockReturnValueOnce(Promise.reject('bwapbwap'));
+      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      (fs.remove as jest.Mock).mockReturnValueOnce(Promise.reject('bwapbwap'));
 
       const result = await fm.cleanup('/fake/dir');
 

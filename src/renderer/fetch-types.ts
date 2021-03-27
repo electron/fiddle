@@ -1,10 +1,9 @@
-import * as fsType from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
 import { callIn } from '../utils/call-in';
-import { fancyImport } from '../utils/import';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 
@@ -42,18 +41,10 @@ export async function fetchTypeDefinitions(version: string): Promise<string> {
  *
  * @param version
  */
-export async function removeTypeDefsForVersion(version: string) {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
+export function removeTypeDefsForVersion(version: string): Promise<void> {
   const _version = normalizeVersion(version);
   const typeDefsDir = path.dirname(getOfflineTypeDefinitionPath(_version));
-
-  if (fs.existsSync(typeDefsDir)) {
-    try {
-      await fs.remove(typeDefsDir);
-    } catch (error) {
-      throw error;
-    }
-  }
+  return fs.remove(typeDefsDir);
 }
 
 /**
@@ -72,10 +63,7 @@ export function getOfflineTypeDefinitionPath(version: string): string {
  * @param {string} version
  * @returns {boolean}
  */
-export async function getOfflineTypeDefinitions(
-  version: string,
-): Promise<boolean> {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
+export function getOfflineTypeDefinitions(version: string): boolean {
   return fs.existsSync(getOfflineTypeDefinitionPath(version));
 }
 
@@ -89,11 +77,10 @@ export async function getOfflineTypeDefinitions(
 export async function getDownloadedVersionTypeDefs(
   version: RunnableVersion,
 ): Promise<string | null> {
-  const fs = await fancyImport<typeof fsType>('fs-extra');
   await fs.mkdirp(definitionPath);
   const offlinePath = getOfflineTypeDefinitionPath(version.version);
 
-  if (await getOfflineTypeDefinitions(version.version)) {
+  if (getOfflineTypeDefinitions(version.version)) {
     try {
       return await fs.readFile(offlinePath, 'utf-8');
     } catch (error) {
@@ -117,7 +104,6 @@ export async function getDownloadedVersionTypeDefs(
 
 export async function getLocalVersionTypeDefs(version: RunnableVersion) {
   if (version.source === VersionSource.local && !!version.localPath) {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const typesPath = getLocalTypePathForVersion(version);
     if (!!typesPath && fs.existsSync(typesPath)) {
       return fs.readFile(typesPath, 'utf-8');

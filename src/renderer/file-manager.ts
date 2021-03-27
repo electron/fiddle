@@ -1,11 +1,10 @@
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { Files, FileTransform } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { FILENAME_KEYS, PACKAGE_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
-import { fancyImport } from '../utils/import';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
@@ -156,8 +155,6 @@ export class FileManager {
    */
   public async cleanup(dir?: string): Promise<boolean> {
     if (dir) {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
-
       if (fs.existsSync(dir)) {
         try {
           await fs.remove(dir);
@@ -183,7 +180,6 @@ export class FileManager {
     options: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<string> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const tmp = await import('tmp');
     const files = await this.getFiles(options, ...transforms);
     const dir = tmp.dirSync();
@@ -211,7 +207,6 @@ export class FileManager {
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
@@ -229,7 +224,6 @@ export class FileManager {
    */
   private async removeFile(filePath: string): Promise<void> {
     try {
-      const fs = await fancyImport<typeof fsType>('fs-extra');
       return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);

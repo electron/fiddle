@@ -5,16 +5,16 @@ import {
   FormGroup,
   MenuItem,
 } from '@blueprintjs/core';
-import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { shell } from 'electron';
-import * as fsType from 'fs-extra';
-import { reaction } from 'mobx';
-import { observer } from 'mobx-react';
-import * as path from 'path';
 import * as React from 'react';
+import * as fs from 'fs-extra';
+import * as namor from 'namor';
+import * as path from 'path';
+import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import { observer } from 'mobx-react';
+import { reaction } from 'mobx';
+import { shell } from 'electron';
 
 import { highlightText } from '../../utils/highlight-text';
-import { fancyImport } from '../../utils/import';
 import { AppState } from '../state';
 import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
@@ -137,11 +137,9 @@ export class AppearanceSettings extends React.Component<
    */
   public async createNewThemeFromCurrent(): Promise<boolean> {
     const { appState } = this.props;
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     const theme = await getTheme(appState.theme);
 
     try {
-      const namor = await fancyImport<any>('namor');
       const name = namor.generate({ words: 2, numbers: 0 });
       const themePath = path.join(THEMES_PATH, `${name}.json`);
 
@@ -175,8 +173,6 @@ export class AppearanceSettings extends React.Component<
    * @returns {Promise<boolean>}
    */
   public async openThemeFolder(): Promise<boolean> {
-    const fs = await fancyImport<typeof fsType>('fs-extra');
-
     try {
       await fs.ensureDir(THEMES_PATH);
       await shell.showItemInFolder(THEMES_PATH);

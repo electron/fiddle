@@ -1,8 +1,7 @@
 import { EditorValues } from '../interfaces';
 import { FILENAME_KEYS } from '../shared-constants';
-import { fancyImport } from './import';
 
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 
 /**
@@ -22,7 +21,6 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
 
   const hits: string[] = [];
   const misses = new Set(Object.keys(FILENAME_KEYS));
-  const fs = await fancyImport<typeof fsType>('fs-extra');
 
   const tryRead = (basename: string) => {
     try {

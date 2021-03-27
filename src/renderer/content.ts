@@ -1,10 +1,9 @@
 import { EditorId, EditorValues, VersionSource } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { fancyImport } from '../utils/import';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
-import * as fsType from 'fs-extra';
+import * as fs from 'fs-extra';
 import * as path from 'path';
 import * as semver from 'semver';
 import decompress from 'decompress';
@@ -33,7 +32,6 @@ async function prepareTemplate(branch: string): Promise<string> {
 
   try {
     // if we don't have it, download it
-    const fs = await fancyImport<typeof fsType>('fs-extra');
     if (!fs.existsSync(folder)) {
       console.log(`Content: ${branch} downloading template`);
       const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;

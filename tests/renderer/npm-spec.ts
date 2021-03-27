@@ -13,11 +13,6 @@ import { overridePlatform, resetPlatform } from '../utils';
 import MockDecommentWorker from '../mocks/worker';
 jest.mock('decomment');
 jest.mock('../../src/utils/exec');
-jest.mock('../../src/utils/import', () => ({
-  fancyImport: async (_p: string) => {
-    return { default: require('builtin-modules') };
-  },
-}));
 
 window.Worker = MockDecommentWorker;
 
