@@ -7,32 +7,28 @@ import { ChromeMac } from '../../../src/renderer/components/chrome-mac';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-// mock out parts of appState that touch the real world
-jest.mock('extract-zip');
-jest.mock('fs-extra');
-
 describe('Chrome-Mac component', () => {
-  const appState: any = new MockState();
+  const store: any = new MockState();
 
   afterEach(() => resetPlatform());
 
   it('renders', () => {
     overridePlatform('darwin');
 
-    const wrapper = shallow(<ChromeMac appState={appState} />);
+    const wrapper = shallow(<ChromeMac appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders nothing on win32', () => {
     overridePlatform('win32');
 
-    const wrapper = shallow(<ChromeMac appState={appState} />);
+    const wrapper = shallow(<ChromeMac appState={store} />);
     expect(wrapper.html()).toBe(null);
   });
 
   describe('handleDoubleClick', () => {
     it('should send a message to the main process', () => {
-      const wrapper = mount(<ChromeMac appState={appState} />);
+      const wrapper = mount(<ChromeMac appState={store} />);
       const chrome = wrapper.instance() as ChromeMac;
       ipcRendererManager.send = jest.fn();
 
