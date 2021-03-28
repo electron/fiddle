@@ -9,7 +9,7 @@ import {
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 
-import { AppState } from '../../src/renderer/state';
+import { App } from '../../src/renderer/app';
 import { TaskRunner } from '../../src/renderer/task-runner';
 import { ipcRendererManager, IpcRendererManager } from '../../src/renderer/ipc';
 import { AppMock } from '../mocks/app';
@@ -30,12 +30,12 @@ describe('Task Runner component', () => {
   }
 
   beforeEach(() => {
-    app = (window.ElectronFiddle.app as unknown) as AppMock; // App; // new AppMock();
-    appState = new MockState();
+    app = (window.ElectronFiddle.app as unknown) as AppMock;
+    appState = app.state;
     runner = app.runner;
     runner.autobisect.foo = 'a';
     ipc = ipcRendererManager;
-    app.taskRunner = new TaskRunner((appState as unknown) as AppState);
+    app.taskRunner = new TaskRunner((app as unknown) as App);
   });
 
   async function requestAndWait(ipcEvent: IpcEvents, req: any) {

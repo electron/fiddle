@@ -9,6 +9,7 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
+import { App } from './app';
 import { AppState } from './state';
 
 import { getVersionRange } from '../utils/get-version-range';
@@ -17,6 +18,7 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { ipcRendererManager } from './ipc';
 
 export class TaskRunner {
+  private readonly appState: AppState;
   private readonly autobisect: (v: RunnableVersion[]) => Promise<RunResult>;
   private readonly done: (r: RunResult) => void;
   private readonly hide: (channels: ElectronReleaseChannel[]) => Promise<void>;
@@ -26,11 +28,11 @@ export class TaskRunner {
   private readonly setVersion: (ver: string) => Promise<void>;
   private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
 
-  constructor(private readonly appState: AppState) {
-    const { app } = window.ElectronFiddle;
-    const { runner } = app;
+  constructor(app: App) {
+    const { state, runner } = app;
     const ipc = ipcRendererManager;
 
+    this.appState = state;
     this.autobisect = runner.autobisect.bind(runner);
     this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
     this.hide = this.appState.hideChannels.bind(this.appState);

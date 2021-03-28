@@ -46,7 +46,7 @@ export class App {
     this.getEditorValues = this.getEditorValues.bind(this);
     this.setEditorValues = this.setEditorValues.bind(this);
 
-    this.taskRunner = new TaskRunner(appState);
+    this.taskRunner = new TaskRunner(this);
   }
 
   public async replaceFiddle(
@@ -289,7 +289,6 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners =
-  window.ElectronFiddle.contentChangeListeners || [];
-window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
+window.ElectronFiddle.contentChangeListeners ||= [];
+window.ElectronFiddle.app ||= new App();
 window.ElectronFiddle.app.setup();
