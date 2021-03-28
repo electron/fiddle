@@ -29,27 +29,27 @@ export class TaskRunner {
   private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
 
   constructor(app: App) {
-    const { state, runner } = app;
+    const { runner, state } = app;
     const ipc = ipcRendererManager;
 
     this.appState = state;
     this.autobisect = runner.autobisect.bind(runner);
     this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
-    this.hide = this.appState.hideChannels.bind(this.appState);
-    this.log = this.appState.pushOutput.bind(this.appState);
+    this.hide = state.hideChannels.bind(state);
+    this.log = state.pushOutput.bind(state);
     this.open = app.openFiddle.bind(app);
     this.run = runner.run.bind(runner);
     this.setVersion = (ver) => {
       console.log('setVersion', ver);
-      if (this.appState.hasVersion(ver)) {
+      if (state.hasVersion(ver)) {
         console.log('calling appState.setVersion', ver);
-        return this.appState.setVersion(ver);
+        return state.setVersion(ver);
       } else {
         console.log('throwing not found');
         throw new Error(`Version "${ver}" not found`);
       }
     };
-    this.show = this.appState.showChannels.bind(this.appState);
+    this.show = state.showChannels.bind(state);
 
     this.bisect = this.bisect.bind(this);
     let event = IpcEvents.TASK_BISECT;
