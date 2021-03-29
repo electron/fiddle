@@ -49,7 +49,6 @@
     "electron-default-menu": "^1.0.2",
     "electron-devtools-installer": "^3.1.1",
     "electron-squirrel-startup": "^1.0.0",
-    "extract-zip": "^2.0.1",
     "fix-path": "^3.0.0",
     "fs-extra": "^9.1.0",
     "mobx": "^5.15.7",

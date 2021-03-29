@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import extract from 'extract-zip';
+import decompress from 'decompress';
 
 import { VersionState } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -244,7 +244,7 @@ async function unzip(zipPath: string, dir: string): Promise<void> {
   process.noAsar = true;
 
   try {
-    await extract(zipPath, { dir });
+    await decompress(zipPath, dir);
     console.log(`Binary: Unpacked!`);
   } finally {
     process.noAsar = false;
