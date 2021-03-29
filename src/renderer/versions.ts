@@ -227,7 +227,7 @@ export function getKnownVersions(): Array<Version> {
  *
  * @param {Array<Version>} versions
  */
-export function saveKnownVersions(versions: Array<Version>) {
+function saveKnownVersions(versions: Array<Version>) {
   return saveVersions(VersionKeys.known, versions);
 }
 
@@ -283,7 +283,7 @@ export async function fetchVersions() {
  * @param {Array<any>} input
  * @returns {boolean}
  */
-export function isExpectedFormat(input: Array<any>): boolean {
+function isExpectedFormat(input: Array<any>): boolean {
   return input.every((entry) => !!entry.version);
 }
 
@@ -293,7 +293,7 @@ export function isExpectedFormat(input: Array<any>): boolean {
  * @param {Array<any>} input
  * @returns {Array<Version>}
  */
-export function migrateVersions(input: Array<any> = []): Array<Version> {
+function migrateVersions(input: Array<any> = []): Array<Version> {
   return input
     .filter((item) => !!item)
     .map((item) => {
@@ -310,7 +310,7 @@ export function migrateVersions(input: Array<any> = []): Array<Version> {
     .filter((item) => !!item) as Array<Version>;
 }
 
-export function isElectronVersion(
+function isElectronVersion(
   input: Version | RunnableVersion,
 ): input is RunnableVersion {
   return (input as RunnableVersion).source !== undefined;

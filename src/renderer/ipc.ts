@@ -10,7 +10,7 @@ import { IpcEvents, ipcRendererEvents } from '../ipc-events';
  * @class IpcManager
  * @extends {EventEmitter}
  */
-export class IpcRendererManager extends EventEmitter {
+class IpcRendererManager extends EventEmitter {
   constructor() {
     super();
 

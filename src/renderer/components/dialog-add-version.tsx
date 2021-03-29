@@ -18,11 +18,11 @@ import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface AddVersionDialogProps {
+interface AddVersionDialogProps {
   appState: AppState;
 }
 
-export interface AddVersionDialogState {
+interface AddVersionDialogState {
   isValidElectron: boolean;
   isValidVersion: boolean;
   folderPath?: string;

@@ -12,7 +12,7 @@ import * as React from 'react';
 import { IPackageManager } from '../npm';
 import { AppState } from '../state';
 
-export interface ExecutionSettingsProps {
+interface ExecutionSettingsProps {
   appState: AppState;
 }
 

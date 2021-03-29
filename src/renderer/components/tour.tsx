@@ -11,12 +11,12 @@ export interface TourScriptStep {
   getButtons?: (handlers: TourStepGetButtonParams) => Array<JSX.Element>;
 }
 
-export interface TourProps {
+interface TourProps {
   tour: Set<TourScriptStep>;
   onStop: () => void;
 }
 
-export interface TourState {
+interface TourState {
   tour: IterableIterator<Array<TourScriptStep>>;
   step: TourScriptStep | null;
   i: number;

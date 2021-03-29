@@ -5,11 +5,11 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
 
-export interface WelcomeTourProps {
+interface WelcomeTourProps {
   appState: AppState;
 }
 
-export interface WelcomeTourState {
+interface WelcomeTourState {
   isTourStarted: boolean;
 }
 

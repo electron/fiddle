@@ -10,11 +10,11 @@ import { idFromUrl, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface AddressBarProps {
+interface AddressBarProps {
   appState: AppState;
 }
 
-export interface AddressBarState {
+interface AddressBarState {
   value: string;
   loaders: {
     gist: any;

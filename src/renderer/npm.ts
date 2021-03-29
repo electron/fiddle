@@ -11,8 +11,8 @@ export interface PMOperationOptions {
   packageManager: IPackageManager;
 }
 
-export let isNpmInstalled: boolean | null = null;
-export let isYarnInstalled: boolean | null = null;
+let isNpmInstalled: boolean | null = null;
+let isYarnInstalled: boolean | null = null;
 
 /* add other modules to automatically ignore here */
 /* perhaps we can expose this to the settings module?*/
@@ -162,7 +162,7 @@ export function packageRun(
   return exec(dir, `${packageManager} run ${command}`);
 }
 
-export function decommentWithWorker(input: string): Promise<string> {
+function decommentWithWorker(input: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const worker = new Worker('../utils/decomment.ts');
     worker.onmessage = function (event: MessageEvent<string>) {

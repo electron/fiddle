@@ -6,15 +6,15 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 
-export interface CreditsSettingsProps {
+interface CreditsSettingsProps {
   appState: AppState;
 }
 
-export interface CreditsSettingsState {
+interface CreditsSettingsState {
   contributors: Array<Contributor>;
 }
 
-export interface Contributor {
+interface Contributor {
   url: string;
   api: string;
   login: string;

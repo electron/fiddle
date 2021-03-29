@@ -22,11 +22,11 @@ const settingsSections = [
   SettingsSections.Credits,
 ];
 
-export interface SettingsProps {
+interface SettingsProps {
   appState: AppState;
 }
 
-export interface SettingsState {
+interface SettingsState {
   section: SettingsSections;
   hasPopoverOpen: boolean;
 }

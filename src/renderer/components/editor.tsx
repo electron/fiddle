@@ -8,7 +8,7 @@ import { EditorId } from '../../interfaces';
 import { getContent } from '../content';
 import { AppState } from '../state';
 
-export interface EditorProps {
+interface EditorProps {
   appState: AppState;
   monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;

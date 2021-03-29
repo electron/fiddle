@@ -5,7 +5,7 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { VersionSelect } from './version-select';
 
-export interface VersionChooserProps {
+interface VersionChooserProps {
   appState: AppState;
 }
 

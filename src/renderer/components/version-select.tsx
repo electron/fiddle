@@ -98,11 +98,11 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
   );
 };
 
-export interface VersionSelectState {
+interface VersionSelectState {
   value: string;
 }
 
-export interface VersionSelectProps {
+interface VersionSelectProps {
   appState: AppState;
   disabled?: boolean;
   currentVersion: RunnableVersion;
