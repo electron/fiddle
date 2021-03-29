@@ -8,6 +8,7 @@ import {
   BlockableAccelerator,
   DocsDemoPage,
   EditorId,
+  ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
@@ -50,7 +51,6 @@ import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
-  ElectronReleaseChannel,
   getDefaultVersion,
   getElectronVersions,
   getReleaseChannel,
@@ -177,6 +177,8 @@ export class AppState {
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
     this.pushOutput = this.pushOutput.bind(this);
+    this.getVersion = this.getVersion.bind(this);
+    this.hasVersion = this.hasVersion.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
     this.setVersion = this.setVersion.bind(this);
     this.showTour = this.showTour.bind(this);
@@ -192,6 +194,8 @@ export class AppState {
     this.setIsQuitting = this.setIsQuitting.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
     this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
+    this.hideChannels = this.hideChannels.bind(this);
+    this.showChannels = this.showChannels.bind(this);
 
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
@@ -351,6 +355,20 @@ export class AppState {
     }
 
     this.isUpdatingElectronVersions = false;
+  }
+
+  @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
+    this.channelsToShow = this.channelsToShow.filter(
+      (ch) => !channels.includes(ch),
+    );
+  }
+
+  @action public showChannels(channels: Array<ElectronReleaseChannel>) {
+    const s = new Set<ElectronReleaseChannel>([
+      ...this.channelsToShow,
+      ...channels,
+    ]);
+    this.channelsToShow = [...s.values()];
   }
 
   @action public async getName() {
@@ -513,6 +531,14 @@ export class AppState {
     }
   }
 
+  public hasVersion(input: string): boolean {
+    return !!this.getVersion(input);
+  }
+
+  public getVersion(input: string): RunnableVersion | null {
+    return this.versions[input];
+  }
+
   /**
    * Select a version of Electron (and download it if necessary).
    *
@@ -522,12 +548,11 @@ export class AppState {
   @action public async setVersion(input: string) {
     const version = normalizeVersion(input);
 
-    if (!this.versions[version]) {
+    if (!this.hasVersion(input)) {
       console.warn(
         `State: Called setVersion() with ${version}, which does not exist.`,
       );
-      this.setVersion(knownVersions[0].version);
-
+      await this.setVersion(knownVersions[0].version);
       return;
     }
 
@@ -649,11 +674,13 @@ export class AppState {
     if (strData.startsWith('Debugger listening on ws://')) return;
     if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
 
-    this.output.push({
+    const entry: OutputEntry = {
       timestamp: Date.now(),
       text: strData.trim(),
       isNotPre,
-    });
+    };
+    ipcRendererManager.send(IpcEvents.OUTPUT_ENTRY, entry);
+    this.output.push(entry);
   }
 
   /**

@@ -341,7 +341,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.INVALID);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
-        'Runner: autobisect Electron 2.0.1 - ❓ invalid',
+        'Runner: autobisect Electron 2.0.1 - finished test ❓ invalid',
       );
 
       spy.mockRestore();

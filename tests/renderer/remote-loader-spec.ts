@@ -1,8 +1,10 @@
 import { observable } from 'mobx';
-import { GenericDialogType } from '../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  GenericDialogType,
+} from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
-import { ElectronReleaseChannel } from '../../src/renderer/versions';
 import {
   INDEX_HTML_NAME,
   MAIN_JS_NAME,

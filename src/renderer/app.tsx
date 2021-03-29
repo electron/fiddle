@@ -22,6 +22,7 @@ import { EMPTY_EDITOR_CONTENT, SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
+import { TaskRunner } from './task-runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
@@ -39,10 +40,13 @@ export class App {
   public fileManager = new FileManager(appState);
   public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
+  public readonly taskRunner: TaskRunner;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
     this.setEditorValues = this.setEditorValues.bind(this);
+
+    this.taskRunner = new TaskRunner(this);
   }
 
   public async replaceFiddle(
@@ -223,6 +227,20 @@ export class App {
   }
 
   /**
+   * Opens a fiddle from the specified location.
+   *
+   * @param {SetFiddleOptions} the fiddle to open
+   */
+  public async openFiddle(fiddle: SetFiddleOptions) {
+    const { filePath, gistId } = fiddle;
+    if (filePath) {
+      await this.fileManager.openFiddle(filePath);
+    } else if (gistId) {
+      await this.remoteLoader.fetchGistAndLoad(gistId);
+    }
+  }
+
+  /**
    * Loads theme CSS into the HTML document.
    *
    * @returns {Promise<void>}
@@ -254,7 +272,6 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners =
-  window.ElectronFiddle.contentChangeListeners || [];
-window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
+window.ElectronFiddle.contentChangeListeners ||= [];
+window.ElectronFiddle.app ||= new App();
 window.ElectronFiddle.app.setup();

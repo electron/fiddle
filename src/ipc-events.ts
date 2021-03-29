@@ -31,6 +31,10 @@ export enum IpcEvents {
   SELECT_ALL_IN_EDITOR = 'SELECT_ALL_IN_EDITOR',
   BLOCK_ACCELERATORS = 'BLOCK_ACCELERATORS',
   CLICK_TITLEBAR_MAC = 'CLICK_TITLEBAR_MAC',
+  TASK_BISECT = 'TASK_BISECT',
+  TASK_TEST = 'TASK_TEST',
+  TASK_DONE = 'TASK_DONE',
+  OUTPUT_ENTRY = 'OUTPUT_ENTRY',
 }
 
 export const ipcMainEvents = [
@@ -43,6 +47,8 @@ export const ipcMainEvents = [
   IpcEvents.CONFIRM_QUIT,
   IpcEvents.BLOCK_ACCELERATORS,
   IpcEvents.CLICK_TITLEBAR_MAC,
+  IpcEvents.OUTPUT_ENTRY,
+  IpcEvents.TASK_DONE,
 ];
 
 export const ipcRendererEvents = [
@@ -69,6 +75,8 @@ export const ipcRendererEvents = [
   IpcEvents.BEFORE_QUIT,
   IpcEvents.GET_APP_PATHS,
   IpcEvents.SELECT_ALL_IN_EDITOR,
+  IpcEvents.TASK_BISECT,
+  IpcEvents.TASK_TEST,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

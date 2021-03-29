@@ -1,18 +1,12 @@
 import semver from 'semver';
 import {
+  ElectronReleaseChannel,
   RunnableVersion,
   Version,
   VersionSource,
   VersionState,
 } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
-
-export const enum ElectronReleaseChannel {
-  stable = 'Stable',
-  beta = 'Beta',
-  nightly = 'Nightly',
-  unsupported = 'Unsupported',
-}
 
 /**
  * Returns a sensible default version string.
