@@ -32,6 +32,8 @@ export class Editor extends React.Component<EditorProps> {
   constructor(props: EditorProps) {
     super(props);
 
+    // TODO(codebytere): handle custom editor language.
+
     switch (props.id) {
       case 'html':
         this.language = 'html';

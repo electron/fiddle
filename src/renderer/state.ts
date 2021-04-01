@@ -4,11 +4,11 @@ import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
-  ALL_EDITORS,
+  DEFAULT_EDITORS,
   ALL_MOSAICS,
   BlockableAccelerator,
   DocsDemoPage,
-  EditorId,
+  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
@@ -21,6 +21,8 @@ import {
   Version,
   VersionSource,
   VersionState,
+  CustomEditorId,
+  EditorId,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
@@ -125,6 +127,7 @@ export class AppState {
     wantsInput: false,
     placeholder: '',
   };
+  @observable public customMosaics: CustomEditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
   @observable
@@ -273,7 +276,7 @@ export class AppState {
         window.onbeforeunload = null;
 
         // set up editor listeners to verify if unsaved
-        const ids = ALL_EDITORS.filter(
+        const ids = DEFAULT_EDITORS.filter(
           (id) => id in window.ElectronFiddle.editors,
         );
         await waitForEditorsToMount(ids);
@@ -560,7 +563,7 @@ export class AppState {
     console.log(`State: Switching to Electron ${version}`);
 
     // Should we update the editor?
-    if (await isContentUnchanged(EditorId.main, this.version)) {
+    if (await isContentUnchanged(DefaultEditorId.main, this.version)) {
       const editorValues = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
@@ -688,7 +691,9 @@ export class AppState {
 
     for (const id of ALL_MOSAICS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = isEditorId(id) ? getEditorBackup(id) : true;
+        this.closedPanels[id] = isEditorId(id, this.customMosaics)
+          ? getEditorBackup(id)
+          : true;
 
         // if we have backup, remove active editor
         delete window.ElectronFiddle.editors[id];
@@ -732,6 +737,17 @@ export class AppState {
   }
 
   /**
+   * Hides the panel for a given MosaicId.
+   *
+   * @param {MosaicId} id
+   */
+  @action public removeMosaic(id: MosaicId) {
+    this.hideAndBackupMosaic(id);
+    delete window.ElectronFiddle.editors[id];
+    this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
+  }
+
+  /**
    * Shows the editor value for a given editor.
    *
    * @param {MosaicId} id
@@ -742,7 +758,7 @@ export class AppState {
   }
 
   /**
-   * Resets editor view to default layout
+   * Resets editor view to default layout.
    *
    *
    */

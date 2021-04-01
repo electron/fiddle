@@ -429,13 +429,23 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
+    const { customMosaics } = this.props.appState;
+
     const getSuffix = (name: string) => path.parse(name).ext.slice(1);
     const filesList = {};
+
+    // Add files for any custom editors created by the user.
+    for (const mosaic of customMosaics) {
+      filesList[mosaic] = { content: values[mosaic] };
+    }
+
+    // Add default Fiddle editor files.
     for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
       filesList[filename] = {
         content: values[editorId] || EMPTY_EDITOR_CONTENT[getSuffix(filename)],
       };
     }
+
     return filesList;
   };
 }

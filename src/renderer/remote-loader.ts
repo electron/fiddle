@@ -1,6 +1,9 @@
 import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
 import {
+  CustomEditorId,
+  DefaultEditorId,
+  EditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -133,9 +136,23 @@ export class RemoteLoader {
       const gist = await octo.gists.get({ gist_id: gistId });
 
       const values: Partial<EditorValues> = {};
+
+      // Fetch default Fiddle editor files.
       for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
         values[editorId] = this.getContentOrEmpty(gist, filename);
       }
+
+      // Fetch any custom editor files that the user may have created in the gist.
+      const maybeCustomEditors = Object.keys(gist.data.files).filter(
+        (file) => !Object.keys(FILENAME_KEYS).includes(file as DefaultEditorId),
+      );
+
+      for (const mosaic of maybeCustomEditors) {
+        await this.verifyCreateCustomEditor(mosaic);
+        values[mosaic] = this.getContentOrEmpty(gist, mosaic);
+        this.appState.customMosaics.push(mosaic as CustomEditorId);
+      }
+
       return this.handleLoadingSuccess(values, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
@@ -194,6 +211,19 @@ export class RemoteLoader {
 
       return '0.0.0';
     }
+  }
+
+  public async verifyCreateCustomEditor(editorName: string): Promise<boolean> {
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
+      label: `Do you want to create a custom editor with name: ${editorName}?`,
+      cancel: 'Skip',
+    });
+
+    this.appState.isGenericDialogShowing = true;
+    await when(() => !this.appState.isGenericDialogShowing);
+
+    return !!this.appState.genericDialogLastResult;
   }
 
   /**

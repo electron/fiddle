@@ -1,4 +1,10 @@
-import { ALL_EDITORS, EditorId, MosaicId, PanelId } from '../interfaces';
+import {
+  DefaultEditorId,
+  DEFAULT_EDITORS,
+  EditorId,
+  MosaicId,
+  PanelId,
+} from '../interfaces';
 import { EditorBackup } from './editor-backup';
 
 /**
@@ -9,9 +15,13 @@ import { EditorBackup } from './editor-backup';
  * @returns {input is EditorId}
  */
 export function isEditorId(
-  input: EditorId | PanelId | MosaicId,
+  input: MosaicId,
+  customMosaics: EditorId[],
 ): input is EditorId {
-  return (ALL_EDITORS as any).includes(input);
+  return (
+    DEFAULT_EDITORS.includes(input as DefaultEditorId) ||
+    customMosaics.includes(input as EditorId)
+  );
 }
 
 /**
@@ -24,7 +34,7 @@ export function isEditorId(
 export function isPanelId(
   input: EditorId | PanelId | MosaicId,
 ): input is PanelId {
-  return !(ALL_EDITORS as any).includes(input);
+  return !DEFAULT_EDITORS.includes(input as DefaultEditorId);
 }
 
 /**

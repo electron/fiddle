@@ -2,15 +2,15 @@ import * as React from 'react';
 
 import { Button, NonIdealState } from '@blueprintjs/core';
 
-import { EditorId } from '../../interfaces';
+import { DefaultEditorId } from '../../interfaces';
 import { AppState } from '../state';
 
 export function renderNonIdealState(appState: AppState) {
   const allEditors = [
-    EditorId.html,
-    EditorId.main,
-    EditorId.renderer,
-    EditorId.preload,
+    DefaultEditorId.html,
+    DefaultEditorId.main,
+    DefaultEditorId.renderer,
+    DefaultEditorId.preload,
   ];
   const resolveButton = (
     <Button

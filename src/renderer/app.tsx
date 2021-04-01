@@ -6,11 +6,13 @@ import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
 import {
-  ALL_EDITORS,
-  EditorId,
+  DEFAULT_EDITORS,
+  DefaultEditorId,
   EditorValues,
   GenericDialogType,
   SetFiddleOptions,
+  EditorId,
+  CustomEditorId,
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
@@ -26,6 +28,7 @@ import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
+import { FILENAME_KEYS } from '../shared-constants';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -68,6 +71,16 @@ export class App {
       }
     }
 
+    // Remove all previously created custom editors.
+    this.state.customMosaics = [];
+    const customEditors = Object.keys(editorValues).filter(
+      (v) => !Object.values(FILENAME_KEYS).includes(v as DefaultEditorId),
+    ) as CustomEditorId[];
+
+    for (const mosaic of customEditors) {
+      this.state.customMosaics.push(mosaic);
+    }
+
     // if the gist content is empty or matches the empty file output, don't show it
     const EMPTIES = Object.values(EMPTY_EDITOR_CONTENT);
     const shouldShowContent = (content?: string) =>
@@ -76,8 +89,10 @@ export class App {
     // sort and display all editors that have content
     const visibleEditors: EditorId[] = Object.entries(editorValues)
       .filter(([_id, content]) => shouldShowContent(content))
-      .map(([id]) => id as EditorId)
+      .map(([id]) => id as DefaultEditorId)
       .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
+
+    console.info(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
@@ -103,7 +118,8 @@ export class App {
       throw new Error('Fiddle not ready');
     }
 
-    for (const name of ALL_EDITORS) {
+    // Set content for default Fiddle mosaics.
+    for (const name of DEFAULT_EDITORS) {
       const editor = fiddle.editors[name];
       const backup = this.state.closedPanels[name];
 
@@ -127,6 +143,17 @@ export class App {
         }
       }
     }
+
+    // Set content for any custom mosaics.
+    for (const mosaic of this.state.customMosaics) {
+      const editor = fiddle.editors[mosaic];
+      if (editor && editor.setValue) {
+        const newValue = values[mosaic]!;
+        if (!editor.getValue || editor.getValue() !== newValue) {
+          editor.setValue(newValue);
+        }
+      }
+    }
   }
 
   /**
@@ -138,18 +165,26 @@ export class App {
     options?: PackageJsonOptions,
   ): Promise<EditorValues> {
     const { ElectronFiddle: fiddle } = window;
+    const { customMosaics } = this.state;
 
     if (!fiddle?.app) {
       throw new Error('Fiddle not ready');
     }
 
-    const values: EditorValues = {
-      css: getEditorValue(EditorId.css),
-      html: getEditorValue(EditorId.html),
-      main: getEditorValue(EditorId.main),
-      preload: getEditorValue(EditorId.preload),
-      renderer: getEditorValue(EditorId.renderer),
+    const customEditorValues = Object.assign(
+      {},
+      ...customMosaics.map((m) => ({ [m]: getEditorValue(m) })),
+    );
+
+    const defaultEditorValues: EditorValues = {
+      css: getEditorValue(DefaultEditorId.css),
+      html: getEditorValue(DefaultEditorId.html),
+      main: getEditorValue(DefaultEditorId.main),
+      preload: getEditorValue(DefaultEditorId.preload),
+      renderer: getEditorValue(DefaultEditorId.renderer),
     };
+
+    const values = { ...customEditorValues, ...defaultEditorValues };
 
     if (options && options.include !== false) {
       values.package = await getPackageJson(this.state, values, options);

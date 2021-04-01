@@ -123,13 +123,25 @@ export class FileManager {
     options?: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<Files> {
+    const { app } = window.ElectronFiddle;
+    const { customMosaics } = app.state;
+
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
-    const values = await window.ElectronFiddle.app.getEditorValues(pOptions);
+    const values = await app.getEditorValues(pOptions);
 
     let output: Files = new Map();
+
+    // Get values for default editors.
     for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
       output.set(filename, values[editorId]);
     }
+
+    // Get values for any custom editors that have been created.
+    for (const mosaic of customMosaics) {
+      output.set(mosaic, values[mosaic]);
+    }
+
+    // Lastly get package name value.
     output.set(PACKAGE_NAME, values.package!);
 
     for (const transform of transforms) {

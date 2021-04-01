@@ -1,5 +1,5 @@
 import { EditorId, EditorValues, VersionSource } from '../interfaces';
-import { USER_DATA_PATH } from './constants';
+import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
@@ -127,7 +127,13 @@ export async function getContent(
   name: EditorId,
   version: string,
 ): Promise<string> {
-  return (await getTemplate(version))[name];
+  const template = await getTemplate(version);
+  if (template && template[name]) {
+    return template[name];
+  } else {
+    const extension = name.split('.')[1];
+    return EMPTY_EDITOR_CONTENT[extension];
+  }
 }
 
 /**

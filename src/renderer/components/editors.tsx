@@ -17,12 +17,7 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import {
-  EditorId,
-  MosaicId,
-  PanelId,
-  SetFiddleOptions,
-} from '../../interfaces';
+import { DefaultEditorId, EditorId, MosaicId, PanelId } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
@@ -49,11 +44,11 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 };
 
 export const TITLE_MAP: Record<MosaicId, string> = {
-  [EditorId.main]: `Main Process (${MAIN_JS_NAME})`,
-  [EditorId.renderer]: `Renderer Process (${RENDERER_JS_NAME})`,
-  [EditorId.preload]: `Preload (${PRELOAD_JS_NAME})`,
-  [EditorId.html]: `HTML (${INDEX_HTML_NAME})`,
-  [EditorId.css]: `Stylesheet (${STYLES_CSS_NAME})`,
+  [DefaultEditorId.main]: `Main Process (${MAIN_JS_NAME})`,
+  [DefaultEditorId.renderer]: `Renderer Process (${RENDERER_JS_NAME})`,
+  [DefaultEditorId.preload]: `Preload (${PRELOAD_JS_NAME})`,
+  [DefaultEditorId.html]: `HTML (${INDEX_HTML_NAME})`,
+  [DefaultEditorId.css]: `Stylesheet (${STYLES_CSS_NAME})`,
   [PanelId.docsDemo]: 'Docs & Demos',
 };
 
@@ -256,13 +251,18 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @returns {JSX.Element | null}
    */
   public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
-    const content = isEditorId(id) && this.renderEditor(id);
+    const { appState } = this.props;
+    const content =
+      isEditorId(id, appState.customMosaics) && this.renderEditor(id);
+    const title = Object.keys(TITLE_MAP).includes(id)
+      ? TITLE_MAP[id]
+      : `Custom Editor (${id})`;
 
     return (
       <MosaicWindow<EditorId>
         className={id}
         path={path}
-        title={TITLE_MAP[id]}
+        title={title}
         renderToolbar={(props: MosaicWindowProps<MosaicId>) =>
           this.renderToolbar(props, id)
         }
