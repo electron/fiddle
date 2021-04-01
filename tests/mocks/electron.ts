@@ -209,23 +209,6 @@ const electronMock = {
     interceptHttpProtocol: jest.fn(),
     uninterceptProtocol: jest.fn(),
   },
-  remote: {
-    app,
-    session,
-    BrowserWindow: MockBrowserWindow,
-    getCurrentWindow: jest.fn(),
-    getGlobal: jest.fn(),
-    Menu: MockMenu,
-    MenuItem: MockMenuItem,
-    process: {
-      argv: [
-        '/Applications/Electron Fiddle.app/Contents/MacOS/electron-fiddle',
-      ],
-    },
-    shell,
-    require: jest.fn(),
-    systemPreferences,
-  },
   require: jest.fn(),
   screen: new Screen(),
   session,
@@ -238,6 +221,5 @@ electronMock.BrowserWindow.getAllWindows.mockReturnValue([]);
 electronMock.BrowserWindow.fromId.mockReturnValue(mainWindowStub);
 electronMock.BrowserWindow.fromWebContents.mockReturnValue(mainWindowStub);
 electronMock.BrowserWindow.getFocusedWindow.mockReturnValue(focusedWindowStub);
-electronMock.remote.getCurrentWindow.mockReturnValue(mainWindowStub);
 
 module.exports = electronMock;
