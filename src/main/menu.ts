@@ -76,6 +76,15 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
         shell.openExternal('https://github.com/electron/electron/issues');
       },
     },
+    {
+      type: 'separator',
+    },
+    {
+      label: 'About Electron Fiddle',
+      click() {
+        app.showAboutPanel();
+      },
+    },
   ];
 }
 
