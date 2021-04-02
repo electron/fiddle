@@ -694,12 +694,12 @@ describe('AppState', () => {
       expect(actual).toBe(expected);
     });
 
-    it('shows combos', () => {
+    it('prefers to display localPath', () => {
       const gistId = 'abcdef';
+      const templateName = 'BrowserWindow';
       const localPath = 'path/to/fiddle';
-      const expected = `${APPNAME} - gist.github.com/${gistId} ${localPath}`;
-      appState.gistId = gistId;
-      appState.localPath = localPath;
+      const expected = `${APPNAME} - ${localPath}`;
+      Object.assign(appState, { gistId, localPath, templateName });
       const actual = appState.title;
       expect(actual).toBe(expected);
     });
