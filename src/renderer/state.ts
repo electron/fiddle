@@ -381,11 +381,8 @@ export class AppState {
     this.isUpdatingElectronVersions = false;
   }
 
-  @action public async getName() {
-    if (!this.name) {
-      this.name = await getName(this);
-    }
-
+  public async getName() {
+    this.name ||= await getName(this);
     return this.name;
   }
 
