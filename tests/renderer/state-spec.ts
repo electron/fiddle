@@ -13,8 +13,7 @@ import {
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import {
-  getDownloadedVersions,
-  getDownloadingVersions,
+  getVersionState,
   removeBinary,
   setupBinary,
 } from '../../src/renderer/binary';
@@ -43,8 +42,7 @@ jest.mock('../../src/renderer/content', () => ({
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
   setupBinary: jest.fn(),
-  getDownloadedVersions: jest.fn().mockResolvedValue([]),
-  getDownloadingVersions: jest.fn().mockReturnValue([]),
+  getVersionState: jest.fn().mockImplementation((v) => v.state),
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn(),
@@ -78,13 +76,15 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new MockVersions());
 
-    (getDownloadedVersions as jest.Mock).mockResolvedValue([]);
-    (getDownloadingVersions as jest.Mock).mockReturnValue([]);
     (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
       mockVersionsArray,
     );
+    (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState();
+    appState.versions = mockVersions;
+    appState.updateVersionStates = jest.fn();
+
     ipcRendererManager.removeAllListeners();
   });
 
@@ -527,25 +527,31 @@ describe('AppState', () => {
       // We just want to verify that the version state was
       // refreshed - we didn't actually add the local version
       // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual(
-        mockVersionsArray.map((v) => v.version),
-      );
+      expect(Object.keys(appState.versions)).toEqual(Object.keys(mockVersions));
     });
   });
 
-  describe('updateDownloadedVersionState()', () => {
-    it('downloads a version if necessary', async () => {
-      (getDownloadedVersions as jest.Mock).mockResolvedValue(['2.0.2']);
+  describe('updateVersionStates()', () => {
+    beforeEach(() => {
+      ipcRendererManager.removeAllListeners();
+      (getVersionState as jest.Mock).mockImplementation(
+        (v: RunnableVersion) => {
+          if (v.version === '2.0.1') return VersionState.downloading;
+          if (v.version === '2.0.2') return VersionState.ready;
+          return VersionState.unknown;
+        },
+      );
+      appState = new AppState();
+    });
 
-      await appState.updateDownloadedVersionState();
+    it('downloads a version if necessary', async () => {
+      await appState.updateVersionStates();
 
       expect(appState.versions['2.0.2'].state).toBe(VersionState.ready);
     });
 
     it('keeps downloading state intact', async () => {
-      (getDownloadingVersions as jest.Mock).mockReturnValue(['2.0.1']);
-
-      await appState.updateDownloadedVersionState();
+      await appState.updateVersionStates();
 
       expect(appState.versions['2.0.1'].state).toBe(VersionState.downloading);
     });

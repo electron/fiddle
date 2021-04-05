@@ -2,14 +2,40 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import extract from 'extract-zip';
 
-import { VersionState } from '../interfaces';
+import { Version, VersionSource, VersionState } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { AppState } from './state';
 import { download as electronDownload } from '@electron/get';
 
-const pendingDownloads: Record<string, Promise<void>> = {};
+// versions that are currently being downloaded
+const downloading: Map<string, Promise<void>> = new Map();
+
+// versions that are currently being unzipped
+const unzipping: Set<string> = new Set();
+
+/**
+ * Determine by inspection the VersionState of this version
+ *
+ * @param {Version} version
+ * @returns {VersionState} the state of the version
+ */
+export function getVersionState(ver: Version): VersionState {
+  const { localPath, version } = ver;
+
+  if (downloading.has(version)) {
+    return VersionState.downloading;
+  }
+
+  if (unzipping.has(version)) {
+    return VersionState.unzipping;
+  }
+
+  const dir = localPath || getDownloadPath(version);
+  const exec = path.join(dir, execSubpath());
+  return fs.existsSync(exec) ? VersionState.ready : VersionState.unknown;
+}
 
 /**
  * General setup, called with a version. Is called during construction
@@ -24,6 +50,11 @@ export function setupBinary(
 ): Promise<void> {
   const version = normalizeVersion(iVersion);
 
+  // Only remote versions can be downloaded
+  if (appState.versions[version].source !== VersionSource.remote) {
+    return Promise.resolve();
+  }
+
   // If we already have it, then we're done
   if (getIsDownloaded(version)) {
     console.log(`Binary: Electron ${version} already downloaded.`);
@@ -32,12 +63,13 @@ export function setupBinary(
   }
 
   // Return a promise that resolves when the download completes
-  let pending = pendingDownloads[version];
+  let pending = downloading.get(version);
   if (pending) {
     console.log(`Binary: Electron ${version} already downloading.`);
   } else {
     console.log(`Binary: Electron ${version} not present, downloading`);
-    pending = pendingDownloads[version] = downloadBinary(appState, version);
+    pending = downloadBinary(appState, version);
+    downloading.set(version, pending);
   }
   return pending;
 }
@@ -55,6 +87,8 @@ async function downloadBinary(
   );
 
   try {
+    unzipping.add(version);
+    downloading.delete(version);
     appState.versions[version].state = VersionState.unzipping;
 
     // Ensure the target path exists
@@ -71,7 +105,7 @@ async function downloadBinary(
     appState.versions[version].state = VersionState.unknown;
   } finally {
     // This task is done, so remove it from the pending tasks list
-    delete pendingDownloads[version];
+    unzipping.delete(version);
   }
 }
 
@@ -138,6 +172,21 @@ export function getIsDownloaded(version: string, dir?: string): boolean {
   return fs.existsSync(expectedPath);
 }
 
+function execSubpath() {
+  const { platform } = process;
+  switch (platform) {
+    case 'darwin':
+      return 'Electron.app/Contents/MacOS/Electron';
+    case 'linux':
+    case 'freebsd':
+      return 'electron';
+    case 'win32':
+      return 'electron.exe';
+    default:
+      throw new Error(`Electron builds are not available for ${platform}`);
+  }
+}
+
 /**
  * Gets the expected path for the binary of a given Electron version
  *
@@ -149,43 +198,7 @@ export function getElectronBinaryPath(
   version: string,
   dir: string = getDownloadPath(version),
 ): string {
-  switch (process.platform) {
-    case 'darwin':
-      return path.join(dir, 'Electron.app/Contents/MacOS/Electron');
-    case 'freebsd':
-    case 'linux':
-      return path.join(dir, 'electron');
-    case 'win32':
-      return path.join(dir, 'electron.exe');
-    default:
-      throw new Error(
-        `Electron builds are not available for ${process.platform}`,
-      );
-  }
-}
-
-export function getDownloadingVersions(appState: AppState) {
-  return Object.entries(appState.versions)
-    .filter(([_, { state }]) => state === 'downloading')
-    .map(([version, _]) => version);
-}
-
-/**
- * Returns an array of all versions downloaded to disk
- *
- * @returns {Promise<Array<string>>}
- */
-export async function getDownloadedVersions(): Promise<Array<string>> {
-  const downloadPath = path.join(USER_DATA_PATH, 'electron-bin');
-  console.log(`Binary: Checking for downloaded versions`);
-
-  try {
-    const dirs = await fs.readdir(downloadPath);
-    return dirs.filter((dir) => dir && getIsDownloaded(dir));
-  } catch (error) {
-    console.warn(`Could not read known Electron versions`, error);
-    return [];
-  }
+  return path.join(dir, execSubpath());
 }
 
 /**

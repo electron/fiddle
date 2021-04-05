@@ -6,6 +6,7 @@ import {
   VersionSource,
   VersionState,
 } from '../interfaces';
+import { getVersionState } from './binary';
 import { normalizeVersion } from '../utils/normalize-version';
 
 /**
@@ -135,6 +136,7 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
 
 function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
   ver.version = normalizeVersion(ver.version);
+  ver.state = getVersionState(ver);
   return ver;
 }
 
