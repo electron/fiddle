@@ -431,7 +431,7 @@ export class AppState {
   }
 
   @action public disableTour() {
-    this.resetView({ isTourShowing: false });
+    this.resetView();
     localStorage.setItem('hasShownTour', 'true');
   }
 
@@ -806,20 +806,16 @@ export class AppState {
    * @param {Record<string, boolean>} [additionalOptions]
    * @memberof AppState
    */
-  @action private resetView(additionalOptions?: Record<string, boolean>) {
-    this.isTokenDialogShowing = false;
-    this.isSettingsShowing = false;
-    this.isTourShowing = false;
-    this.isConsoleShowing = false;
+  @action private resetView(additionalOptions: Record<string, boolean> = {}) {
     this.isAddVersionDialogShowing = false;
+    this.isConsoleShowing = false;
+    this.isSettingsShowing = false;
     this.isThemeDialogShowing = false;
+    this.isTokenDialogShowing = false;
+    this.isTourShowing = false;
 
-    if (additionalOptions) {
-      for (const key in additionalOptions) {
-        if (additionalOptions.hasOwnProperty(key)) {
-          this[key] = additionalOptions[key];
-        }
-      }
+    for (const [key, val] of Object.entries(additionalOptions)) {
+      this[key] = val;
     }
 
     this.setPageHash();
