@@ -31,7 +31,9 @@ function isSubmenu(
  * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getHelpItems(): Array<MenuItemConstructorOptions> {
-  const items = [
+  const items: MenuItemConstructorOptions[] = [];
+
+  items.push(
     {
       type: 'separator',
     },
@@ -76,7 +78,7 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
         shell.openExternal('https://github.com/electron/electron/issues');
       },
     },
-  ];
+  );
 
   // on macOS, there's already the About Electron Fiddle menu item
   // under the first submenu set by the electron-default-menu package
