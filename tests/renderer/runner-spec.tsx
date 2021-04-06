@@ -5,7 +5,7 @@ import * as semver from 'semver';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { RunResult } from '../../src/interfaces';
+import { RunResult, RunnableVersion } from '../../src/interfaces';
 import {
   findModulesInEditors,
   getIsPackageManagerInstalled,
@@ -17,7 +17,7 @@ import { waitFor } from '../../src/utils/wait-for';
 import { AppState } from '../../src/renderer/state';
 import { MockChildProcess } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
+import { MockVersions } from '../mocks/electron-versions';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -33,8 +33,12 @@ describe('Runner component', () => {
   let mockChild: MockChildProcess;
   let store: any;
   let instance: Runner;
+  let mockVersions: Record<string, RunnableVersion>;
+  let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
+    ({ mockVersions, mockVersionsArray } = new MockVersions());
+
     mockChild = new MockChildProcess();
     ipcRendererManager.removeAllListeners();
 
@@ -42,7 +46,7 @@ describe('Runner component', () => {
 
     store = {
       version: '2.0.2',
-      versions: { ...mockVersions },
+      versions: mockVersions,
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       pushOutput: jest.fn(),
