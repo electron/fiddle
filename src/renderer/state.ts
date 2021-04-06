@@ -16,6 +16,7 @@ import {
   OutputEntry,
   OutputOptions,
   RunnableVersion,
+  SetFiddleOptions,
   Version,
   VersionSource,
   VersionState,
@@ -27,7 +28,7 @@ import {
   createMosaicArrangement,
   getVisibleMosaics,
 } from '../utils/editors-mosaic-arrangement';
-import { getName } from '../utils/get-title';
+import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import {
@@ -299,6 +300,33 @@ export class AppState {
   }
 
   /**
+   * @returns {string} the title, e.g. appname, fiddle name, state
+   */
+  @computed get title(): string {
+    const { gistId, isUnsaved, localPath, templateName } = this;
+    const tokens = [];
+
+    if (localPath) {
+      tokens.push(localPath);
+    } else if (templateName) {
+      tokens.push(templateName);
+    } else if (gistId) {
+      tokens.push(`gist.github.com/${gistId}`);
+    }
+
+    if (isUnsaved) {
+      tokens.push('Unsaved');
+    }
+
+    if (tokens.length > 0) {
+      tokens.unshift('-');
+    }
+
+    tokens.unshift('Electron Fiddle');
+    return tokens.join(' ');
+  }
+
+  /**
    * Returns the current RunnableVersion or the first
    * one that can be found.
    */
@@ -357,6 +385,11 @@ export class AppState {
     this.isUpdatingElectronVersions = false;
   }
 
+  public async getName() {
+    this.name ||= await getName(this);
+    return this.name;
+  }
+
   @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
     this.channelsToShow = this.channelsToShow.filter(
       (ch) => !channels.includes(ch),
@@ -369,14 +402,6 @@ export class AppState {
       ...channels,
     ]);
     this.channelsToShow = [...s.values()];
-  }
-
-  @action public async getName() {
-    if (!this.name) {
-      this.name = await getName(this);
-    }
-
-    return this.name;
   }
 
   @action public toggleConsole() {
@@ -561,7 +586,8 @@ export class AppState {
     // Should we update the editor?
     if (await isContentUnchanged(EditorId.main, this.version)) {
       const editorValues = await getTemplate(version);
-      await window.ElectronFiddle.app.replaceFiddle(editorValues, {});
+      const options: SetFiddleOptions = { templateName: version };
+      await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }
 
     this.version = version;

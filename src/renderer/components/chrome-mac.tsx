@@ -2,7 +2,6 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import { IpcEvents } from '../../ipc-events';
 
-import { getTitle } from '../../utils/get-title';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -21,7 +20,7 @@ export class ChromeMac extends React.Component<ChromeMacProps> {
 
     return (
       <div className="chrome drag" onDoubleClick={this.handleDoubleClick}>
-        <small>{getTitle(this.props.appState)}</small>
+        <small>{this.props.appState.title}</small>
       </div>
     );
   }
