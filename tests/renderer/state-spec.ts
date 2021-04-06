@@ -7,6 +7,7 @@ import {
   ElectronReleaseChannel,
   GenericDialogType,
   PanelId,
+  RunnableVersion,
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
@@ -32,7 +33,7 @@ import {
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-title';
-import { mockVersions, mockVersionsArray } from '../mocks/electron-versions';
+import { MockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -52,13 +53,12 @@ jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
     '../../src/renderer/versions',
   );
+  const { MockVersions } = require('../mocks/electron-versions');
+  const { mockVersionsArray } = new MockVersions();
 
   return {
-    getUpdatedElectronVersions: jest.fn().mockImplementation(async () => {
-      return require('../mocks/electron-versions').mockVersionsArray;
-    }),
-    getElectronVersions: () =>
-      require('../mocks/electron-versions').mockVersionsArray,
+    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    getElectronVersions: () => mockVersionsArray,
     getDefaultVersion: () => '2.0.2',
     addLocalVersion: jest.fn(),
     saveLocalVersions: jest.fn(),
@@ -72,8 +72,12 @@ jest.mock('../../src/renderer/ipc');
 
 describe('AppState', () => {
   let appState: AppState;
+  let mockVersions: Record<string, RunnableVersion>;
+  let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
+    ({ mockVersions, mockVersionsArray } = new MockVersions());
+
     (getDownloadedVersions as jest.Mock).mockResolvedValue([]);
     (getDownloadingVersions as jest.Mock).mockReturnValue([]);
     (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
