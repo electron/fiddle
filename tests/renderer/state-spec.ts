@@ -32,7 +32,7 @@ import {
 } from '../../src/renderer/versions';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
-import { getName } from '../../src/utils/get-title';
+import { getName } from '../../src/utils/get-name';
 import { MockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -65,7 +65,7 @@ jest.mock('../../src/renderer/versions', () => {
     getReleaseChannel,
   };
 });
-jest.mock('../../src/utils/get-title', () => ({
+jest.mock('../../src/utils/get-name', () => ({
   getName: jest.fn(),
 }));
 jest.mock('../../src/renderer/ipc');
@@ -720,6 +720,57 @@ describe('AppState', () => {
       appState.removeAcceleratorToBlock(BlockableAccelerator.save);
 
       expect(appState.acceleratorsToBlock).toEqual([]);
+    });
+  });
+
+  describe('title', () => {
+    const APPNAME = 'Electron Fiddle';
+
+    it('defaults to the appname', () => {
+      const expected = APPNAME;
+      const actual = appState.title;
+      expect(actual).toBe(expected);
+    });
+
+    it('shows the name of local fiddles', () => {
+      const localPath = 'path/to/fiddle';
+      const expected = `${APPNAME} - ${localPath}`;
+      appState.localPath = localPath;
+      const actual = appState.title;
+      expect(actual).toBe(expected);
+    });
+
+    it('shows the name of gist fiddles', () => {
+      const gistId = 'abcdef';
+      const expected = `${APPNAME} - gist.github.com/${gistId}`;
+      appState.gistId = gistId;
+      const actual = appState.title;
+      expect(actual).toBe(expected);
+    });
+
+    it('prefers to display localPath', () => {
+      const gistId = 'abcdef';
+      const templateName = 'BrowserWindow';
+      const localPath = 'path/to/fiddle';
+      const expected = `${APPNAME} - ${localPath}`;
+      Object.assign(appState, { gistId, localPath, templateName });
+      const actual = appState.title;
+      expect(actual).toBe(expected);
+    });
+
+    it('shows the name of template fiddles', () => {
+      const templateName = 'BrowserWindow';
+      const expected = `${APPNAME} - ${templateName}`;
+      appState.templateName = templateName;
+      const actual = appState.title;
+      expect(actual).toBe(expected);
+    });
+
+    it('flags unsaved fiddles', () => {
+      const expected = `${APPNAME} - Unsaved`;
+      appState.isUnsaved = true;
+      const actual = appState.title;
+      expect(actual).toBe(expected);
     });
   });
 });
