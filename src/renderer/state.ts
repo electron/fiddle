@@ -22,7 +22,6 @@ import {
   VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { arrayToStringMap } from '../utils/array-to-stringmap';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import {
   createMosaicArrangement,
@@ -125,7 +124,7 @@ export class AppState {
   @observable public versions: Record<
     string,
     RunnableVersion
-  > = arrayToStringMap(knownVersions);
+  > = Object.fromEntries(knownVersions.map((ver) => [ver.version, ver]));
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions: GenericDialogOptions = {
@@ -375,9 +374,7 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      const versions = await getUpdatedElectronVersions();
-      this.versions = arrayToStringMap(versions);
-      await this.updateDownloadedVersionState();
+      this.setVersions(await getUpdatedElectronVersions());
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -482,8 +479,13 @@ export class AppState {
 
   @action public addLocalVersion(input: Version) {
     addLocalVersion(input);
+    this.setVersions(getElectronVersions());
+  }
 
-    this.versions = arrayToStringMap(getElectronVersions());
+  @action private setVersions(versions: RunnableVersion[]) {
+    this.versions = Object.fromEntries(
+      versions.map((ver) => [ver.version, ver]),
+    );
     this.updateDownloadedVersionState();
   }
 
@@ -522,8 +524,7 @@ export class AppState {
       updatedVersions[version].state = VersionState.unknown;
     }
 
-    this.versions = updatedVersions;
-    this.updateDownloadedVersionState();
+    this.setVersions(Object.values(updatedVersions));
   }
 
   /**

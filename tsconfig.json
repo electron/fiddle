@@ -10,7 +10,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "lib": [
-      "es2017",
+      "es2019",
       "dom",
       "WebWorker"
     ],
@@ -26,7 +26,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "pretty": true,
-    "target": "es2017",
+    "target": "es2019",
     "jsx": "react",
     "typeRoots": [
       "./node_modules/@types"

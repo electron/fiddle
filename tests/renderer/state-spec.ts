@@ -42,8 +42,8 @@ jest.mock('../../src/renderer/content', () => ({
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
   setupBinary: jest.fn(),
-  getDownloadedVersions: jest.fn(),
-  getDownloadingVersions: jest.fn(),
+  getDownloadedVersions: jest.fn().mockResolvedValue([]),
+  getDownloadingVersions: jest.fn().mockReturnValue([]),
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
   updateEditorTypeDefinitions: jest.fn(),
@@ -71,11 +71,16 @@ jest.mock('../../src/utils/get-name', () => ({
 jest.mock('../../src/renderer/ipc');
 
 describe('AppState', () => {
-  let appState = new AppState();
+  let appState: AppState;
 
   beforeEach(() => {
+    (getDownloadedVersions as jest.Mock).mockResolvedValue([]);
+    (getDownloadingVersions as jest.Mock).mockReturnValue([]);
+    (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
+      mockVersionsArray,
+    );
+
     appState = new AppState();
-    appState.updateDownloadedVersionState = jest.fn();
     ipcRendererManager.removeAllListeners();
   });
 
@@ -436,13 +441,14 @@ describe('AppState', () => {
   });
 
   describe('hasVersion()', () => {
-    const UNKNOWN_VERSION = 'v999.99.99';
-    const KNOWN_VERSION = Object.keys(appState.versions).pop();
-
     it('returns false if state does not have that version', () => {
+      const UNKNOWN_VERSION = 'v999.99.99';
+
       expect(appState.hasVersion(UNKNOWN_VERSION)).toEqual(false);
     });
     it('returns true if state has that version', () => {
+      const KNOWN_VERSION = Object.keys(appState.versions).pop();
+
       expect(appState.hasVersion(KNOWN_VERSION!)).toBe(true);
     });
   });
@@ -524,22 +530,17 @@ describe('AppState', () => {
   });
 
   describe('updateDownloadedVersionState()', () => {
-    beforeEach(() => {
-      appState = new AppState();
-      ipcRendererManager.removeAllListeners();
-      (getDownloadingVersions as jest.Mock).mockReturnValue(['2.0.1']);
-      (getDownloadedVersions as jest.Mock).mockReturnValue(
-        Promise.resolve(['2.0.2']),
-      );
-    });
-
     it('downloads a version if necessary', async () => {
+      (getDownloadedVersions as jest.Mock).mockResolvedValue(['2.0.2']);
+
       await appState.updateDownloadedVersionState();
 
       expect(appState.versions['2.0.2'].state).toBe(VersionState.ready);
     });
 
     it('keeps downloading state intact', async () => {
+      (getDownloadingVersions as jest.Mock).mockReturnValue(['2.0.1']);
+
       await appState.updateDownloadedVersionState();
 
       expect(appState.versions['2.0.1'].state).toBe(VersionState.downloading);

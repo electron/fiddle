@@ -133,6 +133,11 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
   window.localStorage.setItem(key, stringified);
 }
 
+function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
+  ver.version = normalizeVersion(ver.version);
+  return ver;
+}
+
 /**
  * Return both known as well as local versions.
  *
@@ -155,7 +160,7 @@ export function getElectronVersions(): Array<RunnableVersion> {
     };
   });
 
-  return [...known, ...local];
+  return [...known, ...local].map(sanitizeVersion);
 }
 
 /**
