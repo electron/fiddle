@@ -31,7 +31,7 @@ function isSubmenu(
  * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getHelpItems(): Array<MenuItemConstructorOptions> {
-  return [
+  const items = [
     {
       type: 'separator',
     },
@@ -76,16 +76,25 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
         shell.openExternal('https://github.com/electron/electron/issues');
       },
     },
-    {
-      type: 'separator',
-    },
-    {
-      label: 'About Electron Fiddle',
-      click() {
-        app.showAboutPanel();
-      },
-    },
   ];
+
+  // on macOS, there's already the About Electron Fiddle menu item
+  // under the first submenu set by the electron-default-menu package
+  if (process.platform !== 'darwin') {
+    items.push(
+      {
+        type: 'separator',
+      },
+      {
+        label: 'About Electron Fiddle',
+        click() {
+          app.showAboutPanel();
+        },
+      },
+    );
+  }
+
+  return items;
 }
 
 /**
