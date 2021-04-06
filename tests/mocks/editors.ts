@@ -15,8 +15,8 @@ export class EditorMock {
 }
 
 export class EditorsMock {
-  public main = new EditorMock('main');
-  public renderer = new EditorMock('renderer');
-  public html = new EditorMock('html');
-  public preload = new EditorMock('preload');
+  public 'main.js' = new EditorMock('main.js');
+  public 'renderer.js' = new EditorMock('renderer.js');
+  public 'index.html' = new EditorMock('index.html');
+  public 'preload.js' = new EditorMock('preload.js');
 }

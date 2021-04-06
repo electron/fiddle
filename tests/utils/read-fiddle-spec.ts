@@ -1,15 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs-extra';
-import { MAIN_JS_NAME } from '../../src/shared-constants';
 
 import { readFiddle } from '../../src/utils/read-fiddle';
+import { DefaultEditorId } from '../../src/interfaces';
 
 describe('read-fiddle', () => {
   beforeEach(async () => {
     (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
     (fs.readdirSync as jest.Mock).mockImplementationOnce(() => [
       'LICENSE.txt',
-      MAIN_JS_NAME,
+      DefaultEditorId.main,
     ]);
   });
 
@@ -22,11 +22,11 @@ describe('read-fiddle', () => {
 
     const fiddle = await readFiddle(folder);
 
-    expect(fiddle.css).toBe('');
-    expect(fiddle.html).toBe('');
-    expect(fiddle.main).toBe(MAIN_JS_NAME);
-    expect(fiddle.preload).toBe('');
-    expect(fiddle.renderer).toBe('');
+    expect(fiddle[DefaultEditorId.css]).toBe('');
+    expect(fiddle[DefaultEditorId.html]).toBe('');
+    expect(fiddle[DefaultEditorId.main]).toBe(DefaultEditorId.main);
+    expect(fiddle[DefaultEditorId.preload]).toBe('');
+    expect(fiddle[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();
@@ -41,11 +41,11 @@ describe('read-fiddle', () => {
 
     const fiddle = await readFiddle(folder);
 
-    expect(fiddle.css).toBe('');
-    expect(fiddle.html).toBe('');
-    expect(fiddle.main).toBe('');
-    expect(fiddle.preload).toBe('');
-    expect(fiddle.renderer).toBe('');
+    expect(fiddle[DefaultEditorId.css]).toBe('');
+    expect(fiddle[DefaultEditorId.html]).toBe('');
+    expect(fiddle[DefaultEditorId.main]).toBe('');
+    expect(fiddle[DefaultEditorId.preload]).toBe('');
+    expect(fiddle[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(1);
 
     (console.warn as jest.Mock).mockClear();
@@ -58,11 +58,11 @@ describe('read-fiddle', () => {
 
     const fiddle = await readFiddle(folder);
 
-    expect(fiddle.css).toBe('');
-    expect(fiddle.html).toBe('');
-    expect(fiddle.main).toBe('');
-    expect(fiddle.preload).toBe('');
-    expect(fiddle.renderer).toBe('');
+    expect(fiddle[DefaultEditorId.css]).toBe('');
+    expect(fiddle[DefaultEditorId.html]).toBe('');
+    expect(fiddle[DefaultEditorId.main]).toBe('');
+    expect(fiddle[DefaultEditorId.preload]).toBe('');
+    expect(fiddle[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();

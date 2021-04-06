@@ -14,13 +14,13 @@ import * as path from 'path';
 
 import { when } from 'mobx';
 import {
+  DefaultEditorId,
   EditorValues,
   GenericDialogType,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { FILENAME_KEYS } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
@@ -440,9 +440,9 @@ export class GistActionButton extends React.Component<
     }
 
     // Add default Fiddle editor files.
-    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
+    for (const filename of Object.values(DefaultEditorId)) {
       filesList[filename] = {
-        content: values[editorId] || EMPTY_EDITOR_CONTENT[getSuffix(filename)],
+        content: values[filename] || EMPTY_EDITOR_CONTENT[getSuffix(filename)],
       };
     }
 

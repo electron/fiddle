@@ -1,16 +1,13 @@
+import { PACKAGE_NAME } from '../../src/interfaces';
 import { forgeTransform } from '../../src/renderer/transforms/forge';
-
-jest.mock('../../src/shared-constants', () => ({
-  PACKAGE_NAME: 'package.json',
-}));
 
 describe('forgeTransform()', () => {
   it('adds forge dependencies', async () => {
     const filesBefore = new Map();
-    filesBefore.set('package.json', JSON.stringify({}));
+    filesBefore.set(PACKAGE_NAME, JSON.stringify({}));
 
     const files = await forgeTransform(filesBefore);
-    expect(JSON.parse(files.get('package.json')!)).toEqual({
+    expect(JSON.parse(files.get(PACKAGE_NAME)!)).toEqual({
       devDependencies: {
         '@electron-forge/cli': '6.0.0-beta.52',
         '@electron-forge/maker-deb': '6.0.0-beta.52',
@@ -52,9 +49,9 @@ describe('forgeTransform()', () => {
 
   it('deals with errors', async () => {
     const filesBefore = new Map();
-    filesBefore.set('package.json', 'garbage');
+    filesBefore.set(PACKAGE_NAME, 'garbage');
 
     const files = await forgeTransform(filesBefore);
-    expect(files.get('package.json')).toBe('garbage');
+    expect(files.get(PACKAGE_NAME)).toBe('garbage');
   });
 });

@@ -1,6 +1,5 @@
 import { execSync } from 'child_process';
-import { Files } from '../../interfaces';
-import { PACKAGE_NAME } from '../../shared-constants';
+import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getElectronBinaryPath } from '../binary';
 
 /**

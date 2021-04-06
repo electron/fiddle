@@ -1,10 +1,9 @@
 import * as fs from 'fs-extra';
 
-import { Files } from '../../src/interfaces';
+import { DefaultEditorId, Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { RENDERER_JS_NAME } from '../../src/shared-constants';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('fs-extra');
@@ -16,9 +15,9 @@ jest.mock('tmp', () => ({
 }));
 jest.mock('../../src/renderer/templates', () => ({
   getTemplateValues: () => ({
-    html: '',
-    main: '',
-    renderer: '',
+    [DefaultEditorId.html]: '',
+    [DefaultEditorId.main]: '',
+    [DefaultEditorId.renderer]: '',
   }),
 }));
 
@@ -28,6 +27,8 @@ describe('FileManager', () => {
   beforeEach(() => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
+
+    window.ElectronFiddle.app.state.customMosaics = [];
 
     fm = new FileManager({
       setGenericDialogOptions: jest.fn(),
@@ -45,11 +46,11 @@ describe('FileManager', () => {
 
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          renderer: '',
-          preload: '',
-          main: '',
-          css: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.preload]: '',
+          [DefaultEditorId.main]: '',
+          [DefaultEditorId.css]: '',
         },
         { filePath: fakePath },
       );
@@ -64,11 +65,11 @@ describe('FileManager', () => {
 
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          renderer: '',
-          preload: '',
-          main: '',
-          css: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.preload]: '',
+          [DefaultEditorId.main]: '',
+          [DefaultEditorId.css]: '',
         },
         { filePath: fakePath },
       );
@@ -191,9 +192,9 @@ describe('FileManager', () => {
       await fm.openTemplate('test');
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          main: '',
-          renderer: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.main]: '',
         },
         {
           templateName: 'test',
@@ -240,11 +241,11 @@ describe('FileManager', () => {
   describe('getFiles()', () => {
     it('applies transforms', async () => {
       const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.set(RENDERER_JS_NAME, 'hi');
+        files.set(DefaultEditorId.renderer, 'hi');
         return files;
       });
 
-      expect(result.get(RENDERER_JS_NAME)).toBe('hi');
+      expect(result.get(DefaultEditorId.renderer)).toBe('hi');
     });
 
     it('handles transform error', async () => {
@@ -252,7 +253,7 @@ describe('FileManager', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(result.get(RENDERER_JS_NAME)).toBe('renderer-content');
+      expect(result.get(DefaultEditorId.renderer)).toBe('renderer-content');
     });
   });
 });

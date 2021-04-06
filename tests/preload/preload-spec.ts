@@ -20,10 +20,10 @@ describe('preload', () => {
       expect((window as any).ElectronFiddle).toMatchObject({
         app: null,
         editors: {
-          main: null,
-          preload: null,
-          renderer: null,
-          html: null,
+          'main.js': null,
+          'preload.js': null,
+          'renderer.js': null,
+          'index.html': null,
         },
       });
     });

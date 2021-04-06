@@ -1,3 +1,4 @@
+import { DefaultEditorId } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/renderer/templates';
 
 jest.unmock('fs-extra');
@@ -10,17 +11,17 @@ describe('templates', () => {
     it('loads templates', async () => {
       const values = await getTemplateValues(KNOWN_GOOD_TEMPLATE);
 
-      expect(values.html).toMatch(/^<!DOCTYPE html>/);
-      expect(values.main.length).toBeGreaterThan(0);
-      expect(values.renderer.length).toBeGreaterThan(0);
+      expect(values[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
+      expect(values[DefaultEditorId.main].length).toBeGreaterThan(0);
+      expect(values[DefaultEditorId.renderer].length).toBeGreaterThan(0);
     });
 
     it('handles errors', async () => {
       const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
-      expect(values.html).toBe('');
-      expect(values.main).toBe('');
-      expect(values.renderer).toBe('');
+      expect(values[DefaultEditorId.html]).toBe('');
+      expect(values[DefaultEditorId.main]).toBe('');
+      expect(values[DefaultEditorId.renderer]).toBe('');
     });
 
     it('reports missing files', async () => {

@@ -3,13 +3,6 @@ import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../../shared-constants';
-import {
   Mosaic,
   MosaicBranch,
   MosaicNode,
@@ -17,7 +10,13 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import { DefaultEditorId, EditorId, MosaicId, PanelId } from '../../interfaces';
+import {
+  DefaultEditorId,
+  EditorId,
+  MosaicId,
+  PanelId,
+  SetFiddleOptions,
+} from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
@@ -43,12 +42,12 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   wordWrap: 'on',
 };
 
-export const TITLE_MAP: Record<MosaicId, string> = {
-  [DefaultEditorId.main]: `Main Process (${MAIN_JS_NAME})`,
-  [DefaultEditorId.renderer]: `Renderer Process (${RENDERER_JS_NAME})`,
-  [DefaultEditorId.preload]: `Preload (${PRELOAD_JS_NAME})`,
-  [DefaultEditorId.html]: `HTML (${INDEX_HTML_NAME})`,
-  [DefaultEditorId.css]: `Stylesheet (${STYLES_CSS_NAME})`,
+export const TITLE_MAP: Record<DefaultEditorId | PanelId, string> = {
+  [DefaultEditorId.main]: `Main Process (${DefaultEditorId.main})`,
+  [DefaultEditorId.renderer]: `Renderer Process (${DefaultEditorId.renderer})`,
+  [DefaultEditorId.preload]: `Preload (${DefaultEditorId.preload})`,
+  [DefaultEditorId.html]: `HTML (${DefaultEditorId.html})`,
+  [DefaultEditorId.css]: `Stylesheet (${DefaultEditorId.css})`,
   [PanelId.docsDemo]: 'Docs & Demos',
 };
 

@@ -13,7 +13,12 @@ describe('editor-layout', () => {
     updateEditorLayout();
 
     setTimeout(() => {
-      const { main, html, renderer } = window.ElectronFiddle.editors;
+      const {
+        'main.js': main,
+        'index.html': html,
+        'renderer.js': renderer,
+      } = window.ElectronFiddle.editors;
+
       expect((main!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
       expect((html!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
       expect((renderer!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);

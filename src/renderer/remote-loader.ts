@@ -3,12 +3,11 @@ import { when } from 'mobx';
 import {
   CustomEditorId,
   DefaultEditorId,
-  EditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
+  PACKAGE_NAME,
 } from '../interfaces';
-import { FILENAME_KEYS } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
@@ -85,13 +84,14 @@ export class RemoteLoader {
           continue;
         }
 
-        const valueKey = FILENAME_KEYS[child.name];
-        if (valueKey) {
+        if (
+          Object.values(DefaultEditorId).includes(child.name as DefaultEditorId)
+        ) {
           loaders.push(
             fetch(child.download_url)
               .then((r) => r.text())
               .then((t) => {
-                values[valueKey] = t;
+                values[child.name] = t;
               }),
           );
         }
@@ -138,13 +138,14 @@ export class RemoteLoader {
       const values: Partial<EditorValues> = {};
 
       // Fetch default Fiddle editor files.
-      for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
-        values[editorId] = this.getContentOrEmpty(gist, filename);
+      for (const filename of Object.values(DefaultEditorId)) {
+        values[filename] = this.getContentOrEmpty(gist, filename);
       }
 
       // Fetch any custom editor files that the user may have created in the gist.
       const maybeCustomEditors = Object.keys(gist.data.files).filter(
-        (file) => !Object.keys(FILENAME_KEYS).includes(file as DefaultEditorId),
+        (file) =>
+          !Object.values(DefaultEditorId).includes(file as DefaultEditorId),
       );
 
       for (const mosaic of maybeCustomEditors) {
@@ -191,7 +192,7 @@ export class RemoteLoader {
       owner: ELECTRON_ORG,
       repo: ELECTRON_REPO,
       ref,
-      path: 'package.json',
+      path: PACKAGE_NAME,
     });
 
     if (!Array.isArray(packageJsonData) && !!packageJsonData.content) {

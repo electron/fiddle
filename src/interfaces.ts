@@ -34,12 +34,12 @@ export interface Version {
 }
 
 export interface EditorValues {
-  main: string;
-  renderer: string;
-  html: string;
-  preload: string;
-  css: string;
-  package?: string;
+  [DefaultEditorId.main]: string;
+  [DefaultEditorId.renderer]: string;
+  [DefaultEditorId.html]: string;
+  [DefaultEditorId.preload]: string;
+  [DefaultEditorId.css]: string;
+  PACKAGE_NAME?: string;
 }
 
 export enum RunResult {
@@ -114,7 +114,7 @@ export const enum GenericDialogType {
 }
 
 // Default Editors
-export const enum DefaultEditorId {
+export enum DefaultEditorId {
   'main' = 'main.js',
   'renderer' = 'renderer.js',
   'html' = 'index.html',
@@ -122,7 +122,10 @@ export const enum DefaultEditorId {
   'css' = 'styles.css',
 }
 
-export type CustomEditorId = `${string}.${'js' | 'html' | 'css'}`;
+export type CustomEditorId = Exclude<
+  `${string}.${'js' | 'html' | 'css'}`,
+  DefaultEditorId
+>;
 
 export type EditorId = DefaultEditorId | CustomEditorId;
 
@@ -131,7 +134,7 @@ export const enum PanelId {
   'docsDemo' = 'docsDemo',
 }
 
-export type MosaicId = DefaultEditorId | PanelId | CustomEditorId;
+export type MosaicId = DefaultEditorId | CustomEditorId | PanelId;
 
 export const DEFAULT_EDITORS = [
   DefaultEditorId.main,
@@ -141,7 +144,10 @@ export const DEFAULT_EDITORS = [
   DefaultEditorId.css,
 ];
 
+export const PACKAGE_NAME = 'package.json';
+
 export const ALL_PANELS = [PanelId.docsDemo];
+
 export const ALL_MOSAICS = [...DEFAULT_EDITORS, ...ALL_PANELS] as MosaicId[];
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';

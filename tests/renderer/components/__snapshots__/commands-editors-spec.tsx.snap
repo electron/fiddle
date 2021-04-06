@@ -5,7 +5,7 @@ Array [
   <Blueprint3.MenuItem
     disabled={false}
     icon="eye-off"
-    id="main"
+    id="main.js"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
@@ -15,7 +15,7 @@ Array [
   <Blueprint3.MenuItem
     disabled={false}
     icon="eye-off"
-    id="renderer"
+    id="renderer.js"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
@@ -25,7 +25,7 @@ Array [
   <Blueprint3.MenuItem
     disabled={false}
     icon="eye-off"
-    id="preload"
+    id="preload.js"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
@@ -33,9 +33,9 @@ Array [
     text="Preload (preload.js)"
   />,
   <Blueprint3.MenuItem
-    disabled={true}
+    disabled={false}
     icon="eye-open"
-    id="html"
+    id="index.html"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
@@ -45,13 +45,25 @@ Array [
   <Blueprint3.MenuItem
     disabled={false}
     icon="eye-off"
-    id="css"
+    id="styles.css"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
     shouldDismissPopover={true}
     text="Stylesheet (styles.css)"
   />,
+  <React.Fragment>
+    <Blueprint3.MenuDivider />
+    <Blueprint3.MenuItem
+      disabled={false}
+      icon="plus"
+      multiline={false}
+      onClick={[Function]}
+      popoverProps={Object {}}
+      shouldDismissPopover={true}
+      text="Add Custom Editor"
+    />
+  </React.Fragment>,
   <React.Fragment>
     <Blueprint3.MenuDivider />
     <Blueprint3.MenuItem
@@ -76,7 +88,7 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="main"
+          id="main.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -86,7 +98,7 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="renderer"
+          id="renderer.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -96,7 +108,7 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="preload"
+          id="preload.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -106,7 +118,7 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="html"
+          id="index.html"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -116,13 +128,25 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="css"
+          id="styles.css"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
         />
+        <React.Fragment>
+          <Blueprint3.MenuDivider />
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="plus"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Add Custom Editor"
+          />
+        </React.Fragment>
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem
@@ -178,7 +202,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="main"
+          id="main.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -188,7 +212,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="renderer"
+          id="renderer.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -198,7 +222,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="preload"
+          id="preload.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -208,7 +232,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="html"
+          id="index.html"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
@@ -218,13 +242,25 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-off"
-          id="css"
+          id="styles.css"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Stylesheet (styles.css)"
         />
+        <React.Fragment>
+          <Blueprint3.MenuDivider />
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="plus"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Add Custom Editor"
+          />
+        </React.Fragment>
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem

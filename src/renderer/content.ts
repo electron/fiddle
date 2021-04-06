@@ -71,6 +71,7 @@ function getQuickStart(branch: string): Promise<EditorValues> {
     console.log(`Content: ${branch} template loading`);
     pending = prepareTemplate(branch).then(readFiddle);
     templateCache[branch] = pending;
+    console.info(templateCache[branch]);
   }
   return pending;
 }

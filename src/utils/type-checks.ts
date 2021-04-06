@@ -1,4 +1,5 @@
 import {
+  ALL_PANELS,
   DefaultEditorId,
   DEFAULT_EDITORS,
   EditorId,
@@ -34,7 +35,7 @@ export function isEditorId(
 export function isPanelId(
   input: EditorId | PanelId | MosaicId,
 ): input is PanelId {
-  return !DEFAULT_EDITORS.includes(input as DefaultEditorId);
+  return ALL_PANELS.includes(input as PanelId);
 }
 
 /**

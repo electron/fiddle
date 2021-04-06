@@ -16,11 +16,11 @@ import {
   GenericDialogType,
   MosaicId,
   PanelId,
+  DefaultEditorId,
 } from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
-import { FILENAME_KEYS } from '../../shared-constants';
 
 interface EditorDropdownState {
   value: string;
@@ -191,7 +191,7 @@ export class EditorDropdown extends React.Component<
         // Also fail if the user tries to create two identical editors.
         if (
           appState.customMosaics.includes(name) ||
-          Object.keys(FILENAME_KEYS).includes(name)
+          Object.values(DefaultEditorId).includes(name as DefaultEditorId)
         ) {
           appState.setGenericDialogOptions({
             type: GenericDialogType.warning,

@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { EditorId } from '../../../src/interfaces';
+import { DefaultEditorId } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import { getVisibleMosaics } from '../../../src/utils/editors-mosaic-arrangement';
 
@@ -17,11 +17,12 @@ describe('EditorDropdown component', () => {
       hideAndBackupMosaic: jest.fn(),
       showMosaic: jest.fn(),
       closedPanels: {},
+      customMosaics: [],
     };
 
     (getVisibleMosaics as jest.Mock).mockReturnValue([
-      EditorId.html,
-      EditorId.renderer,
+      DefaultEditorId.html,
+      DefaultEditorId.renderer,
     ]);
   });
 
@@ -41,18 +42,22 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.onItemClick({ currentTarget: { id: EditorId.html } } as any);
+    dropdown.onItemClick({
+      currentTarget: { id: DefaultEditorId.html },
+    } as any);
     expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     expect(store.showMosaic).toHaveBeenCalledTimes(0);
 
-    dropdown.onItemClick({ currentTarget: { id: EditorId.main } } as any);
+    dropdown.onItemClick({
+      currentTarget: { id: DefaultEditorId.main },
+    } as any);
     expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     expect(store.showMosaic).toHaveBeenCalledTimes(1);
   });
 
   it('disables hide button if only one editor open', () => {
     store.mosaicArrangement = 'html';
-    (getVisibleMosaics as jest.Mock).mockReturnValue([EditorId.html]);
+    (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
 
     const wrapper = mount(<EditorDropdown appState={store} />);
     const instance = wrapper.instance() as EditorDropdown;

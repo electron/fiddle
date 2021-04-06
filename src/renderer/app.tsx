@@ -13,6 +13,7 @@ import {
   SetFiddleOptions,
   EditorId,
   CustomEditorId,
+  PACKAGE_NAME,
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
@@ -28,7 +29,6 @@ import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
-import { FILENAME_KEYS } from '../shared-constants';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -74,7 +74,7 @@ export class App {
     // Remove all previously created custom editors.
     this.state.customMosaics = [];
     const customEditors = Object.keys(editorValues).filter(
-      (v) => !Object.values(FILENAME_KEYS).includes(v as DefaultEditorId),
+      (v) => !Object.values(DefaultEditorId).includes(v as DefaultEditorId),
     ) as CustomEditorId[];
 
     for (const mosaic of customEditors) {
@@ -91,8 +91,6 @@ export class App {
       .filter(([_id, content]) => shouldShowContent(content))
       .map(([id]) => id as DefaultEditorId)
       .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
-
-    console.info(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
@@ -177,17 +175,17 @@ export class App {
     );
 
     const defaultEditorValues: EditorValues = {
-      css: getEditorValue(DefaultEditorId.css),
-      html: getEditorValue(DefaultEditorId.html),
-      main: getEditorValue(DefaultEditorId.main),
-      preload: getEditorValue(DefaultEditorId.preload),
-      renderer: getEditorValue(DefaultEditorId.renderer),
+      [DefaultEditorId.css]: getEditorValue(DefaultEditorId.css),
+      [DefaultEditorId.html]: getEditorValue(DefaultEditorId.html),
+      [DefaultEditorId.main]: getEditorValue(DefaultEditorId.main),
+      [DefaultEditorId.preload]: getEditorValue(DefaultEditorId.preload),
+      [DefaultEditorId.renderer]: getEditorValue(DefaultEditorId.renderer),
     };
 
     const values = { ...customEditorValues, ...defaultEditorValues };
 
     if (options && options.include !== false) {
-      values.package = await getPackageJson(this.state, values, options);
+      values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);
     }
 
     return values;

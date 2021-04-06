@@ -1,9 +1,13 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { Files, FileTransform } from '../interfaces';
+import {
+  DefaultEditorId,
+  Files,
+  FileTransform,
+  PACKAGE_NAME,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { FILENAME_KEYS, PACKAGE_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
@@ -132,8 +136,8 @@ export class FileManager {
     let output: Files = new Map();
 
     // Get values for default editors.
-    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
-      output.set(filename, values[editorId]);
+    for (const filename of Object.values(DefaultEditorId)) {
+      output.set(filename, values[filename]);
     }
 
     // Get values for any custom editors that have been created.
@@ -142,7 +146,7 @@ export class FileManager {
     }
 
     // Lastly get package name value.
-    output.set(PACKAGE_NAME, values.package!);
+    output.set(PACKAGE_NAME, values[PACKAGE_NAME]!);
 
     for (const transform of transforms) {
       try {

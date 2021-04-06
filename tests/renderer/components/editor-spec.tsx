@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { EditorId } from '../../../src/interfaces';
+import { DefaultEditorId } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
 
 describe('Editor component', () => {
@@ -44,7 +44,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.main}
+        id={DefaultEditorId.main}
         setFocused={() => undefined}
       />,
     );
@@ -58,7 +58,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.main}
+        id={DefaultEditorId.main}
         setFocused={() => undefined}
       />,
     );
@@ -70,7 +70,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.html}
+        id={DefaultEditorId.html}
         setFocused={() => undefined}
       />,
     );
@@ -82,7 +82,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.css}
+        id={DefaultEditorId.css}
         setFocused={() => undefined}
       />,
     );
@@ -96,7 +96,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.main}
+        id={DefaultEditorId.main}
         setFocused={() => undefined}
       />,
     );
@@ -116,7 +116,7 @@ describe('Editor component', () => {
           appState={store}
           monaco={monaco}
           monacoOptions={{}}
-          id={EditorId.main}
+          id={DefaultEditorId.main}
           editorDidMount={didMount}
           setFocused={() => undefined}
         />,
@@ -143,7 +143,7 @@ describe('Editor component', () => {
             appState={store}
             monaco={monaco}
             monacoOptions={{}}
-            id={EditorId.main}
+            id={DefaultEditorId.main}
             editorDidMount={() => undefined}
             setFocused={() => undefined}
           />,
@@ -167,7 +167,7 @@ describe('Editor component', () => {
             appState={store}
             monaco={monaco}
             monacoOptions={{}}
-            id={EditorId.main}
+            id={DefaultEditorId.main}
             editorDidMount={() => undefined}
             setFocused={() => undefined}
           />,
@@ -193,7 +193,7 @@ describe('Editor component', () => {
           appState={store}
           monaco={monaco}
           monacoOptions={{}}
-          id={EditorId.main}
+          id={DefaultEditorId.main}
           editorDidMount={didMount}
           setFocused={() => undefined}
         />,
@@ -216,7 +216,7 @@ describe('Editor component', () => {
           appState={store}
           monaco={monaco}
           monacoOptions={{}}
-          id={EditorId.main}
+          id={DefaultEditorId.main}
           editorDidMount={() => undefined}
           setFocused={() => undefined}
         />,
@@ -236,7 +236,7 @@ describe('Editor component', () => {
         appState={store}
         monaco={monaco}
         monacoOptions={{}}
-        id={EditorId.main}
+        id={DefaultEditorId.main}
         editorDidMount={didMount}
         setFocused={() => undefined}
       />,

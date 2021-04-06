@@ -1,5 +1,4 @@
-import { EditorValues } from '../interfaces';
-import { FILENAME_KEYS } from '../shared-constants';
+import { DefaultEditorId, EditorValues } from '../interfaces';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -12,22 +11,22 @@ import * as path from 'path';
  */
 export async function readFiddle(folder: string): Promise<EditorValues> {
   const ret: EditorValues = {
-    css: '',
-    html: '',
-    main: '',
-    preload: '',
-    renderer: '',
+    [DefaultEditorId.css]: '',
+    [DefaultEditorId.html]: '',
+    [DefaultEditorId.main]: '',
+    [DefaultEditorId.preload]: '',
+    [DefaultEditorId.renderer]: '',
   };
 
   const hits: string[] = [];
-  const misses = new Set(Object.keys(FILENAME_KEYS));
+  const misses = new Set(Object.values(DefaultEditorId));
 
   const tryRead = (basename: string) => {
     try {
       const filename = path.join(folder, basename);
       const content = fs.readFileSync(filename, 'utf-8');
       hits.push(basename);
-      misses.delete(basename);
+      misses.delete(basename as DefaultEditorId);
       return content || '';
     } catch (error) {
       console.warn(`Could not read template file ${basename}:`, error);
@@ -39,9 +38,8 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     console.warn(`readFiddle(): "${folder}" does not exist`);
   } else {
     for (const file of fs.readdirSync(folder)) {
-      const key = FILENAME_KEYS[file];
-      if (key) {
-        ret[key] = tryRead(file);
+      if (Object.values(DefaultEditorId).includes(file as DefaultEditorId)) {
+        ret[file] = tryRead(file);
       }
     }
   }
