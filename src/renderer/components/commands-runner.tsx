@@ -5,7 +5,7 @@ import * as React from 'react';
 import { VersionState } from '../../interfaces';
 import { AppState } from '../state';
 
-export interface RunnerProps {
+interface RunnerProps {
   appState: AppState;
 }
 

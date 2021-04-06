@@ -77,13 +77,12 @@ export class Runner {
   public async autobisectImpl(
     versions: Array<RunnableVersion>,
   ): Promise<RunResult> {
+    const prefix = `Runner: autobisect`;
     const { appState } = this;
 
     // precondition: can't bisect unless we have >= 2 versions
     if (versions.length < 2) {
-      appState.pushOutput(
-        'Runner: autobisect needs at least two Electron versions',
-      );
+      appState.pushOutput(`${prefix} needs at least two Electron versions`);
       return RunResult.INVALID;
     }
 
@@ -92,11 +91,13 @@ export class Runner {
     const runVersion = async (version: string) => {
       let result = results.get(version);
       if (result === undefined) {
+        const pre = `${prefix} Electron ${version} -`;
+        appState.pushOutput(`${pre} setting version`);
         await appState.setVersion(version);
+        appState.pushOutput(`${pre} starting test`);
         result = await this.run();
         results.set(version, result);
-        const msg = `Runner: autobisect Electron ${version} - ${resultString[result]}`;
-        appState.pushOutput(msg);
+        appState.pushOutput(`${pre} finished test ${resultString[result]}`);
       }
       return result;
     };
@@ -106,7 +107,6 @@ export class Runner {
     let next;
     while (true) {
       const { version } = targetVersion;
-      appState.pushOutput(`Testing ${version}`, { isNotPre: true });
 
       const result = await runVersion(version);
       if (result === RunResult.INVALID) {
@@ -126,16 +126,16 @@ export class Runner {
     const resultBad = await runVersion(bad);
     if (resultGood === resultBad) {
       appState.pushOutput(
-        `Runner: autobisect 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
+        `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
       );
       return RunResult.INVALID;
     }
 
     const msgs = [
-      'Runner: autobisect complete',
-      `${good} ${resultString[RunResult.SUCCESS]}`,
-      `${bad} ${resultString[RunResult.FAILURE]}`,
-      'Commits between versions:',
+      `${prefix} complete`,
+      `${prefix} ${resultString[RunResult.SUCCESS]} ${good}`,
+      `${prefix} ${resultString[RunResult.FAILURE]} ${bad}`,
+      `${prefix} Commits between versions:`,
       `https://github.com/electron/electron/compare/v${good}...v${bad}`,
     ];
     msgs.forEach((msg) => appState.pushOutput(msg));

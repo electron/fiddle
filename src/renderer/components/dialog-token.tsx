@@ -6,11 +6,11 @@ import * as React from 'react';
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
 
-export interface TokenDialogProps {
+interface TokenDialogProps {
   appState: AppState;
 }
 
-export interface TokenDialogState {
+interface TokenDialogState {
   tokenInput: string;
   verifying: boolean;
   error: boolean;

@@ -8,7 +8,7 @@ import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { WrapperMosaicId } from './output-editors-wrapper';
 
-export interface CommandsProps {
+interface CommandsProps {
   appState: AppState;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;

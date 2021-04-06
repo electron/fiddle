@@ -11,11 +11,11 @@ import { GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';
 import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
 
-export interface AddThemeDialogProps {
+interface AddThemeDialogProps {
   appState: AppState;
 }
 
-export interface AddThemeDialogState {
+interface AddThemeDialogState {
   file?: File;
 }
 

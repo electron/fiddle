@@ -64,12 +64,12 @@ export const renderItem: ItemRenderer<LoadedFiddleTheme> = (
   );
 };
 
-export interface AppearanceSettingsProps {
+interface AppearanceSettingsProps {
   appState: AppState;
   toggleHasPopoverOpen: () => void;
 }
 
-export interface AppearanceSettingsState {
+interface AppearanceSettingsState {
   themes: Array<LoadedFiddleTheme>;
   selectedTheme?: LoadedFiddleTheme;
 }

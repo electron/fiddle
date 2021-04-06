@@ -8,4 +8,11 @@ export class MockState {
   @observable public isUsingSystemTheme = true;
   @observable public title = 'Electron Fiddle';
   @observable public output = [];
+  @observable public versionsToShow = [];
+
+  public hasVersion = jest.fn();
+  public hideChannels = jest.fn();
+  public pushOutput = jest.fn();
+  public setVersion = jest.fn();
+  public showChannels = jest.fn();
 }

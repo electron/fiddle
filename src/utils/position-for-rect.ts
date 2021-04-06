@@ -1,6 +1,6 @@
 import { ArrowPosition } from '../interfaces';
 
-export interface PositionResult {
+interface PositionResult {
   top: number;
   left: number;
   type: ArrowPosition;

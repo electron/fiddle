@@ -68,12 +68,12 @@ describe('main', () => {
     it('quits during Squirrel events', () => {
       (shouldQuit as jest.Mock).mockReturnValueOnce(true);
 
-      main();
+      main([]);
       expect(app.quit).toHaveBeenCalledTimes(1);
     });
 
     it('listens to core events', () => {
-      main();
+      main([]);
       expect(app.on).toHaveBeenCalledTimes(4);
     });
   });

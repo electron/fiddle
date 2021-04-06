@@ -4,6 +4,7 @@ import {
   ALL_MOSAICS,
   BlockableAccelerator,
   EditorId,
+  ElectronReleaseChannel,
   GenericDialogType,
   PanelId,
   VersionSource,
@@ -17,7 +18,10 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
+import {
+  DEFAULT_MOSAIC_ARRANGEMENT,
+  SORTED_EDITORS,
+} from '../../src/renderer/constants';
 import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
@@ -56,10 +60,6 @@ jest.mock('../../src/renderer/versions', () => {
     getElectronVersions: () =>
       require('../mocks/electron-versions').mockVersionsArray,
     getDefaultVersion: () => '2.0.2',
-    ElectronReleaseChannel: {
-      stable: 'Stable',
-      beta: 'Beta',
-    },
     addLocalVersion: jest.fn(),
     saveLocalVersions: jest.fn(),
     getReleaseChannel,
@@ -340,6 +340,43 @@ describe('AppState', () => {
     });
   });
 
+  describe('showChannels()', () => {
+    it('adds channels from `channelsToShow`', () => {
+      appState.channelsToShow = [
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.stable,
+      ];
+      appState.showChannels([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+      ]);
+      expect([...appState.channelsToShow].sort()).toEqual([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+      ]);
+    });
+  });
+
+  describe('hideChannels()', () => {
+    it('removes channels from `channelsToShow`', () => {
+      appState.channelsToShow = [
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+        ElectronReleaseChannel.unsupported,
+      ];
+      appState.hideChannels([
+        ElectronReleaseChannel.beta,
+        ElectronReleaseChannel.unsupported,
+      ]);
+      expect([...appState.channelsToShow].sort()).toEqual([
+        ElectronReleaseChannel.nightly,
+        ElectronReleaseChannel.stable,
+      ]);
+    });
+  });
+
   describe('removeVersion()', () => {
     it('removes a version', async () => {
       appState.versions['2.0.2'].state = VersionState.ready;
@@ -395,6 +432,18 @@ describe('AppState', () => {
 
       await appState.downloadVersion('v2.0.2');
       expect(setupBinary).toHaveBeenCalledTimes(0);
+    });
+  });
+
+  describe('hasVersion()', () => {
+    const UNKNOWN_VERSION = 'v999.99.99';
+    const KNOWN_VERSION = Object.keys(appState.versions).pop();
+
+    it('returns false if state does not have that version', () => {
+      expect(appState.hasVersion(UNKNOWN_VERSION)).toEqual(false);
+    });
+    it('returns true if state has that version', () => {
+      expect(appState.hasVersion(KNOWN_VERSION!)).toBe(true);
     });
   });
 
@@ -603,15 +652,15 @@ describe('AppState', () => {
     it('hides a given editor and creates a backup', () => {
       appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
       appState.closedPanels = {};
-      appState.hideAndBackupMosaic(EditorId.main);
+      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: EditorId.renderer,
+        first: SORTED_EDITORS[1],
         second: {
           direction: 'column',
-          first: EditorId.preload,
-          second: EditorId.html,
+          first: SORTED_EDITORS[2],
+          second: SORTED_EDITORS[3],
         },
       });
       expect(appState.closedPanels[EditorId.main]).toBeTruthy();
@@ -635,15 +684,15 @@ describe('AppState', () => {
 
   describe('resetEditorLayout()', () => {
     it('Puts editors in default arrangement', () => {
-      appState.hideAndBackupMosaic(EditorId.main);
+      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: EditorId.renderer,
+        first: SORTED_EDITORS[1],
         second: {
           direction: 'column',
-          first: EditorId.preload,
-          second: EditorId.html,
+          first: SORTED_EDITORS[2],
+          second: SORTED_EDITORS[3],
         },
       });
 

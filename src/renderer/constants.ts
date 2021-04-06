@@ -10,17 +10,25 @@ export const CONFIG_PATH = path.join(
   '.electron-fiddle',
 );
 
+export const SORTED_EDITORS = Object.freeze([
+  EditorId.main,
+  EditorId.renderer,
+  EditorId.html,
+  EditorId.preload,
+  EditorId.css,
+]);
+
 export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
   direction: 'row',
   first: {
     direction: 'column',
-    first: EditorId.main,
-    second: EditorId.renderer,
+    first: SORTED_EDITORS[0],
+    second: SORTED_EDITORS[1],
   },
   second: {
     direction: 'column',
-    first: EditorId.preload,
-    second: EditorId.html,
+    first: SORTED_EDITORS[2],
+    second: SORTED_EDITORS[3],
   },
 };
 

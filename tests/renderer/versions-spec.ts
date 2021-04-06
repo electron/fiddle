@@ -1,9 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { RunnableVersion, VersionSource } from '../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  RunnableVersion,
+  VersionSource,
+} from '../../src/interfaces';
 import {
   addLocalVersion,
-  ElectronReleaseChannel,
   fetchVersions,
   getDefaultVersion,
   getKnownVersions,

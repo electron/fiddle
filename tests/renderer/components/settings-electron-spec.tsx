@@ -1,9 +1,12 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { VersionSource, VersionState } from '../../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  VersionSource,
+  VersionState,
+} from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
-import { ElectronReleaseChannel } from '../../../src/renderer/versions';
 import { mockVersions, mockVersionsArray } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
@@ -22,6 +25,8 @@ describe('ElectronSettings component', () => {
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
       toggleAddVersionDialog: jest.fn(),
+      showChannels: jest.fn(),
+      hideChannels: jest.fn(),
     };
 
     // Render all the states
@@ -158,6 +163,15 @@ describe('ElectronSettings component', () => {
   describe('handleChannelChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<ElectronSettings appState={store} />);
+      store.showChannels.mockImplementation((ids: ElectronReleaseChannel[]) =>
+        store.channelsToShow.push(...ids),
+      );
+      store.hideChannels.mockImplementation(
+        (ids: ElectronReleaseChannel[]) =>
+          (store.channelsToShow = store.channelsToShow.filter(
+            (id: ElectronReleaseChannel) => !ids.includes(id),
+          )),
+      );
       const instance = wrapper.instance() as any;
       await instance.handleChannelChange({
         currentTarget: {

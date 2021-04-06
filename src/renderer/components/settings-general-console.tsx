@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 
-export interface ConsoleSettingsProps {
+interface ConsoleSettingsProps {
   appState: AppState;
 }
 

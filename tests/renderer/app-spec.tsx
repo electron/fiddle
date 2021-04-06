@@ -12,9 +12,13 @@ jest.mock('../../src/renderer/file-manager', () =>
 );
 jest.mock('../../src/renderer/state', () => ({
   appState: {
-    theme: 'defaultDark',
-    getName: () => 'Test',
     closedPanels: {},
+    getName: () => 'Test',
+    hideChannels: jest.fn(),
+    pushOutput: jest.fn(),
+    setVersion: jest.fn(),
+    showChannels: jest.fn(),
+    theme: 'defaultDark',
   },
 }));
 jest.mock('../../src/renderer/components/header', () => ({
@@ -50,6 +54,34 @@ describe('App component', () => {
     });
   });
 
+  describe('openFiddle()', () => {
+    it('understands gists', async () => {
+      const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
+      const app = new App();
+
+      const spy = jest.spyOn(app.remoteLoader, 'fetchGistAndLoad');
+      spy.mockResolvedValue(true);
+
+      await app.openFiddle({ gistId });
+
+      expect(spy).toHaveBeenCalledWith(gistId);
+
+      spy.mockRestore();
+    });
+
+    it('understands files', async () => {
+      const filePath = '/fake/path';
+      const app = new App();
+
+      const openFiddle = app.fileManager.openFiddle as jest.Mock;
+      openFiddle.mockImplementationOnce(() => Promise.resolve());
+
+      await app.openFiddle({ filePath });
+
+      expect(openFiddle).toHaveBeenCalledWith(filePath);
+    });
+  });
+
   describe('getEditorValues()', () => {
     it('gets values', async () => {
       const app = new App();
@@ -78,9 +110,9 @@ describe('App component', () => {
     });
 
     it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-
       const app = new App();
+
+      (window as any).ElectronFiddle = null;
       let threw = false;
       try {
         await app.getEditorValues({});
@@ -340,9 +372,9 @@ describe('App component', () => {
     });
 
     it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-
       const app = new App();
+
+      (window as any).ElectronFiddle = null;
       let threw = false;
       try {
         await app.setEditorValues({ html: '', main: '', renderer: '' });

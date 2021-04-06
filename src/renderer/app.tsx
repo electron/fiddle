@@ -17,10 +17,11 @@ import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { isEditorBackup } from '../utils/type-checks';
-import { EMPTY_EDITOR_CONTENT } from './constants';
+import { EMPTY_EDITOR_CONTENT, SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
+import { TaskRunner } from './task-runner';
 import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
@@ -38,10 +39,13 @@ export class App {
   public fileManager = new FileManager(appState);
   public remoteLoader = new RemoteLoader(appState);
   public runner = new Runner(appState);
+  public readonly taskRunner: TaskRunner;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
     this.setEditorValues = this.setEditorValues.bind(this);
+
+    this.taskRunner = new TaskRunner(this);
   }
 
   public async replaceFiddle(
@@ -63,33 +67,16 @@ export class App {
       }
     }
 
-    // display all editors that have content
-    const visibleEditors = [];
+    // if the gist content is empty or matches the empty file output, don't show it
+    const EMPTIES = Object.values(EMPTY_EDITOR_CONTENT);
+    const shouldShowContent = (content?: string) =>
+      content && content.length > 0 && !EMPTIES.includes(content);
 
-    // ensure consistent sorting of mosaics
-    const sortedEditors = Object.keys(editorValues).sort((a, b) => {
-      const order: Array<string> = [
-        'main',
-        'renderer',
-        'html',
-        'preload',
-        'css',
-      ];
-
-      return order.indexOf(a) - order.indexOf(b);
-    });
-
-    for (const id of sortedEditors) {
-      const content = editorValues[id];
-
-      // if the gist content is empty or matches the empty file output, don't show it
-      if (
-        content.length > 0 &&
-        !Object.values(EMPTY_EDITOR_CONTENT).includes(content)
-      ) {
-        visibleEditors.push(id as EditorId);
-      }
-    }
+    // sort and display all editors that have content
+    const visibleEditors: EditorId[] = Object.entries(editorValues)
+      .filter(([_id, content]) => shouldShowContent(content))
+      .map(([id]) => id as EditorId)
+      .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
@@ -238,6 +225,20 @@ export class App {
   }
 
   /**
+   * Opens a fiddle from the specified location.
+   *
+   * @param {SetFiddleOptions} the fiddle to open
+   */
+  public async openFiddle(fiddle: SetFiddleOptions) {
+    const { filePath, gistId } = fiddle;
+    if (filePath) {
+      await this.fileManager.openFiddle(filePath);
+    } else if (gistId) {
+      await this.remoteLoader.fetchGistAndLoad(gistId);
+    }
+  }
+
+  /**
    * Loads theme CSS into the HTML document.
    *
    * @returns {Promise<void>}
@@ -288,7 +289,6 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners =
-  window.ElectronFiddle.contentChangeListeners || [];
-window.ElectronFiddle.app = window.ElectronFiddle.app || new App();
+window.ElectronFiddle.contentChangeListeners ||= [];
+window.ElectronFiddle.app ||= new App();
 window.ElectronFiddle.app.setup();

@@ -7,11 +7,11 @@ import { Bisector } from '../bisect';
 import { AppState } from '../state';
 import { VersionSelect } from './version-select';
 
-export interface BisectDialogProps {
+interface BisectDialogProps {
   appState: AppState;
 }
 
-export interface BisectDialogState {
+interface BisectDialogState {
   startIndex: number;
   endIndex: number;
   allVersions: Array<RunnableVersion>;

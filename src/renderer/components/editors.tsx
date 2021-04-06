@@ -57,11 +57,11 @@ export const TITLE_MAP: Record<MosaicId, string> = {
   [PanelId.docsDemo]: 'Docs & Demos',
 };
 
-export interface EditorsProps {
+interface EditorsProps {
   appState: AppState;
 }
 
-export interface EditorsState {
+interface EditorsState {
   monaco?: typeof MonacoType;
   isMounted?: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;

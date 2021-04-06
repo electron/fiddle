@@ -5,7 +5,7 @@ import { IpcEvents } from '../../ipc-events';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
-export interface ChromeMacProps {
+interface ChromeMacProps {
   appState: AppState;
 }
 

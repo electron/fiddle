@@ -5,11 +5,11 @@ import { AppState } from '../state';
 import { Editors } from './editors';
 import { Output } from './output';
 
-export interface WrapperProps {
+interface WrapperProps {
   appState: AppState;
 }
 
-export interface WrapperState {
+interface WrapperState {
   mosaicArrangement: MosaicNode<WrapperMosaicId>;
 }
 

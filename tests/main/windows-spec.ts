@@ -37,7 +37,6 @@ describe('windows', () => {
       titleBarStyle: undefined,
       webPreferences: {
         webviewTag: false,
-        enableRemoteModule: true,
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
         contextIsolation: false,

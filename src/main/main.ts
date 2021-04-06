@@ -9,12 +9,15 @@ import { setupAboutPanel } from './about-panel';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
+import { processCommandLine } from './command-line';
 import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 import { IpcMainEvent } from 'electron/main';
+
+let argv: string[] = [];
 
 /**
  * Handle the app's "ready" event. This is essentially
@@ -38,6 +41,8 @@ export async function onReady() {
   setupDialogs();
   setupDevTools();
   setupTitleBarClickMac();
+
+  processCommandLine(argv);
 }
 
 /**
@@ -105,7 +110,9 @@ export function onWindowsAllClosed() {
  *
  * Exported for testing purposes.
  */
-export function main() {
+export function main(argv_in: string[]) {
+  argv = argv_in;
+
   // Handle creating/removing shortcuts on Windows when
   // installing/uninstalling.
   if (shouldQuit()) {
@@ -126,4 +133,7 @@ export function main() {
   app.on('activate', getOrCreateMainWindow);
 }
 
-main();
+// only call main() if this is the main module
+if (typeof module !== 'undefined' && !module.parent) {
+  main(process.argv);
+}

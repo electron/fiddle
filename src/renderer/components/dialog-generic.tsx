@@ -5,7 +5,7 @@ import * as React from 'react';
 import { GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';
 
-export interface GenericDialogProps {
+interface GenericDialogProps {
   appState: AppState;
 }
 

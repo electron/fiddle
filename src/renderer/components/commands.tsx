@@ -10,7 +10,7 @@ import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 
-export interface CommandsProps {
+interface CommandsProps {
   appState: AppState;
 }
 

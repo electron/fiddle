@@ -69,6 +69,11 @@ yarn start
 yarn test
 ```
 
+Note that console calls, e.g. console.log(), are mocked out during tests
+to avoid noise in the test reports. If you want this verbosity, e.g. if
+you're debugging or writing new tests, it can be enabled by setting the
+environment variable `FIDDLE_VERBOSE_TESTS` when running.
+
 ## Release Process
 
 First, bump the version number and create a new `git` tag:

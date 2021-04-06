@@ -1,5 +1,3 @@
-export type WindowNames = 'main';
-
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
@@ -56,10 +54,34 @@ export interface RunnableVersion extends Version {
   downloadProgress?: number;
 }
 
+export const enum ElectronReleaseChannel {
+  stable = 'Stable',
+  beta = 'Beta',
+  nightly = 'Nightly',
+  unsupported = 'Unsupported',
+}
+
 export interface SetFiddleOptions {
   filePath?: string;
   templateName?: string;
   gistId?: string;
+}
+
+export interface SetupRequest {
+  fiddle?: SetFiddleOptions;
+  version?: string;
+  showChannels: ElectronReleaseChannel[];
+  hideChannels: ElectronReleaseChannel[];
+}
+
+export interface BisectRequest {
+  setup: SetupRequest;
+  goodVersion: string;
+  badVersion: string;
+}
+
+export interface TestRequest {
+  setup: SetupRequest;
 }
 
 export interface OutputEntry {
