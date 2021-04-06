@@ -457,7 +457,7 @@ export class AppState {
     this.setVersions(getElectronVersions());
   }
 
-  @action private setVersions(versions: RunnableVersion[] = []) {
+  @action private setVersions(versions: RunnableVersion[]) {
     this.versions = Object.fromEntries(
       versions.map((ver) => [ver.version, ver]),
     );
