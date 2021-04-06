@@ -499,8 +499,7 @@ export class AppState {
       updatedVersions[version].state = VersionState.unknown;
     }
 
-    this.versions = updatedVersions;
-    this.updateDownloadedVersionState();
+    this.setVersions(Object.values(updatedVersions));
   }
 
   /**
