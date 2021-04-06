@@ -1,4 +1,6 @@
-import { AboutPanelOptionsOptions, app } from 'electron';
+import * as fs from 'fs-extra';
+import * as path from 'path';
+import { app } from 'electron';
 
 /**
  * Sets Fiddle's About panel options on Linux and macOS
@@ -6,24 +8,17 @@ import { AboutPanelOptionsOptions, app } from 'electron';
  * @returns
  */
 export function setupAboutPanel(): void {
-  if (process.platform === 'win32') return;
+  const contribFile = path.join(__dirname, '../../../static/contributors.json');
+  const iconPath = path.resolve(__dirname, '../../../assets/icons/fiddle.png');
 
-  const options: AboutPanelOptionsOptions = {
+  app.setAboutPanelOptions({
     applicationName: 'Electron Fiddle',
     applicationVersion: app.getVersion(),
-    version: process.versions.electron,
+    authors: fs.readJSONSync(contribFile).map(({ name }) => name),
     copyright: '© Electron Authors',
-  };
-
-  switch (process.platform) {
-    case 'linux':
-      options.website = 'https://electronjs.org/fiddle';
-    case 'darwin':
-      options.credits =
-        'https://github.com/electron/fiddle/graphs/contributors';
-    default:
-    // fallthrough
-  }
-
-  app.setAboutPanelOptions(options);
+    credits: 'https://github.com/electron/fiddle/graphs/contributors',
+    iconPath,
+    version: process.versions.electron,
+    website: 'https://electronjs.org/fiddle',
+  });
 }
