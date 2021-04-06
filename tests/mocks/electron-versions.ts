@@ -26,3 +26,6 @@ export class MockVersions {
     this.mockVersionsArray = arr;
   }
 }
+
+// export static instances for the tests that still use them
+export const { mockVersions, mockVersionsArray } = new MockVersions();
