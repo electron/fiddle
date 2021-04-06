@@ -387,6 +387,7 @@ export class AppState {
 
   public async getName() {
     this.name ||= await getName(this);
+    return this.name;
   }
 
   @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
