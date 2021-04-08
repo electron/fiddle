@@ -16,18 +16,17 @@ import { waitFor } from '../../src/utils/wait-for';
 import * as path from 'path';
 import * as semver from 'semver';
 import extract from 'extract-zip';
+import { download as electronDownload } from '@electron/get';
 
 jest.mock('fs-extra');
 jest.mock('extract-zip');
+jest.mock('@electron/get');
 jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
   removeTypeDefsForVersion: jest.fn(),
-}));
-jest.mock('@electron/get', () => ({
-  download: jest.fn(),
 }));
 
 describe('binary', () => {
@@ -106,8 +105,9 @@ describe('binary', () => {
     it(`returns ${VersionState.downloading} when downloading`, () => {
       // mock a download in progress
       let downloadResolve: any;
-      const { download } = require('@electron/get');
-      download.mockReturnValue(new Promise((r) => (downloadResolve = r)));
+      (electronDownload as jest.Mock).mockReturnValueOnce(
+        new Promise((r) => (downloadResolve = r)),
+      );
 
       setupBinary(mockState, ver.version);
 
@@ -117,8 +117,7 @@ describe('binary', () => {
 
     it(`returns ${VersionState.unzipping} when unzipping`, async () => {
       // mock a completed download + an unzip in progress
-      const { download } = require('@electron/get');
-      download.mockResolvedValueOnce('/fake/path');
+      (electronDownload as jest.Mock).mockResolvedValueOnce('/fake/path');
       let unzipResolve: any;
       const unzipPromise = new Promise((r) => (unzipResolve = r));
       (extract as jest.Mock).mockReturnValueOnce(unzipPromise);
@@ -193,11 +192,9 @@ describe('binary', () => {
   });
 
   describe('setupBinary()', () => {
-    const { download } = require('@electron/get');
-
     it('does not download local versions', async () => {
       const localPath = '/fake/path';
-      download.mockResolvedValue(localPath);
+      (electronDownload as jest.Mock).mockResolvedValue(localPath);
 
       const version = '3.0.0';
       mockState.versions[version] = {
@@ -208,7 +205,7 @@ describe('binary', () => {
 
       await setupBinary(mockState, version);
 
-      expect(download).not.toHaveBeenCalled();
+      expect(electronDownload).not.toHaveBeenCalled();
       expect(mockState.versions[version].state).toBe(VersionState.unknown);
     });
 
@@ -216,7 +213,7 @@ describe('binary', () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
 
       const localPath = '/fake/path';
-      download.mockResolvedValue(localPath);
+      (electronDownload as jest.Mock).mockResolvedValue(localPath);
 
       const version = '3.0.0';
       mockState.versions[version] = {
@@ -226,8 +223,43 @@ describe('binary', () => {
       };
       await setupBinary(mockState, version);
 
-      expect(download).toHaveBeenCalled();
+      expect(electronDownload).toHaveBeenCalled();
       expect(mockState.versions[version].state).toBe('ready');
+    });
+
+    it('handles progress callbacks from electron/get', async () => {
+      const percent = 50;
+      const version = '9.9.9';
+      const ver: RunnableVersion = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version,
+      };
+      mockState.versions[version] = ver;
+
+      // mock a download in progress...
+      let downloadResolve: any;
+      let getProgressCallback: any;
+      (electronDownload as jest.Mock).mockImplementation(
+        (_: any, opts: any) => {
+          ({ getProgressCallback } = opts.downloadOptions);
+          return new Promise((r) => (downloadResolve = r));
+        },
+      );
+
+      setupBinary(mockState, version);
+      await waitFor(() => getVersionState(ver) === VersionState.downloading);
+
+      expect(ver.downloadProgress).not.toBe(percent);
+
+      // send a progress update
+      getProgressCallback({ percent });
+      expect(ver.downloadProgress).toBe(percent);
+      // and do it again to trigger a different if-else branch
+      getProgressCallback({ percent });
+      expect(ver.downloadProgress).toBe(percent);
+
+      downloadResolve();
     });
 
     it(`does not download a version again`, async () => {
@@ -242,11 +274,27 @@ describe('binary', () => {
 
       await setupBinary(mockState, version);
 
-      expect(download).not.toHaveBeenCalled();
+      expect(electronDownload).not.toHaveBeenCalled();
       expect(mockState.versions[version].state).toBe('ready');
     });
 
-    it(`waits if asked for a version is already downloading`, async () => {
+    it(`returns the same promise if called twice for the same version`, async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
+
+      const version = '123.456.789';
+      mockState.versions[version] = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version,
+      };
+
+      const prom1 = setupBinary(mockState, version);
+      const prom2 = setupBinary(mockState, version);
+
+      expect(prom1).toBe(prom2);
+    });
+
+    it(`waits if asked for a version that is already downloading`, async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
       const version = '3.0.0';
@@ -258,14 +306,12 @@ describe('binary', () => {
 
       await setupBinary(mockState, version);
 
-      expect(download).not.toHaveBeenCalled();
+      expect(electronDownload).not.toHaveBeenCalled();
       expect(mockState.versions[version].state).toBe('ready');
     });
 
     it('handles an error in the zip file', async () => {
-      const { download } = require('@electron/get');
-
-      download.mockReturnValue('/fake/path');
+      (electronDownload as jest.Mock).mockReturnValue('/fake/path');
       const version = '3.0.0';
       mockState.versions[version] = {
         source: VersionSource.remote,
