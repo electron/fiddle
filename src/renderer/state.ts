@@ -30,12 +30,7 @@ import {
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import {
-  getDownloadedVersions,
-  getDownloadingVersions,
-  removeBinary,
-  setupBinary,
-} from './binary';
+import { getVersionState, removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
@@ -342,26 +337,17 @@ export class AppState {
    * current settings for states and channels to display
    */
   @computed get versionsToShow(): Array<RunnableVersion> {
+    const { channelsToShow, statesToShow, versions } = this;
+
+    const filter = (ver: RunnableVersion) =>
+      ver &&
+      statesToShow.includes(ver.state) &&
+      channelsToShow.includes(getReleaseChannel(ver));
+
     return sortedElectronMap<RunnableVersion>(
-      this.versions,
+      versions,
       (_key, item) => item,
-    ).filter((item) => {
-      if (!item) {
-        return false;
-      }
-
-      // Check if we want to show the version
-      if (!this.channelsToShow.includes(getReleaseChannel(item))) {
-        return false;
-      }
-
-      // Check if we want to show the state
-      if (!this.statesToShow.includes(item.state)) {
-        return false;
-      }
-
-      return true;
-    });
+    ).filter(filter);
   }
 
   /**
@@ -486,7 +472,7 @@ export class AppState {
     this.versions = Object.fromEntries(
       versions.map((ver) => [ver.version, ver]),
     );
-    this.updateDownloadedVersionState();
+    this.updateVersionStates();
   }
 
   /**
@@ -549,7 +535,7 @@ export class AppState {
       this.versions = updatedVersions;
 
       await setupBinary(this, version);
-      this.updateDownloadedVersionState();
+      this.updateVersionStates();
     } else {
       console.log(
         `State: Version ${version} already downloaded, doing nothing.`,
@@ -631,28 +617,12 @@ export class AppState {
    *
    * @returns {Promise<void>}
    */
-  @action public async updateDownloadedVersionState(): Promise<void> {
-    const updatedVersions = toJS(this.versions);
-
-    // Keep state of currently downloading binaries first
-    const downloadingVersions = getDownloadingVersions(this);
-    for (const version of downloadingVersions) {
-      if (updatedVersions[version]) {
-        updatedVersions[version].state = VersionState.downloading;
-      }
+  @action public updateVersionStates() {
+    const versions = toJS(this.versions);
+    for (const ver of Object.values(versions)) {
+      ver.state = getVersionState(ver);
     }
-
-    const downloadedVersions = await getDownloadedVersions();
-
-    for (const version of downloadedVersions) {
-      if (updatedVersions[version]) {
-        updatedVersions[version].state = VersionState.ready;
-      }
-    }
-
-    console.log(`State: Updated version state`, updatedVersions);
-
-    this.versions = updatedVersions;
+    this.versions = versions;
   }
 
   /**

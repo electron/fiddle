@@ -4,7 +4,9 @@ import {
   ElectronReleaseChannel,
   RunnableVersion,
   VersionSource,
+  VersionState,
 } from '../../src/interfaces';
+import { getVersionState } from '../../src/renderer/binary';
 import {
   addLocalVersion,
   fetchVersions,
@@ -17,6 +19,12 @@ import {
   VersionKeys,
 } from '../../src/renderer/versions';
 import { mockFetchOnce } from '../utils';
+
+jest.mock('../../src/renderer/binary', () => ({
+  getVersionState: jest
+    .fn()
+    .mockImplementation((v: RunnableVersion) => v.state),
+}));
 
 const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
 
@@ -215,20 +223,35 @@ describe('versions', () => {
 
   describe('getUpdatedElectronVersions()', () => {
     it('gets known versions', async () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(
-        `[{ "version": "3.0.5" }]`,
-      );
-      (window as any).localStorage.getItem.mockReturnValueOnce(
-        `[{ "version": "3.0.5" }]`,
-      );
+      (getVersionState as jest.Mock).mockImplementation((v: any) => {
+        if (v.version === '3.0.5') return VersionState.ready;
+        if (v.version === '3.0.6') return VersionState.unknown;
+        return v.state;
+      });
+
+      (window as any).localStorage.getItem.mockImplementation((key: string) => {
+        if (key === 'known-electron-versions')
+          return '[{ "version": "3.0.5" }]';
+        if (key === 'local-electron-versions')
+          return '[{ "version": "3.0.6" }]';
+        throw new Error(`unexpected key ${key}`);
+      });
+
       mockFetchOnce('');
 
       const result = await getUpdatedElectronVersions();
-      const expectedVersion = { version: '3.0.5', state: 'unknown' };
 
       expect(result).toEqual([
-        { ...expectedVersion, source: 'remote' },
-        { ...expectedVersion, source: 'local', state: 'ready' },
+        {
+          source: VersionSource.remote,
+          state: VersionState.ready,
+          version: '3.0.5',
+        },
+        {
+          source: VersionSource.local,
+          state: VersionState.unknown,
+          version: '3.0.6',
+        },
       ]);
     });
   });
