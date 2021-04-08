@@ -3,16 +3,21 @@ import * as React from 'react';
 
 import {
   ElectronReleaseChannel,
+  RunnableVersion,
   VersionSource,
   VersionState,
 } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
-import { mockVersions, mockVersionsArray } from '../../mocks/electron-versions';
+import { MockVersions } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
   let store: any;
+  let mockVersions: Record<string, RunnableVersion>;
+  let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
+    ({ mockVersions, mockVersionsArray } = new MockVersions());
+
     store = {
       version: '2.0.1',
       versions: { ...mockVersions },

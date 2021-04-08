@@ -5,7 +5,7 @@ import { VersionState } from '../../../src/interfaces';
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
-import { mockVersions } from '../../mocks/electron-versions';
+import { MockVersions } from '../../mocks/electron-versions';
 
 jest.mock('../../../src/renderer/npm');
 jest.mock('../../../src/renderer/file-manager');
@@ -16,11 +16,13 @@ describe('Runner component', () => {
   let store: any;
 
   beforeEach(() => {
+    const { mockVersions } = new MockVersions();
+
     ipcRendererManager.removeAllListeners();
 
     store = {
       version: '2.0.2',
-      versions: { ...mockVersions },
+      versions: mockVersions,
       isRunning: false,
       get currentElectronVersion() {
         return mockVersions[this.version];

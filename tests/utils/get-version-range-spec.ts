@@ -1,10 +1,11 @@
 import * as semver from 'semver';
 
-import { mockVersionsArray } from '../mocks/electron-versions';
+import { MockVersions } from '../mocks/electron-versions';
 
 import { getVersionRange } from '../../src/utils/get-version-range';
 
 describe('getVersionRange', () => {
+  const { mockVersionsArray } = new MockVersions();
   const knownVersions = [...mockVersionsArray].reverse();
   const midpoint = Math.floor(knownVersions.length / 2);
 
