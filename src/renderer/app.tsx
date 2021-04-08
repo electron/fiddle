@@ -169,9 +169,8 @@ export class App {
       throw new Error('Fiddle not ready');
     }
 
-    const customEditorValues = Object.assign(
-      {},
-      ...customMosaics.map((m) => ({ [m]: getEditorValue(m) })),
+    const customEditorValues = Object.fromEntries(
+      customMosaics.map((m) => [m, getEditorValue(m)]),
     );
 
     const defaultEditorValues: EditorValues = {

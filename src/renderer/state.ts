@@ -737,11 +737,11 @@ export class AppState {
   }
 
   /**
-   * Hides the panel for a given MosaicId.
+   * Removes the panel for a given custom MosaicId.
    *
    * @param {MosaicId} id
    */
-  @action public removeMosaic(id: MosaicId) {
+  @action public removeCustomMosaic(id: MosaicId) {
     this.hideAndBackupMosaic(id);
     delete window.ElectronFiddle.editors[id];
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
