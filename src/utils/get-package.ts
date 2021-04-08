@@ -35,7 +35,10 @@ export async function getPackageJson(
   const dependencies: Record<string, string> = {};
 
   if (includeElectron) {
-    devDependencies.electron = appState.version;
+    const packageName = appState.version?.includes('nightly')
+      ? 'electron-nightly'
+      : 'electron';
+    devDependencies[packageName] = appState.version;
   }
 
   if (includeDependencies && values) {

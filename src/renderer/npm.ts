@@ -138,7 +138,7 @@ export async function installModules(
   let nameArgs: Array<string> = [];
 
   if (packageManager === 'npm') {
-    nameArgs = names.length > 0 ? ['-S', ...names] : ['--dev --prod'];
+    nameArgs = names.length > 0 ? ['-S', ...names] : ['--also=dev --prod'];
   } else {
     nameArgs = [...names];
   }

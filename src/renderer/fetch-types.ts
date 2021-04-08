@@ -16,7 +16,10 @@ const definitionPath = path.join(USER_DATA_PATH, 'electron-typedef');
  * @returns {Promise<string>}
  */
 export async function fetchTypeDefinitions(version: string): Promise<string> {
-  const url = `https://unpkg.com/electron@${version}/electron.d.ts`;
+  const packageName = version.includes('nightly')
+    ? 'electron-nightly'
+    : 'electron';
+  const url = `https://unpkg.com/${packageName}@${version}/electron.d.ts`;
 
   let text: string;
   try {
