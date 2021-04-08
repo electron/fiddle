@@ -1,7 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
 
-// Making TypeScript happy and avoiding "esModuleInterop" issues
 const { builtinModules } = require('module');
 
 export type IPackageManager = 'npm' | 'yarn';
@@ -23,7 +22,7 @@ const ignoredModules: Array<string> = [
 ];
 
 /* regular expression to both match and extract module names */
-const requiregx = /require\(['"](.*?)['"]\)/gm;
+const requiregx = /^.*require\(['"](.*?)['"]\)/gm;
 
 /*
  Quick and dirty filter functions for filtering module names
@@ -74,13 +73,12 @@ export async function getIsPackageManagerInstalled(
 /**
  * Finds npm modules in editor values, returning an array of modules.
  */
-export async function findModulesInEditors(values: EditorValues) {
+export function findModulesInEditors(values: EditorValues) {
   const files = [values.main, values.renderer, values.preload];
-  const modules: Array<string> = [];
-
-  for (const file of files) {
-    modules.push(...(await findModules(file)));
-  }
+  const modules = files.reduce(
+    (agg, file) => [...agg, ...findModules(file)],
+    [],
+  );
 
   console.log('Modules Found:', modules);
 
@@ -88,7 +86,7 @@ export async function findModulesInEditors(values: EditorValues) {
 }
 
 /**
- * Finds `require()` statements in a string.
+ * Uses a simple regex to find `require()` statements in a string.
  * Tries to exclude electron and Node built-ins as well as file-path
  * references. Also will try to install base packages of modules
  * that have a slash in them, for example: `lodash/fp` as the actual package
@@ -100,18 +98,18 @@ export async function findModulesInEditors(values: EditorValues) {
  * @param {string} input
  * @returns {Array<string>}
  */
-export async function findModules(input: string) {
+export function findModules(input: string): Array<string> {
   /* container definitions */
   const modules: Array<string> = [];
   let match: RegExpMatchArray | null;
 
-  /* decomment code with the esprima parser */
-  const code = await decommentWithWorker(input);
-
   /* grab all global require matches in the text */
-  while ((match = requiregx.exec(code) || null)) {
-    const mod = match[1];
-    modules.push(mod);
+  while ((match = requiregx.exec(input) || null)) {
+    // ensure commented-out requires aren't downloaded
+    if (!match[0].startsWith('//')) {
+      const mod = match[1];
+      modules.push(mod);
+    }
   }
 
   /* map and reduce */
@@ -160,17 +158,4 @@ export function packageRun(
   command: string,
 ): Promise<string> {
   return exec(dir, `${packageManager} run ${command}`);
-}
-
-function decommentWithWorker(input: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker('../utils/decomment.ts');
-    worker.onmessage = function (event: MessageEvent<string>) {
-      resolve(event.data);
-    };
-    worker.postMessage(input);
-    worker.onerror = function (e) {
-      reject(e);
-    };
-  });
 }
