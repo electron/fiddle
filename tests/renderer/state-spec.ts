@@ -285,7 +285,7 @@ describe('AppState', () => {
   });
 
   describe('toggleGenericDialog()', () => {
-    it('toggles the warnign dialog', () => {
+    it('toggles the warning dialog', () => {
       appState.genericDialogLastResult = true;
 
       appState.toggleGenericDialog();

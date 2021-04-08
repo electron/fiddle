@@ -132,7 +132,7 @@ export class App {
           } else {
             backup.value = values[name]!;
           }
-        } else if (editor && editor.setValue) {
+        } else if (editor?.setValue) {
           // The editor exists, set the value directly
           const newValue = values[name]!;
           if (!editor.getValue || editor.getValue() !== newValue) {
@@ -145,7 +145,7 @@ export class App {
     // Set content for any custom mosaics.
     for (const mosaic of this.state.customMosaics) {
       const editor = fiddle.editors[mosaic];
-      if (editor && editor.setValue) {
+      if (editor?.setValue) {
         const newValue = values[mosaic]!;
         if (!editor.getValue || editor.getValue() !== newValue) {
           editor.setValue(newValue);

@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import * as electron from 'electron';
+import { DefaultEditorId } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { setupGlobalWindow, setupPaths } from '../../src/preload/preload';
 
@@ -20,10 +21,10 @@ describe('preload', () => {
       expect((window as any).ElectronFiddle).toMatchObject({
         app: null,
         editors: {
-          'main.js': null,
-          'preload.js': null,
-          'renderer.js': null,
-          'index.html': null,
+          [DefaultEditorId.main]: null,
+          [DefaultEditorId.preload]: null,
+          [DefaultEditorId.renderer]: null,
+          [DefaultEditorId.html]: null,
         },
       });
     });

@@ -15,6 +15,7 @@ describe('EditorDropdown component', () => {
 
     store = {
       hideAndBackupMosaic: jest.fn(),
+      setGenericDialogOptions: jest.fn(),
       showMosaic: jest.fn(),
       closedPanels: {},
       customMosaics: [],

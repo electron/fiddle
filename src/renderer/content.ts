@@ -71,7 +71,6 @@ function getQuickStart(branch: string): Promise<EditorValues> {
     console.log(`Content: ${branch} template loading`);
     pending = prepareTemplate(branch).then(readFiddle);
     templateCache[branch] = pending;
-    console.info(templateCache[branch]);
   }
   return pending;
 }
@@ -129,7 +128,7 @@ export async function getContent(
   version: string,
 ): Promise<string> {
   const template = await getTemplate(version);
-  if (template && template[name]) {
+  if (template?.[name]) {
     return template[name];
   } else {
     const extension = name.split('.')[1];

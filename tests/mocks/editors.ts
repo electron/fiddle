@@ -1,3 +1,5 @@
+import { DefaultEditorId } from '../../src/interfaces';
+
 export class EditorMock {
   public layout = jest.fn();
   public hasTextFocus = jest.fn();
@@ -15,8 +17,8 @@ export class EditorMock {
 }
 
 export class EditorsMock {
-  public 'main.js' = new EditorMock('main.js');
-  public 'renderer.js' = new EditorMock('renderer.js');
-  public 'index.html' = new EditorMock('index.html');
-  public 'preload.js' = new EditorMock('preload.js');
+  public 'main.js' = new EditorMock(DefaultEditorId.main);
+  public 'renderer.js' = new EditorMock(DefaultEditorId.renderer);
+  public 'index.html' = new EditorMock(DefaultEditorId.html);
+  public 'preload.js' = new EditorMock(DefaultEditorId.preload);
 }
