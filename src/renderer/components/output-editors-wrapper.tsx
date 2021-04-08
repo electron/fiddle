@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Mosaic, MosaicNode } from 'react-mosaic-component';
+import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
 import { Editors } from './editors';
@@ -49,13 +49,12 @@ export class OutputEditorsWrapper extends React.Component<
     );
   }
 
-  private onChange = (currentNode: any) => {
-    const isConsoleShowing = currentNode.splitPercentage !== 0;
+  private onChange = (rootNode: MosaicParent<WrapperMosaicId>) => {
+    const isConsoleShowing = rootNode.splitPercentage !== 0;
 
     if (isConsoleShowing !== this.props.appState.isConsoleShowing) {
       this.props.appState.isConsoleShowing = isConsoleShowing;
     }
-
-    this.setState({ mosaicArrangement: currentNode });
+    this.setState({ mosaicArrangement: rootNode });
   };
 }

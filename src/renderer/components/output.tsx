@@ -1,7 +1,11 @@
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { MosaicContext } from 'react-mosaic-component';
+import {
+  MosaicContext,
+  MosaicNode,
+  MosaicParent,
+} from 'react-mosaic-component';
 import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
@@ -36,15 +40,31 @@ export class Output extends React.Component<CommandsProps> {
 
   public componentDidMount() {
     autorun(() => {
+      /**
+       * Type guard to check whether a react-mosaic node is a parent in the tree
+       * or a leaf. Leaf nodes are represented by the string value of their ID,
+       * whereas parent nodes are objects containing information about the nested
+       * binary tree.
+       * @param node A react-mosaic node
+       * @returns Whether that node is a MosaicParent or not
+       */
+      const isParentNode = (
+        node: MosaicNode<WrapperMosaicId> | null,
+      ): node is MosaicParent<WrapperMosaicId> => {
+        return (node as MosaicParent<WrapperMosaicId>)?.direction !== undefined;
+      };
+
       const { isConsoleShowing } = this.props.appState;
 
       // this context should always exist, but mocking context in enzyme
       // is not fully supported, so this condition makes the tests pass
-      if (this.context.mosaicActions && this.context.mosaicActions.expand) {
-        if (!isConsoleShowing) {
-          this.context.mosaicActions.expand(['first'], 0);
-        } else {
-          this.context.mosaicActions.expand(['first'], 25);
+      if (this.context.mosaicActions) {
+        const mosaicTree = this.context.mosaicActions.getRoot();
+        if (isParentNode(mosaicTree)) {
+          // splitPercentage defines the percentage of space the first panel takes
+          // e.g. 25 would mean the two children panels are split 25%/75%
+          mosaicTree.splitPercentage = isConsoleShowing ? 25 : 0;
+          this.context.mosaicActions.replaceWith([], mosaicTree);
         }
       }
     });
