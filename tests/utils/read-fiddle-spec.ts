@@ -20,13 +20,14 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const fiddle = await readFiddle(folder);
+    const { defaultMosaics, customMosaics } = await readFiddle(folder);
 
-    expect(fiddle[DefaultEditorId.css]).toBe('');
-    expect(fiddle[DefaultEditorId.html]).toBe('');
-    expect(fiddle[DefaultEditorId.main]).toBe(DefaultEditorId.main);
-    expect(fiddle[DefaultEditorId.preload]).toBe('');
-    expect(fiddle[DefaultEditorId.renderer]).toBe('');
+    expect(customMosaics).toMatchObject({});
+    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.main]).toBe(DefaultEditorId.main);
+    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();
@@ -39,30 +40,32 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const fiddle = await readFiddle(folder);
+    const { defaultMosaics, customMosaics } = await readFiddle(folder);
 
-    expect(fiddle[DefaultEditorId.css]).toBe('');
-    expect(fiddle[DefaultEditorId.html]).toBe('');
-    expect(fiddle[DefaultEditorId.main]).toBe('');
-    expect(fiddle[DefaultEditorId.preload]).toBe('');
-    expect(fiddle[DefaultEditorId.renderer]).toBe('');
+    expect(customMosaics).toMatchObject({});
+    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.main]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(1);
 
     (console.warn as jest.Mock).mockClear();
   });
 
-  it('ensures truty even when read returns null', async () => {
+  it('ensures truthy even when read returns null', async () => {
     (fs.readFileSync as jest.Mock).mockImplementation(() => null);
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const fiddle = await readFiddle(folder);
+    const { defaultMosaics, customMosaics } = await readFiddle(folder);
 
-    expect(fiddle[DefaultEditorId.css]).toBe('');
-    expect(fiddle[DefaultEditorId.html]).toBe('');
-    expect(fiddle[DefaultEditorId.main]).toBe('');
-    expect(fiddle[DefaultEditorId.preload]).toBe('');
-    expect(fiddle[DefaultEditorId.renderer]).toBe('');
+    expect(customMosaics).toMatchObject({});
+    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.main]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
+    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();

@@ -66,11 +66,21 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openFiddle(filePath: string) {
+    const { app } = window.ElectronFiddle;
     if (!filePath || typeof filePath !== 'string') return;
 
     console.log(`FileManager: Asked to open`, filePath);
-    const editorValues = await readFiddle(filePath);
-    window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
+    const { customMosaics, defaultMosaics } = await readFiddle(filePath);
+
+    const editorValues = defaultMosaics;
+    for (const custom of Object.keys(customMosaics)) {
+      const verified = await app.remoteLoader.verifyCreateCustomEditor(custom);
+      if (verified) {
+        editorValues[custom] = customMosaics[custom];
+      }
+    }
+
+    app.replaceFiddle(editorValues, { filePath });
   }
 
   /**

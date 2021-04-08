@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
-import { DefaultEditorId, MosaicId } from '../interfaces';
+import { DefaultEditorId, EditorId, MosaicId } from '../interfaces';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
@@ -33,10 +33,10 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
 };
 
 export const DEFAULT_CLOSED_PANELS: Partial<
-  Record<MosaicId, EditorBackup | true>
+  Record<EditorId, EditorBackup | true>
 > = {
   docsDemo: true,
-  css: getEditorBackup(DefaultEditorId.css),
+  'styles.css': getEditorBackup(DefaultEditorId.css),
 };
 
 export const EMPTY_EDITOR_CONTENT = {

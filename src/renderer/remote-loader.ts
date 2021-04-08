@@ -68,7 +68,8 @@ export class RemoteLoader {
       const ok = await this.setElectronVersionWithRef(ref);
       if (!ok) return false;
 
-      const values = await getTemplate(this.appState.version);
+      const template = await getTemplate(this.appState.version);
+      const values = { ...template.customMosaics, ...template.defaultMosaics };
 
       if (!Array.isArray(folder.data)) {
         throw new Error(
@@ -149,9 +150,11 @@ export class RemoteLoader {
       );
 
       for (const mosaic of maybeCustomEditors) {
-        await this.verifyCreateCustomEditor(mosaic);
-        values[mosaic] = this.getContentOrEmpty(gist, mosaic);
-        this.appState.customMosaics.push(mosaic as CustomEditorId);
+        const verified = await this.verifyCreateCustomEditor(mosaic);
+        if (verified) {
+          values[mosaic] = this.getContentOrEmpty(gist, mosaic);
+          this.appState.customMosaics.push(mosaic as CustomEditorId);
+        }
       }
 
       return this.handleLoadingSuccess(values, gistId);

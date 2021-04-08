@@ -564,7 +564,11 @@ export class AppState {
 
     // Should we update the editor?
     if (await isContentUnchanged(DefaultEditorId.main, this.version)) {
-      const editorValues = await getTemplate(version);
+      const template = await getTemplate(version);
+      const editorValues = {
+        ...template.customMosaics,
+        ...template.defaultMosaics,
+      };
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }

@@ -1,4 +1,4 @@
-import { EditorId, EditorValues, VersionSource } from '../interfaces';
+import { EditorId, FiddleEditorTypes, VersionSource } from '../interfaces';
 import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
@@ -55,15 +55,15 @@ async function prepareTemplate(branch: string): Promise<string> {
   return folder;
 }
 
-const templateCache: Record<string, Promise<EditorValues>> = {};
+const templateCache: Record<string, Promise<FiddleEditorTypes>> = {};
 
 /**
- * Get a cached copy of the Electron branch's fiddle
+ * Get a cached copy of the Electron branch's fiddle.
  *
  * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
- * @returns {Promise<EditorValues>}
+ * @returns {Promise<FiddleEditorTypes>}
  */
-function getQuickStart(branch: string): Promise<EditorValues> {
+function getQuickStart(branch: string): Promise<FiddleEditorTypes> {
   // Load the template for that branch.
   // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
@@ -76,11 +76,11 @@ function getQuickStart(branch: string): Promise<EditorValues> {
 }
 
 /**
- * Get a cached copy of the Electron Test fiddle
+ * Get a cached copy of the Electron Test fiddle.
  *
- * @returns {Promise<EditorValues>}
+ * @returns {Promise<FiddleEditorTypes>}
  */
-export function getTestTemplate(): Promise<EditorValues> {
+export function getTestTemplate(): Promise<FiddleEditorTypes> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
 }
 
@@ -106,9 +106,9 @@ function isReleasedMajor(version: semver.SemVer) {
  * Get a cached copy of the fiddle for the specified Electron version.
  *
  * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<EditorValues>}
+ * @returns {Promise<FiddleEditorTypes>}
  */
-export function getTemplate(version: string): Promise<EditorValues> {
+export function getTemplate(version: string): Promise<FiddleEditorTypes> {
   const sem = semver.parse(version);
   return sem && isReleasedMajor(sem)
     ? getQuickStart(`${sem.major}-x-y`)
@@ -127,9 +127,12 @@ export async function getContent(
   name: EditorId,
   version: string,
 ): Promise<string> {
-  const template = await getTemplate(version);
-  if (template?.[name]) {
-    return template[name];
+  const { defaultMosaics, customMosaics } = await getTemplate(version);
+
+  if (defaultMosaics?.[name]) {
+    return defaultMosaics[name];
+  } else if (customMosaics?.[name]) {
+    return customMosaics[name];
   } else {
     const extension = name.split('.')[1];
     return EMPTY_EDITOR_CONTENT[extension];

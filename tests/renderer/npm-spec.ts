@@ -11,6 +11,7 @@ import {
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
 import MockDecommentWorker from '../mocks/worker';
+import { DefaultEditorId } from '../../src/interfaces';
 jest.mock('decomment');
 jest.mock('../../src/utils/exec');
 
@@ -188,11 +189,11 @@ describe('npm', () => {
     it('installs modules across all JavaScript files only once', async () => {
       mocked(decomment).mockReturnValue(mockPackages);
       const result = await findModulesInEditors({
-        html: '',
-        main: mockPackages,
-        renderer: mockPackages,
-        preload: mockPackages,
-        css: '',
+        [DefaultEditorId.html]: '',
+        [DefaultEditorId.main]: mockPackages,
+        [DefaultEditorId.renderer]: mockPackages,
+        [DefaultEditorId.preload]: mockPackages,
+        [DefaultEditorId.css]: '',
       });
 
       expect(result).toHaveLength(2);

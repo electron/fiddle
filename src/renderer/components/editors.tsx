@@ -100,14 +100,18 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
       const fiddle = await getTemplate(version);
+      const values = { ...fiddle.customMosaics, ...fiddle.defaultMosaics };
       const options: SetFiddleOptions = { templateName: version };
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
+
+      await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
 
     ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
       const fiddle = await getTestTemplate();
+      const values = { ...fiddle.customMosaics, ...fiddle.defaultMosaics };
       const options: SetFiddleOptions = { templateName: 'Test' };
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
+
+      await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
 
     ipcRendererManager.on(

@@ -481,6 +481,10 @@ describe('AppState', () => {
     it('possibly updates the editors', async () => {
       appState.versions['1.0.0'] = { version: '1.0.0' } as any;
       (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
+      (getTemplate as jest.Mock).mockResolvedValueOnce({
+        defaultMosaics: {},
+        customMosaics: {},
+      });
 
       await appState.setVersion('v1.0.0');
 

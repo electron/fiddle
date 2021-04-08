@@ -1,4 +1,8 @@
-import { DefaultEditorId, EditorValues } from '../interfaces';
+import {
+  DefaultEditorId,
+  EditorValues,
+  FiddleEditorTypes,
+} from '../interfaces';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -7,10 +11,11 @@ import * as path from 'path';
  * Reads a Fiddle from a directory.
  *
  * @param {string} filePath
- * @returns {Promise<EditorValues>} the loaded Fiddle
+ * @returns {Promise<FiddleEditorTypes>} the loaded Fiddle
  */
-export async function readFiddle(folder: string): Promise<EditorValues> {
-  const ret: EditorValues = {
+export async function readFiddle(folder: string): Promise<FiddleEditorTypes> {
+  const customMosaics: Record<string, string> = {};
+  const defaultMosaics: EditorValues = {
     [DefaultEditorId.css]: '',
     [DefaultEditorId.html]: '',
     [DefaultEditorId.main]: '',
@@ -21,6 +26,9 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
   const hits: string[] = [];
   const misses = new Set(Object.values(DefaultEditorId));
 
+  const isValidEditorName = (name: string) =>
+    /^.*\.(js|html|css)$/gm.test(name);
+
   const tryRead = (basename: string) => {
     try {
       const filename = path.join(folder, basename);
@@ -29,7 +37,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
       misses.delete(basename as DefaultEditorId);
       return content || '';
     } catch (error) {
-      console.warn(`Could not read template file ${basename}:`, error);
+      console.warn(`Could not read file ${basename}:`, error);
       return '';
     }
   };
@@ -39,14 +47,17 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
   } else {
     for (const file of fs.readdirSync(folder)) {
       if (Object.values(DefaultEditorId).includes(file as DefaultEditorId)) {
-        ret[file] = tryRead(file);
+        defaultMosaics[file] = tryRead(file);
+      } else if (isValidEditorName(file)) {
+        customMosaics[file] = tryRead(file);
       }
     }
   }
 
   console.log(`Got Fiddle from "${folder}".
-Found: ${hits.sort().join(', ')}
+Found Default Mosaics: ${hits.sort().join(', ')}
+Found Custom Mosaics: ${Object.keys(customMosaics).sort().join(', ')}
 Missed: ${[...misses].sort().join(', ')}`);
 
-  return ret;
+  return { defaultMosaics, customMosaics };
 }
