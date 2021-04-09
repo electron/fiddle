@@ -4,32 +4,17 @@ import * as React from 'react';
 import { Output } from '../../../src/renderer/components/output';
 import { MockState } from '../../mocks/state';
 
-let mockContext: any = {};
-
-jest.mock('react-mosaic-component', () => {
-  const { MosaicContext, MosaicRootActions } = jest.requireActual(
-    'react-mosaic-component',
-  );
-
-  return {
-    MosaicContext,
-    MosaicRootActions,
-  };
-});
-
-beforeAll(() => {
-  mockContext = {
-    mosaicActions: {
-      expand: jest.fn(),
-      remove: jest.fn(),
-      hide: jest.fn(),
-      replaceWith: jest.fn(),
-      updateTree: jest.fn(),
-      getRoot: jest.fn(),
-    },
-    mosaicId: 'output',
-  };
-});
+const mockContext = {
+  mosaicActions: {
+    expand: jest.fn(),
+    remove: jest.fn(),
+    hide: jest.fn(),
+    replaceWith: jest.fn(),
+    updateTree: jest.fn(),
+    getRoot: jest.fn(),
+  },
+  mosaicId: 'output',
+};
 
 describe('Output component', () => {
   let store: any;
@@ -87,13 +72,20 @@ describe('Output component', () => {
       disableLifecycleMethods: true,
     });
 
+    mockContext.mosaicActions.getRoot.mockReturnValue({
+      direction: 'row',
+      first: 'output',
+      second: 'editors',
+    });
+
     wrapper.instance().context = mockContext;
     wrapper.instance().componentDidMount!();
 
-    expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(
-      ['first'],
-      25,
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ splitPercentage: 25 }),
     );
+    expect(wrapper.html()).not.toBe(null);
 
     store.isConsoleShowing = false;
 
