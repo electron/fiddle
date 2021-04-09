@@ -47,6 +47,51 @@ describe('get-package', () => {
     );
   });
 
+  it('getPackageJson() includes electron-nightly if needed', async () => {
+    const result = await getPackageJson(
+      {
+        getName: () => 'test-app',
+        version: '1.0.0-nightly.123456789',
+      } as any,
+      {
+        main: 'app.goDoTheThing()',
+        renderer: `const say = require('say')`,
+        html: '<html />',
+        preload: 'preload',
+        css: 'body { color: black }',
+      },
+      {
+        includeElectron: true,
+        includeDependencies: true,
+      },
+    );
+
+    expect(result).toEqual(
+      JSON.stringify(
+        {
+          name: 'test-app',
+          productName: 'test-app',
+          description: 'My Electron application description',
+          keywords: [],
+          main: './main.js',
+          version: '1.0.0',
+          author: 'test-user',
+          scripts: {
+            start: 'electron .',
+          },
+          dependencies: {
+            say: '*',
+          },
+          devDependencies: {
+            'electron-nightly': '1.0.0-nightly.123456789',
+          },
+        },
+        undefined,
+        2,
+      ),
+    );
+  });
+
   it('getPackageJson() includes electron if needed', async () => {
     const result = await getPackageJson(
       {

@@ -220,7 +220,7 @@ describe('npm', () => {
 
         expect(exec).toHaveBeenCalledWith<any>(
           '/my/directory',
-          'npm install --dev --prod',
+          'npm install --also=dev --prod',
         );
       });
     });
