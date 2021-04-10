@@ -20,7 +20,6 @@ import {
   VersionState,
 } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
-import { sortedElectronMap } from '../../utils/sorted-electron-map';
 import { AppState } from '../state';
 import { getReleaseChannel } from '../versions';
 
@@ -319,27 +318,13 @@ export class ElectronSettings extends React.Component<
    * @returns {Array<JSX.Element>}
    */
   private renderTableRows(): Array<JSX.Element | null> {
-    const { versions, channelsToShow, statesToShow } = this.props.appState;
-
-    return sortedElectronMap<JSX.Element | null>(versions, (key, item) => {
-      // Check if we want to show the version
-      if (!channelsToShow.includes(getReleaseChannel(item))) {
-        return null;
-      }
-
-      // Check if we want to show the state
-      if (!statesToShow.includes(item.state)) {
-        return null;
-      }
-
-      return (
-        <tr key={item.version}>
-          <td>{item.version}</td>
-          <td>{this.renderHumanState(item)}</td>
-          <td className="action">{this.renderAction(key, item)}</td>
-        </tr>
-      );
-    });
+    return this.props.appState.versionsToShow.map((item) => (
+      <tr key={item.version}>
+        <td>{item.version}</td>
+        <td>{this.renderHumanState(item)}</td>
+        <td className="action">{this.renderAction(item)}</td>
+      </tr>
+    ));
   }
 
   /**
@@ -376,8 +361,8 @@ export class ElectronSettings extends React.Component<
    * @param {RunnableVersion} item
    * @returns {JSX.Element}
    */
-  private renderAction(key: string, item: RunnableVersion): JSX.Element {
-    const { state, source } = item;
+  private renderAction(item: RunnableVersion): JSX.Element {
+    const { state, source, version } = item;
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
       fill: true,
@@ -386,7 +371,7 @@ export class ElectronSettings extends React.Component<
 
     // Already downloaded
     if (state === 'ready') {
-      buttonProps.onClick = () => appState.removeVersion(key);
+      buttonProps.onClick = () => appState.removeVersion(version);
       buttonProps.icon = 'trash';
       buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
     } else if (state === 'downloading') {
@@ -399,7 +384,7 @@ export class ElectronSettings extends React.Component<
       buttonProps.loading = false;
       buttonProps.text = 'Download';
       buttonProps.icon = 'cloud-download';
-      buttonProps.onClick = () => appState.downloadVersion(key);
+      buttonProps.onClick = () => appState.downloadVersion(version);
     }
 
     return <Button {...buttonProps} type={undefined} />;

@@ -178,6 +178,33 @@ exports[`ElectronSettings component renders 1`] = `
       </thead>
       <tbody>
         <tr
+          key="3.0.0-nightly.1"
+        >
+          <td>
+            3.0.0-nightly.1
+          </td>
+          <td>
+            <span>
+              <Blueprint3.Icon
+                icon="box"
+              />
+               
+              Downloaded
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              fill={true}
+              icon="trash"
+              onClick={[Function]}
+              small={true}
+              text="Delete"
+            />
+          </td>
+        </tr>
+        <tr
           key="3.0.0"
         >
           <td>
@@ -310,6 +337,35 @@ exports[`ElectronSettings component renders 1`] = `
               onClick={[Function]}
               small={true}
               text="Delete"
+            />
+          </td>
+        </tr>
+        <tr
+          key="1.8.7"
+        >
+          <td>
+            1.8.7
+          </td>
+          <td>
+            <span>
+              <Blueprint3.Icon
+                icon="cloud"
+              />
+               
+              Not downloaded
+            </span>
+          </td>
+          <td
+            className="action"
+          >
+            <Blueprint3.Button
+              disabled={false}
+              fill={true}
+              icon="cloud-download"
+              loading={false}
+              onClick={[Function]}
+              small={true}
+              text="Download"
             />
           </td>
         </tr>

@@ -91,6 +91,7 @@ class MockStore {
   };
   public channelsToShow = [ElectronReleaseChannel.stable];
   public setVersion = jest.fn();
+  public hasVersion = (version: string) => !!this.versions[version];
 }
 
 describe('RemoteLoader', () => {
