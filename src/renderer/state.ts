@@ -292,6 +292,8 @@ export class AppState {
     ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
       ...this.acceleratorsToBlock,
     ]);
+
+    this.setVersion(this.version);
   }
 
   /**
