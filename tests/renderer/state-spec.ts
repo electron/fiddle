@@ -658,6 +658,18 @@ describe('AppState', () => {
     });
   });
 
+  describe('removeCustomMosaic()', () => {
+    it('removes a given custom mosaic', () => {
+      const file = 'file.js';
+      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      appState.customMosaics = [file];
+
+      appState.removeCustomMosaic(file);
+
+      expect(appState.customMosaics).toEqual([]);
+    });
+  });
+
   describe('hideAndBackupMosaic()', () => {
     it('hides a given editor and creates a backup', () => {
       appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
