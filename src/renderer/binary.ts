@@ -44,7 +44,7 @@ export function getVersionState(ver: Version): VersionState {
  * General setup, called with a version. Is called during construction
  * to ensure that we always have or download at least one version.
  *
- * @param {string} iVersion
+ * @param {RunnableVersion} ver
  * @returns {Promise<void>}
  */
 export function setupBinary(ver: RunnableVersion): Promise<void> {
@@ -101,7 +101,7 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
  * Remove a version from disk. Does not update state. We'll try up to
  * four times before giving up if an error occurs.
  *
- * @param {string} iVersion
+ * @param {RunnableVersion} ver
  * @returns {Promise<void>}
  */
 export async function removeBinary(ver: RunnableVersion) {
