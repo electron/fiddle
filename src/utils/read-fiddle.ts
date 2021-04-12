@@ -23,17 +23,17 @@ export async function readFiddle(folder: string): Promise<EditorTypes> {
   const misses = new Set(Object.values(DefaultEditorId));
 
   const isValidEditorName = (name: string) =>
-    /^[^\s]+\.(css|html|js)$/.test(name);
+    /^[^\s]+\.(css|html|js)$/i.test(name);
 
-  const tryRead = (basename: string) => {
+  const tryRead = (name: string) => {
     try {
-      const filename = path.join(folder, basename);
+      const filename = path.join(folder, name);
       const content = fs.readFileSync(filename, 'utf-8');
-      hits.push(basename);
-      misses.delete(basename as DefaultEditorId);
+      hits.push(name);
+      misses.delete(name as DefaultEditorId);
       return content || '';
     } catch (error) {
-      console.warn(`Could not read file ${basename}:`, error);
+      console.warn(`Could not read file ${name}:`, error);
       return '';
     }
   };
