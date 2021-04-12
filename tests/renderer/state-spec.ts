@@ -84,7 +84,6 @@ describe('AppState', () => {
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState(mockVersionsArray);
-    appState.updateVersionStates = jest.fn();
 
     ipcRendererManager.removeAllListeners();
   });
@@ -201,14 +200,12 @@ describe('AppState', () => {
   describe('get currentElectronVersion()', () => {
     it('returns the current version', () => {
       appState.version = '2.0.2';
-      appState.versions = mockVersions;
 
       expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
     });
 
     it('falls back to the defaultVersion', () => {
       appState.version = 'garbage';
-      appState.versions = mockVersions;
 
       expect(appState.currentElectronVersion).toEqual(mockVersions['2.0.2']);
     });
@@ -388,53 +385,69 @@ describe('AppState', () => {
   });
 
   describe('removeVersion()', () => {
-    it('removes a version', async () => {
-      appState.versions['2.0.2'].state = VersionState.ready;
-      await appState.removeVersion('v2.0.2');
+    let active: string;
+    let version: string;
 
-      expect(removeBinary).toHaveBeenCalledWith<any>('2.0.2');
+    beforeEach(() => {
+      active = appState.currentElectronVersion.version;
+      version = mockVersionsArray.find((v) => v.version !== active)!.version;
+    });
+
+    it('does not remove the active version', async () => {
+      await appState.removeVersion(active);
+      expect(removeBinary).not.toHaveBeenCalled();
+    });
+
+    it('removes a version', async () => {
+      appState.versions[version].state = VersionState.ready;
+      await appState.removeVersion(version);
+      expect(removeBinary).toHaveBeenCalledWith<any>(version);
     });
 
     it('does not remove it if not necessary', async () => {
-      appState.versions['2.0.2'].state = VersionState.unknown;
-      await appState.removeVersion('v2.0.2');
+      appState.versions[version].state = VersionState.unknown;
+      await appState.removeVersion(version);
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
 
     it('does not remove it if not necessary (version not existent)', async () => {
-      appState.versions['2.0.2'] = undefined as any;
-      await appState.removeVersion('v2.0.2');
+      await appState.removeVersion('-1.0.0');
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
 
-    it('removes (and not deletes) a local version', async () => {
-      appState.versions['/local/path'] = {
-        localPath: 'local/path',
-        name: 'local-foo',
-        source: VersionSource.local,
-        state: VersionState.ready,
-        version: '4.0.0',
-      };
+    it('removes (but does not delete) a local version', async () => {
+      const localPath = '/fake/path';
 
-      await appState.removeVersion('/local/path');
+      const ver = appState.versions[version];
+      ver.localPath = localPath;
+      ver.source = VersionSource.local;
+      ver.state = VersionState.ready;
+
+      await appState.removeVersion(version);
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
-      expect(appState.versions['/local/path']).toBeUndefined();
+      expect(appState.versions[version]).toBeUndefined();
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
   });
 
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
-      appState.versions['2.0.2'].state = VersionState.unknown;
+      const version = '2.0.2';
+      const ver = appState.versions[version];
 
-      await appState.downloadVersion('v2.0.2');
-      expect(setupBinary).toHaveBeenCalledWith<any>(appState, '2.0.2');
+      ver.state = VersionState.unknown;
+      await appState.downloadVersion(version);
+
+      expect(setupBinary).toHaveBeenCalledWith<any>(ver);
     });
 
     it('downloads an unknown version', async () => {
-      await appState.downloadVersion('v3.5');
-      expect(setupBinary).toHaveBeenCalledWith<any>(appState, '3.5');
+      const version = '3.5';
+      expect(appState.versions[version]).toBeUndefined();
+      await appState.downloadVersion(version);
+      expect(appState.versions[version]).not.toBeUndefined();
+      expect(setupBinary).toHaveBeenCalledWith<any>(appState.versions[version]);
     });
 
     it('does not download a version if already ready', async () => {
@@ -517,8 +530,6 @@ describe('AppState', () => {
 
   describe('addLocalVersion()', () => {
     it('refreshes version state', async () => {
-      appState.versions = {};
-
       const version = '4.0.0';
       const ver: Version = {
         localPath: '/fake/path',
@@ -532,32 +543,6 @@ describe('AppState', () => {
 
       expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);
-    });
-  });
-
-  describe('updateVersionStates()', () => {
-    beforeEach(() => {
-      ipcRendererManager.removeAllListeners();
-      (getVersionState as jest.Mock).mockImplementation(
-        (v: RunnableVersion) => {
-          if (v.version === '2.0.1') return VersionState.downloading;
-          if (v.version === '2.0.2') return VersionState.ready;
-          return VersionState.unknown;
-        },
-      );
-      appState = new AppState(mockVersionsArray);
-    });
-
-    it('downloads a version if necessary', async () => {
-      await appState.updateVersionStates();
-
-      expect(appState.versions['2.0.2'].state).toBe(VersionState.ready);
-    });
-
-    it('keeps downloading state intact', async () => {
-      await appState.updateVersionStates();
-
-      expect(appState.versions['2.0.1'].state).toBe(VersionState.downloading);
     });
   });
 

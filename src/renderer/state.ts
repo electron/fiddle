@@ -1,5 +1,5 @@
 import * as fs from 'fs-extra';
-import { action, autorun, computed, observable, toJS, when } from 'mobx';
+import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
@@ -112,7 +112,7 @@ export class AppState {
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
-  @observable public versions: Record<string, RunnableVersion>;
+  @observable public readonly versions: Record<string, RunnableVersion>;
   @observable public version: string;
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
@@ -359,7 +359,7 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      this.setVersions(await getUpdatedElectronVersions());
+      this.addNewVersions(await getUpdatedElectronVersions());
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -464,14 +464,13 @@ export class AppState {
 
   @action public addLocalVersion(input: Version) {
     addLocalVersion(input);
-    this.setVersions(getElectronVersions());
+    this.addNewVersions(getElectronVersions());
   }
 
-  @action private setVersions(versions: RunnableVersion[]) {
-    this.versions = Object.fromEntries(
-      versions.map((ver) => [ver.version, ver]),
-    );
-    this.updateVersionStates();
+  @action private addNewVersions(versions: RunnableVersion[]) {
+    for (const ver of versions) {
+      this.versions[ver.version] ||= ver;
+    }
   }
 
   /**
@@ -481,35 +480,27 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async removeVersion(input: string) {
-    const version = normalizeVersion(input);
-    const release = this.versions[version];
-
-    console.log(`State: Removing Electron ${version}`);
-
-    // Already not present?
-    if ((this.versions[version] || { state: '' }).state !== 'ready') {
-      console.log(`State: Version already removed, doing nothing`);
+    const ver = this.getVersion(input);
+    if (ver?.state !== VersionState.ready) {
+      console.log('State: Version already removed, doing nothing');
       return;
     }
 
-    // Update state
-    const updatedVersions = { ...this.versions };
-
-    // Actually remove
-    if (release && release.source === VersionSource.local) {
-      delete updatedVersions[version];
-
-      const versionsAsArray = Object.keys(updatedVersions).map(
-        (k) => updatedVersions[k],
-      );
-
-      saveLocalVersions(versionsAsArray);
-    } else {
-      await removeBinary(version);
-      updatedVersions[version].state = VersionState.unknown;
+    const { version } = ver;
+    if (ver === this.currentElectronVersion) {
+      console.log(`State: Not removing active version ${version}`);
+      return;
     }
 
-    this.setVersions(Object.values(updatedVersions));
+    // Actually remove
+    console.log(`State: Removing Electron ${version}`);
+    if (ver.source === VersionSource.local) {
+      delete this.versions[version];
+      saveLocalVersions(Object.values(this.versions));
+    } else {
+      await removeBinary(version);
+      ver.state = VersionState.unknown;
+    }
   }
 
   /**
@@ -519,27 +510,29 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async downloadVersion(input: string) {
-    const version = normalizeVersion(input);
-    console.log(`State: Downloading Electron ${version}`);
+    let ver = this.getVersion(input);
 
-    const release = this.versions[version] || { state: '', source: '' };
-    const isLocal = release.source === VersionSource.local;
-    const isReady = release.state === 'ready';
-
-    // Fetch new binaries, maybe?
-    if (!isLocal && !isReady) {
-      console.log(`State: Fetching v${version}`);
-      const updatedVersions = { ...this.versions };
-      updatedVersions[version] = updatedVersions[version] || {};
-      this.versions = updatedVersions;
-
-      await setupBinary(this, version);
-      this.updateVersionStates();
-    } else {
-      console.log(
-        `State: Version ${version} already downloaded, doing nothing.`,
-      );
+    // ensure the version is tracked in 'this.versions'
+    if (!ver) {
+      ver = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version: normalizeVersion(input),
+      };
+      ver.state = getVersionState(ver);
+      this.versions[ver.version] = ver;
     }
+
+    const isRemote = ver.source === VersionSource.remote;
+    const isReady = ver.state === VersionState.ready;
+    const { version } = ver;
+    if (!isRemote || isReady) {
+      console.log(`State: Already have version ${version}; not downloading.`);
+      return;
+    }
+
+    console.log(`State: Downloading Electron ${version}`);
+    await setupBinary(ver);
   }
 
   public hasVersion(input: string): boolean {
@@ -547,7 +540,7 @@ export class AppState {
   }
 
   public getVersion(input: string): RunnableVersion | null {
-    return this.versions[input];
+    return this.versions[normalizeVersion(input)];
   }
 
   /**
@@ -557,14 +550,14 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async setVersion(input: string) {
-    const version = normalizeVersion(input);
-
-    if (!this.hasVersion(input)) {
-      console.warn(`State: setVersion() got an unknown version ${version}`);
+    const ver = this.getVersion(input);
+    if (!ver) {
+      console.warn(`State: setVersion() got an unknown version ${input}`);
       await this.setVersion(this.versionsToShow[0].version);
       return;
     }
 
+    const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
 
     // Should we update the editor?
@@ -577,10 +570,8 @@ export class AppState {
     this.version = version;
 
     // Update TypeScript definitions
-    const versionObject = this.versions[version];
-
-    if (versionObject.source === VersionSource.local) {
-      const typePath = getLocalTypePathForVersion(versionObject);
+    if (ver.source === VersionSource.local) {
+      const typePath = getLocalTypePathForVersion(ver);
       console.info(
         `TypeDefs: Watching file for local version ${version} at path ${typePath}`,
       );
@@ -589,7 +580,7 @@ export class AppState {
           console.info(
             `TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`,
           );
-          await updateEditorTypeDefinitions(versionObject);
+          await updateEditorTypeDefinitions(ver);
         });
       } catch (err) {
         console.info('TypeDefs: Unable to start watching.');
@@ -603,23 +594,10 @@ export class AppState {
         this.localTypeWatcher = undefined;
       }
     }
-    await updateEditorTypeDefinitions(versionObject);
+    await updateEditorTypeDefinitions(ver);
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(version);
-  }
-
-  /**
-   * Go and check which versions have already been downloaded.
-   *
-   * @returns {Promise<void>}
-   */
-  @action public updateVersionStates() {
-    const versions = toJS(this.versions);
-    for (const ver of Object.values(versions)) {
-      ver.state = getVersionState(ver);
-    }
-    this.versions = versions;
   }
 
   /**
