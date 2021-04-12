@@ -564,11 +564,8 @@ export class AppState {
 
     // Should we update the editor?
     if (await isContentUnchanged(DefaultEditorId.main, this.version)) {
-      const template = await getTemplate(version);
-      const editorValues = {
-        ...template.customMosaics,
-        ...template.defaultMosaics,
-      };
+      const editorValues = await getTemplate(version);
+
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }
@@ -691,6 +688,7 @@ export class AppState {
   }
 
   @action public async setVisibleMosaics(visible: Array<MosaicId>) {
+    const { editors } = window.ElectronFiddle;
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
     for (const id of ALL_MOSAICS) {
@@ -700,7 +698,7 @@ export class AppState {
           : true;
 
         // if we have backup, remove active editor
-        delete window.ElectronFiddle.editors[id];
+        delete editors[id];
       }
 
       // Remove the backup for panels now. Editors will remove their

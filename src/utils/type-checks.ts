@@ -17,11 +17,11 @@ import { EditorBackup } from './editor-backup';
  */
 export function isEditorId(
   input: MosaicId,
-  customMosaics: EditorId[],
+  editors: string[],
 ): input is EditorId {
   return (
     DEFAULT_EDITORS.includes(input as DefaultEditorId) ||
-    customMosaics.includes(input as EditorId)
+    editors.includes(input as EditorId)
   );
 }
 

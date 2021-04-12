@@ -74,7 +74,6 @@ describe('App component', () => {
   describe('getEditorValues()', () => {
     it('gets values', async () => {
       const app = new App();
-      app.state.customMosaics = [];
 
       const b = await app.getEditorValues({});
 
@@ -389,8 +388,10 @@ describe('App component', () => {
     });
 
     it('attempts to set values for closed editors', () => {
-      const oldMainEditor = window.ElectronFiddle.editors[DefaultEditorId.main];
-      delete window.ElectronFiddle.editors[DefaultEditorId.main];
+      const { editors } = window.ElectronFiddle;
+
+      const oldMainEditor = editors[DefaultEditorId.main];
+      delete editors[DefaultEditorId.main];
 
       (app.state.closedPanels as any)[DefaultEditorId.main] = {
         model: { setValue: jest.fn() },
@@ -417,7 +418,7 @@ describe('App component', () => {
         value: 'css-value',
       });
 
-      window.ElectronFiddle.editors[DefaultEditorId.main] = oldMainEditor;
+      editors[DefaultEditorId.main] = oldMainEditor;
     });
 
     it('throws if the Fiddle object is not present', async () => {

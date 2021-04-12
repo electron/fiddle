@@ -1,4 +1,4 @@
-import { EditorId, EditorTypes, VersionSource } from '../interfaces';
+import { EditorId, EditorValues, VersionSource } from '../interfaces';
 import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
@@ -55,15 +55,15 @@ async function prepareTemplate(branch: string): Promise<string> {
   return folder;
 }
 
-const templateCache: Record<string, Promise<EditorTypes>> = {};
+const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
  * Get a cached copy of the Electron branch's fiddle.
  *
  * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
- * @returns {Promise<EditorTypes>}
+ * @returns {Promise<EditorValues>}
  */
-function getQuickStart(branch: string): Promise<EditorTypes> {
+function getQuickStart(branch: string): Promise<EditorValues> {
   // Load the template for that branch.
   // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
@@ -78,9 +78,9 @@ function getQuickStart(branch: string): Promise<EditorTypes> {
 /**
  * Get a cached copy of the Electron Test fiddle.
  *
- * @returns {Promise<EditorTypes>}
+ * @returns {Promise<EditorValues>}
  */
-export function getTestTemplate(): Promise<EditorTypes> {
+export function getTestTemplate(): Promise<EditorValues> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
 }
 
@@ -106,9 +106,9 @@ function isReleasedMajor(version: semver.SemVer) {
  * Get a cached copy of the fiddle for the specified Electron version.
  *
  * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<EditorTypes>}
+ * @returns {Promise<EditorValues>}
  */
-export function getTemplate(version: string): Promise<EditorTypes> {
+export function getTemplate(version: string): Promise<EditorValues> {
   const sem = semver.parse(version);
   return sem && isReleasedMajor(sem)
     ? getQuickStart(`${sem.major}-x-y`)
@@ -127,10 +127,9 @@ export async function getContent(
   name: EditorId,
   version: string,
 ): Promise<string> {
-  const { defaultMosaics, customMosaics } = await getTemplate(version);
+  const mosaics = await getTemplate(version);
 
-  if (defaultMosaics?.[name]) return defaultMosaics[name];
-  if (customMosaics?.[name]) return customMosaics[name];
+  if (mosaics?.[name]) return mosaics[name]!;
 
   const extension = path.parse(name).ext.slice(1);
   return EMPTY_EDITOR_CONTENT[extension];
@@ -147,9 +146,10 @@ export async function isContentUnchanged(
   name: EditorId,
   version: string,
 ): Promise<boolean> {
-  if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
+  const { ElectronFiddle: fiddle } = window;
+  if (!fiddle || !fiddle.app) return false;
 
-  const values = await window.ElectronFiddle.app.getEditorValues({
+  const values = await fiddle.app.getEditorValues({
     include: false,
   });
 

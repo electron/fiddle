@@ -80,11 +80,14 @@ describe('EditorDropdown component', () => {
   it('can add a valid custom editor', async () => {
     const file = 'file.js';
 
-    store.showCustomEditorDialog = jest.fn().mockReturnValue(file);
+    store.showCustomEditorDialog = jest
+      .fn()
+      .mockReturnValue({ cancelled: false, result: file });
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = file;
+    store.genericDialogLastResult = true;
 
     await dropdown.addCustomEditor();
 
@@ -105,11 +108,14 @@ describe('EditorDropdown component', () => {
   it('errors when trying to add a duplicate custom editor', async () => {
     const badFile = 'main.js';
 
-    store.showCustomEditorDialog = jest.fn().mockReturnValue(badFile);
+    store.showCustomEditorDialog = jest
+      .fn()
+      .mockReturnValue({ cancelled: false, result: badFile });
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = badFile;
+    store.genericDialogLastResult = true;
 
     await dropdown.addCustomEditor();
 
@@ -136,11 +142,14 @@ describe('EditorDropdown component', () => {
   it('errors when trying to add an invalid custom editor', async () => {
     const badFile = 'bad.bad';
 
-    store.showCustomEditorDialog = jest.fn().mockReturnValue(badFile);
+    store.showCustomEditorDialog = jest
+      .fn()
+      .mockReturnValue({ cancelled: false, result: badFile });
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = badFile;
+    store.genericDialogLastResult = true;
 
     await dropdown.addCustomEditor();
 

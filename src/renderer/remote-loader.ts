@@ -3,6 +3,7 @@ import { when } from 'mobx';
 import {
   CustomEditorId,
   DefaultEditorId,
+  DEFAULT_EDITORS,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -68,9 +69,7 @@ export class RemoteLoader {
       const ok = await this.setElectronVersionWithRef(ref);
       if (!ok) return false;
 
-      const template = await getTemplate(this.appState.version);
-      const values = { ...template.customMosaics, ...template.defaultMosaics };
-
+      const values = await getTemplate(this.appState.version);
       if (!Array.isArray(folder.data)) {
         throw new Error(
           'The example Fiddle tried to launch is not a valid Electron example',
@@ -135,12 +134,11 @@ export class RemoteLoader {
     try {
       const octo = await getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
-
       const values: Partial<EditorValues> = {};
 
-      // Fetch default Fiddle editor files.
-      for (const filename of Object.values(DefaultEditorId)) {
-        values[filename] = this.getContentOrEmpty(gist, filename);
+      // Add values for all default editors.
+      for (const editor of DEFAULT_EDITORS) {
+        values[editor] = this.getContentOrEmpty(gist, editor);
       }
 
       // Fetch any custom editor files that the user may have created in the gist.
@@ -149,6 +147,7 @@ export class RemoteLoader {
           !Object.values(DefaultEditorId).includes(file as DefaultEditorId),
       );
 
+      // If it's a custom editor explicitly request permission before creation.
       for (const mosaic of maybeCustomEditors) {
         const verified = await this.verifyCreateCustomEditor(mosaic);
         if (verified) {

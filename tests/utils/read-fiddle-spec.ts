@@ -19,14 +19,14 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const { defaultMosaics, customMosaics } = await readFiddle(folder);
+    const mosaics = await readFiddle(folder);
 
-    expect(customMosaics).toMatchObject({});
-    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.main]).toBe(DefaultEditorId.main);
-    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
+    expect(Object.keys(mosaics)).toHaveLength(5);
+    expect(mosaics[DefaultEditorId.css]).toBe('');
+    expect(mosaics[DefaultEditorId.html]).toBe('');
+    expect(mosaics[DefaultEditorId.main]).toBe(DefaultEditorId.main);
+    expect(mosaics[DefaultEditorId.preload]).toBe('');
+    expect(mosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();
@@ -40,14 +40,15 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const { defaultMosaics, customMosaics } = await readFiddle(folder);
+    const mosaics = await readFiddle(folder);
 
-    expect(customMosaics).toMatchObject({ [file]: '' });
-    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.main]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
+    expect(Object.keys(mosaics)).toHaveLength(6);
+    expect(mosaics[file]).toBe('');
+    expect(mosaics[DefaultEditorId.css]).toBe('');
+    expect(mosaics[DefaultEditorId.html]).toBe('');
+    expect(mosaics[DefaultEditorId.main]).toBe('');
+    expect(mosaics[DefaultEditorId.preload]).toBe('');
+    expect(mosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();
@@ -61,14 +62,14 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const { defaultMosaics, customMosaics } = await readFiddle(folder);
+    const mosaics = await readFiddle(folder);
 
-    expect(customMosaics).toMatchObject({});
-    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.main]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
+    expect(Object.keys(mosaics)).toHaveLength(5);
+    expect(mosaics[DefaultEditorId.css]).toBe('');
+    expect(mosaics[DefaultEditorId.html]).toBe('');
+    expect(mosaics[DefaultEditorId.main]).toBe('');
+    expect(mosaics[DefaultEditorId.preload]).toBe('');
+    expect(mosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(1);
 
     (console.warn as jest.Mock).mockClear();
@@ -80,14 +81,14 @@ describe('read-fiddle', () => {
     console.warn = jest.fn();
     const folder = '/some/place';
 
-    const { defaultMosaics, customMosaics } = await readFiddle(folder);
+    const mosaics = await readFiddle(folder);
 
-    expect(customMosaics).toMatchObject({});
-    expect(defaultMosaics[DefaultEditorId.css]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.html]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.main]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.preload]).toBe('');
-    expect(defaultMosaics[DefaultEditorId.renderer]).toBe('');
+    expect(Object.keys(mosaics)).toHaveLength(5);
+    expect(mosaics[DefaultEditorId.css]).toBe('');
+    expect(mosaics[DefaultEditorId.html]).toBe('');
+    expect(mosaics[DefaultEditorId.main]).toBe('');
+    expect(mosaics[DefaultEditorId.preload]).toBe('');
+    expect(mosaics[DefaultEditorId.renderer]).toBe('');
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();

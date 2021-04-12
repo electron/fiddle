@@ -8,12 +8,11 @@ import { readFiddle } from '../utils/read-fiddle';
  * @param {string} name
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplateValues(name: string): Promise<EditorValues> {
+export function getTemplateValues(name: string): Promise<EditorValues> {
   const folder = path.join(
     __dirname,
     '../../static/show-me',
     name.toLowerCase(),
   );
-  const { defaultMosaics } = await readFiddle(folder);
-  return defaultMosaics;
+  return readFiddle(folder);
 }

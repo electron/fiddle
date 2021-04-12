@@ -179,16 +179,13 @@ describe('Editors component', () => {
       expect(mockAction.run).toHaveBeenCalled();
     });
 
-    const fakeValues = {
-      defaultMosaics: Object.seal({
-        [DefaultEditorId.css]: '',
-        [DefaultEditorId.html]: '',
-        [DefaultEditorId.main]: 'hi',
-        [DefaultEditorId.preload]: '',
-        [DefaultEditorId.renderer]: '',
-      }),
-      customMosaics: {},
-    };
+    const fakeValues = Object.seal({
+      [DefaultEditorId.css]: '',
+      [DefaultEditorId.html]: '',
+      [DefaultEditorId.main]: 'hi',
+      [DefaultEditorId.preload]: '',
+      [DefaultEditorId.renderer]: '',
+    });
 
     it('handles an FS_NEW_FIDDLE command', async () => {
       const { app } = window.ElectronFiddle;

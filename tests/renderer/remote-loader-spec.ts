@@ -97,6 +97,8 @@ describe('RemoteLoader', () => {
     ipcRendererManager.send = jest.fn();
 
     store = new MockStore() as any;
+    store.customMosaics = [];
+
     instance = new RemoteLoader(store);
   });
 
@@ -106,13 +108,14 @@ describe('RemoteLoader', () => {
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
+      const { app } = window.ElectronFiddle;
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       store.gistId = 'abcdtestid';
 
       const result = await instance.fetchGistAndLoad('abcdtestid');
 
       expect(result).toBe(true);
-      expect(window.ElectronFiddle.app.replaceFiddle).toBeCalledWith(
+      expect(app.replaceFiddle).toBeCalledWith(
         {
           [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
           [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
@@ -130,7 +133,6 @@ describe('RemoteLoader', () => {
       const { app } = window.ElectronFiddle;
 
       store.gistId = 'customtestid';
-      store.customMosaics = [];
 
       const file = 'file.js';
       mockGistFiles[file] = { content: 'hello' };

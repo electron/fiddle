@@ -166,7 +166,10 @@ export class EditorDropdown extends React.Component<
     appState.toggleGenericDialog();
     await when(() => !appState.isGenericDialogShowing);
 
-    return appState.genericDialogLastInput;
+    return {
+      cancelled: !appState.genericDialogLastResult,
+      result: appState.genericDialogLastInput,
+    };
   }
 
   public async addCustomEditor() {
@@ -175,10 +178,12 @@ export class EditorDropdown extends React.Component<
     const isValidEditorName = (name: string) =>
       /^[^\s]+\.(css|html|js)$/.test(name);
 
-    const mosaicName = await this.showCustomEditorDialog();
+    const { cancelled, result } = await this.showCustomEditorDialog();
+
+    if (cancelled) return;
 
     // Fail if editor name is not an accepted file type.
-    if (!mosaicName || !isValidEditorName(mosaicName)) {
+    if (!result || !isValidEditorName(result)) {
       appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
         label:
@@ -188,7 +193,7 @@ export class EditorDropdown extends React.Component<
 
       appState.toggleGenericDialog();
     } else {
-      const name = mosaicName as CustomEditorId;
+      const name = result as CustomEditorId;
 
       // Also fail if the user tries to create two identical editors.
       if (

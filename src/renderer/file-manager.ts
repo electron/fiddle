@@ -70,13 +70,19 @@ export class FileManager {
     if (!filePath || typeof filePath !== 'string') return;
 
     console.log(`FileManager: Asked to open`, filePath);
-    const { customMosaics, defaultMosaics } = await readFiddle(filePath);
+    const mosaics = await readFiddle(filePath);
 
-    const editorValues = defaultMosaics;
-    for (const custom of Object.keys(customMosaics)) {
-      const verified = await app.remoteLoader.verifyCreateCustomEditor(custom);
-      if (verified) {
-        editorValues[custom] = customMosaics[custom];
+    const editorValues = {};
+    for (const mosaic of Object.keys(mosaics)) {
+      if (!Object.values(DefaultEditorId).includes(mosaic as DefaultEditorId)) {
+        const verified = await app.remoteLoader.verifyCreateCustomEditor(
+          mosaic,
+        );
+        if (verified) {
+          editorValues[mosaic] = mosaics[mosaic];
+        }
+      } else {
+        editorValues[mosaic] = mosaics[mosaic];
       }
     }
 
@@ -138,24 +144,17 @@ export class FileManager {
     ...transforms: Array<FileTransform>
   ): Promise<Files> {
     const { app } = window.ElectronFiddle;
-    const { customMosaics } = app.state;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await app.getEditorValues(pOptions);
 
     let output: Files = new Map();
 
-    // Get values for default editors.
-    for (const filename of Object.values(DefaultEditorId)) {
-      output.set(filename, values[filename]);
+    // Get values for all editors.
+    for (const filename in values) {
+      output.set(filename, values[filename]!);
     }
 
-    // Get values for any custom editors that have been created.
-    for (const mosaic of customMosaics) {
-      output.set(mosaic, values[mosaic]);
-    }
-
-    // Lastly get package name value.
     output.set(PACKAGE_NAME, values[PACKAGE_NAME]!);
 
     for (const transform of transforms) {

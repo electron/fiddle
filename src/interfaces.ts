@@ -107,11 +107,6 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
-export interface EditorTypes {
-  defaultMosaics: EditorValues;
-  customMosaics: Record<string, string>;
-}
-
 export const enum GenericDialogType {
   'confirm' = 'confirm',
   'warning' = 'warning',
