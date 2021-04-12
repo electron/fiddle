@@ -45,6 +45,7 @@ export class EditorDropdown extends React.Component<
     super(props);
 
     this.onItemClick = this.onItemClick.bind(this);
+    this.showCustomEditorDialog = this.showCustomEditorDialog.bind(this);
     this.addCustomEditor = this.addCustomEditor.bind(this);
     this.removeCustomEditor = this.removeCustomEditor.bind(this);
   }
@@ -150,14 +151,8 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async addCustomEditor() {
+  public async showCustomEditorDialog() {
     const { appState } = this.props;
-
-    const isValidEditorName = (name: string) =>
-      /^.*\.(js|html|css)$/gm.test(name);
-
-    // Reset potentially non-null last description.
-    appState.genericDialogLastInput = null;
 
     appState.setGenericDialogOptions({
       type: GenericDialogType.confirm,
@@ -168,13 +163,19 @@ export class EditorDropdown extends React.Component<
       placeholder: 'file.js',
     });
 
-    appState.isGenericDialogShowing = true;
+    appState.toggleGenericDialog();
     await when(() => !appState.isGenericDialogShowing);
 
-    const cancelled = !appState.genericDialogLastResult;
-    if (cancelled) return;
+    return appState.genericDialogLastInput;
+  }
 
-    const mosaicName = appState.genericDialogLastInput;
+  public async addCustomEditor() {
+    const { appState } = this.props;
+
+    const isValidEditorName = (name: string) =>
+      /^[^\s]+\.(css|html|js)$/.test(name);
+
+    const mosaicName = await this.showCustomEditorDialog();
 
     // Fail if editor name is not an accepted file type.
     if (!mosaicName || !isValidEditorName(mosaicName)) {

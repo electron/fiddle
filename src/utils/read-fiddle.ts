@@ -22,7 +22,8 @@ export async function readFiddle(folder: string): Promise<EditorTypes> {
   const hits: string[] = [];
   const misses = new Set(Object.values(DefaultEditorId));
 
-  const isValidEditorName = (name: string) => /\.(css|html|js)$/i.test(name);
+  const isValidEditorName = (name: string) =>
+    /^[^\s]+\.(css|html|js)$/.test(name);
 
   const tryRead = (basename: string) => {
     try {
