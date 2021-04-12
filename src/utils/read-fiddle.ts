@@ -1,8 +1,4 @@
-import {
-  DefaultEditorId,
-  EditorValues,
-  FiddleEditorTypes,
-} from '../interfaces';
+import { DefaultEditorId, EditorValues, EditorTypes } from '../interfaces';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -11,9 +7,9 @@ import * as path from 'path';
  * Reads a Fiddle from a directory.
  *
  * @param {string} filePath
- * @returns {Promise<FiddleEditorTypes>} the loaded Fiddle
+ * @returns {Promise<EditorTypes>} the loaded Fiddle
  */
-export async function readFiddle(folder: string): Promise<FiddleEditorTypes> {
+export async function readFiddle(folder: string): Promise<EditorTypes> {
   const customMosaics: Record<string, string> = {};
   const defaultMosaics: EditorValues = {
     [DefaultEditorId.css]: '',
@@ -26,8 +22,7 @@ export async function readFiddle(folder: string): Promise<FiddleEditorTypes> {
   const hits: string[] = [];
   const misses = new Set(Object.values(DefaultEditorId));
 
-  const isValidEditorName = (name: string) =>
-    /^.*\.(js|html|css)$/gm.test(name);
+  const isValidEditorName = (name: string) => /\.(css|html|js)$/i.test(name);
 
   const tryRead = (basename: string) => {
     try {

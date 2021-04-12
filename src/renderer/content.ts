@@ -1,4 +1,4 @@
-import { EditorId, FiddleEditorTypes, VersionSource } from '../interfaces';
+import { EditorId, EditorTypes, VersionSource } from '../interfaces';
 import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
@@ -55,15 +55,15 @@ async function prepareTemplate(branch: string): Promise<string> {
   return folder;
 }
 
-const templateCache: Record<string, Promise<FiddleEditorTypes>> = {};
+const templateCache: Record<string, Promise<EditorTypes>> = {};
 
 /**
  * Get a cached copy of the Electron branch's fiddle.
  *
  * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
- * @returns {Promise<FiddleEditorTypes>}
+ * @returns {Promise<EditorTypes>}
  */
-function getQuickStart(branch: string): Promise<FiddleEditorTypes> {
+function getQuickStart(branch: string): Promise<EditorTypes> {
   // Load the template for that branch.
   // Cache the work in a Promise to prevent parallel downloads.
   let pending = templateCache[branch];
@@ -78,9 +78,9 @@ function getQuickStart(branch: string): Promise<FiddleEditorTypes> {
 /**
  * Get a cached copy of the Electron Test fiddle.
  *
- * @returns {Promise<FiddleEditorTypes>}
+ * @returns {Promise<EditorTypes>}
  */
-export function getTestTemplate(): Promise<FiddleEditorTypes> {
+export function getTestTemplate(): Promise<EditorTypes> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
 }
 
@@ -106,9 +106,9 @@ function isReleasedMajor(version: semver.SemVer) {
  * Get a cached copy of the fiddle for the specified Electron version.
  *
  * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<FiddleEditorTypes>}
+ * @returns {Promise<EditorTypes>}
  */
-export function getTemplate(version: string): Promise<FiddleEditorTypes> {
+export function getTemplate(version: string): Promise<EditorTypes> {
   const sem = semver.parse(version);
   return sem && isReleasedMajor(sem)
     ? getQuickStart(`${sem.major}-x-y`)
@@ -129,14 +129,11 @@ export async function getContent(
 ): Promise<string> {
   const { defaultMosaics, customMosaics } = await getTemplate(version);
 
-  if (defaultMosaics?.[name]) {
-    return defaultMosaics[name];
-  } else if (customMosaics?.[name]) {
-    return customMosaics[name];
-  } else {
-    const extension = name.split('.')[1];
-    return EMPTY_EDITOR_CONTENT[extension];
-  }
+  if (defaultMosaics?.[name]) return defaultMosaics[name];
+  if (customMosaics?.[name]) return customMosaics[name];
+
+  const extension = path.parse(name).ext.slice(1);
+  return EMPTY_EDITOR_CONTENT[extension];
 }
 
 /**

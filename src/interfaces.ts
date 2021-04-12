@@ -107,7 +107,7 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
-export interface FiddleEditorTypes {
+export interface EditorTypes {
   defaultMosaics: EditorValues;
   customMosaics: Record<string, string>;
 }

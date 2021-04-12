@@ -172,38 +172,38 @@ export class EditorDropdown extends React.Component<
     await when(() => !appState.isGenericDialogShowing);
 
     const cancelled = !appState.genericDialogLastResult;
-    if (!cancelled) {
-      const mosaicName = appState.genericDialogLastInput;
+    if (cancelled) return;
 
-      // Fail if editor name is not an accepted file type.
-      if (!mosaicName || !isValidEditorName(mosaicName)) {
+    const mosaicName = appState.genericDialogLastInput;
+
+    // Fail if editor name is not an accepted file type.
+    if (!mosaicName || !isValidEditorName(mosaicName)) {
+      appState.setGenericDialogOptions({
+        type: GenericDialogType.warning,
+        label:
+          'Invalid custom editor name - must be either an html, js, or css file.',
+        cancel: undefined,
+      });
+
+      appState.toggleGenericDialog();
+    } else {
+      const name = mosaicName as CustomEditorId;
+
+      // Also fail if the user tries to create two identical editors.
+      if (
+        appState.customMosaics.includes(name) ||
+        Object.values(DefaultEditorId).includes(name as DefaultEditorId)
+      ) {
         appState.setGenericDialogOptions({
           type: GenericDialogType.warning,
-          label:
-            'Invalid custom editor name - must be either an html, js, or css file.',
+          label: `Custom editor name ${name} already exists - duplicates are not allowed`,
           cancel: undefined,
         });
 
         appState.toggleGenericDialog();
       } else {
-        const name = mosaicName as CustomEditorId;
-
-        // Also fail if the user tries to create two identical editors.
-        if (
-          appState.customMosaics.includes(name) ||
-          Object.values(DefaultEditorId).includes(name as DefaultEditorId)
-        ) {
-          appState.setGenericDialogOptions({
-            type: GenericDialogType.warning,
-            label: `Custom editor name ${name} already exists - duplicates are not allowed`,
-            cancel: undefined,
-          });
-
-          appState.toggleGenericDialog();
-        } else {
-          appState.customMosaics.push(name);
-          appState.showMosaic(name);
-        }
+        appState.customMosaics.push(name);
+        appState.showMosaic(name);
       }
     }
   }
