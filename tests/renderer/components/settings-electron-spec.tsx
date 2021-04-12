@@ -114,9 +114,7 @@ describe('ElectronSettings component', () => {
     const instance = wrapper.instance() as any;
     await instance.handleDeleteAll();
 
-    expect(store.removeVersion).toHaveBeenCalledTimes(
-      mockVersionsArray.length - 1,
-    );
+    expect(store.removeVersion).toHaveBeenCalledTimes(mockVersionsArray.length);
   });
 
   it('handles the downloadAll()', async () => {

@@ -394,25 +394,22 @@ describe('AppState', () => {
     });
 
     it('does not remove the active version', async () => {
-      await appState.removeVersion(active);
+      const ver = appState.versions[active];
+      await appState.removeVersion(ver);
       expect(removeBinary).not.toHaveBeenCalled();
     });
 
     it('removes a version', async () => {
       const ver = appState.versions[version];
       ver.state = VersionState.ready;
-      await appState.removeVersion(version);
+      await appState.removeVersion(ver);
       expect(removeBinary).toHaveBeenCalledWith<any>(ver);
     });
 
     it('does not remove it if not necessary', async () => {
-      appState.versions[version].state = VersionState.unknown;
-      await appState.removeVersion(version);
-      expect(removeBinary).toHaveBeenCalledTimes(0);
-    });
-
-    it('does not remove it if not necessary (version not existent)', async () => {
-      await appState.removeVersion('-1.0.0');
+      const ver = appState.versions[version];
+      ver.state = VersionState.unknown;
+      await appState.removeVersion(ver);
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
 
@@ -424,7 +421,7 @@ describe('AppState', () => {
       ver.source = VersionSource.local;
       ver.state = VersionState.ready;
 
-      await appState.removeVersion(version);
+      await appState.removeVersion(ver);
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
       expect(appState.versions[version]).toBeUndefined();

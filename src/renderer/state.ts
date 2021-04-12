@@ -476,14 +476,14 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async removeVersion(input: string) {
-    const ver = this.getVersion(input);
-    if (ver?.state !== VersionState.ready) {
-      console.log('State: Version already removed, doing nothing');
+  @action public async removeVersion(ver: RunnableVersion) {
+    const { version } = ver;
+
+    if (ver.state !== VersionState.ready) {
+      console.log(`State: Version ${version} already removed, doing nothing`);
       return;
     }
 
-    const { version } = ver;
     if (ver === this.currentElectronVersion) {
       console.log(`State: Not removing active version ${version}`);
       return;

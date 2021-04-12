@@ -19,7 +19,6 @@ import {
   VersionSource,
   VersionState,
 } from '../../interfaces';
-import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
 import { getReleaseChannel } from '../versions';
 
@@ -119,16 +118,8 @@ export class ElectronSettings extends React.Component<
    */
   public async handleDeleteAll(): Promise<void> {
     this.setState({ isDeletingAll: true });
-
-    const { versions, removeVersion, version } = this.props.appState;
-
-    for (const key in versions) {
-      // If this isn't the currently selected version, remove it
-      if (normalizeVersion(key) !== normalizeVersion(version)) {
-        await removeVersion(key);
-      }
-    }
-
+    const { versions, removeVersion } = this.props.appState;
+    Object.values(versions).forEach(removeVersion);
     this.setState({ isDeletingAll: false });
   }
 
@@ -371,7 +362,7 @@ export class ElectronSettings extends React.Component<
 
     // Already downloaded
     if (state === 'ready') {
-      buttonProps.onClick = () => appState.removeVersion(version);
+      buttonProps.onClick = () => appState.removeVersion(item);
       buttonProps.icon = 'trash';
       buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
     } else if (state === 'downloading') {
