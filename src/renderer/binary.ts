@@ -133,6 +133,7 @@ export async function removeBinary(ver: RunnableVersion) {
       process.noAsar = true;
       await fs.remove(getDownloadPath(version));
       process.noAsar = false;
+
       isDeleted = true;
     }
   };

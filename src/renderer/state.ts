@@ -30,10 +30,10 @@ import {
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
+import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
-import { removeBinary, setupBinary } from './binary';
 import {
   getLocalTypePathForVersion,
   updateEditorTypeDefinitions,
