@@ -431,28 +431,21 @@ describe('AppState', () => {
 
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
-      const version = '2.0.2';
-      const ver = appState.versions[version];
-
+      const ver = appState.versions['2.0.2'];
       ver.state = VersionState.unknown;
-      await appState.downloadVersion(version);
+
+      await appState.downloadVersion(ver);
 
       expect(setupBinary).toHaveBeenCalledWith<any>(ver);
     });
 
-    it('downloads an unknown version', async () => {
-      const version = '3.5';
-      expect(appState.versions[version]).toBeUndefined();
-      await appState.downloadVersion(version);
-      expect(appState.versions[version]).not.toBeUndefined();
-      expect(setupBinary).toHaveBeenCalledWith<any>(appState.versions[version]);
-    });
-
     it('does not download a version if already ready', async () => {
-      appState.versions['2.0.2'].state = VersionState.ready;
+      const ver = appState.versions['2.0.2'];
+      ver.state = VersionState.ready;
 
-      await appState.downloadVersion('v2.0.2');
-      expect(setupBinary).toHaveBeenCalledTimes(0);
+      await appState.downloadVersion(ver);
+
+      expect(setupBinary).not.toHaveBeenCalled();
     });
   });
 

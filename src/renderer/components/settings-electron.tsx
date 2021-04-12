@@ -104,8 +104,8 @@ export class ElectronSettings extends React.Component<
 
     const { versions, downloadVersion } = this.props.appState;
 
-    for (const key of Object.keys(versions)) {
-      await downloadVersion(key);
+    for (const ver of Object.values(versions)) {
+      await downloadVersion(ver);
     }
 
     this.setState({ isDownloadingAll: false });
@@ -118,8 +118,13 @@ export class ElectronSettings extends React.Component<
    */
   public async handleDeleteAll(): Promise<void> {
     this.setState({ isDeletingAll: true });
+
     const { versions, removeVersion } = this.props.appState;
-    Object.values(versions).forEach(removeVersion);
+
+    for (const ver of Object.values(versions)) {
+      await removeVersion(ver);
+    }
+
     this.setState({ isDeletingAll: false });
   }
 
@@ -349,11 +354,11 @@ export class ElectronSettings extends React.Component<
    *
    * @private
    * @param {string} key
-   * @param {RunnableVersion} item
+   * @param {RunnableVersion} ver
    * @returns {JSX.Element}
    */
-  private renderAction(item: RunnableVersion): JSX.Element {
-    const { state, source, version } = item;
+  private renderAction(ver: RunnableVersion): JSX.Element {
+    const { state, source } = ver;
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
       fill: true,
@@ -362,7 +367,7 @@ export class ElectronSettings extends React.Component<
 
     // Already downloaded
     if (state === 'ready') {
-      buttonProps.onClick = () => appState.removeVersion(item);
+      buttonProps.onClick = () => appState.removeVersion(ver);
       buttonProps.icon = 'trash';
       buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
     } else if (state === 'downloading') {
@@ -375,7 +380,7 @@ export class ElectronSettings extends React.Component<
       buttonProps.loading = false;
       buttonProps.text = 'Download';
       buttonProps.icon = 'cloud-download';
-      buttonProps.onClick = () => appState.downloadVersion(version);
+      buttonProps.onClick = () => appState.downloadVersion(ver);
     }
 
     return <Button {...buttonProps} type={undefined} />;
