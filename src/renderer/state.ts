@@ -53,9 +53,6 @@ import {
   saveLocalVersions,
 } from './versions';
 
-const knownVersions = getElectronVersions();
-const defaultVersion = getDefaultVersion(knownVersions);
-
 /**
  * The application's state. Exported as a singleton below.
  *
@@ -64,7 +61,6 @@ const defaultVersion = getDefaultVersion(knownVersions);
  */
 export class AppState {
   // -- Persisted settings ------------------
-  @observable public version: string = defaultVersion;
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
     'gitHubAvatarUrl',
@@ -116,10 +112,8 @@ export class AppState {
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
-  @observable public versions: Record<
-    string,
-    RunnableVersion
-  > = Object.fromEntries(knownVersions.map((ver) => [ver.version, ver]));
+  @observable public versions: Record<string, RunnableVersion>;
+  @observable public version: string;
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions: GenericDialogOptions = {
@@ -165,9 +159,10 @@ export class AppState {
 
   private outputBuffer = '';
   private name: string;
+  private readonly defaultVersion: string;
   public appData: string;
 
-  constructor() {
+  constructor(versions: RunnableVersion[]) {
     // Bind all actions
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
@@ -192,10 +187,16 @@ export class AppState {
     this.hideChannels = this.hideChannels.bind(this);
     this.showChannels = this.showChannels.bind(this);
 
+    // init fields
+    this.versions = Object.fromEntries(versions.map((v) => [v.version, v]));
+    this.defaultVersion = getDefaultVersion(versions);
+    this.version = this.defaultVersion;
+
+    ipcRendererManager.removeAllListeners(IpcEvents.BEFORE_QUIT);
+    ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
-    ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
@@ -291,6 +292,8 @@ export class AppState {
     ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
       ...this.acceleratorsToBlock,
     ]);
+
+    this.setVersion(this.version);
   }
 
   /**
@@ -325,11 +328,7 @@ export class AppState {
    * one that can be found.
    */
   @computed get currentElectronVersion(): RunnableVersion {
-    if (this.versions[this.version]) {
-      return this.versions[this.version];
-    } else {
-      return this.versions[defaultVersion];
-    }
+    return this.versions[this.version] || this.versions[this.defaultVersion];
   }
 
   /**
@@ -561,10 +560,8 @@ export class AppState {
     const version = normalizeVersion(input);
 
     if (!this.hasVersion(input)) {
-      console.warn(
-        `State: Called setVersion() with ${version}, which does not exist.`,
-      );
-      await this.setVersion(knownVersions[0].version);
+      console.warn(`State: setVersion() got an unknown version ${version}`);
+      await this.setVersion(this.versionsToShow[0].version);
       return;
     }
 
@@ -874,6 +871,3 @@ export class AppState {
     return JSON.parse(value || 'null') as T;
   }
 }
-
-export const appState = new AppState();
-appState.setVersion(appState.version);

@@ -21,8 +21,9 @@ import { EMPTY_EDITOR_CONTENT, SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
+import { AppState } from './state';
+import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
-import { appState } from './state';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
 
@@ -35,10 +36,10 @@ import { defaultDark, defaultLight } from './themes-defaults';
 export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | null = null;
-  public state = appState;
-  public fileManager = new FileManager(appState);
-  public remoteLoader = new RemoteLoader(appState);
-  public runner = new Runner(appState);
+  public state = new AppState(getElectronVersions());
+  public fileManager = new FileManager(this.state);
+  public remoteLoader = new RemoteLoader(this.state);
+  public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
 
   constructor() {

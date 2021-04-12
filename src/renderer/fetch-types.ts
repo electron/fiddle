@@ -137,8 +137,7 @@ export async function updateEditorTypeDefinitions(
   };
 
   // If this method is called before we're ready, we'll delay this work a bit
-  if (!window.ElectronFiddle.app || !window.ElectronFiddle.app.monaco)
-    return defer();
+  if (!window.ElectronFiddle?.app?.monaco) return defer();
 
   const { app } = window.ElectronFiddle;
   const monaco: typeof MonacoType = app.monaco!;

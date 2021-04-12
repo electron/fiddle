@@ -10,17 +10,6 @@ import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 jest.mock('../../src/renderer/file-manager', () =>
   require('../mocks/file-manager'),
 );
-jest.mock('../../src/renderer/state', () => ({
-  appState: {
-    closedPanels: {},
-    getName: () => 'Test',
-    hideChannels: jest.fn(),
-    pushOutput: jest.fn(),
-    setVersion: jest.fn(),
-    showChannels: jest.fn(),
-    theme: 'defaultDark',
-  },
-}));
 jest.mock('../../src/renderer/components/header', () => ({
   Header: () => 'Header;',
 }));

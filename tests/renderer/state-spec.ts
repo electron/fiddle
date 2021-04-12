@@ -8,6 +8,7 @@ import {
   GenericDialogType,
   PanelId,
   RunnableVersion,
+  Version,
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
@@ -25,6 +26,7 @@ import {
 import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
+import { getElectronVersions } from '../../src/renderer/versions';
 import {
   getUpdatedElectronVersions,
   saveLocalVersions,
@@ -56,7 +58,7 @@ jest.mock('../../src/renderer/versions', () => {
 
   return {
     getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
-    getElectronVersions: () => mockVersionsArray,
+    getElectronVersions: jest.fn(),
     getDefaultVersion: () => '2.0.2',
     addLocalVersion: jest.fn(),
     saveLocalVersions: jest.fn(),
@@ -81,8 +83,7 @@ describe('AppState', () => {
     );
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
-    appState = new AppState();
-    appState.versions = mockVersions;
+    appState = new AppState(mockVersionsArray);
     appState.updateVersionStates = jest.fn();
 
     ipcRendererManager.removeAllListeners();
@@ -518,16 +519,19 @@ describe('AppState', () => {
     it('refreshes version state', async () => {
       appState.versions = {};
 
-      await appState.addLocalVersion({
+      const version = '4.0.0';
+      const ver: Version = {
         localPath: '/fake/path',
         name: 'local-foo',
-        version: '4.0.0',
-      });
+        version,
+      };
 
-      // We just want to verify that the version state was
-      // refreshed - we didn't actually add the local version
-      // above, since versions.ts is mocked
-      expect(Object.keys(appState.versions)).toEqual(Object.keys(mockVersions));
+      (getElectronVersions as jest.Mock).mockReturnValue([ver]);
+
+      await appState.addLocalVersion(ver);
+
+      expect(getElectronVersions).toHaveBeenCalledTimes(1);
+      expect(appState.getVersion(version)).toStrictEqual(ver);
     });
   });
 
@@ -541,7 +545,7 @@ describe('AppState', () => {
           return VersionState.unknown;
         },
       );
-      appState = new AppState();
+      appState = new AppState(mockVersionsArray);
     });
 
     it('downloads a version if necessary', async () => {
