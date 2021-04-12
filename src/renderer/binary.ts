@@ -2,11 +2,15 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import extract from 'extract-zip';
 
-import { Version, VersionSource, VersionState } from '../interfaces';
+import {
+  RunnableVersion,
+  Version,
+  VersionSource,
+  VersionState,
+} from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
-import { AppState } from './state';
 import { download as electronDownload } from '@electron/get';
 
 // versions that are currently being downloaded
@@ -44,52 +48,37 @@ export function getVersionState(ver: Version): VersionState {
  * @param {string} iVersion
  * @returns {Promise<void>}
  */
-export function setupBinary(
-  appState: AppState,
-  iVersion: string,
-): Promise<void> {
-  const version = normalizeVersion(iVersion);
+export function setupBinary(ver: RunnableVersion): Promise<void> {
+  const { version } = ver;
 
   // Only remote versions can be downloaded
-  if (appState.versions[version].source !== VersionSource.remote) {
-    return Promise.resolve();
-  }
-
-  // If we already have it, then we're done
-  if (getIsDownloaded(version)) {
-    console.log(`Binary: Electron ${version} already downloaded.`);
-    appState.versions[version].state = VersionState.ready;
+  if (ver.source !== VersionSource.remote) {
     return Promise.resolve();
   }
 
   // Return a promise that resolves when the download completes
   let pending = downloading.get(version);
-  if (pending) {
-    console.log(`Binary: Electron ${version} already downloading.`);
-  } else {
-    console.log(`Binary: Electron ${version} not present, downloading`);
-    pending = downloadBinary(appState, version);
+  if (!pending) {
+    pending = downloadBinary(ver);
     downloading.set(version, pending);
   }
   return pending;
 }
 
-async function downloadBinary(
-  appState: AppState,
-  version: string,
-): Promise<void> {
-  appState.versions[version].state = VersionState.downloading;
+async function downloadBinary(ver: RunnableVersion): Promise<void> {
+  const { version } = ver;
 
-  const zipPath = await download(appState, version);
+  ver.state = VersionState.downloading;
+  console.log(`Binary: Downloading Electron ${version}`);
+  const zipPath = await download(ver);
+
   const extractPath = getDownloadPath(version);
-  console.log(
-    `Binary: Electron ${version} downloaded, now unpacking to ${extractPath}`,
-  );
+  console.log(`Binary: Unpacking ${version} to ${extractPath}`);
 
   try {
     unzipping.add(version);
     downloading.delete(version);
-    appState.versions[version].state = VersionState.unzipping;
+    ver.state = VersionState.unzipping;
 
     // Ensure the target path exists
     await fs.mkdirp(extractPath);
@@ -99,10 +88,10 @@ async function downloadBinary(
 
     const electronFiles = await unzip(zipPath, extractPath);
     console.log(`Binary: Unzipped ${version}`, electronFiles);
-    appState.versions[version].state = VersionState.ready;
+    ver.state = VersionState.ready;
   } catch (error) {
     console.warn(`Binary: Failure while unzipping ${version}`, error);
-    appState.versions[version].state = VersionState.unknown;
+    ver.state = VersionState.unknown;
   } finally {
     // This task is done, so remove it from the pending tasks list
     unzipping.delete(version);
@@ -204,27 +193,19 @@ export function getElectronBinaryPath(
 /**
  * Download an Electron version.
  *
- * @param {AppState} appState
- * @param {string} version
- * @returns {Promise<string>}
+ * @param {RunnableVersion} ver
+ * @returns {Promise<string>} path to the downloaded file
  */
-async function download(appState: AppState, version: string): Promise<string> {
-  const getProgressCallback = (progress: Progress) => {
-    const roundedProgress = Math.round(progress.percent * 100) / 100;
+async function download(ver: RunnableVersion): Promise<string> {
+  const { version } = ver;
 
-    if (roundedProgress !== appState.versions[version].downloadProgress) {
-      console.debug(
-        `Binary: Version ${version} download progress: ${progress.percent}`,
-      );
-      appState.versions[version].downloadProgress = roundedProgress;
+  const getProgressCallback = (progress: Progress) => {
+    const percent = Math.round(progress.percent * 100) / 100;
+    if (ver.downloadProgress !== percent) {
+      ver.downloadProgress = percent;
+      console.debug(`Binary: Version ${version} download progress: ${percent}`);
     }
   };
-
-  if (!appState.versions[version]) {
-    throw new Error(
-      `Version ${version} does not exist in state, cannot download`,
-    );
-  }
 
   const zipFilePath = await electronDownload(version, {
     downloadOptions: {
