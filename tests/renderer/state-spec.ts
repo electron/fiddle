@@ -399,9 +399,10 @@ describe('AppState', () => {
     });
 
     it('removes a version', async () => {
-      appState.versions[version].state = VersionState.ready;
+      const ver = appState.versions[version];
+      ver.state = VersionState.ready;
       await appState.removeVersion(version);
-      expect(removeBinary).toHaveBeenCalledWith<any>(version);
+      expect(removeBinary).toHaveBeenCalledWith<any>(ver);
     });
 
     it('does not remove it if not necessary', async () => {

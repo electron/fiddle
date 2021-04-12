@@ -8,7 +8,6 @@ import {
   VersionSource,
   VersionState,
 } from '../interfaces';
-import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { download as electronDownload } from '@electron/get';
@@ -105,8 +104,8 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
  * @param {string} iVersion
  * @returns {Promise<void>}
  */
-export async function removeBinary(iVersion: string) {
-  const version = normalizeVersion(iVersion);
+export async function removeBinary(ver: RunnableVersion) {
+  const { version } = ver;
   let isDeleted = false;
 
   // utility to re-run removal functions upon failure
@@ -134,7 +133,6 @@ export async function removeBinary(iVersion: string) {
       process.noAsar = true;
       await fs.remove(getDownloadPath(version));
       process.noAsar = false;
-
       isDeleted = true;
     }
   };
@@ -146,6 +144,7 @@ export async function removeBinary(iVersion: string) {
   await rerunner(binaryCleaner);
 
   if (isDeleted) {
+    ver.state = VersionState.unknown;
     await rerunner(typeDefsCleaner);
   }
 }

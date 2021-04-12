@@ -495,8 +495,7 @@ export class AppState {
       delete this.versions[version];
       saveLocalVersions(Object.values(this.versions));
     } else {
-      await removeBinary(version);
-      ver.state = VersionState.unknown;
+      await removeBinary(ver);
     }
   }
 
