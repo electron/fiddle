@@ -42,7 +42,7 @@ import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
 import { waitForEditorsToMount } from '../utils/editor-mounted';
-import { sortedElectronMap } from '../utils/sorted-electron-map';
+import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
@@ -343,10 +343,7 @@ export class AppState {
       statesToShow.includes(ver.state) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
-    return sortedElectronMap<RunnableVersion>(
-      versions,
-      (_key, item) => item,
-    ).filter(filter);
+    return sortVersions(Object.values(versions).filter(filter));
   }
 
   /**

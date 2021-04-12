@@ -7,7 +7,6 @@ import {
 } from '../interfaces';
 import { FILENAME_KEYS } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
-import { sortedElectronMap } from '../utils/sorted-electron-map';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
 import { AppState } from './state';
@@ -146,11 +145,7 @@ export class RemoteLoader {
   public async setElectronVersionWithRef(ref: string): Promise<boolean> {
     const version = await this.getPackageVersionFromRef(ref);
 
-    const supportedVersions = sortedElectronMap(
-      this.appState.versions,
-      (k) => k,
-    );
-    if (!supportedVersions.includes(version)) {
+    if (!this.appState.hasVersion(version)) {
       this.handleLoadingFailed(
         new Error('Version of Electron in example not supported'),
       );

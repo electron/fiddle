@@ -25,23 +25,20 @@ function compare(a: semver.SemVer | string, b: semver.SemVer | string) {
 }
 
 /**
- * Sorts Electron versions and returns the result of a map function.
+ * Inplace sorting of Versions
  *
- * @param {Record<string, RunnableVersion?>} versions
- * @param {(key: string, version: RunnableVersion?) => T} mapFn
- * @returns {Array<T>}
+ * @param {RunnableVersion[]} versions
+ * @returns {RunnableVersion[]}
  */
-export function sortedElectronMap<T>(
-  versions: Record<string, RunnableVersion>,
-  mapFn: (key: string, version: RunnableVersion) => T,
-) {
+export function sortVersions(versions: RunnableVersion[]): RunnableVersion[] {
   type VerSemRun = [
     ver: string,
     sem: semver.SemVer | null,
     run: RunnableVersion,
   ];
-  return Object.entries(versions)
-    .map(([ver, run]): VerSemRun => [ver, semver.parse(ver), run])
-    .sort(([vera, sema], [verb, semb]) => compare(sema || vera, semb || verb))
-    .map(([ver, _, run]) => mapFn(ver, run));
+  const sorted = versions
+    .map((run): VerSemRun => [run.version, semver.parse(run.version), run])
+    .sort(([vera, sema], [verb, semb]) => compare(sema || vera, semb || verb));
+  sorted.forEach(([_1, _2, run], idx) => (versions[idx] = run));
+  return versions;
 }

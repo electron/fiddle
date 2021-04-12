@@ -32,6 +32,7 @@ describe('ElectronSettings component', () => {
       toggleAddVersionDialog: jest.fn(),
       showChannels: jest.fn(),
       hideChannels: jest.fn(),
+      versionsToShow: mockVersionsArray,
     };
 
     // Render all the states
@@ -41,17 +42,23 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
-    store.versions['3.0.0-nightly.1'] = {
-      state: VersionState.ready,
-      version: '3.0.0-nightly.1',
-      source: VersionSource.local,
-    };
+    const moreVersions: RunnableVersion[] = [
+      {
+        source: VersionSource.local,
+        state: VersionState.ready,
+        version: '3.0.0',
+      },
+      {
+        source: VersionSource.remote,
+        state: VersionState.ready,
+        version: '3.0.0-nightly.1',
+      },
+    ];
 
-    store.versions['3.0.0'] = {
-      state: VersionState.ready,
-      version: '3.0.0',
-      source: VersionSource.local,
-    };
+    for (const ver of moreVersions) {
+      store.versions[ver.version] = ver;
+      store.versionsToShow.unshift(ver);
+    }
 
     const wrapper = shallow(<ElectronSettings appState={store} />);
 
@@ -82,15 +89,15 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles downloading a version', async () => {
-    store.versions = {
-      '3.0.0': {
-        state: VersionState.unknown,
-        version: '3.0.0',
-        source: VersionSource.remote,
-      },
+    const version = '3.0.0';
+    const ver = {
+      source: VersionSource.remote,
+      state: VersionState.unknown,
+      version,
     };
-
     store.statesToShow.push(VersionState.unknown);
+    store.versions = { version: ver };
+    store.versionsToShow = [ver];
 
     const wrapper = mount(<ElectronSettings appState={store} />);
 
