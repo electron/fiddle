@@ -126,6 +126,41 @@ describe('RemoteLoader', () => {
       );
     });
 
+    it('loads a fiddle with a custom editor', async () => {
+      const { app } = window.ElectronFiddle;
+
+      store.gistId = 'customtestid';
+      store.customMosaics = [];
+
+      const file = 'file.js';
+      mockGistFiles[file] = { content: 'hello' };
+      mockRepos.push({
+        name: file,
+        download_url: 'https://file',
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+      instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
+
+      const result = await instance.fetchGistAndLoad('customtestid');
+
+      expect(result).toBe(true);
+      expect(store.customMosaics).toEqual([file]);
+      expect(app.replaceFiddle).toBeCalledWith(
+        {
+          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
+          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
+          [DefaultEditorId.renderer]:
+            mockGistFiles[DefaultEditorId.renderer].content,
+          [DefaultEditorId.preload]:
+            mockGistFiles[DefaultEditorId.preload].content,
+          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
+          [file]: mockGistFiles[file].content,
+        },
+        { gistId: 'customtestid' },
+      );
+    });
+
     it('handles an error', async () => {
       (getOctokit as jest.Mock).mockReturnValue({
         gists: {
@@ -310,6 +345,15 @@ describe('RemoteLoader', () => {
   });
 
   describe('loadFiddleFromGist()', () => {
+    it('loads the example with confirmation', async () => {
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
+      instance.fetchGistAndLoad = jest.fn();
+      await instance.loadFiddleFromGist({}, { id: 'gist' });
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>('gist');
+      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith<any>('gist');
+    });
+
     it('loads the example with confirmation', async () => {
       instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
       instance.fetchGistAndLoad = jest.fn();

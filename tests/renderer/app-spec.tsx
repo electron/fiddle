@@ -174,6 +174,32 @@ describe('App component', () => {
         });
     });
 
+    it('shows visible mosaics for non-empty editor contents with custom mosaics', (done) => {
+      const file = 'file.js';
+      const editorValues = {
+        [DefaultEditorId.html]: 'html-value',
+        [DefaultEditorId.main]: 'main-value',
+        [DefaultEditorId.renderer]: 'renderer-value',
+        [DefaultEditorId.css]: '/* Empty */',
+        [DefaultEditorId.preload]: '',
+        [file]: 'file-value',
+      };
+
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+        })
+        .then(() => {
+          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+            file,
+            DefaultEditorId.main,
+            DefaultEditorId.renderer,
+            DefaultEditorId.html,
+          ]);
+          done();
+        });
+    });
+
     it('shows visible mosaics in the correct pre-defined order', (done) => {
       // this order is defined inside the replaceFiddle() function
       const editorValues = {
@@ -230,6 +256,27 @@ describe('App component', () => {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
+      };
+
+      app
+        .replaceFiddle(editorValues, {
+          gistId: 'gistId',
+          templateName: 'templateName',
+          filePath: 'localPath',
+        })
+        .then(() => {
+          expect(app.state.isUnsaved).toBe(false);
+          done();
+        });
+    });
+
+    it('marks the new Fiddle as Saved with custom editors', (done) => {
+      const file = 'file.js';
+      const editorValues = {
+        [DefaultEditorId.html]: 'html-value',
+        [DefaultEditorId.main]: 'main-value',
+        [DefaultEditorId.renderer]: 'renderer-value',
+        [file]: 'file-value',
       };
 
       app
