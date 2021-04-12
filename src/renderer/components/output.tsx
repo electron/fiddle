@@ -1,3 +1,4 @@
+import { shell } from 'electron';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -113,7 +114,7 @@ export class Output extends React.Component<CommandsProps> {
         <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
           <span style={style} className="output-message">
             {timestamp}
-            <a href={text}>{text}</a>
+            <a onClick={() => shell.openExternal(text)}>{text}</a>
           </span>
         </div>
       ) : (
