@@ -86,14 +86,6 @@ describe('versions', () => {
       ).toBe(ElectronReleaseChannel.beta);
     });
 
-    it('identifies an unsupported release', () => {
-      expect(
-        getReleaseChannel({
-          version: 'v2.1.0-unsupported.20180809',
-        } as any),
-      ).toBe(ElectronReleaseChannel.unsupported);
-    });
-
     it('identifies a stable release', () => {
       expect(
         getReleaseChannel({

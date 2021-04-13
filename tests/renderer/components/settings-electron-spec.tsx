@@ -7,6 +7,7 @@ import {
   VersionSource,
   VersionState,
 } from '../../../src/interfaces';
+import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { MockVersions } from '../../mocks/electron-versions';
 
@@ -42,6 +43,10 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
+    const spy = jest
+      .spyOn(versions, 'getOldestSupportedVersion')
+      .mockReturnValue('9.0.0');
+
     const moreVersions: RunnableVersion[] = [
       {
         source: VersionSource.local,
@@ -61,8 +66,9 @@ describe('ElectronSettings component', () => {
     }
 
     const wrapper = shallow(<ElectronSettings appState={store} />);
-
     expect(wrapper).toMatchSnapshot();
+
+    spy.mockRestore();
   });
 
   it('handles removing a version', async () => {

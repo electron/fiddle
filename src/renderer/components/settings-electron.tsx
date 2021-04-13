@@ -21,7 +21,7 @@ import {
 } from '../../interfaces';
 import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
-import { getReleaseChannel } from '../versions';
+import { getReleaseChannel, getOldestSupportedVersion } from '../versions';
 
 interface ElectronSettingsProps {
   appState: AppState;
@@ -46,12 +46,13 @@ export class ElectronSettings extends React.Component<
   constructor(props: ElectronSettingsProps) {
     super(props);
 
-    this.handleDownloadAll = this.handleDownloadAll.bind(this);
-    this.handleDeleteAll = this.handleDeleteAll.bind(this);
-    this.handleChannelChange = this.handleChannelChange.bind(this);
-    this.handleStateChange = this.handleStateChange.bind(this);
-    this.handleDownloadClick = this.handleDownloadClick.bind(this);
     this.handleAddVersion = this.handleAddVersion.bind(this);
+    this.handleChannelChange = this.handleChannelChange.bind(this);
+    this.handleDeleteAll = this.handleDeleteAll.bind(this);
+    this.handleDownloadAll = this.handleDownloadAll.bind(this);
+    this.handleDownloadClick = this.handleDownloadClick.bind(this);
+    this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
+    this.handleStateChange = this.handleStateChange.bind(this);
 
     this.state = {
       isDownloadingAll: false,
@@ -64,7 +65,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Handles a change in which channels should be displayed.
+   * Handles toggline whether to show undownloaded vesions
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
@@ -72,6 +73,17 @@ export class ElectronSettings extends React.Component<
     const { appState } = this.props;
     const { checked } = event.currentTarget;
     appState.showUndownloadedVersions = checked;
+  }
+
+  /**
+   * Handles toggline whether to show obsolete vesions
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleShowObsoleteChange(event: React.FormEvent<HTMLInputElement>) {
+    const { appState } = this.props;
+    const { checked } = event.currentTarget;
+    appState.showObsoleteVersions = checked;
   }
 
   /**
@@ -91,17 +103,17 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Download all versions of Electron.
+   * Download all visible versions of Electron.
    *
    * @returns {Promise<void>}
    */
   public async handleDownloadAll(): Promise<void> {
     this.setState({ isDownloadingAll: true });
 
-    const { versions, downloadVersion } = this.props.appState;
+    const { downloadVersion, versionsToShow } = this.props.appState;
 
-    for (const key of Object.keys(versions)) {
-      await downloadVersion(key);
+    for (const { version } of versionsToShow) {
+      await downloadVersion(version);
     }
 
     this.setState({ isDownloadingAll: false });
@@ -212,18 +224,10 @@ export class ElectronSettings extends React.Component<
       stable: ElectronReleaseChannel.stable,
       beta: ElectronReleaseChannel.beta,
       nightly: ElectronReleaseChannel.nightly,
-      unsupported: ElectronReleaseChannel.unsupported,
     };
 
     return (
-      <FormGroup label="Show Electron versions:">
-        <Checkbox
-          checked={appState.showUndownloadedVersions}
-          id="showUndownloadedVersions"
-          inline={true}
-          label="Undownloaded"
-          onChange={this.handleStateChange}
-        />
+      <FormGroup label="Include Electron versions:">
         {Object.values(channels).map((channel) => (
           <Tooltip
             content={`Can't disable channel of selected version (${appState.version})`}
@@ -242,6 +246,26 @@ export class ElectronSettings extends React.Component<
             />
           </Tooltip>
         ))}
+        <Checkbox
+          checked={appState.showUndownloadedVersions}
+          id="showUndownloadedVersions"
+          inline={true}
+          label="Not downloaded"
+          onChange={this.handleStateChange}
+        />
+        <Tooltip
+          content={`Include versions that have reached end-of-life (older than ${getOldestSupportedVersion()})`}
+          position="bottom"
+          intent="primary"
+        >
+          <Checkbox
+            checked={appState.showObsoleteVersions}
+            id="showObsoleteVersions"
+            inline={true}
+            label="Obsolete"
+            onChange={this.handleShowObsoleteChange}
+          />
+        </Tooltip>
       </FormGroup>
     );
   }

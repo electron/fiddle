@@ -57,12 +57,13 @@ jest.mock('../../src/renderer/versions', () => {
   const { mockVersionsArray } = new MockVersions();
 
   return {
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
-    getElectronVersions: jest.fn(),
-    getDefaultVersion: () => '2.0.2',
     addLocalVersion: jest.fn(),
-    saveLocalVersions: jest.fn(),
+    getDefaultVersion: () => '2.0.2',
+    getElectronVersions: jest.fn(),
+    getOldestSupportedVersion: jest.fn(),
     getReleaseChannel,
+    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    saveLocalVersions: jest.fn(),
   };
 });
 jest.mock('../../src/utils/get-name', () => ({
@@ -376,12 +377,8 @@ describe('AppState', () => {
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly,
         ElectronReleaseChannel.stable,
-        ElectronReleaseChannel.unsupported,
       ];
-      appState.hideChannels([
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.unsupported,
-      ]);
+      appState.hideChannels([ElectronReleaseChannel.beta]);
       expect([...appState.channelsToShow].sort()).toEqual([
         ElectronReleaseChannel.nightly,
         ElectronReleaseChannel.stable,

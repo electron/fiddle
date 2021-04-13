@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -48,6 +49,7 @@ import {
   addLocalVersion,
   getDefaultVersion,
   getElectronVersions,
+  getOldestSupportedVersion,
   getReleaseChannel,
   getUpdatedElectronVersions,
   saveLocalVersions,
@@ -83,6 +85,9 @@ export class AppState {
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
+  @observable public showObsoleteVersions = !!(
+    this.retrieve('showObsoleteVersions') ?? false
+  );
   @observable public showUndownloadedVersions = !!(
     this.retrieve('showUndownloadedVersions') ?? true
   );
@@ -228,6 +233,7 @@ export class AppState {
     autorun(() =>
       this.save('showUndownloadedVersions', this.showUndownloadedVersions),
     );
+    autorun(() => this.save('showObsoleteVersions', this.showObsoleteVersions));
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
@@ -334,13 +340,22 @@ export class AppState {
    * current settings for states and channels to display
    */
   @computed get versionsToShow(): Array<RunnableVersion> {
-    const { channelsToShow, showUndownloadedVersions, versions } = this;
+    const {
+      channelsToShow,
+      showObsoleteVersions,
+      showUndownloadedVersions,
+      versions,
+    } = this;
+    const oldest = semver.parse(getOldestSupportedVersion());
 
     const filter = (ver: RunnableVersion) =>
       ver &&
       (showUndownloadedVersions ||
         ver.state === VersionState.unzipping ||
         ver.state === VersionState.ready) &&
+      (showObsoleteVersions ||
+        !oldest ||
+        oldest.compareMain(ver.version) <= 0) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
     return sortVersions(Object.values(versions).filter(filter));

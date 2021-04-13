@@ -9,15 +9,8 @@ exports[`ElectronSettings component renders 1`] = `
   </h2>
   <Blueprint3.Callout>
     <Blueprint3.FormGroup
-      label="Show Electron versions:"
+      label="Include Electron versions:"
     >
-      <Blueprint3.Checkbox
-        checked={false}
-        id="showUndownloadedVersions"
-        inline={true}
-        label="Undownloaded"
-        onChange={[Function]}
-      />
       <Blueprint3.Tooltip
         content="Can't disable channel of selected version (2.0.1)"
         disabled={false}
@@ -78,23 +71,26 @@ exports[`ElectronSettings component renders 1`] = `
           onChange={[Function]}
         />
       </Blueprint3.Tooltip>
+      <Blueprint3.Checkbox
+        checked={false}
+        id="showUndownloadedVersions"
+        inline={true}
+        label="Not downloaded"
+        onChange={[Function]}
+      />
       <Blueprint3.Tooltip
-        content="Can't disable channel of selected version (2.0.1)"
-        disabled={true}
+        content="Include versions that have reached end-of-life (older than 9.0.0)"
         hoverCloseDelay={0}
         hoverOpenDelay={100}
         intent="primary"
-        key="Unsupported"
         minimal={false}
         position="bottom"
         transitionDuration={100}
       >
         <Blueprint3.Checkbox
-          checked={false}
-          disabled={false}
-          id="Unsupported"
+          id="showObsoleteVersions"
           inline={true}
-          label="Unsupported"
+          label="Obsolete"
           onChange={[Function]}
         />
       </Blueprint3.Tooltip>
