@@ -8,7 +8,6 @@ import {
   VersionSource,
   VersionState,
 } from '../interfaces';
-import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 import { removeTypeDefsForVersion } from './fetch-types';
 import { download as electronDownload } from '@electron/get';
@@ -45,7 +44,7 @@ export function getVersionState(ver: Version): VersionState {
  * General setup, called with a version. Is called during construction
  * to ensure that we always have or download at least one version.
  *
- * @param {string} iVersion
+ * @param {RunnableVersion} ver
  * @returns {Promise<void>}
  */
 export function setupBinary(ver: RunnableVersion): Promise<void> {
@@ -102,11 +101,11 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
  * Remove a version from disk. Does not update state. We'll try up to
  * four times before giving up if an error occurs.
  *
- * @param {string} iVersion
+ * @param {RunnableVersion} ver
  * @returns {Promise<void>}
  */
-export async function removeBinary(iVersion: string) {
-  const version = normalizeVersion(iVersion);
+export async function removeBinary(ver: RunnableVersion) {
+  const { version } = ver;
   let isDeleted = false;
 
   // utility to re-run removal functions upon failure
@@ -146,6 +145,7 @@ export async function removeBinary(iVersion: string) {
   await rerunner(binaryCleaner);
 
   if (isDeleted) {
+    ver.state = VersionState.unknown;
     await rerunner(typeDefsCleaner);
   }
 }

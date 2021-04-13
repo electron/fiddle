@@ -54,7 +54,7 @@ describe('binary', () => {
     it('removes a version', async () => {
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
-      await removeBinary(version);
+      await removeBinary(ver);
       expect(fs.remove).toHaveBeenCalled();
     });
 
@@ -64,14 +64,14 @@ describe('binary', () => {
         throw new Error('Bwap bwap');
       });
 
-      await removeBinary(version);
+      await removeBinary(ver);
       expect(fs.remove).toHaveBeenCalledTimes(4);
     });
 
     it("attempts to clean up the version's associated typedefs", async () => {
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
-      await removeBinary(version);
+      await removeBinary(ver);
       expect(fs.remove).toHaveBeenCalled();
       expect(removeTypeDefsForVersion).toHaveBeenCalled();
     });
@@ -83,7 +83,7 @@ describe('binary', () => {
 
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
 
-      await removeBinary(version);
+      await removeBinary(ver);
       expect(removeTypeDefsForVersion).toHaveBeenCalledTimes(4);
     });
   });

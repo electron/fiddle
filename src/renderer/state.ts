@@ -31,7 +31,7 @@ import {
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
-import { getVersionState, removeBinary, setupBinary } from './binary';
+import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
@@ -491,14 +491,14 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async removeVersion(input: string) {
-    const ver = this.getVersion(input);
-    if (ver?.state !== VersionState.ready) {
-      console.log('State: Version already removed, doing nothing');
+  @action public async removeVersion(ver: RunnableVersion) {
+    const { version } = ver;
+
+    if (ver.state !== VersionState.ready) {
+      console.log(`State: Version ${version} already removed, doing nothing`);
       return;
     }
 
-    const { version } = ver;
     if (ver === this.currentElectronVersion) {
       console.log(`State: Not removing active version ${version}`);
       return;
@@ -510,8 +510,7 @@ export class AppState {
       delete this.versions[version];
       saveLocalVersions(Object.values(this.versions));
     } else {
-      await removeBinary(version);
-      ver.state = VersionState.unknown;
+      await removeBinary(ver);
     }
   }
 
@@ -521,23 +520,11 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async downloadVersion(input: string) {
-    let ver = this.getVersion(input);
+  @action public async downloadVersion(ver: RunnableVersion) {
+    const { source, state, version } = ver;
 
-    // ensure the version is tracked in 'this.versions'
-    if (!ver) {
-      ver = {
-        source: VersionSource.remote,
-        state: VersionState.unknown,
-        version: normalizeVersion(input),
-      };
-      ver.state = getVersionState(ver);
-      this.versions[ver.version] = ver;
-    }
-
-    const isRemote = ver.source === VersionSource.remote;
-    const isReady = ver.state === VersionState.ready;
-    const { version } = ver;
+    const isRemote = source === VersionSource.remote;
+    const isReady = state === VersionState.ready;
     if (!isRemote || isReady) {
       console.log(`State: Already have version ${version}; not downloading.`);
       return;
@@ -607,7 +594,7 @@ export class AppState {
     await updateEditorTypeDefinitions(ver);
 
     // Fetch new binaries, maybe?
-    await this.downloadVersion(version);
+    await this.downloadVersion(ver);
   }
 
   /**

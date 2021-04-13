@@ -19,7 +19,6 @@ import {
   VersionSource,
   VersionState,
 } from '../../interfaces';
-import { normalizeVersion } from '../../utils/normalize-version';
 import { AppState } from '../state';
 import { getReleaseChannel, getOldestSupportedVersion } from '../versions';
 
@@ -112,8 +111,8 @@ export class ElectronSettings extends React.Component<
 
     const { downloadVersion, versionsToShow } = this.props.appState;
 
-    for (const { version } of versionsToShow) {
-      await downloadVersion(version);
+    for (const ver of versionsToShow) {
+      await downloadVersion(ver);
     }
 
     this.setState({ isDownloadingAll: false });
@@ -127,13 +126,10 @@ export class ElectronSettings extends React.Component<
   public async handleDeleteAll(): Promise<void> {
     this.setState({ isDeletingAll: true });
 
-    const { versions, removeVersion, version } = this.props.appState;
+    const { versions, removeVersion } = this.props.appState;
 
-    for (const key in versions) {
-      // If this isn't the currently selected version, remove it
-      if (normalizeVersion(key) !== normalizeVersion(version)) {
-        await removeVersion(key);
-      }
+    for (const ver of Object.values(versions)) {
+      await removeVersion(ver);
     }
 
     this.setState({ isDeletingAll: false });
@@ -338,11 +334,11 @@ export class ElectronSettings extends React.Component<
    *
    * @private
    * @param {string} key
-   * @param {RunnableVersion} item
+   * @param {RunnableVersion} ver
    * @returns {JSX.Element}
    */
   private renderAction(ver: RunnableVersion): JSX.Element {
-    const { state, source, version } = ver;
+    const { state, source } = ver;
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
       fill: true,
@@ -352,7 +348,7 @@ export class ElectronSettings extends React.Component<
     switch (state) {
       case VersionState.ready:
         buttonProps.icon = 'trash';
-        buttonProps.onClick = () => appState.removeVersion(version);
+        buttonProps.onClick = () => appState.removeVersion(ver);
         buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
         break;
 
@@ -368,7 +364,7 @@ export class ElectronSettings extends React.Component<
         buttonProps.disabled = false;
         buttonProps.icon = 'cloud-download';
         buttonProps.loading = false;
-        buttonProps.onClick = () => appState.downloadVersion(version);
+        buttonProps.onClick = () => appState.downloadVersion(ver);
         buttonProps.text = 'Download';
         break;
     }

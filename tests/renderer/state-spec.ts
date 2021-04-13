@@ -397,24 +397,22 @@ describe('AppState', () => {
     });
 
     it('does not remove the active version', async () => {
-      await appState.removeVersion(active);
+      const ver = appState.versions[active];
+      await appState.removeVersion(ver);
       expect(removeBinary).not.toHaveBeenCalled();
     });
 
     it('removes a version', async () => {
-      appState.versions[version].state = VersionState.ready;
-      await appState.removeVersion(version);
-      expect(removeBinary).toHaveBeenCalledWith<any>(version);
+      const ver = appState.versions[version];
+      ver.state = VersionState.ready;
+      await appState.removeVersion(ver);
+      expect(removeBinary).toHaveBeenCalledWith<any>(ver);
     });
 
     it('does not remove it if not necessary', async () => {
-      appState.versions[version].state = VersionState.unknown;
-      await appState.removeVersion(version);
-      expect(removeBinary).toHaveBeenCalledTimes(0);
-    });
-
-    it('does not remove it if not necessary (version not existent)', async () => {
-      await appState.removeVersion('-1.0.0');
+      const ver = appState.versions[version];
+      ver.state = VersionState.unknown;
+      await appState.removeVersion(ver);
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
 
@@ -426,7 +424,7 @@ describe('AppState', () => {
       ver.source = VersionSource.local;
       ver.state = VersionState.ready;
 
-      await appState.removeVersion(version);
+      await appState.removeVersion(ver);
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
       expect(appState.versions[version]).toBeUndefined();
@@ -436,28 +434,21 @@ describe('AppState', () => {
 
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
-      const version = '2.0.2';
-      const ver = appState.versions[version];
-
+      const ver = appState.versions['2.0.2'];
       ver.state = VersionState.unknown;
-      await appState.downloadVersion(version);
+
+      await appState.downloadVersion(ver);
 
       expect(setupBinary).toHaveBeenCalledWith<any>(ver);
     });
 
-    it('downloads an unknown version', async () => {
-      const version = '3.5';
-      expect(appState.versions[version]).toBeUndefined();
-      await appState.downloadVersion(version);
-      expect(appState.versions[version]).not.toBeUndefined();
-      expect(setupBinary).toHaveBeenCalledWith<any>(appState.versions[version]);
-    });
-
     it('does not download a version if already ready', async () => {
-      appState.versions['2.0.2'].state = VersionState.ready;
+      const ver = appState.versions['2.0.2'];
+      ver.state = VersionState.ready;
 
-      await appState.downloadVersion('v2.0.2');
-      expect(setupBinary).toHaveBeenCalledTimes(0);
+      await appState.downloadVersion(ver);
+
+      expect(setupBinary).not.toHaveBeenCalled();
     });
   });
 
