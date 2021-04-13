@@ -152,18 +152,31 @@ describe('ElectronSettings component', () => {
     });
   });
 
-  describe('handleVersionChange()', () => {
-    it('handles a new selection', async () => {
-      const wrapper = shallow(<ElectronSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleStateChange({
-        currentTarget: {
-          id: 'showUndownloadedVersions',
-          checked: true,
-        },
-      });
+  describe('handleStateChange()', () => {
+    it('toggles remote versions', async () => {
+      const id = 'showUndownloadedVersions';
+      for (const checked of [true, false]) {
+        const wrapper = shallow(<ElectronSettings appState={store} />);
+        const instance = wrapper.instance() as any;
+        await instance.handleStateChange({
+          currentTarget: { checked, id },
+        });
+        expect(store[id]).toBe(checked);
+      }
+    });
+  });
 
-      expect(store.showUndownloadedVersions).toBe(true);
+  describe('handleShowObsoleteChange()', () => {
+    it('toggles obsolete versions', async () => {
+      const id = 'showObsoleteVersions';
+      for (const checked of [true, false]) {
+        const wrapper = shallow(<ElectronSettings appState={store} />);
+        const instance = wrapper.instance() as any;
+        await instance.handleShowObsoleteChange({
+          currentTarget: { checked, id },
+        });
+        expect(store[id]).toBe(checked);
+      }
     });
   });
 

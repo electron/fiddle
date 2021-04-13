@@ -47,6 +47,7 @@ jest.mock('../../src/renderer/binary', () => ({
   getVersionState: jest.fn().mockImplementation((v) => v.state),
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
+  getLocalTypePathForVersion: jest.fn(),
   updateEditorTypeDefinitions: jest.fn(),
 }));
 jest.mock('../../src/renderer/versions', () => {
@@ -495,6 +496,13 @@ describe('AppState', () => {
       expect(getTemplate).toHaveBeenCalledTimes(1);
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
     });
+
+    it('updates typescript definitions', async () => {
+      const version = '2.0.2';
+      const ver = appState.versions[version];
+      ver.source = VersionSource.local;
+      appState.setVersion(version);
+    });
   });
 
   describe('setTheme()', () => {
@@ -706,8 +714,12 @@ describe('AppState', () => {
 
   describe('blockAccelerators()', () => {
     it('adds an accelerator to be blocked', () => {
-      appState.addAcceleratorToBlock(BlockableAccelerator.save);
+      appState.acceleratorsToBlock = [];
 
+      appState.addAcceleratorToBlock(BlockableAccelerator.save);
+      expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
+
+      appState.addAcceleratorToBlock(BlockableAccelerator.save);
       expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
     });
 
@@ -715,7 +727,9 @@ describe('AppState', () => {
       appState.acceleratorsToBlock = [BlockableAccelerator.save];
 
       appState.removeAcceleratorToBlock(BlockableAccelerator.save);
+      expect(appState.acceleratorsToBlock).toEqual([]);
 
+      appState.removeAcceleratorToBlock(BlockableAccelerator.save);
       expect(appState.acceleratorsToBlock).toEqual([]);
     });
   });

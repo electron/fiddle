@@ -597,14 +597,12 @@ export class AppState {
       } catch (err) {
         console.info('TypeDefs: Unable to start watching.');
       }
-    } else {
-      if (!!this.localTypeWatcher) {
-        console.info(
-          `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
-        );
-        this.localTypeWatcher.close();
-        this.localTypeWatcher = undefined;
-      }
+    } else if (!!this.localTypeWatcher) {
+      console.info(
+        `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
+      );
+      this.localTypeWatcher.close();
+      this.localTypeWatcher = undefined;
     }
     await updateEditorTypeDefinitions(ver);
 
