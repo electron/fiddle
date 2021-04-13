@@ -58,7 +58,6 @@ export const enum ElectronReleaseChannel {
   stable = 'Stable',
   beta = 'Beta',
   nightly = 'Nightly',
-  unsupported = 'Unsupported',
 }
 
 export interface SetFiddleOptions {

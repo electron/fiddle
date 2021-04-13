@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
@@ -48,6 +49,7 @@ import {
   addLocalVersion,
   getDefaultVersion,
   getElectronVersions,
+  getOldestSupportedVersion,
   getReleaseChannel,
   getUpdatedElectronVersions,
   saveLocalVersions,
@@ -83,13 +85,12 @@ export class AppState {
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
-  @observable public statesToShow: Array<VersionState> = (this.retrieve(
-    'statesToShow',
-  ) as Array<VersionState>) || [
-    VersionState.downloading,
-    VersionState.ready,
-    VersionState.unknown,
-  ];
+  @observable public showObsoleteVersions = !!(
+    this.retrieve('showObsoleteVersions') ?? false
+  );
+  @observable public showUndownloadedVersions = !!(
+    this.retrieve('showUndownloadedVersions') ?? true
+  );
   @observable public isKeepingUserDataDirs = !!this.retrieve(
     'isKeepingUserDataDirs',
   );
@@ -229,7 +230,10 @@ export class AppState {
     autorun(() => this.save('executionFlags', this.executionFlags));
     autorun(() => this.save('version', this.version));
     autorun(() => this.save('channelsToShow', this.channelsToShow));
-    autorun(() => this.save('statesToShow', this.statesToShow));
+    autorun(() =>
+      this.save('showUndownloadedVersions', this.showUndownloadedVersions),
+    );
+    autorun(() => this.save('showObsoleteVersions', this.showObsoleteVersions));
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
@@ -336,11 +340,22 @@ export class AppState {
    * current settings for states and channels to display
    */
   @computed get versionsToShow(): Array<RunnableVersion> {
-    const { channelsToShow, statesToShow, versions } = this;
+    const {
+      channelsToShow,
+      showObsoleteVersions,
+      showUndownloadedVersions,
+      versions,
+    } = this;
+    const oldest = semver.parse(getOldestSupportedVersion());
 
     const filter = (ver: RunnableVersion) =>
       ver &&
-      statesToShow.includes(ver.state) &&
+      (showUndownloadedVersions ||
+        ver.state === VersionState.unzipping ||
+        ver.state === VersionState.ready) &&
+      (showObsoleteVersions ||
+        !oldest ||
+        oldest.compareMain(ver.version) <= 0) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
     return sortVersions(Object.values(versions).filter(filter));
@@ -569,14 +584,12 @@ export class AppState {
       } catch (err) {
         console.info('TypeDefs: Unable to start watching.');
       }
-    } else {
-      if (!!this.localTypeWatcher) {
-        console.info(
-          `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
-        );
-        this.localTypeWatcher.close();
-        this.localTypeWatcher = undefined;
-      }
+    } else if (!!this.localTypeWatcher) {
+      console.info(
+        `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
+      );
+      this.localTypeWatcher.close();
+      this.localTypeWatcher = undefined;
     }
     await updateEditorTypeDefinitions(ver);
 

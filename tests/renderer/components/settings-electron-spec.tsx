@@ -7,6 +7,7 @@ import {
   VersionSource,
   VersionState,
 } from '../../../src/interfaces';
+import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { MockVersions } from '../../mocks/electron-versions';
 
@@ -25,7 +26,7 @@ describe('ElectronSettings component', () => {
         ElectronReleaseChannel.stable,
         ElectronReleaseChannel.beta,
       ],
-      statesToShow: [VersionState.ready, VersionState.downloading],
+      showUndownloadedVersions: false,
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
@@ -42,6 +43,10 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
+    const spy = jest
+      .spyOn(versions, 'getOldestSupportedVersion')
+      .mockReturnValue('9.0.0');
+
     const moreVersions: RunnableVersion[] = [
       {
         source: VersionSource.local,
@@ -61,8 +66,9 @@ describe('ElectronSettings component', () => {
     }
 
     const wrapper = shallow(<ElectronSettings appState={store} />);
-
     expect(wrapper).toMatchSnapshot();
+
+    spy.mockRestore();
   });
 
   it('handles removing a version', async () => {
@@ -95,7 +101,6 @@ describe('ElectronSettings component', () => {
       state: VersionState.unknown,
       version,
     };
-    store.statesToShow.push(VersionState.unknown);
     store.versions = { version: ver };
     store.versionsToShow = [ver];
 
@@ -145,28 +150,31 @@ describe('ElectronSettings component', () => {
     });
   });
 
-  describe('handleVersionChange()', () => {
-    it('handles a new selection', async () => {
-      const wrapper = shallow(<ElectronSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleStateChange({
-        currentTarget: {
-          id: VersionState.ready,
-          checked: false,
-        },
-      });
+  describe('handleStateChange()', () => {
+    it('toggles remote versions', async () => {
+      const id = 'showUndownloadedVersions';
+      for (const checked of [true, false]) {
+        const wrapper = shallow(<ElectronSettings appState={store} />);
+        const instance = wrapper.instance() as any;
+        await instance.handleStateChange({
+          currentTarget: { checked, id },
+        });
+        expect(store[id]).toBe(checked);
+      }
+    });
+  });
 
-      await instance.handleStateChange({
-        currentTarget: {
-          id: VersionState.unknown,
-          checked: true,
-        },
-      });
-
-      expect(store.statesToShow).toEqual([
-        VersionState.downloading,
-        VersionState.unknown,
-      ]);
+  describe('handleShowObsoleteChange()', () => {
+    it('toggles obsolete versions', async () => {
+      const id = 'showObsoleteVersions';
+      for (const checked of [true, false]) {
+        const wrapper = shallow(<ElectronSettings appState={store} />);
+        const instance = wrapper.instance() as any;
+        await instance.handleShowObsoleteChange({
+          currentTarget: { checked, id },
+        });
+        expect(store[id]).toBe(checked);
+      }
     });
   });
 

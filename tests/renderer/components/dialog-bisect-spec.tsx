@@ -28,7 +28,6 @@ describe('BisectDialog component', () => {
       versions,
       versionsToShow: versions,
       channelsToShow: [ElectronReleaseChannel.stable],
-      statesToShow: [VersionState.ready],
       setVersion: jest.fn(),
     };
   });
