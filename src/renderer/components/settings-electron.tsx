@@ -65,7 +65,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Handles toggline whether to show undownloaded vesions
+   * Toggles visibility of non-downloaded versions
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
@@ -76,7 +76,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Handles toggline whether to show obsolete vesions
+   * Toggles visibility of obsolete versions
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
