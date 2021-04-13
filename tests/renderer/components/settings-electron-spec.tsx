@@ -25,7 +25,7 @@ describe('ElectronSettings component', () => {
         ElectronReleaseChannel.stable,
         ElectronReleaseChannel.beta,
       ],
-      statesToShow: [VersionState.ready, VersionState.downloading],
+      showUndownloadedVersions: false,
       downloadVersion: jest.fn(),
       removeVersion: jest.fn(),
       updateElectronVersions: jest.fn(),
@@ -95,7 +95,6 @@ describe('ElectronSettings component', () => {
       state: VersionState.unknown,
       version,
     };
-    store.statesToShow.push(VersionState.unknown);
     store.versions = { version: ver };
     store.versionsToShow = [ver];
 
@@ -153,22 +152,12 @@ describe('ElectronSettings component', () => {
       const instance = wrapper.instance() as any;
       await instance.handleStateChange({
         currentTarget: {
-          id: VersionState.ready,
-          checked: false,
-        },
-      });
-
-      await instance.handleStateChange({
-        currentTarget: {
-          id: VersionState.unknown,
+          id: 'showUndownloadedVersions',
           checked: true,
         },
       });
 
-      expect(store.statesToShow).toEqual([
-        VersionState.downloading,
-        VersionState.unknown,
-      ]);
+      expect(store.showUndownloadedVersions).toBe(true);
     });
   });
 

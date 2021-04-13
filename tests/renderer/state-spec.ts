@@ -339,10 +339,15 @@ describe('AppState', () => {
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
-    it('excludes states', () => {
-      appState.statesToShow = [VersionState.downloading];
+    it('handles undownloaded versions', () => {
+      Object.values(appState.versions).forEach(
+        (ver) => (ver.state = VersionState.unknown),
+      );
+
+      appState.showUndownloadedVersions = false;
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.statesToShow = [VersionState.ready];
+
+      appState.showUndownloadedVersions = true;
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
   });

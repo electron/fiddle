@@ -53,9 +53,6 @@ exports[`BisectDialog component renders 1`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -136,9 +133,6 @@ exports[`BisectDialog component renders 1`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -292,9 +286,6 @@ exports[`BisectDialog component renders 2`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -368,9 +359,6 @@ exports[`BisectDialog component renders 2`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -517,9 +505,6 @@ exports[`BisectDialog component renders 3`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -600,9 +585,6 @@ exports[`BisectDialog component renders 3`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -749,9 +731,6 @@ exports[`BisectDialog component renders 4`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -832,9 +811,6 @@ exports[`BisectDialog component renders 4`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -989,9 +965,6 @@ exports[`BisectDialog component renders 5`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",
@@ -1072,9 +1045,6 @@ exports[`BisectDialog component renders 5`] = `
                 "Stable",
               ],
               "setVersion": [MockFunction],
-              "statesToShow": Array [
-                "ready",
-              ],
               "versions": Array [
                 Object {
                   "source": "local",

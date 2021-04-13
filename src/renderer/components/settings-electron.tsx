@@ -69,14 +69,9 @@ export class ElectronSettings extends React.Component<
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
   public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
-    const { id, checked } = event.currentTarget;
     const { appState } = this.props;
-
-    if (!checked) {
-      appState.statesToShow = appState.statesToShow.filter((s) => s !== id);
-    } else {
-      appState.statesToShow.push(id as VersionState);
-    }
+    const { checked } = event.currentTarget;
+    appState.showUndownloadedVersions = checked;
   }
 
   /**
@@ -143,10 +138,7 @@ export class ElectronSettings extends React.Component<
     return (
       <div className="settings-electron">
         <h2>Electron Settings</h2>
-        <Callout>
-          {this.renderVersionChannelOptions()}
-          {this.renderVersionStateOptions()}
-        </Callout>
+        <Callout>{this.renderVersionShowOptions()}</Callout>
         <br />
         <Callout>
           {this.renderAdvancedButtons()}
@@ -199,54 +191,11 @@ export class ElectronSettings extends React.Component<
 
   /**
    * Renders the various options for which versions should be displayed
-   * in the small dropdown.
    *
    * @private
    * @returns {JSX.Element}
    */
-  private renderVersionStateOptions(): JSX.Element {
-    const { appState } = this.props;
-    const getIsChecked = (state: VersionState) => {
-      return appState.statesToShow.includes(state);
-    };
-
-    return (
-      <FormGroup label="Include Electron versions that are:">
-        <Tooltip content="Always enabled" position="bottom" intent="primary">
-          <Checkbox
-            checked={getIsChecked(VersionState.ready)}
-            label="Ready"
-            id="ready"
-            onChange={this.handleStateChange}
-            inline={true}
-            disabled={true}
-          />
-        </Tooltip>
-        <Checkbox
-          checked={getIsChecked(VersionState.downloading)}
-          label="Downloading"
-          id="downloading"
-          onChange={this.handleStateChange}
-          inline={true}
-        />
-        <Checkbox
-          checked={getIsChecked(VersionState.unknown)}
-          label="Not Downloaded"
-          id="unknown"
-          onChange={this.handleStateChange}
-          inline={true}
-        />
-      </FormGroup>
-    );
-  }
-
-  /**
-   * Renders the various options for which versions should be displayed
-   *
-   * @private
-   * @returns {JSX.Element}
-   */
-  private renderVersionChannelOptions(): JSX.Element {
+  private renderVersionShowOptions(): JSX.Element {
     const { appState } = this.props;
 
     const getIsChecked = (channel: ElectronReleaseChannel) => {
@@ -267,8 +216,15 @@ export class ElectronSettings extends React.Component<
     };
 
     return (
-      <FormGroup label="Include Electron versions from these release channels:">
-        {Object.entries(channels).map(([_, channel]) => (
+      <FormGroup label="Show Electron versions:">
+        <Checkbox
+          checked={appState.showUndownloadedVersions}
+          id="showUndownloadedVersions"
+          inline={true}
+          label="Undownloaded"
+          onChange={this.handleStateChange}
+        />
+        {Object.values(channels).map((channel) => (
           <Tooltip
             content={`Can't disable channel of selected version (${appState.version})`}
             disabled={!getIsCurrentVersionReleaseChannel(channel)}
@@ -361,30 +317,36 @@ export class ElectronSettings extends React.Component<
    * @param {RunnableVersion} item
    * @returns {JSX.Element}
    */
-  private renderAction(item: RunnableVersion): JSX.Element {
-    const { state, source, version } = item;
+  private renderAction(ver: RunnableVersion): JSX.Element {
+    const { state, source, version } = ver;
     const { appState } = this.props;
     const buttonProps: IButtonProps = {
       fill: true,
       small: true,
     };
 
-    // Already downloaded
-    if (state === 'ready') {
-      buttonProps.onClick = () => appState.removeVersion(version);
-      buttonProps.icon = 'trash';
-      buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
-    } else if (state === 'downloading') {
-      buttonProps.disabled = true;
-      buttonProps.loading = true;
-      buttonProps.text = 'Downloading';
-      buttonProps.icon = 'cloud-download';
-    } else {
-      buttonProps.disabled = false;
-      buttonProps.loading = false;
-      buttonProps.text = 'Download';
-      buttonProps.icon = 'cloud-download';
-      buttonProps.onClick = () => appState.downloadVersion(version);
+    switch (state) {
+      case VersionState.ready:
+        buttonProps.icon = 'trash';
+        buttonProps.onClick = () => appState.removeVersion(version);
+        buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
+        break;
+
+      case VersionState.downloading:
+      case VersionState.unzipping:
+        buttonProps.disabled = true;
+        buttonProps.icon = 'cloud-download';
+        buttonProps.loading = true;
+        buttonProps.text = 'Downloading';
+        break;
+
+      case VersionState.unknown:
+        buttonProps.disabled = false;
+        buttonProps.icon = 'cloud-download';
+        buttonProps.loading = false;
+        buttonProps.onClick = () => appState.downloadVersion(version);
+        buttonProps.text = 'Download';
+        break;
     }
 
     return <Button {...buttonProps} type={undefined} />;
