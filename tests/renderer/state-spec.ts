@@ -47,6 +47,7 @@ jest.mock('../../src/renderer/binary', () => ({
   getVersionState: jest.fn().mockImplementation((v) => v.state),
 }));
 jest.mock('../../src/renderer/fetch-types', () => ({
+  getLocalTypePathForVersion: jest.fn(),
   updateEditorTypeDefinitions: jest.fn(),
 }));
 jest.mock('../../src/renderer/versions', () => {
@@ -57,12 +58,13 @@ jest.mock('../../src/renderer/versions', () => {
   const { mockVersionsArray } = new MockVersions();
 
   return {
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
-    getElectronVersions: jest.fn(),
-    getDefaultVersion: () => '2.0.2',
     addLocalVersion: jest.fn(),
-    saveLocalVersions: jest.fn(),
+    getDefaultVersion: () => '2.0.2',
+    getElectronVersions: jest.fn(),
+    getOldestSupportedVersion: jest.fn(),
     getReleaseChannel,
+    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    saveLocalVersions: jest.fn(),
   };
 });
 jest.mock('../../src/utils/get-name', () => ({
@@ -339,10 +341,15 @@ describe('AppState', () => {
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
-    it('excludes states', () => {
-      appState.statesToShow = [VersionState.downloading];
+    it('handles undownloaded versions', () => {
+      Object.values(appState.versions).forEach(
+        (ver) => (ver.state = VersionState.unknown),
+      );
+
+      appState.showUndownloadedVersions = false;
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.statesToShow = [VersionState.ready];
+
+      appState.showUndownloadedVersions = true;
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
   });
@@ -371,12 +378,8 @@ describe('AppState', () => {
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly,
         ElectronReleaseChannel.stable,
-        ElectronReleaseChannel.unsupported,
       ];
-      appState.hideChannels([
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.unsupported,
-      ]);
+      appState.hideChannels([ElectronReleaseChannel.beta]);
       expect([...appState.channelsToShow].sort()).toEqual([
         ElectronReleaseChannel.nightly,
         ElectronReleaseChannel.stable,
@@ -492,6 +495,13 @@ describe('AppState', () => {
 
       expect(getTemplate).toHaveBeenCalledTimes(1);
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
+    });
+
+    it('updates typescript definitions', async () => {
+      const version = '2.0.2';
+      const ver = appState.versions[version];
+      ver.source = VersionSource.local;
+      appState.setVersion(version);
     });
   });
 
@@ -704,8 +714,12 @@ describe('AppState', () => {
 
   describe('blockAccelerators()', () => {
     it('adds an accelerator to be blocked', () => {
-      appState.addAcceleratorToBlock(BlockableAccelerator.save);
+      appState.acceleratorsToBlock = [];
 
+      appState.addAcceleratorToBlock(BlockableAccelerator.save);
+      expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
+
+      appState.addAcceleratorToBlock(BlockableAccelerator.save);
       expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
     });
 
@@ -713,7 +727,9 @@ describe('AppState', () => {
       appState.acceleratorsToBlock = [BlockableAccelerator.save];
 
       appState.removeAcceleratorToBlock(BlockableAccelerator.save);
+      expect(appState.acceleratorsToBlock).toEqual([]);
 
+      appState.removeAcceleratorToBlock(BlockableAccelerator.save);
       expect(appState.acceleratorsToBlock).toEqual([]);
     });
   });

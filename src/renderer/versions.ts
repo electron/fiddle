@@ -69,10 +69,6 @@ export function getReleaseChannel(
     return ElectronReleaseChannel.nightly;
   }
 
-  if (tag.includes('unsupported')) {
-    return ElectronReleaseChannel.unsupported;
-  }
-
   // Must be a stable version, right?
   return ElectronReleaseChannel.stable;
 }
@@ -315,4 +311,16 @@ function isElectronVersion(
   input: Version | RunnableVersion,
 ): input is RunnableVersion {
   return (input as RunnableVersion).source !== undefined;
+}
+
+export function getOldestSupportedVersion(): string | undefined {
+  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 3;
+
+  const oldestSupported = getElectronVersions()
+    .map(({ version }) => version)
+    .filter((version) => /^\d+\.0\.0$/.test(version))
+    .sort(semver.compare)
+    .slice(-NUM_STABLE_BRANCHES)
+    .shift();
+  return oldestSupported;
 }
