@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`BlockAcceleratorsSettings component renders 1`] = `
+<div>
+  <h4>
+    Block Keyboard Shortcuts
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Any keyboard shortcuts checked below will be disabled."
+    >
+      <Blueprint3.Checkbox
+        checked={false}
+        label="Save"
+        onChange={[Function]}
+        value="save"
+      />
+      <Blueprint3.Checkbox
+        checked={false}
+        label="Save as"
+        onChange={[Function]}
+        value="saveAs"
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;

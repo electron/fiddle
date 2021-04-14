@@ -203,7 +203,7 @@ async function download(ver: RunnableVersion): Promise<string> {
     const percent = Math.round(progress.percent * 100) / 100;
     if (ver.downloadProgress !== percent) {
       ver.downloadProgress = percent;
-      console.debug(`Binary: Version ${version} download progress: ${percent}`);
+      console.info(`Binary: Version ${version} download progress: ${percent}`);
     }
   };
 
