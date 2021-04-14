@@ -23,18 +23,11 @@ const EMPTY_EDITOR_CONTENT = {
   js: '// Empty',
 } as const;
 
-function getSuffix(filename: string): string {
-  return path.parse(filename).ext.slice(1);
-}
-
 export function getEmptyContent(filename: string): string {
-  return EMPTY_EDITOR_CONTENT[getSuffix(filename)] || '';
+  const suffix = path.parse(filename).ext.slice(1);
+  return EMPTY_EDITOR_CONTENT[suffix] || '';
 }
-
-const SupportedFiles = Object.freeze(
-  new Set(Object.keys(EMPTY_EDITOR_CONTENT)),
-);
 
 export function isSupportedFile(filename: string): boolean {
-  return SupportedFiles.has(getSuffix(filename));
+  return /\.(css|html|js)$/i.test(filename);
 }
