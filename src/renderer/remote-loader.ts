@@ -1,14 +1,12 @@
-import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
 import {
-  CustomEditorId,
   DefaultEditorId,
-  DEFAULT_EDITORS,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
   PACKAGE_NAME,
 } from '../interfaces';
+import { isKnownFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
@@ -106,25 +104,6 @@ export class RemoteLoader {
   }
 
   /**
-   * Get data from a gist. If it doesn't exist, return an empty string.
-   *
-   * @param {Octokit.Response<Octokit.GistsGetResponse>} gist
-   * @param {string} name
-   * @returns {string}
-   * @memberof RemoteLoader
-   */
-  public getContentOrEmpty(
-    gist: Octokit.Response<Octokit.GistsGetResponse>,
-    name: string,
-  ): string {
-    try {
-      return gist.data.files[name].content;
-    } catch (error) {
-      return '';
-    }
-  }
-
-  /**
    * Load a fiddle
    *
    * @returns {Promise<boolean>}
@@ -136,23 +115,9 @@ export class RemoteLoader {
       const gist = await octo.gists.get({ gist_id: gistId });
       const values: Partial<EditorValues> = {};
 
-      // Add values for all default editors.
-      for (const editor of DEFAULT_EDITORS) {
-        values[editor] = this.getContentOrEmpty(gist, editor);
-      }
-
-      // Fetch any custom editor files that the user may have created in the gist.
-      const maybeCustomEditors = Object.keys(gist.data.files).filter(
-        (file) =>
-          !Object.values(DefaultEditorId).includes(file as DefaultEditorId),
-      );
-
-      // If it's a custom editor explicitly request permission before creation.
-      for (const mosaic of maybeCustomEditors) {
-        const verified = await this.verifyCreateCustomEditor(mosaic);
-        if (verified) {
-          values[mosaic] = this.getContentOrEmpty(gist, mosaic);
-          this.appState.customMosaics.push(mosaic as CustomEditorId);
+      for (const [id, data] of Object.entries(gist.data.files)) {
+        if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
+          values[id] = data.content;
         }
       }
 

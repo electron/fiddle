@@ -2,11 +2,7 @@ import { mount, shallow } from 'enzyme';
 import { observable } from 'mobx';
 import * as React from 'react';
 
-import {
-  ALL_MOSAICS,
-  DocsDemoPage,
-  DefaultEditorId,
-} from '../../../src/interfaces';
+import { DEFAULT_EDITORS, DefaultEditorId } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { Editors } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
@@ -42,8 +38,7 @@ describe('Editors component', () => {
       isTokenDialogShowing: false,
       isSettingsShowing: false,
       setGenericDialogOptions: () => ({}),
-      mosaicArrangement: createMosaicArrangement(ALL_MOSAICS),
-      currentDocsDemoPage: DocsDemoPage.DEFAULT,
+      mosaicArrangement: createMosaicArrangement(DEFAULT_EDITORS),
       customMosaics: [],
     };
 

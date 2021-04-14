@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
-import { DefaultEditorId, EditorId, MosaicId } from '../interfaces';
+import { DefaultEditorId, EditorId } from '../interfaces';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
@@ -10,15 +10,15 @@ export const CONFIG_PATH = path.join(
   '.electron-fiddle',
 );
 
-export const SORTED_EDITORS = Object.freeze([
+export const SORTED_EDITORS = [
   DefaultEditorId.main,
   DefaultEditorId.renderer,
   DefaultEditorId.html,
   DefaultEditorId.preload,
   DefaultEditorId.css,
-]);
+] as const;
 
-export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
+export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<EditorId> = {
   direction: 'row',
   first: {
     direction: 'column',
@@ -30,20 +30,13 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<MosaicId> = {
     first: SORTED_EDITORS[2],
     second: SORTED_EDITORS[3],
   },
-};
+} as const;
 
 export const DEFAULT_CLOSED_PANELS: Partial<
   Record<EditorId, EditorBackup | true>
 > = {
-  docsDemo: true,
   'styles.css': getEditorBackup(DefaultEditorId.css),
-};
-
-export const EMPTY_EDITOR_CONTENT = {
-  html: '<!-- Empty -->',
-  js: '// Empty',
-  css: '/* Empty */',
-};
+} as const;
 
 export const ELECTRON_ORG = 'electron';
 export const ELECTRON_REPO = 'electron';

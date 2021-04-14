@@ -10,7 +10,6 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import * as path from 'path';
 
 import { when } from 'mobx';
 import {
@@ -22,7 +21,7 @@ import {
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
-import { EMPTY_EDITOR_CONTENT } from '../constants';
+import { getEmptyContent } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -430,14 +429,13 @@ export class GistActionButton extends React.Component<
 
   private gistFilesList = (values: EditorValues) => {
     const { customMosaics } = this.props.appState;
-    const getSuffix = (name: string) => path.parse(name).ext.slice(1);
 
     const filesList = {};
 
     // Add files for default editors.
     for (const editor of DEFAULT_EDITORS) {
       filesList[editor] = {
-        content: values[editor] || EMPTY_EDITOR_CONTENT[getSuffix(editor)],
+        content: values[editor] || getEmptyContent(editor),
       };
     }
 

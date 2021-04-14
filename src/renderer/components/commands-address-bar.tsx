@@ -6,7 +6,7 @@ import * as React from 'react';
 
 import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
-import { idFromUrl, urlFromId } from '../../utils/gist';
+import { getGistId, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -65,11 +65,11 @@ export class AddressBar extends React.Component<
    * @memberof AddressBar
    */
   public submit() {
-    const { remoteLoader } = window.ElectronFiddle.app;
     if (this.state.value) {
-      remoteLoader.fetchGistAndLoad(
-        idFromUrl(this.state.value) || this.state.value,
-      );
+      const gistId = getGistId(this.state.value);
+      if (gistId) {
+        window.ElectronFiddle.app.openFiddle({ gistId });
+      }
     }
   }
 

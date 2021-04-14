@@ -10,15 +10,10 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import {
-  DefaultEditorId,
-  EditorId,
-  MosaicId,
-  PanelId,
-  SetFiddleOptions,
-} from '../../interfaces';
+import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { updateEditorLayout } from '../../utils/editor-layout';
+import { getEditorTitle } from '../../utils/editor-utils';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
@@ -29,26 +24,13 @@ import { AppState } from '../state';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
-import {
-  DocsDemoGoHomeButton,
-  MaximizeButton,
-  RemoveButton,
-} from './editors-toolbar-button';
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
     enabled: false,
   },
   wordWrap: 'on',
-};
-
-export const TITLE_MAP: Record<DefaultEditorId | PanelId, string> = {
-  [DefaultEditorId.main]: `Main Process (${DefaultEditorId.main})`,
-  [DefaultEditorId.renderer]: `Renderer Process (${DefaultEditorId.renderer})`,
-  [DefaultEditorId.preload]: `Preload (${DefaultEditorId.preload})`,
-  [DefaultEditorId.html]: `HTML (${DefaultEditorId.html})`,
-  [DefaultEditorId.css]: `Stylesheet (${DefaultEditorId.css})`,
-  [PanelId.docsDemo]: 'Docs & Demos',
 };
 
 interface EditorsProps {
@@ -203,19 +185,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   /**
    * Renders the little tool bar on top of each panel
    *
-   * @param {MosaicWindowProps<MosaicId>} { title }
-   * @param {MosaicId} id
+   * @param {MosaicWindowProps<EditorId>} { title }
+   * @param {EditorId} id
    * @returns {JSX.Element}
    */
   public renderToolbar(
-    { title }: MosaicWindowProps<MosaicId>,
-    id: MosaicId,
+    { title }: MosaicWindowProps<EditorId>,
+    id: EditorId,
   ): JSX.Element {
     const { appState } = this.props;
-    const docsDemoGoHomeMaybe =
-      id === PanelId.docsDemo ? (
-        <DocsDemoGoHomeButton id={id} appState={appState} />
-      ) : null;
 
     // only show toolbar controls if we have more than 1 visible editor
     // Mosaic arrangement is type string if 1 editor, object otherwise
@@ -236,10 +214,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {/* Middle */}
         <div />
         {/* Right */}
-        <div className="mosaic-controls">
-          {docsDemoGoHomeMaybe}
-          {toolbarControlsMaybe}
-        </div>
+        <div className="mosaic-controls">{toolbarControlsMaybe}</div>
       </div>
     );
   }
@@ -251,20 +226,18 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {string} path
    * @returns {JSX.Element | null}
    */
-  public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
+  public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
     const { appState } = this.props;
     const content =
       isEditorId(id, appState.customMosaics) && this.renderEditor(id);
-    const title = Object.keys(TITLE_MAP).includes(id)
-      ? TITLE_MAP[id]
-      : `Custom Editor (${id})`;
+    const title = getEditorTitle(id);
 
     return (
       <MosaicWindow<EditorId>
         className={id}
         path={path}
         title={title}
-        renderToolbar={(props: MosaicWindowProps<MosaicId>) =>
+        renderToolbar={(props: MosaicWindowProps<EditorId>) =>
           this.renderToolbar(props, id)
         }
       >
@@ -302,7 +275,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     if (!monaco) return null;
 
     return (
-      <Mosaic<EditorId | PanelId>
+      <Mosaic<EditorId>
         className={`focused__${this.state.focused}`}
         onChange={this.onChange}
         value={appState.mosaicArrangement}

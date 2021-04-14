@@ -1,41 +1,16 @@
-import {
-  ALL_PANELS,
-  DefaultEditorId,
-  DEFAULT_EDITORS,
-  EditorId,
-  MosaicId,
-  PanelId,
-} from '../interfaces';
 import { EditorBackup } from './editor-backup';
+import { isKnownFile } from './editor-utils';
 
 /**
  * Is the given string of type `EditorId`?
  *
  * @export
- * @param {(EditorId | PanelId | MosaicId)} input
- * @returns {input is EditorId}
+ * @param {string} id
+ * @param {customEditors} other editors to check against
+ * @returns {boolean} true iff the string is an editor id
  */
-export function isEditorId(
-  input: MosaicId,
-  editors: string[],
-): input is EditorId {
-  return (
-    DEFAULT_EDITORS.includes(input as DefaultEditorId) ||
-    editors.includes(input as EditorId)
-  );
-}
-
-/**
- * Is the given string of type `isPanelId`?
- *
- * @export
- * @param {(EditorId | PanelId | MosaicId)} input
- * @returns {input is MosaicId}
- */
-export function isPanelId(
-  input: EditorId | PanelId | MosaicId,
-): input is PanelId {
-  return ALL_PANELS.includes(input as PanelId);
+export function isEditorId(id: string, customEditors: string[]): boolean {
+  return isKnownFile(id) || customEditors.includes(id as any);
 }
 
 /**

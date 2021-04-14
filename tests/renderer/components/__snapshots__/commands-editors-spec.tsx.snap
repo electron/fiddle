@@ -182,13 +182,6 @@ exports[`EditorDropdown component renders 1`] = `
       text="Editors"
     />
   </Blueprint3.Popover>
-  <Blueprint3.Button
-    active={true}
-    icon="help"
-    id="docsDemo"
-    onClick={[Function]}
-    text="Docs & Demos"
-  />
 </Fragment>
 `;
 
@@ -296,12 +289,5 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
       text="Editors"
     />
   </Blueprint3.Popover>
-  <Blueprint3.Button
-    active={true}
-    icon="help"
-    id="docsDemo"
-    onClick={[Function]}
-    text="Docs & Demos"
-  />
 </Fragment>
 `;

@@ -147,7 +147,6 @@ describe('RemoteLoader', () => {
       const result = await instance.fetchGistAndLoad('customtestid');
 
       expect(result).toBe(true);
-      expect(store.customMosaics).toEqual([file]);
       expect(app.replaceFiddle).toBeCalledWith(
         {
           [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,

@@ -11,7 +11,6 @@ import {
   GenericDialogType,
   SetFiddleOptions,
   EditorId,
-  CustomEditorId,
   PACKAGE_NAME,
   DEFAULT_EDITORS,
 } from '../interfaces';
@@ -19,8 +18,9 @@ import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
+import { getEmptyContent, isKnownFile } from '../utils/editor-utils';
 import { isEditorBackup } from '../utils/type-checks';
-import { EMPTY_EDITOR_CONTENT, SORTED_EDITORS } from './constants';
+import { SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -71,25 +71,18 @@ export class App {
       }
     }
 
-    // Remove all previously created custom editors.
-    this.state.customMosaics = [];
-    const customEditors = Object.keys(editorValues).filter(
-      (v) => !Object.values(DefaultEditorId).includes(v as DefaultEditorId),
-    ) as CustomEditorId[];
-
-    // Re-add new custom editors.
-    for (const mosaic of customEditors) {
-      this.state.customMosaics.push(mosaic);
-    }
+    // update the customMosaic list
+    this.state.customMosaics = Object.keys(editorValues).filter(
+      (name) => !isKnownFile(name),
+    ) as EditorId[];
 
     // If the gist content is empty or matches the empty file output, don't show it.
-    const EMPTIES = Object.values(EMPTY_EDITOR_CONTENT);
-    const shouldShowContent = (content?: string) =>
-      content?.length && !EMPTIES.includes(content);
+    const shouldShowContent = (id: EditorId, content?: string) =>
+      content && content.length > 0 && content !== getEmptyContent(id);
 
     // Sort and display all editors that have content.
     const visibleEditors: EditorId[] = Object.entries(editorValues)
-      .filter(([_id, content]) => shouldShowContent(content))
+      .filter(([id, content]) => shouldShowContent(id as EditorId, content))
       .map(([id]) => id as DefaultEditorId)
       .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
 

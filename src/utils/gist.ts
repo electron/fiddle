@@ -27,16 +27,6 @@ export function getGistId(input: string): string | null {
 }
 
 /**
- * Get the id of a gist from a url
- *
- * @param {string} input
- * @returns {(string | null)}
- */
-export function idFromUrl(input: string): string | null {
-  return getGistId(input);
-}
-
-/**
  * Get the url for a gist id
  *
  * @param {string} input

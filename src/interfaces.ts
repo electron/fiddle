@@ -122,19 +122,9 @@ export enum DefaultEditorId {
   'css' = 'styles.css',
 }
 
-export type CustomEditorId = Exclude<
-  `${string}.${'js' | 'html' | 'css'}`,
-  DefaultEditorId
->;
+export type CustomEditorId = `${string}.${'js' | 'html' | 'css'}`;
 
-export type EditorId = DefaultEditorId | CustomEditorId;
-
-// Panels that can show up as a mosaic
-export const enum PanelId {
-  'docsDemo' = 'docsDemo',
-}
-
-export type MosaicId = DefaultEditorId | CustomEditorId | PanelId;
+export type EditorId = CustomEditorId | DefaultEditorId;
 
 export const DEFAULT_EDITORS = [
   DefaultEditorId.main,
@@ -142,20 +132,11 @@ export const DEFAULT_EDITORS = [
   DefaultEditorId.preload,
   DefaultEditorId.html,
   DefaultEditorId.css,
-];
+] as const;
 
 export const PACKAGE_NAME = 'package.json';
 
-export const ALL_PANELS = [PanelId.docsDemo];
-
-export const ALL_MOSAICS = [...DEFAULT_EDITORS, ...ALL_PANELS] as MosaicId[];
-
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
-
-export const enum DocsDemoPage {
-  DEFAULT = 'DEFAULT',
-  DEMO_APP = 'DEMO_APP',
-}
 
 export const enum BlockableAccelerator {
   save = 'save',

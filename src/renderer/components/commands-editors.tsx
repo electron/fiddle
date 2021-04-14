@@ -11,16 +11,15 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import {
-  DEFAULT_EDITORS,
   CustomEditorId,
-  GenericDialogType,
-  MosaicId,
-  PanelId,
+  DEFAULT_EDITORS,
   DefaultEditorId,
+  EditorId,
+  GenericDialogType,
 } from '../../interfaces';
+import { getEditorTitle, isKnownFile } from '../../utils/editor-utils';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
-import { TITLE_MAP } from './editors';
 
 interface EditorDropdownState {
   value: string;
@@ -56,24 +55,7 @@ export class EditorDropdown extends React.Component<
         <Popover content={this.renderMenu()} position={Position.BOTTOM}>
           <Button icon="applications" text="Editors" />
         </Popover>
-        {this.renderDocsDemos()}
       </>
-    );
-  }
-
-  public renderDocsDemos() {
-    if (!process.env.FIDDLE_DOCS_DEMOS) {
-      return null;
-    }
-
-    return (
-      <Button
-        icon="help"
-        text="Docs & Demos"
-        id={PanelId.docsDemo}
-        onClick={this.onItemClick}
-        active={!this.props.appState.closedPanels.docsDemo}
-      />
     );
   }
 
@@ -89,13 +71,14 @@ export class EditorDropdown extends React.Component<
     const allEditors = [...DEFAULT_EDITORS, ...appState.customMosaics];
     for (const id of allEditors) {
       const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+      const title = getEditorTitle(id);
 
-      if (!Object.keys(TITLE_MAP).includes(id)) {
+      if (!isKnownFile(id)) {
         result.push(
           <MenuItem
             icon={icon}
             key={id}
-            text={`Custom Editor (${id})`}
+            text={title}
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
@@ -114,7 +97,7 @@ export class EditorDropdown extends React.Component<
           <MenuItem
             icon={icon}
             key={id}
-            text={TITLE_MAP[id]}
+            text={title}
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
@@ -219,7 +202,7 @@ export class EditorDropdown extends React.Component<
     const { appState } = this.props;
 
     console.log(`EditorDropdown: Removing custom editor ${id}`);
-    appState.removeCustomMosaic(id as MosaicId);
+    appState.removeCustomMosaic(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
@@ -227,12 +210,12 @@ export class EditorDropdown extends React.Component<
     const { appState } = this.props;
     const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    if (visibleMosaics.includes(id as MosaicId)) {
+    if (visibleMosaics.includes(id as EditorId)) {
       console.log(`EditorDropdown: Closing ${id}`);
-      appState.hideAndBackupMosaic(id as MosaicId);
+      appState.hideAndBackupMosaic(id as EditorId);
     } else {
       console.log(`EditorDropdown: Opening ${id}`);
-      appState.showMosaic(id as MosaicId);
+      appState.showMosaic(id as EditorId);
     }
   }
 }

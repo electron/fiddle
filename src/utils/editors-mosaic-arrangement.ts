@@ -1,18 +1,18 @@
 import { MosaicDirection, MosaicNode } from 'react-mosaic-component';
 
-import { MosaicId } from '../interfaces';
+import { EditorId } from '../interfaces';
 
 /**
  * Create a mosaic arrangement given an array of editor ids.
  *
  * @export
- * @param {Array<MosaicId>} input
- * @returns {MosaicNode<MosaicId>}
+ * @param {Array<EditorId>} input
+ * @returns {MosaicNode<EditorId>}
  */
 export function createMosaicArrangement(
-  input: Array<MosaicId>,
+  input: readonly EditorId[],
   direction: MosaicDirection = 'row',
-): MosaicNode<MosaicId> {
+): MosaicNode<EditorId> {
   if (input.length === 1) {
     return input[0];
   }
@@ -32,25 +32,25 @@ export function createMosaicArrangement(
  * Returns an array of visible editors given a mosaic arrangement.
  *
  * @export
- * @param {MosaicNode<MosaicId> | null} input
- * @returns {Array<MosaicId>}
+ * @param {MosaicNode<EditorId> | null} input
+ * @returns {Array<EditorId>}
  */
 export function getVisibleMosaics(
-  input: MosaicNode<MosaicId> | null,
-): Array<MosaicId> {
+  input: MosaicNode<EditorId> | null,
+): Array<EditorId> {
   // Handle the unlikely null case
   if (!input) return [];
 
   // Handle the case where only one editor is visible
   if (typeof input === 'string') {
-    return [input as MosaicId];
+    return [input as EditorId];
   }
 
   // Handle the other cases (2 - 4)
-  const result: Array<MosaicId> = [];
+  const result: Array<EditorId> = [];
   for (const node of [input.first, input.second]) {
     if (typeof node === 'string') {
-      result.push(node as MosaicId);
+      result.push(node as EditorId);
     } else {
       result.push(...getVisibleMosaics(node));
     }
