@@ -14,13 +14,13 @@ import * as path from 'path';
 
 import { when } from 'mobx';
 import {
+  DEFAULT_EDITORS,
   EditorValues,
   GenericDialogType,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { FILENAME_KEYS } from '../../shared-constants';
 import { getOctokit } from '../../utils/octokit';
 import { EMPTY_EDITOR_CONTENT } from '../constants';
 import { ipcRendererManager } from '../ipc';
@@ -429,13 +429,23 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
+    const { customMosaics } = this.props.appState;
     const getSuffix = (name: string) => path.parse(name).ext.slice(1);
+
     const filesList = {};
-    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
-      filesList[filename] = {
-        content: values[editorId] || EMPTY_EDITOR_CONTENT[getSuffix(filename)],
+
+    // Add files for default editors.
+    for (const editor of DEFAULT_EDITORS) {
+      filesList[editor] = {
+        content: values[editor] || EMPTY_EDITOR_CONTENT[getSuffix(editor)],
       };
     }
+
+    // Add files for any custom editors created by the user.
+    for (const mosaic in customMosaics) {
+      filesList[mosaic] = { content: values[mosaic] };
+    }
+
     return filesList;
   };
 }

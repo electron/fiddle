@@ -1,9 +1,9 @@
 import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import { DefaultEditorId } from '../interfaces';
 
 import { IpcEvents } from '../ipc-events';
-import { FILENAME_KEYS } from '../shared-constants';
 import { ipcMainManager } from './ipc';
 
 /**
@@ -63,7 +63,7 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
  * @returns {Promise<boolean>}
  */
 async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
-  const targetPaths = Object.keys(FILENAME_KEYS).map((filename) =>
+  const targetPaths = Object.values(DefaultEditorId).map((filename) =>
     path.join(filePath, filename),
   );
 

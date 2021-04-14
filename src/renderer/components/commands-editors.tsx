@@ -6,10 +6,18 @@ import {
   Popover,
   Position,
 } from '@blueprintjs/core';
+import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { ALL_EDITORS, MosaicId, PanelId } from '../../interfaces';
+import {
+  DEFAULT_EDITORS,
+  CustomEditorId,
+  GenericDialogType,
+  MosaicId,
+  PanelId,
+  DefaultEditorId,
+} from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { TITLE_MAP } from './editors';
@@ -37,6 +45,9 @@ export class EditorDropdown extends React.Component<
     super(props);
 
     this.onItemClick = this.onItemClick.bind(this);
+    this.showCustomEditorDialog = this.showCustomEditorDialog.bind(this);
+    this.addCustomEditor = this.addCustomEditor.bind(this);
+    this.removeCustomEditor = this.removeCustomEditor.bind(this);
   }
 
   public render() {
@@ -75,18 +86,55 @@ export class EditorDropdown extends React.Component<
     const result: Array<JSX.Element> = [];
     const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    for (const id of ALL_EDITORS) {
-      result.push(
-        <MenuItem
-          icon={visibleMosaics.includes(id) ? 'eye-open' : 'eye-off'}
-          key={id}
-          text={TITLE_MAP[id]}
-          id={id}
-          onClick={this.onItemClick}
-          disabled={appState.mosaicArrangement === id} // can't hide last editor panel
-        />,
-      );
+    const allEditors = [...DEFAULT_EDITORS, ...appState.customMosaics];
+    for (const id of allEditors) {
+      const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+
+      if (!Object.keys(TITLE_MAP).includes(id)) {
+        result.push(
+          <MenuItem
+            icon={icon}
+            key={id}
+            text={`Custom Editor (${id})`}
+            id={id}
+            onClick={this.onItemClick}
+            // Can't hide last editor panel.
+            disabled={appState.mosaicArrangement === id}
+          >
+            <MenuItem
+              icon={'cross'}
+              id={id}
+              onClick={this.removeCustomEditor}
+              text={'Remove'}
+            />
+          </MenuItem>,
+        );
+      } else {
+        result.push(
+          <MenuItem
+            icon={icon}
+            key={id}
+            text={TITLE_MAP[id]}
+            id={id}
+            onClick={this.onItemClick}
+            // Can't hide last editor panel.
+            disabled={appState.mosaicArrangement === id}
+          />,
+        );
+      }
     }
+
+    result.push(
+      <React.Fragment key={'fragment-custom-editor'}>
+        <MenuDivider />
+        <MenuItem
+          icon="plus"
+          key="add-custom-editor"
+          text="Add Custom Editor"
+          onClick={this.addCustomEditor}
+        />
+      </React.Fragment>,
+    );
 
     result.push(
       <React.Fragment key={'fragment-reset-layout'}>
@@ -101,6 +149,77 @@ export class EditorDropdown extends React.Component<
     );
 
     return result;
+  }
+
+  public async showCustomEditorDialog() {
+    const { appState } = this.props;
+
+    appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
+      label: 'Enter a filename for your custom editor',
+      wantsInput: true,
+      ok: 'Create',
+      cancel: 'Cancel',
+      placeholder: 'file.js',
+    });
+
+    appState.toggleGenericDialog();
+    await when(() => !appState.isGenericDialogShowing);
+
+    return {
+      cancelled: !appState.genericDialogLastResult,
+      result: appState.genericDialogLastInput,
+    };
+  }
+
+  public async addCustomEditor() {
+    const { appState } = this.props;
+
+    const isValidEditorName = (name: string) =>
+      /^[^\s]+\.(css|html|js)$/.test(name);
+
+    const { cancelled, result } = await this.showCustomEditorDialog();
+
+    if (cancelled) return;
+
+    // Fail if editor name is not an accepted file type.
+    if (!result || !isValidEditorName(result)) {
+      appState.setGenericDialogOptions({
+        type: GenericDialogType.warning,
+        label:
+          'Invalid custom editor name - must be either an html, js, or css file.',
+        cancel: undefined,
+      });
+
+      appState.toggleGenericDialog();
+    } else {
+      const name = result as CustomEditorId;
+
+      // Also fail if the user tries to create two identical editors.
+      if (
+        appState.customMosaics.includes(name) ||
+        Object.values(DefaultEditorId).includes(name as DefaultEditorId)
+      ) {
+        appState.setGenericDialogOptions({
+          type: GenericDialogType.warning,
+          label: `Custom editor name ${name} already exists - duplicates are not allowed`,
+          cancel: undefined,
+        });
+
+        appState.toggleGenericDialog();
+      } else {
+        appState.customMosaics.push(name);
+        appState.showMosaic(name);
+      }
+    }
+  }
+
+  public async removeCustomEditor(event: React.MouseEvent) {
+    const { id } = event.currentTarget;
+    const { appState } = this.props;
+
+    console.log(`EditorDropdown: Removing custom editor ${id}`);
+    appState.removeCustomMosaic(id as MosaicId);
   }
 
   public onItemClick(event: React.MouseEvent) {

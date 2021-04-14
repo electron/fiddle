@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { EditorId } from '../../../src/interfaces';
+import { DefaultEditorId } from '../../../src/interfaces';
 import {
   MaximizeButton,
   RemoveButton,
@@ -56,7 +56,7 @@ describe('Editor toolbar button component', () => {
   describe('MaximizeButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <MaximizeButton id={EditorId.main} appState={store} />,
+        <MaximizeButton id={DefaultEditorId.main} appState={store} />,
         {
           context: mockContext,
         },
@@ -67,7 +67,7 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', () => {
       const wrapper = shallow(
-        <MaximizeButton id={EditorId.main} appState={store} />,
+        <MaximizeButton id={DefaultEditorId.main} appState={store} />,
         {
           context: mockContext,
         },
@@ -83,7 +83,7 @@ describe('Editor toolbar button component', () => {
   describe('RemoveButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <RemoveButton id={EditorId.main} appState={store} />,
+        <RemoveButton id={DefaultEditorId.main} appState={store} />,
         {
           context: mockContext,
         },
@@ -93,7 +93,7 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', () => {
       const wrapper = shallow(
-        <RemoveButton id={EditorId.main} appState={store} />,
+        <RemoveButton id={DefaultEditorId.main} appState={store} />,
         {
           context: mockContext,
         },

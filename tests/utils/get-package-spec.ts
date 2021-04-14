@@ -1,3 +1,4 @@
+import { DefaultEditorId } from '../../src/interfaces';
 import { getPackageJson } from '../../src/utils/get-package';
 
 jest.mock('../../src/utils/get-username', () => ({
@@ -15,11 +16,11 @@ describe('get-package', () => {
         getName: () => 'test-app',
       } as any,
       {
-        main: 'app.goDoTheThing()',
-        renderer: `const say = require('say')`,
-        html: '<html />',
-        preload: 'preload',
-        css: 'body { color: black }',
+        [DefaultEditorId.main]: 'app.goDoTheThing()',
+        [DefaultEditorId.renderer]: `const say = require('say')`,
+        [DefaultEditorId.html]: '<html />',
+        [DefaultEditorId.preload]: 'preload',
+        [DefaultEditorId.css]: 'body { color: black }',
       },
     );
 
@@ -54,11 +55,11 @@ describe('get-package', () => {
         version: '1.0.0-nightly.123456789',
       } as any,
       {
-        main: 'app.goDoTheThing()',
-        renderer: `const say = require('say')`,
-        html: '<html />',
-        preload: 'preload',
-        css: 'body { color: black }',
+        [DefaultEditorId.main]: 'app.goDoTheThing()',
+        [DefaultEditorId.renderer]: `const say = require('say')`,
+        [DefaultEditorId.html]: '<html />',
+        [DefaultEditorId.preload]: 'preload',
+        [DefaultEditorId.css]: 'body { color: black }',
       },
       {
         includeElectron: true,
@@ -99,11 +100,11 @@ describe('get-package', () => {
         version: '1.0.0',
       } as any,
       {
-        main: 'app.goDoTheThing()',
-        renderer: `const say = require('say')`,
-        html: '<html />',
-        preload: 'preload',
-        css: 'body { color: black }',
+        [DefaultEditorId.main]: 'app.goDoTheThing()',
+        [DefaultEditorId.renderer]: `const say = require('say')`,
+        [DefaultEditorId.html]: '<html />',
+        [DefaultEditorId.preload]: 'preload',
+        [DefaultEditorId.css]: 'body { color: black }',
       },
       {
         includeElectron: true,

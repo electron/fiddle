@@ -61,8 +61,10 @@ export class AddThemeDialog extends React.Component<
    */
   public async onSubmit(): Promise<void> {
     const { file } = this.state;
-    const defaultTheme = !!this.props.appState.theme
-      ? await getTheme(this.props.appState.theme)
+    const { appState } = this.props;
+
+    const defaultTheme = !!appState.theme
+      ? await getTheme(appState.theme)
       : defaultDark;
     if (!file) return;
 
@@ -75,11 +77,11 @@ export class AddThemeDialog extends React.Component<
       const name = editor.name ? editor.name : file.name;
       await this.createNewThemeFromMonaco(name, newTheme);
     } catch (error) {
-      this.props.appState.setGenericDialogOptions({
+      appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
         label: `Error: ${error}, please pick a different file.`,
       });
-      this.props.appState.isGenericDialogShowing = true;
+      appState.isGenericDialogShowing = true;
       return;
     }
 

@@ -14,7 +14,9 @@ export function setupAboutPanel(): void {
   app.setAboutPanelOptions({
     applicationName: 'Electron Fiddle',
     applicationVersion: app.getVersion(),
-    authors: fs.readJSONSync(contribFile).map(({ name }) => name),
+    authors: fs
+      .readJSONSync(contribFile)
+      .map(({ name }: { name: string }) => name),
     copyright: '© Electron Authors',
     credits: 'https://github.com/electron/fiddle/graphs/contributors',
     iconPath,

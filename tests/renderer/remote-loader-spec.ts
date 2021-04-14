@@ -1,17 +1,11 @@
 import { observable } from 'mobx';
 import {
+  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogType,
 } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
-import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../../src/shared-constants';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { mockFetchOnce } from '../utils';
@@ -19,19 +13,19 @@ import { mockFetchOnce } from '../utils';
 jest.mock('../../src/utils/octokit');
 
 const mockGistFiles = {
-  [RENDERER_JS_NAME]: {
+  [DefaultEditorId.renderer]: {
     content: 'renderer-content',
   },
-  [MAIN_JS_NAME]: {
+  [DefaultEditorId.main]: {
     content: 'main-content',
   },
-  [INDEX_HTML_NAME]: {
+  [DefaultEditorId.html]: {
     content: 'html',
   },
-  [PRELOAD_JS_NAME]: {
+  [DefaultEditorId.preload]: {
     content: 'preload',
   },
-  [STYLES_CSS_NAME]: {
+  [DefaultEditorId.css]: {
     content: 'css',
   },
 };
@@ -46,23 +40,23 @@ const mockGetGists = {
 
 const mockRepos = [
   {
-    name: MAIN_JS_NAME,
+    name: DefaultEditorId.main,
     download_url: 'https://main',
   },
   {
-    name: RENDERER_JS_NAME,
+    name: DefaultEditorId.renderer,
     download_url: 'https://renderer',
   },
   {
-    name: INDEX_HTML_NAME,
+    name: DefaultEditorId.html,
     download_url: 'https://html',
   },
   {
-    name: STYLES_CSS_NAME,
+    name: DefaultEditorId.css,
     download_url: 'https://css',
   },
   {
-    name: PRELOAD_JS_NAME,
+    name: DefaultEditorId.preload,
     download_url: 'https://preload',
   },
   {
@@ -103,6 +97,8 @@ describe('RemoteLoader', () => {
     ipcRendererManager.send = jest.fn();
 
     store = new MockStore() as any;
+    store.customMosaics = [];
+
     instance = new RemoteLoader(store);
   });
 
@@ -112,21 +108,58 @@ describe('RemoteLoader', () => {
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
+      const { app } = window.ElectronFiddle;
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       store.gistId = 'abcdtestid';
 
       const result = await instance.fetchGistAndLoad('abcdtestid');
 
       expect(result).toBe(true);
-      expect(window.ElectronFiddle.app.replaceFiddle).toBeCalledWith(
+      expect(app.replaceFiddle).toBeCalledWith(
         {
-          html: mockGistFiles[INDEX_HTML_NAME].content,
-          main: mockGistFiles[MAIN_JS_NAME].content,
-          renderer: mockGistFiles[RENDERER_JS_NAME].content,
-          preload: mockGistFiles[PRELOAD_JS_NAME].content,
-          css: mockGistFiles[STYLES_CSS_NAME].content,
+          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
+          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
+          [DefaultEditorId.renderer]:
+            mockGistFiles[DefaultEditorId.renderer].content,
+          [DefaultEditorId.preload]:
+            mockGistFiles[DefaultEditorId.preload].content,
+          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
         },
         { gistId: 'abcdtestid' },
+      );
+    });
+
+    it('loads a fiddle with a custom editor', async () => {
+      const { app } = window.ElectronFiddle;
+
+      store.gistId = 'customtestid';
+
+      const file = 'file.js';
+      mockGistFiles[file] = { content: 'hello' };
+      mockRepos.push({
+        name: file,
+        download_url: 'https://file',
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+      instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
+
+      const result = await instance.fetchGistAndLoad('customtestid');
+
+      expect(result).toBe(true);
+      expect(store.customMosaics).toEqual([file]);
+      expect(app.replaceFiddle).toBeCalledWith(
+        {
+          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
+          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
+          [DefaultEditorId.renderer]:
+            mockGistFiles[DefaultEditorId.renderer].content,
+          [DefaultEditorId.preload]:
+            mockGistFiles[DefaultEditorId.preload].content,
+          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
+          [file]: mockGistFiles[file].content,
+        },
+        { gistId: 'customtestid' },
       );
     });
 
@@ -148,11 +181,11 @@ describe('RemoteLoader', () => {
     beforeEach(() => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
 
-      mockFetchOnce('main');
-      mockFetchOnce('renderer');
-      mockFetchOnce('index');
-      mockFetchOnce('css');
-      mockFetchOnce('preload');
+      mockFetchOnce(DefaultEditorId.main);
+      mockFetchOnce(DefaultEditorId.renderer);
+      mockFetchOnce(DefaultEditorId.html);
+      mockFetchOnce(DefaultEditorId.css);
+      mockFetchOnce(DefaultEditorId.preload);
     });
 
     it('loads an Electron example', async () => {
@@ -167,11 +200,11 @@ describe('RemoteLoader', () => {
       expect(calls[0]).toMatchObject(
         expect.arrayContaining([
           expect.objectContaining({
-            html: 'index',
-            main: 'main',
-            renderer: 'renderer',
-            css: 'css',
-            preload: 'preload',
+            [DefaultEditorId.html]: DefaultEditorId.html,
+            [DefaultEditorId.main]: DefaultEditorId.main,
+            [DefaultEditorId.renderer]: DefaultEditorId.renderer,
+            [DefaultEditorId.css]: DefaultEditorId.css,
+            [DefaultEditorId.preload]: DefaultEditorId.preload,
           }),
         ]),
       );
@@ -314,6 +347,15 @@ describe('RemoteLoader', () => {
   });
 
   describe('loadFiddleFromGist()', () => {
+    it('loads the example with confirmation', async () => {
+      instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
+      instance.fetchGistAndLoad = jest.fn();
+      await instance.loadFiddleFromGist({}, { id: 'gist' });
+
+      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>('gist');
+      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith<any>('gist');
+    });
+
     it('loads the example with confirmation', async () => {
       instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
       instance.fetchGistAndLoad = jest.fn();

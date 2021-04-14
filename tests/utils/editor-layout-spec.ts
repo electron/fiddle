@@ -1,3 +1,4 @@
+import { DefaultEditorId } from '../../src/interfaces';
 import { updateEditorLayout } from '../../src/utils/editor-layout';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
@@ -13,10 +14,18 @@ describe('editor-layout', () => {
     updateEditorLayout();
 
     setTimeout(() => {
-      const { main, html, renderer } = window.ElectronFiddle.editors;
-      expect((main!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
-      expect((html!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
-      expect((renderer!.layout as jest.Mock<any>).mock.calls).toHaveLength(1);
+      const editors = window.ElectronFiddle.editors;
+
+      expect(
+        (editors[DefaultEditorId.main]!.layout as jest.Mock<any>).mock.calls,
+      ).toHaveLength(1);
+      expect(
+        (editors[DefaultEditorId.html]!.layout as jest.Mock<any>).mock.calls,
+      ).toHaveLength(1);
+      expect(
+        (editors[DefaultEditorId.renderer]!.layout as jest.Mock<any>).mock
+          .calls,
+      ).toHaveLength(1);
 
       done();
     }, 100);

@@ -1,5 +1,5 @@
 import { EditorId, EditorValues, VersionSource } from '../interfaces';
-import { USER_DATA_PATH } from './constants';
+import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
@@ -58,7 +58,7 @@ async function prepareTemplate(branch: string): Promise<string> {
 const templateCache: Record<string, Promise<EditorValues>> = {};
 
 /**
- * Get a cached copy of the Electron branch's fiddle
+ * Get a cached copy of the Electron branch's fiddle.
  *
  * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
  * @returns {Promise<EditorValues>}
@@ -76,7 +76,7 @@ function getQuickStart(branch: string): Promise<EditorValues> {
 }
 
 /**
- * Get a cached copy of the Electron Test fiddle
+ * Get a cached copy of the Electron Test fiddle.
  *
  * @returns {Promise<EditorValues>}
  */
@@ -127,7 +127,12 @@ export async function getContent(
   name: EditorId,
   version: string,
 ): Promise<string> {
-  return (await getTemplate(version))[name];
+  const mosaics = await getTemplate(version);
+
+  if (mosaics?.[name]) return mosaics[name]!;
+
+  const extension = path.parse(name).ext.slice(1);
+  return EMPTY_EDITOR_CONTENT[extension];
 }
 
 /**
@@ -141,9 +146,10 @@ export async function isContentUnchanged(
   name: EditorId,
   version: string,
 ): Promise<boolean> {
-  if (!window.ElectronFiddle || !window.ElectronFiddle.app) return false;
+  const { ElectronFiddle: fiddle } = window;
+  if (!fiddle || !fiddle.app) return false;
 
-  const values = await window.ElectronFiddle.app.getEditorValues({
+  const values = await fiddle.app.getEditorValues({
     include: false,
   });
 

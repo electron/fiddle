@@ -1,11 +1,14 @@
 import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
 import {
+  CustomEditorId,
+  DefaultEditorId,
+  DEFAULT_EDITORS,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
+  PACKAGE_NAME,
 } from '../interfaces';
-import { FILENAME_KEYS } from '../shared-constants';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
@@ -67,7 +70,6 @@ export class RemoteLoader {
       if (!ok) return false;
 
       const values = await getTemplate(this.appState.version);
-
       if (!Array.isArray(folder.data)) {
         throw new Error(
           'The example Fiddle tried to launch is not a valid Electron example',
@@ -82,13 +84,14 @@ export class RemoteLoader {
           continue;
         }
 
-        const valueKey = FILENAME_KEYS[child.name];
-        if (valueKey) {
+        if (
+          Object.values(DefaultEditorId).includes(child.name as DefaultEditorId)
+        ) {
           loaders.push(
             fetch(child.download_url)
               .then((r) => r.text())
               .then((t) => {
-                values[valueKey] = t;
+                values[child.name] = t;
               }),
           );
         }
@@ -131,11 +134,28 @@ export class RemoteLoader {
     try {
       const octo = await getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
-
       const values: Partial<EditorValues> = {};
-      for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
-        values[editorId] = this.getContentOrEmpty(gist, filename);
+
+      // Add values for all default editors.
+      for (const editor of DEFAULT_EDITORS) {
+        values[editor] = this.getContentOrEmpty(gist, editor);
       }
+
+      // Fetch any custom editor files that the user may have created in the gist.
+      const maybeCustomEditors = Object.keys(gist.data.files).filter(
+        (file) =>
+          !Object.values(DefaultEditorId).includes(file as DefaultEditorId),
+      );
+
+      // If it's a custom editor explicitly request permission before creation.
+      for (const mosaic of maybeCustomEditors) {
+        const verified = await this.verifyCreateCustomEditor(mosaic);
+        if (verified) {
+          values[mosaic] = this.getContentOrEmpty(gist, mosaic);
+          this.appState.customMosaics.push(mosaic as CustomEditorId);
+        }
+      }
+
       return this.handleLoadingSuccess(values, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
@@ -174,7 +194,7 @@ export class RemoteLoader {
       owner: ELECTRON_ORG,
       repo: ELECTRON_REPO,
       ref,
-      path: 'package.json',
+      path: PACKAGE_NAME,
     });
 
     if (!Array.isArray(packageJsonData) && !!packageJsonData.content) {
@@ -194,6 +214,19 @@ export class RemoteLoader {
 
       return '0.0.0';
     }
+  }
+
+  public async verifyCreateCustomEditor(editorName: string): Promise<boolean> {
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
+      label: `Do you want to create a custom editor with name: ${editorName}?`,
+      cancel: 'Skip',
+    });
+
+    this.appState.isGenericDialogShowing = true;
+    await when(() => !this.appState.isGenericDialogShowing);
+
+    return !!this.appState.genericDialogLastResult;
   }
 
   /**

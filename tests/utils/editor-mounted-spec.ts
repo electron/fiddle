@@ -1,27 +1,27 @@
 import { waitForEditorsToMount } from '../../src/utils/editor-mounted';
 
-import { EditorId } from '../../src/interfaces';
+import { DefaultEditorId } from '../../src/interfaces';
 
 describe('waitforEditorsToMount', () => {
   it('resolves when editors match list', async () => {
     // these editors should be mounted by default.
     const { ElectronFiddle: fiddle } = window as any;
     const ids = [
-      EditorId.html,
-      EditorId.main,
-      EditorId.preload,
-      EditorId.renderer,
+      DefaultEditorId.html,
+      DefaultEditorId.main,
+      DefaultEditorId.preload,
+      DefaultEditorId.renderer,
     ];
     await waitForEditorsToMount(ids);
-    for (const id of ids) {
-      expect(fiddle.editors).toHaveProperty(id);
-    }
+
+    const editors = Object.getOwnPropertyNames(fiddle.editors);
+    expect(editors.sort()).toEqual(ids.sort());
   });
 
   it('rejects if editors fail to match list', async () => {
     try {
       // css editor shouldn't be mounted by default.
-      await waitForEditorsToMount([EditorId.css]);
+      await waitForEditorsToMount([DefaultEditorId.css]);
     } catch (error) {
       expect(error).toMatch('Timed out');
     }

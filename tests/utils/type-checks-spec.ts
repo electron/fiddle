@@ -1,4 +1,4 @@
-import { EditorId, PanelId } from '../../src/interfaces';
+import { DefaultEditorId, PanelId } from '../../src/interfaces';
 import {
   isEditorBackup,
   isEditorId,
@@ -8,14 +8,14 @@ import {
 describe('Type checks', () => {
   describe('isEditorId()', () => {
     it('works', () => {
-      expect(isEditorId(EditorId.html)).toBe(true);
-      expect(isEditorId(PanelId.docsDemo)).toBe(false);
+      expect(isEditorId(DefaultEditorId.html, [])).toBe(true);
+      expect(isEditorId(PanelId.docsDemo, [])).toBe(false);
     });
   });
 
   describe('isPanelId()', () => {
     it('works', () => {
-      expect(isPanelId(EditorId.html)).toBe(false);
+      expect(isPanelId(DefaultEditorId.html)).toBe(false);
       expect(isPanelId(PanelId.docsDemo)).toBe(true);
     });
   });

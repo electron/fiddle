@@ -34,12 +34,12 @@ export interface Version {
 }
 
 export interface EditorValues {
-  main: string;
-  renderer: string;
-  html: string;
-  preload: string;
-  css: string;
-  package?: string;
+  [DefaultEditorId.main]: string;
+  [DefaultEditorId.renderer]: string;
+  [DefaultEditorId.html]: string;
+  [DefaultEditorId.preload]: string;
+  [DefaultEditorId.css]: string;
+  PACKAGE_NAME?: string;
 }
 
 export enum RunResult {
@@ -113,31 +113,42 @@ export const enum GenericDialogType {
   'success' = 'success',
 }
 
-// Editors
-export const enum EditorId {
-  'main' = 'main',
-  'renderer' = 'renderer',
-  'html' = 'html',
-  'preload' = 'preload',
-  'css' = 'css',
+// Default Editors
+export enum DefaultEditorId {
+  'main' = 'main.js',
+  'renderer' = 'renderer.js',
+  'html' = 'index.html',
+  'preload' = 'preload.js',
+  'css' = 'styles.css',
 }
+
+export type CustomEditorId = Exclude<
+  `${string}.${'js' | 'html' | 'css'}`,
+  DefaultEditorId
+>;
+
+export type EditorId = DefaultEditorId | CustomEditorId;
 
 // Panels that can show up as a mosaic
 export const enum PanelId {
   'docsDemo' = 'docsDemo',
 }
 
-export type MosaicId = EditorId | PanelId;
+export type MosaicId = DefaultEditorId | CustomEditorId | PanelId;
 
-export const ALL_EDITORS = [
-  EditorId.main,
-  EditorId.renderer,
-  EditorId.preload,
-  EditorId.html,
-  EditorId.css,
+export const DEFAULT_EDITORS = [
+  DefaultEditorId.main,
+  DefaultEditorId.renderer,
+  DefaultEditorId.preload,
+  DefaultEditorId.html,
+  DefaultEditorId.css,
 ];
+
+export const PACKAGE_NAME = 'package.json';
+
 export const ALL_PANELS = [PanelId.docsDemo];
-export const ALL_MOSAICS = [...ALL_EDITORS, ...ALL_PANELS];
+
+export const ALL_MOSAICS = [...DEFAULT_EDITORS, ...ALL_PANELS] as MosaicId[];
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
 

@@ -3,13 +3,6 @@ import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import {
-  INDEX_HTML_NAME,
-  MAIN_JS_NAME,
-  PRELOAD_JS_NAME,
-  RENDERER_JS_NAME,
-  STYLES_CSS_NAME,
-} from '../../shared-constants';
-import {
   Mosaic,
   MosaicBranch,
   MosaicNode,
@@ -18,6 +11,7 @@ import {
 } from 'react-mosaic-component';
 
 import {
+  DefaultEditorId,
   EditorId,
   MosaicId,
   PanelId,
@@ -48,12 +42,12 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   wordWrap: 'on',
 };
 
-export const TITLE_MAP: Record<MosaicId, string> = {
-  [EditorId.main]: `Main Process (${MAIN_JS_NAME})`,
-  [EditorId.renderer]: `Renderer Process (${RENDERER_JS_NAME})`,
-  [EditorId.preload]: `Preload (${PRELOAD_JS_NAME})`,
-  [EditorId.html]: `HTML (${INDEX_HTML_NAME})`,
-  [EditorId.css]: `Stylesheet (${STYLES_CSS_NAME})`,
+export const TITLE_MAP: Record<DefaultEditorId | PanelId, string> = {
+  [DefaultEditorId.main]: `Main Process (${DefaultEditorId.main})`,
+  [DefaultEditorId.renderer]: `Renderer Process (${DefaultEditorId.renderer})`,
+  [DefaultEditorId.preload]: `Preload (${DefaultEditorId.preload})`,
+  [DefaultEditorId.html]: `HTML (${DefaultEditorId.html})`,
+  [DefaultEditorId.css]: `Stylesheet (${DefaultEditorId.css})`,
   [PanelId.docsDemo]: 'Docs & Demos',
 };
 
@@ -105,15 +99,17 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
       const { version } = this.props.appState;
-      const fiddle = await getTemplate(version);
+      const values = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
+
+      await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
 
     ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
-      const fiddle = await getTestTemplate();
+      const values = await getTestTemplate();
       const options: SetFiddleOptions = { templateName: 'Test' };
-      await window.ElectronFiddle.app.replaceFiddle(fiddle, options);
+
+      await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
 
     ipcRendererManager.on(
@@ -256,13 +252,18 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @returns {JSX.Element | null}
    */
   public renderTile(id: MosaicId, path: Array<MosaicBranch>): JSX.Element {
-    const content = isEditorId(id) && this.renderEditor(id);
+    const { appState } = this.props;
+    const content =
+      isEditorId(id, appState.customMosaics) && this.renderEditor(id);
+    const title = Object.keys(TITLE_MAP).includes(id)
+      ? TITLE_MAP[id]
+      : `Custom Editor (${id})`;
 
     return (
       <MosaicWindow<EditorId>
         className={id}
         path={path}
-        title={TITLE_MAP[id]}
+        title={title}
         renderToolbar={(props: MosaicWindowProps<MosaicId>) =>
           this.renderToolbar(props, id)
         }

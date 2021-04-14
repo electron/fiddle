@@ -1,5 +1,4 @@
-import { EditorValues } from '../interfaces';
-import { FILENAME_KEYS } from '../shared-constants';
+import { DefaultEditorId, EditorValues } from '../interfaces';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -11,26 +10,30 @@ import * as path from 'path';
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(folder: string): Promise<EditorValues> {
-  const ret: EditorValues = {
-    css: '',
-    html: '',
-    main: '',
-    preload: '',
-    renderer: '',
+  const customMosaics: Record<string, string> = {};
+  const defaultMosaics: EditorValues = {
+    [DefaultEditorId.css]: '',
+    [DefaultEditorId.html]: '',
+    [DefaultEditorId.main]: '',
+    [DefaultEditorId.preload]: '',
+    [DefaultEditorId.renderer]: '',
   };
 
   const hits: string[] = [];
-  const misses = new Set(Object.keys(FILENAME_KEYS));
+  const misses = new Set(Object.values(DefaultEditorId));
 
-  const tryRead = (basename: string) => {
+  const isValidEditorName = (name: string) =>
+    /^[^\s]+\.(css|html|js)$/i.test(name);
+
+  const tryRead = (name: string) => {
     try {
-      const filename = path.join(folder, basename);
+      const filename = path.join(folder, name);
       const content = fs.readFileSync(filename, 'utf-8');
-      hits.push(basename);
-      misses.delete(basename);
+      hits.push(name);
+      misses.delete(name as DefaultEditorId);
       return content || '';
     } catch (error) {
-      console.warn(`Could not read template file ${basename}:`, error);
+      console.warn(`Could not read file ${name}:`, error);
       return '';
     }
   };
@@ -39,16 +42,18 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     console.warn(`readFiddle(): "${folder}" does not exist`);
   } else {
     for (const file of fs.readdirSync(folder)) {
-      const key = FILENAME_KEYS[file];
-      if (key) {
-        ret[key] = tryRead(file);
+      if (Object.values(DefaultEditorId).includes(file as DefaultEditorId)) {
+        defaultMosaics[file] = tryRead(file);
+      } else if (isValidEditorName(file)) {
+        customMosaics[file] = tryRead(file);
       }
     }
   }
 
   console.log(`Got Fiddle from "${folder}".
-Found: ${hits.sort().join(', ')}
+Found Default Mosaics: ${hits.sort().join(', ')}
+Found Custom Mosaics: ${Object.keys(customMosaics).sort().join(', ')}
 Missed: ${[...misses].sort().join(', ')}`);
 
-  return ret;
+  return { ...defaultMosaics, ...customMosaics };
 }

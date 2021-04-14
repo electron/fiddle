@@ -1,10 +1,10 @@
 import * as fs from 'fs-extra';
+import * as path from 'path';
 
-import { Files } from '../../src/interfaces';
+import { DefaultEditorId, Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { RENDERER_JS_NAME } from '../../src/shared-constants';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 
 jest.mock('fs-extra');
@@ -16,9 +16,9 @@ jest.mock('tmp', () => ({
 }));
 jest.mock('../../src/renderer/templates', () => ({
   getTemplateValues: () => ({
-    html: '',
-    main: '',
-    renderer: '',
+    [DefaultEditorId.html]: '',
+    [DefaultEditorId.main]: '',
+    [DefaultEditorId.renderer]: '',
   }),
 }));
 
@@ -28,6 +28,8 @@ describe('FileManager', () => {
   beforeEach(() => {
     window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
+
+    window.ElectronFiddle.app.state.customMosaics = [];
 
     fm = new FileManager({
       setGenericDialogOptions: jest.fn(),
@@ -45,11 +47,44 @@ describe('FileManager', () => {
 
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          renderer: '',
-          preload: '',
-          main: '',
-          css: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.preload]: '',
+          [DefaultEditorId.main]: '',
+          [DefaultEditorId.css]: '',
+        },
+        { filePath: fakePath },
+      );
+    });
+
+    it('can open a fiddle with custom editors', async () => {
+      const { app } = window.ElectronFiddle;
+
+      const fakePath = '/fake/path';
+      const file = 'file.js';
+
+      app.remoteLoader.verifyCreateCustomEditor = jest
+        .fn()
+        .mockResolvedValue(true);
+      (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
+      (fs.readdirSync as jest.Mock).mockImplementation(() => [
+        file,
+        DefaultEditorId.html,
+      ]);
+      (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
+        return path.basename(filename) === file ? 'hey' : '';
+      });
+
+      await fm.openFiddle(fakePath);
+
+      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+        {
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.preload]: '',
+          [DefaultEditorId.main]: '',
+          [DefaultEditorId.css]: '',
+          [file]: 'hey',
         },
         { filePath: fakePath },
       );
@@ -64,11 +99,11 @@ describe('FileManager', () => {
 
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          renderer: '',
-          preload: '',
-          main: '',
-          css: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.preload]: '',
+          [DefaultEditorId.main]: '',
+          [DefaultEditorId.css]: '',
         },
         { filePath: fakePath },
       );
@@ -99,6 +134,25 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(5);
+    });
+
+    it('saves a fiddle with custom editors', async () => {
+      const { app } = window.ElectronFiddle;
+
+      const file = 'file.js';
+      app.state.customMosaics = [file];
+      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
+        [file]: 'hi',
+        [DefaultEditorId.html]: 'html',
+        [DefaultEditorId.renderer]: 'renderer',
+        [DefaultEditorId.preload]: 'preload',
+        [DefaultEditorId.main]: 'main',
+        [DefaultEditorId.css]: 'css',
+      });
+
+      await fm.saveFiddle('/fake/path');
+
+      expect(fs.outputFile).toHaveBeenCalledTimes(6);
     });
 
     it('removes a file that is newly empty', async () => {
@@ -191,9 +245,9 @@ describe('FileManager', () => {
       await fm.openTemplate('test');
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
-          html: '',
-          main: '',
-          renderer: '',
+          [DefaultEditorId.html]: '',
+          [DefaultEditorId.renderer]: '',
+          [DefaultEditorId.main]: '',
         },
         {
           templateName: 'test',
@@ -240,11 +294,41 @@ describe('FileManager', () => {
   describe('getFiles()', () => {
     it('applies transforms', async () => {
       const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.set(RENDERER_JS_NAME, 'hi');
+        files.set(DefaultEditorId.renderer, 'hi');
         return files;
       });
 
-      expect(result.get(RENDERER_JS_NAME)).toBe('hi');
+      expect(result.get(DefaultEditorId.renderer)).toBe('hi');
+    });
+
+    it('handles custom editors', async () => {
+      const { app } = window.ElectronFiddle;
+
+      const file = 'file.js';
+      app.state.customMosaics = [file];
+
+      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
+        [file]: 'file',
+        [DefaultEditorId.html]: 'html',
+        [DefaultEditorId.renderer]: 'renderer',
+        [DefaultEditorId.preload]: 'preload',
+        [DefaultEditorId.main]: 'main',
+        [DefaultEditorId.css]: 'css',
+      });
+
+      const result = await fm.getFiles(undefined, async (files: Files) => {
+        files.forEach((value, key) => {
+          files.set(key, `${value}!`);
+        });
+        return files;
+      });
+
+      expect(result.get(DefaultEditorId.main)).toBe('main!');
+      expect(result.get(DefaultEditorId.renderer)).toBe('renderer!');
+      expect(result.get(DefaultEditorId.preload)).toBe('preload!');
+      expect(result.get(DefaultEditorId.html)).toBe('html!');
+      expect(result.get(DefaultEditorId.css)).toBe('css!');
+      expect(result.get(file)).toBe('file!');
     });
 
     it('handles transform error', async () => {
@@ -252,7 +336,7 @@ describe('FileManager', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(result.get(RENDERER_JS_NAME)).toBe('renderer-content');
+      expect(result.get(DefaultEditorId.renderer)).toBe('renderer-content');
     });
   });
 });

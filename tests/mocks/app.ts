@@ -2,17 +2,18 @@ import { FileManager } from './file-manager';
 import { MockState } from './state';
 import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
+import { DefaultEditorId } from '../../src/interfaces';
 
 export class AppMock {
   public setup = jest.fn();
   public replaceFiddle = jest.fn();
   public setEditorValues = jest.fn();
   public getEditorValues = jest.fn().mockResolvedValue({
-    main: 'main-content',
-    preload: 'preload-content',
-    renderer: 'renderer-content',
-    html: 'html-content',
-    css: 'css-content',
+    [DefaultEditorId.main]: 'main-content',
+    [DefaultEditorId.preload]: 'preload-content',
+    [DefaultEditorId.renderer]: 'renderer-content',
+    [DefaultEditorId.html]: 'html-content',
+    [DefaultEditorId.css]: 'css-content',
   });
 
   public loadTheme = jest.fn();

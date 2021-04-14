@@ -1,4 +1,5 @@
 // Remember to update ambient.d.ts for extending window object
+import { DefaultEditorId } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from '../renderer/ipc';
 
@@ -15,10 +16,10 @@ async function preload() {
 export function setupGlobalWindow() {
   window.ElectronFiddle = window.ElectronFiddle || {
     editors: {
-      main: null,
-      renderer: null,
-      html: null,
-      preload: null,
+      [DefaultEditorId.main]: null,
+      [DefaultEditorId.renderer]: null,
+      [DefaultEditorId.html]: null,
+      [DefaultEditorId.preload]: null,
     },
     app: null,
   };

@@ -75,11 +75,16 @@ export async function getIsPackageManagerInstalled(
  * Finds npm modules in editor values, returning an array of modules.
  */
 export async function findModulesInEditors(values: EditorValues) {
-  const files = [values.main, values.renderer, values.preload];
   const modules: Array<string> = [];
 
-  for (const file of files) {
-    modules.push(...(await findModules(file)));
+  // Filter out all editor values which aren't JavaScript files.
+  const contents = Object.entries(values)
+    .filter(([filename]) => filename.endsWith('.js'))
+    .map(([_, content]) => content);
+
+  for (const content of contents) {
+    const found = await findModules(content);
+    modules.push(...found);
   }
 
   console.log('Modules Found:', modules);

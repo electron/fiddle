@@ -32,7 +32,8 @@ export class Editor extends React.Component<EditorProps> {
   constructor(props: EditorProps) {
     super(props);
 
-    switch (props.id) {
+    const fileExtension = props.id.split('.')[1];
+    switch (fileExtension) {
       case 'html':
         this.language = 'html';
         break;
@@ -65,10 +66,10 @@ export class Editor extends React.Component<EditorProps> {
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorDidMount } = this.props;
 
-    // Set the content on the editor
+    // Set the content on the editor.
     await this.setContent();
 
-    // Set the editor as an available object
+    // Set the editor as an available object.
     window.ElectronFiddle.editors[this.props.id] = editor;
 
     // And notify others

@@ -1,6 +1,10 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { GistActionState, GistActionType } from '../../../src/interfaces';
+import {
+  DefaultEditorId,
+  GistActionState,
+  GistActionType,
+} from '../../../src/interfaces';
 
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
@@ -13,11 +17,11 @@ describe('Publish button component', () => {
   const expectedGistCreateOpts = {
     description: 'Electron Fiddle Gist',
     files: {
-      'index.html': { content: 'html-content' },
-      'renderer.js': { content: 'renderer-content' },
-      'main.js': { content: 'main-content' },
-      'preload.js': { content: 'preload-content' },
-      'styles.css': { content: 'css-content' },
+      [DefaultEditorId.html]: { content: 'html-content' },
+      [DefaultEditorId.renderer]: { content: 'renderer-content' },
+      [DefaultEditorId.main]: { content: 'main-content' },
+      [DefaultEditorId.preload]: { content: 'preload-content' },
+      [DefaultEditorId.css]: { content: 'css-content' },
     },
     public: true,
   };
@@ -25,6 +29,7 @@ describe('Publish button component', () => {
   beforeEach(() => {
     store = {
       gitHubPublishAsPublic: true,
+      customMosaics: [],
     };
   });
 
@@ -75,11 +80,11 @@ describe('Publish button component', () => {
     expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'Electron Fiddle Gist',
       files: {
-        'index.html': { content: 'html-content' },
-        'renderer.js': { content: 'renderer-content' },
-        'main.js': { content: 'main-content' },
-        'preload.js': { content: 'preload-content' },
-        'styles.css': { content: 'css-content' },
+        [DefaultEditorId.html]: { content: 'html-content' },
+        [DefaultEditorId.renderer]: { content: 'renderer-content' },
+        [DefaultEditorId.main]: { content: 'main-content' },
+        [DefaultEditorId.preload]: { content: 'preload-content' },
+        [DefaultEditorId.css]: { content: 'css-content' },
       },
       public: true,
     });
@@ -117,7 +122,7 @@ describe('Publish button component', () => {
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
-    wrapper.setProps({ appState: { gistId: 123 } });
+    wrapper.setProps({ appState: { gistId: 123, customMosaics: [] } });
     instance.setState({ actionType: GistActionType.update });
 
     await instance.performGistAction();
@@ -125,11 +130,11 @@ describe('Publish button component', () => {
     expect(mockOctokit.gists.update).toHaveBeenCalledWith({
       gist_id: 123,
       files: {
-        'index.html': { content: 'html-content' },
-        'renderer.js': { content: 'renderer-content' },
-        'main.js': { content: 'main-content' },
-        'preload.js': { content: 'preload-content' },
-        'styles.css': { content: 'css-content' },
+        [DefaultEditorId.html]: { content: 'html-content' },
+        [DefaultEditorId.renderer]: { content: 'renderer-content' },
+        [DefaultEditorId.main]: { content: 'main-content' },
+        [DefaultEditorId.preload]: { content: 'preload-content' },
+        [DefaultEditorId.css]: { content: 'css-content' },
       },
     });
   });
@@ -180,11 +185,11 @@ describe('Publish button component', () => {
     expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'Electron Fiddle Gist',
       files: {
-        'index.html': { content: '<!-- Empty -->' },
-        'renderer.js': { content: '// Empty' },
-        'main.js': { content: '// Empty' },
-        'preload.js': { content: '// Empty' },
-        'styles.css': { content: '/* Empty */' },
+        [DefaultEditorId.html]: { content: '<!-- Empty -->' },
+        [DefaultEditorId.renderer]: { content: '// Empty' },
+        [DefaultEditorId.main]: { content: '// Empty' },
+        [DefaultEditorId.preload]: { content: '// Empty' },
+        [DefaultEditorId.css]: { content: '/* Empty */' },
       },
       public: true,
     });
@@ -213,11 +218,11 @@ describe('Publish button component', () => {
     expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
       description: 'My Custom Description',
       files: {
-        'index.html': { content: '<!-- Empty -->' },
-        'renderer.js': { content: '// Empty' },
-        'main.js': { content: '// Empty' },
-        'preload.js': { content: '// Empty' },
-        'styles.css': { content: '/* Empty */' },
+        [DefaultEditorId.html]: { content: '<!-- Empty -->' },
+        [DefaultEditorId.renderer]: { content: '// Empty' },
+        [DefaultEditorId.main]: { content: '// Empty' },
+        [DefaultEditorId.preload]: { content: '// Empty' },
+        [DefaultEditorId.css]: { content: '/* Empty */' },
       },
       public: true,
     });

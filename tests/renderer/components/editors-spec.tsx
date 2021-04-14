@@ -5,11 +5,10 @@ import * as React from 'react';
 import {
   ALL_MOSAICS,
   DocsDemoPage,
-  EditorId,
-  EditorValues,
+  DefaultEditorId,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
-import { Editors, TITLE_MAP } from '../../../src/renderer/components/editors';
+import { Editors } from '../../../src/renderer/components/editors';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
@@ -45,6 +44,7 @@ describe('Editors component', () => {
       setGenericDialogOptions: () => ({}),
       mosaicArrangement: createMosaicArrangement(ALL_MOSAICS),
       currentDocsDemoPage: DocsDemoPage.DEFAULT,
+      customMosaics: [],
     };
 
     monaco = {
@@ -92,7 +92,7 @@ describe('Editors component', () => {
     });
 
     it('handles an error', () => {
-      (window.ElectronFiddle.editors.html!
+      (window.ElectronFiddle.editors[DefaultEditorId.html]!
         .updateOptions as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
@@ -109,7 +109,7 @@ describe('Editors component', () => {
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
       expect(
-        window.ElectronFiddle.editors.html!.updateOptions,
+        window.ElectronFiddle.editors[DefaultEditorId.html]!.updateOptions,
       ).toHaveBeenCalledWith({
         minimap: { enabled: false },
         wordWrap: 'off',
@@ -121,20 +121,20 @@ describe('Editors component', () => {
     const wrapper = shallow(<Editors appState={store} />);
     const instance: Editors = wrapper.instance() as any;
     const toolbar = instance.renderToolbar(
-      { title: TITLE_MAP[EditorId.main] } as any,
-      EditorId.main,
+      { title: DefaultEditorId.main } as any,
+      DefaultEditorId.main,
     );
 
     expect(toolbar).toMatchSnapshot();
   });
 
   it('does not render toolbar controls if only one editor exists', () => {
-    store.mosaicArrangement = EditorId.main;
+    store.mosaicArrangement = DefaultEditorId.main;
     const wrapper = shallow(<Editors appState={store} />);
     const instance: Editors = wrapper.instance() as any;
     const toolbar = instance.renderToolbar(
-      { title: TITLE_MAP[EditorId.main] } as any,
-      EditorId.main,
+      { title: DefaultEditorId.main } as any,
+      DefaultEditorId.main,
     );
 
     expect(toolbar).toMatchSnapshot();
@@ -179,12 +179,12 @@ describe('Editors component', () => {
       expect(mockAction.run).toHaveBeenCalled();
     });
 
-    const fakeValues: EditorValues = Object.seal({
-      css: '',
-      html: '',
-      main: 'hi',
-      preload: '',
-      renderer: '',
+    const fakeValues = Object.seal({
+      [DefaultEditorId.css]: '',
+      [DefaultEditorId.html]: '',
+      [DefaultEditorId.main]: 'hi',
+      [DefaultEditorId.preload]: '',
+      [DefaultEditorId.renderer]: '',
     });
 
     it('handles an FS_NEW_FIDDLE command', async () => {
@@ -306,13 +306,13 @@ describe('Editors component', () => {
       ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
 
       expect(
-        window.ElectronFiddle.editors.html!.updateOptions,
+        window.ElectronFiddle.editors[DefaultEditorId.html]!.updateOptions,
       ).toHaveBeenCalled();
       expect(
-        window.ElectronFiddle.editors.renderer!.updateOptions,
+        window.ElectronFiddle.editors[DefaultEditorId.renderer]!.updateOptions,
       ).toHaveBeenCalled();
       expect(
-        window.ElectronFiddle.editors.main!.updateOptions,
+        window.ElectronFiddle.editors[DefaultEditorId.main]!.updateOptions,
       ).toHaveBeenCalled();
     });
   });
@@ -336,7 +336,7 @@ describe('Editors component', () => {
       const instance: Editors = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
-      const id = EditorId.html;
+      const id = DefaultEditorId.html;
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
     });
@@ -352,7 +352,7 @@ describe('Editors component', () => {
 
       shallow(<Editors appState={mockStore as any} />);
 
-      mockStore.mosaicArrangement = EditorId.main;
+      mockStore.mosaicArrangement = DefaultEditorId.main;
 
       expect(updateEditorLayout).toHaveBeenCalledTimes(1);
     });

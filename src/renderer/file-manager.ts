@@ -1,9 +1,13 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { Files, FileTransform } from '../interfaces';
+import {
+  DefaultEditorId,
+  Files,
+  FileTransform,
+  PACKAGE_NAME,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { FILENAME_KEYS, PACKAGE_NAME } from '../shared-constants';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
@@ -62,11 +66,27 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openFiddle(filePath: string) {
+    const { app } = window.ElectronFiddle;
     if (!filePath || typeof filePath !== 'string') return;
 
     console.log(`FileManager: Asked to open`, filePath);
-    const editorValues = await readFiddle(filePath);
-    window.ElectronFiddle.app.replaceFiddle(editorValues, { filePath });
+    const mosaics = await readFiddle(filePath);
+
+    const editorValues = {};
+    for (const mosaic of Object.keys(mosaics)) {
+      if (!Object.values(DefaultEditorId).includes(mosaic as DefaultEditorId)) {
+        const verified = await app.remoteLoader.verifyCreateCustomEditor(
+          mosaic,
+        );
+        if (verified) {
+          editorValues[mosaic] = mosaics[mosaic];
+        }
+      } else {
+        editorValues[mosaic] = mosaics[mosaic];
+      }
+    }
+
+    app.replaceFiddle(editorValues, { filePath });
   }
 
   /**
@@ -123,14 +143,19 @@ export class FileManager {
     options?: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<Files> {
+    const { app } = window.ElectronFiddle;
+
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
-    const values = await window.ElectronFiddle.app.getEditorValues(pOptions);
+    const values = await app.getEditorValues(pOptions);
 
     let output: Files = new Map();
-    for (const [filename, editorId] of Object.entries(FILENAME_KEYS)) {
-      output.set(filename, values[editorId]);
+
+    // Get values for all editors.
+    for (const filename in values) {
+      output.set(filename, values[filename]!);
     }
-    output.set(PACKAGE_NAME, values.package!);
+
+    output.set(PACKAGE_NAME, values[PACKAGE_NAME]!);
 
     for (const transform of transforms) {
       try {

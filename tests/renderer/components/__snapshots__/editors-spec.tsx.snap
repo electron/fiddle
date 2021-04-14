@@ -4,7 +4,7 @@ exports[`Editors component does not render toolbar controls if only one editor e
 <div>
   <div>
     <h5>
-      Main Process (main.js)
+      main.js
     </h5>
   </div>
   <div />
@@ -23,7 +23,7 @@ exports[`Editors component renders 1`] = `
   >
     <div
       className="mosaic-tile"
-      key="main"
+      key="main.js"
       style={
         Object {
           "bottom": "50%",
@@ -34,7 +34,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target main"
+        className="mosaic-window mosaic-drop-target main.js"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -198,7 +198,7 @@ exports[`Editors component renders 1`] = `
     </div>
     <div
       className="mosaic-tile"
-      key="renderer"
+      key="renderer.js"
       style={
         Object {
           "bottom": "25%",
@@ -209,7 +209,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target renderer"
+        className="mosaic-window mosaic-drop-target renderer.js"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -373,7 +373,7 @@ exports[`Editors component renders 1`] = `
     </div>
     <div
       className="mosaic-tile"
-      key="preload"
+      key="preload.js"
       style={
         Object {
           "bottom": "0%",
@@ -384,7 +384,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target preload"
+        className="mosaic-window mosaic-drop-target preload.js"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -548,7 +548,7 @@ exports[`Editors component renders 1`] = `
     </div>
     <div
       className="mosaic-tile"
-      key="html"
+      key="index.html"
       style={
         Object {
           "bottom": "50%",
@@ -559,7 +559,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target html"
+        className="mosaic-window mosaic-drop-target index.html"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -723,7 +723,7 @@ exports[`Editors component renders 1`] = `
     </div>
     <div
       className="mosaic-tile"
-      key="css"
+      key="styles.css"
       style={
         Object {
           "bottom": "25%",
@@ -734,7 +734,7 @@ exports[`Editors component renders 1`] = `
       }
     >
       <div
-        className="mosaic-window mosaic-drop-target css"
+        className="mosaic-window mosaic-drop-target styles.css"
       >
         <div
           className="mosaic-window-toolbar draggable"
@@ -1112,7 +1112,7 @@ exports[`Editors component renders a toolbar 1`] = `
 <div>
   <div>
     <h5>
-      Main Process (main.js)
+      main.js
     </h5>
   </div>
   <div />
@@ -1124,25 +1124,26 @@ exports[`Editors component renders a toolbar 1`] = `
         appState={
           Object {
             "currentDocsDemoPage": "DEFAULT",
+            "customMosaics": Array [],
             "isSettingsShowing": false,
             "isTokenDialogShowing": false,
             "mosaicArrangement": Object {
               "direction": "row",
               "first": Object {
                 "direction": "column",
-                "first": "main",
+                "first": "main.js",
                 "second": Object {
                   "direction": "column",
-                  "first": "renderer",
-                  "second": "preload",
+                  "first": "renderer.js",
+                  "second": "preload.js",
                 },
               },
               "second": Object {
                 "direction": "column",
-                "first": "html",
+                "first": "index.html",
                 "second": Object {
                   "direction": "column",
-                  "first": "css",
+                  "first": "styles.css",
                   "second": "docsDemo",
                 },
               },
@@ -1150,31 +1151,32 @@ exports[`Editors component renders a toolbar 1`] = `
             "setGenericDialogOptions": [Function],
           }
         }
-        id="main"
+        id="main.js"
       />
       <RemoveButton
         appState={
           Object {
             "currentDocsDemoPage": "DEFAULT",
+            "customMosaics": Array [],
             "isSettingsShowing": false,
             "isTokenDialogShowing": false,
             "mosaicArrangement": Object {
               "direction": "row",
               "first": Object {
                 "direction": "column",
-                "first": "main",
+                "first": "main.js",
                 "second": Object {
                   "direction": "column",
-                  "first": "renderer",
-                  "second": "preload",
+                  "first": "renderer.js",
+                  "second": "preload.js",
                 },
               },
               "second": Object {
                 "direction": "column",
-                "first": "html",
+                "first": "index.html",
                 "second": Object {
                   "direction": "column",
-                  "first": "css",
+                  "first": "styles.css",
                   "second": "docsDemo",
                 },
               },
@@ -1182,7 +1184,7 @@ exports[`Editors component renders a toolbar 1`] = `
             "setGenericDialogOptions": [Function],
           }
         }
-        id="main"
+        id="main.js"
       />
     </React.Fragment>
   </div>
