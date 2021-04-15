@@ -30,7 +30,6 @@ import {
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId } from '../utils/type-checks';
-import { isKnownFile } from '../utils/editor-utils';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
@@ -305,26 +304,17 @@ export class AppState {
    */
   @computed get title(): string {
     const { gistId, isUnsaved, localPath, templateName } = this;
-    const tokens = [];
 
-    if (localPath) {
-      tokens.push(localPath);
-    } else if (templateName) {
-      tokens.push(templateName);
-    } else if (gistId) {
-      tokens.push(`gist.github.com/${gistId}`);
-    }
+    const name = 'Electron Fiddle';
 
-    if (isUnsaved) {
-      tokens.push('Unsaved');
-    }
+    let source;
+    if (localPath) source = localPath;
+    else if (templateName) source = templateName;
+    else if (gistId) source = `gist.github.com/${gistId}`;
 
-    if (tokens.length > 0) {
-      tokens.unshift('-');
-    }
+    const unsaved = isUnsaved ? 'Unsaved' : '';
 
-    tokens.unshift('Electron Fiddle');
-    return tokens.join(' ');
+    return [name, source, unsaved].filter((x: string) => !!x).join(' - ');
   }
 
   /**
