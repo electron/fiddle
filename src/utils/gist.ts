@@ -12,7 +12,7 @@
  * @pararm {string} input
  * returns {(string | null)}
  */
-export function getGistId(input: string): string | null {
+export function getGistId(input: string): string | undefined {
   let id: string | undefined = input;
   if (input.startsWith('https://gist.github.com')) {
     if (input.endsWith('/')) {
@@ -23,7 +23,7 @@ export function getGistId(input: string): string | null {
   if (id && id.match(/[0-9A-Fa-f]{32}/)) {
     return id;
   }
-  return null;
+  return undefined;
 }
 
 /**

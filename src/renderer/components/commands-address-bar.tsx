@@ -65,12 +65,8 @@ export class AddressBar extends React.Component<
    * @memberof AddressBar
    */
   public submit() {
-    if (this.state.value) {
-      const gistId = getGistId(this.state.value);
-      if (gistId) {
-        window.ElectronFiddle.app.openFiddle({ gistId });
-      }
-    }
+    const gistId = getGistId(this.state.value);
+    window.ElectronFiddle.app.openFiddle({ gistId });
   }
 
   /**
@@ -136,7 +132,7 @@ export class AddressBar extends React.Component<
   public render() {
     const { isUnsaved, activeGistAction } = this.props.appState;
     const { value } = this.state;
-    const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
+    const isCorrect = !!getGistId(value);
     const className = classnames('address-bar', isUnsaved, { empty: !value });
 
     const isPerformingAction = activeGistAction !== GistActionState.none;

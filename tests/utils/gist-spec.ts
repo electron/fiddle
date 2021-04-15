@@ -61,7 +61,7 @@ describe('gist', () => {
 
     it('handles garbage', () => {
       const result = getGistId('https://google.com');
-      expect(result).toBe(null);
+      expect(result).toBe(undefined);
     });
   });
 });
