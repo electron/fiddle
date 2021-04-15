@@ -8,6 +8,7 @@ import {
   showOpenDialog,
   showSaveDialog,
 } from '../../src/main/files';
+import { DEFAULT_EDITORS } from '../../src/interfaces';
 import { ipcMainManager } from '../../src/main/ipc';
 
 import { dialog } from 'electron';
@@ -17,6 +18,7 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 jest.mock('../../src/main/windows');
 jest.mock('fs-extra', () => ({
   existsSync: jest.fn(),
+  readdirSync: jest.fn(),
 }));
 
 const mockTarget = {
@@ -107,6 +109,7 @@ describe('files', () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
       (dialog.showMessageBox as jest.Mock).mockResolvedValue(true);
       (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readdirSync as jest.Mock).mockReturnValue([DEFAULT_EDITORS[0]]);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await showSaveDialog();
@@ -120,6 +123,7 @@ describe('files', () => {
       (dialog.showMessageBox as jest.Mock).mockResolvedValue(false);
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readdirSync as jest.Mock).mockReturnValue([DEFAULT_EDITORS[0]]);
 
       await showSaveDialog();
 
@@ -129,6 +133,7 @@ describe('files', () => {
 
     it('does not overwrite files if an error happens', async () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
+      (fs.readdirSync as jest.Mock).mockReturnValue([DEFAULT_EDITORS[0]]);
       (dialog.showMessageBox as jest.Mock).mockImplementation(async () => {
         throw new Error('Nope');
       });

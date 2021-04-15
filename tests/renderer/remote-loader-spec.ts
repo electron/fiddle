@@ -100,6 +100,10 @@ describe('RemoteLoader', () => {
     store.customMosaics = [];
 
     instance = new RemoteLoader(store);
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      text: () => Promise.resolve('hello'),
+    });
   });
 
   afterEach(() => {
@@ -233,8 +237,8 @@ describe('RemoteLoader', () => {
 
       const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
       expect(result).toBe(false);
-      expect(store.setGenericDialogOptions.mock.calls[0][0].label).toEqual(
-        'Loading the fiddle failed: Error: The example Fiddle tried to launch is not a valid Electron example',
+      expect(store.setGenericDialogOptions.mock.calls[0][0].label).toMatch(
+        'Tried to launch an invalid Fiddle from',
       );
     });
   });

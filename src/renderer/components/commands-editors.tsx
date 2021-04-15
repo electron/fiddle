@@ -13,7 +13,6 @@ import * as React from 'react';
 import {
   CustomEditorId,
   DEFAULT_EDITORS,
-  DefaultEditorId,
   EditorId,
   GenericDialogType,
 } from '../../interfaces';
@@ -179,10 +178,7 @@ export class EditorDropdown extends React.Component<
       const name = result as CustomEditorId;
 
       // Also fail if the user tries to create two identical editors.
-      if (
-        appState.customMosaics.includes(name) ||
-        Object.values(DefaultEditorId).includes(name as DefaultEditorId)
-      ) {
+      if (appState.customMosaics.includes(name) || isKnownFile(name)) {
         appState.setGenericDialogOptions({
           type: GenericDialogType.warning,
           label: `Custom editor name ${name} already exists - duplicates are not allowed`,

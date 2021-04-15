@@ -1,12 +1,11 @@
 import { when } from 'mobx';
 import {
-  DefaultEditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
   PACKAGE_NAME,
 } from '../interfaces';
-import { isKnownFile } from '../utils/editor-utils';
+import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
@@ -15,16 +14,21 @@ import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
-    this.loadFiddleFromElectronExample.bind(this);
-    this.loadFiddleFromGist.bind(this);
-    this.verifyRemoteLoad.bind(this);
-    this.verifyReleaseChannelEnabled.bind(this);
-    this.fetchExampleAndLoad.bind(this);
-    this.fetchGistAndLoad.bind(this);
-    this.setElectronVersionWithRef.bind(this);
-    this.getPackageVersionFromRef.bind(this);
-    this.handleLoadingSuccess.bind(this);
-    this.handleLoadingFailed.bind(this);
+    for (const name of [
+      'fetchExampleAndLoad',
+      'fetchGistAndLoad',
+      'getPackageVersionFromRef',
+      'handleLoadingFailed',
+      'handleLoadingSuccess',
+      'loadFiddleFromElectronExample',
+      'loadFiddleFromGist',
+      'setElectronVersionWithRef',
+      'verifyCreateCustomEditor',
+      'verifyReleaseChannelEnabled',
+      'verifyRemoteLoad',
+    ]) {
+      this[name] = this[name].bind(this);
+    }
   }
 
   public async loadFiddleFromElectronExample(
@@ -64,17 +68,15 @@ export class RemoteLoader {
         path,
       });
 
+      if (!Array.isArray(folder.data)) {
+        throw new Error(`Tried to launch an invalid Fiddle from "${path}"`);
+      }
+
       const ok = await this.setElectronVersionWithRef(ref);
       if (!ok) return false;
 
       const values = await getTemplate(this.appState.version);
-      if (!Array.isArray(folder.data)) {
-        throw new Error(
-          'The example Fiddle tried to launch is not a valid Electron example',
-        );
-      }
-
-      const loaders: Array<Promise<void>> = [];
+      const loaders: Promise<any>[] = [];
 
       for (const child of folder.data) {
         if (!child.download_url) {
@@ -82,15 +84,11 @@ export class RemoteLoader {
           continue;
         }
 
-        if (
-          Object.values(DefaultEditorId).includes(child.name as DefaultEditorId)
-        ) {
+        if (isSupportedFile(child.name)) {
           loaders.push(
             fetch(child.download_url)
               .then((r) => r.text())
-              .then((t) => {
-                values[child.name] = t;
-              }),
+              .then((t) => (values[child.name] = t)),
           );
         }
       }
@@ -116,6 +114,9 @@ export class RemoteLoader {
       const values: Partial<EditorValues> = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
+        if (!isSupportedFile(id)) {
+          continue;
+        }
         if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
           values[id] = data.content;
         }

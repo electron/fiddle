@@ -4,6 +4,14 @@ import { isSupportedFile } from './editor-utils';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+const defaults: EditorValues = Object.freeze({
+  [DefaultEditorId.css]: '',
+  [DefaultEditorId.html]: '',
+  [DefaultEditorId.main]: '',
+  [DefaultEditorId.preload]: '',
+  [DefaultEditorId.renderer]: '',
+});
+
 /**
  * Reads a Fiddle from a directory.
  *
@@ -11,24 +19,12 @@ import * as path from 'path';
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(folder: string): Promise<EditorValues> {
-  const customMosaics: Record<string, string> = {};
-  const defaultMosaics: EditorValues = {
-    [DefaultEditorId.css]: '',
-    [DefaultEditorId.html]: '',
-    [DefaultEditorId.main]: '',
-    [DefaultEditorId.preload]: '',
-    [DefaultEditorId.renderer]: '',
-  };
-
-  const hits: string[] = [];
-  const misses = new Set(Object.values(DefaultEditorId));
+  const content: Record<string, string> = {};
 
   const tryRead = (name: string) => {
     try {
       const filename = path.join(folder, name);
       const content = fs.readFileSync(filename, 'utf-8');
-      hits.push(name);
-      misses.delete(name as DefaultEditorId);
       return content || '';
     } catch (error) {
       console.warn(`Could not read file ${name}:`, error);
@@ -40,18 +36,13 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     console.warn(`readFiddle(): "${folder}" does not exist`);
   } else {
     for (const file of fs.readdirSync(folder)) {
-      if (Object.values(DefaultEditorId).includes(file as DefaultEditorId)) {
-        defaultMosaics[file] = tryRead(file);
-      } else if (isSupportedFile(file)) {
-        customMosaics[file] = tryRead(file);
+      if (isSupportedFile(file)) {
+        content[file] = tryRead(file);
       }
     }
   }
 
-  console.log(`Got Fiddle from "${folder}".
-Found Default Mosaics: ${hits.sort().join(', ')}
-Found Custom Mosaics: ${Object.keys(customMosaics).sort().join(', ')}
-Missed: ${[...misses].sort().join(', ')}`);
-
-  return { ...defaultMosaics, ...customMosaics };
+  const got = { ...defaults, ...content };
+  console.log(`Got Fiddle from "${folder}". Found:`, Object.keys(got).sort());
+  return got;
 }

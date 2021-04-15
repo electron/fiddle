@@ -6,7 +6,6 @@ import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
 import {
-  DefaultEditorId,
   EditorValues,
   GenericDialogType,
   SetFiddleOptions,
@@ -87,7 +86,7 @@ export class App {
     // Sort and display all editors that have content.
     const visibleEditors: EditorId[] = Object.entries(editorValues)
       .filter(([id, content]) => shouldShowContent(id as EditorId, content))
-      .map(([id]) => id as DefaultEditorId)
+      .map(([id]) => id as EditorId)
       .sort(compareEditors);
 
     this.state.gistId = gistId || '';

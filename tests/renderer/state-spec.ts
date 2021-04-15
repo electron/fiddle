@@ -602,28 +602,24 @@ describe('AppState', () => {
   });
 
   describe('getAndRemoveEditorValueBackup()', () => {
+    const id = DefaultEditorId.main;
+
     it('returns null if there is no backup', () => {
-      const result = appState.getAndRemoveEditorValueBackup(
-        DefaultEditorId.main,
-      );
+      const result = appState.getAndRemoveEditorValueBackup(id);
       expect(result).toEqual(null);
     });
 
     it('returns and deletes a backup if there is one', () => {
-      appState.closedPanels[DefaultEditorId.main] = { testBackup: true } as any;
-      const result = appState.getAndRemoveEditorValueBackup(
-        DefaultEditorId.main,
-      );
+      appState.closedPanels[id] = { testBackup: true } as any;
+      const result = appState.getAndRemoveEditorValueBackup(id);
       expect(result).toEqual({ testBackup: true });
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeUndefined();
+      expect(appState.closedPanels[id]).toBeUndefined();
     });
   });
 
   describe('setVisibleMosaics()', () => {
     it('updates the visible editors and creates a backup', async () => {
-      appState.mosaicArrangement = createMosaicArrangement(
-        Object.values(DefaultEditorId),
-      );
+      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
       appState.closedPanels = {};
       appState.customMosaics = [];
       await appState.setVisibleMosaics([DefaultEditorId.main]);

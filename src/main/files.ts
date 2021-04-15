@@ -1,10 +1,10 @@
-import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { DefaultEditorId } from '../interfaces';
+import { dialog } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
+import { isSupportedFile } from '../utils/editor-utils';
 
 /**
  * Ensures that we're listening to file events
@@ -44,38 +44,35 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
     title: `Save Fiddle${as ? ` as ${as}` : ''}`,
   });
 
-  if (!Array.isArray(filePaths) || filePaths.length === 0) {
+  if (!Array.isArray(filePaths)) {
     return;
   }
 
-  console.log(`Asked to save to ${filePaths[0]}`);
+  const folder = filePaths.shift();
+  if (!folder) {
+    return;
+  }
+
+  console.log(`Asked to save to "${folder}"`);
 
   // Let's confirm real quick if we want this
-  if (await ensureSaveTargetEmpty(filePaths[0])) {
-    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
+  if (await isOkToSaveAt(folder)) {
+    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [folder]);
   }
 }
 
 /**
- * Ensures that a folder designated for saving is empty
+ * Confirm it's OK to save files in `folder`
  *
- * @param {string} filePath
+ * @param {string} folder
  * @returns {Promise<boolean>}
  */
-async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
-  const targetPaths = Object.values(DefaultEditorId).map((filename) =>
-    path.join(filePath, filename),
+async function isOkToSaveAt(folder: string): Promise<boolean> {
+  return (
+    !fs.existsSync(folder) ||
+    fs.readdirSync(folder).filter(isSupportedFile).length === 0 ||
+    (await confirmFileOverwrite(folder))
   );
-
-  let noFilesOrOverwriteGranted = true;
-
-  for (const targetPath of targetPaths) {
-    if (fs.existsSync(targetPath) && noFilesOrOverwriteGranted) {
-      noFilesOrOverwriteGranted = await confirmFileOverwrite(targetPath);
-    }
-  }
-
-  return noFilesOrOverwriteGranted;
 }
 
 /**
@@ -85,13 +82,13 @@ async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
  * @param {string} filePath
  * @returns {Promise<boolean>}
  */
-async function confirmFileOverwrite(filePath: string): Promise<boolean> {
+async function confirmFileOverwrite(folder: string): Promise<boolean> {
   try {
     const result = await dialog.showMessageBox({
+      buttons: ['Cancel', 'Save'],
+      detail: `The folder "${folder}" already has code in it.\n \nAre you sure you want to save here?`,
+      message: `Save files to ${path.basename(folder)}?`,
       type: 'warning',
-      buttons: ['Cancel', 'Yes'],
-      message: 'Overwrite files?',
-      detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
     });
 
     return !!result;

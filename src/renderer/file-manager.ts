@@ -1,14 +1,10 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import {
-  DefaultEditorId,
-  Files,
-  FileTransform,
-  PACKAGE_NAME,
-} from '../interfaces';
+import { FileTransform, Files, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
+import { isKnownFile } from '../utils/editor-utils';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
@@ -67,22 +63,15 @@ export class FileManager {
    */
   public async openFiddle(filePath: string) {
     const { app } = window.ElectronFiddle;
-    if (!filePath || typeof filePath !== 'string') return;
+    const { verifyCreateCustomEditor } = app.remoteLoader;
 
     console.log(`FileManager: Asked to open`, filePath);
-    const mosaics = await readFiddle(filePath);
+    if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
-    for (const mosaic of Object.keys(mosaics)) {
-      if (!Object.values(DefaultEditorId).includes(mosaic as DefaultEditorId)) {
-        const verified = await app.remoteLoader.verifyCreateCustomEditor(
-          mosaic,
-        );
-        if (verified) {
-          editorValues[mosaic] = mosaics[mosaic];
-        }
-      } else {
-        editorValues[mosaic] = mosaics[mosaic];
+    for (const [name, value] of Object.entries(await readFiddle(filePath))) {
+      if (isKnownFile(name) || (await verifyCreateCustomEditor(name))) {
+        editorValues[name] = value;
       }
     }
 
