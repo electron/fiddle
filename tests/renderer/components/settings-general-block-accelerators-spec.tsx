@@ -8,7 +8,11 @@ describe('BlockAcceleratorsSettings component', () => {
   let store: any;
 
   beforeEach(() => {
-    store = {};
+    store = {
+      acceleratorsToBlock: [],
+      removeAcceleratorToBlock: jest.fn(),
+      addAcceleratorToBlock: jest.fn(),
+    };
   });
 
   it('renders', () => {
@@ -20,17 +24,22 @@ describe('BlockAcceleratorsSettings component', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
       const instance = wrapper.instance() as any;
-      await instance.handleBlockAcceleratorChange({
-        currentTarget: { checked: false, value: BlockableAccelerator.save },
-      });
-
-      expect(store.acceleratorsToBlock).toBe([]);
 
       await instance.handleBlockAcceleratorChange({
         currentTarget: { checked: false, value: BlockableAccelerator.save },
       });
 
-      expect(store.acceleratorsToBlock).toBe([BlockableAccelerator.save]);
+      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
+        BlockableAccelerator.save,
+      );
+
+      await instance.handleBlockAcceleratorChange({
+        currentTarget: { checked: true, value: BlockableAccelerator.save },
+      });
+
+      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
+        BlockableAccelerator.save,
+      );
     });
   });
 });
