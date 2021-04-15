@@ -11,6 +11,7 @@ import {
   GenericDialogType,
   SetFiddleOptions,
   EditorId,
+  CustomEditorId,
   PACKAGE_NAME,
   DEFAULT_EDITORS,
 } from '../interfaces';
@@ -74,7 +75,7 @@ export class App {
     // update the customMosaic list
     this.state.customMosaics = Object.keys(editorValues).filter(
       (name) => !isKnownFile(name),
-    ) as EditorId[];
+    ) as CustomEditorId[];
 
     // If the gist content is empty or matches the empty file output, don't show it.
     const shouldShowContent = (id: EditorId, content?: string) =>
