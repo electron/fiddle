@@ -150,17 +150,18 @@ export class Runner {
   public async run(): Promise<RunResult> {
     const { fileManager, getEditorValues } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
-    const { currentElectronVersion } = this.appState;
-    const { version, localPath } = currentElectronVersion;
 
-    if (this.appState.isClearingConsoleOnRun) {
-      this.appState.clearConsole();
+    const { appState } = this;
+    const { version, localPath } = appState.currentElectronVersion;
+
+    if (appState.isClearingConsoleOnRun) {
+      appState.clearConsole();
     }
-    this.appState.isConsoleShowing = true;
+    appState.isConsoleShowing = true;
 
     const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
-    const packageManager = this.appState.packageManager;
+    const packageManager = appState.packageManager;
 
     if (!dir) return RunResult.INVALID;
 
@@ -168,6 +169,10 @@ export class Runner {
       await this.installModulesForEditor(values, { dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
+
+      appState.pushError('Could not install modules', error.message);
+      appState.isInstallingModules = false;
+
       fileManager.cleanup(dir);
       return RunResult.INVALID;
     }
@@ -182,7 +187,7 @@ export class Runner {
       message += `Please wait for it to finish downloading `;
       message += `before running the fiddle.`;
 
-      this.appState.pushOutput(message, { isNotPre: true });
+      appState.pushOutput(message, { isNotPre: true });
       fileManager.cleanup(dir);
       return RunResult.INVALID;
     }
@@ -302,7 +307,10 @@ export class Runner {
         }: ${modules.join(', ')}...`,
         { isNotPre: true },
       );
-      pushOutput(await installModules(pmOptions, ...modules));
+
+      const result = await installModules(pmOptions, ...modules);
+      pushOutput(result);
+
       this.appState.isInstallingModules = false;
     }
   }
