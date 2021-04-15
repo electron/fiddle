@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
-import { DefaultEditorId, EditorId } from '../interfaces';
+import { DEFAULT_EDITORS, DefaultEditorId, EditorId } from '../interfaces';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
@@ -10,25 +10,17 @@ export const CONFIG_PATH = path.join(
   '.electron-fiddle',
 );
 
-export const SORTED_EDITORS = [
-  DefaultEditorId.main,
-  DefaultEditorId.renderer,
-  DefaultEditorId.html,
-  DefaultEditorId.preload,
-  DefaultEditorId.css,
-] as const;
-
 export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<EditorId> = {
   direction: 'row',
   first: {
     direction: 'column',
-    first: SORTED_EDITORS[0],
-    second: SORTED_EDITORS[1],
+    first: DEFAULT_EDITORS[0],
+    second: DEFAULT_EDITORS[1],
   },
   second: {
     direction: 'column',
-    first: SORTED_EDITORS[2],
-    second: SORTED_EDITORS[3],
+    first: DEFAULT_EDITORS[2],
+    second: DEFAULT_EDITORS[3],
   },
 } as const;
 

@@ -19,9 +19,12 @@ import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import { getEmptyContent, isKnownFile } from '../utils/editor-utils';
+import {
+  compareEditors,
+  getEmptyContent,
+  isKnownFile,
+} from '../utils/editor-utils';
 import { isEditorBackup } from '../utils/type-checks';
-import { SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -85,7 +88,7 @@ export class App {
     const visibleEditors: EditorId[] = Object.entries(editorValues)
       .filter(([id, content]) => shouldShowContent(id as EditorId, content))
       .map(([id]) => id as DefaultEditorId)
-      .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
+      .sort(compareEditors);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;

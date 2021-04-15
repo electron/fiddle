@@ -1,5 +1,6 @@
 import { DEFAULT_EDITORS, DefaultEditorId } from '../../src/interfaces';
 import {
+  compareEditors,
   getEditorTitle,
   getEmptyContent,
   isKnownFile,
@@ -40,6 +41,21 @@ describe('editor-utils', () => {
       for (const id of DEFAULT_EDITORS) {
         expect(isSupportedFile(id)).toBe(true);
       }
+    });
+  });
+
+  describe('compareEditors', () => {
+    it('sorts default editors in order', () => {
+      const ids = [...DEFAULT_EDITORS];
+      ids.sort(compareEditors);
+      expect(ids).toStrictEqual(DEFAULT_EDITORS);
+    });
+    it('sorts default editors before custom ones', () => {
+      const defaultId = DEFAULT_EDITORS[0];
+      const customId = 'foo.js';
+      const ids = [customId, defaultId];
+      ids.sort(compareEditors);
+      expect(ids).toStrictEqual([defaultId, customId]);
     });
   });
 });

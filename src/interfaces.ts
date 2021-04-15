@@ -126,11 +126,13 @@ export type CustomEditorId = `${string}.${'js' | 'html' | 'css'}`;
 
 export type EditorId = CustomEditorId | DefaultEditorId;
 
+// The order of these fields is the order that
+// they'll be sorted in the mosaic
 export const DEFAULT_EDITORS = [
   DefaultEditorId.main,
   DefaultEditorId.renderer,
-  DefaultEditorId.preload,
   DefaultEditorId.html,
+  DefaultEditorId.preload,
   DefaultEditorId.css,
 ] as const;
 

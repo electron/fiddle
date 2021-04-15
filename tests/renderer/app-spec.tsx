@@ -190,10 +190,10 @@ describe('App component', () => {
         })
         .then(() => {
           expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-            file,
             DefaultEditorId.main,
             DefaultEditorId.renderer,
             DefaultEditorId.html,
+            file,
           ]);
           done();
         });

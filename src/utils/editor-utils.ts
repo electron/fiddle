@@ -31,3 +31,14 @@ export function getEmptyContent(filename: string): string {
 export function isSupportedFile(filename: string): boolean {
   return /\.(css|html|js)$/i.test(filename);
 }
+
+// first go the defaults, in the order they appear in DEFAULT_EDITORS
+// then customs, sorted lexicographically
+export function compareEditors(a: EditorId, b: EditorId) {
+  const ia = DEFAULT_EDITORS.indexOf(a as any);
+  const ib = DEFAULT_EDITORS.indexOf(b as any);
+  if (ia === -1 && ib === -1) return a.localeCompare(b);
+  if (ia === -1) return 1;
+  if (ib === -1) return -1;
+  return ia - ib;
+}
