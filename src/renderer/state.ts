@@ -278,7 +278,7 @@ export class AppState {
         );
         await waitForEditorsToMount(ids);
         for (const editor of Object.values(window.ElectronFiddle.editors)) {
-          const disposable = editor!.onDidChangeModelContent(() => {
+          const disposable = (editor as any)!.onDidChangeModelContent(() => {
             this.isUnsaved = true;
             disposable.dispose();
           });
