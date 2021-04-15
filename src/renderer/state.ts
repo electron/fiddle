@@ -706,8 +706,7 @@ export class AppState {
     // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
     // mount to ensure that we can load content into the editors as soon as they're
     // declared visible.
-
-    await waitForEditorsToMount(visible.filter(isKnownFile));
+    await waitForEditorsToMount(visible);
   }
 
   /**
