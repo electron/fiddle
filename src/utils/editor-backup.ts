@@ -1,9 +1,7 @@
 import { editor } from 'monaco-editor';
 
 import { EditorId } from '../interfaces';
-import { getEditorModel } from './editor-model';
 import { getEditorValue } from './editor-value';
-import { getEditorViewState } from './editor-viewstate';
 
 export interface EditorBackup {
   value?: string;
@@ -18,9 +16,18 @@ export interface EditorBackup {
  * @returns {EditorBackup}
  */
 export function getEditorBackup(id: EditorId): EditorBackup {
+  let model: editor.ITextModel | null = null;
+  let viewState: editor.ICodeEditorViewState | null = null;
+
+  const editor = window.ElectronFiddle?.editors?.[id];
+  if (editor) {
+    model = editor.getModel();
+    viewState = editor.saveViewState();
+  }
+
   return {
+    model,
     value: getEditorValue(id),
-    model: getEditorModel(id),
-    viewState: getEditorViewState(id),
+    viewState,
   };
 }
