@@ -32,7 +32,6 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { isEditorBackup, isEditorId } from '../utils/type-checks';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
-import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
@@ -127,8 +126,7 @@ export class AppState {
   @observable public customMosaics: CustomEditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
-  @observable
-  public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
   @observable public templateName: string | undefined;
   @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
@@ -153,9 +151,7 @@ export class AppState {
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<
-    Record<EditorId, EditorBackup | true>
-  > = DEFAULT_CLOSED_PANELS;
+  @observable public closedPanels: Record<EditorId, EditorBackup> = {};
 
   private outputBuffer = '';
   private name: string;
@@ -307,14 +303,16 @@ export class AppState {
 
     const name = 'Electron Fiddle';
 
-    let source;
-    if (localPath) source = localPath;
-    else if (templateName) source = templateName;
-    else if (gistId) source = `gist.github.com/${gistId}`;
+    let from;
+    if (localPath) from = localPath;
+    else if (templateName) from = templateName;
+    else if (gistId) from = `gist.github.com/${gistId}`;
 
     const unsaved = isUnsaved ? 'Unsaved' : '';
 
-    return [name, source, unsaved].filter((x: string) => !!x).join(' - ');
+    const title = [name, from, unsaved].filter((x: string) => !!x).join(' - ');
+    console.log({ gistId, isUnsaved, localPath, templateName, title });
+    return title;
   }
 
   /**
@@ -746,7 +744,9 @@ export class AppState {
    *
    */
   @action public resetEditorLayout() {
-    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+    // FIXME(ckerr): this DEFAULT_EDITORS.slice thing has gotta go
+    const ids = [...DEFAULT_EDITORS.slice(0, 4), ...this.customMosaics];
+    this.mosaicArrangement = createMosaicArrangement(ids);
   }
 
   @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {

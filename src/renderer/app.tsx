@@ -1,7 +1,7 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { reaction, when } from 'mobx';
+import { autorun, reaction, when } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
@@ -29,6 +29,7 @@ import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
 import { getElectronVersions } from './versions';
+import { getTemplate } from './content';
 import { TaskRunner } from './task-runner';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
@@ -199,6 +200,11 @@ export class App {
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
+    // load the initial fiddle
+    const { version } = this.state;
+    const values = await getTemplate(version);
+    this.replaceFiddle(values, { templateName: version });
+
     return rendered;
   }
 
@@ -285,16 +291,15 @@ export class App {
     // the observables used for the title usually change in a batch,
     // so when setting document title, wait a tick to avoid flicker.
     let titleIdle: any;
-    reaction(
-      () => this.state.title,
-      (title) => {
-        clearTimeout(titleIdle);
-        titleIdle = setTimeout(() => {
-          document.title = title;
-          titleIdle = null;
-        });
-      },
-    );
+    autorun(() => {
+      const { title } = this.state;
+
+      clearTimeout(titleIdle);
+      titleIdle = setTimeout(() => {
+        document.title = title;
+        titleIdle = null;
+      });
+    });
   }
 }
 

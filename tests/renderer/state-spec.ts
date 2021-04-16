@@ -18,7 +18,6 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
@@ -27,7 +26,10 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
+import {
+  createMosaicArrangement,
+  getVisibleMosaics,
+} from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
 import { MockVersions } from '../mocks/electron-versions';
@@ -639,7 +641,7 @@ describe('AppState', () => {
   describe('removeCustomMosaic()', () => {
     it('removes a given custom mosaic', () => {
       const file = 'file.js';
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
       appState.customMosaics = [file];
 
       appState.removeCustomMosaic(file);
@@ -650,17 +652,22 @@ describe('AppState', () => {
 
   describe('hideAndBackupMosaic()', () => {
     it('hides a given editor and creates a backup', () => {
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+      const editors = DEFAULT_EDITORS.slice(0, 4);
       appState.closedPanels = {};
-      appState.hideAndBackupMosaic(DEFAULT_EDITORS[0]);
+
+      appState.mosaicArrangement = createMosaicArrangement(editors);
+      const visible = getVisibleMosaics(appState.mosaicArrangement);
+      expect(visible).toStrictEqual(editors);
+
+      appState.hideAndBackupMosaic(visible[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: DEFAULT_EDITORS[1],
+        first: visible[1],
         second: {
           direction: 'column',
-          first: DEFAULT_EDITORS[2],
-          second: DEFAULT_EDITORS[3],
+          first: visible[2],
+          second: visible[3],
         },
       });
       expect(appState.closedPanels[DefaultEditorId.main]).toBeTruthy();
@@ -684,21 +691,38 @@ describe('AppState', () => {
 
   describe('resetEditorLayout()', () => {
     it('Puts editors in default arrangement', () => {
-      appState.hideAndBackupMosaic(DEFAULT_EDITORS[0]);
+      const editors = DEFAULT_EDITORS.slice(0, 4);
+      appState.mosaicArrangement = createMosaicArrangement(editors);
+      const visible = getVisibleMosaics(appState.mosaicArrangement);
+      expect(visible).toStrictEqual(editors);
+
+      appState.hideAndBackupMosaic(visible[0]);
 
       expect(appState.mosaicArrangement).toEqual({
         direction: 'row',
-        first: DEFAULT_EDITORS[1],
+        first: visible[1],
         second: {
           direction: 'column',
-          first: DEFAULT_EDITORS[2],
-          second: DEFAULT_EDITORS[3],
+          first: visible[2],
+          second: visible[3],
         },
       });
 
       appState.resetEditorLayout();
 
-      expect(appState.mosaicArrangement).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
+      expect(appState.mosaicArrangement).toEqual({
+        direction: 'row',
+        first: {
+          direction: 'column',
+          first: visible[0],
+          second: visible[1],
+        },
+        second: {
+          direction: 'column',
+          first: visible[2],
+          second: visible[3],
+        },
+      });
     });
   });
 

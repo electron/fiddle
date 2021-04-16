@@ -1,5 +1,4 @@
 import { DEFAULT_EDITORS, DefaultEditorId } from '../../src/interfaces';
-import { DEFAULT_MOSAIC_ARRANGEMENT } from '../../src/renderer/constants';
 import {
   createMosaicArrangement,
   getVisibleMosaics,
@@ -27,9 +26,10 @@ describe('Mosaic Arrangement Utilities', () => {
     });
 
     it('creates the correct arrangement for the default visible panels', () => {
-      const result = createMosaicArrangement(DEFAULT_EDITORS.slice(0, 4));
-
-      expect(result).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
+      const editors = DEFAULT_EDITORS.slice(0, 4);
+      const result = createMosaicArrangement(editors);
+      const visible = getVisibleMosaics(result);
+      expect(visible).toEqual(editors);
     });
   });
 
@@ -54,12 +54,6 @@ describe('Mosaic Arrangement Utilities', () => {
       });
 
       expect(result).toEqual([DefaultEditorId.main, DefaultEditorId.renderer]);
-    });
-
-    it('returns the correct array for the default mosaic', () => {
-      const result = getVisibleMosaics(DEFAULT_MOSAIC_ARRANGEMENT);
-
-      expect(result).toEqual(DEFAULT_EDITORS.slice(0, 4));
     });
   });
 });

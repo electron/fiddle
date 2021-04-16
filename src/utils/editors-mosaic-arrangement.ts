@@ -12,10 +12,9 @@ import { EditorId } from '../interfaces';
 export function createMosaicArrangement(
   input: readonly EditorId[],
   direction: MosaicDirection = 'row',
-): MosaicNode<EditorId> {
-  if (input.length === 1) {
-    return input[0];
-  }
+): MosaicNode<EditorId> | null {
+  if (input.length === 0) return null;
+  if (input.length === 1) return input[0];
 
   // This cuts out the first half of input. Input becomes the second half.
   const secondHalf = [...input];
@@ -23,8 +22,8 @@ export function createMosaicArrangement(
 
   return {
     direction,
-    first: createMosaicArrangement(firstHalf, 'column'),
-    second: createMosaicArrangement(secondHalf, 'column'),
+    first: createMosaicArrangement(firstHalf, 'column')!,
+    second: createMosaicArrangement(secondHalf, 'column')!,
   };
 }
 
