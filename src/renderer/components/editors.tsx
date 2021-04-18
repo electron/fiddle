@@ -9,6 +9,7 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
+import { getLeaves } from 'react-mosaic-component';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getEditorTitle } from '../../utils/editor-utils';
@@ -189,10 +190,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     id: EditorId,
   ): JSX.Element {
     const { fiddle } = this.props;
-    const { arranged } = fiddle;
+    const { mosaicLeafCount } = fiddle;
 
     // only show toolbar controls if we have more than 1 visible editor
-    const toolbarControlsMaybe = arranged.length > 1 && (
+    const toolbarControlsMaybe = mosaicLeafCount > 1 && (
       <>
         <MaximizeButton fiddle={fiddle} id={id} />
         <RemoveButton fiddle={fiddle} id={id} />
@@ -262,7 +263,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public render() {
-    const { changingMosaic, focused, monaco } = this.state;
+    const { focused, monaco } = this.state;
     const { fiddle } = this.props;
     const { mosaic } = fiddle;
 
@@ -271,14 +272,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     return (
       <Mosaic<EditorId>
         className={`focused__${focused}`}
+        renderTile={this.renderTile}
+        initialValue={mosaic}
         onChange={this.onChange}
         onRelease={this.onRelease}
-        renderTile={this.renderTile}
-        value={changingMosaic || mosaic}
         zeroStateView={renderNonIdealState(fiddle)}
       />
     );
   }
+  // value={changingMosaic || mosaic}
 
   /**
    * Called when the user initiates a change in the Mosaic itself,
@@ -286,19 +288,25 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    *
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
-  public onChange(changingMosaic: MosaicNode<EditorId> | null) {
+  public onChange() {
+    // changingMosaic: MosaicNode<EditorId> | null) {
     // override the steady-state MosaicNode.
     // this lets react-mosaic-component handle resizing panes
-    this.setState({ changingMosaic });
+    // this.setState({ changingMosaic });
+    console.log('onChange');
   }
 
   /**
    * Called when the user completes a change begun in onChange()
    */
-  public onRelease() {
+  public onRelease(mosaicNode: MosaicNode<EditorId> | null) {
     // the user has finished moving panes around;
     // stop overrideing the layout from props.fiddle.mosaic
-    this.setState({ changingMosaic: null });
+    // FIXME: this is progress but still is wrong.
+    // As soon as we stop overriding, the user's changes are undone
+    // if they're moving panels around.
+    console.log('onRelease', getLeaves(mosaicNode));
+    this.props.fiddle.mosaic = mosaicNode;
   }
 
   /**

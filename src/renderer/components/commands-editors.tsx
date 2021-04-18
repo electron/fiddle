@@ -10,10 +10,10 @@ import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { EditorId, GenericDialogType } from '../../interfaces';
+import { EditorId, GenericDialogType, MAIN_JS } from '../../interfaces';
 import { getEditorTitle, getEmptyContent } from '../../utils/editor-utils';
 import { AppState } from '../state';
-import { Fiddle } from '../fiddle';
+import { EditorState, Fiddle } from '../fiddle';
 
 interface EditorDropdownState {
   value: string;
@@ -60,17 +60,17 @@ export class EditorDropdown extends React.Component<
 
   public renderMenuItems() {
     const { fiddle } = this.props;
-    const { arranged, files } = fiddle;
+    const { mosaicLeafCount, states } = fiddle;
     const result: Array<JSX.Element> = [];
 
-    for (const file of files) {
-      const { id } = file;
-      const icon = file.visible ? 'eye-open' : 'eye-off';
+    for (const [id, state] of states) {
+      const visible =
+        state === EditorState.Visible || state === EditorState.Pending;
+      const icon = visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
-      // can't hide last editor panel.
-      const mustShow = file.visible && arranged.length < 2;
+      const mustShow = visible && mosaicLeafCount < 2;
 
-      if (file.canRemove) {
+      if (id !== MAIN_JS) {
         result.push(
           <MenuItem
             disabled={mustShow}

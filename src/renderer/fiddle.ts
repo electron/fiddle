@@ -1,6 +1,6 @@
 import * as MonacoType from 'monaco-editor';
 import { App } from './app';
-import { EditorId, EditorValues, MAIN_JS } from '../interfaces';
+import { EditorId, EditorValues } from '../interfaces';
 import { MosaicDirection, MosaicNode } from 'react-mosaic-component';
 import { action, computed, observable, reaction } from 'mobx';
 import { parse as pathParse } from 'path';
@@ -10,8 +10,7 @@ import {
   isSupportedFile,
 } from '../utils/editor-utils';
 
-/*
-const enum EditorState {
+export const enum EditorState {
   // The file is known to us but we've chosen not to show it.
   // The contents are cached offscreen.
   Hidden,
@@ -23,52 +22,40 @@ const enum EditorState {
   // The file's contents are visible in a Monaco editor in the mosaic.
   Visible,
 }
-*/
 
 export class Fiddle {
   @observable public isEdited = false;
 
-  @computed public get files(): FiddleFile[] {
-    return [...this.ids].map((id) => ({
-      canRemove: id !== MAIN_JS,
-      id,
-      visible: this.editors.has(id),
-    }));
-  }
-
-  /*
   @computed public get states(): Map<EditorId, EditorState> {
+    const { backups, pending, editors } = this;
+
     const states: Map<EditorId, EditorState> = new Map();
-    for (const id of this.backups.keys()) states.set(id, EditorState.Hidden);
-    for (const id of this.pending.keys()) states.set(id, EditorState.Pending);
-    for (const id of this.editors.keys()) states.set(id, EditorState.Visible);
-    return states;
+    for (const id of backups.keys()) states.set(id, EditorState.Hidden);
+    for (const id of pending.keys()) states.set(id, EditorState.Pending);
+    for (const id of editors.keys()) states.set(id, EditorState.Visible);
+
+    const sortedIds = [...states.keys()].sort(compareEditors);
+    return new Map(sortedIds.map((id) => [id, states.get(id)!]));
   }
-  */
 
-  @computed public get arranged(): EditorId[] {
-    const { editors, pending } = this;
+  @computed private get ids(): EditorId[] {
+    return [...this.states.keys()];
+  }
 
-    return [...new Set([...editors.keys(), ...pending])];
+  @computed public get mosaicLeafCount() {
+    return this.pending.size + this.editors.size;
   }
 
   @observable public mosaic: MosaicNode<EditorId> | null = null;
-  //@computed public get mosaic(): MosaicNode<EditorId> | null {
-  // const { arranged } = this;
 
-  // return createMosaicArrangement([...arranged].sort(compareEditors));
-  //}
-
-  @observable private readonly editors: Map<EditorId, IStandaloneCodeEditor>;
   @observable private readonly backups: Map<EditorId, Backup>;
+  @observable private readonly editors: Map<EditorId, IStandaloneCodeEditor>;
   @observable private readonly pending: Set<EditorId>;
-  @observable private ids: Set<EditorId>;
 
   constructor(private readonly app: App) {
     this.editors = new Map();
     this.backups = new Map();
     this.pending = new Set();
-    this.ids = new Set(); // FIXME(ckerr) is this one needed?
 
     for (const actionName of [
       'add',
@@ -103,10 +90,9 @@ export class Fiddle {
   }
 
   public values(): EditorValues {
-    const values = Object.fromEntries(
+    return Object.fromEntries(
       [...this.ids].map((id) => [id, this.getValue(id)]),
     );
-    return values as any;
   }
 
   @action public set(values: Partial<EditorValues>) {
@@ -120,7 +106,6 @@ export class Fiddle {
 
     for (const entry of Object.entries(values)) {
       const id: EditorId = entry[0] as EditorId;
-      this.ids.add(id);
       removeMe.delete(id);
 
       const value = (entry[1] || '') as string;
@@ -161,7 +146,7 @@ export class Fiddle {
   @action public add(id: EditorId, value: string) {
     console.log(`Mosaics: add ${id}`);
 
-    if (this.ids.has(id)) {
+    if (this.ids.includes(id)) {
       throw new Error(`Cannot add duplicate file "${id}"`);
     }
     if (!isSupportedFile(id)) {
@@ -169,17 +154,7 @@ export class Fiddle {
     }
 
     this.backups.set(id, { value: value || '' });
-    this.ids.add(id);
     this.pending.add(id);
-    this.rebuildMosaic();
-  }
-
-  @action public remove(id: EditorId) {
-    console.log(`Mosaics: remove ${id}`);
-    this.hide(id);
-    this.backups.delete(id);
-    this.ids.delete(id);
-    this.pending.delete(id);
     this.rebuildMosaic();
   }
 
@@ -190,6 +165,15 @@ export class Fiddle {
 
     this.backups.set(id, this.createBackup(editor));
     this.editors.delete(id);
+    this.rebuildMosaic();
+  }
+
+  @action public remove(id: EditorId) {
+    console.log(`Mosaics: remove ${id}`);
+
+    this.backups.delete(id);
+    this.editors.delete(id);
+    this.pending.delete(id);
     this.rebuildMosaic();
   }
 
@@ -255,8 +239,6 @@ export class Fiddle {
   }
 
   @action public addEditor(id: EditorId, editor: IStandaloneCodeEditor) {
-    if (!this.ids.has(id))
-      throw new Error(`Trying to add editor for unknown file "${id}"`);
     if (!this.pending.has(id))
       throw new Error(`Trying to add duplicate editor for file "${id}"`);
 
@@ -294,8 +276,8 @@ export class Fiddle {
   public inspect() {
     if (!process.env.JEST_WORKER_ID)
       throw new Error('inspect() is for clear-box testing.');
-    const { backups, editors, ids } = this;
-    return { backups, editors, ids };
+    const { backups, editors, pending } = this;
+    return { backups, editors, pending };
   }
 
   private getValue(id: EditorId) {
@@ -360,10 +342,4 @@ function getLanguage(filename: string) {
 
 function isInterestingValue(id: EditorId, val: string) {
   return val && val.length > 0 && val !== getEmptyContent(id);
-}
-
-export interface FiddleFile {
-  id: EditorId;
-  visible: boolean;
-  canRemove: boolean;
 }
