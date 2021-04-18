@@ -60,18 +60,15 @@ export class EditorDropdown extends React.Component<
 
   public renderMenuItems() {
     const { fiddle } = this.props;
-    const { files, visible } = fiddle;
+    const { arranged, files } = fiddle;
     const result: Array<JSX.Element> = [];
 
-    console.log('visible', JSON.stringify(visible));
-    console.log('visible.length', JSON.stringify(visible.length));
-    console.log('files', JSON.stringify(files));
     for (const file of files) {
       const { id } = file;
       const icon = file.visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
       // can't hide last editor panel.
-      const mustShow = file.visible && visible.length < 2;
+      const mustShow = file.visible && arranged.length < 2;
 
       if (file.canRemove) {
         result.push(

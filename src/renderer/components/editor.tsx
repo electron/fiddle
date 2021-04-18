@@ -32,7 +32,6 @@ export class Editor extends React.Component<EditorProps> {
 
   constructor(props: EditorProps) {
     super(props);
-    console.log('constructing editor for', props.id);
 
     const fileExtension = props.id.split('.')[1];
     switch (fileExtension) {

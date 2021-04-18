@@ -40,6 +40,7 @@ interface EditorsState {
   isMounted?: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
   focused?: EditorId;
+  changingMosaic: MosaicNode<EditorId> | null;
 }
 
 @observer
@@ -49,6 +50,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     for (const name of [
       'onChange',
+      'onRelease',
       'renderEditor',
       'renderTile',
       'renderToolbar',
@@ -57,7 +59,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       this[name] = this[name].bind(this);
     }
 
-    this.state = { monacoOptions: defaultMonacoOptions };
+    this.state = {
+      changingMosaic: null,
+      monacoOptions: defaultMonacoOptions,
+    };
   }
 
   /**
@@ -184,15 +189,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     id: EditorId,
   ): JSX.Element {
     const { fiddle } = this.props;
+    const { arranged } = fiddle;
 
     // only show toolbar controls if we have more than 1 visible editor
-    console.log(
-      '---> renderToolbar',
-      JSON.stringify(fiddle.visible),
-      new Error('trace'),
-    );
-    // FIXME(ckerr) this doesn't ret re-run when fiddle.visible changes...
-    const toolbarControlsMaybe = fiddle.visible.length > 1 && (
+    const toolbarControlsMaybe = arranged.length > 1 && (
       <>
         <MaximizeButton fiddle={fiddle} id={id} />
         <RemoveButton fiddle={fiddle} id={id} />
@@ -223,7 +223,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
     const content = this.renderEditor(id);
     const title = getEditorTitle(id);
-    console.log('--> RENDER TILE');
 
     return (
       <MosaicWindow<EditorId>
@@ -263,11 +262,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public render() {
+    const { changingMosaic, focused, monaco } = this.state;
     const { fiddle } = this.props;
-    const { focused, monaco } = this.state;
-    const { visible } = fiddle;
-
-    console.log('--> VISIBLE.LENGTH', visible.length);
+    const { mosaic } = fiddle;
 
     if (!monaco) return null;
 
@@ -275,21 +272,33 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       <Mosaic<EditorId>
         className={`focused__${focused}`}
         onChange={this.onChange}
-        value={fiddle.mosaic}
-        zeroStateView={renderNonIdealState(fiddle)}
+        onRelease={this.onRelease}
         renderTile={this.renderTile}
+        value={changingMosaic || mosaic}
+        zeroStateView={renderNonIdealState(fiddle)}
       />
     );
   }
 
   /**
-   * Handles a change in the visible nodes
+   * Called when the user initiates a change in the Mosaic itself,
+   * e.g. dragging the divider between two panes
    *
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
-  public onChange(currentNode: MosaicNode<EditorId> | null) {
-    console.log('FIXME(ckerr) this gets called on drag... wat do?');
-    this.props.fiddle.mosaic = currentNode;
+  public onChange(changingMosaic: MosaicNode<EditorId> | null) {
+    // override the steady-state MosaicNode.
+    // this lets react-mosaic-component handle resizing panes
+    this.setState({ changingMosaic });
+  }
+
+  /**
+   * Called when the user completes a change begun in onChange()
+   */
+  public onRelease() {
+    // the user has finished moving panes around;
+    // stop overrideing the layout from props.fiddle.mosaic
+    this.setState({ changingMosaic: null });
   }
 
   /**
