@@ -9,30 +9,21 @@ import {
   EditorValues,
   GenericDialogType,
   SetFiddleOptions,
-  EditorId,
-  CustomEditorId,
   PACKAGE_NAME,
-  DEFAULT_EDITORS,
 } from '../interfaces';
-import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
-import { updateEditorLayout } from '../utils/editor-layout';
-import { getEditorValue } from '../utils/editor-value';
+import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import {
-  compareEditors,
-  getEmptyContent,
-  isKnownFile,
-} from '../utils/editor-utils';
-import { isEditorBackup } from '../utils/type-checks';
+import { AppState } from './state';
+import { Fiddle } from './fiddle';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
-import { AppState } from './state';
+import { TaskRunner } from './task-runner';
 import { getElectronVersions } from './versions';
 import { getTemplate } from './content';
-import { TaskRunner } from './task-runner';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
+import { ipcRendererManager } from './ipc';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -42,104 +33,48 @@ import { defaultDark, defaultLight } from './themes-defaults';
  */
 export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
-  public monaco: typeof MonacoType | null = null;
+  public monaco: typeof MonacoType | undefined;
   public state = new AppState(getElectronVersions());
-  public fileManager = new FileManager(this.state);
+  public readonly fiddle = new Fiddle(this);
+  public fileManager = new FileManager(this.state, this);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
-  public readonly taskRunner: TaskRunner;
+  public readonly taskRunner = new TaskRunner(this);
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
-    this.setEditorValues = this.setEditorValues.bind(this);
+  }
 
-    this.taskRunner = new TaskRunner(this);
+  private async confirmUnsaved(): Promise<boolean> {
+    const { state } = this;
+
+    state.setGenericDialogOptions({
+      type: GenericDialogType.warning,
+      label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
+      ok: 'Yes',
+    });
+    state.isGenericDialogShowing = true;
+    await when(() => !state.isGenericDialogShowing);
+
+    return !!state.genericDialogLastResult;
   }
 
   public async replaceFiddle(
     editorValues: Partial<EditorValues>,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
+    const { fiddle, state } = this;
+
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
-    if (this.state.isUnsaved) {
-      this.state.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
-        ok: 'Yes',
-      });
-      this.state.isGenericDialogShowing = true;
-      await when(() => !this.state.isGenericDialogShowing);
+    if (fiddle.isEdited && !(await this.confirmUnsaved())) return false;
 
-      if (!this.state.genericDialogLastResult) {
-        return false;
-      }
-    }
+    this.fiddle.set(editorValues);
 
-    // update the customMosaic list
-    this.state.customMosaics = Object.keys(editorValues).filter(
-      (name) => !isKnownFile(name),
-    ) as CustomEditorId[];
-
-    // If the gist content is empty or matches the empty file output, don't show it.
-    const shouldShowContent = (id: EditorId, content?: string) =>
-      content && content.length > 0 && content !== getEmptyContent(id);
-
-    // Sort and display all editors that have content.
-    const visibleEditors: EditorId[] = Object.entries(editorValues)
-      .filter(([id, content]) => shouldShowContent(id as EditorId, content))
-      .map(([id]) => id as EditorId)
-      .sort(compareEditors);
-
-    this.state.gistId = gistId || '';
-    this.state.localPath = filePath;
-    this.state.templateName = templateName;
-
-    // Once loaded, we have a "saved" state.
-    await this.state.setVisibleMosaics(visibleEditors);
-    await this.setEditorValues(editorValues);
-    this.state.isUnsaved = false;
+    state.gistId = gistId || '';
+    state.localPath = filePath;
+    state.templateName = templateName;
 
     return true;
-  }
-
-  /**
-   * Sets the contents of all editor panes.
-   *
-   * @param {EditorValues} values
-   */
-  public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
-    const { ElectronFiddle: fiddle } = window;
-
-    if (!fiddle?.app) {
-      throw new Error('Fiddle not ready');
-    }
-
-    // Set content for mosaics.
-    const allEditors = [...this.state.customMosaics, ...DEFAULT_EDITORS];
-    for (const name of allEditors) {
-      const editor = fiddle.editors[name];
-      const backup = this.state.closedPanels[name];
-
-      if (typeof values[name] !== 'undefined') {
-        if (isEditorBackup(backup)) {
-          // The editor does not exist, attempt to set it on the backup.
-          // If there's a model, we'll do it on the model. Else, we'll
-          // set the value.
-
-          if (backup.model) {
-            backup.model.setValue(values[name]!);
-          } else {
-            backup.value = values[name]!;
-          }
-        } else if (editor?.setValue) {
-          // The editor exists, set the value directly
-          const newValue = values[name]!;
-          if (!editor.getValue || editor.getValue() !== newValue) {
-            editor.setValue(newValue);
-          }
-        }
-      }
-    }
   }
 
   /**
@@ -150,16 +85,7 @@ export class App {
   public async getEditorValues(
     options?: PackageJsonOptions,
   ): Promise<EditorValues> {
-    const { ElectronFiddle: fiddle } = window;
-
-    if (!fiddle?.app) {
-      throw new Error('Fiddle not ready');
-    }
-
-    const values = {} as EditorValues;
-    for (const editor in fiddle?.editors) {
-      values[editor] = getEditorValue(editor as EditorId);
-    }
+    const values = this.fiddle.values();
 
     if (options && options.include !== false) {
       values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);
@@ -186,9 +112,9 @@ export class App {
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Dialogs appState={this.state} />
-        <Header appState={this.state} />
-        <OutputEditorsWrapper appState={this.state} />
+        <Dialogs appState={this.state} fiddle={this.fiddle} />
+        <Header appState={this.state} fiddle={this.fiddle} />
+        <OutputEditorsWrapper appState={this.state} fiddle={this.fiddle} />
       </div>
     );
 
@@ -197,6 +123,7 @@ export class App {
     this.setupResizeListener();
     this.setupThemeListeners();
     this.setupTitleListeners();
+    this.setupUnloadListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
@@ -277,33 +204,68 @@ export class App {
   }
 
   /**
-   * We need to possibly recalculate the layout whenever the window
-   * is resized. This method sets up the listener.
+   * Recalculate the layout whenever the window is resized.
+   * This method sets up the listener.
    */
   public setupResizeListener(): void {
-    window.addEventListener('resize', updateEditorLayout);
+    window.addEventListener('resize', () => this.fiddle.layout());
   }
 
   /**
    * Have document.title track state.title
    */
   public setupTitleListeners() {
-    // the observables used for the title usually change in a batch,
-    // so when setting document title, wait a tick to avoid flicker.
-    let titleIdle: any;
+    let debounce: any;
     autorun(() => {
       const { title } = this.state;
-
-      clearTimeout(titleIdle);
-      titleIdle = setTimeout(() => {
+      clearTimeout(debounce);
+      debounce = setTimeout(() => {
         document.title = title;
-        titleIdle = null;
+        debounce = null;
       });
+    });
+  }
+
+  public setupUnloadListeners() {
+    autorun(async () => {
+      const { state, fiddle } = this;
+
+      if (!fiddle.isEdited) {
+        window.onbeforeunload = null;
+      } else {
+        window.onbeforeunload = () => {
+          ipcRendererManager.send(IpcEvents.SHOW_INACTIVE);
+          state.setGenericDialogOptions({
+            label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
+            ok: 'Exit',
+            type: GenericDialogType.warning,
+          });
+
+          state.isGenericDialogShowing = true;
+
+          // We'll wait until the warning dialog was closed
+          when(() => !state.isGenericDialogShowing).then(() => {
+            const closeConfirmed = state.genericDialogLastResult;
+            // The user confirmed, let's close for real.
+            if (closeConfirmed) {
+              // isQuitting checks if we're trying to quit the app
+              // or just close the window
+              if (state.isQuitting) {
+                ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
+              }
+              window.onbeforeunload = null;
+              window.close();
+            }
+          });
+
+          // return value doesn't matter, we just want to cancel the event
+          return false;
+        };
+      }
     });
   }
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners ||= [];
 window.ElectronFiddle.app ||= new App();
 window.ElectronFiddle.app.setup();

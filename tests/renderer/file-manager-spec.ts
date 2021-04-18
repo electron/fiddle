@@ -1,13 +1,22 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { DefaultEditorId, Files } from '../../src/interfaces';
+import { App } from '../../src/renderer/app';
+import { AppState } from '../../src/renderer/state';
+import {
+  DefaultEditorId,
+  EditorId,
+  Files,
+  MAIN_JS,
+} from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { AppMock } from '../mocks/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import * as readFiddle from '../../src/utils/read-fiddle';
 
-jest.mock('fs-extra');
+// jest.mock('fs-extra');
 jest.mock('tmp', () => ({
   setGracefulCleanup: jest.fn(),
   dirSync: jest.fn(() => ({
@@ -24,16 +33,14 @@ jest.mock('../../src/renderer/templates', () => ({
 
 describe('FileManager', () => {
   let fm: FileManager;
+  let app: AppMock;
 
   beforeEach(() => {
-    window.ElectronFiddle = new ElectronFiddleMock() as any;
     ipcRendererManager.send = jest.fn();
 
-    window.ElectronFiddle.app.state.customMosaics = [];
-
-    fm = new FileManager({
-      setGenericDialogOptions: jest.fn(),
-    } as any);
+    const electronFiddle = new ElectronFiddleMock();
+    ({ app } = electronFiddle);
+    fm = new FileManager((app.state as any) as AppState, (app as any) as App);
   });
 
   afterEach(() => {
@@ -42,71 +49,30 @@ describe('FileManager', () => {
 
   describe('openFiddle()', () => {
     it('opens a local fiddle', async () => {
-      const fakePath = '/fake/path';
-      await fm.openFiddle(fakePath);
-
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-        },
-        { filePath: fakePath },
-      );
+      const dir = path.resolve(__dirname, '../../static/electron-quick-start');
+      await fm.openFiddle(dir);
+      expect(app.replaceFiddle).toHaveBeenCalledTimes(1);
     });
 
     it('can open a fiddle with custom editors', async () => {
-      const { app } = window.ElectronFiddle;
+      const editorValues: Record<EditorId, string> = {
+        [MAIN_JS]: 'console.log("hello world")',
+        ['file.js']: 'console.log("hello there")',
+      };
+      const spy = jest
+        .spyOn(readFiddle, 'readFiddle')
+        .mockResolvedValueOnce(editorValues as any);
+      const filePath = '/fake/path';
 
-      const fakePath = '/fake/path';
-      const file = 'file.js';
+      app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
 
-      app.remoteLoader.verifyCreateCustomEditor = jest
-        .fn()
-        .mockResolvedValue(true);
-      (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
-      (fs.readdirSync as jest.Mock).mockImplementation(() => [
-        file,
-        DefaultEditorId.html,
-      ]);
-      (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
-        return path.basename(filename) === file ? 'hey' : '';
+      await fm.openFiddle(filePath);
+
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(editorValues, {
+        filePath,
       });
 
-      await fm.openFiddle(fakePath);
-
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-          [file]: 'hey',
-        },
-        { filePath: fakePath },
-      );
-    });
-
-    it('writes empty strings if readFile throws an error', async () => {
-      (fs.readFile as jest.Mock).mockImplementation(() => {
-        throw new Error('bwap');
-      });
-      const fakePath = '/fake/path';
-      await fm.openFiddle(fakePath);
-
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-        },
-        { filePath: fakePath },
-      );
+      spy.mockRestore();
     });
 
     it('runs it on IPC event', () => {
@@ -117,14 +83,11 @@ describe('FileManager', () => {
 
     it('does not do anything with incorrect inputs', async () => {
       await fm.openFiddle({} as any);
-      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(
-        0,
-      );
+      expect(app.setEditorValues).toHaveBeenCalledTimes(0);
     });
 
     it('does not do anything if cancelled', async () => {
-      (window.ElectronFiddle.app
-        .setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      (app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
       await fm.openFiddle('/fake/path');
     });
   });
@@ -137,10 +100,8 @@ describe('FileManager', () => {
     });
 
     it('saves a fiddle with custom editors', async () => {
-      const { app } = window.ElectronFiddle;
-
       const file = 'file.js';
-      app.state.customMosaics = [file];
+      app.state.allMosaics = [file];
       (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
         [file]: 'hi',
         [DefaultEditorId.html]: 'html',
@@ -243,7 +204,7 @@ describe('FileManager', () => {
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
       await fm.openTemplate('test');
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           [DefaultEditorId.html]: '',
           [DefaultEditorId.renderer]: '',
@@ -302,10 +263,8 @@ describe('FileManager', () => {
     });
 
     it('handles custom editors', async () => {
-      const { app } = window.ElectronFiddle;
-
       const file = 'file.js';
-      app.state.customMosaics = [file];
+      app.state.allMosaics = [file];
 
       (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
         [file]: 'file',

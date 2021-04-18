@@ -11,10 +11,12 @@ import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 import { WrapperMosaicId } from './output-editors-wrapper';
 
-interface CommandsProps {
+interface OutputProps {
   appState: AppState;
+  fiddle: Fiddle;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }
@@ -24,15 +26,15 @@ interface CommandsProps {
  * whenever a Fiddle is launched in Electron.
  *
  * @class Output
- * @extends {React.Component<CommandsProps>}
+ * @extends {React.Component<OutputProps>}
  */
 @observer
-export class Output extends React.Component<CommandsProps> {
+export class Output extends React.Component<OutputProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperMosaicId>;
   private outputRef = React.createRef<HTMLDivElement>();
 
-  constructor(props: CommandsProps) {
+  constructor(props: OutputProps) {
     super(props);
 
     this.renderTimestamp = this.renderTimestamp.bind(this);

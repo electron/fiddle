@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+import { App } from './app';
 import { FileTransform, Files, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
@@ -13,7 +14,7 @@ import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 
 export class FileManager {
-  constructor(private readonly appState: AppState) {
+  constructor(private readonly appState: AppState, private readonly app: App) {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
@@ -49,10 +50,9 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openTemplate(templateName: string) {
+    const { app } = this;
     const editorValues = await getTemplateValues(templateName);
-    await window.ElectronFiddle.app.replaceFiddle(editorValues, {
-      templateName,
-    });
+    await app.replaceFiddle(editorValues, { templateName });
   }
 
   /**
@@ -62,7 +62,7 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openFiddle(filePath: string) {
-    const { app } = window.ElectronFiddle;
+    const { app } = this;
     const { verifyCreateCustomEditor } = app.remoteLoader;
 
     console.log(`FileManager: Asked to open`, filePath);
@@ -116,7 +116,7 @@ export class FileManager {
         this.appState.gistId = undefined;
       }
 
-      this.appState.isUnsaved = false;
+      this.app.fiddle.isEdited = false;
     }
   }
 
@@ -132,7 +132,7 @@ export class FileManager {
     options?: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<Files> {
-    const { app } = window.ElectronFiddle;
+    const { app } = this;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await app.getEditorValues(pOptions);

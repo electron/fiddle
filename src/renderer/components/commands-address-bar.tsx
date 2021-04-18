@@ -9,9 +9,11 @@ import { GistActionState } from '../../interfaces';
 import { getGistId, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 
 interface AddressBarProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 interface AddressBarState {
@@ -129,10 +131,11 @@ export class AddressBar extends React.Component<
   }
 
   public render() {
-    const { isUnsaved, activeGistAction } = this.props.appState;
+    const { activeGistAction } = this.props.appState;
+    const { isEdited } = this.props.fiddle;
     const { value } = this.state;
     const isCorrect = !!getGistId(value);
-    const className = classnames('address-bar', isUnsaved, { empty: !value });
+    const className = classnames('address-bar', isEdited, { empty: !value });
 
     const isPerformingAction = activeGistAction !== GistActionState.none;
     return (

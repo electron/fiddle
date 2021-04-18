@@ -1,6 +1,8 @@
 import { observable } from 'mobx';
+import { EditorId } from '../../src/interfaces';
 
 export class MockState {
+  @observable public allMosaics: EditorId[] = [];
   @observable public closedPanels = {};
   @observable public gistId = '';
   @observable public isConsoleShowing = true;

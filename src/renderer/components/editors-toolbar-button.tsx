@@ -8,10 +8,10 @@ import {
 } from 'react-mosaic-component';
 
 import { EditorId } from '../../interfaces';
-import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 
 interface ToolbarButtonProps {
-  appState: AppState;
+  fiddle: Fiddle;
   id: EditorId;
 }
 
@@ -57,8 +57,8 @@ export class RemoveButton extends ToolbarButton {
    * Create a button that can remove this panel
    */
   public createButton(_mosaicActions: MosaicRootActions<any>) {
-    const onClick = () =>
-      this.props.appState.hideAndBackupMosaic(this.props.id);
+    // FIXME(ckerr) is this button supposed to remove or to hide
+    const onClick = () => this.props.fiddle.hide(this.props.id);
 
     return <Button icon="cross" className="bp3-small" onClick={onClick} />;
   }

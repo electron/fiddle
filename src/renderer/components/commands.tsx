@@ -6,12 +6,14 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { EditorDropdown } from './commands-editors';
+import { Fiddle } from '../fiddle';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 
 interface CommandsProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 /**
@@ -28,8 +30,9 @@ export class Commands extends React.Component<CommandsProps> {
   }
 
   public render() {
-    const { appState } = this.props;
+    const { appState, fiddle } = this.props;
     const { isBisectCommandShowing: isBisectCommandShowing } = appState;
+    console.log('Commands.render', 'fiddle.visible', fiddle.visible);
 
     return (
       <div className="commands">
@@ -50,12 +53,12 @@ export class Commands extends React.Component<CommandsProps> {
               text="Console"
               onClick={appState.toggleConsole}
             />
-            <EditorDropdown appState={appState} />
+            <EditorDropdown appState={appState} fiddle={fiddle} />
           </ControlGroup>
         </div>
         <div>
-          <AddressBar appState={appState} />
-          <GistActionButton appState={appState} />
+          <AddressBar appState={appState} fiddle={fiddle} />
+          <GistActionButton appState={appState} fiddle={fiddle} />
         </div>
       </div>
     );

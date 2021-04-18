@@ -35,11 +35,11 @@ describe('Editors component', () => {
 
   beforeEach(() => {
     store = {
-      isTokenDialogShowing: false,
+      allMosaics: [],
       isSettingsShowing: false,
-      setGenericDialogOptions: () => ({}),
+      isTokenDialogShowing: false,
       mosaicArrangement: createMosaicArrangement(DEFAULT_EDITORS),
-      customMosaics: [],
+      setGenericDialogOptions: () => ({}),
     };
 
     monaco = {

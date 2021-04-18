@@ -1,14 +1,9 @@
 import * as fs from 'fs-extra';
 import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
-import { MosaicNode } from 'react-mosaic-component';
 
 import {
   BlockableAccelerator,
-  CustomEditorId,
-  DEFAULT_EDITORS,
-  DefaultEditorId,
-  EditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
@@ -16,23 +11,15 @@ import {
   OutputEntry,
   OutputOptions,
   RunnableVersion,
-  SetFiddleOptions,
   Version,
   VersionSource,
   VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import {
-  createMosaicArrangement,
-  getVisibleMosaics,
-} from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
-import { isEditorBackup, isEditorId } from '../utils/type-checks';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
-import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
   updateEditorTypeDefinitions,
@@ -40,7 +27,6 @@ import {
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
-import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
@@ -123,10 +109,8 @@ export class AppState {
     wantsInput: false,
     placeholder: '',
   };
-  @observable public customMosaics: CustomEditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
-  @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
   @observable public templateName: string | undefined;
   @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
@@ -135,7 +119,6 @@ export class AppState {
   @observable public isRunning = false;
   @observable public isAutoBisecting = false;
   @observable public isInstallingModules = false;
-  @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions = false;
   @observable public isQuitting = false;
 
@@ -151,12 +134,10 @@ export class AppState {
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Record<EditorId, EditorBackup> = {};
 
   private outputBuffer = '';
   private name: string;
   private readonly defaultVersion: string;
-  public appData: string;
 
   constructor(versions: RunnableVersion[]) {
     // Bind all actions
@@ -176,7 +157,6 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
-    this.resetEditorLayout = this.resetEditorLayout.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
     this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
@@ -232,55 +212,6 @@ export class AppState {
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
-    autorun(async () => {
-      if (typeof this.isUnsaved === 'undefined') return;
-
-      if (this.isUnsaved) {
-        window.onbeforeunload = () => {
-          ipcRendererManager.send(IpcEvents.SHOW_INACTIVE);
-          this.setGenericDialogOptions({
-            type: GenericDialogType.warning,
-            label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
-            ok: 'Exit',
-          });
-
-          this.isGenericDialogShowing = true;
-
-          // We'll wait until the warning dialog was closed
-          when(() => !this.isGenericDialogShowing).then(() => {
-            const closeConfirmed = this.genericDialogLastResult;
-            // The user confirmed, let's close for real.
-            if (closeConfirmed) {
-              // isQuitting checks if we're trying to quit the app
-              // or just close the window
-              if (this.isQuitting) {
-                ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
-              }
-              window.onbeforeunload = null;
-              window.close();
-            }
-          });
-
-          // return value doesn't matter, we just want to cancel the event
-          return false;
-        };
-      } else {
-        window.onbeforeunload = null;
-
-        // set up editor listeners to verify if unsaved
-        const ids = DEFAULT_EDITORS.filter(
-          (id) => id in window.ElectronFiddle.editors,
-        );
-        await waitForEditorsToMount(ids);
-        for (const editor of Object.values(window.ElectronFiddle.editors)) {
-          const disposable = (editor as any)!.onDidChangeModelContent(() => {
-            this.isUnsaved = true;
-            disposable.dispose();
-          });
-        }
-      }
-    });
-
     // Update our known versions
     this.updateElectronVersions();
 
@@ -299,7 +230,8 @@ export class AppState {
    * @returns {string} the title, e.g. appname, fiddle name, state
    */
   @computed get title(): string {
-    const { gistId, isUnsaved, localPath, templateName } = this;
+    const { gistId, localPath, templateName } = this;
+    const { isEdited } = window.ElectronFiddle.app.fiddle;
 
     const name = 'Electron Fiddle';
 
@@ -308,11 +240,9 @@ export class AppState {
     else if (templateName) from = templateName;
     else if (gistId) from = `gist.github.com/${gistId}`;
 
-    const unsaved = isUnsaved ? 'Unsaved' : '';
+    const unsaved = isEdited ? 'Unsaved' : '';
 
-    const title = [name, from, unsaved].filter((x: string) => !!x).join(' - ');
-    console.log({ gistId, isUnsaved, localPath, templateName, title });
-    return title;
+    return [name, from, unsaved].filter((x: string) => !!x).join(' - ');
   }
 
   /**
@@ -334,7 +264,8 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const oldest = semver.parse(getOldestSupportedVersion());
+    const runnables = Object.values(versions);
+    const oldest = semver.parse(getOldestSupportedVersion(runnables));
 
     const filter = (ver: RunnableVersion) =>
       ver &&
@@ -346,7 +277,7 @@ export class AppState {
         oldest.compareMain(ver.version) <= 0) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
-    return sortVersions(Object.values(versions).filter(filter));
+    return sortVersions(runnables.filter(filter));
   }
 
   /**
@@ -547,13 +478,16 @@ export class AppState {
     const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
 
+    /*
     // Should we update the editor?
-    if (await isContentUnchanged(DefaultEditorId.main, this.version)) {
+    // FIXME: zzz
+    if (await isContentUnchanged(MAIN_JS, this.version)) {
       const editorValues = await getTemplate(version);
 
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }
+    */
 
     this.version = version;
 
@@ -651,102 +585,6 @@ export class AppState {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
-  }
-
-  /**
-   * Sets the editor value for a given editor. Deletes the value after
-   * accessing it.
-   *
-   * @param {EditorId} id
-   */
-  @action public getAndRemoveEditorValueBackup(
-    id: EditorId,
-  ): EditorBackup | null {
-    const value = this.closedPanels[id];
-
-    if (isEditorBackup(value)) {
-      delete this.closedPanels[id];
-      return value;
-    }
-
-    return null;
-  }
-
-  @action public async setVisibleMosaics(visible: Array<EditorId>) {
-    const { editors } = window.ElectronFiddle;
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-
-    const showMe = visible.filter((id) => !currentlyVisible.includes(id));
-    const hideMe = currentlyVisible.filter((id) => !visible.includes(id));
-
-    for (const id of hideMe) {
-      this.closedPanels[id] = isEditorId(id, this.customMosaics)
-        ? getEditorBackup(id)
-        : true;
-      delete editors[id];
-    }
-
-    for (const id of showMe) {
-      // Remove the backup for panels now. Editors will remove their
-      // backup once the data has been loaded.
-      delete this.closedPanels[id];
-    }
-
-    const updatedArrangement = createMosaicArrangement(visible);
-    console.log(
-      `State: Setting visible mosaic panels`,
-      visible,
-      updatedArrangement,
-    );
-
-    this.mosaicArrangement = updatedArrangement;
-
-    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
-    // mount to ensure that we can load content into the editors as soon as they're
-    // declared visible.
-    await waitForEditorsToMount(visible);
-  }
-
-  /**
-   * Hides the panel for a given EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public hideAndBackupMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
-  }
-
-  /**
-   * Removes the panel for a given custom EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public removeCustomMosaic(id: EditorId) {
-    this.hideAndBackupMosaic(id);
-    delete window.ElectronFiddle.editors[id];
-    this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
-  }
-
-  /**
-   * Shows the editor value for a given editor.
-   *
-   * @param {EditorId} id
-   */
-  @action public showMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics([...currentlyVisible, id]);
-  }
-
-  /**
-   * Resets editor view to default layout.
-   *
-   *
-   */
-  @action public resetEditorLayout() {
-    // FIXME(ckerr): this DEFAULT_EDITORS.slice thing has gotta go
-    const ids = [...DEFAULT_EDITORS.slice(0, 4), ...this.customMosaics];
-    this.mosaicArrangement = createMosaicArrangement(ids);
   }
 
   @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {

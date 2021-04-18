@@ -28,8 +28,8 @@ describe('Publish button component', () => {
 
   beforeEach(() => {
     store = {
+      allMosaics: Object.keys(expectedGistCreateOpts.files),
       gitHubPublishAsPublic: true,
-      customMosaics: [],
     };
   });
 
@@ -122,7 +122,8 @@ describe('Publish button component', () => {
     const wrapper = shallow(<GistActionButton appState={store} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
-    wrapper.setProps({ appState: { gistId: 123, customMosaics: [] } });
+    store.gistId = 123;
+    wrapper.setProps({ appState: store });
     instance.setState({ actionType: GistActionType.update });
 
     await instance.performGistAction();

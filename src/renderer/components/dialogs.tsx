@@ -1,16 +1,18 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { AppState } from '../state';
 import { AddThemeDialog } from './dialog-add-theme';
 import { AddVersionDialog } from './dialog-add-version';
+import { AppState } from '../state';
 import { BisectDialog } from './dialog-bisect';
+import { Fiddle } from '../fiddle';
 import { GenericDialog } from './dialog-generic';
-import { TokenDialog } from './dialog-token';
 import { Settings } from './settings';
+import { TokenDialog } from './dialog-token';
 
 interface DialogsProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 /**

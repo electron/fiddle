@@ -33,15 +33,6 @@ export interface Version {
   localPath?: string;
 }
 
-export interface EditorValues {
-  [DefaultEditorId.main]: string;
-  [DefaultEditorId.renderer]: string;
-  [DefaultEditorId.html]: string;
-  [DefaultEditorId.preload]: string;
-  [DefaultEditorId.css]: string;
-  PACKAGE_NAME?: string;
-}
-
 export enum RunResult {
   SUCCESS = 'success', // exit code === 0
   FAILURE = 'failure', // ran, but exit code !== 0
@@ -113,28 +104,11 @@ export const enum GenericDialogType {
   'success' = 'success',
 }
 
-// Default Editors
-export enum DefaultEditorId {
-  'main' = 'main.js',
-  'renderer' = 'renderer.js',
-  'html' = 'index.html',
-  'preload' = 'preload.js',
-  'css' = 'styles.css',
-}
+export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
 
-export type CustomEditorId = `${string}.${'js' | 'html' | 'css'}`;
+export type EditorValues = Record<EditorId, string>;
 
-export type EditorId = CustomEditorId | DefaultEditorId;
-
-// The order of these fields is the order that
-// they'll be sorted in the mosaic
-export const DEFAULT_EDITORS = [
-  DefaultEditorId.main,
-  DefaultEditorId.renderer,
-  DefaultEditorId.html,
-  DefaultEditorId.preload,
-  DefaultEditorId.css,
-] as const;
+export const MAIN_JS = 'main.js';
 
 export const PACKAGE_NAME = 'package.json';
 

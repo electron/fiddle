@@ -1,4 +1,3 @@
-import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
@@ -12,15 +11,13 @@ import {
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { updateEditorLayout } from '../../utils/editor-layout';
 import { getEditorTitle } from '../../utils/editor-utils';
-import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
-import { isEditorId } from '../../utils/type-checks';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 import { activateTheme } from '../themes';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
@@ -35,6 +32,7 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 
 interface EditorsProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 interface EditorsState {
@@ -46,20 +44,18 @@ interface EditorsState {
 
 @observer
 export class Editors extends React.Component<EditorsProps, EditorsState> {
-  // A reaction: Each time mosaicArrangement is changed, we'll update
-  // the editor layout. That method is itself debounced.
-  public disposeLayoutAutorun = reaction(
-    () => this.props.appState.mosaicArrangement,
-    () => updateEditorLayout(),
-  );
-
   constructor(props: EditorsProps) {
     super(props);
 
-    this.onChange = this.onChange.bind(this);
-    this.renderEditor = this.renderEditor.bind(this);
-    this.renderTile = this.renderTile.bind(this);
-    this.setFocused = this.setFocused.bind(this);
+    for (const name of [
+      'onChange',
+      'renderEditor',
+      'renderTile',
+      'renderToolbar',
+      'setFocused',
+    ]) {
+      this[name] = this[name].bind(this);
+    }
 
     this.state = { monacoOptions: defaultMonacoOptions };
   }
@@ -102,31 +98,35 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
-      const editor = getFocusedEditor();
-      if (editor) {
-        const model = editor.getModel();
+      const { fiddle } = this.props;
+
+      const focused = fiddle.focusedEditor();
+      if (focused) {
+        const model = focused.getModel();
         if (model) {
-          editor.setSelection(model.getFullModelRange());
+          focused.setSelection(model.getFullModelRange());
         }
       }
     });
 
     this.setState({ isMounted: true });
     await this.loadMonaco();
-    this.props.appState.isUnsaved = false;
   }
 
   public componentWillUnmount() {
-    this.disposeLayoutAutorun();
     this.stopListening();
   }
 
   private stopListening() {
-    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
-    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
-    ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
+    for (const event of [
+      IpcEvents.FS_NEW_FIDDLE,
+      IpcEvents.FS_NEW_TEST,
+      IpcEvents.MONACO_EXECUTE_COMMAND,
+      IpcEvents.MONACO_TOGGLE_OPTION,
+      IpcEvents.SELECT_ALL_IN_EDITOR,
+    ]) {
+      ipcRendererManager.removeAllListeners(event);
+    }
   }
 
   /**
@@ -136,10 +136,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public executeCommand(commandId: string) {
-    const editor = getFocusedEditor();
+    const { fiddle } = this.props;
+    const focused = fiddle.focusedEditor();
 
-    if (editor) {
-      const command = editor.getAction(commandId);
+    if (focused) {
+      const command = focused.getAction(commandId);
 
       console.log(
         `Editors: Trying to run ${command.id}. Supported: ${command.isSupported}`,
@@ -152,27 +153,16 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public toggleEditorOption(path: string): boolean {
-    if (!window.ElectronFiddle.editors) {
-      return false;
-    }
-
     try {
+      const { fiddle } = this.props;
       const { monacoOptions } = this.state;
-      const newOptions = { ...monacoOptions };
-      const currentSetting = getAtPath(path, newOptions);
 
-      setAtPath(path, newOptions, toggleMonaco(currentSetting));
+      const options = { ...monacoOptions };
+      const currentSetting = getAtPath(path, options);
 
-      Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-        const editor: MonacoType.editor.IStandaloneCodeEditor | null =
-          window.ElectronFiddle.editors[key];
-
-        if (editor) {
-          editor.updateOptions(newOptions);
-        }
-      });
-
-      this.setState({ monacoOptions: newOptions });
+      setAtPath(path, options, toggleMonaco(currentSetting));
+      fiddle.updateOptions(options);
+      this.setState({ monacoOptions: options });
 
       return true;
     } catch (error) {
@@ -193,15 +183,19 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     { title }: MosaicWindowProps<EditorId>,
     id: EditorId,
   ): JSX.Element {
-    const { appState } = this.props;
+    const { fiddle } = this.props;
 
     // only show toolbar controls if we have more than 1 visible editor
-    // Mosaic arrangement is type string if 1 editor, object otherwise
-    const toolbarControlsMaybe = typeof appState.mosaicArrangement !==
-      'string' && (
+    console.log(
+      '---> renderToolbar',
+      JSON.stringify(fiddle.visible),
+      new Error('trace'),
+    );
+    // FIXME(ckerr) this doesn't ret re-run when fiddle.visible changes...
+    const toolbarControlsMaybe = fiddle.visible.length > 1 && (
       <>
-        <MaximizeButton id={id} appState={appState} />
-        <RemoveButton id={id} appState={appState} />
+        <MaximizeButton fiddle={fiddle} id={id} />
+        <RemoveButton fiddle={fiddle} id={id} />
       </>
     );
 
@@ -227,10 +221,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @returns {JSX.Element | null}
    */
   public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
-    const { appState } = this.props;
-    const content =
-      isEditorId(id, appState.customMosaics) && this.renderEditor(id);
+    const content = this.renderEditor(id);
     const title = getEditorTitle(id);
+    console.log('--> RENDER TILE');
 
     return (
       <MosaicWindow<EditorId>
@@ -254,14 +247,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public renderEditor(id: EditorId): JSX.Element | null {
-    const { appState } = this.props;
+    const { appState, fiddle } = this.props;
     const { monaco } = this.state;
 
     return (
       <Editor
+        appState={appState}
+        fiddle={fiddle}
         id={id}
         monaco={monaco!}
-        appState={appState}
         monacoOptions={defaultMonacoOptions}
         setFocused={this.setFocused}
       />
@@ -269,17 +263,20 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public render() {
-    const { appState } = this.props;
-    const { monaco } = this.state;
+    const { fiddle } = this.props;
+    const { focused, monaco } = this.state;
+    const { visible } = fiddle;
+
+    console.log('--> VISIBLE.LENGTH', visible.length);
 
     if (!monaco) return null;
 
     return (
       <Mosaic<EditorId>
-        className={`focused__${this.state.focused}`}
+        className={`focused__${focused}`}
         onChange={this.onChange}
-        value={appState.mosaicArrangement}
-        zeroStateView={renderNonIdealState(appState)}
+        value={fiddle.mosaic}
+        zeroStateView={renderNonIdealState(fiddle)}
         renderTile={this.renderTile}
       />
     );
@@ -291,7 +288,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
   public onChange(currentNode: MosaicNode<EditorId> | null) {
-    this.props.appState.mosaicArrangement = currentNode;
+    console.log('FIXME(ckerr) this gets called on drag... wat do?');
+    this.props.fiddle.mosaic = currentNode;
   }
 
   /**
@@ -301,12 +299,13 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    */
   public async loadMonaco() {
     const { app } = window.ElectronFiddle;
-    const loader = require('monaco-loader');
-    const monaco = app.monaco || (await loader());
 
     if (!app.monaco) {
-      app.monaco = monaco;
+      const loader = require('monaco-loader');
+      app.monaco = await loader();
     }
+
+    const { monaco } = app;
 
     if (!this.state || !this.state.isMounted) {
       this.setState({

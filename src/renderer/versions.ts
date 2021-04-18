@@ -313,10 +313,12 @@ function isElectronVersion(
   return (input as RunnableVersion).source !== undefined;
 }
 
-export function getOldestSupportedVersion(): string | undefined {
+export function getOldestSupportedVersion(
+  versions: RunnableVersion[] = getElectronVersions(),
+): string | undefined {
   const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 3;
 
-  const oldestSupported = getElectronVersions()
+  const oldestSupported = versions
     .map(({ version }) => version)
     .filter((version) => /^\d+\.0\.0$/.test(version))
     .sort(semver.compare)

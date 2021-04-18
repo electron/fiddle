@@ -3,10 +3,12 @@ import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
 import { Editors } from './editors';
+import { Fiddle } from '../fiddle';
 import { Output } from './output';
 
 interface WrapperProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 interface WrapperState {
@@ -20,8 +22,12 @@ export class OutputEditorsWrapper extends React.Component<
   WrapperState
 > {
   private MOSAIC_ELEMENTS = {
-    output: <Output appState={this.props.appState} />,
-    editors: <Editors appState={this.props.appState} />,
+    output: (
+      <Output appState={this.props.appState} fiddle={this.props.fiddle} />
+    ),
+    editors: (
+      <Editors appState={this.props.appState} fiddle={this.props.fiddle} />
+    ),
   };
 
   constructor(props: any) {

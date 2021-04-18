@@ -1,22 +1,11 @@
 import * as React from 'react';
 
 import { Button, NonIdealState } from '@blueprintjs/core';
+import { Fiddle } from '../fiddle';
 
-import { DefaultEditorId } from '../../interfaces';
-import { AppState } from '../state';
-
-export function renderNonIdealState(appState: AppState) {
-  const allEditors = [
-    DefaultEditorId.html,
-    DefaultEditorId.main,
-    DefaultEditorId.renderer,
-    DefaultEditorId.preload,
-  ];
+export function renderNonIdealState(fiddle: Fiddle) {
   const resolveButton = (
-    <Button
-      text="Open all editors"
-      onClick={() => appState.setVisibleMosaics(allEditors)}
-    />
+    <Button text="Open all editors" onClick={() => fiddle.showAll()} />
   );
 
   return (

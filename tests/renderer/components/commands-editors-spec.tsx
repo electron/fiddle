@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { DefaultEditorId, GenericDialogType } from '../../../src/interfaces';
+import { EditorId, GenericDialogType, MAIN_JS } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import { getVisibleMosaics } from '../../../src/utils/editors-mosaic-arrangement';
 
@@ -9,29 +9,36 @@ jest.mock('../../../src/utils/editors-mosaic-arrangement');
 
 describe('EditorDropdown component', () => {
   let store: any;
+  let initialMosaics: EditorId[];
+  let visibleMosaics: EditorId[];
 
   beforeEach(() => {
+    initialMosaics = [MAIN_JS];
+    visibleMosaics = [...initialMosaics];
     store = {
-      hideAndBackupMosaic: jest.fn(),
+      allMosaics: [...initialMosaics],
+      closedPanels: {},
+      hideAndBackupMosaic: jest.fn().mockImplementation((id: EditorId) => {
+        store.closedPanels[id] = true;
+        visibleMosaics = visibleMosaics.filter((x: EditorId) => x !== id);
+      }),
+      removeMosaic: jest.fn().mockImplementation((id: EditorId) => {
+        visibleMosaics = visibleMosaics.filter((x: EditorId) => x !== id);
+        store.allMosaics = store.allMosaics.filter((x: EditorId) => x !== id);
+      }),
       setGenericDialogOptions: jest.fn(),
-      removeCustomMosaic: jest.fn(),
       showMosaic: jest.fn(),
       toggleGenericDialog: jest.fn(),
-      closedPanels: {},
-      customMosaics: [],
     };
 
-    (getVisibleMosaics as jest.Mock).mockReturnValue([
-      DefaultEditorId.html,
-      DefaultEditorId.renderer,
-    ]);
+    (getVisibleMosaics as jest.Mock).mockImplementation(() => visibleMosaics);
   });
 
   afterEach(() => {
     store = {
-      genericDialogLastInput: undefined,
+      allMosaics: [],
       closedPanels: {},
-      customMosaics: [],
+      genericDialogLastInput: undefined,
     };
   });
 
@@ -41,25 +48,22 @@ describe('EditorDropdown component', () => {
   });
 
   it('handles a click for an item', () => {
+    const id = initialMosaics[0];
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.onItemClick({
-      currentTarget: { id: DefaultEditorId.html },
-    } as any);
+    dropdown.onItemClick({ currentTarget: { id } } as any);
     expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     expect(store.showMosaic).toHaveBeenCalledTimes(0);
 
-    dropdown.onItemClick({
-      currentTarget: { id: DefaultEditorId.main },
-    } as any);
+    dropdown.onItemClick({ currentTarget: { id } } as any);
     expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     expect(store.showMosaic).toHaveBeenCalledTimes(1);
   });
 
   it('disables hide button if only one editor open', () => {
-    store.mosaicArrangement = 'html';
-    (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
+    store.mosaicArrangement = MAIN_JS;
+    // (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
 
     const wrapper = mount(<EditorDropdown appState={store} />);
     const instance = wrapper.instance() as EditorDropdown;
@@ -68,10 +72,10 @@ describe('EditorDropdown component', () => {
     expect(menu).toMatchSnapshot();
   });
 
-  it('can add a valid custom editor', async () => {
+  it('can add a valid editor', async () => {
     const file = 'file.js';
 
-    store.showCustomEditorDialog = jest
+    store.showEditorDialog = jest
       .fn()
       .mockReturnValue({ cancelled: false, result: file });
     const wrapper = mount(<EditorDropdown appState={store} />);
@@ -80,11 +84,11 @@ describe('EditorDropdown component', () => {
     store.genericDialogLastInput = file;
     store.genericDialogLastResult = true;
 
-    await dropdown.addCustomEditor();
+    await dropdown.addEditor();
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
       type: GenericDialogType.confirm,
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a filename to add',
       cancel: 'Cancel',
       placeholder: 'file.js',
       ok: 'Create',
@@ -93,26 +97,28 @@ describe('EditorDropdown component', () => {
 
     expect(store.showMosaic).toHaveBeenCalledTimes(1);
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
-    expect(store.customMosaics).toEqual([file]);
+    expect([...store.allMosaics].sort()).toEqual(
+      [...initialMosaics, file].sort(),
+    );
   });
 
-  it('errors when trying to add a duplicate custom editor', async () => {
-    const badFile = 'main.js';
+  it('errors when trying to add a duplicate editor', async () => {
+    const dupe = initialMosaics[0];
 
-    store.showCustomEditorDialog = jest
+    store.showEditorDialog = jest
       .fn()
-      .mockReturnValue({ cancelled: false, result: badFile });
+      .mockReturnValue({ cancelled: false, result: dupe });
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    store.genericDialogLastInput = badFile;
+    store.genericDialogLastInput = dupe;
     store.genericDialogLastResult = true;
 
-    await dropdown.addCustomEditor();
+    await dropdown.addEditor();
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
       type: GenericDialogType.confirm,
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a filename to add',
       cancel: 'Cancel',
       placeholder: 'file.js',
       ok: 'Create',
@@ -121,19 +127,19 @@ describe('EditorDropdown component', () => {
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
       type: GenericDialogType.warning,
-      label: `Custom editor name ${badFile} already exists - duplicates are not allowed`,
+      label: `Filename "${dupe}" already exists - duplicates are not allowed`,
       cancel: undefined,
     });
 
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
     expect(store.showMosaic).toHaveBeenCalledTimes(0);
-    expect(store.customMosaics).toEqual([]);
+    expect(store.allMosaics).toEqual(initialMosaics);
   });
 
-  it('errors when trying to add an invalid custom editor', async () => {
-    const badFile = 'bad.bad';
+  it('errors when trying to add an invalid editor', async () => {
+    const badFile = '💀.💩';
 
-    store.showCustomEditorDialog = jest
+    store.showEditorDialog = jest
       .fn()
       .mockReturnValue({ cancelled: false, result: badFile });
     const wrapper = mount(<EditorDropdown appState={store} />);
@@ -142,40 +148,39 @@ describe('EditorDropdown component', () => {
     store.genericDialogLastInput = badFile;
     store.genericDialogLastResult = true;
 
-    await dropdown.addCustomEditor();
+    await dropdown.addEditor();
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
-      type: GenericDialogType.confirm,
-      label: 'Enter a filename for your custom editor',
       cancel: 'Cancel',
-      placeholder: 'file.js',
+      label: 'Enter a filename to add',
       ok: 'Create',
+      placeholder: 'file.js',
+      type: GenericDialogType.confirm,
       wantsInput: true,
     });
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
-      type: GenericDialogType.warning,
-      label:
-        'Invalid custom editor name - must be either an html, js, or css file.',
       cancel: undefined,
+      label: 'Invalid editor name - must be either an html, js, or css file.',
+      type: GenericDialogType.warning,
     });
 
     expect(store.showMosaic).toHaveBeenCalledTimes(0);
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
-    expect(store.customMosaics).toEqual([]);
+    expect(store.allMosaics).toEqual(initialMosaics);
   });
 
-  it('can remove a custom editor', () => {
+  it('can remove an editor', () => {
     const file = 'file.js';
-    store.customMosaics = [file];
+    store.allMosaics = [file];
 
     const wrapper = mount(<EditorDropdown appState={store} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.removeCustomEditor({
+    dropdown.removeMosaic({
       currentTarget: { id: file },
     } as any);
 
-    expect(store.removeCustomMosaic).toHaveBeenCalledTimes(1);
+    expect(store.removeMosaic).toHaveBeenCalledTimes(1);
   });
 });

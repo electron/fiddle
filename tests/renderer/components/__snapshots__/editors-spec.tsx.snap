@@ -112,9 +112,7 @@ exports[`Editors component renders 1`] = `
         </div>
         <div
           className="mosaic-window-body"
-        >
-          Editor
-        </div>
+        />
         <div
           className="mosaic-window-body-overlay"
           onClick={[Function]}
@@ -287,9 +285,7 @@ exports[`Editors component renders 1`] = `
         </div>
         <div
           className="mosaic-window-body"
-        >
-          Editor
-        </div>
+        />
         <div
           className="mosaic-window-body-overlay"
           onClick={[Function]}
@@ -462,9 +458,7 @@ exports[`Editors component renders 1`] = `
         </div>
         <div
           className="mosaic-window-body"
-        >
-          Editor
-        </div>
+        />
         <div
           className="mosaic-window-body-overlay"
           onClick={[Function]}
@@ -637,9 +631,7 @@ exports[`Editors component renders 1`] = `
         </div>
         <div
           className="mosaic-window-body"
-        >
-          Editor
-        </div>
+        />
         <div
           className="mosaic-window-body-overlay"
           onClick={[Function]}
@@ -812,9 +804,7 @@ exports[`Editors component renders 1`] = `
         </div>
         <div
           className="mosaic-window-body"
-        >
-          Editor
-        </div>
+        />
         <div
           className="mosaic-window-body-overlay"
           onClick={[Function]}
@@ -915,7 +905,7 @@ exports[`Editors component renders a toolbar 1`] = `
       <MaximizeButton
         appState={
           Object {
-            "customMosaics": Array [],
+            "allMosaics": Array [],
             "isSettingsShowing": false,
             "isTokenDialogShowing": false,
             "mosaicArrangement": Object {
@@ -943,7 +933,7 @@ exports[`Editors component renders a toolbar 1`] = `
       <RemoveButton
         appState={
           Object {
-            "customMosaics": Array [],
+            "allMosaics": Array [],
             "isSettingsShowing": false,
             "isTokenDialogShowing": false,
             "mosaicArrangement": Object {

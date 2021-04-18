@@ -10,15 +10,10 @@ import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import {
-  CustomEditorId,
-  DEFAULT_EDITORS,
-  EditorId,
-  GenericDialogType,
-} from '../../interfaces';
-import { getEditorTitle, isKnownFile } from '../../utils/editor-utils';
-import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
+import { EditorId, GenericDialogType } from '../../interfaces';
+import { getEditorTitle, getEmptyContent } from '../../utils/editor-utils';
 import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 
 interface EditorDropdownState {
   value: string;
@@ -26,6 +21,7 @@ interface EditorDropdownState {
 
 interface EditorDropdownProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 /**
@@ -42,10 +38,10 @@ export class EditorDropdown extends React.Component<
   constructor(props: EditorDropdownProps) {
     super(props);
 
+    this.addEditor = this.addEditor.bind(this);
     this.onItemClick = this.onItemClick.bind(this);
-    this.showCustomEditorDialog = this.showCustomEditorDialog.bind(this);
-    this.addCustomEditor = this.addCustomEditor.bind(this);
-    this.removeCustomEditor = this.removeCustomEditor.bind(this);
+    this.removeEditor = this.removeEditor.bind(this);
+    this.showEditorDialog = this.showEditorDialog.bind(this);
   }
 
   public render() {
@@ -63,30 +59,34 @@ export class EditorDropdown extends React.Component<
   }
 
   public renderMenuItems() {
-    const { appState } = this.props;
+    const { fiddle } = this.props;
+    const { files, visible } = fiddle;
     const result: Array<JSX.Element> = [];
-    const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    const allEditors = [...DEFAULT_EDITORS, ...appState.customMosaics];
-    for (const id of allEditors) {
-      const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+    console.log('visible', JSON.stringify(visible));
+    console.log('visible.length', JSON.stringify(visible.length));
+    console.log('files', JSON.stringify(files));
+    for (const file of files) {
+      const { id } = file;
+      const icon = file.visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
+      // can't hide last editor panel.
+      const mustShow = file.visible && visible.length < 2;
 
-      if (!isKnownFile(id)) {
+      if (file.canRemove) {
         result.push(
           <MenuItem
+            disabled={mustShow}
             icon={icon}
-            key={id}
-            text={title}
             id={id}
+            key={id}
             onClick={this.onItemClick}
-            // Can't hide last editor panel.
-            disabled={appState.mosaicArrangement === id}
+            text={title}
           >
             <MenuItem
               icon={'cross'}
               id={id}
-              onClick={this.removeCustomEditor}
+              onClick={this.removeEditor}
               text={'Remove'}
             />
           </MenuItem>,
@@ -94,26 +94,25 @@ export class EditorDropdown extends React.Component<
       } else {
         result.push(
           <MenuItem
+            disabled={mustShow}
             icon={icon}
-            key={id}
-            text={title}
             id={id}
+            key={id}
             onClick={this.onItemClick}
-            // Can't hide last editor panel.
-            disabled={appState.mosaicArrangement === id}
+            text={title}
           />,
         );
       }
     }
 
     result.push(
-      <React.Fragment key={'fragment-custom-editor'}>
+      <React.Fragment key={'fragment-editor'}>
         <MenuDivider />
         <MenuItem
           icon="plus"
-          key="add-custom-editor"
-          text="Add Custom Editor"
-          onClick={this.addCustomEditor}
+          key="add-editor"
+          text="Add Editor"
+          onClick={this.addEditor}
         />
       </React.Fragment>,
     );
@@ -125,7 +124,7 @@ export class EditorDropdown extends React.Component<
           icon="grid-view"
           key="reset-layout"
           text="Reset Layout"
-          onClick={appState.resetEditorLayout}
+          onClick={fiddle.resetLayout}
         />
       </React.Fragment>,
     );
@@ -133,12 +132,12 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async showCustomEditorDialog() {
+  public async showEditorDialog() {
     const { appState } = this.props;
 
     appState.setGenericDialogOptions({
       type: GenericDialogType.confirm,
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a filename to add',
       wantsInput: true,
       ok: 'Create',
       cancel: 'Cancel',
@@ -154,64 +153,38 @@ export class EditorDropdown extends React.Component<
     };
   }
 
-  public async addCustomEditor() {
-    const { appState } = this.props;
+  public async addEditor() {
+    const { appState, fiddle } = this.props;
 
-    const isValidEditorName = (name: string) =>
-      /^[^\s]+\.(css|html|js)$/.test(name);
-
-    const { cancelled, result } = await this.showCustomEditorDialog();
-
+    const { cancelled, result } = await this.showEditorDialog();
     if (cancelled) return;
 
-    // Fail if editor name is not an accepted file type.
-    if (!result || !isValidEditorName(result)) {
+    try {
+      const id = result as EditorId;
+      fiddle.add(id, getEmptyContent(id));
+    } catch (error) {
       appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
-        label:
-          'Invalid custom editor name - must be either an html, js, or css file.',
+        label: error.message,
         cancel: undefined,
       });
-
       appState.toggleGenericDialog();
-    } else {
-      const name = result as CustomEditorId;
-
-      // Also fail if the user tries to create two identical editors.
-      if (appState.customMosaics.includes(name) || isKnownFile(name)) {
-        appState.setGenericDialogOptions({
-          type: GenericDialogType.warning,
-          label: `Custom editor name ${name} already exists - duplicates are not allowed`,
-          cancel: undefined,
-        });
-
-        appState.toggleGenericDialog();
-      } else {
-        appState.customMosaics.push(name);
-        appState.showMosaic(name);
-      }
     }
   }
 
-  public async removeCustomEditor(event: React.MouseEvent) {
+  public async removeEditor(event: React.MouseEvent) {
+    const { fiddle } = this.props;
     const { id } = event.currentTarget;
-    const { appState } = this.props;
 
-    console.log(`EditorDropdown: Removing custom editor ${id}`);
-    appState.removeCustomMosaic(id as EditorId);
+    console.log(`EditorDropdown: Removing editor ${id}`);
+    fiddle.remove(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
+    const { fiddle } = this.props;
     const { id } = event.currentTarget;
-    const { appState } = this.props;
-    const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    if (visibleMosaics.includes(id as EditorId)) {
-      console.log(`EditorDropdown: Closing ${id}`);
-      appState.hideAndBackupMosaic(id as EditorId);
-    } else {
-      console.log(`EditorDropdown: Opening ${id}`);
-      appState.showMosaic(id as EditorId);
-    }
+    console.log('onItemClick calling fiddle.toggle', id);
+    fiddle.toggle(id as EditorId);
   }
 }

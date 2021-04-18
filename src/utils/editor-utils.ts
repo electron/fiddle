@@ -1,16 +1,26 @@
 import * as path from 'path';
-import { DEFAULT_EDITORS, DefaultEditorId, EditorId } from '../interfaces';
+import { EditorId, MAIN_JS } from '../interfaces';
+
+// The order of these fields is the order that
+// they'll be sorted in the mosaic
+const KNOWN_FILES: string[] = [
+  MAIN_JS,
+  'renderer.js',
+  'index.html',
+  'preload.js',
+  'styles.css',
+];
 
 export function isKnownFile(filename: string): boolean {
-  return DEFAULT_EDITORS.includes(filename as any);
+  return KNOWN_FILES.includes(filename);
 }
 
-const TITLE_MAP: Record<DefaultEditorId, string> = Object.freeze({
-  [DefaultEditorId.main]: `Main Process (${DefaultEditorId.main})`,
-  [DefaultEditorId.renderer]: `Renderer Process (${DefaultEditorId.renderer})`,
-  [DefaultEditorId.preload]: `Preload (${DefaultEditorId.preload})`,
-  [DefaultEditorId.html]: `HTML (${DefaultEditorId.html})`,
-  [DefaultEditorId.css]: `Stylesheet (${DefaultEditorId.css})`,
+const TITLE_MAP: Record<EditorId, string> = Object.freeze({
+  [MAIN_JS]: `Main Process (${MAIN_JS})`,
+  'renderer.js': 'Renderer Process (renderer.js)',
+  'index.html': 'HTML (index.html)',
+  'preload.js': 'Preload (preload.js)',
+  'styles.css': 'Stylesheet (styles.css)',
 });
 
 export function getEditorTitle(id: EditorId): string {
@@ -35,8 +45,8 @@ export function isSupportedFile(filename: string): boolean {
 // first go the defaults, in the order they appear in DEFAULT_EDITORS
 // then customs, sorted lexicographically
 export function compareEditors(a: EditorId, b: EditorId) {
-  const ia = DEFAULT_EDITORS.indexOf(a as any);
-  const ib = DEFAULT_EDITORS.indexOf(b as any);
+  const ia = KNOWN_FILES.indexOf(a as any);
+  const ib = KNOWN_FILES.indexOf(b as any);
   if (ia === -1 && ib === -1) return a.localeCompare(b);
   if (ia === -1) return 1;
   if (ib === -1) return -1;

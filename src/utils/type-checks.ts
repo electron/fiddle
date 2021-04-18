@@ -1,17 +1,4 @@
 import { EditorBackup } from './editor-backup';
-import { isKnownFile } from './editor-utils';
-
-/**
- * Is the given string of type `EditorId`?
- *
- * @export
- * @param {string} id
- * @param {customEditors} other editors to check against
- * @returns {boolean} true iff the string is an editor id
- */
-export function isEditorId(id: string, customEditors: string[]): boolean {
-  return isKnownFile(id) || customEditors.includes(id as any);
-}
 
 /**
  * Is the given input of type `EditorBackup`?

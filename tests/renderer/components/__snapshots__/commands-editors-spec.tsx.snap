@@ -3,55 +3,26 @@
 exports[`EditorDropdown component disables hide button if only one editor open 1`] = `
 Array [
   <Blueprint3.MenuItem
-    disabled={false}
-    icon="eye-off"
+    disabled={true}
+    icon="eye-open"
     id="main.js"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
     shouldDismissPopover={true}
     text="Main Process (main.js)"
-  />,
-  <Blueprint3.MenuItem
-    disabled={false}
-    icon="eye-off"
-    id="renderer.js"
-    multiline={false}
-    onClick={[Function]}
-    popoverProps={Object {}}
-    shouldDismissPopover={true}
-    text="Renderer Process (renderer.js)"
-  />,
-  <Blueprint3.MenuItem
-    disabled={false}
-    icon="eye-open"
-    id="index.html"
-    multiline={false}
-    onClick={[Function]}
-    popoverProps={Object {}}
-    shouldDismissPopover={true}
-    text="HTML (index.html)"
-  />,
-  <Blueprint3.MenuItem
-    disabled={false}
-    icon="eye-off"
-    id="preload.js"
-    multiline={false}
-    onClick={[Function]}
-    popoverProps={Object {}}
-    shouldDismissPopover={true}
-    text="Preload (preload.js)"
-  />,
-  <Blueprint3.MenuItem
-    disabled={false}
-    icon="eye-off"
-    id="styles.css"
-    multiline={false}
-    onClick={[Function]}
-    popoverProps={Object {}}
-    shouldDismissPopover={true}
-    text="Stylesheet (styles.css)"
-  />,
+  >
+    <Blueprint3.MenuItem
+      disabled={false}
+      icon="cross"
+      id="main.js"
+      multiline={false}
+      onClick={[Function]}
+      popoverProps={Object {}}
+      shouldDismissPopover={true}
+      text="Remove"
+    />
+  </Blueprint3.MenuItem>,
   <React.Fragment>
     <Blueprint3.MenuDivider />
     <Blueprint3.MenuItem
@@ -61,7 +32,7 @@ Array [
       onClick={[Function]}
       popoverProps={Object {}}
       shouldDismissPopover={true}
-      text="Add Custom Editor"
+      text="Add Editor"
     />
   </React.Fragment>,
   <React.Fragment>
@@ -87,54 +58,25 @@ exports[`EditorDropdown component renders 1`] = `
       <Blueprint3.Menu>
         <Blueprint3.MenuItem
           disabled={false}
-          icon="eye-off"
+          icon="eye-open"
           id="main.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Main Process (main.js)"
-        />
-        <Blueprint3.MenuItem
-          disabled={false}
-          icon="eye-open"
-          id="renderer.js"
-          multiline={false}
-          onClick={[Function]}
-          popoverProps={Object {}}
-          shouldDismissPopover={true}
-          text="Renderer Process (renderer.js)"
-        />
-        <Blueprint3.MenuItem
-          disabled={false}
-          icon="eye-open"
-          id="index.html"
-          multiline={false}
-          onClick={[Function]}
-          popoverProps={Object {}}
-          shouldDismissPopover={true}
-          text="HTML (index.html)"
-        />
-        <Blueprint3.MenuItem
-          disabled={false}
-          icon="eye-off"
-          id="preload.js"
-          multiline={false}
-          onClick={[Function]}
-          popoverProps={Object {}}
-          shouldDismissPopover={true}
-          text="Preload (preload.js)"
-        />
-        <Blueprint3.MenuItem
-          disabled={false}
-          icon="eye-off"
-          id="styles.css"
-          multiline={false}
-          onClick={[Function]}
-          popoverProps={Object {}}
-          shouldDismissPopover={true}
-          text="Stylesheet (styles.css)"
-        />
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="main.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem
@@ -144,7 +86,7 @@ exports[`EditorDropdown component renders 1`] = `
             onClick={[Function]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
-            text="Add Custom Editor"
+            text="Add Editor"
           />
         </React.Fragment>
         <React.Fragment>

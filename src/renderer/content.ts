@@ -124,12 +124,9 @@ export function getTemplate(version: string): Promise<EditorValues> {
  * @param {string} version
  * @returns {Promise<string>}
  */
-export async function getContent(
-  name: EditorId,
-  version: string,
-): Promise<string> {
-  const mosaics = await getTemplate(version);
-  return mosaics?.[name] || getEmptyContent(name);
+async function getContent(name: EditorId, version: string): Promise<string> {
+  const content = await getTemplate(version);
+  return content?.[name] || getEmptyContent(name);
 }
 
 /**

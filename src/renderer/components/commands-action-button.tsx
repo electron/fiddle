@@ -13,7 +13,6 @@ import * as React from 'react';
 
 import { when } from 'mobx';
 import {
-  DEFAULT_EDITORS,
   EditorValues,
   GenericDialogType,
   GistActionState,
@@ -24,9 +23,11 @@ import { getOctokit } from '../../utils/octokit';
 import { getEmptyContent } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { Fiddle } from '../fiddle';
 
 interface GistActionButtonProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 interface IGistActionButtonState {
@@ -165,14 +166,14 @@ export class GistActionButton extends React.Component<
    * Publish a new GitHub gist.
    */
   public async handlePublish() {
-    const { appState } = this.props;
+    const { appState, fiddle } = this.props;
     appState.activeGistAction = GistActionState.publishing;
 
     const description = await this.getFiddleDescriptionFromUser();
 
     if (description) {
       await this.publishGist(description);
-      appState.isUnsaved = false;
+      fiddle.isEdited = false;
     }
 
     appState.genericDialogLastInput = null;
@@ -183,7 +184,7 @@ export class GistActionButton extends React.Component<
    * Update an existing GitHub gist.
    */
   public async handleUpdate() {
-    const { appState } = this.props;
+    const { appState, fiddle } = this.props;
     const octo = await getOctokit(this.props.appState);
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
@@ -196,7 +197,7 @@ export class GistActionButton extends React.Component<
         files: this.gistFilesList(values) as any,
       });
 
-      appState.isUnsaved = false;
+      fiddle.isEdited = false;
       console.log('Updating: Updating done', { gist });
       this.renderToast({ message: 'Successfully updated gist!' });
     } catch (error) {
@@ -220,7 +221,7 @@ export class GistActionButton extends React.Component<
    * Delete an existing GitHub gist.
    */
   public async handleDelete() {
-    const { appState } = this.props;
+    const { appState, fiddle } = this.props;
     const octo = await getOctokit(this.props.appState);
 
     appState.activeGistAction = GistActionState.deleting;
@@ -230,7 +231,7 @@ export class GistActionButton extends React.Component<
         gist_id: appState.gistId!,
       });
 
-      appState.isUnsaved = true;
+      fiddle.isEdited = true;
       console.log('Deleting: Deleting done', { gist });
       this.renderToast({ message: 'Successfully deleted gist!' });
     } catch (error) {
@@ -258,6 +259,7 @@ export class GistActionButton extends React.Component<
     const { gistId } = this.props.appState;
     const { actionType } = this.state;
 
+    console.log('gistId', gistId, 'actionType', actionType);
     if (gistId) {
       switch (actionType) {
         case GistActionType.publish:
@@ -424,24 +426,19 @@ export class GistActionButton extends React.Component<
   }
 
   private renderToast = (toast: IToastProps) => {
-    this.toaster.show(toast);
+    this.toaster?.show(toast);
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const { customMosaics } = this.props.appState;
+    const { allMosaics } = this.props.appState;
 
     const filesList = {};
 
-    // Add files for default editors.
-    for (const editor of DEFAULT_EDITORS) {
-      filesList[editor] = {
-        content: values[editor] || getEmptyContent(editor),
+    // Add files
+    for (const id of allMosaics) {
+      filesList[id] = {
+        content: values[id] || getEmptyContent(id),
       };
-    }
-
-    // Add files for any custom editors created by the user.
-    for (const mosaic in customMosaics) {
-      filesList[mosaic] = { content: values[mosaic] };
     }
 
     return filesList;

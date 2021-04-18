@@ -1,16 +1,8 @@
-import { DefaultEditorId, EditorValues } from '../interfaces';
+import { EditorValues, MAIN_JS } from '../interfaces';
 import { isSupportedFile } from './editor-utils';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-
-const defaults: EditorValues = Object.freeze({
-  [DefaultEditorId.css]: '',
-  [DefaultEditorId.html]: '',
-  [DefaultEditorId.main]: '',
-  [DefaultEditorId.preload]: '',
-  [DefaultEditorId.renderer]: '',
-});
 
 /**
  * Reads a Fiddle from a directory.
@@ -42,7 +34,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     }
   }
 
-  const got = { ...defaults, ...content };
+  const got = { [MAIN_JS]: '', ...content };
   console.log(`Got Fiddle from "${folder}". Found:`, Object.keys(got).sort());
   return got;
 }

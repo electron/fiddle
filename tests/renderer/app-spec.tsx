@@ -4,9 +4,15 @@ import { EditorBackup } from '../../src/utils/editor-backup';
 import { waitFor } from '../../src/utils/wait-for';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
-import { DefaultEditorId, PACKAGE_NAME } from '../../src/interfaces';
+import {
+  DefaultEditorId,
+  EditorValues,
+  MAIN_JS,
+  PACKAGE_NAME,
+} from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
+jest.mock('fs-extra');
 jest.mock('../../src/renderer/file-manager', () =>
   require('../mocks/file-manager'),
 );
@@ -364,34 +370,31 @@ describe('App component', () => {
     beforeEach(() => {
       app = new App();
       (app.state as Partial<AppState>) = new MockState();
-      app.state.customMosaics = [];
     });
 
     it('attempts to set values', () => {
-      const app = new App();
-      app.setEditorValues({
+      const { editors } = (window as any).ElectronFiddle;
+
+      const values: Partial<EditorValues> = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
-      });
+      };
 
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.html].setValue,
-      ).toHaveBeenCalledWith('html-value');
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.main].setValue,
-      ).toHaveBeenCalledWith('main-value');
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.renderer]
-          .setValue,
-      ).toHaveBeenCalledWith('renderer-value');
+      const app = new App();
+      app.setEditorValues(values);
+
+      for (const [key, value] of Object.entries(values)) {
+        expect(editors[key].setValue).toHaveBeenCalledWith(value);
+      }
     });
 
     it('attempts to set values for closed editors', () => {
       const { editors } = window.ElectronFiddle;
 
-      const oldMainEditor = editors[DefaultEditorId.main];
-      delete editors[DefaultEditorId.main];
+      // remove the main.js editor but keep a handle to it
+      const oldMainEditor = editors[MAIN_JS];
+      delete editors[MAIN_JS];
 
       (app.state.closedPanels as any)[DefaultEditorId.main] = {
         model: { setValue: jest.fn() },

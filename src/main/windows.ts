@@ -43,6 +43,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
   browserWindow.loadFile('./dist/static/index.html');
+  browserWindow.webContents.openDevTools();
 
   browserWindow.webContents.once('dom-ready', () => {
     if (browserWindow) {
@@ -74,7 +75,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  ipcMainManager.handleOnce(IpcEvents.GET_APP_PATHS, () => {
+  ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};
     const pathsToQuery = [
       'home',

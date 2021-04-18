@@ -623,7 +623,7 @@ describe('AppState', () => {
     it('updates the visible editors and creates a backup', async () => {
       appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
       appState.closedPanels = {};
-      appState.customMosaics = [];
+      appState.allMosaics = [];
       await appState.setVisibleMosaics([DefaultEditorId.main]);
 
       // we just need to mock something truthy here
@@ -638,15 +638,15 @@ describe('AppState', () => {
     });
   });
 
-  describe('removeCustomMosaic()', () => {
-    it('removes a given custom mosaic', () => {
+  describe('removeMosaic()', () => {
+    it('removes a given mosaic', () => {
       const file = 'file.js';
       appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
-      appState.customMosaics = [file];
+      appState.allMosaics = [file];
 
-      appState.removeCustomMosaic(file);
+      appState.removeMosaic(file);
 
-      expect(appState.customMosaics).toEqual([]);
+      expect(appState.allMosaics).toEqual([]);
     });
   });
 
@@ -692,6 +692,7 @@ describe('AppState', () => {
   describe('resetEditorLayout()', () => {
     it('Puts editors in default arrangement', () => {
       const editors = DEFAULT_EDITORS.slice(0, 4);
+      appState.allMosaics = [...editors];
       appState.mosaicArrangement = createMosaicArrangement(editors);
       const visible = getVisibleMosaics(appState.mosaicArrangement);
       expect(visible).toStrictEqual(editors);

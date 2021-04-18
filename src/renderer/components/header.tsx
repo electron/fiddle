@@ -3,10 +3,12 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { ChromeMac } from './chrome-mac';
 import { Commands } from './commands';
+import { Fiddle } from '../fiddle';
 import { WelcomeTour } from './tour-welcome';
 
 interface HeaderProps {
   appState: AppState;
+  fiddle: Fiddle;
 }
 
 /**
@@ -21,7 +23,11 @@ export class Header extends React.Component<HeaderProps> {
       <>
         <ChromeMac appState={this.props.appState} />
         <header id="header">
-          <Commands key="commands" appState={this.props.appState} />
+          <Commands
+            appState={this.props.appState}
+            fiddle={this.props.fiddle}
+            key="commands"
+          />
         </header>
         <WelcomeTour appState={this.props.appState} />
       </>
