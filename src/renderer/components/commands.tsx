@@ -6,14 +6,14 @@ import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { EditorDropdown } from './commands-editors';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
 
 interface CommandsProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 /**
@@ -30,9 +30,8 @@ export class Commands extends React.Component<CommandsProps> {
   }
 
   public render() {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
     const { isBisectCommandShowing: isBisectCommandShowing } = appState;
-    console.log('Commands.render', 'fiddle.visible', fiddle.visible);
 
     return (
       <div className="commands">
@@ -53,12 +52,12 @@ export class Commands extends React.Component<CommandsProps> {
               text="Console"
               onClick={appState.toggleConsole}
             />
-            <EditorDropdown appState={appState} fiddle={fiddle} />
+            <EditorDropdown appState={appState} editorMosaic={editorMosaic} />
           </ControlGroup>
         </div>
         <div>
-          <AddressBar appState={appState} fiddle={fiddle} />
-          <GistActionButton appState={appState} fiddle={fiddle} />
+          <AddressBar appState={appState} editorMosaic={editorMosaic} />
+          <GistActionButton appState={appState} editorMosaic={editorMosaic} />
         </div>
       </div>
     );

@@ -19,7 +19,7 @@ type IStandaloneCodeEditor = MonacoType.editor.IStandaloneCodeEditor;
  * The state of a file in the mosaic editor.
  * @readonly
  * @enum
- * @see Fiddle.states
+ * @see EditorMosaic.states
  */
 export const enum EditorState {
   /** The file is known to us but we've chosen not to show it.
@@ -48,13 +48,13 @@ interface EditorData {
   pending?: boolean;
 }
 
-export class Fiddle {
+export class EditorMosaic {
   /**
    * Tracks whether or not the editor mosaic has unsaved changes.
    *
    * @public
    * @type {boolean}
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @observable public isEdited = false;
 
@@ -64,7 +64,7 @@ export class Fiddle {
    * @public
    * @type {EditorStates}
    * @see EditorState
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @computed public get states(): EditorStates {
     const states: EditorStates = new Map();
@@ -88,7 +88,7 @@ export class Fiddle {
    *
    * @public
    * @type {MosaicNode<EditorId> | null>
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @observable public mosaic: MosaicNode<EditorId> | null = null;
 
@@ -99,7 +99,7 @@ export class Fiddle {
    *
    * @private
    * @type {EditorId[]}
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @computed private get leaves(): EditorId[] {
     const leaves = [];
@@ -116,7 +116,7 @@ export class Fiddle {
    *
    * @public
    * @type {number}
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @computed public get mosaicLeafCount(): number {
     return this.leaves.length;
@@ -126,7 +126,7 @@ export class Fiddle {
    * Implementation data on the files in the editor mosaic.
    *
    * @private
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @observable private readonly ids: Map<EditorId, EditorData> = new Map();
 
@@ -178,10 +178,10 @@ export class Fiddle {
    * @function set
    * @public
    * @param {Partial<EditorValues>} values - the files to be added
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @action public set(values: Partial<EditorValues>) {
-    console.log('Editor: setting mosaics', Object.keys(values));
+    console.log('EditorMosaic: setting mosaics', Object.keys(values));
 
     // show files whose content is nonempty and is also
     // different from the placeholder empty content
@@ -234,7 +234,7 @@ export class Fiddle {
    * @throws Will throw an Error if the file cannot be added
    */
   @action public add(id: EditorId, value: string) {
-    console.log(`Mosaics: add ${id}`);
+    console.log(`EditorMosaic: add ${id}`);
 
     if (this.ids.has(id)) {
       throw new Error(`Cannot add duplicate file "${id}"`);
@@ -259,10 +259,10 @@ export class Fiddle {
    * @function remove
    * @param {EditorId} id - the file to remove from the editor mosaic
    * @see hide
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @action public remove(id: EditorId) {
-    console.log(`Mosaics: remove ${id}`);
+    console.log(`EditorMosaic: remove ${id}`);
     this.ids.delete(id);
     this.isEdited = true;
     this.rebuildMosaic();
@@ -275,7 +275,7 @@ export class Fiddle {
    *
    * @function values
    * @public
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   public values(): EditorValues {
     const values = {};
@@ -290,7 +290,7 @@ export class Fiddle {
    * @private
    * @param {EditorData} the data to query
    * @see values
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   private value(data: EditorData) {
     const { backup, editor } = data;
@@ -309,7 +309,7 @@ export class Fiddle {
    *
    * @function inspect
    * @public
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   public inspect() {
     if (!process.env.JEST_WORKER_ID)
@@ -364,7 +364,7 @@ export class Fiddle {
    * @see remove
    */
   @action public hide(id: EditorId) {
-    console.log(`Mosaics: hide ${id}`);
+    console.log(`EditorMosaic: hide ${id}`);
     const data = this.ids.get(id);
     if (!data?.editor) return; // no editor for that id
 
@@ -383,10 +383,10 @@ export class Fiddle {
    * @param {EditorId} id - the file to add to the editor mosaic
    * @see hide
    * @see showAll
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @action public show(id: EditorId) {
-    console.log(`Mosaics: show ${id}`);
+    console.log(`EditorMosaic: show ${id}`);
     const data = this.ids.get(id);
     if (!data || data.pending || data.editor) return;
 
@@ -402,7 +402,7 @@ export class Fiddle {
    * @param {EditorId} id - the file to add to the editor mosaic
    * @see hide
    * @see show
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @action public toggle(id: EditorId) {
     if (this.leaves.includes(id)) {
@@ -418,7 +418,7 @@ export class Fiddle {
    * @function showAll
    * @public
    * @see show
-   * @memberof Fiddle
+   * @memberof EditorMosaic
    */
   @action public showAll() {
     for (const [id, data] of this.ids) {
@@ -494,7 +494,7 @@ export class Fiddle {
       throw new Error(`Unexpected editor for file "${id}"`);
     }
 
-    console.log(`Editor: adding editor for ${id}`);
+    console.log(`EditorMosaic: adding editor for ${id}`);
     data.editor = editor;
     data.pending = false;
     this.observeEdits(editor);
@@ -518,7 +518,6 @@ export class Fiddle {
 
   private observeEdits(editor: IStandaloneCodeEditor) {
     const disposable = editor.onDidChangeModelContent(() => {
-      console.log('i heard an edit');
       this.isEdited ||= true;
       disposable.dispose();
     });

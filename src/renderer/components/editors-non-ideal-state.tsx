@@ -1,11 +1,11 @@
 import * as React from 'react';
 
 import { Button, NonIdealState } from '@blueprintjs/core';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 
-export function renderNonIdealState(fiddle: Fiddle) {
+export function renderNonIdealState(editorMosaic: EditorMosaic) {
   const resolveButton = (
-    <Button text="Open all editors" onClick={() => fiddle.showAll()} />
+    <Button text="Open all editors" onClick={() => editorMosaic.showAll()} />
   );
 
   return (

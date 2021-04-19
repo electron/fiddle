@@ -6,12 +6,12 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { EditorId } from '../../interfaces';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 import { monacoLanguage } from '../../utils/editor-utils';
 
 interface EditorProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
   monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
   id: EditorId;
@@ -55,13 +55,13 @@ export class Editor extends React.Component<EditorProps> {
    * @param {MonacoType.editor.IStandaloneCodeEditor} editor
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
-    const { fiddle, editorDidMount, id } = this.props;
+    const { editorMosaic, editorDidMount, id } = this.props;
 
     // Set the content on the editor.
     await this.setContent();
 
     // Set the editor as an available object.
-    fiddle.addEditor(id, editor);
+    editorMosaic.addEditor(id, editor);
 
     // And notify others
     if (editorDidMount) {
@@ -116,13 +116,7 @@ export class Editor extends React.Component<EditorProps> {
    * @memberof Editor
    */
   private async setContent() {
-    const { fiddle, id } = this.props;
-    // const { version } = appState;
-
-    fiddle.restore(id, this.editor);
-
-    // couldn't restore content?
-    // const value = await getContent(id, version);
-    // this.createModel(value);
+    const { editorMosaic, id } = this.props;
+    editorMosaic.restore(id, this.editor);
   }
 }

@@ -3,12 +3,12 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { ChromeMac } from './chrome-mac';
 import { Commands } from './commands';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 import { WelcomeTour } from './tour-welcome';
 
 interface HeaderProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 /**
@@ -19,17 +19,18 @@ interface HeaderProps {
  */
 export class Header extends React.Component<HeaderProps> {
   public render() {
+    const { appState, editorMosaic } = this.props;
     return (
       <>
-        <ChromeMac appState={this.props.appState} />
+        <ChromeMac appState={appState} />
         <header id="header">
           <Commands
-            appState={this.props.appState}
-            fiddle={this.props.fiddle}
+            appState={appState}
+            editorMosaic={editorMosaic}
             key="commands"
           />
         </header>
-        <WelcomeTour appState={this.props.appState} />
+        <WelcomeTour appState={appState} />
       </>
     );
   }

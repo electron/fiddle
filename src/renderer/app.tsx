@@ -14,7 +14,7 @@ import {
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { AppState } from './state';
-import { Fiddle } from './fiddle';
+import { EditorMosaic } from './editor-mosaic';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -35,7 +35,7 @@ export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
   public monaco: typeof MonacoType | undefined;
   public state = new AppState(getElectronVersions());
-  public readonly fiddle = new Fiddle(this);
+  public readonly editorMosaic = new EditorMosaic(this);
   public fileManager = new FileManager(this.state, this);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
@@ -63,12 +63,12 @@ export class App {
     editorValues: Partial<EditorValues>,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
-    const { fiddle, state } = this;
+    const { editorMosaic, state } = this;
 
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
-    if (fiddle.isEdited && !(await this.confirmUnsaved())) return false;
+    if (editorMosaic.isEdited && !(await this.confirmUnsaved())) return false;
 
-    this.fiddle.set(editorValues);
+    this.editorMosaic.set(editorValues);
 
     state.gistId = gistId || '';
     state.localPath = filePath;
@@ -85,7 +85,7 @@ export class App {
   public async getEditorValues(
     options?: PackageJsonOptions,
   ): Promise<EditorValues> {
-    const values = this.fiddle.values();
+    const values = this.editorMosaic.values();
 
     if (options && options.include !== false) {
       values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);
@@ -112,9 +112,12 @@ export class App {
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Dialogs appState={this.state} fiddle={this.fiddle} />
-        <Header appState={this.state} fiddle={this.fiddle} />
-        <OutputEditorsWrapper appState={this.state} fiddle={this.fiddle} />
+        <Dialogs appState={this.state} editorMosaic={this.editorMosaic} />
+        <Header appState={this.state} editorMosaic={this.editorMosaic} />
+        <OutputEditorsWrapper
+          appState={this.state}
+          editorMosaic={this.editorMosaic}
+        />
       </div>
     );
 
@@ -208,7 +211,7 @@ export class App {
    * This method sets up the listener.
    */
   public setupResizeListener(): void {
-    window.addEventListener('resize', () => this.fiddle.layout());
+    window.addEventListener('resize', () => this.editorMosaic.layout());
   }
 
   /**
@@ -228,9 +231,9 @@ export class App {
 
   public setupUnloadListeners() {
     autorun(async () => {
-      const { state, fiddle } = this;
+      const { editorMosaic, state } = this;
 
-      if (!fiddle.isEdited) {
+      if (!editorMosaic.isEdited) {
         window.onbeforeunload = null;
       } else {
         window.onbeforeunload = () => {

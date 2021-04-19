@@ -4,16 +4,16 @@ import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { IpcEvents } from '../../ipc-events';
+import { AppState } from '../state';
+import { EditorMosaic } from '../editor-mosaic';
 import { GistActionState } from '../../interfaces';
+import { IpcEvents } from '../../ipc-events';
 import { getGistId, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
-import { AppState } from '../state';
-import { Fiddle } from '../fiddle';
 
 interface AddressBarProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 interface AddressBarState {
@@ -132,7 +132,7 @@ export class AddressBar extends React.Component<
 
   public render() {
     const { activeGistAction } = this.props.appState;
-    const { isEdited } = this.props.fiddle;
+    const { isEdited } = this.props.editorMosaic;
     const { value } = this.state;
     const isCorrect = !!getGistId(value);
     const className = classnames('address-bar', isEdited, { empty: !value });

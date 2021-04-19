@@ -9,20 +9,19 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import { getLeaves } from 'react-mosaic-component';
+import { AppState } from '../state';
+import { Editor } from './editor';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
+import { EditorMosaic } from '../editor-mosaic';
 import { IpcEvents } from '../../ipc-events';
-import { getEditorTitle } from '../../utils/editor-utils';
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { activateTheme } from '../themes';
 import { getAtPath, setAtPath } from '../../utils/js-path';
-import { toggleMonaco } from '../../utils/toggle-monaco';
+import { getEditorTitle } from '../../utils/editor-utils';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
-import { AppState } from '../state';
-import { Fiddle } from '../fiddle';
-import { activateTheme } from '../themes';
-import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
-import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { toggleMonaco } from '../../utils/toggle-monaco';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -33,7 +32,7 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
 
 interface EditorsProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 interface EditorsState {
@@ -104,9 +103,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
-      const { fiddle } = this.props;
+      const { editorMosaic } = this.props;
 
-      const focused = fiddle.focusedEditor();
+      const focused = editorMosaic.focusedEditor();
       if (focused) {
         const model = focused.getModel();
         if (model) {
@@ -142,8 +141,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public executeCommand(commandId: string) {
-    const { fiddle } = this.props;
-    const focused = fiddle.focusedEditor();
+    const { editorMosaic } = this.props;
+    const focused = editorMosaic.focusedEditor();
 
     if (focused) {
       const command = focused.getAction(commandId);
@@ -160,14 +159,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public toggleEditorOption(path: string): boolean {
     try {
-      const { fiddle } = this.props;
+      const { editorMosaic } = this.props;
       const { monacoOptions } = this.state;
 
       const options = { ...monacoOptions };
       const currentSetting = getAtPath(path, options);
 
       setAtPath(path, options, toggleMonaco(currentSetting));
-      fiddle.updateOptions(options);
+      editorMosaic.updateOptions(options);
       this.setState({ monacoOptions: options });
 
       return true;
@@ -189,14 +188,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     { title }: MosaicWindowProps<EditorId>,
     id: EditorId,
   ): JSX.Element {
-    const { fiddle } = this.props;
-    const { mosaicLeafCount } = fiddle;
+    const { editorMosaic } = this.props;
+    const { mosaicLeafCount } = editorMosaic;
 
     // only show toolbar controls if we have more than 1 visible editor
     const toolbarControlsMaybe = mosaicLeafCount > 1 && (
       <>
-        <MaximizeButton fiddle={fiddle} id={id} />
-        <RemoveButton fiddle={fiddle} id={id} />
+        <MaximizeButton editorMosaic={editorMosaic} id={id} />
+        <RemoveButton editorMosaic={editorMosaic} id={id} />
       </>
     );
 
@@ -247,13 +246,13 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public renderEditor(id: EditorId): JSX.Element | null {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
     const { monaco } = this.state;
 
     return (
       <Editor
         appState={appState}
-        fiddle={fiddle}
+        editorMosaic={editorMosaic}
         id={id}
         monaco={monaco!}
         monacoOptions={defaultMonacoOptions}
@@ -264,8 +263,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public render() {
     const { focused, monaco } = this.state;
-    const { fiddle } = this.props;
-    const { mosaic } = fiddle;
+    const { editorMosaic } = this.props;
+    const { mosaic } = editorMosaic;
 
     if (!monaco) return null;
 
@@ -276,7 +275,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         initialValue={mosaic}
         onChange={this.onChange}
         onRelease={this.onRelease}
-        zeroStateView={renderNonIdealState(fiddle)}
+        zeroStateView={renderNonIdealState(editorMosaic)}
       />
     );
   }
@@ -301,12 +300,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    */
   public onRelease(mosaicNode: MosaicNode<EditorId> | null) {
     // the user has finished moving panes around;
-    // stop overrideing the layout from props.fiddle.mosaic
+    // stop overrideing the layout from props.editorMosaic.mosaic
     // FIXME: this is progress but still is wrong.
     // As soon as we stop overriding, the user's changes are undone
     // if they're moving panels around.
-    console.log('onRelease', getLeaves(mosaicNode));
-    this.props.fiddle.mosaic = mosaicNode;
+    this.props.editorMosaic.mosaic = mosaicNode;
   }
 
   /**

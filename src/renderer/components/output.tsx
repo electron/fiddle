@@ -11,12 +11,12 @@ import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 import { WrapperMosaicId } from './output-editors-wrapper';
 
 interface OutputProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }

@@ -116,7 +116,7 @@ export class FileManager {
         this.appState.gistId = undefined;
       }
 
-      this.app.fiddle.isEdited = false;
+      this.app.editorMosaic.isEdited = false;
     }
   }
 

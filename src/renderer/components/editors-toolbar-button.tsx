@@ -8,10 +8,10 @@ import {
 } from 'react-mosaic-component';
 
 import { EditorId } from '../../interfaces';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 
 interface ToolbarButtonProps {
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
   id: EditorId;
 }
 
@@ -54,11 +54,10 @@ export class MaximizeButton extends ToolbarButton {
 
 export class RemoveButton extends ToolbarButton {
   /**
-   * Create a button that can remove this panel
+   * Create a button that can hide this file
    */
   public createButton(_mosaicActions: MosaicRootActions<any>) {
-    // FIXME(ckerr) is this button supposed to remove or to hide
-    const onClick = () => this.props.fiddle.hide(this.props.id);
+    const onClick = () => this.props.editorMosaic.hide(this.props.id);
 
     return <Button icon="cross" className="bp3-small" onClick={onClick} />;
   }

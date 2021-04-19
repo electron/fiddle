@@ -18,16 +18,16 @@ import {
   GistActionState,
   GistActionType,
 } from '../../interfaces';
-import { IpcEvents } from '../../ipc-events';
-import { getOctokit } from '../../utils/octokit';
-import { getEmptyContent } from '../../utils/editor-utils';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
+import { IpcEvents } from '../../ipc-events';
+import { getEmptyContent } from '../../utils/editor-utils';
+import { getOctokit } from '../../utils/octokit';
+import { ipcRendererManager } from '../ipc';
 
 interface GistActionButtonProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 interface IGistActionButtonState {
@@ -166,14 +166,14 @@ export class GistActionButton extends React.Component<
    * Publish a new GitHub gist.
    */
   public async handlePublish() {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
     appState.activeGistAction = GistActionState.publishing;
 
     const description = await this.getFiddleDescriptionFromUser();
 
     if (description) {
       await this.publishGist(description);
-      fiddle.isEdited = false;
+      editorMosaic.isEdited = false;
     }
 
     appState.genericDialogLastInput = null;
@@ -184,7 +184,7 @@ export class GistActionButton extends React.Component<
    * Update an existing GitHub gist.
    */
   public async handleUpdate() {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
     const octo = await getOctokit(this.props.appState);
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
@@ -197,7 +197,7 @@ export class GistActionButton extends React.Component<
         files: this.gistFilesList(values) as any,
       });
 
-      fiddle.isEdited = false;
+      editorMosaic.isEdited = false;
       console.log('Updating: Updating done', { gist });
       this.renderToast({ message: 'Successfully updated gist!' });
     } catch (error) {
@@ -221,7 +221,7 @@ export class GistActionButton extends React.Component<
    * Delete an existing GitHub gist.
    */
   public async handleDelete() {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
     const octo = await getOctokit(this.props.appState);
 
     appState.activeGistAction = GistActionState.deleting;
@@ -231,7 +231,7 @@ export class GistActionButton extends React.Component<
         gist_id: appState.gistId!,
       });
 
-      fiddle.isEdited = true;
+      editorMosaic.isEdited = true;
       console.log('Deleting: Deleting done', { gist });
       this.renderToast({ message: 'Successfully deleted gist!' });
     } catch (error) {
@@ -430,6 +430,7 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
+    // FIXME(ckerr)
     const { allMosaics } = this.props.appState;
 
     const filesList = {};

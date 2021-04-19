@@ -13,7 +13,7 @@ import * as React from 'react';
 import { EditorId, GenericDialogType, MAIN_JS } from '../../interfaces';
 import { getEditorTitle, getEmptyContent } from '../../utils/editor-utils';
 import { AppState } from '../state';
-import { EditorState, Fiddle } from '../fiddle';
+import { EditorState, EditorMosaic } from '../editor-mosaic';
 
 interface EditorDropdownState {
   value: string;
@@ -21,7 +21,7 @@ interface EditorDropdownState {
 
 interface EditorDropdownProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 /**
@@ -59,8 +59,8 @@ export class EditorDropdown extends React.Component<
   }
 
   public renderMenuItems() {
-    const { fiddle } = this.props;
-    const { mosaicLeafCount, states } = fiddle;
+    const { editorMosaic } = this.props;
+    const { mosaicLeafCount, states } = editorMosaic;
     const result: Array<JSX.Element> = [];
 
     for (const [id, state] of states) {
@@ -121,7 +121,7 @@ export class EditorDropdown extends React.Component<
           icon="grid-view"
           key="reset-layout"
           text="Reset Layout"
-          onClick={fiddle.resetLayout}
+          onClick={editorMosaic.resetLayout}
         />
       </React.Fragment>,
     );
@@ -151,14 +151,14 @@ export class EditorDropdown extends React.Component<
   }
 
   public async addEditor() {
-    const { appState, fiddle } = this.props;
+    const { appState, editorMosaic } = this.props;
 
     const { cancelled, result } = await this.showEditorDialog();
     if (cancelled) return;
 
     try {
       const id = result as EditorId;
-      fiddle.add(id, getEmptyContent(id));
+      editorMosaic.add(id, getEmptyContent(id));
     } catch (error) {
       appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
@@ -170,18 +170,16 @@ export class EditorDropdown extends React.Component<
   }
 
   public async removeEditor(event: React.MouseEvent) {
-    const { fiddle } = this.props;
+    const { editorMosaic } = this.props;
     const { id } = event.currentTarget;
 
     console.log(`EditorDropdown: Removing editor ${id}`);
-    fiddle.remove(id as EditorId);
+    editorMosaic.remove(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
-    const { fiddle } = this.props;
+    const { editorMosaic } = this.props;
     const { id } = event.currentTarget;
-
-    console.log('onItemClick calling fiddle.toggle', id);
-    fiddle.toggle(id as EditorId);
+    editorMosaic.toggle(id as EditorId);
   }
 }

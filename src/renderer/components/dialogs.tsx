@@ -5,14 +5,14 @@ import { AddThemeDialog } from './dialog-add-theme';
 import { AddVersionDialog } from './dialog-add-version';
 import { AppState } from '../state';
 import { BisectDialog } from './dialog-bisect';
-import { Fiddle } from '../fiddle';
+import { EditorMosaic } from '../editor-mosaic';
 import { GenericDialog } from './dialog-generic';
 import { Settings } from './settings';
 import { TokenDialog } from './dialog-token';
 
 interface DialogsProps {
   appState: AppState;
-  fiddle: Fiddle;
+  editorMosaic: EditorMosaic;
 }
 
 /**

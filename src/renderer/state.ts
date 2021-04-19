@@ -231,7 +231,7 @@ export class AppState {
    */
   @computed get title(): string {
     const { gistId, localPath, templateName } = this;
-    const { isEdited } = window.ElectronFiddle.app.fiddle;
+    const { isEdited } = window.ElectronFiddle.app.editorMosaic;
 
     const name = 'Electron Fiddle';
 
