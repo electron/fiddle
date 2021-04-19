@@ -321,15 +321,7 @@ export class EditorMosaic {
   //=== Layout
 
   /**
-   * Rebuild the mosaic observable based on the current state.
-   *
-   * NB ordinarily this would be a @computed property since it usually
-   * is built from `leaves` just like it is here; but we also need
-   * it to be writable when the user resizes/moves items in the mosaic.
-   *
-   * FIXME(ckerr): maybe this should be computed anyway and then have a
-   * public setter to force the change here internally. That would let
-   * us remove all the rebuildMosaic() calls
+   * Rebuild the mosaic layout based on the current files
    *
    * @function rebuildMosaic
    * @private
