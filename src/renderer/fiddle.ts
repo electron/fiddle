@@ -15,16 +15,22 @@ import {
 
 type IStandaloneCodeEditor = MonacoType.editor.IStandaloneCodeEditor;
 
+/**
+ * The state of a file in the mosaic editor.
+ * @readonly
+ * @enum
+ * @see Fiddle.states
+ */
 export const enum EditorState {
-  // The file is known to us but we've chosen not to show it.
-  // Its contents are cached offscreen.
+  /** The file is known to us but we've chosen not to show it.
+      Its contents are cached offscreen. */
   Hidden,
 
-  // Space has been allocated in the mosaic for this file but the monaco
-  // editor hasn't mounted yet. This is an interm step before 'Visible'.
+  /** Space has been allocated in the mosaic for this file but the monaco
+      editor hasn't mounted yet. This is an interm step before 'Visible'. */
   Pending,
 
-  // The file's contents are visible in a Monaco editor in the mosaic.
+  /** The file's contents are visible in a Monaco editor in the mosaic. */
   Visible,
 }
 
@@ -43,14 +49,23 @@ interface EditorData {
 }
 
 export class Fiddle {
+  /**
+   * Tracks whether or not the editor mosaic has unsaved changes.
+   *
+   * @public
+   * @type {boolean}
+   * @memberof Fiddle
+   */
   @observable public isEdited = false;
 
-  @observable public mosaic: MosaicNode<EditorId> | null = null;
-
-  @computed public get mosaicLeafCount() {
-    return this.leaves.length;
-  }
-
+  /**
+   * The states of all the files in the editor mosaic.
+   *
+   * @public
+   * @type {EditorStates}
+   * @see EditorState
+   * @memberof Fiddle
+   */
   @computed public get states(): EditorStates {
     const states: EditorStates = new Map();
 
@@ -67,8 +82,25 @@ export class Fiddle {
     return states;
   }
 
-  @observable private readonly ids: Map<EditorId, EditorData> = new Map();
+  /**
+   * The root node of the editor mosaic, for consumption by the editors
+   * component
+   *
+   * @public
+   * @type {MosaicNode<EditorId> | null>
+   * @memberof Fiddle
+   */
+  @observable public mosaic: MosaicNode<EditorId> | null = null;
 
+  /**
+   * The ids that currently have a spot in the editor mosaic,
+   * either currently active (EditorState.visible) or about to be
+   * as soon as a monaco editor mounts (EditorState.pending).
+   *
+   * @private
+   * @type {EditorId[]}
+   * @memberof Fiddle
+   */
   @computed private get leaves(): EditorId[] {
     const leaves = [];
     for (const [id, data] of this.ids) {
@@ -78,6 +110,25 @@ export class Fiddle {
     }
     return leaves;
   }
+
+  /**
+   * The number of leaves currently in the editor mosaic.
+   *
+   * @public
+   * @type {number}
+   * @memberof Fiddle
+   */
+  @computed public get mosaicLeafCount(): number {
+    return this.leaves.length;
+  }
+
+  /**
+   * Implementation data on the files in the editor mosaic.
+   *
+   * @private
+   * @memberof Fiddle
+   */
+  @observable private readonly ids: Map<EditorId, EditorData> = new Map();
 
   constructor(private readonly app: App) {
     for (const name of [
@@ -119,24 +170,16 @@ export class Fiddle {
     );
   }
 
-  public values(): EditorValues {
-    const values = {};
-    for (const [id, data] of this.ids) values[id] = this.value(data);
-    return values;
-  }
+  //=== Set / Add / Remove files
 
-  private value(data: EditorData) {
-    const { backup, editor } = data;
-
-    let value;
-    if (editor) {
-      value = editor.getValue();
-    } else if (backup) {
-      value = backup.value;
-    }
-    return value || '';
-  }
-
+  /**
+   * Set the contents of the mosaic filter, replacing any previous contents.
+   *
+   * @function set
+   * @public
+   * @param {Partial<EditorValues>} values - the files to be added
+   * @memberof Fiddle
+   */
   @action public set(values: Partial<EditorValues>) {
     console.log('Editor: setting mosaics', Object.keys(values));
 
@@ -175,19 +218,21 @@ export class Fiddle {
       }
     }
 
-    for (const id of removeMe) {
-      this.ids.delete(id);
-    }
+    for (const id of removeMe) this.ids.delete(id);
 
     this.isEdited = false;
     this.rebuildMosaic();
   }
 
-  @action private rebuildMosaic() {
-    const leaves = [...this.leaves].sort(compareEditors);
-    this.mosaic = createBalancedTreeFromLeaves(leaves, 'row');
-  }
-
+  /**
+   * Adds a new file to the editor mosaic.
+   *
+   * @function add
+   * @public
+   * @param {EditorId} id - the file to add
+   * @param {string} text - the file's contents
+   * @throws Will throw an Error if the file cannot be added
+   */
   @action public add(id: EditorId, value: string) {
     console.log(`Mosaics: add ${id}`);
 
@@ -207,6 +252,117 @@ export class Fiddle {
     this.rebuildMosaic();
   }
 
+  /**
+   * Remove a file from the editor mosaic.
+   * Unlike `hide` this function forgets the file completely.
+   *
+   * @function remove
+   * @param {EditorId} id - the file to remove from the editor mosaic
+   * @see hide
+   * @memberof Fiddle
+   */
+  @action public remove(id: EditorId) {
+    console.log(`Mosaics: remove ${id}`);
+    this.ids.delete(id);
+    this.isEdited = true;
+    this.rebuildMosaic();
+  }
+
+  //=== Getters
+
+  /**
+   * Get the current values in the editor mosaic, including hidden files.
+   *
+   * @function values
+   * @public
+   * @memberof Fiddle
+   */
+  public values(): EditorValues {
+    const values = {};
+    for (const [id, data] of this.ids) values[id] = this.value(data);
+    return values;
+  }
+
+  /**
+   * Get the contents of the specified file.
+   *
+   * @function value
+   * @private
+   * @param {EditorData} the data to query
+   * @see values
+   * @memberof Fiddle
+   */
+  private value(data: EditorData) {
+    const { backup, editor } = data;
+
+    let value;
+    if (editor) {
+      value = editor.getValue();
+    } else if (backup) {
+      value = backup.value;
+    }
+    return value || '';
+  }
+
+  /**
+   * Clear-box testing helper.
+   *
+   * @function inspect
+   * @public
+   * @memberof Fiddle
+   */
+  public inspect() {
+    if (!process.env.JEST_WORKER_ID)
+      throw new Error('inspect() is for clear-box testing.');
+    const { ids, leaves } = this;
+    return { ids, leaves };
+  }
+
+  //=== Layout
+
+  /**
+   * Rebuild the mosaic observable based on the current state.
+   *
+   * NB ordinarily this would be a @computed property since it usually
+   * is built from `leaves` just like it is here; but we also need
+   * it to be writable when the user resizes/moves items in the mosaic.
+   *
+   * FIXME(ckerr): maybe this should be computed anyway and then have a
+   * public setter to force the change here internally. That would let
+   * us remove all the rebuildMosaic() calls
+   *
+   * @function rebuildMosaic
+   * @private
+   */
+  @action private rebuildMosaic() {
+    const leaves = [...this.leaves].sort(compareEditors);
+    this.mosaic = createBalancedTreeFromLeaves(leaves, 'row');
+  }
+
+  /**
+   * Resets the editor mosaic to its default layout.
+   *
+   * @function resetLayout
+   * @public
+   */
+  @action public resetLayout() {
+    const { isEdited } = this;
+    this.set(this.values());
+    this.isEdited = isEdited;
+  }
+
+  //=== Visibility
+
+  /**
+   * Remove an editor from the editor mosaic, but remember it offscreen
+   * so that it can be re-shown with `show`.
+   *
+   * @function hide
+   * @public
+   * @param {EditorId} id - the file to remove from the editor mosaic
+   * @see show
+   * @see remove
+   */
   @action public hide(id: EditorId) {
     console.log(`Mosaics: hide ${id}`);
     const data = this.ids.get(id);
@@ -218,13 +374,17 @@ export class Fiddle {
     this.rebuildMosaic();
   }
 
-  @action public remove(id: EditorId) {
-    console.log(`Mosaics: remove ${id}`);
-    this.ids.delete(id);
-    this.isEdited = true;
-    this.rebuildMosaic();
-  }
-
+  /**
+   * Add a file to the editor mosaic if it was previously hidden.
+   * This is the opposite of `hide`
+   *
+   * @function show
+   * @public
+   * @param {EditorId} id - the file to add to the editor mosaic
+   * @see hide
+   * @see showAll
+   * @memberof Fiddle
+   */
   @action public show(id: EditorId) {
     console.log(`Mosaics: show ${id}`);
     const data = this.ids.get(id);
@@ -234,6 +394,16 @@ export class Fiddle {
     this.rebuildMosaic();
   }
 
+  /**
+   * Shows or hides the given file, depending on its current state
+   *
+   * @function toggle
+   * @public
+   * @param {EditorId} id - the file to add to the editor mosaic
+   * @see hide
+   * @see show
+   * @memberof Fiddle
+   */
   @action public toggle(id: EditorId) {
     if (this.leaves.includes(id)) {
       this.hide(id);
@@ -242,6 +412,14 @@ export class Fiddle {
     }
   }
 
+  /**
+   * Show any hidden files.
+   *
+   * @function showAll
+   * @public
+   * @see show
+   * @memberof Fiddle
+   */
   @action public showAll() {
     for (const [id, data] of this.ids) {
       if (data.backup) {
@@ -250,21 +428,10 @@ export class Fiddle {
     }
   }
 
-  @action public resetLayout() {
-    const { isEdited } = this;
-    this.set(this.values());
-    this.isEdited = isEdited;
-  }
+  //=== IStandaloneCodeEditor helpers
 
   public focusedEditor(): IStandaloneCodeEditor | undefined {
     return [...this.editors].find((editor) => editor.hasTextFocus());
-  }
-
-  public inspect() {
-    if (!process.env.JEST_WORKER_ID)
-      throw new Error('inspect() is for clear-box testing.');
-    const { ids, leaves } = this;
-    return { ids, leaves };
   }
 
   private layoutDebounce: any;
@@ -282,7 +449,7 @@ export class Fiddle {
     for (const editor of this.editors) editor.updateOptions(options);
   }
 
-  // backup / restore
+  //=== Backup & Restore
 
   private createBackup(editor: IStandaloneCodeEditor): Backup {
     const model = editor.getModel() || undefined;
@@ -310,7 +477,7 @@ export class Fiddle {
     return true;
   }
 
-  // editor was mounted
+  //=== Working with mounted Monaco editors
 
   private createModel(filename: string, value: string) {
     const { monaco } = this.app;
@@ -333,14 +500,16 @@ export class Fiddle {
     this.observeEdits(editor);
   }
 
-  // listen for user edits
+  //=== Listen for user edits
 
   private ignoreAllEdits() {
     for (const editor of this.editors) this.ignoreEdits(editor);
   }
 
   private ignoreEdits(editor: IStandaloneCodeEditor) {
-    editor.onDidChangeModelContent(null as any);
+    editor.onDidChangeModelContent(() => {
+      /* no-op */
+    });
   }
 
   private observeAllEdits() {
@@ -355,7 +524,7 @@ export class Fiddle {
     });
   }
 
-  // helpers
+  //=== Misc Helpers: editor generator func
 
   private *editorGen() {
     for (const { editor } of this.ids.values()) {
