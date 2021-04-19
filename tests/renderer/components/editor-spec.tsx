@@ -1,15 +1,23 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
-import { DefaultEditorId } from '../../../src/interfaces';
+import { App } from '../../../src/renderer/app';
 import { Editor } from '../../../src/renderer/components/editor';
+import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
+import { EditorValues, MAIN_JS } from '../../../src/interfaces';
+
+import { MonacoEditorMock } from '../../mocks/monaco-editor';
+import { createEditorValues } from '../../mocks/editor-values';
 
 describe('Editor component', () => {
+  let app: any;
   let store: any;
   let monaco: any;
+  let editorMosaic: any;
+  let editorValues: EditorValues;
   const editorDispose = jest.fn();
   const updateOptions = jest.fn();
-  const onDidFocusEditorText = jest.fn();
+  //   const onDidFocusEditorText = jest.fn();
 
   beforeEach(() => {
     store = {
@@ -21,14 +29,11 @@ describe('Editor component', () => {
 
     editorDispose.mockReset();
 
+    editorValues = createEditorValues();
+
     monaco = {
       editor: {
-        create: jest.fn(() => ({
-          dispose: editorDispose,
-          onDidFocusEditorText,
-          setModel: jest.fn(),
-          restoreViewState: jest.fn(),
-        })),
+        create: jest.fn().mockImplementation(() => new MonacoEditorMock()),
         createModel: jest.fn(() => ({
           updateOptions,
         })),
@@ -36,19 +41,30 @@ describe('Editor component', () => {
         dispose: jest.fn(),
       },
     };
+
+    app = { monaco };
+    editorMosaic = new EditorMosaic(app as App);
+    (window as any).ElectronFiddle.app = app;
   });
 
-  it('renders the editor container', () => {
+  function createEditorComponent(didMount: any = undefined) {
     const wrapper = shallow(
       <Editor
         appState={store}
+        editorMosaic={editorMosaic}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
+        editorDidMount={didMount}
         setFocused={() => undefined}
       />,
     );
+    const instance: any = wrapper.instance();
+    return { instance, wrapper };
+  }
 
+  it('renders the editor container', () => {
+    const { wrapper } = createEditorComponent();
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
   });
 
@@ -56,9 +72,10 @@ describe('Editor component', () => {
     let wrapper = shallow(
       <Editor
         appState={store}
+        editorMosaic={editorMosaic}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
         setFocused={() => undefined}
       />,
     );
@@ -68,9 +85,10 @@ describe('Editor component', () => {
     wrapper = shallow(
       <Editor
         appState={store}
+        editorMosaic={editorMosaic}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.html}
+        id={'foo.html'}
         setFocused={() => undefined}
       />,
     );
@@ -80,9 +98,10 @@ describe('Editor component', () => {
     wrapper = shallow(
       <Editor
         appState={store}
+        editorMosaic={editorMosaic}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.css}
+        id={'foo.css'}
         setFocused={() => undefined}
       />,
     );
@@ -91,15 +110,7 @@ describe('Editor component', () => {
   });
 
   it('denies updates', () => {
-    const wrapper = shallow(
-      <Editor
-        appState={store}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={DefaultEditorId.main}
-        setFocused={() => undefined}
-      />,
-    );
+    const { wrapper } = createEditorComponent();
 
     expect(
       (wrapper as any)
@@ -110,18 +121,10 @@ describe('Editor component', () => {
 
   describe('initMonaco()', async () => {
     it('attempts to create an editor', async () => {
+      editorMosaic.set(editorValues);
+
       const didMount = jest.fn();
-      const wrapper = shallow(
-        <Editor
-          appState={store}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={DefaultEditorId.main}
-          editorDidMount={didMount}
-          setFocused={() => undefined}
-        />,
-      );
-      const instance: any = wrapper.instance();
+      const { instance } = createEditorComponent(didMount);
 
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
@@ -130,7 +133,9 @@ describe('Editor component', () => {
       expect(monaco.editor.create).toHaveBeenCalled();
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
+  });
 
+  /*
     describe('backups', async () => {
       it('attempts to restore a backup if contains a model', async () => {
         store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
@@ -249,4 +254,5 @@ describe('Editor component', () => {
 
     expect(editorDispose).toHaveBeenCalled();
   });
+  */
 });

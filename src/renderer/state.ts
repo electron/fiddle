@@ -8,9 +8,11 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  MAIN_JS,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
+  SetFiddleOptions,
   Version,
   VersionSource,
   VersionState,
@@ -28,6 +30,7 @@ import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
 import { sortVersions } from '../utils/sort-versions';
+import { getTemplate, isContentUnchanged } from './content';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
@@ -478,16 +481,12 @@ export class AppState {
     const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
 
-    /*
     // Should we update the editor?
-    // FIXME: zzz
     if (await isContentUnchanged(MAIN_JS, this.version)) {
       const editorValues = await getTemplate(version);
-
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }
-    */
 
     this.version = version;
 

@@ -1,17 +1,18 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
-
 import { observable } from 'mobx';
+import { shallow } from 'enzyme';
+
 import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
-import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
-import { MockState } from '../../mocks/state';
 import { GistActionState } from '../../../src/interfaces';
+import { urlFromId } from '../../../src/utils/gist';
+
+import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
 
 jest.mock('../../../src/utils/octokit');
 
 describe('AddressBar component', () => {
   let store: any;
-  (window as any).ElectronFiddle = new ElectronFiddleMock();
+  let editorMosaic: any;
 
   class MockStore {
     @observable public gistId: string | null = null;
@@ -22,42 +23,50 @@ describe('AddressBar component', () => {
   }
 
   beforeEach(() => {
+    const electronFiddle = new ElectronFiddleMock();
+    (window as any).ElectronFiddle = new ElectronFiddleMock();
     store = new MockStore();
+    editorMosaic = electronFiddle.app.editorMosaic;
   });
 
+  function createAddressBar() {
+    const wrapper = shallow(
+      <AddressBar appState={store} editorMosaic={editorMosaic} />,
+    );
+    const instance: AddressBar = wrapper.instance() as any;
+    return { instance, wrapper };
+  }
+
   it('renders', () => {
-    const wrapper = shallow(<AddressBar appState={store} />);
+    const { wrapper } = createAddressBar();
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('uses an existing gistId as state', () => {
-    store.gistId = 'hi';
+  it('uses a AppState.gistId', () => {
+    const gistId1 = '5b827f4aafa7ee29bdc70282ecc31640';
+    const gistId2 = '2f748f0c0079769e9532924b117f9252';
 
-    const wrapper = shallow(<AddressBar appState={store} />);
-    expect((wrapper.state() as any).value).toBe('https://gist.github.com/hi');
+    // uses the gistId that was present when the wrapper was created...
+    store.gistId = gistId1;
+    const { wrapper } = createAddressBar();
+    expect((wrapper.state() as any).value).toBe(urlFromId(store.gistId));
+
+    // ..and updates it based on changes to the AppState.gistId
+    store.gistId = gistId2;
+    expect((wrapper.state() as any).value).toBe(urlFromId(store.gistId));
   });
 
   it('handles change', () => {
-    const wrapper = shallow(<AddressBar appState={store} />);
-    const instance: AddressBar = wrapper.instance() as any;
-    instance.handleChange({ target: { value: 'hi' } } as any);
+    const value = 'hi';
+    const { instance, wrapper } = createAddressBar();
+    instance.handleChange({ target: { value } } as any);
 
-    expect(wrapper.state('value')).toBe('hi');
-  });
-
-  it('handles an external state change', () => {
-    const mockStore = new MockState() as any;
-    const wrapper = shallow(<AddressBar appState={mockStore} />);
-
-    mockStore.gistId = 'hi';
-
-    expect((wrapper.state() as any).value).toBe('https://gist.github.com/hi');
+    expect(wrapper.state('value')).toBe(value);
   });
 
   it('handles submit', () => {
     const preventDefault = jest.fn();
-    const wrapper = shallow(<AddressBar appState={store} />);
-    const instance: AddressBar = wrapper.instance() as any;
+    const { instance, wrapper } = createAddressBar();
 
     instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     wrapper.find('form').simulate('submit', { preventDefault });
@@ -67,7 +76,7 @@ describe('AddressBar component', () => {
   });
 
   it('disables during gist publishing', async () => {
-    const wrapper = shallow(<AddressBar appState={store} />);
+    const { wrapper } = createAddressBar();
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.publishing } },
@@ -85,7 +94,7 @@ describe('AddressBar component', () => {
   });
 
   it('disables during gist updating', async () => {
-    const wrapper = shallow(<AddressBar appState={store} />);
+    const { wrapper } = createAddressBar();
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.updating } },
@@ -103,7 +112,7 @@ describe('AddressBar component', () => {
   });
 
   it('disables during gist deleting', async () => {
-    const wrapper = shallow(<AddressBar appState={store} />);
+    const { wrapper } = createAddressBar();
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.deleting } },

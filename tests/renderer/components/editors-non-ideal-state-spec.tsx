@@ -1,5 +1,5 @@
+import { EditorMosaicMock } from '../../mocks/editor-mosaic';
 import { mount } from 'enzyme';
-
 import { renderNonIdealState } from '../../../src/renderer/components/editors-non-ideal-state';
 
 describe('renderNonIdealState()', () => {
@@ -8,10 +8,10 @@ describe('renderNonIdealState()', () => {
   });
 
   it('handles a click', () => {
-    const mockState = { setVisibleMosaics: jest.fn() };
-    const wrapper = mount(renderNonIdealState(mockState as any));
+    const editorMosaic = new EditorMosaicMock();
+    const wrapper = mount(renderNonIdealState(editorMosaic as any));
     wrapper.find('button').simulate('click');
 
-    expect(mockState.setVisibleMosaics).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.showAll).toHaveBeenCalledTimes(1);
   });
 });

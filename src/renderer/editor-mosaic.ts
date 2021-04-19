@@ -319,6 +319,7 @@ export class EditorMosaic {
   @action private rebuildMosaic() {
     const leaves = [...this.leaves].sort(compareEditors);
     this.mosaic = createBalancedTreeFromLeaves(leaves, 'row');
+    console.log('rebuildMosaic', JSON.stringify(this.mosaic));
   }
 
   /**

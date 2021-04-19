@@ -1,4 +1,5 @@
-import { DEFAULT_EDITORS, DefaultEditorId } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
+import { createEditorValues } from '../mocks/editor-values';
 import {
   compareEditors,
   getEditorTitle,
@@ -10,9 +11,7 @@ import {
 describe('editor-utils', () => {
   describe('getEditorTitle', () => {
     it('recognizes default titles', () => {
-      expect(getEditorTitle(DefaultEditorId.main)).toBe(
-        'Main Process (main.js)',
-      );
+      expect(getEditorTitle(MAIN_JS)).toBe('Main Process (main.js)');
     });
     it('recognizes custom titles', () => {
       expect(getEditorTitle('foo.js')).toBe('Custom Editor (foo.js)');
@@ -30,7 +29,7 @@ describe('editor-utils', () => {
 
   describe('isKnownFile', () => {
     it('marks default editors as known files', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isKnownFile(id)).toBe(true);
       }
     });
@@ -38,24 +37,32 @@ describe('editor-utils', () => {
 
   describe('isSupportedFile', () => {
     it('supports all default editor types', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isSupportedFile(id)).toBe(true);
       }
     });
   });
 
   describe('compareEditors', () => {
-    it('sorts default editors in order', () => {
-      const ids = [...DEFAULT_EDITORS];
-      ids.sort(compareEditors);
-      expect(ids).toStrictEqual(DEFAULT_EDITORS);
+    it('sorts known files in a consistent order', () => {
+      const ids = Object.keys(createEditorValues());
+      const sorted1 = [...ids].sort(compareEditors);
+      ids.push(ids.shift()!);
+      ids.push(ids.shift()!);
+      const sorted2 = [...ids].sort(compareEditors);
+      expect(sorted1).toStrictEqual(sorted2);
     });
-    it('sorts default editors before custom ones', () => {
-      const defaultId = DEFAULT_EDITORS[0];
-      const customId = 'foo.js';
-      const ids = [customId, defaultId];
+
+    it('sorts known editors before supported ones', () => {
+      const filename = 'hello.js';
+
+      let ids = [MAIN_JS, filename];
       ids.sort(compareEditors);
-      expect(ids).toStrictEqual([defaultId, customId]);
+      expect(ids).toStrictEqual([MAIN_JS, filename]);
+
+      ids = [filename, MAIN_JS];
+      ids.sort(compareEditors);
+      expect(ids).toStrictEqual([MAIN_JS, filename]);
     });
   });
 });

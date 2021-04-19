@@ -83,6 +83,7 @@ export class Editor extends React.Component<EditorProps> {
       });
 
       // mark this editor as focused whenever it is
+      console.log('this.editor', JSON.stringify(this.editor));
       this.editor.onDidFocusEditorText(() => {
         const { id, setFocused } = this.props;
         setFocused(id);

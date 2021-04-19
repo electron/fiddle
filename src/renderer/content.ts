@@ -141,11 +141,15 @@ export async function isContentUnchanged(
   version: string,
 ): Promise<boolean> {
   const { ElectronFiddle: fiddle } = window;
+  console.log('fiddle', !!fiddle);
+  console.log('fiddle.app', !!fiddle?.app);
   if (!fiddle || !fiddle.app) return false;
 
   const values = await fiddle.app.getEditorValues({
     include: false,
   });
+  console.log('values', JSON.stringify(values));
+  console.log('content', JSON.stringify(await getContent(name, version)));
 
   return values[name] === (await getContent(name, version));
 }

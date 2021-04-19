@@ -5,17 +5,17 @@ Array [
   <Blueprint3.MenuItem
     disabled={true}
     icon="eye-open"
-    id="main.js"
+    id="index.html"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
     shouldDismissPopover={true}
-    text="Main Process (main.js)"
+    text="HTML (index.html)"
   >
     <Blueprint3.MenuItem
       disabled={false}
       icon="cross"
-      id="main.js"
+      id="index.html"
       multiline={false}
       onClick={[Function]}
       popoverProps={Object {}}
@@ -41,6 +41,7 @@ Array [
       disabled={false}
       icon="grid-view"
       multiline={false}
+      onClick={[Function]}
       popoverProps={Object {}}
       shouldDismissPopover={true}
       text="Reset Layout"
@@ -57,19 +58,19 @@ exports[`EditorDropdown component renders 1`] = `
     content={
       <Blueprint3.Menu>
         <Blueprint3.MenuItem
-          disabled={false}
+          disabled={true}
           icon="eye-open"
-          id="main.js"
+          id="index.html"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="Main Process (main.js)"
+          text="HTML (index.html)"
         >
           <Blueprint3.MenuItem
             disabled={false}
             icon="cross"
-            id="main.js"
+            id="index.html"
             multiline={false}
             onClick={[Function]}
             popoverProps={Object {}}
@@ -95,6 +96,7 @@ exports[`EditorDropdown component renders 1`] = `
             disabled={false}
             icon="grid-view"
             multiline={false}
+            onClick={[Function]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
             text="Reset Layout"

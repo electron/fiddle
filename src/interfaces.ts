@@ -106,6 +106,7 @@ export const enum GenericDialogType {
 
 export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
 
+// FIXME(ckerr) replace all the Partial<EditorValues>
 export type EditorValues = Record<EditorId, string>;
 
 export const MAIN_JS = 'main.js';

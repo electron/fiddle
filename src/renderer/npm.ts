@@ -80,7 +80,7 @@ export async function findModulesInEditors(values: EditorValues) {
   // Filter out all editor values which aren't JavaScript files.
   const contents = Object.entries(values)
     .filter(([filename]) => filename.endsWith('.js'))
-    .map(([_, content]) => content);
+    .map(([_, content]) => content as string);
 
   for (const content of contents) {
     const found = await findModules(content);

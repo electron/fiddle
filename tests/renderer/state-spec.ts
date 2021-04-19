@@ -1,9 +1,5 @@
-import * as MonacoType from 'monaco-editor';
-
 import {
   BlockableAccelerator,
-  DEFAULT_EDITORS,
-  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogType,
   RunnableVersion,
@@ -11,7 +7,6 @@ import {
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
 import {
   getVersionState,
   removeBinary,
@@ -26,11 +21,6 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import {
-  createMosaicArrangement,
-  getVisibleMosaics,
-} from '../../src/utils/editors-mosaic-arrangement';
-import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
 import { MockVersions } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -92,6 +82,8 @@ describe('AppState', () => {
     expect(appState).toBeTruthy();
   });
 
+  // FIXME(ckerr) this needs to be in app tests
+  /*
   describe('isUnsaved autorun handler', () => {
     it('can close the window if user accepts the dialog', (done) => {
       window.close = jest.fn();
@@ -151,26 +143,8 @@ describe('AppState', () => {
         done();
       });
     });
-
-    it('sets the onDidChangeModelContent handler if saved', async (done) => {
-      // confirm that setting appState.isUnsaved to false
-      // causes a new change-model-content callback to be installed
-      appState.isUnsaved = false;
-      const fn = window.ElectronFiddle.editors!['renderer.js']!
-        .onDidChangeModelContent;
-      await waitFor(() => (fn as jest.Mock).mock.calls.length > 0);
-      expect(window.onbeforeunload).toBe(null);
-      expect(fn as jest.Mock).toHaveBeenCalledTimes(1);
-
-      // confirm that invoking the new callback sets appState.isUnsaved to true
-      const call = (fn as jest.Mock).mock.calls[0];
-      const callback = call[0];
-      callback();
-      expect(appState.isUnsaved).toBe(true);
-
-      done();
-    });
   });
+  */
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
@@ -479,10 +453,7 @@ describe('AppState', () => {
     it('possibly updates the editors', async () => {
       appState.versions['1.0.0'] = { version: '1.0.0' } as any;
       (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
-      (getTemplate as jest.Mock).mockResolvedValueOnce({
-        defaultMosaics: {},
-        customMosaics: {},
-      });
+      (getTemplate as jest.Mock).mockResolvedValueOnce({});
 
       await appState.setVersion('v1.0.0');
 
@@ -603,130 +574,6 @@ describe('AppState', () => {
     });
   });
 
-  describe('getAndRemoveEditorValueBackup()', () => {
-    const id = DefaultEditorId.main;
-
-    it('returns null if there is no backup', () => {
-      const result = appState.getAndRemoveEditorValueBackup(id);
-      expect(result).toEqual(null);
-    });
-
-    it('returns and deletes a backup if there is one', () => {
-      appState.closedPanels[id] = { testBackup: true } as any;
-      const result = appState.getAndRemoveEditorValueBackup(id);
-      expect(result).toEqual({ testBackup: true });
-      expect(appState.closedPanels[id]).toBeUndefined();
-    });
-  });
-
-  describe('setVisibleMosaics()', () => {
-    it('updates the visible editors and creates a backup', async () => {
-      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
-      appState.closedPanels = {};
-      appState.allMosaics = [];
-      await appState.setVisibleMosaics([DefaultEditorId.main]);
-
-      // we just need to mock something truthy here
-      window.ElectronFiddle.editors[
-        DefaultEditorId.main
-      ] = {} as MonacoType.editor.IStandaloneCodeEditor;
-
-      expect(appState.mosaicArrangement).toEqual(DefaultEditorId.main);
-      expect(appState.closedPanels[DefaultEditorId.renderer]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.html]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeUndefined();
-    });
-  });
-
-  describe('removeMosaic()', () => {
-    it('removes a given mosaic', () => {
-      const file = 'file.js';
-      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
-      appState.allMosaics = [file];
-
-      appState.removeMosaic(file);
-
-      expect(appState.allMosaics).toEqual([]);
-    });
-  });
-
-  describe('hideAndBackupMosaic()', () => {
-    it('hides a given editor and creates a backup', () => {
-      const editors = DEFAULT_EDITORS.slice(0, 4);
-      appState.closedPanels = {};
-
-      appState.mosaicArrangement = createMosaicArrangement(editors);
-      const visible = getVisibleMosaics(appState.mosaicArrangement);
-      expect(visible).toStrictEqual(editors);
-
-      appState.hideAndBackupMosaic(visible[0]);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: visible[1],
-        second: {
-          direction: 'column',
-          first: visible[2],
-          second: visible[3],
-        },
-      });
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.renderer]).toBeUndefined();
-      expect(appState.closedPanels[DefaultEditorId.html]).toBeUndefined();
-    });
-  });
-
-  describe('showMosaic()', () => {
-    it('shows a given editor', () => {
-      appState.mosaicArrangement = DefaultEditorId.main;
-      appState.showMosaic(DefaultEditorId.html);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: DefaultEditorId.main,
-        second: DefaultEditorId.html,
-      });
-    });
-  });
-
-  describe('resetEditorLayout()', () => {
-    it('Puts editors in default arrangement', () => {
-      const editors = DEFAULT_EDITORS.slice(0, 4);
-      appState.allMosaics = [...editors];
-      appState.mosaicArrangement = createMosaicArrangement(editors);
-      const visible = getVisibleMosaics(appState.mosaicArrangement);
-      expect(visible).toStrictEqual(editors);
-
-      appState.hideAndBackupMosaic(visible[0]);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: visible[1],
-        second: {
-          direction: 'column',
-          first: visible[2],
-          second: visible[3],
-        },
-      });
-
-      appState.resetEditorLayout();
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: {
-          direction: 'column',
-          first: visible[0],
-          second: visible[1],
-        },
-        second: {
-          direction: 'column',
-          first: visible[2],
-          second: visible[3],
-        },
-      });
-    });
-  });
-
   describe('blockAccelerators()', () => {
     it('adds an accelerator to be blocked', () => {
       appState.acceleratorsToBlock = [];
@@ -794,7 +641,7 @@ describe('AppState', () => {
 
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
-      appState.isUnsaved = true;
+      window.ElectronFiddle.app.editorMosaic.isEdited = true;
       const actual = appState.title;
       expect(actual).toBe(expected);
     });

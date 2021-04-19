@@ -8,10 +8,9 @@ configure({ adapter: new Adapter() });
 global.confirm = jest.fn();
 
 if (!process.env.hasOwnProperty('FIDDLE_VERBOSE_TESTS')) {
-  jest.spyOn(global.console, 'error').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'info').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
+  for (const name of ['debug', 'error', 'info', 'log', 'warn']) {
+    jest.spyOn(global.console, name).mockImplementation(() => jest.fn());
+  }
 }
 jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');

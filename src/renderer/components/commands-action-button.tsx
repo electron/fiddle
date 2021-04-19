@@ -17,12 +17,13 @@ import {
   GenericDialogType,
   GistActionState,
   GistActionType,
+  MAIN_JS,
 } from '../../interfaces';
 import { AppState } from '../state';
 import { EditorMosaic } from '../editor-mosaic';
 import { IpcEvents } from '../../ipc-events';
-import { getEmptyContent } from '../../utils/editor-utils';
 import { getOctokit } from '../../utils/octokit';
+import { getEmptyContent } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
 
 interface GistActionButtonProps {
@@ -259,7 +260,6 @@ export class GistActionButton extends React.Component<
     const { gistId } = this.props.appState;
     const { actionType } = this.state;
 
-    console.log('gistId', gistId, 'actionType', actionType);
     if (gistId) {
       switch (actionType) {
         case GistActionType.publish:
@@ -431,18 +431,17 @@ export class GistActionButton extends React.Component<
 
   private gistFilesList = (values: EditorValues) => {
     const filesList = {};
-    // FIXME(ckerr)
-    /*
-    const { allMosaics } = this.props.appState;
 
-
-    // Add files
-    for (const id of allMosaics) {
-      filesList[id] = {
-        content: values[id] || getEmptyContent(id),
+    const required_files = [MAIN_JS];
+    for (const filename of required_files) {
+      filesList[filename] = {
+        content: getEmptyContent(filename),
       };
     }
-    */
+
+    for (const [filename, content] of Object.entries(values)) {
+      filesList[filename] = { content };
+    }
 
     return filesList;
   };

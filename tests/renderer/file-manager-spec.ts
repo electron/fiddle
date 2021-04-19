@@ -1,20 +1,20 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+import * as readFiddle from '../../src/utils/read-fiddle';
 import { App } from '../../src/renderer/app';
 import { AppState } from '../../src/renderer/state';
-import {
-  DefaultEditorId,
-  EditorId,
-  Files,
-  MAIN_JS,
-} from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
+import { EditorId, Files, MAIN_JS } from '../../src/interfaces';
 import { FileManager } from '../../src/renderer/file-manager';
+import { IpcEvents } from '../../src/ipc-events';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+
 import { AppMock } from '../mocks/app';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import * as readFiddle from '../../src/utils/read-fiddle';
+import { createEditorValues } from '../mocks/editor-values';
+
+const editorValues = createEditorValues();
+const editorCount = Object.keys(editorValues).length;
 
 // jest.mock('fs-extra');
 jest.mock('tmp', () => ({
@@ -24,11 +24,7 @@ jest.mock('tmp', () => ({
   })),
 }));
 jest.mock('../../src/renderer/templates', () => ({
-  getTemplateValues: () => ({
-    [DefaultEditorId.html]: '',
-    [DefaultEditorId.main]: '',
-    [DefaultEditorId.renderer]: '',
-  }),
+  getTemplateValues: () => editorValues,
 }));
 
 describe('FileManager', () => {
@@ -96,24 +92,21 @@ describe('FileManager', () => {
     it('saves all non-empty files in Fiddle', async () => {
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(5);
+      expect(fs.outputFile).toHaveBeenCalledTimes(editorCount);
     });
 
     it('saves a fiddle with custom editors', async () => {
       const file = 'file.js';
-      app.state.allMosaics = [file];
-      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
+      const values = {
+        ...editorValues,
         [file]: 'hi',
-        [DefaultEditorId.html]: 'html',
-        [DefaultEditorId.renderer]: 'renderer',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.main]: 'main',
-        [DefaultEditorId.css]: 'css',
-      });
+      };
+
+      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce(values);
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(6);
+      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
     it('removes a file that is newly empty', async () => {
@@ -129,8 +122,8 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(5);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(5);
+      expect(fs.outputFile).toHaveBeenCalledTimes(editorCount);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(editorCount);
     });
 
     it('handles an error (remove)', async () => {
@@ -174,7 +167,8 @@ describe('FileManager', () => {
         includeElectron: false,
       });
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(6);
+      // + 1 for package.json
+      expect(fs.outputFile).toHaveBeenCalledTimes(editorCount + 1);
       expect(tmp.setGracefulCleanup).toHaveBeenCalled();
     });
 
@@ -204,16 +198,9 @@ describe('FileManager', () => {
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
       await fm.openTemplate('test');
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.main]: '',
-        },
-        {
-          templateName: 'test',
-        },
-      );
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(editorValues, {
+        templateName: 'test',
+      });
     });
 
     it('runs openTemplate on IPC event', () => {
@@ -254,40 +241,15 @@ describe('FileManager', () => {
 
   describe('getFiles()', () => {
     it('applies transforms', async () => {
+      const filename = MAIN_JS;
+      const content = 'hi';
+
       const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.set(DefaultEditorId.renderer, 'hi');
+        files.set(filename, content);
         return files;
       });
 
-      expect(result.get(DefaultEditorId.renderer)).toBe('hi');
-    });
-
-    it('handles custom editors', async () => {
-      const file = 'file.js';
-      app.state.allMosaics = [file];
-
-      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-        [file]: 'file',
-        [DefaultEditorId.html]: 'html',
-        [DefaultEditorId.renderer]: 'renderer',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.main]: 'main',
-        [DefaultEditorId.css]: 'css',
-      });
-
-      const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.forEach((value, key) => {
-          files.set(key, `${value}!`);
-        });
-        return files;
-      });
-
-      expect(result.get(DefaultEditorId.main)).toBe('main!');
-      expect(result.get(DefaultEditorId.renderer)).toBe('renderer!');
-      expect(result.get(DefaultEditorId.preload)).toBe('preload!');
-      expect(result.get(DefaultEditorId.html)).toBe('html!');
-      expect(result.get(DefaultEditorId.css)).toBe('css!');
-      expect(result.get(file)).toBe('file!');
+      expect(result.get(filename)).toBe(content);
     });
 
     it('handles transform error', async () => {
@@ -295,7 +257,9 @@ describe('FileManager', () => {
         throw new Error('bwap bwap');
       });
 
-      expect(result.get(DefaultEditorId.renderer)).toBe('renderer-content');
+      for (const [filename, content] of Object.entries(editorValues)) {
+        expect(result.get(filename)).toBe(content);
+      }
     });
   });
 });
