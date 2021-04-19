@@ -33,9 +33,12 @@ const EMPTY_EDITOR_CONTENT = {
   js: '// Empty',
 } as const;
 
+function getSuffix(filename: string) {
+  return path.parse(filename).ext.slice(1);
+}
+
 export function getEmptyContent(filename: string): string {
-  const suffix = path.parse(filename).ext.slice(1);
-  return EMPTY_EDITOR_CONTENT[suffix] || '';
+  return EMPTY_EDITOR_CONTENT[getSuffix(filename)] || '';
 }
 
 export function isSupportedFile(filename: string): boolean {
@@ -51,4 +54,11 @@ export function compareEditors(a: EditorId, b: EditorId) {
   if (ia === -1) return 1;
   if (ib === -1) return -1;
   return ia - ib;
+}
+
+export function monacoLanguage(filename: string) {
+  const suffix = getSuffix(filename);
+  if (suffix === 'css') return 'css';
+  if (suffix === 'html') return 'html';
+  return 'javascript';
 }
