@@ -1,6 +1,6 @@
 import * as fs from 'fs-extra';
 import semver from 'semver';
-import { action, autorun, computed, observable, when } from 'mobx';
+import { action, autorun, computed, observable } from 'mobx';
 
 import {
   BlockableAccelerator,

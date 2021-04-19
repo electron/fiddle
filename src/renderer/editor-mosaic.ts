@@ -22,15 +22,17 @@ type IStandaloneCodeEditor = MonacoType.editor.IStandaloneCodeEditor;
  * @see EditorMosaic.states
  */
 export const enum EditorState {
-  /** The file is known to us but we've chosen not to show it.
+  /** The file is known to us but we've chosen not to show it, either
+      because the content was boring or because hide() was called.
       Its contents are cached offscreen. */
   Hidden,
 
-  /** Space has been allocated in the mosaic for this file but the monaco
-      editor hasn't mounted yet. This is an interm step before 'Visible'. */
+  /** Space has been allocated for this file in the mosaic but the
+      monaco editor has not mounted in React yet. This is an interim
+      state before 'Visible. */
   Pending,
 
-  /** The file's contents are visible in a Monaco editor in the mosaic. */
+  /** The file is visible in a Monaco editor in the mosaic. */
   Visible,
 }
 
@@ -50,7 +52,7 @@ interface EditorData {
 
 export class EditorMosaic {
   /**
-   * Tracks whether or not the editor mosaic has unsaved changes.
+   * Is true any of the contents is are unsaved.
    *
    * @public
    * @type {boolean}
@@ -63,8 +65,8 @@ export class EditorMosaic {
    *
    * @public
    * @type {EditorStates}
-   * @see EditorState
    * @memberof EditorMosaic
+   * @see EditorState
    */
   @computed public get states(): EditorStates {
     const states: EditorStates = new Map();
@@ -141,7 +143,6 @@ export class EditorMosaic {
       'observeEdits',
       'remove',
       'resetLayout',
-      'restore',
       'set',
       'show',
       'showAll',
@@ -204,6 +205,7 @@ export class EditorMosaic {
         this.ids.set(id, { backup: { value } });
       } else {
         const data = this.ids.get(id);
+        console.log('value is', value);
         if (data?.editor) {
           // we want it + have a place for it
           this.ignoreEdits(data.editor);
@@ -248,6 +250,8 @@ export class EditorMosaic {
       pending: true,
     });
 
+    console.log('id', id, 'data', JSON.stringify(this.ids.get(id)));
+
     this.isEdited = true;
     this.rebuildMosaic();
   }
@@ -258,8 +262,8 @@ export class EditorMosaic {
    *
    * @function remove
    * @param {EditorId} id - the file to remove from the editor mosaic
-   * @see hide
    * @memberof EditorMosaic
+   * @see hide
    */
   @action public remove(id: EditorId) {
     console.log(`EditorMosaic: remove ${id}`);
@@ -278,30 +282,15 @@ export class EditorMosaic {
    * @memberof EditorMosaic
    */
   public values(): EditorValues {
+    const getValue = (data: EditorData) => {
+      const { backup, editor } = data;
+      const value = editor ? editor.getValue() : backup!.value;
+      return value || '';
+    };
+
     const values = {};
-    for (const [id, data] of this.ids) values[id] = this.value(data);
+    for (const [id, data] of this.ids) values[id] = getValue(data);
     return values;
-  }
-
-  /**
-   * Get the contents of the specified file.
-   *
-   * @function value
-   * @private
-   * @param {EditorData} the data to query
-   * @see values
-   * @memberof EditorMosaic
-   */
-  private value(data: EditorData) {
-    const { backup, editor } = data;
-
-    let value;
-    if (editor) {
-      value = editor.getValue();
-    } else if (backup) {
-      value = backup.value;
-    }
-    return value || '';
   }
 
   /**
@@ -325,6 +314,7 @@ export class EditorMosaic {
    *
    * @function rebuildMosaic
    * @private
+   * @memberof EditorMosaic
    */
   @action private rebuildMosaic() {
     const leaves = [...this.leaves].sort(compareEditors);
@@ -336,6 +326,7 @@ export class EditorMosaic {
    *
    * @function resetLayout
    * @public
+   * @memberof EditorMosaic
    */
   @action public resetLayout() {
     const { isEdited } = this;
@@ -352,6 +343,7 @@ export class EditorMosaic {
    * @function hide
    * @public
    * @param {EditorId} id - the file to remove from the editor mosaic
+   * @memberof EditorMosaic
    * @see show
    * @see remove
    */
@@ -373,9 +365,9 @@ export class EditorMosaic {
    * @function show
    * @public
    * @param {EditorId} id - the file to add to the editor mosaic
+   * @memberof EditorMosaic
    * @see hide
    * @see showAll
-   * @memberof EditorMosaic
    */
   @action public show(id: EditorId) {
     console.log(`EditorMosaic: show ${id}`);
@@ -392,9 +384,9 @@ export class EditorMosaic {
    * @function toggle
    * @public
    * @param {EditorId} id - the file to add to the editor mosaic
+   * @memberof EditorMosaic
    * @see hide
    * @see show
-   * @memberof EditorMosaic
    */
   @action public toggle(id: EditorId) {
     if (this.leaves.includes(id)) {
@@ -409,8 +401,8 @@ export class EditorMosaic {
    *
    * @function showAll
    * @public
-   * @see show
    * @memberof EditorMosaic
+   * @see show
    */
   @action public showAll() {
     for (const [id, data] of this.ids) {
@@ -432,6 +424,7 @@ export class EditorMosaic {
     const DEBOUNCE_MSEC = 50;
     clearTimeout(this.layoutDebounce);
     this.layoutDebounce = setTimeout(() => {
+      console.log('in timeout num editors is', [...this.editors].length);
       for (const editor of this.editors) editor.layout();
       this.layoutDebounce = null;
     }, DEBOUNCE_MSEC);
@@ -450,36 +443,23 @@ export class EditorMosaic {
     return { model, value, viewState };
   }
 
-  @action public restore(id: EditorId, editor: IStandaloneCodeEditor): boolean {
-    const data = this.ids.get(id);
-    if (!data?.backup) return false;
-
-    const { backup } = data;
-    data.backup = undefined;
-
-    if (backup.viewState) {
-      editor.restoreViewState(backup.viewState);
-    }
-    if (backup.model) {
-      editor.setModel(backup.model);
-    } else {
-      editor.setModel(this.createModel(id, backup.value ?? ''));
-    }
-
-    return true;
-  }
-
   //=== Working with mounted Monaco editors
 
   private createModel(filename: string, value: string) {
     const { monaco } = this.app;
-    if (!monaco) throw new Error('monaco not loaded yet');
-
-    const model = monaco.editor.createModel(value, monacoLanguage(filename));
+    const model = monaco!.editor.createModel(value, monacoLanguage(filename));
     model.updateOptions({ tabSize: 2 });
     return model;
   }
 
+  /**
+   * When a monaco editor is mounted, call this to populate its content
+   *
+   * @public
+   * @param {EditorId} id - the filename to place in the editor
+   * @param {IStandaloneCodeEditor} editor - the editor to use
+   * @memberof EditorMosaic
+   */
   @action public addEditor(id: EditorId, editor: IStandaloneCodeEditor) {
     const data = this.ids.get(id);
     if (!data?.pending) {
@@ -487,6 +467,20 @@ export class EditorMosaic {
     }
 
     console.log(`EditorMosaic: adding editor for ${id}`);
+
+    // try to restore the content from backup
+    const backup = data.backup!;
+    if (backup.viewState) {
+      editor.restoreViewState(backup.viewState);
+    }
+    if (backup.model) {
+      editor.setModel(backup.model);
+    } else {
+      editor.setModel(this.createModel(id, backup.value));
+    }
+    data.backup = undefined;
+
+    // add it to our bookkeeping
     data.editor = editor;
     data.pending = false;
     this.observeEdits(editor);

@@ -430,10 +430,11 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
+    const filesList = {};
     // FIXME(ckerr)
+    /*
     const { allMosaics } = this.props.appState;
 
-    const filesList = {};
 
     // Add files
     for (const id of allMosaics) {
@@ -441,6 +442,7 @@ export class GistActionButton extends React.Component<
         content: values[id] || getEmptyContent(id),
       };
     }
+    */
 
     return filesList;
   };

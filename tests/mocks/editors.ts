@@ -1,4 +1,4 @@
-import { DefaultEditorId } from '../../src/interfaces';
+// import { MAIN_JS } from '../../src/interfaces';
 
 export class EditorMock {
   public layout = jest.fn();
@@ -16,9 +16,11 @@ export class EditorMock {
   constructor(public readonly name: string) {}
 }
 
+/*
 export class EditorsMock {
-  public [DefaultEditorId.main] = new EditorMock(DefaultEditorId.main);
+  public [MAIN_JS] = new EditorMock(MAIN_JS);
   public [DefaultEditorId.renderer] = new EditorMock(DefaultEditorId.renderer);
   public [DefaultEditorId.html] = new EditorMock(DefaultEditorId.html);
   public [DefaultEditorId.preload] = new EditorMock(DefaultEditorId.preload);
 }
+*/

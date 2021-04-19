@@ -57,9 +57,6 @@ export class Editor extends React.Component<EditorProps> {
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorMosaic, editorDidMount, id } = this.props;
 
-    // Set the content on the editor.
-    await this.setContent();
-
     // Set the editor as an available object.
     editorMosaic.addEditor(id, editor);
 
@@ -107,16 +104,5 @@ export class Editor extends React.Component<EditorProps> {
 
   public render() {
     return <div className="editorContainer" ref={this.containerRef} />;
-  }
-
-  /**
-   * Sets the content on the editor, including the model and the view state.
-   *
-   * @private
-   * @memberof Editor
-   */
-  private async setContent() {
-    const { editorMosaic, id } = this.props;
-    editorMosaic.restore(id, this.editor);
   }
 }

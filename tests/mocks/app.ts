@@ -2,18 +2,19 @@ import { FileManager } from './file-manager';
 import { MockState } from './state';
 import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
-import { DefaultEditorId } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
 
 export class AppMock {
   public setup = jest.fn();
   public replaceFiddle = jest.fn();
   public setEditorValues = jest.fn();
   public getEditorValues = jest.fn().mockResolvedValue({
-    [DefaultEditorId.main]: 'main-content',
-    [DefaultEditorId.preload]: 'preload-content',
-    [DefaultEditorId.renderer]: 'renderer-content',
-    [DefaultEditorId.html]: 'html-content',
-    [DefaultEditorId.css]: 'css-content',
+    [MAIN_JS]: 'main-content',
+    // FIXME(ckerr)
+    // [DefaultEditorId.preload]: 'preload-content',
+    // [DefaultEditorId.renderer]: 'renderer-content',
+    // [DefaultEditorId.html]: 'html-content',
+    // [DefaultEditorId.css]: 'css-content',
   });
 
   public loadTheme = jest.fn();
@@ -31,8 +32,11 @@ export class AppMock {
 
   public monaco = {
     editor: {
-      setTheme: jest.fn(),
+      createModel: () => ({
+        updateOptions: jest.fn(),
+      }),
       defineTheme: jest.fn(),
+      setTheme: jest.fn(),
     },
     languages: {
       typescript: {
