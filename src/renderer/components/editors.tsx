@@ -50,7 +50,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     console.log('constructor');
 
     for (const name of [
-      'onChange',
       'onRelease',
       'renderEditor',
       'renderTile',
@@ -275,37 +274,16 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         className={`focused__${focused}`}
         renderTile={this.renderTile}
         initialValue={mosaic}
-        onChange={this.onChange}
         onRelease={this.onRelease}
         zeroStateView={renderNonIdealState(editorMosaic)}
       />
     );
   }
-  // value={changingMosaic || mosaic}
 
   /**
-   * Called when the user initiates a change in the Mosaic itself,
-   * e.g. dragging the divider between two panes
-   *
-   * @param {(MosaicNode<EditorId> | null)} currentNode
-   */
-  public onChange() {
-    // changingMosaic: MosaicNode<EditorId> | null) {
-    // override the steady-state MosaicNode.
-    // this lets react-mosaic-component handle resizing panes
-    // this.setState({ changingMosaic });
-    console.log('onChange');
-  }
-
-  /**
-   * Called when the user completes a change begun in onChange()
+   * Called when the user completes a change
    */
   public onRelease(mosaicNode: MosaicNode<EditorId> | null) {
-    // the user has finished moving panes around;
-    // stop overrideing the layout from props.editorMosaic.mosaic
-    // FIXME: this is progress but still is wrong.
-    // As soon as we stop overriding, the user's changes are undone
-    // if they're moving panels around.
     this.props.editorMosaic.mosaic = mosaicNode;
   }
 
