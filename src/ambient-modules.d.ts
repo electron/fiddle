@@ -1,2 +1,2 @@
-declare module 'fix-path';
 declare module 'namor';
+declare module 'shell-path';
