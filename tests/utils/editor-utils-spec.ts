@@ -64,5 +64,17 @@ describe('editor-utils', () => {
       ids.sort(compareEditors);
       expect(ids).toStrictEqual([MAIN_JS, filename]);
     });
+
+    it('sorts supported files lexicographically', () => {
+      const expected = ['a.js', 'b.js'];
+
+      const ids = [...expected];
+      ids.sort(compareEditors);
+      expect(ids).toStrictEqual(expected);
+
+      ids.reverse();
+      ids.sort(compareEditors);
+      expect(ids).toStrictEqual(expected);
+    });
   });
 });
