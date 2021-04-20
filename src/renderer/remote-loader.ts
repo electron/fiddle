@@ -111,7 +111,7 @@ export class RemoteLoader {
     try {
       const octo = await getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
-      const values: Partial<EditorValues> = {};
+      const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
         if (!isSupportedFile(id)) {
@@ -227,12 +227,12 @@ export class RemoteLoader {
   /**
    * Loading a fiddle from GitHub succeeded, let's move on.
    *
-   * @param {Partial<EditorValues>} values
+   * @param {EditorValues} values
    * @param {string} gistId
    * @returns {boolean}
    */
   private async handleLoadingSuccess(
-    values: Partial<EditorValues>,
+    values: EditorValues,
     gistId: string,
   ): Promise<boolean> {
     await window.ElectronFiddle.app.replaceFiddle(values, { gistId });

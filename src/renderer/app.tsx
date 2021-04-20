@@ -60,7 +60,7 @@ export class App {
   }
 
   public async replaceFiddle(
-    editorValues: Partial<EditorValues>,
+    editorValues: EditorValues,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
     const { editorMosaic, state } = this;

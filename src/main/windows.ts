@@ -43,7 +43,6 @@ export function createMainWindow(): Electron.BrowserWindow {
   let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
   browserWindow.loadFile('./dist/static/index.html');
-  browserWindow.webContents.openDevTools();
 
   browserWindow.webContents.once('dom-ready', () => {
     if (browserWindow) {

@@ -10,7 +10,7 @@ import { waitFor } from '../../src/utils/wait-for';
 describe('EditorMosaic', () => {
   let app: AppMock;
   let editorMosaic: EditorMosaic;
-  let valuesIn: Partial<EditorValues>;
+  let valuesIn: EditorValues;
   let editor: MonacoEditorMock;
   const newFile = 'hello.js';
   const boringFile = 'boring.js';

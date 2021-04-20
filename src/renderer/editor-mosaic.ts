@@ -178,10 +178,10 @@ export class EditorMosaic {
    *
    * @function set
    * @public
-   * @param {Partial<EditorValues>} values - the files to be added
+   * @param {EditorValues} values - the files to be added
    * @memberof EditorMosaic
    */
-  @action public set(values: Partial<EditorValues>) {
+  @action public set(values: EditorValues) {
     console.log('EditorMosaic: setting mosaics', Object.keys(values));
 
     // show files whose content is nonempty and is also
