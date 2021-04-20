@@ -205,7 +205,6 @@ export class EditorMosaic {
         this.ids.set(id, { backup: { value } });
       } else {
         const data = this.ids.get(id);
-        console.log('value is', value);
         if (data?.editor) {
           // we want it + have a place for it
           this.ignoreEdits(data.editor);
@@ -249,8 +248,6 @@ export class EditorMosaic {
       backup: { value: value || '' },
       pending: true,
     });
-
-    console.log('id', id, 'data', JSON.stringify(this.ids.get(id)));
 
     this.isEdited = true;
     this.rebuildMosaic();
@@ -319,7 +316,6 @@ export class EditorMosaic {
   @action private rebuildMosaic() {
     const leaves = [...this.leaves].sort(compareEditors);
     this.mosaic = createBalancedTreeFromLeaves(leaves, 'row');
-    console.log('rebuildMosaic', JSON.stringify(this.mosaic));
   }
 
   /**
@@ -351,10 +347,14 @@ export class EditorMosaic {
   @action public hide(id: EditorId) {
     console.log(`EditorMosaic: hide ${id}`);
     const data = this.ids.get(id);
-    if (!data?.editor) return; // no editor for that id
+    if (!data) return; // we don't know this file
+    if (!data.editor && !data.pending) return; // already hidden
 
-    data.backup = this.createBackup(data.editor);
-    data.editor = undefined;
+    if (data.editor) {
+      data.backup = this.createBackup(data.editor);
+      data.editor = undefined;
+    }
+
     data.pending = false;
     this.rebuildMosaic();
   }
@@ -425,7 +425,6 @@ export class EditorMosaic {
     const DEBOUNCE_MSEC = 50;
     clearTimeout(this.layoutDebounce);
     this.layoutDebounce = setTimeout(() => {
-      console.log('in timeout num editors is', [...this.editors].length);
       for (const editor of this.editors) editor.layout();
       this.layoutDebounce = null;
     }, DEBOUNCE_MSEC);

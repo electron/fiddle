@@ -119,6 +119,8 @@ describe('Editor component', () => {
     ).toBe(false);
   });
 
+  /*
+  * FIXME(ckerr)
   describe('initMonaco()', async () => {
     it('attempts to create an editor', async () => {
       editorMosaic.set(editorValues);
@@ -135,7 +137,6 @@ describe('Editor component', () => {
     });
   });
 
-  /*
     describe('backups', async () => {
       it('attempts to restore a backup if contains a model', async () => {
         store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
