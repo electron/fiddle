@@ -4,8 +4,8 @@ import { AppState } from '../../src/renderer/state';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { EditorValues } from '../../src/interfaces';
 // import { EditorValues, MAIN_JS, PACKAGE_NAME } from '../../src/interfaces';
-// import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
-// import { waitFor } from '../../src/utils/wait-for';
+import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { waitFor } from '../../src/utils/wait-for';
 
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { MockState } from '../mocks/state';
@@ -161,6 +161,117 @@ describe('App component', () => {
       it('replaces the fiddle if confirmed', async () => {
         await testDialog(true, editorValues2);
       });
+    });
+  });
+
+  describe('setupThemeListeners()', () => {
+    let app: App;
+    const addEventListenerMock = jest.fn();
+    beforeEach(() => {
+      // matchMedia mock
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        value: jest.fn().mockImplementation((query) => ({
+          matches: false,
+          media: query,
+          onchange: null,
+          addListener: jest.fn(), // Deprecated
+          removeListener: jest.fn(), // Deprecated
+          addEventListener: addEventListenerMock,
+          removeEventListener: jest.fn(),
+          dispatchEvent: jest.fn(),
+        })),
+      });
+
+      // app mock
+      app = new App();
+      (app.state as Partial<AppState>) = new MockState();
+      app.state.isUsingSystemTheme = true;
+      app.state.setTheme = jest.fn();
+    });
+
+    describe('isUsingSystemTheme reaction', () => {
+      it('ignores system theme changes when not isUsingSystemTheme', () => {
+        app.state.isUsingSystemTheme = true;
+        app.setupThemeListeners();
+        app.state.isUsingSystemTheme = false;
+        expect(app.state.setTheme).not.toHaveBeenCalled();
+      });
+
+      it('sets theme according to system when isUsingSystemTheme', () => {
+        app.setupThemeListeners();
+
+        // isUsingSystemTheme and prefersDark
+        app.state.isUsingSystemTheme = false;
+        (window.matchMedia as jest.Mock).mockReturnValue({
+          matches: true,
+        });
+        app.state.isUsingSystemTheme = true;
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+
+        // isUsingSystemTheme and not prefersDark
+        app.state.isUsingSystemTheme = false;
+        (window.matchMedia as jest.Mock).mockReturnValue({
+          matches: false,
+        });
+        app.state.isUsingSystemTheme = true;
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
+    });
+
+    describe('prefers-color-scheme event listener', () => {
+      it('adds an event listener to the "change" event', () => {
+        app.setupThemeListeners();
+        expect(addEventListenerMock).toHaveBeenCalled();
+        const event = addEventListenerMock.mock.calls[0][0];
+        expect(event).toBe('change');
+      });
+
+      it('does nothing if not isUsingSystemTheme', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = false;
+        callback({ matches: true });
+        expect(app.state.setTheme).not.toHaveBeenCalled();
+      });
+
+      it('sets dark theme if isUsingSystemTheme and prefers dark', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = true;
+        callback({ matches: true });
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+      });
+
+      it('sets light theme if isUsingSystemTheme and not prefers dark', () => {
+        app.setupThemeListeners();
+        const callback = addEventListenerMock.mock.calls[0][1];
+        app.state.isUsingSystemTheme = true;
+        callback({ matches: false });
+        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
+    });
+  });
+
+  describe('setupTitleListeners()', () => {
+    let app: App;
+
+    beforeEach(() => {
+      app = new App();
+    });
+
+    it('updates the document title when state.title changes', async () => {
+      const oldTitle = document.title;
+      const newTitle = '😊';
+
+      const state = new MockState();
+      app.state = state as any;
+      app.setupTitleListeners();
+      state.title = newTitle;
+
+      await waitFor(() => document.title != oldTitle);
+
+      expect(document.title).toMatch(newTitle);
     });
   });
 });

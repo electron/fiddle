@@ -112,7 +112,7 @@ export class App {
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
-        <Dialogs appState={this.state} editorMosaic={this.editorMosaic} />
+        <Dialogs appState={this.state} />
         <Header appState={this.state} editorMosaic={this.editorMosaic} />
         <OutputEditorsWrapper
           appState={this.state}

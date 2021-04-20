@@ -38,6 +38,13 @@ exports[`Commands component renders 1`] = `
             "gistId": null,
           }
         }
+        editorMosaic={
+          EditorMosaicMock {
+            "addEditor": [MockFunction],
+            "isEdited": false,
+            "showAll": [MockFunction],
+          }
+        }
       />
     </Blueprint3.ControlGroup>
   </div>
@@ -48,11 +55,25 @@ exports[`Commands component renders 1`] = `
           "gistId": null,
         }
       }
+      editorMosaic={
+        EditorMosaicMock {
+          "addEditor": [MockFunction],
+          "isEdited": false,
+          "showAll": [MockFunction],
+        }
+      }
     />
     <action-button
       appState={
         Object {
           "gistId": null,
+        }
+      }
+      editorMosaic={
+        EditorMosaicMock {
+          "addEditor": [MockFunction],
+          "isEdited": false,
+          "showAll": [MockFunction],
         }
       }
     />

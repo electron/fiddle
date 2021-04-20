@@ -39,7 +39,7 @@ export const enum EditorState {
 export type EditorStates = Map<EditorId, EditorState>;
 
 interface Backup {
-  model?: MonacoType.editor.ITextModel | undefined;
+  model?: MonacoType.editor.ITextModel | null;
   value: string;
   viewState?: MonacoType.editor.ICodeEditorViewState | undefined;
 }
@@ -437,7 +437,7 @@ export class EditorMosaic {
   //=== Backup & Restore
 
   private createBackup(editor: IStandaloneCodeEditor): Backup {
-    const model = editor.getModel() || undefined;
+    const model = editor.getModel();
     const value = editor.getValue() || '';
     const viewState = editor.saveViewState() || undefined;
     return { model, value, viewState };

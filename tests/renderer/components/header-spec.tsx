@@ -21,9 +21,12 @@ jest.mock('../../../src/renderer/components/tour-welcome', () => ({
 
 describe('Header component', () => {
   const store: any = {};
+  const editorMosaic: any = {};
 
   it('renders', () => {
-    const wrapper = shallow(<Header appState={store} />);
+    const wrapper = shallow(
+      <Header appState={store} editorMosaic={editorMosaic} />,
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

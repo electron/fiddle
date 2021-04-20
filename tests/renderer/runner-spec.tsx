@@ -5,11 +5,7 @@ import * as semver from 'semver';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import {
-  RunResult,
-  RunnableVersion,
-  DefaultEditorId,
-} from '../../src/interfaces';
+import { MAIN_JS, RunResult, RunnableVersion } from '../../src/interfaces';
 import {
   findModulesInEditors,
   getIsPackageManagerInstalled,
@@ -468,11 +464,7 @@ describe('Runner component', () => {
 
       await instance.installModulesForEditor(
         {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.main]: `const a = require('say')`,
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.css]: '',
+          [MAIN_JS]: `const a = require('say')`,
         },
         { dir: '/fake/path', packageManager: 'npm' },
       );
@@ -486,11 +478,7 @@ describe('Runner component', () => {
 
       await instance.installModulesForEditor(
         {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.main]: `const a = require('say')`,
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.css]: '',
+          [MAIN_JS]: `const a = require('say')`,
         },
         { dir: '/fake/path', packageManager: 'npm' },
       );

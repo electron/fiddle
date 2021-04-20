@@ -87,8 +87,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       const values = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
 
-      console.log('asdf', JSON.stringify(values));
-      console.log('asdf', JSON.stringify(options));
       await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
 

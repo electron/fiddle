@@ -162,11 +162,20 @@ describe('EditorMosaic', () => {
 
   describe('hide', () => {
     it('hides a file if visible', () => {
+      const filename = MAIN_JS;
       editorMosaic.set(valuesIn);
-      editorMosaic.addEditor(MAIN_JS, editor as any);
-      expect(editorMosaic.states.get(MAIN_JS)).toBe(EditorState.Visible);
-      editorMosaic.hide(MAIN_JS);
-      expect(editorMosaic.states.get(MAIN_JS)).toBe(EditorState.Hidden);
+      editorMosaic.addEditor(filename, editor as any);
+      expect(editorMosaic.states.get(filename)).toBe(EditorState.Visible);
+      editorMosaic.hide(filename);
+      expect(editorMosaic.states.get(filename)).toBe(EditorState.Hidden);
+    });
+
+    it('hides a file if pending', () => {
+      const filename = MAIN_JS;
+      editorMosaic.set(valuesIn);
+      expect(editorMosaic.states.get(filename)).toBe(EditorState.Pending);
+      editorMosaic.hide(filename);
+      expect(editorMosaic.states.get(filename)).toBe(EditorState.Hidden);
     });
 
     it('does nothing if file is unknown', () => {
@@ -178,7 +187,7 @@ describe('EditorMosaic', () => {
       const filename = boringFile;
       editorMosaic.set(valuesIn);
       expect(editorMosaic.states.get(filename)).toBe(EditorState.Hidden);
-      expectNoChange(editorMosaic, () => editorMosaic.hide(MAIN_JS));
+      expectNoChange(editorMosaic, () => editorMosaic.hide(filename));
     });
   });
 
@@ -343,6 +352,17 @@ describe('EditorMosaic', () => {
       editorMosaic.set(valuesIn);
       expect(() => editorMosaic.addEditor(boringFile, editor as any)).toThrow();
       expect(() => editorMosaic.addEditor(newFile, editor as any)).toThrow();
+    });
+
+    it('initializes with a fixed tab size', () => {
+      editorMosaic.set(valuesIn);
+      editorMosaic.addEditor(MAIN_JS, editor as any);
+      const modelMock = app.monaco.editor.createModel();
+      expect(modelMock.updateOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabSize: 2,
+        }),
+      );
     });
   });
 

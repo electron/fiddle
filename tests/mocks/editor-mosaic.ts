@@ -3,6 +3,7 @@ import { observable } from 'mobx';
 export class EditorMosaicMock {
   @observable public isEdited = false;
   public showAll = jest.fn();
+  public addEditor = jest.fn();
 
   /*
   @computed public get states(): EditorStates {
@@ -21,6 +22,5 @@ export class EditorMosaicMock {
   public focusedEditor(): IStandaloneCodeEditor | undefined {
   public layout() {
   public updateOptions(options: MonacoType.editor.IEditorOptions) {
-  @action public addEditor(id: EditorId, editor: IStandaloneCodeEditor) {
   */
 }

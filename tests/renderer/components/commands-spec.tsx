@@ -1,7 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
 import { Commands } from '../../../src/renderer/components/commands';
+
+import { AppMock } from '../../mocks/app';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
@@ -20,16 +22,20 @@ jest.mock('../../../src/renderer/components/commands-action-button', () => ({
 }));
 
 describe('Commands component', () => {
-  let store: any;
+  let app: AppMock;
 
   beforeEach(() => {
-    store = {
-      gistId: null,
-    };
+    app = new AppMock();
+    app.state = { gistId: null } as any;
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Commands appState={store} />);
+    const wrapper = shallow(
+      <Commands
+        appState={app.state as any}
+        editorMosaic={app.editorMosaic as any}
+      />,
+    );
     expect(wrapper).toMatchSnapshot();
   });
 });

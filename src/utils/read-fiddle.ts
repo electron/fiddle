@@ -11,7 +11,7 @@ import * as path from 'path';
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(folder: string): Promise<EditorValues> {
-  const content: Record<string, string> = {};
+  const got: EditorValues = {};
 
   const tryRead = (name: string) => {
     try {
@@ -29,12 +29,15 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
   } else {
     for (const file of fs.readdirSync(folder)) {
       if (isSupportedFile(file)) {
-        content[file] = tryRead(file);
+        got[file] = tryRead(file);
       }
     }
   }
 
-  const got = { [MAIN_JS]: '', ...content };
+  if (!(MAIN_JS in got)) {
+    got[MAIN_JS] = '';
+  }
+
   console.log(`Got Fiddle from "${folder}". Found:`, Object.keys(got).sort());
   return got;
 }

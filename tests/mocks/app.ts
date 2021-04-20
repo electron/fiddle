@@ -1,6 +1,7 @@
 import { EditorMosaicMock } from './editor-mosaic';
 import { FileManager } from './file-manager';
 import { MockState } from './state';
+import { MonacoEditorMock } from './monaco-editor';
 import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
 import { createEditorValues } from './editor-values';
@@ -26,12 +27,20 @@ export class AppMock {
   public state = new MockState();
   public taskRunner = {};
 
-  public monaco = {
+  public monaco: any = {
+    model: {
+      updateOptions: jest.fn(),
+    },
     editor: {
-      createModel: () => ({
-        updateOptions: jest.fn(),
-      }),
+      lastCreated: null,
+      create: jest
+        .fn()
+        .mockImplementation(
+          () => (this.monaco.lastCreated = new MonacoEditorMock()),
+        ),
+      createModel: () => this.monaco.model,
       defineTheme: jest.fn(),
+      onDidFocusEditorText: jest.fn(),
       setTheme: jest.fn(),
     },
     languages: {

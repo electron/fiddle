@@ -9,12 +9,21 @@ import {
 } from '../../src/renderer/themes';
 import { DefaultThemes } from '../../src/renderer/themes-defaults';
 
+import { AppMock } from '../mocks/app';
+
 jest.mock('fs-extra');
 
 describe('themes', () => {
+  let app: AppMock;
+
+  beforeEach(() => {
+    app = new AppMock();
+    (window as any).ElectronFiddle.app = app;
+  });
+
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = window.ElectronFiddle.app.monaco as any;
+      const { editor } = app.monaco as any;
 
       await activateTheme();
 
@@ -23,14 +32,14 @@ describe('themes', () => {
       expect(editor.defineTheme.mock.calls[0][1].base).toBe('vs-dark');
     });
 
-    it(`does not do anything if Monaco isn't available yet`, async () => {
-      const { editor } = window.ElectronFiddle.app.monaco as any;
-      window.ElectronFiddle.app.monaco = null;
+    it('does nothing if Monaco is unavailable', async () => {
+      const { editor } = app.monaco as any;
+      (app as any).monaco = null;
 
       await activateTheme();
 
-      expect(editor.defineTheme).toHaveBeenCalledTimes(0);
-      expect(editor.setTheme).toHaveBeenCalledTimes(0);
+      expect(editor.defineTheme).not.toHaveBeenCalled();
+      expect(editor.setTheme).not.toHaveBeenCalled();
     });
   });
 

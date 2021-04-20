@@ -10,6 +10,7 @@ exports[`Header component renders 1`] = `
   >
     <commands
       appState={Object {}}
+      editorMosaic={Object {}}
       key="commands"
     />
   </header>

@@ -8,6 +8,7 @@ export class MonacoEditorMock {
   };
   public value = '';
 
+  public dispose = jest.fn();
   public getAction = jest.fn().mockImplementation(() => this.action);
   public getModel = jest.fn().mockImplementation(() => this.model);
   public getValue = jest.fn().mockImplementation(() => this.value);
@@ -19,6 +20,7 @@ export class MonacoEditorMock {
       dispose: jest.fn(),
     };
   });
+  public onDidFocusEditorText = jest.fn();
   public restoreViewState = jest.fn();
   public saveViewState = jest.fn();
   public setModel = jest.fn().mockImplementation((model) => {

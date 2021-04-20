@@ -22,12 +22,7 @@ export class OutputEditorsWrapper extends React.Component<
   WrapperState
 > {
   private MOSAIC_ELEMENTS = {
-    output: (
-      <Output
-        appState={this.props.appState}
-        editorMosaic={this.props.editorMosaic}
-      />
-    ),
+    output: <Output appState={this.props.appState} />,
     editors: (
       <Editors
         appState={this.props.appState}
