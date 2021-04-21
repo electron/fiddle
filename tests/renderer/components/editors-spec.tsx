@@ -42,6 +42,7 @@ describe('Editors component', () => {
     (window as any).ElectronFiddle.app = app;
     editor = new MonacoEditorMock();
     editorValues = createEditorValues();
+    editorValues['styles.css'] = '/* styles.css */';
     editorMosaic = new EditorMosaic(app as any);
   });
 
@@ -63,6 +64,10 @@ describe('Editors component', () => {
 
   it('renders', () => {
     editorMosaic.set(editorValues);
+    console.log(
+      JSON.stringify(editorMosaic.inspect()),
+      JSON.stringify(editorMosaic.mosaic),
+    );
     const { wrapper } = createMountedEditorsComponent();
     wrapper.setState({ monaco: app.monaco });
     expect(wrapper).toMatchSnapshot();

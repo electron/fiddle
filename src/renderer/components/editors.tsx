@@ -9,20 +9,19 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
-import { AppState } from '../state';
-import { Editor } from './editor';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { EditorMosaic } from '../editor-mosaic';
 import { IpcEvents } from '../../ipc-events';
-import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
-import { activateTheme } from '../themes';
 import { getAtPath, setAtPath } from '../../utils/js-path';
+import { toggleMonaco } from '../../utils/toggle-monaco';
 import { getEditorTitle } from '../../utils/editor-utils';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
+import { AppState } from '../state';
+import { activateTheme } from '../themes';
+import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
-import { toggleMonaco } from '../../utils/toggle-monaco';
-
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
     enabled: false,
@@ -40,7 +39,6 @@ interface EditorsState {
   isMounted?: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
   focused?: EditorId;
-  changingMosaic: MosaicNode<EditorId> | null;
 }
 
 @observer
@@ -48,20 +46,13 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   constructor(props: EditorsProps) {
     super(props);
 
-    for (const name of [
-      'onRelease',
-      'renderEditor',
-      'renderTile',
-      'renderToolbar',
-      'setFocused',
-    ]) {
-      this[name] = this[name].bind(this);
-    }
+    this.onRelease = this.onRelease.bind(this);
+    this.renderToolbar = this.renderToolbar.bind(this);
+    this.renderEditor = this.renderEditor.bind(this);
+    this.renderTile = this.renderTile.bind(this);
+    this.setFocused = this.setFocused.bind(this);
 
-    this.state = {
-      changingMosaic: null,
-      monacoOptions: defaultMonacoOptions,
-    };
+    this.state = { monacoOptions: defaultMonacoOptions };
   }
 
   /**
@@ -122,15 +113,11 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   private stopListening() {
-    for (const event of [
-      IpcEvents.FS_NEW_FIDDLE,
-      IpcEvents.FS_NEW_TEST,
-      IpcEvents.MONACO_EXECUTE_COMMAND,
-      IpcEvents.MONACO_TOGGLE_OPTION,
-      IpcEvents.SELECT_ALL_IN_EDITOR,
-    ]) {
-      ipcRendererManager.removeAllListeners(event);
-    }
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+    ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
+    ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
+    ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
   }
 
   /**
@@ -158,15 +145,13 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public toggleEditorOption(path: string): boolean {
     try {
-      const { editorMosaic } = this.props;
       const { monacoOptions } = this.state;
+      const newOptions = { ...monacoOptions };
+      const currentSetting = getAtPath(path, newOptions);
 
-      const options = { ...monacoOptions };
-      const currentSetting = getAtPath(path, options);
-
-      setAtPath(path, options, toggleMonaco(currentSetting));
-      editorMosaic.updateOptions(options);
-      this.setState({ monacoOptions: options });
+      setAtPath(path, newOptions, toggleMonaco(currentSetting));
+      this.props.editorMosaic.updateOptions(newOptions);
+      this.setState({ monacoOptions: newOptions });
 
       return true;
     } catch (error) {

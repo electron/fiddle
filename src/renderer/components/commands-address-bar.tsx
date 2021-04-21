@@ -109,13 +109,14 @@ export class AddressBar extends React.Component<
     this.setState({ value: event.target.value });
   }
 
-  /**
-   * If the input text is empty when it loses focus,
-   * reset it to the current gist
-   */
   public handleBlur(event: React.FocusEvent<HTMLInputElement>) {
-    if (!event.target.value) {
-      this.setState({ value: urlFromId(this.props.appState.gistId) });
+    const { gistId } = this.props.appState;
+    const url = urlFromId(gistId);
+
+    const shouldResetURL =
+      url === event.target.value || event.target.value === '';
+    if (url && shouldResetURL) {
+      this.setState({ value: url });
     }
   }
 

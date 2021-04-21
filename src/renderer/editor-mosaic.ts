@@ -5,7 +5,7 @@ import {
   MosaicNode,
   createBalancedTreeFromLeaves,
 } from 'react-mosaic-component';
-import { action, computed, observable, reaction } from 'mobx';
+import { action, computed, observable, reaction, toJS } from 'mobx';
 import {
   compareEditors,
   getEmptyContent,
@@ -29,7 +29,7 @@ export const enum EditorState {
 
   /** Space has been allocated for this file in the mosaic but the
       monaco editor has not mounted in React yet. This is an interim
-      state before 'Visible. */
+      state before the file's state becomes Visible. */
   Pending,
 
   /** The file is visible in a Monaco editor in the mosaic. */
@@ -85,8 +85,7 @@ export class EditorMosaic {
   }
 
   /**
-   * The root node of the editor mosaic, for consumption by the editors
-   * component
+   * The root node of the editor mosaic, for use by the editors component.
    *
    * @public
    * @type {MosaicNode<EditorId> | null>
@@ -96,8 +95,8 @@ export class EditorMosaic {
 
   /**
    * The ids that currently have a spot in the editor mosaic,
-   * either currently active (EditorState.visible) or about to be
-   * as soon as a monaco editor mounts (EditorState.pending).
+   * either currently active (EditorState.visible) or waiting to
+   * become active once an editor mounts (EditorState.pending).
    *
    * @private
    * @type {EditorId[]}
@@ -300,8 +299,9 @@ export class EditorMosaic {
   public inspect() {
     if (!process.env.JEST_WORKER_ID)
       throw new Error('inspect() is for clear-box testing.');
-    const { ids, leaves } = this;
-    return { ids, leaves };
+    const { ids, leaves, mosaic, states } = this;
+    const snapshot = JSON.stringify(toJS({ ids, leaves, mosaic, states }));
+    return { ids, leaves, snapshot };
   }
 
   //=== Layout

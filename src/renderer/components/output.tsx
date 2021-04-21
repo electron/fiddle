@@ -13,7 +13,7 @@ import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
 import { WrapperMosaicId } from './output-editors-wrapper';
 
-interface OutputProps {
+interface CommandsProps {
   appState: AppState;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
@@ -24,15 +24,15 @@ interface OutputProps {
  * whenever a Fiddle is launched in Electron.
  *
  * @class Output
- * @extends {React.Component<OutputProps>}
+ * @extends {React.Component<CommandsProps>}
  */
 @observer
-export class Output extends React.Component<OutputProps> {
+export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperMosaicId>;
   private outputRef = React.createRef<HTMLDivElement>();
 
-  constructor(props: OutputProps) {
+  constructor(props: CommandsProps) {
     super(props);
 
     this.renderTimestamp = this.renderTimestamp.bind(this);

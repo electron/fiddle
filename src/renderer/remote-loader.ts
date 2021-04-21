@@ -14,21 +14,16 @@ import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
-    for (const name of [
-      'fetchExampleAndLoad',
-      'fetchGistAndLoad',
-      'getPackageVersionFromRef',
-      'handleLoadingFailed',
-      'handleLoadingSuccess',
-      'loadFiddleFromElectronExample',
-      'loadFiddleFromGist',
-      'setElectronVersionWithRef',
-      'verifyCreateCustomEditor',
-      'verifyReleaseChannelEnabled',
-      'verifyRemoteLoad',
-    ]) {
-      this[name] = this[name].bind(this);
-    }
+    this.loadFiddleFromElectronExample.bind(this);
+    this.loadFiddleFromGist.bind(this);
+    this.verifyRemoteLoad.bind(this);
+    this.verifyReleaseChannelEnabled.bind(this);
+    this.fetchExampleAndLoad.bind(this);
+    this.fetchGistAndLoad.bind(this);
+    this.setElectronVersionWithRef.bind(this);
+    this.getPackageVersionFromRef.bind(this);
+    this.handleLoadingSuccess.bind(this);
+    this.handleLoadingFailed.bind(this);
   }
 
   public async loadFiddleFromElectronExample(
@@ -68,14 +63,14 @@ export class RemoteLoader {
         path,
       });
 
-      if (!Array.isArray(folder.data)) {
-        throw new Error(`Tried to launch an invalid Fiddle from "${path}"`);
-      }
-
       const ok = await this.setElectronVersionWithRef(ref);
       if (!ok) return false;
 
       const values = await getTemplate(this.appState.version);
+      if (!Array.isArray(folder.data)) {
+        throw new Error(`Tried to launch an invalid Fiddle from "${path}"`);
+      }
+
       const loaders: Promise<any>[] = [];
 
       for (const child of folder.data) {
@@ -117,7 +112,7 @@ export class RemoteLoader {
         if (!isSupportedFile(id)) {
           continue;
         }
-        if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
+        if (isKnownFile(id) || (await this.verifyAddEditor(id))) {
           values[id] = data.content;
         }
       }
@@ -182,7 +177,7 @@ export class RemoteLoader {
     }
   }
 
-  public async verifyCreateCustomEditor(editorName: string): Promise<boolean> {
+  public async verifyAddEditor(editorName: string): Promise<boolean> {
     this.appState.setGenericDialogOptions({
       type: GenericDialogType.confirm,
       label: `Do you want to create a custom editor with name: ${editorName}?`,

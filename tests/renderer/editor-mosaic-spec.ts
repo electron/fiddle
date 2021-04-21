@@ -4,7 +4,6 @@ import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import { EditorMosaic, EditorState } from '../../src/renderer/editor-mosaic';
 import { MonacoEditorMock } from '../mocks/monaco-editor';
 import { getEmptyContent } from '../../src/utils/editor-utils';
-import { toJS } from 'mobx';
 import { waitFor } from '../../src/utils/wait-for';
 
 describe('EditorMosaic', () => {
@@ -16,21 +15,14 @@ describe('EditorMosaic', () => {
   const boringFile = 'boring.js';
   const unsupportedFile = 'wrong-suffix.java';
 
-  function takeSnapshot(em: EditorMosaic) {
-    return [
-      JSON.stringify(toJS(em.states)),
-      JSON.stringify(toJS(em.inspect())),
-    ];
-  }
-
-  function expectSnapshotToMatch(em: EditorMosaic, snap: any) {
-    expect(takeSnapshot(em)).toStrictEqual(snap);
+  function expectSnapshotToMatch(em: EditorMosaic, snapshot: any) {
+    expect(em.inspect().snapshot).toStrictEqual(snapshot);
   }
 
   function expectNoChange(em: EditorMosaic, func: any) {
-    const snap = takeSnapshot(em);
+    const { snapshot } = em.inspect();
     func();
-    expectSnapshotToMatch(em, snap);
+    expectSnapshotToMatch(em, snapshot);
   }
 
   beforeEach(() => {
@@ -357,7 +349,7 @@ describe('EditorMosaic', () => {
     it('initializes with a fixed tab size', () => {
       editorMosaic.set(valuesIn);
       editorMosaic.addEditor(MAIN_JS, editor as any);
-      const modelMock = app.monaco.editor.createModel();
+      const modelMock = app.monaco.latestModel;
       expect(modelMock.updateOptions).toHaveBeenCalledWith(
         expect.objectContaining({
           tabSize: 2,

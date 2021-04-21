@@ -28,20 +28,22 @@ export class AppMock {
   public taskRunner = {};
 
   public monaco: any = {
-    model: {
-      updateOptions: jest.fn(),
-    },
+    latestEditor: null,
+    latestModel: null,
     editor: {
-      lastCreated: null,
       create: jest
         .fn()
         .mockImplementation(
-          () => (this.monaco.lastCreated = new MonacoEditorMock()),
+          () => (this.monaco.latestEditor = new MonacoEditorMock()),
         ),
-      createModel: () => this.monaco.model,
-      defineTheme: jest.fn(),
+      createModel: jest
+        .fn()
+        .mockImplementation(
+          () => (this.monaco.latestModel = { updateOptions: jest.fn() }),
+        ),
       onDidFocusEditorText: jest.fn(),
       setTheme: jest.fn(),
+      defineTheme: jest.fn(),
     },
     languages: {
       typescript: {

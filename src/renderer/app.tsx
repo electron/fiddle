@@ -13,16 +13,16 @@ import {
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import { AppState } from './state';
-import { EditorMosaic } from './editor-mosaic';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
-import { TaskRunner } from './task-runner';
+import { AppState } from './state';
 import { getElectronVersions } from './versions';
-import { getTemplate } from './content';
+import { TaskRunner } from './task-runner';
 import { getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
+import { EditorMosaic } from './editor-mosaic';
+import { getTemplate } from './content';
 import { ipcRendererManager } from './ipc';
 
 /**
@@ -36,13 +36,15 @@ export class App {
   public monaco: typeof MonacoType | undefined;
   public state = new AppState(getElectronVersions());
   public readonly editorMosaic = new EditorMosaic(this);
-  public fileManager = new FileManager(this.state, this);
+  public fileManager = new FileManager(this.state);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
-  public readonly taskRunner = new TaskRunner(this);
+  public readonly taskRunner: TaskRunner;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
+
+    this.taskRunner = new TaskRunner(this);
   }
 
   private async confirmUnsaved(): Promise<boolean> {

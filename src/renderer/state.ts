@@ -22,15 +22,14 @@ import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
+import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
   updateEditorTypeDefinitions,
 } from './fetch-types';
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
-
 import { sortVersions } from '../utils/sort-versions';
-import { getTemplate, isContentUnchanged } from './content';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
@@ -135,8 +134,6 @@ export class AppState {
   @observable public isAddVersionDialogShowing = false;
   @observable public isThemeDialogShowing = false;
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
-
-  // -- Editor Values stored when we close the editor ------------------
 
   private outputBuffer = '';
   private name: string;
@@ -267,8 +264,7 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const runnables = Object.values(versions);
-    const oldest = semver.parse(getOldestSupportedVersion(runnables));
+    const oldest = semver.parse(getOldestSupportedVersion());
 
     const filter = (ver: RunnableVersion) =>
       ver &&
@@ -280,7 +276,7 @@ export class AppState {
         oldest.compareMain(ver.version) <= 0) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
-    return sortVersions(runnables.filter(filter));
+    return sortVersions(Object.values(versions).filter(filter));
   }
 
   /**
@@ -484,6 +480,7 @@ export class AppState {
     // Should we update the editor?
     if (await isContentUnchanged(MAIN_JS, this.version)) {
       const editorValues = await getTemplate(version);
+
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }

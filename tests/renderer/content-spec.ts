@@ -103,26 +103,22 @@ describe('content', () => {
 
     it('returns content', async () => {
       const version = VERSION_IN_FIXTURES;
-      const values = await getTemplate(version);
-      expectSaneContent(values);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns fallback content for an unparsable version', async () => {
       const version = 'beep';
-      const values = await getTemplate(version);
-      expectSaneContent(values);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns fallback content for an non-existent version', async () => {
       const version = '999.0.0-beta.1';
-      const values = await getTemplate(version);
-      expectSaneContent(values);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('provides fallback content if downloads fail', async () => {
       const version = VERSION_NOT_IN_FIXTURES;
-      const values = await getTemplate(version);
-      expectSaneContent(values);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns the same content when called multiple times', async () => {

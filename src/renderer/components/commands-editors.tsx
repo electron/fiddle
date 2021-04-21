@@ -38,10 +38,10 @@ export class EditorDropdown extends React.Component<
   constructor(props: EditorDropdownProps) {
     super(props);
 
-    this.addEditor = this.addEditor.bind(this);
     this.onItemClick = this.onItemClick.bind(this);
-    this.removeEditor = this.removeEditor.bind(this);
     this.showEditorDialog = this.showEditorDialog.bind(this);
+    this.addEditor = this.addEditor.bind(this);
+    this.removeEditor = this.removeEditor.bind(this);
   }
 
   public render() {
@@ -64,21 +64,22 @@ export class EditorDropdown extends React.Component<
     const result: Array<JSX.Element> = [];
 
     for (const [id, state] of states) {
-      const visible =
-        state === EditorState.Visible || state === EditorState.Pending;
-      const icon = visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
+      const visible = state !== EditorState.Hidden;
+      const icon = visible ? 'eye-open' : 'eye-off';
+
+      // Can't hide last editor panel.
       const mustShow = visible && mosaicLeafCount < 2;
 
       if (id !== MAIN_JS) {
         result.push(
           <MenuItem
-            disabled={mustShow}
             icon={icon}
-            id={id}
             key={id}
-            onClick={this.onItemClick}
             text={title}
+            id={id}
+            onClick={this.onItemClick}
+            disabled={mustShow}
           >
             <MenuItem
               icon={'cross'}
@@ -91,12 +92,12 @@ export class EditorDropdown extends React.Component<
       } else {
         result.push(
           <MenuItem
-            disabled={mustShow}
             icon={icon}
-            id={id}
             key={id}
-            onClick={this.onItemClick}
             text={title}
+            id={id}
+            onClick={this.onItemClick}
+            disabled={mustShow}
           />,
         );
       }
@@ -172,8 +173,6 @@ export class EditorDropdown extends React.Component<
   public async removeEditor(event: React.MouseEvent) {
     const { editorMosaic } = this.props;
     const { id } = event.currentTarget;
-
-    console.log(`EditorDropdown: Removing editor ${id}`);
     editorMosaic.remove(id as EditorId);
   }
 

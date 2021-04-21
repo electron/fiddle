@@ -130,7 +130,6 @@ describe('windows', () => {
       (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
       (electron.ipcMain.handle as jest.Mock).mockImplementation(
         (event, listener) => {
-          console.log('event', event, 'listener', listener);
           if (event === IpcEvents.GET_APP_PATHS) {
             result = listener();
           }

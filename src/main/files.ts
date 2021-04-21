@@ -1,6 +1,6 @@
+import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import { dialog } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
@@ -44,34 +44,29 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
     title: `Save Fiddle${as ? ` as ${as}` : ''}`,
   });
 
-  if (!Array.isArray(filePaths)) {
+  if (!Array.isArray(filePaths) || filePaths.length === 0) {
     return;
   }
 
-  const folder = filePaths.shift();
-  if (!folder) {
-    return;
-  }
-
-  console.log(`Asked to save to "${folder}"`);
+  console.log(`Asked to save to ${filePaths[0]}`);
 
   // Let's confirm real quick if we want this
-  if (await isOkToSaveAt(folder)) {
-    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [folder]);
+  if (await isOkToSaveAt(filePaths[0])) {
+    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
   }
 }
 
 /**
  * Confirm it's OK to save files in `folder`
  *
- * @param {string} folder
+ * @param {string} filePath
  * @returns {Promise<boolean>}
  */
-async function isOkToSaveAt(folder: string): Promise<boolean> {
+async function isOkToSaveAt(filePath: string): Promise<boolean> {
   return (
-    !fs.existsSync(folder) ||
-    fs.readdirSync(folder).filter(isSupportedFile).length === 0 ||
-    (await confirmFileOverwrite(folder))
+    !fs.existsSync(filePath) ||
+    fs.readdirSync(filePath).filter(isSupportedFile).length === 0 ||
+    (await confirmFileOverwrite(filePath))
   );
 }
 
@@ -82,13 +77,13 @@ async function isOkToSaveAt(folder: string): Promise<boolean> {
  * @param {string} filePath
  * @returns {Promise<boolean>}
  */
-async function confirmFileOverwrite(folder: string): Promise<boolean> {
+async function confirmFileOverwrite(filePath: string): Promise<boolean> {
   try {
     const result = await dialog.showMessageBox({
-      buttons: ['Cancel', 'Save'],
-      detail: `The folder "${folder}" already has code in it.\n \nAre you sure you want to save here?`,
-      message: `Save files to ${path.basename(folder)}?`,
       type: 'warning',
+      buttons: ['Cancel', 'Save'],
+      detail: `The folder "${filePath}" already has code in it.\n \nAre you sure you want to save here?`,
+      message: `Save files to ${path.basename(filePath)}?`,
     });
 
     return !!result;

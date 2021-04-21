@@ -4,8 +4,8 @@
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 
-import { AppState } from '../state';
 import { EditorId } from '../../interfaces';
+import { AppState } from '../state';
 import { EditorMosaic } from '../editor-mosaic';
 import { monacoLanguage } from '../../utils/editor-utils';
 
@@ -41,7 +41,7 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   public async componentDidMount() {
-    return this.initMonaco();
+    await this.initMonaco();
   }
 
   public componentWillUnmount() {

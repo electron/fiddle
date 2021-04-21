@@ -1,31 +1,28 @@
 import * as fs from 'fs-extra';
-import * as path from 'path';
 
-import * as readFiddle from '../../src/utils/read-fiddle';
-import { App } from '../../src/renderer/app';
-import { AppState } from '../../src/renderer/state';
-import { EditorId, Files, MAIN_JS } from '../../src/interfaces';
-import { FileManager } from '../../src/renderer/file-manager';
+import { Files, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
+import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-
 import { AppMock } from '../mocks/app';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
 import { createEditorValues } from '../mocks/editor-values';
 
 const editorValues = createEditorValues();
 const editorCount = Object.keys(editorValues).length;
 
-// jest.mock('fs-extra');
 jest.mock('tmp', () => ({
   setGracefulCleanup: jest.fn(),
   dirSync: jest.fn(() => ({
     name: '/fake/temp',
   })),
 }));
-jest.mock('../../src/renderer/templates', () => ({
-  getTemplateValues: () => editorValues,
-}));
+
+jest.mock('../../src/utils/read-fiddle', () => {
+  const { createEditorValues } = require('../mocks/editor-values');
+  return {
+    readFiddle: () => createEditorValues(),
+  };
+});
 
 describe('FileManager', () => {
   let fm: FileManager;
@@ -33,10 +30,8 @@ describe('FileManager', () => {
 
   beforeEach(() => {
     ipcRendererManager.send = jest.fn();
-
-    const electronFiddle = new ElectronFiddleMock();
-    ({ app } = electronFiddle);
-    fm = new FileManager((app.state as any) as AppState, (app as any) as App);
+    ({ app } = (window as any).ElectronFiddle);
+    fm = new FileManager(app.state as any);
   });
 
   afterEach(() => {
@@ -45,30 +40,10 @@ describe('FileManager', () => {
 
   describe('openFiddle()', () => {
     it('opens a local fiddle', async () => {
-      const dir = path.resolve(__dirname, '../../static/electron-quick-start');
-      await fm.openFiddle(dir);
-      expect(app.replaceFiddle).toHaveBeenCalledTimes(1);
-    });
-
-    it('can open a fiddle with custom editors', async () => {
-      const editorValues: Record<EditorId, string> = {
-        [MAIN_JS]: 'console.log("hello world")',
-        ['file.js']: 'console.log("hello there")',
-      };
-      const spy = jest
-        .spyOn(readFiddle, 'readFiddle')
-        .mockResolvedValueOnce(editorValues as any);
       const filePath = '/fake/path';
-
-      app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
-
+      const opts: SetFiddleOptions = { filePath };
       await fm.openFiddle(filePath);
-
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(editorValues, {
-        filePath,
-      });
-
-      spy.mockRestore();
+      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, opts);
     });
 
     it('runs it on IPC event', () => {
@@ -79,11 +54,11 @@ describe('FileManager', () => {
 
     it('does not do anything with incorrect inputs', async () => {
       await fm.openFiddle({} as any);
-      expect(app.setEditorValues).toHaveBeenCalledTimes(0);
+      expect(app.replaceFiddle).toHaveBeenCalledTimes(0);
     });
 
     it('does not do anything if cancelled', async () => {
-      (app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      app.replaceFiddle.mockResolvedValueOnce(false);
       await fm.openFiddle('/fake/path');
     });
   });
@@ -93,20 +68,6 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.outputFile).toHaveBeenCalledTimes(editorCount);
-    });
-
-    it('saves a fiddle with custom editors', async () => {
-      const file = 'file.js';
-      const values = {
-        ...editorValues,
-        [file]: 'hi',
-      };
-
-      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce(values);
-
-      await fm.saveFiddle('/fake/path');
-
-      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
     it('removes a file that is newly empty', async () => {

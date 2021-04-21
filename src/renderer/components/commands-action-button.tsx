@@ -19,12 +19,12 @@ import {
   GistActionType,
   MAIN_JS,
 } from '../../interfaces';
-import { AppState } from '../state';
 import { EditorMosaic } from '../editor-mosaic';
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
 import { getEmptyContent } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
+import { AppState } from '../state';
 
 interface GistActionButtonProps {
   appState: AppState;

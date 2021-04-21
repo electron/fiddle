@@ -111,7 +111,7 @@ describe('Editor component', () => {
     instance.containerRef.current = 'ref';
     await instance.initMonaco();
 
-    expect(monaco.lastCreated.onDidFocusEditorText).toHaveBeenCalled();
+    expect(monaco.latestEditor.onDidFocusEditorText).toHaveBeenCalled();
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
@@ -122,6 +122,6 @@ describe('Editor component', () => {
     await instance.initMonaco();
     instance.componentWillUnmount();
 
-    expect(monaco.lastCreated.dispose).toHaveBeenCalled();
+    expect(monaco.latestEditor.dispose).toHaveBeenCalled();
   });
 });

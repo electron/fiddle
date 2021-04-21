@@ -8,7 +8,7 @@ import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { AppMock } from '../mocks/app';
 import { createEditorValues } from '../mocks/editor-values';
 import { mockFetchOnce } from '../utils';
 
@@ -32,6 +32,7 @@ class MockStore {
 }
 
 describe('RemoteLoader', () => {
+  let app: AppMock;
   let instance: RemoteLoader;
   let store: any;
   let mockGistFiles: any;
@@ -39,15 +40,13 @@ describe('RemoteLoader', () => {
   let mockRepos: any;
   let mockGetRepos: any;
   let editorValues: EditorValues;
-  let ElectronFiddle: ElectronFiddleMock;
 
   beforeEach(() => {
-    ElectronFiddle = new ElectronFiddleMock();
-    (window as any).ElectronFiddle = ElectronFiddle;
     ipcRendererManager.send = jest.fn();
 
+    ({ app } = (window as any).ElectronFiddle);
     store = new MockStore() as any;
-    store.customMosaics = [];
+    app.state = store;
 
     instance = new RemoteLoader(store);
 
@@ -56,29 +55,23 @@ describe('RemoteLoader', () => {
     });
 
     editorValues = createEditorValues();
-    mockGistFiles = {};
-    for (const [filename, content] of Object.entries(editorValues)) {
-      mockGistFiles[filename] = { content };
-    }
 
+    mockGistFiles = Object.fromEntries(
+      Object.entries(editorValues).map(([id, content]) => [id, { content }]),
+    );
     mockGetGists = {
-      get: async () => ({
-        data: {
-          files: mockGistFiles,
-        },
-      }),
+      get: jest.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
     };
 
-    mockRepos = Object.keys(editorValues).map((name) => ({
-      name,
-      download_url: `https://${name}`,
-    }));
-    mockRepos.push({ name: 'stuff', download_url: 'https://google.com/' });
-
+    mockRepos = [
+      ...Object.keys(editorValues).map((name) => ({
+        name,
+        download_url: `https://${name}`,
+      })),
+      { name: 'stuff', download_url: 'https://google.com/' },
+    ];
     mockGetRepos = {
-      getContents: async () => ({
-        data: mockRepos,
-      }),
+      getContents: jest.fn().mockResolvedValue({ data: mockRepos }),
     };
   });
 
@@ -89,7 +82,6 @@ describe('RemoteLoader', () => {
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       const gistId = 'abctestid';
-      const { app } = ElectronFiddle;
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       store.gistId = 'abcdtestid';
 
@@ -103,7 +95,6 @@ describe('RemoteLoader', () => {
       const filename = 'file.js';
       const content = '// hello!';
       const gistId = 'customtestid';
-      const { app } = ElectronFiddle;
 
       store.gistId = gistId;
 
@@ -115,7 +106,7 @@ describe('RemoteLoader', () => {
       });
 
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
-      instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
+      instance.verifyAddEditor = jest.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -152,11 +143,10 @@ describe('RemoteLoader', () => {
       for (const filename of Object.keys(mockGistFiles)) {
         expectedValues[filename] = filename;
       }
-      expect(ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
-      expect(ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
-        expectedValues,
-        { gistId: '' },
-      );
+      expect(app.replaceFiddle).toHaveBeenCalledTimes(1);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(expectedValues, {
+        gistId: '',
+      });
     });
 
     it('handles an error', async () => {
@@ -183,8 +173,10 @@ describe('RemoteLoader', () => {
 
       const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
       expect(result).toBe(false);
-      expect(store.setGenericDialogOptions.mock.calls[0][0].label).toMatch(
-        'Tried to launch an invalid Fiddle from',
+      expect(store.setGenericDialogOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          label: expect.stringMatching('invalid Fiddle'),
+        }),
       );
     });
   });

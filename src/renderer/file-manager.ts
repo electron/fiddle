@@ -1,20 +1,19 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { App } from './app';
 import { FileTransform, Files, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
-import { isKnownFile } from '../utils/editor-utils';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
 import { getTemplateValues } from './templates';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
+import { isKnownFile } from '../utils/editor-utils';
 
 export class FileManager {
-  constructor(private readonly appState: AppState, private readonly app: App) {
+  constructor(private readonly appState: AppState) {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
@@ -50,9 +49,10 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openTemplate(templateName: string) {
-    const { app } = this;
     const editorValues = await getTemplateValues(templateName);
-    await app.replaceFiddle(editorValues, { templateName });
+    await window.ElectronFiddle.app.replaceFiddle(editorValues, {
+      templateName,
+    });
   }
 
   /**
@@ -62,15 +62,15 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openFiddle(filePath: string) {
-    const { app } = this;
-    const { verifyCreateCustomEditor } = app.remoteLoader;
+    const { app } = window.ElectronFiddle;
+    const { verifyAddEditor } = app.remoteLoader;
 
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
     for (const [name, value] of Object.entries(await readFiddle(filePath))) {
-      if (isKnownFile(name) || (await verifyCreateCustomEditor(name))) {
+      if (isKnownFile(name) || (await verifyAddEditor(name))) {
         editorValues[name] = value;
       }
     }
@@ -116,7 +116,8 @@ export class FileManager {
         this.appState.gistId = undefined;
       }
 
-      this.app.editorMosaic.isEdited = false;
+      const { app } = window.ElectronFiddle;
+      app.editorMosaic.isEdited = false;
     }
   }
 
@@ -132,7 +133,7 @@ export class FileManager {
     options?: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<Files> {
-    const { app } = this;
+    const { app } = window.ElectronFiddle;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await app.getEditorValues(pOptions);

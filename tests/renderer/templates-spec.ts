@@ -23,9 +23,9 @@ describe('templates', () => {
 
       await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
-      expect(console.log).toHaveBeenCalledTimes(1);
-      expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
-        'Got Fiddle from',
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching('Got Fiddle from'),
+        [MAIN_JS],
       );
 
       (console.log as jest.Mock).mockClear();
