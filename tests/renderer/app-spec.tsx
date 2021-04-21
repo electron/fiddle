@@ -91,10 +91,19 @@ describe('App component', () => {
   });
 
   describe('getEditorValues()', () => {
+    const PACKAGE_JSON = 'package.json';
+
     it('gets values', async () => {
       const app = new App();
       app.editorMosaic.set(editorValues);
       expect(await app.getEditorValues()).toStrictEqual(editorValues);
+    });
+
+    it(`injects ${PACKAGE_JSON} if requested`, async () => {
+      const app = new App();
+      app.editorMosaic.set(editorValues);
+      const got = await app.getEditorValues({ include: true });
+      expect(Object.keys(got)).toEqual(expect.arrayContaining([PACKAGE_JSON]));
     });
   });
 
