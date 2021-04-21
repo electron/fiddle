@@ -1,10 +1,12 @@
 import { reaction } from 'mobx';
+
 import { App } from '../../src/renderer/app';
 import { AppState } from '../../src/renderer/state';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { EditorValues } from '../../src/interfaces';
-// import { EditorValues, MAIN_JS, PACKAGE_NAME } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { ipcRendererManager } from '../../src/renderer/ipc';
 import { waitFor } from '../../src/utils/wait-for';
 
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
@@ -12,14 +14,23 @@ import { MockState } from '../mocks/state';
 import { createEditorValues } from '../mocks/editor-values';
 
 jest.mock('fs-extra');
+jest.mock('../../src/renderer/binary', () => ({
+  downloadBinary: jest.fn().mockImplementation(() => Promise.resolve()),
+  getVersionState: jest.fn().mockReturnValue('ready'),
+  setupBinary: jest.fn().mockImplementation(() => Promise.resolve()),
+}));
+jest.mock('../../src/renderer/fetch-types', () => ({
+  fetchTypeDefinitions: jest.fn(),
+  updateEditorTypeDefinitions: jest.fn(),
+}));
 jest.mock('../../src/renderer/file-manager', () =>
   require('../mocks/file-manager'),
 );
-jest.mock('../../src/renderer/components/header', () => ({
-  Header: () => 'Header;',
-}));
 jest.mock('../../src/renderer/components/dialogs', () => ({
   Dialogs: () => 'Dialogs;',
+}));
+jest.mock('../../src/renderer/components/header', () => ({
+  Header: () => 'Header;',
 }));
 jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
@@ -272,6 +283,69 @@ describe('App component', () => {
       await waitFor(() => document.title != oldTitle);
 
       expect(document.title).toMatch(newTitle);
+    });
+  });
+
+  describe('isUnsaved autorun handler', () => {
+    let app: App;
+
+    beforeEach(() => {
+      // setup: mock close & ipc
+      window.close = jest.fn();
+      ipcRendererManager.send = jest.fn();
+
+      // setup: create an app
+      app = new App();
+      (window as any).ElectronFiddle.app = app;
+      app.setupUnloadListeners();
+
+      // expect the app to be watching for exit if the fiddle is edited
+      app.editorMosaic.isEdited = true;
+      expect(window.onbeforeunload).toBeTruthy();
+
+      // expect that the code watching for exit pops up a confirmation dialog
+      const result = window.onbeforeunload!(undefined as any);
+      expect(result).toBe(false);
+      expect(app.state.isGenericDialogShowing).toBe(true);
+    });
+
+    it('can close the window if user accepts the dialog', (done) => {
+      app.state.genericDialogLastResult = true;
+      app.state.isGenericDialogShowing = false;
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalled();
+        done();
+      });
+    });
+
+    it('can close the app after user accepts dialog', (done) => {
+      const { state } = app;
+      state.genericDialogLastResult = true;
+      state.isGenericDialogShowing = false;
+      state.isQuitting = true;
+
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalledTimes(1);
+        expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.CONFIRM_QUIT,
+        );
+        done();
+      });
+    });
+
+    it('takes no action if user cancels the dialog', (done) => {
+      const { state } = app;
+      state.genericDialogLastResult = false;
+      state.isGenericDialogShowing = false;
+      state.isQuitting = true;
+
+      process.nextTick(() => {
+        expect(window.close).toHaveBeenCalledTimes(0);
+        expect(ipcRendererManager.send).not.toHaveBeenCalledWith<any>(
+          IpcEvents.CONFIRM_QUIT,
+        );
+        done();
+      });
     });
   });
 });
