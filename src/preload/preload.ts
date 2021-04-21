@@ -2,8 +2,6 @@
 import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from '../renderer/ipc';
 
-process.env.DEBUG = '*';
-
 async function preload() {
   setupGlobalWindow();
   await setupPaths();
