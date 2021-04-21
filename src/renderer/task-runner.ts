@@ -40,12 +40,9 @@ export class TaskRunner {
     this.open = app.openFiddle.bind(app);
     this.run = runner.run.bind(runner);
     this.setVersion = (ver) => {
-      console.log('setVersion', ver);
       if (state.hasVersion(ver)) {
-        console.log('calling appState.setVersion', ver);
         return state.setVersion(ver);
       } else {
-        console.log('throwing not found');
         throw new Error(`Version "${ver}" not found`);
       }
     };

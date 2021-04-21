@@ -47,7 +47,6 @@ interface EditorsState {
 export class Editors extends React.Component<EditorsProps, EditorsState> {
   constructor(props: EditorsProps) {
     super(props);
-    console.log('constructor');
 
     for (const name of [
       'onRelease',
@@ -81,7 +80,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
-      console.log('in IpcEvents.FS_NEW_FIDDLE');
       const { version } = this.props.appState;
       const values = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
