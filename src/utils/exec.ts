@@ -1,5 +1,5 @@
 // Singleton: We don't want to do this more than once
-let _fixPathCalled = false;
+let _shellPathCalled = false;
 
 /**
  * Execute a command in a directory.
@@ -32,16 +32,19 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
 }
 
 /**
- * On macOS, we need to fix the $PATH environment variable
+ * On macOS & Linux, we need to fix the $PATH environment variable
  * so that we can call `npm`.
  *
  * @returns {Promise<void>}
  */
 export async function maybeFixPath(): Promise<void> {
-  if (!_fixPathCalled && process.platform !== 'win32') {
-    const fixPaths = require('fix-path');
-    fixPaths();
+  if (!_shellPathCalled && process.platform !== 'win32') {
+    const shellPaths = require('shell-path');
+    const paths = await shellPaths();
+    if (paths) {
+      process.env.PATH = paths;
+    }
   }
 
-  _fixPathCalled = true;
+  _shellPathCalled = true;
 }
