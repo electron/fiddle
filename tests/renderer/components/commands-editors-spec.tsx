@@ -4,6 +4,7 @@ import { mount, shallow } from 'enzyme';
 import { EditorId, GenericDialogType } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import { EditorMosaic, EditorState } from '../../../src/renderer/editor-mosaic';
+import { compareEditors } from '../../../src/utils/editor-utils';
 
 import { AppMock } from '../../mocks/app';
 import { MonacoEditorMock } from '../../mocks/monaco-editor';
@@ -35,7 +36,9 @@ describe('EditorDropdown component', () => {
   // create a mosaic with numFiles files total, numVisible of which are showing
   function setupMosaic(numFiles: number, numVisible: number) {
     const allValues = createEditorValues();
-    const filenames = Object.keys(allValues).slice(0, numFiles) as EditorId[];
+    const filenames = Object.keys(allValues)
+      .sort(compareEditors)
+      .slice(0, numFiles) as EditorId[];
 
     const editorValues = {};
     filenames.forEach((name) => (editorValues[name] = allValues[name]));
@@ -95,7 +98,7 @@ describe('EditorDropdown component', () => {
     ) {
       store.showEditorDialog = jest
         .fn()
-        .mockReturnValue({ cancelled: false, result: file });
+        .mockReturnValue({ cancelled: !confirm, result: file });
       store.genericDialogLastInput = file;
       store.genericDialogLastResult = confirm;
       await dropdown.addEditor();
@@ -108,6 +111,17 @@ describe('EditorDropdown component', () => {
         wantsInput: true,
       });
     }
+
+    it('does nothing if the cancel button is pressed', async () => {
+      setupMosaic(1, 1);
+      const numFiles = editorMosaic.states.size;
+      const { dropdown } = createEditorDropdown(mount);
+      const file = 'newFile.js';
+      await addFileDialog(dropdown, false, file);
+
+      expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
+      expect(editorMosaic.states.size).toBe(numFiles);
+    });
 
     it('succeeds for supported files', async () => {
       setupMosaic(1, 1);

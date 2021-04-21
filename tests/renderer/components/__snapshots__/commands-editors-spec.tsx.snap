@@ -5,24 +5,13 @@ Array [
   <Blueprint3.MenuItem
     disabled={true}
     icon="eye-open"
-    id="index.html"
+    id="main.js"
     multiline={false}
     onClick={[Function]}
     popoverProps={Object {}}
     shouldDismissPopover={true}
-    text="HTML (index.html)"
-  >
-    <Blueprint3.MenuItem
-      disabled={false}
-      icon="cross"
-      id="index.html"
-      multiline={false}
-      onClick={[Function]}
-      popoverProps={Object {}}
-      shouldDismissPopover={true}
-      text="Remove"
-    />
-  </Blueprint3.MenuItem>,
+    text="Main Process (main.js)"
+  />,
   <React.Fragment>
     <Blueprint3.MenuDivider />
     <Blueprint3.MenuItem
@@ -60,24 +49,13 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={true}
           icon="eye-open"
-          id="index.html"
+          id="main.js"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="HTML (index.html)"
-        >
-          <Blueprint3.MenuItem
-            disabled={false}
-            icon="cross"
-            id="index.html"
-            multiline={false}
-            onClick={[Function]}
-            popoverProps={Object {}}
-            shouldDismissPopover={true}
-            text="Remove"
-          />
-        </Blueprint3.MenuItem>
+          text="Main Process (main.js)"
+        />
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem
