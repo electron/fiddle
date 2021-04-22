@@ -25,7 +25,6 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     webPreferences: {
       webviewTag: false,
       nodeIntegration: true,
-      nodeIntegrationInWorker: true,
       contextIsolation: false,
       preload: path.join(__dirname, '..', 'preload', 'preload'),
     },
