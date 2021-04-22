@@ -129,8 +129,8 @@ export class GistActionButton extends React.Component<
   private async publishGist(description: string) {
     const { appState } = this.props;
 
-    const octo = await getOctokit(this.props.appState);
-    const { gitHubPublishAsPublic } = this.props.appState;
+    const octo = await getOctokit(appState);
+    const { gitHubPublishAsPublic } = appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 

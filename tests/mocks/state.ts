@@ -8,7 +8,7 @@ export class MockState {
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public gistId = '';
-  @observable public gistPublishAsPublic = true;
+  @observable public gitHubPublishAsPublic = true;
   @observable public gitHubToken: string | null = null;
   @observable public isConsoleShowing = true;
   @observable public isGenericDialogShowing = false;
@@ -16,8 +16,6 @@ export class MockState {
   @observable public output = [];
   @observable public title = 'Electron Fiddle';
   @observable public versionsToShow = [];
-
-  public gitHubPublishAsPublic = true;
 
   public hasVersion = jest.fn();
   public hideChannels = jest.fn();

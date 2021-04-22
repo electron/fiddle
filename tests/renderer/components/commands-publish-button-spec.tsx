@@ -11,16 +11,40 @@ import { IpcEvents } from '../../../src/ipc-events';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
-
+import { AppMock } from '../../mocks/app';
 import { MockState } from '../../mocks/state';
 
 jest.mock('../../../src/utils/octokit');
 
-describe('Action button component', () => {
-  let state: MockState;
-  const description = 'Electron Fiddle Gist';
+class OctokitMock {
+  private static nextId = 1;
 
-  const expectedGistCreateOpts = {
+  public authenticate = jest.fn();
+  public gists = {
+    create: jest.fn().mockImplementation(() => ({
+      data: {
+        id: OctokitMock.nextId++,
+      },
+    })),
+    delete: jest.fn(),
+    update: jest.fn(),
+  };
+}
+
+function mockImplementationThrows(mock: jest.Mock, message: string) {
+  mock.mockImplementation(() => {
+    throw new Error(message);
+  });
+}
+
+describe('Action button component', () => {
+  const description = 'Electron Fiddle Gist';
+  const errorMessage = '💀';
+  let state: MockState;
+  let app: AppMock;
+  let mocktokit: OctokitMock;
+
+  const gistCreateOpts = {
     description,
     files: {
       [DefaultEditorId.html]: { content: 'html-content' },
@@ -30,10 +54,18 @@ describe('Action button component', () => {
       [DefaultEditorId.css]: { content: 'css-content' },
     },
     public: true,
-  };
+  } as const;
 
   beforeEach(() => {
-    ({ state } = (window as any).ElectronFiddle.app);
+    ({ app } = (window as any).ElectronFiddle);
+    ({ state } = app);
+
+    // have the octokit getter use our mock
+    mocktokit = new OctokitMock();
+    (getOctokit as any).mockImplementation(() => mocktokit);
+
+    // listen for generated ipc traffic
+    ipcRendererManager.send = jest.fn();
   });
 
   function createActionButton() {
@@ -48,26 +80,25 @@ describe('Action button component', () => {
   });
 
   it('registers for FS_SAVE_FIDDLE_GIST events', () => {
-    const spyOn = jest.spyOn(ipcRendererManager, 'on');
-    const spyOff = jest.spyOn(ipcRendererManager, 'off');
-
     const event = IpcEvents.FS_SAVE_FIDDLE_GIST;
+
+    // confirm that it starts listening when mounted
+    let spy = jest.spyOn(ipcRendererManager, 'on');
     const { instance, wrapper } = createActionButton();
-    expect(spyOn).toHaveBeenCalledWith(event, instance.handleClick);
+    expect(spy).toHaveBeenCalledWith(event, instance.handleClick);
+    spy.mockRestore();
 
+    // confirm that it stops listening when unmounted
+    spy = jest.spyOn(ipcRendererManager, 'off');
     wrapper.unmount();
-    expect(spyOff).toHaveBeenCalledWith(event, instance.handleClick);
-
-    spyOn.mockRestore();
-    spyOff.mockRestore();
+    expect(spy).toHaveBeenCalledWith(event, instance.handleClick);
+    spy.mockRestore();
   });
 
   it('toggles the auth dialog on click if not authed', async () => {
     state.toggleAuthDialog = jest.fn();
-
     const { instance } = createActionButton();
     await instance.handleClick();
-
     expect(state.toggleAuthDialog).toHaveBeenCalled();
   });
 
@@ -82,21 +113,16 @@ describe('Action button component', () => {
   });
 
   describe('publish mode', () => {
-    const gistId = '123';
-    let mockOctokit: any;
     let instance: any;
+    let dispose: any;
 
     beforeEach(() => {
-      mockOctokit = {
-        authenticate: jest.fn(),
-        gists: {
-          create: jest.fn(async () => ({ data: { id: gistId } })),
-        },
-      };
-
-      (getOctokit as any).mockImplementation(() => mockOctokit);
-
+      // create a button that's primed to publish a new gist
       ({ instance } = createActionButton());
+    });
+
+    afterEach(() => {
+      if (dispose) dispose();
     });
 
     it('publishes a gist', async () => {
@@ -105,16 +131,14 @@ describe('Action button component', () => {
         .mockReturnValue(description);
 
       await instance.performGistAction();
-      expect(mockOctokit.gists.create).toHaveBeenCalledWith(
-        expectedGistCreateOpts,
-      );
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
     });
 
     function registerDialogHandler(
       description: string | null,
       result: boolean,
     ) {
-      return reaction(
+      dispose = reaction(
         () => state.isGenericDialogShowing,
         () => {
           state.genericDialogLastInput = description;
@@ -126,29 +150,26 @@ describe('Action button component', () => {
 
     it('asks the user for a description', async () => {
       const description = 'some non-default description';
-      const disposer = registerDialogHandler(description, true);
+      registerDialogHandler(description, true);
       await instance.performGistAction();
-      expect(mockOctokit.gists.create).toHaveBeenCalledWith({
-        ...expectedGistCreateOpts,
+      expect(mocktokit.gists.create).toHaveBeenCalledWith({
+        ...gistCreateOpts,
         description,
       });
-      disposer();
     });
 
     it('provides a default description', async () => {
-      const disposer = registerDialogHandler(null, true);
+      registerDialogHandler(null, true);
       await instance.performGistAction();
-      expect(mockOctokit.gists.create).toHaveBeenCalledWith(
-        expectedGistCreateOpts,
-      );
-      disposer();
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
+      dispose();
     });
 
     it('publishes only if the user confirms', async () => {
-      const disposer = registerDialogHandler(null, false);
+      registerDialogHandler(null, false);
       await instance.performGistAction();
-      expect(mockOctokit.gists.create).not.toHaveBeenCalled();
-      disposer();
+      expect(mocktokit.gists.create).not.toHaveBeenCalled();
+      dispose();
     });
 
     it('handles missing content', async () => {
@@ -156,14 +177,12 @@ describe('Action button component', () => {
       instance.getFiddleDescriptionFromUser = jest
         .fn()
         .mockReturnValue(description);
-      (window as any).ElectronFiddle.app.getEditorValues.mockReturnValueOnce(
-        {},
-      );
+      app.getEditorValues.mockReturnValueOnce({});
 
       await instance.performGistAction();
 
-      expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
-        ...expectedGistCreateOpts,
+      expect(mocktokit.gists.create).toHaveBeenCalledWith({
+        ...gistCreateOpts,
         files: {
           [DefaultEditorId.html]: { content: '<!-- Empty -->' },
           [DefaultEditorId.renderer]: { content: '// Empty' },
@@ -175,9 +194,7 @@ describe('Action button component', () => {
     });
 
     it('handles an error in Gist publishing', async () => {
-      mockOctokit.gists.create.mockImplementation(() => {
-        throw new Error('💣');
-      });
+      mockImplementationThrows(mocktokit.gists.create, errorMessage);
 
       const { instance } = createActionButton();
       instance.getFiddleDescriptionFromUser = jest
@@ -188,23 +205,31 @@ describe('Action button component', () => {
 
       expect(state.activeGistAction).toBe(GistActionState.none);
     });
+
+    it('can publish private gists', async () => {
+      registerDialogHandler(description, true);
+      instance.setPrivate();
+      await instance.performGistAction();
+      const { create } = mocktokit.gists;
+      expect(create).toHaveBeenCalledWith({ ...gistCreateOpts, public: false });
+    });
+
+    it('can publish public gists', async () => {
+      registerDialogHandler(description, true);
+      instance.setPublic();
+      await instance.performGistAction();
+      const { create } = mocktokit.gists;
+      expect(create).toHaveBeenCalledWith({ ...gistCreateOpts, public: true });
+    });
   });
 
   describe('update mode', () => {
     const gistId = '123';
-    let mockOctokit: any;
     let wrapper: any;
     let instance: any;
 
     beforeEach(() => {
-      mockOctokit = {
-        authenticate: jest.fn(),
-        gists: {
-          update: jest.fn(),
-        },
-      };
-      (getOctokit as any).mockReturnValue(mockOctokit);
-
+      // create a button that's primed to update gistId
       state.gistId = gistId;
       ({ instance, wrapper } = createActionButton());
       wrapper.setProps({ appState: state });
@@ -214,22 +239,18 @@ describe('Action button component', () => {
     it('attempts to update an existing Gist', async () => {
       await instance.performGistAction();
 
-      expect(mockOctokit.gists.update).toHaveBeenCalledWith({
+      expect(mocktokit.gists.update).toHaveBeenCalledWith({
         gist_id: gistId,
-        files: expectedGistCreateOpts.files,
+        files: gistCreateOpts.files,
       });
     });
 
     it('notifies the user if updating fails', async () => {
-      const errorMessage = '💀';
-      ipcRendererManager.send = jest.fn();
-      mockOctokit.gists.update.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
+      mockImplementationThrows(mocktokit.gists.update, errorMessage);
 
       await instance.performGistAction();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
         IpcEvents.SHOW_WARNING_DIALOG,
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
@@ -241,20 +262,11 @@ describe('Action button component', () => {
 
   describe('delete mode', () => {
     const gistId = '123';
-    let mockOctokit: any;
     let wrapper: any;
     let instance: any;
 
     beforeEach(() => {
-      mockOctokit = {
-        authenticate: jest.fn(),
-        gists: {
-          delete: jest.fn(),
-        },
-      };
-
-      (getOctokit as any).mockReturnValue(mockOctokit);
-
+      // create a button primed to delete gistId
       ({ instance, wrapper } = createActionButton());
       wrapper.setProps({ appState: { gistId } });
       instance.setState({ actionType: GistActionType.delete });
@@ -262,22 +274,15 @@ describe('Action button component', () => {
 
     it('attempts to delete an existing Gist', async () => {
       await instance.performGistAction();
-
-      expect(mockOctokit.gists.delete).toHaveBeenCalledWith({
-        gist_id: gistId,
-      });
+      expect(mocktokit.gists.delete).toHaveBeenCalledWith({ gist_id: gistId });
     });
 
     it('notifies the user if deleting fails', async () => {
-      const errorMessage = '🔥';
-      ipcRendererManager.send = jest.fn();
-      mockOctokit.gists.delete.mockImplementation(() => {
-        throw new Error(errorMessage);
-      });
+      mockImplementationThrows(mocktokit.gists.delete, errorMessage);
 
       await instance.performGistAction();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
         IpcEvents.SHOW_WARNING_DIALOG,
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
@@ -287,61 +292,18 @@ describe('Action button component', () => {
     });
   });
 
-  it('uses the privacy setting correctly', async () => {
-    const mockOctokit = {
-      authenticate: jest.fn(),
-      gists: {
-        create: jest.fn(() => {
-          throw new Error('bwap bwap');
-        }),
-      },
-    };
-
-    (getOctokit as any).mockReturnValue(mockOctokit);
-
-    const { instance } = createActionButton();
-    instance.getFiddleDescriptionFromUser = jest
-      .fn()
-      .mockReturnValue(description);
-
-    instance.setPrivate();
-    await instance.performGistAction();
-
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
-      ...expectedGistCreateOpts,
-      public: false,
-    });
-
-    instance.setPublic();
-    await instance.performGistAction();
-
-    expect(mockOctokit.gists.create).toHaveBeenCalledWith<any>({
-      ...expectedGistCreateOpts,
-      public: true,
-    });
-  });
-
   describe('disables itself', () => {
     async function testDisabledWhen(gistActionState: GistActionState) {
+      // create a button with no initial state
       state.activeGistAction = GistActionState.none;
-      const { instance, wrapper } = createActionButton();
+      const { wrapper } = createActionButton();
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
-      instance.performGistAction = jest.fn().mockImplementationOnce(() => {
-        return new Promise<void>((resolve) => {
-          wrapper.setProps(
-            { appState: { state, activeGistAction: gistActionState } },
-            () => expect(wrapper.find('fieldset').prop('disabled')).toBe(true),
-          );
-          wrapper.setProps(
-            { appState: { state, activeGistAction: GistActionState.none } },
-            () => expect(wrapper.find('fieldset').prop('disabled')).toBe(false),
-          );
-          resolve();
-        });
-      });
+      state.activeGistAction = gistActionState;
+      expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
 
-      await instance.performGistAction();
+      state.activeGistAction = GistActionState.none;
+      expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
     }
 
     it('while publishing', async () => {
