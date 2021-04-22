@@ -31,18 +31,12 @@ class OctokitMock {
   };
 }
 
-function mockImplementationThrows(mock: jest.Mock, message: string) {
-  mock.mockImplementation(() => {
-    throw new Error(message);
-  });
-}
-
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
   const errorMessage = '💀';
-  let state: MockState;
   let app: AppMock;
   let mocktokit: OctokitMock;
+  let state: MockState;
 
   const gistCreateOpts = {
     description,
@@ -194,7 +188,9 @@ describe('Action button component', () => {
     });
 
     it('handles an error in Gist publishing', async () => {
-      mockImplementationThrows(mocktokit.gists.create, errorMessage);
+      mocktokit.gists.create.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
 
       const { instance } = createActionButton();
       instance.getFiddleDescriptionFromUser = jest
@@ -246,7 +242,9 @@ describe('Action button component', () => {
     });
 
     it('notifies the user if updating fails', async () => {
-      mockImplementationThrows(mocktokit.gists.update, errorMessage);
+      mocktokit.gists.update.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
 
       await instance.performGistAction();
 
@@ -278,7 +276,9 @@ describe('Action button component', () => {
     });
 
     it('notifies the user if deleting fails', async () => {
-      mockImplementationThrows(mocktokit.gists.delete, errorMessage);
+      mocktokit.gists.delete.mockImplementation(() => {
+        throw new Error(errorMessage);
+      });
 
       await instance.performGistAction();
 
