@@ -259,21 +259,15 @@ export class GistActionButton extends React.Component<
     const { gistId } = this.props.appState;
     const { actionType } = this.state;
 
-    if (gistId) {
-      switch (actionType) {
-        case GistActionType.publish:
-          await this.handlePublish();
-          break;
-        case GistActionType.update:
-          await this.handleUpdate();
-          break;
-        case GistActionType.delete:
-          await this.handleDelete();
-          break;
-      }
-    } else {
-      await this.handlePublish();
+    if (gistId && actionType === GistActionType.update) {
+      return this.handleUpdate();
     }
+
+    if (gistId && actionType == GistActionType.delete) {
+      return this.handleDelete();
+    }
+
+    return this.handlePublish();
   }
 
   /**
@@ -425,7 +419,7 @@ export class GistActionButton extends React.Component<
   }
 
   private renderToast = (toast: IToastProps) => {
-    this.toaster.show(toast);
+    this.toaster?.show(toast);
   };
 
   private gistFilesList = (values: EditorValues) => {
