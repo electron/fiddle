@@ -1,5 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
+import decomment from 'decomment';
 
 // Making TypeScript happy and avoiding "esModuleInterop" issues
 const { builtinModules } = require('module');
@@ -111,7 +112,7 @@ export async function findModules(input: string) {
   let match: RegExpMatchArray | null;
 
   /* decomment code with the esprima parser */
-  const code = await decommentWithWorker(input);
+  const code = await decomment(input);
 
   /* grab all global require matches in the text */
   while ((match = requiregx.exec(code) || null)) {
@@ -165,17 +166,4 @@ export function packageRun(
   command: string,
 ): Promise<string> {
   return exec(dir, `${packageManager} run ${command}`);
-}
-
-function decommentWithWorker(input: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker('../utils/decomment.ts');
-    worker.onmessage = function (event: MessageEvent<string>) {
-      resolve(event.data);
-    };
-    worker.postMessage(input);
-    worker.onerror = function (e) {
-      reject(e);
-    };
-  });
 }

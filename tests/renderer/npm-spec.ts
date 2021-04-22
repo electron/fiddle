@@ -10,12 +10,9 @@ import {
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-import MockDecommentWorker from '../mocks/worker';
 import { DefaultEditorId } from '../../src/interfaces';
 jest.mock('decomment');
 jest.mock('../../src/utils/exec');
-
-window.Worker = MockDecommentWorker;
 
 describe('npm', () => {
   const mockBuiltins = `
