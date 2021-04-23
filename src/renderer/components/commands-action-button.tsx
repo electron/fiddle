@@ -263,7 +263,7 @@ export class GistActionButton extends React.Component<
       return this.handleUpdate();
     }
 
-    if (gistId && actionType == GistActionType.delete) {
+    if (gistId && actionType === GistActionType.delete) {
       return this.handleDelete();
     }
 
