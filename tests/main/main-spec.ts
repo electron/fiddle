@@ -19,7 +19,7 @@ import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { setupAboutPanel } from '../../src/main/about-panel';
 import { overridePlatform } from '../utils';
-import { MockBrowserWindow } from '../mocks/browser-window';
+import { BrowserWindowMock } from '../mocks/browser-window';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
@@ -153,7 +153,7 @@ describe('main', () => {
       });
 
       it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
-        const mockWindow = new MockBrowserWindow();
+        const mockWindow = new BrowserWindowMock();
         (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
           mockWindow,
         );
@@ -167,7 +167,7 @@ describe('main', () => {
       });
 
       it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
-        const mockWindow = new MockBrowserWindow();
+        const mockWindow = new BrowserWindowMock();
         (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
           mockWindow,
         );
@@ -183,7 +183,7 @@ describe('main', () => {
       });
 
       it('should maximize the window if AppleActionOnDoubleClick is maximize and the window is not maximized', () => {
-        const mockWindow = new MockBrowserWindow();
+        const mockWindow = new BrowserWindowMock();
         mockWindow.isMaximized.mockReturnValue(false);
         (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
           mockWindow,
@@ -200,7 +200,7 @@ describe('main', () => {
       });
 
       it('should unmaximize the window if AppleActionOnDoubleClick is maximize and the window is maximized', () => {
-        const mockWindow = new MockBrowserWindow();
+        const mockWindow = new BrowserWindowMock();
         mockWindow.isMaximized.mockReturnValue(true);
         (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
           mockWindow,
@@ -217,7 +217,7 @@ describe('main', () => {
       });
 
       it('should do nothing if AppleActionOnDoubleClick is an unknown value', () => {
-        const mockWindow = new MockBrowserWindow();
+        const mockWindow = new BrowserWindowMock();
         (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
           mockWindow,
         );

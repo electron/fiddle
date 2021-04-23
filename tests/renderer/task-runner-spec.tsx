@@ -13,11 +13,11 @@ import { App } from '../../src/renderer/app';
 import { TaskRunner } from '../../src/renderer/task-runner';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppMock } from '../mocks/app';
-import { MockState } from '../mocks/state';
+import { StateMock } from '../mocks/state';
 
 describe('Task Runner component', () => {
   let app: AppMock;
-  let appState: MockState;
+  let appState: StateMock;
   let runner: any;
   let ipc: any;
 

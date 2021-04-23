@@ -4,7 +4,7 @@ import * as React from 'react';
 import { observable } from 'mobx';
 import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
 import { ElectronFiddleMock } from '../../mocks/electron-fiddle';
-import { MockState } from '../../mocks/state';
+import { StateMock } from '../../mocks/state';
 import { GistActionState } from '../../../src/interfaces';
 
 jest.mock('../../../src/utils/octokit');
@@ -46,7 +46,7 @@ describe('AddressBar component', () => {
   });
 
   it('handles an external state change', () => {
-    const mockStore = new MockState() as any;
+    const mockStore = new StateMock() as any;
     const wrapper = shallow(<AddressBar appState={mockStore} />);
 
     mockStore.gistId = 'hi';

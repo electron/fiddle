@@ -7,7 +7,7 @@ import {
   VersionState,
 } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
-import { MockVersions } from '../../mocks/electron-versions';
+import { VersionsMock } from '../../mocks/electron-versions';
 
 const { unknown } = VersionState;
 const { remote } = VersionSource;
@@ -28,7 +28,7 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    const { mockVersions } = new MockVersions();
+    const { mockVersions } = new VersionsMock();
 
     const versions = {
       ...mockVersions,

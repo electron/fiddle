@@ -1,9 +1,8 @@
 import { App } from '../../src/renderer/app';
-import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
 import { waitFor } from '../../src/utils/wait-for';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { MockState } from '../mocks/state';
+import { StateMock } from '../mocks/state';
 import { DefaultEditorId, PACKAGE_NAME } from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
@@ -119,7 +118,7 @@ describe('App component', () => {
 
     beforeEach(() => {
       app = new App();
-      (app.state as Partial<AppState>) = new MockState();
+      (app.state as any) = new StateMock();
       app.state.isUnsaved = false;
       app.state.setGenericDialogOptions = jest.fn();
       app.state.setVisibleMosaics = jest.fn();
@@ -323,7 +322,7 @@ describe('App component', () => {
 
       it('sets editor values and source info if prompt is accepted', (done) => {
         const app = new App();
-        (app.state as Partial<AppState>) = new MockState();
+        (app.state as any) = new StateMock();
         app.state.isUnsaved = true;
         app.state.setVisibleMosaics = jest.fn();
         app.state.setGenericDialogOptions = jest.fn();
@@ -363,7 +362,7 @@ describe('App component', () => {
 
     beforeEach(() => {
       app = new App();
-      (app.state as Partial<AppState>) = new MockState();
+      (app.state as any) = new StateMock();
       app.state.customMosaics = [];
     });
 
@@ -537,7 +536,7 @@ describe('App component', () => {
 
       // app mock
       app = new App();
-      (app.state as Partial<AppState>) = new MockState();
+      (app.state as any) = new StateMock();
       app.state.isUsingSystemTheme = true;
       app.state.setTheme = jest.fn();
     });
@@ -610,7 +609,7 @@ describe('App component', () => {
 
     beforeEach(() => {
       app = new App();
-      (app.state as Partial<AppState>) = new MockState();
+      (app.state as any) = new StateMock();
     });
 
     it('updates the document title when state.title changes', async () => {

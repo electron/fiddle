@@ -19,9 +19,9 @@ import {
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { waitFor } from '../../src/utils/wait-for';
 import { AppState } from '../../src/renderer/state';
-import { MockChildProcess } from '../mocks/child-process';
+import { ChildProcessMock } from '../mocks/child-process';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { MockVersions } from '../mocks/electron-versions';
+import { VersionsMock } from '../mocks/electron-versions';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -34,16 +34,16 @@ jest.mock('child_process');
 jest.mock('path');
 
 describe('Runner component', () => {
-  let mockChild: MockChildProcess;
+  let mockChild: ChildProcessMock;
   let store: any;
   let instance: Runner;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new MockVersions());
+    ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    mockChild = new MockChildProcess();
+    mockChild = new ChildProcessMock();
     ipcRendererManager.removeAllListeners();
 
     (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);

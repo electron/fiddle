@@ -34,7 +34,7 @@ import {
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
-import { MockVersions } from '../mocks/electron-versions';
+import { VersionsMock } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -54,8 +54,8 @@ jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
     '../../src/renderer/versions',
   );
-  const { MockVersions } = require('../mocks/electron-versions');
-  const { mockVersionsArray } = new MockVersions();
+  const { VersionsMock } = require('../mocks/electron-versions');
+  const { mockVersionsArray } = new VersionsMock();
 
   return {
     addLocalVersion: jest.fn(),
@@ -78,7 +78,7 @@ describe('AppState', () => {
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new MockVersions());
+    ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
     (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
       mockVersionsArray,

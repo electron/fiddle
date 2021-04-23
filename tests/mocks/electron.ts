@@ -1,10 +1,10 @@
 import { EventEmitter } from 'events';
-import { MockBrowserWindow } from './browser-window';
-import { MockWebContents } from './web-contents';
+import { BrowserWindowMock } from './browser-window';
+import { WebContentsMock } from './web-contents';
 
-const createdNotifications: Array<MockNotification> = [];
+const createdNotifications: Array<NotificationMock> = [];
 
-class MockNotification extends EventEmitter {
+class NotificationMock extends EventEmitter {
   public readonly show = jest.fn();
 
   constructor(public readonly options: any) {
@@ -20,34 +20,34 @@ class Screen extends EventEmitter {
   public readonly getCursorScreenPoint = jest.fn();
 }
 
-class MockAutoUpdater extends EventEmitter {
+class AutoUpdaterMock extends EventEmitter {
   public readonly quitAndInstall = jest.fn();
 }
 
-export class MockMenu {
+export class MenuMock {
   public static readonly setApplicationMenu = jest.fn();
   public static readonly sendActionToFirstResponder = jest.fn();
   public static readonly getApplicationMenu = jest.fn();
   public static readonly buildFromTemplate = jest.fn();
   public readonly popup = jest.fn();
   public readonly closePopup = jest.fn();
-  public items: Array<MockMenuItem> = [];
-  public append(mi: MockMenuItem) {
+  public items: Array<MenuItemMock> = [];
+  public append(mi: MenuItemMock) {
     this.items.push(mi);
   }
-  public insert(pos: number, mi: MockMenuItem) {
+  public insert(pos: number, mi: MenuItemMock) {
     this.items = this.items.splice(pos, 0, mi);
   }
 }
 
-export class MockNativeImage {
+export class NativeImageMock {
   public readonly args: Array<any>;
   constructor(...args: Array<any>) {
     this.args = args;
   }
 }
 
-export class MockMenuItem {
+export class MenuItemMock {
   public enabled: boolean;
   public visible: boolean;
   public label: string;
@@ -67,7 +67,7 @@ export class MockMenuItem {
   }
 }
 
-export class MockIPCMain extends EventEmitter {
+export class IPCMainMock extends EventEmitter {
   public send: any;
   public handle: any;
   public handleOnce: any;
@@ -80,7 +80,7 @@ export class MockIPCMain extends EventEmitter {
   }
 }
 
-export class MockIPCRenderer extends EventEmitter {
+export class IPCRendererMock extends EventEmitter {
   public send: any;
   public invoke: any;
 
@@ -138,7 +138,7 @@ const app = {
 
 const mainWindowStub = CreateWindowStub();
 const focusedWindowStub = CreateWindowStub();
-const autoUpdater = new MockAutoUpdater();
+const autoUpdater = new AutoUpdaterMock();
 
 const session = {
   defaultSession: {
@@ -163,7 +163,7 @@ const systemPreferences = {
 const electronMock = {
   app,
   autoUpdater,
-  BrowserWindow: MockBrowserWindow,
+  BrowserWindow: BrowserWindowMock,
   clipboard: {
     readText: jest.fn(),
     readImage: jest.fn(),
@@ -178,10 +178,10 @@ const electronMock = {
     showOpenDialogSync: jest.fn().mockReturnValue(['path']),
     showMessageBox: jest.fn().mockResolvedValue({}),
   },
-  ipcMain: new MockIPCMain(),
-  ipcRenderer: new MockIPCRenderer(),
+  ipcMain: new IPCMainMock(),
+  ipcRenderer: new IPCRendererMock(),
   nativeImage: {
-    createFromPath: (...args: Array<any>) => new MockNativeImage(...args),
+    createFromPath: (...args: Array<any>) => new NativeImageMock(...args),
     createFromBuffer: jest.fn(),
     createFromDataURL: jest.fn(function () {
       return { toPNG: jest.fn(() => 'content') };
@@ -189,9 +189,9 @@ const electronMock = {
     createEmpty: jest.fn(),
   },
   match: jest.fn(),
-  Menu: MockMenu,
-  MenuItem: MockMenuItem,
-  Notification: MockNotification,
+  Menu: MenuMock,
+  MenuItem: MenuItemMock,
+  Notification: NotificationMock,
   _notifications: createdNotifications,
   protocol: {
     registerStandardSchemes: jest.fn(),
@@ -214,7 +214,7 @@ const electronMock = {
   session,
   shell,
   systemPreferences,
-  webContents: MockWebContents,
+  webContents: WebContentsMock,
 };
 
 electronMock.BrowserWindow.getAllWindows.mockReturnValue([]);

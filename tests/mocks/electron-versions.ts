@@ -4,7 +4,7 @@ import {
   VersionState,
 } from '../../src/interfaces';
 
-export class MockVersions {
+export class VersionsMock {
   public readonly mockVersions: Record<string, RunnableVersion>;
   public readonly mockVersionsArray: RunnableVersion[];
 

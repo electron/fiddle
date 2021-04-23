@@ -1,5 +1,5 @@
 import { mount, shallow } from 'enzyme';
-import { MockState } from '../../mocks/state';
+import { StateMock } from '../../mocks/state';
 import * as React from 'react';
 import { IpcEvents } from '../../../src/ipc-events';
 
@@ -8,7 +8,7 @@ import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('Chrome-Mac component', () => {
-  const store: any = new MockState();
+  const store: any = new StateMock();
 
   afterEach(() => resetPlatform());
 

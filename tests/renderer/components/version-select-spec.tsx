@@ -14,7 +14,7 @@ import {
   renderItem,
   VersionSelect,
 } from '../../../src/renderer/components/version-select';
-import { MockVersions } from '../../mocks/electron-versions';
+import { VersionsMock } from '../../mocks/electron-versions';
 
 const { downloading, ready, unknown, unzipping } = VersionState;
 const { remote, local } = VersionSource;
@@ -35,7 +35,7 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    const { mockVersions } = new MockVersions();
+    const { mockVersions } = new VersionsMock();
 
     store = {
       version: '2.0.2',

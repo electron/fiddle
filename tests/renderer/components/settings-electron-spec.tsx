@@ -9,7 +9,7 @@ import {
 } from '../../../src/interfaces';
 import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
-import { MockVersions } from '../../mocks/electron-versions';
+import { VersionsMock } from '../../mocks/electron-versions';
 
 describe('ElectronSettings component', () => {
   let store: any;
@@ -17,7 +17,7 @@ describe('ElectronSettings component', () => {
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new MockVersions());
+    ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
     store = {
       version: '2.0.1',

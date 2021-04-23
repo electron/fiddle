@@ -1,7 +1,7 @@
 import { DefaultEditorId } from '../../src/interfaces';
 
 import { FileManager } from './file-manager';
-import { MockState } from './state';
+import { StateMock } from './state';
 import { MonacoEditorMock } from './monaco-editor';
 import { RemoteLoader } from './remote-loader';
 import { RunnerMock } from './runner';
@@ -28,7 +28,7 @@ export class AppMock {
   public fileManager = new FileManager();
   public remoteLoader = new RemoteLoader();
   public runner = new RunnerMock();
-  public state = new MockState();
+  public state = new StateMock();
   public taskRunner = {};
 
   public monaco: any = {

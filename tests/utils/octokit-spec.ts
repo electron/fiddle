@@ -3,7 +3,7 @@ import { getOctokit } from '../../src/utils/octokit';
 let mockConstructed = 0;
 
 jest.mock('@octokit/rest', () => ({
-  Octokit: class MockOctokit {
+  Octokit: class OctokitMock {
     authenticate: jest.Mock;
     constructor() {
       ++mockConstructed;

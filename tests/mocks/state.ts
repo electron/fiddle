@@ -11,9 +11,9 @@ import {
 import { EditorBackup } from '../../src/utils/editor-backup';
 
 import { BisectorMock } from './bisector';
-import { MockVersions } from './electron-versions';
+import { VersionsMock } from './electron-versions';
 
-export class MockState {
+export class StateMock {
   @observable public activeGistAction: GistActionState = GistActionState.none;
   @observable public closedPanels: Partial<
     Record<MosaicId, EditorBackup | true>
@@ -22,7 +22,7 @@ export class MockState {
   @observable public customMosaics: CustomEditorId[] = [];
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
-  @observable public gistId: string | undefined;
+  @observable public gistId: string | undefined = '';
   @observable public isAutoBisecting = false;
   @observable public isConfirmationPromptShowing = false;
   @observable public isConsoleShowing = true;
@@ -55,13 +55,12 @@ export class MockState {
   public toggleGenericDialog = jest.fn();
   public toggleWarningDialog = jest.fn();
 
-
-  public currentElectronVersion = new MockVersions().mockVersionsArray.shift()!;
+  public currentElectronVersion = new VersionsMock().mockVersionsArray.shift()!;
 
   public Bisector = new BisectorMock();
 
   constructor() {
-    const { mockVersions: obj, mockVersionsArray: arr } = new MockVersions();
+    const { mockVersions: obj, mockVersionsArray: arr } = new VersionsMock();
     this.versions = obj;
     this.currentElectronVersion = arr[arr.length - 1];
     this.version = this.currentElectronVersion.version;
