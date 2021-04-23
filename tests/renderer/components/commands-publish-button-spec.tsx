@@ -119,15 +119,6 @@ describe('Action button component', () => {
       if (dispose) dispose();
     });
 
-    it('publishes a gist', async () => {
-      instance.getFiddleDescriptionFromUser = jest
-        .fn()
-        .mockReturnValue(description);
-
-      await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
-    });
-
     function registerDialogHandler(
       description: string | null,
       result: boolean,
@@ -141,6 +132,12 @@ describe('Action button component', () => {
         },
       );
     }
+
+    it('publishes a gist', async () => {
+      registerDialogHandler(description, true);
+      await instance.performGistAction();
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
+    });
 
     it('asks the user for a description', async () => {
       const description = 'some non-default description';
@@ -167,11 +164,9 @@ describe('Action button component', () => {
     });
 
     it('handles missing content', async () => {
-      const { instance } = createActionButton();
-      instance.getFiddleDescriptionFromUser = jest
-        .fn()
-        .mockReturnValue(description);
       app.getEditorValues.mockReturnValueOnce({});
+      const { instance } = createActionButton();
+      registerDialogHandler(description, true);
 
       await instance.performGistAction();
 
