@@ -257,17 +257,19 @@ export class GistActionButton extends React.Component<
    */
   public async performGistAction(): Promise<void> {
     const { gistId } = this.props.appState;
-    const { actionType } = this.state;
 
-    if (gistId && actionType === GistActionType.update) {
-      return this.handleUpdate();
+    const actionType = gistId ? this.state.actionType : GistActionType.publish;
+
+    switch (actionType) {
+      case GistActionType.delete:
+        return this.handleDelete();
+
+      case GistActionType.publish:
+        return this.handlePublish();
+
+      case GistActionType.update:
+        return this.handleUpdate();
     }
-
-    if (gistId && actionType === GistActionType.delete) {
-      return this.handleDelete();
-    }
-
-    return this.handlePublish();
   }
 
   /**
