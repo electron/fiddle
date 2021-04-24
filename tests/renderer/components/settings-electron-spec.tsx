@@ -27,9 +27,11 @@ describe('ElectronSettings component', () => {
     ];
 
     // Render all the states
-    store.versions['1.8.7'].state = VersionState.unknown;
-    store.versions['2.0.1'].state = VersionState.ready;
-    store.versions['2.0.2'].state = VersionState.downloading;
+    let i = 0;
+    store.versionsToShow[i++].state = VersionState.ready;
+    store.versionsToShow[i++].state = VersionState.downloading;
+    store.versionsToShow[i++].state = VersionState.unknown;
+    store.versionsToShow[i++].state = VersionState.unzipping;
   });
 
   it('renders', () => {

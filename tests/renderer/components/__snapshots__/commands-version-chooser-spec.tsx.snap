@@ -50,6 +50,7 @@ exports[`VersionSelect component renders 1`] = `
         "isConsoleShowing": true,
         "isEnablingElectronLogging": false,
         "isGenericDialogShowing": false,
+        "isInstallingModules": false,
         "isRunning": false,
         "isSettingsShowing": false,
         "isTokenDialogShowing": false,
