@@ -20,26 +20,48 @@ describe('Runner component', () => {
     ipcRendererManager.removeAllListeners();
   });
 
-  it('renders default', () => {
-    const wrapper = shallow(<Runner appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
-  });
+  describe('renders', () => {
+    function expectSnapshotToMatch() {
+      const wrapper = shallow(<Runner appState={store as any} />);
+      expect(wrapper).toMatchSnapshot();
+    }
 
-  it('renders running', () => {
-    store.isRunning = true;
-    const wrapper = shallow(<Runner appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
-  });
+    it('idle', () => {
+      store.currentElectronVersion.state = VersionState.ready;
+      expectSnapshotToMatch();
+    });
 
-  it('renders downloading', () => {
-    store.versions['2.0.2'].state = VersionState.downloading;
-    const wrapper = shallow(<Runner appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
-  });
+    it('running', () => {
+      store.currentElectronVersion.state = VersionState.ready;
+      store.isRunning = true;
+      expectSnapshotToMatch();
+    });
 
-  it('renders "checking status"', () => {
-    store.versions['2.0.2'].state = VersionState.unknown;
-    const wrapper = shallow(<Runner appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
+    it('installing modules', () => {
+      store.currentElectronVersion.state = VersionState.ready;
+      store.isInstallingModules = true;
+      expectSnapshotToMatch();
+    });
+
+    it('VersionState.downloading', () => {
+      store.currentElectronVersion.state = VersionState.downloading;
+      store.currentElectronVersion.downloadProgress = 50;
+      expectSnapshotToMatch();
+    });
+
+    it('VersionState.unzipping', () => {
+      store.currentElectronVersion.state = VersionState.unzipping;
+      expectSnapshotToMatch();
+    });
+
+    it('VersionState.ready', () => {
+      store.currentElectronVersion.state = VersionState.ready;
+      expectSnapshotToMatch();
+    });
+
+    it('VersionState.unknown', () => {
+      store.currentElectronVersion.state = VersionState.unknown;
+      expectSnapshotToMatch();
+    });
   });
 });
