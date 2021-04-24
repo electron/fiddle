@@ -24,24 +24,36 @@ describe('GenericDialog component', () => {
     resetPlatform();
   });
 
-  it('renders a warning', () => {
-    store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
-  });
+  describe('renders', () => {
+    function expectDialogTypeToMatchSnapshot(type: GenericDialogType) {
+      store.genericDialogOptions.type = type;
+      store.isGenericDialogShowing = true;
+      const wrapper = shallow(<GenericDialog appState={store as any} />);
+      expect(wrapper).toMatchSnapshot();
+    }
 
-  it('renders a confirmation', () => {
-    store.genericDialogOptions.type = GenericDialogType.confirm;
-    store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
-  });
+    it('warning', () => {
+      expectDialogTypeToMatchSnapshot(GenericDialogType.warning);
+    });
 
-  it('renders a success message', () => {
-    store.genericDialogOptions.type = GenericDialogType.success;
-    store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
-    expect(wrapper).toMatchSnapshot();
+    it('confirmation', () => {
+      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+    });
+
+    it('confirmation', () => {
+      expectDialogTypeToMatchSnapshot(GenericDialogType.success);
+    });
+
+    it('with an input prompt', () => {
+      store.genericDialogOptions.wantsInput = true;
+      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+    });
+
+    it('with an input prompt and placeholder', () => {
+      store.genericDialogOptions.wantsInput = true;
+      store.genericDialogOptions.placeholder = 'placeholder';
+      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+    });
   });
 
   it('onClose() closes itself', () => {

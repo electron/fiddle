@@ -41,3 +41,80 @@ exports[`GenericDialog component renders a warning 1`] = `
   <p />
 </Blueprint3.Alert>
 `;
+
+exports[`GenericDialog component renders confirmation 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  confirmButtonText="OK"
+  icon="help"
+  intent="primary"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders confirmation 2`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  confirmButtonText="OK"
+  icon="info-sign"
+  intent="success"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders warning 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  confirmButtonText="OK"
+  icon="warning-sign"
+  intent="danger"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders with an input prompt 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  confirmButtonText="OK"
+  icon="help"
+  intent="primary"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+  <Blueprint3.InputGroup
+    id="input"
+  />
+</Blueprint3.Alert>
+`;
+
+exports[`GenericDialog component renders with an input prompt and placeholder 1`] = `
+<Blueprint3.Alert
+  canEscapeKeyCancel={false}
+  canOutsideClickCancel={false}
+  confirmButtonText="OK"
+  icon="help"
+  intent="primary"
+  isOpen={true}
+  onClose={[Function]}
+>
+  <p />
+  <Blueprint3.InputGroup
+    id="input"
+    placeholder="placeholder"
+  />
+</Blueprint3.Alert>
+`;
