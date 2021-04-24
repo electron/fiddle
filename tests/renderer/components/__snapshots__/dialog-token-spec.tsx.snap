@@ -3,7 +3,7 @@
 exports[`TokenDialog component renders 1`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
-  isOpen={true}
+  isOpen={false}
   onClose={[Function]}
   title="GitHub Token"
 >

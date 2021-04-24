@@ -1,10 +1,11 @@
 import { DefaultEditorId } from '../../src/interfaces';
-
-import { FileManager } from './file-manager';
-import { StateMock } from './state';
-import { MonacoEditorMock } from './monaco-editor';
-import { RemoteLoader } from './remote-loader';
-import { RunnerMock } from './runner';
+import {
+  FileManagerMock,
+  MonacoEditorMock,
+  RemoteLoaderMock,
+  RunnerMock,
+  StateMock,
+} from './mocks';
 
 export class AppMock {
   public setup = jest.fn();
@@ -25,8 +26,8 @@ export class AppMock {
     dispose: jest.fn(),
   };
 
-  public fileManager = new FileManager();
-  public remoteLoader = new RemoteLoader();
+  public fileManager = new FileManagerMock();
+  public remoteLoader = new RemoteLoaderMock();
   public runner = new RunnerMock();
   public state = new StateMock();
   public taskRunner = {};

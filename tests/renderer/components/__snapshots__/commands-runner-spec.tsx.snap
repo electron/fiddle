@@ -3,13 +3,10 @@
 exports[`Runner component renders "checking status" 1`] = `
 <Blueprint3.Button
   className="button-run"
-  disabled={true}
-  icon={
-    <Blueprint3.Spinner
-      size={16}
-    />
-  }
-  text="Checking status"
+  disabled={false}
+  icon="play"
+  onClick={[MockFunction]}
+  text="Run"
 />
 `;
 
@@ -26,13 +23,10 @@ exports[`Runner component renders default 1`] = `
 exports[`Runner component renders downloading 1`] = `
 <Blueprint3.Button
   className="button-run"
-  disabled={true}
-  icon={
-    <Blueprint3.Spinner
-      size={16}
-    />
-  }
-  text="Downloading"
+  disabled={false}
+  icon="play"
+  onClick={[MockFunction]}
+  text="Run"
 />
 `;
 

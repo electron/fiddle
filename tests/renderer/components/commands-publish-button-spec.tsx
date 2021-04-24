@@ -9,10 +9,12 @@ import {
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
 
+import { StateMock } from '../../mocks/mocks';
+
 jest.mock('../../../src/utils/octokit');
 
 describe('Publish button component', () => {
-  let store: any;
+  let store: StateMock;
 
   const expectedGistCreateOpts = {
     description: 'Electron Fiddle Gist',
@@ -27,21 +29,18 @@ describe('Publish button component', () => {
   };
 
   beforeEach(() => {
-    store = {
-      gitHubPublishAsPublic: true,
-      customMosaics: [],
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
   it('renders', () => {
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('toggles the auth dialog on click if not authed', async () => {
     store.toggleAuthDialog = jest.fn();
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
     await instance.handleClick();
 
@@ -51,7 +50,7 @@ describe('Publish button component', () => {
   it('toggles the publish method on click if authed', async () => {
     store.gitHubToken = 'github-token';
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
     instance.performGistAction = jest.fn();
     await instance.handleClick();
@@ -69,7 +68,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     instance.getFiddleDescriptionFromUser = jest
@@ -100,7 +99,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     instance.getFiddleDescriptionFromUser = jest.fn().mockReturnValue(null);
@@ -119,7 +118,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     wrapper.setProps({ appState: { gistId: 123, customMosaics: [] } });
@@ -149,7 +148,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     wrapper.setProps({ appState: { gistId: 123 } });
@@ -172,7 +171,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     instance.getFiddleDescriptionFromUser = jest
@@ -205,7 +204,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     instance.getFiddleDescriptionFromUser = jest
@@ -240,7 +239,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
     instance.getFiddleDescriptionFromUser = jest
       .fn()
@@ -263,7 +262,7 @@ describe('Publish button component', () => {
 
     (getOctokit as any).mockReturnValue(mockOctokit);
 
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     instance.getFiddleDescriptionFromUser = jest
@@ -289,7 +288,7 @@ describe('Publish button component', () => {
 
   it('disables during gist publishing', async () => {
     store.activeGistAction = GistActionState.none;
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
@@ -317,7 +316,7 @@ describe('Publish button component', () => {
 
   it('disables during gist updating', async () => {
     store.activeGistAction = GistActionState.none;
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
@@ -345,7 +344,7 @@ describe('Publish button component', () => {
 
   it('disables during gist deleting', async () => {
     store.activeGistAction = GistActionState.none;
-    const wrapper = shallow(<GistActionButton appState={store} />);
+    const wrapper = shallow(<GistActionButton appState={store as any} />);
     const instance: GistActionButton = wrapper.instance() as any;
 
     expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
@@ -373,7 +372,7 @@ describe('Publish button component', () => {
 
   describe('privacy menu', () => {
     it('toggles the privacy setting', () => {
-      const wrapper = shallow(<GistActionButton appState={store} />);
+      const wrapper = shallow(<GistActionButton appState={store as any} />);
       const instance: GistActionButton = wrapper.instance() as any;
 
       instance.setPublic();

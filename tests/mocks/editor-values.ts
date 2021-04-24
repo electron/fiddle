@@ -1,8 +1,8 @@
-import { DefaultEditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
+import { DefaultEditorId, EditorValues } from '../../src/interfaces';
 
 export function createEditorValues(): EditorValues {
   return {
-    [MAIN_JS]: '// main.js',
+    [DefaultEditorId.main]: '// main.js',
     [DefaultEditorId.renderer]: '// renderer.js',
     [DefaultEditorId.preload]: '// preload.js',
     [DefaultEditorId.html]: '<!-- index.html -->',

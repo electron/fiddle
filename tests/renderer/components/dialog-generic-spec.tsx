@@ -3,11 +3,12 @@ import * as React from 'react';
 
 import { GenericDialogType } from '../../../src/interfaces';
 import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
-import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
+import { StateMock } from '../../mocks/mocks';
+
 describe('GenericDialog component', () => {
-  let store: AppState;
+  let store: StateMock;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -16,16 +17,7 @@ describe('GenericDialog component', () => {
   });
 
   beforeEach(() => {
-    (store as Partial<AppState>) = {
-      isGenericDialogShowing: false,
-      genericDialogOptions: {
-        type: GenericDialogType.warning,
-        label: 'Some message',
-        ok: 'Ok',
-        cancel: '',
-      },
-      toggleGenericDialog: jest.fn(),
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
   afterAll(() => {
@@ -34,27 +26,27 @@ describe('GenericDialog component', () => {
 
   it('renders a warning', () => {
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store} />);
+    const wrapper = shallow(<GenericDialog appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders a confirmation', () => {
     store.genericDialogOptions.type = GenericDialogType.confirm;
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store} />);
+    const wrapper = shallow(<GenericDialog appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders a success message', () => {
     store.genericDialogOptions.type = GenericDialogType.success;
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store} />);
+    const wrapper = shallow(<GenericDialog appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('onClose() closes itself', () => {
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store} />);
+    const wrapper = shallow(<GenericDialog appState={store as any} />);
     const instance: GenericDialog = wrapper.instance() as any;
 
     instance.onClose(true);

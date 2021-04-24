@@ -14,13 +14,14 @@ import {
   renderItem,
   VersionSelect,
 } from '../../../src/renderer/components/version-select';
-import { VersionsMock } from '../../mocks/electron-versions';
+
+import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { downloading, ready, unknown, unzipping } = VersionState;
 const { remote, local } = VersionSource;
 
 describe('VersionSelect component', () => {
-  let store: any;
+  let store: StateMock;
 
   const mockVersion1 = {
     source: remote,
@@ -35,25 +36,18 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    const { mockVersions } = new VersionsMock();
+    ({ state: store } = (window as any).ElectronFiddle.app);
 
-    store = {
-      version: '2.0.2',
-      versions: {
-        ...mockVersions,
-        '3.1.3': undefined,
-        '1.0.0': { ...mockVersion1 },
-        '3.0.0-unsupported': { ...mockVersion2 },
-      },
-      channelsToShow: [
-        ElectronReleaseChannel.stable,
-        ElectronReleaseChannel.beta,
-      ],
-      setVersion: jest.fn(),
-      get currentRunnableVersion() {
-        return mockVersions['2.0.2'];
-      },
-    };
+    const { mockVersions } = new VersionsMock();
+    store.initVersions('2.0.2', {
+      ...mockVersions,
+      '1.0.0': { ...mockVersion1 },
+      '3.0.0-unsupported': { ...mockVersion2 },
+    });
+    store.channelsToShow = [
+      ElectronReleaseChannel.stable,
+      ElectronReleaseChannel.beta,
+    ];
   });
 
   const onVersionSelect = () => ({});
@@ -61,7 +55,7 @@ describe('VersionSelect component', () => {
   it('renders', () => {
     const wrapper = shallow(
       <VersionSelect
-        appState={store}
+        appState={store as any}
         currentVersion={mockVersion1}
         onVersionSelect={onVersionSelect}
       />,

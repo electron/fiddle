@@ -5,23 +5,16 @@ import { DefaultEditorId, GenericDialogType } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import { getVisibleMosaics } from '../../../src/utils/editors-mosaic-arrangement';
 
+import { StateMock } from '../../mocks/mocks';
+
 jest.mock('../../../src/utils/editors-mosaic-arrangement');
 
 describe('EditorDropdown component', () => {
-  let store: any;
+  let store: StateMock;
 
   beforeEach(() => {
     (process.env as any).FIDDLE_DOCS_DEMOS = false;
-
-    store = {
-      hideAndBackupMosaic: jest.fn(),
-      setGenericDialogOptions: jest.fn(),
-      removeCustomMosaic: jest.fn(),
-      showMosaic: jest.fn(),
-      toggleGenericDialog: jest.fn(),
-      closedPanels: {},
-      customMosaics: [],
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
 
     (getVisibleMosaics as jest.Mock).mockReturnValue([
       DefaultEditorId.html,
@@ -29,28 +22,20 @@ describe('EditorDropdown component', () => {
     ]);
   });
 
-  afterEach(() => {
-    store = {
-      genericDialogLastInput: undefined,
-      closedPanels: {},
-      customMosaics: [],
-    };
-  });
-
   it('renders', () => {
-    const wrapper = shallow(<EditorDropdown appState={store} />);
+    const wrapper = shallow(<EditorDropdown appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders the extra button if the FIDDLE_DOCS_DEMOS is set', () => {
     (process.env as any).FIDDLE_DOCS_DEMOS = true;
 
-    const wrapper = shallow(<EditorDropdown appState={store} />);
+    const wrapper = shallow(<EditorDropdown appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('handles a click for an item', () => {
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     dropdown.onItemClick({
@@ -67,10 +52,10 @@ describe('EditorDropdown component', () => {
   });
 
   it('disables hide button if only one editor open', () => {
-    store.mosaicArrangement = 'html';
+    store.mosaicArrangement = DefaultEditorId.html;
     (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
 
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const instance = wrapper.instance() as EditorDropdown;
     const menu = instance.renderMenuItems();
 
@@ -83,7 +68,7 @@ describe('EditorDropdown component', () => {
     store.showCustomEditorDialog = jest
       .fn()
       .mockReturnValue({ cancelled: false, result: file });
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = file;
@@ -111,7 +96,7 @@ describe('EditorDropdown component', () => {
     store.showCustomEditorDialog = jest
       .fn()
       .mockReturnValue({ cancelled: false, result: badFile });
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = badFile;
@@ -145,7 +130,7 @@ describe('EditorDropdown component', () => {
     store.showCustomEditorDialog = jest
       .fn()
       .mockReturnValue({ cancelled: false, result: badFile });
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     store.genericDialogLastInput = badFile;
@@ -178,7 +163,7 @@ describe('EditorDropdown component', () => {
     const file = 'file.js';
     store.customMosaics = [file];
 
-    const wrapper = mount(<EditorDropdown appState={store} />);
+    const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
     dropdown.removeCustomEditor({

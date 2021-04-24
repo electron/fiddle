@@ -6,7 +6,7 @@ exports[`AddressBar component renders 1`] = `
   onSubmit={[Function]}
 >
   <fieldset
-    disabled={true}
+    disabled={false}
   >
     <Blueprint3.InputGroup
       key="addressbar"

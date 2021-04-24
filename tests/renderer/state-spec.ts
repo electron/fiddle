@@ -95,7 +95,7 @@ describe('AppState', () => {
   });
 
   describe('isUnsaved autorun handler', () => {
-    it('can close the window if user accepts the dialog', (done) => {
+    it('can close the window if user accepts the dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -106,13 +106,11 @@ describe('AppState', () => {
 
       appState.genericDialogLastResult = true;
       appState.isGenericDialogShowing = false;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalled();
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).toHaveBeenCalled();
     });
 
-    it('can close the app after user accepts dialog', (done) => {
+    it('can close the app after user accepts dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -124,16 +122,14 @@ describe('AppState', () => {
       appState.genericDialogLastResult = true;
       appState.isGenericDialogShowing = false;
       appState.isQuitting = true;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalledTimes(1);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.CONFIRM_QUIT,
-        );
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+      );
     });
 
-    it('takes no action if user cancels the dialog', (done) => {
+    it('takes no action if user cancels the dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -145,13 +141,11 @@ describe('AppState', () => {
       appState.genericDialogLastResult = false;
       appState.isGenericDialogShowing = false;
       appState.isQuitting = true;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalledTimes(0);
-        expect(ipcRendererManager.send).not.toHaveBeenCalledWith<any>(
-          IpcEvents.CONFIRM_QUIT,
-        );
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).not.toHaveBeenCalled();
+      expect(ipcRendererManager.send).not.toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+      );
     });
 
     it('sets the onDidChangeModelContent handler if saved', async (done) => {

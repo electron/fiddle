@@ -1,13 +1,13 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
-import { GenericDialogType } from '../../../src/interfaces';
 import { Dialogs } from '../../../src/renderer/components/dialogs';
-import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
+import { StateMock } from '../../mocks/mocks';
+
 describe('Dialogs component', () => {
-  let store: AppState;
+  let store: StateMock;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -16,18 +16,8 @@ describe('Dialogs component', () => {
   });
 
   beforeEach(() => {
-    (store as Partial<AppState>) = {
-      isTokenDialogShowing: false,
-      isSettingsShowing: false,
-      isAddVersionDialogShowing: false,
-      genericDialogOptions: {
-        type: GenericDialogType.confirm,
-        label: '',
-        ok: '',
-        cancel: '',
-      },
-      isGenericDialogShowing: true,
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
+    store.isGenericDialogShowing = true;
   });
 
   afterAll(() => {
@@ -36,19 +26,19 @@ describe('Dialogs component', () => {
 
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
+    const wrapper = shallow(<Dialogs appState={store as any} />);
     expect(wrapper.text()).toBe('<TokenDialog /><GenericDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
+    const wrapper = shallow(<Dialogs appState={store as any} />);
     expect(wrapper.text()).toBe('<Settings /><GenericDialog />');
   });
 
   it('renders the settings dialog', () => {
     store.isAddVersionDialogShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
+    const wrapper = shallow(<Dialogs appState={store as any} />);
     expect(wrapper.text()).toBe('<AddVersionDialog /><GenericDialog />');
   });
 });
