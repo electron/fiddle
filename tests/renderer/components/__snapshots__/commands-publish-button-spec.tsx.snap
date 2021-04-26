@@ -1,9 +1,9 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Publish button component renders 1`] = `
+exports[`Action button component renders 1`] = `
 <Fragment>
   <fieldset
-    disabled={true}
+    disabled={false}
   >
     <Blueprint3.ButtonGroup
       className="button-gist-action"
@@ -58,7 +58,7 @@ exports[`Publish button component renders 1`] = `
       </Blueprint3.Popover>
       <Blueprint3.Button
         icon="upload"
-        loading={true}
+        loading={false}
         onClick={[Function]}
         text="Publish"
       />

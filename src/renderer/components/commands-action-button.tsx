@@ -129,8 +129,8 @@ export class GistActionButton extends React.Component<
   private async publishGist(description: string) {
     const { appState } = this.props;
 
-    const octo = await getOctokit(this.props.appState);
-    const { gitHubPublishAsPublic } = this.props.appState;
+    const octo = await getOctokit(appState);
+    const { gitHubPublishAsPublic } = appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
@@ -257,22 +257,18 @@ export class GistActionButton extends React.Component<
    */
   public async performGistAction(): Promise<void> {
     const { gistId } = this.props.appState;
-    const { actionType } = this.state;
 
-    if (gistId) {
-      switch (actionType) {
-        case GistActionType.publish:
-          await this.handlePublish();
-          break;
-        case GistActionType.update:
-          await this.handleUpdate();
-          break;
-        case GistActionType.delete:
-          await this.handleDelete();
-          break;
-      }
-    } else {
-      await this.handlePublish();
+    const actionType = gistId ? this.state.actionType : GistActionType.publish;
+
+    switch (actionType) {
+      case GistActionType.delete:
+        return this.handleDelete();
+
+      case GistActionType.publish:
+        return this.handlePublish();
+
+      case GistActionType.update:
+        return this.handleUpdate();
     }
   }
 
@@ -425,7 +421,7 @@ export class GistActionButton extends React.Component<
   }
 
   private renderToast = (toast: IToastProps) => {
-    this.toaster.show(toast);
+    this.toaster?.show(toast);
   };
 
   private gistFilesList = (values: EditorValues) => {
