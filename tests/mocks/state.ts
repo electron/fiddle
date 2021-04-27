@@ -18,7 +18,7 @@ import { VersionsMock } from './electron-versions';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
-  @observable public activeGistAction: GistActionState = GistActionState.none;
+  @observable public activeGistAction = GistActionState.none;
   @observable public channelsToShow: ElectronReleaseChannel[] = [];
   @observable public closedPanels: Partial<
     Record<MosaicId, EditorBackup | true>
@@ -28,7 +28,7 @@ export class StateMock {
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogOptions: GenericDialogOptions = {} as any;
-  @observable public gistId: string | undefined = '';
+  @observable public gistId = '';
   @observable public gitHubAvatarUrl: string | null = null;
   @observable public gitHubLogin: string | null = null;
   @observable public gitHubName: string | null = null;
@@ -57,9 +57,11 @@ export class StateMock {
   @observable public versions: Record<string, RunnableVersion>;
   @observable public versionsToShow: RunnableVersion[] = [];
 
+  public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();
   public addLocalVersion = jest.fn();
   public clearConsole = jest.fn();
+  public currentElectronVersion = new VersionsMock().mockVersionsArray.shift()!;
   public disableTour = jest.fn();
   public downloadVersion = jest.fn();
   public getAndRemoveEditorValueBackup = jest.fn();
@@ -90,10 +92,6 @@ export class StateMock {
   public toggleGenericDialog = jest.fn();
   public toggleWarningDialog = jest.fn();
   public updateElectronVersions = jest.fn();
-
-  public currentElectronVersion = new VersionsMock().mockVersionsArray.shift()!;
-
-  public Bisector = new BisectorMock();
 
   constructor() {
     const { mockVersions: obj, mockVersionsArray: arr } = new VersionsMock();
