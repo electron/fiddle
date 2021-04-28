@@ -17,16 +17,21 @@ import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
-    this.loadFiddleFromElectronExample.bind(this);
-    this.loadFiddleFromGist.bind(this);
-    this.verifyRemoteLoad.bind(this);
-    this.verifyReleaseChannelEnabled.bind(this);
-    this.fetchExampleAndLoad.bind(this);
-    this.fetchGistAndLoad.bind(this);
-    this.setElectronVersionWithRef.bind(this);
-    this.getPackageVersionFromRef.bind(this);
-    this.handleLoadingSuccess.bind(this);
-    this.handleLoadingFailed.bind(this);
+    for (const name of [
+      'fetchExampleAndLoad',
+      'fetchGistAndLoad',
+      'getPackageVersionFromRef',
+      'handleLoadingFailed',
+      'handleLoadingSuccess',
+      'loadFiddleFromElectronExample',
+      'loadFiddleFromGist',
+      'setElectronVersionWithRef',
+      'verifyCreateCustomEditor',
+      'verifyReleaseChannelEnabled',
+      'verifyRemoteLoad',
+    ]) {
+      this[name] = this[name].bind(this);
+    }
   }
 
   public async loadFiddleFromElectronExample(
