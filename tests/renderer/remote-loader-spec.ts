@@ -8,7 +8,6 @@ import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { mockFetchOnce } from '../utils';
 
 jest.mock('../../src/utils/octokit');
 
@@ -147,7 +146,6 @@ describe('RemoteLoader', () => {
       const result = await instance.fetchGistAndLoad('customtestid');
 
       expect(result).toBe(true);
-      expect(store.customMosaics).toEqual([file]);
       expect(app.replaceFiddle).toBeCalledWith(
         {
           [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
@@ -181,11 +179,13 @@ describe('RemoteLoader', () => {
     beforeEach(() => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
 
-      mockFetchOnce(DefaultEditorId.main);
-      mockFetchOnce(DefaultEditorId.renderer);
-      mockFetchOnce(DefaultEditorId.html);
-      mockFetchOnce(DefaultEditorId.css);
-      mockFetchOnce(DefaultEditorId.preload);
+      window.fetch = jest.fn().mockImplementation((url: string) => {
+        const entry = mockRepos.find((entry) => entry.download_url === url);
+        if (!entry) throw new Error(url);
+        return Promise.resolve({
+          text: () => Promise.resolve(entry.name),
+        });
+      });
     });
 
     it('loads an Electron example', async () => {

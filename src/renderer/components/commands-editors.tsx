@@ -20,6 +20,7 @@ import {
 } from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
+import { isSupportedFile } from '../../utils/editor-utils';
 import { TITLE_MAP } from './editors';
 
 interface EditorDropdownState {
@@ -175,15 +176,12 @@ export class EditorDropdown extends React.Component<
   public async addCustomEditor() {
     const { appState } = this.props;
 
-    const isValidEditorName = (name: string) =>
-      /^[^\s]+\.(css|html|js)$/.test(name);
-
     const { cancelled, result } = await this.showCustomEditorDialog();
 
     if (cancelled) return;
 
     // Fail if editor name is not an accepted file type.
-    if (!result || !isValidEditorName(result)) {
+    if (!result || !isSupportedFile(result)) {
       appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
         label:

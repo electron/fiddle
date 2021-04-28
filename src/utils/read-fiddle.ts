@@ -1,4 +1,5 @@
 import { DefaultEditorId, EditorValues } from '../interfaces';
+import { isKnownFile, isSupportedFile } from './editor-utils';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -22,9 +23,6 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
   const hits: string[] = [];
   const misses = new Set(Object.values(DefaultEditorId));
 
-  const isValidEditorName = (name: string) =>
-    /^[^\s]+\.(css|html|js)$/i.test(name);
-
   const tryRead = (name: string) => {
     try {
       const filename = path.join(folder, name);
@@ -42,9 +40,9 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     console.warn(`readFiddle(): "${folder}" does not exist`);
   } else {
     for (const file of fs.readdirSync(folder)) {
-      if (Object.values(DefaultEditorId).includes(file as DefaultEditorId)) {
+      if (isKnownFile(file)) {
         defaultMosaics[file] = tryRead(file);
-      } else if (isValidEditorName(file)) {
+      } else if (isSupportedFile(file)) {
         customMosaics[file] = tryRead(file);
       }
     }
