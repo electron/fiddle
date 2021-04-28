@@ -20,7 +20,8 @@ import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { isEditorBackup } from '../utils/type-checks';
-import { EMPTY_EDITOR_CONTENT, SORTED_EDITORS } from './constants';
+import { getEmptyContent } from '../utils/editor-utils';
+import { SORTED_EDITORS } from './constants';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -83,13 +84,13 @@ export class App {
     }
 
     // If the gist content is empty or matches the empty file output, don't show it.
-    const EMPTIES = Object.values(EMPTY_EDITOR_CONTENT);
-    const shouldShowContent = (content?: string) =>
-      content?.length && !EMPTIES.includes(content);
+    const shouldShow = (id: EditorId, val?: string) => {
+      return !!val && val.length > 0 && val !== getEmptyContent(id);
+    };
 
     // Sort and display all editors that have content.
     const visibleEditors: EditorId[] = Object.entries(editorValues)
-      .filter(([_id, content]) => shouldShowContent(content))
+      .filter(([id, content]) => shouldShow(id as EditorId, content))
       .map(([id]) => id as DefaultEditorId)
       .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
 
