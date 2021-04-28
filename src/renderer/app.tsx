@@ -20,8 +20,7 @@ import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { isEditorBackup } from '../utils/type-checks';
-import { getEmptyContent } from '../utils/editor-utils';
-import { SORTED_EDITORS } from './constants';
+import { compareEditors, getEmptyContent } from '../utils/editor-utils';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -92,7 +91,7 @@ export class App {
     const visibleEditors: EditorId[] = Object.entries(editorValues)
       .filter(([id, content]) => shouldShow(id as EditorId, content))
       .map(([id]) => id as DefaultEditorId)
-      .sort((a, b) => SORTED_EDITORS.indexOf(a) - SORTED_EDITORS.indexOf(b));
+      .sort(compareEditors);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
