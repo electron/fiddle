@@ -8,11 +8,11 @@ import {
   ALL_MOSAICS,
   BlockableAccelerator,
   DocsDemoPage,
-  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  MAIN_JS,
   MosaicId,
   OutputEntry,
   OutputOptions,
@@ -563,7 +563,7 @@ export class AppState {
     console.log(`State: Switching to Electron ${version}`);
 
     // Should we update the editor?
-    if (await isContentUnchanged(DefaultEditorId.main, this.version)) {
+    if (await isContentUnchanged(MAIN_JS, this.version)) {
       const editorValues = await getTemplate(version);
 
       const options: SetFiddleOptions = { templateName: version };

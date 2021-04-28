@@ -1,4 +1,4 @@
-import { DefaultEditorId, EditorValues } from '../interfaces';
+import { EditorValues, MAIN_JS } from '../interfaces';
 import { findModulesInEditors } from '../renderer/npm';
 import { AppState } from '../renderer/state';
 import { getUsername } from './get-username';
@@ -53,7 +53,7 @@ export async function getPackageJson(
       productName: name,
       description: 'My Electron application description',
       keywords: [],
-      main: `./${DefaultEditorId.main}`,
+      main: `./${MAIN_JS}`,
       version: '1.0.0',
       author: getUsername(),
       scripts: {

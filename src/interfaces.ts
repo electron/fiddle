@@ -144,6 +144,10 @@ export const DEFAULT_EDITORS = [
   DefaultEditorId.css,
 ];
 
+// main.js gets special treatment: it is required as the entry point
+// when we run fiddles or create a package.json to package fiddles.
+export const MAIN_JS = DefaultEditorId.main;
+
 export const PACKAGE_NAME = 'package.json';
 
 export const ALL_PANELS = [PanelId.docsDemo];
