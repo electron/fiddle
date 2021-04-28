@@ -11,7 +11,6 @@ import {
 } from 'react-mosaic-component';
 
 import {
-  DefaultEditorId,
   EditorId,
   MosaicId,
   PanelId,
@@ -22,6 +21,7 @@ import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
+import { getEditorTitle } from '../../utils/editor-utils';
 import { isEditorId } from '../../utils/type-checks';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
@@ -40,15 +40,6 @@ const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
     enabled: false,
   },
   wordWrap: 'on',
-};
-
-export const TITLE_MAP: Record<DefaultEditorId | PanelId, string> = {
-  [DefaultEditorId.main]: `Main Process (${DefaultEditorId.main})`,
-  [DefaultEditorId.renderer]: `Renderer Process (${DefaultEditorId.renderer})`,
-  [DefaultEditorId.preload]: `Preload (${DefaultEditorId.preload})`,
-  [DefaultEditorId.html]: `HTML (${DefaultEditorId.html})`,
-  [DefaultEditorId.css]: `Stylesheet (${DefaultEditorId.css})`,
-  [PanelId.docsDemo]: 'Docs & Demos',
 };
 
 interface EditorsProps {
@@ -255,9 +246,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     const { appState } = this.props;
     const content =
       isEditorId(id, appState.customMosaics) && this.renderEditor(id);
-    const title = Object.keys(TITLE_MAP).includes(id)
-      ? TITLE_MAP[id]
-      : `Custom Editor (${id})`;
+    const title = getEditorTitle(id as EditorId);
 
     return (
       <MosaicWindow<EditorId>

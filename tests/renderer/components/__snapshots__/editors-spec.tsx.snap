@@ -917,7 +917,7 @@ exports[`Editors component renders 1`] = `
           <div>
             <div>
               <h5>
-                Docs & Demos
+                Custom Editor (docsDemo)
               </h5>
             </div>
             <div />
@@ -1039,14 +1039,14 @@ exports[`Editors component renders 1`] = `
             <div
               className="mosaic-window-title"
             >
-              Docs & Demos
+              Custom Editor (docsDemo)
             </div>
           </div>
           <div
             className="mosaic-window-body"
           >
             <h4>
-              Docs & Demos
+              Custom Editor (docsDemo)
             </h4>
             <span
               className="bp3-icon bp3-icon-application"

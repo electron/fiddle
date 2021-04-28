@@ -11,7 +11,6 @@ const KNOWN_FILES: string[] = [
   'styles.css',
 ];
 
-// -->
 export function isKnownFile(filename: string): boolean {
   return KNOWN_FILES.includes(filename);
 }
