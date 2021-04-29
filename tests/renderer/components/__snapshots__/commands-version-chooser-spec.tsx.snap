@@ -4,17 +4,82 @@ exports[`VersionSelect component renders 1`] = `
 <Blueprint3.ButtonGroup>
   <VersionSelect
     appState={
-      Object {
+      StateMock {
+        "Bisector": BisectorMock {
+          "calculatePivot": [MockFunction],
+          "continue": [MockFunction],
+          "getCurrentVersion": [MockFunction],
+        },
+        "acceleratorsToBlock": Array [],
+        "activeGistAction": "none",
+        "addAcceleratorToBlock": [MockFunction],
+        "addLocalVersion": [MockFunction],
         "channelsToShow": Array [
           "Stable",
           "Beta",
         ],
+        "clearConsole": [MockFunction],
+        "closedPanels": Object {},
+        "currentDocsDemoPage": "DEFAULT",
         "currentElectronVersion": Object {
           "source": "remote",
           "state": "ready",
           "version": "2.0.2",
         },
+        "customMosaics": Array [],
+        "disableTour": [MockFunction],
+        "downloadVersion": [MockFunction],
+        "genericDialogLastInput": null,
+        "genericDialogLastResult": null,
+        "genericDialogOptions": Object {},
+        "getAndRemoveEditorValueBackup": [MockFunction],
+        "getName": [MockFunction],
+        "gistId": "",
+        "gitHubAvatarUrl": null,
+        "gitHubLogin": null,
+        "gitHubName": null,
+        "gitHubPublishAsPublic": true,
+        "gitHubToken": null,
+        "hasVersion": [MockFunction],
+        "hideAndBackupMosaic": [MockFunction],
+        "hideChannels": [MockFunction],
+        "isAddVersionDialogShowing": false,
+        "isAutoBisecting": false,
+        "isClearingConsoleOnRun": false,
+        "isConfirmationPromptShowing": false,
+        "isConsoleShowing": true,
+        "isEnablingElectronLogging": false,
+        "isGenericDialogShowing": false,
+        "isInstallingModules": false,
+        "isRunning": false,
+        "isSettingsShowing": false,
+        "isTokenDialogShowing": false,
+        "isTourShowing": false,
+        "isUsingSystemTheme": true,
+        "isWarningDialogShowing": false,
+        "mosaicArrangement": null,
+        "output": Array [],
+        "pushError": [MockFunction],
+        "pushOutput": [MockFunction],
+        "removeAcceleratorToBlock": [MockFunction],
+        "removeCustomMosaic": [MockFunction],
+        "removeVersion": [MockFunction],
+        "setGenericDialogOptions": [MockFunction],
+        "setTheme": [MockFunction],
         "setVersion": [MockFunction],
+        "setVisibleMosaics": [MockFunction],
+        "showChannels": [MockFunction],
+        "showCustomEditorDialog": [MockFunction],
+        "showMosaic": [MockFunction],
+        "showUndownloadedVersions": false,
+        "signOutGitHub": [MockFunction],
+        "theme": undefined,
+        "title": "Electron Fiddle",
+        "toggleAddVersionDialog": [MockFunction],
+        "toggleAuthDialog": [MockFunction],
+        "toggleGenericDialog": [MockFunction],
+        "toggleWarningDialog": [MockFunction],
+        "updateElectronVersions": [MockFunction],
         "version": "2.0.2",
         "versions": Object {
           "1.0.0": Object {
@@ -52,7 +117,6 @@ exports[`VersionSelect component renders 1`] = `
             "state": "unknown",
             "version": "3.0.0-unsupported",
           },
-          "3.1.3": undefined,
         },
         "versionsToShow": Array [
           Object {
@@ -100,6 +164,7 @@ exports[`VersionSelect component renders 1`] = `
         "version": "2.0.2",
       }
     }
+    disabled={true}
     onVersionSelect={[Function]}
   />
 </Blueprint3.ButtonGroup>

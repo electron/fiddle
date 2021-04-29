@@ -12,7 +12,7 @@ import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
 import { AppMock } from '../../mocks/app';
-import { MockState } from '../../mocks/state';
+import { StateMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/utils/octokit');
 
@@ -36,7 +36,7 @@ describe('Action button component', () => {
   const errorMessage = '💀';
   let app: AppMock;
   let mocktokit: OctokitMock;
-  let state: MockState;
+  let state: StateMock;
 
   const gistCreateOpts = {
     description,

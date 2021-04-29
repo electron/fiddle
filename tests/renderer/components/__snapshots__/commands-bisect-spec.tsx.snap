@@ -23,6 +23,7 @@ exports[`Bisect commands component disables helper buttons if Electron binary is
 
 exports[`Bisect commands component renders bisect dialog button if no bisect instance 1`] = `
 <Blueprint3.Button
+  disabled={false}
   icon="git-branch"
   text="Bisect"
 />

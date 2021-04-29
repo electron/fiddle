@@ -1,4 +1,3 @@
-import { observable } from 'mobx';
 import {
   DefaultEditorId,
   ElectronReleaseChannel,
@@ -8,6 +7,7 @@ import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
 import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { FetchMock } from '../utils';
 
 jest.mock('../../src/utils/octokit');
 
@@ -70,35 +70,21 @@ const mockGetRepos = {
   }),
 };
 
-class MockStore {
-  @observable public isGenericDialogShowing = false;
-  public setGenericDialogOptions = jest.fn();
-  public toggleGenericDialog = jest.fn();
-  public versions = {
-    '4.0.0': {
-      version: '4.0.0',
-    },
-    '4.0.0-beta': {
-      version: '4.0.0-beta',
-    },
-  };
-  public channelsToShow = [ElectronReleaseChannel.stable];
-  public setVersion = jest.fn();
-  public hasVersion = (version: string) => !!this.versions[version];
-}
-
 describe('RemoteLoader', () => {
   let instance: RemoteLoader;
-  let store: any;
+  let app: AppMock;
+  let store: StateMock;
 
   beforeEach(() => {
-    window.ElectronFiddle = new ElectronFiddleMock() as any;
+    ({ app } = (window as any).ElectronFiddle);
+    ({ state: store } = app);
     ipcRendererManager.send = jest.fn();
-
-    store = new MockStore() as any;
-    store.customMosaics = [];
-
-    instance = new RemoteLoader(store);
+    store.channelsToShow = [ElectronReleaseChannel.stable];
+    store.initVersions('4.0.0', {
+      '4.0.0': { version: '4.0.0' },
+      '4.0.0-beta': { version: '4.0.0-beta' },
+    } as any);
+    instance = new RemoteLoader(store as any);
   });
 
   afterEach(() => {
@@ -107,7 +93,6 @@ describe('RemoteLoader', () => {
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
-      const { app } = window.ElectronFiddle;
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       store.gistId = 'abcdtestid';
 
@@ -129,8 +114,6 @@ describe('RemoteLoader', () => {
     });
 
     it('loads a fiddle with a custom editor', async () => {
-      const { app } = window.ElectronFiddle;
-
       store.gistId = 'customtestid';
 
       const file = 'file.js';
@@ -176,37 +159,30 @@ describe('RemoteLoader', () => {
   });
 
   describe('fetchExampleAndLoad()', () => {
+    let fetchMock: FetchMock;
+
     beforeEach(() => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
-
-      window.fetch = jest.fn().mockImplementation((url: string) => {
-        const entry = mockRepos.find((entry) => entry.download_url === url);
-        if (!entry) throw new Error(url);
-        return Promise.resolve({
-          text: () => Promise.resolve(entry.name),
-        });
-      });
+      fetchMock = new FetchMock();
+      for (const { name, download_url } of mockRepos) {
+        fetchMock.add(download_url, name);
+      }
     });
 
     it('loads an Electron example', async () => {
-      (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
+      (getOctokit as jest.Mock).mockResolvedValue({ repos: mockGetRepos });
 
       await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
-      const { calls } = (window.ElectronFiddle.app
-        .replaceFiddle as jest.Mock).mock;
-
-      expect(calls).toHaveLength(1);
-      expect(calls[0]).toMatchObject(
-        expect.arrayContaining([
-          expect.objectContaining({
-            [DefaultEditorId.html]: DefaultEditorId.html,
-            [DefaultEditorId.main]: DefaultEditorId.main,
-            [DefaultEditorId.renderer]: DefaultEditorId.renderer,
-            [DefaultEditorId.css]: DefaultEditorId.css,
-            [DefaultEditorId.preload]: DefaultEditorId.preload,
-          }),
-        ]),
+      expect(app.replaceFiddle).toHaveBeenCalledWith(
+        expect.objectContaining({
+          [DefaultEditorId.html]: DefaultEditorId.html,
+          [DefaultEditorId.main]: DefaultEditorId.main,
+          [DefaultEditorId.renderer]: DefaultEditorId.renderer,
+          [DefaultEditorId.css]: DefaultEditorId.css,
+          [DefaultEditorId.preload]: DefaultEditorId.preload,
+        }),
+        expect.anything(),
       );
     });
 

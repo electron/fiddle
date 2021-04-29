@@ -34,7 +34,7 @@ import {
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
-import { MockVersions } from '../mocks/electron-versions';
+import { VersionsMock } from '../mocks/electron-versions';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -54,8 +54,8 @@ jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
     '../../src/renderer/versions',
   );
-  const { MockVersions } = require('../mocks/electron-versions');
-  const { mockVersionsArray } = new MockVersions();
+  const { VersionsMock } = require('../mocks/electron-versions');
+  const { mockVersionsArray } = new VersionsMock();
 
   return {
     addLocalVersion: jest.fn(),
@@ -78,7 +78,7 @@ describe('AppState', () => {
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new MockVersions());
+    ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
     (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
       mockVersionsArray,
@@ -95,7 +95,7 @@ describe('AppState', () => {
   });
 
   describe('isUnsaved autorun handler', () => {
-    it('can close the window if user accepts the dialog', (done) => {
+    it('can close the window if user accepts the dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -106,13 +106,11 @@ describe('AppState', () => {
 
       appState.genericDialogLastResult = true;
       appState.isGenericDialogShowing = false;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalled();
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).toHaveBeenCalled();
     });
 
-    it('can close the app after user accepts dialog', (done) => {
+    it('can close the app after user accepts dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -124,16 +122,14 @@ describe('AppState', () => {
       appState.genericDialogLastResult = true;
       appState.isGenericDialogShowing = false;
       appState.isQuitting = true;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalledTimes(1);
-        expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.CONFIRM_QUIT,
-        );
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+      );
     });
 
-    it('takes no action if user cancels the dialog', (done) => {
+    it('takes no action if user cancels the dialog', async () => {
       window.close = jest.fn();
       appState.isUnsaved = true;
       expect(window.onbeforeunload).toBeTruthy();
@@ -145,13 +141,11 @@ describe('AppState', () => {
       appState.genericDialogLastResult = false;
       appState.isGenericDialogShowing = false;
       appState.isQuitting = true;
-      process.nextTick(() => {
-        expect(window.close).toHaveBeenCalledTimes(0);
-        expect(ipcRendererManager.send).not.toHaveBeenCalledWith<any>(
-          IpcEvents.CONFIRM_QUIT,
-        );
-        done();
-      });
+      await process.nextTick;
+      expect(window.close).not.toHaveBeenCalled();
+      expect(ipcRendererManager.send).not.toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+      );
     });
 
     it('sets the onDidChangeModelContent handler if saved', async (done) => {

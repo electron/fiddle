@@ -18,7 +18,7 @@ import {
   saveLocalVersions,
   VersionKeys,
 } from '../../src/renderer/versions';
-import { mockFetchOnce } from '../utils';
+import { FetchMock } from '../utils';
 
 jest.mock('../../src/renderer/binary', () => ({
   getVersionState: jest
@@ -172,10 +172,11 @@ describe('versions', () => {
 
   describe('fetchVersions()', () => {
     it('fetches versions >= 0.24.0', async () => {
-      const mockUnpkgResponse = fs.readFileSync(
-        path.join(__dirname, '../mocks/unpkg-mock.json'),
-      );
-      mockFetchOnce(mockUnpkgResponse.toString());
+      const fetchMock = new FetchMock();
+      const url = 'https://unpkg.com/electron-releases/lite.json';
+      const filename = path.join(__dirname, '../mocks/unpkg-mock.json');
+      const contents = fs.readFileSync(filename).toString();
+      fetchMock.add(url, contents);
 
       const result = await fetchVersions();
       const expected = [
@@ -229,8 +230,8 @@ describe('versions', () => {
         throw new Error(`unexpected key ${key}`);
       });
 
-      mockFetchOnce('');
-
+      const fetchMock = new FetchMock();
+      fetchMock.add('getUpdatedElectronVersions', '');
       const result = await getUpdatedElectronVersions();
 
       expect(result).toEqual([

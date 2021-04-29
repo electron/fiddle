@@ -4,7 +4,7 @@ exports[`AddVersionDialog component renders 1`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
-  isOpen={true}
+  isOpen={false}
   onClose={[Function]}
   title="Add local Electron build"
 >
@@ -67,7 +67,7 @@ exports[`AddVersionDialog component renders 2`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
-  isOpen={true}
+  isOpen={false}
   onClose={[Function]}
   title="Add local Electron build"
 >

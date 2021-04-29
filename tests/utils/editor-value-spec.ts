@@ -1,6 +1,6 @@
 import { DefaultEditorId, MosaicId } from '../../src/interfaces';
 import { getEditorValue } from '../../src/utils/editor-value';
-import { MockState } from '../mocks/state';
+import { StateMock } from '../mocks/state';
 
 describe('getEditorValue()', () => {
   it('returns the value for an editor if it exists', () => {
@@ -12,7 +12,7 @@ describe('getEditorValue()', () => {
     const oldEditor = window.ElectronFiddle.editors[DefaultEditorId.html];
     window.ElectronFiddle.editors[DefaultEditorId.html] = null;
 
-    window.ElectronFiddle.app.state = new MockState() as any;
+    window.ElectronFiddle.app.state = new StateMock() as any;
     const mockState = window.ElectronFiddle.app.state;
 
     mockState.closedPanels = {
@@ -25,7 +25,7 @@ describe('getEditorValue()', () => {
     expect(getEditorValue(DefaultEditorId.html)).toBe('editor-backup-value');
 
     // revert to initial state
-    window.ElectronFiddle.app.state = new MockState() as any;
+    window.ElectronFiddle.app.state = new StateMock() as any;
     window.ElectronFiddle.editors[DefaultEditorId.html] = oldEditor;
   });
 

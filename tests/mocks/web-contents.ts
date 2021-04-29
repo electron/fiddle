@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-export class MockWebContents extends EventEmitter {
+export class WebContentsMock extends EventEmitter {
   public static fromId = jest.fn();
   public static getAllWebContents = jest.fn();
   public static getFocusedWebContents = jest.fn();

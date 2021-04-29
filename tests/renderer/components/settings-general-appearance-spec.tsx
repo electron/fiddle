@@ -12,6 +12,8 @@ import {
 import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
 
+import { StateMock } from '../../mocks/mocks';
+
 const mockThemes = [
   {
     name: 'defaultDark',
@@ -34,12 +36,10 @@ jest.mock('../../../src/renderer/themes', () => ({
 }));
 
 describe('AppearanceSettings component', () => {
-  let store: any;
+  let store: StateMock;
 
   beforeEach(() => {
-    store = {
-      setTheme: jest.fn(),
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
 
     (getAvailableThemes as jest.Mock).mockResolvedValue(mockThemes);
   });
@@ -47,7 +47,7 @@ describe('AppearanceSettings component', () => {
   it('renders', () => {
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store}
+        appState={store as any}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
@@ -55,25 +55,23 @@ describe('AppearanceSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the correct selected theme', (done) => {
+  it('renders the correct selected theme', async () => {
     store.theme = 'defaultDark';
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store}
+        appState={store as any}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
 
-    process.nextTick(() => {
-      expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
-      done();
-    });
+    await process.nextTick;
+    expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
   });
 
   it('handles a theme change', () => {
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store}
+        appState={store as any}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
@@ -86,7 +84,10 @@ describe('AppearanceSettings component', () => {
   it('toggles popover toggle event', () => {
     const toggleFunc = jest.fn();
     const wrapper = shallow(
-      <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
+      <AppearanceSettings
+        appState={store as any}
+        toggleHasPopoverOpen={toggleFunc}
+      />,
     );
 
     // Find the button
@@ -105,7 +106,7 @@ describe('AppearanceSettings component', () => {
     it('attempts to open the folder', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store}
+          appState={store as any}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -118,7 +119,7 @@ describe('AppearanceSettings component', () => {
     it('handles an error', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store}
+          appState={store as any}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -135,7 +136,7 @@ describe('AppearanceSettings component', () => {
     it('creates a new file from the current theme', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store}
+          appState={store as any}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -163,7 +164,7 @@ describe('AppearanceSettings component', () => {
       );
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store}
+          appState={store as any}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -176,7 +177,7 @@ describe('AppearanceSettings component', () => {
     it('handles an error', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store}
+          appState={store as any}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );

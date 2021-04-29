@@ -1,6 +1,6 @@
 import decomment from 'decomment';
 
-export default class MockWorker {
+export default class WorkerMock {
   public onmessage: (msg: any) => any;
   public onmessageerror: () => any;
   public onerror: () => any;

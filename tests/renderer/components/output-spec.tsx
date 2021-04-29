@@ -2,7 +2,7 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Output } from '../../../src/renderer/components/output';
-import { MockState } from '../../mocks/state';
+import { StateMock } from '../../mocks/state';
 
 const mockContext = {
   mosaicActions: {
@@ -20,7 +20,7 @@ describe('Output component', () => {
   let store: any;
 
   beforeEach(() => {
-    store = new MockState();
+    store = new StateMock();
   });
 
   it('renders', () => {

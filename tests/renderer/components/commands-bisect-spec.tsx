@@ -3,40 +3,30 @@ import * as React from 'react';
 import { VersionState } from '../../../src/interfaces';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 
+import { RunnerMock, StateMock } from '../../mocks/mocks';
+
 describe('Bisect commands component', () => {
-  let store: any;
+  let store: StateMock;
+  let runner: RunnerMock;
 
   beforeEach(() => {
-    store = {
-      Bisector: {
-        continue: jest.fn(),
-        getCurrentVersion: jest.fn(),
-      },
-      currentElectronVersion: {
-        state: VersionState.ready,
-      },
-      setVersion: jest.fn(),
-      version: '1.0.0',
-      pushOutput: jest.fn(),
-      setGenericDialogOptions: jest.fn(),
-      isGenericDialogShowing: false,
-    };
+    ({ runner, state: store } = (window as any).ElectronFiddle.app);
   });
 
   it('renders helper buttons if bisect instance is active', () => {
-    const wrapper = shallow(<BisectHandler appState={store} />);
+    const wrapper = shallow(<BisectHandler appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('disables helper buttons if Electron binary is downloading', () => {
     store.currentElectronVersion.state = VersionState.downloading;
-    const wrapper = shallow(<BisectHandler appState={store} />);
+    const wrapper = shallow(<BisectHandler appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders bisect dialog button if no bisect instance', () => {
-    delete store.Bisector;
-    const wrapper = shallow(<BisectHandler appState={store} />);
+    (store as any).Bisector = null;
+    const wrapper = shallow(<BisectHandler appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -44,7 +34,7 @@ describe('Bisect commands component', () => {
     let wrapper: ShallowWrapper;
     let instance: BisectHandler;
     beforeEach(() => {
-      wrapper = shallow(<BisectHandler appState={store} />);
+      wrapper = shallow(<BisectHandler appState={store as any} />);
       instance = wrapper.instance() as any;
       instance.continueBisect = jest.fn();
     });
@@ -62,21 +52,19 @@ describe('Bisect commands component', () => {
 
   describe('continueBisect()', () => {
     it('closes the currently running app', () => {
-      const wrapper = shallow(<BisectHandler appState={store} />);
+      const wrapper = shallow(<BisectHandler appState={store as any} />);
       const instance: BisectHandler = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
         version: '2.0.0',
       });
-      const mockStop = jest.fn();
-      window.ElectronFiddle.app.runner.stop = mockStop;
       instance.continueBisect(true);
 
-      expect(mockStop).toHaveBeenCalled();
+      expect(runner.stop).toHaveBeenCalled();
     });
 
     it('sets version assigned by bisect algorithm', () => {
-      const wrapper = shallow(<BisectHandler appState={store} />);
+      const wrapper = shallow(<BisectHandler appState={store as any} />);
       const instance: BisectHandler = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
@@ -87,7 +75,7 @@ describe('Bisect commands component', () => {
     });
 
     it('terminates bisect if algorithm returns array', () => {
-      const wrapper = shallow(<BisectHandler appState={store} />);
+      const wrapper = shallow(<BisectHandler appState={store as any} />);
       const instance: BisectHandler = wrapper.instance() as any;
       instance.terminateBisect = jest.fn();
 
@@ -123,7 +111,7 @@ describe('Bisect commands component', () => {
 
   describe('terminateBisect()', () => {
     it('removes the bisect instance from the app state', () => {
-      const wrapper = shallow(<BisectHandler appState={store} />);
+      const wrapper = shallow(<BisectHandler appState={store as any} />);
       const instance: BisectHandler = wrapper.instance() as any;
 
       instance.terminateBisect();
