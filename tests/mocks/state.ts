@@ -4,11 +4,10 @@ import { MosaicNode } from 'react-mosaic-component';
 import {
   BlockableAccelerator,
   CustomEditorId,
-  DocsDemoPage,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GistActionState,
-  MosaicId,
+  EditorId,
   RunnableVersion,
 } from '../../src/interfaces';
 import { EditorBackup } from '../../src/utils/editor-backup';
@@ -21,9 +20,8 @@ export class StateMock {
   @observable public activeGistAction = GistActionState.none;
   @observable public channelsToShow: ElectronReleaseChannel[] = [];
   @observable public closedPanels: Partial<
-    Record<MosaicId, EditorBackup | true>
+    Record<EditorId, EditorBackup | true>
   > = {};
-  @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public customMosaics: CustomEditorId[] = [];
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
@@ -48,7 +46,7 @@ export class StateMock {
   @observable public isTourShowing = false;
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
-  @observable public mosaicArrangement: MosaicNode<MosaicId> | null = null;
+  @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
   @observable public output = [];
   @observable public showUndownloadedVersions = false;
   @observable public theme: string | null;

@@ -2,7 +2,7 @@ import * as MonacoType from 'monaco-editor';
 
 // Type-only-import
 import { App as AppType } from './renderer/app';
-import { MosaicId } from './interfaces';
+import { EditorId } from './interfaces';
 
 declare global {
   interface Window {
@@ -11,7 +11,7 @@ declare global {
       app: AppType;
       contentChangeListeners: Array<any>;
       editors: Record<
-        MosaicId,
+        EditorId,
         MonacoType.editor.IStandaloneCodeEditor | null | undefined
       >;
     };

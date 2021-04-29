@@ -1,12 +1,11 @@
 import * as MonacoType from 'monaco-editor';
 
 import {
-  ALL_MOSAICS,
   BlockableAccelerator,
+  DEFAULT_EDITORS,
   DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogType,
-  PanelId,
   RunnableVersion,
   Version,
   VersionSource,
@@ -619,7 +618,7 @@ describe('AppState', () => {
 
   describe('setVisibleMosaics()', () => {
     it('updates the visible editors and creates a backup', async () => {
-      appState.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
+      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
       appState.closedPanels = {};
       appState.customMosaics = [];
       await appState.setVisibleMosaics([DefaultEditorId.main]);
@@ -633,22 +632,6 @@ describe('AppState', () => {
       expect(appState.closedPanels[DefaultEditorId.renderer]).toBeTruthy();
       expect(appState.closedPanels[DefaultEditorId.html]).toBeTruthy();
       expect(appState.closedPanels[DefaultEditorId.main]).toBeUndefined();
-    });
-
-    it('removes the backup for a non-editor right away', async () => {
-      appState.closedPanels = {};
-      appState.closedPanels[PanelId.docsDemo] = true;
-
-      for (const mosaic of ALL_MOSAICS) {
-        // we just need to mock something truthy here
-        window.ElectronFiddle.editors[
-          mosaic
-        ] = {} as MonacoType.editor.IStandaloneCodeEditor;
-      }
-
-      await appState.setVisibleMosaics(ALL_MOSAICS);
-
-      expect(appState.closedPanels[PanelId.docsDemo]).toBeUndefined();
     });
   });
 

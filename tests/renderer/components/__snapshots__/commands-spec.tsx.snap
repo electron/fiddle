@@ -24,7 +24,6 @@ exports[`Commands component renders 1`] = `
             "channelsToShow": Array [],
             "clearConsole": [MockFunction],
             "closedPanels": Object {},
-            "currentDocsDemoPage": "DEFAULT",
             "currentElectronVersion": Object {
               "source": "remote",
               "state": "ready",
@@ -131,7 +130,6 @@ exports[`Commands component renders 1`] = `
             "channelsToShow": Array [],
             "clearConsole": [MockFunction],
             "closedPanels": Object {},
-            "currentDocsDemoPage": "DEFAULT",
             "currentElectronVersion": Object {
               "source": "remote",
               "state": "ready",
@@ -248,7 +246,6 @@ exports[`Commands component renders 1`] = `
             "channelsToShow": Array [],
             "clearConsole": [MockFunction],
             "closedPanels": Object {},
-            "currentDocsDemoPage": "DEFAULT",
             "currentElectronVersion": Object {
               "source": "remote",
               "state": "ready",
@@ -358,7 +355,6 @@ exports[`Commands component renders 1`] = `
           "channelsToShow": Array [],
           "clearConsole": [MockFunction],
           "closedPanels": Object {},
-          "currentDocsDemoPage": "DEFAULT",
           "currentElectronVersion": Object {
             "source": "remote",
             "state": "ready",
@@ -465,7 +461,6 @@ exports[`Commands component renders 1`] = `
           "channelsToShow": Array [],
           "clearConsole": [MockFunction],
           "closedPanels": Object {},
-          "currentDocsDemoPage": "DEFAULT",
           "currentElectronVersion": Object {
             "source": "remote",
             "state": "ready",

@@ -14,8 +14,7 @@ import {
   DEFAULT_EDITORS,
   CustomEditorId,
   GenericDialogType,
-  MosaicId,
-  PanelId,
+  EditorId,
   DefaultEditorId,
 } from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
@@ -56,24 +55,7 @@ export class EditorDropdown extends React.Component<
         <Popover content={this.renderMenu()} position={Position.BOTTOM}>
           <Button icon="applications" text="Editors" />
         </Popover>
-        {this.renderDocsDemos()}
       </>
-    );
-  }
-
-  public renderDocsDemos() {
-    if (!process.env.FIDDLE_DOCS_DEMOS) {
-      return null;
-    }
-
-    return (
-      <Button
-        icon="help"
-        text="Docs & Demos"
-        id={PanelId.docsDemo}
-        onClick={this.onItemClick}
-        active={!this.props.appState.closedPanels.docsDemo}
-      />
     );
   }
 
@@ -217,7 +199,7 @@ export class EditorDropdown extends React.Component<
     const { appState } = this.props;
 
     console.log(`EditorDropdown: Removing custom editor ${id}`);
-    appState.removeCustomMosaic(id as MosaicId);
+    appState.removeCustomMosaic(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
@@ -225,12 +207,12 @@ export class EditorDropdown extends React.Component<
     const { appState } = this.props;
     const visibleMosaics = getVisibleMosaics(appState.mosaicArrangement);
 
-    if (visibleMosaics.includes(id as MosaicId)) {
+    if (visibleMosaics.includes(id as EditorId)) {
       console.log(`EditorDropdown: Closing ${id}`);
-      appState.hideAndBackupMosaic(id as MosaicId);
+      appState.hideAndBackupMosaic(id as EditorId);
     } else {
       console.log(`EditorDropdown: Opening ${id}`);
-      appState.showMosaic(id as MosaicId);
+      appState.showMosaic(id as EditorId);
     }
   }
 }

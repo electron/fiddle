@@ -10,10 +10,10 @@ interface WrapperProps {
 }
 
 interface WrapperState {
-  mosaicArrangement: MosaicNode<WrapperMosaicId>;
+  mosaicArrangement: MosaicNode<WrapperEditorId>;
 }
 
-export type WrapperMosaicId = 'output' | 'editors';
+export type WrapperEditorId = 'output' | 'editors';
 
 export class OutputEditorsWrapper extends React.Component<
   WrapperProps,
@@ -39,7 +39,7 @@ export class OutputEditorsWrapper extends React.Component<
   public render() {
     return (
       <>
-        <Mosaic<WrapperMosaicId>
+        <Mosaic<WrapperEditorId>
           renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
           resize={{ minimumPaneSizePercentage: 0 }}
           value={this.state.mosaicArrangement}
@@ -49,7 +49,7 @@ export class OutputEditorsWrapper extends React.Component<
     );
   }
 
-  private onChange = (rootNode: MosaicParent<WrapperMosaicId>) => {
+  private onChange = (rootNode: MosaicParent<WrapperEditorId>) => {
     const isConsoleShowing = rootNode.splitPercentage !== 0;
 
     if (isConsoleShowing !== this.props.appState.isConsoleShowing) {

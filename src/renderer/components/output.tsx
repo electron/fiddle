@@ -11,7 +11,7 @@ import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
-import { WrapperMosaicId } from './output-editors-wrapper';
+import { WrapperEditorId } from './output-editors-wrapper';
 
 interface CommandsProps {
   appState: AppState;
@@ -29,7 +29,7 @@ interface CommandsProps {
 @observer
 export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
-  public context: MosaicContext<WrapperMosaicId>;
+  public context: MosaicContext<WrapperEditorId>;
   private outputRef = React.createRef<HTMLDivElement>();
 
   constructor(props: CommandsProps) {
@@ -50,9 +50,9 @@ export class Output extends React.Component<CommandsProps> {
        * @returns Whether that node is a MosaicParent or not
        */
       const isParentNode = (
-        node: MosaicNode<WrapperMosaicId> | null,
-      ): node is MosaicParent<WrapperMosaicId> => {
-        return (node as MosaicParent<WrapperMosaicId>)?.direction !== undefined;
+        node: MosaicNode<WrapperEditorId> | null,
+      ): node is MosaicParent<WrapperEditorId> => {
+        return (node as MosaicParent<WrapperEditorId>)?.direction !== undefined;
       };
 
       const { isConsoleShowing } = this.props.appState;

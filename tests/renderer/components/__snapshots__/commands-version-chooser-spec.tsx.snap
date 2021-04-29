@@ -20,7 +20,6 @@ exports[`VersionSelect component renders 1`] = `
         ],
         "clearConsole": [MockFunction],
         "closedPanels": Object {},
-        "currentDocsDemoPage": "DEFAULT",
         "currentElectronVersion": Object {
           "source": "remote",
           "state": "ready",
