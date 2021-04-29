@@ -6,7 +6,7 @@ import {
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { AppMock, StateMock } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 
 jest.mock('../../src/utils/octokit');
