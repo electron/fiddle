@@ -1,20 +1,25 @@
-import * as path from 'path';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 
-import { readFiddle } from '../../src/utils/read-fiddle';
+import { EditorValues, MAIN_JS } from '../../src/interfaces';
+import { createEditorValues } from '../mocks/editor-values';
 import { isSupportedFile } from '../../src/utils/editor-utils';
-import { DefaultEditorId } from '../../src/interfaces';
-
-const defaultFiles = ['LICENSE.txt', DefaultEditorId.main];
+import { readFiddle } from '../../src/utils/read-fiddle';
 
 describe('read-fiddle', () => {
   const folder = '/some/place';
 
-  beforeEach(async () => {
+  beforeEach(() => {
     (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
+    (fs.readFileSync as jest.Mock).mockImplementation((filename) => filename);
+    console.warn = jest.fn();
   });
 
-  function setupFSMocks(editorValues: Record<string, string>) {
+  afterEach(() => {
+    (console.warn as jest.Mock).mockClear();
+  });
+
+  function setupFSMocks(editorValues: EditorValues) {
     (fs.existsSync as jest.Mock).mockReturnValue(true);
     (fs.readdirSync as jest.Mock).mockReturnValue(Object.keys(editorValues));
     (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
@@ -22,57 +27,30 @@ describe('read-fiddle', () => {
     });
   }
 
-  it('reads known content', async () => {
-    (fs.readdirSync as jest.Mock).mockImplementationOnce(() => defaultFiles);
-    (fs.readFileSync as jest.Mock).mockImplementation((filename) =>
-      path.basename(filename),
-    );
-    console.warn = jest.fn();
-    const folder = '/some/place';
+  it('injects main.js if not present', async () => {
+    const mockValues = {}; // no files
+    setupFSMocks(mockValues);
 
-    const mosaics = await readFiddle(folder);
+    const fiddle = await readFiddle(folder);
 
-    expect(Object.keys(mosaics)).toHaveLength(5);
-    expect(mosaics[DefaultEditorId.css]).toBe('');
-    expect(mosaics[DefaultEditorId.html]).toBe('');
-    expect(mosaics[DefaultEditorId.main]).toBe(DefaultEditorId.main);
-    expect(mosaics[DefaultEditorId.preload]).toBe('');
-    expect(mosaics[DefaultEditorId.renderer]).toBe('');
-    expect(console.warn).toHaveBeenCalledTimes(0);
-
-    (console.warn as jest.Mock).mockClear();
+    expect(console.warn).not.toHaveBeenCalled();
+    expect(fiddle).toStrictEqual({ [MAIN_JS]: '' });
   });
 
-  it('reads custom content', async () => {
-    const file = 'file.js';
-    (fs.readdirSync as jest.Mock).mockImplementationOnce(() => [file]);
-    (fs.readFileSync as jest.Mock).mockImplementation(() => '');
+  it('reads supported files', async () => {
+    const content = 'hello';
+    const mockValues = { [MAIN_JS]: content };
+    setupFSMocks(mockValues);
 
-    console.warn = jest.fn();
-    const folder = '/some/place';
+    const fiddle = await readFiddle(folder);
 
-    const mosaics = await readFiddle(folder);
-
-    expect(Object.keys(mosaics)).toHaveLength(6);
-    expect(mosaics[file]).toBe('');
-    expect(mosaics[DefaultEditorId.css]).toBe('');
-    expect(mosaics[DefaultEditorId.html]).toBe('');
-    expect(mosaics[DefaultEditorId.main]).toBe('');
-    expect(mosaics[DefaultEditorId.preload]).toBe('');
-    expect(mosaics[DefaultEditorId.renderer]).toBe('');
-    expect(console.warn).toHaveBeenCalledTimes(0);
-
-    (console.warn as jest.Mock).mockClear();
+    expect(fiddle).toStrictEqual(mockValues);
   });
 
   it('skips unsupported files', async () => {
     const content = 'hello';
     const mockValues = {
-      [DefaultEditorId.css]: content,
-      [DefaultEditorId.html]: content,
-      [DefaultEditorId.main]: content,
-      [DefaultEditorId.preload]: content,
-      [DefaultEditorId.renderer]: content,
+      [MAIN_JS]: content,
       'file.js': content,
       'file.php': content,
     };
@@ -82,46 +60,34 @@ describe('read-fiddle', () => {
     );
 
     const fiddle = await readFiddle(folder);
+
     expect(fiddle).toStrictEqual(expected);
   });
 
   it('handles read errors gracefully', async () => {
-    (fs.readdirSync as jest.Mock).mockImplementationOnce(() => defaultFiles);
+    const mockValues = createEditorValues();
+    setupFSMocks(mockValues);
     (fs.readFileSync as jest.Mock).mockImplementation(() => {
       throw new Error('bwap');
     });
-    console.warn = jest.fn();
-    const folder = '/some/place';
 
-    const mosaics = await readFiddle(folder);
+    const files = await readFiddle(folder);
 
-    expect(Object.keys(mosaics)).toHaveLength(5);
-    expect(mosaics[DefaultEditorId.css]).toBe('');
-    expect(mosaics[DefaultEditorId.html]).toBe('');
-    expect(mosaics[DefaultEditorId.main]).toBe('');
-    expect(mosaics[DefaultEditorId.preload]).toBe('');
-    expect(mosaics[DefaultEditorId.renderer]).toBe('');
-    expect(console.warn).toHaveBeenCalledTimes(1);
-
-    (console.warn as jest.Mock).mockClear();
+    const expectedFiles = Object.keys(mockValues);
+    expect(Object.keys(files)).toStrictEqual(expectedFiles);
+    Object.values(files).forEach((content) => expect(content).toBe(''));
+    expect(console.warn).toHaveBeenCalledTimes(expectedFiles.length);
   });
 
   it('ensures truthy even when read returns null', async () => {
-    (fs.readdirSync as jest.Mock).mockImplementationOnce(() => defaultFiles);
-    (fs.readFileSync as jest.Mock).mockImplementation(() => null);
-    console.warn = jest.fn();
-    const folder = '/some/place';
+    const mockValues = createEditorValues();
+    setupFSMocks(mockValues);
+    (fs.readFileSync as jest.Mock).mockReturnValue(null);
 
-    const mosaics = await readFiddle(folder);
+    const files = await readFiddle(folder);
 
-    expect(Object.keys(mosaics)).toHaveLength(5);
-    expect(mosaics[DefaultEditorId.css]).toBe('');
-    expect(mosaics[DefaultEditorId.html]).toBe('');
-    expect(mosaics[DefaultEditorId.main]).toBe('');
-    expect(mosaics[DefaultEditorId.preload]).toBe('');
-    expect(mosaics[DefaultEditorId.renderer]).toBe('');
+    expect(Object.keys(files)).toStrictEqual(Object.keys(mockValues));
+    Object.values(files).forEach((content) => expect(content).toBe(''));
     expect(console.warn).toHaveBeenCalledTimes(0);
-
-    (console.warn as jest.Mock).mockClear();
   });
 });

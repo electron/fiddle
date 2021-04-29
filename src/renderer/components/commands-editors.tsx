@@ -12,10 +12,9 @@ import * as React from 'react';
 
 import {
   DEFAULT_EDITORS,
-  CustomEditorId,
-  GenericDialogType,
-  EditorId,
   DefaultEditorId,
+  EditorId,
+  GenericDialogType,
 } from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
@@ -173,7 +172,7 @@ export class EditorDropdown extends React.Component<
 
       appState.toggleGenericDialog();
     } else {
-      const name = result as CustomEditorId;
+      const name = result as EditorId;
 
       // Also fail if the user tries to create two identical editors.
       if (

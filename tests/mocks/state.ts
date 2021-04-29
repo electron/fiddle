@@ -3,11 +3,10 @@ import { MosaicNode } from 'react-mosaic-component';
 
 import {
   BlockableAccelerator,
-  CustomEditorId,
+  EditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GistActionState,
-  EditorId,
   RunnableVersion,
 } from '../../src/interfaces';
 import { EditorBackup } from '../../src/utils/editor-backup';
@@ -22,7 +21,7 @@ export class StateMock {
   @observable public closedPanels: Partial<
     Record<EditorId, EditorBackup | true>
   > = {};
-  @observable public customMosaics: CustomEditorId[] = [];
+  @observable public customMosaics: EditorId[] = [];
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogOptions: GenericDialogOptions = {} as any;

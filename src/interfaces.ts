@@ -33,15 +33,6 @@ export interface Version {
   localPath?: string;
 }
 
-export interface EditorValues {
-  [DefaultEditorId.main]: string;
-  [DefaultEditorId.renderer]: string;
-  [DefaultEditorId.html]: string;
-  [DefaultEditorId.preload]: string;
-  [DefaultEditorId.css]: string;
-  PACKAGE_NAME?: string;
-}
-
 export enum RunResult {
   SUCCESS = 'success', // exit code === 0
   FAILURE = 'failure', // ran, but exit code !== 0
@@ -113,6 +104,10 @@ export const enum GenericDialogType {
   'success' = 'success',
 }
 
+export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
+
+export type EditorValues = Record<EditorId, string>;
+
 // Default Editors
 export enum DefaultEditorId {
   'main' = 'main.js',
@@ -121,13 +116,6 @@ export enum DefaultEditorId {
   'preload' = 'preload.js',
   'css' = 'styles.css',
 }
-
-export type CustomEditorId = Exclude<
-  `${string}.${'js' | 'html' | 'css'}`,
-  DefaultEditorId
->;
-
-export type EditorId = DefaultEditorId | CustomEditorId;
 
 export const DEFAULT_EDITORS = [
   DefaultEditorId.main,

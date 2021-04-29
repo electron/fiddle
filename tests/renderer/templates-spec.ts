@@ -1,4 +1,4 @@
-import { DefaultEditorId } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/renderer/templates';
 
 jest.unmock('fs-extra');
@@ -10,18 +10,12 @@ describe('templates', () => {
   describe('getTemplateValues()', () => {
     it('loads templates', async () => {
       const values = await getTemplateValues(KNOWN_GOOD_TEMPLATE);
-
-      expect(values[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
-      expect(values[DefaultEditorId.main].length).toBeGreaterThan(0);
-      expect(values[DefaultEditorId.renderer].length).toBeGreaterThan(0);
+      expect(values[MAIN_JS].length).toBeGreaterThan(0);
     });
 
     it('handles errors', async () => {
       const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
-
-      expect(values[DefaultEditorId.html]).toBe('');
-      expect(values[DefaultEditorId.main]).toBe('');
-      expect(values[DefaultEditorId.renderer]).toBe('');
+      expect(values[MAIN_JS]).toBe('');
     });
 
     it('reports missing files', async () => {
@@ -29,9 +23,9 @@ describe('templates', () => {
 
       await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
-      expect(console.log).toHaveBeenCalledTimes(1);
-      expect((console.log as jest.Mock).mock.calls[0][0]).toMatch(
-        'Missed: index.html, main.js, preload.js, renderer.js, styles.css',
+      expect(console.log).toHaveBeenCalledWith(
+        expect.stringMatching('Got Fiddle from'),
+        [MAIN_JS],
       );
 
       (console.log as jest.Mock).mockClear();
