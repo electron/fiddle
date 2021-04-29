@@ -20,7 +20,7 @@ import {
 } from '../../interfaces';
 import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
-import { TITLE_MAP } from './editors';
+import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
   value: string;
@@ -89,13 +89,14 @@ export class EditorDropdown extends React.Component<
     const allEditors = [...DEFAULT_EDITORS, ...appState.customMosaics];
     for (const id of allEditors) {
       const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+      const title = getEditorTitle(id);
 
-      if (!Object.keys(TITLE_MAP).includes(id)) {
+      if (!DEFAULT_EDITORS.includes(id as any)) {
         result.push(
           <MenuItem
             icon={icon}
             key={id}
-            text={`Custom Editor (${id})`}
+            text={title}
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
@@ -114,7 +115,7 @@ export class EditorDropdown extends React.Component<
           <MenuItem
             icon={icon}
             key={id}
-            text={TITLE_MAP[id]}
+            text={title}
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
@@ -175,15 +176,12 @@ export class EditorDropdown extends React.Component<
   public async addCustomEditor() {
     const { appState } = this.props;
 
-    const isValidEditorName = (name: string) =>
-      /^[^\s]+\.(css|html|js)$/.test(name);
-
     const { cancelled, result } = await this.showCustomEditorDialog();
 
     if (cancelled) return;
 
     // Fail if editor name is not an accepted file type.
-    if (!result || !isValidEditorName(result)) {
+    if (!result || !isSupportedFile(result)) {
       appState.setGenericDialogOptions({
         type: GenericDialogType.warning,
         label:

@@ -1,6 +1,7 @@
 import { EditorId, EditorValues, VersionSource } from '../interfaces';
-import { EMPTY_EDITOR_CONTENT, USER_DATA_PATH } from './constants';
+import { USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
+import { getEmptyContent } from '../utils/editor-utils';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
@@ -128,11 +129,8 @@ export async function getContent(
   version: string,
 ): Promise<string> {
   const mosaics = await getTemplate(version);
-
   if (mosaics?.[name]) return mosaics[name]!;
-
-  const extension = path.parse(name).ext.slice(1);
-  return EMPTY_EDITOR_CONTENT[extension];
+  return getEmptyContent(name);
 }
 
 /**

@@ -1,9 +1,5 @@
-import { Octokit } from '@octokit/rest';
 import { when } from 'mobx';
 import {
-  CustomEditorId,
-  DefaultEditorId,
-  DEFAULT_EDITORS,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -14,19 +10,25 @@ import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
 import { AppState } from './state';
 import { getReleaseChannel } from './versions';
+import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
-    this.loadFiddleFromElectronExample.bind(this);
-    this.loadFiddleFromGist.bind(this);
-    this.verifyRemoteLoad.bind(this);
-    this.verifyReleaseChannelEnabled.bind(this);
-    this.fetchExampleAndLoad.bind(this);
-    this.fetchGistAndLoad.bind(this);
-    this.setElectronVersionWithRef.bind(this);
-    this.getPackageVersionFromRef.bind(this);
-    this.handleLoadingSuccess.bind(this);
-    this.handleLoadingFailed.bind(this);
+    for (const name of [
+      'fetchExampleAndLoad',
+      'fetchGistAndLoad',
+      'getPackageVersionFromRef',
+      'handleLoadingFailed',
+      'handleLoadingSuccess',
+      'loadFiddleFromElectronExample',
+      'loadFiddleFromGist',
+      'setElectronVersionWithRef',
+      'verifyCreateCustomEditor',
+      'verifyReleaseChannelEnabled',
+      'verifyRemoteLoad',
+    ]) {
+      this[name] = this[name].bind(this);
+    }
   }
 
   public async loadFiddleFromElectronExample(
@@ -84,9 +86,7 @@ export class RemoteLoader {
           continue;
         }
 
-        if (
-          Object.values(DefaultEditorId).includes(child.name as DefaultEditorId)
-        ) {
+        if (isSupportedFile(child.name)) {
           loaders.push(
             fetch(child.download_url)
               .then((r) => r.text())
@@ -106,25 +106,6 @@ export class RemoteLoader {
   }
 
   /**
-   * Get data from a gist. If it doesn't exist, return an empty string.
-   *
-   * @param {Octokit.Response<Octokit.GistsGetResponse>} gist
-   * @param {string} name
-   * @returns {string}
-   * @memberof RemoteLoader
-   */
-  public getContentOrEmpty(
-    gist: Octokit.Response<Octokit.GistsGetResponse>,
-    name: string,
-  ): string {
-    try {
-      return gist.data.files[name].content;
-    } catch (error) {
-      return '';
-    }
-  }
-
-  /**
    * Load a fiddle
    *
    * @returns {Promise<boolean>}
@@ -136,23 +117,12 @@ export class RemoteLoader {
       const gist = await octo.gists.get({ gist_id: gistId });
       const values: Partial<EditorValues> = {};
 
-      // Add values for all default editors.
-      for (const editor of DEFAULT_EDITORS) {
-        values[editor] = this.getContentOrEmpty(gist, editor);
-      }
-
-      // Fetch any custom editor files that the user may have created in the gist.
-      const maybeCustomEditors = Object.keys(gist.data.files).filter(
-        (file) =>
-          !Object.values(DefaultEditorId).includes(file as DefaultEditorId),
-      );
-
-      // If it's a custom editor explicitly request permission before creation.
-      for (const mosaic of maybeCustomEditors) {
-        const verified = await this.verifyCreateCustomEditor(mosaic);
-        if (verified) {
-          values[mosaic] = this.getContentOrEmpty(gist, mosaic);
-          this.appState.customMosaics.push(mosaic as CustomEditorId);
+      for (const [id, data] of Object.entries(gist.data.files)) {
+        if (!isSupportedFile(id)) {
+          continue;
+        }
+        if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
+          values[id] = data.content;
         }
       }
 

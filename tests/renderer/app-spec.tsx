@@ -160,10 +160,10 @@ describe('App component', () => {
       const gistId = 'gistId';
       await app.replaceFiddle(editorValues, { gistId });
       expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-        file,
         DefaultEditorId.main,
         DefaultEditorId.renderer,
         DefaultEditorId.html,
+        file,
       ]);
     });
 

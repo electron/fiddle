@@ -7,6 +7,7 @@ import * as React from 'react';
 import { EditorId } from '../../interfaces';
 import { getContent } from '../content';
 import { AppState } from '../state';
+import { monacoLanguage } from '../../utils/editor-utils';
 
 interface EditorProps {
   appState: AppState;
@@ -32,17 +33,7 @@ export class Editor extends React.Component<EditorProps> {
   constructor(props: EditorProps) {
     super(props);
 
-    const fileExtension = props.id.split('.')[1];
-    switch (fileExtension) {
-      case 'html':
-        this.language = 'html';
-        break;
-      case 'css':
-        this.language = 'css';
-        break;
-      default:
-        this.language = 'javascript';
-    }
+    this.language = monacoLanguage(props.id);
   }
 
   public shouldComponentUpdate() {

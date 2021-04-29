@@ -2,14 +2,25 @@ import * as path from 'path';
 import * as fs from 'fs-extra';
 
 import { readFiddle } from '../../src/utils/read-fiddle';
+import { isSupportedFile } from '../../src/utils/editor-utils';
 import { DefaultEditorId } from '../../src/interfaces';
 
 const defaultFiles = ['LICENSE.txt', DefaultEditorId.main];
 
 describe('read-fiddle', () => {
+  const folder = '/some/place';
+
   beforeEach(async () => {
     (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
   });
+
+  function setupFSMocks(editorValues: Record<string, string>) {
+    (fs.existsSync as jest.Mock).mockReturnValue(true);
+    (fs.readdirSync as jest.Mock).mockReturnValue(Object.keys(editorValues));
+    (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
+      return editorValues[path.basename(filename)];
+    });
+  }
 
   it('reads known content', async () => {
     (fs.readdirSync as jest.Mock).mockImplementationOnce(() => defaultFiles);
@@ -52,6 +63,26 @@ describe('read-fiddle', () => {
     expect(console.warn).toHaveBeenCalledTimes(0);
 
     (console.warn as jest.Mock).mockClear();
+  });
+
+  it('skips unsupported files', async () => {
+    const content = 'hello';
+    const mockValues = {
+      [DefaultEditorId.css]: content,
+      [DefaultEditorId.html]: content,
+      [DefaultEditorId.main]: content,
+      [DefaultEditorId.preload]: content,
+      [DefaultEditorId.renderer]: content,
+      'file.js': content,
+      'file.php': content,
+    };
+    setupFSMocks(mockValues);
+    const expected = Object.fromEntries(
+      Object.entries(mockValues).filter(([id, _]) => isSupportedFile(id)),
+    );
+
+    const fiddle = await readFiddle(folder);
+    expect(fiddle).toStrictEqual(expected);
   });
 
   it('handles read errors gracefully', async () => {

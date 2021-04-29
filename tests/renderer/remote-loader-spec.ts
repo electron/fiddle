@@ -6,9 +6,8 @@ import {
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
-
-import { FetchMock } from '../utils';
 import { AppMock, StateMock } from '../mocks/mocks';
+import { FetchMock } from '../utils';
 
 jest.mock('../../src/utils/octokit');
 
@@ -130,7 +129,6 @@ describe('RemoteLoader', () => {
       const result = await instance.fetchGistAndLoad('customtestid');
 
       expect(result).toBe(true);
-      expect(store.customMosaics).toEqual([file]);
       expect(app.replaceFiddle).toBeCalledWith(
         {
           [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
@@ -165,7 +163,6 @@ describe('RemoteLoader', () => {
 
     beforeEach(() => {
       instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
-
       fetchMock = new FetchMock();
       for (const { name, download_url } of mockRepos) {
         fetchMock.add(download_url, name);
