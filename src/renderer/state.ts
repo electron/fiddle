@@ -109,6 +109,10 @@ export class AppState {
     (this.retrieve('executionFlags') as Array<string>) === null
       ? []
       : (this.retrieve('executionFlags') as Array<string>);
+  @observable public environmentVariables: Array<string> =
+    (this.retrieve('environmentVariables') as Array<string>) === null
+      ? []
+      : (this.retrieve('executionFlags') as Array<string>);
   @observable public packageManager: IPackageManager =
     (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
   @observable public acceleratorsToBlock: Array<BlockableAccelerator> =

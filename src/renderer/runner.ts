@@ -324,13 +324,20 @@ export class Runner {
    * @memberof Runner
    */
   public async execute(dir: string): Promise<RunResult> {
-    const { currentElectronVersion, pushOutput } = this.appState;
+    const {
+      currentElectronVersion,
+      isEnablingElectronLogging,
+      pushOutput,
+      executionFlags,
+      environmentVariables,
+    } = this.appState;
+
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
     const env = { ...process.env };
-    if (this.appState.isEnablingElectronLogging) {
+    if (isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
       env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
       env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
@@ -340,8 +347,14 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
+    // Add user-specified environment variables if any have been set.
+    for (const v of environmentVariables) {
+      const [key, value] = v.split('=');
+      env[key] = value;
+    }
+
     // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(this.appState.executionFlags);
+    const options = [dir, '--inspect'].concat(executionFlags);
 
     return new Promise((resolve, _reject) => {
       this.child = spawn(binaryPath, options, { cwd: dir, env });

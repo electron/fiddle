@@ -29,6 +29,8 @@ exports[`VersionSelect component renders 1`] = `
         "customMosaics": Array [],
         "disableTour": [MockFunction],
         "downloadVersion": [MockFunction],
+        "environmentVariables": Array [],
+        "executionFlags": Array [],
         "genericDialogLastInput": null,
         "genericDialogLastResult": null,
         "genericDialogOptions": Object {},
