@@ -79,24 +79,22 @@ describe('ExecutionSettings component', () => {
     it('handles new environment variables', async () => {
       const wrapper = shallow(<ExecutionSettings appState={store} />);
       const instance = wrapper.instance() as any;
+
+      const dragRegions = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
+      const trash = 'ELECTRON_TRASH=trash-cli';
       await instance.handleEnvironmentVariableChange({
-        currentTarget: { value: 'ELECTRON_DEBUG_DRAG_REGIONS=1' },
+        currentTarget: { value: dragRegions },
       });
 
-      expect(store.environmentVariables).toEqual([
-        'ELECTRON_DEBUG_DRAG_REGIONS=1',
-      ]);
+      expect(store.environmentVariables).toEqual([dragRegions]);
 
       await instance.handleEnvironmentVariableChange({
         currentTarget: {
-          value: 'ELECTRON_DEBUG_DRAG_REGIONS=1|ELECTRON_TRASH=trash-cli',
+          value: `${dragRegions}|${trash}`,
         },
       });
 
-      expect(store.environmentVariables).toEqual([
-        'ELECTRON_DEBUG_DRAG_REGIONS=1',
-        'ELECTRON_TRASH=trash-cli',
-      ]);
+      expect(store.environmentVariables).toEqual([dragRegions, trash]);
     });
   });
 });
