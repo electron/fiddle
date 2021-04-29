@@ -2,7 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import * as content from '../../../src/renderer/content';
-import { ALL_MOSAICS, DefaultEditorId } from '../../../src/interfaces';
+import { DEFAULT_EDITORS, DefaultEditorId } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
@@ -38,7 +38,7 @@ describe('Editors component', () => {
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
     ({ monaco, state: store } = ElectronFiddle.app);
-    store.mosaicArrangement = createMosaicArrangement(ALL_MOSAICS);
+    store.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
   });
 
   it('renders', () => {

@@ -63,7 +63,6 @@ exports[`BisectDialog component renders 1`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -264,7 +263,6 @@ exports[`BisectDialog component renders 1`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -538,7 +536,6 @@ exports[`BisectDialog component renders 2`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -732,7 +729,6 @@ exports[`BisectDialog component renders 2`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -999,7 +995,6 @@ exports[`BisectDialog component renders 3`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -1200,7 +1195,6 @@ exports[`BisectDialog component renders 3`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -1467,7 +1461,6 @@ exports[`BisectDialog component renders 4`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -1668,7 +1661,6 @@ exports[`BisectDialog component renders 4`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -1943,7 +1935,6 @@ exports[`BisectDialog component renders 5`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",
@@ -2144,7 +2135,6 @@ exports[`BisectDialog component renders 5`] = `
               ],
               "clearConsole": [MockFunction],
               "closedPanels": Object {},
-              "currentDocsDemoPage": "DEFAULT",
               "currentElectronVersion": Object {
                 "source": "remote",
                 "state": "ready",

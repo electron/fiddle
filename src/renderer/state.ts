@@ -4,16 +4,15 @@ import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
-  DEFAULT_EDITORS,
-  ALL_MOSAICS,
   BlockableAccelerator,
-  DocsDemoPage,
+  CustomEditorId,
+  DEFAULT_EDITORS,
+  EditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
   MAIN_JS,
-  MosaicId,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
@@ -21,8 +20,6 @@ import {
   Version,
   VersionSource,
   VersionState,
-  CustomEditorId,
-  EditorId,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
@@ -32,7 +29,6 @@ import {
 } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
-import { isEditorBackup, isEditorId, isPanelId } from '../utils/type-checks';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
@@ -131,9 +127,8 @@ export class AppState {
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
   @observable
-  public mosaicArrangement: MosaicNode<MosaicId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
+  public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
-  @observable public currentDocsDemoPage: DocsDemoPage = DocsDemoPage.DEFAULT;
   @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
 
@@ -157,8 +152,9 @@ export class AppState {
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<
-    Record<MosaicId, EditorBackup | true>
+  @observable public closedPanels: Record<
+    EditorId,
+    EditorBackup
   > = DEFAULT_CLOSED_PANELS;
 
   private outputBuffer = '';
@@ -281,7 +277,7 @@ export class AppState {
         );
         await waitForEditorsToMount(ids);
         for (const editor of Object.values(window.ElectronFiddle.editors)) {
-          const disposable = editor!.onDidChangeModelContent(() => {
+          const disposable = (editor as any).onDidChangeModelContent(() => {
             this.isUnsaved = true;
             disposable.dispose();
           });
@@ -678,37 +674,19 @@ export class AppState {
     id: EditorId,
   ): EditorBackup | null {
     const value = this.closedPanels[id];
-
-    if (isEditorBackup(value)) {
-      delete this.closedPanels[id];
-      return value;
-    }
-
-    return null;
+    delete this.closedPanels[id];
+    return value;
   }
 
-  @action public async setVisibleMosaics(visible: Array<MosaicId>) {
+  @action public async setVisibleMosaics(visible: Array<EditorId>) {
     const { editors } = window.ElectronFiddle;
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
 
-    for (const id of ALL_MOSAICS) {
+    for (const id of DEFAULT_EDITORS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = isEditorId(id, this.customMosaics)
-          ? getEditorBackup(id)
-          : true;
-
+        this.closedPanels[id] = getEditorBackup(id);
         // if we have backup, remove active editor
         delete editors[id];
-      }
-
-      // Remove the backup for panels now. Editors will remove their
-      // backup once the data has been loaded.
-      if (
-        isPanelId(id) &&
-        visible.includes(id) &&
-        !currentlyVisible.includes(id)
-      ) {
-        delete this.closedPanels[id];
       }
     }
 
@@ -729,21 +707,21 @@ export class AppState {
   }
 
   /**
-   * Hides the panel for a given MosaicId.
+   * Hides the panel for a given EditorId.
    *
-   * @param {MosaicId} id
+   * @param {EditorId} id
    */
-  @action public hideAndBackupMosaic(id: MosaicId) {
+  @action public hideAndBackupMosaic(id: EditorId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
     this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
   }
 
   /**
-   * Removes the panel for a given custom MosaicId.
+   * Removes the panel for a given custom EditorId.
    *
-   * @param {MosaicId} id
+   * @param {EditorId} id
    */
-  @action public removeCustomMosaic(id: MosaicId) {
+  @action public removeCustomMosaic(id: EditorId) {
     this.hideAndBackupMosaic(id);
     delete window.ElectronFiddle.editors[id];
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
@@ -752,9 +730,9 @@ export class AppState {
   /**
    * Shows the editor value for a given editor.
    *
-   * @param {MosaicId} id
+   * @param {EditorId} id
    */
-  @action public showMosaic(id: MosaicId) {
+  @action public showMosaic(id: EditorId) {
     const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
     this.setVisibleMosaics([...currentlyVisible, id]);
   }

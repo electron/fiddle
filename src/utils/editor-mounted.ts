@@ -1,4 +1,4 @@
-import { MosaicId } from '../interfaces';
+import { EditorId } from '../interfaces';
 
 import { waitFor } from './wait-for';
 
@@ -6,7 +6,7 @@ import { waitFor } from './wait-for';
  * Waits for editors to mount on a list of Mosaic IDs
  * @param editors
  */
-export function waitForEditorsToMount(editors: Array<MosaicId>) {
+export function waitForEditorsToMount(editors: Array<EditorId>) {
   const allMounted = () =>
     editors.every((id) => !!window.ElectronFiddle.editors[id]);
   const opts = { timeout: 3000, interval: 100 };

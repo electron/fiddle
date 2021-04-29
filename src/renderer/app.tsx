@@ -19,7 +19,6 @@ import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import { isEditorBackup } from '../utils/type-checks';
 import { compareEditors, getEmptyContent } from '../utils/editor-utils';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -121,10 +120,9 @@ export class App {
     const allEditors = [...this.state.customMosaics, ...DEFAULT_EDITORS];
     for (const name of allEditors) {
       const editor = fiddle.editors[name];
-      const backup = this.state.closedPanels[name];
-
       if (typeof values[name] !== 'undefined') {
-        if (isEditorBackup(backup)) {
+        const backup = this.state.closedPanels[name];
+        if (backup) {
           // The editor does not exist, attempt to set it on the backup.
           // If there's a model, we'll do it on the model. Else, we'll
           // set the value.

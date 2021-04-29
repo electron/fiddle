@@ -1,4 +1,4 @@
-import { DefaultEditorId, MosaicId } from '../../src/interfaces';
+import { DefaultEditorId, EditorId } from '../../src/interfaces';
 import { getEditorValue } from '../../src/utils/editor-value';
 import { StateMock } from '../mocks/state';
 
@@ -16,7 +16,7 @@ describe('getEditorValue()', () => {
     const mockState = window.ElectronFiddle.app.state;
 
     mockState.closedPanels = {
-      [DefaultEditorId.html as MosaicId]: {
+      [DefaultEditorId.html as EditorId]: {
         value: 'editor-backup-value',
       },
     };
