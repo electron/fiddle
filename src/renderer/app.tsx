@@ -74,8 +74,9 @@ export class App {
     }
 
     // Remove all previously created custom editors.
-    const isCustom = (filename: string) => !isKnownFile(filename);
-    this.state.customMosaics = Object.keys(editorValues).filter(isCustom);
+    this.state.customMosaics = Object.keys(editorValues).filter(
+      (filename: string) => !isKnownFile(filename),
+    ) as EditorId[];
 
     // If the gist content is empty or matches the empty file output, don't show it.
     const shouldShow = (id: EditorId, val?: string) => {
