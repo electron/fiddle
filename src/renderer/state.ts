@@ -29,7 +29,6 @@ import {
 } from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
-import { isEditorBackup } from '../utils/type-checks';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
@@ -153,8 +152,9 @@ export class AppState {
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Partial<
-    Record<EditorId, EditorBackup | true>
+  @observable public closedPanels: Record<
+    EditorId,
+    EditorBackup
   > = DEFAULT_CLOSED_PANELS;
 
   private outputBuffer = '';
@@ -674,13 +674,8 @@ export class AppState {
     id: EditorId,
   ): EditorBackup | null {
     const value = this.closedPanels[id];
-
-    if (isEditorBackup(value)) {
-      delete this.closedPanels[id];
-      return value;
-    }
-
-    return null;
+    delete this.closedPanels[id];
+    return value;
   }
 
   @action public async setVisibleMosaics(visible: Array<EditorId>) {

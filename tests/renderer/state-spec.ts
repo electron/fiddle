@@ -603,7 +603,7 @@ describe('AppState', () => {
       const result = appState.getAndRemoveEditorValueBackup(
         DefaultEditorId.main,
       );
-      expect(result).toEqual(null);
+      expect(result).toEqual(undefined);
     });
 
     it('returns and deletes a backup if there is one', () => {
