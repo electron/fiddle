@@ -1,5 +1,8 @@
-export class FileManager {
+export class FileManagerMock {
   public cleanup = jest.fn();
+  public getFiles = jest.fn();
   public openFiddle = jest.fn();
-  public saveToTemp = jest.fn(() => '/mock/temp/dir');
+  public openTemplate = jest.fn();
+  public saveFiddle = jest.fn();
+  public saveToTemp = jest.fn().mockResolvedValue('/mock/temp/dir');
 }

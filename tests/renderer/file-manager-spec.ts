@@ -5,7 +5,8 @@ import { DefaultEditorId, Files } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+
+import { AppMock } from '../mocks/mocks';
 
 jest.mock('fs-extra');
 jest.mock('tmp', () => ({
@@ -23,17 +24,17 @@ jest.mock('../../src/renderer/templates', () => ({
 }));
 
 describe('FileManager', () => {
+  let app: AppMock;
   let fm: FileManager;
 
   beforeEach(() => {
-    window.ElectronFiddle = new ElectronFiddleMock() as any;
+    ({ app } = (window as any).ElectronFiddle);
     ipcRendererManager.send = jest.fn();
-
-    window.ElectronFiddle.app.state.customMosaics = [];
 
     fm = new FileManager({
       setGenericDialogOptions: jest.fn(),
     } as any);
+    app.fileManager = fm as any;
   });
 
   afterEach(() => {
@@ -45,7 +46,7 @@ describe('FileManager', () => {
       const fakePath = '/fake/path';
       await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           [DefaultEditorId.html]: '',
           [DefaultEditorId.renderer]: '',
@@ -58,14 +59,10 @@ describe('FileManager', () => {
     });
 
     it('can open a fiddle with custom editors', async () => {
-      const { app } = window.ElectronFiddle;
-
       const fakePath = '/fake/path';
       const file = 'file.js';
 
-      app.remoteLoader.verifyCreateCustomEditor = jest
-        .fn()
-        .mockResolvedValue(true);
+      app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
       (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
       (fs.readdirSync as jest.Mock).mockImplementation(() => [
         file,
@@ -77,7 +74,7 @@ describe('FileManager', () => {
 
       await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           [DefaultEditorId.html]: '',
           [DefaultEditorId.renderer]: '',
@@ -97,7 +94,7 @@ describe('FileManager', () => {
       const fakePath = '/fake/path';
       await fm.openFiddle(fakePath);
 
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           [DefaultEditorId.html]: '',
           [DefaultEditorId.renderer]: '',
@@ -117,14 +114,11 @@ describe('FileManager', () => {
 
     it('does not do anything with incorrect inputs', async () => {
       await fm.openFiddle({} as any);
-      expect(window.ElectronFiddle.app.setEditorValues).toHaveBeenCalledTimes(
-        0,
-      );
+      expect(app.setEditorValues).not.toHaveBeenCalled();
     });
 
     it('does not do anything if cancelled', async () => {
-      (window.ElectronFiddle.app
-        .setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      (app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
       await fm.openFiddle('/fake/path');
     });
   });
@@ -137,8 +131,6 @@ describe('FileManager', () => {
     });
 
     it('saves a fiddle with custom editors', async () => {
-      const { app } = window.ElectronFiddle;
-
       const file = 'file.js';
       app.state.customMosaics = [file];
       (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
@@ -243,7 +235,7 @@ describe('FileManager', () => {
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
       await fm.openTemplate('test');
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledWith<any>(
+      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
         {
           [DefaultEditorId.html]: '',
           [DefaultEditorId.renderer]: '',
@@ -302,8 +294,6 @@ describe('FileManager', () => {
     });
 
     it('handles custom editors', async () => {
-      const { app } = window.ElectronFiddle;
-
       const file = 'file.js';
       app.state.customMosaics = [file];
 

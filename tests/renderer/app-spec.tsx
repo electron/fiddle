@@ -1,15 +1,9 @@
 import { App } from '../../src/renderer/app';
-import { AppState } from '../../src/renderer/state';
 import { EditorBackup } from '../../src/utils/editor-backup';
 import { waitFor } from '../../src/utils/wait-for';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { MockState } from '../mocks/state';
 import { DefaultEditorId, PACKAGE_NAME } from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
-jest.mock('../../src/renderer/file-manager', () =>
-  require('../mocks/file-manager'),
-);
 jest.mock('../../src/renderer/components/header', () => ({
   Header: () => 'Header;',
 }));
@@ -21,19 +15,28 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 }));
 
 describe('App component', () => {
+  let app: App;
+  let ElectronFiddle: any;
+
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
   });
 
   beforeEach(() => {
-    (window as any).ElectronFiddle = new ElectronFiddleMock();
+    ({ ElectronFiddle } = window as any);
+
+    // make a real App and inject it into the mocks
+    app = new App();
+    const { app: appMock } = ElectronFiddle;
+    const { state, fileManager, remoteLoader, runner } = appMock;
+    Object.assign(app, { state, fileManager, remoteLoader, runner });
+    ElectronFiddle.app = app;
   });
 
   describe('setup()', () => {
     it('renders the app', async () => {
       jest.useFakeTimers();
 
-      const app = new App();
       const result = (await app.setup()) as HTMLDivElement;
       jest.runAllTimers();
 
@@ -45,38 +48,27 @@ describe('App component', () => {
 
   describe('openFiddle()', () => {
     it('understands gists', async () => {
+      const { fetchGistAndLoad } = app.remoteLoader;
+      (fetchGistAndLoad as jest.Mock).mockResolvedValue(true);
+
       const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
-      const app = new App();
-
-      const spy = jest.spyOn(app.remoteLoader, 'fetchGistAndLoad');
-      spy.mockResolvedValue(true);
-
       await app.openFiddle({ gistId });
-
-      expect(spy).toHaveBeenCalledWith(gistId);
-
-      spy.mockRestore();
+      expect(fetchGistAndLoad).toHaveBeenCalledWith(gistId);
     });
 
     it('understands files', async () => {
+      const { openFiddle } = app.fileManager;
+      (openFiddle as jest.Mock).mockImplementationOnce(() => Promise.resolve());
+
       const filePath = '/fake/path';
-      const app = new App();
-
-      const openFiddle = app.fileManager.openFiddle as jest.Mock;
-      openFiddle.mockImplementationOnce(() => Promise.resolve());
-
       await app.openFiddle({ filePath });
-
       expect(openFiddle).toHaveBeenCalledWith(filePath);
     });
   });
 
   describe('getEditorValues()', () => {
     it('gets values', async () => {
-      const app = new App();
-
       const b = await app.getEditorValues({});
-
       expect(b[DefaultEditorId.html]).toBe('editor-value');
       expect(b[DefaultEditorId.main]).toBe('editor-value');
       expect(b[DefaultEditorId.renderer]).toBe('editor-value');
@@ -85,9 +77,9 @@ describe('App component', () => {
     });
 
     it('handles missing editors', async () => {
-      window.ElectronFiddle.editors[DefaultEditorId.html] = null;
-      window.ElectronFiddle.editors[DefaultEditorId.main] = null;
-      window.ElectronFiddle.editors[DefaultEditorId.renderer] = null;
+      ElectronFiddle.editors[DefaultEditorId.html] = null;
+      ElectronFiddle.editors[DefaultEditorId.main] = null;
+      ElectronFiddle.editors[DefaultEditorId.renderer] = null;
 
       const app = new App();
       const result = await app.getEditorValues({});
@@ -115,18 +107,7 @@ describe('App component', () => {
   });
 
   describe('replaceFiddle()', () => {
-    let app: App;
-
-    beforeEach(() => {
-      app = new App();
-      (app.state as Partial<AppState>) = new MockState();
-      app.state.isUnsaved = false;
-      app.state.setGenericDialogOptions = jest.fn();
-      app.state.setVisibleMosaics = jest.fn();
-      app.setEditorValues = jest.fn();
-    });
-
-    it('sets editor values and source info', (done) => {
+    it('sets editor values and source info', async () => {
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -135,22 +116,19 @@ describe('App component', () => {
         [DefaultEditorId.preload]: '',
       };
 
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-          templateName: 'templateName',
-          filePath: 'localPath',
-        })
-        .then(() => {
-          expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
-          expect(app.state.gistId).toBe('gistId');
-          expect(app.state.templateName).toBe('templateName');
-          expect(app.state.localPath).toBe('localPath');
-          done();
-        });
+      app.setEditorValues = jest.fn();
+      await app.replaceFiddle(editorValues, {
+        gistId: 'gistId',
+        templateName: 'templateName',
+        filePath: 'localPath',
+      });
+      expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
+      expect(app.state.gistId).toBe('gistId');
+      expect(app.state.templateName).toBe('templateName');
+      expect(app.state.localPath).toBe('localPath');
     });
 
-    it('only shows mosaic for non-empty editor contents', (done) => {
+    it('only shows mosaic for non-empty editor contents', async () => {
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -159,21 +137,16 @@ describe('App component', () => {
         [DefaultEditorId.preload]: '',
       };
 
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-        })
-        .then(() => {
-          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-            DefaultEditorId.main,
-            DefaultEditorId.renderer,
-            DefaultEditorId.html,
-          ]);
-          done();
-        });
+      const gistId = 'gistId';
+      await app.replaceFiddle(editorValues, { gistId });
+      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+        DefaultEditorId.main,
+        DefaultEditorId.renderer,
+        DefaultEditorId.html,
+      ]);
     });
 
-    it('shows visible mosaics for non-empty editor contents with custom mosaics', (done) => {
+    it('shows visible mosaics for non-empty editor contents with custom mosaics', async () => {
       const file = 'file.js';
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
@@ -184,22 +157,17 @@ describe('App component', () => {
         [file]: 'file-value',
       };
 
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-        })
-        .then(() => {
-          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-            file,
-            DefaultEditorId.main,
-            DefaultEditorId.renderer,
-            DefaultEditorId.html,
-          ]);
-          done();
-        });
+      const gistId = 'gistId';
+      await app.replaceFiddle(editorValues, { gistId });
+      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+        file,
+        DefaultEditorId.main,
+        DefaultEditorId.renderer,
+        DefaultEditorId.html,
+      ]);
     });
 
-    it('shows visible mosaics in the correct pre-defined order', (done) => {
+    it('shows visible mosaics in the correct pre-defined order', async () => {
       // this order is defined inside the replaceFiddle() function
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
@@ -207,19 +175,14 @@ describe('App component', () => {
         [DefaultEditorId.renderer]: 'renderer-value',
         [DefaultEditorId.css]: 'css-value',
       };
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-        })
-        .then(() => {
-          expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-            DefaultEditorId.main,
-            DefaultEditorId.renderer,
-            DefaultEditorId.html,
-            DefaultEditorId.css,
-          ]);
-          done();
-        });
+      const gistId = 'gistId';
+      await app.replaceFiddle(editorValues, { gistId });
+      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+        DefaultEditorId.main,
+        DefaultEditorId.renderer,
+        DefaultEditorId.html,
+        DefaultEditorId.css,
+      ]);
     });
 
     it('unsets state of previous source when called', (done) => {
@@ -250,48 +213,41 @@ describe('App component', () => {
       });
     });
 
-    it('marks the new Fiddle as Saved', (done) => {
+    it('marks the new Fiddle as Saved', async () => {
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
-      };
+      } as const;
 
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-          templateName: 'templateName',
-          filePath: 'localPath',
-        })
-        .then(() => {
-          expect(app.state.isUnsaved).toBe(false);
-          done();
-        });
+      await app.replaceFiddle(editorValues, {
+        filePath: 'localPath',
+        gistId: 'gistId',
+        templateName: 'templateName',
+      });
+      expect(app.state.isUnsaved).toBe(false);
     });
 
-    it('marks the new Fiddle as Saved with custom editors', (done) => {
+    it('marks the new Fiddle as Saved with custom editors', async () => {
       const file = 'file.js';
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
         [file]: 'file-value',
-      };
+      } as const;
 
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-          templateName: 'templateName',
-          filePath: 'localPath',
-        })
-        .then(() => {
-          expect(app.state.isUnsaved).toBe(false);
-          done();
-        });
+      await app.replaceFiddle(editorValues, {
+        filePath: 'localPath',
+        gistId: 'gistId',
+        templateName: 'templateName',
+      });
+      expect(app.state.isUnsaved).toBe(false);
     });
 
     describe('when current Fiddle is unsaved and prompt appears', () => {
       it('takes no action if prompt is rejected', (done) => {
+        app.setEditorValues = jest.fn();
         app.state.isUnsaved = true;
         expect(app.state.localPath).toBeUndefined();
         expect(app.state.gistId).toBe('');
@@ -322,12 +278,8 @@ describe('App component', () => {
       });
 
       it('sets editor values and source info if prompt is accepted', (done) => {
-        const app = new App();
-        (app.state as Partial<AppState>) = new MockState();
-        app.state.isUnsaved = true;
-        app.state.setVisibleMosaics = jest.fn();
-        app.state.setGenericDialogOptions = jest.fn();
         app.setEditorValues = jest.fn();
+        app.state.isUnsaved = true;
 
         const editorValues = {
           [DefaultEditorId.html]: 'html-value',
@@ -359,16 +311,7 @@ describe('App component', () => {
   });
 
   describe('setEditorValues()', () => {
-    let app: App;
-
-    beforeEach(() => {
-      app = new App();
-      (app.state as Partial<AppState>) = new MockState();
-      app.state.customMosaics = [];
-    });
-
     it('attempts to set values', () => {
-      const app = new App();
       app.setEditorValues({
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -388,7 +331,7 @@ describe('App component', () => {
     });
 
     it('attempts to set values for closed editors', () => {
-      const { editors } = window.ElectronFiddle;
+      const { editors } = ElectronFiddle;
 
       const oldMainEditor = editors[DefaultEditorId.main];
       delete editors[DefaultEditorId.main];
@@ -457,9 +400,9 @@ describe('App component', () => {
       const app = new App();
       app.setupResizeListener();
 
-      expect(window.addEventListener).toHaveBeenCalled();
-      expect((window.addEventListener as jest.Mock).mock.calls[0][0]).toBe(
+      expect(window.addEventListener).toHaveBeenCalledWith(
         'resize',
+        expect.anything(),
       );
     });
   });
@@ -517,7 +460,6 @@ describe('App component', () => {
   });
 
   describe('setupThemeListeners()', () => {
-    let app: App;
     const addEventListenerMock = jest.fn();
     beforeEach(() => {
       // matchMedia mock
@@ -534,12 +476,6 @@ describe('App component', () => {
           dispatchEvent: jest.fn(),
         })),
       });
-
-      // app mock
-      app = new App();
-      (app.state as Partial<AppState>) = new MockState();
-      app.state.isUsingSystemTheme = true;
-      app.state.setTheme = jest.fn();
     });
 
     describe('isUsingSystemTheme reaction', () => {
@@ -574,9 +510,10 @@ describe('App component', () => {
     describe('prefers-color-scheme event listener', () => {
       it('adds an event listener to the "change" event', () => {
         app.setupThemeListeners();
-        expect(addEventListenerMock).toHaveBeenCalled();
-        const event = addEventListenerMock.mock.calls[0][0];
-        expect(event).toBe('change');
+        expect(addEventListenerMock).toHaveBeenCalledWith(
+          'change',
+          expect.anything(),
+        );
       });
 
       it('does nothing if not isUsingSystemTheme', () => {
@@ -606,13 +543,6 @@ describe('App component', () => {
   });
 
   describe('setupTitleListeners()', () => {
-    let app: App;
-
-    beforeEach(() => {
-      app = new App();
-      (app.state as Partial<AppState>) = new MockState();
-    });
-
     it('updates the document title when state.title changes', async () => {
       const title = 'Hello, World!';
       app.setupTitleListeners();

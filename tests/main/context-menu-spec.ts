@@ -10,10 +10,10 @@ import {
 } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';
-import { MockBrowserWindow } from '../mocks/browser-window';
+import { BrowserWindowMock } from '../mocks/browser-window';
 
 import { Menu } from 'electron';
-import { MockWebContents } from '../mocks/web-contents';
+import { WebContentsMock } from '../mocks/web-contents';
 
 jest.mock('../../src/utils/devmode');
 jest.mock('../../src/main/ipc');
@@ -32,7 +32,7 @@ describe('context-menu', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    mockWindow = new MockBrowserWindow();
+    mockWindow = new BrowserWindowMock();
     createContextMenu(mockWindow as any);
   });
 
@@ -144,7 +144,7 @@ describe('context-menu', () => {
       (isDevMode as any).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
       mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
-      mockWindow.webContents.devToolsWebContents = new MockWebContents();
+      mockWindow.webContents.devToolsWebContents = new WebContentsMock();
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
@@ -157,7 +157,7 @@ describe('context-menu', () => {
       (isDevMode as any).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
       mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
-      mockWindow.webContents.devToolsWebContents = new MockWebContents();
+      mockWindow.webContents.devToolsWebContents = new WebContentsMock();
       mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(
         () => {
           throw new Error('💩');

@@ -48,38 +48,134 @@ exports[`BisectDialog component renders 1`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -105,6 +201,31 @@ exports[`BisectDialog component renders 1`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -128,38 +249,134 @@ exports[`BisectDialog component renders 1`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -185,6 +402,31 @@ exports[`BisectDialog component renders 1`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -281,38 +523,134 @@ exports[`BisectDialog component renders 2`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -338,6 +676,31 @@ exports[`BisectDialog component renders 2`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -354,38 +717,134 @@ exports[`BisectDialog component renders 2`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -411,6 +870,31 @@ exports[`BisectDialog component renders 2`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -500,38 +984,134 @@ exports[`BisectDialog component renders 3`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -557,6 +1137,31 @@ exports[`BisectDialog component renders 3`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -580,38 +1185,134 @@ exports[`BisectDialog component renders 3`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -637,6 +1338,31 @@ exports[`BisectDialog component renders 3`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -726,38 +1452,134 @@ exports[`BisectDialog component renders 4`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -783,6 +1605,31 @@ exports[`BisectDialog component renders 4`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -806,38 +1653,134 @@ exports[`BisectDialog component renders 4`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -863,6 +1806,31 @@ exports[`BisectDialog component renders 4`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -960,38 +1928,134 @@ exports[`BisectDialog component renders 5`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -1017,6 +2081,31 @@ exports[`BisectDialog component renders 5`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }
@@ -1040,38 +2129,134 @@ exports[`BisectDialog component renders 5`] = `
       >
         <VersionSelect
           appState={
-            Object {
+            StateMock {
+              "Bisector": BisectorMock {
+                "calculatePivot": [MockFunction],
+                "continue": [MockFunction],
+                "getCurrentVersion": [MockFunction],
+              },
+              "acceleratorsToBlock": Array [],
+              "activeGistAction": "none",
+              "addAcceleratorToBlock": [MockFunction],
+              "addLocalVersion": [MockFunction],
               "channelsToShow": Array [
                 "Stable",
               ],
+              "clearConsole": [MockFunction],
+              "closedPanels": Object {},
+              "currentDocsDemoPage": "DEFAULT",
+              "currentElectronVersion": Object {
+                "source": "remote",
+                "state": "ready",
+                "version": "1.8.7",
+              },
+              "customMosaics": Array [],
+              "disableTour": [MockFunction],
+              "downloadVersion": [MockFunction],
+              "genericDialogLastInput": null,
+              "genericDialogLastResult": null,
+              "genericDialogOptions": Object {},
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "getName": [MockFunction],
+              "gistId": "",
+              "gitHubAvatarUrl": null,
+              "gitHubLogin": null,
+              "gitHubName": null,
+              "gitHubPublishAsPublic": true,
+              "gitHubToken": null,
+              "hasVersion": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "hideChannels": [MockFunction],
+              "isAddVersionDialogShowing": false,
+              "isAutoBisecting": false,
+              "isClearingConsoleOnRun": false,
+              "isConfirmationPromptShowing": false,
+              "isConsoleShowing": true,
+              "isEnablingElectronLogging": false,
+              "isGenericDialogShowing": false,
+              "isInstallingModules": false,
+              "isRunning": false,
+              "isSettingsShowing": false,
+              "isTokenDialogShowing": false,
+              "isTourShowing": false,
+              "isUsingSystemTheme": true,
+              "isWarningDialogShowing": false,
+              "mosaicArrangement": null,
+              "output": Array [],
+              "pushError": [MockFunction],
+              "pushOutput": [MockFunction],
+              "removeAcceleratorToBlock": [MockFunction],
+              "removeCustomMosaic": [MockFunction],
+              "removeVersion": [MockFunction],
+              "setGenericDialogOptions": [MockFunction],
+              "setTheme": [MockFunction],
               "setVersion": [MockFunction],
-              "versions": Array [
-                Object {
+              "setVisibleMosaics": [MockFunction],
+              "showChannels": [MockFunction],
+              "showCustomEditorDialog": [MockFunction],
+              "showMosaic": [MockFunction],
+              "showUndownloadedVersions": false,
+              "signOutGitHub": [MockFunction],
+              "theme": undefined,
+              "title": "Electron Fiddle",
+              "toggleAddVersionDialog": [MockFunction],
+              "toggleAuthDialog": [MockFunction],
+              "toggleGenericDialog": [MockFunction],
+              "toggleWarningDialog": [MockFunction],
+              "updateElectronVersions": [MockFunction],
+              "version": "1.8.7",
+              "versions": Object {
+                "1.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "1.0.0",
                 },
-                Object {
+                "10.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
+                },
+                "2.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "2.0.0",
                 },
-                Object {
+                "3.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "3.0.0",
                 },
-                Object {
+                "4.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "4.0.0",
                 },
-                Object {
+                "5.0.0": Object {
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
                 },
-              ],
+                "6.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                "7.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                "8.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                "9.0.0": Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+              },
               "versionsToShow": Array [
                 Object {
                   "source": "local",
@@ -1097,6 +2282,31 @@ exports[`BisectDialog component renders 5`] = `
                   "source": "local",
                   "state": "ready",
                   "version": "5.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "6.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "7.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "8.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "9.0.0",
+                },
+                Object {
+                  "source": "local",
+                  "state": "ready",
+                  "version": "10.0.0",
                 },
               ],
             }

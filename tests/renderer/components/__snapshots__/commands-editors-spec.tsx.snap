@@ -33,7 +33,7 @@ Array [
     text="Preload (preload.js)"
   />,
   <Blueprint3.MenuItem
-    disabled={false}
+    disabled={true}
     icon="eye-open"
     id="index.html"
     multiline={false}

@@ -1,8 +1,11 @@
-import { FileManager } from './file-manager';
-import { MockState } from './state';
-import { RemoteLoader } from './remote-loader';
-import { RunnerMock } from './runner';
 import { DefaultEditorId } from '../../src/interfaces';
+import {
+  FileManagerMock,
+  MonacoEditorMock,
+  RemoteLoaderMock,
+  RunnerMock,
+  StateMock,
+} from './mocks';
 
 export class AppMock {
   public setup = jest.fn();
@@ -23,14 +26,27 @@ export class AppMock {
     dispose: jest.fn(),
   };
 
-  public fileManager = new FileManager();
-  public remoteLoader = new RemoteLoader();
+  public fileManager = new FileManagerMock();
+  public remoteLoader = new RemoteLoaderMock();
   public runner = new RunnerMock();
-  public state = new MockState();
+  public state = new StateMock();
   public taskRunner = {};
 
-  public monaco = {
+  public monaco: any = {
+    latestEditor: null,
+    latestModel: null,
     editor: {
+      create: jest
+        .fn()
+        .mockImplementation(
+          () => (this.monaco.latestEditor = new MonacoEditorMock()),
+        ),
+      createModel: jest
+        .fn()
+        .mockImplementation(
+          () => (this.monaco.latestModel = { updateOptions: jest.fn() }),
+        ),
+      onDidFocusEditorText: jest.fn(),
       setTheme: jest.fn(),
       defineTheme: jest.fn(),
     },

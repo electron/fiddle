@@ -1,7 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { shallow } from 'enzyme';
 
 import { Commands } from '../../../src/renderer/components/commands';
+
+import { StateMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
@@ -20,16 +22,14 @@ jest.mock('../../../src/renderer/components/commands-action-button', () => ({
 }));
 
 describe('Commands component', () => {
-  let store: any;
+  let store: StateMock;
 
   beforeEach(() => {
-    store = {
-      gistId: null,
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
   it('renders', () => {
-    const wrapper = shallow(<Commands appState={store} />);
+    const wrapper = shallow(<Commands appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 });

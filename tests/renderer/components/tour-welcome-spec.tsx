@@ -7,32 +7,32 @@ import {
 } from '../../../src/renderer/components/tour-welcome';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
+import { StateMock } from '../../mocks/mocks';
+
 describe('Header component', () => {
-  let store: any;
+  let store: StateMock;
 
   beforeEach(() => {
-    store = {
-      isTourShowing: true,
-      disableTour: jest.fn(),
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
+    store.isTourShowing = true;
 
     ipcRendererManager.removeAllListeners();
   });
 
   it('renders', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
+    const wrapper = shallow(<WelcomeTour appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders null if the tour is not showing', () => {
     store.isTourShowing = false;
 
-    const wrapper = shallow(<WelcomeTour appState={store} />);
+    const wrapper = shallow(<WelcomeTour appState={store as any} />);
     expect(wrapper.html()).toBe(null);
   });
 
   it('renders the tour once started', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
+    const wrapper = shallow(<WelcomeTour appState={store as any} />);
     const instance: WelcomeTour = wrapper.instance() as any;
 
     instance.startTour();
@@ -42,7 +42,7 @@ describe('Header component', () => {
   });
 
   it('stops the tour on stopTour()', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
+    const wrapper = shallow(<WelcomeTour appState={store as any} />);
     const instance: WelcomeTour = wrapper.instance() as any;
 
     instance.stopTour();

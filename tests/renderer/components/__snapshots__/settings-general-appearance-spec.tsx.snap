@@ -25,14 +25,17 @@ exports[`AppearanceSettings component renders 1`] = `
     Appearance
   </h4>
   <Blueprint3.Checkbox
+    checked={true}
     label="Sync theme with system setting"
     onChange={[Function]}
   />
   <Blueprint3.FormGroup
+    disabled={true}
     inline={true}
     label="Choose your theme"
   >
     <Blueprint3.Select
+      disabled={true}
       filterable={true}
       itemPredicate={[Function]}
       itemRenderer={[Function]}
@@ -54,6 +57,7 @@ exports[`AppearanceSettings component renders 1`] = `
       }
     >
       <Blueprint3.Button
+        disabled={true}
         icon="tint"
         id="open-theme-selector"
         onClick={[Function]}
@@ -61,7 +65,9 @@ exports[`AppearanceSettings component renders 1`] = `
       />
     </Blueprint3.Select>
   </Blueprint3.FormGroup>
-  <Blueprint3.Callout>
+  <Blueprint3.Callout
+    hidden={true}
+  >
     <p>
       To add themes, add JSON theme files to
        

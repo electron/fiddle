@@ -18,10 +18,12 @@ import {
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { waitFor } from '../../src/utils/wait-for';
-import { AppState } from '../../src/renderer/state';
-import { MockChildProcess } from '../mocks/child-process';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
-import { MockVersions } from '../mocks/electron-versions';
+import {
+  ChildProcessMock,
+  FileManagerMock,
+  StateMock,
+  VersionsMock,
+} from '../mocks/mocks';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -34,43 +36,26 @@ jest.mock('child_process');
 jest.mock('path');
 
 describe('Runner component', () => {
-  let mockChild: MockChildProcess;
-  let store: any;
+  let mockChild: ChildProcessMock;
+  let store: StateMock;
   let instance: Runner;
+  let fileManager: FileManagerMock;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
 
   beforeEach(() => {
-    ({ mockVersions, mockVersionsArray } = new MockVersions());
+    ({ mockVersions, mockVersionsArray } = new VersionsMock());
+    ({ fileManager, state: store } = (window as any).ElectronFiddle.app);
+    store.initVersions('2.0.2', { ...mockVersions });
+    store.getName.mockResolvedValue('test-app-name');
 
-    mockChild = new MockChildProcess();
+    mockChild = new ChildProcessMock();
     ipcRendererManager.removeAllListeners();
 
     (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
-
-    store = {
-      version: '2.0.2',
-      versions: mockVersions,
-      downloadVersion: jest.fn(),
-      removeVersion: jest.fn(),
-      pushOutput: jest.fn(),
-      clearConsole: jest.fn(),
-      pushError: jest.fn(),
-      packageManager: 'npm',
-      get currentElectronVersion() {
-        return mockVersions['2.0.2'];
-      },
-      getName: async () => 'test-app-name',
-      setVersion: (version: string) => {
-        store.version = version;
-        return true;
-      },
-    };
-
-    (window as any).ElectronFiddle = new ElectronFiddleMock();
     (getIsDownloaded as jest.Mock).mockReturnValue(true);
 
-    instance = new Runner(store as AppState);
+    instance = new Runner(store as any);
   });
 
   describe('run()', () => {
@@ -90,9 +75,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
-      expect(
-        window.ElectronFiddle.app.fileManager.saveToTemp,
-      ).toHaveBeenCalled();
+      expect(fileManager.saveToTemp).toHaveBeenCalled();
       expect(installModules).toHaveBeenCalled();
     });
 
@@ -117,9 +100,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
-      expect(
-        window.ElectronFiddle.app.fileManager.saveToTemp,
-      ).toHaveBeenCalled();
+      expect(fileManager.saveToTemp).toHaveBeenCalled();
       expect(installModules).toHaveBeenCalled();
     });
 
@@ -191,24 +172,22 @@ describe('Runner component', () => {
       expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
     });
 
-    it('cleans the app data dir after a run', async (done) => {
+    it('cleans the app data dir after a run', async () => {
       // get run() out of the way
       (spawn as any).mockReturnValueOnce(mockChild);
       setTimeout(() => mockChild.emit('close', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      process.nextTick(() => {
-        const { cleanup } = window.ElectronFiddle.app.fileManager;
-        expect(cleanup).toHaveBeenCalledTimes(2);
-        expect(cleanup).toHaveBeenLastCalledWith(
-          path.join(`/test-path/test-app-name`),
-        );
-        done();
-      });
+      await process.nextTick;
+      const { cleanup } = fileManager;
+      expect(cleanup).toHaveBeenCalledTimes(2);
+      expect(cleanup).toHaveBeenLastCalledWith(
+        path.join(`/test-path/test-app-name`),
+      );
     });
 
-    it('does not clean the app data dir after a run if configured', async (done) => {
+    it('does not clean the app data dir after a run if configured', async () => {
       (instance as any).appState.isKeepingUserDataDirs = true;
 
       // get run() out of the way
@@ -217,11 +196,9 @@ describe('Runner component', () => {
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      process.nextTick(() => {
-        const { cleanup } = window.ElectronFiddle.app.fileManager;
-        expect(cleanup).toHaveBeenCalledTimes(1);
-        done();
-      });
+      await process.nextTick;
+      const { cleanup } = fileManager;
+      expect(cleanup).toHaveBeenCalledTimes(1);
     });
 
     it('automatically cleans the console when enabled', async () => {
@@ -244,8 +221,7 @@ describe('Runner component', () => {
     });
 
     it('does not run if writing files fails', async () => {
-      (window.ElectronFiddle.app.fileManager
-        .saveToTemp as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (fileManager.saveToTemp as jest.Mock).mockRejectedValueOnce('bwap bwap');
 
       expect(await instance.run()).toBe(RunResult.INVALID);
     });
