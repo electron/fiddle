@@ -616,6 +616,16 @@ export class AppState {
   }
 
   /**
+   * Ensure that any buffered console output is
+   * printed before a running Fiddle is stopped.
+   *
+   * @returns {void}
+   */
+  @action public flushOutput(): void {
+    this.pushOutput('\r\n', { bypassBuffer: false });
+  }
+
+  /**
    * Push output to the application's state. Accepts a buffer or a string as input,
    * attaches a timestamp, and pushes into the store.
    *
@@ -628,12 +638,11 @@ export class AppState {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
-    // TODO: This drops the first part of the buffer... is that fully expected?
     if (process.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split('\r\n');
-      for (let partIndex = 0; partIndex < parts.length; partIndex += 1) {
+      for (let partIndex = 0; partIndex < parts.length; partIndex++) {
         const part = parts[partIndex];
         if (partIndex === parts.length - 1) {
           this.outputBuffer = part;
