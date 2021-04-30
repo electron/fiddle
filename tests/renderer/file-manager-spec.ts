@@ -1,12 +1,14 @@
 import * as fs from 'fs-extra';
-import * as path from 'path';
 
-import { DefaultEditorId, Files } from '../../src/interfaces';
+import { AppState } from '../../src/renderer/state';
+import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { readFiddle } from '../../src/utils/read-fiddle';
 
 import { AppMock } from '../mocks/mocks';
+import { createEditorValues } from '../mocks/editor-values';
 
 jest.mock('fs-extra');
 jest.mock('tmp', () => ({
@@ -15,25 +17,23 @@ jest.mock('tmp', () => ({
     name: '/fake/temp',
   })),
 }));
-jest.mock('../../src/renderer/templates', () => ({
-  getTemplateValues: () => ({
-    [DefaultEditorId.html]: '',
-    [DefaultEditorId.main]: '',
-    [DefaultEditorId.renderer]: '',
-  }),
+
+jest.mock('../../src/utils/read-fiddle', () => ({
+  readFiddle: jest.fn(),
 }));
 
 describe('FileManager', () => {
+  const editorValues = createEditorValues();
   let app: AppMock;
   let fm: FileManager;
 
   beforeEach(() => {
-    ({ app } = (window as any).ElectronFiddle);
     ipcRendererManager.send = jest.fn();
+    (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
 
-    fm = new FileManager({
-      setGenericDialogOptions: jest.fn(),
-    } as any);
+    // create a real FileManager and insert it into our mocks
+    ({ app } = (window as any).ElectronFiddle);
+    fm = new FileManager((app.state as unknown) as AppState);
     app.fileManager = fm as any;
   });
 
@@ -42,68 +42,25 @@ describe('FileManager', () => {
   });
 
   describe('openFiddle()', () => {
-    it('opens a local fiddle', async () => {
-      const fakePath = '/fake/path';
-      await fm.openFiddle(fakePath);
+    const filePath = '/fake/path';
 
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-        },
-        { filePath: fakePath },
-      );
+    it('opens a local fiddle', async () => {
+      const opts: SetFiddleOptions = { filePath };
+      await fm.openFiddle(filePath);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, opts);
     });
 
-    it('can open a fiddle with custom editors', async () => {
-      const fakePath = '/fake/path';
+    it('opens a fiddle with custom editors', async () => {
       const file = 'file.js';
+      const content = 'hey';
+      const values = { ...editorValues, [file]: content };
+      (readFiddle as jest.Mock).mockResolvedValue(values);
 
       app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
-      (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
-      (fs.readdirSync as jest.Mock).mockImplementation(() => [
-        file,
-        DefaultEditorId.html,
-      ]);
-      (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
-        return path.basename(filename) === file ? 'hey' : '';
-      });
 
-      await fm.openFiddle(fakePath);
-
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-          [file]: 'hey',
-        },
-        { filePath: fakePath },
-      );
-    });
-
-    it('writes empty strings if readFile throws an error', async () => {
-      (fs.readFile as jest.Mock).mockImplementation(() => {
-        throw new Error('bwap');
-      });
-      const fakePath = '/fake/path';
-      await fm.openFiddle(fakePath);
-
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.preload]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.css]: '',
-        },
-        { filePath: fakePath },
-      );
+      await fm.openFiddle(filePath);
+      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(values, { filePath });
     });
 
     it('runs it on IPC event', () => {
@@ -125,26 +82,22 @@ describe('FileManager', () => {
 
   describe('saveFiddle()', () => {
     it('saves all non-empty files in Fiddle', async () => {
-      await fm.saveFiddle('/fake/path');
+      const values = { ...editorValues };
+      app.getEditorValues.mockReturnValue(values);
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(5);
+      await fm.saveFiddle('/fake/path');
+      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
     it('saves a fiddle with custom editors', async () => {
       const file = 'file.js';
+      const content = 'hi';
+      const values = { ...editorValues, [file]: content };
       app.state.customMosaics = [file];
-      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-        [file]: 'hi',
-        [DefaultEditorId.html]: 'html',
-        [DefaultEditorId.renderer]: 'renderer',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.main]: 'main',
-        [DefaultEditorId.css]: 'css',
-      });
+      app.getEditorValues.mockReturnValueOnce(values);
 
       await fm.saveFiddle('/fake/path');
-
-      expect(fs.outputFile).toHaveBeenCalledTimes(6);
+      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
     it('removes a file that is newly empty', async () => {
@@ -160,8 +113,9 @@ describe('FileManager', () => {
 
       await fm.saveFiddle('/fake/path');
 
-      expect(fs.outputFile).toHaveBeenCalledTimes(5);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(5);
+      const n = Object.keys(editorValues).length;
+      expect(fs.outputFile).toHaveBeenCalledTimes(n);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(n);
     });
 
     it('handles an error (remove)', async () => {
@@ -234,17 +188,11 @@ describe('FileManager', () => {
 
   describe('openTemplate()', () => {
     it('attempts to open a template', async () => {
-      await fm.openTemplate('test');
-      expect(app.replaceFiddle).toHaveBeenCalledWith<any>(
-        {
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.renderer]: '',
-          [DefaultEditorId.main]: '',
-        },
-        {
-          templateName: 'test',
-        },
-      );
+      const templateName = 'test';
+      await fm.openTemplate(templateName);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
+        templateName,
+      });
     });
 
     it('runs openTemplate on IPC event', () => {
@@ -284,49 +232,41 @@ describe('FileManager', () => {
   });
 
   describe('getFiles()', () => {
-    it('applies transforms', async () => {
-      const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.set(DefaultEditorId.renderer, 'hi');
-        return files;
-      });
+    let expected: Files;
 
-      expect(result.get(DefaultEditorId.renderer)).toBe('hi');
+    beforeEach(() => {
+      app.getEditorValues.mockReturnValue(editorValues);
+      expected = new Map(Object.entries(editorValues));
+      expected.set(PACKAGE_NAME, undefined as any);
     });
 
-    it('handles custom editors', async () => {
+    it(`always inserts ${PACKAGE_NAME}`, async () => {
+      expect(await fm.getFiles()).toStrictEqual(expected);
+    });
+
+    it('includes custom editors', async () => {
       const file = 'file.js';
+      const content = '// file.js';
+      const values = { ...editorValues, [file]: content };
+      app.getEditorValues.mockReturnValue(values);
+      expected.set(file, content);
       app.state.customMosaics = [file];
 
-      (app.getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-        [file]: 'file',
-        [DefaultEditorId.html]: 'html',
-        [DefaultEditorId.renderer]: 'renderer',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.main]: 'main',
-        [DefaultEditorId.css]: 'css',
-      });
+      expect(await fm.getFiles()).toStrictEqual(expected);
+    });
 
-      const result = await fm.getFiles(undefined, async (files: Files) => {
-        files.forEach((value, key) => {
-          files.set(key, `${value}!`);
-        });
-        return files;
-      });
-
-      expect(result.get(DefaultEditorId.main)).toBe('main!');
-      expect(result.get(DefaultEditorId.renderer)).toBe('renderer!');
-      expect(result.get(DefaultEditorId.preload)).toBe('preload!');
-      expect(result.get(DefaultEditorId.html)).toBe('html!');
-      expect(result.get(DefaultEditorId.css)).toBe('css!');
-      expect(result.get(file)).toBe('file!');
+    it('applies transforms', async () => {
+      const transformed: Files = new Map([['👉', '👈']]);
+      const transform = async () => transformed;
+      expect(await fm.getFiles(undefined, transform)).toBe(transformed);
     });
 
     it('handles transform error', async () => {
-      const result = await fm.getFiles(undefined, async () => {
-        throw new Error('bwap bwap');
-      });
-
-      expect(result.get(DefaultEditorId.renderer)).toBe('renderer-content');
+      const transform = async () => {
+        throw new Error('💩');
+      };
+      const result = await fm.getFiles(undefined, transform);
+      expect(result).toStrictEqual(expected);
     });
   });
 });

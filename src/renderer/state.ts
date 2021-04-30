@@ -5,7 +5,6 @@ import { MosaicNode } from 'react-mosaic-component';
 
 import {
   BlockableAccelerator,
-  CustomEditorId,
   DEFAULT_EDITORS,
   EditorId,
   ElectronReleaseChannel,
@@ -127,7 +126,7 @@ export class AppState {
     wantsInput: false,
     placeholder: '',
   };
-  @observable public customMosaics: CustomEditorId[] = [];
+  @observable public customMosaics: EditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
   @observable

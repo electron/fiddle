@@ -11,7 +11,6 @@ import {
   GenericDialogType,
   SetFiddleOptions,
   EditorId,
-  CustomEditorId,
   PACKAGE_NAME,
   DEFAULT_EDITORS,
 } from '../interfaces';
@@ -19,7 +18,11 @@ import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
 import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import { compareEditors, getEmptyContent } from '../utils/editor-utils';
+import {
+  compareEditors,
+  getEmptyContent,
+  isKnownFile,
+} from '../utils/editor-utils';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -52,7 +55,7 @@ export class App {
   }
 
   public async replaceFiddle(
-    editorValues: Partial<EditorValues>,
+    editorValues: EditorValues,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
     // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
@@ -71,15 +74,9 @@ export class App {
     }
 
     // Remove all previously created custom editors.
-    this.state.customMosaics = [];
-    const customEditors = Object.keys(editorValues).filter(
-      (v) => !Object.values(DefaultEditorId).includes(v as DefaultEditorId),
-    ) as CustomEditorId[];
-
-    // Re-add new custom editors.
-    for (const mosaic of customEditors) {
-      this.state.customMosaics.push(mosaic);
-    }
+    this.state.customMosaics = Object.keys(editorValues).filter(
+      (filename: string) => !isKnownFile(filename),
+    ) as EditorId[];
 
     // If the gist content is empty or matches the empty file output, don't show it.
     const shouldShow = (id: EditorId, val?: string) => {
@@ -88,7 +85,7 @@ export class App {
 
     // Sort and display all editors that have content.
     const visibleEditors: EditorId[] = Object.entries(editorValues)
-      .filter(([id, content]) => shouldShow(id as EditorId, content))
+      .filter(([id, content]) => shouldShow(id as EditorId, content as string))
       .map(([id]) => id as DefaultEditorId)
       .sort(compareEditors);
 
@@ -109,7 +106,7 @@ export class App {
    *
    * @param {EditorValues} values
    */
-  public async setEditorValues(values: Partial<EditorValues>): Promise<void> {
+  public async setEditorValues(values: EditorValues): Promise<void> {
     const { ElectronFiddle: fiddle } = window;
 
     if (!fiddle?.app) {
@@ -157,7 +154,7 @@ export class App {
       throw new Error('Fiddle not ready');
     }
 
-    const values = {} as EditorValues;
+    const values: EditorValues = {};
     for (const editor in fiddle?.editors) {
       values[editor] = getEditorValue(editor as EditorId);
     }
