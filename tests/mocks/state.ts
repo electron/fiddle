@@ -23,6 +23,8 @@ export class StateMock {
     Record<EditorId, EditorBackup | true>
   > = {};
   @observable public customMosaics: CustomEditorId[] = [];
+  @observable public environmentVariables: string[] = [];
+  @observable public executionFlags: string[] = [];
   @observable public genericDialogLastInput: string | null = null;
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogOptions: GenericDialogOptions = {} as any;

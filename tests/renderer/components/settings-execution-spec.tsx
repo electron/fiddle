@@ -7,7 +7,10 @@ describe('ExecutionSettings component', () => {
   let store: any;
 
   beforeEach(() => {
-    store = {};
+    store = {
+      executionFlags: [],
+      environmentVariables: [],
+    };
   });
 
   it('renders', () => {
@@ -69,6 +72,29 @@ describe('ExecutionSettings component', () => {
         '--lang=es',
         '--js-flags=--expose-gc',
       ]);
+    });
+  });
+
+  describe('handleEnvironmentVariableChange()', () => {
+    it('handles new environment variables', async () => {
+      const wrapper = shallow(<ExecutionSettings appState={store} />);
+      const instance = wrapper.instance() as any;
+
+      const dragRegions = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
+      const trash = 'ELECTRON_TRASH=trash-cli';
+      await instance.handleEnvironmentVariableChange({
+        currentTarget: { value: dragRegions },
+      });
+
+      expect(store.environmentVariables).toEqual([dragRegions]);
+
+      await instance.handleEnvironmentVariableChange({
+        currentTarget: {
+          value: `${dragRegions}|${trash}`,
+        },
+      });
+
+      expect(store.environmentVariables).toEqual([dragRegions, trash]);
     });
   });
 });

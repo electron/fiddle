@@ -32,6 +32,9 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
       this,
     );
     this.handleExecutionFlagChange = this.handleExecutionFlagChange.bind(this);
+    this.handleEnvironmentVariableChange = this.handleEnvironmentVariableChange.bind(
+      this,
+    );
   }
 
   /**
@@ -56,7 +59,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
   }
 
   /**
-   * Handles a change in the execution flags run with the Electron executable
+   * Handles a change in the execution flags run with the Electron executable.
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
@@ -66,11 +69,26 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
     this.props.appState.executionFlags = flags;
   }
 
+  /**
+   * Handles a change in the environment variables run with the Electron executable.
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleEnvironmentVariableChange(
+    event: React.FormEvent<HTMLInputElement>,
+  ) {
+    const { value } = event.currentTarget;
+
+    const variables = value.split('|');
+    this.props.appState.environmentVariables = variables;
+  }
+
   public render() {
     const {
       isKeepingUserDataDirs,
       isEnablingElectronLogging,
-      executionFlags = [],
+      executionFlags,
+      environmentVariables,
     } = this.props.appState;
 
     const deleteUserDirLabel = `
@@ -81,7 +99,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
     `.trim();
     const electronLoggingLabel = `
       There are some flags that Electron uses to log extra information both internally
-      and through Chromium.  Enable this option to make Fiddle produce those logs.`.trim();
+      and through Chromium. Enable this option to make Fiddle produce those logs.`.trim();
 
     return (
       <div>
@@ -103,6 +121,17 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
         <br />
         <Callout>
           <FormGroup label={electronLoggingLabel}>
+            <p>
+              Enabling advanced Electron logging will set the{' '}
+              <code>ELECTRON_ENABLE_LOGGING</code>,
+              <code>ELECTRON_DEBUG_NOTIFICATION</code>, and{' '}
+              <code>ELECTRON_ENABLE_STACK_DUMPING</code> environment variables
+              to true. See{' '}
+              <a href="https://www.electronjs.org/docs/api/environnment-variables">
+                documentation
+              </a>{' '}
+              for more information about what they do.
+            </p>
             <Checkbox
               checked={isEnablingElectronLogging}
               label="Enable advanced Electron logging."
@@ -118,7 +147,7 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
               <a href="https://www.electronjs.org/docs/api/command-line-switches">
                 user-provided flags
               </a>
-              , such as &apos;--js-flags=--expose-gc&apos;. Those can be added
+              , such as <code>--js-flags=--expose-gc</code>. Those can be added
               here as bar-separated (|) flags to run when you start your
               Fiddles.
             </p>
@@ -127,6 +156,29 @@ export class ExecutionSettings extends React.Component<ExecutionSettingsProps> {
               placeholder="--js-flags=--expose-gc|--lang=es"
               value={executionFlags.join('|')}
               onChange={this.handleExecutionFlagChange}
+            />
+          </FormGroup>
+        </Callout>
+        <br />
+        <Callout>
+          <FormGroup>
+            <p>
+              Electron allows starting the executable with{' '}
+              <a href="https://www.electronjs.org/docs/api/environment-variables">
+                user-provided environment variables
+              </a>
+              , such as{' '}
+              <code>
+                NODE_OPTIONS=&quot;--no-warnings --max-old-space-size=2048&quot;
+              </code>
+              . Those can be added here as bar-separated (|) variables to run
+              when you start your Fiddles.
+            </p>
+            <br />
+            <InputGroup
+              placeholder='NODE_OPTIONS="--no-warnings --max-old-space-size=2048"'
+              value={environmentVariables.join('|')}
+              onChange={this.handleEnvironmentVariableChange}
             />
           </FormGroup>
         </Callout>
