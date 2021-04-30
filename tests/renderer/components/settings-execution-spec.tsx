@@ -1,7 +1,10 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { ExecutionSettings } from '../../../src/renderer/components/settings-execution';
+import {
+  ExecutionSettings,
+  SettingItemType,
+} from '../../../src/renderer/components/settings-execution';
 
 describe('ExecutionSettings component', () => {
   let store: any;
@@ -54,47 +57,104 @@ describe('ExecutionSettings component', () => {
     });
   });
 
-  describe('handleExecutionFlagChange()', () => {
-    it('handles new flags', async () => {
-      const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleExecutionFlagChange({
-        currentTarget: { value: '--lang=es' },
+  describe('handleItemSettingsChange()', () => {
+    describe('with executionFlags', () => {
+      it('updates when new flags are added', async () => {
+        const wrapper = shallow(<ExecutionSettings appState={store} />);
+        const instance = wrapper.instance() as any;
+
+        await instance.handleSettingsItemChange(
+          {
+            currentTarget: { name: 'flag-0', value: '--lang=es' },
+          },
+          SettingItemType.Flag,
+        );
+
+        expect(instance.state.executionFlags).toEqual({
+          'flag-0': '--lang=es',
+        });
+
+        await instance.handleSettingsItemChange(
+          {
+            currentTarget: { name: 'flag-1', value: '--js-flags=--expose-gc' },
+          },
+          SettingItemType.Flag,
+        );
+
+        expect(instance.state.executionFlags).toEqual({
+          'flag-0': '--lang=es',
+          'flag-1': '--js-flags=--expose-gc',
+        });
       });
 
-      expect(store.executionFlags).toEqual(['--lang=es']);
+      it('saves properly', async () => {
+        const wrapper = shallow(<ExecutionSettings appState={store} />);
+        const instance = wrapper.instance() as any;
 
-      await instance.handleExecutionFlagChange({
-        currentTarget: { value: '--lang=es|--js-flags=--expose-gc' },
+        instance.setState({
+          executionFlags: {
+            'flag-0': '--lang=es',
+            'flag-1': '--js-flags=--expose-gc',
+          },
+        });
+
+        await instance.handleSettingsItemSave(SettingItemType.Flag);
+        expect(store.executionFlags).toEqual([
+          '--lang=es',
+          '--js-flags=--expose-gc',
+        ]);
       });
-
-      expect(store.executionFlags).toEqual([
-        '--lang=es',
-        '--js-flags=--expose-gc',
-      ]);
     });
-  });
 
-  describe('handleEnvironmentVariableChange()', () => {
-    it('handles new environment variables', async () => {
-      const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+    describe('with environmentVariables', () => {
+      it('updates when new flags are added', async () => {
+        const wrapper = shallow(<ExecutionSettings appState={store} />);
+        const instance = wrapper.instance() as any;
 
-      const dragRegions = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
-      const trash = 'ELECTRON_TRASH=trash-cli';
-      await instance.handleEnvironmentVariableChange({
-        currentTarget: { value: dragRegions },
+        await instance.handleSettingsItemChange(
+          {
+            currentTarget: {
+              name: 'var-0',
+              value: 'ELECTRON_DEBUG_DRAG_REGIONS=1',
+            },
+          },
+          SettingItemType.EnvVar,
+        );
+
+        expect(instance.state.environmentVariables).toEqual({
+          'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
+        });
+
+        await instance.handleSettingsItemChange(
+          {
+            currentTarget: { name: 'var-1', value: 'ELECTRON_TRASH=trash-cli' },
+          },
+          SettingItemType.EnvVar,
+        );
+
+        expect(instance.state.environmentVariables).toEqual({
+          'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
+          'var-1': 'ELECTRON_TRASH=trash-cli',
+        });
       });
 
-      expect(store.environmentVariables).toEqual([dragRegions]);
+      it('saves properly', async () => {
+        const wrapper = shallow(<ExecutionSettings appState={store} />);
+        const instance = wrapper.instance() as any;
 
-      await instance.handleEnvironmentVariableChange({
-        currentTarget: {
-          value: `${dragRegions}|${trash}`,
-        },
+        instance.setState({
+          environmentVariables: {
+            'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
+            'var-1': 'ELECTRON_TRASH=trash-cli',
+          },
+        });
+
+        await instance.handleSettingsItemSave(SettingItemType.EnvVar);
+        expect(store.environmentVariables).toEqual([
+          'ELECTRON_DEBUG_DRAG_REGIONS=1',
+          'ELECTRON_TRASH=trash-cli',
+        ]);
       });
-
-      expect(store.environmentVariables).toEqual([dragRegions, trash]);
     });
   });
 });

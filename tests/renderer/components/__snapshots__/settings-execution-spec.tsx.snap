@@ -74,15 +74,35 @@ exports[`ExecutionSettings component renders 1`] = `
         <code>
           --js-flags=--expose-gc
         </code>
-        . Those can be added here as bar-separated (|) flags to run when you start your Fiddles.
+        . Those can be added to run when you start your Fiddles.
       </p>
       <br />
       <Blueprint3.InputGroup
+        key="flag-0"
+        name="flag-0"
         onChange={[Function]}
-        placeholder="--js-flags=--expose-gc|--lang=es"
+        placeholder="--js-flags=--expose-gc"
+        rightElement={
+          <Blueprint3.Button
+            icon="cross"
+            onClick={[Function]}
+          />
+        }
         value=""
       />
     </Blueprint3.FormGroup>
+    <Blueprint3.ButtonGroup>
+      <Blueprint3.Button
+        onClick={[Function]}
+      >
+        Add New Flag
+      </Blueprint3.Button>
+      <Blueprint3.Button
+        onClick={[Function]}
+      >
+        Save Flags
+      </Blueprint3.Button>
+    </Blueprint3.ButtonGroup>
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
@@ -100,15 +120,35 @@ exports[`ExecutionSettings component renders 1`] = `
         <code>
           NODE_OPTIONS="--no-warnings --max-old-space-size=2048"
         </code>
-        . Those can be added here as bar-separated (|) variables to run when you start your Fiddles.
+        . Those can be added here to run when you start your Fiddles.
       </p>
       <br />
       <Blueprint3.InputGroup
+        key="var-0"
+        name="var-0"
         onChange={[Function]}
         placeholder="NODE_OPTIONS=\\"--no-warnings --max-old-space-size=2048\\""
+        rightElement={
+          <Blueprint3.Button
+            icon="cross"
+            onClick={[Function]}
+          />
+        }
         value=""
       />
     </Blueprint3.FormGroup>
+    <Blueprint3.ButtonGroup>
+      <Blueprint3.Button
+        onClick={[Function]}
+      >
+        Add New Variable
+      </Blueprint3.Button>
+      <Blueprint3.Button
+        onClick={[Function]}
+      >
+        Save Variables
+      </Blueprint3.Button>
+    </Blueprint3.ButtonGroup>
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
