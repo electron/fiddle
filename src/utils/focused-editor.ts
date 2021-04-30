@@ -1,16 +1,18 @@
-import * as MonacoType from 'monaco-editor';
+import { Editor } from '../renderer/state';
 
 /**
  * Returns the currently focused editor.
  *
  * @returns {(MonacoType.editor.IStandaloneCodeEditor | null)}
  */
-export function getFocusedEditor(): MonacoType.editor.IStandaloneCodeEditor | null {
-  const focusedKey = Object.keys(window.ElectronFiddle.editors).find((key) => {
-    const editor: MonacoType.editor.IStandaloneCodeEditor =
-      window.ElectronFiddle.editors[key];
-    return editor && editor.hasTextFocus && editor.hasTextFocus();
-  });
+export function getFocusedEditor(): Editor | null {
+  const { editorMosaic } = window.ElectronFiddle.app.state;
 
-  return focusedKey ? window.ElectronFiddle.editors[focusedKey] : null;
+  for (const editor of editorMosaic.editors.values()) {
+    if (editor.hasTextFocus()) {
+      return editor;
+    }
+  }
+
+  return null;
 }

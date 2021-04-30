@@ -55,13 +55,13 @@ export class Editor extends React.Component<EditorProps> {
    * @param {MonacoType.editor.IStandaloneCodeEditor} editor
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
-    const { editorDidMount } = this.props;
+    const { appState, editorDidMount, id } = this.props;
 
     // Set the content on the editor.
     await this.setContent();
 
     // Set the editor as an available object.
-    window.ElectronFiddle.editors[this.props.id] = editor;
+    appState.editorMosaic.editors.set(id, editor);
 
     // And notify others
     if (editorDidMount) {

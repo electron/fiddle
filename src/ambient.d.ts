@@ -10,10 +10,6 @@ declare global {
       appPaths: Record<string, string>;
       app: AppType;
       contentChangeListeners: Array<any>;
-      editors: Record<
-        EditorId,
-        MonacoType.editor.IStandaloneCodeEditor | null | undefined
-      >;
     };
   }
 }

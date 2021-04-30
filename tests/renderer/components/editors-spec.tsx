@@ -10,7 +10,11 @@ import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { updateEditorLayout } from '../../../src/utils/editor-layout';
 
-import { MonacoEditorMock, StateMock } from '../../mocks/mocks';
+import {
+  EditorMosaicMock,
+  MonacoEditorMock,
+  StateMock,
+} from '../../mocks/mocks';
 
 jest.mock('monaco-loader', () =>
   jest.fn(async () => {
@@ -34,10 +38,12 @@ describe('Editors component', () => {
   let ElectronFiddle: any;
   let monaco: any;
   let store: StateMock;
+  let editorMosaic: EditorMosaicMock;
 
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
     ({ monaco, state: store } = ElectronFiddle.app);
+    ({ editorMosaic } = store);
     store.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
   });
 
@@ -64,20 +70,11 @@ describe('Editors component', () => {
   });
 
   describe('toggleEditorOption()', () => {
-    it('handles a missing ElectronFiddle global', () => {
-      const oldEditors = ElectronFiddle.editors;
-      ElectronFiddle.editors = undefined as any;
-
-      const wrapper = shallow(<Editors appState={store as any} />);
-      const instance: Editors = wrapper.instance() as any;
-
-      expect(instance.toggleEditorOption('wordWrap')).toBe(false);
-      ElectronFiddle.editors = oldEditors;
-    });
+    const filename = DefaultEditorId.html;
 
     it('handles an error', () => {
-      (ElectronFiddle.editors[DefaultEditorId.html]!
-        .updateOptions as jest.Mock).mockImplementationOnce(() => {
+      const editor = editorMosaic.editors.get(filename);
+      editor!.updateOptions.mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
 
@@ -92,9 +89,8 @@ describe('Editors component', () => {
       const instance: Editors = wrapper.instance() as any;
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
-      expect(
-        ElectronFiddle.editors[DefaultEditorId.html]!.updateOptions,
-      ).toHaveBeenCalledWith({
+      const editor = editorMosaic.editors.get(filename);
+      expect(editor!.updateOptions).toHaveBeenCalledWith({
         minimap: { enabled: false },
         wordWrap: 'off',
       });
@@ -279,10 +275,9 @@ describe('Editors component', () => {
 
       ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
 
-      const { editors: eds } = ElectronFiddle;
-      expect(eds[DefaultEditorId.html]!.updateOptions).toHaveBeenCalled();
-      expect(eds[DefaultEditorId.renderer]!.updateOptions).toHaveBeenCalled();
-      expect(eds[DefaultEditorId.main]!.updateOptions).toHaveBeenCalled();
+      for (const editor of editorMosaic.editors.values()) {
+        expect(editor.updateOptions).toHaveBeenCalled();
+      }
     });
   });
 

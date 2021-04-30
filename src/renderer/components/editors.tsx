@@ -151,10 +151,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public toggleEditorOption(path: string): boolean {
-    if (!window.ElectronFiddle.editors) {
-      return false;
-    }
-
     try {
       const { monacoOptions } = this.state;
       const newOptions = { ...monacoOptions };
@@ -162,14 +158,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
       setAtPath(path, newOptions, toggleMonaco(currentSetting));
 
-      Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-        const editor: MonacoType.editor.IStandaloneCodeEditor | null =
-          window.ElectronFiddle.editors[key];
-
-        if (editor) {
-          editor.updateOptions(newOptions);
-        }
-      });
+      const { editorMosaic } = window.ElectronFiddle.app.state;
+      for (const editor of editorMosaic.editors.values()) {
+        editor.updateOptions(newOptions);
+      }
 
       this.setState({ monacoOptions: newOptions });
 

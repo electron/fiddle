@@ -12,15 +12,9 @@ import { EditorId } from '../interfaces';
 export function getEditorViewState(
   id: EditorId,
 ): editor.ICodeEditorViewState | null {
-  const { ElectronFiddle: fiddle } = window;
-
-  if (!fiddle?.editors) {
-    return null;
-  }
-
-  if (fiddle.editors[id] && fiddle.editors[id]!.saveViewState) {
-    return fiddle.editors[id]!.saveViewState();
-  }
-
-  return null;
+  return (
+    window.ElectronFiddle?.app?.state.editorMosaic.editors
+      .get(id)
+      ?.saveViewState() || null
+  );
 }

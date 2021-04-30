@@ -1,27 +1,30 @@
 import { DefaultEditorId } from '../../src/interfaces';
 import { getEditorModel } from '../../src/utils/editor-model';
+import { EditorMosaicMock } from '../mocks/editor-mosaic';
 
 describe('getEditorModel()', () => {
+  const filename = DefaultEditorId.html;
+  let editorMosaic: EditorMosaicMock;
+
+  beforeEach(() => {
+    ({ editorMosaic } = (window as any).ElectronFiddle.app.state);
+  });
+
   it('returns the value for an editor', () => {
-    expect(getEditorModel(DefaultEditorId.html)).toEqual({ testModel: true });
+    const model = { testModel: true };
+    const editor = editorMosaic.editors.get(filename);
+    editor!.getModel.mockReturnValue(model);
+
+    expect(getEditorModel(filename)).toBe(model);
   });
 
   it('returns null if the editor does not exist', () => {
-    const { ElectronFiddle: fiddle } = window as any;
-    const oldEditor = fiddle.editors[DefaultEditorId.html];
-    delete fiddle.editors[DefaultEditorId.html];
-
-    expect(getEditorModel(DefaultEditorId.html)).toEqual(null);
-
-    fiddle.editors[DefaultEditorId.html] = oldEditor;
+    editorMosaic.editors.delete(filename);
+    expect(getEditorModel(filename)).toBeNull();
   });
 
   it('returns null if window.Fiddle is not ready', () => {
-    const { ElectronFiddle: fiddle } = window as any;
     (window as any).ElectronFiddle = undefined;
-
-    expect(getEditorModel(DefaultEditorId.html)).toEqual(null);
-
-    window.ElectronFiddle = fiddle;
+    expect(getEditorModel(filename)).toBeNull();
   });
 });

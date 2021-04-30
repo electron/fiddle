@@ -1,9 +1,9 @@
 export class MonacoEditorMock {
-  private action = {
+  public action = {
     isSupported: jest.fn(),
     run: jest.fn(),
   };
-  private model = {
+  public model = {
     getFullModelRange: jest.fn(),
   };
   public value = '';

@@ -7,12 +7,11 @@ import * as MonacoType from 'monaco-editor';
 import { ipcRenderer } from 'electron';
 import {
   DefaultEditorId,
+  EditorId,
   EditorValues,
   GenericDialogType,
-  SetFiddleOptions,
-  EditorId,
   PACKAGE_NAME,
-  DEFAULT_EDITORS,
+  SetFiddleOptions,
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
@@ -114,27 +113,23 @@ export class App {
     }
 
     // Set content for mosaics.
-    const allEditors = [...this.state.customMosaics, ...DEFAULT_EDITORS];
-    for (const name of allEditors) {
-      const editor = fiddle.editors[name];
-      if (typeof values[name] !== 'undefined') {
-        const backup = this.state.closedPanels[name];
-        if (backup) {
-          // The editor does not exist, attempt to set it on the backup.
-          // If there's a model, we'll do it on the model. Else, we'll
-          // set the value.
-
-          if (backup.model) {
-            backup.model.setValue(values[name]!);
-          } else {
-            backup.value = values[name]!;
-          }
-        } else if (editor?.setValue) {
-          // The editor exists, set the value directly
-          const newValue = values[name]!;
-          if (!editor.getValue || editor.getValue() !== newValue) {
-            editor.setValue(newValue);
-          }
+    const { closedPanels, editorMosaic } = this.state;
+    for (const [name, content] of Object.entries(values)) {
+      const backup = closedPanels[name];
+      if (backup) {
+        // The editor does not exist, attempt to set it on the backup.
+        // If there's a model, we'll do it on the model. Else, we'll
+        // set the value.
+        if (backup.model) {
+          backup.model.setValue(values[name]!);
+        } else {
+          backup.value = values[name]!;
+        }
+      } else {
+        const editor = editorMosaic.editors.get(name as EditorId);
+        // The editor exists, set the value directly
+        if (editor && editor.getValue() !== content) {
+          editor.setValue(content as string);
         }
       }
     }
@@ -155,8 +150,8 @@ export class App {
     }
 
     const values: EditorValues = {};
-    for (const editor in fiddle?.editors) {
-      values[editor] = getEditorValue(editor as EditorId);
+    for (const name of this.state.editorMosaic.editors.keys()) {
+      values[name] = getEditorValue(name);
     }
 
     if (options && options.include !== false) {

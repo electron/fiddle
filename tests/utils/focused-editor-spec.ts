@@ -1,47 +1,51 @@
-import { DefaultEditorId } from '../../src/interfaces';
+import { DefaultEditorId, EditorId } from '../../src/interfaces';
 import { getFocusedEditor } from '../../src/utils/focused-editor';
-import { EditorMock } from '../mocks/editors';
-import { ElectronFiddleMock } from '../mocks/electron-fiddle';
+import { EditorMosaicMock, MonacoEditorMock } from '../mocks/mocks';
 
 describe('focused-editor', () => {
+  let editorMosaic: EditorMosaicMock;
+
   beforeEach(() => {
-    window.ElectronFiddle = new ElectronFiddleMock() as any;
+    ({ editorMosaic } = (window as any).ElectronFiddle.app.state);
   });
 
+  function setFocus(editor?: MonacoEditorMock) {
+    for (const e of editorMosaic.editors.values()) {
+      e.hasTextFocus.mockReturnValue(e === editor);
+    }
+  }
+
+  function expectCanFocus(name: EditorId) {
+    const editor = editorMosaic.editors.get(name);
+    setFocus(editor);
+    expect(getFocusedEditor()).toBe(editor);
+  }
+
   it('getFocusedEditor() returns the focused editor when it is main.js', () => {
-    (window.ElectronFiddle.editors[DefaultEditorId.main]!
-      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
-    expect((getFocusedEditor() as any).name).toBe(DefaultEditorId.main);
+    expectCanFocus(DefaultEditorId.main);
   });
 
   it('getFocusedEditor() returns the focused editor when it is preload.js', () => {
-    (window.ElectronFiddle.editors[DefaultEditorId.preload]!
-      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
-    expect((getFocusedEditor() as any).name).toBe(DefaultEditorId.preload);
+    expectCanFocus(DefaultEditorId.preload);
   });
 
   it('getFocusedEditor() returns the focused editor when it is index.html', () => {
-    (window.ElectronFiddle.editors[DefaultEditorId.html]!
-      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
-    expect((getFocusedEditor() as any).name).toBe(DefaultEditorId.html);
+    expectCanFocus(DefaultEditorId.html);
   });
 
   it('getFocusedEditor() returns the focused editor when it is renderer.js', () => {
-    (window.ElectronFiddle.editors[DefaultEditorId.renderer]!
-      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
-    expect((getFocusedEditor() as any).name).toBe(DefaultEditorId.renderer);
+    expectCanFocus(DefaultEditorId.renderer);
   });
 
   it('getFocusedEditor() returns the focused editor when it is custom', () => {
-    const file = new EditorMock('file.js');
-    window.ElectronFiddle.editors['file.js'] = file;
-
-    (window.ElectronFiddle.editors['file.js']!
-      .hasTextFocus as jest.Mock<any>).mockReturnValue(true);
-    expect((getFocusedEditor() as any).name).toBe('file.js');
+    const file = 'file.js';
+    const editor = new MonacoEditorMock();
+    editorMosaic.editors.set(file, editor);
+    expectCanFocus(file);
   });
 
   it('getFocusedEditor() returns null if the editor does not exist', () => {
-    expect(getFocusedEditor() as any).toBe(null);
+    setFocus(undefined);
+    expect(getFocusedEditor()).toBe(null);
   });
 });
