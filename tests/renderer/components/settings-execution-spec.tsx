@@ -63,27 +63,30 @@ describe('ExecutionSettings component', () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
         const instance = wrapper.instance() as any;
 
+        const lang = '--lang=es';
+        const flags = '--js-flags=--expose-gc';
+
         await instance.handleSettingsItemChange(
           {
-            currentTarget: { name: 'flag-0', value: '--lang=es' },
+            currentTarget: { name: '0', value: lang },
           },
-          SettingItemType.Flag,
+          SettingItemType.Flags,
         );
 
         expect(instance.state.executionFlags).toEqual({
-          'flag-0': '--lang=es',
+          '0': lang,
         });
 
         await instance.handleSettingsItemChange(
           {
-            currentTarget: { name: 'flag-1', value: '--js-flags=--expose-gc' },
+            currentTarget: { name: '1', value: flags },
           },
-          SettingItemType.Flag,
+          SettingItemType.Flags,
         );
 
         expect(instance.state.executionFlags).toEqual({
-          'flag-0': '--lang=es',
-          'flag-1': '--js-flags=--expose-gc',
+          '0': lang,
+          '1': flags,
         });
       });
 
@@ -91,18 +94,18 @@ describe('ExecutionSettings component', () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
         const instance = wrapper.instance() as any;
 
+        const lang = '--lang=es';
+        const flags = '--js-flags=--expose-gc';
+
         instance.setState({
           executionFlags: {
-            'flag-0': '--lang=es',
-            'flag-1': '--js-flags=--expose-gc',
+            '0': lang,
+            '1': flags,
           },
         });
 
-        await instance.handleSettingsItemSave(SettingItemType.Flag);
-        expect(store.executionFlags).toEqual([
-          '--lang=es',
-          '--js-flags=--expose-gc',
-        ]);
+        await instance.handleSettingsItemSave(SettingItemType.Flags);
+        expect(store.executionFlags).toEqual([lang, flags]);
       });
     });
 
@@ -111,30 +114,31 @@ describe('ExecutionSettings component', () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
         const instance = wrapper.instance() as any;
 
+        const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
+        const trash = 'ELECTRON_TRASH=trash-cli';
+
         await instance.handleSettingsItemChange(
           {
             currentTarget: {
-              name: 'var-0',
-              value: 'ELECTRON_DEBUG_DRAG_REGIONS=1',
+              name: '0',
+              value: debug,
             },
           },
-          SettingItemType.EnvVar,
+          SettingItemType.EnvVars,
         );
 
-        expect(instance.state.environmentVariables).toEqual({
-          'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
-        });
+        expect(instance.state.environmentVariables).toEqual({ '0': debug });
 
         await instance.handleSettingsItemChange(
           {
-            currentTarget: { name: 'var-1', value: 'ELECTRON_TRASH=trash-cli' },
+            currentTarget: { name: '1', value: trash },
           },
-          SettingItemType.EnvVar,
+          SettingItemType.EnvVars,
         );
 
         expect(instance.state.environmentVariables).toEqual({
-          'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
-          'var-1': 'ELECTRON_TRASH=trash-cli',
+          '0': debug,
+          '1': trash,
         });
       });
 
@@ -142,18 +146,18 @@ describe('ExecutionSettings component', () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
         const instance = wrapper.instance() as any;
 
+        const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
+        const trash = 'ELECTRON_TRASH=trash-cli';
+
         instance.setState({
           environmentVariables: {
-            'var-0': 'ELECTRON_DEBUG_DRAG_REGIONS=1',
-            'var-1': 'ELECTRON_TRASH=trash-cli',
+            '0': debug,
+            '1': trash,
           },
         });
 
-        await instance.handleSettingsItemSave(SettingItemType.EnvVar);
-        expect(store.environmentVariables).toEqual([
-          'ELECTRON_DEBUG_DRAG_REGIONS=1',
-          'ELECTRON_TRASH=trash-cli',
-        ]);
+        await instance.handleSettingsItemSave(SettingItemType.EnvVars);
+        expect(store.environmentVariables).toEqual([debug, trash]);
       });
     });
   });

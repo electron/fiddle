@@ -78,8 +78,8 @@ exports[`ExecutionSettings component renders 1`] = `
       </p>
       <br />
       <Blueprint3.InputGroup
-        key="flag-0"
-        name="flag-0"
+        key="0"
+        name="0"
         onChange={[Function]}
         placeholder="--js-flags=--expose-gc"
         rightElement={
@@ -124,8 +124,8 @@ exports[`ExecutionSettings component renders 1`] = `
       </p>
       <br />
       <Blueprint3.InputGroup
-        key="var-0"
-        name="var-0"
+        key="0"
+        name="0"
         onChange={[Function]}
         placeholder="NODE_OPTIONS=\\"--no-warnings --max-old-space-size=2048\\""
         rightElement={

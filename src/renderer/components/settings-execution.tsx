@@ -15,8 +15,8 @@ import { IPackageManager } from '../npm';
 import { AppState } from '../state';
 
 export enum SettingItemType {
-  EnvVar,
-  Flag,
+  EnvVars = 'environmentVariables',
+  Flags = 'executionFlags',
 }
 
 interface ExecutionSettingsProps {
@@ -24,8 +24,7 @@ interface ExecutionSettingsProps {
 }
 
 interface ExecutionSettingsState {
-  executionFlags: Record<string, string>;
-  environmentVariables: Record<string, string>;
+  [setting: string]: Record<string, string>;
 }
 
 /**
@@ -46,13 +45,13 @@ export class ExecutionSettings extends React.Component<
       executionFlags: Object.assign(
         {},
         ...props.appState.executionFlags.map((flag, idx) => {
-          return { [`flag-${idx}`]: flag };
+          return { [idx]: flag };
         }),
       ),
       environmentVariables: Object.assign(
         {},
         ...props.appState.environmentVariables.map((envVar, idx) => {
-          return { [`var-${idx}`]: envVar };
+          return { [idx]: envVar };
         }),
       ),
     };
@@ -71,11 +70,11 @@ export class ExecutionSettings extends React.Component<
     const { environmentVariables, executionFlags } = this.state;
 
     if (Object.keys(executionFlags).length === 0) {
-      this.addNewSettingsItem(SettingItemType.Flag);
+      this.addNewSettingsItem(SettingItemType.Flags);
     }
 
     if (Object.keys(environmentVariables).length === 0) {
-      this.addNewSettingsItem(SettingItemType.EnvVar);
+      this.addNewSettingsItem(SettingItemType.EnvVars);
     }
   }
 
@@ -107,16 +106,10 @@ export class ExecutionSettings extends React.Component<
    * @param {SettingItemType} type
    */
   public handleSettingsItemSave(type: SettingItemType) {
-    const { executionFlags, environmentVariables } = this.state;
     const { appState } = this.props;
 
-    if (type === SettingItemType.Flag) {
-      const flags = Object.values(executionFlags);
-      appState.executionFlags = flags.filter((f) => f !== '');
-    } else {
-      const vars = Object.values(environmentVariables);
-      appState.environmentVariables = vars.filter((v) => v !== '');
-    }
+    const values = Object.values(this.state[type]);
+    appState[type] = values.filter((v) => v !== '');
   }
 
   /**
@@ -132,21 +125,12 @@ export class ExecutionSettings extends React.Component<
   ) {
     const { name, value } = event.currentTarget;
 
-    if (type === SettingItemType.Flag) {
-      this.setState((prevState) => ({
-        executionFlags: {
-          ...prevState.executionFlags,
-          [name]: value,
-        },
-      }));
-    } else {
-      this.setState((prevState) => ({
-        environmentVariables: {
-          ...prevState.environmentVariables,
-          [name]: value,
-        },
-      }));
-    }
+    this.setState((prevState) => ({
+      [type]: {
+        ...prevState[type],
+        [name]: value,
+      },
+    }));
   }
 
   /**
@@ -155,25 +139,14 @@ export class ExecutionSettings extends React.Component<
    * @param {SettingItemType} type
    */
   private addNewSettingsItem(type: SettingItemType) {
-    if (type === SettingItemType.Flag) {
-      const flagsArray = Object.entries(this.state.executionFlags);
+    const array = Object.entries(this.state[type]);
 
-      this.setState((prevState) => ({
-        executionFlags: {
-          ...prevState.executionFlags,
-          [`flag-${flagsArray.length}`]: '',
-        },
-      }));
-    } else {
-      const varsArray = Object.entries(this.state.environmentVariables);
-
-      this.setState((prevState) => ({
-        environmentVariables: {
-          ...prevState.environmentVariables,
-          [`var-${varsArray.length}`]: '',
-        },
-      }));
-    }
+    this.setState((prevState) => ({
+      [type as any]: {
+        ...prevState[type],
+        [array.length]: '',
+      },
+    }));
   }
 
   /**
@@ -191,29 +164,14 @@ export class ExecutionSettings extends React.Component<
 
   public renderDeleteItem(idx: string, type: SettingItemType): JSX.Element {
     const clickFn = () => {
-      if (type === SettingItemType.Flag) {
-        const flags = this.state.executionFlags;
-        if (Object.keys(flags).length === 1) {
-          flags[idx] = '';
-        } else {
-          delete flags[idx];
-        }
-
-        this.setState({
-          executionFlags: flags,
-        });
+      const updated = this.state[type];
+      if (Object.keys(updated).length === 1) {
+        updated[idx] = '';
       } else {
-        const vars = this.state.environmentVariables;
-        if (Object.keys(vars).length === 1) {
-          vars[idx] = '';
-        } else {
-          delete vars[idx];
-        }
-
-        this.setState({
-          environmentVariables: vars,
-        });
+        delete updated[idx];
       }
+
+      this.setState({ [type]: updated });
     };
 
     return <Button icon="cross" onClick={clickFn} />;
@@ -223,7 +181,7 @@ export class ExecutionSettings extends React.Component<
     const { environmentVariables } = this.state;
 
     const varsArray = Object.entries(environmentVariables);
-    const type = SettingItemType.EnvVar;
+    const type = SettingItemType.EnvVars;
 
     return (
       <FormGroup>
@@ -261,7 +219,7 @@ export class ExecutionSettings extends React.Component<
     const { executionFlags } = this.state;
 
     const flagsArray = Object.entries(executionFlags);
-    const type = SettingItemType.Flag;
+    const type = SettingItemType.Flags;
 
     return (
       <FormGroup>
@@ -351,12 +309,12 @@ export class ExecutionSettings extends React.Component<
           {this.renderExecutionFlags()}
           <ButtonGroup>
             <Button
-              onClick={() => this.addNewSettingsItem(SettingItemType.Flag)}
+              onClick={() => this.addNewSettingsItem(SettingItemType.Flags)}
             >
               Add New Flag
             </Button>
             <Button
-              onClick={() => this.handleSettingsItemSave(SettingItemType.Flag)}
+              onClick={() => this.handleSettingsItemSave(SettingItemType.Flags)}
             >
               Save Flags
             </Button>
@@ -367,13 +325,13 @@ export class ExecutionSettings extends React.Component<
           {this.renderEnvironmentVariables()}
           <ButtonGroup>
             <Button
-              onClick={() => this.addNewSettingsItem(SettingItemType.EnvVar)}
+              onClick={() => this.addNewSettingsItem(SettingItemType.EnvVars)}
             >
               Add New Variable
             </Button>
             <Button
               onClick={() =>
-                this.handleSettingsItemSave(SettingItemType.EnvVar)
+                this.handleSettingsItemSave(SettingItemType.EnvVars)
               }
             >
               Save Variables
