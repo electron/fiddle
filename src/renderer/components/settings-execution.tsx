@@ -62,7 +62,6 @@ export class ExecutionSettings extends React.Component<
     );
 
     this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
-    this.handleSettingsItemSave = this.handleSettingsItemSave.bind(this);
     this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
   }
 
@@ -100,19 +99,6 @@ export class ExecutionSettings extends React.Component<
   }
 
   /**
-   * Saves currently set execution flags or environment variables
-   * run with the Electron executable.
-   *
-   * @param {SettingItemType} type
-   */
-  public handleSettingsItemSave(type: SettingItemType) {
-    const { appState } = this.props;
-
-    const values = Object.values(this.state[type]);
-    appState[type] = values.filter((v) => v !== '');
-  }
-
-  /**
    * Handles a change in the execution flags or environment variables
    * run with the Electron executable.
    *
@@ -123,6 +109,7 @@ export class ExecutionSettings extends React.Component<
     event: React.ChangeEvent<HTMLInputElement>,
     type: SettingItemType,
   ) {
+    const { appState } = this.props;
     const { name, value } = event.currentTarget;
 
     this.setState((prevState) => ({
@@ -131,6 +118,8 @@ export class ExecutionSettings extends React.Component<
         [name]: value,
       },
     }));
+
+    appState[type] = Object.values(this.state[type]).filter((v) => v !== '');
   }
 
   /**
@@ -313,11 +302,6 @@ export class ExecutionSettings extends React.Component<
             >
               Add New Flag
             </Button>
-            <Button
-              onClick={() => this.handleSettingsItemSave(SettingItemType.Flags)}
-            >
-              Save Flags
-            </Button>
           </ButtonGroup>
         </Callout>
         <br />
@@ -328,13 +312,6 @@ export class ExecutionSettings extends React.Component<
               onClick={() => this.addNewSettingsItem(SettingItemType.EnvVars)}
             >
               Add New Variable
-            </Button>
-            <Button
-              onClick={() =>
-                this.handleSettingsItemSave(SettingItemType.EnvVars)
-              }
-            >
-              Save Variables
             </Button>
           </ButtonGroup>
         </Callout>

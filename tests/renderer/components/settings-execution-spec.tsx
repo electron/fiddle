@@ -73,9 +73,8 @@ describe('ExecutionSettings component', () => {
           SettingItemType.Flags,
         );
 
-        expect(instance.state.executionFlags).toEqual({
-          '0': lang,
-        });
+        expect(instance.state.executionFlags).toEqual({ '0': lang });
+        expect(store.executionFlags).toEqual([lang]);
 
         await instance.handleSettingsItemChange(
           {
@@ -88,23 +87,6 @@ describe('ExecutionSettings component', () => {
           '0': lang,
           '1': flags,
         });
-      });
-
-      it('saves properly', async () => {
-        const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance = wrapper.instance() as any;
-
-        const lang = '--lang=es';
-        const flags = '--js-flags=--expose-gc';
-
-        instance.setState({
-          executionFlags: {
-            '0': lang,
-            '1': flags,
-          },
-        });
-
-        await instance.handleSettingsItemSave(SettingItemType.Flags);
         expect(store.executionFlags).toEqual([lang, flags]);
       });
     });
@@ -128,6 +110,7 @@ describe('ExecutionSettings component', () => {
         );
 
         expect(instance.state.environmentVariables).toEqual({ '0': debug });
+        expect(store.environmentVariables).toEqual([debug]);
 
         await instance.handleSettingsItemChange(
           {
@@ -140,23 +123,6 @@ describe('ExecutionSettings component', () => {
           '0': debug,
           '1': trash,
         });
-      });
-
-      it('saves properly', async () => {
-        const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance = wrapper.instance() as any;
-
-        const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
-        const trash = 'ELECTRON_TRASH=trash-cli';
-
-        instance.setState({
-          environmentVariables: {
-            '0': debug,
-            '1': trash,
-          },
-        });
-
-        await instance.handleSettingsItemSave(SettingItemType.EnvVars);
         expect(store.environmentVariables).toEqual([debug, trash]);
       });
     });

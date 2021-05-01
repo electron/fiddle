@@ -97,11 +97,6 @@ exports[`ExecutionSettings component renders 1`] = `
       >
         Add New Flag
       </Blueprint3.Button>
-      <Blueprint3.Button
-        onClick={[Function]}
-      >
-        Save Flags
-      </Blueprint3.Button>
     </Blueprint3.ButtonGroup>
   </Blueprint3.Callout>
   <br />
@@ -142,11 +137,6 @@ exports[`ExecutionSettings component renders 1`] = `
         onClick={[Function]}
       >
         Add New Variable
-      </Blueprint3.Button>
-      <Blueprint3.Button
-        onClick={[Function]}
-      >
-        Save Variables
       </Blueprint3.Button>
     </Blueprint3.ButtonGroup>
   </Blueprint3.Callout>
