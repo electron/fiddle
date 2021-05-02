@@ -1,4 +1,4 @@
-import { observable } from 'mobx';
+import { observable, toJS } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
 
 import {
@@ -107,5 +107,37 @@ export class StateMock {
     this.versionsToShow = Object.values(mockVersions);
     this.version = version;
     this.currentElectronVersion = mockVersions[version];
+  }
+
+  // Invoked when a snapshot is made.
+  //
+  // Snapshots get very "noisy" when they include the entire Mock's details.
+  // We can avoid most of that noise by hiding fields that hold default values.
+  public toJSON() {
+    const defaultValues = new StateMock();
+    const serialize = (input: any) => JSON.stringify(toJS(input));
+    const isDefaultValue = (key: string, value: any) =>
+      serialize(value) === serialize(defaultValues[key]);
+
+    const o = {};
+    for (const entry of Object.entries(this)) {
+      const key = entry[0];
+      let val = toJS(entry[1]);
+
+      // omit any fields that have the default value
+      if (isDefaultValue(key, val)) continue;
+
+      // make some verbose properties a little terser
+      if (key === 'versions') {
+        val = Object.values(val).map((ver: RunnableVersion) =>
+          [ver.version, ver.state, ver.source].join(' '),
+        );
+      } else if (key === 'versionsToShow') {
+        val = val.map((ver: RunnableVersion) => ver.version);
+      }
+
+      o[key] = val;
+    }
+    return o;
   }
 }
