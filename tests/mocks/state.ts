@@ -138,6 +138,7 @@ export class StateMock {
 
       o[key] = val;
     }
-    return o;
+
+    return Object.keys(o).length === 0 ? 'default StateMock' : o;
   }
 }

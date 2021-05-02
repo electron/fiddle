@@ -10,10 +10,10 @@ exports[`Commands component renders 1`] = `
       vertical={false}
     >
       <version-chooser
-        appState={Object {}}
+        appState={"default StateMock"}
       />
       <runner
-        appState={Object {}}
+        appState={"default StateMock"}
       />
     </Blueprint3.ControlGroup>
     <Blueprint3.ControlGroup
@@ -26,16 +26,16 @@ exports[`Commands component renders 1`] = `
         text="Console"
       />
       <EditorDropdown
-        appState={Object {}}
+        appState={"default StateMock"}
       />
     </Blueprint3.ControlGroup>
   </div>
   <div>
     <address-bar
-      appState={Object {}}
+      appState={"default StateMock"}
     />
     <action-button
-      appState={Object {}}
+      appState={"default StateMock"}
     />
   </div>
 </div>
