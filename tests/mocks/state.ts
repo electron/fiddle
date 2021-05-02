@@ -118,6 +118,8 @@ export class StateMock {
     const serialize = (input: any) => JSON.stringify(toJS(input));
     const isDefaultValue = (key: string, value: any) =>
       serialize(value) === serialize(defaultValues[key]);
+    const terserRunnable = (ver: RunnableVersion) =>
+      [ver.version, ver.source, ver.state].join(' ');
 
     const o = {};
     for (const entry of Object.entries(this)) {
@@ -128,12 +130,12 @@ export class StateMock {
       if (isDefaultValue(key, val)) continue;
 
       // make some verbose properties a little terser
-      if (key === 'versions') {
-        val = Object.values(val).map((ver: RunnableVersion) =>
-          [ver.version, ver.state, ver.source].join(' '),
-        );
+      if (key == 'currentElectronVersion') {
+        val = terserRunnable(val);
+      } else if (key === 'versions') {
+        val = Object.values(val).map(terserRunnable);
       } else if (key === 'versionsToShow') {
-        val = val.map((ver: RunnableVersion) => ver.version);
+        val = val.map(terserRunnable);
       }
 
       o[key] = val;
