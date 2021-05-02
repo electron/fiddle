@@ -9,14 +9,11 @@ import { EditorId } from '../interfaces';
  * @returns {editor.ITextModel | null}
  */
 export function getEditorModel(id: EditorId): editor.ITextModel | null {
-  const { ElectronFiddle: fiddle } = window;
+  if (window.ElectronFiddle?.app?.state) {
+    const { editorMosaic } = window.ElectronFiddle.app.state;
 
-  if (!fiddle?.editors) {
-    return null;
-  }
-
-  if (fiddle.editors[id] && fiddle.editors[id]!.getModel) {
-    return fiddle.editors[id]!.getModel();
+    const editor = editorMosaic.editors.get(id);
+    if (editor) return editor.getModel();
   }
 
   return null;

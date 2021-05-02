@@ -1,7 +1,11 @@
 import { App } from '../../src/renderer/app';
 import { EditorBackup } from '../../src/utils/editor-backup';
 import { waitFor } from '../../src/utils/wait-for';
-import { DefaultEditorId, PACKAGE_NAME } from '../../src/interfaces';
+import {
+  DefaultEditorId,
+  EditorValues,
+  PACKAGE_NAME,
+} from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 
 jest.mock('../../src/renderer/components/header', () => ({
@@ -17,6 +21,7 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 describe('App component', () => {
   let app: App;
   let ElectronFiddle: any;
+  let editorMosaic: any;
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
@@ -24,6 +29,7 @@ describe('App component', () => {
 
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
+    ({ editorMosaic } = ElectronFiddle.app.state);
 
     // make a real App and inject it into the mocks
     app = new App();
@@ -68,27 +74,16 @@ describe('App component', () => {
 
   describe('getEditorValues()', () => {
     it('gets values', async () => {
+      const value = 'editor-value';
+      for (const editor of editorMosaic.editors.values()) {
+        editor.getValue.mockReturnValue(value);
+      }
       const b = await app.getEditorValues({});
-      expect(b[DefaultEditorId.html]).toBe('editor-value');
-      expect(b[DefaultEditorId.main]).toBe('editor-value');
-      expect(b[DefaultEditorId.renderer]).toBe('editor-value');
+      expect(b[DefaultEditorId.html]).toBe(value);
+      expect(b[DefaultEditorId.main]).toBe(value);
+      expect(b[DefaultEditorId.renderer]).toBe(value);
       expect(b[PACKAGE_NAME]).toBeTruthy();
       expect(JSON.parse(b[PACKAGE_NAME]!)).toBeTruthy();
-    });
-
-    it('handles missing editors', async () => {
-      ElectronFiddle.editors[DefaultEditorId.html] = null;
-      ElectronFiddle.editors[DefaultEditorId.main] = null;
-      ElectronFiddle.editors[DefaultEditorId.renderer] = null;
-
-      const app = new App();
-      const result = await app.getEditorValues({});
-
-      expect(result[DefaultEditorId.html]).toBe('');
-      expect(result[DefaultEditorId.main]).toBe('');
-      expect(result[DefaultEditorId.renderer]).toBe('');
-      expect(result[PACKAGE_NAME]).toBeTruthy();
-      expect(JSON.parse(result[PACKAGE_NAME]!)).toBeTruthy();
     });
 
     it('throws if the Fiddle object is not present', async () => {
@@ -312,29 +307,21 @@ describe('App component', () => {
 
   describe('setEditorValues()', () => {
     it('attempts to set values', () => {
-      app.setEditorValues({
+      const editorValues: EditorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
-      });
+      } as const;
+      app.setEditorValues(editorValues);
 
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.html].setValue,
-      ).toHaveBeenCalledWith('html-value');
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.main].setValue,
-      ).toHaveBeenCalledWith('main-value');
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.renderer]
-          .setValue,
-      ).toHaveBeenCalledWith('renderer-value');
+      for (const [filename, value] of Object.entries(editorValues)) {
+        const editor = editorMosaic.editors.get(filename);
+        expect(editor.setValue).toHaveBeenCalledWith(value);
+      }
     });
 
     it('attempts to set values for closed editors', () => {
-      const { editors } = ElectronFiddle;
-
-      const oldMainEditor = editors[DefaultEditorId.main];
-      delete editors[DefaultEditorId.main];
+      editorMosaic.editors.delete(DefaultEditorId.main);
 
       (app.state.closedPanels as any)[DefaultEditorId.main] = {
         model: { setValue: jest.fn() },
@@ -360,8 +347,6 @@ describe('App component', () => {
       expect(app.state.closedPanels[DefaultEditorId.css]).toEqual({
         value: 'css-value',
       });
-
-      editors[DefaultEditorId.main] = oldMainEditor;
     });
 
     it('throws if the Fiddle object is not present', async () => {
@@ -386,10 +371,8 @@ describe('App component', () => {
         [DefaultEditorId.main]: 'main-value',
       });
 
-      expect(
-        (window as any).ElectronFiddle.editors[DefaultEditorId.renderer]
-          .setValue,
-      ).not.toHaveBeenCalled();
+      const editor = editorMosaic.editors.get(DefaultEditorId.renderer);
+      expect(editor.setValue).not.toHaveBeenCalled();
     });
   });
 

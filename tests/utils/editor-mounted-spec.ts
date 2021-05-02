@@ -4,18 +4,18 @@ import { DefaultEditorId } from '../../src/interfaces';
 
 describe('waitforEditorsToMount', () => {
   it('resolves when editors match list', async () => {
+    const { editorMosaic } = (window as any).ElectronFiddle.app.state;
+
     // these editors should be mounted by default.
-    const { ElectronFiddle: fiddle } = window as any;
-    const ids = [
+    const files = [
       DefaultEditorId.html,
       DefaultEditorId.main,
       DefaultEditorId.preload,
       DefaultEditorId.renderer,
     ];
-    await waitForEditorsToMount(ids);
+    await waitForEditorsToMount(files);
 
-    const editors = Object.getOwnPropertyNames(fiddle.editors);
-    expect(editors.sort()).toEqual(ids.sort());
+    files.every((file) => expect(editorMosaic.editors.has(file)).toBe(true));
   });
 
   it('rejects if editors fail to match list', async () => {
