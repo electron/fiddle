@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import * as MonacoType from 'monaco-editor';
 import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 import { MosaicNode } from 'react-mosaic-component';
@@ -30,6 +31,7 @@ import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
+import { EditorMosaic } from './editor-mosaic';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
 import {
@@ -51,6 +53,8 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from './versions';
+
+export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
 /**
  * The application's state. Exported as a singleton below.
@@ -126,6 +130,7 @@ export class AppState {
     wantsInput: false,
     placeholder: '',
   };
+  @observable public readonly editorMosaic = new EditorMosaic();
   @observable public customMosaics: EditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
@@ -275,11 +280,9 @@ export class AppState {
         window.onbeforeunload = null;
 
         // set up editor listeners to verify if unsaved
-        const ids = DEFAULT_EDITORS.filter(
-          (id) => id in window.ElectronFiddle.editors,
-        );
-        await waitForEditorsToMount(ids);
-        for (const editor of Object.values(window.ElectronFiddle.editors)) {
+        const { editors } = this.editorMosaic;
+        await waitForEditorsToMount([...editors.keys()]);
+        for (const editor of editors.values()) {
           const disposable = (editor as any).onDidChangeModelContent(() => {
             this.isUnsaved = true;
             disposable.dispose();
@@ -682,14 +685,14 @@ export class AppState {
   }
 
   @action public async setVisibleMosaics(visible: Array<EditorId>) {
-    const { editors } = window.ElectronFiddle;
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
+    const { editorMosaic, mosaicArrangement } = this;
+    const currentlyVisible = getVisibleMosaics(mosaicArrangement);
 
     for (const id of DEFAULT_EDITORS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
         this.closedPanels[id] = getEditorBackup(id);
         // if we have backup, remove active editor
-        delete editors[id];
+        editorMosaic.editors.delete(id);
       }
     }
 
@@ -726,7 +729,7 @@ export class AppState {
    */
   @action public removeCustomMosaic(id: EditorId) {
     this.hideAndBackupMosaic(id);
-    delete window.ElectronFiddle.editors[id];
+    this.editorMosaic.editors.delete(id);
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
   }
 

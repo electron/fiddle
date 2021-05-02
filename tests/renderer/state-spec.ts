@@ -1,5 +1,3 @@
-import * as MonacoType from 'monaco-editor';
-
 import {
   BlockableAccelerator,
   DEFAULT_EDITORS,
@@ -33,7 +31,7 @@ import {
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
-import { VersionsMock } from '../mocks/electron-versions';
+import { MonacoEditorMock, VersionsMock } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -148,11 +146,15 @@ describe('AppState', () => {
     });
 
     it('sets the onDidChangeModelContent handler if saved', async (done) => {
+      const { editorMosaic } = appState;
+      const editor = new MonacoEditorMock();
+      const fn = editor.onDidChangeModelContent;
+      const filename = DefaultEditorId.renderer;
+      editorMosaic.editors.set(filename, editor as any);
+
       // confirm that setting appState.isUnsaved to false
       // causes a new change-model-content callback to be installed
       appState.isUnsaved = false;
-      const fn = window.ElectronFiddle.editors!['renderer.js']!
-        .onDidChangeModelContent;
       await waitFor(() => (fn as jest.Mock).mock.calls.length > 0);
       expect(window.onbeforeunload).toBe(null);
       expect(fn as jest.Mock).toHaveBeenCalledTimes(1);
@@ -624,9 +626,8 @@ describe('AppState', () => {
       await appState.setVisibleMosaics([DefaultEditorId.main]);
 
       // we just need to mock something truthy here
-      window.ElectronFiddle.editors[
-        DefaultEditorId.main
-      ] = {} as MonacoType.editor.IStandaloneCodeEditor;
+      const { editorMosaic } = (window as any).ElectronFiddle.app.state;
+      editorMosaic.editors.set(DefaultEditorId.main, {});
 
       expect(appState.mosaicArrangement).toEqual(DefaultEditorId.main);
       expect(appState.closedPanels[DefaultEditorId.renderer]).toBeTruthy();

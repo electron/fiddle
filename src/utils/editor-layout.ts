@@ -3,11 +3,8 @@
  * a debounced version below.
  */
 function _updateEditorLayout() {
-  Object.keys(window.ElectronFiddle.editors).forEach((key) => {
-    if (window.ElectronFiddle.editors[key]) {
-      window.ElectronFiddle.editors[key].layout();
-    }
-  });
+  const { editorMosaic } = window.ElectronFiddle.app.state;
+  editorMosaic.editors.forEach((editor) => editor.layout());
 }
 
 let handle: number;

@@ -3,6 +3,7 @@ import { MosaicNode } from 'react-mosaic-component';
 
 import {
   BlockableAccelerator,
+  DefaultEditorId,
   EditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
@@ -12,6 +13,8 @@ import {
 import { EditorBackup } from '../../src/utils/editor-backup';
 
 import { BisectorMock } from './bisector';
+import { EditorMosaicMock } from './editor-mosaic';
+import { MonacoEditorMock } from './monaco-editor';
 import { VersionsMock } from './electron-versions';
 
 export class StateMock {
@@ -21,7 +24,6 @@ export class StateMock {
   @observable public closedPanels: Partial<
     Record<EditorId, EditorBackup | true>
   > = {};
-  @observable public customMosaics: EditorId[] = [];
   @observable public environmentVariables: string[] = [];
   @observable public executionFlags: string[] = [];
   @observable public genericDialogLastInput: string | null = null;
@@ -47,7 +49,6 @@ export class StateMock {
   @observable public isTourShowing = false;
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
-  @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
   @observable public output = [];
   @observable public showUndownloadedVersions = false;
   @observable public theme: string | null;
@@ -55,6 +56,11 @@ export class StateMock {
   @observable public version: string;
   @observable public versions: Record<string, RunnableVersion>;
   @observable public versionsToShow: RunnableVersion[] = [];
+
+  // editor mosaic
+  @observable public customMosaics: EditorId[] = [];
+  @observable public editorMosaic = new EditorMosaicMock();
+  @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
   public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();
@@ -97,6 +103,15 @@ export class StateMock {
     this.versions = obj;
     this.currentElectronVersion = arr[arr.length - 1];
     this.version = this.currentElectronVersion.version;
+
+    for (const filename of [
+      DefaultEditorId.main,
+      DefaultEditorId.renderer,
+      DefaultEditorId.html,
+      DefaultEditorId.preload,
+    ]) {
+      this.editorMosaic.editors.set(filename, new MonacoEditorMock());
+    }
   }
 
   public initVersions(
