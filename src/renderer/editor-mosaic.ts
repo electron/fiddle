@@ -1,17 +1,26 @@
-// external dependencies
 import * as MonacoType from 'monaco-editor';
 import { MosaicNode } from 'react-mosaic-component';
 import { action, observable } from 'mobx';
 
-// app deps
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
+import { getEditorValue } from '../utils/editor-value';
 import {
   createMosaicArrangement,
   getVisibleMosaics,
 } from '../utils/editors-mosaic-arrangement';
 import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
-import { DEFAULT_EDITORS, EditorId } from '../interfaces';
+import {
+  DEFAULT_EDITORS,
+  DefaultEditorId,
+  EditorId,
+  EditorValues,
+} from '../interfaces';
 import { waitForEditorsToMount } from '../utils/editor-mounted';
+import {
+  compareEditors,
+  getEmptyContent,
+  isKnownFile,
+} from '../utils/editor-utils';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
@@ -31,8 +40,10 @@ export class EditorMosaic {
       'hideAndBackupMosaic',
       'removeCustomMosaic',
       'resetEditorLayout',
+      'set',
       'setVisibleMosaics',
       'showMosaic',
+      'values',
     ]) {
       this[name] = this[name].bind(this);
     }
@@ -116,8 +127,71 @@ export class EditorMosaic {
    *
    *
    */
-  //  --->
   @action public resetEditorLayout() {
     this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+  }
+
+  @action public async set(editorValues: EditorValues) {
+    // Remove all previously created custom editors.
+    this.customMosaics = Object.keys(editorValues).filter(
+      (filename: string) => !isKnownFile(filename),
+    ) as EditorId[];
+
+    // If the gist content is empty or matches the empty file output, don't show it.
+    const shouldShow = (id: EditorId, val?: string) => {
+      return !!val && val.length > 0 && val !== getEmptyContent(id);
+    };
+
+    // Sort and display all editors that have content.
+    const visibleEditors: EditorId[] = Object.entries(editorValues)
+      .filter(([id, content]) => shouldShow(id as EditorId, content as string))
+      .map(([id]) => id as DefaultEditorId)
+      .sort(compareEditors);
+
+    // Once loaded, we have a "saved" state.
+    await this.setVisibleMosaics(visibleEditors);
+
+    // Set content for mosaics.
+    for (const [name, value] of Object.entries(editorValues)) {
+      const editor = this.editors.get(name as EditorId);
+      if (editor) {
+        // The editor exists, set the value directly
+        if (editor.getValue() !== value) {
+          editor.setValue(value as string);
+        }
+      } else {
+        // The editor does not exist, attempt to set it on the backup.
+        // If there's a model, we'll do it on the model. Else, we'll
+        // set the value.
+        let backup = this.closedPanels[name];
+        if (!backup) {
+          backup = { value };
+          this.closedPanels[name] = backup;
+        } else if (backup.model) {
+          backup.model.setValue(value);
+        } else {
+          backup.value = value;
+        }
+      }
+    }
+  }
+
+  /**
+   * Retrieves the contents of all editor panes.
+   *
+   * @returns {EditorValues}
+   */
+  public values(): EditorValues {
+    const values: EditorValues = {};
+
+    for (const name of Object.keys(this.closedPanels)) {
+      values[name] = getEditorValue(name as EditorId);
+    }
+
+    for (const name of this.editors.keys()) {
+      values[name] = getEditorValue(name);
+    }
+
+    return values;
   }
 }

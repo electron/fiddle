@@ -6,8 +6,6 @@ import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
 import {
-  DefaultEditorId,
-  EditorId,
   EditorValues,
   GenericDialogType,
   PACKAGE_NAME,
@@ -15,13 +13,7 @@ import {
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { updateEditorLayout } from '../utils/editor-layout';
-import { getEditorValue } from '../utils/editor-value';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
-import {
-  compareEditors,
-  getEmptyContent,
-  isKnownFile,
-} from '../utils/editor-utils';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
@@ -48,7 +40,6 @@ export class App {
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
-    this.setEditorValues = this.setEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);
   }
@@ -72,67 +63,14 @@ export class App {
       }
     }
 
-    // Remove all previously created custom editors.
-    this.state.editorMosaic.customMosaics = Object.keys(editorValues).filter(
-      (filename: string) => !isKnownFile(filename),
-    ) as EditorId[];
-
-    // If the gist content is empty or matches the empty file output, don't show it.
-    const shouldShow = (id: EditorId, val?: string) => {
-      return !!val && val.length > 0 && val !== getEmptyContent(id);
-    };
-
-    // Sort and display all editors that have content.
-    const visibleEditors: EditorId[] = Object.entries(editorValues)
-      .filter(([id, content]) => shouldShow(id as EditorId, content as string))
-      .map(([id]) => id as DefaultEditorId)
-      .sort(compareEditors);
+    await this.state.editorMosaic.set(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
     this.state.templateName = templateName;
-
-    // Once loaded, we have a "saved" state.
-    await this.state.editorMosaic.setVisibleMosaics(visibleEditors);
-    await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
 
     return true;
-  }
-
-  /**
-   * Sets the contents of all editor panes.
-   *
-   * @param {EditorValues} values
-   */
-  public async setEditorValues(values: EditorValues): Promise<void> {
-    const { ElectronFiddle: fiddle } = window;
-
-    if (!fiddle?.app) {
-      throw new Error('Fiddle not ready');
-    }
-
-    // Set content for mosaics.
-    const { editorMosaic } = this.state;
-    for (const [name, content] of Object.entries(values)) {
-      const backup = editorMosaic.closedPanels[name];
-      if (backup) {
-        // The editor does not exist, attempt to set it on the backup.
-        // If there's a model, we'll do it on the model. Else, we'll
-        // set the value.
-        if (backup.model) {
-          backup.model.setValue(values[name]!);
-        } else {
-          backup.value = values[name]!;
-        }
-      } else {
-        const editor = editorMosaic.editors.get(name as EditorId);
-        // The editor exists, set the value directly
-        if (editor && editor.getValue() !== content) {
-          editor.setValue(content as string);
-        }
-      }
-    }
   }
 
   /**
@@ -143,16 +81,7 @@ export class App {
   public async getEditorValues(
     options?: PackageJsonOptions,
   ): Promise<EditorValues> {
-    const { ElectronFiddle: fiddle } = window;
-
-    if (!fiddle?.app) {
-      throw new Error('Fiddle not ready');
-    }
-
-    const values: EditorValues = {};
-    for (const name of this.state.editorMosaic.editors.keys()) {
-      values[name] = getEditorValue(name);
-    }
+    const values = this.state.editorMosaic.values();
 
     if (options && options.include !== false) {
       values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);

@@ -10,7 +10,6 @@ import {
 export class AppMock {
   public setup = jest.fn();
   public replaceFiddle = jest.fn();
-  public setEditorValues = jest.fn();
   public getEditorValues = jest.fn().mockResolvedValue({
     [DefaultEditorId.main]: 'main-content',
     [DefaultEditorId.preload]: 'preload-content',

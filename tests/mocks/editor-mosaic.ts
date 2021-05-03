@@ -20,8 +20,10 @@ export class EditorMosaicMock {
   public hideAndBackupMosaic = jest.fn();
   public removeCustomMosaic = jest.fn();
   public resetEditorLayout = jest.fn();
+  public set = jest.fn();
   public setVisibleMosaics = jest.fn();
   public showMosaic = jest.fn();
+  public values = jest.fn().mockReturnValue({});
 
   public toJSON() {
     const o = objectDifference(this, new EditorMosaicMock());

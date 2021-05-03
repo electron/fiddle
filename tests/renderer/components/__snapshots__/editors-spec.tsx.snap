@@ -945,8 +945,10 @@ exports[`Editors component renders a toolbar 1`] = `
               },
               "removeCustomMosaic": [MockFunction],
               "resetEditorLayout": [MockFunction],
+              "set": [MockFunction],
               "setVisibleMosaics": [MockFunction],
               "showMosaic": [MockFunction],
+              "values": [MockFunction],
             },
           }
         }
@@ -985,8 +987,10 @@ exports[`Editors component renders a toolbar 1`] = `
               },
               "removeCustomMosaic": [MockFunction],
               "resetEditorLayout": [MockFunction],
+              "set": [MockFunction],
               "setVisibleMosaics": [MockFunction],
               "showMosaic": [MockFunction],
+              "values": [MockFunction],
             },
           }
         }

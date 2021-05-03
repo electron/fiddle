@@ -61,6 +61,7 @@ export class Editor extends React.Component<EditorProps> {
     await this.setContent();
 
     // Set the editor as an available object.
+    console.log('mounted', id, !!editor, new Error('trace'));
     appState.editorMosaic.editors.set(id, editor);
 
     // And notify others
