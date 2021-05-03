@@ -14,7 +14,6 @@ import {
   EditorValues,
 } from '../interfaces';
 import { waitForEditorsToMount } from '../utils/editor-mounted';
-import { getEditorModel } from '../utils/editor-model';
 import {
   compareEditors,
   getEmptyContent,
@@ -223,7 +222,7 @@ export class EditorMosaic {
   public getEditorBackup(id: EditorId): EditorBackup {
     return {
       value: this.getEditorValue(id),
-      model: getEditorModel(id),
+      model: this.getEditorModel(id),
       viewState: this.getEditorViewState(id),
     };
   }
@@ -239,5 +238,15 @@ export class EditorMosaic {
     id: EditorId,
   ): MonacoType.editor.ICodeEditorViewState | null {
     return this.editors.get(id)?.saveViewState() || null;
+  }
+
+  /**
+   * Return the model for a given editor
+   *
+   * @param {EditorId} id
+   * @returns {editor.ITextModel | null}
+   */
+  public getEditorModel(id: EditorId): MonacoType.editor.ITextModel | null {
+    return this.editors.get(id)?.getModel() || null;
   }
 }
