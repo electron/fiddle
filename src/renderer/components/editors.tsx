@@ -12,7 +12,6 @@ import {
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { updateEditorLayout } from '../../utils/editor-layout';
 import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
@@ -49,7 +48,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   // the editor layout. That method is itself debounced.
   public disposeLayoutAutorun = reaction(
     () => this.props.appState.editorMosaic.mosaicArrangement,
-    () => updateEditorLayout(),
+    () => this.props.appState.editorMosaic.layout(),
   );
 
   constructor(props: EditorsProps) {

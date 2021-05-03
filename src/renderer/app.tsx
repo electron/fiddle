@@ -12,7 +12,6 @@ import {
   SetFiddleOptions,
 } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
-import { updateEditorLayout } from '../utils/editor-layout';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -198,7 +197,7 @@ export class App {
    * is resized. This method sets up the listener.
    */
   public setupResizeListener(): void {
-    window.addEventListener('resize', updateEditorLayout);
+    window.addEventListener('resize', this.state.editorMosaic.layout);
   }
 
   /**

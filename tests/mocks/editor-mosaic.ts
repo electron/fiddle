@@ -26,6 +26,9 @@ export class EditorMosaicMock {
   public getEditorViewState = jest
     .fn()
     .mockImplementation((id) => this.editors.get(id)?.saveViewState() || null);
+  public layout = jest.fn().mockImplementation(() => {
+    this.editors.forEach((editor) => editor.layout());
+  });
   public hideAndBackupMosaic = jest.fn();
   public removeCustomMosaic = jest.fn();
   public resetEditorLayout = jest.fn();

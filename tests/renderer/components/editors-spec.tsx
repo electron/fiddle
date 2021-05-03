@@ -8,7 +8,6 @@ import { IpcEvents } from '../../../src/ipc-events';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { updateEditorLayout } from '../../../src/utils/editor-layout';
 
 import {
   EditorMosaicMock,
@@ -28,10 +27,6 @@ jest.mock('../../../src/renderer/components/editor', () => ({
 
 jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn(),
-}));
-
-jest.mock('../../../src/utils/editor-layout', () => ({
-  updateEditorLayout: jest.fn(),
 }));
 
 describe('Editors component', () => {
@@ -312,7 +307,7 @@ describe('Editors component', () => {
     it('automatically updates the layout when the mosaic arrangement changes', () => {
       shallow(<Editors appState={store as any} />);
       store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
-      expect(updateEditorLayout).toHaveBeenCalledTimes(1);
+      expect(store.editorMosaic.layout).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -39,6 +39,7 @@ export class EditorMosaic {
     for (const name of [
       'getAndRemoveEditorValueBackup',
       'hideAndBackupMosaic',
+      'layout',
       'removeCustomMosaic',
       'resetEditorLayout',
       'set',
@@ -248,5 +249,16 @@ export class EditorMosaic {
    */
   public getEditorModel(id: EditorId): MonacoType.editor.ITextModel | null {
     return this.editors.get(id)?.getModel() || null;
+  }
+
+  private layoutDebounce: any;
+
+  public layout() {
+    const DEBOUNCE_MSEC = 50;
+    clearTimeout(this.layoutDebounce);
+    this.layoutDebounce = setTimeout(() => {
+      for (const editor of this.editors.values()) editor.layout();
+      this.layoutDebounce = null;
+    }, DEBOUNCE_MSEC);
   }
 }

@@ -359,4 +359,20 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.getEditorModel(filename)).toBeNull();
     });
   });
+
+  describe('editor-layout', () => {
+    it('layout() calls editor.layout() only once', (done) => {
+      editorMosaic.layout();
+      editorMosaic.layout();
+      editorMosaic.layout();
+      editorMosaic.layout();
+
+      setTimeout(() => {
+        for (const editor of editorMosaic.editors.values()) {
+          expect(editor.layout).toHaveBeenCalledTimes(1);
+        }
+        done();
+      }, 100);
+    });
+  });
 });
