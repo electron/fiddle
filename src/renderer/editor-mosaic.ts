@@ -1,6 +1,6 @@
 import * as MonacoType from 'monaco-editor';
 import { MosaicNode } from 'react-mosaic-component';
-import { action, observable } from 'mobx';
+import { action, observable, reaction } from 'mobx';
 
 import {
   createMosaicArrangement,
@@ -49,6 +49,12 @@ export class EditorMosaic {
     ]) {
       this[name] = this[name].bind(this);
     }
+    // A reaction: Each time mosaicArrangement is changed, we'll update
+    // the editor layout. That method is itself debounced.
+    reaction(
+      () => this.mosaicArrangement,
+      () => this.layout(),
+    );
   }
 
   /**
@@ -205,7 +211,6 @@ export class EditorMosaic {
    */
   public getEditorValue(id: EditorId): string {
     const editor = this.editors.get(id);
-    console.log('getEditorValue', !!editor, editor?.getValue());
     if (editor) return editor.getValue();
 
     const backup = this.closedPanels[id];
@@ -255,10 +260,13 @@ export class EditorMosaic {
 
   public layout() {
     const DEBOUNCE_MSEC = 50;
-    clearTimeout(this.layoutDebounce);
-    this.layoutDebounce = setTimeout(() => {
-      for (const editor of this.editors.values()) editor.layout();
-      this.layoutDebounce = null;
-    }, DEBOUNCE_MSEC);
+    if (!this.layoutDebounce) {
+      this.layoutDebounce = setTimeout(() => {
+        for (const editor of this.editors.values()) {
+          editor?.layout?.();
+        }
+        this.layoutDebounce = null;
+      }, DEBOUNCE_MSEC);
+    }
   }
 }

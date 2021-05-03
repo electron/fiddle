@@ -13,6 +13,7 @@ import { compareEditors } from '../../src/utils/editor-utils';
 import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { MonacoEditorMock, createEditorValues } from '../mocks/mocks';
 import { waitForEditorsToMount } from '../../src/utils/editor-mounted';
+import { waitFor } from '../../src/utils/wait-for';
 
 jest.mock('../../src/utils/editor-mounted', () => ({
   waitForEditorsToMount: jest.fn(),
@@ -361,18 +362,27 @@ describe('EditorMosaic', () => {
   });
 
   describe('editor-layout', () => {
-    it('layout() calls editor.layout() only once', (done) => {
-      editorMosaic.layout();
-      editorMosaic.layout();
-      editorMosaic.layout();
-      editorMosaic.layout();
+    it('layout() calls editor.layout() only once', async () => {
+      const editor = new MonacoEditorMock();
+      const filename = DefaultEditorId.html;
+      await editorMosaic.editors.set(filename, editor as any);
 
-      setTimeout(() => {
-        for (const editor of editorMosaic.editors.values()) {
-          expect(editor.layout).toHaveBeenCalledTimes(1);
-        }
-        done();
-      }, 100);
+      editorMosaic.layout();
+      editorMosaic.layout();
+      editorMosaic.layout();
+      editorMosaic.layout();
+      await waitFor(() => editor.layout.mock.calls.length > 0);
+
+      expect(editor.layout).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('disposeLayoutAutorun()', () => {
+    it('automatically updates the layout when the mosaic arrangement changes', () => {
+      const spy = jest.spyOn(editorMosaic, 'layout');
+      editorMosaic.mosaicArrangement = DefaultEditorId.main;
+      expect(spy).toHaveBeenCalledTimes(1);
+      spy.mockRestore();
     });
   });
 });

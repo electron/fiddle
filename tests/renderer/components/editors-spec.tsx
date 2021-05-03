@@ -117,16 +117,6 @@ describe('Editors component', () => {
     expect(toolbar).toMatchSnapshot();
   });
 
-  it('componentWillUnmount() unsubscribes the layout reaction', () => {
-    const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
-    (instance as any).disposeLayoutAutorun = jest.fn();
-
-    wrapper.unmount();
-
-    expect(instance.disposeLayoutAutorun).toHaveBeenCalledTimes(1);
-  });
-
   it('onChange() updates the mosaic arrangement in the appState', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
@@ -300,14 +290,6 @@ describe('Editors component', () => {
       const id = DefaultEditorId.html;
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
-    });
-  });
-
-  describe('disposeLayoutAutorun()', () => {
-    it('automatically updates the layout when the mosaic arrangement changes', () => {
-      shallow(<Editors appState={store as any} />);
-      store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
-      expect(store.editorMosaic.layout).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -1,4 +1,3 @@
-import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
@@ -44,13 +43,6 @@ interface EditorsState {
 
 @observer
 export class Editors extends React.Component<EditorsProps, EditorsState> {
-  // A reaction: Each time mosaicArrangement is changed, we'll update
-  // the editor layout. That method is itself debounced.
-  public disposeLayoutAutorun = reaction(
-    () => this.props.appState.editorMosaic.mosaicArrangement,
-    () => this.props.appState.editorMosaic.layout(),
-  );
-
   constructor(props: EditorsProps) {
     super(props);
 
@@ -115,7 +107,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public componentWillUnmount() {
-    this.disposeLayoutAutorun();
     this.stopListening();
   }
 
