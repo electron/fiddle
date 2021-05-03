@@ -10,12 +10,10 @@ exports[`ExecutionSettings component renders 1`] = `
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="Whenever Electron runs, it creates a user data directory for cookies, the cache,
-      and various other things that it needs to keep around. Since fiddles are usually
-      just run once, we delete this directory after your fiddle exits. Enable this
-      setting to keep the user data directories around."
-    >
+    <Blueprint3.FormGroup>
+      <p>
+        Whenever Electron runs, it creates a user data directory for cookies, the cache, and various other things that it needs to keep around. Since fiddles are usually just run once, we delete this directory after your fiddle exits. Enable this setting to keep the user data directories around.
+      </p>
       <Blueprint3.Checkbox
         label="Do not delete user data directories."
         onChange={[Function]}
@@ -24,17 +22,14 @@ exports[`ExecutionSettings component renders 1`] = `
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="There are some flags that Electron uses to log extra information both internally
-      and through Chromium. Enable this option to make Fiddle produce those logs."
-    >
+    <Blueprint3.FormGroup>
       <p>
-        Enabling advanced Electron logging will set the
-         
+        There are some flags that Electron uses to log extra information both internally and through Chromium. Enable this option to make Fiddle produce those logs. Enabling advanced Electron logging will set the 
         <code>
           ELECTRON_ENABLE_LOGGING
         </code>
         ,
+         
         <code>
           ELECTRON_DEBUG_NOTIFICATION
         </code>
@@ -84,6 +79,7 @@ exports[`ExecutionSettings component renders 1`] = `
         placeholder="--js-flags=--expose-gc"
         rightElement={
           <Blueprint3.Button
+            disabled={true}
             icon="cross"
             onClick={[Function]}
           />
@@ -125,6 +121,7 @@ exports[`ExecutionSettings component renders 1`] = `
         placeholder="NODE_OPTIONS=\\"--no-warnings --max-old-space-size=2048\\""
         rightElement={
           <Blueprint3.Button
+            disabled={true}
             icon="cross"
             onClick={[Function]}
           />

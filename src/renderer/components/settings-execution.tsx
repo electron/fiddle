@@ -77,6 +77,15 @@ export class ExecutionSettings extends React.Component<
     }
   }
 
+  public componentDidUpdate() {
+    const { appState } = this.props;
+
+    for (const type of Object.values(SettingItemType)) {
+      const values = Object.values(this.state[type]);
+      appState[type] = values.filter((v) => v !== '');
+    }
+  }
+
   /**
    * Handles a change on whether or not the user data dir should be deleted
    * after a run.
@@ -109,7 +118,6 @@ export class ExecutionSettings extends React.Component<
     event: React.ChangeEvent<HTMLInputElement>,
     type: SettingItemType,
   ) {
-    const { appState } = this.props;
     const { name, value } = event.currentTarget;
 
     this.setState((prevState) => ({
@@ -118,8 +126,6 @@ export class ExecutionSettings extends React.Component<
         [name]: value,
       },
     }));
-
-    appState[type] = Object.values(this.state[type]).filter((v) => v !== '');
   }
 
   /**
@@ -252,16 +258,6 @@ export class ExecutionSettings extends React.Component<
       isEnablingElectronLogging,
     } = this.props.appState;
 
-    const deleteUserDirLabel = `
-      Whenever Electron runs, it creates a user data directory for cookies, the cache,
-      and various other things that it needs to keep around. Since fiddles are usually
-      just run once, we delete this directory after your fiddle exits. Enable this
-      setting to keep the user data directories around.
-    `.trim();
-    const electronLoggingLabel = `
-      There are some flags that Electron uses to log extra information both internally
-      and through Chromium. Enable this option to make Fiddle produce those logs.`.trim();
-
     return (
       <div>
         <h2>Execution</h2>
@@ -271,7 +267,14 @@ export class ExecutionSettings extends React.Component<
         </Callout>
         <br />
         <Callout>
-          <FormGroup label={deleteUserDirLabel}>
+          <FormGroup>
+            <p>
+              Whenever Electron runs, it creates a user data directory for
+              cookies, the cache, and various other things that it needs to keep
+              around. Since fiddles are usually just run once, we delete this
+              directory after your fiddle exits. Enable this setting to keep the
+              user data directories around.
+            </p>
             <Checkbox
               checked={isKeepingUserDataDirs}
               label="Do not delete user data directories."
@@ -281,10 +284,12 @@ export class ExecutionSettings extends React.Component<
         </Callout>
         <br />
         <Callout>
-          <FormGroup label={electronLoggingLabel}>
+          <FormGroup>
             <p>
-              Enabling advanced Electron logging will set the{' '}
-              <code>ELECTRON_ENABLE_LOGGING</code>,
+              There are some flags that Electron uses to log extra information
+              both internally and through Chromium. Enable this option to make
+              Fiddle produce those logs. Enabling advanced Electron logging will
+              set the <code>ELECTRON_ENABLE_LOGGING</code>,{' '}
               <code>ELECTRON_DEBUG_NOTIFICATION</code>, and{' '}
               <code>ELECTRON_ENABLE_STACK_DUMPING</code> environment variables
               to true. See{' '}
