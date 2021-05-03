@@ -152,8 +152,9 @@ export class ExecutionSettings extends React.Component<
   };
 
   public renderDeleteItem(idx: string, type: SettingItemType): JSX.Element {
-    const clickFn = () => {
-      const updated = this.state[type];
+    const updated = this.state[type];
+
+    const removeFn = () => {
       if (Object.keys(updated).length === 1) {
         updated[idx] = '';
       } else {
@@ -163,7 +164,13 @@ export class ExecutionSettings extends React.Component<
       this.setState({ [type]: updated });
     };
 
-    return <Button icon="cross" onClick={clickFn} />;
+    return (
+      <Button
+        icon="cross"
+        disabled={Object.keys(updated).length === 1}
+        onClick={removeFn}
+      />
+    );
   }
 
   private renderEnvironmentVariables() {
