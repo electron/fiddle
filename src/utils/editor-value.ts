@@ -8,9 +8,12 @@ import { EditorId } from '../interfaces';
  */
 export function getEditorValue(id: EditorId): string {
   if (window.ElectronFiddle?.app?.state) {
-    const { closedPanels, editorMosaic } = window.ElectronFiddle.app.state;
+    const {
+      closedPanels,
+      editors,
+    } = window.ElectronFiddle.app.state.editorMosaic;
 
-    const editor = editorMosaic.editors.get(id);
+    const editor = editors.get(id);
     if (editor) return editor.getValue();
 
     const backup = closedPanels[id];

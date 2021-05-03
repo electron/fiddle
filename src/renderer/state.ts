@@ -2,12 +2,9 @@ import * as fs from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
-import { MosaicNode } from 'react-mosaic-component';
 
 import {
   BlockableAccelerator,
-  DEFAULT_EDITORS,
-  EditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GenericDialogType,
@@ -22,17 +19,11 @@ import {
   VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import {
-  createMosaicArrangement,
-  getVisibleMosaics,
-} from '../utils/editors-mosaic-arrangement';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
-import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import { getTemplate, isContentUnchanged } from './content';
 import {
   getLocalTypePathForVersion,
@@ -131,11 +122,8 @@ export class AppState {
     placeholder: '',
   };
   @observable public readonly editorMosaic = new EditorMosaic();
-  @observable public customMosaics: EditorId[] = [];
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
-  @observable
-  public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public templateName: string | undefined;
   @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
@@ -160,11 +148,6 @@ export class AppState {
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
-  @observable public closedPanels: Record<
-    EditorId,
-    EditorBackup
-  > = DEFAULT_CLOSED_PANELS;
-
   private outputBuffer = '';
   private name: string;
   private readonly defaultVersion: string;
@@ -188,7 +171,6 @@ export class AppState {
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
-    this.resetEditorLayout = this.resetEditorLayout.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
     this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
@@ -668,88 +650,6 @@ export class AppState {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
-  }
-
-  /**
-   * Sets the editor value for a given editor. Deletes the value after
-   * accessing it.
-   *
-   * @param {EditorId} id
-   */
-  @action public getAndRemoveEditorValueBackup(
-    id: EditorId,
-  ): EditorBackup | null {
-    const value = this.closedPanels[id];
-    delete this.closedPanels[id];
-    return value;
-  }
-
-  @action public async setVisibleMosaics(visible: Array<EditorId>) {
-    const { editorMosaic, mosaicArrangement } = this;
-    const currentlyVisible = getVisibleMosaics(mosaicArrangement);
-
-    for (const id of DEFAULT_EDITORS) {
-      if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = getEditorBackup(id);
-        // if we have backup, remove active editor
-        editorMosaic.editors.delete(id);
-      }
-    }
-
-    const updatedArrangement = createMosaicArrangement(visible);
-    console.log(
-      `State: Setting visible mosaic panels`,
-      visible,
-      updatedArrangement,
-    );
-
-    this.mosaicArrangement = updatedArrangement;
-
-    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
-    // mount to ensure that we can load content into the editors as soon as they're
-    // declared visible.
-
-    await waitForEditorsToMount(visible);
-  }
-
-  /**
-   * Hides the panel for a given EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public hideAndBackupMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
-  }
-
-  /**
-   * Removes the panel for a given custom EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public removeCustomMosaic(id: EditorId) {
-    this.hideAndBackupMosaic(id);
-    this.editorMosaic.editors.delete(id);
-    this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
-  }
-
-  /**
-   * Shows the editor value for a given editor.
-   *
-   * @param {EditorId} id
-   */
-  @action public showMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics([...currentlyVisible, id]);
-  }
-
-  /**
-   * Resets editor view to default layout.
-   *
-   *
-   */
-  @action public resetEditorLayout() {
-    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
   @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {

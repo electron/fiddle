@@ -27,7 +27,7 @@ describe('getEditorValue()', () => {
     // set up mock state that has the editor deleted and a backup
     editorMosaic.editors.delete(filename);
     const value = 'editor-backup-value';
-    state.closedPanels = { [filename]: { value } };
+    state.editorMosaic.closedPanels = { [filename]: { value } };
 
     expect(getEditorValue(filename)).toBe(value);
   });

@@ -73,7 +73,7 @@ export class App {
     }
 
     // Remove all previously created custom editors.
-    this.state.customMosaics = Object.keys(editorValues).filter(
+    this.state.editorMosaic.customMosaics = Object.keys(editorValues).filter(
       (filename: string) => !isKnownFile(filename),
     ) as EditorId[];
 
@@ -93,7 +93,7 @@ export class App {
     this.state.templateName = templateName;
 
     // Once loaded, we have a "saved" state.
-    await this.state.setVisibleMosaics(visibleEditors);
+    await this.state.editorMosaic.setVisibleMosaics(visibleEditors);
     await this.setEditorValues(editorValues);
     this.state.isUnsaved = false;
 
@@ -113,9 +113,9 @@ export class App {
     }
 
     // Set content for mosaics.
-    const { closedPanels, editorMosaic } = this.state;
+    const { editorMosaic } = this.state;
     for (const [name, content] of Object.entries(values)) {
-      const backup = closedPanels[name];
+      const backup = editorMosaic.closedPanels[name];
       if (backup) {
         // The editor does not exist, attempt to set it on the backup.
         // If there's a model, we'll do it on the model. Else, we'll

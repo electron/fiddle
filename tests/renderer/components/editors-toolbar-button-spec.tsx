@@ -7,6 +7,8 @@ import {
   RemoveButton,
 } from '../../../src/renderer/components/editors-toolbar-button';
 
+import { StateMock } from '../../mocks/mocks';
+
 let mockContext: any = {};
 
 jest.mock('react-mosaic-component', () => {
@@ -26,7 +28,7 @@ jest.mock('react-mosaic-component', () => {
 });
 
 describe('Editor toolbar button component', () => {
-  let store: any = {};
+  let store: StateMock;
 
   beforeAll(() => {
     mockContext = {
@@ -48,15 +50,13 @@ describe('Editor toolbar button component', () => {
       mosaicId: 'test',
     };
 
-    store = {
-      hideAndBackupMosaic: jest.fn(),
-    };
+    ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
   describe('MaximizeButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <MaximizeButton id={DefaultEditorId.main} appState={store} />,
+        <MaximizeButton id={DefaultEditorId.main} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -67,7 +67,7 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', () => {
       const wrapper = shallow(
-        <MaximizeButton id={DefaultEditorId.main} appState={store} />,
+        <MaximizeButton id={DefaultEditorId.main} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -83,7 +83,7 @@ describe('Editor toolbar button component', () => {
   describe('RemoveButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <RemoveButton id={DefaultEditorId.main} appState={store} />,
+        <RemoveButton id={DefaultEditorId.main} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -93,14 +93,14 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', () => {
       const wrapper = shallow(
-        <RemoveButton id={DefaultEditorId.main} appState={store} />,
+        <RemoveButton id={DefaultEditorId.main} appState={store as any} />,
         {
           context: mockContext,
         },
       );
 
       wrapper.dive().dive().find('button').simulate('click');
-      expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+      expect(store.editorMosaic.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
     });
   });
 });

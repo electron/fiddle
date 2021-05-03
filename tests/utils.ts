@@ -1,3 +1,5 @@
+import { toJS } from 'mobx';
+
 const platform = process.platform;
 
 export function overridePlatform(value: NodeJS.Platform) {
@@ -50,4 +52,14 @@ export class FetchMock {
       });
     });
   }
+}
+
+// return an object containing props in 'a' that are different from in 'b'
+export function objectDifference<Type>(a: Type, b: Type): Type {
+  const serialize = (input: any) => JSON.stringify(toJS(input));
+  return Object.fromEntries(
+    Object.entries(a)
+      .filter(([key, val]) => serialize(val) !== serialize(b[key]))
+      .map(([key, val]) => [key, toJS(val)]),
+  ) as Type;
 }

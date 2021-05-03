@@ -134,7 +134,7 @@ describe('App component', () => {
 
       const gistId = 'gistId';
       await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+      expect(editorMosaic.setVisibleMosaics).toHaveBeenCalledWith([
         DefaultEditorId.main,
         DefaultEditorId.renderer,
         DefaultEditorId.html,
@@ -154,7 +154,7 @@ describe('App component', () => {
 
       const gistId = 'gistId';
       await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+      expect(editorMosaic.setVisibleMosaics).toHaveBeenCalledWith([
         DefaultEditorId.main,
         DefaultEditorId.renderer,
         DefaultEditorId.html,
@@ -172,7 +172,7 @@ describe('App component', () => {
       };
       const gistId = 'gistId';
       await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
+      expect(editorMosaic.setVisibleMosaics).toHaveBeenCalledWith([
         DefaultEditorId.main,
         DefaultEditorId.renderer,
         DefaultEditorId.html,
@@ -323,11 +323,11 @@ describe('App component', () => {
     it('attempts to set values for closed editors', () => {
       editorMosaic.editors.delete(DefaultEditorId.main);
 
-      (app.state.closedPanels as any)[DefaultEditorId.main] = {
+      (editorMosaic.closedPanels as any)[DefaultEditorId.main] = {
         model: { setValue: jest.fn() },
       };
-      app.state.closedPanels[DefaultEditorId.preload] = {};
-      app.state.closedPanels[DefaultEditorId.css] = {};
+      editorMosaic.closedPanels[DefaultEditorId.preload] = {};
+      editorMosaic.closedPanels[DefaultEditorId.css] = {};
 
       app.setEditorValues({
         [DefaultEditorId.html]: 'html-value',
@@ -338,13 +338,13 @@ describe('App component', () => {
       });
 
       expect(
-        (app.state.closedPanels[DefaultEditorId.main] as EditorBackup)!.model!
-          .setValue,
+        (editorMosaic.closedPanels[DefaultEditorId.main] as EditorBackup)!
+          .model!.setValue,
       ).toHaveBeenCalledWith('main-value');
-      expect(app.state.closedPanels[DefaultEditorId.preload]).toEqual({
+      expect(editorMosaic.closedPanels[DefaultEditorId.preload]).toEqual({
         value: 'preload-value',
       });
-      expect(app.state.closedPanels[DefaultEditorId.css]).toEqual({
+      expect(editorMosaic.closedPanels[DefaultEditorId.css]).toEqual({
         value: 'css-value',
       });
     });

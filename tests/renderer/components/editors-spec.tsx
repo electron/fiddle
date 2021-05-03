@@ -44,7 +44,9 @@ describe('Editors component', () => {
     ({ ElectronFiddle } = window as any);
     ({ monaco, state: store } = ElectronFiddle.app);
     ({ editorMosaic } = store);
-    store.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
+    store.editorMosaic.mosaicArrangement = createMosaicArrangement(
+      DEFAULT_EDITORS,
+    );
   });
 
   it('renders', () => {
@@ -109,7 +111,7 @@ describe('Editors component', () => {
   });
 
   it('does not render toolbar controls if only one editor exists', () => {
-    store.mosaicArrangement = DefaultEditorId.main;
+    store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
     const toolbar = instance.renderToolbar(
@@ -136,7 +138,9 @@ describe('Editors component', () => {
 
     instance.onChange({ testArrangement: true } as any);
 
-    expect(store.mosaicArrangement).toEqual({ testArrangement: true });
+    expect(store.editorMosaic.mosaicArrangement).toEqual({
+      testArrangement: true,
+    });
   });
 
   describe('IPC commands', () => {
@@ -307,7 +311,7 @@ describe('Editors component', () => {
   describe('disposeLayoutAutorun()', () => {
     it('automatically updates the layout when the mosaic arrangement changes', () => {
       shallow(<Editors appState={store as any} />);
-      store.mosaicArrangement = DefaultEditorId.main;
+      store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
       expect(updateEditorLayout).toHaveBeenCalledTimes(1);
     });
   });

@@ -70,6 +70,7 @@ Array [
       disabled={false}
       icon="grid-view"
       multiline={false}
+      onClick={[MockFunction]}
       popoverProps={Object {}}
       shouldDismissPopover={true}
       text="Reset Layout"
@@ -153,6 +154,7 @@ exports[`EditorDropdown component renders 1`] = `
             disabled={false}
             icon="grid-view"
             multiline={false}
+            onClick={[MockFunction]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
             text="Reset Layout"
@@ -260,6 +262,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
             disabled={false}
             icon="grid-view"
             multiline={false}
+            onClick={[MockFunction]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
             text="Reset Layout"

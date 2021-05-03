@@ -37,22 +37,25 @@ describe('EditorDropdown component', () => {
   it('handles a click for an item', () => {
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
+    const { editorMosaic } = store;
 
     dropdown.onItemClick({
       currentTarget: { id: DefaultEditorId.html },
     } as any);
-    expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
-    expect(store.showMosaic).toHaveBeenCalledTimes(0);
+    expect(editorMosaic.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(0);
 
     dropdown.onItemClick({
       currentTarget: { id: DefaultEditorId.main },
     } as any);
-    expect(store.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
-    expect(store.showMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(1);
   });
 
   it('disables hide button if only one editor open', () => {
-    store.mosaicArrangement = DefaultEditorId.html;
+    const { editorMosaic } = store;
+
+    editorMosaic.mosaicArrangement = DefaultEditorId.html;
     (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
@@ -63,6 +66,7 @@ describe('EditorDropdown component', () => {
   });
 
   it('can add a valid custom editor', async () => {
+    const { editorMosaic } = store;
     const file = 'file.js';
 
     store.showCustomEditorDialog = jest
@@ -85,12 +89,13 @@ describe('EditorDropdown component', () => {
       wantsInput: true,
     });
 
-    expect(store.showMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.customMosaics).toEqual([file]);
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
-    expect(store.customMosaics).toEqual([file]);
   });
 
   it('errors when trying to add a duplicate custom editor', async () => {
+    const { editorMosaic } = store;
     const badFile = 'main.js';
 
     store.showCustomEditorDialog = jest
@@ -120,11 +125,12 @@ describe('EditorDropdown component', () => {
     });
 
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
-    expect(store.showMosaic).toHaveBeenCalledTimes(0);
-    expect(store.customMosaics).toEqual([]);
+    expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(0);
+    expect(editorMosaic.customMosaics).toEqual([]);
   });
 
   it('errors when trying to add an invalid custom editor', async () => {
+    const { editorMosaic } = store;
     const badFile = 'bad.bad';
 
     store.showCustomEditorDialog = jest
@@ -154,14 +160,15 @@ describe('EditorDropdown component', () => {
       cancel: undefined,
     });
 
-    expect(store.showMosaic).toHaveBeenCalledTimes(0);
+    expect(editorMosaic.customMosaics).toEqual([]);
+    expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(0);
     expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
-    expect(store.customMosaics).toEqual([]);
   });
 
   it('can remove a custom editor', () => {
+    const { editorMosaic } = store;
     const file = 'file.js';
-    store.customMosaics = [file];
+    editorMosaic.customMosaics = [file];
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
@@ -170,6 +177,6 @@ describe('EditorDropdown component', () => {
       currentTarget: { id: file },
     } as any);
 
-    expect(store.removeCustomMosaic).toHaveBeenCalledTimes(1);
+    expect(editorMosaic.removeCustomMosaic).toHaveBeenCalledTimes(1);
   });
 });

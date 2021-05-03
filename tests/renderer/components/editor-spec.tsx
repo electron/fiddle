@@ -109,7 +109,7 @@ describe('Editor component', () => {
 
     describe('backups', async () => {
       it('attempts to restore a backup if contains a model', async () => {
-        store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+        store.editorMosaic.getAndRemoveEditorValueBackup.mockReturnValueOnce({
           model: true,
           viewState: true,
         });
@@ -134,7 +134,7 @@ describe('Editor component', () => {
       });
 
       it('attempts to restore a backup if contains a string value', async () => {
-        store.getAndRemoveEditorValueBackup.mockReturnValueOnce({
+        store.editorMosaic.getAndRemoveEditorValueBackup.mockReturnValueOnce({
           value: 'hello',
         });
 

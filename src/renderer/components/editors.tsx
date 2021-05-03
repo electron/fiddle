@@ -48,7 +48,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   // A reaction: Each time mosaicArrangement is changed, we'll update
   // the editor layout. That method is itself debounced.
   public disposeLayoutAutorun = reaction(
-    () => this.props.appState.mosaicArrangement,
+    () => this.props.appState.editorMosaic.mosaicArrangement,
     () => updateEditorLayout(),
   );
 
@@ -188,8 +188,8 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     // only show toolbar controls if we have more than 1 visible editor
     // Mosaic arrangement is type string if 1 editor, object otherwise
-    const toolbarControlsMaybe = typeof appState.mosaicArrangement !==
-      'string' && (
+    const toolbarControlsMaybe = typeof appState.editorMosaic
+      .mosaicArrangement !== 'string' && (
       <>
         <MaximizeButton id={id} appState={appState} />
         <RemoveButton id={id} appState={appState} />
@@ -267,7 +267,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       <Mosaic<EditorId>
         className={`focused__${this.state.focused}`}
         onChange={this.onChange}
-        value={appState.mosaicArrangement}
+        value={appState.editorMosaic.mosaicArrangement}
         zeroStateView={renderNonIdealState(appState)}
         renderTile={this.renderTile}
       />
@@ -280,7 +280,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
   public onChange(currentNode: MosaicNode<EditorId> | null) {
-    this.props.appState.mosaicArrangement = currentNode;
+    this.props.appState.editorMosaic.mosaicArrangement = currentNode;
   }
 
   /**

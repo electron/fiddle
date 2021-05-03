@@ -915,22 +915,38 @@ exports[`Editors component renders a toolbar 1`] = `
       <MaximizeButton
         appState={
           Object {
-            "mosaicArrangement": Object {
-              "direction": "row",
-              "first": Object {
-                "direction": "column",
-                "first": "main.js",
-                "second": "renderer.js",
+            "editorMosaic": Object {
+              "closedPanels": Object {},
+              "customMosaics": Array [],
+              "editors": Object {
+                "index.html": "default MonacoEditorMock",
+                "main.js": "default MonacoEditorMock",
+                "preload.js": "default MonacoEditorMock",
+                "renderer.js": "default MonacoEditorMock",
               },
-              "second": Object {
-                "direction": "column",
-                "first": "preload.js",
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "mosaicArrangement": Object {
+                "direction": "row",
+                "first": Object {
+                  "direction": "column",
+                  "first": "main.js",
+                  "second": "renderer.js",
+                },
                 "second": Object {
                   "direction": "column",
-                  "first": "index.html",
-                  "second": "styles.css",
+                  "first": "preload.js",
+                  "second": Object {
+                    "direction": "column",
+                    "first": "index.html",
+                    "second": "styles.css",
+                  },
                 },
               },
+              "removeCustomMosaic": [MockFunction],
+              "resetEditorLayout": [MockFunction],
+              "setVisibleMosaics": [MockFunction],
+              "showMosaic": [MockFunction],
             },
           }
         }
@@ -939,22 +955,38 @@ exports[`Editors component renders a toolbar 1`] = `
       <RemoveButton
         appState={
           Object {
-            "mosaicArrangement": Object {
-              "direction": "row",
-              "first": Object {
-                "direction": "column",
-                "first": "main.js",
-                "second": "renderer.js",
+            "editorMosaic": Object {
+              "closedPanels": Object {},
+              "customMosaics": Array [],
+              "editors": Object {
+                "index.html": "default MonacoEditorMock",
+                "main.js": "default MonacoEditorMock",
+                "preload.js": "default MonacoEditorMock",
+                "renderer.js": "default MonacoEditorMock",
               },
-              "second": Object {
-                "direction": "column",
-                "first": "preload.js",
+              "getAndRemoveEditorValueBackup": [MockFunction],
+              "hideAndBackupMosaic": [MockFunction],
+              "mosaicArrangement": Object {
+                "direction": "row",
+                "first": Object {
+                  "direction": "column",
+                  "first": "main.js",
+                  "second": "renderer.js",
+                },
                 "second": Object {
                   "direction": "column",
-                  "first": "index.html",
-                  "second": "styles.css",
+                  "first": "preload.js",
+                  "second": Object {
+                    "direction": "column",
+                    "first": "index.html",
+                    "second": "styles.css",
+                  },
                 },
               },
+              "removeCustomMosaic": [MockFunction],
+              "resetEditorLayout": [MockFunction],
+              "setVisibleMosaics": [MockFunction],
+              "showMosaic": [MockFunction],
             },
           }
         }
