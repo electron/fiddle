@@ -1,6 +1,5 @@
 import { App } from '../../src/renderer/app';
 import { waitFor } from '../../src/utils/wait-for';
-// import { DefaultEditorId, PACKAGE_NAME } from '../../src/interfaces';
 import { DefaultEditorId } from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
@@ -18,7 +17,6 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 describe('App component', () => {
   let app: App;
   let ElectronFiddle: any;
-  //   let editorMosaic: any;
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
@@ -26,7 +24,6 @@ describe('App component', () => {
 
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
-    //     ({ editorMosaic } = ElectronFiddle.app.state);
 
     // make a real App and inject it into the mocks
     app = new App();
