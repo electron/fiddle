@@ -436,7 +436,7 @@ export class GistActionButton extends React.Component<
     }
 
     // Add files for any custom editors created by the user.
-    for (const mosaic in customMosaics) {
+    for (const mosaic of customMosaics) {
       filesList[mosaic] = { content: values[mosaic] };
     }
 
