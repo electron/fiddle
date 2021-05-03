@@ -64,9 +64,7 @@ export function objectDifference<Type>(a: Type, b: Type): Type {
     const val = toJS(entry[1]);
     if (serialize(val) == serialize(b[key])) continue;
 
-    o[key] = ['Bisector, editorMosaic'].includes(key)
-      ? objectDifference(val, b[key])
-      : toJS(val);
+    o[key] = key === 'editorMosaic' ? objectDifference(val, b[key]) : toJS(val);
   }
   return o as Type;
 }

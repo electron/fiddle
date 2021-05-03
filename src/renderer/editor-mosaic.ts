@@ -2,12 +2,11 @@ import * as MonacoType from 'monaco-editor';
 import { MosaicNode } from 'react-mosaic-component';
 import { action, observable } from 'mobx';
 
-import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 import {
   createMosaicArrangement,
   getVisibleMosaics,
 } from '../utils/editors-mosaic-arrangement';
-import { DEFAULT_CLOSED_PANELS, DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
+import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import {
   DEFAULT_EDITORS,
   DefaultEditorId,
@@ -15,6 +14,8 @@ import {
   EditorValues,
 } from '../interfaces';
 import { waitForEditorsToMount } from '../utils/editor-mounted';
+import { getEditorModel } from '../utils/editor-model';
+import { getEditorViewState } from '../utils/editor-viewstate';
 import {
   compareEditors,
   getEmptyContent,
@@ -23,15 +24,18 @@ import {
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
+export interface EditorBackup {
+  value?: string;
+  model?: MonacoType.editor.ITextModel | null;
+  viewState?: MonacoType.editor.ICodeEditorViewState | null;
+}
+
 export class EditorMosaic {
   @observable public readonly editors: Map<EditorId, Editor> = new Map();
   @observable public customMosaics: EditorId[] = [];
   @observable
   public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
-  @observable public closedPanels: Record<
-    EditorId,
-    EditorBackup
-  > = DEFAULT_CLOSED_PANELS;
+  @observable public closedPanels: Record<EditorId, EditorBackup> = {};
 
   constructor() {
     for (const name of [
@@ -68,7 +72,7 @@ export class EditorMosaic {
 
     for (const id of DEFAULT_EDITORS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = getEditorBackup(id);
+        this.closedPanels[id] = this.getEditorBackup(id);
         // if we have backup, remove active editor
         editors.delete(id);
       }
@@ -209,5 +213,19 @@ export class EditorMosaic {
     if (backup?.value) return backup.value;
 
     return '';
+  }
+
+  /**
+   * Returns a backup for a given editor
+   *
+   * @param {EditorId} id
+   * @returns {EditorBackup}
+   */
+  public getEditorBackup(id: EditorId): EditorBackup {
+    return {
+      value: this.getEditorValue(id),
+      model: getEditorModel(id),
+      viewState: getEditorViewState(id),
+    };
   }
 }

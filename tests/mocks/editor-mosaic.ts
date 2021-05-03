@@ -4,7 +4,7 @@ import { MosaicNode } from 'react-mosaic-component';
 import { observable } from 'mobx';
 
 import { EditorId } from '../../src/interfaces';
-import { EditorBackup } from '../../src/utils/editor-backup';
+import { EditorBackup } from '../../src/renderer/editor-mosaic';
 
 import { objectDifference } from '../utils';
 
@@ -17,6 +17,7 @@ export class EditorMosaicMock {
   @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
   public getAndRemoveEditorValueBackup = jest.fn();
+  public getEditorBackup = jest.fn();
   public getEditorValue = jest
     .fn()
     .mockImplementation((id) => this.editors.get(id)?.getValue() || '');

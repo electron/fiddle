@@ -2,7 +2,6 @@ import * as path from 'path';
 import { MosaicNode } from 'react-mosaic-component';
 
 import { DefaultEditorId, EditorId } from '../interfaces';
-import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
 
 export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
 export const CONFIG_PATH = path.join(
@@ -30,12 +29,6 @@ export const DEFAULT_MOSAIC_ARRANGEMENT: MosaicNode<EditorId> = {
     first: SORTED_EDITORS[2],
     second: SORTED_EDITORS[3],
   },
-};
-
-export const DEFAULT_CLOSED_PANELS: Partial<
-  Record<EditorId, EditorBackup | true>
-> = {
-  'styles.css': getEditorBackup(DefaultEditorId.css),
 };
 
 export const ELECTRON_ORG = 'electron';
