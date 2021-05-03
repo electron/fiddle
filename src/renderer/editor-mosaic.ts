@@ -15,7 +15,6 @@ import {
 } from '../interfaces';
 import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { getEditorModel } from '../utils/editor-model';
-import { getEditorViewState } from '../utils/editor-viewstate';
 import {
   compareEditors,
   getEmptyContent,
@@ -225,7 +224,20 @@ export class EditorMosaic {
     return {
       value: this.getEditorValue(id),
       model: getEditorModel(id),
-      viewState: getEditorViewState(id),
+      viewState: this.getEditorViewState(id),
     };
+  }
+
+  /**
+   * Returns the view state for a given editor.
+   *
+   * @export
+   * @param {EditorId} id
+   * @returns {(editor.ICodeEditorViewState | null)}
+   */
+  public getEditorViewState(
+    id: EditorId,
+  ): MonacoType.editor.ICodeEditorViewState | null {
+    return this.editors.get(id)?.saveViewState() || null;
   }
 }

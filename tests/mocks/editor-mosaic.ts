@@ -17,10 +17,15 @@ export class EditorMosaicMock {
   @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
   public getAndRemoveEditorValueBackup = jest.fn();
-  public getEditorBackup = jest.fn();
+  public getEditorBackup = jest
+    .fn()
+    .mockImplementation((id) => this.closedPanels[id]);
   public getEditorValue = jest
     .fn()
     .mockImplementation((id) => this.editors.get(id)?.getValue() || '');
+  public getEditorViewState = jest
+    .fn()
+    .mockImplementation((id) => this.editors.get(id)?.saveViewState() || null);
   public hideAndBackupMosaic = jest.fn();
   public removeCustomMosaic = jest.fn();
   public resetEditorLayout = jest.fn();
