@@ -17,6 +17,9 @@ export class EditorMosaicMock {
   @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
   public getAndRemoveEditorValueBackup = jest.fn();
+  public getEditorValue = jest
+    .fn()
+    .mockImplementation((id) => this.editors.get(id)?.getValue() || '');
   public hideAndBackupMosaic = jest.fn();
   public removeCustomMosaic = jest.fn();
   public resetEditorLayout = jest.fn();
@@ -27,8 +30,6 @@ export class EditorMosaicMock {
 
   public toJSON() {
     const o = objectDifference(this, new EditorMosaicMock());
-    const ret = Object.keys(o).length === 0 ? 'default EditorMosaicMock' : o;
-    console.log('ret', ret);
-    return ret;
+    return Object.keys(o).length === 0 ? 'default EditorMosaicMock' : o;
   }
 }

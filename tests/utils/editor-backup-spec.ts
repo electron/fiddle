@@ -1,6 +1,6 @@
-import { DefaultEditorId } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
 import { getEditorBackup } from '../../src/utils/editor-backup';
-import { EditorMosaicMock } from '../mocks/mocks';
+import { EditorMosaicMock, MonacoEditorMock } from '../mocks/mocks';
 
 describe('getEditorBackup()', () => {
   let editorMosaic: EditorMosaicMock;
@@ -10,15 +10,15 @@ describe('getEditorBackup()', () => {
   });
 
   it('returns the value for an editor', () => {
-    const filename = DefaultEditorId.html;
-    const editor = editorMosaic.editors.get(filename);
+    const filename = MAIN_JS;
     const model = { testModel: true };
     const viewState = { testViewState: true };
     const value = 'editor-value';
 
-    (editor as any).model = model;
-    editor!.saveViewState.mockReturnValue(viewState);
-    editor!.value = value;
+    const editor = editorMosaic.editors.get(filename) as MonacoEditorMock;
+    editor.model = model as any;
+    editor.saveViewState.mockReturnValue(viewState);
+    editor.value = value;
 
     expect(getEditorBackup(filename)).toEqual({ model, value, viewState });
   });

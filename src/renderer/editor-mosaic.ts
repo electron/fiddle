@@ -3,7 +3,6 @@ import { MosaicNode } from 'react-mosaic-component';
 import { action, observable } from 'mobx';
 
 import { EditorBackup, getEditorBackup } from '../utils/editor-backup';
-import { getEditorValue } from '../utils/editor-value';
 import {
   createMosaicArrangement,
   getVisibleMosaics,
@@ -185,13 +184,30 @@ export class EditorMosaic {
     const values: EditorValues = {};
 
     for (const name of Object.keys(this.closedPanels)) {
-      values[name] = getEditorValue(name as EditorId);
+      values[name] = this.getEditorValue(name as EditorId);
     }
 
     for (const name of this.editors.keys()) {
-      values[name] = getEditorValue(name);
+      values[name] = this.getEditorValue(name);
     }
 
     return values;
+  }
+
+  /**
+   * Return the value for a given editor
+   *
+   * @param {EditorId} id
+   * @returns {string}
+   */
+  public getEditorValue(id: EditorId): string {
+    const editor = this.editors.get(id);
+    console.log('getEditorValue', !!editor, editor?.getValue());
+    if (editor) return editor.getValue();
+
+    const backup = this.closedPanels[id];
+    if (backup?.value) return backup.value;
+
+    return '';
   }
 }

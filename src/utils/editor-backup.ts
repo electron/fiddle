@@ -2,7 +2,6 @@ import { editor } from 'monaco-editor';
 
 import { EditorId } from '../interfaces';
 import { getEditorModel } from './editor-model';
-import { getEditorValue } from './editor-value';
 import { getEditorViewState } from './editor-viewstate';
 
 export interface EditorBackup {
@@ -18,8 +17,10 @@ export interface EditorBackup {
  * @returns {EditorBackup}
  */
 export function getEditorBackup(id: EditorId): EditorBackup {
+  const { editorMosaic } = (window as any).ElectronFiddle.app.state;
+
   return {
-    value: getEditorValue(id),
+    value: editorMosaic.getEditorValue(id),
     model: getEditorModel(id),
     viewState: getEditorViewState(id),
   };

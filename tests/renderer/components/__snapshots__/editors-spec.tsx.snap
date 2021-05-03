@@ -916,16 +916,6 @@ exports[`Editors component renders a toolbar 1`] = `
         appState={
           Object {
             "editorMosaic": Object {
-              "closedPanels": Object {},
-              "customMosaics": Array [],
-              "editors": Object {
-                "index.html": "default MonacoEditorMock",
-                "main.js": "default MonacoEditorMock",
-                "preload.js": "default MonacoEditorMock",
-                "renderer.js": "default MonacoEditorMock",
-              },
-              "getAndRemoveEditorValueBackup": [MockFunction],
-              "hideAndBackupMosaic": [MockFunction],
               "mosaicArrangement": Object {
                 "direction": "row",
                 "first": Object {
@@ -943,12 +933,6 @@ exports[`Editors component renders a toolbar 1`] = `
                   },
                 },
               },
-              "removeCustomMosaic": [MockFunction],
-              "resetEditorLayout": [MockFunction],
-              "set": [MockFunction],
-              "setVisibleMosaics": [MockFunction],
-              "showMosaic": [MockFunction],
-              "values": [MockFunction],
             },
           }
         }
@@ -958,16 +942,6 @@ exports[`Editors component renders a toolbar 1`] = `
         appState={
           Object {
             "editorMosaic": Object {
-              "closedPanels": Object {},
-              "customMosaics": Array [],
-              "editors": Object {
-                "index.html": "default MonacoEditorMock",
-                "main.js": "default MonacoEditorMock",
-                "preload.js": "default MonacoEditorMock",
-                "renderer.js": "default MonacoEditorMock",
-              },
-              "getAndRemoveEditorValueBackup": [MockFunction],
-              "hideAndBackupMosaic": [MockFunction],
               "mosaicArrangement": Object {
                 "direction": "row",
                 "first": Object {
@@ -985,12 +959,6 @@ exports[`Editors component renders a toolbar 1`] = `
                   },
                 },
               },
-              "removeCustomMosaic": [MockFunction],
-              "resetEditorLayout": [MockFunction],
-              "set": [MockFunction],
-              "setVisibleMosaics": [MockFunction],
-              "showMosaic": [MockFunction],
-              "values": [MockFunction],
             },
           }
         }
