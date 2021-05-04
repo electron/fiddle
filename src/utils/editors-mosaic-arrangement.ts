@@ -27,34 +27,3 @@ export function createMosaicArrangement(
     second: createMosaicArrangement(secondHalf, 'column'),
   };
 }
-
-/**
- * Returns an array of visible editors given a mosaic arrangement.
- *
- * @export
- * @param {MosaicNode<EditorId> | null} input
- * @returns {Array<EditorId>}
- */
-export function getVisibleMosaics(
-  input: MosaicNode<EditorId> | null,
-): Array<EditorId> {
-  // Handle the unlikely null case
-  if (!input) return [];
-
-  // Handle the case where only one editor is visible
-  if (typeof input === 'string') {
-    return [input as EditorId];
-  }
-
-  // Handle the other cases (2 - 4)
-  const result: Array<EditorId> = [];
-  for (const node of [input.first, input.second]) {
-    if (typeof node === 'string') {
-      result.push(node as EditorId);
-    } else {
-      result.push(...getVisibleMosaics(node));
-    }
-  }
-
-  return result;
-}

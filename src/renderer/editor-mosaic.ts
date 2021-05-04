@@ -1,12 +1,9 @@
 import * as MonacoType from 'monaco-editor';
-import { MosaicNode } from 'react-mosaic-component';
+import { MosaicNode, getLeaves } from 'react-mosaic-component';
 import { action, observable, reaction } from 'mobx';
 import { waitFor } from '../utils/wait-for';
 
-import {
-  createMosaicArrangement,
-  getVisibleMosaics,
-} from '../utils/editors-mosaic-arrangement';
+import { createMosaicArrangement } from '../utils/editors-mosaic-arrangement';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import {
   DEFAULT_EDITORS,
@@ -91,8 +88,8 @@ export class EditorMosaic {
   }
 
   @action public setVisibleMosaics(visible: Array<EditorId>) {
-    const { editors, mosaicArrangement } = this;
-    const currentlyVisible = getVisibleMosaics(mosaicArrangement);
+    const { editors } = this;
+    const currentlyVisible = this.getVisibleMosaics();
 
     for (const id of DEFAULT_EDITORS) {
       if (!visible.includes(id) && currentlyVisible.includes(id)) {
@@ -124,8 +121,7 @@ export class EditorMosaic {
    * @param {EditorId} id
    */
   @action public hideAndBackupMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics(currentlyVisible.filter((v) => v !== id));
+    this.setVisibleMosaics(this.getVisibleMosaics().filter((v) => v !== id));
   }
 
   /**
@@ -145,8 +141,7 @@ export class EditorMosaic {
    * @param {EditorId} id
    */
   @action public showMosaic(id: EditorId) {
-    const currentlyVisible = getVisibleMosaics(this.mosaicArrangement);
-    this.setVisibleMosaics([...currentlyVisible, id]);
+    this.setVisibleMosaics([...this.getVisibleMosaics(), id]);
   }
 
   /**
@@ -307,6 +302,10 @@ export class EditorMosaic {
     await waitFor(allMounted, opts).catch((error) => {
       throw `Can't mount editors onto mosaics. ${error.toString()}`;
     });
+  }
+
+  public getVisibleMosaics(): EditorId[] {
+    return getLeaves(this.mosaicArrangement);
   }
 
   //=== Listen for user edits
