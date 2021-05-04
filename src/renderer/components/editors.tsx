@@ -145,12 +145,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
       const currentSetting = getAtPath(path, newOptions);
 
       setAtPath(path, newOptions, toggleMonaco(currentSetting));
-
-      const { editorMosaic } = window.ElectronFiddle.app.state;
-      for (const editor of editorMosaic.editors.values()) {
-        editor.updateOptions(newOptions);
-      }
-
+      this.props.appState.editorMosaic.updateOptions(newOptions);
       this.setState({ monacoOptions: newOptions });
 
       return true;

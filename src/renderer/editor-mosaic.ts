@@ -340,6 +340,10 @@ export class EditorMosaic {
     return [...this.editors.values()].find((editor) => editor.hasTextFocus());
   }
 
+  public updateOptions(options: MonacoType.editor.IEditorOptions) {
+    for (const editor of this.editors.values()) editor.updateOptions(options);
+  }
+
   //=== Listen for user edits
 
   private ignoreAllEdits() {
