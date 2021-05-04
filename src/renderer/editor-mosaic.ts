@@ -336,6 +336,10 @@ export class EditorMosaic {
     return getLeaves(this.mosaicArrangement);
   }
 
+  public focusedEditor(): Editor | undefined {
+    return [...this.editors.values()].find((editor) => editor.hasTextFocus());
+  }
+
   //=== Listen for user edits
 
   private ignoreAllEdits() {

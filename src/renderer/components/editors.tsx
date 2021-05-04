@@ -11,7 +11,6 @@ import {
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { getFocusedEditor } from '../../utils/focused-editor';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
 import { getEditorTitle } from '../../utils/editor-utils';
@@ -92,7 +91,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
-      const editor = getFocusedEditor();
+      const editor = this.props.appState.editorMosaic.focusedEditor();
       if (editor) {
         const model = editor.getModel();
         if (model) {
@@ -124,7 +123,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @memberof Editors
    */
   public executeCommand(commandId: string) {
-    const editor = getFocusedEditor();
+    const editor = this.props.appState.editorMosaic.focusedEditor();
 
     if (editor) {
       const command = editor.getAction(commandId);

@@ -933,7 +933,6 @@ exports[`Editors component renders a toolbar 1`] = `
                   "value": "/* style.css */",
                 },
               },
-              "editors": Object {},
               "layoutDebounce": 25,
               "mosaicArrangement": Object {
                 "direction": "row",
@@ -978,7 +977,6 @@ exports[`Editors component renders a toolbar 1`] = `
                   "value": "/* style.css */",
                 },
               },
-              "editors": Object {},
               "layoutDebounce": 25,
               "mosaicArrangement": Object {
                 "direction": "row",

@@ -98,7 +98,7 @@ export class StateMock {
       DefaultEditorId.html,
       DefaultEditorId.preload,
     ]) {
-      this.editorMosaic.editors.set(filename, new MonacoEditorMock());
+      this.editorMosaic.addEditor(filename, new MonacoEditorMock());
     }
   }
 

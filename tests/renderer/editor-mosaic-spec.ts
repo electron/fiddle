@@ -3,6 +3,7 @@ import {
   DefaultEditorId,
   EditorId,
   EditorValues,
+  MAIN_JS,
 } from '../../src/interfaces';
 import {
   EditorBackup,
@@ -19,11 +20,16 @@ import { waitFor } from '../../src/utils/wait-for';
 
 describe('EditorMosaic', () => {
   let editorMosaic: EditorMosaic;
+  let valuesIn: EditorValues;
+  let editor: MonacoEditorMock;
 
   beforeEach(() => {
     // inject a real EditorMosaic into our mock scaffolding
     editorMosaic = new EditorMosaic();
     (window as any).ElectronFiddle.app.state.editorMosaic = editorMosaic;
+
+    editor = new MonacoEditorMock();
+    valuesIn = createEditorValues();
   });
 
   describe('getAndRemoveEditorValueBackup()', () => {
@@ -54,7 +60,7 @@ describe('EditorMosaic', () => {
       editorMosaic.setVisibleMosaics([DefaultEditorId.main]);
 
       // we just need to mock something truthy here
-      editorMosaic.editors.set(DefaultEditorId.main, {} as any);
+      editorMosaic.addEditor(DefaultEditorId.main, editor as any);
 
       expect(editorMosaic.mosaicArrangement).toEqual(DefaultEditorId.main);
       expect(editorMosaic.closedPanels[DefaultEditorId.renderer]).toBeTruthy();
@@ -213,7 +219,7 @@ describe('EditorMosaic', () => {
         [DefaultEditorId.renderer]: 'renderer-value',
       } as const;
       for (const filename of Object.keys(values)) {
-        editorMosaic.editors.set(
+        editorMosaic.addEditor(
           filename as EditorId,
           new MonacoEditorMock() as any,
         );
@@ -275,7 +281,7 @@ describe('EditorMosaic', () => {
     beforeEach(() => {
       const editor = new MonacoEditorMock();
       editor.getValue.mockReturnValue(value);
-      editorMosaic.editors.set(filename, editor as any);
+      editorMosaic.addEditor(filename, editor as any);
     });
 
     it('returns the value for an editor if it exists', () => {
@@ -304,7 +310,7 @@ describe('EditorMosaic', () => {
     beforeEach(() => {
       const editor = new MonacoEditorMock();
       editor.getValue.mockReturnValue(value);
-      editorMosaic.editors.set(filename, editor as any);
+      editorMosaic.addEditor(filename, editor as any);
     });
 
     it('returns the value for an editor', () => {
@@ -332,7 +338,7 @@ describe('EditorMosaic', () => {
       const editor = new MonacoEditorMock();
       const viewState = { testViewState: true };
       editor.saveViewState.mockReturnValue(viewState);
-      editorMosaic.editors.set(filename, editor as any);
+      editorMosaic.addEditor(filename, editor as any);
 
       expect(editorMosaic.getEditorViewState(filename)).toBe(viewState);
     });
@@ -354,7 +360,7 @@ describe('EditorMosaic', () => {
       const model = { testModel: true };
       const editor = new MonacoEditorMock();
       editor.getModel.mockReturnValue(model);
-      editorMosaic.editors.set(filename, editor as any);
+      editorMosaic.addEditor(filename, editor as any);
 
       expect(editorMosaic.getEditorModel(filename)).toBe(model);
     });
@@ -365,11 +371,27 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('editor-layout', () => {
+  describe('focusedEditor', () => {
+    it('finds the focused editor if there is one', () => {
+      const filename = MAIN_JS;
+      editorMosaic.set(valuesIn);
+      editorMosaic.addEditor(filename, editor as any);
+      editor.hasTextFocus.mockReturnValue(true);
+
+      expect(editorMosaic.focusedEditor()).toBe(editor);
+    });
+
+    it('returns undefined if none have focus', () => {
+      editorMosaic.set(valuesIn);
+      expect(editorMosaic.focusedEditor()).toBeUndefined();
+    });
+  });
+
+  describe('layout', () => {
     it('layout() calls editor.layout() only once', async () => {
       const editor = new MonacoEditorMock();
       const filename = DefaultEditorId.html;
-      await editorMosaic.editors.set(filename, editor as any);
+      await editorMosaic.addEditor(filename, editor as any);
 
       editorMosaic.layout();
       editorMosaic.layout();
@@ -399,7 +421,7 @@ describe('EditorMosaic', () => {
         DefaultEditorId.renderer,
       ];
       for (const file of files) {
-        editorMosaic.editors.set(file, new MonacoEditorMock() as any);
+        editorMosaic.addEditor(file, new MonacoEditorMock() as any);
       }
 
       await editorMosaic.waitForEditorsToMount(files);
