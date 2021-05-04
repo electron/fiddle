@@ -78,6 +78,7 @@ export class StateMock {
   public hideChannels = jest.fn();
   public pushError = jest.fn();
   public pushOutput = jest.fn();
+  public flushOutput = jest.fn();
   public removeAcceleratorToBlock = jest.fn();
   public removeCustomMosaic = jest.fn();
   public removeVersion = jest.fn();

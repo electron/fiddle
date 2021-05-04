@@ -327,6 +327,7 @@ export class Runner {
     const {
       currentElectronVersion,
       isEnablingElectronLogging,
+      flushOutput,
       pushOutput,
       executionFlags,
       environmentVariables,
@@ -368,6 +369,8 @@ export class Runner {
         pushOutput(data, { bypassBuffer: false }),
       );
       this.child.on('close', async (code) => {
+        flushOutput();
+
         this.appState.isRunning = false;
         this.child = null;
 
