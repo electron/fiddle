@@ -1,6 +1,7 @@
 import * as MonacoType from 'monaco-editor';
 import { MosaicNode } from 'react-mosaic-component';
 import { action, observable, reaction } from 'mobx';
+import { waitFor } from '../utils/wait-for';
 
 import {
   createMosaicArrangement,
@@ -294,6 +295,18 @@ export class EditorMosaic {
         this.layoutDebounce = null;
       }, DEBOUNCE_MSEC);
     }
+  }
+
+  /**
+   * Waits for editors to mount on a list of Mosaic IDs
+   * @param editors
+   */
+  public async waitForEditorsToMount(files: EditorId[]) {
+    const allMounted = () => files.every((id) => this.editors.has(id));
+    const opts = { timeout: 3000, interval: 100 };
+    await waitFor(allMounted, opts).catch((error) => {
+      throw `Can't mount editors onto mosaics. ${error.toString()}`;
+    });
   }
 
   //=== Listen for user edits
