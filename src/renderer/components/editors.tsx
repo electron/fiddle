@@ -103,7 +103,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     this.setState({ isMounted: true });
     await this.loadMonaco();
-    this.props.appState.isUnsaved = false;
   }
 
   public componentWillUnmount() {

@@ -49,11 +49,11 @@ describe('EditorMosaic', () => {
   });
 
   describe('setVisibleMosaics()', () => {
-    it('updates the visible editors and creates a backup', async () => {
+    it('updates the visible editors and creates a backup', () => {
       editorMosaic.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
       editorMosaic.closedPanels = {};
       editorMosaic.customMosaics = [];
-      await editorMosaic.setVisibleMosaics([DefaultEditorId.main]);
+      editorMosaic.setVisibleMosaics([DefaultEditorId.main]);
 
       // we just need to mock something truthy here
       editorMosaic.editors.set(DefaultEditorId.main, {} as any);
@@ -136,16 +136,22 @@ describe('EditorMosaic', () => {
   });
 
   describe('values()', () => {
-    it('gets values', async () => {
+    it('gets values', () => {
       (waitForEditorsToMount as jest.Mock).mockResolvedValue(true);
       const values = createEditorValues();
-      await editorMosaic.set(values);
+      editorMosaic.set(values);
       expect(editorMosaic.values()).toStrictEqual(values);
     });
   });
 
   describe('set()', () => {
-    it('only shows non-empty files', async () => {
+    it('resets isEdited to false', () => {
+      editorMosaic.isEdited = true;
+      editorMosaic.set(createEditorValues());
+      expect(editorMosaic.isEdited).toBe(false);
+    });
+
+    it('only shows non-empty files', () => {
       const spy = jest.spyOn(editorMosaic, 'setVisibleMosaics');
 
       const values = {
@@ -156,7 +162,7 @@ describe('EditorMosaic', () => {
         [DefaultEditorId.preload]: '',
       } as const;
 
-      await editorMosaic.set(values);
+      editorMosaic.set(values);
       expect(spy).toHaveBeenCalledWith([
         DefaultEditorId.main,
         DefaultEditorId.renderer,
@@ -166,7 +172,7 @@ describe('EditorMosaic', () => {
       spy.mockRestore();
     });
 
-    it('shows visible mosaics for non-empty editor contents with custom mosaics', async () => {
+    it('shows visible mosaics for non-empty editor contents with custom mosaics', () => {
       const spy = jest.spyOn(editorMosaic, 'setVisibleMosaics');
 
       const file = 'file.js';
@@ -179,7 +185,7 @@ describe('EditorMosaic', () => {
         [file]: 'file-value',
       } as const;
 
-      await editorMosaic.set(values);
+      editorMosaic.set(values);
       expect(spy).toHaveBeenCalledWith([
         DefaultEditorId.main,
         DefaultEditorId.renderer,
@@ -190,19 +196,19 @@ describe('EditorMosaic', () => {
       spy.mockRestore();
     });
 
-    it('sorts the mosaics', async () => {
+    it('sorts the mosaics', () => {
       const spy = jest.spyOn(editorMosaic, 'setVisibleMosaics');
 
       // this order is defined inside the replaceFiddle() function
       const values = createEditorValues();
-      await editorMosaic.set(values);
+      editorMosaic.set(values);
       const expected = Object.keys(values).sort(compareEditors);
       expect(spy).toHaveBeenCalledWith(expected);
 
       spy.mockRestore();
     });
 
-    it('attempts to set values', async () => {
+    it('attempts to set values', () => {
       const values: EditorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -214,7 +220,7 @@ describe('EditorMosaic', () => {
           new MonacoEditorMock() as any,
         );
       }
-      await editorMosaic.set(values);
+      editorMosaic.set(values);
 
       for (const [filename, value] of Object.entries(values)) {
         const editor = editorMosaic.editors.get(filename as EditorId);
@@ -222,7 +228,7 @@ describe('EditorMosaic', () => {
       }
     });
 
-    it('attempts to set values for closed editors', async () => {
+    it('attempts to set values for closed editors', () => {
       editorMosaic.editors.delete(DefaultEditorId.main);
 
       (editorMosaic.closedPanels as any)[DefaultEditorId.main] = {
@@ -231,7 +237,7 @@ describe('EditorMosaic', () => {
       editorMosaic.closedPanels[DefaultEditorId.preload] = {};
       editorMosaic.closedPanels[DefaultEditorId.css] = {};
 
-      await editorMosaic.set({
+      editorMosaic.set({
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
@@ -251,11 +257,11 @@ describe('EditorMosaic', () => {
       });
     });
 
-    it('does not set a value if none passed in', async () => {
+    it('does not set a value if none passed in', () => {
       const id = DefaultEditorId.renderer;
       const oldValue = editorMosaic.getEditorValue(id);
 
-      await editorMosaic.set({
+      editorMosaic.set({
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
       });

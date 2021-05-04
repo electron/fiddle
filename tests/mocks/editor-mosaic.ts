@@ -14,8 +14,10 @@ export class EditorMosaicMock {
   @observable public closedPanels: Record<EditorId, EditorBackup> = {};
   @observable public customMosaics: EditorId[] = [];
   @observable public editors: Map<EditorId, Editor> = new Map();
+  @observable public isEdited = false;
   @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
+  public addEditor = jest.fn();
   public getAndRemoveEditorValueBackup = jest.fn();
   public getEditorBackup = jest
     .fn()

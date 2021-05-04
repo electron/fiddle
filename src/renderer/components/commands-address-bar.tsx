@@ -134,10 +134,11 @@ export class AddressBar extends React.Component<
   }
 
   public render() {
-    const { isUnsaved, activeGistAction } = this.props.appState;
+    const { activeGistAction } = this.props.appState;
+    const { isEdited } = this.props.appState.editorMosaic;
     const { value } = this.state;
     const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
-    const className = classnames('address-bar', isUnsaved, { empty: !value });
+    const className = classnames('address-bar', isEdited, { empty: !value });
 
     const isPerformingAction = activeGistAction !== GistActionState.none;
     return (

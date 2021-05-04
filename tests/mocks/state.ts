@@ -39,6 +39,7 @@ export class StateMock {
   @observable public isEnablingElectronLogging = false;
   @observable public isGenericDialogShowing = false;
   @observable public isInstallingModules = false;
+  @observable public isQuitting = false;
   @observable public isRunning = false;
   @observable public isSettingsShowing = false;
   @observable public isTokenDialogShowing = false;
@@ -69,6 +70,7 @@ export class StateMock {
   public pushOutput = jest.fn();
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
+  public runConfirmationDialog = jest.fn();
   public setGenericDialogOptions = jest.fn().mockReturnValue({});
   public setTheme = jest.fn();
   public setVersion = jest.fn().mockImplementation((version: string) => {

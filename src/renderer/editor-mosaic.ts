@@ -13,7 +13,7 @@ import {
   EditorId,
   EditorValues,
 } from '../interfaces';
-import { waitForEditorsToMount } from '../utils/editor-mounted';
+// import { waitForEditorsToMount } from '../utils/editor-mounted';
 import {
   compareEditors,
   getEmptyContent,
@@ -34,11 +34,16 @@ export class EditorMosaic {
   @observable
   public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
   @observable public closedPanels: Record<EditorId, EditorBackup> = {};
+  @observable public isEdited = false;
 
   constructor() {
     for (const name of [
       'getAndRemoveEditorValueBackup',
       'hideAndBackupMosaic',
+      'ignoreAllEdits',
+      'ignoreEdits',
+      'observeAllEdits',
+      'observeEdits',
       'layout',
       'removeCustomMosaic',
       'resetEditorLayout',
@@ -49,11 +54,24 @@ export class EditorMosaic {
     ]) {
       this[name] = this[name].bind(this);
     }
-    // A reaction: Each time mosaicArrangement is changed, we'll update
-    // the editor layout. That method is itself debounced.
+
+    // whenever the mosaics are changed,
+    // upate the editor layout
     reaction(
       () => this.mosaicArrangement,
       () => this.layout(),
+    );
+
+    // whenever isEdited is set, stop or start listening to edits again.
+    reaction(
+      () => this.isEdited,
+      () => {
+        if (this.isEdited) {
+          this.ignoreAllEdits();
+        } else {
+          this.observeAllEdits();
+        }
+      },
     );
   }
 
@@ -71,7 +89,7 @@ export class EditorMosaic {
     return value;
   }
 
-  @action public async setVisibleMosaics(visible: Array<EditorId>) {
+  @action public setVisibleMosaics(visible: Array<EditorId>) {
     const { editors, mosaicArrangement } = this;
     const currentlyVisible = getVisibleMosaics(mosaicArrangement);
 
@@ -96,7 +114,7 @@ export class EditorMosaic {
     // mount to ensure that we can load content into the editors as soon as they're
     // declared visible.
 
-    await waitForEditorsToMount(visible);
+    // await waitForEditorsToMount(visible);
   }
 
   /**
@@ -139,7 +157,7 @@ export class EditorMosaic {
     this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
   }
 
-  @action public async set(editorValues: EditorValues) {
+  @action public set(editorValues: EditorValues) {
     // Remove all previously created custom editors.
     this.customMosaics = Object.keys(editorValues).filter(
       (filename: string) => !isKnownFile(filename),
@@ -157,7 +175,7 @@ export class EditorMosaic {
       .sort(compareEditors);
 
     // Once loaded, we have a "saved" state.
-    await this.setVisibleMosaics(visibleEditors);
+    this.setVisibleMosaics(visibleEditors);
 
     // Set content for mosaics.
     for (const [name, value] of Object.entries(editorValues)) {
@@ -165,6 +183,7 @@ export class EditorMosaic {
       if (editor) {
         // The editor exists, set the value directly
         if (editor.getValue() !== value) {
+          this.ignoreEdits(editor);
           editor.setValue(value as string);
         }
       } else {
@@ -182,6 +201,13 @@ export class EditorMosaic {
         }
       }
     }
+
+    this.isEdited = false;
+  }
+
+  @action public addEditor(id: EditorId, editor: Editor) {
+    this.editors.set(id, editor);
+    this.observeEdits(editor);
   }
 
   /**
@@ -268,5 +294,28 @@ export class EditorMosaic {
         this.layoutDebounce = null;
       }, DEBOUNCE_MSEC);
     }
+  }
+
+  //=== Listen for user edits
+
+  private ignoreAllEdits() {
+    for (const editor of this.editors.values()) this.ignoreEdits(editor);
+  }
+
+  private ignoreEdits(editor: Editor) {
+    editor.onDidChangeModelContent(() => {
+      /* no-op */
+    });
+  }
+
+  private observeAllEdits() {
+    for (const editor of this.editors.values()) this.observeEdits(editor);
+  }
+
+  private observeEdits(editor: Editor) {
+    const disposable = editor.onDidChangeModelContent(() => {
+      this.isEdited ||= true;
+      disposable.dispose();
+    });
   }
 }

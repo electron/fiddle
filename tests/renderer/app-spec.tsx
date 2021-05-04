@@ -1,8 +1,13 @@
 import { App } from '../../src/renderer/app';
-import { waitFor } from '../../src/utils/wait-for';
-import { DefaultEditorId } from '../../src/interfaces';
+import { DefaultEditorId, EditorValues } from '../../src/interfaces';
+import { EditorMosaicMock, createEditorValues } from '../mocks/mocks';
+import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
-import { createEditorValues } from '../mocks/mocks';
+import { ipcRendererManager } from '../../src/renderer/ipc';
+import { waitFor } from '../../src/utils/wait-for';
+import { setupBinary } from '../../src/renderer/binary';
+
+global.fetch = window.fetch = jest.fn();
 
 jest.mock('../../src/renderer/components/header', () => ({
   Header: () => 'Header;',
@@ -14,6 +19,18 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
+// TODO(ckerr): these two `jest.mock` calls are required because
+// instantiating a new App instantiates a new State, which
+// calls setVersion(), which tries to fetch binary & types.
+jest.mock('../../src/renderer/binary', () => ({
+  getVersionState: jest.fn(),
+  setupBinary: jest.fn(),
+}));
+jest.mock('../../src/renderer/fetch-types', () => ({
+  getLocalTypePathForVersion: jest.fn(),
+  updateEditorTypeDefinitions: jest.fn(),
+}));
+
 describe('App component', () => {
   let app: App;
   let ElectronFiddle: any;
@@ -23,13 +40,14 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
-    ({ ElectronFiddle } = window as any);
+    (setupBinary as jest.Mock).mockReturnValue(() => Promise.resolve());
 
     // make a real App and inject it into the mocks
-    app = new App();
+    ({ ElectronFiddle } = window as any);
     const { app: appMock } = ElectronFiddle;
-    const { state, fileManager, remoteLoader, runner } = appMock;
-    Object.assign(app, { state, fileManager, remoteLoader, runner });
+    const { fileManager, remoteLoader, runner, state } = appMock;
+    app = new App();
+    Object.assign(app, { fileManager, remoteLoader, runner, state });
     ElectronFiddle.app = app;
   });
 
@@ -98,32 +116,19 @@ describe('App component', () => {
       expect(state.localPath).toBe('localPath');
     });
 
-    it('unsets state of previous source when called', (done) => {
-      app.state.isUnsaved = true;
+    it('unsets state of previous source when called', async () => {
+      app.state.editorMosaic.isEdited = true;
       app.state.localPath = '/fake/path';
 
+      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
         [DefaultEditorId.renderer]: 'renderer-value',
       };
 
-      expect(app.state.localPath).toBe('/fake/path');
-
-      app
-        .replaceFiddle(editorValues, {
-          gistId: 'gistId',
-        })
-        .then(() => {
-          expect(app.state.localPath).toBeUndefined();
-          done();
-        });
-
-      setTimeout(() => {
-        expect(app.state.isGenericDialogShowing).toBe(true);
-        app.state.genericDialogLastResult = true;
-        app.state.isGenericDialogShowing = false;
-      });
+      await app.replaceFiddle(editorValues, { gistId: 'gistId' });
+      expect(app.state.localPath).toBeUndefined();
     });
 
     it('marks the new Fiddle as Saved', async () => {
@@ -138,7 +143,7 @@ describe('App component', () => {
         gistId: 'gistId',
         templateName: 'templateName',
       });
-      expect(app.state.isUnsaved).toBe(false);
+      expect(app.state.editorMosaic.isEdited).toBe(false);
     });
 
     it('marks the new Fiddle as Saved with custom editors', async () => {
@@ -155,45 +160,37 @@ describe('App component', () => {
         gistId: 'gistId',
         templateName: 'templateName',
       });
-      expect(app.state.isUnsaved).toBe(false);
+      expect(app.state.editorMosaic.isEdited).toBe(false);
     });
 
     describe('when current Fiddle is unsaved and prompt appears', () => {
-      it('takes no action if prompt is rejected', (done) => {
+      it('takes no action if prompt is rejected', async () => {
         const { state } = app;
 
-        state.isUnsaved = true;
+        state.editorMosaic.isEdited = true;
         expect(state.localPath).toBeUndefined();
         expect(state.gistId).toBe('');
         expect(state.templateName).toBeUndefined();
 
-        app
-          .replaceFiddle(
-            {},
-            {
-              gistId: 'gistId',
-              templateName: 'templateName',
-              filePath: 'localPath',
-            },
-          )
-          .then(() => {
-            expect(state.editorMosaic.set).not.toHaveBeenCalled();
-            expect(state.localPath).toBeUndefined();
-            expect(state.gistId).toBe('');
-            expect(state.templateName).toBeUndefined();
-            done();
-          });
+        (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
 
-        setTimeout(() => {
-          expect(state.isGenericDialogShowing).toBe(true);
-          state.genericDialogLastResult = false;
-          state.isGenericDialogShowing = false;
-        });
+        await app.replaceFiddle(
+          {},
+          {
+            gistId: 'gistId',
+            templateName: 'templateName',
+            filePath: 'localPath',
+          },
+        );
+        expect(state.editorMosaic.set).not.toHaveBeenCalled();
+        expect(state.localPath).toBeUndefined();
+        expect(state.gistId).toBe('');
+        expect(state.templateName).toBeUndefined();
       });
 
-      it('sets editor values and source info if prompt is accepted', (done) => {
+      it('sets editor values and source info if prompt is accepted', async () => {
         const { state } = app;
-        state.isUnsaved = true;
+        state.editorMosaic.isEdited = true;
 
         const editorValues = {
           [DefaultEditorId.html]: 'html-value',
@@ -201,25 +198,17 @@ describe('App component', () => {
           [DefaultEditorId.renderer]: 'renderer-value',
         };
 
-        app
-          .replaceFiddle(editorValues, {
-            gistId: 'gistId',
-            templateName: 'templateName',
-            filePath: 'localPath',
-          })
-          .then(() => {
-            expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
-            expect(state.gistId).toBe('gistId');
-            expect(state.templateName).toBe('templateName');
-            expect(state.localPath).toBe('localPath');
-            done();
-          });
+        (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
 
-        setTimeout(() => {
-          expect(state.isGenericDialogShowing).toBe(true);
-          state.genericDialogLastResult = true;
-          state.isGenericDialogShowing = false;
+        await app.replaceFiddle(editorValues, {
+          gistId: 'gistId',
+          templateName: 'templateName',
+          filePath: 'localPath',
         });
+        expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
+        expect(state.gistId).toBe('gistId');
+        expect(state.templateName).toBe('templateName');
+        expect(state.localPath).toBe('localPath');
       });
     });
   });
@@ -228,7 +217,6 @@ describe('App component', () => {
     it('attaches to the handler', () => {
       window.addEventListener = jest.fn();
 
-      const app = new App();
       app.setupResizeListener();
 
       expect(window.addEventListener).toHaveBeenCalledWith(
@@ -242,7 +230,6 @@ describe('App component', () => {
     it(`adds the current theme's css to the document`, async () => {
       document.head!.innerHTML = "<style id='fiddle-theme'></style>";
 
-      const app = new App();
       await app.loadTheme();
 
       expect(document.head!.innerHTML).toEqual(
@@ -272,7 +259,6 @@ describe('App component', () => {
     it('removes the dark theme option if required', async () => {
       document.body.classList.add('bp3-dark');
 
-      const app = new App();
       app.state.theme = 'defaultLight';
 
       await app.loadTheme();
@@ -281,7 +267,6 @@ describe('App component', () => {
     });
 
     it('adds the dark theme option if required', async () => {
-      const app = new App();
       app.state.theme = 'custom-dark';
 
       await app.loadTheme();
@@ -380,6 +365,99 @@ describe('App component', () => {
       (app.state.title as any) = title;
       await waitFor(() => document.title?.length > 0);
       expect(document.title).toMatch(title);
+    });
+  });
+
+  describe('prompting to confirm replacing an unsaved fiddle', () => {
+    // make a second fiddle that differs from the first
+    const editorValues = createEditorValues();
+    const editorValues2: EditorValues = { MAIN_JS: '// hello world' };
+    let editorMosaic: EditorMosaicMock;
+
+    beforeEach(() => {
+      ({ editorMosaic } = app.state as any);
+    });
+
+    async function testDialog(confirm: boolean) {
+      const localPath = '/etc/passwd';
+      const gistId = '2c24ecd147c9c28c9b2d0cf738d4993a';
+
+      // load up a fiddle...
+      await app.replaceFiddle(editorValues, { filePath: localPath });
+      expect(app.state.gistId).toBeFalsy();
+      expect(app.state.localPath).toBe(localPath);
+
+      // ...mark it as edited so that trying a confirm dialog
+      // will be triggered when we try to replace it
+      editorMosaic.isEdited = true;
+
+      // set up a reaction to confirm the replacement
+      // when it happens
+      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(confirm);
+
+      // now try to replace
+      await app.replaceFiddle(editorValues2, { gistId });
+      expect(app.state.runConfirmationDialog).toHaveBeenCalled();
+    }
+
+    it('does not replace the fiddle if not confirmed', async () => {
+      await testDialog(false);
+      expect(app.state.editorMosaic.set).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces the fiddle if confirmed', async () => {
+      await testDialog(true);
+      expect(app.state.editorMosaic.set).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('prompting to confirm exiting an unsaved fiddle', () => {
+    beforeEach(() => {
+      // setup: mock close & ipc
+      window.close = jest.fn();
+      ipcRendererManager.send = jest.fn();
+      app.setupUnloadListeners();
+    });
+
+    it('can close the window if user accepts the dialog', async () => {
+      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+
+      // expect the app to be watching for exit if the fiddle is edited
+      app.state.editorMosaic.isEdited = true;
+      expect(window.onbeforeunload).toBeTruthy();
+      const result = await window.onbeforeunload!(undefined as any);
+      expect(result).toBe(false);
+      expect(window.close).toHaveBeenCalled();
+    });
+
+    it('can close the app after user accepts dialog', async () => {
+      app.state.isQuitting = true;
+      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+
+      // expect the app to be watching for exit if the fiddle is edited
+      app.state.editorMosaic.isEdited = true;
+      expect(window.onbeforeunload).toBeTruthy();
+      const result = await window.onbeforeunload!(undefined as any);
+
+      expect(result).toBe(false);
+      expect(window.close).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.CONFIRM_QUIT,
+      );
+    });
+
+    it('does nothing if user cancels the dialog', async () => {
+      app.state.isQuitting = true;
+      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
+
+      // expect the app to be watching for exit if the fiddle is edited
+      app.state.editorMosaic.isEdited = true;
+      expect(window.onbeforeunload).toBeTruthy();
+      const result = await window.onbeforeunload!(undefined as any);
+
+      expect(result).toBe(false);
+      expect(window.close).not.toHaveBeenCalled();
+      expect(ipcRendererManager.send).not.toHaveBeenCalled();
     });
   });
 });
