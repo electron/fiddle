@@ -10,98 +10,12 @@ save your Fiddle either as a GitHub Gist or to a local folder. Once published
 on GitHub, anyone can quickly try your Fiddle out by just entering it in the
 address bar.
 
-# Download
+**[Download Fiddle now!](https://www.electronjs.org/fiddle)**
 
-<table>
-<tbody>
-</tbody>
-  <tr>
-    <td>
-      <img src="./.github/images/windows.png" width="24"><br />
-      Windows
-    </td>
-    <td>
-      <span>32-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-ia32-setup.exe">
-        💿 Installer
-      </a>
-      <br />
-      <span>64-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-x64-setup.exe">
-        💿 Installer
-      </a>
-      <br />
-      <span>ARM64</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-win32-arm64-setup.exe">
-        💿 Installer
-      </a>
-      <span>
-        ❓ Don't know what kind of chip you have? Hit start, enter "processor" for info.
-      </span>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <img src="./.github/images/macos.png" width="24"><br />
-      macOS
-    </td>
-    <td>
-      <span>Intel Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-x64-0.20.0.zip">
-        📦 Standalone Zip
-      </a><br />
-      <span>Apple Silicon Processor</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/Electron.Fiddle-darwin-arm64-0.20.0.zip">
-        📦 Standalone Zip
-      </a><br />
-      <span>
-        ❓ Don't know what kind of chip you have? Learn more at <a href="https://support.apple.com/en-us/HT211814">apple.com</a>.
-      </span>
-    </td>
-  </tr>
-  <tr>
-    <td>
-      <img src="./.github/images/linux.png" width="24"><br />
-      Linux
-    </td>
-    <td>
-      <span>32-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.i386.rpm">
-        💿 rpm
-      </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_i386.deb">
-        💿 deb
-      </a><br />
-      <span>64-bit</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.x86_64.rpm">
-        💿 rpm
-      </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_amd64.deb">
-        💿 deb
-      </a><br />
-      <span>ARM64</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.arm64.rpm">
-        💿 rpm
-      </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_arm64.deb">
-        💿 deb
-      </a><br />
-      <span>ARMv7 (armhf)</span>
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle-0.20.0-1.arm64.rpm">
-        💿 rpm
-      </a> |
-      <a href="https://github.com/electron/fiddle/releases/download/v0.20.0/electron-fiddle_0.20.0_armhf.deb">
-        💿 deb
-      </a>
-    </td>
-  </tr>
-</table>
-
-<hr />
 
 <img src="https://user-images.githubusercontent.com/1426799/52155868-d3357c80-2639-11e9-9496-fa97b1dc7897.jpg" width="880px" alt="Electron Fiddle screenshot">
 
-# Features
+## Features
 
 ### Explore Electron
 
