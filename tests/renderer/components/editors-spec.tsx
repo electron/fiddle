@@ -5,7 +5,7 @@ import * as content from '../../../src/renderer/content';
 import { DEFAULT_EDITORS, DefaultEditorId } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
-import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
+import { createMosaicArrangement } from '../../../src/renderer/editor-mosaic';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 

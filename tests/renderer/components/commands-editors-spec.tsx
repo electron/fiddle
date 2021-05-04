@@ -6,8 +6,6 @@ import { EditorDropdown } from '../../../src/renderer/components/commands-editor
 
 import { EditorMosaicMock, StateMock } from '../../mocks/mocks';
 
-jest.mock('../../../src/utils/editors-mosaic-arrangement');
-
 describe('EditorDropdown component', () => {
   let store: StateMock;
   let editorMosaic: EditorMosaicMock;

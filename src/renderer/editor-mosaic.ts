@@ -1,9 +1,8 @@
 import * as MonacoType from 'monaco-editor';
-import { MosaicNode, getLeaves } from 'react-mosaic-component';
+import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 import { action, observable, reaction } from 'mobx';
 import { waitFor } from '../utils/wait-for';
 
-import { createMosaicArrangement } from '../utils/editors-mosaic-arrangement';
 import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
 import {
   DEFAULT_EDITORS,
@@ -19,6 +18,32 @@ import {
 } from '../utils/editor-utils';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
+
+/**
+ * Create a mosaic arrangement given an array of editor ids.
+ *
+ * @export
+ * @param {Array<EditorId>} input
+ * @returns {MosaicNode<EditorId>}
+ */
+export function createMosaicArrangement(
+  input: EditorId[],
+  direction: MosaicDirection = 'row',
+): MosaicNode<EditorId> {
+  if (input.length === 1) {
+    return input[0];
+  }
+
+  // This cuts out the first half of input. Input becomes the second half.
+  const secondHalf = [...input];
+  const firstHalf = secondHalf.splice(0, Math.floor(secondHalf.length / 2));
+
+  return {
+    direction,
+    first: createMosaicArrangement(firstHalf, 'column'),
+    second: createMosaicArrangement(secondHalf, 'column'),
+  };
+}
 
 export interface EditorBackup {
   value?: string;
@@ -87,7 +112,8 @@ export class EditorMosaic {
     return value;
   }
 
-  @action public setVisibleMosaics(visible: Array<EditorId>) {
+  @action public setVisibleMosaics(visible: EditorId[]) {
+    console.log('setVisibleMosaics', JSON.stringify(visible));
     const { editors } = this;
     const currentlyVisible = this.getVisibleMosaics();
 
@@ -99,7 +125,9 @@ export class EditorMosaic {
       }
     }
 
-    const updatedArrangement = createMosaicArrangement(visible);
+    const updatedArrangement = createMosaicArrangement(
+      visible.sort(compareEditors),
+    );
     console.log(
       `State: Setting visible mosaic panels`,
       visible,

@@ -4,13 +4,16 @@ import {
   EditorId,
   EditorValues,
 } from '../../src/interfaces';
-import { EditorBackup, EditorMosaic } from '../../src/renderer/editor-mosaic';
+import {
+  EditorBackup,
+  EditorMosaic,
+  createMosaicArrangement,
+} from '../../src/renderer/editor-mosaic';
 import {
   DEFAULT_MOSAIC_ARRANGEMENT,
   SORTED_EDITORS,
 } from '../../src/renderer/constants';
 import { compareEditors } from '../../src/utils/editor-utils';
-import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { MonacoEditorMock, createEditorValues } from '../mocks/mocks';
 import { waitFor } from '../../src/utils/wait-for';
 
@@ -87,11 +90,11 @@ describe('EditorMosaic', () => {
           second: SORTED_EDITORS[3],
         },
       });
-      expect(editorMosaic.closedPanels[DefaultEditorId.main]).toBeTruthy();
-      expect(
-        editorMosaic.closedPanels[DefaultEditorId.renderer],
-      ).toBeUndefined();
-      expect(editorMosaic.closedPanels[DefaultEditorId.html]).toBeUndefined();
+
+      const { closedPanels } = editorMosaic;
+      expect(closedPanels[DefaultEditorId.main]).toBeTruthy();
+      expect(closedPanels[DefaultEditorId.renderer]).toBeUndefined();
+      expect(closedPanels[DefaultEditorId.html]).toBeUndefined();
     });
   });
 
@@ -411,6 +414,33 @@ describe('EditorMosaic', () => {
       } catch (error) {
         expect(error).toMatch('Timed out');
       }
+    });
+  });
+
+  describe('createMosaicArrangement()', () => {
+    it('creates the correct arrangement for one visible panel', () => {
+      const result = createMosaicArrangement([DefaultEditorId.main]);
+
+      expect(result).toEqual(DefaultEditorId.main);
+    });
+
+    it('creates the correct arrangement for two visible panels', () => {
+      const result = createMosaicArrangement([
+        DefaultEditorId.main,
+        DefaultEditorId.renderer,
+      ]);
+
+      expect(result).toEqual({
+        direction: 'row',
+        first: DefaultEditorId.main,
+        second: DefaultEditorId.renderer,
+      });
+    });
+
+    it('creates the correct arrangement for the default visible panels', () => {
+      const result = createMosaicArrangement(SORTED_EDITORS.slice(0, 4));
+
+      expect(result).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
     });
   });
 });
