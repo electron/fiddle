@@ -2,17 +2,17 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import * as content from '../../../src/renderer/content';
-import { DEFAULT_EDITORS, DefaultEditorId } from '../../../src/interfaces';
+import { DefaultEditorId, EditorValues } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
-import { createMosaicArrangement } from '../../../src/renderer/editor-mosaic';
+import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 import {
-  EditorMosaicMock,
   MonacoEditorMock,
   StateMock,
+  createEditorValues,
 } from '../../mocks/mocks';
 
 jest.mock('monaco-loader', () =>
@@ -33,15 +33,17 @@ describe('Editors component', () => {
   let ElectronFiddle: any;
   let monaco: any;
   let store: StateMock;
-  let editorMosaic: EditorMosaicMock;
+  let editorMosaic: EditorMosaic;
+  let editorValues: EditorValues;
 
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
     ({ monaco, state: store } = ElectronFiddle.app);
-    ({ editorMosaic } = store);
-    store.editorMosaic.mosaicArrangement = createMosaicArrangement(
-      DEFAULT_EDITORS,
-    );
+    editorMosaic = new EditorMosaic();
+    store.editorMosaic = editorMosaic as any;
+
+    editorValues = createEditorValues();
+    store.editorMosaic.set(editorValues);
   });
 
   it('renders', () => {
@@ -70,8 +72,9 @@ describe('Editors component', () => {
     const filename = DefaultEditorId.html;
 
     it('handles an error', () => {
-      const editor = editorMosaic.editors.get(filename);
-      editor!.updateOptions.mockImplementationOnce(() => {
+      const editor = new MonacoEditorMock();
+      editorMosaic.addEditor(filename, editor as any);
+      editor.updateOptions.mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
 
@@ -85,9 +88,10 @@ describe('Editors component', () => {
       const wrapper = shallow(<Editors appState={store as any} />);
       const instance: Editors = wrapper.instance() as any;
 
+      const editor = new MonacoEditorMock();
+      editorMosaic.addEditor(filename, editor as any);
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
-      const editor = editorMosaic.editors.get(filename);
-      expect(editor!.updateOptions).toHaveBeenCalledWith({
+      expect(editor.updateOptions).toHaveBeenCalledWith({
         minimap: { enabled: false },
         wordWrap: 'off',
       });
