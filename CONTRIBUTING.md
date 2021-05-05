@@ -27,8 +27,8 @@ Here are some things to keep in mind as you file pull requests to fix bugs, add 
 
 * If you're unfamiliar with forking, branching, and pull requests, please see [GitHub's extensive
   documentation](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests).
-* Travis CI and AppVeyor are used to make sure that any new or changed code meets the project's
-  style guidelines, and that the project's testsuite passes for each new commit.
+* GitHub Actions is used to make sure that any new or changed code meets the project's
+  style guidelines, and that the project's test suite passes for each new commit.
 * Unless it's impractical, please write tests for your changes. This will help us so that we can
   spot regressions much easier.
 * When creating commit messages and pull request titles, please adhere to the [conventional
@@ -57,7 +57,7 @@ cd fiddle
 yarn
 ```
 
-4. Start Fiddle and Explore!
+4. Start Fiddle and explore!
 
 ```sh
 yarn start
@@ -76,12 +76,30 @@ environment variable `FIDDLE_VERBOSE_TESTS` when running.
 
 ## Release Process
 
-First, bump the version number and create a new `git` tag:
+> **Note:** Releasing is only available to contributors who have write
+> access to the `electron/fiddle` repository.
+
+First, create a new branch for your release.
+
+Then, run the [`yarn version`](https://classic.yarnpkg.com/en/docs/cli/version/)
+command, which will guide you through an interactive prompt to update the package
+version number.
 
 ```sh
 yarn version
+info Current version: 1.0.1
+question New version: 1.0.2
+info New version: 1.0.2
+✨  Done in 9.42s.
 ```
 
-Then, push that tag to the GitHub repository. CI will automatically draft a new
-release. Check that all the expected files are present, that installers work,
-and then publish the release.
+After running the command, you should have a commit updating the `version` field in
+the `package.json` file, as well as a git tag corresponding with the new version
+number.
+
+Then, you'll want to commit the version bump change onto the main branch. Push
+your commit upstream and open a new pull request.
+
+Finally, push your tag to the GitHub repository with `git push origin <tag_name>`.
+CI will automatically draft a new release. Check that all the expected files are present,
+that installers work, and then publish the release.
