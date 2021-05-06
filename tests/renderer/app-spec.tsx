@@ -1,12 +1,8 @@
 import { App } from '../../src/renderer/app';
-import { EditorBackup } from '../../src/utils/editor-backup';
 import { waitFor } from '../../src/utils/wait-for';
-import {
-  DefaultEditorId,
-  EditorValues,
-  PACKAGE_NAME,
-} from '../../src/interfaces';
+import { DefaultEditorId } from '../../src/interfaces';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { createEditorValues } from '../mocks/mocks';
 
 jest.mock('../../src/renderer/components/header', () => ({
   Header: () => 'Header;',
@@ -21,7 +17,6 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 describe('App component', () => {
   let app: App;
   let ElectronFiddle: any;
-  let editorMosaic: any;
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
@@ -29,7 +24,6 @@ describe('App component', () => {
 
   beforeEach(() => {
     ({ ElectronFiddle } = window as any);
-    ({ editorMosaic } = ElectronFiddle.app.state);
 
     // make a real App and inject it into the mocks
     app = new App();
@@ -74,35 +68,17 @@ describe('App component', () => {
 
   describe('getEditorValues()', () => {
     it('gets values', async () => {
-      const value = 'editor-value';
-      for (const editor of editorMosaic.editors.values()) {
-        editor.getValue.mockReturnValue(value);
-      }
+      const values = createEditorValues();
+      (app.state.editorMosaic.values as jest.Mock).mockReturnValue(values);
       const b = await app.getEditorValues({});
-      expect(b[DefaultEditorId.html]).toBe(value);
-      expect(b[DefaultEditorId.main]).toBe(value);
-      expect(b[DefaultEditorId.renderer]).toBe(value);
-      expect(b[PACKAGE_NAME]).toBeTruthy();
-      expect(JSON.parse(b[PACKAGE_NAME]!)).toBeTruthy();
-    });
-
-    it('throws if the Fiddle object is not present', async () => {
-      const app = new App();
-
-      (window as any).ElectronFiddle = null;
-      let threw = false;
-      try {
-        await app.getEditorValues({});
-      } catch (error) {
-        threw = true;
-      }
-
-      expect(threw).toBe(true);
+      expect(b).toStrictEqual(values);
     });
   });
 
   describe('replaceFiddle()', () => {
     it('sets editor values and source info', async () => {
+      const { state } = app;
+
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -111,73 +87,15 @@ describe('App component', () => {
         [DefaultEditorId.preload]: '',
       };
 
-      app.setEditorValues = jest.fn();
       await app.replaceFiddle(editorValues, {
         gistId: 'gistId',
         templateName: 'templateName',
         filePath: 'localPath',
       });
-      expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
-      expect(app.state.gistId).toBe('gistId');
-      expect(app.state.templateName).toBe('templateName');
-      expect(app.state.localPath).toBe('localPath');
-    });
-
-    it('only shows mosaic for non-empty editor contents', async () => {
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [DefaultEditorId.css]: '/* Empty */',
-        [DefaultEditorId.preload]: '',
-      };
-
-      const gistId = 'gistId';
-      await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-        DefaultEditorId.main,
-        DefaultEditorId.renderer,
-        DefaultEditorId.html,
-      ]);
-    });
-
-    it('shows visible mosaics for non-empty editor contents with custom mosaics', async () => {
-      const file = 'file.js';
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [DefaultEditorId.css]: '/* Empty */',
-        [DefaultEditorId.preload]: '',
-        [file]: 'file-value',
-      };
-
-      const gistId = 'gistId';
-      await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-        DefaultEditorId.main,
-        DefaultEditorId.renderer,
-        DefaultEditorId.html,
-        file,
-      ]);
-    });
-
-    it('shows visible mosaics in the correct pre-defined order', async () => {
-      // this order is defined inside the replaceFiddle() function
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [DefaultEditorId.css]: 'css-value',
-      };
-      const gistId = 'gistId';
-      await app.replaceFiddle(editorValues, { gistId });
-      expect(app.state.setVisibleMosaics).toHaveBeenCalledWith([
-        DefaultEditorId.main,
-        DefaultEditorId.renderer,
-        DefaultEditorId.html,
-        DefaultEditorId.css,
-      ]);
+      expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
+      expect(state.gistId).toBe('gistId');
+      expect(state.templateName).toBe('templateName');
+      expect(state.localPath).toBe('localPath');
     });
 
     it('unsets state of previous source when called', (done) => {
@@ -242,11 +160,12 @@ describe('App component', () => {
 
     describe('when current Fiddle is unsaved and prompt appears', () => {
       it('takes no action if prompt is rejected', (done) => {
-        app.setEditorValues = jest.fn();
-        app.state.isUnsaved = true;
-        expect(app.state.localPath).toBeUndefined();
-        expect(app.state.gistId).toBe('');
-        expect(app.state.templateName).toBeUndefined();
+        const { state } = app;
+
+        state.isUnsaved = true;
+        expect(state.localPath).toBeUndefined();
+        expect(state.gistId).toBe('');
+        expect(state.templateName).toBeUndefined();
 
         app
           .replaceFiddle(
@@ -258,23 +177,23 @@ describe('App component', () => {
             },
           )
           .then(() => {
-            expect(app.setEditorValues).not.toHaveBeenCalled();
-            expect(app.state.localPath).toBeUndefined();
-            expect(app.state.gistId).toBe('');
-            expect(app.state.templateName).toBeUndefined();
+            expect(state.editorMosaic.set).not.toHaveBeenCalled();
+            expect(state.localPath).toBeUndefined();
+            expect(state.gistId).toBe('');
+            expect(state.templateName).toBeUndefined();
             done();
           });
 
         setTimeout(() => {
-          expect(app.state.isGenericDialogShowing).toBe(true);
-          app.state.genericDialogLastResult = false;
-          app.state.isGenericDialogShowing = false;
+          expect(state.isGenericDialogShowing).toBe(true);
+          state.genericDialogLastResult = false;
+          state.isGenericDialogShowing = false;
         });
       });
 
       it('sets editor values and source info if prompt is accepted', (done) => {
-        app.setEditorValues = jest.fn();
-        app.state.isUnsaved = true;
+        const { state } = app;
+        state.isUnsaved = true;
 
         const editorValues = {
           [DefaultEditorId.html]: 'html-value',
@@ -289,90 +208,19 @@ describe('App component', () => {
             filePath: 'localPath',
           })
           .then(() => {
-            expect(app.setEditorValues).toHaveBeenCalledWith(editorValues);
-            expect(app.state.gistId).toBe('gistId');
-            expect(app.state.templateName).toBe('templateName');
-            expect(app.state.localPath).toBe('localPath');
+            expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
+            expect(state.gistId).toBe('gistId');
+            expect(state.templateName).toBe('templateName');
+            expect(state.localPath).toBe('localPath');
             done();
           });
 
         setTimeout(() => {
-          expect(app.state.isGenericDialogShowing).toBe(true);
-          app.state.genericDialogLastResult = true;
-          app.state.isGenericDialogShowing = false;
+          expect(state.isGenericDialogShowing).toBe(true);
+          state.genericDialogLastResult = true;
+          state.isGenericDialogShowing = false;
         });
       });
-    });
-  });
-
-  describe('setEditorValues()', () => {
-    it('attempts to set values', () => {
-      const editorValues: EditorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-      } as const;
-      app.setEditorValues(editorValues);
-
-      for (const [filename, value] of Object.entries(editorValues)) {
-        const editor = editorMosaic.editors.get(filename);
-        expect(editor.setValue).toHaveBeenCalledWith(value);
-      }
-    });
-
-    it('attempts to set values for closed editors', () => {
-      editorMosaic.editors.delete(DefaultEditorId.main);
-
-      (app.state.closedPanels as any)[DefaultEditorId.main] = {
-        model: { setValue: jest.fn() },
-      };
-      app.state.closedPanels[DefaultEditorId.preload] = {};
-      app.state.closedPanels[DefaultEditorId.css] = {};
-
-      app.setEditorValues({
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [DefaultEditorId.preload]: 'preload-value',
-        [DefaultEditorId.css]: 'css-value',
-      });
-
-      expect(
-        (app.state.closedPanels[DefaultEditorId.main] as EditorBackup)!.model!
-          .setValue,
-      ).toHaveBeenCalledWith('main-value');
-      expect(app.state.closedPanels[DefaultEditorId.preload]).toEqual({
-        value: 'preload-value',
-      });
-      expect(app.state.closedPanels[DefaultEditorId.css]).toEqual({
-        value: 'css-value',
-      });
-    });
-
-    it('throws if the Fiddle object is not present', async () => {
-      (window as any).ElectronFiddle = null;
-      let threw = false;
-      try {
-        await app.setEditorValues({
-          [DefaultEditorId.html]: '',
-          [DefaultEditorId.main]: '',
-          [DefaultEditorId.renderer]: '',
-        });
-      } catch (error) {
-        threw = true;
-      }
-
-      expect(threw).toBe(true);
-    });
-
-    it('does not set a value if none passed in', async () => {
-      await app.setEditorValues({
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-      });
-
-      const editor = editorMosaic.editors.get(DefaultEditorId.renderer);
-      expect(editor.setValue).not.toHaveBeenCalled();
     });
   });
 

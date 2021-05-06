@@ -1,6 +1,5 @@
 import {
   BlockableAccelerator,
-  DEFAULT_EDITORS,
   DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -16,10 +15,6 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import {
-  DEFAULT_MOSAIC_ARRANGEMENT,
-  SORTED_EDITORS,
-} from '../../src/renderer/constants';
 import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
@@ -28,7 +23,6 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import { createMosaicArrangement } from '../../src/utils/editors-mosaic-arrangement';
 import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
 import { MonacoEditorMock, VersionsMock } from '../mocks/mocks';
@@ -597,108 +591,6 @@ describe('AppState', () => {
 
       expect(appState.output[1].text).toBe('⚠️ Bwap bwap. Error encountered:');
       expect(appState.output[2].text).toBe('Error: Bwap bwap');
-    });
-  });
-
-  describe('getAndRemoveEditorValueBackup()', () => {
-    it('returns null if there is no backup', () => {
-      const result = appState.getAndRemoveEditorValueBackup(
-        DefaultEditorId.main,
-      );
-      expect(result).toEqual(undefined);
-    });
-
-    it('returns and deletes a backup if there is one', () => {
-      appState.closedPanels[DefaultEditorId.main] = { testBackup: true } as any;
-      const result = appState.getAndRemoveEditorValueBackup(
-        DefaultEditorId.main,
-      );
-      expect(result).toEqual({ testBackup: true });
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeUndefined();
-    });
-  });
-
-  describe('setVisibleMosaics()', () => {
-    it('updates the visible editors and creates a backup', async () => {
-      appState.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
-      appState.closedPanels = {};
-      appState.customMosaics = [];
-      await appState.setVisibleMosaics([DefaultEditorId.main]);
-
-      // we just need to mock something truthy here
-      const { editorMosaic } = (window as any).ElectronFiddle.app.state;
-      editorMosaic.editors.set(DefaultEditorId.main, {});
-
-      expect(appState.mosaicArrangement).toEqual(DefaultEditorId.main);
-      expect(appState.closedPanels[DefaultEditorId.renderer]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.html]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeUndefined();
-    });
-  });
-
-  describe('removeCustomMosaic()', () => {
-    it('removes a given custom mosaic', () => {
-      const file = 'file.js';
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
-      appState.customMosaics = [file];
-
-      appState.removeCustomMosaic(file);
-
-      expect(appState.customMosaics).toEqual([]);
-    });
-  });
-
-  describe('hideAndBackupMosaic()', () => {
-    it('hides a given editor and creates a backup', () => {
-      appState.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
-      appState.closedPanels = {};
-      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: SORTED_EDITORS[1],
-        second: {
-          direction: 'column',
-          first: SORTED_EDITORS[2],
-          second: SORTED_EDITORS[3],
-        },
-      });
-      expect(appState.closedPanels[DefaultEditorId.main]).toBeTruthy();
-      expect(appState.closedPanels[DefaultEditorId.renderer]).toBeUndefined();
-      expect(appState.closedPanels[DefaultEditorId.html]).toBeUndefined();
-    });
-  });
-
-  describe('showMosaic()', () => {
-    it('shows a given editor', () => {
-      appState.mosaicArrangement = DefaultEditorId.main;
-      appState.showMosaic(DefaultEditorId.html);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: DefaultEditorId.main,
-        second: DefaultEditorId.html,
-      });
-    });
-  });
-
-  describe('resetEditorLayout()', () => {
-    it('Puts editors in default arrangement', () => {
-      appState.hideAndBackupMosaic(SORTED_EDITORS[0]);
-
-      expect(appState.mosaicArrangement).toEqual({
-        direction: 'row',
-        first: SORTED_EDITORS[1],
-        second: {
-          direction: 'column',
-          first: SORTED_EDITORS[2],
-          second: SORTED_EDITORS[3],
-        },
-      });
-
-      appState.resetEditorLayout();
-
-      expect(appState.mosaicArrangement).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
     });
   });
 

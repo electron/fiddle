@@ -1,3 +1,5 @@
+import { toJS } from 'mobx';
+
 const platform = process.platform;
 
 export function overridePlatform(value: NodeJS.Platform) {
@@ -50,4 +52,19 @@ export class FetchMock {
       });
     });
   }
+}
+
+// return an object containing props in 'a' that are different from in 'b'
+export function objectDifference<Type>(a: Type, b: Type): Type {
+  const serialize = (input: any) => JSON.stringify(toJS(input));
+
+  const o = {};
+  for (const entry of Object.entries(a)) {
+    const key = entry[0];
+    const val = toJS(entry[1]);
+    if (serialize(val) == serialize(b[key])) continue;
+
+    o[key] = key === 'editorMosaic' ? objectDifference(val, b[key]) : toJS(val);
+  }
+  return o as Type;
 }

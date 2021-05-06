@@ -136,7 +136,7 @@ export class Editor extends React.Component<EditorProps> {
     const { appState, id } = this.props;
     const { version } = appState;
 
-    const backup = appState.getAndRemoveEditorValueBackup(id);
+    const backup = appState.editorMosaic.getAndRemoveEditorValueBackup(id);
 
     if (backup) {
       console.log(`Editor: Backup found, restoring state`);

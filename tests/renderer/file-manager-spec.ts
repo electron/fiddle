@@ -71,11 +71,11 @@ describe('FileManager', () => {
 
     it('does not do anything with incorrect inputs', async () => {
       await fm.openFiddle({} as any);
-      expect(app.setEditorValues).not.toHaveBeenCalled();
+      expect(app.replaceFiddle).not.toHaveBeenCalled();
     });
 
     it('does not do anything if cancelled', async () => {
-      (app.setEditorValues as jest.Mock).mockResolvedValueOnce(false);
+      (app.replaceFiddle as jest.Mock).mockResolvedValueOnce(false);
       await fm.openFiddle('/fake/path');
     });
   });
@@ -93,7 +93,7 @@ describe('FileManager', () => {
       const file = 'file.js';
       const content = 'hi';
       const values = { ...editorValues, [file]: content };
-      app.state.customMosaics = [file];
+      app.state.editorMosaic.customMosaics = [file];
       app.getEditorValues.mockReturnValueOnce(values);
 
       await fm.saveFiddle('/fake/path');
@@ -250,7 +250,7 @@ describe('FileManager', () => {
       const values = { ...editorValues, [file]: content };
       app.getEditorValues.mockReturnValue(values);
       expected.set(file, content);
-      app.state.customMosaics = [file];
+      app.state.editorMosaic.customMosaics = [file];
 
       expect(await fm.getFiles()).toStrictEqual(expected);
     });

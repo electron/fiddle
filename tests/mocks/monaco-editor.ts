@@ -1,3 +1,5 @@
+import { objectDifference } from '../utils';
+
 export class MonacoEditorMock {
   public action = {
     isSupported: jest.fn(),
@@ -34,4 +36,9 @@ export class MonacoEditorMock {
   public updateOptions = jest.fn();
 
   private listener: any;
+
+  public toJSON() {
+    const o = objectDifference(this, new MonacoEditorMock());
+    return Object.keys(o).length === 0 ? 'default MonacoEditorMock' : o;
+  }
 }

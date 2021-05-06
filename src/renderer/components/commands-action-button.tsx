@@ -424,7 +424,7 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const { customMosaics } = this.props.appState;
+    const { customMosaics } = this.props.appState.editorMosaic;
 
     const filesList = {};
 

@@ -8,7 +8,6 @@ import { IpcEvents } from '../../../src/ipc-events';
 import { createMosaicArrangement } from '../../../src/utils/editors-mosaic-arrangement';
 import { getFocusedEditor } from '../../../src/utils/focused-editor';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { updateEditorLayout } from '../../../src/utils/editor-layout';
 
 import {
   EditorMosaicMock,
@@ -30,10 +29,6 @@ jest.mock('../../../src/utils/focused-editor', () => ({
   getFocusedEditor: jest.fn(),
 }));
 
-jest.mock('../../../src/utils/editor-layout', () => ({
-  updateEditorLayout: jest.fn(),
-}));
-
 describe('Editors component', () => {
   let ElectronFiddle: any;
   let monaco: any;
@@ -44,7 +39,9 @@ describe('Editors component', () => {
     ({ ElectronFiddle } = window as any);
     ({ monaco, state: store } = ElectronFiddle.app);
     ({ editorMosaic } = store);
-    store.mosaicArrangement = createMosaicArrangement(DEFAULT_EDITORS);
+    store.editorMosaic.mosaicArrangement = createMosaicArrangement(
+      DEFAULT_EDITORS,
+    );
   });
 
   it('renders', () => {
@@ -109,7 +106,7 @@ describe('Editors component', () => {
   });
 
   it('does not render toolbar controls if only one editor exists', () => {
-    store.mosaicArrangement = DefaultEditorId.main;
+    store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
     const toolbar = instance.renderToolbar(
@@ -120,23 +117,15 @@ describe('Editors component', () => {
     expect(toolbar).toMatchSnapshot();
   });
 
-  it('componentWillUnmount() unsubscribes the layout reaction', () => {
-    const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
-    (instance as any).disposeLayoutAutorun = jest.fn();
-
-    wrapper.unmount();
-
-    expect(instance.disposeLayoutAutorun).toHaveBeenCalledTimes(1);
-  });
-
   it('onChange() updates the mosaic arrangement in the appState', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
 
     instance.onChange({ testArrangement: true } as any);
 
-    expect(store.mosaicArrangement).toEqual({ testArrangement: true });
+    expect(store.editorMosaic.mosaicArrangement).toEqual({
+      testArrangement: true,
+    });
   });
 
   describe('IPC commands', () => {
@@ -301,14 +290,6 @@ describe('Editors component', () => {
       const id = DefaultEditorId.html;
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
-    });
-  });
-
-  describe('disposeLayoutAutorun()', () => {
-    it('automatically updates the layout when the mosaic arrangement changes', () => {
-      shallow(<Editors appState={store as any} />);
-      store.mosaicArrangement = DefaultEditorId.main;
-      expect(updateEditorLayout).toHaveBeenCalledTimes(1);
     });
   });
 });
