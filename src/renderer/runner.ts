@@ -387,7 +387,7 @@ export class Runner {
         await this.deleteUserData();
 
         if (typeof code !== 'number') {
-          pushOutput(`Electron exited with signal ${signal}`);
+          pushOutput(`Electron exited with signal ${signal}.`);
           resolve(RunResult.INVALID);
         } else {
           pushOutput(`Electron exited with code ${code}.`);
