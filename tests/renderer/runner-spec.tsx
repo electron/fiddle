@@ -124,6 +124,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Electron exited with code 0.',
       );
@@ -145,6 +146,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `Electron exited with code ${ARBITRARY_FAIL_CODE}.`,
       );
@@ -168,6 +170,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.INVALID);
       expect(store.isRunning).toBe(false);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
       expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
     });
