@@ -175,6 +175,7 @@ export class AppState {
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
     this.pushOutput = this.pushOutput.bind(this);
+    this.flushOutput = this.flushOutput.bind(this);
     this.getVersion = this.getVersion.bind(this);
     this.hasVersion = this.hasVersion.bind(this);
     this.removeVersion = this.removeVersion.bind(this);
