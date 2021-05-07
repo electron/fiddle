@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
+import isRunning from 'is-running';
 
 import {
   EditorValues,
@@ -201,10 +202,17 @@ export class Runner {
    * @returns {boolean} true if runner is now idle
    * @memberof Runner
    */
-  public stop(): boolean {
+  public stop(): void {
     this.appState.isRunning = !!this.child && !this.child.kill();
-    const isIdle = !this.appState.isRunning;
-    return isIdle;
+
+    // If the child process is still alive 1 second after we've
+    // attempted to kill it by normal means, kill it forcefully.
+    setTimeout(() => {
+      const pid = this.child?.pid;
+      if (pid && isRunning(pid)) {
+        this.child?.kill('SIGKILL');
+      }
+    }, 1000);
   }
 
   /**
@@ -368,7 +376,7 @@ export class Runner {
       this.child.stderr!.on('data', (data) =>
         pushOutput(data, { bypassBuffer: false }),
       );
-      this.child.on('close', async (code) => {
+      this.child.on('close', async (code, signal) => {
         flushOutput();
 
         this.appState.isRunning = false;
@@ -379,14 +387,11 @@ export class Runner {
         await this.deleteUserData();
 
         if (typeof code !== 'number') {
-          pushOutput('Electron exited.');
+          pushOutput(`Electron exited with signal ${signal}.`);
           resolve(RunResult.INVALID);
-        } else if (!code) {
-          pushOutput(`Electron exited with code ${code}.`);
-          resolve(RunResult.SUCCESS);
         } else {
           pushOutput(`Electron exited with code ${code}.`);
-          resolve(RunResult.FAILURE);
+          resolve(!code ? RunResult.SUCCESS : RunResult.FAILURE);
         }
       });
     });

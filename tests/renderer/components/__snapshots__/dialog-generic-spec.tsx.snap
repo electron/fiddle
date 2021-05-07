@@ -8,6 +8,7 @@ exports[`GenericDialog component renders confirmation 1`] = `
   icon="help"
   intent="primary"
   isOpen={true}
+  loading={false}
   onClose={[Function]}
 >
   <p />
@@ -22,6 +23,7 @@ exports[`GenericDialog component renders confirmation 2`] = `
   icon="info-sign"
   intent="success"
   isOpen={true}
+  loading={false}
   onClose={[Function]}
 >
   <p />
@@ -36,6 +38,7 @@ exports[`GenericDialog component renders warning 1`] = `
   icon="warning-sign"
   intent="danger"
   isOpen={true}
+  loading={false}
   onClose={[Function]}
 >
   <p />
@@ -50,6 +53,7 @@ exports[`GenericDialog component renders with an input prompt 1`] = `
   icon="help"
   intent="primary"
   isOpen={true}
+  loading={false}
   onClose={[Function]}
 >
   <p />
@@ -67,6 +71,7 @@ exports[`GenericDialog component renders with an input prompt and placeholder 1`
   icon="help"
   intent="primary"
   isOpen={true}
+  loading={false}
   onClose={[Function]}
 >
   <p />
