@@ -55,6 +55,13 @@ describe('gist', () => {
       expect(actual).toBe(expected);
     });
 
+    it('trims extra spaces from the gist url', () => {
+      const expected = GIST_ID;
+      const input = `   https://gist.github.com/${expected} `;
+      const actual = getGistId(input);
+      expect(actual).toBe(expected);
+    });
+
     it('recognizes gist URLs without usernames', () => {
       const expected = GIST_ID;
       const input = `https://gist.github.com/${expected}`;

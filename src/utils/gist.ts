@@ -9,10 +9,12 @@
  *-  https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f
  *-  https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f/
  *
- * @pararm {string} input
+ * @pararm {string} rawInput
  * returns {(string | null)}
  */
-export function getGistId(input: string): string | null {
+export function getGistId(rawInput: string): string | null {
+  let input = rawInput.trim();
+
   let id: string | undefined = input;
   if (input.startsWith('https://gist.github.com')) {
     if (input.endsWith('/')) {
@@ -20,10 +22,8 @@ export function getGistId(input: string): string | null {
     }
     id = input.split('/').pop();
   }
-  if (id && id.match(/[0-9A-Fa-f]{32}/)) {
-    return id;
-  }
-  return null;
+
+  return id?.match(/[0-9A-Fa-f]{32}/) ? id : null;
 }
 
 /**
