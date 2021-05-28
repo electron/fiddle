@@ -62,6 +62,7 @@ export interface SetupRequest {
   version?: string;
   showChannels: ElectronReleaseChannel[];
   hideChannels: ElectronReleaseChannel[];
+  useObsolete?: boolean;
 }
 
 export interface BisectRequest {

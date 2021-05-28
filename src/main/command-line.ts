@@ -18,7 +18,7 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     hideChannels: [],
   };
 
-  const { fiddle, version, betas, nightlies } = opts;
+  const { fiddle, version, betas, nightlies, obsolete } = opts;
 
   if (fs.existsSync(fiddle)) {
     config.fiddle = { filePath: fiddle };
@@ -34,6 +34,10 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
 
   if (version) {
     config.version = version;
+  }
+
+  if (obsolete === true || obsolete === false) {
+    config.useObsolete = obsolete;
   }
 
   if (betas) {
@@ -97,6 +101,8 @@ export async function processCommandLine(argv: string[]) {
     .option('--no-nightlies', 'Omit nightly releases')
     .option('--betas', 'Include beta releases')
     .option('--no-betas', 'Omit beta releases')
+    .option('--obsolete', 'Include obsolete releases')
+    .option('--no-obsolete', 'Omit obsolete releases')
     .action(bisect);
 
   program
