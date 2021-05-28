@@ -69,20 +69,26 @@ async function sendTask(type: IpcEvents, task: any) {
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
-  sendTask(IpcEvents.TASK_BISECT, {
-    setup: getSetup(opts),
-    goodVersion: good,
-    badVersion: bad,
-  });
+  try {
+    await sendTask(IpcEvents.TASK_BISECT, {
+      setup: getSetup(opts),
+      goodVersion: good,
+      badVersion: bad,
+    });
+  } catch (err) {
+    console.error(err);
+    process.exit(1);
+  }
 }
 
 async function test(opts: commander.OptionValues) {
   try {
-    sendTask(IpcEvents.TASK_TEST, {
+    await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
   } catch (err) {
     console.error(err);
+    process.exit(1);
   }
 }
 

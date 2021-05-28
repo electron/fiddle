@@ -68,12 +68,16 @@ describe('processCommandLine()', () => {
     it('handles a --fiddle option that is unrecognizable', async () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, '--fiddle', FIDDLE];
-      const expected = `Unrecognized Fiddle "${FIDDLE}"`;
-      const spy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const exitExpected = 1;
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
       await processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
-      expect(spy).toHaveBeenCalledWith(expected);
-      spy.mockReset();
+      expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
+      expect(exitSpy).toHaveBeenCalledWith(exitExpected);
+      consoleSpy.mockReset();
+      exitSpy.mockReset();
     });
 
     it('handles a --version option', async () => {
@@ -127,6 +131,21 @@ describe('processCommandLine()', () => {
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${ElectronReleaseChannel.beta}"],"showChannels":[]}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
+    });
+
+    it('handles a --fiddle option that is unrecognizable', async () => {
+      const FIDDLE = '✨🤪💎';
+      const argv = [...ARGV, '--fiddle', FIDDLE];
+      const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
+      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const exitExpected = 1;
+      const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+      await processCommandLine(argv);
+      expect(ipcMainManager.send).not.toHaveBeenCalled();
+      expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
+      expect(exitSpy).toHaveBeenCalledWith(exitExpected);
+      consoleSpy.mockReset();
+      exitSpy.mockReset();
     });
 
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
