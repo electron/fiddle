@@ -46,6 +46,7 @@ export class StateMock {
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
   @observable public output = [];
+  @observable public showObsoleteVersions = false;
   @observable public showUndownloadedVersions = false;
   @observable public theme: string | null;
   @observable public title = 'Electron Fiddle';
