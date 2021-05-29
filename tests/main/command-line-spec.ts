@@ -31,6 +31,15 @@ describe('processCommandLine()', () => {
     expect(ipcMainManager.send).not.toHaveBeenCalled();
   });
 
+  it('exits with 2 if called with invalid parameters', async () => {
+    const argv = [...ARGV_PREFIX, 'test', '--this-option-is-unknown=true'];
+    const exitCode = 2;
+    const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+    await processCommandLine(argv);
+    expect(exitSpy).toHaveBeenCalledWith(exitCode);
+    exitSpy.mockReset();
+  });
+
   function expectSendCalledOnceWith(event: IpcEvents, payload: string) {
     const send = ipcMainManager.send as jest.Mock;
     expect(send).toHaveBeenCalledTimes(1);
