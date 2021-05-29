@@ -70,7 +70,7 @@ describe('processCommandLine()', () => {
       const argv = [...ARGV, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      const exitExpected = 1;
+      const exitExpected = 2;
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
       await processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
@@ -135,10 +135,10 @@ describe('processCommandLine()', () => {
 
     it('handles a --fiddle option that is unrecognizable', async () => {
       const FIDDLE = '✨🤪💎';
-      const argv = [...ARGV, '--fiddle', FIDDLE];
+      const argv = [...ARGV, GOOD, BAD, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
-      const exitExpected = 1;
+      const exitExpected = 2;
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
       await processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
