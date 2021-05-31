@@ -1,4 +1,3 @@
-import { show } from '@blueprintjs/core/lib/esm/components/context-menu/contextMenu';
 import {
   app,
   BrowserWindow,
@@ -239,7 +238,6 @@ function getFileMenu(
     {
       label: 'Open Recent',
       role: 'recentDocuments',
-      // click: ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, what is my file path),
       submenu: [
         {
           label: 'Clear Recent',

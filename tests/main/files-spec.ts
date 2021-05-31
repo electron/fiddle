@@ -70,8 +70,8 @@ describe('files', () => {
     });
 
     it('adds the opened file path to recent files', async () => {
+      (app.addRecentDocument as jest.Mock).mock.calls[0];
       await showOpenDialog();
-      // (app.addRecentDocument as jest.Mock).mock.calls[0];
       expect(app.addRecentDocument).toHaveBeenCalled();
     });
   });

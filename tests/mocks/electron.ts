@@ -104,6 +104,7 @@ function CreateWindowStub() {
 }
 
 const app = {
+  addRecentDocument: jest.fn(),
   getName: jest.fn().mockReturnValue('Electron Fiddle'),
   exit: jest.fn(),
   hide: jest.fn(),

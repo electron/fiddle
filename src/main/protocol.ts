@@ -92,6 +92,12 @@ export const listenForProtocolHandler = () => {
       handlePotentialProtocolLaunch(url);
     }
   });
+  app.on('open-file', (_, url) => {
+    if (!url || url.length < 1) {
+      return;
+    }
+    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [url]);
+  });
 
   // pass protocol URL via npm start args in dev mode
   if (isDevMode() && process.env.npm_config_argv) {
