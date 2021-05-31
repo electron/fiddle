@@ -10,7 +10,7 @@ import {
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 
-import { dialog } from 'electron';
+import { app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
@@ -67,6 +67,12 @@ describe('files', () => {
       await showOpenDialog();
 
       expect(mockTarget.webContents.send).toHaveBeenCalledTimes(1);
+    });
+
+    it('adds the opened file path to recent files', async () => {
+      await showOpenDialog();
+      // (app.addRecentDocument as jest.Mock).mock.calls[0];
+      expect(app.addRecentDocument).toHaveBeenCalled();
     });
   });
 
