@@ -25,7 +25,7 @@ const TEST_TEMPLATE_BRANCH = 'test-template';
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
  * @returns {Promise<string>} Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
@@ -61,7 +61,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
 /**
  * Get a cached copy of the Electron branch's fiddle.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `master`
+ * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
  * @returns {Promise<EditorValues>}
  */
 function getQuickStart(branch: string): Promise<EditorValues> {
