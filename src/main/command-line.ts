@@ -51,17 +51,18 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
   return config;
 }
 
+const exitCodes = Object.freeze({
+  [RunResult.SUCCESS]: 0,
+  [RunResult.FAILURE]: 1,
+  [RunResult.INVALID]: 2,
+});
+
 async function sendTask(type: IpcEvents, task: any) {
   const onOutputEntry = (_: any, msg: OutputEntry) => {
     console.log(
       `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
     );
   };
-  const exitCodes = Object.freeze({
-    [RunResult.SUCCESS]: 0,
-    [RunResult.FAILURE]: 1,
-    [RunResult.INVALID]: 2,
-  });
   const onTaskDone = (_: any, r: RunResult) => app.exit(exitCodes[r]);
   ipcMainManager.on(IpcEvents.OUTPUT_ENTRY, onOutputEntry);
   ipcMainManager.once(IpcEvents.TASK_DONE, onTaskDone);
@@ -69,25 +70,32 @@ async function sendTask(type: IpcEvents, task: any) {
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
-  sendTask(IpcEvents.TASK_BISECT, {
-    setup: getSetup(opts),
-    goodVersion: good,
-    badVersion: bad,
-  });
+  try {
+    await sendTask(IpcEvents.TASK_BISECT, {
+      setup: getSetup(opts),
+      goodVersion: good,
+      badVersion: bad,
+    });
+  } catch (err) {
+    console.error(err);
+    process.exit(exitCodes[RunResult.INVALID]);
+  }
 }
 
 async function test(opts: commander.OptionValues) {
   try {
-    sendTask(IpcEvents.TASK_TEST, {
+    await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
   } catch (err) {
     console.error(err);
+    process.exit(exitCodes[RunResult.INVALID]);
   }
 }
 
 export async function processCommandLine(argv: string[]) {
   const program = new commander.Command();
+  program.exitOverride();
 
   program
     .command('bisect <goodVersion> <badVersion>')
@@ -121,6 +129,11 @@ Example calls:
 
   // do nothing if argv holds no commands/options
   if (argv.length > (process.defaultApp ? 2 : 1)) {
-    program.parse(argv, { from: 'electron' });
+    try {
+      program.parse(argv, { from: 'electron' });
+    } catch (err) {
+      console.error(err);
+      process.exit(exitCodes[RunResult.INVALID]);
+    }
   }
 }
