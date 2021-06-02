@@ -36,7 +36,7 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     config.version = version;
   }
 
-  if (obsolete === true || obsolete === false) {
+  if (typeof obsolete === 'boolean') {
     config.useObsolete = obsolete;
   }
 

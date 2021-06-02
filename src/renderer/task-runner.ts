@@ -107,7 +107,7 @@ export class TaskRunner {
     const { log } = this;
     const { fiddle, hideChannels, showChannels, useObsolete, version } = req;
 
-    if (useObsolete === true || useObsolete === false) {
+    if (typeof useObsolete === 'boolean') {
       this.showObsoleteVersions(useObsolete);
     }
 
