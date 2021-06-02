@@ -57,6 +57,7 @@ describe('Task Runner component', () => {
     const GIST_ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
     const SHOW = [ElectronReleaseChannel.stable];
     const HIDE = [ElectronReleaseChannel.beta, ElectronReleaseChannel.nightly];
+    const USE_OBSOLETE = true;
     const VERSIONS = [
       '12.0.0',
       '11.2.0',
@@ -77,6 +78,7 @@ describe('Task Runner component', () => {
       setup: {
         showChannels: SHOW,
         hideChannels: HIDE,
+        useObsolete: USE_OBSOLETE,
         fiddle: {
           gistId: GIST_ID,
         },
@@ -98,6 +100,7 @@ describe('Task Runner component', () => {
 
       expect(app.openFiddle).toHaveBeenCalledTimes(1);
       expect(app.openFiddle).toHaveBeenCalledWith(req.setup.fiddle);
+      expect(appState.showObsoleteVersions).toBe(USE_OBSOLETE);
       expect(appState.setVersion).not.toHaveBeenCalled();
       expect(appState.showChannels).toHaveBeenCalledTimes(1);
       expect(appState.showChannels).toHaveBeenCalledWith(SHOW);

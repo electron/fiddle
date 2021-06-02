@@ -88,6 +88,7 @@ exports[`ElectronSettings component renders 1`] = `
         transitionDuration={100}
       >
         <Blueprint3.Checkbox
+          checked={false}
           id="showObsoleteVersions"
           inline={true}
           label="Obsolete"

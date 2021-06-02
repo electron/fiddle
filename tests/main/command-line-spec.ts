@@ -142,6 +142,20 @@ describe('processCommandLine()', () => {
       expectBisectCalledOnceWith(expected);
     });
 
+    it('handles a --obsolete option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--obsolete'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":true}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
+    it('handles a --no-obsolete option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--no-obsolete'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":false}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
     it('handles a --fiddle option that is unrecognizable', async () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, GOOD, BAD, '--fiddle', FIDDLE];
