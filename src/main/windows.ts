@@ -79,12 +79,6 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  // ipcMainManager.on(IpcEvents.SET_SHOW_ME_TEMPLATE, (_, result) => {
-  //   if (browserWindow && browserWindow.isFocused()) {
-  //     setupMenu(result);
-  //   }
-  // });
-
   ipcMainManager.handleOnce(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};
     const pathsToQuery = [

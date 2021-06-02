@@ -57,6 +57,11 @@ export interface SetFiddleOptions {
   gistId?: string;
 }
 
+export interface SetUpMenuOptions {
+  acceleratorsToBlock?: BlockableAccelerator[] | null;
+  activeTemplate?: string | null;
+}
+
 export interface SetupRequest {
   fiddle?: SetFiddleOptions;
   version?: string;

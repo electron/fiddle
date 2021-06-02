@@ -33,7 +33,7 @@ export async function onReady() {
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
 
-  setupMenu();
+  setupMenu({});
   setupMenuHandler();
   setupProtocolHandler();
   setupFileListeners();
@@ -59,14 +59,20 @@ export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.BLOCK_ACCELERATORS,
     async (_, acceleratorsToBlock) => {
-      (await import('./menu')).setupMenu(acceleratorsToBlock);
+      (await import('./menu')).setupMenu({
+        acceleratorsToBlock,
+        activeTemplate: null,
+      });
     },
   );
 
   ipcMainManager.on(
     IpcEvents.SET_SHOW_ME_TEMPLATE,
     async (_, activeTemplate) => {
-      (await import('./menu')).setupMenu([], activeTemplate);
+      (await import('./menu')).setupMenu({
+        acceleratorsToBlock: [],
+        activeTemplate,
+      });
     },
   );
 }

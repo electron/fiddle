@@ -106,6 +106,7 @@ export class FileManager {
         // content in the file, remove a file that possibly exists.
         if (content) {
           await this.saveFile(savePath, content);
+          ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
         } else {
           await this.removeFile(savePath);
         }

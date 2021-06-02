@@ -6,7 +6,11 @@ import {
   shell,
 } from 'electron';
 
-import { BlockableAccelerator, Templates } from '../interfaces';
+import {
+  BlockableAccelerator,
+  SetUpMenuOptions,
+  Templates,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { SHOW_ME_TEMPLATES } from '../templates';
 import { showOpenDialog, showSaveDialog } from './files';
@@ -292,10 +296,10 @@ function getFileMenu(
 /**
  * Creates the app's window menu.
  */
-export function setupMenu(
-  acceleratorsToBlock: BlockableAccelerator[] = [],
-  activeTemplate = null,
-) {
+export function setupMenu(options: SetUpMenuOptions) {
+  const acceleratorsToBlock = options.acceleratorsToBlock || [];
+  const activeTemplate = options.activeTemplate || null;
+
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(

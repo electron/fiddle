@@ -28,7 +28,7 @@ describe('menu', () => {
     it('creates a menu (Darwin)', () => {
       overridePlatform('darwin');
 
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(8);
@@ -44,7 +44,7 @@ describe('menu', () => {
     it('creates a menu (Windows)', () => {
       overridePlatform('win32');
 
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
@@ -60,7 +60,7 @@ describe('menu', () => {
     it('creates a menu (Linux)', () => {
       overridePlatform('linux');
 
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
@@ -76,7 +76,7 @@ describe('menu', () => {
     it('adds Monaco toggle options', () => {
       overridePlatform('linux');
 
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       const submenu = result[2]
@@ -98,7 +98,7 @@ describe('menu', () => {
     it('adds Bisect toggle', () => {
       overridePlatform('linux');
 
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       const submenu = result[2]
@@ -114,7 +114,7 @@ describe('menu', () => {
     });
 
     it('overwrites Select All command', () => {
-      setupMenu();
+      setupMenu({});
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       // use find here because the index is platform-specific
@@ -127,6 +127,25 @@ describe('menu', () => {
         IpcEvents.SELECT_ALL_IN_EDITOR,
       );
     });
+
+    // describe("setup Show Me Menu", () => {
+    //   let showMe: any;
+    //   beforeEach(() => {
+    //     ipcMainManager.removeAllListeners();
+    //     ipcMainManager.send = jest.fn();
+    //     overridePlatform('darwin');
+    //     setupMenu({});
+    //     const mock = (electron.Menu.buildFromTemplate as any).mock;
+    //     const menu = mock.calls[0][0];
+    //     showMe = menu[menu.length - 2];
+    //   });
+
+    //   it ("checks correct show me radio button after click", () => {
+    //     showMe = showMe.submenu[0].submenu[0].click();
+    //     console.log(showMe);
+    //     expect(showMe.submenu[0].submenu[0].checked === undefined);
+    //   });
+    // });
   });
 
   describe('menu groups', () => {
@@ -134,7 +153,7 @@ describe('menu', () => {
       ipcMainManager.removeAllListeners();
       ipcMainManager.send = jest.fn();
       overridePlatform('darwin');
-      setupMenu();
+      setupMenu({});
     });
 
     describe('getHelpItems()', () => {
@@ -223,18 +242,46 @@ describe('menu', () => {
 
     describe('getShowMeMenu()', () => {
       let showMe: any;
+      enum Idx {
+        NEW_FIDDLE = 0,
+        NEW_TEST = 1,
+        NEW_WINDOW = 2,
+        OPEN = 4,
+        SAVE = 6,
+        SAVE_AS = 7,
+        PUBLISH = 9,
+        FORGE = 10,
+      }
+      let file: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
         const menu = mock.calls[0][0];
         showMe = menu[menu.length - 2];
+        file = menu[1];
+        console.log('HELLHL');
       });
 
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
+        expect(showMe.submenu[0].submenu[0].checked === 'hello');
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_OPEN_TEMPLATE,
           ['App'],
+        );
+      });
+
+      it('show me menu resets upon file open', () => {
+        file.submenu[Idx.OPEN].click();
+        let pass = true;
+        for (let i = 0; i < showMe.subMenu[0].submenu.length - 1; i++) {
+          if (showMe.subMenu[0].submenu[i].checked === true) {
+            pass = false;
+          }
+        }
+        expect(pass).toEqual(true);
+        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+          IpcEvents.SET_SHOW_ME_TEMPLATE,
         );
       });
     });
@@ -339,7 +386,7 @@ describe('menu', () => {
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
-        setupMenu([BlockableAccelerator.save]);
+        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.save] });
         file.submenu[Idx.SAVE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
@@ -347,7 +394,7 @@ describe('menu', () => {
       });
 
       it('saves as a Fiddle with blocked accelerator', () => {
-        setupMenu([BlockableAccelerator.saveAs]);
+        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.saveAs] });
         file.submenu[Idx.SAVE_AS].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
