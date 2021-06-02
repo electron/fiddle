@@ -51,6 +51,12 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
+  browserWindow.on('focus', () => {
+    if (browserWindow) {
+      ipcMainManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+    }
+  });
+
   browserWindow.on('closed', () => {
     browserWindows = browserWindows.filter((bw) => browserWindow !== bw);
 
@@ -72,6 +78,12 @@ export function createMainWindow(): Electron.BrowserWindow {
       browserWindow.showInactive();
     }
   });
+
+  // ipcMainManager.on(IpcEvents.SET_SHOW_ME_TEMPLATE, (_, result) => {
+  //   if (browserWindow && browserWindow.isFocused()) {
+  //     setupMenu(result);
+  //   }
+  // });
 
   ipcMainManager.handleOnce(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};

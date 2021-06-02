@@ -62,6 +62,13 @@ export function setupMenuHandler() {
       (await import('./menu')).setupMenu(acceleratorsToBlock);
     },
   );
+
+  ipcMainManager.on(
+    IpcEvents.SET_SHOW_ME_TEMPLATE,
+    async (_, activeTemplate) => {
+      (await import('./menu')).setupMenu([], activeTemplate);
+    },
+  );
 }
 
 /**

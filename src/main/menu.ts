@@ -169,11 +169,14 @@ function getTasksMenu(): MenuItemConstructorOptions {
 
 function getShowMeMenuItem(
   key: string,
+  activeKey: string | null,
   item: string | Templates,
 ): MenuItemConstructorOptions {
   if (typeof item === 'string') {
     return {
       label: key,
+      type: 'radio',
+      checked: key === activeKey,
       click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key]),
     };
   }
@@ -181,15 +184,19 @@ function getShowMeMenuItem(
   return {
     label: key,
     submenu: Object.keys(item).map((subkey) => {
-      return getShowMeMenuItem(subkey, item[subkey]);
+      return getShowMeMenuItem(subkey, activeKey, item[subkey]);
     }),
   };
 }
 
-function getShowMeMenu(): MenuItemConstructorOptions {
+function getShowMeMenu(
+  activeTemplate: string | null,
+): MenuItemConstructorOptions {
   const showMeMenu: Array<MenuItemConstructorOptions> = Object.keys(
     SHOW_ME_TEMPLATES,
-  ).map((key) => getShowMeMenuItem(key, SHOW_ME_TEMPLATES[key]));
+  ).map((key) =>
+    getShowMeMenuItem(key, activeTemplate, SHOW_ME_TEMPLATES[key]),
+  );
 
   return {
     label: 'Show Me',
@@ -285,7 +292,10 @@ function getFileMenu(
 /**
  * Creates the app's window menu.
  */
-export function setupMenu(acceleratorsToBlock: BlockableAccelerator[] = []) {
+export function setupMenu(
+  acceleratorsToBlock: BlockableAccelerator[] = [],
+  activeTemplate = null,
+) {
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
   const menu = (defaultMenu(
@@ -373,7 +383,12 @@ export function setupMenu(acceleratorsToBlock: BlockableAccelerator[] = []) {
     getFileMenu(acceleratorsToBlock),
   );
 
-  menu.splice(menu.length - 1, 0, getTasksMenu(), getShowMeMenu());
+  menu.splice(
+    menu.length - 1,
+    0,
+    getTasksMenu(),
+    getShowMeMenu(activeTemplate),
+  );
 
   Menu.setApplicationMenu(Menu.buildFromTemplate(menu));
 }

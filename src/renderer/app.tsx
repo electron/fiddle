@@ -11,7 +11,7 @@ import {
   PACKAGE_NAME,
   SetFiddleOptions,
 } from '../interfaces';
-import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
+import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -69,6 +69,9 @@ export class App {
     this.state.templateName = templateName;
     this.state.isUnsaved = false;
 
+    // update menu when a new Fiddle is loaded
+    ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, templateName);
+
     return true;
   }
 
@@ -120,6 +123,10 @@ export class App {
     this.setupTitleListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
+
+    ipcRenderer.on(IpcEvents.SET_SHOW_ME_TEMPLATE, () => {
+      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.state.templateName);
+    });
 
     return rendered;
   }
