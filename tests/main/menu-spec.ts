@@ -128,24 +128,38 @@ describe('menu', () => {
       );
     });
 
-    // describe("setup Show Me Menu", () => {
-    //   let showMe: any;
-    //   beforeEach(() => {
-    //     ipcMainManager.removeAllListeners();
-    //     ipcMainManager.send = jest.fn();
-    //     overridePlatform('darwin');
-    //     setupMenu({});
-    //     const mock = (electron.Menu.buildFromTemplate as any).mock;
-    //     const menu = mock.calls[0][0];
-    //     showMe = menu[menu.length - 2];
-    //   });
+    describe('setup Show Me menu', () => {
+      it('show me menu correctly contains no check when no template is selected', () => {
+        overridePlatform('darwin');
+        setupMenu({});
 
-    //   it ("checks correct show me radio button after click", () => {
-    //     showMe = showMe.submenu[0].submenu[0].click();
-    //     console.log(showMe);
-    //     expect(showMe.submenu[0].submenu[0].checked === undefined);
-    //   });
-    // });
+        const result = (electron.Menu.buildFromTemplate as any).mock
+          .calls[0][0];
+        const showMeMenu = result[result.length - 2];
+
+        let showMeItemChecked = true;
+        if (showMeMenu.submenu[0].submenu[0]) {
+          showMeItemChecked = showMeMenu.submenu[0].submenu[0].checked;
+        }
+        expect(showMeItemChecked).toEqual(false);
+      });
+
+      it('checks correct show me radio button after click', () => {
+        overridePlatform('darwin');
+        // simulate the menu rebuild after click that sends correct templateName
+        setupMenu({ activeTemplate: 'App' });
+
+        const result = (electron.Menu.buildFromTemplate as any).mock
+          .calls[0][0];
+        const showMeMenu = result[result.length - 2];
+
+        let showMeItemChecked = false;
+        if (showMeMenu.submenu[0].submenu[0]) {
+          showMeItemChecked = showMeMenu.submenu[0].submenu[0].checked;
+        }
+        expect(showMeItemChecked).toEqual(true);
+      });
+    });
   });
 
   describe('menu groups', () => {
@@ -242,46 +256,18 @@ describe('menu', () => {
 
     describe('getShowMeMenu()', () => {
       let showMe: any;
-      enum Idx {
-        NEW_FIDDLE = 0,
-        NEW_TEST = 1,
-        NEW_WINDOW = 2,
-        OPEN = 4,
-        SAVE = 6,
-        SAVE_AS = 7,
-        PUBLISH = 9,
-        FORGE = 10,
-      }
-      let file: any;
 
       beforeEach(() => {
         const mock = (electron.Menu.buildFromTemplate as any).mock;
         const menu = mock.calls[0][0];
         showMe = menu[menu.length - 2];
-        file = menu[1];
-        console.log('HELLHL');
       });
 
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
-        expect(showMe.submenu[0].submenu[0].checked === 'hello');
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_OPEN_TEMPLATE,
           ['App'],
-        );
-      });
-
-      it('show me menu resets upon file open', () => {
-        file.submenu[Idx.OPEN].click();
-        let pass = true;
-        for (let i = 0; i < showMe.subMenu[0].submenu.length - 1; i++) {
-          if (showMe.subMenu[0].submenu[i].checked === true) {
-            pass = false;
-          }
-        }
-        expect(pass).toEqual(true);
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.SET_SHOW_ME_TEMPLATE,
         );
       });
     });
