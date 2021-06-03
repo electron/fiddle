@@ -107,6 +107,7 @@ export class FileManager {
         if (content) {
           await this.saveFile(savePath, content);
           ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+          this.appState.templateName = undefined;
         } else {
           await this.removeFile(savePath);
         }
