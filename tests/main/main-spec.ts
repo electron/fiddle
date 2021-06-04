@@ -74,7 +74,7 @@ describe('main', () => {
 
     it('listens to core events', () => {
       main([]);
-      expect(app.on).toHaveBeenCalledTimes(4);
+      expect(app.on).toHaveBeenCalledTimes(5);
     });
   });
 
