@@ -73,8 +73,20 @@ async function sendTask(type: IpcEvents, task: any) {
   ipcMainManager.send(type, [task]);
 }
 
+function logConfig() {
+  const packageJson = require('../../package.json');
+  const { name, version } = packageJson;
+  const { argv, platform } = process;
+  console.log(`${name} started
+   argv: ${JSON.stringify(argv)}
+   date: ${new Date()}
+   platform: ${platform}
+   version: ${version}`);
+}
+
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
+    if (opts.logConfig) logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
       setup: getSetup(opts),
       goodVersion: good,
@@ -88,6 +100,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
 
 async function test(opts: commander.OptionValues) {
   try {
+    if (opts.logConfig) logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
@@ -105,6 +118,7 @@ export async function processCommandLine(argv: string[]) {
     .command('bisect <goodVersion> <badVersion>')
     .description('Find where regressions were introduced')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
+    .option('--log-config', 'Log the fiddle version, platform, and args', false)
     .option('--nightlies', 'Include nightly releases')
     .option('--no-nightlies', 'Omit nightly releases')
     .option('--betas', 'Include beta releases')
@@ -118,6 +132,7 @@ export async function processCommandLine(argv: string[]) {
     .description('Test a fiddle')
     .option('--version <version>', 'Use Electron version')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
+    .option('--log-config', 'Log the fiddle version, platform, and args', false)
     .action(test);
 
   program.addHelpText(
