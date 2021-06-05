@@ -75,13 +75,11 @@ async function sendTask(type: IpcEvents, task: any) {
 
 function logConfig() {
   const packageJson = require('../../package.json');
-  const { name, version } = packageJson;
-  const { argv, platform } = process;
-  console.log(`${name} started
-   argv: ${JSON.stringify(argv)}
+  console.log(`${packageJson.name} started
+   argv: ${JSON.stringify(process.argv)}
    date: ${new Date()}
-   platform: ${platform}
-   version: ${version}`);
+   platform: ${process.platform}
+   version: ${packageJson.version}`);
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
