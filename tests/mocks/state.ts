@@ -47,6 +47,7 @@ export class StateMock {
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
   @observable public output = [];
+  @observable public showObsoleteVersions = false;
   @observable public showUndownloadedVersions = false;
   @observable public theme: string | null;
   @observable public title = 'Electron Fiddle';
@@ -68,6 +69,7 @@ export class StateMock {
   public hideChannels = jest.fn();
   public pushError = jest.fn();
   public pushOutput = jest.fn();
+  public flushOutput = jest.fn();
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
   public runConfirmationDialog = jest.fn();

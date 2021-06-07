@@ -10,7 +10,7 @@ import {
   EditorId,
   EditorValues,
 } from '../interfaces';
-// import { waitForEditorsToMount } from '../utils/editor-mounted';
+
 import {
   compareEditors,
   getEmptyContent,
@@ -135,12 +135,6 @@ export class EditorMosaic {
     );
 
     this.mosaicArrangement = updatedArrangement;
-
-    // after the mosaicArrangement loads, we want to wait for the Mosaic editors to
-    // mount to ensure that we can load content into the editors as soon as they're
-    // declared visible.
-
-    // await waitForEditorsToMount(visible);
   }
 
   /**

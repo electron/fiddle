@@ -124,6 +124,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Electron exited with code 0.',
       );
@@ -145,6 +146,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `Electron exited with code ${ARBITRARY_FAIL_CODE}.`,
       );
@@ -159,17 +161,22 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
+      const signal = 'SIGTERM';
+
       // mock child process gives output,
       // then exits without an explicit exitCode
       mockChild.stdout.emit('data', 'hi');
       mockChild.stderr.emit('data', 'hi');
-      mockChild.emit('close');
+      mockChild.emit('close', null, signal);
       const result = await runPromise;
 
       expect(result).toBe(RunResult.INVALID);
       expect(store.isRunning).toBe(false);
+      expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
-      expect(store.pushOutput).toHaveBeenLastCalledWith('Electron exited.');
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        `Electron exited with signal ${signal}.`,
+      );
     });
 
     it('cleans the app data dir after a run', async () => {
@@ -257,15 +264,14 @@ describe('Runner component', () => {
       expect(store.isRunning).toBe(true);
 
       // call stop and wait for run() to resolve
-      const stopped = instance.stop();
+      instance.stop();
       const runResult = await runPromise;
 
-      expect(stopped).toBe(true);
       expect(runResult).toBe(RunResult.INVALID);
       expect(store.isRunning).toBe(false);
     });
 
-    it('returns failure if killing child process fails', async () => {
+    it('fails if killing child process fails', async () => {
       (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
       mockChild.kill.mockReturnValueOnce(false);
@@ -275,14 +281,8 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
-      const stopped = instance.stop();
-      expect(stopped).toBe(false);
-    });
-
-    it('does nothing if called when idle', () => {
-      const stopped = instance.stop();
-
-      expect(stopped).toBe(true);
+      instance.stop();
+      expect(store.isRunning).toBe(true);
     });
   });
 
