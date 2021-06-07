@@ -1,3 +1,4 @@
+import { reaction } from 'mobx';
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -421,6 +422,47 @@ describe('AppState', () => {
 
       expect(appState.theme).toBe('');
       expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('runConfirmationDialog()', () => {
+    let dispose: any;
+
+    afterEach(() => {
+      if (dispose) dispose();
+    });
+
+    function registerDialogHandler(
+      description: string | null,
+      result: boolean,
+    ) {
+      dispose = reaction(
+        () => appState.isGenericDialogShowing,
+        () => {
+          appState.genericDialogLastInput = description;
+          appState.genericDialogLastResult = result;
+          appState.isGenericDialogShowing = false;
+        },
+      );
+    }
+
+    const Description = 'some non-default description';
+
+    const Opts = {
+      type: GenericDialogType.warning,
+      label: 'foo',
+    } as const;
+
+    it('returns true if confirmed by user', async () => {
+      registerDialogHandler(Description, true);
+      const response = await appState.runConfirmationDialog(Opts);
+      expect(response).toBe(true);
+    });
+
+    it('returns false if rejected by user', async () => {
+      registerDialogHandler(Description, false);
+      const response = await appState.runConfirmationDialog(Opts);
+      expect(response).toBe(false);
     });
   });
 
