@@ -141,14 +141,12 @@ describe('EditorMosaic', () => {
 
   describe('values()', () => {
     it('works on closed panels', () => {
-      editorMosaic.waitForEditorsToMount = jest.fn().mockResolvedValue(true);
       const values = createEditorValues();
       editorMosaic.set(values);
       expect(editorMosaic.values()).toStrictEqual(values);
     });
 
     it('works on open panels', () => {
-      editorMosaic.waitForEditorsToMount = jest.fn().mockResolvedValue(true);
       const values = createEditorValues();
       editorMosaic.set(values);
 
@@ -430,33 +428,6 @@ describe('EditorMosaic', () => {
       editorMosaic.mosaicArrangement = DefaultEditorId.main;
       expect(spy).toHaveBeenCalledTimes(1);
       spy.mockRestore();
-    });
-  });
-
-  describe('waitforEditorsToMount', () => {
-    it('resolves when editors match list', async () => {
-      const files = [
-        DefaultEditorId.html,
-        DefaultEditorId.main,
-        DefaultEditorId.preload,
-        DefaultEditorId.renderer,
-      ];
-      for (const file of files) {
-        editorMosaic.addEditor(file, new MonacoEditorMock() as any);
-      }
-
-      await editorMosaic.waitForEditorsToMount(files);
-
-      files.every((file) => expect(editorMosaic.editors.has(file)).toBe(true));
-    });
-
-    it('rejects if editors fail to match list', async () => {
-      try {
-        // css editor shouldn't be mounted by default.
-        await editorMosaic.waitForEditorsToMount([DefaultEditorId.css]);
-      } catch (error) {
-        expect(error).toMatch('Timed out');
-      }
     });
   });
 
