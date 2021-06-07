@@ -140,10 +140,31 @@ describe('EditorMosaic', () => {
   });
 
   describe('values()', () => {
-    it('gets values', () => {
+    it('works on closed panels', () => {
       editorMosaic.waitForEditorsToMount = jest.fn().mockResolvedValue(true);
       const values = createEditorValues();
       editorMosaic.set(values);
+      expect(editorMosaic.values()).toStrictEqual(values);
+    });
+
+    it('works on open panels', () => {
+      editorMosaic.waitForEditorsToMount = jest.fn().mockResolvedValue(true);
+      const values = createEditorValues();
+      editorMosaic.set(values);
+
+      // now modify values _after_ calling editorMosaic.set()
+      for (const [file, value] of Object.entries(values)) {
+        values[file] = `${value} plus more text`;
+      }
+
+      // and then add Monaco editors
+      for (const [file, value] of Object.entries(values)) {
+        const editor = new MonacoEditorMock();
+        editor.setValue(value);
+        editorMosaic.addEditor(file as any, editor as any);
+      }
+
+      // values() should match the modified values
       expect(editorMosaic.values()).toStrictEqual(values);
     });
   });
