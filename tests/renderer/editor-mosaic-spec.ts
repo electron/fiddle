@@ -465,4 +465,39 @@ describe('EditorMosaic', () => {
       expect(result).toEqual(DEFAULT_MOSAIC_ARRANGEMENT);
     });
   });
+
+  describe('isEdited', () => {
+    const id = MAIN_JS;
+    let editor: MonacoEditorMock;
+
+    beforeEach(() => {
+      editor = new MonacoEditorMock();
+      editorMosaic.set(valuesIn);
+      editorMosaic.addEditor(id, editor as any);
+      expect(editorMosaic.isEdited).toBe(false);
+    });
+
+    function testForIsEdited() {
+      expect(editorMosaic.isEdited).toBe(false);
+
+      editor.setValue(`${editor.getValue()} more text`);
+
+      expect(editorMosaic.isEdited).toBe(true);
+    }
+
+    it('recognizes edits', () => {
+      testForIsEdited();
+    });
+
+    it('recognizes edits after isEdited has been manually set to false', () => {
+      editorMosaic.isEdited = false;
+      testForIsEdited();
+    });
+
+    it('recognizes edits after isEdited has been manually toggled', () => {
+      editorMosaic.isEdited = true;
+      editorMosaic.isEdited = false;
+      testForIsEdited();
+    });
+  });
 });
