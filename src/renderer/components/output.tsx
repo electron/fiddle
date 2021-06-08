@@ -2,6 +2,7 @@ import { shell } from 'electron';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import * as MonacoType from 'monaco-editor';
 import {
   MosaicContext,
   MosaicNode,
@@ -15,6 +16,10 @@ import { WrapperEditorId } from './output-editors-wrapper';
 
 interface CommandsProps {
   appState: AppState;
+  monaco: typeof MonacoType;
+  monacoOptions: MonacoType.editor.IEditorOptions;
+  options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
+  editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }
@@ -32,14 +37,20 @@ export class Output extends React.Component<CommandsProps> {
   public context: MosaicContext<WrapperEditorId>;
   private outputRef = React.createRef<HTMLDivElement>();
 
+  public editor: MonacoType.editor.IStandaloneCodeEditor;
+  public language = 'javascript';
+  public value = '';
+
   constructor(props: CommandsProps) {
     super(props);
 
     this.renderTimestamp = this.renderTimestamp.bind(this);
     this.renderEntry = this.renderEntry.bind(this);
+    this.language = 'javascript';
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
+    await this.initMonaco();
     autorun(() => {
       /**
        * Type guard to check whether a react-mosaic node is a parent in the tree
@@ -69,6 +80,10 @@ export class Output extends React.Component<CommandsProps> {
         }
       }
     });
+  }
+
+  public componentWillUnmount() {
+    this.destroyMonaco();
   }
 
   public componentDidUpdate() {
@@ -129,20 +144,95 @@ export class Output extends React.Component<CommandsProps> {
     return lines.map(renderLine);
   }
 
+  public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
+    const { editorDidMount } = this.props;
+
+    await this.setContent(this.props.appState.output);
+
+    if (editorDidMount) {
+      editorDidMount(editor);
+    }
+  }
+
+  // render output into monaco
+  UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
+    this.setContent(newProps.appState.output);
+  }
+  /**
+   * Initialize Monaco.
+   */
+  public async initMonaco() {
+    const { monaco, monacoOptions: monacoOptions } = this.props;
+    const ref = this.outputRef.current;
+    console.log({
+      monacoOptions,
+      monaco,
+      ref,
+    });
+    if (ref) {
+      this.editor = monaco.editor.create(ref, {
+        language: this.language,
+        theme: 'main',
+        contextmenu: false,
+        model: null,
+        ...monacoOptions,
+      });
+      await this.editorDidMount(this.editor);
+    }
+  }
+
+  private async setContent(output: OutputEntry[]) {
+    const { appState } = this.props;
+
+    const lines = output.slice(Math.max(appState.output.length - 1000, 1));
+
+    const value = '';
+    for (const line of lines) {
+      value.concat(line.timestamp + ' ' + line.text);
+    }
+    this.createModel(value);
+  }
+
+  /**
+   * Create a model and attach it to the editor
+   *
+   * @private
+   * @param {string} value
+   */
+  private createModel(value: string) {
+    const { monaco } = this.props;
+
+    const model = monaco.editor.createModel(value, this.language);
+    model.updateOptions({
+      tabSize: 2,
+    });
+
+    this.editor.setModel(model);
+  }
+
+  /**
+   * Destroy Monaco.
+   */
+  public destroyMonaco() {
+    if (typeof this.editor !== 'undefined') {
+      console.log('Editor: Disposing');
+      this.editor.dispose();
+    }
+  }
+
   public render(): JSX.Element | null {
-    const { output, isConsoleShowing } = this.props.appState;
+    const { isConsoleShowing } = this.props.appState;
 
     if (!isConsoleShowing) {
       return null;
     }
 
-    // The last 1000 lines
-    const lines = output.slice(-1000).map(this.renderEntry);
-
     return (
-      <div className="output" ref={this.outputRef}>
-        {lines}
-      </div>
+      <div
+        className="output"
+        ref={this.outputRef}
+        style={{ display: isConsoleShowing ? 'initial' : 'none' }}
+      />
     );
   }
 }
