@@ -52,6 +52,19 @@ describe('processCommandLine()', () => {
     expect(stringify(request)).toBe(payload);
   }
 
+  async function expectLogConfigOptionWorks(argv: string[]) {
+    argv = [...argv, '--log-config'];
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    await processCommandLine(argv);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringMatching('electron-fiddle started'),
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringMatching(`platform: ${process.platform}`),
+    );
+    consoleSpy.mockReset();
+  }
+
   describe('test', () => {
     const ARGV = [...ARGV_PREFIX, 'test'];
 
@@ -95,6 +108,10 @@ describe('processCommandLine()', () => {
       const expected = `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"version":"${VERSION}"}}`;
       await processCommandLine(argv);
       expectTestCalledOnceWith(expected);
+    });
+
+    it('handles a --log-config option', async () => {
+      await expectLogConfigOptionWorks([...ARGV, '--log-config']);
     });
   });
 
@@ -169,6 +186,10 @@ describe('processCommandLine()', () => {
       expect(exitSpy).toHaveBeenCalledWith(exitExpected);
       consoleSpy.mockReset();
       exitSpy.mockReset();
+    });
+
+    it('handles a --log-config option', async () => {
+      await expectLogConfigOptionWorks([...ARGV, GOOD, BAD, '--log-config']);
     });
 
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
