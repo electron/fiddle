@@ -259,9 +259,11 @@ describe('Action button component', () => {
     let instance: any;
 
     beforeEach(() => {
+      state.gistId = gistId;
+
       // create a button primed to delete gistId
       ({ instance, wrapper } = createActionButton());
-      wrapper.setProps({ appState: { gistId } });
+      wrapper.setProps({ appState: state });
       instance.setState({ actionType: GistActionType.delete });
     });
 
