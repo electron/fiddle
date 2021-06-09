@@ -1,8 +1,8 @@
 import { shell } from 'electron';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
+import * as React from 'react';
 import {
   MosaicContext,
   MosaicNode,
@@ -35,11 +35,11 @@ interface CommandsProps {
 export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperEditorId>;
-  private outputRef = React.createRef<HTMLDivElement>();
-
   public editor: MonacoType.editor.IStandaloneCodeEditor;
   public language = 'javascript';
   public value = '';
+
+  private outputRef = React.createRef<HTMLDivElement>();
 
   constructor(props: CommandsProps) {
     super(props);
@@ -50,8 +50,9 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   public async componentDidMount() {
-    await this.initMonaco();
-    autorun(() => {
+    autorun(async () => {
+      await this.initMonaco().catch(console.error);
+
       /**
        * Type guard to check whether a react-mosaic node is a parent in the tree
        * or a leaf. Leaf nodes are represented by the string value of their ID,
@@ -146,7 +147,6 @@ export class Output extends React.Component<CommandsProps> {
 
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorDidMount } = this.props;
-
     await this.setContent(this.props.appState.output);
 
     if (editorDidMount) {
@@ -158,17 +158,13 @@ export class Output extends React.Component<CommandsProps> {
   UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
     this.setContent(newProps.appState.output);
   }
+
   /**
    * Initialize Monaco.
    */
   public async initMonaco() {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
-    console.log({
-      monacoOptions,
-      monaco,
-      ref,
-    });
     if (ref) {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
@@ -183,12 +179,11 @@ export class Output extends React.Component<CommandsProps> {
 
   private async setContent(output: OutputEntry[]) {
     const { appState } = this.props;
-
+    debugger;
     const lines = output.slice(Math.max(appState.output.length - 1000, 1));
-
-    const value = '';
+    let value = '';
     for (const line of lines) {
-      value.concat(line.timestamp + ' ' + line.text);
+      value = value + (line.timestamp + ' ' + line.text + '\n');
     }
     this.createModel(value);
   }
@@ -201,7 +196,6 @@ export class Output extends React.Component<CommandsProps> {
    */
   private createModel(value: string) {
     const { monaco } = this.props;
-
     const model = monaco.editor.createModel(value, this.language);
     model.updateOptions({
       tabSize: 2,
@@ -223,15 +217,11 @@ export class Output extends React.Component<CommandsProps> {
   public render(): JSX.Element | null {
     const { isConsoleShowing } = this.props.appState;
 
-    if (!isConsoleShowing) {
-      return null;
-    }
-
     return (
       <div
         className="output"
         ref={this.outputRef}
-        style={{ display: isConsoleShowing ? 'initial' : 'none' }}
+        style={{ display: isConsoleShowing ? 'block' : 'none' }}
       />
     );
   }

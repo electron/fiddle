@@ -3,7 +3,7 @@ import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
 import { Editors } from './editors';
-import { Output } from './output';
+import { Outputs } from './outputs';
 
 interface WrapperProps {
   appState: AppState;
@@ -20,7 +20,7 @@ export class OutputEditorsWrapper extends React.Component<
   WrapperState
 > {
   private MOSAIC_ELEMENTS = {
-    output: <Output appState={this.props.appState} />,
+    output: <Outputs appState={this.props.appState} />,
     editors: <Editors appState={this.props.appState} />,
   };
 

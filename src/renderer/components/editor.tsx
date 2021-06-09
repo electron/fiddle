@@ -74,7 +74,6 @@ export class Editor extends React.Component<EditorProps> {
   public async initMonaco() {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.containerRef.current;
-
     if (ref) {
       this.editor = monaco.editor.create(ref, {
         language: this.language,
