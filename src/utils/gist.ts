@@ -15,15 +15,15 @@
 export function getGistId(rawInput: string): string | null {
   let input = rawInput.trim();
 
-  let id: string | undefined = input;
+  let id = input;
   if (input.startsWith('https://gist.github.com')) {
     if (input.endsWith('/')) {
       input = input.slice(0, -1);
     }
-    id = input.split('/').pop();
+    id = input.split('/').pop()!;
   }
 
-  return id?.match(/[0-9A-Fa-f]{32}/) ? id : null;
+  return id.match(/[0-9A-Fa-f]{32}/) ? id : null;
 }
 
 /**
