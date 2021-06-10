@@ -36,7 +36,7 @@ export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperEditorId>;
   public editor: MonacoType.editor.IStandaloneCodeEditor;
-  public language = 'javascript';
+  public language = 'consoleOutputLanguage';
   public value = '';
 
   private outputRef = React.createRef<HTMLDivElement>();
@@ -46,7 +46,7 @@ export class Output extends React.Component<CommandsProps> {
 
     this.renderTimestamp = this.renderTimestamp.bind(this);
     this.renderEntry = this.renderEntry.bind(this);
-    this.language = 'javascript';
+    this.language = 'consoleOutputLanguage';
   }
 
   public async componentDidMount() {
@@ -166,8 +166,11 @@ export class Output extends React.Component<CommandsProps> {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
     if (ref) {
+      this.setupMonacoLanguage(monaco);
       this.editor = monaco.editor.create(ref, {
         language: this.language,
+        // TODO: work on allowing this editor to have a different theme than the tiles
+        // https://github.com/Microsoft/monaco-editor/issues/338
         theme: 'main',
         contextmenu: false,
         model: null,
@@ -177,15 +180,27 @@ export class Output extends React.Component<CommandsProps> {
     }
   }
 
+  private setupMonacoLanguage(monaco: any) {
+    // register a new language
+    monaco.languages.register({ id: 'consoleOutputLanguage' });
+    // Register a tokens provider for the language
+    monaco.languages.setMonarchTokensProvider('consoleOutputLanguage', {
+      tokenizer: {
+        root: [[/\d{1,2}:\d{2}:\d{2}\s(A|P)M/, 'custom-date']],
+      },
+    });
+  }
+
   private async setContent(output: OutputEntry[]) {
     const { appState } = this.props;
     debugger;
-    const lines = output.slice(Math.max(appState.output.length - 1000, 1));
-    let value = '';
-    for (const line of lines) {
-      value = value + (line.timestamp + ' ' + line.text + '\n');
+    const outputs = output.slice(Math.max(appState.output.length - 1000, 1));
+    const lines: string[] = [];
+    for (const output of outputs) {
+      const date = new Date(output.timestamp).toLocaleTimeString();
+      lines.push(date + ' ' + output.text);
     }
-    this.createModel(value);
+    this.createModel(lines.join('\n'));
   }
 
   /**
