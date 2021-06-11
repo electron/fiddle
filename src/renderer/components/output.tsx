@@ -172,7 +172,9 @@ export class Output extends React.Component<CommandsProps> {
         // TODO: work on allowing this editor to have a different theme than the tiles
         // https://github.com/Microsoft/monaco-editor/issues/338
         theme: 'main',
+        readOnly: true,
         contextmenu: false,
+        automaticLayout: true,
         model: null,
         ...monacoOptions,
       });
@@ -193,7 +195,6 @@ export class Output extends React.Component<CommandsProps> {
 
   private async setContent(output: OutputEntry[]) {
     const { appState } = this.props;
-    debugger;
     const outputs = output.slice(Math.max(appState.output.length - 1000, 1));
     const lines: string[] = [];
     for (const output of outputs) {
