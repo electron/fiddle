@@ -51,7 +51,8 @@ export class Output extends React.Component<CommandsProps> {
 
   public async componentDidMount() {
     autorun(async () => {
-      await this.initMonaco().catch(console.error);
+      this.destroyMonaco();
+      await this.initMonaco();
 
       /**
        * Type guard to check whether a react-mosaic node is a parent in the tree
@@ -108,7 +109,7 @@ export class Output extends React.Component<CommandsProps> {
       return new Date(ts).toLocaleTimeString();
     }
   }
-
+  // TODO: deal with this
   /**
    * An individual entry might span multiple lines. To ensure that
    * each line has a timestamp, this method might split up entries.
@@ -155,8 +156,8 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   // render output into monaco
-  UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    this.setContent(newProps.appState.output);
+  public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
+    await this.setContent(newProps.appState.output);
   }
 
   /**
@@ -169,8 +170,6 @@ export class Output extends React.Component<CommandsProps> {
       this.setupMonacoLanguage(monaco);
       this.editor = monaco.editor.create(ref, {
         language: this.language,
-        // TODO: work on allowing this editor to have a different theme than the tiles
-        // https://github.com/Microsoft/monaco-editor/issues/338
         theme: 'main',
         readOnly: true,
         contextmenu: false,
@@ -178,6 +177,7 @@ export class Output extends React.Component<CommandsProps> {
         model: null,
         ...monacoOptions,
       });
+
       await this.editorDidMount(this.editor);
     }
   }
