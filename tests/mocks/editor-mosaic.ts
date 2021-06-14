@@ -1,5 +1,5 @@
 import { MonacoEditorMock } from './monaco-editor';
-import { MosaicNode } from 'react-mosaic-component';
+import { MosaicNode, getLeaves } from 'react-mosaic-component';
 
 import { observable } from 'mobx';
 
@@ -14,8 +14,10 @@ export class EditorMosaicMock {
   @observable public closedPanels: Record<EditorId, EditorBackup> = {};
   @observable public customMosaics: EditorId[] = [];
   @observable public editors: Map<EditorId, Editor> = new Map();
+  @observable public isEdited = false;
   @observable public mosaicArrangement: MosaicNode<EditorId> | null = null;
 
+  public addEditor = jest.fn();
   public getAndRemoveEditorValueBackup = jest.fn();
   public getEditorBackup = jest
     .fn()
@@ -26,6 +28,9 @@ export class EditorMosaicMock {
   public getEditorViewState = jest
     .fn()
     .mockImplementation((id) => this.editors.get(id)?.saveViewState() || null);
+  public getVisibleMosaics = jest
+    .fn()
+    .mockImplementation(() => getLeaves(this.mosaicArrangement));
   public layout = jest.fn().mockImplementation(() => {
     this.editors.forEach((editor) => editor.layout());
   });

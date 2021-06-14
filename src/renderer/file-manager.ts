@@ -116,7 +116,7 @@ export class FileManager {
         this.appState.gistId = undefined;
       }
 
-      this.appState.isUnsaved = false;
+      this.appState.editorMosaic.isEdited = false;
     }
   }
 

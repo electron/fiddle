@@ -32,7 +32,6 @@ import {
 import { ipcRendererManager } from './ipc';
 import { activateTheme } from './themes';
 
-import { waitForEditorsToMount } from '../utils/editor-mounted';
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
@@ -132,7 +131,6 @@ export class AppState {
   @observable public isRunning = false;
   @observable public isAutoBisecting = false;
   @observable public isInstallingModules = false;
-  @observable public isUnsaved: boolean;
   @observable public isUpdatingElectronVersions = false;
   @observable public isQuitting = false;
 
@@ -227,53 +225,6 @@ export class AppState {
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
 
-    autorun(async () => {
-      if (typeof this.isUnsaved === 'undefined') return;
-
-      if (this.isUnsaved) {
-        window.onbeforeunload = () => {
-          ipcRendererManager.send(IpcEvents.SHOW_INACTIVE);
-          this.setGenericDialogOptions({
-            type: GenericDialogType.warning,
-            label: `The current Fiddle is unsaved. Do you want to exit anyway?`,
-            ok: 'Exit',
-          });
-
-          this.isGenericDialogShowing = true;
-
-          // We'll wait until the warning dialog was closed
-          when(() => !this.isGenericDialogShowing).then(() => {
-            const closeConfirmed = this.genericDialogLastResult;
-            // The user confirmed, let's close for real.
-            if (closeConfirmed) {
-              // isQuitting checks if we're trying to quit the app
-              // or just close the window
-              if (this.isQuitting) {
-                ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
-              }
-              window.onbeforeunload = null;
-              window.close();
-            }
-          });
-
-          // return value doesn't matter, we just want to cancel the event
-          return false;
-        };
-      } else {
-        window.onbeforeunload = null;
-
-        // set up editor listeners to verify if unsaved
-        const { editors } = this.editorMosaic;
-        await waitForEditorsToMount([...editors.keys()]);
-        for (const editor of editors.values()) {
-          const disposable = (editor as any).onDidChangeModelContent(() => {
-            this.isUnsaved = true;
-            disposable.dispose();
-          });
-        }
-      }
-    });
-
     // Update our known versions
     this.updateElectronVersions();
 
@@ -292,7 +243,8 @@ export class AppState {
    * @returns {string} the title, e.g. appname, fiddle name, state
    */
   @computed get title(): string {
-    const { gistId, isUnsaved, localPath, templateName } = this;
+    const { gistId, localPath, templateName } = this;
+    const { isEdited } = this.editorMosaic;
     const tokens = [];
 
     if (localPath) {
@@ -303,7 +255,7 @@ export class AppState {
       tokens.push(`gist.github.com/${gistId}`);
     }
 
-    if (isUnsaved) {
+    if (isEdited) {
       tokens.push('Unsaved');
     }
 
@@ -596,6 +548,15 @@ export class AppState {
     this.gitHubLogin = null;
     this.gitHubToken = null;
     this.gitHubName = null;
+  }
+
+  @action public async runConfirmationDialog(
+    opts: GenericDialogOptions,
+  ): Promise<boolean> {
+    this.setGenericDialogOptions(opts);
+    this.isGenericDialogShowing = true;
+    await when(() => !this.isGenericDialogShowing);
+    return !!this.genericDialogLastResult;
   }
 
   /**
