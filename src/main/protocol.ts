@@ -92,6 +92,13 @@ export const listenForProtocolHandler = () => {
       handlePotentialProtocolLaunch(url);
     }
   });
+
+  app.removeAllListeners('second-instance');
+  app.on('second-instance', (_event, commandLine, _workingDirectory) => {
+    // Someone tried to run a second instance
+    scanArgv(commandLine);
+  });
+
   app.on('open-file', (_, path) => {
     if (!path || path.length < 1) {
       return;
