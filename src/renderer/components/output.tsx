@@ -1,4 +1,3 @@
-import { shell } from 'electron';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
@@ -8,7 +7,6 @@ import {
   MosaicNode,
   MosaicParent,
 } from 'react-mosaic-component';
-import { isWebUri } from 'valid-url';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
@@ -44,8 +42,6 @@ export class Output extends React.Component<CommandsProps> {
   constructor(props: CommandsProps) {
     super(props);
 
-    this.renderTimestamp = this.renderTimestamp.bind(this);
-    this.renderEntry = this.renderEntry.bind(this);
     this.language = 'consoleOutputLanguage';
   }
 
@@ -53,34 +49,7 @@ export class Output extends React.Component<CommandsProps> {
     autorun(async () => {
       this.destroyMonaco();
       await this.initMonaco();
-
-      /**
-       * Type guard to check whether a react-mosaic node is a parent in the tree
-       * or a leaf. Leaf nodes are represented by the string value of their ID,
-       * whereas parent nodes are objects containing information about the nested
-       * binary tree.
-       * @param node A react-mosaic node
-       * @returns Whether that node is a MosaicParent or not
-       */
-      const isParentNode = (
-        node: MosaicNode<WrapperEditorId> | null,
-      ): node is MosaicParent<WrapperEditorId> => {
-        return (node as MosaicParent<WrapperEditorId>)?.direction !== undefined;
-      };
-
-      const { isConsoleShowing } = this.props.appState;
-
-      // this context should always exist, but mocking context in enzyme
-      // is not fully supported, so this condition makes the tests pass
-      if (this.context.mosaicActions) {
-        const mosaicTree = this.context.mosaicActions.getRoot();
-        if (isParentNode(mosaicTree)) {
-          // splitPercentage defines the percentage of space the first panel takes
-          // e.g. 25 would mean the two children panels are split 25%/75%
-          mosaicTree.splitPercentage = isConsoleShowing ? 25 : 0;
-          this.context.mosaicActions.replaceWith([], mosaicTree);
-        }
-      }
+      this.toggleConsole();
     });
   }
 
@@ -89,73 +58,20 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   public componentDidUpdate() {
-    if (this.outputRef.current) {
-      this.outputRef.current.scrollTop = this.outputRef.current.scrollHeight;
-    }
+    this.toggleConsole();
   }
 
   /**
-   * Render the timestamp
-   *
-   * @param {number} ts
-   * @returns {string}
+   * Handle the editor having been mounted. This refers to Monaco's
+   * mount, not React's.
    */
-  public renderTimestamp(ts: number): string {
-    const { renderTimestamp } = this.props;
-
-    if (renderTimestamp) {
-      return renderTimestamp(ts);
-    } else {
-      return new Date(ts).toLocaleTimeString();
-    }
-  }
-  // TODO: deal with this
-  /**
-   * An individual entry might span multiple lines. To ensure that
-   * each line has a timestamp, this method might split up entries.
-   *
-   * @param {OutputEntry} entry
-   * @returns {Array<JSX.Element>}
-   * @memberof Output
-   */
-  public renderEntry(entry: OutputEntry, index: number): Array<JSX.Element> {
-    const ts = this.renderTimestamp(entry.timestamp);
-    const timestamp = <span className="timestamp">{ts}</span>;
-    const lines = entry.text.split(/\r?\n/);
-    const style: React.CSSProperties = entry.isNotPre
-      ? { whiteSpace: 'initial' }
-      : {};
-
-    const renderLine = (text: string, lineIndex: number): JSX.Element =>
-      isWebUri(text) ? (
-        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-          <span style={style} className="output-message">
-            {timestamp}
-            <a onClick={() => shell.openExternal(text)}>{text}</a>
-          </span>
-        </div>
-      ) : (
-        <div key={`${entry.timestamp}--${index}--${lineIndex}`}>
-          <span style={style} className="output-message">
-            {timestamp}
-            {text}
-          </span>
-        </div>
-      );
-
-    return lines.map(renderLine);
-  }
-
-  public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
-    const { editorDidMount } = this.props;
+  public async editorDidMount() {
     await this.setContent(this.props.appState.output);
-
-    if (editorDidMount) {
-      editorDidMount(editor);
-    }
   }
 
-  // render output into monaco
+  /**
+   *  Set Monaco Editor's value.
+   */
   public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
     await this.setContent(newProps.appState.output);
   }
@@ -178,11 +94,56 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.editorDidMount(this.editor);
+      await this.editorDidMount();
     }
   }
 
-  private setupMonacoLanguage(monaco: any) {
+  /**
+   * Destroy Monaco.
+   */
+  public destroyMonaco() {
+    if (typeof this.editor !== 'undefined') {
+      console.log('Editor: Disposing');
+      this.editor.dispose();
+    }
+  }
+
+  public toggleConsole() {
+    /**
+     * Type guard to check whether a react-mosaic node is a parent in the tree
+     * or a leaf. Leaf nodes are represented by the string value of their ID,
+     * whereas parent nodes are objects containing information about the nested
+     * binary tree.
+     * @param node A react-mosaic node
+     * @returns Whether that node is a MosaicParent or not
+     */
+    const isParentNode = (
+      node: MosaicNode<WrapperEditorId> | null,
+    ): node is MosaicParent<WrapperEditorId> => {
+      return (node as MosaicParent<WrapperEditorId>)?.direction !== undefined;
+    };
+
+    const { isConsoleShowing } = this.props.appState;
+
+    if (this.context.mosaicActions) {
+      const mosaicTree = this.context.mosaicActions.getRoot();
+      if (isParentNode(mosaicTree)) {
+        // splitPercentage defines the percentage of space the first panel takes
+        // e.g. 25 would mean the two children panels are split 25%/75%
+        if (!isConsoleShowing) {
+          mosaicTree.splitPercentage = 0;
+        } else if (mosaicTree.splitPercentage === 0) {
+          mosaicTree.splitPercentage = 25;
+        }
+        this.context.mosaicActions.replaceWith([], mosaicTree);
+      }
+    }
+  }
+
+  /**
+   * Set up Monaco Language.
+   */
+  private setupMonacoLanguage(monaco: typeof MonacoType) {
     // register a new language
     monaco.languages.register({ id: 'consoleOutputLanguage' });
     // Register a tokens provider for the language
@@ -193,15 +154,41 @@ export class Output extends React.Component<CommandsProps> {
     });
   }
 
+  /**
+   * Sets the model and content on the editor
+   *
+   * @private
+   * @memberof Output
+   */
   private async setContent(output: OutputEntry[]) {
+    this.createModel(this.getOutputLines(output));
+    // have terminal always scroll to the bottom
+    this.editor.revealLine(this.editor.getScrollHeight());
+  }
+
+  /**
+   * Processes output entries such that each entry has a timestamp and value text.
+   *
+   * An individual entry might span multiple lines. To ensure that
+   * each line has a timestamp, this method might split up entries.
+   *
+   * @param {OutputEntry} entry
+   * @returns string
+   * @memberof Output
+   */
+  private getOutputLines(output: OutputEntry[]) {
     const { appState } = this.props;
-    const outputs = output.slice(Math.max(appState.output.length - 1000, 1));
     const lines: string[] = [];
+    const outputs = output.slice(Math.max(appState.output.length - 1000, 1));
+
     for (const output of outputs) {
+      const segments = output.text.split(/\r?\n/);
       const date = new Date(output.timestamp).toLocaleTimeString();
-      lines.push(date + ' ' + output.text);
+      for (const segment of segments) {
+        lines.push(date + ' ' + segment);
+      }
     }
-    this.createModel(lines.join('\n'));
+    return lines.join('\n');
   }
 
   /**
@@ -220,16 +207,6 @@ export class Output extends React.Component<CommandsProps> {
     this.editor.setModel(model);
   }
 
-  /**
-   * Destroy Monaco.
-   */
-  public destroyMonaco() {
-    if (typeof this.editor !== 'undefined') {
-      console.log('Editor: Disposing');
-      this.editor.dispose();
-    }
-  }
-
   public render(): JSX.Element | null {
     const { isConsoleShowing } = this.props.appState;
 
@@ -237,7 +214,7 @@ export class Output extends React.Component<CommandsProps> {
       <div
         className="output"
         ref={this.outputRef}
-        style={{ display: isConsoleShowing ? 'block' : 'none' }}
+        style={{ display: isConsoleShowing ? 'inline-block' : 'none' }}
       />
     );
   }

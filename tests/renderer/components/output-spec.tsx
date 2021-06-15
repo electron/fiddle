@@ -18,59 +18,103 @@ const mockContext = {
 
 describe('Output component', () => {
   let store: any;
+  let monaco: any;
 
   beforeEach(() => {
     store = new StateMock();
+    ({ monaco } = (window as any).ElectronFiddle.app);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<Output appState={store} />);
-    expect(wrapper.html()).toBe('<div class="output"></div>');
-  });
-
-  it('renders with output', () => {
-    store.output = [
-      {
-        timestamp: 1532704072127,
-        text: 'Hello!',
-      },
-      {
-        timestamp: 1532704073130,
-        text: 'Hi!',
-      },
-      {
-        timestamp: 1532704073130,
-        text: 'Hi!',
-        isNotPre: true,
-      },
-    ];
-
-    const renderTimestamp = (i: number) => i.toString();
+  it('renders the output container', () => {
     const wrapper = shallow(
-      <Output appState={store} renderTimestamp={renderTimestamp} />,
+      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    );
+    expect(wrapper.html()).toBe(
+      '<div class="output" style="display:inline-block"></div>',
+    );
+  });
+
+  it('correctly sets the language', () => {
+    const wrapper = shallow(
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
     );
 
-    expect(wrapper).toMatchSnapshot();
+    expect((wrapper.instance() as any).language).toBe('consoleOutputLanguage');
   });
 
-  it('calculates a timestamp', () => {
-    const wrapper = shallow(<Output appState={store} />);
-    const instance: Output = wrapper.instance() as any;
+  describe('initMonaco()', async () => {
+    it('attempts to create an editor', async () => {
+      const didMount = jest.fn();
+      const wrapper = shallow(
+        <Output
+          appState={store as any}
+          monaco={monaco}
+          monacoOptions={{}}
+          editorDidMount={didMount}
+        />,
+      );
+      const instance: any = wrapper.instance();
 
-    const result = instance.renderTimestamp(1546834508111);
+      instance.outputRef.current = 'ref';
+      await instance.initMonaco();
 
-    // Depends on the server, we just want to verify that we
-    // get _something_
-    expect(result).toBeTruthy();
+      expect(didMount).toHaveBeenCalled();
+      expect(monaco.editor.create).toHaveBeenCalled();
+      expect(monaco.editor.createModel).toHaveBeenCalled();
+    });
+
+    it('initializes with a fixed tab size', async () => {
+      const didMount = jest.fn();
+      const wrapper = shallow(
+        <Output
+          appState={store as any}
+          monaco={monaco}
+          monacoOptions={{}}
+          editorDidMount={didMount}
+        />,
+      );
+      const instance: any = wrapper.instance();
+
+      instance.containerRef.current = 'ref';
+      await instance.initMonaco();
+
+      expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabSize: 2,
+        }),
+      );
+    });
+  });
+
+  it('componentWillUnmount() attempts to dispose the editor', async () => {
+    const didMount = jest.fn();
+    const wrapper = shallow(
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={didMount}
+      />,
+    );
+    const instance: any = wrapper.instance();
+
+    instance.containerRef.current = 'ref';
+    await instance.initMonaco();
+    instance.componentWillUnmount();
+
+    expect(monaco.latestEditor.dispose).toHaveBeenCalled();
   });
 
   it('hides the console with react-mosaic-component', () => {
     // manually trigger lifecycle methods so that
     // context can be set before mounting method
-    const wrapper = shallow(<Output appState={store} />, {
-      context: mockContext,
-      disableLifecycleMethods: true,
-    });
+    const wrapper = shallow(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+      {
+        context: mockContext,
+        disableLifecycleMethods: true,
+      },
+    );
 
     mockContext.mosaicActions.getRoot.mockReturnValue({
       direction: 'row',
@@ -95,12 +139,32 @@ describe('Output component', () => {
     expect(wrapper.html()).toBe(null);
   });
 
-  it('handles componentDidUpdate', () => {
-    const wrapper = shallow(<Output appState={store} />);
+  it('handles componentDidUpdate', async () => {
+    store.output = [
+      {
+        timestamp: 1532704072127,
+        text: 'Hello!',
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+        isNotPre: true,
+      },
+    ];
+
+    const wrapper = shallow(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    );
     const instance: any = wrapper.instance() as any;
 
-    instance.outputRef = { current: { scrollTop: 0, scrollHeight: 200 } };
+    instance.outputRef = React.createRef<HTMLDivElement>();
+    await instance.initMonaco();
+
     instance.componentDidUpdate();
-    expect(instance.outputRef.current.scrollTop).toBe(200);
+    expect(instance.editor.getScrollTop()).toBe(3);
   });
 });
