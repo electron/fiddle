@@ -137,9 +137,7 @@ export class Output extends React.Component<CommandsProps> {
     }
 
     // The last 1000 lines
-    const lines = output
-      .slice(Math.max(output.length - 1000, 1))
-      .map(this.renderEntry);
+    const lines = output.slice(-1000).map(this.renderEntry);
 
     return (
       <div className="output" ref={this.outputRef}>
