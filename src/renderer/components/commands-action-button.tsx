@@ -172,7 +172,7 @@ export class GistActionButton extends React.Component<
 
     if (description) {
       await this.publishGist(description);
-      appState.isUnsaved = false;
+      appState.editorMosaic.isEdited = false;
     }
 
     appState.genericDialogLastInput = null;
@@ -196,7 +196,7 @@ export class GistActionButton extends React.Component<
         files: this.gistFilesList(values) as any,
       });
 
-      appState.isUnsaved = false;
+      appState.editorMosaic.isEdited = false;
       console.log('Updating: Updating done', { gist });
       this.renderToast({ message: 'Successfully updated gist!' });
     } catch (error) {
@@ -230,7 +230,7 @@ export class GistActionButton extends React.Component<
         gist_id: appState.gistId!,
       });
 
-      appState.isUnsaved = true;
+      appState.editorMosaic.isEdited = true;
       console.log('Deleting: Deleting done', { gist });
       this.renderToast({ message: 'Successfully deleted gist!' });
     } catch (error) {

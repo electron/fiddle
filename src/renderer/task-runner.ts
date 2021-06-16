@@ -27,6 +27,7 @@ export class TaskRunner {
   private readonly run: () => Promise<RunResult>;
   private readonly setVersion: (ver: string) => Promise<void>;
   private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly showObsoleteVersions: (show: boolean) => void;
 
   constructor(app: App) {
     const { runner, state } = app;
@@ -36,6 +37,8 @@ export class TaskRunner {
     this.autobisect = runner.autobisect.bind(runner);
     this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
     this.hide = state.hideChannels.bind(state);
+    this.showObsoleteVersions = (use: boolean) =>
+      (state.showObsoleteVersions = use);
     this.log = state.pushOutput.bind(state);
     this.open = app.openFiddle.bind(app);
     this.run = runner.run.bind(runner);
@@ -102,7 +105,11 @@ export class TaskRunner {
 
   private async setup(req: SetupRequest) {
     const { log } = this;
-    const { fiddle, hideChannels, showChannels, version } = req;
+    const { fiddle, hideChannels, showChannels, useObsolete, version } = req;
+
+    if (typeof useObsolete === 'boolean') {
+      this.showObsoleteVersions(useObsolete);
+    }
 
     if (hideChannels.length > 0) {
       log(`Task: Hide channels ${hideChannels.join(', ')}`);

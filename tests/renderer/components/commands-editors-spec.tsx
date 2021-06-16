@@ -3,20 +3,19 @@ import * as React from 'react';
 
 import { DefaultEditorId, GenericDialogType } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
-import { getVisibleMosaics } from '../../../src/utils/editors-mosaic-arrangement';
 
-import { StateMock } from '../../mocks/mocks';
-
-jest.mock('../../../src/utils/editors-mosaic-arrangement');
+import { EditorMosaicMock, StateMock } from '../../mocks/mocks';
 
 describe('EditorDropdown component', () => {
   let store: StateMock;
+  let editorMosaic: EditorMosaicMock;
 
   beforeEach(() => {
     (process.env as any).FIDDLE_DOCS_DEMOS = false;
     ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ editorMosaic } = store);
 
-    (getVisibleMosaics as jest.Mock).mockReturnValue([
+    editorMosaic.getVisibleMosaics.mockReturnValue([
       DefaultEditorId.html,
       DefaultEditorId.renderer,
     ]);
@@ -56,7 +55,7 @@ describe('EditorDropdown component', () => {
     const { editorMosaic } = store;
 
     editorMosaic.mosaicArrangement = DefaultEditorId.html;
-    (getVisibleMosaics as jest.Mock).mockReturnValue([DefaultEditorId.html]);
+    editorMosaic.getVisibleMosaics.mockReturnValue([DefaultEditorId.html]);
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const instance = wrapper.instance() as EditorDropdown;

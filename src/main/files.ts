@@ -1,4 +1,4 @@
-import { dialog } from 'electron';
+import { dialog, app } from 'electron';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import { DefaultEditorId } from '../interfaces';
@@ -28,7 +28,7 @@ export async function showOpenDialog() {
   if (!filePaths || filePaths.length < 1) {
     return;
   }
-
+  app.addRecentDocument(filePaths[0]);
   ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [filePaths[0]]);
 }
 

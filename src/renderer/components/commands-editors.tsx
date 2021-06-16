@@ -16,7 +16,6 @@ import {
   EditorId,
   GenericDialogType,
 } from '../../interfaces';
-import { getVisibleMosaics } from '../../utils/editors-mosaic-arrangement';
 import { AppState } from '../state';
 import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
 
@@ -65,9 +64,7 @@ export class EditorDropdown extends React.Component<
   public renderMenuItems() {
     const { appState } = this.props;
     const result: Array<JSX.Element> = [];
-    const visibleMosaics = getVisibleMosaics(
-      appState.editorMosaic.mosaicArrangement,
-    );
+    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
 
     const allEditors = [
       ...DEFAULT_EDITORS,
@@ -210,9 +207,7 @@ export class EditorDropdown extends React.Component<
     const { id } = event.currentTarget;
     const { appState } = this.props;
     const { editorMosaic } = appState;
-    const visibleMosaics = getVisibleMosaics(
-      appState.editorMosaic.mosaicArrangement,
-    );
+    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
 
     if (visibleMosaics.includes(id as EditorId)) {
       console.log(`EditorDropdown: Closing ${id}`);

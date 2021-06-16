@@ -18,7 +18,7 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     hideChannels: [],
   };
 
-  const { fiddle, version, betas, nightlies } = opts;
+  const { fiddle, version, betas, nightlies, obsolete } = opts;
 
   if (fs.existsSync(fiddle)) {
     config.fiddle = { filePath: fiddle };
@@ -34,6 +34,10 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
 
   if (version) {
     config.version = version;
+  }
+
+  if (typeof obsolete === 'boolean') {
+    config.useObsolete = obsolete;
   }
 
   if (betas) {
@@ -69,8 +73,18 @@ async function sendTask(type: IpcEvents, task: any) {
   ipcMainManager.send(type, [task]);
 }
 
+function logConfig() {
+  const packageJson = require('../../package.json');
+  console.log(`${packageJson.name} started
+   argv: ${JSON.stringify(process.argv)}
+   date: ${new Date()}
+   platform: ${process.platform}
+   version: ${packageJson.version}`);
+}
+
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
+    if (opts.logConfig) logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
       setup: getSetup(opts),
       goodVersion: good,
@@ -84,6 +98,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
 
 async function test(opts: commander.OptionValues) {
   try {
+    if (opts.logConfig) logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
@@ -101,10 +116,13 @@ export async function processCommandLine(argv: string[]) {
     .command('bisect <goodVersion> <badVersion>')
     .description('Find where regressions were introduced')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
+    .option('--log-config', 'Log the fiddle version, platform, and args', false)
     .option('--nightlies', 'Include nightly releases')
     .option('--no-nightlies', 'Omit nightly releases')
     .option('--betas', 'Include beta releases')
     .option('--no-betas', 'Omit beta releases')
+    .option('--obsolete', 'Include obsolete releases')
+    .option('--no-obsolete', 'Omit obsolete releases')
     .action(bisect);
 
   program
@@ -112,6 +130,7 @@ export async function processCommandLine(argv: string[]) {
     .description('Test a fiddle')
     .option('--version <version>', 'Use Electron version')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
+    .option('--log-config', 'Log the fiddle version, platform, and args', false)
     .action(test);
 
   program.addHelpText(

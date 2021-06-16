@@ -52,6 +52,19 @@ describe('processCommandLine()', () => {
     expect(stringify(request)).toBe(payload);
   }
 
+  async function expectLogConfigOptionWorks(argv: string[]) {
+    argv = [...argv, '--log-config'];
+    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    await processCommandLine(argv);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringMatching('electron-fiddle started'),
+    );
+    expect(consoleSpy).toHaveBeenCalledWith(
+      expect.stringMatching(`platform: ${process.platform}`),
+    );
+    consoleSpy.mockReset();
+  }
+
   describe('test', () => {
     const ARGV = [...ARGV_PREFIX, 'test'];
 
@@ -95,6 +108,10 @@ describe('processCommandLine()', () => {
       const expected = `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"version":"${VERSION}"}}`;
       await processCommandLine(argv);
       expectTestCalledOnceWith(expected);
+    });
+
+    it('handles a --log-config option', async () => {
+      await expectLogConfigOptionWorks([...ARGV, '--log-config']);
     });
   });
 
@@ -142,6 +159,20 @@ describe('processCommandLine()', () => {
       expectBisectCalledOnceWith(expected);
     });
 
+    it('handles a --obsolete option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--obsolete'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":true}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
+    it('handles a --no-obsolete option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--no-obsolete'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":false}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
     it('handles a --fiddle option that is unrecognizable', async () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, GOOD, BAD, '--fiddle', FIDDLE];
@@ -155,6 +186,10 @@ describe('processCommandLine()', () => {
       expect(exitSpy).toHaveBeenCalledWith(exitExpected);
       consoleSpy.mockReset();
       exitSpy.mockReset();
+    });
+
+    it('handles a --log-config option', async () => {
+      await expectLogConfigOptionWorks([...ARGV, GOOD, BAD, '--log-config']);
     });
 
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {

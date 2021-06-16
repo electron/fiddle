@@ -60,8 +60,7 @@ export class Editor extends React.Component<EditorProps> {
     // Set the content on the editor.
     await this.setContent();
 
-    // Set the editor as an available object.
-    appState.editorMosaic.editors.set(id, editor);
+    appState.editorMosaic.addEditor(id, editor);
 
     // And notify others
     if (editorDidMount) {

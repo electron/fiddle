@@ -247,6 +247,16 @@ function getFileMenu(
       accelerator: 'CmdOrCtrl+O',
     },
     {
+      label: 'Open Recent',
+      role: 'recentDocuments',
+      submenu: [
+        {
+          label: 'Clear Recent',
+          role: 'clearRecentDocuments',
+        },
+      ],
+    },
+    {
       type: 'separator',
     },
     {

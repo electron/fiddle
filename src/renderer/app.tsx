@@ -1,10 +1,12 @@
 import { initSentry } from '../sentry';
 initSentry();
 
-import { reaction, when } from 'mobx';
+import { autorun, reaction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
+import { IpcEvents } from '../ipc-events';
+import { ipcRendererManager } from './ipc';
 import {
   EditorValues,
   GenericDialogType,
@@ -43,31 +45,38 @@ export class App {
     this.taskRunner = new TaskRunner(this);
   }
 
+  private async confirmReplaceUnsaved() {
+    return this.state.runConfirmationDialog({
+      label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
+      ok: 'Yes',
+      type: GenericDialogType.warning,
+    });
+  }
+
+  private async confirmExitUnsaved() {
+    return this.state.runConfirmationDialog({
+      label: 'The current Fiddle is unsaved. Do you want to exit anyway?',
+      ok: 'Exit',
+      type: GenericDialogType.warning,
+    });
+  }
+
   public async replaceFiddle(
     editorValues: EditorValues,
     { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
-    // if unsaved, prompt user to make sure they're okay with overwriting and changing directory
-    if (this.state.isUnsaved) {
-      this.state.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
-        ok: 'Yes',
-      });
-      this.state.isGenericDialogShowing = true;
-      await when(() => !this.state.isGenericDialogShowing);
+    const { state } = this;
+    const { editorMosaic } = state;
 
-      if (!this.state.genericDialogLastResult) {
-        return false;
-      }
+    if (editorMosaic.isEdited && !(await this.confirmReplaceUnsaved())) {
+      return false;
     }
 
-    await this.state.editorMosaic.set(editorValues);
+    this.state.editorMosaic.set(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = filePath;
     this.state.templateName = templateName;
-    this.state.isUnsaved = false;
 
     // update menu when a new Fiddle is loaded
     ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, templateName);
@@ -121,6 +130,7 @@ export class App {
     this.setupResizeListener();
     this.setupThemeListeners();
     this.setupTitleListeners();
+    this.setupUnloadListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
@@ -224,6 +234,33 @@ export class App {
         });
       },
     );
+  }
+
+  public setupUnloadListeners() {
+    autorun(async () => {
+      const { state } = this;
+      const { editorMosaic } = state;
+
+      if (!editorMosaic.isEdited) {
+        window.onbeforeunload = null;
+        return;
+      }
+
+      window.onbeforeunload = async () => {
+        if (await this.confirmExitUnsaved()) {
+          // isQuitting checks if we're trying to quit the app
+          // or just close the window
+          if (state.isQuitting) {
+            ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
+          }
+          window.onbeforeunload = null;
+          window.close();
+        }
+
+        // return value doesn't matter, we just want to cancel the event
+        return false;
+      };
+    });
   }
 }
 

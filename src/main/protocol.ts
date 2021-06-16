@@ -93,6 +93,19 @@ export const listenForProtocolHandler = () => {
     }
   });
 
+  app.removeAllListeners('second-instance');
+  app.on('second-instance', (_event, commandLine, _workingDirectory) => {
+    // Someone tried to run a second instance
+    scanArgv(commandLine);
+  });
+
+  app.on('open-file', (_, path) => {
+    if (!path || path.length < 1) {
+      return;
+    }
+    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [path]);
+  });
+
   // pass protocol URL via npm start args in dev mode
   if (isDevMode() && process.env.npm_config_argv) {
     scanNpmArgv(process.env.npm_config_argv);

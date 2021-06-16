@@ -1,6 +1,6 @@
+import { reaction } from 'mobx';
 import {
   BlockableAccelerator,
-  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogType,
   RunnableVersion,
@@ -8,7 +8,6 @@ import {
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
 import {
   getVersionState,
   removeBinary,
@@ -23,9 +22,8 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import { waitFor } from '../../src/utils/wait-for';
 import { getName } from '../../src/utils/get-name';
-import { MonacoEditorMock, VersionsMock } from '../mocks/mocks';
+import { VersionsMock } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -83,84 +81,6 @@ describe('AppState', () => {
 
   it('exists', () => {
     expect(appState).toBeTruthy();
-  });
-
-  describe('isUnsaved autorun handler', () => {
-    it('can close the window if user accepts the dialog', async () => {
-      window.close = jest.fn();
-      appState.isUnsaved = true;
-      expect(window.onbeforeunload).toBeTruthy();
-
-      const result = window.onbeforeunload!(undefined as any);
-      expect(result).toBe(false);
-      expect(appState.isGenericDialogShowing).toBe(true);
-
-      appState.genericDialogLastResult = true;
-      appState.isGenericDialogShowing = false;
-      await process.nextTick;
-      expect(window.close).toHaveBeenCalled();
-    });
-
-    it('can close the app after user accepts dialog', async () => {
-      window.close = jest.fn();
-      appState.isUnsaved = true;
-      expect(window.onbeforeunload).toBeTruthy();
-
-      const result = window.onbeforeunload!(undefined as any);
-      expect(result).toBe(false);
-      expect(appState.isGenericDialogShowing).toBe(true);
-
-      appState.genericDialogLastResult = true;
-      appState.isGenericDialogShowing = false;
-      appState.isQuitting = true;
-      await process.nextTick;
-      expect(window.close).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.CONFIRM_QUIT,
-      );
-    });
-
-    it('takes no action if user cancels the dialog', async () => {
-      window.close = jest.fn();
-      appState.isUnsaved = true;
-      expect(window.onbeforeunload).toBeTruthy();
-
-      const result = window.onbeforeunload!(undefined as any);
-      expect(result).toBe(false);
-      expect(appState.isGenericDialogShowing).toBe(true);
-
-      appState.genericDialogLastResult = false;
-      appState.isGenericDialogShowing = false;
-      appState.isQuitting = true;
-      await process.nextTick;
-      expect(window.close).not.toHaveBeenCalled();
-      expect(ipcRendererManager.send).not.toHaveBeenCalledWith(
-        IpcEvents.CONFIRM_QUIT,
-      );
-    });
-
-    it('sets the onDidChangeModelContent handler if saved', async (done) => {
-      const { editorMosaic } = appState;
-      const editor = new MonacoEditorMock();
-      const fn = editor.onDidChangeModelContent;
-      const filename = DefaultEditorId.renderer;
-      editorMosaic.editors.set(filename, editor as any);
-
-      // confirm that setting appState.isUnsaved to false
-      // causes a new change-model-content callback to be installed
-      appState.isUnsaved = false;
-      await waitFor(() => (fn as jest.Mock).mock.calls.length > 0);
-      expect(window.onbeforeunload).toBe(null);
-      expect(fn as jest.Mock).toHaveBeenCalledTimes(1);
-
-      // confirm that invoking the new callback sets appState.isUnsaved to true
-      const call = (fn as jest.Mock).mock.calls[0];
-      const callback = call[0];
-      callback();
-      expect(appState.isUnsaved).toBe(true);
-
-      done();
-    });
   });
 
   describe('updateElectronVersions()', () => {
@@ -505,6 +425,47 @@ describe('AppState', () => {
     });
   });
 
+  describe('runConfirmationDialog()', () => {
+    let dispose: any;
+
+    afterEach(() => {
+      if (dispose) dispose();
+    });
+
+    function registerDialogHandler(
+      description: string | null,
+      result: boolean,
+    ) {
+      dispose = reaction(
+        () => appState.isGenericDialogShowing,
+        () => {
+          appState.genericDialogLastInput = description;
+          appState.genericDialogLastResult = result;
+          appState.isGenericDialogShowing = false;
+        },
+      );
+    }
+
+    const Description = 'some non-default description';
+
+    const Opts = {
+      type: GenericDialogType.warning,
+      label: 'foo',
+    } as const;
+
+    it('returns true if confirmed by user', async () => {
+      registerDialogHandler(Description, true);
+      const response = await appState.runConfirmationDialog(Opts);
+      expect(response).toBe(true);
+    });
+
+    it('returns false if rejected by user', async () => {
+      registerDialogHandler(Description, false);
+      const response = await appState.runConfirmationDialog(Opts);
+      expect(response).toBe(false);
+    });
+  });
+
   describe('setGenericDialogOptions()', () => {
     it('sets the warning dialog options', () => {
       appState.setGenericDialogOptions({
@@ -661,7 +622,7 @@ describe('AppState', () => {
 
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
-      appState.isUnsaved = true;
+      appState.editorMosaic.isEdited = true;
       const actual = appState.title;
       expect(actual).toBe(expected);
     });

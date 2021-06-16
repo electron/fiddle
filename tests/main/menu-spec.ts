@@ -310,10 +310,11 @@ describe('menu', () => {
         NEW_TEST = 1,
         NEW_WINDOW = 2,
         OPEN = 4,
-        SAVE = 6,
-        SAVE_AS = 7,
-        PUBLISH = 9,
-        FORGE = 10,
+        OPEN_RECENT = 5,
+        SAVE = 7,
+        SAVE_AS = 8,
+        PUBLISH = 10,
+        FORGE = 11,
       }
 
       beforeEach(() => {

@@ -41,6 +41,20 @@ describe('protocol', () => {
   });
 
   describe('listenForProtocolHandler()', () => {
+    it('handles a Fiddle url (second-instance)', () => {
+      overridePlatform('win32');
+
+      listenForProtocolHandler();
+
+      const handler = (app.on as any).mock.calls[1][1];
+
+      handler({}, ['electron-fiddle://gist/hi']);
+      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        IpcEvents.LOAD_GIST_REQUEST,
+        [{ id: 'hi' }],
+      );
+    });
+
     it('handles a Fiddle url (open-url)', () => {
       overridePlatform('darwin');
 
