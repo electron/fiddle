@@ -5,7 +5,6 @@ import { autorun, reaction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
-import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from './ipc';
 import {
   EditorValues,

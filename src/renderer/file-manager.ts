@@ -117,7 +117,6 @@ export class FileManager {
         this.appState.gistId = undefined;
       }
       ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
-      this.appState.isUnsaved = false;
       this.appState.editorMosaic.isEdited = false;
     }
   }
