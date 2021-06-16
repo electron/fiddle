@@ -171,7 +171,11 @@ describe('Output component', () => {
     await instance.initMonaco();
 
     instance.editor.setContent(store.output);
-    const expectedFormattedOutput = '8:07:53 AM Hi!\n8:07:53 AM Hi!';
+    const expectedFormattedOutput =
+      new Date(store.output[1].timestamp).toLocaleTimeString() +
+      ` Hi!\n` +
+      new Date(store.output[2].timestamp).toLocaleTimeString() +
+      ' Hi!';
     // makes sure setContent() is called with the right values
     expect(monaco.editor.createModel).toHaveBeenCalledWith(
       expectedFormattedOutput,
