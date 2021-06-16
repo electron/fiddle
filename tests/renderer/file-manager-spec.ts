@@ -114,19 +114,20 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       const n = Object.keys(editorValues).length;
+      // ipc calls for each editor value + one for SET_SHOW_ME_TEMPLATE
+      const ipcCalls = n + 1;
       expect(fs.outputFile).toHaveBeenCalledTimes(n);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(n);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(ipcCalls);
     });
 
     it('handles an error (remove)', async () => {
       (fs.remove as jest.Mock).mockImplementation(() => {
         throw new Error('bwap');
       });
-
       await fm.saveFiddle('/fake/path');
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(2);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {

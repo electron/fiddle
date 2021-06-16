@@ -106,7 +106,6 @@ export class FileManager {
         // content in the file, remove a file that possibly exists.
         if (content) {
           await this.saveFile(savePath, content);
-          ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
           this.appState.templateName = undefined;
         } else {
           await this.removeFile(savePath);
@@ -117,7 +116,7 @@ export class FileManager {
         this.appState.localPath = pathToSave;
         this.appState.gistId = undefined;
       }
-
+      ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
       this.appState.isUnsaved = false;
     }
   }
