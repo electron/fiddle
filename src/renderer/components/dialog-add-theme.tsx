@@ -49,7 +49,7 @@ export class AddThemeDialog extends React.Component<
    */
   public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
     const { files } = event.target as any;
-    const file = files?.[0] ;
+    const file = files?.[0];
 
     this.setState({ file });
   }
