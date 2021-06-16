@@ -181,6 +181,7 @@ describe('Output component', () => {
   });
 
   it('handles componentDidUpdate', async () => {
+    // set up component
     const editorDidMount = jest.fn();
     const wrapper = shallow(
       <Output
@@ -196,6 +197,7 @@ describe('Output component', () => {
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
 
+    // setContent will trigger componentDidUpdate()
     instance.editor.setContent(store.output);
     expect(spy).toHaveBeenCalled();
   });
