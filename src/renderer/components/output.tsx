@@ -185,7 +185,7 @@ export class Output extends React.Component<CommandsProps> {
   private getOutputLines(output: OutputEntry[]) {
     const { appState } = this.props;
     const lines: string[] = [];
-    const outputs = output.slice(Math.max(appState.output.length - 1000, 1));
+    const outputs = output.slice(appState.output.length - 1000);
 
     for (const output of outputs) {
       const segments = output.text.split(/\r?\n/);

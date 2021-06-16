@@ -142,10 +142,6 @@ describe('Output component', () => {
   it('setContent updates model with correct values', async () => {
     store.output = [
       {
-        timestamp: 1532704072127,
-        text: 'Console Ready!',
-      },
-      {
         timestamp: 1532704073130,
         text: 'Hi!',
       },
@@ -172,9 +168,9 @@ describe('Output component', () => {
 
     instance.editor.setContent(store.output);
     const expectedFormattedOutput =
-      new Date(store.output[1].timestamp).toLocaleTimeString() +
+      new Date(store.output[0].timestamp).toLocaleTimeString() +
       ` Hi!\n` +
-      new Date(store.output[2].timestamp).toLocaleTimeString() +
+      new Date(store.output[1].timestamp).toLocaleTimeString() +
       ' Hi!';
     // makes sure setContent() is called with the right values
     expect(monaco.editor.createModel).toHaveBeenCalledWith(
