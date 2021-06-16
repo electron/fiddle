@@ -8,11 +8,15 @@ export class MonacoEditorMock {
   public model = {
     getFullModelRange: jest.fn(),
   };
+  public scrollHeight = 0;
   public value = '';
 
   public dispose = jest.fn();
   public getAction = jest.fn().mockImplementation(() => this.action);
   public getModel = jest.fn().mockImplementation(() => this.model);
+  public getScrollHeight = jest
+    .fn()
+    .mockImplementation(() => this.scrollHeight);
   public getValue = jest.fn().mockImplementation(() => this.value);
   public hasTextFocus = jest.fn();
   public layout = jest.fn();
@@ -24,7 +28,9 @@ export class MonacoEditorMock {
   });
   public onDidFocusEditorText = jest.fn();
   public restoreViewState = jest.fn();
+  public revealLine = jest.fn();
   public saveViewState = jest.fn();
+  public setContent = jest.fn();
   public setModel = jest.fn().mockImplementation((model) => {
     this.model = model;
   });

@@ -35,7 +35,6 @@ export class Output extends React.Component<CommandsProps> {
   public context: MosaicContext<WrapperEditorId>;
   public editor: MonacoType.editor.IStandaloneCodeEditor;
   public language = 'consoleOutputLanguage';
-  public value = '';
 
   private outputRef = React.createRef<HTMLDivElement>();
 
@@ -65,8 +64,15 @@ export class Output extends React.Component<CommandsProps> {
    * Handle the editor having been mounted. This refers to Monaco's
    * mount, not React's.
    */
-  public async editorDidMount() {
+  public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
+    const { editorDidMount } = this.props;
+
     await this.setContent(this.props.appState.output);
+
+    // Notify other editors that the initial editor was mounted
+    if (editorDidMount) {
+      editorDidMount(editor);
+    }
   }
 
   /**
@@ -94,7 +100,7 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.editorDidMount();
+      await this.editorDidMount(this.editor);
     }
   }
 

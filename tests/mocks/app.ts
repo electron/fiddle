@@ -46,8 +46,9 @@ export class AppMock {
           () => (this.monaco.latestModel = { updateOptions: jest.fn() }),
         ),
       onDidFocusEditorText: jest.fn(),
-      setTheme: jest.fn(),
       defineTheme: jest.fn(),
+      revealLine: jest.fn(),
+      setTheme: jest.fn(),
     },
     languages: {
       typescript: {
@@ -55,6 +56,9 @@ export class AppMock {
           addExtraLib: jest.fn(),
         },
       },
+      register: jest.fn(),
+      setMonarchTokensProvider: jest.fn(),
+      registerCompletionItemProvider: jest.fn(),
     },
   };
 }

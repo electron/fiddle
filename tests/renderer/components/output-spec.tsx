@@ -42,15 +42,15 @@ describe('Output component', () => {
     expect((wrapper.instance() as any).language).toBe('consoleOutputLanguage');
   });
 
-  describe('initMonaco()', async () => {
+  describe('initMonaco()', () => {
     it('attempts to create an editor', async () => {
-      const didMount = jest.fn();
+      const editorDidMount = jest.fn();
       const wrapper = shallow(
         <Output
           appState={store as any}
           monaco={monaco}
           monacoOptions={{}}
-          editorDidMount={didMount}
+          editorDidMount={editorDidMount}
         />,
       );
       const instance: any = wrapper.instance();
@@ -58,7 +58,7 @@ describe('Output component', () => {
       instance.outputRef.current = 'ref';
       await instance.initMonaco();
 
-      expect(didMount).toHaveBeenCalled();
+      expect(editorDidMount).toHaveBeenCalled();
       expect(monaco.editor.create).toHaveBeenCalled();
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
@@ -75,7 +75,7 @@ describe('Output component', () => {
       );
       const instance: any = wrapper.instance();
 
-      instance.containerRef.current = 'ref';
+      instance.outputRef.current = 'ref';
       await instance.initMonaco();
 
       expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
@@ -98,14 +98,14 @@ describe('Output component', () => {
     );
     const instance: any = wrapper.instance();
 
-    instance.containerRef.current = 'ref';
+    instance.outputRef.current = 'ref';
     await instance.initMonaco();
     instance.componentWillUnmount();
 
     expect(monaco.latestEditor.dispose).toHaveBeenCalled();
   });
 
-  it('hides the console with react-mosaic-component', () => {
+  it('hides the console with react-mosaic-component', async () => {
     // manually trigger lifecycle methods so that
     // context can be set before mounting method
     const wrapper = shallow(
@@ -115,28 +115,28 @@ describe('Output component', () => {
         disableLifecycleMethods: true,
       },
     );
+    const instance: any = wrapper.instance();
 
+    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
+    // the context is {}. That's never the case in production.
+    // direction is required to be recognized as a valid root node
     mockContext.mosaicActions.getRoot.mockReturnValue({
+      splitPercentage: 25,
       direction: 'row',
-      first: 'output',
-      second: 'editors',
     });
 
     wrapper.instance().context = mockContext;
     wrapper.instance().componentDidMount!();
 
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalled();
     expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ splitPercentage: 25 }),
     );
     expect(wrapper.html()).not.toBe(null);
-
-    store.isConsoleShowing = false;
-
-    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
-    // the context is {}. That's never the case in production.
-    // expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 0);
-    expect(wrapper.html()).toBe(null);
   });
 
   it('handles componentDidUpdate', async () => {
@@ -156,15 +156,22 @@ describe('Output component', () => {
       },
     ];
 
+    const editorDidMount = jest.fn();
     const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={editorDidMount}
+      />,
     );
-    const instance: any = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
 
-    instance.outputRef = React.createRef<HTMLDivElement>();
+    instance.outputRef.current = 'ref';
     await instance.initMonaco();
 
-    instance.componentDidUpdate();
-    expect(instance.editor.getScrollTop()).toBe(3);
+    instance.editor.setContent(store.output);
+    expect(instance.editor.revealLine).toHaveBeenCalled();
+    expect(instance.editor.revealLine).toHaveBeenCalledWith(3);
   });
 });
