@@ -139,11 +139,11 @@ describe('Output component', () => {
     expect(wrapper.html()).not.toBe(null);
   });
 
-  it('handles componentDidUpdate', async () => {
+  it('setContent updates model with correct values', async () => {
     store.output = [
       {
         timestamp: 1532704072127,
-        text: 'Hello!',
+        text: 'Console Ready!',
       },
       {
         timestamp: 1532704073130,
@@ -171,7 +171,32 @@ describe('Output component', () => {
     await instance.initMonaco();
 
     instance.editor.setContent(store.output);
+    const expectedFormattedOutput = '8:07:53 AM Hi!\n8:07:53 AM Hi!';
+    // makes sure setContent() is called with the right values
+    expect(monaco.editor.createModel).toHaveBeenCalledWith(
+      expectedFormattedOutput,
+      'consoleOutputLanguage',
+    );
     expect(instance.editor.revealLine).toHaveBeenCalled();
-    expect(instance.editor.revealLine).toHaveBeenCalledWith(3);
+  });
+
+  it('handles componentDidUpdate', async () => {
+    const editorDidMount = jest.fn();
+    const wrapper = shallow(
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={editorDidMount}
+      />,
+    );
+    const instance: any = wrapper.instance();
+    const spy = jest.spyOn(instance, 'toggleConsole');
+
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+
+    instance.editor.setContent(store.output);
+    expect(spy).toHaveBeenCalled();
   });
 });
