@@ -11,6 +11,7 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { getGistId } from '../utils/gist';
 import { ipcMainManager } from './ipc';
+import { findProtocolArg } from './protocol';
 
 function getSetup(opts: commander.OptionValues): SetupRequest {
   const config: SetupRequest = {
@@ -149,6 +150,7 @@ Example calls:
   // do nothing if argv holds no commands/options
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     try {
+      if (findProtocolArg(argv)) return;
       program.parse(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
