@@ -244,14 +244,11 @@ export class RemoteLoader {
   public async askToDownloadMissingVersion(
     missingVersion: string,
   ): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
+    return this.appState.runConfirmationDialog({
       label: `It doesn't look like you've previously downloaded ${missingVersion} - Would you like to download it now?`,
+      ok: 'Download',
+      type: GenericDialogType.confirm,
     });
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
   public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
