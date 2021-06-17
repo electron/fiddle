@@ -5,7 +5,22 @@ exports[`Output component renders with output 1`] = `
   className="output"
 >
   <div
-    key="1532704073130--0--0"
+    key="1532704072127--0--0"
+  >
+    <span
+      className="output-message"
+      style={Object {}}
+    >
+      <span
+        className="timestamp"
+      >
+        1532704072127
+      </span>
+      Hello!
+    </span>
+  </div>
+  <div
+    key="1532704073130--1--0"
   >
     <span
       className="output-message"
@@ -20,7 +35,7 @@ exports[`Output component renders with output 1`] = `
     </span>
   </div>
   <div
-    key="1532704073130--1--0"
+    key="1532704073130--2--0"
   >
     <span
       className="output-message"
