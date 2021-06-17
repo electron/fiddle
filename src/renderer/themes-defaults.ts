@@ -90,7 +90,7 @@ export const defaultLight: LoadedFiddleTheme = {
   editor: {
     base: 'vs',
     inherit: true,
-    rules: [{ token: 'custom-date', foreground: '008800' }],
+    rules: [{ token: 'custom-date', foreground: '#008800' }],
     colors: {},
   },
 };

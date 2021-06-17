@@ -33,7 +33,7 @@ interface CommandsProps {
 export class Output extends React.Component<CommandsProps> {
   public static contextType = MosaicContext;
   public context: MosaicContext<WrapperEditorId>;
-  public editor: MonacoType.editor.IStandaloneCodeEditor;
+  public editor?: MonacoType.editor.IStandaloneCodeEditor;
   public language = 'consoleOutputLanguage';
 
   private outputRef = React.createRef<HTMLDivElement>();
@@ -46,14 +46,14 @@ export class Output extends React.Component<CommandsProps> {
 
   public async componentDidMount() {
     autorun(async () => {
-      this.destroyMonaco();
+      this.destroyMonacoEditor();
       await this.initMonaco();
       this.toggleConsole();
     });
   }
 
   public componentWillUnmount() {
-    this.destroyMonaco();
+    this.destroyMonacoEditor();
   }
 
   public componentDidUpdate() {
@@ -89,7 +89,7 @@ export class Output extends React.Component<CommandsProps> {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
     if (ref) {
-      this.setupMonacoLanguage(monaco);
+      this.setupCustomOutputEditorLanguage(monaco);
       this.editor = monaco.editor.create(ref, {
         language: this.language,
         theme: 'main',
@@ -107,10 +107,11 @@ export class Output extends React.Component<CommandsProps> {
   /**
    * Destroy Monaco.
    */
-  public destroyMonaco() {
+  public destroyMonacoEditor() {
     if (typeof this.editor !== 'undefined') {
       console.log('Editor: Disposing');
       this.editor.dispose();
+      delete this.editor;
     }
   }
 
@@ -147,9 +148,11 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   /**
-   * Set up Monaco Language.
+   * Set up Monaco Language to catch custom regex expressions
+   *
+   * tokenizes timestamps so`main` theme can render them with a custom colour.
    */
-  private setupMonacoLanguage(monaco: typeof MonacoType) {
+  private setupCustomOutputEditorLanguage(monaco: typeof MonacoType) {
     // register a new language
     monaco.languages.register({ id: 'consoleOutputLanguage' });
     // Register a tokens provider for the language
@@ -167,9 +170,9 @@ export class Output extends React.Component<CommandsProps> {
    * @memberof Output
    */
   private async setContent(output: OutputEntry[]) {
-    this.createModel(this.getOutputLines(output));
+    this.setEditorText(this.getOutputLines(output));
     // have terminal always scroll to the bottom
-    this.editor.revealLine(this.editor.getScrollHeight());
+    this.editor?.revealLine(this.editor?.getScrollHeight());
   }
 
   /**
@@ -183,9 +186,8 @@ export class Output extends React.Component<CommandsProps> {
    * @memberof Output
    */
   private getOutputLines(output: OutputEntry[]) {
-    const { appState } = this.props;
     const lines: string[] = [];
-    const outputs = output.slice(appState.output.length - 1000);
+    const outputs = output.slice(-1000);
 
     for (const output of outputs) {
       const segments = output.text.split(/\r?\n/);
@@ -203,14 +205,14 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @param {string} value
    */
-  private createModel(value: string) {
+  private setEditorText(value: string) {
     const { monaco } = this.props;
     const model = monaco.editor.createModel(value, this.language);
     model.updateOptions({
       tabSize: 2,
     });
 
-    this.editor.setModel(model);
+    this.editor?.setModel(model);
   }
 
   public render(): JSX.Element | null {

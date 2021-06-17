@@ -27,6 +27,8 @@ export class MonacoEditorMock {
     };
   });
   public onDidFocusEditorText = jest.fn();
+  public register = jest.fn();
+  public registerCompletionItemProvider = jest.fn();
   public restoreViewState = jest.fn();
   public revealLine = jest.fn();
   public saveViewState = jest.fn();
@@ -34,13 +36,13 @@ export class MonacoEditorMock {
   public setModel = jest.fn().mockImplementation((model) => {
     this.model = model;
   });
+  public setMonarchTokensProvider = jest.fn();
   public setSelection = jest.fn();
   public setValue = jest.fn().mockImplementation((value) => {
     this.value = value;
     if (this.listener) this.listener();
   });
   public updateOptions = jest.fn();
-
   private listener: any;
 
   public toJSON() {
