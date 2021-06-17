@@ -137,27 +137,21 @@ export class RemoteLoader {
   public async setElectronVersionWithRef(ref: string): Promise<boolean> {
     const version = await this.getPackageVersionFromRef(ref);
 
-    let downloadMissing = false;
     if (!this.appState.hasVersion(version)) {
-      downloadMissing = await this.askToDownloadMissingVersion(version);
-      if (downloadMissing) {
-        const versionToDownload = {
-          source: VersionSource.remote,
-          state: VersionState.unknown,
-          version,
-        };
+      const versionToDownload = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version,
+      };
 
-        try {
-          this.appState.addNewVersions([versionToDownload]);
-          await this.appState.downloadVersion(versionToDownload);
-        } catch {
-          this.appState.removeVersion(versionToDownload);
-          this.handleLoadingFailed(
-            new Error(`Failed to download missing Electron version ${version}`),
-          );
-          return false;
-        }
-      } else {
+      try {
+        this.appState.addNewVersions([versionToDownload]);
+        await this.appState.downloadVersion(versionToDownload);
+      } catch {
+        await this.appState.removeVersion(versionToDownload);
+        this.handleLoadingFailed(
+          new Error(`Failed to download Electron version ${version}`),
+        );
         return false;
       }
     }
@@ -233,22 +227,6 @@ export class RemoteLoader {
     await when(() => !this.appState.isGenericDialogShowing);
 
     return !!this.appState.genericDialogLastResult;
-  }
-
-  /**
-   * Asks the user if they would like to try to download a missing version
-   * of Electron.
-   *
-   * @param {string} missingVersion The version missing from the user's downloaded versions.
-   */
-  public async askToDownloadMissingVersion(
-    missingVersion: string,
-  ): Promise<boolean> {
-    return this.appState.runConfirmationDialog({
-      label: `It doesn't look like you've previously downloaded ${missingVersion} - Would you like to download it now?`,
-      ok: 'Download',
-      type: GenericDialogType.confirm,
-    });
   }
 
   public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {

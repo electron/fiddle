@@ -244,9 +244,6 @@ describe('RemoteLoader', () => {
       instance.getPackageVersionFromRef = jest
         .fn()
         .mockReturnValueOnce(version);
-      instance.askToDownloadMissingVersion = jest
-        .fn()
-        .mockReturnValueOnce(true);
 
       const result = await instance.setElectronVersionWithRef(version);
       expect(result).toBe(true);
@@ -258,19 +255,6 @@ describe('RemoteLoader', () => {
         },
       ]);
       expect(store.setVersion).toBeCalledWith(version);
-    });
-
-    it('does not load unsupported versions of Electron', async () => {
-      const version = '3.0.0';
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce(version);
-      instance.askToDownloadMissingVersion = jest
-        .fn()
-        .mockReturnValueOnce(false);
-
-      const result = await instance.setElectronVersionWithRef(version);
-      expect(result).toBe(false);
     });
   });
 
