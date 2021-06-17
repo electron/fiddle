@@ -32,7 +32,7 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
   }
 
   /**
-   * Executed right after the component mounts. We'll setup the IPC listeners here.
+   * Executed right after the component mounts.
    *
    * @memberof Outputs
    */
@@ -59,12 +59,12 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
   }
 
   /**
-   * Loads monaco. If it's already loaded, it'll just set it on the current state.
+   * Loads monaco for the Outputs component. Monaco must be loaded for editors.tsx and outputs.tsx
+   * separately. If it's already loaded, it'll just set it on the current state.
    * We're doing things a bit roundabout to ensure that we're not overloading the
    * mobx state with a gigantic Monaco tree.
    */
   public async loadMonaco() {
-    console.log('LOADING MONACO');
     const { app } = window.ElectronFiddle;
     const loader = require('monaco-loader');
     const monaco = app.monaco || (await loader());

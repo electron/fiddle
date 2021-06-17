@@ -65,8 +65,7 @@
     "shell-path": "^2.1.0",
     "tmp": "0.2.1",
     "tslib": "^2.1.0",
-    "update-electron-app": "^2.0.1",
-    "valid-url": "^1.0.9"
+    "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
