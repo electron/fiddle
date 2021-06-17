@@ -5,7 +5,6 @@ import { autorun, reaction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
-import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from './ipc';
 import {
   EditorValues,
@@ -13,7 +12,7 @@ import {
   PACKAGE_NAME,
   SetFiddleOptions,
 } from '../interfaces';
-import { WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
+import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -78,6 +77,9 @@ export class App {
     this.state.localPath = filePath;
     this.state.templateName = templateName;
 
+    // update menu when a new Fiddle is loaded
+    ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, templateName);
+
     return true;
   }
 
@@ -130,6 +132,10 @@ export class App {
     this.setupUnloadListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
+
+    ipcRenderer.on(IpcEvents.SET_SHOW_ME_TEMPLATE, () => {
+      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.state.templateName);
+    });
 
     return rendered;
   }

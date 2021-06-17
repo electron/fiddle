@@ -127,6 +127,33 @@ describe('menu', () => {
         IpcEvents.SELECT_ALL_IN_EDITOR,
       );
     });
+
+    describe('setup Show Me menu', () => {
+      it('show me menu correctly contains no check when no template is selected', () => {
+        overridePlatform('darwin');
+        setupMenu();
+
+        const result = (electron.Menu.buildFromTemplate as any).mock
+          .calls[0][0];
+        const showMeMenu = result[result.length - 2];
+
+        const showMeItemChecked = showMeMenu?.submenu[0]?.submenu[0]?.checked;
+        expect(showMeItemChecked).toEqual(false);
+      });
+
+      it('checks correct show me radio button after click', () => {
+        overridePlatform('darwin');
+        // simulate the menu rebuild after click that sends correct templateName
+        setupMenu({ activeTemplate: 'App' });
+
+        const result = (electron.Menu.buildFromTemplate as any).mock
+          .calls[0][0];
+        const showMeMenu = result[result.length - 2];
+
+        const showMeItemChecked = showMeMenu?.submenu[0]?.submenu[0]?.checked;
+        expect(showMeItemChecked).toEqual(true);
+      });
+    });
   });
 
   describe('menu groups', () => {
@@ -340,7 +367,7 @@ describe('menu', () => {
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
-        setupMenu([BlockableAccelerator.save]);
+        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.save] });
         file.submenu[Idx.SAVE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
@@ -348,7 +375,7 @@ describe('menu', () => {
       });
 
       it('saves as a Fiddle with blocked accelerator', () => {
-        setupMenu([BlockableAccelerator.saveAs]);
+        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.saveAs] });
         file.submenu[Idx.SAVE_AS].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
