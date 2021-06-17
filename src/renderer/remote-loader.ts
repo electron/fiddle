@@ -157,6 +157,8 @@ export class RemoteLoader {
           );
           return false;
         }
+      } else {
+        return false;
       }
     }
 
@@ -288,19 +290,14 @@ export class RemoteLoader {
    * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
-    if (navigator.onLine) {
-      this.appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Loading the fiddle failed: ${error}`,
-        cancel: undefined,
-      });
-    } else {
-      this.appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Loading the fiddle failed. Your computer seems to be offline. Error: ${error}`,
-        cancel: undefined,
-      });
-    }
+    const failedLabel = `Loading the fiddle failed: ${error.message}`;
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.warning,
+      label: navigator.onLine
+        ? failedLabel
+        : `Your computer seems to be offline. ${failedLabel}`,
+      cancel: undefined,
+    });
 
     this.appState.toggleGenericDialog();
 
