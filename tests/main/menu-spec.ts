@@ -28,7 +28,7 @@ describe('menu', () => {
     it('creates a menu (Darwin)', () => {
       overridePlatform('darwin');
 
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(8);
@@ -44,7 +44,7 @@ describe('menu', () => {
     it('creates a menu (Windows)', () => {
       overridePlatform('win32');
 
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
@@ -60,7 +60,7 @@ describe('menu', () => {
     it('creates a menu (Linux)', () => {
       overridePlatform('linux');
 
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       expect(result.length).toBe(7);
@@ -76,7 +76,7 @@ describe('menu', () => {
     it('adds Monaco toggle options', () => {
       overridePlatform('linux');
 
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       const submenu = result[2]
@@ -98,7 +98,7 @@ describe('menu', () => {
     it('adds Bisect toggle', () => {
       overridePlatform('linux');
 
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       const submenu = result[2]
@@ -114,7 +114,7 @@ describe('menu', () => {
     });
 
     it('overwrites Select All command', () => {
-      setupMenu({});
+      setupMenu();
 
       const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
       // use find here because the index is platform-specific
@@ -131,16 +131,13 @@ describe('menu', () => {
     describe('setup Show Me menu', () => {
       it('show me menu correctly contains no check when no template is selected', () => {
         overridePlatform('darwin');
-        setupMenu({});
+        setupMenu();
 
         const result = (electron.Menu.buildFromTemplate as any).mock
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
-        let showMeItemChecked = true;
-        if (showMeMenu.submenu[0].submenu[0]) {
-          showMeItemChecked = showMeMenu.submenu[0].submenu[0].checked;
-        }
+        const showMeItemChecked = showMeMenu?.submenu[0]?.submenu[0]?.checked;
         expect(showMeItemChecked).toEqual(false);
       });
 
@@ -153,10 +150,7 @@ describe('menu', () => {
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
-        let showMeItemChecked = false;
-        if (showMeMenu.submenu[0].submenu[0]) {
-          showMeItemChecked = showMeMenu.submenu[0].submenu[0].checked;
-        }
+        const showMeItemChecked = showMeMenu?.submenu[0]?.submenu[0]?.checked;
         expect(showMeItemChecked).toEqual(true);
       });
     });
@@ -167,7 +161,7 @@ describe('menu', () => {
       ipcMainManager.removeAllListeners();
       ipcMainManager.send = jest.fn();
       overridePlatform('darwin');
-      setupMenu({});
+      setupMenu();
     });
 
     describe('getHelpItems()', () => {

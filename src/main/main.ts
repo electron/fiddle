@@ -33,7 +33,7 @@ export async function onReady() {
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
 
-  setupMenu({});
+  setupMenu();
   setupMenuHandler();
   setupProtocolHandler();
   setupFileListeners();

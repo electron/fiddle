@@ -306,9 +306,9 @@ function getFileMenu(
 /**
  * Creates the app's window menu.
  */
-export function setupMenu(options: SetUpMenuOptions) {
-  const acceleratorsToBlock = options.acceleratorsToBlock || [];
-  const activeTemplate = options.activeTemplate || null;
+export function setupMenu(options?: SetUpMenuOptions) {
+  const acceleratorsToBlock = options?.acceleratorsToBlock || [];
+  const activeTemplate = options?.activeTemplate || null;
 
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
