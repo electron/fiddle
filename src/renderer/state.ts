@@ -419,7 +419,7 @@ export class AppState {
     this.addNewVersions(getElectronVersions());
   }
 
-  @action private addNewVersions(versions: RunnableVersion[]) {
+  @action public addNewVersions(versions: RunnableVersion[]) {
     for (const ver of versions) {
       this.versions[ver.version] ||= ver;
     }

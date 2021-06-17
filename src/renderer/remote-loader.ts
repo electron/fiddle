@@ -4,6 +4,8 @@ import {
   ElectronReleaseChannel,
   GenericDialogType,
   PACKAGE_NAME,
+  VersionSource,
+  VersionState,
 } from '../interfaces';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -135,11 +137,27 @@ export class RemoteLoader {
   public async setElectronVersionWithRef(ref: string): Promise<boolean> {
     const version = await this.getPackageVersionFromRef(ref);
 
+    let downloadMissing = false;
     if (!this.appState.hasVersion(version)) {
-      this.handleLoadingFailed(
-        new Error('Version of Electron in example not supported'),
-      );
-      return false;
+      downloadMissing = await this.askToDownloadMissingVersion(version);
+      if (downloadMissing) {
+        const versionToDownload = {
+          source: VersionSource.remote,
+          state: VersionState.unknown,
+          version,
+        };
+
+        try {
+          this.appState.addNewVersions([versionToDownload]);
+          await this.appState.downloadVersion(versionToDownload);
+        } catch {
+          this.appState.removeVersion(versionToDownload);
+          this.handleLoadingFailed(
+            new Error(`Failed to download missing Electron version ${version}`),
+          );
+          return false;
+        }
+      }
     }
 
     // check if version is part of release channel
@@ -200,14 +218,33 @@ export class RemoteLoader {
   }
 
   /**
-   * Verifies from the user that we should be loading this fiddle
+   * Verifies from the user that we should be loading this fiddle.
    *
-   * @param what What are we loading from (gist, example, etc.)
+   * @param {string} what What are we loading from (gist, example, etc.)
    */
   public async verifyRemoteLoad(what: string): Promise<boolean> {
     this.appState.setGenericDialogOptions({
       type: GenericDialogType.confirm,
       label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`,
+    });
+    this.appState.isGenericDialogShowing = true;
+    await when(() => !this.appState.isGenericDialogShowing);
+
+    return !!this.appState.genericDialogLastResult;
+  }
+
+  /**
+   * Asks the user if they would like to try to download a missing version
+   * of Electron.
+   *
+   * @param {string} missingVersion The version missing from the user's downloaded versions.
+   */
+  public async askToDownloadMissingVersion(
+    missingVersion: string,
+  ): Promise<boolean> {
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.confirm,
+      label: `It doesn't look like you've previously downloaded ${missingVersion} - Would you like to download it now?`,
     });
     this.appState.isGenericDialogShowing = true;
     await when(() => !this.appState.isGenericDialogShowing);
