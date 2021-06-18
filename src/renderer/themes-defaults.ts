@@ -58,7 +58,7 @@ export const defaultDark: LoadedFiddleTheme = {
   editor: {
     base: 'vs-dark',
     inherit: true,
-    rules: [],
+    rules: [{ token: 'custom-date', foreground: '008800' }],
     colors: {
       'editor.background': '#2f3241',
     },
@@ -90,7 +90,7 @@ export const defaultLight: LoadedFiddleTheme = {
   editor: {
     base: 'vs',
     inherit: true,
-    rules: [],
+    rules: [{ token: 'custom-date', foreground: '#008800' }],
     colors: {},
   },
 };

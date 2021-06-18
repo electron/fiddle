@@ -18,22 +18,129 @@ const mockContext = {
 
 describe('Output component', () => {
   let store: any;
+  let monaco: any;
 
   beforeEach(() => {
     store = new StateMock();
+    ({ monaco } = (window as any).ElectronFiddle.app);
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<Output appState={store} />);
-    expect(wrapper.html()).toBe('<div class="output"></div>');
+  it('renders the output container', () => {
+    const wrapper = shallow(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    );
+    expect(wrapper.html()).toBe(
+      '<div class="output" style="display:inline-block"></div>',
+    );
   });
 
-  it('renders with output', () => {
-    store.output = [
+  it('correctly sets the language', () => {
+    const wrapper = shallow(
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
+    );
+
+    expect((wrapper.instance() as any).language).toBe('consoleOutputLanguage');
+  });
+
+  describe('initMonaco()', () => {
+    it('attempts to create an editor', async () => {
+      const editorDidMount = jest.fn();
+      const wrapper = shallow(
+        <Output
+          appState={store as any}
+          monaco={monaco}
+          monacoOptions={{}}
+          editorDidMount={editorDidMount}
+        />,
+      );
+      const instance: any = wrapper.instance();
+
+      instance.outputRef.current = 'ref';
+      await instance.initMonaco();
+
+      expect(editorDidMount).toHaveBeenCalled();
+      expect(monaco.editor.create).toHaveBeenCalled();
+      expect(monaco.editor.createModel).toHaveBeenCalled();
+    });
+
+    it('initializes with a fixed tab size', async () => {
+      const didMount = jest.fn();
+      const wrapper = shallow(
+        <Output
+          appState={store as any}
+          monaco={monaco}
+          monacoOptions={{}}
+          editorDidMount={didMount}
+        />,
+      );
+      const instance: any = wrapper.instance();
+
+      instance.outputRef.current = 'ref';
+      await instance.initMonaco();
+
+      expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tabSize: 2,
+        }),
+      );
+    });
+  });
+
+  it('componentWillUnmount() attempts to dispose the editor', async () => {
+    const didMount = jest.fn();
+    const wrapper = shallow(
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={didMount}
+      />,
+    );
+    const instance: any = wrapper.instance();
+
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+    instance.componentWillUnmount();
+
+    expect(monaco.latestEditor.dispose).toHaveBeenCalled();
+  });
+
+  it('hides the console with react-mosaic-component', async () => {
+    // manually trigger lifecycle methods so that
+    // context can be set before mounting method
+    const wrapper = shallow(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
       {
-        timestamp: 1532704072127,
-        text: 'Hello!',
+        context: mockContext,
+        disableLifecycleMethods: true,
       },
+    );
+    const instance: any = wrapper.instance();
+
+    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
+    // the context is {}. That's never the case in production.
+    // direction is required to be recognized as a valid root node
+    mockContext.mosaicActions.getRoot.mockReturnValue({
+      splitPercentage: 25,
+      direction: 'row',
+    });
+
+    wrapper.instance().context = mockContext;
+    wrapper.instance().componentDidMount!();
+
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalled();
+    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
+      [],
+      expect.objectContaining({ splitPercentage: 25 }),
+    );
+    expect(wrapper.html()).not.toBe(null);
+  });
+
+  it('setContent updates model with correct values', async () => {
+    store.output = [
       {
         timestamp: 1532704073130,
         text: 'Hi!',
@@ -45,62 +152,53 @@ describe('Output component', () => {
       },
     ];
 
-    const renderTimestamp = (i: number) => i.toString();
+    const editorDidMount = jest.fn();
     const wrapper = shallow(
-      <Output appState={store} renderTimestamp={renderTimestamp} />,
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={editorDidMount}
+      />,
     );
+    const instance: any = wrapper.instance();
 
-    expect(wrapper).toMatchSnapshot();
-  });
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
 
-  it('calculates a timestamp', () => {
-    const wrapper = shallow(<Output appState={store} />);
-    const instance: Output = wrapper.instance() as any;
-
-    const result = instance.renderTimestamp(1546834508111);
-
-    // Depends on the server, we just want to verify that we
-    // get _something_
-    expect(result).toBeTruthy();
-  });
-
-  it('hides the console with react-mosaic-component', () => {
-    // manually trigger lifecycle methods so that
-    // context can be set before mounting method
-    const wrapper = shallow(<Output appState={store} />, {
-      context: mockContext,
-      disableLifecycleMethods: true,
-    });
-
-    mockContext.mosaicActions.getRoot.mockReturnValue({
-      direction: 'row',
-      first: 'output',
-      second: 'editors',
-    });
-
-    wrapper.instance().context = mockContext;
-    wrapper.instance().componentDidMount!();
-
-    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
-      [],
-      expect.objectContaining({ splitPercentage: 25 }),
+    instance.editor.setContent(store.output);
+    const expectedFormattedOutput =
+      new Date(store.output[0].timestamp).toLocaleTimeString() +
+      ` Hi!\n` +
+      new Date(store.output[1].timestamp).toLocaleTimeString() +
+      ' Hi!';
+    // makes sure setContent() is called with the right values
+    expect(monaco.editor.createModel).toHaveBeenCalledWith(
+      expectedFormattedOutput,
+      'consoleOutputLanguage',
     );
-    expect(wrapper.html()).not.toBe(null);
-
-    store.isConsoleShowing = false;
-
-    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
-    // the context is {}. That's never the case in production.
-    // expect(mockContext.mosaicActions.expand).toHaveBeenCalledWith(['first'], 0);
-    expect(wrapper.html()).toBe(null);
+    expect(instance.editor.revealLine).toHaveBeenCalled();
   });
 
-  it('handles componentDidUpdate', () => {
-    const wrapper = shallow(<Output appState={store} />);
-    const instance: any = wrapper.instance() as any;
+  it('handles componentDidUpdate', async () => {
+    // set up component
+    const editorDidMount = jest.fn();
+    const wrapper = shallow(
+      <Output
+        appState={store as any}
+        monaco={monaco}
+        monacoOptions={{}}
+        editorDidMount={editorDidMount}
+      />,
+    );
+    const instance: any = wrapper.instance();
+    const spy = jest.spyOn(instance, 'toggleConsole');
 
-    instance.outputRef = { current: { scrollTop: 0, scrollHeight: 200 } };
-    instance.componentDidUpdate();
-    expect(instance.outputRef.current.scrollTop).toBe(200);
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+
+    // setContent will trigger componentDidUpdate()
+    instance.editor.setContent(store.output);
+    expect(spy).toHaveBeenCalled();
   });
 });
