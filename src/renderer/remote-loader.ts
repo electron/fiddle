@@ -4,6 +4,8 @@ import {
   ElectronReleaseChannel,
   GenericDialogType,
   PACKAGE_NAME,
+  VersionSource,
+  VersionState,
 } from '../interfaces';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -136,10 +138,22 @@ export class RemoteLoader {
     const version = await this.getPackageVersionFromRef(ref);
 
     if (!this.appState.hasVersion(version)) {
-      this.handleLoadingFailed(
-        new Error('Version of Electron in example not supported'),
-      );
-      return false;
+      const versionToDownload = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version,
+      };
+
+      try {
+        this.appState.addNewVersions([versionToDownload]);
+        await this.appState.downloadVersion(versionToDownload);
+      } catch {
+        await this.appState.removeVersion(versionToDownload);
+        this.handleLoadingFailed(
+          new Error(`Failed to download Electron version ${version}`),
+        );
+        return false;
+      }
     }
 
     // check if version is part of release channel
@@ -200,9 +214,9 @@ export class RemoteLoader {
   }
 
   /**
-   * Verifies from the user that we should be loading this fiddle
+   * Verifies from the user that we should be loading this fiddle.
    *
-   * @param what What are we loading from (gist, example, etc.)
+   * @param {string} what What are we loading from (gist, example, etc.)
    */
   public async verifyRemoteLoad(what: string): Promise<boolean> {
     this.appState.setGenericDialogOptions({
@@ -251,19 +265,14 @@ export class RemoteLoader {
    * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
-    if (navigator.onLine) {
-      this.appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Loading the fiddle failed: ${error}`,
-        cancel: undefined,
-      });
-    } else {
-      this.appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Loading the fiddle failed. Your computer seems to be offline. Error: ${error}`,
-        cancel: undefined,
-      });
-    }
+    const failedLabel = `Loading the fiddle failed: ${error.message}`;
+    this.appState.setGenericDialogOptions({
+      type: GenericDialogType.warning,
+      label: navigator.onLine
+        ? failedLabel
+        : `Your computer seems to be offline. ${failedLabel}`,
+      cancel: undefined,
+    });
 
     this.appState.toggleGenericDialog();
 

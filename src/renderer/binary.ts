@@ -85,8 +85,8 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
     // Ensure the target path is empty
     await fs.emptyDir(extractPath);
 
-    const electronFiles = await unzip(zipPath, extractPath);
-    console.log(`Binary: Unzipped ${version}`, electronFiles);
+    await unzip(zipPath, extractPath);
+    console.log(`Binary: Unzipped ${version}`);
     ver.state = VersionState.ready;
   } catch (error) {
     console.warn(`Binary: Failure while unzipping ${version}`, error);

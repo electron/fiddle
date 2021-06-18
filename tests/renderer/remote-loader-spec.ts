@@ -1,7 +1,8 @@
 import {
   DefaultEditorId,
   ElectronReleaseChannel,
-  GenericDialogType,
+  VersionSource,
+  VersionState,
 } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
@@ -211,7 +212,7 @@ describe('RemoteLoader', () => {
       const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
       expect(result).toBe(false);
       expect(store.setGenericDialogOptions.mock.calls[0][0].label).toEqual(
-        'Loading the fiddle failed: Error: The example Fiddle tried to launch is not a valid Electron example',
+        'Loading the fiddle failed: The example Fiddle tried to launch is not a valid Electron example',
       );
     });
   });
@@ -238,24 +239,27 @@ describe('RemoteLoader', () => {
       expect(store.channelsToShow).toContain(ElectronReleaseChannel.beta);
     });
 
-    it('does not load unsupported versions of Fiddle', async () => {
+    it('tries to download missing versions of Electron', async () => {
+      const version = '5.0.0';
       instance.getPackageVersionFromRef = jest
         .fn()
-        .mockReturnValueOnce('5.0.0');
+        .mockReturnValueOnce(version);
 
-      const result = await instance.setElectronVersionWithRef('5.0.0');
-      expect(result).toBe(false);
-      expect(store.setGenericDialogOptions).toBeCalledWith({
-        type: GenericDialogType.warning,
-        label:
-          'Loading the fiddle failed: Error: Version of Electron in example not supported',
-        cancel: undefined,
-      });
+      const result = await instance.setElectronVersionWithRef(version);
+      expect(result).toBe(true);
+      expect(store.addNewVersions).toBeCalledWith([
+        {
+          source: VersionSource.remote,
+          state: VersionState.unknown,
+          version,
+        },
+      ]);
+      expect(store.setVersion).toBeCalledWith(version);
     });
   });
 
   describe('getPackageFromRef()', () => {
-    it('gets electron version from package.json', async () => {
+    it('gets Electron version from package.json', async () => {
       const versionString = JSON.stringify({ version: '4.0.0' });
       const content = Buffer.from(versionString).toString('base64');
       const mockGetPackageJson = {
@@ -323,15 +327,6 @@ describe('RemoteLoader', () => {
   });
 
   describe('loadFiddleFromGist()', () => {
-    it('loads the example with confirmation', async () => {
-      instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
-      instance.fetchGistAndLoad = jest.fn();
-      await instance.loadFiddleFromGist({}, { id: 'gist' });
-
-      expect(instance.verifyRemoteLoad).toHaveBeenCalledWith<any>('gist');
-      expect(instance.fetchGistAndLoad).toHaveBeenCalledWith<any>('gist');
-    });
-
     it('loads the example with confirmation', async () => {
       instance.verifyRemoteLoad = jest.fn().mockReturnValue(true);
       instance.fetchGistAndLoad = jest.fn();

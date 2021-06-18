@@ -58,6 +58,7 @@ export class StateMock {
   public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();
   public addLocalVersion = jest.fn();
+  public addNewVersions = jest.fn();
   public clearConsole = jest.fn();
   public currentElectronVersion = new VersionsMock().mockVersionsArray.shift()!;
   public disableTour = jest.fn();
