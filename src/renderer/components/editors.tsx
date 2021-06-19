@@ -35,7 +35,6 @@ interface EditorsProps {
 interface EditorsState {
   readonly monaco: typeof MonacoType;
   focused?: EditorId;
-  isMounted: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
@@ -50,7 +49,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.setFocused = this.setFocused.bind(this);
 
     this.state = {
-      isMounted: false,
       monaco: window.ElectronFiddle.app.monaco,
       monacoOptions: defaultMonacoOptions,
     };
@@ -102,8 +100,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         }
       }
     });
-
-    this.setState({ isMounted: true });
   }
 
   public componentWillUnmount() {

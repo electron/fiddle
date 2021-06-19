@@ -18,7 +18,6 @@ interface OutputsProps {
 
 interface OutputsState {
   readonly monaco: typeof MonacoType;
-  isMounted: boolean;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
@@ -28,19 +27,9 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
     super(props);
 
     this.state = {
-      isMounted: false,
       monaco: window.ElectronFiddle.app.monaco,
       monacoOptions: defaultMonacoOptions,
     };
-  }
-
-  /**
-   * Executed right after the component mounts.
-   *
-   * @memberof Outputs
-   */
-  public componentDidMount() {
-    this.setState({ isMounted: true });
   }
 
   public render() {
