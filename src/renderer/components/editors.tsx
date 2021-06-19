@@ -234,7 +234,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     return (
       <Editor
         id={id}
-        monaco={monaco!}
+        monaco={monaco}
         appState={appState}
         monacoOptions={defaultMonacoOptions}
         setFocused={this.setFocused}
@@ -244,9 +244,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public render() {
     const { appState } = this.props;
-    const { monaco } = this.state;
-
-    if (!monaco) return null;
 
     return (
       <Mosaic<EditorId>

@@ -47,13 +47,9 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
     const { appState } = this.props;
     const { monaco } = this.state;
 
-    if (!monaco) {
-      return null;
-    }
-
     return (
       <Output
-        monaco={monaco!}
+        monaco={monaco}
         appState={appState}
         monacoOptions={defaultMonacoOptions}
       />
