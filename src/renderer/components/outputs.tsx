@@ -17,8 +17,8 @@ interface OutputsProps {
 }
 
 interface OutputsState {
+  readonly monaco: typeof MonacoType;
   isMounted: boolean;
-  monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 

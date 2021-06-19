@@ -13,8 +13,8 @@ import { AppState } from '../state';
 import { WrapperEditorId } from './output-editors-wrapper';
 
 interface CommandsProps {
-  appState: AppState;
-  monaco: typeof MonacoType;
+  readonly appState: AppState;
+  readonly monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   // Used to keep testing conform

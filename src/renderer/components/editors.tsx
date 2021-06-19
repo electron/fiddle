@@ -33,9 +33,9 @@ interface EditorsProps {
 }
 
 interface EditorsState {
+  readonly monaco: typeof MonacoType;
   focused?: EditorId;
   isMounted: boolean;
-  monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
