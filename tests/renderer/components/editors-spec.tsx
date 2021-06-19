@@ -269,17 +269,6 @@ describe('Editors component', () => {
     });
   });
 
-  describe('loadMonaco()', () => {
-    it('loads Monaco', async () => {
-      ElectronFiddle.app.monaco = null;
-
-      shallow(<Editors appState={store as any} />);
-
-      await process.nextTick;
-      expect(ElectronFiddle.app.monaco).toEqual({ monaco: true });
-    });
-  });
-
   describe('setFocused()', () => {
     it('sets the "focused" property', () => {
       const wrapper = shallow(<Editors appState={store as any} />);

@@ -401,7 +401,7 @@ export class AppState {
 
   @action public setTheme(fileName?: string) {
     this.theme = fileName || '';
-    activateTheme(undefined, undefined, fileName);
+    activateTheme(fileName);
     window.ElectronFiddle.app.loadTheme();
   }
 

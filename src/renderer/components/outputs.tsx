@@ -3,7 +3,6 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { activateTheme } from '../themes';
 import { Output } from './output';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
@@ -18,8 +17,8 @@ interface OutputsProps {
 }
 
 interface OutputsState {
-  monaco?: typeof MonacoType;
-  isMounted?: boolean;
+  isMounted: boolean;
+  monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
@@ -28,7 +27,11 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
   constructor(props: OutputsProps) {
     super(props);
 
-    this.state = { monacoOptions: defaultMonacoOptions };
+    this.state = {
+      isMounted: false,
+      monaco: window.ElectronFiddle.app.monaco,
+      monacoOptions: defaultMonacoOptions,
+    };
   }
 
   /**
@@ -36,8 +39,7 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
    *
    * @memberof Outputs
    */
-  public async componentDidMount() {
-    await this.loadMonaco();
+  public componentDidMount() {
     this.setState({ isMounted: true });
   }
 
@@ -56,25 +58,5 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
         monacoOptions={defaultMonacoOptions}
       />
     );
-  }
-
-  /**
-   * FIXME: we should attempt to remove this code duplication with editors.loadMonaco()
-   *
-   * Loads monaco for the Outputs component. Monaco must be loaded for editors.tsx and outputs.tsx
-   * separately. If it's already loaded, it'll just set it on the current state.
-   * We're doing things a bit roundabout to ensure that we're not overloading the
-   * mobx state with a gigantic Monaco tree.
-   */
-  public async loadMonaco() {
-    const { monaco } = window.ElectronFiddle.app;
-
-    if (this.state?.isMounted) {
-      this.setState({ monaco });
-    } else {
-      this.setState({ monaco, monacoOptions: defaultMonacoOptions });
-    }
-
-    await activateTheme(monaco, undefined, this.props.appState.theme);
   }
 }
