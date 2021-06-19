@@ -264,6 +264,5 @@ export class App {
 }
 
 window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.contentChangeListeners ||= [];
 window.ElectronFiddle.app ||= new App();
 window.ElectronFiddle.app.setup();

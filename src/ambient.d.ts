@@ -6,7 +6,6 @@ declare global {
     ElectronFiddle: {
       appPaths: Record<string, string>;
       app: AppType;
-      contentChangeListeners: Array<any>;
     };
   }
 }
