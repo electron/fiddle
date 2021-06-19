@@ -14,7 +14,6 @@ interface EditorProps {
   monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
   id: EditorId;
-  options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   onChange?: (
     value: string,

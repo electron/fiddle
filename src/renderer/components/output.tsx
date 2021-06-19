@@ -16,7 +16,6 @@ interface CommandsProps {
   appState: AppState;
   monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
-  options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
