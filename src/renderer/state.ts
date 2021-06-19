@@ -497,7 +497,24 @@ export class AppState {
       return;
     }
 
-    const { version } = ver;
+    const { localPath, version } = ver;
+
+    if (localPath && !fs.existsSync(localPath)) {
+      console.error(
+        `State: setVersion() got a version ${version} with missing binary`,
+      );
+
+      this.setGenericDialogOptions({
+        type: GenericDialogType.warning,
+        label: `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
+        cancel: undefined,
+      });
+      this.toggleGenericDialog();
+
+      await this.setVersion(this.versionsToShow[0].version);
+      return;
+    }
+
     console.log(`State: Switching to Electron ${version}`);
 
     // Should we update the editor?

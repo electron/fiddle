@@ -1,4 +1,4 @@
-import { Button, IButtonProps, Spinner } from '@blueprintjs/core';
+import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -26,7 +26,7 @@ export class Runner extends React.Component<RunnerProps> {
     } = this.props.appState;
 
     const state = currentElectronVersion && currentElectronVersion.state;
-    const props: IButtonProps = { className: 'button-run', disabled: true };
+    const props: ButtonProps = { className: 'button-run', disabled: true };
 
     if (state === VersionState.downloading) {
       props.text = 'Downloading';
