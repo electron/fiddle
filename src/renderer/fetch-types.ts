@@ -3,7 +3,6 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
-import { callIn } from '../utils/call-in';
 import { normalizeVersion } from '../utils/normalize-version';
 import { USER_DATA_PATH } from './constants';
 
@@ -122,25 +121,9 @@ export async function getLocalVersionTypeDefs(version: RunnableVersion) {
  */
 export async function updateEditorTypeDefinitions(
   version: RunnableVersion,
-  i = 0,
 ): Promise<void> {
-  const defer = async (): Promise<void> => {
-    if (i > 10) {
-      console.warn(`Fetch Types: Failed, dependencies do not exist`);
-      return;
-    }
-
-    console.warn(`Fetch Types: Called too soon, deferring`);
-    return callIn(i * 100 + 200, () =>
-      updateEditorTypeDefinitions(version, i + 1),
-    );
-  };
-
-  // If this method is called before we're ready, we'll delay this work a bit
-  if (!window.ElectronFiddle?.app?.monaco) return defer();
-
   const { app } = window.ElectronFiddle;
-  const monaco: typeof MonacoType = app.monaco!;
+  const { monaco } = app;
   const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
 
   const getTypeDefs =

@@ -272,38 +272,13 @@ describe('fetch-types', () => {
       ).toHaveBeenCalled();
     });
 
-    it('it waits for Monaco to show up', async () => {
-      mockFetch();
-
-      const { app } = (window as any).ElectronFiddle;
-      const { monaco } = app;
-
-      (window as any).ElectronFiddle = {};
-
-      setTimeout(() => {
-        window.ElectronFiddle.app = app;
-      }, 300);
-
-      await updateEditorTypeDefinitions(version);
-
-      expect(
-        monaco.languages.typescript.javascriptDefaults.addExtraLib,
-      ).toHaveBeenCalled();
-    });
-
-    it('it does not wait forever', async () => {
-      (window as any).ElectronFiddle = {};
-
-      await updateEditorTypeDefinitions(version, 11);
-    });
-
     it('handles definitions not existing', async () => {
       (window.fetch as jest.Mock).mockResolvedValue(null);
 
       let errored = false;
 
       try {
-        await updateEditorTypeDefinitions(version, 11);
+        await updateEditorTypeDefinitions(version);
       } catch (error) {
         errored = true;
       }
