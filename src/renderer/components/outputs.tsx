@@ -67,21 +67,12 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
    * mobx state with a gigantic Monaco tree.
    */
   public async loadMonaco() {
-    const { app } = window.ElectronFiddle;
-    const loader = require('monaco-loader');
-    const monaco = app.monaco || (await loader());
+    const { monaco } = window.ElectronFiddle.app;
 
-    if (!app.monaco) {
-      app.monaco = monaco;
-    }
-
-    if (!this.state || !this.state.isMounted) {
-      this.setState({
-        monaco,
-        monacoOptions: defaultMonacoOptions,
-      });
-    } else {
+    if (this.state?.isMounted) {
       this.setState({ monaco });
+    } else {
+      this.setState({ monaco, monacoOptions: defaultMonacoOptions });
     }
 
     await activateTheme(monaco, undefined, this.props.appState.theme);

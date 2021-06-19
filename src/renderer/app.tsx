@@ -28,14 +28,13 @@ import { defaultDark, defaultLight } from './themes-defaults';
  */
 export class App {
   public typeDefDisposable: MonacoType.IDisposable | null = null;
-  public monaco: typeof MonacoType | null = null;
   public state = new AppState(getElectronVersions());
   public fileManager = new FileManager(this.state);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
 
-  constructor() {
+  constructor(public readonly monaco: typeof MonacoType) {
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);
