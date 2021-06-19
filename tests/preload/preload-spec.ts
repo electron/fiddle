@@ -3,7 +3,7 @@
  */
 import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
-import { setupGlobalWindow, setupPaths } from '../../src/preload/preload';
+import { setupFiddleGlobal } from '../../src/preload/preload';
 
 describe('preload', () => {
   // We instantiate this in `tests/setup.js` for the main and
@@ -14,16 +14,10 @@ describe('preload', () => {
   });
 
   describe('setupGlobalWindow()', () => {
-    it('sets up a window.ElectronFiddle object', () => {
-      setupGlobalWindow();
+    it('sets up a window.ElectronFiddle object', async () => {
+      await setupFiddleGlobal();
 
       expect((window as any).ElectronFiddle).toMatchObject({ app: null });
-    });
-  });
-
-  describe('setupPaths()', () => {
-    beforeEach(() => {
-      setupGlobalWindow();
     });
 
     it('sets app paths', async () => {
@@ -32,7 +26,7 @@ describe('preload', () => {
       };
       (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(obj);
 
-      await setupPaths();
+      await setupFiddleGlobal();
 
       expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
         IpcEvents.GET_APP_PATHS,

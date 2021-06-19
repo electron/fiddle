@@ -3,19 +3,14 @@ import { IpcEvents } from '../ipc-events';
 import { ipcRendererManager } from '../renderer/ipc';
 
 async function preload() {
-  setupGlobalWindow();
-  await setupPaths();
+  await setupFiddleGlobal();
 }
 
-export function setupGlobalWindow() {
-  window.ElectronFiddle = window.ElectronFiddle || {
-    app: null,
+export async function setupFiddleGlobal() {
+  window.ElectronFiddle = {
+    app: null as any, // this will be set in main.tsx
+    appPaths: await ipcRendererManager.invoke(IpcEvents.GET_APP_PATHS),
   };
-}
-
-export async function setupPaths() {
-  const appPaths = await ipcRendererManager.invoke(IpcEvents.GET_APP_PATHS);
-  window.ElectronFiddle.appPaths = appPaths;
 }
 
 preload();
