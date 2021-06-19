@@ -1,6 +1,3 @@
-import { initSentry } from '../sentry';
-initSentry();
-
 import { autorun, reaction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 
@@ -262,7 +259,3 @@ export class App {
     });
   }
 }
-
-window.ElectronFiddle = window.ElectronFiddle || {};
-window.ElectronFiddle.app ||= new App();
-window.ElectronFiddle.app.setup();
