@@ -4,7 +4,8 @@ import { initSentry } from '../sentry';
 
 initSentry();
 
-require('monaco-loader')().then((mon: typeof MonacoType) => {
-  window.ElectronFiddle.app = new App(mon);
+require('monaco-loader')().then((monaco: typeof MonacoType) => {
+  window.ElectronFiddle.monaco = monaco;
+  window.ElectronFiddle.app = new App();
   window.ElectronFiddle.app.setup();
 });

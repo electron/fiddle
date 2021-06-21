@@ -49,7 +49,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.setFocused = this.setFocused.bind(this);
 
     this.state = {
-      monaco: window.ElectronFiddle.app.monaco,
+      monaco: window.ElectronFiddle.monaco,
       monacoOptions: defaultMonacoOptions,
     };
   }

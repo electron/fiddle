@@ -263,9 +263,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       await updateEditorTypeDefinitions(version);
-
-      const { app } = (window as any).ElectronFiddle;
-      const { monaco } = app;
+      const { monaco } = (window as any).ElectronFiddle;
 
       expect(
         monaco.languages.typescript.javascriptDefaults.addExtraLib,

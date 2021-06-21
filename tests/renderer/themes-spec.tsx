@@ -14,7 +14,7 @@ jest.mock('fs-extra');
 describe('themes', () => {
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = (window as any).ElectronFiddle.app.monaco;
+      const { editor } = (window as any).ElectronFiddle.monaco;
 
       activateTheme(await getTheme());
 

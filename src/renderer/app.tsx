@@ -34,7 +34,7 @@ export class App {
   public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
 
-  constructor(public readonly monaco: typeof MonacoType) {
+  constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);

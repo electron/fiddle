@@ -27,7 +27,7 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
     super(props);
 
     this.state = {
-      monaco: window.ElectronFiddle.app.monaco,
+      monaco: window.ElectronFiddle.monaco,
       monacoOptions: defaultMonacoOptions,
     };
   }

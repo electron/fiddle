@@ -22,7 +22,7 @@ describe('Output component', () => {
 
   beforeEach(() => {
     store = new StateMock();
-    ({ monaco } = (window as any).ElectronFiddle.app);
+    ({ monaco } = (window as any).ElectronFiddle);
   });
 
   it('renders the output container', () => {

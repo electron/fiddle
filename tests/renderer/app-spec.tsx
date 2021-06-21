@@ -46,7 +46,7 @@ describe('App component', () => {
     ({ ElectronFiddle } = window as any);
     const { app: appMock } = ElectronFiddle;
     const { fileManager, remoteLoader, runner, state } = appMock;
-    app = new App(ElectronFiddle.app.monaco);
+    app = new App();
     Object.assign(app, { fileManager, remoteLoader, runner, state });
     ElectronFiddle.app = app;
   });

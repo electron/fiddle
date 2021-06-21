@@ -122,8 +122,7 @@ export async function getLocalVersionTypeDefs(version: RunnableVersion) {
 export async function updateEditorTypeDefinitions(
   version: RunnableVersion,
 ): Promise<void> {
-  const { app } = window.ElectronFiddle;
-  const { monaco } = app;
+  const { app, monaco } = window.ElectronFiddle;
   const typeDefDisposable: MonacoType.IDisposable = app.typeDefDisposable!;
 
   const getTypeDefs =

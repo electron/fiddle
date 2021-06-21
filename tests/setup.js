@@ -1,6 +1,6 @@
 const { configure } = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
-const { ElectronFiddleMock } = require('./mocks/electron-fiddle');
+const { ElectronFiddleMock } = require('./mocks/mocks');
 const { createSerializer } = require('enzyme-to-json');
 
 configure({ adapter: new Adapter() });

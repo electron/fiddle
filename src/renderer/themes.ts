@@ -19,7 +19,7 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
  * @param {LoadedFiddleTheme} [theme]
  */
 export function activateTheme(theme: LoadedFiddleTheme) {
-  const { monaco } = window.ElectronFiddle.app;
+  const { monaco } = window.ElectronFiddle;
   monaco.editor.defineTheme('main', theme.editor as any);
   monaco.editor.setTheme('main');
 }
