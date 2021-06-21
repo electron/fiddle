@@ -16,7 +16,7 @@ describe('themes', () => {
     it('attempts to activate a theme', async () => {
       const { editor } = (window as any).ElectronFiddle.app.monaco;
 
-      await activateTheme();
+      activateTheme(await getTheme());
 
       expect(editor.defineTheme).toHaveBeenCalled();
       expect(editor.setTheme).toHaveBeenCalled();

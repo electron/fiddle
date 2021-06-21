@@ -30,7 +30,6 @@ import {
   updateEditorTypeDefinitions,
 } from './fetch-types';
 import { ipcRendererManager } from './ipc';
-import { activateTheme } from './themes';
 
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
@@ -401,8 +400,7 @@ export class AppState {
 
   @action public setTheme(fileName?: string) {
     this.theme = fileName || '';
-    activateTheme(fileName);
-    window.ElectronFiddle.app.loadTheme();
+    window.ElectronFiddle.app.loadTheme(this.theme);
   }
 
   @action public setGenericDialogOptions(opts: GenericDialogOptions) {

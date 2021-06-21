@@ -16,13 +16,11 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
  * Activate a given theme (or the default)
  *
  * @param {typeof MonacoType} [monaco]
- * @param {string} [theme name]
+ * @param {LoadedFiddleTheme} [theme]
+): Promise<LoadedFiddleTheme> {
  */
-export async function activateTheme(name?: string | null) {
+export function activateTheme(theme: LoadedFiddleTheme) {
   const { monaco } = window.ElectronFiddle.app;
-  if (!monaco?.editor) return;
-
-  const theme = await getTheme(name);
   monaco.editor.defineTheme('main', theme.editor as any);
   monaco.editor.setTheme('main');
 }

@@ -17,7 +17,7 @@ import { Runner } from './runner';
 import { AppState } from './state';
 import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
-import { getTheme } from './themes';
+import { activateTheme, getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
 
 /**
@@ -101,7 +101,7 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void | Element | React.Component> {
-    this.loadTheme();
+    this.loadTheme(this.state.theme || '');
 
     const React = await import('react');
     const { render } = await import('react-dom');
@@ -187,11 +187,12 @@ export class App {
    *
    * @returns {Promise<void>}
    */
-  public async loadTheme(): Promise<void> {
+  public async loadTheme(name: string): Promise<void> {
     const tag: HTMLStyleElement | null = document.querySelector(
       'style#fiddle-theme',
     );
-    const theme = await getTheme(this.state.theme);
+    const theme = await getTheme(name);
+    activateTheme(theme);
 
     if (tag && theme.css) {
       tag.innerHTML = theme.css;

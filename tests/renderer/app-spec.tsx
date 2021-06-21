@@ -230,7 +230,7 @@ describe('App component', () => {
     it(`adds the current theme's css to the document`, async () => {
       document.head!.innerHTML = "<style id='fiddle-theme'></style>";
 
-      await app.loadTheme();
+      await app.loadTheme('');
 
       expect(document.head!.innerHTML).toEqual(
         `<style id="fiddle-theme">
@@ -259,17 +259,13 @@ describe('App component', () => {
     it('removes the dark theme option if required', async () => {
       document.body.classList.add('bp3-dark');
 
-      app.state.theme = 'defaultLight';
-
-      await app.loadTheme();
+      await app.loadTheme('defaultLight');
 
       expect(document.body.classList.value).toBe('');
     });
 
     it('adds the dark theme option if required', async () => {
-      app.state.theme = 'custom-dark';
-
-      await app.loadTheme();
+      await app.loadTheme('custom-dark');
 
       expect(document.body.classList.value).toBe('bp3-dark');
     });
