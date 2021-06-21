@@ -113,12 +113,12 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions: GenericDialogOptions = {
-    type: GenericDialogType.warning,
+    cancel: 'Cancel',
     label: '' as string | JSX.Element,
     ok: 'Okay',
-    cancel: 'Cancel',
-    wantsInput: false,
     placeholder: '',
+    type: GenericDialogType.warning,
+    wantsInput: false,
   };
   @observable public readonly editorMosaic = new EditorMosaic();
   @observable public genericDialogLastResult: boolean | null = null;
@@ -366,14 +366,6 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toggleGenericDialog() {
-    this.isGenericDialogShowing = !this.isGenericDialogShowing;
-
-    if (this.isGenericDialogShowing) {
-      this.genericDialogLastResult = null;
-    }
-  }
-
   @action public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
   }
@@ -403,16 +395,6 @@ export class AppState {
     this.theme = fileName || '';
     activateTheme(undefined, undefined, fileName);
     window.ElectronFiddle.app.loadTheme();
-  }
-
-  @action public setGenericDialogOptions(opts: GenericDialogOptions) {
-    this.genericDialogOptions = {
-      ok: 'Okay',
-      cancel: 'Cancel',
-      wantsInput: false,
-      placeholder: '',
-      ...opts,
-    };
   }
 
   @action public addLocalVersion(input: Version) {
@@ -504,12 +486,9 @@ export class AppState {
         `State: setVersion() got a version ${version} with missing binary`,
       );
 
-      this.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
-        cancel: undefined,
-      });
-      this.toggleGenericDialog();
+      this.showErrorDialog(
+        `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
+      );
 
       await this.setVersion(this.versionsToShow[0].version);
       return;
@@ -568,13 +547,67 @@ export class AppState {
     this.gitHubName = null;
   }
 
-  @action public async runConfirmationDialog(
+  @action public async showGenericDialog(
     opts: GenericDialogOptions,
-  ): Promise<boolean> {
-    this.setGenericDialogOptions(opts);
+  ): Promise<{ confirm: boolean; input: string }> {
+    this.genericDialogLastResult = null;
+    this.genericDialogOptions = opts;
     this.isGenericDialogShowing = true;
     await when(() => !this.isGenericDialogShowing);
-    return !!this.genericDialogLastResult;
+    return {
+      confirm: Boolean(this.genericDialogLastResult),
+      input: this.genericDialogLastInput || opts.defaultInput || '',
+    };
+  }
+
+  @action public async showInputDialog(opts: {
+    cancel: string;
+    defaultInput?: string;
+    label: string | JSX.Element;
+    ok: string;
+    placeholder: string;
+  }): Promise<string | undefined> {
+    const { confirm, input } = await this.showGenericDialog({
+      ...opts,
+      type: GenericDialogType.confirm,
+      wantsInput: true,
+    });
+    return confirm ? input : undefined;
+  }
+
+  @action public async showConfirmDialog(opts: {
+    cancel: string;
+    label: string | JSX.Element;
+    ok: string;
+  }): Promise<boolean> {
+    const { confirm } = await this.showGenericDialog({
+      ...opts,
+      wantsInput: false,
+      type: GenericDialogType.confirm,
+    });
+    return confirm;
+  }
+
+  @action public async showInfoDialog(
+    label: string | JSX.Element,
+  ): Promise<void> {
+    await this.showGenericDialog({
+      label,
+      ok: 'Close',
+      type: GenericDialogType.success,
+      wantsInput: false,
+    });
+  }
+
+  @action public async showErrorDialog(
+    label: string | JSX.Element,
+  ): Promise<void> {
+    await this.showGenericDialog({
+      label,
+      ok: 'Close',
+      type: GenericDialogType.warning,
+      wantsInput: false,
+    });
   }
 
   /**

@@ -15,7 +15,6 @@ import { when } from 'mobx';
 import {
   DEFAULT_EDITORS,
   EditorValues,
-  GenericDialogType,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
@@ -102,27 +101,15 @@ export class GistActionButton extends React.Component<
     }
   }
 
-  public async getFiddleDescriptionFromUser(): Promise<string | null> {
-    const { appState } = this.props;
-
-    // Reset potentially non-null last description.
-    appState.genericDialogLastInput = null;
-
-    appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
-      label: 'Please provide a brief description for your Fiddle Gist',
-      wantsInput: true,
-      ok: 'Publish',
+  private getFiddleDescriptionFromUser(): Promise<string | undefined> {
+    const placeholder = 'Electron Fiddle Gist' as const;
+    return this.props.appState.showInputDialog({
       cancel: 'Cancel',
-      placeholder: 'Electron Fiddle Gist',
+      defaultInput: placeholder,
+      label: 'Please provide a brief description for your Fiddle Gist',
+      ok: 'Publish',
+      placeholder,
     });
-    appState.isGenericDialogShowing = true;
-    await when(() => !appState.isGenericDialogShowing);
-
-    const cancelled = !appState.genericDialogLastResult;
-    return cancelled
-      ? null
-      : appState.genericDialogLastInput ?? 'Electron Fiddle Gist';
   }
 
   private async publishGist(description: string) {
@@ -175,7 +162,6 @@ export class GistActionButton extends React.Component<
       appState.editorMosaic.isEdited = false;
     }
 
-    appState.genericDialogLastInput = null;
     appState.activeGistAction = GistActionState.none;
   }
 

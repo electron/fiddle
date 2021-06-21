@@ -30,7 +30,7 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
     this.props.appState.genericDialogLastInput =
       input && input.value !== '' ? input.value : null;
     this.props.appState.genericDialogLastResult = result;
-    this.props.appState.toggleGenericDialog();
+    this.props.appState.isGenericDialogShowing = false;
   }
 
   public render() {

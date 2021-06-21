@@ -6,16 +6,10 @@ import {
   Popover,
   Position,
 } from '@blueprintjs/core';
-import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import {
-  DEFAULT_EDITORS,
-  DefaultEditorId,
-  EditorId,
-  GenericDialogType,
-} from '../../interfaces';
+import { DEFAULT_EDITORS, DefaultEditorId, EditorId } from '../../interfaces';
 import { AppState } from '../state';
 import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
 
@@ -135,64 +129,41 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async showCustomEditorDialog() {
-    const { appState } = this.props;
-
-    appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
-      label: 'Enter a filename for your custom editor',
-      wantsInput: true,
-      ok: 'Create',
+  private showCustomEditorDialog(): Promise<string | undefined> {
+    return this.props.appState.showInputDialog({
       cancel: 'Cancel',
+      label: 'Enter a filename for your custom editor',
+      ok: 'Create',
       placeholder: 'file.js',
     });
-
-    appState.toggleGenericDialog();
-    await when(() => !appState.isGenericDialogShowing);
-
-    return {
-      cancelled: !appState.genericDialogLastResult,
-      result: appState.genericDialogLastInput,
-    };
   }
 
   public async addCustomEditor() {
     const { appState } = this.props;
 
-    const { cancelled, result } = await this.showCustomEditorDialog();
-
-    if (cancelled) return;
+    const result = await this.showCustomEditorDialog();
+    if (!result) return;
 
     // Fail if editor name is not an accepted file type.
-    if (!result || !isSupportedFile(result)) {
-      appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label:
-          'Invalid custom editor name - must be either an html, js, or css file.',
-        cancel: undefined,
-      });
-
-      appState.toggleGenericDialog();
-    } else {
-      const name = result as EditorId;
-
-      // Also fail if the user tries to create two identical editors.
-      if (
-        appState.editorMosaic.customMosaics.includes(name) ||
-        Object.values(DefaultEditorId).includes(name as DefaultEditorId)
-      ) {
-        appState.setGenericDialogOptions({
-          type: GenericDialogType.warning,
-          label: `Custom editor name ${name} already exists - duplicates are not allowed`,
-          cancel: undefined,
-        });
-
-        appState.toggleGenericDialog();
-      } else {
-        appState.editorMosaic.customMosaics.push(name);
-        appState.editorMosaic.showMosaic(name);
-      }
+    if (!isSupportedFile(result)) {
+      return appState.showErrorDialog(
+        'Invalid editor name. Must be an html, js, or css file.',
+      );
     }
+    const name = result as EditorId;
+
+    // Also fail if the user tries to create two identical editors.
+    if (
+      appState.editorMosaic.customMosaics.includes(name) ||
+      Object.values(DefaultEditorId).includes(name as DefaultEditorId)
+    ) {
+      return appState.showErrorDialog(
+        `Custom editor name ${name} already exists - duplicates are not allowed`,
+      );
+    }
+
+    appState.editorMosaic.customMosaics.push(name);
+    appState.editorMosaic.showMosaic(name);
   }
 
   public async removeCustomEditor(event: React.MouseEvent) {

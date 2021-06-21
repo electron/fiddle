@@ -193,19 +193,6 @@ describe('AppState', () => {
     });
   });
 
-  describe('toggleGenericDialog()', () => {
-    it('toggles the warning dialog', () => {
-      appState.genericDialogLastResult = true;
-
-      appState.toggleGenericDialog();
-      expect(appState.isGenericDialogShowing).toBe(true);
-      expect(appState.genericDialogLastResult).toBe(null);
-
-      appState.toggleGenericDialog();
-      expect(appState.isGenericDialogShowing).toBe(false);
-    });
-  });
-
   describe('setIsQuitting()', () => {
     it('sets isQuitting variable as true', () => {
       appState.setIsQuitting();
@@ -425,60 +412,164 @@ describe('AppState', () => {
     });
   });
 
-  describe('runConfirmationDialog()', () => {
+  describe('dialog helpers', () => {
     let dispose: any;
 
     afterEach(() => {
       if (dispose) dispose();
     });
 
-    function registerDialogHandler(
-      description: string | null,
-      result: boolean,
-    ) {
+    function registerDialogHandler(input: string | null, result: boolean) {
       dispose = reaction(
         () => appState.isGenericDialogShowing,
         () => {
-          appState.genericDialogLastInput = description;
+          appState.genericDialogLastInput = input;
           appState.genericDialogLastResult = result;
           appState.isGenericDialogShowing = false;
         },
       );
     }
 
-    const Description = 'some non-default description';
+    const Input = 'Entropy requires no maintenance.';
+    const DefaultInput = 'default input';
 
     const Opts = {
-      type: GenericDialogType.warning,
       label: 'foo',
+      ok: 'Close',
+      type: GenericDialogType.warning,
+      wantsInput: false,
     } as const;
 
-    it('returns true if confirmed by user', async () => {
-      registerDialogHandler(Description, true);
-      const response = await appState.runConfirmationDialog(Opts);
-      expect(response).toBe(true);
-    });
-
-    it('returns false if rejected by user', async () => {
-      registerDialogHandler(Description, false);
-      const response = await appState.runConfirmationDialog(Opts);
-      expect(response).toBe(false);
-    });
-  });
-
-  describe('setGenericDialogOptions()', () => {
-    it('sets the warning dialog options', () => {
-      appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: 'foo',
+    describe('showGenericDialog()', () => {
+      it('shows a dialog', async () => {
+        const promise = appState.showGenericDialog(Opts);
+        expect(appState.isGenericDialogShowing).toBe(true);
+        appState.isGenericDialogShowing = false;
+        await promise;
       });
-      expect(appState.genericDialogOptions).toEqual({
-        type: GenericDialogType.warning,
-        label: 'foo',
-        ok: 'Okay',
-        placeholder: '',
+
+      it('resolves when the dialog is dismissed', async () => {
+        registerDialogHandler(Input, true);
+        const promise = appState.showGenericDialog(Opts);
+        await promise;
+        expect(appState).toHaveProperty('isGenericDialogShowing', false);
+      });
+
+      it('returns true if confirmed by user', async () => {
+        registerDialogHandler(Input, true);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('confirm', true);
+      });
+
+      it('returns false if rejected by user', async () => {
+        registerDialogHandler(Input, false);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('confirm', false);
+      });
+
+      it('returns the user-inputted text', async () => {
+        registerDialogHandler(Input, true);
+        const result = await appState.showGenericDialog({
+          ...Opts,
+          defaultInput: DefaultInput,
+        });
+        expect(result).toHaveProperty('input', Input);
+      });
+
+      it('returns defaultInput as a fallback', async () => {
+        registerDialogHandler(null, true);
+        const result = await appState.showGenericDialog({
+          ...Opts,
+          defaultInput: DefaultInput,
+        });
+        expect(result).toHaveProperty('input', DefaultInput);
+      });
+
+      it('returns an empty string as a last resort', async () => {
+        registerDialogHandler(null, true);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('input', '');
+      });
+    });
+
+    describe('showInputDialog', () => {
+      const input = 'fnord' as const;
+      const inputOpts = {
         cancel: 'Cancel',
-        wantsInput: false,
+        label: 'label',
+        ok: 'Close',
+        placeholder: 'Placeholder',
+      } as const;
+
+      it('returns text when confirmed', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+          input,
+        });
+        const result = await appState.showInputDialog(inputOpts);
+        expect(result).toBe(input);
+      });
+
+      it('returns undefined when canceled', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: false,
+          input,
+        });
+        const result = await appState.showInputDialog(inputOpts);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('showConfirmDialog', () => {
+      const label = 'Do you want to confirm this dialog?';
+      async function testConfirmDialog(confirm: boolean) {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm,
+          input: undefined,
+        });
+        const result = await appState.showConfirmDialog({
+          cancel: 'Cancel',
+          label,
+          ok: 'Confirm',
+        });
+        expect(result).toBe(confirm);
+      }
+
+      it('returns true when confirmed', () => testConfirmDialog(true));
+      it('returns false when canceled', () => testConfirmDialog(false));
+    });
+
+    describe('showErrorDialog', () => {
+      const label = 'This is an error message.';
+
+      it('shows an error dialog', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+        });
+        await appState.showErrorDialog(label);
+        expect(appState.showGenericDialog).toHaveBeenCalledWith({
+          label,
+          ok: 'Close',
+          type: GenericDialogType.warning,
+          wantsInput: false,
+        });
+      });
+    });
+
+    describe('showInfoDialog', () => {
+      const label = 'This is an informational message.';
+
+      it('shows an error dialog', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+        });
+        await appState.showInfoDialog(label);
+        expect(appState.showGenericDialog).toHaveBeenCalledWith({
+          label,
+          ok: 'Close',
+          type: GenericDialogType.success,
+          wantsInput: false,
+        });
       });
     });
   });

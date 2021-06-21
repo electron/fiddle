@@ -62,6 +62,6 @@ describe('GenericDialog component', () => {
     const instance: GenericDialog = wrapper.instance() as any;
 
     instance.onClose(true);
-    expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
+    expect(store.isGenericDialogShowing).toBe(false);
   });
 });

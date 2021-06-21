@@ -120,7 +120,7 @@ describe('App component', () => {
       app.state.editorMosaic.isEdited = true;
       app.state.localPath = '/fake/path';
 
-      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -172,7 +172,7 @@ describe('App component', () => {
         expect(state.gistId).toBe('');
         expect(state.templateName).toBeUndefined();
 
-        (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
+        state.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
 
         await app.replaceFiddle(
           {},
@@ -198,7 +198,7 @@ describe('App component', () => {
           [DefaultEditorId.renderer]: 'renderer-value',
         };
 
-        (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+        state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
 
         await app.replaceFiddle(editorValues, {
           gistId: 'gistId',
@@ -393,11 +393,11 @@ describe('App component', () => {
 
       // set up a reaction to confirm the replacement
       // when it happens
-      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(confirm);
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(confirm);
 
       // now try to replace
       await app.replaceFiddle(editorValues2, { gistId });
-      expect(app.state.runConfirmationDialog).toHaveBeenCalled();
+      expect(app.state.showConfirmDialog).toHaveBeenCalled();
     }
 
     it('does not replace the fiddle if not confirmed', async () => {
@@ -420,7 +420,7 @@ describe('App component', () => {
     });
 
     it('can close the window if user accepts the dialog', async () => {
-      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
@@ -432,7 +432,7 @@ describe('App component', () => {
 
     it('can close the app after user accepts dialog', async () => {
       app.state.isQuitting = true;
-      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(true);
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
@@ -448,7 +448,7 @@ describe('App component', () => {
 
     it('does nothing if user cancels the dialog', async () => {
       app.state.isQuitting = true;
-      (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;

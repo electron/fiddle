@@ -114,6 +114,7 @@ describe('AddThemeDialog component', () => {
     });
 
     it('shows an error dialog for a malformed theme', async () => {
+      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
       const instance: AddThemeDialog = wrapper.instance() as any;
 
@@ -126,12 +127,9 @@ describe('AddThemeDialog component', () => {
       await instance.onSubmit();
 
       expect(fs.readJSONSync).toHaveBeenCalledTimes(1);
-      const error = 'File does not match specifications';
-      expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
-        label: `Error: ${error}, please pick a different file.`,
-        type: 'warning',
-      });
-      expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(/file does not match specifications/i),
+      );
     });
   });
 

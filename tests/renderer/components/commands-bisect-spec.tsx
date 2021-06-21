@@ -78,6 +78,7 @@ describe('Bisect commands component', () => {
       const wrapper = shallow(<BisectHandler appState={store as any} />);
       const instance: BisectHandler = wrapper.instance() as any;
       instance.terminateBisect = jest.fn();
+      store.showInfoDialog = jest.fn().mockResolvedValueOnce(undefined);
 
       // same value is only returned when there is only 1 version left
       store.Bisector.continue.mockReturnValue([
@@ -88,24 +89,19 @@ describe('Bisect commands component', () => {
       expect(store.setVersion).not.toHaveBeenCalled();
       expect(instance.terminateBisect).toHaveBeenCalled();
       expect(store.pushOutput).toHaveBeenCalled();
-      expect(store.isGenericDialogShowing).toEqual(true);
-      expect(store.setGenericDialogOptions).toHaveBeenCalledWith({
-        cancel: undefined,
-        label: (
-          <>
-            Bisect complete. Check the range{' '}
-            <a
-              target="_blank"
-              rel="noreferrer"
-              href={`https://github.com/electron/electron/compare/vminVer...vmaxVer`}
-            >
-              {'minVer'}...{'maxVer'}
-            </a>
-            .
-          </>
-        ),
-        type: 'success',
-      });
+      expect(store.showInfoDialog).toHaveBeenCalledWith(
+        <>
+          Bisect complete. Check the range{' '}
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href={`https://github.com/electron/electron/compare/vminVer...vmaxVer`}
+          >
+            {'minVer'}...{'maxVer'}
+          </a>
+          .
+        </>,
+      );
     });
   });
 
