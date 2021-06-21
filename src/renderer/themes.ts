@@ -17,7 +17,6 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
  *
  * @param {typeof MonacoType} [monaco]
  * @param {LoadedFiddleTheme} [theme]
-): Promise<LoadedFiddleTheme> {
  */
 export function activateTheme(theme: LoadedFiddleTheme) {
   const { monaco } = window.ElectronFiddle.app;
