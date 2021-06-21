@@ -180,6 +180,26 @@ export function addLocalVersion(input: Version): Array<Version> {
 }
 
 /**
+ * Check to see if local version has already been added
+ * for the current folder path
+ *
+ * @param {Version} input
+ * @returns {boolean}
+ */
+export function hasExistingLocalVersion(
+  folderPath: string,
+): Version | undefined {
+  const versions = getLocalVersions();
+  let duplicate;
+
+  versions.find((v) => {
+    if (v.localPath === folderPath) duplicate = v;
+  });
+
+  return duplicate ? (duplicate as Version) : undefined;
+}
+
+/**
  * Retrieves local Electron versions, configured by the user.
  *
  * @returns {Array<Version>}

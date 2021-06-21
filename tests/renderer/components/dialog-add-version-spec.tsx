@@ -49,6 +49,18 @@ describe('AddVersionDialog component', () => {
     });
 
     expect(wrapper).toMatchSnapshot();
+
+    wrapper.setState({
+      isValidVersion: true,
+      isValidElectron: true,
+      existingLocalVersion: {
+        version: '2.2.2',
+        localPath: mockFile,
+      },
+      folderPath: mockFile,
+    });
+
+    expect(wrapper).toMatchSnapshot();
   });
 
   it('overrides default input with Electron dialog', () => {
@@ -124,6 +136,22 @@ describe('AddVersionDialog component', () => {
 
       expect(result.localPath).toBe('/test/path');
       expect(result.version).toBe('3.3.3');
+    });
+
+    it('shows dialog warning when adding duplicate local versions', async () => {
+      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+
+      wrapper.setState({
+        isValidElectron: true,
+        folderPath: '/test/path',
+        version: '3.3.3',
+        existingLocalVersion: {
+          version: '2.2.2',
+          localPath: '/test/path',
+        },
+      });
+
+      expect(wrapper).toMatchSnapshot();
     });
   });
 });

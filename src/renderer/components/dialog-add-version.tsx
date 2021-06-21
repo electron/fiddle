@@ -17,6 +17,7 @@ import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { hasExistingLocalVersion } from '../versions';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -25,6 +26,7 @@ interface AddVersionDialogProps {
 interface AddVersionDialogState {
   isValidElectron: boolean;
   isValidVersion: boolean;
+  existingLocalVersion?: Version;
   folderPath?: string;
   version: string;
 }
@@ -72,7 +74,9 @@ export class AddVersionDialog extends React.Component<
    */
   public setFolderPath(folderPath: string) {
     const isValidElectron = getIsDownloaded('custom', folderPath);
-    this.setState({ folderPath, isValidElectron });
+    const existingLocalVersion = hasExistingLocalVersion(folderPath);
+
+    this.setState({ existingLocalVersion, folderPath, isValidElectron });
   }
 
   public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
@@ -168,26 +172,39 @@ export class AddVersionDialog extends React.Component<
   }
 
   private renderPath(): JSX.Element | null {
-    const { folderPath, isValidElectron } = this.state;
+    const { folderPath } = this.state;
 
     if (!folderPath) return null;
 
-    const info = isValidElectron
-      ? `We found an ${getElectronNameForPlatform()} in this folder.`
-      : `We did not find a ${getElectronNameForPlatform()} in this folder...`;
-
     return (
       <Callout>
-        {info}
+        {this.renderDialog()}
         {this.renderVersionInput()}
       </Callout>
     );
   }
 
-  private renderVersionInput(): JSX.Element | null {
-    const { isValidElectron, isValidVersion, version } = this.state;
+  private renderDialog(): string {
+    const { existingLocalVersion, isValidElectron } = this.state;
 
-    if (!isValidElectron) return null;
+    if (isValidElectron && existingLocalVersion) {
+      return `This folder path has already been added as version "${existingLocalVersion.version}". Please remove and re-add.`;
+    } else if (isValidElectron) {
+      return `We found an ${getElectronNameForPlatform()} in this folder.`;
+    }
+
+    return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
+  }
+
+  private renderVersionInput(): JSX.Element | null {
+    const {
+      existingLocalVersion,
+      isValidElectron,
+      isValidVersion,
+      version,
+    } = this.state;
+
+    if (!isValidElectron || existingLocalVersion) return null;
 
     return (
       <>
