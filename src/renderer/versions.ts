@@ -184,7 +184,7 @@ export function addLocalVersion(input: Version): Array<Version> {
  * for the current folder path
  *
  * @param {Version} input
- * @returns {boolean}
+ * @returns {Version | undefined}
  */
 export function hasExistingLocalVersion(
   folderPath: string,

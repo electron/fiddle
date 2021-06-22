@@ -95,8 +95,13 @@ export class AddVersionDialog extends React.Component<
    * @returns {Promise<void>}
    */
   public async onSubmit(): Promise<void> {
-    const { folderPath, version } = this.state;
-
+    const {
+      folderPath,
+      version,
+      isValidElectron,
+      existingLocalVersion,
+    } = this.state;
+    const { versions } = this.props.appState;
     if (!folderPath) return;
 
     const name = folderPath.slice(-20).split(path.sep).slice(1).join(path.sep);
@@ -107,6 +112,16 @@ export class AddVersionDialog extends React.Component<
       name,
     };
 
+    // remove old local electron version if the user adds a new one with the same path
+    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
+    if (shouldRemovePreviousVersion) {
+      // get previous version
+      for (const ver of Object.values(versions)) {
+        if (ver.localPath === existingLocalVersion?.localPath) {
+          this.props.appState.removeVersion(ver);
+        }
+      }
+    }
     this.props.appState.addLocalVersion(toAdd);
     this.onClose();
   }
@@ -120,15 +135,18 @@ export class AddVersionDialog extends React.Component<
   }
 
   get buttons() {
+    const { isValidElectron, existingLocalVersion } = this.state;
     const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
+    // remove old local electron version if the user adds a new one with the same path
+    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
 
     return [
       <Button
         icon="add"
         key="submit"
-        disabled={!canSubmit}
+        disabled={shouldRemovePreviousVersion ? false : !canSubmit}
         onClick={this.onSubmit}
-        text="Add"
+        text={shouldRemovePreviousVersion ? 'OK' : 'Add'}
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
@@ -175,7 +193,6 @@ export class AddVersionDialog extends React.Component<
     const { folderPath } = this.state;
 
     if (!folderPath) return null;
-
     return (
       <Callout>
         {this.renderDialog()}
@@ -188,7 +205,7 @@ export class AddVersionDialog extends React.Component<
     const { existingLocalVersion, isValidElectron } = this.state;
 
     if (isValidElectron && existingLocalVersion) {
-      return `This folder path has already been added as version "${existingLocalVersion.version}". Please remove and re-add.`;
+      return `This folder path has already been added as version "${existingLocalVersion.version}". Would you like to set this path as a new version? \n \n`;
     } else if (isValidElectron) {
       return `We found an ${getElectronNameForPlatform()} in this folder.`;
     }
@@ -203,12 +220,14 @@ export class AddVersionDialog extends React.Component<
       isValidVersion,
       version,
     } = this.state;
+    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
 
-    if (!isValidElectron || existingLocalVersion) return null;
+    if (!isValidElectron) return null;
 
     return (
       <>
         <p>
+          {shouldRemovePreviousVersion && <br />}
           Please specify a version, used for typings and the name. Must be{' '}
           <code>semver</code> compliant.
         </p>
