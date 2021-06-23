@@ -104,8 +104,10 @@ export class TaskRunner {
   }
 
   private async setup(req: SetupRequest) {
-    const { log } = this;
+    const { appState, log } = this;
     const { fiddle, hideChannels, showChannels, useObsolete, version } = req;
+
+    appState.resetView();
 
     if (typeof useObsolete === 'boolean') {
       this.showObsoleteVersions(useObsolete);

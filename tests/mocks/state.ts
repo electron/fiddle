@@ -73,6 +73,7 @@ export class StateMock {
   public flushOutput = jest.fn();
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
+  public resetView = jest.fn();
   public setTheme = jest.fn();
   public setVersion = jest.fn().mockImplementation((version: string) => {
     this.version = version;

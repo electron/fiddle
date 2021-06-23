@@ -135,14 +135,14 @@ export class AppState {
   @observable public isQuitting = false;
 
   // -- Various "isShowing" settings ------------------
+  @observable public isAddVersionDialogShowing = false;
   @observable public isBisectCommandShowing: boolean;
+  @observable public isBisectDialogShowing = false;
   @observable public isConsoleShowing = false;
-  @observable public isTokenDialogShowing = false;
   @observable public isGenericDialogShowing = false;
   @observable public isSettingsShowing = false;
-  @observable public isBisectDialogShowing = false;
-  @observable public isAddVersionDialogShowing = false;
   @observable public isThemeDialogShowing = false;
+  @observable public isTokenDialogShowing = false;
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
 
   // -- Editor Values stored when we close the editor ------------------
@@ -699,24 +699,30 @@ export class AppState {
       ]);
     }
   }
+
   /**
-   * Resets the view, optionally with certain view flags enabled.
-   *
-   * @param {Record<string, boolean>} [additionalOptions]
-   * @memberof AppState
+   * Show or close secondary windows such as settings and dialogs.
    */
-  @action private resetView(additionalOptions: Record<string, boolean> = {}) {
-    this.isAddVersionDialogShowing = false;
-    this.isConsoleShowing = false;
-    this.isSettingsShowing = false;
-    this.isThemeDialogShowing = false;
-    this.isTokenDialogShowing = false;
-    this.isTourShowing = false;
-
-    for (const [key, val] of Object.entries(additionalOptions)) {
-      this[key] = val;
-    }
-
+  @action public resetView(
+    opts: {
+      isAddVersionDialogShowing?: boolean;
+      isBisectDialogShowing?: boolean;
+      isConsoleShowing?: boolean;
+      isGenericDialogShowing?: boolean;
+      isSettingsShowing?: boolean;
+      isThemeDialogShowing?: boolean;
+      isTokenDialogShowing?: boolean;
+      isTourShowing?: boolean;
+    } = {},
+  ) {
+    this.isAddVersionDialogShowing = Boolean(opts.isAddVersionDialogShowing);
+    this.isBisectDialogShowing = Boolean(opts.isBisectDialogShowing);
+    this.isConsoleShowing = Boolean(opts.isConsoleShowing);
+    this.isGenericDialogShowing = Boolean(opts.isGenericDialogShowing);
+    this.isSettingsShowing = Boolean(opts.isSettingsShowing);
+    this.isThemeDialogShowing = Boolean(opts.isThemeDialogShowing);
+    this.isTokenDialogShowing = Boolean(opts.isTokenDialogShowing);
+    this.isTourShowing = Boolean(opts.isTourShowing);
     this.setPageHash();
   }
 
