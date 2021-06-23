@@ -17,7 +17,7 @@ import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { getExistingLocalVersion } from '../versions';
+import { getLocalVersionForPath } from '../versions';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -74,7 +74,7 @@ export class AddVersionDialog extends React.Component<
    */
   public setFolderPath(folderPath: string) {
     const isValidElectron = getIsDownloaded('custom', folderPath);
-    const existingLocalVersion = getExistingLocalVersion(folderPath);
+    const existingLocalVersion = getLocalVersionForPath(folderPath);
 
     this.setState({ existingLocalVersion, folderPath, isValidElectron });
   }
@@ -101,7 +101,7 @@ export class AddVersionDialog extends React.Component<
       isValidElectron,
       existingLocalVersion,
     } = this.state;
-    const { versions } = this.props.appState;
+
     if (!folderPath) return;
 
     const name = folderPath.slice(-20).split(path.sep).slice(1).join(path.sep);
@@ -113,14 +113,9 @@ export class AddVersionDialog extends React.Component<
     };
 
     // swap to old local electron version if the user adds a new one with the same path
-    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
-    if (shouldSetToPreviousVersion) {
+    if (isValidElectron && existingLocalVersion?.localPath) {
       // set previous version as active version
-      for (const ver of Object.values(versions)) {
-        if (ver.localPath === existingLocalVersion?.localPath) {
-          this.props.appState.setVersion(ver.version);
-        }
-      }
+      this.props.appState.setVersion(existingLocalVersion.localPath);
     } else {
       this.props.appState.addLocalVersion(toAdd);
     }
@@ -149,7 +144,7 @@ export class AddVersionDialog extends React.Component<
       <Button
         icon="add"
         key="submit"
-        disabled={shouldSetToPreviousVersion ? false : !canSubmit}
+        disabled={!shouldSetToPreviousVersion && !canSubmit}
         onClick={this.onSubmit}
         text={shouldSetToPreviousVersion ? 'OK' : 'Add'}
       />,
@@ -201,13 +196,13 @@ export class AddVersionDialog extends React.Component<
     if (!folderPath) return null;
     return (
       <Callout>
-        {this.getVersionFromPathDialog()}
+        {this.buildDialogText()}
         {!shouldSetToPreviousVersion && this.renderVersionInput()}
       </Callout>
     );
   }
 
-  private getVersionFromPathDialog(): string {
+  private buildDialogText(): string {
     const { existingLocalVersion, isValidElectron } = this.state;
 
     if (isValidElectron && existingLocalVersion) {
