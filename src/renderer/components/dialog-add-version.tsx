@@ -17,7 +17,7 @@ import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { hasExistingLocalVersion } from '../versions';
+import { getExistingLocalVersion } from '../versions';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -74,7 +74,7 @@ export class AddVersionDialog extends React.Component<
    */
   public setFolderPath(folderPath: string) {
     const isValidElectron = getIsDownloaded('custom', folderPath);
-    const existingLocalVersion = hasExistingLocalVersion(folderPath);
+    const existingLocalVersion = getExistingLocalVersion(folderPath);
 
     this.setState({ existingLocalVersion, folderPath, isValidElectron });
   }
@@ -112,17 +112,18 @@ export class AddVersionDialog extends React.Component<
       name,
     };
 
-    // remove old local electron version if the user adds a new one with the same path
-    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
-    if (shouldRemovePreviousVersion) {
-      // get previous version
+    // swap to old local electron version if the user adds a new one with the same path
+    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
+    if (shouldSetToPreviousVersion) {
+      // set previous version as active version
       for (const ver of Object.values(versions)) {
         if (ver.localPath === existingLocalVersion?.localPath) {
-          this.props.appState.removeVersion(ver);
+          this.props.appState.setVersion(ver.version);
         }
       }
+    } else {
+      this.props.appState.addLocalVersion(toAdd);
     }
-    this.props.appState.addLocalVersion(toAdd);
     this.onClose();
   }
 
@@ -135,18 +136,22 @@ export class AddVersionDialog extends React.Component<
   }
 
   get buttons() {
-    const { isValidElectron, existingLocalVersion } = this.state;
-    const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
-    // remove old local electron version if the user adds a new one with the same path
-    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
+    const {
+      isValidElectron,
+      isValidVersion,
+      existingLocalVersion,
+    } = this.state;
+    const canSubmit = isValidElectron && isValidVersion;
+    // swap to old local electron version if the user adds a new one with the same path
+    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
 
     return [
       <Button
         icon="add"
         key="submit"
-        disabled={shouldRemovePreviousVersion ? false : !canSubmit}
+        disabled={shouldSetToPreviousVersion ? false : !canSubmit}
         onClick={this.onSubmit}
-        text={shouldRemovePreviousVersion ? 'OK' : 'Add'}
+        text={shouldSetToPreviousVersion ? 'OK' : 'Add'}
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
@@ -190,44 +195,38 @@ export class AddVersionDialog extends React.Component<
   }
 
   private renderPath(): JSX.Element | null {
-    const { folderPath } = this.state;
+    const { isValidElectron, folderPath, existingLocalVersion } = this.state;
+    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
 
     if (!folderPath) return null;
     return (
       <Callout>
-        {this.renderDialog()}
-        {this.renderVersionInput()}
+        {this.getVersionFromPathDialog()}
+        {!shouldSetToPreviousVersion && this.renderVersionInput()}
       </Callout>
     );
   }
 
-  private renderDialog(): string {
+  private getVersionFromPathDialog(): string {
     const { existingLocalVersion, isValidElectron } = this.state;
 
     if (isValidElectron && existingLocalVersion) {
-      return `This folder path has already been added as version "${existingLocalVersion.version}". Would you like to set this path as a new version? \n \n`;
+      return `This folder path has already been added as version "${existingLocalVersion.version}".
+      Would you like to set your Electron version to "${existingLocalVersion.version}"? \n \n`;
     } else if (isValidElectron) {
       return `We found an ${getElectronNameForPlatform()} in this folder.`;
+    } else {
+      return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
     }
-
-    return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
   }
 
   private renderVersionInput(): JSX.Element | null {
-    const {
-      existingLocalVersion,
-      isValidElectron,
-      isValidVersion,
-      version,
-    } = this.state;
-    const shouldRemovePreviousVersion = isValidElectron && existingLocalVersion;
-
+    const { isValidElectron, isValidVersion, version } = this.state;
     if (!isValidElectron) return null;
 
     return (
       <>
         <p>
-          {shouldRemovePreviousVersion && <br />}
           Please specify a version, used for typings and the name. Must be{' '}
           <code>semver</code> compliant.
         </p>

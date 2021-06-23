@@ -23,24 +23,10 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
     />
     <br />
     <Blueprint3.Callout>
-      This folder path has already been added as version "2.2.2". Would you like to set this path as a new version? 
+      This folder path has already been added as version "2.2.2".
+      Would you like to set your Electron version to "2.2.2"? 
  
 
-      <p>
-        <br />
-        Please specify a version, used for typings and the name. Must be
-         
-        <code>
-          semver
-        </code>
-         compliant.
-      </p>
-      <Blueprint3.InputGroup
-        intent="danger"
-        onChange={[Function]}
-        placeholder="4.0.0"
-        value="3.3.3"
-      />
     </Blueprint3.Callout>
   </div>
   <div
@@ -217,23 +203,10 @@ exports[`AddVersionDialog component renders 3`] = `
     />
     <br />
     <Blueprint3.Callout>
-      This folder path has already been added as version "2.2.2". Would you like to set this path as a new version? 
+      This folder path has already been added as version "2.2.2".
+      Would you like to set your Electron version to "2.2.2"? 
  
 
-      <p>
-        <br />
-        Please specify a version, used for typings and the name. Must be
-         
-        <code>
-          semver
-        </code>
-         compliant.
-      </p>
-      <Blueprint3.InputGroup
-        onChange={[Function]}
-        placeholder="4.0.0"
-        value=""
-      />
     </Blueprint3.Callout>
   </div>
   <div

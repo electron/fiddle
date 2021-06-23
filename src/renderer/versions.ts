@@ -186,15 +186,11 @@ export function addLocalVersion(input: Version): Array<Version> {
  * @param {Version} input
  * @returns {Version | undefined}
  */
-export function hasExistingLocalVersion(
+export function getExistingLocalVersion(
   folderPath: string,
 ): Version | undefined {
   const versions = getLocalVersions();
-  let duplicate;
-
-  versions.find((v) => {
-    if (v.localPath === folderPath) duplicate = v;
-  });
+  const duplicate = versions.find((v) => v.localPath === folderPath);
 
   return duplicate ? (duplicate as Version) : undefined;
 }
