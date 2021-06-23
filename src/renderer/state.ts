@@ -113,12 +113,12 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions: GenericDialogOptions = {
-    cancel: 'Cancel',
+    type: GenericDialogType.warning,
     label: '' as string | JSX.Element,
     ok: 'Okay',
-    placeholder: '',
-    type: GenericDialogType.warning,
+    cancel: 'Cancel',
     wantsInput: false,
+    placeholder: '',
   };
   @observable public readonly editorMosaic = new EditorMosaic();
   @observable public genericDialogLastResult: boolean | null = null;
@@ -561,7 +561,7 @@ export class AppState {
   }
 
   @action public async showInputDialog(opts: {
-    cancel: string;
+    cancel?: string;
     defaultInput?: string;
     label: string | JSX.Element;
     ok: string;
@@ -569,6 +569,7 @@ export class AppState {
   }): Promise<string | undefined> {
     const { confirm, input } = await this.showGenericDialog({
       ...opts,
+      cancel: opts.cancel || 'Cancel',
       type: GenericDialogType.confirm,
       wantsInput: true,
     });
@@ -576,12 +577,13 @@ export class AppState {
   }
 
   @action public async showConfirmDialog(opts: {
-    cancel: string;
+    cancel?: string;
     label: string | JSX.Element;
     ok: string;
   }): Promise<boolean> {
     const { confirm } = await this.showGenericDialog({
       ...opts,
+      cancel: opts.cancel || 'Cancel',
       wantsInput: false,
       type: GenericDialogType.confirm,
     });

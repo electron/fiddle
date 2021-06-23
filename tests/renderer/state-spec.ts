@@ -495,7 +495,6 @@ describe('AppState', () => {
     describe('showInputDialog', () => {
       const input = 'fnord' as const;
       const inputOpts = {
-        cancel: 'Cancel',
         label: 'label',
         ok: 'Close',
         placeholder: 'Placeholder',
@@ -528,7 +527,6 @@ describe('AppState', () => {
           input: undefined,
         });
         const result = await appState.showConfirmDialog({
-          cancel: 'Cancel',
           label,
           ok: 'Confirm',
         });

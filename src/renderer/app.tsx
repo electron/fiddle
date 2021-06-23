@@ -41,16 +41,13 @@ export class App {
 
   private confirmReplaceUnsaved(): Promise<boolean> {
     return this.state.showConfirmDialog({
-      cancel: 'Cancel',
-      label:
-        'Opening this Fiddle will replace your unsaved changes. Do you want to proceed?',
+      label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
       ok: 'Open',
     });
   }
 
   private confirmExitUnsaved(): Promise<boolean> {
     return this.state.showConfirmDialog({
-      cancel: 'Cancel',
       label: 'The current Fiddle is unsaved. Do you want to exit anyway?',
       ok: 'Exit',
     });

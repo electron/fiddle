@@ -74,7 +74,6 @@ describe('EditorDropdown component', () => {
     await dropdown.addCustomEditor();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      cancel: 'Cancel',
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',
@@ -95,7 +94,6 @@ describe('EditorDropdown component', () => {
     await dropdown.addCustomEditor();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      cancel: 'Cancel',
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',
@@ -121,7 +119,6 @@ describe('EditorDropdown component', () => {
     await dropdown.addCustomEditor();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      cancel: 'Cancel',
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',

@@ -104,7 +104,6 @@ export class GistActionButton extends React.Component<
   private getFiddleDescriptionFromUser(): Promise<string | undefined> {
     const placeholder = 'Electron Fiddle Gist' as const;
     return this.props.appState.showInputDialog({
-      cancel: 'Cancel',
       defaultInput: placeholder,
       label: 'Please provide a brief description for your Fiddle Gist',
       ok: 'Publish',

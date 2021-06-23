@@ -131,7 +131,6 @@ export class EditorDropdown extends React.Component<
 
   private showCustomEditorDialog(): Promise<string | undefined> {
     return this.props.appState.showInputDialog({
-      cancel: 'Cancel',
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',

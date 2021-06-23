@@ -213,7 +213,6 @@ export class RemoteLoader {
    */
   public verifyRemoteLoad(what: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
-      cancel: 'Cancel',
       label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`,
       ok: 'Load',
     });
@@ -221,7 +220,6 @@ export class RemoteLoader {
 
   public verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
-      cancel: 'Cancel',
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
               version of Electron from the example?`,

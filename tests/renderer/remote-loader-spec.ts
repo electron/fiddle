@@ -282,7 +282,6 @@ describe('RemoteLoader', () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
       await instance.verifyReleaseChannelEnabled(ElectronReleaseChannel.beta);
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
-        cancel: 'Cancel',
         label: expect.stringMatching(/enable the release channel/i),
         ok: 'Enable',
       });
@@ -300,7 +299,6 @@ describe('RemoteLoader', () => {
       );
 
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
-        cancel: 'Cancel',
         label: expect.stringMatching(/for version 4.0.0/i),
         ok: 'Load',
       });
@@ -332,7 +330,6 @@ describe('RemoteLoader', () => {
 
       expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
-        cancel: 'Cancel',
         label: expect.stringMatching(/are you sure/i),
         ok: 'Load',
       });
