@@ -73,6 +73,7 @@ export class StateMock {
   public flushOutput = jest.fn();
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
+  public resetView = jest.fn();
   public runConfirmationDialog = jest.fn();
   public setGenericDialogOptions = jest.fn().mockReturnValue({});
   public setTheme = jest.fn();
