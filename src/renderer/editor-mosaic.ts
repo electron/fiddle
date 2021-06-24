@@ -20,7 +20,7 @@ export enum EditorPresence {
 
   /** Space has been allocated for this file in the mosaic but the
       monaco editor has not mounted in React yet. This is an interim
-      state before the editor's state becomes Visible. */
+      state before the editor is Visible. */
   Pending,
 
   /** The file is visible in one of the mosaic's monaco editors */
@@ -64,7 +64,7 @@ export class EditorMosaic {
   @observable public readonly editors: Map<EditorId, Editor> = new Map();
 
   @computed public get files() {
-    const { editors, backups, mosaicArrangement: mosaic } = this;
+    const { backups, editors, mosaicArrangement: mosaic } = this;
 
     const files: Map<EditorId, EditorPresence> = new Map();
     for (const id of backups.keys()) files.set(id, EditorPresence.Hidden);

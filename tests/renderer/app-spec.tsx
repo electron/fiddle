@@ -395,19 +395,15 @@ describe('App component', () => {
     }
 
     it('does not replace the fiddle if not confirmed', async () => {
-      const { set } = app.state.editorMosaic;
-      (set as jest.Mock).mockReset();
-
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(false);
-      expect(set).toHaveBeenCalledTimes(1);
+      expect(setSpy).toHaveBeenCalledTimes(1);
     });
 
     it('replaces the fiddle if confirmed', async () => {
-      const { set } = app.state.editorMosaic;
-      (set as jest.Mock).mockReset();
-
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(true);
-      expect(set).toHaveBeenCalledTimes(2);
+      expect(setSpy).toHaveBeenCalledTimes(2);
     });
   });
 

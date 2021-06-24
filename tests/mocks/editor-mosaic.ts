@@ -18,9 +18,6 @@ export class EditorMosaicMock {
   public getEditorValue = jest
     .fn()
     .mockImplementation((id) => this.editors.get(id)?.getValue() || '');
-  public getEditorViewState = jest
-    .fn()
-    .mockImplementation((id) => this.editors.get(id)?.saveViewState() || null);
   public layout = jest.fn().mockImplementation(() => {
     this.editors.forEach((editor) => editor.layout());
   });
