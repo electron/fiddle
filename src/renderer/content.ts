@@ -132,24 +132,3 @@ export async function getContent(
   if (mosaics?.[name]) return mosaics[name]!;
   return getEmptyContent(name);
 }
-
-/**
- * Did the content change?
- *
- * @param {EditorId} name
- * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<boolean>}
- */
-export async function isContentUnchanged(
-  name: EditorId,
-  version: string,
-): Promise<boolean> {
-  const { ElectronFiddle: fiddle } = window;
-  if (!fiddle || !fiddle.app) return false;
-
-  const values = await fiddle.app.getEditorValues({
-    include: false,
-  });
-
-  return values[name] === (await getContent(name, version));
-}

@@ -166,14 +166,11 @@ describe('App component', () => {
     describe('when current Fiddle is unsaved and prompt appears', () => {
       it('takes no action if prompt is rejected', async () => {
         const { state } = app;
+        const { editorMosaic, gistId, localPath, templateName } = state;
+        editorMosaic.set = jest.fn();
+        (state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
 
-        state.editorMosaic.isEdited = true;
-        expect(state.localPath).toBeUndefined();
-        expect(state.gistId).toBe('');
-        expect(state.templateName).toBeUndefined();
-
-        (app.state.runConfirmationDialog as jest.Mock).mockResolvedValue(false);
-
+        editorMosaic.isEdited = true;
         await app.replaceFiddle(
           {},
           {
@@ -182,10 +179,11 @@ describe('App component', () => {
             filePath: 'localPath',
           },
         );
-        expect(state.editorMosaic.set).not.toHaveBeenCalled();
-        expect(state.localPath).toBeUndefined();
-        expect(state.gistId).toBe('');
-        expect(state.templateName).toBeUndefined();
+
+        expect(editorMosaic.set).not.toHaveBeenCalled();
+        expect(state.localPath).toBe(localPath);
+        expect(state.gistId).toBe(gistId);
+        expect(state.templateName).toBe(templateName);
       });
 
       it('sets editor values and source info if prompt is accepted', async () => {
