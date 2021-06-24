@@ -1,5 +1,5 @@
-import { Button, IButtonGroupProps, MenuItem } from '@blueprintjs/core';
-import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import { Button, ButtonGroupProps, MenuItem } from '@blueprintjs/core';
+import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -58,15 +58,32 @@ export function getItemIcon({ state }: RunnableVersion) {
  * Helper method: Returns the <Select /> predicate for an Electron
  * version.
  *
+ * Sorts by index of the chosen query.
+ * For example, if we take the following versions:
+ * [3.0.0, 14.3.0, 13.2.0, 12.0.0-nightly.20210301, 12.0.0-beta.3]
+ * and a search query of '3', this method would sort them into:
+ * [3.0.0, 13.2.0, 14.3.0, 12.0.0-beta.3, 12.0.0-nightly.20210301]
+ *
  * @param {string} query
- * @param {RunnableVersion} { version }
+ * @param {RunnableVersion[]} versions
  * @returns
  */
-export const filterItem: ItemPredicate<RunnableVersion> = (
+export const filterItems: ItemListPredicate<RunnableVersion> = (
   query,
-  { version },
+  versions,
 ) => {
-  return version.toLowerCase().includes(query.toLowerCase());
+  if (query === '') return versions;
+
+  const q = query.toLowerCase();
+
+  return versions
+    .filter(({ version }) => version.toLowerCase().includes(q))
+    .sort((a, b) => {
+      if (a.version.indexOf(q) > b.version.indexOf(q)) return 1;
+      if (b.version.indexOf(q) > a.version.indexOf(q)) return -1;
+
+      return 0;
+    });
 };
 
 /**
@@ -107,7 +124,7 @@ interface VersionSelectProps {
   disabled?: boolean;
   currentVersion: RunnableVersion;
   onVersionSelect: (version: RunnableVersion) => void;
-  buttonGroupProps?: IButtonGroupProps;
+  buttonGroupProps?: ButtonGroupProps;
   itemDisabled?:
     | keyof RunnableVersion
     | ((item: RunnableVersion, index: number) => boolean);
@@ -134,7 +151,7 @@ export class VersionSelect extends React.Component<
         filterable={true}
         items={this.props.appState.versionsToShow}
         itemRenderer={renderItem}
-        itemPredicate={filterItem}
+        itemListPredicate={filterItems}
         itemDisabled={itemDisabled}
         onItemSelect={this.props.onVersionSelect}
         noResults={<MenuItem disabled={true} text="No results." />}

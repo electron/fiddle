@@ -8,7 +8,7 @@ import {
   VersionState,
 } from '../../../src/interfaces';
 import {
-  filterItem,
+  filterItems,
   getItemIcon,
   getItemLabel,
   renderItem,
@@ -140,10 +140,25 @@ describe('VersionSelect component', () => {
     });
   });
 
-  describe('filterItem()', () => {
+  describe('filterItems()', () => {
     it('correctly matches a query', () => {
-      expect(filterItem('test', mockVersion1)).toBe(false);
-      expect(filterItem('1.0.0', mockVersion1)).toBe(true);
+      const versions = [
+        { version: '14.3.0' },
+        { version: '3.0.0' },
+        { version: '13.2.0' },
+        { version: '12.0.0-nightly.20210301' },
+        { version: '12.0.0-beta.3' },
+      ] as RunnableVersion[];
+
+      const expected = [
+        { version: '3.0.0' },
+        { version: '13.2.0' },
+        { version: '14.3.0' },
+        { version: '12.0.0-beta.3' },
+        { version: '12.0.0-nightly.20210301' },
+      ] as RunnableVersion[];
+
+      expect(filterItems('3', versions)).toEqual(expected);
     });
   });
 });
