@@ -127,7 +127,7 @@ describe('windows', () => {
       // to instantly call the listener.
       let result: any;
       (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
-      (electron.ipcMain.handleOnce as jest.Mock).mockImplementation(
+      (electron.ipcMain.handle as jest.Mock).mockImplementation(
         (event, listener) => {
           if (event === IpcEvents.GET_APP_PATHS) {
             result = listener();

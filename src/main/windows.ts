@@ -79,7 +79,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  ipcMainManager.handleOnce(IpcEvents.GET_APP_PATHS, () => {
+  ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};
     const pathsToQuery = [
       'home',
