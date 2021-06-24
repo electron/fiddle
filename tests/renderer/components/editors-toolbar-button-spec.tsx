@@ -100,7 +100,7 @@ describe('Editor toolbar button component', () => {
       );
 
       wrapper.dive().dive().find('button').simulate('click');
-      expect(store.editorMosaic.hideAndBackupMosaic).toHaveBeenCalledTimes(1);
+      expect(store.editorMosaic.hide).toHaveBeenCalledTimes(1);
     });
   });
 });

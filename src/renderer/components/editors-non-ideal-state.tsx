@@ -2,20 +2,13 @@ import * as React from 'react';
 
 import { Button, NonIdealState } from '@blueprintjs/core';
 
-import { DefaultEditorId } from '../../interfaces';
-import { AppState } from '../state';
+import { EditorMosaic } from '../editor-mosaic';
 
-export function renderNonIdealState(appState: AppState) {
-  const allEditors = [
-    DefaultEditorId.html,
-    DefaultEditorId.main,
-    DefaultEditorId.renderer,
-    DefaultEditorId.preload,
-  ];
+export function renderNonIdealState(editorMosaic: EditorMosaic) {
   const resolveButton = (
     <Button
       text="Open all editors"
-      onClick={() => appState.editorMosaic.setVisibleMosaics(allEditors)}
+      onClick={() => editorMosaic.resetLayout()}
     />
   );
 

@@ -388,9 +388,12 @@ describe('AppState', () => {
     });
 
     it('possibly updates the editors', async () => {
+      const { replaceFiddle } = window.ElectronFiddle.app;
+      (replaceFiddle as jest.Mock).mockReset();
+
       appState.versions['1.0.0'] = { version: '1.0.0' } as any;
       (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
-      (getTemplate as jest.Mock).mockResolvedValueOnce({
+      (getTemplate as jest.Mock).mockReset().mockResolvedValueOnce({
         defaultMosaics: {},
         customMosaics: {},
       });
@@ -398,7 +401,7 @@ describe('AppState', () => {
       await appState.setVersion('v1.0.0');
 
       expect(getTemplate).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
+      expect(replaceFiddle).toHaveBeenCalledTimes(1);
     });
 
     it('updates typescript definitions', async () => {

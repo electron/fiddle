@@ -1,22 +1,31 @@
 import * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
-import { action, observable, reaction } from 'mobx';
-
-import { DEFAULT_MOSAIC_ARRANGEMENT } from './constants';
-import {
-  DEFAULT_EDITORS,
-  DefaultEditorId,
-  EditorId,
-  EditorValues,
-} from '../interfaces';
+import { action, computed, observable, reaction } from 'mobx';
+import { DefaultEditorId, EditorId, EditorValues } from '../interfaces';
 
 import {
   compareEditors,
   getEmptyContent,
   isKnownFile,
+  monacoLanguage,
 } from '../utils/editor-utils';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
+
+export enum EditorPresence {
+  /** The file is known to us but we've chosen not to show it, either
+      because the content was boring or because hide() was called.
+      Its contents are cached offscreen. */
+  Hidden,
+
+  /** Space has been allocated for this file in the mosaic but the
+      monaco editor has not mounted in React yet. This is an interim
+      state before the editor's state becomes Visible. */
+  Pending,
+
+  /** The file is visible in one of the mosaic's monaco editors */
+  Visible,
+}
 
 /**
  * Create a mosaic arrangement given an array of editor ids.
@@ -29,9 +38,7 @@ export function createMosaicArrangement(
   input: EditorId[],
   direction: MosaicDirection = 'row',
 ): MosaicNode<EditorId> {
-  if (input.length === 1) {
-    return input[0];
-  }
+  if (input.length < 2) return input[0];
 
   // This cuts out the first half of input. Input becomes the second half.
   const secondHalf = [...input];
@@ -44,34 +51,45 @@ export function createMosaicArrangement(
   };
 }
 
-export interface EditorBackup {
+interface EditorBackup {
   value?: string;
-  model?: MonacoType.editor.ITextModel | null;
   viewState?: MonacoType.editor.ICodeEditorViewState | null;
 }
 
 export class EditorMosaic {
-  @observable public readonly editors: Map<EditorId, Editor> = new Map();
+  @observable private readonly backups: Map<EditorId, EditorBackup> = new Map();
   @observable public customMosaics: EditorId[] = [];
-  @observable
-  public mosaicArrangement: MosaicNode<EditorId> | null = DEFAULT_MOSAIC_ARRANGEMENT;
-  @observable public closedPanels: Record<EditorId, EditorBackup> = {};
   @observable public isEdited = false;
+  @observable public mosaicArrangement: MosaicNode<EditorId> | null;
+  @observable public readonly editors: Map<EditorId, Editor> = new Map();
+
+  @computed public get files() {
+    const { editors, backups, mosaicArrangement: mosaic } = this;
+
+    const files: Map<EditorId, EditorPresence> = new Map();
+    for (const id of backups.keys()) files.set(id, EditorPresence.Hidden);
+    for (const id of getLeaves(mosaic)) files.set(id, EditorPresence.Pending);
+    for (const id of editors.keys()) files.set(id, EditorPresence.Visible);
+    return files;
+  }
+
+  @computed public get numVisible() {
+    return getLeaves(this.mosaicArrangement).length;
+  }
 
   constructor() {
     for (const name of [
-      'getAndRemoveEditorValueBackup',
-      'hideAndBackupMosaic',
+      'hide',
       'ignoreAllEdits',
       'ignoreEdits',
+      'layout',
       'observeAllEdits',
       'observeEdits',
-      'layout',
       'removeCustomMosaic',
-      'resetEditorLayout',
+      'resetLayout',
       'set',
-      'setVisibleMosaics',
-      'showMosaic',
+      'show',
+      'toggle',
       'values',
     ]) {
       this[name] = this[name].bind(this);
@@ -97,29 +115,14 @@ export class EditorMosaic {
     );
   }
 
-  /**
-   * Sets the editor value for a given editor. Deletes the value after
-   * accessing it.
-   *
-   * @param {EditorId} id
-   */
-  @action public getAndRemoveEditorValueBackup(
-    id: EditorId,
-  ): EditorBackup | null {
-    const value = this.closedPanels[id];
-    delete this.closedPanels[id];
-    return value;
-  }
+  @action private setVisible(visible: EditorId[]) {
+    console.log('setVisible', JSON.stringify(visible));
+    const { backups, editors } = this;
 
-  @action public setVisibleMosaics(visible: EditorId[]) {
-    console.log('setVisibleMosaics', JSON.stringify(visible));
-    const { editors } = this;
-    const currentlyVisible = this.getVisibleMosaics();
-
-    for (const id of DEFAULT_EDITORS) {
-      if (!visible.includes(id) && currentlyVisible.includes(id)) {
-        this.closedPanels[id] = this.getEditorBackup(id);
-        // if we have backup, remove active editor
+    // cache and remove any unwanted editors
+    for (const [id, editor] of editors) {
+      if (!visible.includes(id)) {
+        backups.set(id, { viewState: editor.saveViewState() });
         editors.delete(id);
       }
     }
@@ -141,8 +144,16 @@ export class EditorMosaic {
    *
    * @param {EditorId} id
    */
-  @action public hideAndBackupMosaic(id: EditorId) {
-    this.setVisibleMosaics(this.getVisibleMosaics().filter((v) => v !== id));
+  @action public hide(id: EditorId) {
+    this.setVisible(this.getVisibleMosaics().filter((v) => v !== id));
+  }
+
+  @action public toggle(id: EditorId) {
+    if (this.files.get(id) === EditorPresence.Hidden) {
+      this.show(id);
+    } else {
+      this.hide(id);
+    }
   }
 
   /**
@@ -151,8 +162,7 @@ export class EditorMosaic {
    * @param {EditorId} id
    */
   @action public removeCustomMosaic(id: EditorId) {
-    this.hideAndBackupMosaic(id);
-    this.editors.delete(id);
+    this.hide(id);
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
   }
 
@@ -161,22 +171,20 @@ export class EditorMosaic {
    *
    * @param {EditorId} id
    */
-  @action public showMosaic(id: EditorId) {
-    this.setVisibleMosaics([...this.getVisibleMosaics(), id]);
+  @action public show(id: EditorId) {
+    this.setVisible([...this.getVisibleMosaics(), id]);
   }
 
   /**
    * Resets editor view to default layout.
-   *
-   *
    */
-  @action public resetEditorLayout() {
-    this.mosaicArrangement = DEFAULT_MOSAIC_ARRANGEMENT;
+  @action public resetLayout() {
+    this.set(this.values());
   }
 
-  @action public set(editorValues: EditorValues) {
+  @action public set(values: EditorValues) {
     // Remove all previously created custom editors.
-    this.customMosaics = Object.keys(editorValues).filter(
+    this.customMosaics = Object.keys(values).filter(
       (filename: string) => !isKnownFile(filename),
     ) as EditorId[];
 
@@ -186,36 +194,22 @@ export class EditorMosaic {
     };
 
     // Sort and display all editors that have content.
-    const visibleEditors: EditorId[] = Object.entries(editorValues)
+    const visibleEditors: EditorId[] = Object.entries(values)
       .filter(([id, content]) => shouldShow(id as EditorId, content as string))
       .map(([id]) => id as DefaultEditorId)
       .sort(compareEditors);
 
     // Once loaded, we have a "saved" state.
-    this.setVisibleMosaics(visibleEditors);
+    this.setVisible(visibleEditors);
 
     // Set content for mosaics.
-    for (const [name, value] of Object.entries(editorValues)) {
+    for (const [name, value] of Object.entries(values)) {
       const editor = this.editors.get(name as EditorId);
-      if (editor) {
-        // The editor exists, set the value directly
-        if (editor.getValue() !== value) {
-          this.ignoreEdits(editor);
-          editor.setValue(value as string);
-        }
-      } else {
-        // The editor does not exist, attempt to set it on the backup.
-        // If there's a model, we'll do it on the model. Else, we'll
-        // set the value.
-        let backup = this.closedPanels[name];
-        if (!backup) {
-          backup = { value };
-          this.closedPanels[name] = backup;
-        } else if (backup.model) {
-          backup.model.setValue(value);
-        } else {
-          backup.value = value;
-        }
+      if (!editor) {
+        this.backups.set(name as EditorId, { value: value as string });
+      } else if (editor.getValue() !== value) {
+        this.ignoreEdits(editor);
+        editor.setValue(value as string);
       }
     }
 
@@ -224,96 +218,59 @@ export class EditorMosaic {
 
   @action public addEditor(id: EditorId, editor: Editor) {
     this.editors.set(id, editor);
+
+    const backup = this.backups.get(id);
+    delete this.backups[id];
+    if (backup?.viewState) {
+      editor.restoreViewState(backup.viewState);
+    } else {
+      const { monaco } = window.ElectronFiddle;
+      const value = backup?.value ?? '';
+      const language = monacoLanguage(id);
+      const model = monaco.editor.createModel(value, language);
+      model.updateOptions({ tabSize: 2 });
+      editor.setModel(model);
+    }
+
     this.observeEdits(editor);
   }
 
   /**
-   * Retrieves the contents of all editor panes.
+   * Retrieves the contents of all files.
    *
    * @returns {EditorValues}
    */
   public values(): EditorValues {
     const values: EditorValues = {};
-
-    for (const name of Object.keys(this.closedPanels)) {
-      values[name] = this.getEditorValue(name as EditorId);
-    }
-
-    for (const name of this.editors.keys()) {
-      values[name] = this.getEditorValue(name);
-    }
-
+    for (const id of this.backups.keys()) values[id] = this.getEditorValue(id);
+    for (const id of this.editors.keys()) values[id] = this.getEditorValue(id);
     return values;
   }
 
   /**
-   * Return the value for a given editor
+   * Return the contents of the specified file
    *
    * @param {EditorId} id
    * @returns {string}
    */
   public getEditorValue(id: EditorId): string {
-    const editor = this.editors.get(id);
-    if (editor) return editor.getValue();
-
-    const backup = this.closedPanels[id];
-    if (backup?.value) return backup.value;
-
-    return '';
+    const { backups, editors } = this;
+    return editors.get(id)?.getValue() || backups.get(id)?.value || '';
   }
 
-  /**
-   * Returns a backup for a given editor
-   *
-   * @param {EditorId} id
-   * @returns {EditorBackup}
-   */
-  public getEditorBackup(id: EditorId): EditorBackup {
-    return {
-      value: this.getEditorValue(id),
-      model: this.getEditorModel(id),
-      viewState: this.getEditorViewState(id),
-    };
-  }
-
-  /**
-   * Returns the view state for a given editor.
-   *
-   * @export
-   * @param {EditorId} id
-   * @returns {(editor.ICodeEditorViewState | null)}
-   */
-  public getEditorViewState(
-    id: EditorId,
-  ): MonacoType.editor.ICodeEditorViewState | null {
-    return this.editors.get(id)?.saveViewState() || null;
-  }
-
-  /**
-   * Return the model for a given editor
-   *
-   * @param {EditorId} id
-   * @returns {editor.ITextModel | null}
-   */
-  public getEditorModel(id: EditorId): MonacoType.editor.ITextModel | null {
-    return this.editors.get(id)?.getModel() || null;
-  }
-
-  private layoutDebounce: any;
+  private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
   public layout() {
     const DEBOUNCE_MSEC = 50;
     if (!this.layoutDebounce) {
       this.layoutDebounce = setTimeout(() => {
-        for (const editor of this.editors.values()) {
-          editor?.layout?.();
-        }
-        this.layoutDebounce = null;
+        for (const editor of this.editors.values()) editor.layout();
+        delete this.layoutDebounce;
       }, DEBOUNCE_MSEC);
     }
   }
 
-  public getVisibleMosaics(): EditorId[] {
+  private getVisibleMosaics(): EditorId[] {
     return getLeaves(this.mosaicArrangement);
   }
 
@@ -333,7 +290,7 @@ export class EditorMosaic {
 
   private ignoreEdits(editor: Editor) {
     editor.onDidChangeModelContent(() => {
-      /* no-op */
+      // no-op
     });
   }
 

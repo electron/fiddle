@@ -169,8 +169,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
     // only show toolbar controls if we have more than 1 visible editor
     // Mosaic arrangement is type string if 1 editor, object otherwise
-    const toolbarControlsMaybe = typeof appState.editorMosaic
-      .mosaicArrangement !== 'string' && (
+    const toolbarControlsMaybe = appState.editorMosaic.numVisible > 1 && (
       <>
         <MaximizeButton id={id} appState={appState} />
         <RemoveButton id={id} appState={appState} />
@@ -239,14 +238,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public render() {
-    const { appState } = this.props;
+    const { editorMosaic } = this.props.appState;
 
     return (
       <Mosaic<EditorId>
         className={`focused__${this.state.focused}`}
         onChange={this.onChange}
-        value={appState.editorMosaic.mosaicArrangement}
-        zeroStateView={renderNonIdealState(appState)}
+        value={editorMosaic.mosaicArrangement}
+        zeroStateView={renderNonIdealState(editorMosaic)}
         renderTile={this.renderTile}
       />
     );

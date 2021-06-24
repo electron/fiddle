@@ -916,7 +916,7 @@ exports[`Editors component renders a toolbar 1`] = `
         appState={
           Object {
             "editorMosaic": Object {
-              "closedPanels": Object {
+              "backups": Object {
                 "index.html": Object {
                   "value": "<!-- index.html -->",
                 },
@@ -960,7 +960,7 @@ exports[`Editors component renders a toolbar 1`] = `
         appState={
           Object {
             "editorMosaic": Object {
-              "closedPanels": Object {
+              "backups": Object {
                 "index.html": Object {
                   "value": "<!-- index.html -->",
                 },

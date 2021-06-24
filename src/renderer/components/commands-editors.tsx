@@ -17,6 +17,7 @@ import {
   GenericDialogType,
 } from '../../interfaces';
 import { AppState } from '../state';
+import { EditorPresence } from '../editor-mosaic';
 import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
@@ -62,16 +63,13 @@ export class EditorDropdown extends React.Component<
   }
 
   public renderMenuItems() {
-    const { appState } = this.props;
     const result: Array<JSX.Element> = [];
-    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
 
-    const allEditors = [
-      ...DEFAULT_EDITORS,
-      ...appState.editorMosaic.customMosaics,
-    ];
-    for (const id of allEditors) {
-      const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+    const { editorMosaic } = this.props.appState;
+    const { numVisible, files } = editorMosaic;
+
+    for (const [id, presence] of files.entries()) {
+      const icon = presence === EditorPresence.Hidden ? 'eye-off' : 'eye-open';
       const title = getEditorTitle(id);
 
       if (!DEFAULT_EDITORS.includes(id as any)) {
@@ -83,7 +81,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={appState.editorMosaic.mosaicArrangement === id}
+            disabled={numVisible < 2}
           >
             <MenuItem
               icon={'cross'}
@@ -102,7 +100,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={appState.editorMosaic.mosaicArrangement === id}
+            disabled={numVisible < 2}
           />,
         );
       }
@@ -127,7 +125,7 @@ export class EditorDropdown extends React.Component<
           icon="grid-view"
           key="reset-layout"
           text="Reset Layout"
-          onClick={appState.editorMosaic.resetEditorLayout}
+          onClick={editorMosaic.resetLayout}
         />
       </React.Fragment>,
     );
@@ -190,7 +188,7 @@ export class EditorDropdown extends React.Component<
         appState.toggleGenericDialog();
       } else {
         appState.editorMosaic.customMosaics.push(name);
-        appState.editorMosaic.showMosaic(name);
+        appState.editorMosaic.show(name);
       }
     }
   }
@@ -205,16 +203,7 @@ export class EditorDropdown extends React.Component<
 
   public onItemClick(event: React.MouseEvent) {
     const { id } = event.currentTarget;
-    const { appState } = this.props;
-    const { editorMosaic } = appState;
-    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
 
-    if (visibleMosaics.includes(id as EditorId)) {
-      console.log(`EditorDropdown: Closing ${id}`);
-      editorMosaic.hideAndBackupMosaic(id as EditorId);
-    } else {
-      console.log(`EditorDropdown: Opening ${id}`);
-      editorMosaic.showMosaic(id as EditorId);
-    }
+    this.props.appState.editorMosaic.toggle(id as EditorId);
   }
 }
