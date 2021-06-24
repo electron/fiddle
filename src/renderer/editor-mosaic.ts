@@ -57,11 +57,9 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
-  @observable private readonly backups: Map<EditorId, EditorBackup> = new Map();
   @observable public customMosaics: EditorId[] = [];
   @observable public isEdited = false;
   @observable public mosaicArrangement: MosaicNode<EditorId> | null;
-  @observable public readonly editors: Map<EditorId, Editor> = new Map();
 
   @computed public get files() {
     const { backups, editors, mosaicArrangement: mosaic } = this;
@@ -76,6 +74,9 @@ export class EditorMosaic {
   @computed public get numVisible() {
     return getLeaves(this.mosaicArrangement).length;
   }
+
+  @observable private readonly backups: Map<EditorId, EditorBackup> = new Map();
+  @observable private readonly editors: Map<EditorId, Editor> = new Map();
 
   constructor() {
     for (const name of [

@@ -256,13 +256,13 @@ describe('Editors component', () => {
     });
 
     it('handles the monaco editor option commands', () => {
+      const id = MAIN_JS;
+      const editor = new MonacoEditorMock();
+      editorMosaic.addEditor(id, editor as any);
+
       shallow(<Editors appState={store as any} />);
-
       ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
-
-      for (const editor of editorMosaic.editors.values()) {
-        expect(editor.updateOptions).toHaveBeenCalled();
-      }
+      expect(editor.updateOptions).toHaveBeenCalled();
     });
   });
 
