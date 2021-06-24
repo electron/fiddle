@@ -1,7 +1,6 @@
-import { EditorId, EditorValues, VersionSource } from '../interfaces';
+import { EditorValues, VersionSource } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
 import { getElectronVersions } from './versions';
-import { getEmptyContent } from '../utils/editor-utils';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
@@ -114,21 +113,4 @@ export function getTemplate(version: string): Promise<EditorValues> {
   return sem && isReleasedMajor(sem)
     ? getQuickStart(`${sem.major}-x-y`)
     : readFiddle(STATIC_TEMPLATE_DIR);
-}
-
-/**
- * Returns expected content for a given name.
- *
- * @export
- * @param {EditorId} name
- * @param {string} version
- * @returns {Promise<string>}
- */
-export async function getContent(
-  name: EditorId,
-  version: string,
-): Promise<string> {
-  const mosaics = await getTemplate(version);
-  if (mosaics?.[name]) return mosaics[name]!;
-  return getEmptyContent(name);
 }
