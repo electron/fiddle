@@ -14,23 +14,13 @@ jest.mock('fs-extra');
 describe('themes', () => {
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = window.ElectronFiddle.app.monaco as any;
+      const { editor } = (window as any).ElectronFiddle.monaco;
 
-      await activateTheme();
+      activateTheme(await getTheme());
 
       expect(editor.defineTheme).toHaveBeenCalled();
       expect(editor.setTheme).toHaveBeenCalled();
       expect(editor.defineTheme.mock.calls[0][1].base).toBe('vs-dark');
-    });
-
-    it(`does not do anything if Monaco isn't available yet`, async () => {
-      const { editor } = window.ElectronFiddle.app.monaco as any;
-      window.ElectronFiddle.app.monaco = null;
-
-      await activateTheme();
-
-      expect(editor.defineTheme).toHaveBeenCalledTimes(0);
-      expect(editor.setTheme).toHaveBeenCalledTimes(0);
     });
   });
 

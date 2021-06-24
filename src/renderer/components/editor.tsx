@@ -10,11 +10,10 @@ import { AppState } from '../state';
 import { monacoLanguage } from '../../utils/editor-utils';
 
 interface EditorProps {
-  appState: AppState;
-  monaco: typeof MonacoType;
+  readonly appState: AppState;
+  readonly id: EditorId;
+  readonly monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
-  id: EditorId;
-  options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   onChange?: (
     value: string,

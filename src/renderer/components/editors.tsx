@@ -17,7 +17,6 @@ import { getEditorTitle } from '../../utils/editor-utils';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-import { activateTheme } from '../themes';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
 import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
@@ -34,10 +33,9 @@ interface EditorsProps {
 }
 
 interface EditorsState {
-  monaco?: typeof MonacoType;
-  isMounted?: boolean;
-  monacoOptions: MonacoType.editor.IEditorOptions;
+  readonly monaco: typeof MonacoType;
   focused?: EditorId;
+  monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
 @observer
@@ -50,7 +48,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     this.renderTile = this.renderTile.bind(this);
     this.setFocused = this.setFocused.bind(this);
 
-    this.state = { monacoOptions: defaultMonacoOptions };
+    this.state = {
+      monaco: window.ElectronFiddle.monaco,
+      monacoOptions: defaultMonacoOptions,
+    };
   }
 
   /**
@@ -99,9 +100,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         }
       }
     });
-
-    this.setState({ isMounted: true });
-    await this.loadMonaco();
   }
 
   public componentWillUnmount() {
@@ -232,7 +230,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     return (
       <Editor
         id={id}
-        monaco={monaco!}
+        monaco={monaco}
         appState={appState}
         monacoOptions={defaultMonacoOptions}
         setFocused={this.setFocused}
@@ -242,9 +240,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
 
   public render() {
     const { appState } = this.props;
-    const { monaco } = this.state;
-
-    if (!monaco) return null;
 
     return (
       <Mosaic<EditorId>
@@ -264,32 +259,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    */
   public onChange(currentNode: MosaicNode<EditorId> | null) {
     this.props.appState.editorMosaic.mosaicArrangement = currentNode;
-  }
-
-  /**
-   * Loads monaco. If it's already loaded, it'll just set it on the current state.
-   * We're doing things a bit roundabout to ensure that we're not overloading the
-   * mobx state with a gigantic Monaco tree.
-   */
-  public async loadMonaco() {
-    const { app } = window.ElectronFiddle;
-    const loader = require('monaco-loader');
-    const monaco = app.monaco || (await loader());
-
-    if (!app.monaco) {
-      app.monaco = monaco;
-    }
-
-    if (!this.state || !this.state.isMounted) {
-      this.setState({
-        monaco,
-        monacoOptions: defaultMonacoOptions,
-      });
-    } else {
-      this.setState({ monaco });
-    }
-
-    await activateTheme(monaco, undefined, this.props.appState.theme);
   }
 
   /**

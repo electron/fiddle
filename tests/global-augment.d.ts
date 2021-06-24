@@ -1,19 +1,13 @@
-import { EditorId } from '../src/interfaces';
-import { App as AppType } from '../src/renderer/app';
-import { EditorMock } from './mocks/editors';
+import { ElectronFiddleMock, MonacoMock } from './mocks/mocks';
 
 declare global {
   interface Window {
-    ElectronFiddle: {
-      app: AppType;
-      editors: Record<EditorId, EditorMock>;
-    };
+    ElectronFiddle: ElectronFiddleMock;
+    monaco: MonacoMock;
   }
 }
 
 interface Window {
-  ElectronFiddle: {
-    app: AppType;
-    editors: Record<EditorId, EditorMock>;
-  };
+  ElectronFiddle: ElectronFiddleMock;
+  monaco: MonacoMock;
 }

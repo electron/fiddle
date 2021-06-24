@@ -9,6 +9,7 @@ import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 import {
+  AppMock,
   MonacoEditorMock,
   StateMock,
   createEditorValues,
@@ -25,15 +26,15 @@ jest.mock('../../../src/renderer/components/editor', () => ({
 }));
 
 describe('Editors component', () => {
-  let ElectronFiddle: any;
+  let app: AppMock;
   let monaco: any;
   let store: StateMock;
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    ({ ElectronFiddle } = window as any);
-    ({ monaco, state: store } = ElectronFiddle.app);
+    ({ app, monaco } = (window as any).ElectronFiddle);
+    ({ state: store } = app);
     editorMosaic = new EditorMosaic();
     store.editorMosaic = editorMosaic as any;
 
@@ -152,8 +153,6 @@ describe('Editors component', () => {
     } as const;
 
     it('handles an FS_NEW_FIDDLE command', async () => {
-      const { app } = ElectronFiddle;
-
       let resolve: any;
       const replacePromise = new Promise((r) => {
         resolve = r;
@@ -218,8 +217,6 @@ describe('Editors component', () => {
     });
 
     it('handles an FS_NEW_TEST command', async () => {
-      const { app } = ElectronFiddle;
-
       // setup
       const getTestTemplateSpy = jest
         .spyOn(content, 'getTestTemplate')
@@ -266,17 +263,6 @@ describe('Editors component', () => {
       for (const editor of editorMosaic.editors.values()) {
         expect(editor.updateOptions).toHaveBeenCalled();
       }
-    });
-  });
-
-  describe('loadMonaco()', () => {
-    it('loads Monaco', async () => {
-      ElectronFiddle.app.monaco = null;
-
-      shallow(<Editors appState={store as any} />);
-
-      await process.nextTick;
-      expect(ElectronFiddle.app.monaco).toEqual({ monaco: true });
     });
   });
 

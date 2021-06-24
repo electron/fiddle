@@ -11,7 +11,8 @@ describe('Editor component', () => {
   let monaco: any;
 
   beforeEach(() => {
-    ({ monaco, state: store } = (window as any).ElectronFiddle.app);
+    ({ monaco } = window.ElectronFiddle);
+    ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
   it('renders the editor container', () => {

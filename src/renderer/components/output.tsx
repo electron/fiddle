@@ -13,10 +13,9 @@ import { AppState } from '../state';
 import { WrapperEditorId } from './output-editors-wrapper';
 
 interface CommandsProps {
-  appState: AppState;
-  monaco: typeof MonacoType;
+  readonly appState: AppState;
+  readonly monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
-  options?: Partial<MonacoType.editor.IEditorConstructionOptions>;
   editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;

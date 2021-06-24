@@ -1,4 +1,4 @@
-import { AppMock } from './app';
+import { AppMock, MonacoMock } from './mocks';
 
 export class ElectronFiddleMock {
   public app = new AppMock();
@@ -6,4 +6,5 @@ export class ElectronFiddleMock {
     userData: '/fake/path',
     home: `~`,
   };
+  public monaco = new MonacoMock();
 }

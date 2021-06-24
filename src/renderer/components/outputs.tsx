@@ -3,7 +3,6 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { activateTheme } from '../themes';
 import { Output } from './output';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
@@ -18,8 +17,7 @@ interface OutputsProps {
 }
 
 interface OutputsState {
-  monaco?: typeof MonacoType;
-  isMounted?: boolean;
+  readonly monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
 }
 
@@ -28,62 +26,22 @@ export class Outputs extends React.Component<OutputsProps, OutputsState> {
   constructor(props: OutputsProps) {
     super(props);
 
-    this.state = { monacoOptions: defaultMonacoOptions };
-  }
-
-  /**
-   * Executed right after the component mounts.
-   *
-   * @memberof Outputs
-   */
-  public async componentDidMount() {
-    await this.loadMonaco();
-    this.setState({ isMounted: true });
+    this.state = {
+      monaco: window.ElectronFiddle.monaco,
+      monacoOptions: defaultMonacoOptions,
+    };
   }
 
   public render() {
     const { appState } = this.props;
     const { monaco } = this.state;
 
-    if (!monaco) {
-      return null;
-    }
-
     return (
       <Output
-        monaco={monaco!}
+        monaco={monaco}
         appState={appState}
         monacoOptions={defaultMonacoOptions}
       />
     );
-  }
-
-  /**
-   * FIXME: we should attempt to remove this code duplication with editors.loadMonaco()
-   *
-   * Loads monaco for the Outputs component. Monaco must be loaded for editors.tsx and outputs.tsx
-   * separately. If it's already loaded, it'll just set it on the current state.
-   * We're doing things a bit roundabout to ensure that we're not overloading the
-   * mobx state with a gigantic Monaco tree.
-   */
-  public async loadMonaco() {
-    const { app } = window.ElectronFiddle;
-    const loader = require('monaco-loader');
-    const monaco = app.monaco || (await loader());
-
-    if (!app.monaco) {
-      app.monaco = monaco;
-    }
-
-    if (!this.state || !this.state.isMounted) {
-      this.setState({
-        monaco,
-        monacoOptions: defaultMonacoOptions,
-      });
-    } else {
-      this.setState({ monaco });
-    }
-
-    await activateTheme(monaco, undefined, this.props.appState.theme);
   }
 }
