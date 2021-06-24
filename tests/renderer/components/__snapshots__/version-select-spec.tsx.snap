@@ -22,7 +22,7 @@ exports[`VersionSelect component renders 1`] = `
 <Blueprint3.Select
   disabled={false}
   filterable={true}
-  itemPredicate={[Function]}
+  itemListPredicate={[Function]}
   itemRenderer={[Function]}
   items={
     Array [
