@@ -77,13 +77,13 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
   const q = query.toLowerCase();
 
   return versions
-    .filter(({ version }) => version.toLowerCase().includes(q))
-    .sort((a, b) => {
-      if (a.version.indexOf(q) > b.version.indexOf(q)) return 1;
-      if (b.version.indexOf(q) > a.version.indexOf(q)) return -1;
-
-      return 0;
-    });
+    .map((version: RunnableVersion) => ({
+      index: version.version.toLowerCase().indexOf(q),
+      version,
+    }))
+    .filter((item) => item.index !== -1)
+    .sort((a, b) => a.index - b.index)
+    .map((item) => item.version);
 };
 
 /**
