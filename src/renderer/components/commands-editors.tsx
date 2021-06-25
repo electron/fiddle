@@ -66,10 +66,11 @@ export class EditorDropdown extends React.Component<
     const result: Array<JSX.Element> = [];
 
     const { editorMosaic } = this.props.appState;
-    const { numVisible, files } = editorMosaic;
+    const { files, numVisible } = editorMosaic;
 
-    for (const [id, presence] of files.entries()) {
-      const icon = presence === EditorPresence.Hidden ? 'eye-off' : 'eye-open';
+    for (const [id, presence] of files) {
+      const visible = presence !== EditorPresence.Hidden;
+      const icon = visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
 
       if (!DEFAULT_EDITORS.includes(id as any)) {
@@ -81,7 +82,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={numVisible < 2}
+            disabled={visible && numVisible < 2}
           >
             <MenuItem
               icon={'cross'}
@@ -100,7 +101,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={numVisible < 2}
+            disabled={visible && numVisible < 2}
           />,
         );
       }

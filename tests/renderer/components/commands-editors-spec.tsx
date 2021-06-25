@@ -1,11 +1,15 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+// import { inspect } from 'util';
+import { isSupportedFile } from '../../../src/utils/editor-utils';
 
 import {
   DefaultEditorId,
+  EditorId,
   GenericDialogType,
   MAIN_JS,
 } from '../../../src/interfaces';
+import { AppState } from '../../../src/renderer/state';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import {
   EditorMosaic,
@@ -60,17 +64,41 @@ describe('EditorDropdown component', () => {
     expect(toggleSpy).toHaveBeenCalledTimes(2);
   });
 
-  it('disables hide button if only one editor open', () => {
-    const file = 'file.js';
-    const content = '// content';
-    editorMosaic.set({ [file]: content });
-    editorMosaic.addEditor(file, new MonacoEditorMock() as any);
-
-    const wrapper = mount(<EditorDropdown appState={store as any} />);
+  function renderFileMenuItems(appState: AppState) {
+    const wrapper = mount(<EditorDropdown appState={appState} />);
     const instance = wrapper.instance() as EditorDropdown;
-    const menu = instance.renderMenuItems();
+    const rendered = instance.renderMenuItems();
+    return rendered.filter((item) => isSupportedFile(item.props?.id));
+  }
 
-    expect(menu).toMatchSnapshot();
+  it('disables hide button for the last visible editor', () => {
+    // setup: confirm we're rendering a menu for a mosaic with >1 visible files
+    const values = editorMosaic.values();
+    const filenames = Object.keys(values);
+    for (const id of filenames)
+      editorMosaic.addEditor(id as EditorId, new MonacoEditorMock() as any);
+    expect(filenames.length).toBeGreaterThan(1);
+    expect(editorMosaic.numVisible).toBeGreaterThan(1);
+    expect(editorMosaic.numVisible).toBe(filenames.length);
+
+    // test part 1: confirm the toggle menuitems should all be enabled
+    let menuItems = renderFileMenuItems(store as any);
+    expect(menuItems.length).toBe(Object.keys(values).length);
+    expect(menuItems.every((item) => !item.props.disabled)).toBe(true);
+
+    // setup: now hide all but one of the files
+    const hiddenFiles = Object.keys(values);
+    const visibleFile = hiddenFiles.pop() as EditorId;
+    for (const file of hiddenFiles) editorMosaic.hide(file as EditorId);
+    expect(editorMosaic.numVisible).toBe(1);
+    expect(editorMosaic.files.get(visibleFile)).toBe(EditorPresence.Visible);
+
+    // test part 2: test that the last visible file's button is disabled
+    // and all the others are still enabled.
+    menuItems = renderFileMenuItems(store as any);
+    for (const item of menuItems) {
+      expect(item.props.disabled).toBe(item.props.id === visibleFile);
+    }
   });
 
   it('can add a valid custom editor', async () => {
