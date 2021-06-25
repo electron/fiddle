@@ -6,7 +6,6 @@ import {
   MAIN_JS,
 } from '../../src/interfaces';
 import {
-  EditorBackup,
   EditorMosaic,
   createMosaicArrangement,
 } from '../../src/renderer/editor-mosaic';
@@ -254,12 +253,6 @@ describe('EditorMosaic', () => {
     it('attempts to set values for closed editors', () => {
       editorMosaic.editors.delete(DefaultEditorId.main);
 
-      (editorMosaic.closedPanels as any)[DefaultEditorId.main] = {
-        model: { setValue: jest.fn() },
-      };
-      editorMosaic.closedPanels[DefaultEditorId.preload] = {};
-      editorMosaic.closedPanels[DefaultEditorId.css] = {};
-
       editorMosaic.set({
         [DefaultEditorId.html]: 'html-value',
         [DefaultEditorId.main]: 'main-value',
@@ -268,10 +261,6 @@ describe('EditorMosaic', () => {
         [DefaultEditorId.css]: 'css-value',
       });
 
-      expect(
-        (editorMosaic.closedPanels[DefaultEditorId.main] as EditorBackup)!
-          .model!.setValue,
-      ).toHaveBeenCalledWith('main-value');
       expect(editorMosaic.closedPanels[DefaultEditorId.preload]).toEqual({
         value: 'preload-value',
       });
@@ -290,6 +279,17 @@ describe('EditorMosaic', () => {
       });
 
       expect(editorMosaic.getEditorValue(id)).toBe(oldValue);
+    });
+
+    it('does not remember values from the previous call', () => {
+      const id = DefaultEditorId.main;
+      const content = '// content';
+      editorMosaic.set({ [id]: content });
+      expect(editorMosaic.getEditorValue(id)).toBe(content);
+
+      editorMosaic.set({});
+      expect(editorMosaic.getEditorValue(id)).not.toBe(content);
+      expect(editorMosaic.getEditorValue(id)).toBe('');
     });
   });
 
