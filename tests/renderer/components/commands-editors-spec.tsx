@@ -1,7 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import { DefaultEditorId, GenericDialogType } from '../../../src/interfaces';
+import { DefaultEditorId } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 
 import { EditorMosaicMock, StateMock } from '../../mocks/mocks';
@@ -65,103 +65,72 @@ describe('EditorDropdown component', () => {
   });
 
   it('can add a valid custom editor', async () => {
-    const { editorMosaic } = store;
     const file = 'file.js';
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(file);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
 
-    store.showCustomEditorDialog = jest
-      .fn()
-      .mockReturnValue({ cancelled: false, result: file });
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
-
-    store.genericDialogLastInput = file;
-    store.genericDialogLastResult = true;
-
     await dropdown.addCustomEditor();
 
-    expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
-      type: GenericDialogType.confirm,
+    expect(store.showInputDialog).toHaveBeenCalledWith({
       label: 'Enter a filename for your custom editor',
-      cancel: 'Cancel',
-      placeholder: 'file.js',
       ok: 'Create',
-      wantsInput: true,
+      placeholder: 'file.js',
     });
 
+    const { editorMosaic } = store;
     expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(1);
     expect(editorMosaic.customMosaics).toEqual([file]);
-    expect(store.toggleGenericDialog).toHaveBeenCalledTimes(1);
   });
 
   it('errors when trying to add a duplicate custom editor', async () => {
-    const { editorMosaic } = store;
-    const badFile = 'main.js';
+    const dupe = DefaultEditorId.html;
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(dupe);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
 
-    store.showCustomEditorDialog = jest
-      .fn()
-      .mockReturnValue({ cancelled: false, result: badFile });
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
-
-    store.genericDialogLastInput = badFile;
-    store.genericDialogLastResult = true;
-
     await dropdown.addCustomEditor();
 
-    expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
-      type: GenericDialogType.confirm,
+    expect(store.showInputDialog).toHaveBeenCalledWith({
       label: 'Enter a filename for your custom editor',
-      cancel: 'Cancel',
-      placeholder: 'file.js',
       ok: 'Create',
-      wantsInput: true,
+      placeholder: 'file.js',
     });
 
-    expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
-      type: GenericDialogType.warning,
-      label: `Custom editor name ${badFile} already exists - duplicates are not allowed`,
-      cancel: undefined,
-    });
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Custom editor name ${dupe} already exists - duplicates are not allowed`,
+    );
 
-    expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
+    const { editorMosaic } = store;
     expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(0);
     expect(editorMosaic.customMosaics).toEqual([]);
   });
 
   it('errors when trying to add an invalid custom editor', async () => {
-    const { editorMosaic } = store;
     const badFile = 'bad.bad';
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(badFile);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
 
-    store.showCustomEditorDialog = jest
-      .fn()
-      .mockReturnValue({ cancelled: false, result: badFile });
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    store.genericDialogLastInput = badFile;
-    store.genericDialogLastResult = true;
-
     await dropdown.addCustomEditor();
 
-    expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(1, {
-      type: GenericDialogType.confirm,
+    expect(store.showInputDialog).toHaveBeenCalledWith({
       label: 'Enter a filename for your custom editor',
-      cancel: 'Cancel',
-      placeholder: 'file.js',
       ok: 'Create',
-      wantsInput: true,
+      placeholder: 'file.js',
     });
 
-    expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
-      type: GenericDialogType.warning,
-      label:
-        'Invalid custom editor name - must be either an html, js, or css file.',
-      cancel: undefined,
-    });
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      expect.stringMatching(/invalid editor name/i),
+    );
 
+    const { editorMosaic } = store;
     expect(editorMosaic.customMosaics).toEqual([]);
     expect(editorMosaic.showMosaic).toHaveBeenCalledTimes(0);
-    expect(store.toggleGenericDialog).toHaveBeenCalledTimes(2);
   });
 
   it('can remove a custom editor', () => {

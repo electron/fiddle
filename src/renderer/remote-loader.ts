@@ -1,8 +1,6 @@
-import { when } from 'mobx';
 import {
   EditorValues,
   ElectronReleaseChannel,
-  GenericDialogType,
   PACKAGE_NAME,
   VersionSource,
   VersionState,
@@ -200,17 +198,12 @@ export class RemoteLoader {
     }
   }
 
-  public async verifyCreateCustomEditor(editorName: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
-      label: `Do you want to create a custom editor with name: ${editorName}?`,
+  public verifyCreateCustomEditor(editorName: string): Promise<boolean> {
+    return this.appState.showConfirmDialog({
       cancel: 'Skip',
+      label: `Do you want to create a custom editor with name: ${editorName}?`,
+      ok: 'Create',
     });
-
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
   /**
@@ -218,28 +211,20 @@ export class RemoteLoader {
    *
    * @param {string} what What are we loading from (gist, example, etc.)
    */
-  public async verifyRemoteLoad(what: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
+  public verifyRemoteLoad(what: string): Promise<boolean> {
+    return this.appState.showConfirmDialog({
       label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`,
+      ok: 'Load',
     });
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
-  public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.warning,
+  public verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
+    return this.appState.showConfirmDialog({
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
               version of Electron from the example?`,
+      ok: 'Enable',
     });
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
   /**
@@ -266,15 +251,11 @@ export class RemoteLoader {
    */
   private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.warning,
-      label: navigator.onLine
+    this.appState.showErrorDialog(
+      navigator.onLine
         ? failedLabel
         : `Your computer seems to be offline. ${failedLabel}`,
-      cancel: undefined,
-    });
-
-    this.appState.toggleGenericDialog();
+    );
 
     console.warn(`Loading Fiddle failed`, error);
     return false;

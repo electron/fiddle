@@ -93,9 +93,10 @@ export interface OutputOptions {
 
 export interface GenericDialogOptions {
   type: GenericDialogType;
-  ok?: string;
+  ok: string;
   cancel?: string;
-  wantsInput?: boolean;
+  wantsInput: boolean;
+  defaultInput?: string;
   label: string | JSX.Element;
   placeholder?: string;
 }

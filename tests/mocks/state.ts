@@ -74,20 +74,20 @@ export class StateMock {
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
   public resetView = jest.fn();
-  public runConfirmationDialog = jest.fn();
-  public setGenericDialogOptions = jest.fn().mockReturnValue({});
   public setTheme = jest.fn();
   public setVersion = jest.fn().mockImplementation((version: string) => {
     this.version = version;
     this.currentElectronVersion = this.versions[version];
   });
   public showChannels = jest.fn();
-  public showCustomEditorDialog = jest.fn();
+  public showConfirmDialog = jest.fn();
+  public showErrorDialog = jest.fn();
+  public showGenericDialog = jest.fn();
+  public showInfoDialog = jest.fn();
+  public showInputDialog = jest.fn();
   public signOutGitHub = jest.fn();
   public toggleAddVersionDialog = jest.fn();
   public toggleAuthDialog = jest.fn();
-  public toggleGenericDialog = jest.fn();
-  public toggleWarningDialog = jest.fn();
   public updateElectronVersions = jest.fn();
 
   constructor() {
