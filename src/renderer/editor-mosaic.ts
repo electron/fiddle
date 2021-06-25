@@ -197,8 +197,8 @@ export class EditorMosaic {
       .map(([id]) => id as DefaultEditorId)
       .sort(compareEditors);
 
-    // Once loaded, we have a "saved" state.
     this.setVisible(visibleEditors);
+    this.backups.clear();
 
     // Set content for mosaics.
     for (const entry of Object.entries(values)) {

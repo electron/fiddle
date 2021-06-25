@@ -309,6 +309,17 @@ describe('EditorMosaic', () => {
       }
     });
 
+    it('does not remember values from the previous call', () => {
+      const id = MAIN_JS;
+      const content = '// content';
+      editorMosaic.set({ [id]: content });
+      expect(editorMosaic.getEditorValue(id)).toBe(content);
+
+      editorMosaic.set({});
+      expect(editorMosaic.getEditorValue(id)).not.toBe(content);
+      expect(editorMosaic.getEditorValue(id)).toBe('');
+    });
+
     it('uses the expected layout', () => {
       editorMosaic.set(valuesIn);
       expect(editorMosaic.mosaicArrangement).toStrictEqual({
