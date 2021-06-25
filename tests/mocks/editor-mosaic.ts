@@ -1,4 +1,4 @@
-import { MonacoEditorMock } from './monaco-editor';
+import { MonacoEditorMock } from './monaco';
 
 import { observable } from 'mobx';
 
@@ -15,9 +15,7 @@ export class EditorMosaicMock {
   @observable public numVisible = 0;
 
   public addEditor = jest.fn();
-  public getEditorValue = jest
-    .fn()
-    .mockImplementation((id) => this.editors.get(id)?.getValue() || '');
+  public value = jest.fn((id) => this.editors.get(id)?.getValue() || '');
   public layout = jest.fn().mockImplementation(() => {
     this.editors.forEach((editor) => editor.layout());
   });

@@ -10,15 +10,10 @@ import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import {
-  DEFAULT_EDITORS,
-  DefaultEditorId,
-  EditorId,
-  GenericDialogType,
-} from '../../interfaces';
 import { AppState } from '../state';
+import { DEFAULT_EDITORS, EditorId, GenericDialogType } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
-import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
+import { getEditorTitle } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
   value: string;
@@ -157,40 +152,22 @@ export class EditorDropdown extends React.Component<
 
   public async addCustomEditor() {
     const { appState } = this.props;
+    const { editorMosaic } = appState;
 
     const { cancelled, result } = await this.showCustomEditorDialog();
+    if (cancelled || !result) return;
 
-    if (cancelled) return;
-
-    // Fail if editor name is not an accepted file type.
-    if (!result || !isSupportedFile(result)) {
+    try {
+      const id = result as EditorId;
+      editorMosaic.add(id);
+      editorMosaic.show(id);
+    } catch (error) {
       appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label:
-          'Invalid custom editor name - must be either an html, js, or css file.',
         cancel: undefined,
+        label: error.message,
+        type: GenericDialogType.warning,
       });
-
       appState.toggleGenericDialog();
-    } else {
-      const name = result as EditorId;
-
-      // Also fail if the user tries to create two identical editors.
-      if (
-        appState.editorMosaic.customMosaics.includes(name) ||
-        Object.values(DefaultEditorId).includes(name as DefaultEditorId)
-      ) {
-        appState.setGenericDialogOptions({
-          type: GenericDialogType.warning,
-          label: `Custom editor name ${name} already exists - duplicates are not allowed`,
-          cancel: undefined,
-        });
-
-        appState.toggleGenericDialog();
-      } else {
-        appState.editorMosaic.customMosaics.push(name);
-        appState.editorMosaic.show(name);
-      }
     }
   }
 

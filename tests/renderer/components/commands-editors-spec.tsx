@@ -130,15 +130,15 @@ describe('EditorDropdown component', () => {
   });
 
   it('errors when trying to add a duplicate custom editor', async () => {
-    const badFile = 'main.js';
+    const dupe = Object.keys(editorMosaic.values()).pop();
 
     store.showCustomEditorDialog = jest
       .fn()
-      .mockReturnValue({ cancelled: false, result: badFile });
+      .mockReturnValue({ cancelled: false, result: dupe });
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    store.genericDialogLastInput = badFile;
+    store.genericDialogLastInput = dupe!;
     store.genericDialogLastResult = true;
 
     await dropdown.addCustomEditor();
@@ -154,7 +154,7 @@ describe('EditorDropdown component', () => {
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
       type: GenericDialogType.warning,
-      label: `Custom editor name ${badFile} already exists - duplicates are not allowed`,
+      label: expect.stringMatching(/file already exists/i),
       cancel: undefined,
     });
 
@@ -188,8 +188,7 @@ describe('EditorDropdown component', () => {
 
     expect(store.setGenericDialogOptions).toHaveBeenNthCalledWith(2, {
       type: GenericDialogType.warning,
-      label:
-        'Invalid custom editor name - must be either an html, js, or css file.',
+      label: expect.stringMatching(/Must be \.js, \.html, or \.css/i),
       cancel: undefined,
     });
 

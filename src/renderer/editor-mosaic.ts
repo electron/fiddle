@@ -7,6 +7,7 @@ import {
   compareEditors,
   getEmptyContent,
   isKnownFile,
+  isSupportedFile,
   monacoLanguage,
 } from '../utils/editor-utils';
 
@@ -180,6 +181,7 @@ export class EditorMosaic {
     this.set(this.values());
   }
 
+  /** Set the contents of the mosaic */
   @action public set(values: EditorValues) {
     // Remove all previously created custom editors.
     this.customMosaics = Object.keys(values).filter(
@@ -218,6 +220,17 @@ export class EditorMosaic {
     this.isEdited = false;
   }
 
+  /** Add a file to the mosaic */
+  @action public add(id: EditorId, value: string = getEmptyContent(id)) {
+    if (!isSupportedFile(id))
+      throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
+
+    if (this.files.has(id))
+      throw new Error(`Cannot add file "${id}": File already exists`);
+
+    this.set({ ...this.values(), [id]: value });
+  }
+
   private createModel(id: EditorId, value: string): Model {
     const { monaco } = window.ElectronFiddle;
     const language = monacoLanguage(id);
@@ -227,6 +240,9 @@ export class EditorMosaic {
   }
 
   @action public addEditor(id: EditorId, editor: Editor) {
+    if (this.files.get(id) !== EditorPresence.Pending)
+      throw new Error(`added Editor for unexpected file "${id}"`);
+
     this.editors.set(id, editor);
 
     const backup = this.backups.get(id);
@@ -238,25 +254,15 @@ export class EditorMosaic {
     this.observeEdits(editor);
   }
 
-  /**
-   * Retrieves the contents of all files.
-   *
-   * @returns {EditorValues}
-   */
+  /** Get the contents of all files. */
   public values(): EditorValues {
-    const values: EditorValues = {};
-    for (const id of this.backups.keys()) values[id] = this.getEditorValue(id);
-    for (const id of this.editors.keys()) values[id] = this.getEditorValue(id);
-    return values;
+    return Object.fromEntries(
+      [...this.files].map(([id]) => [id, this.value(id)]),
+    );
   }
 
-  /**
-   * Return the contents of the specified file
-   *
-   * @param {EditorId} id
-   * @returns {string}
-   */
-  public getEditorValue(id: EditorId): string {
+  /** Get the contents of the specified file. */
+  public value(id: EditorId): string {
     const { backups, editors } = this;
     return (
       editors.get(id)?.getValue() || backups.get(id)?.model.getValue() || ''

@@ -313,11 +313,11 @@ describe('EditorMosaic', () => {
       const id = MAIN_JS;
       const content = '// content';
       editorMosaic.set({ [id]: content });
-      expect(editorMosaic.getEditorValue(id)).toBe(content);
+      expect(editorMosaic.value(id)).toBe(content);
 
       editorMosaic.set({});
-      expect(editorMosaic.getEditorValue(id)).not.toBe(content);
-      expect(editorMosaic.getEditorValue(id)).toBe('');
+      expect(editorMosaic.value(id)).not.toBe(content);
+      expect(editorMosaic.value(id)).toBe('');
     });
 
     it('uses the expected layout', () => {
@@ -342,7 +342,7 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('getEditorValue()', () => {
+  describe('value()', () => {
     const id = MAIN_JS;
     const content = '// content';
     const emptyContent = getEmptyContent(id);
@@ -352,7 +352,7 @@ describe('EditorMosaic', () => {
       editorMosaic.set({ [id]: value });
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
 
-      expect(editorMosaic.getEditorValue(id)).toBe(value);
+      expect(editorMosaic.value(id)).toBe(value);
     });
 
     it('returns values for files that are pending', () => {
@@ -360,7 +360,7 @@ describe('EditorMosaic', () => {
       editorMosaic.set({ [id]: value });
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Pending);
 
-      expect(editorMosaic.getEditorValue(id)).toBe(value);
+      expect(editorMosaic.value(id)).toBe(value);
     });
 
     it('returns values for files that are visible', () => {
@@ -369,11 +369,11 @@ describe('EditorMosaic', () => {
       editorMosaic.addEditor(id, editor as any);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
 
-      expect(editorMosaic.getEditorValue(id)).toBe(value);
+      expect(editorMosaic.value(id)).toBe(value);
     });
 
     it('returns an empty string if the editor does not exist', () => {
-      expect(editorMosaic.getEditorValue('unknown.js')).toBe('');
+      expect(editorMosaic.value('unknown.js')).toBe('');
     });
   });
 
@@ -395,9 +395,11 @@ describe('EditorMosaic', () => {
 
   describe('layout', () => {
     it('layout() calls editor.layout() only once', async () => {
+      const id = DefaultEditorId.html;
+      const content = '<!-- content -->';
       const editor = new MonacoEditorMock();
-      const filename = DefaultEditorId.html;
-      await editorMosaic.addEditor(filename, editor as any);
+      editorMosaic.set({ [id]: content });
+      await editorMosaic.addEditor(id, editor as any);
 
       editorMosaic.layout();
       editorMosaic.layout();
