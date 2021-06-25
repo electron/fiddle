@@ -29,9 +29,8 @@ export function createMosaicArrangement(
   input: EditorId[],
   direction: MosaicDirection = 'row',
 ): MosaicNode<EditorId> {
-  if (input.length === 1) {
-    return input[0];
-  }
+  // Return single editor or undefined.
+  if (input.length < 2) return input[0];
 
   // This cuts out the first half of input. Input becomes the second half.
   const secondHalf = [...input];
@@ -193,6 +192,7 @@ export class EditorMosaic {
 
     // Once loaded, we have a "saved" state.
     this.setVisibleMosaics(visibleEditors);
+    this.closedPanels = {};
 
     // Set content for mosaics.
     for (const [name, value] of Object.entries(editorValues)) {
