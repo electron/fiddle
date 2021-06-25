@@ -934,7 +934,7 @@ exports[`Editors component renders a toolbar 1`] = `
                 },
               },
               "layoutDebounce": 25,
-              "mosaicArrangement": Object {
+              "mosaic": Object {
                 "direction": "row",
                 "first": Object {
                   "direction": "column",
@@ -978,7 +978,7 @@ exports[`Editors component renders a toolbar 1`] = `
                 },
               },
               "layoutDebounce": 25,
-              "mosaicArrangement": Object {
+              "mosaic": Object {
                 "direction": "row",
                 "first": Object {
                   "direction": "column",

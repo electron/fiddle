@@ -4,11 +4,7 @@ import {
   EditorValues,
   MAIN_JS,
 } from '../../src/interfaces';
-import {
-  EditorMosaic,
-  createMosaicArrangement,
-  EditorPresence,
-} from '../../src/renderer/editor-mosaic';
+import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 import {
   AppMock,
@@ -43,6 +39,13 @@ describe('EditorMosaic', () => {
     beforeEach(() => {
       editorMosaic.set({ [id]: content });
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Pending);
+    });
+
+    it('throws when called on an unexpected file', () => {
+      const otherId = 'file.js';
+      expect(() => editorMosaic.addEditor(otherId, editor as any)).toThrow(
+        /unexpected file/i,
+      );
     });
 
     it('makes a file visible', () => {
@@ -334,7 +337,7 @@ describe('EditorMosaic', () => {
 
     it('uses the expected layout', () => {
       editorMosaic.set(valuesIn);
-      expect(editorMosaic.mosaicArrangement).toStrictEqual({
+      expect(editorMosaic.mosaic).toStrictEqual({
         direction: 'row',
         first: {
           direction: 'column',
@@ -426,30 +429,9 @@ describe('EditorMosaic', () => {
   describe('disposeLayoutAutorun()', () => {
     it('automatically updates the layout when the mosaic arrangement changes', () => {
       const spy = jest.spyOn(editorMosaic, 'layout');
-      editorMosaic.mosaicArrangement = DefaultEditorId.main;
+      editorMosaic.mosaic = DefaultEditorId.main;
       expect(spy).toHaveBeenCalledTimes(1);
       spy.mockRestore();
-    });
-  });
-
-  describe('createMosaicArrangement()', () => {
-    it('creates the correct arrangement for one visible panel', () => {
-      const result = createMosaicArrangement([DefaultEditorId.main]);
-
-      expect(result).toEqual(DefaultEditorId.main);
-    });
-
-    it('creates the correct arrangement for two visible panels', () => {
-      const result = createMosaicArrangement([
-        DefaultEditorId.main,
-        DefaultEditorId.renderer,
-      ]);
-
-      expect(result).toEqual({
-        direction: 'row',
-        first: DefaultEditorId.main,
-        second: DefaultEditorId.renderer,
-      });
     });
   });
 

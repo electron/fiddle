@@ -147,6 +147,7 @@ export class EditorDropdown extends React.Component<
       const id = result as EditorId;
       editorMosaic.add(id);
       editorMosaic.show(id);
+      editorMosaic.customMosaics.push(id);
     } catch (error) {
       appState.showErrorDialog(error.message);
     }

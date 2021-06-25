@@ -6,10 +6,7 @@ import { EditorMosaic } from '../editor-mosaic';
 
 export function renderNonIdealState(editorMosaic: EditorMosaic) {
   const resolveButton = (
-    <Button
-      text="Open all editors"
-      onClick={() => editorMosaic.resetLayout()}
-    />
+    <Button text="Reset editors" onClick={() => editorMosaic.resetLayout()} />
   );
 
   return (

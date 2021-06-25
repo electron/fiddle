@@ -125,7 +125,7 @@ describe('Editors component', () => {
 
     const arrangement = { testArrangement: true };
     instance.onChange(arrangement as any);
-    expect(editorMosaic.mosaicArrangement).toStrictEqual(arrangement);
+    expect(editorMosaic.mosaic).toStrictEqual(arrangement);
   });
 
   describe('IPC commands', () => {

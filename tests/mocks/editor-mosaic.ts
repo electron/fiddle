@@ -1,29 +1,24 @@
 import { MonacoEditorMock } from './monaco';
-
 import { observable } from 'mobx';
-
 import { EditorId } from '../../src/interfaces';
-
 import { objectDifference } from '../utils';
 
 export type Editor = MonacoEditorMock;
 
 export class EditorMosaicMock {
   @observable public customMosaics: EditorId[] = [];
-  @observable public editors: Map<EditorId, Editor> = new Map();
   @observable public isEdited = false;
   @observable public numVisible = 0;
+  @observable private editors: Map<EditorId, Editor> = new Map();
 
   public addEditor = jest.fn();
-  public value = jest.fn((id) => this.editors.get(id)?.getValue() || '');
-  public layout = jest.fn().mockImplementation(() => {
-    this.editors.forEach((editor) => editor.layout());
-  });
   public hide = jest.fn();
+  public layout = jest.fn(() => this.editors.forEach((e) => e.layout()));
   public removeCustomMosaic = jest.fn();
   public resetLayout = jest.fn();
   public set = jest.fn();
   public show = jest.fn();
+  public value = jest.fn((id) => this.editors.get(id)?.getValue() || '');
   public values = jest.fn().mockReturnValue({});
 
   public toJSON() {
