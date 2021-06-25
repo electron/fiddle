@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { reaction } from 'mobx';
 import { shallow } from 'enzyme';
 
 import {
@@ -108,40 +107,21 @@ describe('Action button component', () => {
 
   describe('publish mode', () => {
     let instance: any;
-    let dispose: any;
 
     beforeEach(() => {
       // create a button that's primed to publish a new gist
       ({ instance } = createActionButton());
     });
 
-    afterEach(() => {
-      if (dispose) dispose();
-    });
-
-    function registerDialogHandler(
-      description: string | null,
-      result: boolean,
-    ) {
-      dispose = reaction(
-        () => state.isGenericDialogShowing,
-        () => {
-          state.genericDialogLastInput = description;
-          state.genericDialogLastResult = result;
-          state.isGenericDialogShowing = false;
-        },
-      );
-    }
-
     it('publishes a gist', async () => {
-      registerDialogHandler(description, true);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
       expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
     });
 
     it('asks the user for a description', async () => {
       const description = 'some non-default description';
-      registerDialogHandler(description, true);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
       expect(mocktokit.gists.create).toHaveBeenCalledWith({
         ...gistCreateOpts,
@@ -149,24 +129,16 @@ describe('Action button component', () => {
       });
     });
 
-    it('provides a default description', async () => {
-      registerDialogHandler(null, true);
-      await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith(gistCreateOpts);
-      dispose();
-    });
-
     it('publishes only if the user confirms', async () => {
-      registerDialogHandler(null, false);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(undefined);
       await instance.performGistAction();
       expect(mocktokit.gists.create).not.toHaveBeenCalled();
-      dispose();
     });
 
     it('handles missing content', async () => {
       app.getEditorValues.mockReturnValueOnce({});
       const { instance } = createActionButton();
-      registerDialogHandler(description, true);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 
       await instance.performGistAction();
 
@@ -187,18 +159,15 @@ describe('Action button component', () => {
         throw new Error(errorMessage);
       });
 
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+
       const { instance } = createActionButton();
-      instance.getFiddleDescriptionFromUser = jest
-        .fn()
-        .mockReturnValue(description);
-
       await instance.performGistAction();
-
       expect(state.activeGistAction).toBe(GistActionState.none);
     });
 
     it('can publish private gists', async () => {
-      registerDialogHandler(description, true);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       instance.setPrivate();
       await instance.performGistAction();
       const { create } = mocktokit.gists;
@@ -206,7 +175,7 @@ describe('Action button component', () => {
     });
 
     it('can publish public gists', async () => {
-      registerDialogHandler(description, true);
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       instance.setPublic();
       await instance.performGistAction();
       const { create } = mocktokit.gists;

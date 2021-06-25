@@ -40,6 +40,7 @@ export function createMosaicArrangement(
   input: EditorId[],
   direction: MosaicDirection = 'row',
 ): MosaicNode<EditorId> {
+  // Return single editor or undefined.
   if (input.length < 2) return input[0];
 
   // This cuts out the first half of input. Input becomes the second half.

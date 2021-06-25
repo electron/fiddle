@@ -273,6 +273,18 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.files.get(id)).not.toBe(EditorPresence.Hidden);
     });
 
+    it('does not set a value if none passed in', () => {
+      const id = DefaultEditorId.renderer;
+      const oldValue = editorMosaic.value(id);
+
+      editorMosaic.set({
+        [DefaultEditorId.html]: 'html-value',
+        [DefaultEditorId.main]: 'main-value',
+      });
+
+      expect(editorMosaic.value(id)).toBe(oldValue);
+    });
+
     it('reuses existing editors', () => {
       // setup: get a mosaic with a visible editor
       const id = MAIN_JS;

@@ -3,12 +3,7 @@ import * as MonacoType from 'monaco-editor';
 
 import { ipcRenderer } from 'electron';
 import { ipcRendererManager } from './ipc';
-import {
-  EditorValues,
-  GenericDialogType,
-  PACKAGE_NAME,
-  SetFiddleOptions,
-} from '../interfaces';
+import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
@@ -40,19 +35,17 @@ export class App {
     this.taskRunner = new TaskRunner(this);
   }
 
-  private async confirmReplaceUnsaved() {
-    return this.state.runConfirmationDialog({
+  private confirmReplaceUnsaved(): Promise<boolean> {
+    return this.state.showConfirmDialog({
       label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
-      ok: 'Yes',
-      type: GenericDialogType.warning,
+      ok: 'Open',
     });
   }
 
-  private async confirmExitUnsaved() {
-    return this.state.runConfirmationDialog({
+  private confirmExitUnsaved(): Promise<boolean> {
+    return this.state.showConfirmDialog({
       label: 'The current Fiddle is unsaved. Do you want to exit anyway?',
       ok: 'Exit',
-      type: GenericDialogType.warning,
     });
   }
 

@@ -6,12 +6,11 @@ import {
   Popover,
   Position,
 } from '@blueprintjs/core';
-import { when } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { DEFAULT_EDITORS, EditorId, GenericDialogType } from '../../interfaces';
+import { DEFAULT_EDITORS, EditorId } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
 import { getEditorTitle } from '../../utils/editor-utils';
 
@@ -129,59 +128,42 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async showCustomEditorDialog() {
-    const { appState } = this.props;
-
-    appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
+  private showCustomEditorDialog(): Promise<string | undefined> {
+    return this.props.appState.showInputDialog({
       label: 'Enter a filename for your custom editor',
-      wantsInput: true,
       ok: 'Create',
-      cancel: 'Cancel',
       placeholder: 'file.js',
     });
-
-    appState.toggleGenericDialog();
-    await when(() => !appState.isGenericDialogShowing);
-
-    return {
-      cancelled: !appState.genericDialogLastResult,
-      result: appState.genericDialogLastInput,
-    };
   }
 
   public async addCustomEditor() {
     const { appState } = this.props;
     const { editorMosaic } = appState;
 
-    const { cancelled, result } = await this.showCustomEditorDialog();
-    if (cancelled || !result) return;
+    const result = await this.showCustomEditorDialog();
+    if (!result) return;
 
     try {
       const id = result as EditorId;
       editorMosaic.add(id);
       editorMosaic.show(id);
     } catch (error) {
-      appState.setGenericDialogOptions({
-        cancel: undefined,
-        label: error.message,
-        type: GenericDialogType.warning,
-      });
-      appState.toggleGenericDialog();
+      appState.showErrorDialog(error.message);
     }
   }
 
   public async removeCustomEditor(event: React.MouseEvent) {
     const { id } = event.currentTarget;
-    const { appState } = this.props;
+    const { editorMosaic } = this.props.appState;
 
     console.log(`EditorDropdown: Removing custom editor ${id}`);
-    appState.editorMosaic.removeCustomMosaic(id as EditorId);
+    editorMosaic.removeCustomMosaic(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
     const { id } = event.currentTarget;
+    const { editorMosaic } = this.props.appState;
 
-    this.props.appState.editorMosaic.toggle(id as EditorId);
+    editorMosaic.toggle(id as EditorId);
   }
 }
