@@ -283,7 +283,6 @@ describe('EditorMosaic', () => {
       // now call set again, same filename DIFFERENT content
       content = '// second content';
       editorMosaic.set({ [id]: content });
-      editorMosaic.addEditor(id, editor as any);
       // test that editorMosaic set the editor to the new content
       expect(editor.getValue()).toBe(content);
       expect(editorMosaic.isEdited).toBe(false);

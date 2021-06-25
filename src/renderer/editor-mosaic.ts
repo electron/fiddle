@@ -211,6 +211,7 @@ export class EditorMosaic {
       } else if (editor.getValue() !== value) {
         this.ignoreEdits(editor);
         editor.setValue(value as string);
+        this.observeEdits(editor);
       }
     }
 
