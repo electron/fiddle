@@ -11,6 +11,7 @@ import {
 } from '../utils/editor-utils';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
+type Model = MonacoType.editor.ITextModel;
 
 export enum EditorPresence {
   /** The file is known to us but we've chosen not to show it, either
@@ -52,7 +53,7 @@ export function createMosaicArrangement(
 }
 
 interface EditorBackup {
-  value?: string;
+  model: Model;
   viewState?: MonacoType.editor.ICodeEditorViewState | null;
 }
 
@@ -123,21 +124,17 @@ export class EditorMosaic {
     // cache and remove any unwanted editors
     for (const [id, editor] of editors) {
       if (!visible.includes(id)) {
-        backups.set(id, { viewState: editor.saveViewState() });
         editors.delete(id);
+        backups.set(id, {
+          model: editor.getModel()!,
+          viewState: editor.saveViewState(),
+        });
       }
     }
 
-    const updatedArrangement = createMosaicArrangement(
-      visible.sort(compareEditors),
-    );
-    console.log(
-      `State: Setting visible mosaic panels`,
-      visible,
-      updatedArrangement,
-    );
-
-    this.mosaicArrangement = updatedArrangement;
+    const mosaic = createMosaicArrangement(visible.sort(compareEditors));
+    console.log('State: Setting visible mosaic panels', visible, mosaic);
+    this.mosaicArrangement = mosaic;
   }
 
   /**
@@ -204,13 +201,16 @@ export class EditorMosaic {
     this.setVisible(visibleEditors);
 
     // Set content for mosaics.
-    for (const [name, value] of Object.entries(values)) {
-      const editor = this.editors.get(name as EditorId);
+    for (const entry of Object.entries(values)) {
+      const id = entry[0] as EditorId;
+      const value = entry[1] as string;
+
+      const editor = this.editors.get(id);
       if (!editor) {
-        this.backups.set(name as EditorId, { value: value as string });
+        this.backups.set(id, { model: this.createModel(id, value) });
       } else if (editor.getValue() !== value) {
         this.ignoreEdits(editor);
-        editor.setValue(value as string);
+        editor.setValue(value);
         this.observeEdits(editor);
       }
     }
@@ -218,21 +218,22 @@ export class EditorMosaic {
     this.isEdited = false;
   }
 
+  private createModel(id: EditorId, value: string): Model {
+    const { monaco } = window.ElectronFiddle;
+    const language = monacoLanguage(id);
+    const model = monaco.editor.createModel(value, language);
+    model.updateOptions({ tabSize: 2 });
+    return model;
+  }
+
   @action public addEditor(id: EditorId, editor: Editor) {
     this.editors.set(id, editor);
 
     const backup = this.backups.get(id);
-    delete this.backups[id];
-    if (backup?.viewState) {
-      editor.restoreViewState(backup.viewState);
-    } else {
-      const { monaco } = window.ElectronFiddle;
-      const value = backup?.value ?? '';
-      const language = monacoLanguage(id);
-      const model = monaco.editor.createModel(value, language);
-      model.updateOptions({ tabSize: 2 });
-      editor.setModel(model);
-    }
+    this.backups.delete(id);
+    if (!backup) return;
+    if (backup.viewState) editor.restoreViewState(backup.viewState);
+    editor.setModel(backup.model);
 
     this.observeEdits(editor);
   }
@@ -257,7 +258,9 @@ export class EditorMosaic {
    */
   public getEditorValue(id: EditorId): string {
     const { backups, editors } = this;
-    return editors.get(id)?.getValue() || backups.get(id)?.value || '';
+    return (
+      editors.get(id)?.getValue() || backups.get(id)?.model.getValue() || ''
+    );
   }
 
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;

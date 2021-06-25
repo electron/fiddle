@@ -235,8 +235,8 @@ describe('EditorMosaic', () => {
       // and then add Monaco editors
       for (const [file, value] of Object.entries(values)) {
         const editor = new MonacoEditorMock();
-        editor.setValue(value);
         editorMosaic.addEditor(file as any, editor as any);
+        editor.setValue(value);
       }
 
       // values() should match the modified values

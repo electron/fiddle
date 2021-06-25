@@ -12,7 +12,7 @@ import {
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { EditorMosaicMock } from './editor-mosaic';
-import { MonacoEditorMock } from './monaco-editor';
+import { MonacoEditorMock } from './monaco';
 import { VersionsMock } from './electron-versions';
 
 export class StateMock {

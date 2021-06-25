@@ -918,19 +918,19 @@ exports[`Editors component renders a toolbar 1`] = `
             "editorMosaic": Object {
               "backups": Object {
                 "index.html": Object {
-                  "value": "<!-- index.html -->",
+                  "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
                 },
                 "main.js": Object {
-                  "value": "// main.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
                 },
                 "preload.js": Object {
-                  "value": "// preload.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
                 },
                 "renderer.js": Object {
-                  "value": "// renderer.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
                 },
                 "styles.css": Object {
-                  "value": "/* style.css */",
+                  "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
                 },
               },
               "layoutDebounce": 25,
@@ -962,19 +962,19 @@ exports[`Editors component renders a toolbar 1`] = `
             "editorMosaic": Object {
               "backups": Object {
                 "index.html": Object {
-                  "value": "<!-- index.html -->",
+                  "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
                 },
                 "main.js": Object {
-                  "value": "// main.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
                 },
                 "preload.js": Object {
-                  "value": "// preload.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
                 },
                 "renderer.js": Object {
-                  "value": "// renderer.js",
+                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
                 },
                 "styles.css": Object {
-                  "value": "/* style.css */",
+                  "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
                 },
               },
               "layoutDebounce": 25,
