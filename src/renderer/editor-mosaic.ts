@@ -172,14 +172,15 @@ export class EditorMosaic {
     this.isEdited = false;
   }
 
-  /** Add a file to the mosaic */
-  @action public add(id: EditorId, value: string = getEmptyContent(id)) {
+  /** Add a new file to the mosaic */
+  @action public addNew(id: EditorId, value: string = getEmptyContent(id)) {
     if (this.files.has(id))
       throw new Error(`Cannot add file "${id}": File already exists`);
 
     this.addOrReplace(id, value);
   }
 
+  /** Add a file to the mosaic, replacing the existing file if present */
   @action private addOrReplace(id: EditorId, value: string) {
     if (!isSupportedFile(id))
       throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
@@ -204,6 +205,7 @@ export class EditorMosaic {
     }
   }
 
+  /** Wire up a newly-mounted monaco editor */
   @action public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
     if (!backup) throw new Error(`added Editor for unexpected file "${id}"`);
