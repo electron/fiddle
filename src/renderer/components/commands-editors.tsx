@@ -37,7 +37,6 @@ export class EditorDropdown extends React.Component<
     super(props);
 
     this.onItemClick = this.onItemClick.bind(this);
-    this.showCustomEditorDialog = this.showCustomEditorDialog.bind(this);
     this.addCustomEditor = this.addCustomEditor.bind(this);
     this.removeCustomEditor = this.removeCustomEditor.bind(this);
   }
@@ -128,23 +127,20 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  private showCustomEditorDialog(): Promise<string | undefined> {
-    return this.props.appState.showInputDialog({
+  public async addCustomEditor() {
+    const { appState } = this.props;
+
+    const filename = await appState.showInputDialog({
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',
     });
-  }
 
-  public async addCustomEditor() {
-    const { appState } = this.props;
-    const { editorMosaic } = appState;
-
-    const result = await this.showCustomEditorDialog();
-    if (!result) return;
+    if (!filename) return;
 
     try {
-      const id = result as EditorId;
+      const id = filename as EditorId;
+      const { editorMosaic } = appState;
       editorMosaic.addNew(id);
       editorMosaic.show(id);
       editorMosaic.customMosaics.push(id);
