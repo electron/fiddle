@@ -1,3 +1,4 @@
+import { reaction } from 'mobx';
 import {
   DefaultEditorId,
   EditorId,
@@ -467,6 +468,26 @@ describe('EditorMosaic', () => {
       editorMosaic.isEdited = true;
       editorMosaic.isEdited = false;
       testForIsEdited();
+    });
+
+    it('does not re-emit when isEdited is already true', () => {
+      let changeCount = 0;
+      const dispose = reaction(
+        () => editorMosaic.isEdited,
+        () => ++changeCount,
+      );
+      expect(editorMosaic.isEdited).toBe(false);
+      expect(changeCount).toBe(0);
+
+      editor.setValue(`${editor.getValue()} more text`);
+      expect(editorMosaic.isEdited).toBe(true);
+      expect(changeCount).toBe(1);
+
+      editor.setValue(`${editor.getValue()} and even more text`);
+      expect(editorMosaic.isEdited).toBe(true);
+      expect(changeCount).toBe(1);
+
+      dispose();
     });
   });
 });
