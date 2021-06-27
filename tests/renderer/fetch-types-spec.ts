@@ -52,7 +52,7 @@ describe('fetch-types', () => {
   });
 
   describe('getOfflineTypeDefinitionPath()', () => {
-    it('returns a path', async () => {
+    it('returns a path', () => {
       const expected = path.join(
         'user/data/electron-typedef/3.0.0/electron.d.ts',
       );
