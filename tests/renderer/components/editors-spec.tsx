@@ -15,12 +15,6 @@ import {
   createEditorValues,
 } from '../../mocks/mocks';
 
-jest.mock('monaco-loader', () =>
-  jest.fn(async () => {
-    return { monaco: true };
-  }),
-);
-
 jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
 }));
@@ -180,7 +174,7 @@ describe('Editors component', () => {
     });
 
     describe('SELECT_ALL_IN_EDITOR handler', () => {
-      it('selects all in the focused editor', async () => {
+      it('selects all in the focused editor', (done) => {
         shallow(<Editors appState={store as any} />);
 
         const range = 'range';
@@ -191,11 +185,13 @@ describe('Editors component', () => {
 
         ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
 
-        await process.nextTick;
-        expect(editor.setSelection).toHaveBeenCalledWith('range');
+        process.nextTick(() => {
+          expect(editor.setSelection).toHaveBeenCalledWith('range');
+          done();
+        });
       });
 
-      it('does not change selection if the selected editor has no model', async () => {
+      it('does not change selection if the selected editor has no model', (done) => {
         shallow(<Editors appState={store as any} />);
 
         const editor = new MonacoEditorMock();
@@ -204,9 +200,11 @@ describe('Editors component', () => {
 
         ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
 
-        await process.nextTick;
-        expect(editor.getModel).toHaveBeenCalledTimes(1);
-        expect(editor.setSelection).not.toHaveBeenCalled();
+        process.nextTick(() => {
+          expect(editor.getModel).toHaveBeenCalledTimes(1);
+          expect(editor.setSelection).not.toHaveBeenCalled();
+          done();
+        });
       });
 
       it('does not crash if there is no selected editor', () => {
@@ -241,7 +239,8 @@ describe('Editors component', () => {
       getTestTemplateSpy.mockRestore();
       replaceFiddleSpy.mockRestore();
     });
-    it('handles a SELECT_ALL_IN_EDITOR command', async () => {
+
+    it('handles a SELECT_ALL_IN_EDITOR command', (done) => {
       shallow(<Editors appState={store as any} />);
 
       const range = 'range';
@@ -250,9 +249,10 @@ describe('Editors component', () => {
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
       ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
-      await process.nextTick;
-
-      expect(editor.setSelection).toHaveBeenCalledWith(range);
+      process.nextTick(() => {
+        expect(editor.setSelection).toHaveBeenCalledWith(range);
+        done();
+      });
     });
 
     it('handles the monaco editor option commands', () => {
