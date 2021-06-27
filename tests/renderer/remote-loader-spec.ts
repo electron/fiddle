@@ -31,11 +31,7 @@ const mockGistFiles = {
 };
 
 const mockGetGists = {
-  get: async () => ({
-    data: {
-      files: mockGistFiles,
-    },
-  }),
+  get: () => Promise.resolve({ data: { files: mockGistFiles } }),
 };
 
 const mockRepos = [
@@ -66,9 +62,7 @@ const mockRepos = [
 ];
 
 const mockGetRepos = {
-  getContents: async () => ({
-    data: mockRepos,
-  }),
+  getContents: () => Promise.resolve({ data: mockRepos }),
 };
 
 describe('RemoteLoader', () => {
@@ -148,9 +142,7 @@ describe('RemoteLoader', () => {
     it('handles an error', async () => {
       (getOctokit as jest.Mock).mockReturnValue({
         gists: {
-          get: async () => {
-            throw new Error('Bwap bwap');
-          },
+          get: () => Promise.reject(new Error('Bwap bwap')),
         },
       });
 
@@ -190,9 +182,7 @@ describe('RemoteLoader', () => {
     it('handles an error', async () => {
       (getOctokit as jest.Mock).mockReturnValue({
         repos: {
-          getContents: async () => {
-            throw new Error('Bwap bwap');
-          },
+          getContents: () => Promise.reject(new Error('Bwap bwap')),
         },
       });
 
@@ -204,9 +194,7 @@ describe('RemoteLoader', () => {
       store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
       (getOctokit as jest.Mock).mockReturnValue({
         repos: {
-          getContents: async () => ({
-            not_an_array: true,
-          }),
+          getContents: () => Promise.resolve({ not_an_array: true }),
         },
       });
 
@@ -265,9 +253,7 @@ describe('RemoteLoader', () => {
       const versionString = JSON.stringify({ version: '4.0.0' });
       const content = Buffer.from(versionString).toString('base64');
       const mockGetPackageJson = {
-        getContents: async () => ({
-          data: { content },
-        }),
+        getContents: () => Promise.resolve({ data: { content } }),
       };
 
       (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetPackageJson });
