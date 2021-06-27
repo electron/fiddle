@@ -57,57 +57,45 @@ describe('AddressBar component', () => {
     expect(preventDefault).toHaveBeenCalled();
   });
 
-  it('disables during gist publishing', async () => {
+  it('disables during gist publishing', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.publishing } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(true),
     );
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.none } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(false),
     );
   });
 
-  it('disables during gist updating', async () => {
+  it('disables during gist updating', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.updating } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(true),
     );
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.none } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(false),
     );
   });
 
-  it('disables during gist deleting', async () => {
+  it('disables during gist deleting', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.deleting } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(true),
     );
 
     wrapper.setProps(
       { appState: { ...store, activeGistAction: GistActionState.none } },
-      () => {
-        expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
-      },
+      () => expect(wrapper.find('fieldset').prop('disabled')).toBe(false),
     );
   });
 });
