@@ -126,7 +126,7 @@ export class RemoteLoader {
         }
       }
 
-      return this.handleLoadingSuccess(values, gistId);
+      return await this.handleLoadingSuccess(values, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
     }
