@@ -41,9 +41,7 @@ describe('CreditsSettings component', () => {
   });
 
   it('renders', async () => {
-    (fs.readJSON as jest.Mock).mockImplementation(async () => {
-      return mockContributors;
-    });
+    (fs.readJSON as jest.Mock).mockResolvedValue(mockContributors);
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
     const instance: CreditsSettings = wrapper.instance() as any;
@@ -53,9 +51,7 @@ describe('CreditsSettings component', () => {
   });
 
   it('renders for contributors with less data', async () => {
-    (fs.readJSON as jest.Mock).mockImplementation(async () => {
-      return mockContributorsBroken;
-    });
+    (fs.readJSON as jest.Mock).mockResolvedValue(mockContributorsBroken);
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
     const instance: CreditsSettings = wrapper.instance() as any;
@@ -65,9 +61,7 @@ describe('CreditsSettings component', () => {
   });
 
   it('renders nothing if we do not have contributors', async () => {
-    (fs.readJSON as jest.Mock).mockImplementation(async () => {
-      return [];
-    });
+    (fs.readJSON as jest.Mock).mockResolvedValue([]);
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
     const instance: CreditsSettings = wrapper.instance() as any;
@@ -77,9 +71,7 @@ describe('CreditsSettings component', () => {
   });
 
   it('handles a read error', async () => {
-    (fs.readJSON as jest.Mock).mockImplementation(async () => {
-      throw new Error('Bwap-bwap');
-    });
+    (fs.readJSON as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
     const instance: CreditsSettings = wrapper.instance() as any;
@@ -89,9 +81,7 @@ describe('CreditsSettings component', () => {
   });
 
   it('handles a click', async () => {
-    (fs.readJSON as jest.Mock).mockImplementation(async () => {
-      return mockContributors;
-    });
+    (fs.readJSON as jest.Mock).mockReturnValue(mockContributors);
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
     const instance: CreditsSettings = wrapper.instance() as any;
