@@ -163,7 +163,7 @@ describe('content', () => {
       (global.fetch as jest.Mock).mockClear();
     });
 
-    it('returns the same promise if the work is already pending', async () => {
+    it('returns the same promise if the work is already pending', () => {
       const prom1 = getTemplate(VERSION_IN_FIXTURES);
       const prom2 = getTemplate(VERSION_IN_FIXTURES);
       expect(prom1).toEqual(prom2);
