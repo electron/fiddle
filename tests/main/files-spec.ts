@@ -135,9 +135,7 @@ describe('files', () => {
 
     it('does not overwrite files if an error happens', async () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
-      (dialog.showMessageBox as jest.Mock).mockImplementation(async () => {
-        throw new Error('Nope');
-      });
+      (dialog.showMessageBox as jest.Mock).mockRejectedValue(new Error('Nope'));
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
       (fs.existsSync as jest.Mock).mockReturnValue(true);
 
