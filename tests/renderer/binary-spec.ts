@@ -116,28 +116,28 @@ describe('binary', () => {
       unzipResolve();
     });
 
-    it(`returns ${VersionState.ready} when it is a local version that exists`, async () => {
+    it(`returns ${VersionState.ready} when it is a local version that exists`, () => {
       ver.source = VersionSource.local;
       ver.localPath = '/fake/path';
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       expect(getVersionState(ver)).toBe(VersionState.ready);
     });
 
-    it(`returns ${VersionState.unknown} when it is a local version that is missing`, async () => {
+    it(`returns ${VersionState.unknown} when it is a local version that is missing`, () => {
       ver.source = VersionSource.local;
       ver.localPath = '/fake/path';
       (fs.existsSync as jest.Mock).mockReturnValue(false);
       expect(getVersionState(ver)).toBe(VersionState.unknown);
     });
 
-    it(`returns ${VersionState.ready} when it is a remote version that is downloaded`, async () => {
+    it(`returns ${VersionState.ready} when it is a remote version that is downloaded`, () => {
       ver.source = VersionSource.remote;
       ver.localPath = undefined;
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       expect(getVersionState(ver)).toBe(VersionState.ready);
     });
 
-    it(`returns ${VersionState.unknown} when it is a remote version is not downloaded`, async () => {
+    it(`returns ${VersionState.unknown} when it is a remote version is not downloaded`, () => {
       ver.source = VersionSource.remote;
       ver.localPath = undefined;
       (fs.existsSync as jest.Mock).mockReturnValue(false);
@@ -233,7 +233,7 @@ describe('binary', () => {
       downloadResolve();
     });
 
-    it(`returns the same promise if called twice for the same version`, async () => {
+    it(`returns the same promise if called twice for the same version`, () => {
       (fs.existsSync as jest.Mock).mockReturnValue(false);
 
       const prom1 = setupBinary(ver);
