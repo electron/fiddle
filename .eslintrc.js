@@ -1,6 +1,8 @@
 const config = {
   parser: '@typescript-eslint/parser', // Specifies the ESLint parser
   parserOptions: {
+    project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
     ecmaVersion: 2020, // Allows for the parsing of modern ECMAScript features
     sourceType: 'module', // Allows for the use of imports
     ecmaFeatures: {
@@ -20,6 +22,11 @@ const config = {
   rules: {
     // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
+
+    '@typescript-eslint/return-await': 'error',
+    '@typescript-eslint/require-await': 'error',
+    '@typescript-eslint/await-thenable': 'error',
+
     '@typescript-eslint/ban-ts-comment': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
@@ -27,7 +34,7 @@ const config = {
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
-  ignorePatterns: ['/out', '/dist', '/coverage'],
+  ignorePatterns: ['/out', '/dist', '/coverage', '.eslintrc.js'],
 };
 
 module.exports = config;
