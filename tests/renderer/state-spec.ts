@@ -85,10 +85,8 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
-        async () => {
-          throw new Error('Bwap-bwap');
-        },
+      (getUpdatedElectronVersions as jest.Mock).mockRejectedValue(
+        new Error('Bwap-bwap'),
       );
 
       await appState.updateElectronVersions();
@@ -388,7 +386,7 @@ describe('AppState', () => {
       expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
     });
 
-    it('updates typescript definitions', async () => {
+    it('updates typescript definitions', () => {
       const version = '2.0.2';
       const ver = appState.versions[version];
       ver.source = VersionSource.local;
@@ -573,7 +571,7 @@ describe('AppState', () => {
   });
 
   describe('addLocalVersion()', () => {
-    it('refreshes version state', async () => {
+    it('refreshes version state', () => {
       const version = '4.0.0';
       const ver: Version = {
         localPath: '/fake/path',
@@ -583,7 +581,7 @@ describe('AppState', () => {
 
       (getElectronVersions as jest.Mock).mockReturnValue([ver]);
 
-      await appState.addLocalVersion(ver);
+      appState.addLocalVersion(ver);
 
       expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);
