@@ -165,7 +165,7 @@ export class EditorDropdown extends React.Component<
     appState.editorMosaic.showMosaic(name);
   }
 
-  public async removeCustomEditor(event: React.MouseEvent) {
+  public removeCustomEditor(event: React.MouseEvent) {
     const { id } = event.currentTarget;
     const { appState } = this.props;
 
