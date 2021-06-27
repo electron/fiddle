@@ -59,7 +59,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    *
    * @memberof Editors
    */
-  public async componentDidMount() {
+  public componentDidMount() {
     this.stopListening();
 
     ipcRendererManager.on(
