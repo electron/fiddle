@@ -1,32 +1,7 @@
-import {
-  invertPosition,
-  positionForRect,
-} from '../../src/utils/position-for-rect';
+import { positionForRect } from '../../src/utils/position-for-rect';
 import { overridePlatform } from '../utils';
 
 describe('position-for-rect', () => {
-  describe('invertPosition()', () => {
-    it('inverts "right"', () => {
-      expect(invertPosition('right')).toBe('left');
-    });
-
-    it('inverts "left"', () => {
-      expect(invertPosition('left')).toBe('right');
-    });
-
-    it('inverts "top"', () => {
-      expect(invertPosition('top')).toBe('bottom');
-    });
-
-    it('inverts "bottom"', () => {
-      expect(invertPosition('bottom')).toBe('top');
-    });
-
-    it('always returns a position', () => {
-      expect(invertPosition('xyz' as any)).toBe('top');
-    });
-  });
-
   describe('positionForRect()', () => {
     const { innerWidth, innerHeight } = window;
 
