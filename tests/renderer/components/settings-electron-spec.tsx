@@ -63,7 +63,7 @@ describe('ElectronSettings component', () => {
     spy.mockRestore();
   });
 
-  it('handles removing a version', async () => {
+  it('handles removing a version', () => {
     store.versions['3.0.0-nightly.1'] = {
       state: VersionState.ready,
       version: '3.0.0-nightly.1',
@@ -86,7 +86,7 @@ describe('ElectronSettings component', () => {
     expect(store.removeVersion).toHaveBeenCalledTimes(1);
   });
 
-  it('handles downloading a version', async () => {
+  it('handles downloading a version', () => {
     const version = '3.0.0';
     const ver = {
       source: VersionSource.remote,
