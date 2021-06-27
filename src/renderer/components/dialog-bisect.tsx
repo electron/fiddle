@@ -66,9 +66,9 @@ export class BisectDialog extends React.Component<
   /**
    * Handles the submission of the dialog
    *
-   * @returns {Promise<void>}
+   * @returns {void}
    */
-  public async onSubmit(): Promise<void> {
+  public onSubmit(): void {
     const range = this.getBisectRange();
     if (range.length > 1) {
       const { appState } = this.props;
@@ -79,7 +79,7 @@ export class BisectDialog extends React.Component<
     }
   }
 
-  public async onAuto(): Promise<void> {
+  public onAuto(): void {
     const range = this.getBisectRange();
     if (range.length > 1) {
       window.ElectronFiddle.app.runner.autobisect(range);
