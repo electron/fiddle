@@ -179,22 +179,24 @@ describe('Runner component', () => {
       );
     });
 
-    it('cleans the app data dir after a run', async () => {
+    it('cleans the app data dir after a run', async (done) => {
       // get run() out of the way
       (spawn as any).mockReturnValueOnce(mockChild);
       setTimeout(() => mockChild.emit('close', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(2);
-      expect(cleanup).toHaveBeenLastCalledWith(
-        path.join(`/test-path/test-app-name`),
-      );
+      process.nextTick(() => {
+        const { cleanup } = fileManager;
+        expect(cleanup).toHaveBeenCalledTimes(2);
+        expect(cleanup).toHaveBeenLastCalledWith(
+          path.join(`/test-path/test-app-name`),
+        );
+        done();
+      });
     });
 
-    it('does not clean the app data dir after a run if configured', async () => {
+    it('does not clean the app data dir after a run if configured', async (done) => {
       (instance as any).appState.isKeepingUserDataDirs = true;
 
       // get run() out of the way
@@ -203,9 +205,11 @@ describe('Runner component', () => {
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(1);
+      process.nextTick(() => {
+        const { cleanup } = fileManager;
+        expect(cleanup).toHaveBeenCalledTimes(1);
+        done();
+      });
     });
 
     it('automatically cleans the console when enabled', async () => {
@@ -239,9 +243,7 @@ describe('Runner component', () => {
 
       instance.installModulesForEditor = jest
         .fn()
-        .mockImplementationOnce(async () => {
-          throw new Error('Bwap-bwap');
-        });
+        .mockRejectedValue(new Error('Bwap-bwap'));
 
       expect(await instance.run()).toBe(RunResult.INVALID);
 
@@ -342,26 +344,21 @@ describe('Runner component', () => {
       );
     });
 
-    async function allRunsReturn(runResult: RunResult) {
-      instance.run = jest.fn().mockImplementation(() => runResult);
-      const bisectRange = [...mockVersionsArray].reverse();
+    it.each([RunResult.SUCCESS, RunResult.FAILURE])(
+      `returns ${RunResult.INVALID} if the test always returns %s`,
+      async (runResult: RunResult) => {
+        instance.run = jest.fn().mockResolvedValue(runResult);
 
-      const bisectResult = await instance.autobisect(bisectRange);
+        const bisectRange = [...mockVersionsArray].reverse();
+        const bisectResult = await instance.autobisect(bisectRange);
 
-      expect(bisectResult).toBe(RunResult.INVALID);
-      expect(store.pushOutput).toHaveBeenCalled();
-      expect((store.pushOutput as jest.Mock).mock.calls.pop()[0]).toMatch(
-        'both returned',
-      );
-    }
-
-    it('returns invalid if a bad version cannot be found', () => {
-      allRunsReturn(RunResult.SUCCESS);
-    });
-
-    it('returns invalid if a good version cannot be found', async () => {
-      allRunsReturn(RunResult.FAILURE);
-    });
+        expect(bisectResult).toBe(RunResult.INVALID);
+        expect(store.pushOutput).toHaveBeenCalled();
+        expect((store.pushOutput as jest.Mock).mock.calls.pop()[0]).toMatch(
+          'both returned',
+        );
+      },
+    );
   });
 
   describe('installModules()', () => {
