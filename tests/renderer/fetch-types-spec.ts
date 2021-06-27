@@ -53,9 +53,7 @@ describe('fetch-types', () => {
 
   describe('getOfflineTypeDefinitionPath()', () => {
     it('returns a path', () => {
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
       expect(getOfflineTypeDefinitionPath('3.0.0')).toBe(expected);
     });
   });
@@ -65,9 +63,7 @@ describe('fetch-types', () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
 
       const result = getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(result).toBe(true);
       expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
@@ -77,10 +73,7 @@ describe('fetch-types', () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
 
       const result = getOfflineTypeDefinitions('3.0.0');
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
-
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
       expect(result).toBe(false);
       expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
     });
@@ -98,9 +91,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(result).toBe(`it's me, the type definition`);
       expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
@@ -112,9 +103,7 @@ describe('fetch-types', () => {
       (window.fetch as jest.Mock).mockRejectedValue({});
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(result).toBe(null);
       expect(fs.existsSync).toHaveBeenCalledWith<any>(expected);
@@ -126,9 +115,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(fs.outputFile).toHaveBeenCalledWith<any>(
         expected,
@@ -143,9 +130,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(fs.outputFile).toHaveBeenCalledWith<any>(expected, def);
       expect(result).toBe(def);
@@ -158,9 +143,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(result).toBe(def);
       expect(fs.readFile).toHaveBeenCalledWith<any>(expected, 'utf-8');
@@ -172,9 +155,7 @@ describe('fetch-types', () => {
       mockFetch();
 
       const result = await getDownloadedVersionTypeDefs(version);
-      const expected = path.join(
-        'user/data/electron-typedef/3.0.0/electron.d.ts',
-      );
+      const expected = 'user/data/electron-typedef/3.0.0/electron.d.ts';
 
       expect(result).toBe(null);
       expect(fs.readFile).toHaveBeenCalledWith<any>(expected, 'utf-8');
