@@ -37,7 +37,7 @@ export class EditorMosaic {
   @observable public isEdited = false;
 
   @computed public get files() {
-    const files: Map<EditorId, EditorPresence> = new Map();
+    const files = new Map<EditorId, EditorPresence>();
 
     const { backups, editors, mosaic } = this;
     for (const id of backups.keys()) files.set(id, EditorPresence.Hidden);
@@ -51,26 +51,13 @@ export class EditorMosaic {
     return getLeaves(this.mosaic).length;
   }
 
-  // client code should avoid using this; it's public for components/editors.tsx
+  // try to not use this. it's public because components/editors.tsx needs it
   @observable public mosaic: MosaicNode<EditorId> | null;
 
-  @observable private readonly backups: Map<EditorId, EditorBackup> = new Map();
-  @observable private readonly editors: Map<EditorId, Editor> = new Map();
+  @observable private readonly backups = new Map<EditorId, EditorBackup>();
+  @observable private readonly editors = new Map<EditorId, Editor>();
 
   constructor() {
-    for (const name of [
-      'hide',
-      'layout',
-      'removeCustomMosaic',
-      'resetLayout',
-      'set',
-      'show',
-      'toggle',
-      'values',
-    ]) {
-      this[name] = this[name].bind(this);
-    }
-
     // whenever the mosaics are changed,
     // upate the editor layout
     reaction(
@@ -191,11 +178,14 @@ export class EditorMosaic {
   }
 
   @action private setValue(id: EditorId, value: string) {
+    // create a new model
     const { monaco } = window.ElectronFiddle;
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);
     model.updateOptions({ tabSize: 2 });
 
+    // if we have an editor, use the model now.
+    // otherwise, cache it in `backups` for later.
     const backup: EditorBackup = { model };
     const editor = this.editors.get(id);
     if (editor) {
