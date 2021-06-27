@@ -62,7 +62,7 @@ const exitCodes = Object.freeze({
   [RunResult.INVALID]: 2,
 });
 
-async function sendTask(type: IpcEvents, task: any) {
+function sendTask(type: IpcEvents, task: any) {
   const onOutputEntry = (_: any, msg: OutputEntry) => {
     console.log(
       `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
@@ -83,10 +83,10 @@ function logConfig() {
    version: ${packageJson.version}`);
 }
 
-async function bisect(good: string, bad: string, opts: commander.OptionValues) {
+function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
     if (opts.logConfig) logConfig();
-    await sendTask(IpcEvents.TASK_BISECT, {
+    sendTask(IpcEvents.TASK_BISECT, {
       setup: getSetup(opts),
       goodVersion: good,
       badVersion: bad,
@@ -97,10 +97,10 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   }
 }
 
-async function test(opts: commander.OptionValues) {
+function test(opts: commander.OptionValues) {
   try {
     if (opts.logConfig) logConfig();
-    await sendTask(IpcEvents.TASK_TEST, {
+    sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
   } catch (err) {
@@ -109,7 +109,7 @@ async function test(opts: commander.OptionValues) {
   }
 }
 
-export async function processCommandLine(argv: string[]) {
+export function processCommandLine(argv: string[]) {
   const program = new commander.Command();
   program.exitOverride();
 

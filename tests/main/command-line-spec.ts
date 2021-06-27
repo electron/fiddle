@@ -26,16 +26,16 @@ describe('processCommandLine()', () => {
     ipcMainManager.send = jest.fn();
   });
 
-  it('does nothing when passed no arguments', async () => {
-    await processCommandLine(ARGV_PREFIX);
+  it('does nothing when passed no arguments', () => {
+    processCommandLine(ARGV_PREFIX);
     expect(ipcMainManager.send).not.toHaveBeenCalled();
   });
 
-  it('exits with 2 if called with invalid parameters', async () => {
+  it('exits with 2 if called with invalid parameters', () => {
     const argv = [...ARGV_PREFIX, 'test', '--this-option-is-unknown=true'];
     const exitCode = 2;
     const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
-    await processCommandLine(argv);
+    processCommandLine(argv);
     expect(exitSpy).toHaveBeenCalledWith(exitCode);
     exitSpy.mockReset();
   });
@@ -52,10 +52,10 @@ describe('processCommandLine()', () => {
     expect(stringify(request)).toBe(payload);
   }
 
-  async function expectLogConfigOptionWorks(argv: string[]) {
+  function expectLogConfigOptionWorks(argv: string[]) {
     argv = [...argv, '--log-config'];
     const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
-    await processCommandLine(argv);
+    processCommandLine(argv);
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringMatching('electron-fiddle started'),
     );
@@ -72,29 +72,29 @@ describe('processCommandLine()', () => {
       expectSendCalledOnceWith(IpcEvents.TASK_TEST, payload);
     }
 
-    it('uses cwd as the default fiddle location', async () => {
+    it('uses cwd as the default fiddle location', () => {
       const argv = ARGV;
       const expected = `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectTestCalledOnceWith(expected);
     });
 
-    it('handles a --fiddle that is a hex gist id', async () => {
+    it('handles a --fiddle that is a hex gist id', () => {
       const GIST_ID = 'af3e1a018f5dcce4a2ff40004ef5bab5';
       const argv = [...ARGV, '--fiddle', GIST_ID];
       const expected = `{"setup":{"fiddle":{"gistId":"${GIST_ID}"},"hideChannels":[],"showChannels":[]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectTestCalledOnceWith(expected);
     });
 
-    it('handles a --fiddle option that is unrecognizable', async () => {
+    it('handles a --fiddle option that is unrecognizable', () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const exitExpected = 2;
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
       expect(exitSpy).toHaveBeenCalledWith(exitExpected);
@@ -102,16 +102,16 @@ describe('processCommandLine()', () => {
       exitSpy.mockReset();
     });
 
-    it('handles a --version option', async () => {
+    it('handles a --version option', () => {
       const VERSION = '12.0.0';
       const argv = [...ARGV, '--version', VERSION];
       const expected = `{"setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"version":"${VERSION}"}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectTestCalledOnceWith(expected);
     });
 
-    it('handles a --log-config option', async () => {
-      await expectLogConfigOptionWorks([...ARGV, '--log-config']);
+    it('handles a --log-config option', () => {
+      expectLogConfigOptionWorks([...ARGV, '--log-config']);
     });
   });
 
@@ -124,63 +124,63 @@ describe('processCommandLine()', () => {
       expectSendCalledOnceWith(IpcEvents.TASK_BISECT, payload);
     }
 
-    it('sends a bisect request', async () => {
+    it('sends a bisect request', () => {
       const argv = [...ARGV, GOOD, BAD];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --nightlies option', async () => {
+    it('handles a --nightlies option', () => {
       const argv = [...ARGV, GOOD, BAD, '--nightlies'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.nightly}"]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --no-nightlies option', async () => {
+    it('handles a --no-nightlies option', () => {
       const argv = [...ARGV, GOOD, BAD, '--no-nightlies'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${ElectronReleaseChannel.nightly}"],"showChannels":[]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --betas option', async () => {
+    it('handles a --betas option', () => {
       const argv = [...ARGV, GOOD, BAD, '--betas'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.beta}"]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --no-betas option', async () => {
+    it('handles a --no-betas option', () => {
       const argv = [...ARGV, GOOD, BAD, '--no-betas'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${ElectronReleaseChannel.beta}"],"showChannels":[]}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --obsolete option', async () => {
+    it('handles a --obsolete option', () => {
       const argv = [...ARGV, GOOD, BAD, '--obsolete'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":true}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --no-obsolete option', async () => {
+    it('handles a --no-obsolete option', () => {
       const argv = [...ARGV, GOOD, BAD, '--no-obsolete'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":[],"useObsolete":false}}`;
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
-    it('handles a --fiddle option that is unrecognizable', async () => {
+    it('handles a --fiddle option that is unrecognizable', () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, GOOD, BAD, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
       const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
       const exitExpected = 2;
       const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
-      await processCommandLine(argv);
+      processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
       expect(exitSpy).toHaveBeenCalledWith(exitExpected);
@@ -188,34 +188,34 @@ describe('processCommandLine()', () => {
       exitSpy.mockReset();
     });
 
-    it('handles a --log-config option', async () => {
-      await expectLogConfigOptionWorks([...ARGV, GOOD, BAD, '--log-config']);
+    it('handles a --log-config option', () => {
+      expectLogConfigOptionWorks([...ARGV, GOOD, BAD, '--log-config']);
     });
 
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
-      async function expectDoneCausesExit(result: RunResult, exitCode: number) {
+      function expectDoneCausesExit(result: RunResult, exitCode: number) {
         const argv = [...ARGV, GOOD, BAD];
         (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
           const fakeEvent = {};
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
-        await processCommandLine(argv);
+        processCommandLine(argv);
         expect(app.exit).toHaveBeenCalledWith(exitCode);
       }
 
-      it(`exits with 0 on ${RunResult.SUCCESS}`, async () => {
-        await expectDoneCausesExit(RunResult.SUCCESS, 0);
+      it(`exits with 0 on ${RunResult.SUCCESS}`, () => {
+        expectDoneCausesExit(RunResult.SUCCESS, 0);
       });
 
-      it(`exits with 1 on ${RunResult.FAILURE}`, async () => {
-        await expectDoneCausesExit(RunResult.FAILURE, 1);
+      it(`exits with 1 on ${RunResult.FAILURE}`, () => {
+        expectDoneCausesExit(RunResult.FAILURE, 1);
       });
 
-      it(`exits with 2 on ${RunResult.INVALID}`, async () => {
-        await expectDoneCausesExit(RunResult.INVALID, 2);
+      it(`exits with 2 on ${RunResult.INVALID}`, () => {
+        expectDoneCausesExit(RunResult.INVALID, 2);
       });
 
-      it('sends output messages to the console', async () => {
+      it('sends output messages to the console', () => {
         const now = Date.now();
         const text = 'asieoniezi';
         const expected = `[${new Date(now).toLocaleTimeString()}] ${text}`;
@@ -228,7 +228,7 @@ describe('processCommandLine()', () => {
         });
 
         const argv = [...ARGV, GOOD, BAD];
-        await processCommandLine(argv);
+        processCommandLine(argv);
 
         expect(spy).toHaveBeenCalledWith(expected);
 
