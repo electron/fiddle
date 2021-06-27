@@ -1,5 +1,6 @@
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
+import { inspect } from 'util';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 import {
@@ -43,10 +44,10 @@ export class Output extends React.Component<CommandsProps> {
     this.language = 'consoleOutputLanguage';
   }
 
-  public async componentDidMount() {
-    autorun(async () => {
+  public componentDidMount() {
+    autorun(() => {
       this.destroyMonacoEditor();
-      await this.initMonaco();
+      this.initMonaco();
       this.toggleConsole();
     });
   }
@@ -55,7 +56,10 @@ export class Output extends React.Component<CommandsProps> {
     this.destroyMonacoEditor();
   }
 
-  public componentDidUpdate() {
+  public componentDidUpdate(prevProps: any, prevState: any) {
+    console.log('prevProps', inspect(prevProps));
+    console.log('prevState', inspect(prevState));
+    console.log('componentDidUpdate', new Error('trace'));
     this.toggleConsole();
   }
 
@@ -63,10 +67,10 @@ export class Output extends React.Component<CommandsProps> {
    * Handle the editor having been mounted. This refers to Monaco's
    * mount, not React's.
    */
-  public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
+  public editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { editorDidMount } = this.props;
 
-    await this.setContent(this.props.appState.output);
+    this.setContent(this.props.appState.output);
 
     // Notify other editors that the initial editor was mounted
     if (editorDidMount) {
@@ -77,14 +81,14 @@ export class Output extends React.Component<CommandsProps> {
   /**
    *  Set Monaco Editor's value.
    */
-  public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    await this.setContent(newProps.appState.output);
+  public UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
+    this.setContent(newProps.appState.output);
   }
 
   /**
    * Initialize Monaco.
    */
-  public async initMonaco() {
+  public initMonaco() {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
     if (ref) {
@@ -99,7 +103,7 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.editorDidMount(this.editor);
+      this.editorDidMount(this.editor);
     }
   }
 
@@ -114,7 +118,7 @@ export class Output extends React.Component<CommandsProps> {
     }
   }
 
-  public toggleConsole() {
+  private toggleConsole() {
     /**
      * Type guard to check whether a react-mosaic node is a parent in the tree
      * or a leaf. Leaf nodes are represented by the string value of their ID,
@@ -168,7 +172,7 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @memberof Output
    */
-  private async setContent(output: OutputEntry[]) {
+  private setContent(output: OutputEntry[]) {
     this.setEditorText(this.getOutputLines(output));
     // have terminal always scroll to the bottom
     this.editor?.revealLine(this.editor?.getScrollHeight());

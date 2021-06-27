@@ -125,14 +125,15 @@ describe('Output component', () => {
       direction: 'row',
     });
 
-    wrapper.instance().context = mockContext;
-    wrapper.instance().componentDidMount!();
+    instance.context = mockContext;
+    instance.componentDidMount!();
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
 
-    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalled();
-    expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
+    const { replaceWith } = mockContext.mosaicActions;
+    expect(replaceWith).toHaveBeenCalled();
+    expect(replaceWith).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ splitPercentage: 25 }),
     );
@@ -180,7 +181,7 @@ describe('Output component', () => {
     expect(instance.editor.revealLine).toHaveBeenCalled();
   });
 
-  it('handles componentDidUpdate', async () => {
+  it('handles componentDidUpdate', () => {
     // set up component
     const editorDidMount = jest.fn();
     const wrapper = shallow(
@@ -193,11 +194,13 @@ describe('Output component', () => {
     );
     const instance: any = wrapper.instance();
     const spy = jest.spyOn(instance, 'toggleConsole');
-
+    instance.componentDidMount();
     instance.outputRef.current = 'ref';
-    await instance.initMonaco();
+    instance.initMonaco();
 
-    // setContent will trigger componentDidUpdate()
+    // setting `store.isConsoleShowing` will trigger componentDidUpdate()
+    store.isConsoleShowing = !!store.isConsoleShowing;
+
     instance.editor.setContent(store.output);
     expect(spy).toHaveBeenCalled();
   });
