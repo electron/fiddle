@@ -259,7 +259,11 @@ describe('Action button component', () => {
   });
 
   describe('disables itself', () => {
-    async function testDisabledWhen(gistActionState: GistActionState) {
+    it.each([
+      GistActionState.deleting,
+      GistActionState.publishing,
+      GistActionState.updating,
+    ])('while %s', (gistActionState: GistActionState) => {
       // create a button with no initial state
       state.activeGistAction = GistActionState.none;
       const { wrapper } = createActionButton();
@@ -270,16 +274,6 @@ describe('Action button component', () => {
 
       state.activeGistAction = GistActionState.none;
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
-    }
-
-    it('while publishing', async () => {
-      await testDisabledWhen(GistActionState.publishing);
-    });
-    it('while updating', async () => {
-      await testDisabledWhen(GistActionState.updating);
-    });
-    it('while deleting', async () => {
-      await testDisabledWhen(GistActionState.deleting);
     });
   });
 
