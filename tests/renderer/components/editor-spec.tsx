@@ -85,7 +85,7 @@ describe('Editor component', () => {
     ).toBe(false);
   });
 
-  describe('initMonaco()', async () => {
+  describe('initMonaco()', () => {
     it('attempts to create an editor', async () => {
       const didMount = jest.fn();
       const wrapper = shallow(
@@ -108,7 +108,7 @@ describe('Editor component', () => {
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
 
-    describe('backups', async () => {
+    describe('backups', () => {
       it('attempts to restore a backup if contains a model', async () => {
         store.editorMosaic.getAndRemoveEditorValueBackup.mockReturnValueOnce({
           model: true,
