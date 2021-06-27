@@ -12,7 +12,7 @@ describe('waitFor()', () => {
     expect(result).toBe(number);
   });
 
-  it('rejects if it takes too long', async () => {
+  it('rejects if it takes too long', () => {
     const test = () => false;
     const opts = { interval: 10, timeout: 100 };
     expect(waitFor(test, opts)).rejects.toMatch('Timed out');
