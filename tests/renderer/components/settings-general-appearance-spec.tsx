@@ -55,7 +55,7 @@ describe('AppearanceSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('renders the correct selected theme', async () => {
+  it('renders the correct selected theme', (done) => {
     store.theme = 'defaultDark';
     const wrapper = shallow(
       <AppearanceSettings
@@ -64,8 +64,10 @@ describe('AppearanceSettings component', () => {
       />,
     );
 
-    await process.nextTick;
-    expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
+    process.nextTick(() => {
+      expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
+      done();
+    });
   });
 
   it('handles a theme change', () => {

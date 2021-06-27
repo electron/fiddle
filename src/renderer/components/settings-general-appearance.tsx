@@ -175,7 +175,7 @@ export class AppearanceSettings extends React.Component<
   public async openThemeFolder(): Promise<boolean> {
     try {
       await fs.ensureDir(THEMES_PATH);
-      await shell.showItemInFolder(THEMES_PATH);
+      shell.showItemInFolder(THEMES_PATH);
       return true;
     } catch (error) {
       console.warn(`Appearance Settings: Could not open themes folder`);
