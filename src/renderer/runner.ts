@@ -288,7 +288,7 @@ export class Runner {
     values: EditorValues,
     pmOptions: PMOperationOptions,
   ): Promise<void> {
-    const modules = await findModulesInEditors(values);
+    const modules = findModulesInEditors(values);
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {

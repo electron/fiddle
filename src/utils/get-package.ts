@@ -41,7 +41,7 @@ export async function getPackageJson(
   }
 
   if (includeDependencies && values) {
-    const modules = await findModulesInEditors(values);
+    const modules = findModulesInEditors(values);
     modules.forEach((mod) => {
       dependencies[mod] = '*';
     });

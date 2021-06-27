@@ -163,29 +163,29 @@ describe('npm', () => {
   });
 
   describe('findModules()', () => {
-    it('returns required modules in a JS file', async () => {
+    it('returns required modules in a JS file', () => {
       mocked(decomment).mockReturnValue(mockPackages);
-      const modules = await findModules(mockPackages);
+      const modules = findModules(mockPackages);
       expect(modules).toEqual(['cow', 'say']);
     });
 
-    it('ignores node and electron builtins', async () => {
+    it('ignores node and electron builtins', () => {
       mocked(decomment).mockReturnValue(mockBuiltins);
-      const modules = await findModules(mockBuiltins);
+      const modules = findModules(mockBuiltins);
       expect(modules).toHaveLength(0);
     });
 
-    it('ignores commented modules', async () => {
+    it('ignores commented modules', () => {
       mocked(decomment).mockReturnValue('');
-      const modules = await findModules(mockComments);
+      const modules = findModules(mockComments);
       expect(modules).toHaveLength(0);
     });
   });
 
   describe('findModulesInEditors()', () => {
-    it('installs modules across all JavaScript files only once', async () => {
+    it('installs modules across all JavaScript files only once', () => {
       mocked(decomment).mockReturnValue(mockPackages);
-      const result = await findModulesInEditors({
+      const result = findModulesInEditors({
         [DefaultEditorId.html]: '',
         [DefaultEditorId.main]: mockPackages,
         [DefaultEditorId.renderer]: mockPackages,
@@ -200,7 +200,7 @@ describe('npm', () => {
 
   describe('installModules()', () => {
     describe('npm', () => {
-      it('attempts to install a single module', async () => {
+      it('attempts to install a single module', () => {
         installModules(
           { dir: '/my/directory', packageManager: 'npm' },
           'say',
@@ -213,7 +213,7 @@ describe('npm', () => {
         );
       });
 
-      it('attempts to installs all modules', async () => {
+      it('attempts to installs all modules', () => {
         installModules({ dir: '/my/directory', packageManager: 'npm' });
 
         expect(exec).toHaveBeenCalledWith<any>(
@@ -224,7 +224,7 @@ describe('npm', () => {
     });
 
     describe('yarn', () => {
-      it('attempts to install a single module', async () => {
+      it('attempts to install a single module', () => {
         installModules(
           { dir: '/my/directory', packageManager: 'yarn' },
           'say',
@@ -237,7 +237,7 @@ describe('npm', () => {
         );
       });
 
-      it('attempts to installs all modules', async () => {
+      it('attempts to installs all modules', () => {
         installModules({ dir: '/my/directory', packageManager: 'yarn' });
 
         expect(exec).toHaveBeenCalledWith<any>('/my/directory', 'yarn add');
@@ -246,7 +246,7 @@ describe('npm', () => {
   });
 
   describe('packageRun()', () => {
-    it('attempts to run a command via npm', async () => {
+    it('attempts to run a command via npm', () => {
       packageRun({ dir: '/my/directory', packageManager: 'npm' }, 'package');
 
       expect(exec).toHaveBeenCalledWith<any>(
@@ -255,7 +255,7 @@ describe('npm', () => {
       );
     });
 
-    it('attempts to run a command via yarn', async () => {
+    it('attempts to run a command via yarn', () => {
       packageRun({ dir: '/my/directory', packageManager: 'yarn' }, 'package');
 
       expect(exec).toHaveBeenCalledWith<any>(

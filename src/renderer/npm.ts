@@ -75,7 +75,7 @@ export async function getIsPackageManagerInstalled(
 /**
  * Finds npm modules in editor values, returning an array of modules.
  */
-export async function findModulesInEditors(values: EditorValues) {
+export function findModulesInEditors(values: EditorValues) {
   const modules: Array<string> = [];
 
   // Filter out all editor values which aren't JavaScript files.
@@ -84,7 +84,7 @@ export async function findModulesInEditors(values: EditorValues) {
     .map(([_, content]) => content) as string[];
 
   for (const content of contents) {
-    const found = await findModules(content);
+    const found = findModules(content);
     modules.push(...found);
   }
 
@@ -106,13 +106,13 @@ export async function findModulesInEditors(values: EditorValues) {
  * @param {string} input
  * @returns {Array<string>}
  */
-export async function findModules(input: string) {
+export function findModules(input: string): string[] {
   /* container definitions */
   const modules: Array<string> = [];
   let match: RegExpMatchArray | null;
 
   /* decomment code with the esprima parser */
-  const code = await decomment(input);
+  const code = decomment(input);
 
   /* grab all global require matches in the text */
   while ((match = requiregx.exec(code) || null)) {
@@ -137,7 +137,7 @@ export async function findModules(input: string) {
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export async function installModules(
+export function installModules(
   { dir, packageManager }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
