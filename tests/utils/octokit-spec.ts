@@ -14,18 +14,18 @@ jest.mock('@octokit/rest', () => ({
 
 describe('octokit', () => {
   describe('getOctokit()', () => {
-    it('constructs the Octokit only once', async () => {
-      await getOctokit();
-      await getOctokit();
+    it('constructs the Octokit only once', () => {
+      getOctokit();
+      getOctokit();
       expect(mockConstructed).toBe(1);
     });
 
-    it('uses GitHub authentication when available', async () => {
+    it('uses GitHub authentication when available', () => {
       const mockStore = {
         gistId: 'abcdtestid',
         gitHubToken: 'testToken',
       };
-      const { authenticate } = await getOctokit(mockStore as any);
+      const { authenticate } = getOctokit(mockStore as any);
 
       expect(authenticate).toHaveBeenCalledTimes(1);
       expect((authenticate as jest.Mock).mock.calls[0][0]).toEqual({

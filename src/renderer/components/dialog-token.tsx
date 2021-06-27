@@ -60,7 +60,7 @@ export class TokenDialog extends React.Component<
     this.setState({ verifying: true });
     this.props.appState.gitHubToken = this.state.tokenInput;
 
-    const octo = await getOctokit(this.props.appState);
+    const octo = getOctokit(this.props.appState);
 
     try {
       const { data } = await octo.users.getAuthenticated();

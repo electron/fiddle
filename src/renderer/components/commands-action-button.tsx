@@ -114,7 +114,7 @@ export class GistActionButton extends React.Component<
   private async publishGist(description: string) {
     const { appState } = this.props;
 
-    const octo = await getOctokit(appState);
+    const octo = getOctokit(appState);
     const { gitHubPublishAsPublic } = appState;
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
@@ -169,7 +169,7 @@ export class GistActionButton extends React.Component<
    */
   public async handleUpdate() {
     const { appState } = this.props;
-    const octo = await getOctokit(this.props.appState);
+    const octo = getOctokit(this.props.appState);
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
@@ -206,7 +206,7 @@ export class GistActionButton extends React.Component<
    */
   public async handleDelete() {
     const { appState } = this.props;
-    const octo = await getOctokit(this.props.appState);
+    const octo = getOctokit(this.props.appState);
 
     appState.activeGistAction = GistActionState.deleting;
 

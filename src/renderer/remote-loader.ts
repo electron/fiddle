@@ -59,7 +59,7 @@ export class RemoteLoader {
     path: string,
   ): Promise<boolean> {
     try {
-      const octo = await getOctokit(this.appState);
+      const octo = getOctokit(this.appState);
 
       const folder = await octo.repos.getContents({
         owner: ELECTRON_REPO,
@@ -113,7 +113,7 @@ export class RemoteLoader {
    */
   public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
-      const octo = await getOctokit(this.appState);
+      const octo = getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
       const values: EditorValues = {};
 
@@ -171,7 +171,7 @@ export class RemoteLoader {
   }
 
   public async getPackageVersionFromRef(ref: string): Promise<string> {
-    const octo = await getOctokit(this.appState);
+    const octo = getOctokit(this.appState);
     const { data: packageJsonData } = await octo.repos.getContents({
       owner: ELECTRON_ORG,
       repo: ELECTRON_REPO,

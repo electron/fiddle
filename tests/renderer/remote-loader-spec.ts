@@ -171,7 +171,7 @@ describe('RemoteLoader', () => {
     });
 
     it('loads an Electron example', async () => {
-      (getOctokit as jest.Mock).mockResolvedValue({ repos: mockGetRepos });
+      (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
 
       await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
