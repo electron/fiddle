@@ -8,20 +8,20 @@ describe('templates', () => {
   const KNOWN_BAD_TEMPLATE = 'not-a-real-show-me';
 
   describe('getTemplateValues()', () => {
-    it('loads templates', async () => {
-      const values = await getTemplateValues(KNOWN_GOOD_TEMPLATE);
+    it('loads templates', () => {
+      const values = getTemplateValues(KNOWN_GOOD_TEMPLATE);
       expect(values[MAIN_JS].length).toBeGreaterThan(0);
     });
 
-    it('handles errors', async () => {
-      const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
+    it('handles errors', () => {
+      const values = getTemplateValues(KNOWN_BAD_TEMPLATE);
       expect(values[MAIN_JS]).toBe('');
     });
 
-    it('reports missing files', async () => {
+    it('reports missing files', () => {
       console.log = jest.fn();
 
-      await getTemplateValues(KNOWN_BAD_TEMPLATE);
+      getTemplateValues(KNOWN_BAD_TEMPLATE);
 
       expect(console.log).toHaveBeenCalledWith(
         expect.stringMatching('Got Fiddle from'),

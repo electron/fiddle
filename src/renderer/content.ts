@@ -113,7 +113,7 @@ export function getTemplate(version: string): Promise<EditorValues> {
   const sem = semver.parse(version);
   return sem && isReleasedMajor(sem)
     ? getQuickStart(`${sem.major}-x-y`)
-    : readFiddle(STATIC_TEMPLATE_DIR);
+    : Promise.resolve(readFiddle(STATIC_TEMPLATE_DIR));
 }
 
 /**

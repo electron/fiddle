@@ -27,27 +27,27 @@ describe('read-fiddle', () => {
     });
   }
 
-  it('injects main.js if not present', async () => {
+  it('injects main.js if not present', () => {
     const mockValues = {}; // no files
     setupFSMocks(mockValues);
 
-    const fiddle = await readFiddle(folder);
+    const fiddle = readFiddle(folder);
 
     expect(console.warn).not.toHaveBeenCalled();
     expect(fiddle).toStrictEqual({ [MAIN_JS]: '' });
   });
 
-  it('reads supported files', async () => {
+  it('reads supported files', () => {
     const content = 'hello';
     const mockValues = { [MAIN_JS]: content };
     setupFSMocks(mockValues);
 
-    const fiddle = await readFiddle(folder);
+    const fiddle = readFiddle(folder);
 
     expect(fiddle).toStrictEqual(mockValues);
   });
 
-  it('skips unsupported files', async () => {
+  it('skips unsupported files', () => {
     const content = 'hello';
     const mockValues = {
       [MAIN_JS]: content,
@@ -59,19 +59,19 @@ describe('read-fiddle', () => {
       Object.entries(mockValues).filter(([id, _]) => isSupportedFile(id)),
     );
 
-    const fiddle = await readFiddle(folder);
+    const fiddle = readFiddle(folder);
 
     expect(fiddle).toStrictEqual(expected);
   });
 
-  it('handles read errors gracefully', async () => {
+  it('handles read errors gracefully', () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
     (fs.readFileSync as jest.Mock).mockImplementation(() => {
       throw new Error('bwap');
     });
 
-    const files = await readFiddle(folder);
+    const files = readFiddle(folder);
 
     const expectedFiles = Object.keys(mockValues);
     expect(Object.keys(files)).toStrictEqual(expectedFiles);
@@ -79,12 +79,12 @@ describe('read-fiddle', () => {
     expect(console.warn).toHaveBeenCalledTimes(expectedFiles.length);
   });
 
-  it('ensures truthy even when read returns null', async () => {
+  it('ensures truthy even when read returns null', () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
     (fs.readFileSync as jest.Mock).mockReturnValue(null);
 
-    const files = await readFiddle(folder);
+    const files = readFiddle(folder);
 
     expect(Object.keys(files)).toStrictEqual(Object.keys(mockValues));
     Object.values(files).forEach((content) => expect(content).toBe(''));

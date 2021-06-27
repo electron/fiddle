@@ -6,9 +6,9 @@ import { readFiddle } from '../utils/read-fiddle';
  * Returns expected content for a given name.
  *
  * @param {string} name
- * @returns {Promise<EditorValues>}
+ * @returns {EditorValues}
  */
-export function getTemplateValues(name: string): Promise<EditorValues> {
+export function getTemplateValues(name: string): EditorValues {
   const folder = path.join(
     __dirname,
     '../../static/show-me',

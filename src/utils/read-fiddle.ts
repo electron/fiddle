@@ -8,9 +8,9 @@ import * as path from 'path';
  * Reads a Fiddle from a directory.
  *
  * @param {string} filePath
- * @returns {Promise<EditorValues>} the loaded Fiddle
+ * @returns {EditorValues} the loaded Fiddle
  */
-export async function readFiddle(folder: string): Promise<EditorValues> {
+export function readFiddle(folder: string): EditorValues {
   const got: EditorValues = {};
 
   const tryRead = (name: string) => {

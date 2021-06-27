@@ -49,7 +49,7 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openTemplate(templateName: string) {
-    const editorValues = await getTemplateValues(templateName);
+    const editorValues = getTemplateValues(templateName);
     await window.ElectronFiddle.app.replaceFiddle(editorValues, {
       templateName,
     });
@@ -69,7 +69,7 @@ export class FileManager {
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
-    for (const [name, value] of Object.entries(await readFiddle(filePath))) {
+    for (const [name, value] of Object.entries(readFiddle(filePath))) {
       if (isKnownFile(name) || (await verifyCreateCustomEditor(name))) {
         editorValues[name] = value;
       }

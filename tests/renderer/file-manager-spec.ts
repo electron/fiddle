@@ -29,7 +29,7 @@ describe('FileManager', () => {
 
   beforeEach(() => {
     ipcRendererManager.send = jest.fn();
-    (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
+    (readFiddle as jest.Mock).mockReturnValue(editorValues);
 
     // create a real FileManager and insert it into our mocks
     ({ app } = (window as any).ElectronFiddle);
@@ -54,7 +54,7 @@ describe('FileManager', () => {
       const file = 'file.js';
       const content = 'hey';
       const values = { ...editorValues, [file]: content };
-      (readFiddle as jest.Mock).mockResolvedValue(values);
+      (readFiddle as jest.Mock).mockReturnValue(values);
 
       app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
 
