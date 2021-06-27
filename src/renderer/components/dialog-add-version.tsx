@@ -88,9 +88,9 @@ export class AddVersionDialog extends React.Component<
   /**
    * Handles the submission of the dialog
    *
-   * @returns {Promise<void>}
+   * @returns {void}
    */
-  public async onSubmit(): Promise<void> {
+  public onSubmit(): void {
     const { folderPath, version } = this.state;
 
     if (!folderPath) return;

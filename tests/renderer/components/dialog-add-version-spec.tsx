@@ -100,15 +100,15 @@ describe('AddVersionDialog component', () => {
   });
 
   describe('onSubmit', () => {
-    it('does not do anything without a file', async () => {
+    it('does not do anything without a file', () => {
       const wrapper = shallow(<AddVersionDialog appState={store as any} />);
 
-      await (wrapper.instance() as any).onSubmit();
+      (wrapper.instance() as any).onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(0);
     });
 
-    it('adds a local version using the given data', async () => {
+    it('adds a local version using the given data', () => {
       const wrapper = shallow(<AddVersionDialog appState={store as any} />);
 
       wrapper.setState({
@@ -116,7 +116,7 @@ describe('AddVersionDialog component', () => {
         folderPath: '/test/path',
       });
 
-      await (wrapper.instance() as any).onSubmit();
+      (wrapper.instance() as any).onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
 
