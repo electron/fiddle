@@ -410,7 +410,7 @@ describe('EditorMosaic', () => {
     it('layout() calls editor.layout() only once', async () => {
       const editor = new MonacoEditorMock();
       const filename = DefaultEditorId.html;
-      await editorMosaic.addEditor(filename, editor as any);
+      editorMosaic.addEditor(filename, editor as any);
 
       editorMosaic.layout();
       editorMosaic.layout();
