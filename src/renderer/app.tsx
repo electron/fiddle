@@ -129,7 +129,7 @@ export class App {
     return rendered;
   }
 
-  public async setupThemeListeners() {
+  public setupThemeListeners() {
     const setSystemTheme = (prefersDark: boolean) => {
       if (prefersDark) {
         this.state.setTheme(defaultDark.file);
@@ -226,7 +226,7 @@ export class App {
   }
 
   public setupUnloadListeners() {
-    autorun(async () => {
+    autorun(() => {
       const { state } = this;
       const { editorMosaic } = state;
 
