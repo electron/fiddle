@@ -258,12 +258,15 @@ describe('FileManager', () => {
 
     it('applies transforms', async () => {
       const transformed: Files = new Map([['👉', '👈']]);
-      const transform = () => Promise.resolve(transformed);
+      const transform = () => transformed;
       expect(await fm.getFiles(undefined, transform)).toBe(transformed);
     });
 
     it('handles transform error', async () => {
-      const transform = () => Promise.reject(new Error('💩'));
+      const transform = (files: Files) => {
+        throw new Error('💩');
+        return files;
+      };
       const result = await fm.getFiles(undefined, transform);
       expect(result).toStrictEqual(expected);
     });

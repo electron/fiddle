@@ -150,7 +150,7 @@ export class FileManager {
     for (const transform of transforms) {
       try {
         console.log(`getFiles: Applying ${transform.name}`);
-        output = await transform(output);
+        output = transform(output);
       } catch (error) {
         console.warn(`getFiles: Failed to apply transform`, {
           transform,

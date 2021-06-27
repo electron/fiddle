@@ -4,10 +4,9 @@ import { Files } from '../../interfaces';
  * This transform adds dotfiles (like .gitignore)
  *
  * @param {Files} files
- * @returns {Promise<Files>}
+ * @returns {Files}
  */
-export async function dotfilesTransform(files: Files): Promise<Files> {
+export function dotfilesTransform(files: Files): Files {
   files.set('.gitignore', 'node_modules\nout');
-
   return files;
 }

@@ -2,11 +2,11 @@ import { PACKAGE_NAME } from '../../src/interfaces';
 import { forgeTransform } from '../../src/renderer/transforms/forge';
 
 describe('forgeTransform()', () => {
-  it('adds forge dependencies', async () => {
+  it('adds forge dependencies', () => {
     const filesBefore = new Map();
     filesBefore.set(PACKAGE_NAME, JSON.stringify({}));
 
-    const files = await forgeTransform(filesBefore);
+    const files = forgeTransform(filesBefore);
     expect(JSON.parse(files.get(PACKAGE_NAME)!)).toEqual({
       devDependencies: {
         '@electron-forge/cli': '6.0.0-beta.52',
@@ -47,11 +47,11 @@ describe('forgeTransform()', () => {
     });
   });
 
-  it('deals with errors', async () => {
+  it('deals with errors', () => {
     const filesBefore = new Map();
     filesBefore.set(PACKAGE_NAME, 'garbage');
 
-    const files = await forgeTransform(filesBefore);
+    const files = forgeTransform(filesBefore);
     expect(files.get(PACKAGE_NAME)).toBe('garbage');
   });
 });

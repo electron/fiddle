@@ -7,9 +7,9 @@ import { getElectronBinaryPath } from '../binary';
  * project.
  *
  * @param {Files} files
- * @returns {Promise<Files>}
+ * @returns {Files}
  */
-export async function forgeTransform(files: Files): Promise<Files> {
+export function forgeTransform(files: Files): Files {
   if (files.get(PACKAGE_NAME)) {
     try {
       const parsed = JSON.parse(files.get(PACKAGE_NAME)!);

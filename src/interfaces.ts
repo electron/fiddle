@@ -1,6 +1,6 @@
 export type Files = Map<string, string>;
 
-export type FileTransform = (files: Files) => Promise<Files>;
+export type FileTransform = (files: Files) => Files;
 
 export enum VersionState {
   ready = 'ready',
