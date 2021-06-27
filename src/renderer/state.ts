@@ -170,7 +170,6 @@ export class AppState {
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
-    this.setShowMeMenu = this.setShowMeMenu.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
     this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
     this.hideChannels = this.hideChannels.bind(this);
@@ -674,11 +673,7 @@ export class AppState {
     console.warn(error);
   }
 
-  @action public async setShowMeMenu() {
-    ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
-  }
-
-  @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {
+  @action public addAcceleratorToBlock(acc: BlockableAccelerator) {
     if (!this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
       ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
@@ -687,7 +682,7 @@ export class AppState {
     }
   }
 
-  @action public async removeAcceleratorToBlock(acc: BlockableAccelerator) {
+  @action public removeAcceleratorToBlock(acc: BlockableAccelerator) {
     if (this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
         (a) => a !== acc,
