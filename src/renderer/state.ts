@@ -43,8 +43,6 @@ import {
   saveLocalVersions,
 } from './versions';
 
-export type Editor = MonacoType.editor.IStandaloneCodeEditor;
-
 /**
  * The application's state. Exported as a singleton below.
  *
