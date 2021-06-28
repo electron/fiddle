@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra';
-import * as MonacoType from 'monaco-editor';
 import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 
