@@ -15,7 +15,7 @@ import {
 } from '../../src/renderer/constants';
 import { compareEditors } from '../../src/utils/editor-utils';
 import { MonacoEditorMock, createEditorValues } from '../mocks/mocks';
-import { waitFor } from '../../src/utils/wait-for';
+import { waitFor } from '../utils';
 
 describe('EditorMosaic', () => {
   let editorMosaic: EditorMosaic;

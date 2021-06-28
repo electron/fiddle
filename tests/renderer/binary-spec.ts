@@ -10,8 +10,7 @@ import {
   VersionState,
 } from '../../src/interfaces';
 import { removeTypeDefsForVersion } from '../../src/renderer/fetch-types';
-import { overridePlatform, resetPlatform } from '../utils';
-import { waitFor } from '../../src/utils/wait-for';
+import { overridePlatform, resetPlatform, waitFor } from '../utils';
 
 import * as path from 'path';
 import * as semver from 'semver';
