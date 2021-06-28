@@ -23,10 +23,7 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
     />
     <br />
     <Blueprint3.Callout>
-      This folder path has already been added as version "2.2.2".
-      Would you like to set your Electron version to "2.2.2"? 
- 
-
+      This folder is already in use as version "2.2.2". Would you like to switch to that version now?
     </Blueprint3.Callout>
   </div>
   <div
@@ -40,7 +37,7 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
         icon="add"
         key="submit"
         onClick={[Function]}
-        text="OK"
+        text="Switch"
       />
       <Blueprint3.Button
         icon="cross"
@@ -203,10 +200,7 @@ exports[`AddVersionDialog component renders 3`] = `
     />
     <br />
     <Blueprint3.Callout>
-      This folder path has already been added as version "2.2.2".
-      Would you like to set your Electron version to "2.2.2"? 
- 
-
+      This folder is already in use as version "2.2.2". Would you like to switch to that version now?
     </Blueprint3.Callout>
   </div>
   <div
@@ -220,7 +214,7 @@ exports[`AddVersionDialog component renders 3`] = `
         icon="add"
         key="submit"
         onClick={[Function]}
-        text="OK"
+        text="Switch"
       />
       <Blueprint3.Button
         icon="cross"

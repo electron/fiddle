@@ -136,7 +136,8 @@ export class AddVersionDialog extends React.Component<
       isValidVersion,
       existingLocalVersion,
     } = this.state;
-    const canSubmit = isValidElectron && isValidVersion;
+    const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
+    const canSwitch = isValidElectron && existingLocalVersion;
     // swap to old local electron version if the user adds a new one with the same path
     const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
 
@@ -144,9 +145,9 @@ export class AddVersionDialog extends React.Component<
       <Button
         icon="add"
         key="submit"
-        disabled={!shouldSetToPreviousVersion && !canSubmit}
+        disabled={!canAdd && !canSwitch}
         onClick={this.onSubmit}
-        text={shouldSetToPreviousVersion ? 'OK' : 'Add'}
+        text={shouldSetToPreviousVersion ? 'Switch' : 'Add'}
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
@@ -191,13 +192,13 @@ export class AddVersionDialog extends React.Component<
 
   private renderPath(): JSX.Element | null {
     const { isValidElectron, folderPath, existingLocalVersion } = this.state;
-    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
+    const canSwitch = isValidElectron && existingLocalVersion;
 
     if (!folderPath) return null;
     return (
       <Callout>
         {this.buildDialogText()}
-        {!shouldSetToPreviousVersion && this.renderVersionInput()}
+        {!canSwitch && this.renderVersionInput()}
       </Callout>
     );
   }
@@ -206,8 +207,7 @@ export class AddVersionDialog extends React.Component<
     const { existingLocalVersion, isValidElectron } = this.state;
 
     if (isValidElectron && existingLocalVersion) {
-      return `This folder path has already been added as version "${existingLocalVersion.version}".
-      Would you like to set your Electron version to "${existingLocalVersion.version}"? \n \n`;
+      return `This folder is already in use as version "${existingLocalVersion.version}". Would you like to switch to that version now?`;
     } else if (isValidElectron) {
       return `We found an ${getElectronNameForPlatform()} in this folder.`;
     } else {
