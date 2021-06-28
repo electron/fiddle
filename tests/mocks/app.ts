@@ -1,5 +1,6 @@
 import { DefaultEditorId } from '../../src/interfaces';
 import {
+  ElectronTypesMock,
   FileManagerMock,
   RemoteLoaderMock,
   RunnerMock,
@@ -20,12 +21,9 @@ export class AppMock {
   public loadTheme = jest.fn();
   public openFiddle = jest.fn();
 
-  public typeDefDisposable = {
-    dispose: jest.fn(),
-  };
-
   public fileManager = new FileManagerMock();
   public remoteLoader = new RemoteLoaderMock();
+  public electronTypes = new ElectronTypesMock();
   public runner = new RunnerMock();
   public state = new StateMock();
   public taskRunner = {};

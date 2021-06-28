@@ -11,6 +11,7 @@ import { MonacoEditorMock } from './monaco-editor';
 import { RemoteLoaderMock } from './remote-loader';
 import { RunnerMock } from './runner';
 import { StateMock } from './state';
+import { ElectronTypesMock } from './electron-types';
 import { VersionsMock } from './electron-versions';
 import { WebContentsMock } from './web-contents';
 import { createEditorValues } from './editor-values';
@@ -29,13 +30,14 @@ export {
   ChildProcessMock,
   EditorMosaicMock,
   ElectronFiddleMock,
+  ElectronTypesMock,
   FileManagerMock,
   IPCMainMock,
   IPCRendererMock,
   MenuItemMock,
   MenuMock,
-  MonacoMock,
   MonacoEditorMock,
+  MonacoMock,
   NativeImageMock,
   RemoteLoaderMock,
   RunnerMock,

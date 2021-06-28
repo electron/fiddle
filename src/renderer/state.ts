@@ -24,10 +24,6 @@ import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { getTemplate, isContentUnchanged } from './content';
-import {
-  getLocalTypePathForVersion,
-  updateEditorTypeDefinitions,
-} from './fetch-types';
 import { ipcRendererManager } from './ipc';
 
 import { sortVersions } from '../utils/sort-versions';
@@ -120,7 +116,6 @@ export class AppState {
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
   @observable public templateName: string | undefined;
-  @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
@@ -500,31 +495,6 @@ export class AppState {
     }
 
     this.version = version;
-
-    // Update TypeScript definitions
-    if (ver.source === VersionSource.local) {
-      const typePath = getLocalTypePathForVersion(ver);
-      console.info(
-        `TypeDefs: Watching file for local version ${version} at path ${typePath}`,
-      );
-      try {
-        this.localTypeWatcher = fs.watch(typePath!, async () => {
-          console.info(
-            `TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`,
-          );
-          await updateEditorTypeDefinitions(ver);
-        });
-      } catch (err) {
-        console.info('TypeDefs: Unable to start watching.');
-      }
-    } else if (!!this.localTypeWatcher) {
-      console.info(
-        `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
-      );
-      this.localTypeWatcher.close();
-      this.localTypeWatcher = undefined;
-    }
-    await updateEditorTypeDefinitions(ver);
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(ver);

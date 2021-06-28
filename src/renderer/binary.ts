@@ -9,7 +9,6 @@ import {
   VersionState,
 } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { removeTypeDefsForVersion } from './fetch-types';
 import { download as electronDownload } from '@electron/get';
 
 // versions that are currently being downloaded
@@ -139,7 +138,7 @@ export async function removeBinary(ver: RunnableVersion) {
   };
 
   const typeDefsCleaner = async () => {
-    await removeTypeDefsForVersion(version);
+    window.ElectronFiddle.app.electronTypes.uncache(ver);
   };
 
   await rerunner(binaryCleaner);
