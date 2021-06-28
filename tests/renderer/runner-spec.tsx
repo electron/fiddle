@@ -17,7 +17,7 @@ import {
   packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
-import { waitFor } from '../../src/utils/wait-for';
+import { waitFor } from '../utils';
 import {
   ChildProcessMock,
   FileManagerMock,
