@@ -7,6 +7,7 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
+import { isValid } from 'namor';
 import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
@@ -138,8 +139,6 @@ export class AddVersionDialog extends React.Component<
     } = this.state;
     const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
     const canSwitch = isValidElectron && existingLocalVersion;
-    // swap to old local electron version if the user adds a new one with the same path
-    const shouldSetToPreviousVersion = isValidElectron && existingLocalVersion;
 
     return [
       <Button
@@ -147,7 +146,7 @@ export class AddVersionDialog extends React.Component<
         key="submit"
         disabled={!canAdd && !canSwitch}
         onClick={this.onSubmit}
-        text={shouldSetToPreviousVersion ? 'Switch' : 'Add'}
+        text={canSwitch ? 'Switch' : 'Add'}
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
@@ -204,11 +203,19 @@ export class AddVersionDialog extends React.Component<
   }
 
   private buildDialogText(): string {
-    const { existingLocalVersion, isValidElectron } = this.state;
+    const {
+      isValidElectron,
+      isValidVersion,
+      existingLocalVersion,
+    } = this.state;
+    const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
+    const canSwitch = isValidElectron && existingLocalVersion;
 
-    if (isValidElectron && existingLocalVersion) {
-      return `This folder is already in use as version "${existingLocalVersion.version}". Would you like to switch to that version now?`;
-    } else if (isValidElectron) {
+    if (canSwitch) {
+      return `This folder is already in use as version "${
+        existingLocalVersion!.version
+      }". Would you like to switch to that version now?`;
+    } else if (canAdd) {
       return `We found an ${getElectronNameForPlatform()} in this folder.`;
     } else {
       return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
