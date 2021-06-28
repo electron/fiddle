@@ -57,7 +57,7 @@ describe('ElectronTypes', () => {
   });
 
   afterEach(() => {
-    electronTypes.clear();
+    electronTypes.setVersion();
     tmpdir.removeCallback();
   });
 

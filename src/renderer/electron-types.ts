@@ -22,9 +22,10 @@ export class ElectronTypes {
     private readonly cacheDir: string,
   ) {}
 
-  public async setVersion(ver: RunnableVersion): Promise<void> {
+  public async setVersion(ver?: RunnableVersion): Promise<void> {
     this.clear();
 
+    if (!ver) return;
     const { localPath: dir, source, version } = ver;
 
     if (dir) {
@@ -44,7 +45,7 @@ export class ElectronTypes {
     }
   }
 
-  public clear() {
+  private clear() {
     this.dispose();
     this.unwatch();
   }
