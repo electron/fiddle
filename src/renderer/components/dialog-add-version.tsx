@@ -7,7 +7,6 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import { isValid } from 'namor';
 import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
@@ -203,23 +202,18 @@ export class AddVersionDialog extends React.Component<
   }
 
   private buildDialogText(): string {
-    const {
-      isValidElectron,
-      isValidVersion,
-      existingLocalVersion,
-    } = this.state;
-    const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
+    const { isValidElectron, existingLocalVersion } = this.state;
     const canSwitch = isValidElectron && existingLocalVersion;
 
-    if (canSwitch) {
+    if (canSwitch)
       return `This folder is already in use as version "${
         existingLocalVersion!.version
       }". Would you like to switch to that version now?`;
-    } else if (canAdd) {
+
+    if (isValidElectron)
       return `We found an ${getElectronNameForPlatform()} in this folder.`;
-    } else {
-      return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
-    }
+
+    return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
   }
 
   private renderVersionInput(): JSX.Element | null {
