@@ -1,5 +1,5 @@
 import { autorun, reaction } from 'mobx';
-import * as MonacoType from 'monaco-editor';
+import * as path from 'path';
 
 import { ipcRenderer } from 'electron';
 import { ipcRendererManager } from './ipc';
@@ -14,6 +14,8 @@ import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
+import { ElectronTypes } from './electron-types';
+import { USER_DATA_PATH } from './constants';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -22,17 +24,22 @@ import { defaultDark, defaultLight } from './themes-defaults';
  * @class App
  */
 export class App {
-  public typeDefDisposable: MonacoType.IDisposable | null = null;
   public state = new AppState(getElectronVersions());
   public fileManager = new FileManager(this.state);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
+  public readonly electronTypes: ElectronTypes;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);
+
+    this.electronTypes = new ElectronTypes(
+      window.ElectronFiddle.monaco,
+      path.join(USER_DATA_PATH, 'electron-typedef'),
+    );
   }
 
   private confirmReplaceUnsaved(): Promise<boolean> {
@@ -119,6 +126,7 @@ export class App {
     this.setupThemeListeners();
     this.setupTitleListeners();
     this.setupUnloadListeners();
+    this.setupTypeListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
@@ -127,6 +135,16 @@ export class App {
     });
 
     return rendered;
+  }
+
+  private setupTypeListeners() {
+    const updateTypes = () =>
+      this.electronTypes.setVersion(this.state.currentElectronVersion);
+    reaction(
+      () => this.state.version,
+      () => updateTypes(),
+    );
+    updateTypes();
   }
 
   public async setupThemeListeners() {

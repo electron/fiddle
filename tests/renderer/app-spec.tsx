@@ -19,16 +19,12 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
-// TODO(ckerr): these two `jest.mock` calls are required because
+// TODO(ckerr): this `jest.mock` call is required because
 // instantiating a new App instantiates a new State, which
 // calls setVersion(), which tries to fetch binary & types.
 jest.mock('../../src/renderer/binary', () => ({
   getVersionState: jest.fn(),
   setupBinary: jest.fn(),
-}));
-jest.mock('../../src/renderer/fetch-types', () => ({
-  getLocalTypePathForVersion: jest.fn(),
-  updateEditorTypeDefinitions: jest.fn(),
 }));
 
 describe('App component', () => {
@@ -45,9 +41,15 @@ describe('App component', () => {
     // make a real App and inject it into the mocks
     ({ ElectronFiddle } = window as any);
     const { app: appMock } = ElectronFiddle;
-    const { fileManager, remoteLoader, runner, state } = appMock;
+    const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
-    Object.assign(app, { fileManager, remoteLoader, runner, state });
+    Object.assign(app, {
+      electronTypes,
+      fileManager,
+      remoteLoader,
+      runner,
+      state,
+    });
     ElectronFiddle.app = app;
   });
 
@@ -61,6 +63,25 @@ describe('App component', () => {
       expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
 
       jest.useRealTimers();
+    });
+
+    it('updates electronTypes when state.version changes', async () => {
+      const { state } = app;
+
+      // test that electronTypes is set during app.setup
+      const spy = jest.spyOn(app.electronTypes, 'setVersion');
+      await app.setup();
+      expect(spy).toHaveBeenLastCalledWith(state.currentElectronVersion);
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      // set up the next test: change state.version to a different version
+      const version = Object.values(state.versions).shift()!;
+      expect(state.currentElectronVersion).not.toStrictEqual(version);
+      await state.setVersion(version.version);
+      expect(state.currentElectronVersion).toStrictEqual(version);
+      // test that electronTypes was updated when state.version changed
+      expect(spy).toHaveBeenLastCalledWith(state.currentElectronVersion);
+      expect(spy).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -34,10 +34,6 @@ jest.mock('../../src/renderer/binary', () => ({
   setupBinary: jest.fn(),
   getVersionState: jest.fn().mockImplementation((v) => v.state),
 }));
-jest.mock('../../src/renderer/fetch-types', () => ({
-  getLocalTypePathForVersion: jest.fn(),
-  updateEditorTypeDefinitions: jest.fn(),
-}));
 jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
     '../../src/renderer/versions',
