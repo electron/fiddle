@@ -17,6 +17,7 @@ import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { getLocalVersionForPath } from '../versions';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -25,6 +26,7 @@ interface AddVersionDialogProps {
 interface AddVersionDialogState {
   isValidElectron: boolean;
   isValidVersion: boolean;
+  existingLocalVersion?: Version;
   folderPath?: string;
   version: string;
 }
@@ -72,7 +74,9 @@ export class AddVersionDialog extends React.Component<
    */
   public setFolderPath(folderPath: string) {
     const isValidElectron = getIsDownloaded('custom', folderPath);
-    this.setState({ folderPath, isValidElectron });
+    const existingLocalVersion = getLocalVersionForPath(folderPath);
+
+    this.setState({ existingLocalVersion, folderPath, isValidElectron });
   }
 
   public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
@@ -91,7 +95,12 @@ export class AddVersionDialog extends React.Component<
    * @returns {Promise<void>}
    */
   public async onSubmit(): Promise<void> {
-    const { folderPath, version } = this.state;
+    const {
+      folderPath,
+      version,
+      isValidElectron,
+      existingLocalVersion,
+    } = this.state;
 
     if (!folderPath) return;
 
@@ -103,7 +112,13 @@ export class AddVersionDialog extends React.Component<
       name,
     };
 
-    this.props.appState.addLocalVersion(toAdd);
+    // swap to old local electron version if the user adds a new one with the same path
+    if (isValidElectron && existingLocalVersion?.localPath) {
+      // set previous version as active version
+      this.props.appState.setVersion(existingLocalVersion.localPath);
+    } else {
+      this.props.appState.addLocalVersion(toAdd);
+    }
     this.onClose();
   }
 
@@ -116,15 +131,21 @@ export class AddVersionDialog extends React.Component<
   }
 
   get buttons() {
-    const canSubmit = this.state.isValidElectron && this.state.isValidVersion;
+    const {
+      isValidElectron,
+      isValidVersion,
+      existingLocalVersion,
+    } = this.state;
+    const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
+    const canSwitch = isValidElectron && existingLocalVersion;
 
     return [
       <Button
         icon="add"
         key="submit"
-        disabled={!canSubmit}
+        disabled={!canAdd && !canSwitch}
         onClick={this.onSubmit}
-        text="Add"
+        text={canSwitch ? 'Switch' : 'Add'}
       />,
       <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
     ];
@@ -168,25 +189,35 @@ export class AddVersionDialog extends React.Component<
   }
 
   private renderPath(): JSX.Element | null {
-    const { folderPath, isValidElectron } = this.state;
+    const { isValidElectron, folderPath, existingLocalVersion } = this.state;
+    const canSwitch = isValidElectron && existingLocalVersion;
 
     if (!folderPath) return null;
-
-    const info = isValidElectron
-      ? `We found an ${getElectronNameForPlatform()} in this folder.`
-      : `We did not find a ${getElectronNameForPlatform()} in this folder...`;
-
     return (
       <Callout>
-        {info}
-        {this.renderVersionInput()}
+        {this.buildDialogText()}
+        {!canSwitch && this.renderVersionInput()}
       </Callout>
     );
   }
 
+  private buildDialogText(): string {
+    const { isValidElectron, existingLocalVersion } = this.state;
+    const canSwitch = isValidElectron && existingLocalVersion;
+
+    if (canSwitch)
+      return `This folder is already in use as version "${
+        existingLocalVersion!.version
+      }". Would you like to switch to that version now?`;
+
+    if (isValidElectron)
+      return `We found an ${getElectronNameForPlatform()} in this folder.`;
+
+    return `We did not find a ${getElectronNameForPlatform()} in this folder...`;
+  }
+
   private renderVersionInput(): JSX.Element | null {
     const { isValidElectron, isValidVersion, version } = this.state;
-
     if (!isValidElectron) return null;
 
     return (

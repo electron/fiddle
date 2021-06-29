@@ -180,6 +180,18 @@ export function addLocalVersion(input: Version): Array<Version> {
 }
 
 /**
+ * Get the Version (if any) that is located at localPath.
+ *
+ * @param {string} input
+ * @returns {Version | undefined}
+ */
+export function getLocalVersionForPath(
+  folderPath: string,
+): Version | undefined {
+  return getLocalVersions().find((v) => v.localPath === folderPath);
+}
+
+/**
  * Retrieves local Electron versions, configured by the user.
  *
  * @returns {Array<Version>}
