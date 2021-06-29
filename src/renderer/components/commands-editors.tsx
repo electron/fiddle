@@ -141,7 +141,7 @@ export class EditorDropdown extends React.Component<
     try {
       const id = filename as EditorId;
       const { editorMosaic } = appState;
-      editorMosaic.addNew(id);
+      editorMosaic.addNewFile(id);
       editorMosaic.show(id);
       editorMosaic.customMosaics.push(id);
     } catch (error) {

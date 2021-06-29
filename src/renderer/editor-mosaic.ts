@@ -79,9 +79,96 @@ export class EditorMosaic {
     );
   }
 
+  /** Reset the layout to the initial layout we had when set() was called */
+  @action public resetLayout() {
+    this.set(this.values());
+  }
+
+  /// set / add / get the files in the model
+
+  /** Set the contents of the mosaic */
+  @action public set(valuesIn: EditorValues) {
+    // set() clears out the previous Fiddle, so clear our previous state
+    // except for this.editors -- we recycle editors below in setFile()
+    this.backups.clear();
+    this.customMosaics = [];
+    this.mosaic = null;
+
+    // add the files to the mosaic, recycling existing editors when possible.
+    const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
+    for (const [id, value] of values) this.addFile(id, value);
+
+    this.isEdited = false;
+  }
+
+  /** Add a file. If we already have a file with that name, replace it. */
+  @action private addFile(id: EditorId, value: string) {
+    if (!isSupportedFile(id))
+      throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
+
+    // create a moncao model with the file's contents
+    const { monaco } = window.ElectronFiddle;
+    const language = monacoLanguage(id);
+    const model = monaco.editor.createModel(value, language);
+    model.updateOptions({ tabSize: 2 });
+
+    // if we have an editor available, use the monaco model now.
+    // otherwise, save the file in `this.backups` for future use.
+    const backup: EditorBackup = { model };
+    const editor = this.editors.get(id);
+    if (editor) {
+      this.setEditorFromBackup(editor, backup);
+    } else {
+      this.backups.set(id, backup);
+    }
+
+    // if the file has nontrivial content, put it in the mosaic to show it.
+    if (value.length && value !== getEmptyContent(id)) this.show(id);
+  }
+
   /// show or hide files in the view
 
-  /** Toggle visibility of the specified file's editor */
+  /** Show the specified file's editor */
+  @action public show(id: EditorId) {
+    this.setVisible([...getLeaves(this.mosaic), id]);
+  }
+
+  @action private setVisible(visible: EditorId[]) {
+    // Sort the files and remove duplicates
+    visible = [...new Set(visible)].sort(compareEditors);
+
+    // Decide what layout would be good for this set of files
+    const mosaic = EditorMosaic.createMosaic(visible);
+
+    // Use that new layout. Note: if there are new files in `visible`,
+    // setting `this.mosaic` here is what triggers new Monaco editors to
+    // be created for them in React, via components/editors.tsx's use of
+    // this.mosaic in its render() function. After they mount,
+    // editors.tsx will call addEditor() to tell us about them. The same
+    // holds true for removing editors; setting this.mosaic is what will
+    // trigger their removal from React.
+    this.mosaic = mosaic;
+  }
+
+  private static createMosaic(
+    input: EditorId[],
+    direction: MosaicDirection = 'row',
+  ): MosaicNode<EditorId> {
+    // Return single editor or undefined.
+    if (input.length < 2) return input[0];
+
+    // This cuts out the first half of input. Input becomes the second half.
+    const secondHalf = [...input];
+    const firstHalf = secondHalf.splice(0, Math.floor(secondHalf.length / 2));
+
+    return {
+      direction,
+      first: EditorMosaic.createMosaic(firstHalf, 'column'),
+      second: EditorMosaic.createMosaic(secondHalf, 'column'),
+    };
+  }
+
+  /** Helper to toggle visibility of the specified file's editor */
   @action public toggle(id: EditorId) {
     if (this.files.get(id) === EditorPresence.Hidden) {
       this.show(id);
@@ -104,35 +191,6 @@ export class EditorMosaic {
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
   }
 
-  /** Show the specified file's editor */
-  @action public show(id: EditorId) {
-    this.setVisible([...getLeaves(this.mosaic), id]);
-  }
-
-  @action private setVisible(visible: EditorId[]) {
-    this.mosaic = EditorMosaic.CreateMosaic(
-      [...new Set(visible)].sort(compareEditors),
-    );
-  }
-
-  private static CreateMosaic(
-    input: EditorId[],
-    direction: MosaicDirection = 'row',
-  ): MosaicNode<EditorId> {
-    // Return single editor or undefined.
-    if (input.length < 2) return input[0];
-
-    // This cuts out the first half of input. Input becomes the second half.
-    const secondHalf = [...input];
-    const firstHalf = secondHalf.splice(0, Math.floor(secondHalf.length / 2));
-
-    return {
-      direction,
-      first: EditorMosaic.CreateMosaic(firstHalf, 'column'),
-      second: EditorMosaic.CreateMosaic(secondHalf, 'column'),
-    };
-  }
-
   /**
    * Removes the panel for a given custom EditorId.
    *
@@ -143,75 +201,31 @@ export class EditorMosaic {
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
   }
 
-  /** Reset the mosaic's layout back to the default */
-  @action public resetLayout() {
-    this.set(this.values());
-  }
 
-  /// set / add / get the files in the model
-
-  /** Set the contents of the mosaic */
-  @action public set(valuesIn: EditorValues) {
-    const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
-    this.backups.clear();
-    this.customMosaics = [];
-    this.mosaic = null;
-    for (const [id, value] of values) this.addOrReplace(id, value);
-    this.isEdited = false;
-  }
-
-  /** Add a new file to the mosaic */
-  @action public addNew(id: EditorId, value: string = getEmptyContent(id)) {
-    if (this.files.has(id))
-      throw new Error(`Cannot add file "${id}": File already exists`);
-
-    this.addOrReplace(id, value);
-  }
-
-  /** Add a file to the mosaic, replacing the existing file if present */
-  @action private addOrReplace(id: EditorId, value: string) {
-    if (!isSupportedFile(id))
-      throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
-
-    this.setValue(id, value);
-
-    if (value.length && value !== getEmptyContent(id)) this.show(id);
-  }
-
-  @action private setValue(id: EditorId, value: string) {
-    // create a new model
-    const { monaco } = window.ElectronFiddle;
-    const language = monacoLanguage(id);
-    const model = monaco.editor.createModel(value, language);
-    model.updateOptions({ tabSize: 2 });
-
-    // if we have an editor, use the model now.
-    // otherwise, cache it in `backups` for later.
-    const backup: EditorBackup = { model };
-    const editor = this.editors.get(id);
-    if (editor) {
-      this.restoreEditor(editor, backup);
-    } else {
-      this.backups.set(id, backup);
-    }
-  }
-
-  /** Wire up a newly-mounted monaco editor */
+  /** Wire up a newly-mounted Monaco editor */
   @action public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
     if (!backup) throw new Error(`added Editor for unexpected file "${id}"`);
 
     this.backups.delete(id);
     this.editors.set(id, editor);
-    this.restoreEditor(editor, backup);
+    this.setEditorFromBackup(editor, backup);
   }
 
-  /** Set an editor's model and viewState */
-  @action private restoreEditor(editor: Editor, backup: EditorBackup) {
-    this.ignoreEdits(editor);
+  /** Populate a MonacoEditor with the file's contents */
+  @action private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
+    this.ignoreEdits(editor); // pause this so that isEdited doesn't get set
     if (backup.viewState) editor.restoreViewState(backup.viewState);
     editor.setModel(backup.model);
-    this.observeEdits(editor);
+    this.observeEdits(editor); // resume
+  }
+
+  /** Add a new file to the mosaic */
+  @action public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
+    if (this.files.has(id))
+      throw new Error(`Cannot add file "${id}": File already exists`);
+
+    this.addFile(id, value);
   }
 
   /** Get the contents of a single file. */
