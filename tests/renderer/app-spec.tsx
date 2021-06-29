@@ -4,7 +4,7 @@ import { EditorMosaicMock, createEditorValues } from '../mocks/mocks';
 import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { waitFor } from '../../src/utils/wait-for';
+import { waitFor } from '../utils';
 import { setupBinary } from '../../src/renderer/binary';
 
 global.fetch = window.fetch = jest.fn();

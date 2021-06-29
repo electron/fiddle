@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra';
-import * as MonacoType from 'monaco-editor';
 import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 
@@ -41,8 +40,6 @@ import {
   getUpdatedElectronVersions,
   saveLocalVersions,
 } from './versions';
-
-export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
 /**
  * The application's state. Exported as a singleton below.

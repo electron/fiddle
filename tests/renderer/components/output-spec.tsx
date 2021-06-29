@@ -44,34 +44,21 @@ describe('Output component', () => {
 
   describe('initMonaco()', () => {
     it('attempts to create an editor', async () => {
-      const editorDidMount = jest.fn();
       const wrapper = shallow(
-        <Output
-          appState={store as any}
-          monaco={monaco}
-          monacoOptions={{}}
-          editorDidMount={editorDidMount}
-        />,
+        <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
       );
       const instance: any = wrapper.instance();
 
       instance.outputRef.current = 'ref';
       await instance.initMonaco();
 
-      expect(editorDidMount).toHaveBeenCalled();
       expect(monaco.editor.create).toHaveBeenCalled();
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
 
     it('initializes with a fixed tab size', async () => {
-      const didMount = jest.fn();
       const wrapper = shallow(
-        <Output
-          appState={store as any}
-          monaco={monaco}
-          monacoOptions={{}}
-          editorDidMount={didMount}
-        />,
+        <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
       );
       const instance: any = wrapper.instance();
 
@@ -87,14 +74,8 @@ describe('Output component', () => {
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
-    const didMount = jest.fn();
     const wrapper = shallow(
-      <Output
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        editorDidMount={didMount}
-      />,
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
     );
     const instance: any = wrapper.instance();
 
@@ -152,14 +133,8 @@ describe('Output component', () => {
       },
     ];
 
-    const editorDidMount = jest.fn();
     const wrapper = shallow(
-      <Output
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        editorDidMount={editorDidMount}
-      />,
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
     );
     const instance: any = wrapper.instance();
 
@@ -182,14 +157,8 @@ describe('Output component', () => {
 
   it('handles componentDidUpdate', async () => {
     // set up component
-    const editorDidMount = jest.fn();
     const wrapper = shallow(
-      <Output
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        editorDidMount={editorDidMount}
-      />,
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
     );
     const instance: any = wrapper.instance();
     const spy = jest.spyOn(instance, 'toggleConsole');

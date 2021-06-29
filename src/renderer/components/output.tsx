@@ -16,7 +16,6 @@ interface CommandsProps {
   readonly appState: AppState;
   readonly monaco: typeof MonacoType;
   monacoOptions: MonacoType.editor.IEditorOptions;
-  editorDidMount?: (editor: MonacoType.editor.IStandaloneCodeEditor) => void;
   // Used to keep testing conform
   renderTimestamp?: (ts: number) => string;
 }
@@ -60,21 +59,6 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   /**
-   * Handle the editor having been mounted. This refers to Monaco's
-   * mount, not React's.
-   */
-  public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
-    const { editorDidMount } = this.props;
-
-    await this.setContent(this.props.appState.output);
-
-    // Notify other editors that the initial editor was mounted
-    if (editorDidMount) {
-      editorDidMount(editor);
-    }
-  }
-
-  /**
    *  Set Monaco Editor's value.
    */
   public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
@@ -99,7 +83,7 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.editorDidMount(this.editor);
+      await this.setContent(this.props.appState.output);
     }
   }
 
