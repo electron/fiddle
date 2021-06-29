@@ -6,12 +6,7 @@ import { Response } from 'cross-fetch';
 let fakeUserData: tmp.DirResult | null;
 
 import { DefaultEditorId } from '../../src/interfaces';
-import {
-  getContent,
-  getTemplate,
-  getTestTemplate,
-  isContentUnchanged,
-} from '../../src/renderer/content';
+import { getTemplate, getTestTemplate } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
 jest.mock('../../src/renderer/constants', () => {
@@ -89,72 +84,7 @@ describe('content', () => {
     });
   });
 
-  describe('getContent()', () => {
-    beforeEach(() => {
-      // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
-      jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
-    });
-    afterEach(() => {
-      (global.fetch as jest.Mock).mockClear();
-    });
-
-    it('returns content for HTML editor', async () => {
-      const curVer = VERSION_IN_FIXTURES;
-      expect(await getContent(DefaultEditorId.html, curVer)).toBeTruthy();
-    });
-
-    it('returns content for the renderer editor', async () => {
-      const curVer = VERSION_IN_FIXTURES;
-      expect(await getContent(DefaultEditorId.renderer, curVer)).toBeTruthy();
-    });
-
-    it('returns content for the main editor', async () => {
-      const curVer = VERSION_IN_FIXTURES;
-      expect(await getContent(DefaultEditorId.main, curVer)).toBeTruthy();
-    });
-
-    it('returns fallback content for an unparsable version', async () => {
-      expect(await getContent(DefaultEditorId.main, 'beep')).toBeTruthy();
-    });
-
-    it('returns fallback content for an non-existent version', async () => {
-      expect(
-        await getContent(DefaultEditorId.main, '999.0.0-beta.1'),
-      ).toBeTruthy();
-    });
-
-    it('downloads and returns content for known versions', async () => {
-      const content = await getContent(
-        DefaultEditorId.html,
-        VERSION_IN_FIXTURES,
-      );
-      expect(lastResponse).toMatchObject({ status: 200 });
-      expect(content).toMatch(/^<!DOCTYPE html>/);
-    });
-
-    it('provides fallback content if downloads fail', async () => {
-      const content = await getContent(
-        DefaultEditorId.html,
-        VERSION_NOT_IN_FIXTURES,
-      );
-      expect(lastResponse).toMatchObject({ status: 404 });
-      expect(content).toMatch(/^<!DOCTYPE html>/);
-    });
-
-    it('returns the same content when called multiple times', async () => {
-      const curVer = VERSION_IN_FIXTURES;
-      const id = DefaultEditorId.main;
-      const expected = await getContent(id, curVer);
-
-      const numTries = 3;
-      for (let i = 0; i < numTries; ++i) {
-        const content = await getContent(id, curVer);
-        expect(content).toEqual(expected);
-      }
-    });
-  });
-
-  describe('getTemplate()', () => {
+  describe('getTempalte()', () => {
     beforeEach(() => {
       // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
       jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
@@ -168,74 +98,51 @@ describe('content', () => {
       const prom2 = getTemplate(VERSION_IN_FIXTURES);
       expect(prom1).toEqual(prom2);
     });
-  });
 
-  describe('isContentUnchanged()', () => {
-    const curVer = VERSION_IN_FIXTURES;
-
-    it('returns false if app is not available', async () => {
-      (window.ElectronFiddle.app as any) = null;
-      const isUnchanged = await isContentUnchanged(
-        DefaultEditorId.main,
-        curVer,
-      );
-      expect(isUnchanged).toBe(false);
+    it.each([
+      DefaultEditorId.html,
+      DefaultEditorId.renderer,
+      DefaultEditorId.main,
+    ])('returns content for %p', async (id) => {
+      const version = VERSION_IN_FIXTURES;
+      const values = await getTemplate(version);
+      expect(values[id]).toBeTruthy();
     });
 
-    describe(DefaultEditorId.main, () => {
-      it('returns false if it changed', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          'main.js': 'hi',
-        });
-
-        const isUnchanged = await isContentUnchanged(
-          DefaultEditorId.main,
-          curVer,
-        );
-        expect(isUnchanged).toBe(false);
-      });
-
-      it('returns true if it did not change', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          'main.js': await getContent(DefaultEditorId.main, curVer),
-        });
-
-        const isUnchanged = await isContentUnchanged(
-          DefaultEditorId.main,
-          curVer,
-        );
-        expect(isUnchanged).toBe(true);
-      });
+    it('returns fallback content for an unparsable version', async () => {
+      const version = 'beep';
+      const values = await getTemplate(version);
+      expect(values[DefaultEditorId.main]).toBeTruthy();
     });
 
-    describe(DefaultEditorId.renderer, () => {
-      it('returns false if it changed', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          'renderer.js': 'hi',
-        });
+    it('returns fallback content for an non-existent version', async () => {
+      const version = '999.0.0-beta.1';
+      const values = await getTemplate(version);
+      expect(values[DefaultEditorId.main]).toBeTruthy();
+    });
 
-        const isUnchanged = await isContentUnchanged(
-          DefaultEditorId.renderer,
-          curVer,
-        );
-        expect(isUnchanged).toBe(false);
-      });
+    it('downloads and returns content for known versions', async () => {
+      const version = VERSION_IN_FIXTURES;
+      const values = await getTemplate(version);
+      expect(lastResponse).toMatchObject({ status: 200 });
+      expect(values[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
+    });
 
-      it('returns true if it did not change', async () => {
-        (window.ElectronFiddle.app
-          .getEditorValues as jest.Mock<any>).mockReturnValueOnce({
-          'renderer.js': await getContent(DefaultEditorId.renderer, curVer),
-        });
+    it('provides fallback content if downloads fail', async () => {
+      const version = VERSION_NOT_IN_FIXTURES;
+      const content = await getTemplate(version);
+      expect(lastResponse).toMatchObject({ status: 404 });
+      expect(content[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
+    });
 
-        const isUnchanged = await isContentUnchanged(
-          DefaultEditorId.renderer,
-          curVer,
-        );
-        expect(isUnchanged).toBe(true);
-      });
+    it('returns the same content when called multiple times', async () => {
+      const curVer = VERSION_IN_FIXTURES;
+      const expected = await getTemplate(curVer);
+
+      const numTries = 3;
+      for (let i = 0; i < numTries; ++i) {
+        expect(await getTemplate(curVer)).toEqual(expected);
+      }
     });
   });
 });

@@ -187,14 +187,11 @@ describe('App component', () => {
     describe('when current Fiddle is unsaved and prompt appears', () => {
       it('takes no action if prompt is rejected', async () => {
         const { state } = app;
+        const { editorMosaic, gistId, localPath, templateName } = state;
+        editorMosaic.set = jest.fn();
+        (state.showConfirmDialog as jest.Mock).mockResolvedValue(false);
 
-        state.editorMosaic.isEdited = true;
-        expect(state.localPath).toBeUndefined();
-        expect(state.gistId).toBe('');
-        expect(state.templateName).toBeUndefined();
-
-        state.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
-
+        editorMosaic.isEdited = true;
         await app.replaceFiddle(
           {},
           {
@@ -203,10 +200,11 @@ describe('App component', () => {
             filePath: 'localPath',
           },
         );
-        expect(state.editorMosaic.set).not.toHaveBeenCalled();
-        expect(state.localPath).toBeUndefined();
-        expect(state.gistId).toBe('');
-        expect(state.templateName).toBeUndefined();
+
+        expect(editorMosaic.set).not.toHaveBeenCalled();
+        expect(state.localPath).toBe(localPath);
+        expect(state.gistId).toBe(gistId);
+        expect(state.templateName).toBe(templateName);
       });
 
       it('sets editor values and source info if prompt is accepted', async () => {
@@ -418,13 +416,15 @@ describe('App component', () => {
     }
 
     it('does not replace the fiddle if not confirmed', async () => {
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(false);
-      expect(app.state.editorMosaic.set).toHaveBeenCalledTimes(1);
+      expect(setSpy).toHaveBeenCalledTimes(1);
     });
 
     it('replaces the fiddle if confirmed', async () => {
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(true);
-      expect(app.state.editorMosaic.set).toHaveBeenCalledTimes(2);
+      expect(setSpy).toHaveBeenCalledTimes(2);
     });
   });
 

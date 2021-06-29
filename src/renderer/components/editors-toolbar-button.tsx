@@ -57,8 +57,7 @@ export class RemoveButton extends ToolbarButton {
    * Create a button that can remove this panel
    */
   public createButton(_mosaicActions: MosaicRootActions<any>) {
-    const onClick = () =>
-      this.props.appState.editorMosaic.hideAndBackupMosaic(this.props.id);
+    const onClick = () => this.props.appState.editorMosaic.hide(this.props.id);
 
     return <Button icon="cross" className="bp3-small" onClick={onClick} />;
   }

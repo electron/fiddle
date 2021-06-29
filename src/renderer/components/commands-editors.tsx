@@ -9,9 +9,10 @@ import {
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { DEFAULT_EDITORS, DefaultEditorId, EditorId } from '../../interfaces';
 import { AppState } from '../state';
-import { getEditorTitle, isSupportedFile } from '../../utils/editor-utils';
+import { DEFAULT_EDITORS, EditorId } from '../../interfaces';
+import { EditorPresence } from '../editor-mosaic';
+import { getEditorTitle } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
   value: string;
@@ -36,7 +37,6 @@ export class EditorDropdown extends React.Component<
     super(props);
 
     this.onItemClick = this.onItemClick.bind(this);
-    this.showCustomEditorDialog = this.showCustomEditorDialog.bind(this);
     this.addCustomEditor = this.addCustomEditor.bind(this);
     this.removeCustomEditor = this.removeCustomEditor.bind(this);
   }
@@ -56,16 +56,14 @@ export class EditorDropdown extends React.Component<
   }
 
   public renderMenuItems() {
-    const { appState } = this.props;
     const result: Array<JSX.Element> = [];
-    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
 
-    const allEditors = [
-      ...DEFAULT_EDITORS,
-      ...appState.editorMosaic.customMosaics,
-    ];
-    for (const id of allEditors) {
-      const icon = visibleMosaics.includes(id) ? 'eye-open' : 'eye-off';
+    const { editorMosaic } = this.props.appState;
+    const { files, numVisible } = editorMosaic;
+
+    for (const [id, presence] of files) {
+      const visible = presence !== EditorPresence.Hidden;
+      const icon = visible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
 
       if (!DEFAULT_EDITORS.includes(id as any)) {
@@ -77,7 +75,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={appState.editorMosaic.mosaicArrangement === id}
+            disabled={visible && numVisible < 2}
           >
             <MenuItem
               icon={'cross'}
@@ -96,7 +94,7 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={appState.editorMosaic.mosaicArrangement === id}
+            disabled={visible && numVisible < 2}
           />,
         );
       }
@@ -121,7 +119,7 @@ export class EditorDropdown extends React.Component<
           icon="grid-view"
           key="reset-layout"
           text="Reset Layout"
-          onClick={appState.editorMosaic.resetEditorLayout}
+          onClick={editorMosaic.resetLayout}
         />
       </React.Fragment>,
     );
@@ -129,62 +127,40 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  private showCustomEditorDialog(): Promise<string | undefined> {
-    return this.props.appState.showInputDialog({
+  public async addCustomEditor() {
+    const { appState } = this.props;
+
+    const filename = await appState.showInputDialog({
       label: 'Enter a filename for your custom editor',
       ok: 'Create',
       placeholder: 'file.js',
     });
-  }
 
-  public async addCustomEditor() {
-    const { appState } = this.props;
+    if (!filename) return;
 
-    const result = await this.showCustomEditorDialog();
-    if (!result) return;
-
-    // Fail if editor name is not an accepted file type.
-    if (!isSupportedFile(result)) {
-      return appState.showErrorDialog(
-        'Invalid editor name. Must be an html, js, or css file.',
-      );
+    try {
+      const id = filename as EditorId;
+      const { editorMosaic } = appState;
+      editorMosaic.addNewFile(id);
+      editorMosaic.show(id);
+      editorMosaic.customMosaics.push(id);
+    } catch (error) {
+      appState.showErrorDialog(error.message);
     }
-    const name = result as EditorId;
-
-    // Also fail if the user tries to create two identical editors.
-    if (
-      appState.editorMosaic.customMosaics.includes(name) ||
-      Object.values(DefaultEditorId).includes(name as DefaultEditorId)
-    ) {
-      return appState.showErrorDialog(
-        `Custom editor name ${name} already exists - duplicates are not allowed`,
-      );
-    }
-
-    appState.editorMosaic.customMosaics.push(name);
-    appState.editorMosaic.showMosaic(name);
   }
 
   public async removeCustomEditor(event: React.MouseEvent) {
     const { id } = event.currentTarget;
-    const { appState } = this.props;
+    const { editorMosaic } = this.props.appState;
 
     console.log(`EditorDropdown: Removing custom editor ${id}`);
-    appState.editorMosaic.removeCustomMosaic(id as EditorId);
+    editorMosaic.removeCustomMosaic(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
     const { id } = event.currentTarget;
-    const { appState } = this.props;
-    const { editorMosaic } = appState;
-    const visibleMosaics = appState.editorMosaic.getVisibleMosaics();
+    const { editorMosaic } = this.props.appState;
 
-    if (visibleMosaics.includes(id as EditorId)) {
-      console.log(`EditorDropdown: Closing ${id}`);
-      editorMosaic.hideAndBackupMosaic(id as EditorId);
-    } else {
-      console.log(`EditorDropdown: Opening ${id}`);
-      editorMosaic.showMosaic(id as EditorId);
-    }
+    editorMosaic.toggle(id as EditorId);
   }
 }

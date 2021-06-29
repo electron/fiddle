@@ -409,9 +409,7 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const { customMosaics } = this.props.appState.editorMosaic;
-
-    const filesList = {};
+    const filesList: EditorValues = {};
 
     // Add files for default editors.
     for (const editor of DEFAULT_EDITORS) {
@@ -420,9 +418,8 @@ export class GistActionButton extends React.Component<
       };
     }
 
-    // Add files for any custom editors created by the user.
-    for (const mosaic of customMosaics) {
-      filesList[mosaic] = { content: values[mosaic] };
+    for (const id of Object.keys(values)) {
+      filesList[id] = { content: values[id] };
     }
 
     return filesList;

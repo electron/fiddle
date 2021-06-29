@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { DefaultEditorId } from '../../../src/interfaces';
+import { DefaultEditorId, MAIN_JS } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
 
 import { StateMock } from '../../mocks/mocks';
@@ -86,14 +86,15 @@ describe('Editor component', () => {
   });
 
   describe('initMonaco()', async () => {
-    it('attempts to create an editor', async () => {
+    it('calls editorMosaic.addEditor', async () => {
+      const id = MAIN_JS;
       const didMount = jest.fn();
       const wrapper = shallow(
         <Editor
           appState={store as any}
           monaco={monaco}
           monacoOptions={{}}
-          id={DefaultEditorId.main}
+          id={id}
           editorDidMount={didMount}
           setFocused={() => undefined}
         />,
@@ -104,86 +105,9 @@ describe('Editor component', () => {
       await instance.initMonaco();
 
       expect(didMount).toHaveBeenCalled();
-      expect(monaco.editor.create).toHaveBeenCalled();
-      expect(monaco.editor.createModel).toHaveBeenCalled();
-    });
-
-    describe('backups', async () => {
-      it('attempts to restore a backup if contains a model', async () => {
-        store.editorMosaic.getAndRemoveEditorValueBackup.mockReturnValueOnce({
-          model: true,
-          viewState: true,
-        });
-
-        const wrapper = shallow(
-          <Editor
-            appState={store as any}
-            monaco={monaco}
-            monacoOptions={{}}
-            id={DefaultEditorId.main}
-            editorDidMount={() => undefined}
-            setFocused={() => undefined}
-          />,
-        );
-        const instance: any = wrapper.instance();
-
-        instance.containerRef.current = 'ref';
-        await instance.initMonaco();
-
-        expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(1);
-        expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
-      });
-
-      it('attempts to restore a backup if contains a string value', async () => {
-        store.editorMosaic.getAndRemoveEditorValueBackup.mockReturnValueOnce({
-          value: 'hello',
-        });
-
-        const wrapper = shallow(
-          <Editor
-            appState={store as any}
-            monaco={monaco}
-            monacoOptions={{}}
-            id={DefaultEditorId.main}
-            editorDidMount={() => undefined}
-            setFocused={() => undefined}
-          />,
-        );
-        const instance: any = wrapper.instance();
-
-        instance.containerRef.current = 'ref';
-        await instance.initMonaco();
-
-        expect(instance.editor.restoreViewState).toHaveBeenCalledTimes(0);
-        expect(instance.editor.setModel).toHaveBeenCalledTimes(1);
-        expect(monaco.editor.createModel).toHaveBeenCalledWith(
-          'hello',
-          'javascript',
-        );
-      });
-    });
-
-    it('initializes with a fixed tab size', async () => {
-      const didMount = jest.fn();
-      const wrapper = shallow(
-        <Editor
-          appState={store as any}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={DefaultEditorId.main}
-          editorDidMount={didMount}
-          setFocused={() => undefined}
-        />,
-      );
-      const instance: any = wrapper.instance();
-
-      instance.containerRef.current = 'ref';
-      await instance.initMonaco();
-
-      expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tabSize: 2,
-        }),
+      expect(store.editorMosaic.addEditor).toHaveBeenCalledWith(
+        id,
+        expect.anything(),
       );
     });
 

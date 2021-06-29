@@ -8,7 +8,6 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
-  MAIN_JS,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
@@ -23,7 +22,7 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
-import { getTemplate, isContentUnchanged } from './content';
+import { getTemplate } from './content';
 import { ipcRendererManager } from './ipc';
 
 import { sortVersions } from '../utils/sort-versions';
@@ -487,9 +486,8 @@ export class AppState {
     console.log(`State: Switching to Electron ${version}`);
 
     // Should we update the editor?
-    if (await isContentUnchanged(MAIN_JS, this.version)) {
+    if (!this.editorMosaic.isEdited) {
       const editorValues = await getTemplate(version);
-
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
     }

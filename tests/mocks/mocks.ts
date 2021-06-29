@@ -6,8 +6,7 @@ import { ChildProcessMock } from './child-process';
 import { EditorMosaicMock } from './editor-mosaic';
 import { ElectronFiddleMock } from './electron-fiddle';
 import { FileManagerMock } from './file-manager';
-import { MonacoMock } from './monaco';
-import { MonacoEditorMock } from './monaco-editor';
+import { MonacoEditorMock, MonacoMock, MonacoModelMock } from './monaco';
 import { RemoteLoaderMock } from './remote-loader';
 import { RunnerMock } from './runner';
 import { StateMock } from './state';
@@ -38,6 +37,7 @@ export {
   MenuMock,
   MonacoEditorMock,
   MonacoMock,
+  MonacoModelMock,
   NativeImageMock,
   RemoteLoaderMock,
   RunnerMock,

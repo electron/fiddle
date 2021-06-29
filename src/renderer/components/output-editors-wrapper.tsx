@@ -10,7 +10,7 @@ interface WrapperProps {
 }
 
 interface WrapperState {
-  mosaicArrangement: MosaicNode<WrapperEditorId>;
+  mosaic: MosaicNode<WrapperEditorId>;
 }
 
 export type WrapperEditorId = 'output' | 'editors';
@@ -27,7 +27,7 @@ export class OutputEditorsWrapper extends React.Component<
   constructor(props: any) {
     super(props);
     this.state = {
-      mosaicArrangement: {
+      mosaic: {
         direction: 'column',
         first: 'output',
         second: 'editors',
@@ -42,7 +42,7 @@ export class OutputEditorsWrapper extends React.Component<
         <Mosaic<WrapperEditorId>
           renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
           resize={{ minimumPaneSizePercentage: 0 }}
-          value={this.state.mosaicArrangement}
+          value={this.state.mosaic}
           onChange={this.onChange}
         />
       </>
@@ -55,6 +55,6 @@ export class OutputEditorsWrapper extends React.Component<
     if (isConsoleShowing !== this.props.appState.isConsoleShowing) {
       this.props.appState.isConsoleShowing = isConsoleShowing;
     }
-    this.setState({ mosaicArrangement: rootNode });
+    this.setState({ mosaic: rootNode });
   };
 }

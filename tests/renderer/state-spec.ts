@@ -14,7 +14,7 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
+import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getElectronVersions } from '../../src/renderer/versions';
@@ -27,7 +27,6 @@ import { VersionsMock } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
-  isContentUnchanged: jest.fn(),
   getTemplate: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
@@ -372,11 +371,9 @@ describe('AppState', () => {
 
     it('possibly updates the editors', async () => {
       appState.versions['1.0.0'] = { version: '1.0.0' } as any;
-      (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
-      (getTemplate as jest.Mock).mockResolvedValueOnce({
-        defaultMosaics: {},
-        customMosaics: {},
-      });
+      appState.editorMosaic.isEdited = false;
+      (getTemplate as jest.Mock).mockReset().mockResolvedValueOnce({});
+      (window.ElectronFiddle.app.replaceFiddle as jest.Mock).mockReset();
 
       await appState.setVersion('v1.0.0');
 
