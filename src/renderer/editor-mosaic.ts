@@ -51,8 +51,9 @@ export class EditorMosaic {
     return getLeaves(this.mosaic).length;
   }
 
-  // try to not use this. it's public because components/editors.tsx needs it
-  @observable public mosaic: MosaicNode<EditorId> | null;
+  // You probably want EditorMosaic.files instead.
+  // This is only public because components/editors.tsx needs it
+  @observable public mosaic: MosaicNode<EditorId> | null = null;
 
   @observable private readonly backups = new Map<EditorId, EditorBackup>();
   @observable private readonly editors = new Map<EditorId, Editor>();

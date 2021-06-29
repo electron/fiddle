@@ -171,7 +171,6 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    console.log('--> calling dropdown.removeCustomEditor');
     dropdown.removeCustomEditor({
       currentTarget: { id: file },
     } as any);
