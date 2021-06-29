@@ -76,8 +76,8 @@ export class StateMock {
   public resetView = jest.fn();
   public setTheme = jest.fn();
   public setVersion = jest.fn().mockImplementation((version: string) => {
-    this.version = version;
     this.currentElectronVersion = this.versions[version];
+    this.version = version;
   });
   public showChannels = jest.fn();
   public showConfirmDialog = jest.fn();
