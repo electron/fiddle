@@ -167,7 +167,7 @@ describe('ElectronTypes', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fs.existsSync(cacheFile)).toBe(true);
 
-      // test re-using that version does not trigger another fetch
+      // test re-using the same version does not trigger another fetch
       // (i.e. the types are cached locally)
       await electronTypes.setVersion(remoteVersion);
       expect(addExtraLib).toHaveBeenCalledTimes(2);
@@ -175,7 +175,7 @@ describe('ElectronTypes', () => {
       expect(fetchSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('does not crash if fetch rejects', async () => {
+    it('does not crash if fetch() rejects', async () => {
       const spy = jest
         .spyOn(global, 'fetch')
         .mockRejectedValue(new Error('💩'));
@@ -184,7 +184,7 @@ describe('ElectronTypes', () => {
       expect(addExtraLib).not.toHaveBeenCalled();
     });
 
-    it('does not crash if fetch cannot find package', async () => {
+    it('does not crash if fetch() does not find the package', async () => {
       const spy = makeFetchSpy('Cannot find package');
       await electronTypes.setVersion(remoteVersion);
       expect(spy).toHaveBeenCalledTimes(1);

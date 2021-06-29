@@ -45,11 +45,6 @@ export class ElectronTypes {
     }
   }
 
-  private clear() {
-    this.dispose();
-    this.unwatch();
-  }
-
   public uncache(ver: RunnableVersion) {
     if (ver.source === VersionSource.remote)
       fs.removeSync(this.getCacheFile(ver));
@@ -69,6 +64,11 @@ export class ElectronTypes {
 
   private getCacheFile(ver: RunnableVersion) {
     return path.join(this.cacheDir, ver.version, ELECTRON_DTS);
+  }
+
+  private clear() {
+    this.dispose();
+    this.unwatch();
   }
 
   private dispose() {
