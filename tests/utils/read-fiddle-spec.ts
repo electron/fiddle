@@ -3,7 +3,7 @@ import * as path from 'path';
 
 import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { createEditorValues } from '../mocks/editor-values';
-import { isSupportedFile } from '../../src/utils/editor-utils';
+import { getEmptyContent, isSupportedFile } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
 
 describe('read-fiddle', () => {
@@ -34,7 +34,7 @@ describe('read-fiddle', () => {
     const fiddle = await readFiddle(folder);
 
     expect(console.warn).not.toHaveBeenCalled();
-    expect(fiddle).toStrictEqual({ [MAIN_JS]: '' });
+    expect(fiddle).toStrictEqual({ [MAIN_JS]: getEmptyContent(MAIN_JS) });
   });
 
   it('reads supported files', async () => {
