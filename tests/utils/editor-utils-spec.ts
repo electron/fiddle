@@ -1,4 +1,4 @@
-import { DEFAULT_EDITORS, MAIN_JS } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
 import {
   compareEditors,
   getEditorTitle,
@@ -6,6 +6,7 @@ import {
   isKnownFile,
   isSupportedFile,
 } from '../../src/utils/editor-utils';
+import { createEditorValues } from '../mocks/editor-values';
 
 describe('editor-utils', () => {
   describe('getEditorTitle', () => {
@@ -28,7 +29,7 @@ describe('editor-utils', () => {
 
   describe('isKnownFile', () => {
     it('marks default editors as known files', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isKnownFile(id)).toBe(true);
       }
     });
@@ -36,7 +37,7 @@ describe('editor-utils', () => {
 
   describe('isSupportedFile', () => {
     it('supports all default editor types', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isSupportedFile(id)).toBe(true);
       }
     });
@@ -44,7 +45,7 @@ describe('editor-utils', () => {
 
   describe('compareEditors', () => {
     it('sorts known files in a consistent order', () => {
-      const ids = [...DEFAULT_EDITORS];
+      const ids = Object.keys(createEditorValues());
       const sorted1 = [...ids].sort(compareEditors);
       ids.push(ids.shift()!);
       ids.push(ids.shift()!);
