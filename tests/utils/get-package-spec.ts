@@ -1,5 +1,6 @@
-import { DefaultEditorId } from '../../src/interfaces';
+import { EditorValues } from '../../src/interfaces';
 import { getPackageJson } from '../../src/utils/get-package';
+import { createEditorValues } from '../mocks/editor-values';
 
 jest.mock('../../src/utils/get-username', () => ({
   getUsername: () => 'test-user',
@@ -10,18 +11,18 @@ jest.mock('../../src/renderer/npm', () => ({
 }));
 
 describe('get-package', () => {
+  let editorValues: EditorValues;
+
+  beforeEach(() => {
+    editorValues = createEditorValues();
+  });
+
   it('getPackageJson() returns a default package.json', async () => {
     const result = await getPackageJson(
       {
         getName: () => 'test-app',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
     );
 
     expect(result).toEqual(
@@ -54,13 +55,7 @@ describe('get-package', () => {
         getName: () => 'test-app',
         version: '1.0.0-nightly.123456789',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
       {
         includeElectron: true,
         includeDependencies: true,
@@ -99,13 +94,7 @@ describe('get-package', () => {
         getName: () => 'test-app',
         version: '1.0.0',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
       {
         includeElectron: true,
         includeDependencies: true,
