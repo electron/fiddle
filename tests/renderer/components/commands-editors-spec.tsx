@@ -102,10 +102,10 @@ describe('EditorDropdown component', () => {
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
-    await dropdown.addCustomEditor();
+    await dropdown.addNewFile();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a name for your new file',
       ok: 'Create',
       placeholder: 'file.js',
     });
@@ -121,10 +121,10 @@ describe('EditorDropdown component', () => {
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
-    await dropdown.addCustomEditor();
+    await dropdown.addNewFile();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a name for your new file',
       ok: 'Create',
       placeholder: 'file.js',
     });
@@ -144,10 +144,10 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    await dropdown.addCustomEditor();
+    await dropdown.addNewFile();
 
     expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a name for your new file',
       ok: 'Create',
       placeholder: 'file.js',
     });
@@ -171,7 +171,7 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.removeCustomEditor({
+    dropdown.removeFile({
       currentTarget: { id: file },
     } as any);
     expect(editorMosaic.files.get(file)).toBe(EditorPresence.Hidden);

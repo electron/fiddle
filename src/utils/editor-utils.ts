@@ -15,6 +15,8 @@ export function isKnownFile(filename: string): boolean {
   return KNOWN_FILES.includes(filename);
 }
 
+export const requiredFiles = new Set<EditorId>([MAIN_JS]);
+
 const TITLE_MAP: Record<EditorId, string> = Object.freeze({
   [MAIN_JS]: `Main Process (${MAIN_JS})`,
   'renderer.js': 'Renderer Process (renderer.js)',

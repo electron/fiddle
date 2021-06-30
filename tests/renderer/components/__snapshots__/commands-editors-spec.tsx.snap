@@ -16,7 +16,18 @@ exports[`EditorDropdown component renders 1`] = `
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="HTML (index.html)"
-        />
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="index.html"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
@@ -26,7 +37,18 @@ exports[`EditorDropdown component renders 1`] = `
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Renderer Process (renderer.js)"
-        />
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="renderer.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem
@@ -36,7 +58,7 @@ exports[`EditorDropdown component renders 1`] = `
             onClick={[Function]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
-            text="Add Custom Editor"
+            text="Add New File"
           />
         </React.Fragment>
         <React.Fragment>
@@ -94,7 +116,18 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="HTML (index.html)"
-        />
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="index.html"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
@@ -104,7 +137,18 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
           popoverProps={Object {}}
           shouldDismissPopover={true}
           text="Renderer Process (renderer.js)"
-        />
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="renderer.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
         <React.Fragment>
           <Blueprint3.MenuDivider />
           <Blueprint3.MenuItem
@@ -114,7 +158,7 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
             onClick={[Function]}
             popoverProps={Object {}}
             shouldDismissPopover={true}
-            text="Add Custom Editor"
+            text="Add New File"
           />
         </React.Fragment>
         <React.Fragment>
