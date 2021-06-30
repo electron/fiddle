@@ -3,7 +3,7 @@ import * as React from 'react';
 import { isSupportedFile } from '../../../src/utils/editor-utils';
 
 import { AppState } from '../../../src/renderer/state';
-import { DefaultEditorId, EditorId, MAIN_JS } from '../../../src/interfaces';
+import { EditorId, MAIN_JS } from '../../../src/interfaces';
 import { EditorDropdown } from '../../../src/renderer/components/commands-editors';
 import {
   EditorMosaic,
@@ -23,10 +23,7 @@ describe('EditorDropdown component', () => {
 
   beforeEach(() => {
     editorMosaic = new EditorMosaic();
-    editorMosaic.set({
-      [DefaultEditorId.html]: `<!-- ${DefaultEditorId.html} -->`,
-      [DefaultEditorId.renderer]: `// ${DefaultEditorId.renderer}`,
-    });
+    editorMosaic.set(createEditorValues());
     showSpy = jest.spyOn(editorMosaic, 'show');
     toggleSpy = jest.spyOn(editorMosaic, 'toggle');
 

@@ -10,6 +10,58 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
+          id="main.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Main Process (main.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="renderer.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Renderer Process (renderer.js)"
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="renderer.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="preload.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Preload (preload.js)"
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="preload.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
           id="index.html"
           multiline={false}
           onClick={[Function]}
@@ -31,17 +83,17 @@ exports[`EditorDropdown component renders 1`] = `
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="renderer.js"
+          id="styles.css"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="Renderer Process (renderer.js)"
+          text="Stylesheet (styles.css)"
         >
           <Blueprint3.MenuItem
             disabled={false}
             icon="cross"
-            id="renderer.js"
+            id="styles.css"
             multiline={false}
             onClick={[Function]}
             popoverProps={Object {}}
@@ -110,6 +162,58 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
+          id="main.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Main Process (main.js)"
+        />
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="renderer.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Renderer Process (renderer.js)"
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="renderer.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
+          id="preload.js"
+          multiline={false}
+          onClick={[Function]}
+          popoverProps={Object {}}
+          shouldDismissPopover={true}
+          text="Preload (preload.js)"
+        >
+          <Blueprint3.MenuItem
+            disabled={false}
+            icon="cross"
+            id="preload.js"
+            multiline={false}
+            onClick={[Function]}
+            popoverProps={Object {}}
+            shouldDismissPopover={true}
+            text="Remove"
+          />
+        </Blueprint3.MenuItem>
+        <Blueprint3.MenuItem
+          disabled={false}
+          icon="eye-open"
           id="index.html"
           multiline={false}
           onClick={[Function]}
@@ -131,17 +235,17 @@ exports[`EditorDropdown component renders the extra button if the FIDDLE_DOCS_DE
         <Blueprint3.MenuItem
           disabled={false}
           icon="eye-open"
-          id="renderer.js"
+          id="styles.css"
           multiline={false}
           onClick={[Function]}
           popoverProps={Object {}}
           shouldDismissPopover={true}
-          text="Renderer Process (renderer.js)"
+          text="Stylesheet (styles.css)"
         >
           <Blueprint3.MenuItem
             disabled={false}
             icon="cross"
-            id="renderer.js"
+            id="styles.css"
             multiline={false}
             onClick={[Function]}
             popoverProps={Object {}}
