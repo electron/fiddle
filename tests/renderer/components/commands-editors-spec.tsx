@@ -93,7 +93,7 @@ describe('EditorDropdown component', () => {
   });
 
   describe('addNewFile()', () => {
-    it('can add a valid custom editor', async () => {
+    it('can add a new file', async () => {
       // setup: pick a file id that's new to editorMosaic
       const file = 'file.js';
       store.showInputDialog = jest.fn().mockResolvedValueOnce(file);
@@ -114,7 +114,7 @@ describe('EditorDropdown component', () => {
       expect(editorMosaic.files.has(file)).toBe(true);
     });
 
-    it('errors when trying to add a duplicate file', async () => {
+    it('does not add duplicate files', async () => {
       // setup: pick a file id that's already in editorMosaic
       const dupe = Object.keys(editorMosaic.values()).pop();
       store.showInputDialog = jest.fn().mockReturnValue(dupe);
@@ -135,7 +135,7 @@ describe('EditorDropdown component', () => {
       expect(showSpy).not.toHaveBeenCalled();
     });
 
-    it('errors when trying to add an unsupported file', async () => {
+    it('does not add unsupported files', async () => {
       // setup: pick a file that is not supported
       const badFile = 'unsupported.cpp' as EditorId;
       store.showInputDialog = jest.fn().mockResolvedValueOnce(badFile);
@@ -159,7 +159,7 @@ describe('EditorDropdown component', () => {
     });
   });
 
-  it('can remove a custom editor', () => {
+  it('can remove an editor', () => {
     const file = 'file.js';
     const content = '// content';
     const values = { ...createEditorValues(), [file]: content };
