@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { DefaultEditorId } from '../../../src/interfaces';
+import { MAIN_JS } from '../../../src/interfaces';
 import {
   MaximizeButton,
   RemoveButton,
@@ -56,7 +56,7 @@ describe('Editor toolbar button component', () => {
   describe('MaximizeButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <MaximizeButton id={DefaultEditorId.main} appState={store as any} />,
+        <MaximizeButton id={MAIN_JS} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -67,7 +67,7 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', () => {
       const wrapper = shallow(
-        <MaximizeButton id={DefaultEditorId.main} appState={store as any} />,
+        <MaximizeButton id={MAIN_JS} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -83,7 +83,7 @@ describe('Editor toolbar button component', () => {
   describe('RemoveButton', () => {
     it('renders', () => {
       const wrapper = shallow(
-        <RemoveButton id={DefaultEditorId.main} appState={store as any} />,
+        <RemoveButton id={MAIN_JS} appState={store as any} />,
         {
           context: mockContext,
         },
@@ -96,7 +96,7 @@ describe('Editor toolbar button component', () => {
       const hideSpy = jest.spyOn(editorMosaic, 'hide');
 
       const wrapper = shallow(
-        <RemoveButton id={DefaultEditorId.main} appState={store as any} />,
+        <RemoveButton id={MAIN_JS} appState={store as any} />,
         {
           context: mockContext,
         },
