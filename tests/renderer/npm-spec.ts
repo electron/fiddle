@@ -10,7 +10,6 @@ import {
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-import { DefaultEditorId } from '../../src/interfaces';
 jest.mock('decomment');
 jest.mock('../../src/utils/exec');
 
@@ -186,11 +185,9 @@ describe('npm', () => {
     it('installs modules across all JavaScript files only once', async () => {
       mocked(decomment).mockReturnValue(mockPackages);
       const result = await findModulesInEditors({
-        [DefaultEditorId.html]: '',
-        [DefaultEditorId.main]: mockPackages,
-        [DefaultEditorId.renderer]: mockPackages,
-        [DefaultEditorId.preload]: mockPackages,
-        [DefaultEditorId.css]: '',
+        'file1.js': mockPackages,
+        'file2.js': mockPackages,
+        'file3.js': mockPackages,
       });
 
       expect(result).toHaveLength(2);
