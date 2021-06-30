@@ -89,7 +89,7 @@ export class EditorDropdown extends React.Component<
             <MenuItem
               icon={'cross'}
               id={id}
-              onClick={(event: React.MouseEvent) => this.removeFile(event)}
+              onClick={this.removeFile}
               text={'Remove'}
             />
           </MenuItem>,
