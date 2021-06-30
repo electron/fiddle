@@ -1,5 +1,5 @@
 import {
-  DefaultEditorId,
+  EditorValues,
   ElectronReleaseChannel,
   VersionSource,
   VersionState,
@@ -7,74 +7,20 @@ import {
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
-import { AppMock, StateMock } from '../mocks/mocks';
+import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 
 jest.mock('../../src/utils/octokit');
-
-const mockGistFiles = {
-  [DefaultEditorId.renderer]: {
-    content: 'renderer-content',
-  },
-  [DefaultEditorId.main]: {
-    content: 'main-content',
-  },
-  [DefaultEditorId.html]: {
-    content: 'html',
-  },
-  [DefaultEditorId.preload]: {
-    content: 'preload',
-  },
-  [DefaultEditorId.css]: {
-    content: 'css',
-  },
-};
-
-const mockGetGists = {
-  get: async () => ({
-    data: {
-      files: mockGistFiles,
-    },
-  }),
-};
-
-const mockRepos = [
-  {
-    name: DefaultEditorId.main,
-    download_url: 'https://main',
-  },
-  {
-    name: DefaultEditorId.renderer,
-    download_url: 'https://renderer',
-  },
-  {
-    name: DefaultEditorId.html,
-    download_url: 'https://html',
-  },
-  {
-    name: DefaultEditorId.css,
-    download_url: 'https://css',
-  },
-  {
-    name: DefaultEditorId.preload,
-    download_url: 'https://preload',
-  },
-  {
-    name: 'other_stuff',
-    download_url: 'https://google.com',
-  },
-];
-
-const mockGetRepos = {
-  getContents: async () => ({
-    data: mockRepos,
-  }),
-};
 
 describe('RemoteLoader', () => {
   let instance: RemoteLoader;
   let app: AppMock;
   let store: StateMock;
+  let mockGistFiles: any;
+  let mockGetGists: any;
+  let mockRepos: any;
+  let mockGetRepos: any;
+  let editorValues: EditorValues;
 
   beforeEach(() => {
     ({ app } = (window as any).ElectronFiddle);
@@ -86,6 +32,26 @@ describe('RemoteLoader', () => {
       '4.0.0-beta': { version: '4.0.0-beta' },
     } as any);
     instance = new RemoteLoader(store as any);
+
+    editorValues = createEditorValues();
+
+    mockGistFiles = Object.fromEntries(
+      Object.entries(editorValues).map(([id, content]) => [id, { content }]),
+    );
+    mockGetGists = {
+      get: jest.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
+    };
+
+    mockRepos = [
+      ...Object.keys(editorValues).map((name) => ({
+        name,
+        download_url: `https://${name}`,
+      })),
+      { name: 'stuff', download_url: 'https://google.com/' },
+    ];
+    mockGetRepos = {
+      getContents: jest.fn().mockResolvedValue({ data: mockRepos }),
+    };
   });
 
   afterEach(() => {
@@ -94,55 +60,37 @@ describe('RemoteLoader', () => {
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
+      const gistId = 'abcdtestid';
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
-      store.gistId = 'abcdtestid';
+      store.gistId = gistId;
 
-      const result = await instance.fetchGistAndLoad('abcdtestid');
+      const result = await instance.fetchGistAndLoad(gistId);
 
       expect(result).toBe(true);
-      expect(app.replaceFiddle).toBeCalledWith(
-        {
-          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
-          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
-          [DefaultEditorId.renderer]:
-            mockGistFiles[DefaultEditorId.renderer].content,
-          [DefaultEditorId.preload]:
-            mockGistFiles[DefaultEditorId.preload].content,
-          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
-        },
-        { gistId: 'abcdtestid' },
-      );
+      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
     it('loads a fiddle with a custom editor', async () => {
-      store.gistId = 'customtestid';
+      const filename = 'file.js';
+      const content = '// hello!';
+      const gistId = 'customtestid';
 
-      const file = 'file.js';
-      mockGistFiles[file] = { content: 'hello' };
+      store.gistId = gistId;
+
+      editorValues[filename] = content;
+      mockGistFiles[filename] = { content };
       mockRepos.push({
-        name: file,
-        download_url: 'https://file',
+        name: filename,
+        download_url: `https://${filename}`,
       });
 
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
 
-      const result = await instance.fetchGistAndLoad('customtestid');
+      const result = await instance.fetchGistAndLoad(gistId);
 
       expect(result).toBe(true);
-      expect(app.replaceFiddle).toBeCalledWith(
-        {
-          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
-          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
-          [DefaultEditorId.renderer]:
-            mockGistFiles[DefaultEditorId.renderer].content,
-          [DefaultEditorId.preload]:
-            mockGistFiles[DefaultEditorId.preload].content,
-          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
-          [file]: mockGistFiles[file].content,
-        },
-        { gistId: 'customtestid' },
-      );
+      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
     it('handles an error', async () => {
@@ -171,18 +119,17 @@ describe('RemoteLoader', () => {
     });
 
     it('loads an Electron example', async () => {
-      (getOctokit as jest.Mock).mockResolvedValue({ repos: mockGetRepos });
+      (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
 
       await instance.fetchExampleAndLoad('4.0.0', 'test/path');
 
+      const expectedValues = {};
+      for (const filename of Object.keys(mockGistFiles)) {
+        expectedValues[filename] = filename;
+      }
+      expect(app.replaceFiddle).toHaveBeenCalledTimes(1);
       expect(app.replaceFiddle).toHaveBeenCalledWith(
-        expect.objectContaining({
-          [DefaultEditorId.html]: DefaultEditorId.html,
-          [DefaultEditorId.main]: DefaultEditorId.main,
-          [DefaultEditorId.renderer]: DefaultEditorId.renderer,
-          [DefaultEditorId.css]: DefaultEditorId.css,
-          [DefaultEditorId.preload]: DefaultEditorId.preload,
-        }),
+        expectedValues,
         expect.anything(),
       );
     });
