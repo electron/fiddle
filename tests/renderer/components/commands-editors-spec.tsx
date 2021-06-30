@@ -100,6 +100,7 @@ describe('EditorDropdown component', () => {
       const dropdown = wrapper.instance() as EditorDropdown;
       return { dropdown, wrapper };
     }
+
     it('can add a new file', async () => {
       // setup: pick a file id that's new to editorMosaic
       const file = 'file.js';
@@ -118,6 +119,16 @@ describe('EditorDropdown component', () => {
       expect(addSpy).toHaveBeenCalledTimes(1);
       expect(showSpy).toHaveBeenCalledTimes(1);
       expect(editorMosaic.files.has(file)).toBe(true);
+    });
+
+    it('does not add a file if user cancels', async () => {
+      store.showInputDialog = jest.fn().mockReturnValue(undefined);
+      const { dropdown } = createEditorDropdown();
+
+      await dropdown.addNewFile();
+      expect(store.showInputDialog).toHaveBeenCalled();
+      expect(store.showErrorDialog).not.toHaveBeenCalled();
+      expect(showSpy).not.toHaveBeenCalled();
     });
 
     it('does not add duplicate files', async () => {
