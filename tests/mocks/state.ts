@@ -93,17 +93,6 @@ export class StateMock {
     this.versions = obj;
     this.currentElectronVersion = arr[arr.length - 1];
     this.version = this.currentElectronVersion.version;
-
-    /*
-    for (const filename of [
-      DefaultEditorId.main,
-      DefaultEditorId.renderer,
-      DefaultEditorId.html,
-      DefaultEditorId.preload,
-    ]) {
-      this.editorMosaic.addEditor(filename, new MonacoEditorMock() as any);
-    }
-    */
   }
 
   public initVersions(
