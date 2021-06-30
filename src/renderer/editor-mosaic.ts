@@ -201,7 +201,6 @@ export class EditorMosaic {
     this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
   }
 
-
   /** Wire up a newly-mounted Monaco editor */
   @action public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
@@ -247,7 +246,7 @@ export class EditorMosaic {
 
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
-  public layout() {
+  public layout = () => {
     const DEBOUNCE_MSEC = 50;
     if (!this.layoutDebounce) {
       this.layoutDebounce = setTimeout(() => {
@@ -255,7 +254,7 @@ export class EditorMosaic {
         delete this.layoutDebounce;
       }, DEBOUNCE_MSEC);
     }
-  }
+  };
 
   public focusedEditor(): Editor | undefined {
     return [...this.editors.values()].find((editor) => editor.hasTextFocus());
