@@ -1,7 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { DefaultEditorId, MAIN_JS } from '../../../src/interfaces';
+import { MAIN_JS } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
 
 import { StateMock } from '../../mocks/mocks';
@@ -21,7 +21,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
         setFocused={() => undefined}
       />,
     );
@@ -35,7 +35,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
         setFocused={() => undefined}
       />,
     );
@@ -47,7 +47,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.html}
+        id={'index.html'}
         setFocused={() => undefined}
       />,
     );
@@ -59,7 +59,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.css}
+        id={'foo.css'}
         setFocused={() => undefined}
       />,
     );
@@ -73,7 +73,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
         setFocused={() => undefined}
       />,
     );
