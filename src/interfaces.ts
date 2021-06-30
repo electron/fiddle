@@ -124,14 +124,6 @@ export enum DefaultEditorId {
   'css' = 'styles.css',
 }
 
-export const DEFAULT_EDITORS = [
-  DefaultEditorId.main,
-  DefaultEditorId.renderer,
-  DefaultEditorId.preload,
-  DefaultEditorId.html,
-  DefaultEditorId.css,
-];
-
 // main.js gets special treatment: it is required as the entry point
 // when we run fiddles or create a package.json to package fiddles.
 export const MAIN_JS = DefaultEditorId.main;

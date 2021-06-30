@@ -5,7 +5,7 @@
   "testURL": "http://localhost",
   "testRegex": "(-spec)\\.(ts|tsx)$",
   "resetMocks": true,
-  "bail": true,
+  "bail": false,
   "resetModules": true,
   "snapshotSerializers": [
     "enzyme-to-json/serializer"
