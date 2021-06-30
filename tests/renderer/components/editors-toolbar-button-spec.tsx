@@ -92,6 +92,9 @@ describe('Editor toolbar button component', () => {
     });
 
     it('handles a click', () => {
+      const { editorMosaic } = store;
+      const hideSpy = jest.spyOn(editorMosaic, 'hide');
+
       const wrapper = shallow(
         <RemoveButton id={DefaultEditorId.main} appState={store as any} />,
         {
@@ -100,7 +103,7 @@ describe('Editor toolbar button component', () => {
       );
 
       wrapper.dive().dive().find('button').simulate('click');
-      expect(store.editorMosaic.hide).toHaveBeenCalledTimes(1);
+      expect(hideSpy).toHaveBeenCalledTimes(1);
     });
   });
 });

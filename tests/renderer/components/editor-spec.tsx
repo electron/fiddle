@@ -87,8 +87,12 @@ describe('Editor component', () => {
 
   describe('initMonaco()', async () => {
     it('calls editorMosaic.addEditor', async () => {
-      const id = MAIN_JS;
       const didMount = jest.fn();
+      const { editorMosaic } = store;
+      const addEditorSpy = jest.spyOn(editorMosaic, 'addEditor');
+
+      const id = MAIN_JS;
+      editorMosaic.set({ [MAIN_JS]: '// content' });
       const wrapper = shallow(
         <Editor
           appState={store as any}
@@ -100,24 +104,21 @@ describe('Editor component', () => {
         />,
       );
       const instance: any = wrapper.instance();
-
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
 
       expect(didMount).toHaveBeenCalled();
-      expect(store.editorMosaic.addEditor).toHaveBeenCalledWith(
-        id,
-        expect.anything(),
-      );
+      expect(addEditorSpy).toHaveBeenCalledWith(id, expect.anything());
     });
 
     it('sets up a listener on focused text editor', async () => {
+      store.editorMosaic.set({ [MAIN_JS]: '// content' });
       const wrapper = shallow(
         <Editor
           appState={store as any}
           monaco={monaco}
           monacoOptions={{}}
-          id={DefaultEditorId.main}
+          id={MAIN_JS}
           editorDidMount={() => undefined}
           setFocused={() => undefined}
         />,
@@ -132,12 +133,14 @@ describe('Editor component', () => {
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
     const didMount = jest.fn();
+
+    store.editorMosaic.set({ [MAIN_JS]: '// content' });
     const wrapper = shallow(
       <Editor
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={DefaultEditorId.main}
+        id={MAIN_JS}
         editorDidMount={didMount}
         setFocused={() => undefined}
       />,

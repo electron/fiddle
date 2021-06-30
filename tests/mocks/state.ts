@@ -8,10 +8,10 @@ import {
   GistActionState,
   RunnableVersion,
 } from '../../src/interfaces';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
-import { EditorMosaicMock } from './editor-mosaic';
 import { MonacoEditorMock } from './monaco';
 import { VersionsMock } from './electron-versions';
 
@@ -19,7 +19,7 @@ export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
   @observable public activeGistAction = GistActionState.none;
   @observable public channelsToShow: ElectronReleaseChannel[] = [];
-  @observable public editorMosaic = new EditorMosaicMock();
+  @observable public editorMosaic = new EditorMosaic();
   @observable public environmentVariables: string[] = [];
   @observable public executionFlags: string[] = [];
   @observable public genericDialogLastInput: string | null = null;
@@ -96,14 +96,16 @@ export class StateMock {
     this.currentElectronVersion = arr[arr.length - 1];
     this.version = this.currentElectronVersion.version;
 
+    /*
     for (const filename of [
       DefaultEditorId.main,
       DefaultEditorId.renderer,
       DefaultEditorId.html,
       DefaultEditorId.preload,
     ]) {
-      this.editorMosaic.addEditor(filename, new MonacoEditorMock());
+      this.editorMosaic.addEditor(filename, new MonacoEditorMock() as any);
     }
+    */
   }
 
   public initVersions(
