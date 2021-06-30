@@ -234,7 +234,7 @@ export class EditorMosaic {
 
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
-  public layout() {
+  public layout = () => {
     const DEBOUNCE_MSEC = 50;
     if (!this.layoutDebounce) {
       this.layoutDebounce = setTimeout(() => {
@@ -242,7 +242,7 @@ export class EditorMosaic {
         delete this.layoutDebounce;
       }, DEBOUNCE_MSEC);
     }
-  }
+  };
 
   public focusedEditor(): Editor | undefined {
     return [...this.editors.values()].find((editor) => editor.hasTextFocus());
