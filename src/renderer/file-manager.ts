@@ -63,14 +63,13 @@ export class FileManager {
    */
   public async openFiddle(filePath: string) {
     const { app } = window.ElectronFiddle;
-    const { confirmAddFile } = app.remoteLoader;
 
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
     for (const [name, value] of Object.entries(await readFiddle(filePath))) {
-      if (isKnownFile(name) || (await confirmAddFile(name))) {
+      if (isKnownFile(name) || (await app.remoteLoader.confirmAddFile(name))) {
         editorValues[name] = value;
       }
     }

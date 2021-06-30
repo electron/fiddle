@@ -15,16 +15,16 @@ export function isKnownFile(filename: string): boolean {
   return KNOWN_FILES.includes(filename);
 }
 
-const TITLE_MAP: Record<EditorId, string> = Object.freeze({
-  [MAIN_JS]: `Main Process (${MAIN_JS})`,
-  'renderer.js': 'Renderer Process (renderer.js)',
-  'index.html': 'HTML (index.html)',
-  'preload.js': 'Preload (preload.js)',
-  'styles.css': 'Stylesheet (styles.css)',
-});
+const TITLE_MAP = new Map<EditorId, string>([
+  [MAIN_JS, `Main Process (${MAIN_JS})`],
+  ['renderer.js', 'Renderer Process (renderer.js)'],
+  ['index.html', 'HTML (index.html)'],
+  ['preload.js', 'Preload (preload.js)'],
+  ['styles.css', 'Stylesheet (styles.css)'],
+]);
 
 export function getEditorTitle(id: EditorId): string {
-  return TITLE_MAP[id] || id;
+  return TITLE_MAP.get(id) || id;
 }
 
 const EMPTY_EDITOR_CONTENT = {

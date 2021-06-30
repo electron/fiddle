@@ -29,13 +29,21 @@ class OctokitMock {
   };
 }
 
+type GistFile = { content: string };
+type GistFiles = { [id: string]: GistFile };
+type GistCreateOpts = {
+  description: string;
+  files: GistFiles;
+  public: boolean;
+};
+
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
   const errorMessage = '💀';
   let app: AppMock;
   let mocktokit: OctokitMock;
   let state: StateMock;
-  let expectedGistCreateOpts: any;
+  let expectedGistCreateOpts: GistCreateOpts;
 
   beforeEach(() => {
     ({ app } = (window as any).ElectronFiddle);
@@ -50,8 +58,11 @@ describe('Action button component', () => {
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
-    const files = Object.fromEntries(
-      Object.entries(editorValues).map(([id, content]) => [id, { content }]),
+    const files: GistFiles = Object.fromEntries(
+      Object.entries(editorValues).map(([id, content]) => [
+        id,
+        { content } as GistFile,
+      ]),
     );
     expectedGistCreateOpts = { description, files, public: true } as const;
   });
@@ -200,7 +211,7 @@ describe('Action button component', () => {
 
       expect(mocktokit.gists.update).toHaveBeenCalledWith({
         gist_id: gistId,
-        files: expectedGistCreateOpts.files,
+        files: expectedGistCreateOpts.files as unknown,
       });
     });
 

@@ -23,7 +23,6 @@ export class RemoteLoader {
       'loadFiddleFromElectronExample',
       'loadFiddleFromGist',
       'setElectronVersionWithRef',
-      'confirmAddFile',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
     ]) {
@@ -198,13 +197,13 @@ export class RemoteLoader {
     }
   }
 
-  public confirmAddFile(filename: string): Promise<boolean> {
+  public confirmAddFile = (filename: string): Promise<boolean> => {
     return this.appState.showConfirmDialog({
       cancel: 'Skip',
       label: `Do you want to add "${filename}"?`,
       ok: 'Add',
     });
-  }
+  };
 
   /**
    * Verifies from the user that we should be loading this fiddle.

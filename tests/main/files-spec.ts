@@ -147,10 +147,10 @@ describe('files', () => {
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       (fs.readdirSync as jest.Mock).mockReturnValue([MAIN_JS]);
 
-      let caughtError = undefined;
+      let caughtError: unknown;
       try {
         await showSaveDialog();
-      } catch (error) {
+      } catch (error: unknown) {
         caughtError = error;
       }
 

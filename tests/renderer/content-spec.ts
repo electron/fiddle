@@ -133,7 +133,7 @@ describe('content', () => {
       }
     });
 
-    it('returns the same promise if the work is already pending', async () => {
+    it('returns the same promise if the work is already pending', () => {
       const version = VERSION_IN_FIXTURES;
       const a = getTemplate(version);
       const b = getTemplate(version);

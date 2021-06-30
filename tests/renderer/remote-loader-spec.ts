@@ -13,14 +13,17 @@ import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
 
 jest.mock('../../src/utils/octokit');
 
+type GistFile = { content: string };
+type GistFiles = { [id: string]: GistFile };
+
 describe('RemoteLoader', () => {
   let instance: RemoteLoader;
   let app: AppMock;
   let store: StateMock;
-  let mockGistFiles: any;
-  let mockGetGists: any;
-  let mockRepos: any;
-  let mockGetRepos: any;
+  let mockGistFiles: GistFiles;
+  let mockGetGists: { get: () => Promise<{ files: GistFiles }> };
+  let mockRepos: Array<{ name: string; download_url: string }>;
+  let mockGetRepos: { getContents: () => Promise<{ data: typeof mockRepos }> };
   let editorValues: EditorValues;
 
   beforeEach(() => {
@@ -37,7 +40,10 @@ describe('RemoteLoader', () => {
     editorValues = createEditorValues();
 
     mockGistFiles = Object.fromEntries(
-      Object.entries(editorValues).map(([id, content]) => [id, { content }]),
+      Object.entries(editorValues).map(([id, content]) => [
+        id,
+        { content: content as string },
+      ]),
     );
     mockGetGists = {
       get: jest.fn().mockResolvedValue({ data: { files: mockGistFiles } }),

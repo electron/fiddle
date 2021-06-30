@@ -35,10 +35,6 @@ export class EditorDropdown extends React.Component<
 > {
   constructor(props: EditorDropdownProps) {
     super(props);
-
-    this.onItemClick = this.onItemClick.bind(this);
-    this.addNewFile = this.addNewFile.bind(this);
-    this.removeFile = this.removeFile.bind(this);
   }
 
   public render() {
@@ -92,7 +88,7 @@ export class EditorDropdown extends React.Component<
             <MenuItem
               icon={'cross'}
               id={id}
-              onClick={this.removeFile}
+              onClick={(event: React.MouseEvent) => this.removeFile(event)}
               text={'Remove'}
             />
           </MenuItem>,
@@ -127,7 +123,7 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async addNewFile() {
+  public addNewFile = async () => {
     const { appState } = this.props;
 
     const filename = await appState.showInputDialog({
@@ -146,19 +142,19 @@ export class EditorDropdown extends React.Component<
     } catch (error) {
       appState.showErrorDialog(error.message);
     }
-  }
+  };
 
-  public async removeFile(event: React.MouseEvent) {
+  public removeFile = (event: React.MouseEvent) => {
     const { id } = event.currentTarget;
     const { editorMosaic } = this.props.appState;
 
     editorMosaic.hide(id as EditorId);
-  }
+  };
 
-  public onItemClick(event: React.MouseEvent) {
+  public onItemClick = (event: React.MouseEvent) => {
     const { id } = event.currentTarget;
     const { editorMosaic } = this.props.appState;
 
     editorMosaic.toggle(id as EditorId);
-  }
+  };
 }

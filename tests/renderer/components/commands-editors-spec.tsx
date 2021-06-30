@@ -93,6 +93,13 @@ describe('EditorDropdown component', () => {
   });
 
   describe('addNewFile()', () => {
+    function createEditorDropdown() {
+      const wrapper = mount(
+        <EditorDropdown appState={(store as unknown) as AppState} />,
+      );
+      const dropdown = wrapper.instance() as EditorDropdown;
+      return { dropdown, wrapper };
+    }
     it('can add a new file', async () => {
       // setup: pick a file id that's new to editorMosaic
       const file = 'file.js';
@@ -100,8 +107,7 @@ describe('EditorDropdown component', () => {
       const addSpy = jest.spyOn(editorMosaic, 'addNewFile');
       expect(editorMosaic.files.has(file)).toBe(false);
 
-      const wrapper = mount(<EditorDropdown appState={store as any} />);
-      const dropdown = wrapper.instance() as EditorDropdown;
+      const { dropdown } = createEditorDropdown();
       await dropdown.addNewFile();
 
       expect(store.showInputDialog).toHaveBeenCalledWith({
@@ -120,8 +126,7 @@ describe('EditorDropdown component', () => {
       store.showInputDialog = jest.fn().mockReturnValue(dupe);
       expect(editorMosaic.files.has(dupe as EditorId)).toBe(true);
 
-      const wrapper = mount(<EditorDropdown appState={store as any} />);
-      const dropdown = wrapper.instance() as EditorDropdown;
+      const { dropdown } = createEditorDropdown();
       await dropdown.addNewFile();
 
       expect(store.showInputDialog).toHaveBeenCalledWith({
@@ -142,8 +147,7 @@ describe('EditorDropdown component', () => {
       store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
       expect(isSupportedFile(badFile)).toBe(false);
 
-      const wrapper = mount(<EditorDropdown appState={store as any} />);
-      const dropdown = wrapper.instance() as EditorDropdown;
+      const { dropdown } = createEditorDropdown();
       await dropdown.addNewFile();
 
       expect(store.showInputDialog).toHaveBeenCalledWith({
@@ -169,9 +173,7 @@ describe('EditorDropdown component', () => {
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
 
-    dropdown.removeFile({
-      currentTarget: { id: file },
-    } as any);
+    dropdown.removeFile({ currentTarget: { id: file } } as any);
     expect(editorMosaic.files.get(file)).toBe(EditorPresence.Hidden);
   });
 });
