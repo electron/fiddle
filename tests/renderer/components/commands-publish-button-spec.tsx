@@ -3,6 +3,7 @@ import { shallow } from 'enzyme';
 
 import {
   DefaultEditorId,
+  MAIN_JS,
   GistActionState,
   GistActionType,
 } from '../../../src/interfaces';
@@ -145,11 +146,7 @@ describe('Action button component', () => {
       expect(mocktokit.gists.create).toHaveBeenCalledWith({
         ...gistCreateOpts,
         files: {
-          [DefaultEditorId.html]: { content: '<!-- Empty -->' },
-          [DefaultEditorId.renderer]: { content: '// Empty' },
-          [DefaultEditorId.main]: { content: '// Empty' },
-          [DefaultEditorId.preload]: { content: '// Empty' },
-          [DefaultEditorId.css]: { content: '/* Empty */' },
+          [MAIN_JS]: { content: '// Empty' },
         },
       });
     });
