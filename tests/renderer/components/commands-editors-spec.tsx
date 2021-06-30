@@ -92,70 +92,71 @@ describe('EditorDropdown component', () => {
     }
   });
 
-  it('can add a valid custom editor', async () => {
-    const file = 'file.js';
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(file);
-    const addSpy = jest.spyOn(editorMosaic, 'addNewFile');
+  describe('addNewFile()', () => {
+    it('can add a valid custom editor', async () => {
+      // setup: pick a file id that's new to editorMosaic
+      const file = 'file.js';
+      store.showInputDialog = jest.fn().mockResolvedValueOnce(file);
+      const addSpy = jest.spyOn(editorMosaic, 'addNewFile');
+      expect(editorMosaic.files.has(file)).toBe(false);
 
-    const wrapper = mount(<EditorDropdown appState={store as any} />);
-    const dropdown = wrapper.instance() as EditorDropdown;
-    await dropdown.addNewFile();
+      const wrapper = mount(<EditorDropdown appState={store as any} />);
+      const dropdown = wrapper.instance() as EditorDropdown;
+      await dropdown.addNewFile();
 
-    expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a name for your new file',
-      ok: 'Create',
-      placeholder: 'file.js',
+      expect(store.showInputDialog).toHaveBeenCalledWith({
+        label: 'Enter a name for your new file',
+        ok: 'Create',
+        placeholder: 'file.js',
+      });
+      expect(addSpy).toHaveBeenCalledTimes(1);
+      expect(showSpy).toHaveBeenCalledTimes(1);
+      expect(editorMosaic.files.has(file)).toBe(true);
     });
 
-    expect(addSpy).toHaveBeenCalledTimes(1);
-    expect(showSpy).toHaveBeenCalledTimes(1);
-    expect(editorMosaic.files.has(file)).toBe(true);
-  });
+    it('errors when trying to add a duplicate file', async () => {
+      // setup: pick a file id that's already in editorMosaic
+      const dupe = Object.keys(editorMosaic.values()).pop();
+      store.showInputDialog = jest.fn().mockReturnValue(dupe);
+      expect(editorMosaic.files.has(dupe as EditorId)).toBe(true);
 
-  it('errors when trying to add a duplicate custom editor', async () => {
-    const dupe = Object.keys(editorMosaic.values()).pop();
-    store.showInputDialog = jest.fn().mockReturnValue(dupe);
+      const wrapper = mount(<EditorDropdown appState={store as any} />);
+      const dropdown = wrapper.instance() as EditorDropdown;
+      await dropdown.addNewFile();
 
-    const wrapper = mount(<EditorDropdown appState={store as any} />);
-    const dropdown = wrapper.instance() as EditorDropdown;
-    await dropdown.addNewFile();
-
-    expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a name for your new file',
-      ok: 'Create',
-      placeholder: 'file.js',
+      expect(store.showInputDialog).toHaveBeenCalledWith({
+        label: 'Enter a name for your new file',
+        ok: 'Create',
+        placeholder: 'file.js',
+      });
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(/file already exists/i),
+      );
+      expect(showSpy).not.toHaveBeenCalled();
     });
 
-    expect(store.showErrorDialog).toHaveBeenCalledWith(
-      expect.stringMatching(/file already exists/i),
-    );
+    it('errors when trying to add an unsupported file', async () => {
+      // setup: pick a file that is not supported
+      const badFile = 'unsupported.cpp' as EditorId;
+      store.showInputDialog = jest.fn().mockResolvedValueOnce(badFile);
+      store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
+      expect(isSupportedFile(badFile)).toBe(false);
 
-    expect(showSpy).not.toHaveBeenCalled();
-  });
+      const wrapper = mount(<EditorDropdown appState={store as any} />);
+      const dropdown = wrapper.instance() as EditorDropdown;
+      await dropdown.addNewFile();
 
-  it('errors when trying to add an invalid custom editor', async () => {
-    const badFile = 'bad.bad' as EditorId;
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(badFile);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
-
-    const wrapper = mount(<EditorDropdown appState={store as any} />);
-    const dropdown = wrapper.instance() as EditorDropdown;
-
-    await dropdown.addNewFile();
-
-    expect(store.showInputDialog).toHaveBeenCalledWith({
-      label: 'Enter a name for your new file',
-      ok: 'Create',
-      placeholder: 'file.js',
+      expect(store.showInputDialog).toHaveBeenCalledWith({
+        label: 'Enter a name for your new file',
+        ok: 'Create',
+        placeholder: 'file.js',
+      });
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(/cannot add file/i),
+      );
+      expect(showSpy).not.toHaveBeenCalled();
+      expect(store.editorMosaic.files.has(badFile)).toBe(false);
     });
-
-    expect(store.showErrorDialog).toHaveBeenCalledWith(
-      expect.stringMatching(/cannot add file/i),
-    );
-
-    const { editorMosaic } = store;
-    expect(showSpy).toHaveBeenCalledTimes(0);
-    expect(editorMosaic.files.has(badFile)).toBe(false);
   });
 
   it('can remove a custom editor', () => {
