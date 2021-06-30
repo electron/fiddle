@@ -1,5 +1,5 @@
 import * as path from 'path';
-import { EditorId, MAIN_JS } from '../interfaces';
+import { EditorId, EditorValues, MAIN_JS } from '../interfaces';
 
 // The order of these fields is the order that
 // they'll be sorted in the mosaic
@@ -14,8 +14,6 @@ const KNOWN_FILES: string[] = [
 export function isKnownFile(filename: string): boolean {
   return KNOWN_FILES.includes(filename);
 }
-
-export const requiredFiles = new Set<EditorId>([MAIN_JS]);
 
 const TITLE_MAP: Record<EditorId, string> = Object.freeze({
   [MAIN_JS]: `Main Process (${MAIN_JS})`,
@@ -47,8 +45,8 @@ export function isSupportedFile(filename: string): boolean {
   return /\.(css|html|js)$/i.test(filename);
 }
 
-// first go the defaults, in the order they appear in DEFAULT_EDITORS
-// then customs, sorted lexicographically
+// the KNOWN_FILES, in the order of that array, goes first.
+// then everything else, sorted lexigraphically
 export function compareEditors(a: EditorId, b: EditorId) {
   const ia = KNOWN_FILES.indexOf(a as any);
   const ib = KNOWN_FILES.indexOf(b as any);
@@ -63,4 +61,13 @@ export function monacoLanguage(filename: string) {
   if (suffix === 'css') return 'css';
   if (suffix === 'html') return 'html';
   return 'javascript';
+}
+
+export const requiredFiles = new Set<EditorId>([MAIN_JS]);
+
+export function ensureRequiredFiles(values: EditorValues): EditorValues {
+  for (const file of requiredFiles) {
+    values[file] ??= getEmptyContent(file);
+  }
+  return values;
 }
