@@ -191,16 +191,6 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('removeCustomMosaic()', () => {
-    it('removes a given custom mosaic', () => {
-      const file = 'file.js';
-      editorMosaic.customMosaics = [file];
-
-      editorMosaic.removeCustomMosaic(file);
-      expect(editorMosaic.customMosaics).toEqual([]);
-    });
-  });
-
   describe('resetLayout()', () => {
     it('resets editors to their original arrangement', () => {
       const serializeState = () => [...editorMosaic.files.entries()];

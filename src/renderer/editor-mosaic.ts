@@ -191,17 +191,6 @@ export class EditorMosaic {
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
   }
 
-  /**
-   * Removes the panel for a given custom EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public removeCustomMosaic(id: EditorId) {
-    this.hide(id);
-    this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
-  }
-
-
   /** Wire up a newly-mounted Monaco editor */
   @action public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);

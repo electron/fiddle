@@ -154,7 +154,7 @@ export class EditorDropdown extends React.Component<
     const { editorMosaic } = this.props.appState;
 
     console.log(`EditorDropdown: Removing custom editor ${id}`);
-    editorMosaic.removeCustomMosaic(id as EditorId);
+    editorMosaic.hide(id as EditorId);
   }
 
   public onItemClick(event: React.MouseEvent) {
