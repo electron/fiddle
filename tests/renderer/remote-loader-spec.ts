@@ -4,11 +4,12 @@ import {
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
-import { ipcRendererManager } from '../../src/renderer/ipc';
-import { RemoteLoader } from '../../src/renderer/remote-loader';
-import { getOctokit } from '../../src/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
+import { RemoteLoader } from '../../src/renderer/remote-loader';
+import { getOctokit } from '../../src/utils/octokit';
+import { ipcRendererManager } from '../../src/renderer/ipc';
+import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
 
 jest.mock('../../src/utils/octokit');
 
@@ -70,10 +71,13 @@ describe('RemoteLoader', () => {
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
-    it('loads a fiddle with a custom editor', async () => {
+    it('loads a fiddle with a new file', async () => {
+      // setup: adding a new supported file
       const filename = 'file.js';
       const content = '// hello!';
       const gistId = 'customtestid';
+      expect(isKnownFile(filename)).toBe(false);
+      expect(isSupportedFile(filename)).toBe(true);
 
       store.gistId = gistId;
 
