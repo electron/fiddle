@@ -45,7 +45,7 @@ export function isSupportedFile(filename: string): boolean {
   return /\.(css|html|js)$/i.test(filename);
 }
 
-// the KNOWN_FILES, in the order of that array, goes first.
+// the KNOWN_FILES, in the order of that array, go first.
 // then everything else, sorted lexigraphically
 export function compareEditors(a: EditorId, b: EditorId) {
   const ia = KNOWN_FILES.indexOf(a as any);
@@ -63,7 +63,11 @@ export function monacoLanguage(filename: string) {
   return 'javascript';
 }
 
-export const requiredFiles = new Set<EditorId>([MAIN_JS]);
+const requiredFiles = new Set<EditorId>([MAIN_JS]);
+
+export function isRequiredFile(id: EditorId) {
+  return requiredFiles.has(id);
+}
 
 export function ensureRequiredFiles(values: EditorValues): EditorValues {
   for (const file of requiredFiles) {

@@ -12,7 +12,7 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { EditorId } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
-import { getEditorTitle, requiredFiles } from '../../utils/editor-utils';
+import { getEditorTitle, isRequiredFile } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
   value: string;
@@ -62,7 +62,8 @@ export class EditorDropdown extends React.Component<
       const icon = fileIsVisible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
 
-      if (requiredFiles.has(id)) {
+      if (isRequiredFile(id)) {
+        // Can't remove a required file.
         result.push(
           <MenuItem
             icon={icon}
