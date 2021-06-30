@@ -83,7 +83,7 @@ describe('FileManager', () => {
   describe('saveFiddle()', () => {
     it('saves all non-empty files in Fiddle', async () => {
       const values = { ...editorValues };
-      app.getEditorValues.mockReturnValue(values);
+      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
 
       await fm.saveFiddle('/fake/path');
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
@@ -91,10 +91,9 @@ describe('FileManager', () => {
 
     it('saves a fiddle with custom editors', async () => {
       const file = 'file.js';
-      const content = 'hi';
+      const content = '// hi';
       const values = { ...editorValues, [file]: content };
-      app.state.editorMosaic.customMosaics = [file];
-      app.getEditorValues.mockReturnValueOnce(values);
+      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
 
       await fm.saveFiddle('/fake/path');
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
@@ -250,10 +249,8 @@ describe('FileManager', () => {
       const content = '// file.js';
       const values = { ...editorValues, [file]: content };
       app.getEditorValues.mockReturnValue(values);
-      expected.set(file, content);
-      app.state.editorMosaic.customMosaics = [file];
 
-      expect(await fm.getFiles()).toStrictEqual(expected);
+      expect((await fm.getFiles()).get(file)).toStrictEqual(content);
     });
 
     it('applies transforms', async () => {

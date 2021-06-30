@@ -98,7 +98,7 @@ describe('EditorDropdown component', () => {
   it('can add a valid custom editor', async () => {
     const file = 'file.js';
     store.showInputDialog = jest.fn().mockResolvedValueOnce(file);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
+    const addSpy = jest.spyOn(editorMosaic, 'addNewFile');
 
     const wrapper = mount(<EditorDropdown appState={store as any} />);
     const dropdown = wrapper.instance() as EditorDropdown;
@@ -110,8 +110,9 @@ describe('EditorDropdown component', () => {
       placeholder: 'file.js',
     });
 
+    expect(addSpy).toHaveBeenCalledTimes(1);
     expect(showSpy).toHaveBeenCalledTimes(1);
-    expect(editorMosaic.customMosaics).toEqual([file]);
+    expect(editorMosaic.files.has(file)).toBe(true);
   });
 
   it('errors when trying to add a duplicate custom editor', async () => {
@@ -133,11 +134,10 @@ describe('EditorDropdown component', () => {
     );
 
     expect(showSpy).not.toHaveBeenCalled();
-    expect(editorMosaic.customMosaics).toEqual([]);
   });
 
   it('errors when trying to add an invalid custom editor', async () => {
-    const badFile = 'bad.bad';
+    const badFile = 'bad.bad' as EditorId;
     store.showInputDialog = jest.fn().mockResolvedValueOnce(badFile);
     store.showErrorDialog = jest.fn().mockResolvedValueOnce(undefined);
 
@@ -157,8 +157,8 @@ describe('EditorDropdown component', () => {
     );
 
     const { editorMosaic } = store;
-    expect(editorMosaic.customMosaics).toEqual([]);
     expect(showSpy).toHaveBeenCalledTimes(0);
+    expect(editorMosaic.files.has(badFile)).toBe(false);
   });
 
   it('can remove a custom editor', () => {

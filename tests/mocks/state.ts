@@ -2,7 +2,6 @@ import { observable } from 'mobx';
 
 import {
   BlockableAccelerator,
-  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GistActionState,
@@ -12,7 +11,6 @@ import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
-import { MonacoEditorMock } from './monaco';
 import { VersionsMock } from './electron-versions';
 
 export class StateMock {

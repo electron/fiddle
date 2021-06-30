@@ -143,7 +143,6 @@ export class EditorDropdown extends React.Component<
       const { editorMosaic } = appState;
       editorMosaic.addNewFile(id);
       editorMosaic.show(id);
-      editorMosaic.customMosaics.push(id);
     } catch (error) {
       appState.showErrorDialog(error.message);
     }
