@@ -23,7 +23,7 @@ export class RemoteLoader {
       'loadFiddleFromElectronExample',
       'loadFiddleFromGist',
       'setElectronVersionWithRef',
-      'verifyCreateCustomEditor',
+      'confirmAddFile',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
     ]) {
@@ -121,7 +121,7 @@ export class RemoteLoader {
         if (!isSupportedFile(id)) {
           continue;
         }
-        if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
+        if (isKnownFile(id) || (await this.confirmAddFile(id))) {
           values[id] = data.content;
         }
       }
@@ -198,11 +198,11 @@ export class RemoteLoader {
     }
   }
 
-  public verifyCreateCustomEditor(editorName: string): Promise<boolean> {
+  public confirmAddFile(filename: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
       cancel: 'Skip',
-      label: `Do you want to create a custom editor with name: ${editorName}?`,
-      ok: 'Create',
+      label: `Do you want to add "${filename}"?`,
+      ok: 'Add',
     });
   }
 

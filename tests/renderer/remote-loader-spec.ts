@@ -85,7 +85,7 @@ describe('RemoteLoader', () => {
       });
 
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
-      instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
+      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
 

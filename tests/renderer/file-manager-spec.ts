@@ -56,7 +56,7 @@ describe('FileManager', () => {
       const values = { ...editorValues, [file]: content };
       (readFiddle as jest.Mock).mockResolvedValue(values);
 
-      app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
+      app.remoteLoader.confirmAddFile.mockResolvedValue(true);
 
       await fm.openFiddle(filePath);
       expect(readFiddle).toHaveBeenCalledWith(filePath);
