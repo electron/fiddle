@@ -10,11 +10,21 @@ import { createEditorValues } from '../mocks/editor-values';
 
 describe('editor-utils', () => {
   describe('getEditorTitle', () => {
-    it('recognizes default titles', () => {
-      expect(getEditorTitle(MAIN_JS)).toBe('Main Process (main.js)');
+    it('recognizes known files', () => {
+      // setup: id is a known file
+      const id = MAIN_JS;
+      expect(isKnownFile(id));
+      expect(isSupportedFile(id));
+
+      expect(getEditorTitle(id)).toBe('Main Process (main.js)');
     });
-    it('recognizes custom titles', () => {
-      expect(getEditorTitle('foo.js')).toBe('Custom Editor (foo.js)');
+    it('recognizes supported files', () => {
+      // set up: id is supported but not known
+      const id = 'foo.js';
+      expect(!isKnownFile(id));
+      expect(isSupportedFile(id));
+
+      expect(getEditorTitle(id)).toBe(id);
     });
   });
 

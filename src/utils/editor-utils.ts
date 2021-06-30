@@ -24,7 +24,7 @@ const TITLE_MAP: Record<EditorId, string> = Object.freeze({
 });
 
 export function getEditorTitle(id: EditorId): string {
-  return TITLE_MAP[id] || `Custom Editor (${id})`;
+  return TITLE_MAP[id] || id;
 }
 
 const EMPTY_EDITOR_CONTENT = {
