@@ -1,6 +1,5 @@
 import * as fs from 'fs-extra';
 import semver from 'semver';
-import objectHash from 'object-hash';
 import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
@@ -469,37 +468,38 @@ export class AppState {
       return;
     }
 
-    const { localPath, version } = ver;
+    const { localPath, version: newVersion } = ver;
 
     if (localPath && !fs.existsSync(localPath)) {
       console.error(
-        `State: setVersion() got a version ${version} with missing binary`,
+        `State: setVersion() got a version ${newVersion} with missing binary`,
       );
 
       this.showErrorDialog(
-        `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
+        `Local Electron build missing for version ${newVersion} - please verify it is in the correct location or remove and re-add it.`,
       );
 
       await this.setVersion(this.versionsToShow[0].version);
       return;
     }
 
-    console.log(`State: Switching to Electron ${version}`);
+    console.log(`State: Switching to Electron ${newVersion}`);
+    this.version = newVersion;
 
     // if there's no current fiddle,
     // or if the current fiddle is the previous version's template,
     // then load the new version's template.
-    const current = this.editorMosaic.values();
-    if (
-      Object.keys(current).length === 0 ||
-      objectHash(current) === objectHash(await getTemplate(this.version))
-    ) {
-      const editorValues = await getTemplate(version);
-      const options: SetFiddleOptions = { templateName: version };
-      await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
+    const shouldReplace = () =>
+      this.editorMosaic.files.size === 0 ||
+      (this.templateName && !this.editorMosaic.isEdited);
+    if (shouldReplace()) {
+      const options: SetFiddleOptions = { templateName: newVersion };
+      const values = await getTemplate(newVersion);
+      // test again just in case something happened while we awaited that template
+      if (shouldReplace()) {
+        await window.ElectronFiddle.app.replaceFiddle(values, options);
+      }
     }
-
-    this.version = version;
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(ver);

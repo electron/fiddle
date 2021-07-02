@@ -371,16 +371,19 @@ describe('AppState', () => {
     });
 
     describe('loads the template for the new version', () => {
-      let nextVersion: string;
+      let newVersion: string;
+      let oldVersion: string;
       let replaceSpy: ReturnType<typeof jest.spyOn>;
+      const nextValues = createEditorValues();
 
       beforeEach(() => {
         // pick some version that differs from the current version
-        nextVersion = Object.keys(appState.versions)
-          .filter((version) => version !== appState.version)
+        oldVersion = appState.version;
+        newVersion = Object.keys(appState.versions)
+          .filter((version) => version !== oldVersion)
           .shift()!;
-        expect(nextVersion).not.toStrictEqual(appState.version);
-        expect(nextVersion).toBeTruthy();
+        expect(newVersion).not.toStrictEqual(oldVersion);
+        expect(newVersion).toBeTruthy();
 
         // spy on app.replaceFiddle
         replaceSpy = jest.spyOn(
@@ -388,51 +391,45 @@ describe('AppState', () => {
           'replaceFiddle',
         );
         replaceSpy.mockReset();
+
+        (getTemplate as jest.Mock).mockResolvedValue(nextValues);
       });
 
       it('if there is no current fiddle', async () => {
         // setup: current fiddle is empty
-        const currentValues = {};
-        appState.editorMosaic.set(currentValues);
-        const nextValues = createEditorValues();
-        (getTemplate as jest.Mock)
-          .mockReset()
-          .mockResolvedValueOnce(nextValues);
+        appState.editorMosaic.set({});
 
-        await appState.setVersion(nextVersion);
+        await appState.setVersion(newVersion);
         expect(replaceSpy).toHaveBeenCalledTimes(1);
         expect(replaceSpy).toHaveBeenCalledWith(nextValues, {
-          templateName: nextVersion,
+          templateName: newVersion,
         });
       });
 
-      it('if the current fiddle is the template for the previous version', async () => {
-        // setup: current fiddle matches previous version's template
-        const currentValues = { [MAIN_JS]: '// content' };
-        const nextValues = createEditorValues();
-        (getTemplate as jest.Mock).mockImplementation((version: string) => {
-          if (version === appState.version)
-            return Promise.resolve(currentValues);
-          if (version === nextVersion) return Promise.resolve(nextValues);
-          return Promise.reject(new Error(`Not expected in test ${version}`));
-        });
+      it('if the current fiddle is an unedited template', async () => {
+        appState.templateName = oldVersion;
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = false;
 
-        appState.editorMosaic.set(currentValues);
-        await appState.setVersion(nextVersion);
-        expect(replaceSpy).toHaveBeenCalledTimes(1);
-        expect(replaceSpy).toHaveBeenCalledWith(nextValues, {
-          templateName: nextVersion,
-        });
+        await appState.setVersion(newVersion);
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
       });
 
-      it('but not otherwise', async () => {
-        // setup: current fiddle is nonempty and is not equal to the template
-        const currentValues = { [MAIN_JS]: '// file one' };
-        const currentTemplate = { ...currentValues, 'foo.js': '// file two' };
-        appState.editorMosaic.set(currentValues);
-        (getTemplate as jest.Mock).mockResolvedValueOnce(currentTemplate);
+      it('but not if the current fiddle is edited', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = true;
+        appState.templateName = oldVersion;
 
-        await appState.setVersion(nextVersion);
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).not.toHaveBeenCalled();
+      });
+
+      it('but not if the current fiddle is not a template', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.localPath = '/some/path/to/a/fiddle';
+
+        await appState.setVersion(newVersion);
         expect(replaceSpy).not.toHaveBeenCalled();
       });
     });
