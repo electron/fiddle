@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import semver from 'semver';
+import objectHash from 'object-hash';
 import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
@@ -485,8 +486,14 @@ export class AppState {
 
     console.log(`State: Switching to Electron ${version}`);
 
-    // Should we update the editor?
-    if (!this.editorMosaic.isEdited) {
+    // if there's no current fiddle,
+    // or if the current fiddle is the previous version's template,
+    // then load the new version's template.
+    const current = this.editorMosaic.values();
+    if (
+      Object.keys(current).length === 0 ||
+      objectHash(current) === objectHash(await getTemplate(this.version))
+    ) {
       const editorValues = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
       await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
