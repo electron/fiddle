@@ -1,3 +1,4 @@
+import { EditorPresence } from '../../src/renderer/editor-mosaic';
 import { MonacoEditorMock } from './monaco';
 import { observable } from 'mobx';
 import { EditorId } from '../../src/interfaces';
@@ -9,7 +10,8 @@ export class EditorMosaicMock {
   @observable public customMosaics: EditorId[] = [];
   @observable public isEdited = false;
   @observable public numVisible = 0;
-  @observable private editors: Map<EditorId, Editor> = new Map();
+  @observable public files = new Map<EditorId, EditorPresence>();
+  @observable private editors = new Map<EditorId, Editor>();
 
   public addEditor = jest.fn();
   public hide = jest.fn();

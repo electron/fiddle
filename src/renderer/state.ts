@@ -468,34 +468,34 @@ export class AppState {
       return;
     }
 
-    const { localPath, version: newVersion } = ver;
+    const { localPath, version } = ver;
 
     if (localPath && !fs.existsSync(localPath)) {
       console.error(
-        `State: setVersion() got a version ${newVersion} with missing binary`,
+        `State: setVersion() got a version ${version} with missing binary`,
       );
 
       this.showErrorDialog(
-        `Local Electron build missing for version ${newVersion} - please verify it is in the correct location or remove and re-add it.`,
+        `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
       );
 
       await this.setVersion(this.versionsToShow[0].version);
       return;
     }
 
-    console.log(`State: Switching to Electron ${newVersion}`);
-    this.version = newVersion;
+    console.log(`State: Switching to Electron ${version}`);
+    this.version = version;
 
-    // if there's no current fiddle,
+    // If there's no current fiddle,
     // or if the current fiddle is the previous version's template,
     // then load the new version's template.
     const shouldReplace = () =>
-      this.editorMosaic.files.size === 0 ||
-      (this.templateName && !this.editorMosaic.isEdited);
+      this.editorMosaic.files.size === 0 || // no current fiddle
+      (this.templateName && !this.editorMosaic.isEdited); // unedited template
     if (shouldReplace()) {
-      const options: SetFiddleOptions = { templateName: newVersion };
-      const values = await getTemplate(newVersion);
-      // test again just in case something happened while we awaited that template
+      const options: SetFiddleOptions = { templateName: version };
+      const values = await getTemplate(version);
+      // test again just in case something happened while we awaited
       if (shouldReplace()) {
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       }

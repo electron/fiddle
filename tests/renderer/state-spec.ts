@@ -401,9 +401,8 @@ describe('AppState', () => {
 
         await appState.setVersion(newVersion);
         expect(replaceSpy).toHaveBeenCalledTimes(1);
-        expect(replaceSpy).toHaveBeenCalledWith(nextValues, {
-          templateName: newVersion,
-        });
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
       });
 
       it('if the current fiddle is an unedited template', async () => {

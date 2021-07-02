@@ -1,5 +1,5 @@
 import { App } from '../../src/renderer/app';
-import { DefaultEditorId, EditorValues } from '../../src/interfaces';
+import { DefaultEditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import { EditorMosaicMock, createEditorValues } from '../mocks/mocks';
 import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
@@ -51,6 +51,9 @@ describe('App component', () => {
       state,
     });
     ElectronFiddle.app = app;
+
+    state.editorMosaic.set({ [MAIN_JS]: '// content' });
+    state.editorMosaic.files.set(MAIN_JS, 'pending');
   });
 
   describe('setup()', () => {
