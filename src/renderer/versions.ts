@@ -274,9 +274,8 @@ export async function fetchVersions(): Promise<Version[]> {
   const MIN_DOWNLOAD_VERSION = semver.parse('0.24.0')!;
 
   const versions: Version[] = data
-    .map(({ version }) => semver.parse(version))
-    .filter((sem) => sem && semver.gte(sem, MIN_DOWNLOAD_VERSION))
-    .map((sem) => ({ version: sem!.version }));
+    .map(({ version }) => ({ version }))
+    .filter(({ version }) => semver.gte(version, MIN_DOWNLOAD_VERSION));
 
   console.log(`Fetched ${versions.length} new Electron versions`);
   if (versions?.length > 0) saveKnownVersions(versions);
