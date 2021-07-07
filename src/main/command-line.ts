@@ -19,7 +19,6 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     hideChannels: [],
   };
 
-  console.log(JSON.stringify(opts));
   const { betas, fiddle, full, nightlies, obsolete, version } = opts;
 
   if (fs.existsSync(fiddle)) {
