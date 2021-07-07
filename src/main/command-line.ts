@@ -19,7 +19,7 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     hideChannels: [],
   };
 
-  const { fiddle, version, betas, nightlies, obsolete } = opts;
+  const { betas, fiddle, full, nightlies, obsolete, version } = opts;
 
   if (fs.existsSync(fiddle)) {
     config.fiddle = { filePath: fiddle };
@@ -51,6 +51,16 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
     config.showChannels.push(ElectronReleaseChannel.nightly);
   } else if (nightlies === false) {
     config.hideChannels.push(ElectronReleaseChannel.nightly);
+  }
+
+  if (full) {
+    config.useObsolete = true;
+    config.hideChannels = [];
+    config.showChannels = [
+      ElectronReleaseChannel.beta,
+      ElectronReleaseChannel.nightly,
+      ElectronReleaseChannel.stable,
+    ];
   }
 
   return config;
@@ -118,6 +128,7 @@ export async function processCommandLine(argv: string[]) {
     .description('Find where regressions were introduced')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
     .option('--log-config', 'Log the fiddle version, platform, and args', false)
+    .option('--full', 'Shorthand --betas --nightlies --obsolete', false)
     .option('--nightlies', 'Include nightly releases')
     .option('--no-nightlies', 'Omit nightly releases')
     .option('--betas', 'Include beta releases')
@@ -140,7 +151,7 @@ export async function processCommandLine(argv: string[]) {
 
 Example calls:
   $ electron-fiddle bisect 10.0.0 11.2.0 --fiddle /path/to/fiddle
-  $ electron-fiddle bisect 10.0.0 11.2.0 --fiddle /path/to/fiddle --betas --nightlies
+  $ electron-fiddle bisect 10.0.0 11.2.0 --fiddle /path/to/fiddle --full
   $ electron-fiddle test --version 11.2.0 --fiddle /path/to/fiddle
   $ electron-fiddle test --version 11.2.0 --fiddle 8c5fc0c6a5153d49b5a4a56d3ed9da8f
   $ electron-fiddle test --version 11.2.0 --fiddle https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f/

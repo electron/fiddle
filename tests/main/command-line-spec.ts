@@ -131,6 +131,13 @@ describe('processCommandLine()', () => {
       expectBisectCalledOnceWith(expected);
     });
 
+    it('handles a --full option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--full'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.beta}","${ElectronReleaseChannel.nightly}","${ElectronReleaseChannel.stable}"],"useObsolete":true}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
     it('handles a --nightlies option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--nightlies'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.nightly}"]}}`;
