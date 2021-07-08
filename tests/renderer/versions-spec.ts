@@ -173,8 +173,8 @@ describe('versions', () => {
   describe('fetchVersions()', () => {
     it('fetches versions >= 0.24.0', async () => {
       const fetchMock = new FetchMock();
-      const url = 'https://unpkg.com/electron-releases/lite.json';
-      const filename = path.join(__dirname, '../mocks/unpkg-mock.json');
+      const url = 'https://electronjs.org/headers/index.json';
+      const filename = path.join(__dirname, '../mocks/versions-mock.json');
       const contents = fs.readFileSync(filename).toString();
       fetchMock.add(url, contents);
 
