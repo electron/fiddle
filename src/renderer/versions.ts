@@ -260,30 +260,26 @@ export async function getUpdatedElectronVersions(): Promise<
 }
 
 /**
- * Fetch the latest known versions directly from npm.
+ * Fetch a list of released versions from electronjs.org.
  *
- * @returns {Promise<Array<Version>>}
+ * @returns {Promise<Version[]>}
  */
-export async function fetchVersions() {
-  const response = await window.fetch(
-    'https://unpkg.com/electron-releases/lite.json',
-  );
-  const data = await response.json();
+export async function fetchVersions(): Promise<Version[]> {
+  const url = 'https://electronjs.org/headers/index.json';
+  const response = await window.fetch(url);
+  const data = (await response.json()) as { version: string }[];
 
   // pre-0.24.0 versions were technically 'atom-shell' and cannot
   // be downloaded with @electron/get
-  const MIN_DOWNLOAD_VERSION = '0.24.0';
+  const MIN_DOWNLOAD_VERSION = semver.parse('0.24.0')!;
 
-  const output = data
-    .map(({ version }: any) => ({ version }))
-    .filter(({ version }: any) => semver.gte(version, MIN_DOWNLOAD_VERSION));
+  const versions: Version[] = data
+    .map(({ version }) => ({ version }))
+    .filter(({ version }) => semver.gte(version, MIN_DOWNLOAD_VERSION));
 
-  if (output?.length > 0 && isExpectedFormat(output)) {
-    console.log(`Fetched new Electron versions (Count: ${output.length})`);
-    saveKnownVersions(output);
-  }
-
-  return output;
+  console.log(`Fetched ${versions.length} new Electron versions`);
+  if (versions?.length > 0) saveKnownVersions(versions);
+  return versions;
 }
 
 /**
