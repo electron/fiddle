@@ -1,4 +1,4 @@
-import { autorun, reaction } from 'mobx';
+import { autorun, reaction, when } from 'mobx';
 import * as path from 'path';
 
 import { ipcRenderer } from 'electron';
@@ -110,6 +110,10 @@ export class App {
       './components/output-editors-wrapper'
     );
     const { Header } = await import('./components/header');
+
+    // The AppState constructor started loading a fiddle.
+    // Wait for it here so the UI doesn't start life in `nonIdealState`.
+    await when(() => this.state.editorMosaic.files.size !== 0);
 
     const className = `${process.platform} container`;
     const app = (
