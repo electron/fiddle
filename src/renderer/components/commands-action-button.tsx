@@ -410,7 +410,9 @@ export class GistActionButton extends React.Component<
   private gistFilesList = (values: EditorValues) => {
     values = ensureRequiredFiles(values);
     return Object.fromEntries(
-      Object.entries(values).map(([id, content]) => [id, { content }]),
+      Object.entries(values)
+        .filter(([, content]) => Boolean(content))
+        .map(([id, content]) => [id, { content }]),
     );
   };
 }
