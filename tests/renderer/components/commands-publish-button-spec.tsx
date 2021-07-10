@@ -2,6 +2,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import {
+  EditorValues,
   MAIN_JS,
   GistActionState,
   GistActionType,
@@ -43,7 +44,16 @@ describe('Action button component', () => {
   let app: AppMock;
   let mocktokit: OctokitMock;
   let state: StateMock;
-  let expectedGistCreateOpts: GistCreateOpts;
+  let expectedGistOpts: GistCreateOpts;
+
+  function getGistFiles(values: EditorValues): GistFiles {
+    return Object.fromEntries(
+      Object.entries(values).map(([id, content]) => [
+        id,
+        { content } as GistFile,
+      ]),
+    );
+  }
 
   beforeEach(() => {
     ({ app } = (window as any).ElectronFiddle);
@@ -58,13 +68,8 @@ describe('Action button component', () => {
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
-    const files: GistFiles = Object.fromEntries(
-      Object.entries(editorValues).map(([id, content]) => [
-        id,
-        { content } as GistFile,
-      ]),
-    );
-    expectedGistCreateOpts = { description, files, public: true } as const;
+    const files = getGistFiles(editorValues);
+    expectedGistOpts = { description, files, public: true } as const;
   });
 
   function createActionButton() {
@@ -122,9 +127,7 @@ describe('Action button component', () => {
     it('publishes a gist', async () => {
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
-      expect(mocktokit.gists.create).toHaveBeenCalledWith(
-        expectedGistCreateOpts,
-      );
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
     });
 
     it('asks the user for a description', async () => {
@@ -132,7 +135,7 @@ describe('Action button component', () => {
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
       expect(mocktokit.gists.create).toHaveBeenCalledWith({
-        ...expectedGistCreateOpts,
+        ...expectedGistOpts,
         description,
       });
     });
@@ -143,18 +146,32 @@ describe('Action button component', () => {
       expect(mocktokit.gists.create).not.toHaveBeenCalled();
     });
 
-    it('handles missing content', async () => {
-      app.getEditorValues.mockReturnValueOnce({});
-      const { instance } = createActionButton();
-      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+    describe('empty files', () => {
+      it('are replaced with default content for required files', async () => {
+        const values = { [MAIN_JS]: '' } as const;
 
-      await instance.performGistAction();
+        app.getEditorValues.mockReturnValueOnce(values);
+        const { instance } = createActionButton();
+        state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+        await instance.performGistAction();
 
-      expect(mocktokit.gists.create).toHaveBeenCalledWith({
-        ...expectedGistCreateOpts,
-        files: {
-          [MAIN_JS]: { content: '// Empty' },
-        },
+        const files = getGistFiles(values);
+        const expected = { ...expectedGistOpts, files };
+        expect(mocktokit.gists.create).toHaveBeenCalledWith(expected);
+      });
+
+      it('are omitted if they are not required files', async () => {
+        const required = { [MAIN_JS]: '// fnord' };
+        const optional = { 'foo.js': '' };
+
+        app.getEditorValues.mockReturnValueOnce({ ...required, ...optional });
+        const { instance } = createActionButton();
+        state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+        await instance.performGistAction();
+
+        const files = getGistFiles(required);
+        const expected = { ...expectedGistOpts, files };
+        expect(mocktokit.gists.create).toHaveBeenCalledWith(expected);
       });
     });
 
@@ -176,7 +193,7 @@ describe('Action button component', () => {
       await instance.performGistAction();
       const { create } = mocktokit.gists;
       expect(create).toHaveBeenCalledWith({
-        ...expectedGistCreateOpts,
+        ...expectedGistOpts,
         public: false,
       });
     });
@@ -187,7 +204,7 @@ describe('Action button component', () => {
       await instance.performGistAction();
       const { create } = mocktokit.gists;
       expect(create).toHaveBeenCalledWith({
-        ...expectedGistCreateOpts,
+        ...expectedGistOpts,
         public: true,
       });
     });
@@ -211,7 +228,7 @@ describe('Action button component', () => {
 
       expect(mocktokit.gists.update).toHaveBeenCalledWith({
         gist_id: gistId,
-        files: expectedGistCreateOpts.files as unknown,
+        files: expectedGistOpts.files as unknown,
       });
     });
 

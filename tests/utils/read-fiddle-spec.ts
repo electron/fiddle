@@ -3,7 +3,11 @@ import * as path from 'path';
 
 import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { createEditorValues } from '../mocks/editor-values';
-import { getEmptyContent, isSupportedFile } from '../../src/utils/editor-utils';
+import {
+  ensureRequiredFiles,
+  getEmptyContent,
+  isSupportedFile,
+} from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
 
 describe('read-fiddle', () => {
@@ -64,6 +68,14 @@ describe('read-fiddle', () => {
     expect(fiddle).toStrictEqual(expected);
   });
 
+  function expectedOnReadError(values: EditorValues): EditorValues {
+    // empty strings since the files could not be read,
+    // and some truthy content in required files
+    return ensureRequiredFiles(
+      Object.fromEntries(Object.keys(values).map((id) => [id, ''])),
+    );
+  }
+
   it('handles read errors gracefully', async () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
@@ -72,11 +84,7 @@ describe('read-fiddle', () => {
     });
 
     const files = await readFiddle(folder);
-
-    const expectedFiles = Object.keys(mockValues);
-    expect(Object.keys(files)).toStrictEqual(expectedFiles);
-    Object.values(files).forEach((content) => expect(content).toBe(''));
-    expect(console.warn).toHaveBeenCalledTimes(expectedFiles.length);
+    expect(files).toStrictEqual(expectedOnReadError(mockValues));
   });
 
   it('ensures truthy even when read returns null', async () => {
@@ -85,9 +93,6 @@ describe('read-fiddle', () => {
     (fs.readFileSync as jest.Mock).mockReturnValue(null);
 
     const files = await readFiddle(folder);
-
-    expect(Object.keys(files)).toStrictEqual(Object.keys(mockValues));
-    Object.values(files).forEach((content) => expect(content).toBe(''));
-    expect(console.warn).toHaveBeenCalledTimes(0);
+    expect(files).toStrictEqual(expectedOnReadError(mockValues));
   });
 });

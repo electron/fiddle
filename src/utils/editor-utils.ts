@@ -71,7 +71,7 @@ export function isRequiredFile(id: EditorId) {
 
 export function ensureRequiredFiles(values: EditorValues): EditorValues {
   for (const file of requiredFiles) {
-    values[file] ??= getEmptyContent(file);
+    values[file] ||= getEmptyContent(file);
   }
   return values;
 }
