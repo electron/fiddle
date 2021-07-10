@@ -1,5 +1,5 @@
-import { EditorValues, MAIN_JS } from '../interfaces';
-import { isSupportedFile } from './editor-utils';
+import { EditorValues } from '../interfaces';
+import { ensureRequiredFiles, isSupportedFile } from './editor-utils';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
@@ -11,7 +11,7 @@ import * as path from 'path';
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
 export async function readFiddle(folder: string): Promise<EditorValues> {
-  const got: EditorValues = {};
+  let got: EditorValues = {};
 
   const tryRead = (name: string) => {
     try {
@@ -34,10 +34,7 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
     }
   }
 
-  if (!(MAIN_JS in got)) {
-    got[MAIN_JS] = '';
-  }
-
+  got = ensureRequiredFiles(got);
   console.log(`Got Fiddle from "${folder}". Found:`, Object.keys(got).sort());
   return got;
 }

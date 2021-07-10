@@ -3,7 +3,6 @@ import { AppMock } from './app';
 import { BisectorMock } from './bisector';
 import { BrowserWindowMock } from './browser-window';
 import { ChildProcessMock } from './child-process';
-import { EditorMosaicMock } from './editor-mosaic';
 import { ElectronFiddleMock } from './electron-fiddle';
 import { FileManagerMock } from './file-manager';
 import { MonacoEditorMock, MonacoMock, MonacoModelMock } from './monaco';
@@ -27,7 +26,6 @@ export {
   BisectorMock,
   BrowserWindowMock,
   ChildProcessMock,
-  EditorMosaicMock,
   ElectronFiddleMock,
   ElectronTypesMock,
   FileManagerMock,

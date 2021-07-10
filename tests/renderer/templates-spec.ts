@@ -1,4 +1,5 @@
 import { MAIN_JS } from '../../src/interfaces';
+import { getEmptyContent } from '../../src/utils/editor-utils';
 import { getTemplateValues } from '../../src/renderer/templates';
 
 jest.unmock('fs-extra');
@@ -15,7 +16,7 @@ describe('templates', () => {
 
     it('handles errors', async () => {
       const values = await getTemplateValues(KNOWN_BAD_TEMPLATE);
-      expect(values[MAIN_JS]).toBe('');
+      expect(values[MAIN_JS]).toBe(getEmptyContent(MAIN_JS));
     });
 
     it('reports missing files', async () => {

@@ -1,4 +1,4 @@
-import { DEFAULT_EDITORS, MAIN_JS } from '../../src/interfaces';
+import { MAIN_JS } from '../../src/interfaces';
 import {
   compareEditors,
   getEditorTitle,
@@ -6,14 +6,25 @@ import {
   isKnownFile,
   isSupportedFile,
 } from '../../src/utils/editor-utils';
+import { createEditorValues } from '../mocks/editor-values';
 
 describe('editor-utils', () => {
   describe('getEditorTitle', () => {
-    it('recognizes default titles', () => {
-      expect(getEditorTitle(MAIN_JS)).toBe('Main Process (main.js)');
+    it('recognizes known files', () => {
+      // setup: id is a known file
+      const id = MAIN_JS;
+      expect(isKnownFile(id));
+      expect(isSupportedFile(id));
+
+      expect(getEditorTitle(id)).toBe('Main Process (main.js)');
     });
-    it('recognizes custom titles', () => {
-      expect(getEditorTitle('foo.js')).toBe('Custom Editor (foo.js)');
+    it('recognizes supported files', () => {
+      // set up: id is supported but not known
+      const id = 'foo.js';
+      expect(!isKnownFile(id));
+      expect(isSupportedFile(id));
+
+      expect(getEditorTitle(id)).toBe(id);
     });
   });
 
@@ -28,7 +39,7 @@ describe('editor-utils', () => {
 
   describe('isKnownFile', () => {
     it('marks default editors as known files', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isKnownFile(id)).toBe(true);
       }
     });
@@ -36,7 +47,7 @@ describe('editor-utils', () => {
 
   describe('isSupportedFile', () => {
     it('supports all default editor types', () => {
-      for (const id of DEFAULT_EDITORS) {
+      for (const id of Object.keys(createEditorValues())) {
         expect(isSupportedFile(id)).toBe(true);
       }
     });
@@ -44,7 +55,7 @@ describe('editor-utils', () => {
 
   describe('compareEditors', () => {
     it('sorts known files in a consistent order', () => {
-      const ids = [...DEFAULT_EDITORS];
+      const ids = Object.keys(createEditorValues());
       const sorted1 = [...ids].sort(compareEditors);
       ids.push(ids.shift()!);
       ids.push(ids.shift()!);

@@ -33,7 +33,6 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
-  @observable public customMosaics: EditorId[] = [];
   @observable public isEdited = false;
 
   @computed public get files() {
@@ -91,7 +90,6 @@ export class EditorMosaic {
     // set() clears out the previous Fiddle, so clear our previous state
     // except for this.editors -- we recycle editors below in setFile()
     this.backups.clear();
-    this.customMosaics = [];
     this.mosaic = null;
 
     // add the files to the mosaic, recycling existing editors when possible.
@@ -189,16 +187,6 @@ export class EditorMosaic {
     }
 
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
-  }
-
-  /**
-   * Removes the panel for a given custom EditorId.
-   *
-   * @param {EditorId} id
-   */
-  @action public removeCustomMosaic(id: EditorId) {
-    this.hide(id);
-    this.customMosaics = this.customMosaics.filter((mosaic) => mosaic !== id);
   }
 
   /** Wire up a newly-mounted Monaco editor */

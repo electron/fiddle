@@ -2,11 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import * as content from '../../../src/renderer/content';
-import {
-  DefaultEditorId,
-  EditorValues,
-  MAIN_JS,
-} from '../../../src/interfaces';
+import { EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
@@ -69,7 +65,7 @@ describe('Editors component', () => {
   });
 
   describe('toggleEditorOption()', () => {
-    const filename = DefaultEditorId.html;
+    const filename = MAIN_JS;
 
     it('handles an error', () => {
       const editor = new MonacoEditorMock();
@@ -101,10 +97,7 @@ describe('Editors component', () => {
   it('renders a toolbar', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
-    const toolbar = instance.renderToolbar(
-      { title: DefaultEditorId.main } as any,
-      DefaultEditorId.main,
-    );
+    const toolbar = instance.renderToolbar({ title: MAIN_JS } as any, MAIN_JS);
 
     expect(toolbar).toMatchSnapshot();
   });
@@ -144,13 +137,7 @@ describe('Editors component', () => {
       expect(action.run).toHaveBeenCalled();
     });
 
-    const fakeValues = {
-      [DefaultEditorId.css]: '',
-      [DefaultEditorId.html]: '',
-      [DefaultEditorId.main]: 'hi',
-      [DefaultEditorId.preload]: '',
-      [DefaultEditorId.renderer]: '',
-    } as const;
+    const fakeValues = { [MAIN_JS]: 'hi' } as const;
 
     it('handles an FS_NEW_FIDDLE command', async () => {
       let resolve: any;
@@ -272,7 +259,7 @@ describe('Editors component', () => {
       const instance: Editors = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
-      const id = DefaultEditorId.html;
+      const id = MAIN_JS;
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
     });

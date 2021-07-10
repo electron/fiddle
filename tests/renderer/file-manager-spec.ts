@@ -6,9 +6,9 @@ import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { readFiddle } from '../../src/utils/read-fiddle';
+import { isSupportedFile } from '../../src/utils/editor-utils';
 
-import { AppMock } from '../mocks/mocks';
-import { createEditorValues } from '../mocks/editor-values';
+import { AppMock, createEditorValues } from '../mocks/mocks';
 
 jest.mock('fs-extra');
 jest.mock('tmp', () => ({
@@ -50,13 +50,13 @@ describe('FileManager', () => {
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, opts);
     });
 
-    it('opens a fiddle with custom editors', async () => {
+    it('opens a fiddle with supported files', async () => {
       const file = 'file.js';
-      const content = 'hey';
+      expect(isSupportedFile(file));
+      const content = '// content';
       const values = { ...editorValues, [file]: content };
       (readFiddle as jest.Mock).mockResolvedValue(values);
-
-      app.remoteLoader.verifyCreateCustomEditor.mockResolvedValue(true);
+      app.remoteLoader.confirmAddFile.mockResolvedValue(true);
 
       await fm.openFiddle(filePath);
       expect(readFiddle).toHaveBeenCalledWith(filePath);
@@ -83,18 +83,17 @@ describe('FileManager', () => {
   describe('saveFiddle()', () => {
     it('saves all non-empty files in Fiddle', async () => {
       const values = { ...editorValues };
-      app.getEditorValues.mockReturnValue(values);
+      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
 
       await fm.saveFiddle('/fake/path');
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
-    it('saves a fiddle with custom editors', async () => {
+    it('saves a fiddle with supported files', async () => {
       const file = 'file.js';
-      const content = 'hi';
+      const content = '// hi';
       const values = { ...editorValues, [file]: content };
-      app.state.editorMosaic.customMosaics = [file];
-      app.getEditorValues.mockReturnValueOnce(values);
+      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
 
       await fm.saveFiddle('/fake/path');
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
@@ -245,15 +244,14 @@ describe('FileManager', () => {
       expect(await fm.getFiles()).toStrictEqual(expected);
     });
 
-    it('includes custom editors', async () => {
+    it('includes supported files', async () => {
       const file = 'file.js';
       const content = '// file.js';
+      expect(isSupportedFile(file));
       const values = { ...editorValues, [file]: content };
-      app.getEditorValues.mockReturnValue(values);
-      expected.set(file, content);
-      app.state.editorMosaic.customMosaics = [file];
 
-      expect(await fm.getFiles()).toStrictEqual(expected);
+      app.getEditorValues.mockReturnValue(values);
+      expect((await fm.getFiles()).get(file)).toStrictEqual(content);
     });
 
     it('applies transforms', async () => {
