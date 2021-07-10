@@ -3,6 +3,7 @@ import {
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogType,
+  MAIN_JS,
   RunnableVersion,
   Version,
   VersionSource,
@@ -23,7 +24,7 @@ import {
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
-import { VersionsMock } from '../mocks/mocks';
+import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
@@ -369,16 +370,67 @@ describe('AppState', () => {
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
 
-    it('possibly updates the editors', async () => {
-      appState.versions['1.0.0'] = { version: '1.0.0' } as any;
-      appState.editorMosaic.isEdited = false;
-      (getTemplate as jest.Mock).mockReset().mockResolvedValueOnce({});
-      (window.ElectronFiddle.app.replaceFiddle as jest.Mock).mockReset();
+    describe('loads the template for the new version', () => {
+      let newVersion: string;
+      let oldVersion: string;
+      let replaceSpy: ReturnType<typeof jest.spyOn>;
+      const nextValues = createEditorValues();
 
-      await appState.setVersion('v1.0.0');
+      beforeEach(() => {
+        // pick some version that differs from the current version
+        oldVersion = appState.version;
+        newVersion = Object.keys(appState.versions)
+          .filter((version) => version !== oldVersion)
+          .shift()!;
+        expect(newVersion).not.toStrictEqual(oldVersion);
+        expect(newVersion).toBeTruthy();
 
-      expect(getTemplate).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
+        // spy on app.replaceFiddle
+        replaceSpy = jest.spyOn(
+          (window as any).ElectronFiddle.app,
+          'replaceFiddle',
+        );
+        replaceSpy.mockReset();
+
+        (getTemplate as jest.Mock).mockResolvedValue(nextValues);
+      });
+
+      it('if there is no current fiddle', async () => {
+        // setup: current fiddle is empty
+        appState.editorMosaic.set({});
+
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).toHaveBeenCalledTimes(1);
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
+      });
+
+      it('if the current fiddle is an unedited template', async () => {
+        appState.templateName = oldVersion;
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = false;
+
+        await appState.setVersion(newVersion);
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
+      });
+
+      it('but not if the current fiddle is edited', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = true;
+        appState.templateName = oldVersion;
+
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).not.toHaveBeenCalled();
+      });
+
+      it('but not if the current fiddle is not a template', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.localPath = '/some/path/to/a/fiddle';
+
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).not.toHaveBeenCalled();
+      });
     });
 
     it('updates typescript definitions', async () => {

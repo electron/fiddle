@@ -51,6 +51,9 @@ describe('App component', () => {
       state,
     });
     ElectronFiddle.app = app;
+
+    state.editorMosaic.set({ [MAIN_JS]: '// content' });
+    state.editorMosaic.files.set(MAIN_JS, 'pending');
   });
 
   describe('setup()', () => {

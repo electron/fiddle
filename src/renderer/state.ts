@@ -484,15 +484,22 @@ export class AppState {
     }
 
     console.log(`State: Switching to Electron ${version}`);
-
-    // Should we update the editor?
-    if (!this.editorMosaic.isEdited) {
-      const editorValues = await getTemplate(version);
-      const options: SetFiddleOptions = { templateName: version };
-      await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
-    }
-
     this.version = version;
+
+    // If there's no current fiddle,
+    // or if the current fiddle is the previous version's template,
+    // then load the new version's template.
+    const shouldReplace = () =>
+      this.editorMosaic.files.size === 0 || // no current fiddle
+      (this.templateName && !this.editorMosaic.isEdited); // unedited template
+    if (shouldReplace()) {
+      const options: SetFiddleOptions = { templateName: version };
+      const values = await getTemplate(version);
+      // test again just in case something happened while we awaited
+      if (shouldReplace()) {
+        await window.ElectronFiddle.app.replaceFiddle(values, options);
+      }
+    }
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(ver);
