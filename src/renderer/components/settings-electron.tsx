@@ -75,6 +75,17 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
+   * Toggles visibility of non-downloaded versions
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   */
+  public handleZipChange = (event: React.FormEvent<HTMLInputElement>) => {
+    const { appState } = this.props;
+    const { checked } = event.currentTarget;
+    appState.keepVersionsZipped = checked;
+  };
+
+  /**
    * Toggles visibility of obsolete versions
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
@@ -146,7 +157,10 @@ export class ElectronSettings extends React.Component<
     return (
       <div className="settings-electron">
         <h2>Electron Settings</h2>
-        <Callout>{this.renderVersionShowOptions()}</Callout>
+        <Callout>
+          {this.renderVersionShowOptions()}
+          {this.renderZipOptions()}
+        </Callout>
         <br />
         <Callout>
           {this.renderAdvancedButtons()}
@@ -194,6 +208,26 @@ export class ElectronSettings extends React.Component<
           text="Add Local Electron Build"
         />
       </ButtonGroup>
+    );
+  }
+
+  /**
+   * Renders the various options for which versions should be displayed
+   *
+   * @private
+   * @returns {JSX.Element}
+   */
+  private renderZipOptions(): JSX.Element {
+    const { appState } = this.props;
+
+    return (
+      <Checkbox
+        checked={appState.keepVersionsZipped}
+        id="keepVersionsZipped"
+        inline={true}
+        label="Keep downloads compressed until needed"
+        onChange={this.handleZipChange}
+      />
     );
   }
 
@@ -347,22 +381,29 @@ export class ElectronSettings extends React.Component<
 
     switch (state) {
       case VersionState.ready:
+      case VersionState.downloaded:
         buttonProps.icon = 'trash';
         buttonProps.onClick = () => appState.removeVersion(ver);
         buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
         break;
 
       case VersionState.downloading:
-      case VersionState.unzipping:
         buttonProps.disabled = true;
         buttonProps.icon = 'cloud-download';
         buttonProps.loading = true;
         buttonProps.text = 'Downloading';
         break;
 
+      case VersionState.unzipping:
+        buttonProps.disabled = true;
+        buttonProps.icon = 'refresh';
+        buttonProps.loading = true;
+        buttonProps.text = 'Unzipping';
+        break;
+
       case VersionState.unknown:
         buttonProps.disabled = false;
-        buttonProps.icon = 'cloud-download';
+        buttonProps.icon = 'cloud';
         buttonProps.loading = false;
         buttonProps.onClick = () => appState.downloadVersion(ver);
         buttonProps.text = 'Download';

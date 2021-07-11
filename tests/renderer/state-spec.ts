@@ -31,9 +31,11 @@ jest.mock('../../src/renderer/content', () => ({
   getTemplate: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
-  removeBinary: jest.fn(),
-  setupBinary: jest.fn(),
+  downloadBinary: jest.fn(),
   getVersionState: jest.fn().mockImplementation((v) => v.state),
+  removeBinary: jest.fn(),
+  removeExec: jest.fn(),
+  setupBinary: jest.fn(),
 }));
 jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
@@ -338,6 +340,7 @@ describe('AppState', () => {
       const ver = appState.versions['2.0.2'];
       ver.state = VersionState.ready;
 
+      (setupBinary as jest.Mock).mockReset();
       await appState.downloadVersion(ver);
 
       expect(setupBinary).not.toHaveBeenCalled();
@@ -367,7 +370,7 @@ describe('AppState', () => {
       appState.downloadVersion = jest.fn();
       await appState.setVersion('v2.0.2');
 
-      expect(appState.downloadVersion).toHaveBeenCalled();
+      expect(setupBinary).toHaveBeenCalled();
     });
 
     describe('loads the template for the new version', () => {

@@ -1,4 +1,9 @@
-import { Button, ButtonGroupProps, MenuItem } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroupProps,
+  IconName,
+  MenuItem,
+} from '@blueprintjs/core';
 import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -9,6 +14,19 @@ import { AppState } from '../state';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
+interface StateInfo {
+  icon: IconName;
+  text: string;
+}
+
+const versionStateInfo = new Map<VersionState, StateInfo>([
+  [VersionState.unknown, { icon: 'cloud', text: 'Not downloaded' }],
+  [VersionState.downloading, { icon: 'cloud-download', text: 'Downloading' }],
+  [VersionState.downloaded, { icon: 'compressed', text: 'Downloaded' }],
+  [VersionState.unzipping, { icon: 'refresh', text: 'Unzipping' }],
+  [VersionState.ready, { icon: 'saved', text: 'Ready' }],
+]);
+
 /**
  * Helper method: Returns the <Select /> label for an Electron
  * version.
@@ -16,43 +34,20 @@ const ElectronVersionSelect = Select.ofType<RunnableVersion>();
  * @param {RunnableVersion} { source, state }
  * @returns {string}
  */
-export function getItemLabel({ source, state, name }: RunnableVersion): string {
-  let label = '';
-
-  if (source === VersionSource.local) {
-    label = name || 'Local';
-  } else {
-    if (state === VersionState.unknown) {
-      label = `Not downloaded`;
-    } else if (state === VersionState.ready) {
-      label = `Downloaded`;
-    } else if (state === VersionState.downloading) {
-      label = `Downloading`;
-    }
-  }
-
-  return label;
-}
+export const getItemLabel = ({ source, state, name }: RunnableVersion) =>
+  source === VersionSource.local
+    ? name || 'Local'
+    : versionStateInfo.get(state)!.text;
 
 /**
  * Helper method: Returns the <Select /> icon for an Electron
  * version.
  *
  * @param {RunnableVersion} { state }
- * @returns
+ * @returns {IconName | undefined}
  */
-export function getItemIcon({ state }: RunnableVersion) {
-  switch (state) {
-    case VersionState.unknown:
-      return 'cloud';
-    case VersionState.ready:
-      return 'saved';
-    case VersionState.downloading:
-      return 'cloud-download';
-    case VersionState.unzipping:
-      return 'compressed';
-  }
-}
+export const getItemIcon = ({ state }: RunnableVersion) =>
+  versionStateInfo.get(state)!.icon;
 
 /**
  * Helper method: Returns the <Select /> predicate for an Electron

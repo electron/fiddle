@@ -96,6 +96,12 @@ exports[`ElectronSettings component renders 1`] = `
         />
       </Blueprint3.Tooltip>
     </Blueprint3.FormGroup>
+    <Blueprint3.Checkbox
+      id="keepVersionsZipped"
+      inline={true}
+      label="Keep downloads compressed until needed"
+      onChange={[Function]}
+    />
   </Blueprint3.Callout>
   <br />
   <Blueprint3.Callout>
@@ -275,7 +281,7 @@ exports[`ElectronSettings component renders 1`] = `
             <Blueprint3.Button
               disabled={false}
               fill={true}
-              icon="cloud-download"
+              icon="cloud"
               loading={false}
               onClick={[Function]}
               small={true}
@@ -304,10 +310,10 @@ exports[`ElectronSettings component renders 1`] = `
             <Blueprint3.Button
               disabled={true}
               fill={true}
-              icon="cloud-download"
+              icon="refresh"
               loading={true}
               small={true}
-              text="Downloading"
+              text="Unzipping"
             />
           </td>
         </tr>

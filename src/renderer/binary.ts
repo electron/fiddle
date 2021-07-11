@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import * as os from 'os';
 import * as path from 'path';
 import extract from 'extract-zip';
 
@@ -11,11 +12,30 @@ import {
 import { USER_DATA_PATH } from './constants';
 import { download as electronDownload } from '@electron/get';
 
-// versions that are currently being downloaded
-const downloading: Map<string, Promise<void>> = new Map();
-
 // versions that are currently being unzipped
-const unzipping: Set<string> = new Set();
+const downloading = new Set<string>();
+const unzipping = new Set<string>();
+
+// versions that are currently being downloaded
+const pending = new Map<string, Promise<void>>();
+
+function setPending(version: string, promise: Promise<void>) {
+  // Until the Promise resolves, keep it in the `pending` map
+  promise = promise.finally(() => pending.delete(version));
+  pending.set(version, promise);
+  return promise;
+}
+
+const getZipPath = (version: string) =>
+  path.join(
+    getDownloadPath(version),
+    `electron-v${version}-${os.platform}-${os.arch()}.zip`,
+  );
+
+function findZip(version: string) {
+  const filename = getZipPath(version);
+  return fs.existsSync(filename) ? filename : undefined;
+}
 
 /**
  * Determine by inspection the VersionState of this version
@@ -36,55 +56,91 @@ export function getVersionState(ver: Version): VersionState {
 
   const dir = localPath || getDownloadPath(version);
   const exec = path.join(dir, execSubpath());
-  return fs.existsSync(exec) ? VersionState.ready : VersionState.unknown;
+  if (fs.existsSync(exec)) return VersionState.ready;
+  if (!localPath && findZip(version)) return VersionState.downloaded;
+  return VersionState.unknown;
 }
 
-/**
- * General setup, called with a version. Is called during construction
- * to ensure that we always have or download at least one version.
- *
- * @param {RunnableVersion} ver
- * @returns {Promise<void>}
- */
-export function setupBinary(ver: RunnableVersion): Promise<void> {
-  const { version } = ver;
+const isNotZip = (file: string) => !/.zip$/i.test(file);
 
+const fsRemoveIf = (folder: string, test: (file: string) => boolean) => {
+  process.noAsar = true;
+  for (const file of fs.readdirSync(folder).filter((file) => test(file)))
+    fs.removeSync(path.join(folder, file));
+  process.noAsar = false;
+};
+
+const emptyDirExceptZip = (folder: string) => fsRemoveIf(folder, isNotZip);
+
+export function downloadBinary(ver: RunnableVersion): Promise<void> {
   // Only remote versions can be downloaded
-  if (ver.source !== VersionSource.remote) {
-    return Promise.resolve();
-  }
+  if (ver.source !== VersionSource.remote) return Promise.resolve();
 
-  // Return a promise that resolves when the download completes
-  let pending = downloading.get(version);
-  if (!pending) {
-    pending = downloadBinary(ver);
-    downloading.set(version, pending);
-  }
-  return pending;
+  // is there already a pending promise?
+  const { version } = ver;
+  const promise = pending.get(version);
+  if (promise) return promise;
+
+  // do we have it already?
+  if (findZip(version)) return Promise.resolve();
+
+  // get it
+  return setPending(version, downloadBinaryImpl(ver));
 }
 
-async function downloadBinary(ver: RunnableVersion): Promise<void> {
+async function downloadBinaryImpl(ver: RunnableVersion): Promise<void> {
   const { version } = ver;
 
+  // download the zipfile
   ver.state = VersionState.downloading;
   console.log(`Binary: Downloading Electron ${version}`);
-  const zipPath = await download(ver);
-
-  const extractPath = getDownloadPath(version);
-  console.log(`Binary: Unpacking ${version} to ${extractPath}`);
 
   try {
-    unzipping.add(version);
+    // download the electron zipfile and move it to the `destination` folder
+    downloading.add(version);
+    const zipfile = await download(ver);
+    await fs.move(zipfile, getZipPath(version));
+    ver.state = VersionState.downloaded;
+  } finally {
     downloading.delete(version);
+  }
+}
+
+export function setupBinary(ver: RunnableVersion): Promise<void> {
+  // Only remote versions can be downloaded
+  if (ver.source !== VersionSource.remote) return Promise.resolve();
+
+  // is there already a pending promise?
+  const { state, version } = ver;
+  const promise = pending.get(version);
+  if (promise) return promise;
+
+  // do we have it already?
+  if (state === VersionState.ready) return Promise.resolve();
+
+  // get it
+  return setPending(
+    version,
+    downloadBinary(ver).then(() => setupBinaryImpl(ver)),
+  );
+}
+
+async function setupBinaryImpl(ver: RunnableVersion): Promise<void> {
+  const { version } = ver;
+
+  const zipfile = findZip(version);
+  console.log(`Binary: Unzipping ${zipfile}`);
+
+  try {
+    // update state variables
+    unzipping.add(version);
     ver.state = VersionState.unzipping;
 
-    // Ensure the target path exists
-    await fs.mkdirp(extractPath);
+    // ensure the target path is empty
+    const destination = getDownloadPath(version);
+    emptyDirExceptZip(destination);
 
-    // Ensure the target path is empty
-    await fs.emptyDir(extractPath);
-
-    await unzip(zipPath, extractPath);
+    await unzip(zipfile!, destination);
     console.log(`Binary: Unzipped ${version}`);
     ver.state = VersionState.ready;
   } catch (error) {
@@ -94,6 +150,17 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
     // This task is done, so remove it from the pending tasks list
     unzipping.delete(version);
   }
+}
+
+// remove the unzipped content but keep the zipfile
+export function removeExec(ver: RunnableVersion) {
+  // does this version have unzipped content?
+  const { state, source, version } = ver;
+  if (source !== VersionSource.remote) return;
+  if (state !== VersionState.ready) return;
+
+  emptyDirExceptZip(getDownloadPath(version));
+  ver.state = VersionState.downloaded;
 }
 
 /**
@@ -130,7 +197,7 @@ export async function removeBinary(ver: RunnableVersion) {
       // the Electron binaries. Electron, powering Fiddle, will try to
       // "correct" our calls, but we don't want that right here.
       process.noAsar = true;
-      await fs.remove(getDownloadPath(version));
+      await fs.removeSync(getDownloadPath(version));
       process.noAsar = false;
 
       isDeleted = true;

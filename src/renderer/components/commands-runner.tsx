@@ -36,6 +36,9 @@ export class Runner extends React.Component<RunnerProps> {
     } else if (state === VersionState.unzipping) {
       props.text = 'Unzipping';
       props.icon = <Spinner size={16} />;
+    } else if (state === VersionState.downloaded) {
+      props.text = 'Downloaded';
+      props.icon = 'compressed';
     } else if (state === VersionState.ready) {
       props.disabled = false;
 

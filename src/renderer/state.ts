@@ -19,7 +19,12 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
-import { removeBinary, setupBinary } from './binary';
+import {
+  downloadBinary,
+  removeBinary,
+  removeExec,
+  setupBinary,
+} from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { getTemplate } from './content';
@@ -67,6 +72,9 @@ export class AppState {
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
+  @observable public keepVersionsZipped = !!(
+    this.retrieve('keepVersionsZipped') ?? true
+  );
   @observable public showObsoleteVersions = !!(
     this.retrieve('showObsoleteVersions') ?? false
   );
@@ -432,19 +440,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async downloadVersion(ver: RunnableVersion) {
-    const { source, state, version } = ver;
-
-    const isRemote = source === VersionSource.remote;
-    const isReady = state === VersionState.ready;
-    if (!isRemote || isReady) {
-      console.log(`State: Already have version ${version}; not downloading.`);
-      return;
-    }
-
-    console.log(`State: Downloading Electron ${version}`);
-    await setupBinary(ver);
-  }
+  public downloadVersion = (ver: RunnableVersion) => downloadBinary(ver);
 
   public hasVersion(input: string): boolean {
     return !!this.getVersion(input);
@@ -484,6 +480,7 @@ export class AppState {
     }
 
     console.log(`State: Switching to Electron ${version}`);
+    const oldVersion = this.version;
     this.version = version;
 
     // If there's no current fiddle,
@@ -501,8 +498,11 @@ export class AppState {
       }
     }
 
-    // Fetch new binaries, maybe?
-    await this.downloadVersion(ver);
+    await setupBinary(ver);
+
+    if (this.keepVersionsZipped && oldVersion != this.version) {
+      removeExec(this.versions[oldVersion]);
+    }
   }
 
   /**

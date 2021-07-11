@@ -113,7 +113,7 @@ describe('VersionSelect component', () => {
         state: ready,
       };
 
-      expect(getItemLabel(input)).toBe('Downloaded');
+      expect(getItemLabel(input)).toBe('Ready');
     });
 
     it('returns the correct label for a version downloading', () => {
@@ -132,7 +132,7 @@ describe('VersionSelect component', () => {
         { state: downloading, expected: 'cloud-download' },
         { state: ready, expected: 'saved' },
         { state: unknown, expected: 'cloud' },
-        { state: unzipping, expected: 'compressed' },
+        { state: unzipping, expected: 'refresh' },
       ];
       icons.forEach(({ state, expected }) => {
         expect(getItemIcon({ ...mockVersion1, state })).toBe(expected);

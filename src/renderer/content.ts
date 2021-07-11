@@ -1,6 +1,6 @@
-import { EditorValues, VersionSource } from '../interfaces';
+import { EditorValues } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { getElectronVersions } from './versions';
+import { getKnownVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
@@ -93,14 +93,12 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version: semver.SemVer) {
-  const newestRelease = getElectronVersions()
-    .filter((version) => version.source === VersionSource.remote)
-    .map((version) => semver.parse(version.version))
-    .filter((version) => !!version)
-    .reduce((acc, cur) => (acc && acc.compare(cur!) > 0 ? acc : cur));
-  return newestRelease && version.major <= newestRelease.major;
-}
+const isReleasedMajor = (version: semver.SemVer) =>
+  getKnownVersions()
+    .map(({ version }) => semver.parse(version))
+    .filter((sem) => Boolean(sem))
+    .map((sem) => sem!.major)
+    .includes(version.major);
 
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
