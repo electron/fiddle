@@ -5,9 +5,6 @@
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "main": "./dist/src/main/main",
-  "engines": {
-    "node": ">=14.16.0"
-  },
   "scripts": {
     "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
