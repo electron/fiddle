@@ -13,25 +13,25 @@ import * as path from 'path';
 export async function readFiddle(folder: string): Promise<EditorValues> {
   const got: EditorValues = {};
 
-  const tryRead = (name: string) => {
-    try {
-      const filename = path.join(folder, name);
-      const content = fs.readFileSync(filename, 'utf-8');
-      return content || '';
-    } catch (error) {
-      console.warn(`Could not read file ${name}:`, error);
-      return '';
-    }
-  };
+  try {
+    const names = (await fs.readdir(folder)).filter(isSupportedFile);
+    const values = await Promise.allSettled(
+      names.map((name) => fs.readFile(path.join(folder, name), 'utf8')),
+    );
 
-  if (!fs.existsSync(folder)) {
-    console.warn(`readFiddle(): "${folder}" does not exist`);
-  } else {
-    for (const file of fs.readdirSync(folder)) {
-      if (isSupportedFile(file)) {
-        got[file] = tryRead(file);
+    for (let i = 0; i < names.length; ++i) {
+      const name = names[i];
+      const value = values[i];
+
+      if (value.status === 'fulfilled') {
+        got[name] = value.value || '';
+      } else {
+        console.warn(`Could not read file ${name}:`, value.reason);
+        got[name] = '';
       }
     }
+  } catch (err) {
+    console.warn(`Unable to read "${folder}": ${err.toString()}`);
   }
 
   if (!(MAIN_JS in got)) {
