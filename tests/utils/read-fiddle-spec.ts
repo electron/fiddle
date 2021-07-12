@@ -10,8 +10,9 @@ describe('read-fiddle', () => {
   const folder = '/some/place';
 
   beforeEach(() => {
-    (fs.existsSync as jest.Mock).mockImplementationOnce(() => true);
-    (fs.readFileSync as jest.Mock).mockImplementation((filename) => filename);
+    (fs.readFile as jest.Mock).mockImplementation((filename) =>
+      Promise.resolve(filename),
+    );
     console.warn = jest.fn();
   });
 
@@ -20,11 +21,10 @@ describe('read-fiddle', () => {
   });
 
   function setupFSMocks(editorValues: EditorValues) {
-    (fs.existsSync as jest.Mock).mockReturnValue(true);
-    (fs.readdirSync as jest.Mock).mockReturnValue(Object.keys(editorValues));
-    (fs.readFileSync as jest.Mock).mockImplementation((filename) => {
-      return editorValues[path.basename(filename)];
-    });
+    (fs.readdir as jest.Mock).mockResolvedValue(Object.keys(editorValues));
+    (fs.readFile as jest.Mock).mockImplementation((filename) =>
+      Promise.resolve(editorValues[path.basename(filename)]),
+    );
   }
 
   it('injects main.js if not present', async () => {
@@ -67,9 +67,7 @@ describe('read-fiddle', () => {
   it('handles read errors gracefully', async () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
-    (fs.readFileSync as jest.Mock).mockImplementation(() => {
-      throw new Error('bwap');
-    });
+    (fs.readFile as jest.Mock).mockRejectedValue(new Error('bwap'));
 
     const files = await readFiddle(folder);
 
@@ -82,7 +80,7 @@ describe('read-fiddle', () => {
   it('ensures truthy even when read returns null', async () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
-    (fs.readFileSync as jest.Mock).mockReturnValue(null);
+    (fs.readFile as jest.Mock).mockResolvedValue(null);
 
     const files = await readFiddle(folder);
 
