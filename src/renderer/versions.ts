@@ -61,7 +61,7 @@ export function getReleaseChannel(
 ): ElectronReleaseChannel {
   const tag = typeof input === 'string' ? input : input.version || '';
 
-  if (tag.includes('beta')) {
+  if (tag.includes('beta') || tag.includes('alpha')) {
     return ElectronReleaseChannel.beta;
   }
 
