@@ -74,6 +74,8 @@ class IpcMainManager extends EventEmitter {
     channel: IpcEvents,
     listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any,
   ) {
+    // there can be only one, so remove previous one first
+    ipcMain.removeHandler(channel);
     ipcMain.handle(channel, listener);
   }
 
