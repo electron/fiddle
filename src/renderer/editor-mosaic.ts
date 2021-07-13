@@ -80,9 +80,9 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  @action public resetLayout() {
+  @action resetLayout = () => {
     this.set(this.values());
-  }
+  };
 
   /// set / add / get the files in the model
 
