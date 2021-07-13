@@ -330,7 +330,7 @@ describe('EditorMosaic', () => {
 
       afterEach(() => {
         // this is the real test.
-        // the it()s below is setup for the different conditions
+        // the three it()s below each set a different test condition
         editorMosaic.set({});
         expect(editorMosaic.files.has(id)).toBe(false);
         expect(editorMosaic.value(id)).toBe('');
