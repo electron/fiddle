@@ -325,15 +325,35 @@ describe('EditorMosaic', () => {
       }
     });
 
-    it('does not remember values from the previous call', () => {
+    describe('does not remember files from previous calls', () => {
       const id = MAIN_JS;
-      const content = '// content';
-      editorMosaic.set({ [id]: content });
-      expect(editorMosaic.value(id)).toBe(content);
 
-      editorMosaic.set({});
-      expect(editorMosaic.value(id)).not.toBe(content);
-      expect(editorMosaic.value(id)).toBe('');
+      afterEach(() => {
+        // this is the real test.
+        // the three it()s below each set a different test condition
+        editorMosaic.set({});
+        expect(editorMosaic.files.has(id)).toBe(false);
+        expect(editorMosaic.value(id)).toBe('');
+      });
+
+      it('even if the file was visible', () => {
+        const content = '// fnord';
+        editorMosaic.set({ [id]: content });
+        editorMosaic.addEditor(id, editor as any);
+        expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
+      });
+
+      it('even if the file was hidden', () => {
+        const content = '';
+        editorMosaic.set({ [id]: content });
+        expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
+      });
+
+      it('even if the file was pending', () => {
+        const content = '// fnord';
+        editorMosaic.set({ [id]: content });
+        expect(editorMosaic.files.get(id)).toBe(EditorPresence.Pending);
+      });
     });
 
     it('uses the expected layout', () => {
