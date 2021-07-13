@@ -97,6 +97,9 @@ export class EditorMosaic {
     // add the files to the mosaic, recycling existing editors when possible.
     const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
     for (const [id, value] of values) this.addFile(id, value);
+    for (const id of this.editors.keys()) {
+      if (!values.has(id)) this.editors.delete(id);
+    }
 
     this.isEdited = false;
   }
