@@ -79,9 +79,9 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  @action public resetLayout() {
+  @action resetLayout = () => {
     this.set(this.values());
-  }
+  };
 
   /// set / add / get the files in the model
 
@@ -95,6 +95,9 @@ export class EditorMosaic {
     // add the files to the mosaic, recycling existing editors when possible.
     const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
     for (const [id, value] of values) this.addFile(id, value);
+    for (const id of this.editors.keys()) {
+      if (!values.has(id)) this.editors.delete(id);
+    }
 
     this.isEdited = false;
   }

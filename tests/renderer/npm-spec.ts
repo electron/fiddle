@@ -1,5 +1,5 @@
 import { mocked } from 'ts-jest/utils';
-import decomment from 'decomment';
+import stripComments from 'strip-comments';
 
 import {
   findModules,
@@ -10,7 +10,7 @@ import {
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-jest.mock('decomment');
+jest.mock('strip-comments');
 jest.mock('../../src/utils/exec');
 
 describe('npm', () => {
@@ -163,19 +163,19 @@ describe('npm', () => {
 
   describe('findModules()', () => {
     it('returns required modules in a JS file', async () => {
-      mocked(decomment).mockReturnValue(mockPackages);
+      mocked(stripComments).mockReturnValue(mockPackages);
       const modules = await findModules(mockPackages);
       expect(modules).toEqual(['cow', 'say']);
     });
 
     it('ignores node and electron builtins', async () => {
-      mocked(decomment).mockReturnValue(mockBuiltins);
+      mocked(stripComments).mockReturnValue(mockBuiltins);
       const modules = await findModules(mockBuiltins);
       expect(modules).toHaveLength(0);
     });
 
     it('ignores commented modules', async () => {
-      mocked(decomment).mockReturnValue('');
+      mocked(stripComments).mockReturnValue('');
       const modules = await findModules(mockComments);
       expect(modules).toHaveLength(0);
     });
@@ -183,7 +183,7 @@ describe('npm', () => {
 
   describe('findModulesInEditors()', () => {
     it('installs modules across all JavaScript files only once', async () => {
-      mocked(decomment).mockReturnValue(mockPackages);
+      mocked(stripComments).mockReturnValue(mockPackages);
       const result = await findModulesInEditors({
         'file1.js': mockPackages,
         'file2.js': mockPackages,

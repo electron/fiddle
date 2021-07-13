@@ -1,6 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
-import decomment from 'decomment';
+import stripComments from 'strip-comments';
 
 // Making TypeScript happy and avoiding "esModuleInterop" issues
 const { builtinModules } = require('module');
@@ -106,13 +106,12 @@ export async function findModulesInEditors(values: EditorValues) {
  * @param {string} input
  * @returns {Array<string>}
  */
-export async function findModules(input: string) {
+export async function findModules(code: string) {
   /* container definitions */
   const modules: Array<string> = [];
   let match: RegExpMatchArray | null;
 
-  /* decomment code with the esprima parser */
-  const code = await decomment(input);
+  code = stripComments(code);
 
   /* grab all global require matches in the text */
   while ((match = requiregx.exec(code) || null)) {
