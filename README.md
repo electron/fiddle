@@ -1,6 +1,6 @@
 # <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
-[![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=master)](https://coveralls.io/github/electron/fiddle?branch=master)
+[![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=main)](https://coveralls.io/github/electron/fiddle?branch=main)
 [![Electron Discord Invite](https://img.shields.io/discord/745037351163527189?color=%237289DA&label=chat&logo=discord&logoColor=white)](https://discord.com/invite/electron)
 
 Electron Fiddle lets you create and play with small Electron experiments. It
@@ -56,11 +56,11 @@ the world!
 
 ## Contributing
 
-Electron Fiddle is a community-driven project that welcomes all sorts of contributions. Please check out our [Contributing Guide](https://github.com/electron/fiddle/blob/master/CONTRIBUTING.md) for more details.
+Electron Fiddle is a community-driven project that welcomes all sorts of contributions. Please check out our [Contributing Guide](https://github.com/electron/fiddle/blob/main/CONTRIBUTING.md) for more details.
 
 ## License
 
-[MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/master/LICENSE.md).
+[MIT, please see the LICENSE file for full details](https://github.com/electron/fiddle/blob/main/LICENSE.md).
 
 When using the Electron or other GitHub logos, be sure to follow the [GitHub
 logo guidelines](https://github.com/logos).
