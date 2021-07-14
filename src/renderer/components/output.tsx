@@ -7,7 +7,6 @@ import {
   MosaicNode,
   MosaicParent,
 } from 'react-mosaic-component';
-import { monacoLanguage } from 'src/utils/editor-utils';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
