@@ -68,27 +68,15 @@ export class MenuItemMock {
 }
 
 export class IPCMainMock extends EventEmitter {
-  public send: any;
-  public handle: any;
-  public handleOnce: any;
-
-  constructor() {
-    super();
-    this.send = jest.fn();
-    this.handle = jest.fn();
-    this.handleOnce = jest.fn();
-  }
+  public handle = jest.fn();
+  public handleOnce = jest.fn();
+  public removeHandler = jest.fn();
+  public send = jest.fn();
 }
 
 export class IPCRendererMock extends EventEmitter {
-  public send: any;
-  public invoke: any;
-
-  constructor() {
-    super();
-    this.send = jest.fn();
-    this.invoke = jest.fn();
-  }
+  public send = jest.fn();
+  public invoke = jest.fn();
 }
 
 function CreateWindowStub() {
