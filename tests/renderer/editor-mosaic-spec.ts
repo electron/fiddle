@@ -289,33 +289,57 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.value(id)).toBe(oldValue);
     });
 
-    it('reuses existing editors', () => {
-      // setup: get a mosaic with a visible editor
-      const id = MAIN_JS;
-      let content = '// first content';
-      editorMosaic.set({ [id]: content });
-      editorMosaic.addEditor(id, editor as any);
+    describe('reuses existing editors', () => {
+      it('when the old file was visible and the new one should be too', () => {
+        // setup: get a mosaic with a visible editor
+        const id = MAIN_JS;
+        let content = '// first content';
+        editorMosaic.set({ [id]: content });
+        editorMosaic.addEditor(id, editor as any);
 
-      // now call set again, same filename DIFFERENT content
-      content = '// second content';
-      editorMosaic.set({ [id]: content });
-      // test that editorMosaic set the editor to the new content
-      expect(editor.getValue()).toBe(content);
-      expect(editorMosaic.isEdited).toBe(false);
+        // now call set again, same filename DIFFERENT content
+        content = '// second content';
+        editorMosaic.set({ [id]: content });
+        // test that editorMosaic set the editor to the new content
+        expect(editor.getValue()).toBe(content);
+        expect(editorMosaic.isEdited).toBe(false);
 
-      // test that the editor still responds to edits
-      content = '// third content';
-      editor.setValue(content);
-      expect(editorMosaic.isEdited).toBe(true);
+        // test that the editor still responds to edits
+        content = '// third content';
+        editor.setValue(content);
+        expect(editorMosaic.isEdited).toBe(true);
 
-      // now call set again, same filename and SAME content
-      editorMosaic.set({ [id]: content });
-      expect(editorMosaic.isEdited).toBe(false);
+        // now call set again, same filename and SAME content
+        editorMosaic.set({ [id]: content });
+        expect(editorMosaic.isEdited).toBe(false);
 
-      // test that the editor still responds to edits
-      content = '// fourth content';
-      editor.setValue(content);
-      expect(editorMosaic.isEdited).toBe(true);
+        // test that the editor still responds to edits
+        content = '// fourth content';
+        editor.setValue(content);
+        expect(editorMosaic.isEdited).toBe(true);
+      });
+
+      it('but not when the new file should be hidden', () => {
+        // set up a fully populated mosaic with visible files
+        editorMosaic.set(valuesIn);
+        for (const [id, presence] of editorMosaic.files) {
+          if (presence === EditorPresence.Pending) {
+            editorMosaic.addEditor(id, new MonacoEditorMock() as any);
+          }
+        }
+
+        // now replace with one visible file and one hidden file
+        const keys = Object.keys(valuesIn);
+        const [id1, id2] = keys;
+        const values = { [id1]: '// potrzebie', [id2]: '' };
+        editorMosaic.set(values);
+
+        // test that id1 got recycled by id2 is hidden
+        const { files } = editorMosaic;
+        expect(files.size).toBe(2);
+        expect(files.get(id1 as EditorId)).toBe(EditorPresence.Visible);
+        expect(files.get(id2 as EditorId)).toBe(EditorPresence.Hidden);
+      });
     });
 
     it('does not add unrequested files', () => {
