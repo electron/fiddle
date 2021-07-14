@@ -322,7 +322,7 @@ function isElectronVersion(
 }
 
 export function getOldestSupportedVersion(): string | undefined {
-  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 3;
+  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 4;
 
   const oldestSupported = getElectronVersions()
     .map(({ version }) => version)
