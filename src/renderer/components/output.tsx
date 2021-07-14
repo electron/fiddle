@@ -7,6 +7,7 @@ import {
   MosaicNode,
   MosaicParent,
 } from 'react-mosaic-component';
+import { monacoLanguage } from 'src/utils/editor-utils';
 
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
@@ -35,23 +36,26 @@ export class Output extends React.Component<CommandsProps> {
   public language = 'consoleOutputLanguage';
 
   private outputRef = React.createRef<HTMLDivElement>();
+  private outputUri: MonacoType.Uri;
 
   constructor(props: CommandsProps) {
     super(props);
 
+    const { monaco } = this.props;
+    this.outputUri = new monaco.Uri();
     this.language = 'consoleOutputLanguage';
   }
 
   public async componentDidMount() {
     const { monaco } = this.props;
     autorun(async () => {
-      // init the output editor if it has not been initialized yet.
-      if (monaco.editor.getModels().length < 5) {
+      const hasOutputEditor = monaco.editor.getModel(this.outputUri);
+      if (!hasOutputEditor) {
         await this.initMonaco();
       }
 
       this.toggleConsole();
-      this.setContent(this.props.appState.output, false);
+      this.setContent(this.props.appState.output);
     });
   }
 
@@ -67,7 +71,7 @@ export class Output extends React.Component<CommandsProps> {
    *  Set Monaco Editor's value.
    */
   public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    await this.setContent(newProps.appState.output, false);
+    await this.setContent(newProps.appState.output);
   }
 
   /**
@@ -88,7 +92,7 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.setContent(this.props.appState.output, true);
+      await this.setContent(this.props.appState.output);
     }
   }
 
@@ -157,8 +161,8 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @memberof Output
    */
-  private async setContent(output: OutputEntry[], init: boolean) {
-    this.setEditorText(this.getOutputLines(output), init);
+  private async setContent(output: OutputEntry[]) {
+    this.setEditorText(this.getOutputLines(output));
     // have terminal always scroll to the bottom
     this.editor?.revealLine(this.editor?.getScrollHeight());
   }
@@ -193,11 +197,15 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @param {string} value
    */
-  private setEditorText(value: string, init: boolean) {
+  private setEditorText(value: string) {
     const { monaco } = this.props;
 
-    if (init) {
-      const model = monaco.editor.createModel(value, this.language);
+    if (!monaco.editor.getModel(this.outputUri)) {
+      const model = monaco.editor.createModel(
+        value,
+        this.language,
+        this.outputUri,
+      );
       model.updateOptions({
         tabSize: 2,
       });
@@ -206,6 +214,7 @@ export class Output extends React.Component<CommandsProps> {
       this.editor?.setValue(value);
     }
   }
+
   public render(): JSX.Element | null {
     const { isConsoleShowing } = this.props.appState;
 
