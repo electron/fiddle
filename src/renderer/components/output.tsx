@@ -43,10 +43,15 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   public async componentDidMount() {
+    const { monaco } = this.props;
     autorun(async () => {
-      this.destroyMonacoEditor();
-      await this.initMonaco();
+      // init the output editor if it has not been initialized yet.
+      if (monaco.editor.getModels().length < 5) {
+        await this.initMonaco();
+      }
+
       this.toggleConsole();
+      this.setContent(this.props.appState.output, false);
     });
   }
 
@@ -62,7 +67,7 @@ export class Output extends React.Component<CommandsProps> {
    *  Set Monaco Editor's value.
    */
   public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    await this.setContent(newProps.appState.output);
+    await this.setContent(newProps.appState.output, false);
   }
 
   /**
@@ -83,7 +88,7 @@ export class Output extends React.Component<CommandsProps> {
         ...monacoOptions,
       });
 
-      await this.setContent(this.props.appState.output);
+      await this.setContent(this.props.appState.output, true);
     }
   }
 
@@ -152,8 +157,8 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @memberof Output
    */
-  private async setContent(output: OutputEntry[]) {
-    this.setEditorText(this.getOutputLines(output));
+  private async setContent(output: OutputEntry[], init: boolean) {
+    this.setEditorText(this.getOutputLines(output), init);
     // have terminal always scroll to the bottom
     this.editor?.revealLine(this.editor?.getScrollHeight());
   }
@@ -188,16 +193,19 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @param {string} value
    */
-  private setEditorText(value: string) {
+  private setEditorText(value: string, init: boolean) {
     const { monaco } = this.props;
-    const model = monaco.editor.createModel(value, this.language);
-    model.updateOptions({
-      tabSize: 2,
-    });
 
-    this.editor?.setModel(model);
+    if (init) {
+      const model = monaco.editor.createModel(value, this.language);
+      model.updateOptions({
+        tabSize: 2,
+      });
+      this.editor!.setModel(model);
+    } else {
+      this.editor?.setValue(value);
+    }
   }
-
   public render(): JSX.Element | null {
     const { isConsoleShowing } = this.props.appState;
 
