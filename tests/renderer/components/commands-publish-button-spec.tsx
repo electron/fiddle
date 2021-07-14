@@ -5,6 +5,7 @@ import {
   DefaultEditorId,
   GistActionState,
   GistActionType,
+  MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
@@ -135,8 +136,11 @@ describe('Action button component', () => {
       expect(mocktokit.gists.create).not.toHaveBeenCalled();
     });
 
-    it('handles missing content', async () => {
-      app.getEditorValues.mockReturnValueOnce({});
+    it.each([
+      ['handles missing files', {}],
+      ['handles empty files', { [MAIN_JS]: '' }],
+    ])('%s', async (_, appEditorValues) => {
+      app.getEditorValues.mockReturnValueOnce(appEditorValues);
       const { instance } = createActionButton();
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 

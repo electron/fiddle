@@ -409,19 +409,9 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const filesList: EditorValues = {};
-
-    // Add files for default editors.
-    for (const editor of DEFAULT_EDITORS) {
-      filesList[editor] = {
-        content: values[editor] || getEmptyContent(editor),
-      };
-    }
-
-    for (const id of Object.keys(values)) {
-      filesList[id] = { content: values[id] };
-    }
-
-    return filesList;
+    const ids = [...DEFAULT_EDITORS, ...Object.keys(values)];
+    return Object.fromEntries(
+      ids.map((id) => [id, { content: values[id] || getEmptyContent(id) }]),
+    );
   };
 }
