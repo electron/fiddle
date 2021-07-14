@@ -334,7 +334,7 @@ describe('EditorMosaic', () => {
         const values = { [id1]: '// potrzebie', [id2]: '' };
         editorMosaic.set(values);
 
-        // test that id1 got recycled by id2 is hidden
+        // test that id1 got recycled but id2 is hidden
         const { files } = editorMosaic;
         expect(files.size).toBe(2);
         expect(files.get(id1 as EditorId)).toBe(EditorPresence.Visible);
