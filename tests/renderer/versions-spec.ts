@@ -11,7 +11,7 @@ import {
   addLocalVersion,
   fetchVersions,
   getDefaultVersion,
-  getKnownVersions,
+  getReleasedVersions,
   getLocalVersions,
   getReleaseChannel,
   getUpdatedElectronVersions,
@@ -190,19 +190,19 @@ describe('versions', () => {
     });
   });
 
-  describe('getKnownVersions()', () => {
+  describe('getReleasedVersions()', () => {
     it('tries to get versions from localStorage', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(
         `[{ "version": "3.0.5" }]`,
       );
 
-      expect(getKnownVersions()).toEqual([{ version: '3.0.5' }]);
+      expect(getReleasedVersions()).toEqual([{ version: '3.0.5' }]);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(expectedVersionCount);
+      expect(getReleasedVersions().length).toBe(expectedVersionCount);
     });
 
     it('falls back to a local require', () => {
@@ -210,7 +210,7 @@ describe('versions', () => {
         `[{ "garbage": "true" }]`,
       );
 
-      expect(getKnownVersions().length).toBe(expectedVersionCount);
+      expect(getReleasedVersions().length).toBe(expectedVersionCount);
     });
   });
 

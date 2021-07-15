@@ -1,6 +1,6 @@
-import { EditorValues, VersionSource } from '../interfaces';
+import { EditorValues } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { getElectronVersions } from './versions';
+import { getReleasedVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
@@ -94,12 +94,13 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @returns {boolean} true if major version is a known release
  */
 function isReleasedMajor(version: semver.SemVer) {
-  const newestRelease = getElectronVersions()
-    .filter((version) => version.source === VersionSource.remote)
-    .map((version) => semver.parse(version.version))
-    .filter((version) => !!version)
-    .reduce((acc, cur) => (acc && acc.compare(cur!) > 0 ? acc : cur));
-  return newestRelease && version.major <= newestRelease.major;
+  const releasedMajors = new Set<number>(
+    getReleasedVersions()
+      .map(({ version }) => semver.parse(version))
+      .filter((sem) => Number.isInteger(sem?.major))
+      .map((sem) => sem!.major),
+  );
+  return releasedMajors.has(version.major);
 }
 
 /**
