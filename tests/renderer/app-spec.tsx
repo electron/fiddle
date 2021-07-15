@@ -1,7 +1,8 @@
 import { App } from '../../src/renderer/app';
 import { DefaultEditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
-import { EditorMosaicMock, createEditorValues } from '../mocks/mocks';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { IpcEvents } from '../../src/ipc-events';
+import { createEditorValues } from '../mocks/mocks';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { waitFor } from '../utils';
@@ -111,7 +112,7 @@ describe('App component', () => {
   describe('getEditorValues()', () => {
     it('gets values', async () => {
       const values = createEditorValues();
-      (app.state.editorMosaic.values as jest.Mock).mockReturnValue(values);
+      jest.spyOn(app.state.editorMosaic, 'values').mockReturnValue(values);
       const b = await app.getEditorValues({});
       expect(b).toStrictEqual(values);
     });
@@ -120,6 +121,7 @@ describe('App component', () => {
   describe('replaceFiddle()', () => {
     it('sets editor values and source info', async () => {
       const { state } = app;
+      const setSpy = jest.spyOn(state.editorMosaic, 'set');
 
       const editorValues = {
         [DefaultEditorId.html]: 'html-value',
@@ -134,7 +136,7 @@ describe('App component', () => {
         templateName: 'templateName',
         filePath: 'localPath',
       });
-      expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
+      expect(setSpy).toHaveBeenCalledWith(editorValues);
       expect(state.gistId).toBe('gistId');
       expect(state.templateName).toBe('templateName');
       expect(state.localPath).toBe('localPath');
@@ -212,6 +214,8 @@ describe('App component', () => {
 
       it('sets editor values and source info if prompt is accepted', async () => {
         const { state } = app;
+        const setSpy = jest.spyOn(state.editorMosaic, 'set');
+
         state.editorMosaic.isEdited = true;
 
         const editorValues = {
@@ -227,7 +231,7 @@ describe('App component', () => {
           templateName: 'templateName',
           filePath: 'localPath',
         });
-        expect(state.editorMosaic.set).toHaveBeenCalledWith(editorValues);
+        expect(setSpy).toHaveBeenCalledWith(editorValues);
         expect(state.gistId).toBe('gistId');
         expect(state.templateName).toBe('templateName');
         expect(state.localPath).toBe('localPath');
@@ -390,7 +394,7 @@ describe('App component', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
     const editorValues2: EditorValues = { MAIN_JS: '// hello world' };
-    let editorMosaic: EditorMosaicMock;
+    let editorMosaic: EditorMosaic;
 
     beforeEach(() => {
       ({ editorMosaic } = app.state as any);

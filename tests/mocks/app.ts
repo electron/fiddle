@@ -1,23 +1,16 @@
-import { DefaultEditorId } from '../../src/interfaces';
 import {
   ElectronTypesMock,
   FileManagerMock,
   RemoteLoaderMock,
   RunnerMock,
   StateMock,
+  createEditorValues,
 } from './mocks';
 
 export class AppMock {
   public setup = jest.fn();
   public replaceFiddle = jest.fn();
-  public getEditorValues = jest.fn().mockResolvedValue({
-    [DefaultEditorId.main]: 'main-content',
-    [DefaultEditorId.preload]: 'preload-content',
-    [DefaultEditorId.renderer]: 'renderer-content',
-    [DefaultEditorId.html]: 'html-content',
-    [DefaultEditorId.css]: 'css-content',
-  });
-
+  public getEditorValues = jest.fn().mockResolvedValue(createEditorValues());
   public loadTheme = jest.fn();
   public openFiddle = jest.fn();
 
