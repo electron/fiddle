@@ -41,11 +41,11 @@ describe('Action button component', () => {
   const gistCreateOpts = {
     description,
     files: {
-      [DefaultEditorId.html]: { content: 'html-content' },
-      [DefaultEditorId.renderer]: { content: 'renderer-content' },
-      [DefaultEditorId.main]: { content: 'main-content' },
-      [DefaultEditorId.preload]: { content: 'preload-content' },
-      [DefaultEditorId.css]: { content: 'css-content' },
+      [DefaultEditorId.html]: { content: '<!-- index.html -->' },
+      [DefaultEditorId.renderer]: { content: '// renderer.js' },
+      [DefaultEditorId.main]: { content: '// main.js' },
+      [DefaultEditorId.preload]: { content: '// preload.js' },
+      [DefaultEditorId.css]: { content: '/* style.css */' },
     },
     public: true,
   } as const;

@@ -142,7 +142,7 @@ function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
  * @returns {Array<Version>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
-  const known: Array<RunnableVersion> = getKnownVersions().map((version) => {
+  const known: Array<RunnableVersion> = getReleasedVersions().map((version) => {
     return {
       ...version,
       source: VersionSource.remote,
@@ -225,7 +225,7 @@ export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
  *
  * @returns {Array<Version>}
  */
-export function getKnownVersions(): Array<Version> {
+export function getReleasedVersions(): Array<Version> {
   return getVersions(VersionKeys.known, () =>
     require('../../static/releases.json'),
   );
@@ -324,7 +324,7 @@ function isElectronVersion(
 export function getOldestSupportedVersion(): string | undefined {
   const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 4;
 
-  const oldestSupported = getElectronVersions()
+  const oldestSupported = getReleasedVersions()
     .map(({ version }) => version)
     .filter((version) => /^\d+\.0\.0$/.test(version))
     .sort(semver.compare)
