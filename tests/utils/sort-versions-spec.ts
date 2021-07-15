@@ -30,10 +30,12 @@ describe('sort-versions', () => {
     ]);
   });
 
-  it('sorts nightly and beta versions correctly', () => {
+  it('sorts nightly, alpha, and beta versions correctly', () => {
     const unsorted: RunnableVersion[] = [
+      makeVersion('v3.0.0-alpha.1'),
       makeVersion('v2.0.0-nightly.20200101'),
       makeVersion('v2.0.0-beta.1'),
+      makeVersion('v2.0.0-alpha.1'),
       makeVersion('v2.0.0-nightly.20200102'),
       makeVersion('v3.0.0-beta.1'),
       makeVersion('v3.0.0-nightly.20200105'),
@@ -48,11 +50,13 @@ describe('sort-versions', () => {
     expect(sorted).toStrictEqual<any>([
       makeVersion('v3.0.0'),
       makeVersion('v3.0.0-beta.1'),
+      makeVersion('v3.0.0-alpha.1'),
       makeVersion('v3.0.0-nightly.20200105'),
       makeVersion('v2.0.0'),
       makeVersion('v2.0.0-beta.3'),
       makeVersion('v2.0.0-beta.2'),
       makeVersion('v2.0.0-beta.1'),
+      makeVersion('v2.0.0-alpha.1'),
       makeVersion('v2.0.0-nightly.20200102'),
       makeVersion('v2.0.0-nightly.20200101'),
     ]);

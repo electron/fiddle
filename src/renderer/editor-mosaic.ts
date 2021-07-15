@@ -123,8 +123,12 @@ export class EditorMosaic {
       this.backups.set(id, backup);
     }
 
-    // if the file has nontrivial content, put it in the mosaic to show it.
-    if (value.length && value !== getEmptyContent(id)) this.show(id);
+    // only show the file if it has nontrivial content
+    if (value.length && value !== getEmptyContent(id)) {
+      this.show(id);
+    } else {
+      this.hide(id);
+    }
   }
 
   /// show or hide files in the view

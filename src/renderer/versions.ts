@@ -61,7 +61,7 @@ export function getReleaseChannel(
 ): ElectronReleaseChannel {
   const tag = typeof input === 'string' ? input : input.version || '';
 
-  if (tag.includes('beta')) {
+  if (tag.includes('beta') || tag.includes('alpha')) {
     return ElectronReleaseChannel.beta;
   }
 
@@ -322,7 +322,7 @@ function isElectronVersion(
 }
 
 export function getOldestSupportedVersion(): string | undefined {
-  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 3;
+  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 4;
 
   const oldestSupported = getElectronVersions()
     .map(({ version }) => version)

@@ -3,9 +3,9 @@ import { shallow } from 'enzyme';
 
 import {
   EditorValues,
-  MAIN_JS,
   GistActionState,
   GistActionType,
+  MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
