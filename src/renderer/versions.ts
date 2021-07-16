@@ -15,37 +15,19 @@ import { normalizeVersion } from '../utils/normalize-version';
  * @param {Array<RunnableVersion>} knownVersions
  * @returns {string}
  */
-export function getDefaultVersion(
-  knownVersions: Array<RunnableVersion> = [],
-): string {
-  const ls = localStorage.getItem('version');
+export function getDefaultVersion(versions: RunnableVersion[]): string {
+  const key = localStorage.getItem('version');
+  if (key && versions.some(({ version }) => version === key)) return key;
 
-  if (
-    ls &&
-    knownVersions &&
-    knownVersions.find(({ version }) => version === ls)
-  ) {
-    return ls;
-  }
+  // newest stable release
+  const latestStable = versions
+    .map(({ version }) => semver.parse(version))
+    .filter((sem) => Boolean(sem) && sem!.prerelease.length === 0)
+    .sort((a, b) => -semver.compare(a!, b!))
+    .shift();
+  if (latestStable) return latestStable.version;
 
-  // Self-heal: Version not formated correctly
-  const normalized = ls && normalizeVersion(ls);
-  if (normalized) {
-    if (
-      knownVersions &&
-      knownVersions.find(({ version }) => version === normalized)
-    ) {
-      return normalized;
-    }
-  }
-
-  // Alright, the first version?
-  const last = knownVersions && knownVersions[knownVersions.length - 1];
-  if (last) {
-    return last.version;
-  }
-
-  // Report error
+  // how do we not have a stable version listed?
   throw new Error('Corrupted version data');
 }
 
