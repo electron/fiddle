@@ -27,7 +27,6 @@ async function main() {
 
   const metadata = {
     expectedVersionCount: releases.length,
-    lastElectronVersion: releases[releases.length - 1].version,
   };
   const releasesMetadataPath = path.resolve(
     __dirname,
