@@ -112,19 +112,10 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
   window.localStorage.setItem(key, stringified);
 }
 
-/**
- * Create a RunnableVersion from a Version
- */
-function makeRunnableVersion(ver: Version): RunnableVersion {
-  const isLocal = Boolean(ver.localPath);
-  const run: RunnableVersion = {
-    ...ver,
-    source: isLocal ? VersionSource.local : VersionSource.remote,
-    state: VersionState.unknown,
-    version: normalizeVersion(ver.version),
-  };
-  run.state = getVersionState(run);
-  return run;
+function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
+  ver.version = normalizeVersion(ver.version);
+  ver.state = getVersionState(ver);
+  return ver;
 }
 
 /**
@@ -133,8 +124,23 @@ function makeRunnableVersion(ver: Version): RunnableVersion {
  * @returns {Array<Version>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
-  const versions = [...getReleasedVersions(), ...getLocalVersions()];
-  return versions.map((ver) => makeRunnableVersion(ver));
+  const known: Array<RunnableVersion> = getReleasedVersions().map((version) => {
+    return {
+      ...version,
+      source: VersionSource.remote,
+      state: VersionState.unknown,
+    };
+  });
+
+  const local: Array<RunnableVersion> = getLocalVersions().map((version) => {
+    return {
+      ...version,
+      source: VersionSource.local,
+      state: VersionState.ready,
+    };
+  });
+
+  return [...known, ...local].map(sanitizeVersion);
 }
 
 /**
