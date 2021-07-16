@@ -71,7 +71,6 @@ export class Output extends React.Component<CommandsProps> {
   public async initMonaco() {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
-    console.log('This.initMONACO');
     if (ref) {
       this.setupCustomOutputEditorLanguage(monaco);
       this.editor = monaco.editor.create(ref, {
