@@ -2,6 +2,7 @@ import { Button, ButtonGroupProps, MenuItem } from '@blueprintjs/core';
 import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import semver from 'semver';
 
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
@@ -77,12 +78,25 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
   const q = query.toLowerCase();
 
   return versions
-    .map((version: RunnableVersion) => ({
-      index: version.version.toLowerCase().indexOf(q),
-      version,
-    }))
+    .map((version: RunnableVersion) => {
+      const lowercase = version.version.toLowerCase();
+      return {
+        index: lowercase.indexOf(q),
+        coerced: semver.coerce(lowercase),
+        version,
+      };
+    })
     .filter((item) => item.index !== -1)
-    .sort((a, b) => a.index - b.index)
+    .sort((a, b) => {
+      // If the user is searching for e.g. 'nightly' we
+      // want to sort nightlies by descending major version.
+      if (isNaN(+q)) {
+        if (a.coerced && b.coerced) {
+          return semver.rcompare(a.coerced, b.coerced);
+        }
+      }
+      return a.index - b.index;
+    })
     .map((item) => item.version);
 };
 
