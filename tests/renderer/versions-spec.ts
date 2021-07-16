@@ -42,30 +42,21 @@ describe('versions', () => {
       expect(output).toBe('2.0.2');
     });
 
-    it('handles a v-prefixed version', () => {
-      (localStorage.getItem as any).mockReturnValue('v2.0.2');
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
-    });
-
-    it('handles garbage data', () => {
-      (localStorage.getItem as any).mockReturnValue('v3.0.0');
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
-    });
-
-    it('handles if no version is set', () => {
+    it('uses the newest stable as a fallback', () => {
       (localStorage.getItem as any).mockReturnValue(null);
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
+      const output = getDefaultVersion([
+        { version: '11.0.0' },
+        { version: '15.0.0-nightly.20210715' },
+        { version: '13.0.0' },
+        { version: '15.0.0-alpha.1' },
+        { version: '12.0.0' },
+        { version: '14.0.0-beta.1' },
+      ] as any);
+      expect(output).toBe('13.0.0');
     });
 
     it('throws if everything goes wrong', () => {
-      const testFn = () => {
-        return getDefaultVersion(null as any);
-      };
-
-      expect(testFn).toThrow();
+      expect(() => getDefaultVersion([])).toThrow();
     });
   });
 
