@@ -8,15 +8,17 @@ import {
 } from '../../src/interfaces';
 import { getVersionState } from '../../src/renderer/binary';
 import {
+  VersionKeys,
   addLocalVersion,
-  fetchVersions,
+  fetchReleasedVersions,
   getDefaultVersion,
-  getReleasedVersions,
+  getElectronVersions,
+  getLocalVersionForPath,
   getLocalVersions,
   getReleaseChannel,
+  getReleasedVersions,
   getUpdatedElectronVersions,
   saveLocalVersions,
-  VersionKeys,
 } from '../../src/renderer/versions';
 import { FetchMock } from '../utils';
 
@@ -161,15 +163,16 @@ describe('versions', () => {
     });
   });
 
-  describe('fetchVersions()', () => {
+  describe('fetchReleasedVersions()', () => {
+    const url = 'https://releases.electronjs.org/releases.json';
+
     it('fetches versions >= 0.24.0', async () => {
       const fetchMock = new FetchMock();
-      const url = 'https://electronjs.org/headers/index.json';
       const filename = path.join(__dirname, '../mocks/versions-mock.json');
       const contents = fs.readFileSync(filename).toString();
       fetchMock.add(url, contents);
 
-      const result = await fetchVersions();
+      const result = await fetchReleasedVersions();
       const expected = [
         { version: '10.0.0-nightly.20200303' },
         { version: '9.0.0-beta.5' },
@@ -178,6 +181,14 @@ describe('versions', () => {
 
       expect(result).toEqual(expected);
       expect(window.localStorage.setItem).toHaveBeenCalled();
+    });
+
+    it('only saves the versions if it gets a result', async () => {
+      const fetchMock = new FetchMock();
+      fetchMock.add(url, '[]');
+      const result = await fetchReleasedVersions();
+      expect(result).toStrictEqual([]);
+      expect(window.localStorage.setItem).not.toHaveBeenCalled();
     });
   });
 
@@ -217,7 +228,7 @@ describe('versions', () => {
         if (key === 'known-electron-versions')
           return '[{ "version": "3.0.5" }]';
         if (key === 'local-electron-versions')
-          return '[{ "version": "3.0.6" }]';
+          return '[{ "version": "3.0.6", "localPath": "/dev/null" }]';
         throw new Error(`unexpected key ${key}`);
       });
 
@@ -232,11 +243,110 @@ describe('versions', () => {
           version: '3.0.5',
         },
         {
+          localPath: '/dev/null',
           source: VersionSource.local,
           state: VersionState.unknown,
           version: '3.0.6',
         },
       ]);
+    });
+  });
+
+  function mockLocalStorageValues(local: unknown, released: unknown) {
+    (window as any).localStorage.getItem = jest.fn((key: string) => {
+      if (key === VersionKeys.local) return JSON.stringify(local);
+      if (key === VersionKeys.released) return JSON.stringify(released);
+      throw new Error(`bug in test: unexpected key ${key}`);
+    });
+  }
+
+  describe('getElectronVersions()', () => {
+    it('includes both local and remote versions', async () => {
+      const state = VersionState.ready;
+      (getVersionState as jest.Mock).mockReturnValue(state);
+      const local = [{ version: '999.0.0', localPath: '/some/path' }];
+      const released = [{ version: '100.0.0' }, { version: '101.0.0' }];
+      mockLocalStorageValues(local, released);
+
+      const versions = await getElectronVersions();
+      expect(versions).toStrictEqual([
+        {
+          source: VersionSource.remote,
+          state,
+          version: '100.0.0',
+        },
+        {
+          source: VersionSource.remote,
+          state,
+          version: '101.0.0',
+        },
+        {
+          source: VersionSource.local,
+          localPath: '/some/path',
+          state,
+          version: '999.0.0',
+        },
+      ]);
+    });
+
+    it('migrates old local versions', async () => {
+      const state = VersionState.ready;
+      (getVersionState as jest.Mock).mockReturnValue(state);
+
+      const local = [{ tag_name: 'v999.0.0', name: 'ok', url: '/dev/null' }];
+      const released: unknown = [];
+      mockLocalStorageValues(local, released);
+
+      const versions = await getElectronVersions();
+      expect(versions).toStrictEqual([
+        {
+          localPath: '/dev/null',
+          name: 'ok',
+          source: VersionSource.local,
+          state,
+          version: '999.0.0',
+        },
+      ]);
+    });
+
+    it('does not throw if LocalStorage is corrupt', async () => {
+      const local = '😂😁😁';
+      const released: unknown = [];
+      mockLocalStorageValues(local, released);
+
+      const versions = await getElectronVersions();
+      expect(versions).toStrictEqual([]);
+    });
+
+    it('normalizes version names', async () => {
+      const state = VersionState.ready;
+      (getVersionState as jest.Mock).mockReturnValue(state);
+      mockLocalStorageValues([], [{ version: 'v100.0.0' }]);
+
+      const versions = await getElectronVersions();
+      expect(versions).toStrictEqual([
+        expect.objectContaining({ version: '100.0.0' }),
+      ]);
+    });
+  });
+
+  describe('getLocalVersionForPath', () => {
+    const local = [
+      { version: '999.0.0', localPath: '/dev/null' },
+      { version: '999.0.1', localPath: '/etc/passwd' },
+    ] as const;
+    const released: unknown[] = [];
+
+    it('returns undefined if no match found', () => {
+      mockLocalStorageValues(local, released);
+      const ver = getLocalVersionForPath('/dev/random');
+      expect(ver).toBeUndefined();
+    });
+
+    it('returns a match if found', () => {
+      mockLocalStorageValues(local, released);
+      const ver = getLocalVersionForPath('/etc/passwd');
+      expect(ver).toMatchObject({ version: '999.0.1' });
     });
   });
 });
