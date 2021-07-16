@@ -1,5 +1,5 @@
-const fs = require('fs-extra');
 const path = require('path');
+const fs = require('fs-extra');
 const fetch = require('node-fetch');
 
 const file = path.join(__dirname, '..', 'static', 'releases.json');
@@ -15,8 +15,8 @@ async function getReleases() {
 }
 
 async function main() {
-  const raw = await getReleases();
-  const releases = raw.map(({ version }) => ({ version }));
+  const data = await getReleases();
+  const releases = data.map(({ version }) => ({ version }));
 
   console.log(`Updating local releases.json with ${releases.length} versions.`);
 
