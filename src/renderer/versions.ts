@@ -120,10 +120,10 @@ function makeRunnableVersion(ver: Version): RunnableVersion {
   const run: RunnableVersion = {
     ...ver,
     source: isLocal ? VersionSource.local : VersionSource.remote,
-    state: isLocal ? VersionState.ready : VersionState.unknown,
+    state: VersionState.unknown,
     version: normalizeVersion(ver.version),
   };
-  run.state = getVersionState(ver);
+  run.state = getVersionState(run);
   return run;
 }
 
@@ -253,6 +253,7 @@ export async function fetchReleasedVersions(): Promise<Version[]> {
     .map(({ version }) => ({ version }))
     .filter(({ version }) => semver.gte(version, MIN_DOWNLOAD_VERSION));
 
+  console.log(`Fetched ${versions.length} new Electron versions`);
   if (versions.length > 0) saveReleasedVersions(versions);
   return versions;
 }
