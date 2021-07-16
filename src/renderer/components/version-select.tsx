@@ -78,18 +78,22 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
   const q = query.toLowerCase();
 
   return versions
-    .map((version: RunnableVersion) => ({
-      index: version.version.toLowerCase().indexOf(q),
-      version,
-    }))
+    .map((version: RunnableVersion) => {
+      const lowercase = version.version.toLowerCase();
+      return {
+        index: lowercase.indexOf(q),
+        coerced: semver.coerce(lowercase),
+        version,
+      };
+    })
     .filter((item) => item.index !== -1)
     .sort((a, b) => {
       // If the user is searching for e.g. 'nightly' we
       // want to sort nightlies by descending major version.
       if (isNaN(+q)) {
-        const one = semver.coerce(a.version.version);
-        const two = semver.coerce(b.version.version);
-        if (one && two) return semver.rcompare(one, two);
+        if (a.coerced && b.coerced) {
+          return semver.rcompare(a.coerced, b.coerced);
+        }
       }
       return a.index - b.index;
     })
