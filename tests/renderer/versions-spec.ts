@@ -17,7 +17,6 @@ import {
   getLocalVersions,
   getReleaseChannel,
   getReleasedVersions,
-  getUpdatedElectronVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { FetchMock } from '../utils';
@@ -213,42 +212,6 @@ describe('versions', () => {
       );
 
       expect(getReleasedVersions().length).toBe(expectedVersionCount);
-    });
-  });
-
-  describe('getUpdatedElectronVersions()', () => {
-    it('gets known versions', async () => {
-      (getVersionState as jest.Mock).mockImplementation((v: any) => {
-        if (v.version === '3.0.5') return VersionState.ready;
-        if (v.version === '3.0.6') return VersionState.unknown;
-        return v.state;
-      });
-
-      (window as any).localStorage.getItem.mockImplementation((key: string) => {
-        if (key === 'known-electron-versions')
-          return '[{ "version": "3.0.5" }]';
-        if (key === 'local-electron-versions')
-          return '[{ "version": "3.0.6", "localPath": "/dev/null" }]';
-        throw new Error(`unexpected key ${key}`);
-      });
-
-      const fetchMock = new FetchMock();
-      fetchMock.add('getUpdatedElectronVersions', '');
-      const result = await getUpdatedElectronVersions();
-
-      expect(result).toEqual([
-        {
-          source: VersionSource.remote,
-          state: VersionState.ready,
-          version: '3.0.5',
-        },
-        {
-          localPath: '/dev/null',
-          source: VersionSource.local,
-          state: VersionState.unknown,
-          version: '3.0.6',
-        },
-      ]);
     });
   });
 

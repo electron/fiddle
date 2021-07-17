@@ -29,11 +29,12 @@ import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
+  fetchReleasedVersions,
   getDefaultVersion,
   getElectronVersions,
   getOldestSupportedVersion,
   getReleaseChannel,
-  getUpdatedElectronVersions,
+  makeRunnableVersion,
   saveLocalVersions,
 } from './versions';
 
@@ -302,7 +303,15 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      this.addNewVersions(await getUpdatedElectronVersions());
+      const all = await fetchReleasedVersions();
+      let newCount = 0;
+      for (const ver of all) {
+        if (!(ver.version in this.versions)) {
+          ++newCount;
+          this.versions[ver.version] = makeRunnableVersion(ver);
+        }
+      }
+      console.log(`Fetched ${all.length} Electron versions (${newCount} new)`);
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }

@@ -20,7 +20,7 @@ import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getElectronVersions } from '../../src/renderer/versions';
 import {
-  getUpdatedElectronVersions,
+  fetchReleasedVersions,
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
@@ -44,11 +44,12 @@ jest.mock('../../src/renderer/versions', () => {
 
   return {
     addLocalVersion: jest.fn(),
+    fetchReleasedVersions: jest.fn().mockResolvedValue(mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
     getElectronVersions: jest.fn(),
     getOldestSupportedVersion: jest.fn(),
     getReleaseChannel,
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    makeRunnableVersion: jest.fn((v) => v),
     saveLocalVersions: jest.fn(),
   };
 });
@@ -65,9 +66,7 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
-      mockVersionsArray,
-    );
+    (fetchReleasedVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState(mockVersionsArray);
@@ -81,13 +80,17 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
-        async () => {
-          throw new Error('Bwap-bwap');
-        },
-      );
-
+      (fetchReleasedVersions as jest.Mock).mockRejectedValue(new Error('💩'));
       await appState.updateElectronVersions();
+    });
+
+    it('fetches and adds new versions', async () => {
+      const version = '100.0.0';
+      (fetchReleasedVersions as jest.Mock).mockResolvedValue([{ version }]);
+      const oldCount = Object.keys(appState.versions).length;
+      await appState.updateElectronVersions();
+      const newCount = Object.keys(appState.versions).length;
+      expect(newCount).toBe(oldCount + 1);
     });
   });
 

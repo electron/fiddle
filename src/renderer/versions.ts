@@ -112,10 +112,19 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
   window.localStorage.setItem(key, stringified);
 }
 
-function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
-  ver.version = normalizeVersion(ver.version);
-  ver.state = getVersionState(ver);
-  return ver;
+/**
+ * Create a RunnableVersion from a Version
+ */
+export function makeRunnableVersion(ver: Version): RunnableVersion {
+  const isLocal = Boolean(ver.localPath);
+  const run: RunnableVersion = {
+    ...ver,
+    source: isLocal ? VersionSource.local : VersionSource.remote,
+    state: isLocal ? VersionState.ready : VersionState.unknown,
+    version: normalizeVersion(ver.version),
+  };
+  run.state = getVersionState(ver);
+  return run;
 }
 
 /**
@@ -124,23 +133,8 @@ function sanitizeVersion(ver: RunnableVersion): RunnableVersion {
  * @returns {Array<Version>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
-  const known: Array<RunnableVersion> = getReleasedVersions().map((version) => {
-    return {
-      ...version,
-      source: VersionSource.remote,
-      state: VersionState.unknown,
-    };
-  });
-
-  const local: Array<RunnableVersion> = getLocalVersions().map((version) => {
-    return {
-      ...version,
-      source: VersionSource.local,
-      state: VersionState.ready,
-    };
-  });
-
-  return [...known, ...local].map(sanitizeVersion);
+  const versions = [...getReleasedVersions(), ...getLocalVersions()];
+  return versions.map((ver) => makeRunnableVersion(ver));
 }
 
 /**
@@ -223,25 +217,6 @@ function saveReleasedVersions(versions: Array<Version>) {
 }
 
 /**
- * Tries to refresh our known versions and returns whatever we have
- * saved after.
- *
- * @export
- * @returns {Promise<Array<RunnableVersion>>}
- */
-export async function getUpdatedElectronVersions(): Promise<
-  Array<RunnableVersion>
-> {
-  try {
-    await fetchReleasedVersions();
-  } catch (error) {
-    console.warn(`Versions: Failed to fetch versions`, { error });
-  }
-
-  return getElectronVersions();
-}
-
-/**
  * Fetch a list of released versions from electronjs.org.
  *
  * @returns {Promise<Version[]>}
@@ -259,7 +234,6 @@ export async function fetchReleasedVersions(): Promise<Version[]> {
     .map(({ version }) => ({ version }))
     .filter(({ version }) => semver.gte(version, MIN_DOWNLOAD_VERSION));
 
-  console.log(`Fetched ${versions.length} new Electron versions`);
   if (versions.length > 0) saveReleasedVersions(versions);
   return versions;
 }
