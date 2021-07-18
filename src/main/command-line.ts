@@ -96,11 +96,11 @@ async function logConfig() {
    argv: ${JSON.stringify(process.argv)}
    date: ${new Date()}
    fiddle.version: ${packageJson.version}
-   getos: ${JSON.stringify(osinfo)}
    os.arch: ${os.arch()}
    os.platform: ${os.platform()}
    os.release: ${os.release()}
-   os.version: ${os.version()}`);
+   os.version: ${os.version()}
+   platform: ${JSON.stringify(osinfo)}`);
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
