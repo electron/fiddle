@@ -89,7 +89,7 @@ async function sendTask(type: IpcEvents, task: any) {
 async function logConfig() {
   const packageJson = require('../../package.json');
   const osinfo = await new Promise((resolve) =>
-    getos((err, result) => resolve(err ? err : result)),
+    getos((err, result) => resolve(err || result)),
   );
 
   console.log(`${packageJson.name} started
@@ -172,7 +172,7 @@ Example calls:
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     try {
       if (findProtocolArg(argv)) return;
-      program.parse(argv, { from: 'electron' });
+      await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
       process.exit(exitCodes[RunResult.INVALID]);
