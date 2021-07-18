@@ -161,7 +161,7 @@ describe('versions', () => {
   describe('fetchVersions()', () => {
     it('fetches versions >= 0.24.0', async () => {
       const fetchMock = new FetchMock();
-      const url = 'https://electronjs.org/headers/index.json';
+      const url = 'https://releases.electronjs.org/releases.json';
       const filename = path.join(__dirname, '../mocks/versions-mock.json');
       const contents = fs.readFileSync(filename).toString();
       fetchMock.add(url, contents);
