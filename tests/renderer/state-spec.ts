@@ -18,7 +18,7 @@ import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { getElectronVersions } from '../../src/renderer/versions';
+import { getElectronVersions, makeRunnable } from '../../src/renderer/versions';
 import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
@@ -46,6 +46,7 @@ jest.mock('../../src/renderer/versions', () => {
     getElectronVersions: jest.fn(),
     getOldestSupportedMajor: jest.fn(),
     getReleaseChannel,
+    makeRunnable: jest.fn((v) => v),
     saveLocalVersions: jest.fn(),
   };
 });
@@ -78,8 +79,22 @@ describe('AppState', () => {
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
       (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
+      await appState.updateElectronVersions();
+    });
+
+    it('adds new versions', async () => {
+      const version = '100.0.0';
+      const ver: Version = { version };
+
+      (fetchVersions as jest.Mock).mockResolvedValue([ver]);
+      (makeRunnable as jest.Mock).mockImplementation((v: unknown) => v);
+
+      const oldCount = Object.keys(appState.versions).length;
 
       await appState.updateElectronVersions();
+      const newCount = Object.keys(appState.versions).length;
+      expect(newCount).toBe(oldCount + 1);
+      expect(appState.versions[version]).toStrictEqual(ver);
     });
   });
 
