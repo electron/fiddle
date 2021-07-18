@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra';
-import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
@@ -29,11 +28,12 @@ import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
+  fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getOldestSupportedVersion,
+  getOldestSupportedMajor,
   getReleaseChannel,
-  getUpdatedElectronVersions,
+  makeRunnable,
   saveLocalVersions,
 } from './versions';
 
@@ -277,7 +277,7 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const oldest = semver.parse(getOldestSupportedVersion());
+    const oldest = getOldestSupportedMajor();
 
     const filter = (ver: RunnableVersion) =>
       ver &&
@@ -286,7 +286,7 @@ export class AppState {
         ver.state === VersionState.ready) &&
       (showObsoleteVersions ||
         !oldest ||
-        oldest.compareMain(ver.version) <= 0) &&
+        oldest <= Number.parseInt(ver.version)) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
     return sortVersions(Object.values(versions).filter(filter));
@@ -302,7 +302,11 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      this.addNewVersions(await getUpdatedElectronVersions());
+      this.addNewVersions(
+        (await fetchVersions())
+          .filter((ver) => !(ver.version in this.versions))
+          .map((ver) => makeRunnable(ver)),
+      );
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }

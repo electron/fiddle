@@ -20,7 +20,7 @@ import {
   VersionState,
 } from '../../interfaces';
 import { AppState } from '../state';
-import { getReleaseChannel, getOldestSupportedVersion } from '../versions';
+import { getReleaseChannel, getOldestSupportedMajor } from '../versions';
 
 interface ElectronSettingsProps {
   appState: AppState;
@@ -250,7 +250,7 @@ export class ElectronSettings extends React.Component<
           onChange={this.handleStateChange}
         />
         <Tooltip
-          content={`Include versions that have reached end-of-life (older than ${getOldestSupportedVersion()})`}
+          content={`Include versions that have reached end-of-life (older than ${getOldestSupportedMajor()}.0.0)`}
           position="bottom"
           intent="primary"
         >
