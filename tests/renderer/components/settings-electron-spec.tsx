@@ -36,8 +36,8 @@ describe('ElectronSettings component', () => {
 
   it('renders', () => {
     const spy = jest
-      .spyOn(versions, 'getOldestSupportedVersion')
-      .mockReturnValue('9.0.0');
+      .spyOn(versions, 'getOldestSupportedMajor')
+      .mockReturnValue(9);
 
     const moreVersions: RunnableVersion[] = [
       {
