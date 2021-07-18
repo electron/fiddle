@@ -5,7 +5,6 @@ import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as semver from 'semver';
 import decompress from 'decompress';
 
 // parent directory of all the downloaded template fiddles
@@ -93,14 +92,9 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version: semver.SemVer) {
-  const releasedMajors = new Set<number>(
-    getReleasedVersions()
-      .map(({ version }) => semver.parse(version))
-      .filter((sem) => Number.isInteger(sem?.major))
-      .map((sem) => sem!.major),
-  );
-  return releasedMajors.has(version.major);
+function isReleasedMajor(major: number) {
+  const prefix = `${major}.`;
+  return getReleasedVersions().some((ver) => ver.version.startsWith(prefix));
 }
 
 /**
@@ -110,8 +104,8 @@ function isReleasedMajor(version: semver.SemVer) {
  * @returns {Promise<EditorValues>}
  */
 export function getTemplate(version: string): Promise<EditorValues> {
-  const sem = semver.parse(version);
-  return sem && isReleasedMajor(sem)
-    ? getQuickStart(`${sem.major}-x-y`)
+  const major = Number.parseInt(version);
+  return major && isReleasedMajor(major)
+    ? getQuickStart(`${major}-x-y`)
     : readFiddle(STATIC_TEMPLATE_DIR);
 }

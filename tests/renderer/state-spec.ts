@@ -19,10 +19,7 @@ import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getElectronVersions } from '../../src/renderer/versions';
-import {
-  getUpdatedElectronVersions,
-  saveLocalVersions,
-} from '../../src/renderer/versions';
+import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -44,14 +41,15 @@ jest.mock('../../src/renderer/versions', () => {
 
   return {
     addLocalVersion: jest.fn(),
+    fetchVersions: jest.fn(mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
     getElectronVersions: jest.fn(),
-    getOldestSupportedVersion: jest.fn(),
+    getOldestSupportedMajor: jest.fn(),
     getReleaseChannel,
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
     saveLocalVersions: jest.fn(),
   };
 });
+
 jest.mock('../../src/utils/get-name', () => ({
   getName: jest.fn(),
 }));
@@ -65,9 +63,7 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
-      mockVersionsArray,
-    );
+    (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState(mockVersionsArray);
@@ -81,11 +77,7 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
-        async () => {
-          throw new Error('Bwap-bwap');
-        },
-      );
+      (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
 
       await appState.updateElectronVersions();
     });
