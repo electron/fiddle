@@ -172,7 +172,7 @@ Example calls:
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     try {
       if (findProtocolArg(argv)) return;
-      program.parse(argv, { from: 'electron' });
+      await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
       process.exit(exitCodes[RunResult.INVALID]);
