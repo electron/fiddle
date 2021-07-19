@@ -6,6 +6,8 @@ import * as React from 'react';
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
+import { IpcEvents } from '../../ipc-events';
+import { ipcRendererManager } from '../ipc';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
@@ -161,6 +163,13 @@ export class VersionSelect extends React.Component<
           className="version-chooser"
           text={`Electron v${version}`}
           icon={getItemIcon(currentVersion)}
+          onContextMenu={async (e) => {
+            e.preventDefault();
+            await ipcRendererManager.invoke(
+              IpcEvents.SHOW_VERSION_CONTEXT_MENU,
+              version,
+            );
+          }}
           disabled={!!this.props.disabled}
         />
       </ElectronVersionSelect>

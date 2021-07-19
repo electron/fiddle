@@ -7,12 +7,13 @@ import {
   getInspectItems,
   getMonacoItems,
   getRunItems,
+  getVersionChooserItem,
 } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
 
-import { Menu } from 'electron';
+import { clipboard, Menu } from 'electron';
 import { WebContentsMock } from '../mocks/web-contents';
 
 jest.mock('../../src/utils/devmode');
@@ -197,6 +198,15 @@ describe('context-menu', () => {
 
         expect(ipcMainManager.send).toHaveBeenCalledTimes(i);
       });
+    });
+  });
+
+  describe('getVersionChooserItem()', () => {
+    it('correctly copies the version text to clipboard on click', () => {
+      const version = 'v1.0.0';
+      const item = getVersionChooserItem(version);
+      (item as any).click();
+      expect(clipboard.writeText).toHaveBeenCalledWith(version);
     });
   });
 

@@ -78,6 +78,7 @@ exports[`VersionSelect component renders 1`] = `
     className="version-chooser"
     disabled={false}
     icon="cloud"
+    onContextMenu={[Function]}
     text="Electron v1.0.0"
   />
 </Blueprint3.Select>
