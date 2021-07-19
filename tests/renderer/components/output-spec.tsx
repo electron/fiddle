@@ -55,22 +55,6 @@ describe('Output component', () => {
       expect(monaco.editor.create).toHaveBeenCalled();
       expect(monaco.editor.createModel).toHaveBeenCalled();
     });
-
-    it('initializes with a fixed tab size', async () => {
-      const wrapper = shallow(
-        <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
-      );
-      const instance: any = wrapper.instance();
-
-      instance.outputRef.current = 'ref';
-      await instance.initMonaco();
-
-      expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
-        expect.objectContaining({
-          tabSize: 2,
-        }),
-      );
-    });
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
@@ -120,7 +104,7 @@ describe('Output component', () => {
     expect(wrapper.html()).not.toBe(null);
   });
 
-  it('setContent updates model with correct values', async () => {
+  it('updateModel updates model with correct values', async () => {
     store.output = [
       {
         timestamp: 1532704073130,
@@ -140,19 +124,45 @@ describe('Output component', () => {
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
+    instance.updateModel();
 
-    instance.editor.setContent(store.output);
-    const expectedFormattedOutput =
-      new Date(store.output[0].timestamp).toLocaleTimeString() +
-      ` Hi!\n` +
-      new Date(store.output[1].timestamp).toLocaleTimeString() +
-      ' Hi!';
-    // makes sure setContent() is called with the right values
-    expect(monaco.editor.createModel).toHaveBeenCalledWith(
-      expectedFormattedOutput,
-      'consoleOutputLanguage',
-    );
+    expect(monaco.editor.createModel).toHaveBeenCalled();
     expect(instance.editor.revealLine).toHaveBeenCalled();
+  });
+
+  it('updateModel correctly observes and gets called when output is updated', async () => {
+    store.output = [
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+      },
+    ];
+
+    const wrapper = shallow(
+      <Output appState={store as any} monaco={monaco} monacoOptions={{}} />,
+    );
+
+    const instance: any = wrapper.instance();
+    const spy = jest.spyOn(instance, 'updateModel');
+
+    instance.outputRef.current = 'ref';
+    await instance.initMonaco();
+
+    instance.updateModel();
+
+    // new output
+    store.output = [
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+      },
+      {
+        timestamp: 1532704073130,
+        text: 'Hi!',
+        isNotPre: true,
+      },
+    ];
+    expect(spy).toHaveBeenCalledTimes(2);
   });
 
   it('handles componentDidUpdate', async () => {

@@ -1,4 +1,4 @@
-import { autorun } from 'mobx';
+import { autorun, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
@@ -35,16 +35,23 @@ export class Output extends React.Component<CommandsProps> {
   public language = 'consoleOutputLanguage';
 
   private outputRef = React.createRef<HTMLDivElement>();
+  private readonly model: MonacoType.editor.ITextModel;
 
   constructor(props: CommandsProps) {
     super(props);
 
+    const { monaco } = this.props;
     this.language = 'consoleOutputLanguage';
+    this.model = monaco.editor.createModel('', this.language);
+    this.updateModel();
+    reaction(
+      () => props.appState.output.length,
+      () => this.updateModel(),
+    );
   }
 
   public async componentDidMount() {
     autorun(async () => {
-      this.destroyMonacoEditor();
       await this.initMonaco();
       this.toggleConsole();
     });
@@ -56,13 +63,6 @@ export class Output extends React.Component<CommandsProps> {
 
   public componentDidUpdate() {
     this.toggleConsole();
-  }
-
-  /**
-   *  Set Monaco Editor's value.
-   */
-  public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    await this.setContent(newProps.appState.output);
   }
 
   /**
@@ -79,11 +79,9 @@ export class Output extends React.Component<CommandsProps> {
         readOnly: true,
         contextmenu: false,
         automaticLayout: true,
-        model: null,
+        model: this.model,
         ...monacoOptions,
       });
-
-      await this.setContent(this.props.appState.output);
     }
   }
 
@@ -152,8 +150,8 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @memberof Output
    */
-  private async setContent(output: OutputEntry[]) {
-    this.setEditorText(this.getOutputLines(output));
+  private async updateModel() {
+    this.model.setValue(this.getOutputLines(this.props.appState.output));
     // have terminal always scroll to the bottom
     this.editor?.revealLine(this.editor?.getScrollHeight());
   }
@@ -180,22 +178,6 @@ export class Output extends React.Component<CommandsProps> {
       }
     }
     return lines.join('\n');
-  }
-
-  /**
-   * Create a model and attach it to the editor
-   *
-   * @private
-   * @param {string} value
-   */
-  private setEditorText(value: string) {
-    const { monaco } = this.props;
-    const model = monaco.editor.createModel(value, this.language);
-    model.updateOptions({
-      tabSize: 2,
-    });
-
-    this.editor?.setModel(model);
   }
 
   public render(): JSX.Element | null {
