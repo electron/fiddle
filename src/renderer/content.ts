@@ -5,7 +5,6 @@ import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import decompress from 'decompress';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
@@ -39,12 +38,22 @@ async function prepareTemplate(branch: string): Promise<string> {
         throw new Error(`${url} ${response.status} ${response.statusText}`);
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-      await fs.ensureDir(TEMPLATES_DIR);
-      console.log(`Content: ${branch} unzipping template`);
-      await decompress(Buffer.from(arrayBuffer), TEMPLATES_DIR);
+      // save it to a tempfile
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const { tmpNameSync } = await import('tmp');
+      const tempfile = tmpNameSync({ template: 'electron-fiddle-XXXXXX.zip' });
+      console.log(`Content: ${branch} saving template to "${tempfile}"`);
+      await fs.writeFile(tempfile, buffer, { encoding: 'utf8' });
 
-      console.log(`Content: ${branch} finished unzipping`);
+      // unzip it from the tempfile
+      console.log(`Content: ${branch} unzipping template`);
+      await fs.ensureDir(TEMPLATES_DIR);
+      const { default: extract } = await import('extract-zip');
+      await extract(tempfile, { dir: TEMPLATES_DIR });
+
+      // cleanup
+      console.log(`Content: ${branch} unzipped; removing "${tempfile}"`);
+      await fs.remove(tempfile);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
