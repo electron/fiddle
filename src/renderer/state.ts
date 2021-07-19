@@ -82,6 +82,7 @@ export class AppState {
   @observable public isClearingConsoleOnRun = !!this.retrieve(
     'isClearingConsoleOnRun',
   );
+  @observable public isShowingTimestamp = !!this.retrieve('isShowingTimestamp');
   @observable public isUsingSystemTheme = !!(
     this.retrieve('isUsingSystemTheme') ?? true
   );
@@ -192,6 +193,7 @@ export class AppState {
     autorun(() =>
       this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun),
     );
+    autorun(() => this.save('isShowingTimestamp', this.isShowingTimestamp));
     autorun(() => this.save('isUsingSystemTheme', this.isUsingSystemTheme));
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));

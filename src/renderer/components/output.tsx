@@ -170,11 +170,15 @@ export class Output extends React.Component<CommandsProps> {
     const lines: string[] = [];
     const outputs = output.slice(-1000);
 
+    const { isShowingTimestamp } = this.props.appState;
+
     for (const output of outputs) {
       const segments = output.text.split(/\r?\n/);
+
       const date = new Date(output.timestamp).toLocaleTimeString();
       for (const segment of segments) {
-        lines.push(date + ' ' + segment);
+        const line = isShowingTimestamp ? date + ' ' + segment : segment;
+        lines.push(line);
       }
     }
     return lines.join('\n');
