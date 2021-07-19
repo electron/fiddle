@@ -1,5 +1,7 @@
 import * as commander from 'commander';
 import * as fs from 'fs-extra';
+import * as os from 'os';
+import getos from 'getos';
 
 import { app } from 'electron';
 import {
@@ -84,18 +86,26 @@ async function sendTask(type: IpcEvents, task: any) {
   ipcMainManager.send(type, [task]);
 }
 
-function logConfig() {
+async function logConfig() {
   const packageJson = require('../../package.json');
+  const osinfo = await new Promise((resolve) =>
+    getos((err, result) => resolve(err || result)),
+  );
+
   console.log(`${packageJson.name} started
    argv: ${JSON.stringify(process.argv)}
    date: ${new Date()}
-   platform: ${process.platform}
-   version: ${packageJson.version}`);
+   fiddle.version: ${packageJson.version}
+   os.arch: ${os.arch()}
+   os.platform: ${os.platform()}
+   os.release: ${os.release()}
+   os.version: ${os.version()}
+   platform: ${JSON.stringify(osinfo)}`);
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) logConfig();
+    if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
       setup: getSetup(opts),
       goodVersion: good,
@@ -109,7 +119,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
 
 async function test(opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) logConfig();
+    if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
@@ -162,7 +172,7 @@ Example calls:
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     try {
       if (findProtocolArg(argv)) return;
-      program.parse(argv, { from: 'electron' });
+      await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
       process.exit(exitCodes[RunResult.INVALID]);
