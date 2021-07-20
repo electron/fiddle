@@ -1,6 +1,5 @@
 import {
   BrowserWindow,
-  clipboard,
   ContextMenuParams,
   Menu,
   MenuItemConstructorOptions,
@@ -134,32 +133,6 @@ export function getInspectItems(
       },
     },
   ];
-}
-
-/**
- * Returns the version copier item.
- *
- * @param version the Electron version number to copy.
- * @returns {Array<MenuItemConstructorOptions>}
- */
-export function getVersionChooserItem(version: string) {
-  return {
-    id: 'copy-version',
-    label: 'Copy Version Number',
-    click: () => clipboard.writeText(version),
-  };
-}
-
-/**
- * Creates a context menu to copy the current Electron version.
- *
- * @param version the Electron version number to copy.
- */
-export function showVersionChooserContextMenu(version: string) {
-  const item = getVersionChooserItem(version);
-  const menu = Menu.buildFromTemplate([item]);
-
-  menu.popup({});
 }
 
 /**

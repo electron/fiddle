@@ -16,7 +16,6 @@ import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 import { IpcMainEvent } from 'electron/main';
-import { showVersionChooserContextMenu } from './context-menu';
 
 let argv: string[] = [];
 
@@ -74,13 +73,6 @@ export function setupMenuHandler() {
         acceleratorsToBlock: [],
         activeTemplate,
       });
-    },
-  );
-
-  ipcMainManager.handle(
-    IpcEvents.SHOW_VERSION_CONTEXT_MENU,
-    (_event, version) => {
-      showVersionChooserContextMenu(version);
     },
   );
 }
