@@ -3,7 +3,6 @@ import * as fs from 'fs-extra';
 import * as os from 'os';
 import getos from 'getos';
 
-import { app } from 'electron';
 import {
   ElectronReleaseChannel,
   OutputEntry,
@@ -80,7 +79,7 @@ async function sendTask(type: IpcEvents, task: any) {
       `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
     );
   };
-  const onTaskDone = (_: any, r: RunResult) => app.exit(exitCodes[r]);
+  const onTaskDone = (_: any, r: RunResult) => exitWithCode(exitCodes[r]);
   ipcMainManager.on(IpcEvents.OUTPUT_ENTRY, onOutputEntry);
   ipcMainManager.once(IpcEvents.TASK_DONE, onTaskDone);
   ipcMainManager.send(type, [task]);
@@ -103,6 +102,11 @@ async function logConfig() {
    platform: ${JSON.stringify(osinfo)}`);
 }
 
+async function exitWithCode(code: number) {
+  console.log(`Electron Fiddle is exiting with code ${code}`);
+  process.exit(code);
+}
+
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
     if (opts.logConfig) await logConfig();
@@ -113,7 +117,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
     });
   } catch (err) {
     console.error(err);
-    process.exit(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes[RunResult.INVALID]);
   }
 }
 
@@ -125,7 +129,7 @@ async function test(opts: commander.OptionValues) {
     });
   } catch (err) {
     console.error(err);
-    process.exit(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes[RunResult.INVALID]);
   }
 }
 
@@ -175,7 +179,7 @@ Example calls:
       await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
-      process.exit(exitCodes[RunResult.INVALID]);
+      exitWithCode(exitCodes[RunResult.INVALID]);
     }
   }
 }
