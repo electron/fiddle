@@ -1,6 +1,5 @@
 // use a stable-sorting stringify for comparing expected & actual payloads
 import stringify from 'json-stable-stringify';
-import { app } from 'electron';
 
 import {
   ElectronReleaseChannel,
@@ -207,7 +206,7 @@ describe('processCommandLine()', () => {
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
         await processCommandLine(argv);
-        expect(app.exit).toHaveBeenCalledWith(exitCode);
+        expect(process.exit).toHaveBeenCalledWith(exitCode);
       }
 
       it(`exits with 0 on ${RunResult.SUCCESS}`, async () => {
