@@ -82,7 +82,9 @@ export class AppState {
   @observable public isClearingConsoleOnRun = !!this.retrieve(
     'isClearingConsoleOnRun',
   );
-  @observable public isShowingTimestamp = !!this.retrieve('isShowingTimestamp');
+  @observable public isShowingTimestamp = !!(
+    this.retrieve('isShowingTimestamp') ?? true
+  );
   @observable public isUsingSystemTheme = !!(
     this.retrieve('isUsingSystemTheme') ?? true
   );
