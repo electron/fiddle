@@ -1,5 +1,12 @@
-import { Button, ButtonGroupProps, MenuItem } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroupProps,
+  ContextMenu,
+  Menu,
+  MenuItem,
+} from '@blueprintjs/core';
 import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
@@ -101,6 +108,31 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
 };
 
 /**
+ * Renders a context menu to copy the current Electron version.
+ *
+ * @param {React.MouseEvent<HTMLButtonElement>} e
+ * @param {string} version the Electron version number to copy.
+ */
+export const renderVersionContextMenu = (
+  e: React.MouseEvent<HTMLButtonElement>,
+  version: string,
+) => {
+  e.preventDefault();
+
+  ContextMenu.show(
+    <Menu>
+      <MenuItem
+        text="Copy Version Number"
+        onClick={() => {
+          clipboard.writeText(version);
+        }}
+      />
+    </Menu>,
+    { left: e.clientX, top: e.clientY },
+  );
+};
+
+/**
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
  *
@@ -175,6 +207,9 @@ export class VersionSelect extends React.Component<
           className="version-chooser"
           text={`Electron v${version}`}
           icon={getItemIcon(currentVersion)}
+          onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
+            renderVersionContextMenu(e, version);
+          }}
           disabled={!!this.props.disabled}
         />
       </ElectronVersionSelect>
