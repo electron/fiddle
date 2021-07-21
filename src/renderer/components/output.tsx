@@ -35,6 +35,7 @@ export class Output extends React.Component<CommandsProps> {
   public language = 'consoleOutputLanguage';
 
   private outputRef = React.createRef<HTMLDivElement>();
+  private outputTimeStamps: string[] = [];
   private readonly model: MonacoType.editor.ITextModel;
 
   constructor(props: CommandsProps) {
@@ -71,6 +72,7 @@ export class Output extends React.Component<CommandsProps> {
   public async initMonaco() {
     const { monaco, monacoOptions: monacoOptions } = this.props;
     const ref = this.outputRef.current;
+    this.getLineNumber = this.getLineNumber.bind(this);
     if (ref) {
       this.setupCustomOutputEditorLanguage(monaco);
       this.editor = monaco.editor.create(ref, {
@@ -81,6 +83,9 @@ export class Output extends React.Component<CommandsProps> {
         automaticLayout: true,
         model: this.model,
         ...monacoOptions,
+        lineNumbers: this.getLineNumber,
+        lineNumbersMinChars: 12,
+        wordWrap: 'on',
       });
     }
   }
@@ -94,6 +99,10 @@ export class Output extends React.Component<CommandsProps> {
       this.editor.dispose();
       delete this.editor;
     }
+  }
+
+  public getLineNumber(originalLineNumber: number) {
+    return this.outputTimeStamps[originalLineNumber - 1];
   }
 
   public toggleConsole() {
@@ -171,14 +180,17 @@ export class Output extends React.Component<CommandsProps> {
     const outputs = output.slice(-1000);
 
     const { isShowingTimestamp } = this.props.appState;
+    // reset outputTimeStamps
+    this.outputTimeStamps = [];
 
     for (const output of outputs) {
       const segments = output.text.split(/\r?\n/);
 
       const date = new Date(output.timestamp).toLocaleTimeString();
       for (const segment of segments) {
-        const line = isShowingTimestamp ? date + ' ' + segment : segment;
+        const line = isShowingTimestamp ? `${date} ${segment}` : `${segment}`;
         lines.push(line);
+        this.outputTimeStamps.push(date);
       }
     }
     return lines.join('\n');
