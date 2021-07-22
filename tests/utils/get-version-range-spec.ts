@@ -2,10 +2,7 @@ import * as semver from 'semver';
 
 import { VersionsMock } from '../mocks/electron-versions';
 
-import {
-  getVersionRange,
-  semverCompare,
-} from '../../src/utils/get-version-range';
+import { getVersionRange } from '../../src/utils/get-version-range';
 
 describe('getVersionRange', () => {
   const { mockVersionsArray } = new VersionsMock();
@@ -70,39 +67,5 @@ describe('getVersionRange', () => {
 
     versions = getVersionRange(lowerBound, upperBound, newestToOldest);
     expect(versions).toEqual(oldestToNewest);
-  });
-
-  describe('semverCompare', () => {
-    it('can handle prerelease sorting', () => {
-      const versions = [
-        'v2.0.0-nightly.20210103',
-        'v2.0.0-alpha.1',
-        'v1.0.0',
-        'v2.0.0-nightly.20210101',
-        'v2.0.0-beta.1',
-        'v2.0.0-beta.2',
-        'v2.0.0-alpha.3',
-        'v3.0.0',
-        'v14.0.0-nightly.20210901',
-        'v14.1.2-beta.1',
-        'v14.3.2-beta.2',
-      ];
-
-      const expected = [
-        'v1.0.0',
-        'v2.0.0-nightly.20210101',
-        'v2.0.0-nightly.20210103',
-        'v2.0.0-alpha.1',
-        'v2.0.0-alpha.3',
-        'v2.0.0-beta.1',
-        'v2.0.0-beta.2',
-        'v3.0.0',
-        'v14.0.0-nightly.20210901',
-        'v14.1.2-beta.1',
-        'v14.3.2-beta.2',
-      ];
-
-      expect(versions.sort(semverCompare)).toEqual(expected);
-    });
   });
 });

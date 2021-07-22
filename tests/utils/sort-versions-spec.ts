@@ -73,8 +73,6 @@ describe('sort-versions', () => {
     const sorted = sortVersions([...unsorted]);
 
     expect(sorted).toStrictEqual<any>([
-      makeVersion('garbage'),
-      makeVersion('moreGarbage'),
       makeVersion('v3.0.0'),
       makeVersion('v1.0.0'),
     ]);
