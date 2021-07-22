@@ -40,7 +40,6 @@ export class StateMock {
   @observable public isQuitting = false;
   @observable public isRunning = false;
   @observable public isSettingsShowing = false;
-  @observable public isShowingTimestamp = true;
   @observable public isTokenDialogShowing = false;
   @observable public isTourShowing = false;
   @observable public isUsingSystemTheme = true;

@@ -20,7 +20,6 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
     super(props);
 
     this.handleClearOnRunChange = this.handleClearOnRunChange.bind(this);
-    this.handleShowTimestampChange = this.handleShowTimestampChange.bind(this);
   }
 
   /**
@@ -34,25 +33,12 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
     this.props.appState.isClearingConsoleOnRun = checked;
   }
 
-  /**
-   * Handles a change on whether or not the console timestamps should be shown
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
-   */
-  public handleShowTimestampChange(event: React.FormEvent<HTMLInputElement>) {
-    const { checked } = event.currentTarget;
-    this.props.appState.isShowingTimestamp = checked;
-  }
-
   public render() {
-    const { isClearingConsoleOnRun, isShowingTimestamp } = this.props.appState;
+    const { isClearingConsoleOnRun } = this.props.appState;
 
     const clearOnRunLabel = `
       Enable this option to automatically clear the console whenever you run your
       fiddle.`.trim();
-
-    const showTimestampLabel = `
-      Enable this option to show timestamps for each log entry within the console.`.trim();
 
     return (
       <div>
@@ -63,13 +49,6 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
               checked={isClearingConsoleOnRun}
               label="Clear on run."
               onChange={this.handleClearOnRunChange}
-            />
-          </FormGroup>
-          <FormGroup label={showTimestampLabel}>
-            <Checkbox
-              checked={isShowingTimestamp}
-              label="Show Console Timestamps."
-              onChange={this.handleShowTimestampChange}
             />
           </FormGroup>
         </Callout>

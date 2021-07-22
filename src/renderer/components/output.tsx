@@ -179,7 +179,6 @@ export class Output extends React.Component<CommandsProps> {
     const lines: string[] = [];
     const outputs = output.slice(-1000);
 
-    const { isShowingTimestamp } = this.props.appState;
     // reset outputTimeStamps
     this.outputTimeStamps = [];
 
@@ -188,8 +187,7 @@ export class Output extends React.Component<CommandsProps> {
 
       const date = new Date(output.timestamp).toLocaleTimeString();
       for (const segment of segments) {
-        const line = isShowingTimestamp ? `${date} ${segment}` : `${segment}`;
-        lines.push(line);
+        lines.push(segment);
         this.outputTimeStamps.push(date);
       }
     }
