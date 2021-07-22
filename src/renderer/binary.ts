@@ -130,7 +130,7 @@ export async function removeBinary(ver: RunnableVersion) {
       // the Electron binaries. Electron, powering Fiddle, will try to
       // "correct" our calls, but we don't want that right here.
       process.noAsar = true;
-      await fs.remove(getDownloadPath(version));
+      fs.removeSync(getDownloadPath(version));
       process.noAsar = false;
 
       isDeleted = true;
