@@ -14,6 +14,7 @@ import { AppState } from './state';
 
 import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
+import { urlFromId } from '../utils/gist';
 
 import { ipcRendererManager } from './ipc';
 
@@ -130,7 +131,12 @@ export class TaskRunner {
     }
 
     if (fiddle) {
-      log(`Task: Open fiddle \"${JSON.stringify(fiddle)}"`);
+      const { gistId } = fiddle;
+      if (gistId) {
+        log(`Task: Open fiddle "${gistId}" ("${urlFromId(gistId)}")`);
+      } else {
+        log(`Task: Open fiddle "${JSON.stringify(fiddle)}"`);
+      }
       await this.open(fiddle);
     }
   }
