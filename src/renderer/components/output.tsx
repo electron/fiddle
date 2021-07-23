@@ -102,7 +102,12 @@ export class Output extends React.Component<CommandsProps> {
   }
 
   public getLineNumber(originalLineNumber: number) {
-    return this.outputTimeStamps[originalLineNumber - 1];
+    try {
+      return this.outputTimeStamps[originalLineNumber - 1];
+    } catch (err) {
+      console.warn(`Could not retrieve output timestamp.`, { err });
+    }
+    return '';
   }
 
   public toggleConsole() {
