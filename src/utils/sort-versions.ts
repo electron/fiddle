@@ -11,20 +11,17 @@ const preTags = ['nightly', 'alpha', 'beta'];
  * @param b Prerelease tag data for the new version.
  * @returns 0 | 1 | -1
  */
-const preCompare = (
-  a: readonly (string | number)[],
-  b: readonly (string | number)[],
-) => {
-  const one = preTags.indexOf(a[0] as string);
-  const two = preTags.indexOf(b[0] as string);
-  if (one === two) {
+const preCompare = (a: string[], b: string[]) => {
+  const first = preTags.indexOf(a[0]);
+  const second = preTags.indexOf(b[0]);
+  if (first === second) {
     // Whether the prerelease tag number is the same
     // e.g. alpha.1 & alpha.1.
     if (a[1] === b[1]) return 0;
     return a[1] > b[1] ? 1 : -1;
   }
 
-  return one > two ? 1 : -1;
+  return first > second ? 1 : -1;
 };
 
 /**
@@ -37,16 +34,25 @@ const preCompare = (
  * @param b The new Electron version.
  * @returns 0 | 1 | -1
  */
-export function semverCompare(a: string, b: string) {
-  const hasPre = (v: string) => preTags.some((tag) => v.includes(tag));
+export function semverCompare(
+  a: string | semver.SemVer,
+  b: string | semver.SemVer,
+) {
+  const pA = typeof a === 'string' ? semver.parse(a) : a;
+  const pB = typeof b === 'string' ? semver.parse(b) : b;
+
+  const sameMain = (a: semver.SemVer | null, b: semver.SemVer | null) =>
+    a !== null && b !== null && a.compareMain(b) === 0;
 
   // Check that major.minor.patch are the same for a and b.
-  if (semver.coerce(a)?.raw === semver.coerce(b)?.raw) {
-    if (hasPre(a) && hasPre(b)) {
-      const { prerelease: aPre } = semver.parse(a) as semver.SemVer;
-      const { prerelease: bPre } = semver.parse(b) as semver.SemVer;
-      return preCompare(aPre, bPre);
-    }
+  if (a === 'v3.0.0' || b === 'v2.0.0') throw new Error('hey');
+  if (
+    sameMain(pA, pB) &&
+    pA?.prerelease.length !== 0 &&
+    pB?.prerelease.length !== 0
+  ) {
+    if (a === 'v3.0.0' || b === 'v3.0.0') throw new Error('hey');
+    return preCompare(pA?.prerelease as string[], pB?.prerelease as string[]);
   }
 
   return semver.compare(a, b);
@@ -59,15 +65,18 @@ export function semverCompare(a: string, b: string) {
  * @returns {RunnableVersion[]}
  */
 export function sortVersions(versions: RunnableVersion[]): RunnableVersion[] {
-  type VerSemRun = [ver: string, run: RunnableVersion];
+  type VerSemRun = [
+    ver: string,
+    sem: semver.SemVer | null,
+    run: RunnableVersion,
+  ];
 
-  const filtered = versions.filter((runnable) =>
-    semver.valid(runnable.version),
-  );
-  const sorted = filtered
-    .map((run): VerSemRun => [run.version, run])
-    .sort(([vera], [verb]) => -semverCompare(vera, verb));
-  sorted.forEach(([_1, run], idx) => (filtered[idx] = run));
-
-  return filtered;
+  const sorted = versions
+    .map((run): VerSemRun => [run.version, semver.parse(run.version), run])
+    .sort(
+      ([vera, sema], [verb, semb]) =>
+        -semverCompare(sema || vera, semb || verb),
+    );
+  sorted.forEach(([_1, _2, run], idx) => (versions[idx] = run));
+  return versions;
 }
