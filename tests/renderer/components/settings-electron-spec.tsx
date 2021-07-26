@@ -106,6 +106,26 @@ describe('ElectronSettings component', () => {
     expect(store.downloadVersion).toHaveBeenCalledTimes(1);
   });
 
+  it('handles missing local versions', () => {
+    const version = '99999.0.0';
+    const ver = {
+      source: VersionSource.local,
+      state: VersionState.unknown,
+      version,
+    };
+    store.versions = { version: ver };
+    store.versionsToShow = [ver];
+
+    const wrapper = mount(<ElectronSettings appState={store as any} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.removeVersion).toHaveBeenCalledTimes(1);
+  });
+
   it('handles the deleteAll()', async () => {
     const wrapper = shallow(<ElectronSettings appState={store as any} />);
     const instance = wrapper.instance() as any;
