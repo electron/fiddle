@@ -82,7 +82,7 @@ export interface TestRequest {
 
 export interface OutputEntry {
   text: string;
-  timestamp: number;
+  timeString: string;
   isNotPre?: boolean;
 }
 

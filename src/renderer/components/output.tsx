@@ -37,6 +37,10 @@ export class Output extends React.Component<CommandsProps> {
   private outputRef = React.createRef<HTMLDivElement>();
   private readonly model: MonacoType.editor.ITextModel;
 
+  // make it wide enough to fit all of OutputEntry's timestamps
+  private readonly lineNumbersMinChars =
+    new Date('2021-12-31T23:59:59').toLocaleTimeString().length + 1;
+
   constructor(props: CommandsProps) {
     super(props);
 
@@ -81,6 +85,7 @@ export class Output extends React.Component<CommandsProps> {
         automaticLayout: true,
         model: this.model,
         ...monacoOptions,
+        wordWrap: 'on',
       });
     }
   }
@@ -151,33 +156,41 @@ export class Output extends React.Component<CommandsProps> {
    * @memberof Output
    */
   private async updateModel() {
-    this.model.setValue(this.getOutputLines(this.props.appState.output));
-    // have terminal always scroll to the bottom
-    this.editor?.revealLine(this.editor?.getScrollHeight());
+    // set the lines
+    const lines = Output.getLines(this.props.appState.output);
+    this.model.setValue(lines.map(({ text }) => text).join('\n'));
+
+    // if we have an editor, tell it the line numbers and scroll to newest
+    const { editor, lineNumbersMinChars } = this;
+    if (!editor) return;
+    const timestrs = lines.map(({ timeString }) => timeString);
+    // adjust `i` here because the value passed in by monaco starts at 1, not 0
+    const lineNumbers = (i: number) => timestrs[i - 1] || '';
+    editor.updateOptions({ lineNumbers, lineNumbersMinChars });
+    console.log(lineNumbersMinChars);
+    editor.revealLine(editor.getScrollHeight());
   }
 
   /**
-   * Processes output entries such that each entry has a timestamp and value text.
+   * An OutputEntry might span multiple lines.
+   * Split it into individual lines to ensure each one has a timestamp.
    *
-   * An individual entry might span multiple lines. To ensure that
-   * each line has a timestamp, this method might split up entries.
-   *
-   * @param {OutputEntry} entry
-   * @returns string
+   * @param {OutputEntry} entries that may include paragraphs
+   * @returns {OutputEntry} single-line entries
    * @memberof Output
    */
-  private getOutputLines(output: OutputEntry[]) {
-    const lines: string[] = [];
-    const outputs = output.slice(-1000);
+  private static getLines(paragraphs: OutputEntry[]): OutputEntry[] {
+    const lines: OutputEntry[] = [];
 
-    for (const output of outputs) {
-      const segments = output.text.split(/\r?\n/);
-      const date = new Date(output.timestamp).toLocaleTimeString();
-      for (const segment of segments) {
-        lines.push(date + ' ' + segment);
+    paragraphs = paragraphs.slice(-1000);
+
+    for (const { text, timeString } of paragraphs) {
+      for (const line of text.split(/\r?\n/)) {
+        lines.push({ text: line, timeString });
       }
     }
-    return lines.join('\n');
+
+    return lines;
   }
 
   public render(): JSX.Element | null {

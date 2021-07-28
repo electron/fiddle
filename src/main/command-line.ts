@@ -75,9 +75,7 @@ const exitCodes = Object.freeze({
 
 async function sendTask(type: IpcEvents, task: any) {
   const onOutputEntry = (_: any, msg: OutputEntry) => {
-    console.log(
-      `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
-    );
+    console.log(`[${msg.timeString}] ${msg.text}`);
   };
   const onTaskDone = (_: any, r: RunResult) => exitWithCode(exitCodes[r]);
   ipcMainManager.on(IpcEvents.OUTPUT_ENTRY, onOutputEntry);

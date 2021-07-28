@@ -222,13 +222,13 @@ describe('processCommandLine()', () => {
       });
 
       it('sends output messages to the console', async () => {
-        const now = Date.now();
+        const timeString = new Date().toLocaleTimeString();
         const text = 'asieoniezi';
-        const expected = `[${new Date(now).toLocaleTimeString()}] ${text}`;
+        const expected = `[${timeString}] ${text}`;
         const spy = jest.spyOn(console, 'log').mockReturnValue();
 
         const fakeEvent = {};
-        const entry: OutputEntry = { text, timestamp: now };
+        const entry: OutputEntry = { text, timeString };
         (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
           ipcMainManager.emit(IpcEvents.OUTPUT_ENTRY, fakeEvent, entry);
         });

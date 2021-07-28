@@ -662,7 +662,7 @@ describe('AppState', () => {
       appState.pushOutput(Buffer.from('hi'));
 
       expect(appState.output[1].text).toBe('hi');
-      expect(appState.output[1].timestamp).toBeTruthy();
+      expect(appState.output[1].timeString).toBeTruthy();
     });
 
     it('ignores the "Debuggeer listening on..." output', () => {
