@@ -53,7 +53,7 @@ export function getMonacoItems({
       id: 'go_to_definition',
       label: 'Go to Definition',
       click() {
-        const cmd = ['editor.action.goToDeclaration'];
+        const cmd = ['editor.action.revealDefinition'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       },
     },
@@ -61,7 +61,7 @@ export function getMonacoItems({
       id: 'peek_definition',
       label: 'Peek Definition',
       click() {
-        const cmd = ['editor.action.previewDeclaration'];
+        const cmd = ['editor.action.peekDefinition'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       },
     },
