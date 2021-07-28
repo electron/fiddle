@@ -107,13 +107,13 @@ describe('Output component', () => {
   it('updateModel updates model with correct values', async () => {
     store.output = [
       {
-        timestamp: 1532704073130,
         text: 'Hi!',
+        timeString: '12:00:01 PM',
       },
       {
-        timestamp: 1532704073130,
-        text: 'Hi!',
         isNotPre: true,
+        text: 'Hi!',
+        timeString: '12:00:01 PM',
       },
     ];
 
