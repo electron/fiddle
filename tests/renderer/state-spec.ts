@@ -242,7 +242,7 @@ describe('AppState', () => {
 
     it('handles undownloaded versions', () => {
       Object.values(appState.versions).forEach(
-        (ver) => (ver.state = VersionState.unknown),
+        (ver) => (ver.state = VersionState.absent),
       );
 
       appState.showUndownloadedVersions = false;
@@ -303,14 +303,14 @@ describe('AppState', () => {
 
     it('removes a version', async () => {
       const ver = appState.versions[version];
-      ver.state = VersionState.ready;
+      ver.state = VersionState.installed;
       await appState.removeVersion(ver);
       expect(removeBinary).toHaveBeenCalledWith<any>(ver);
     });
 
     it('does not remove it if not necessary', async () => {
       const ver = appState.versions[version];
-      ver.state = VersionState.unknown;
+      ver.state = VersionState.absent;
       await appState.removeVersion(ver);
       expect(removeBinary).toHaveBeenCalledTimes(0);
     });
@@ -321,7 +321,7 @@ describe('AppState', () => {
       const ver = appState.versions[version];
       ver.localPath = localPath;
       ver.source = VersionSource.local;
-      ver.state = VersionState.ready;
+      ver.state = VersionState.installed;
 
       await appState.removeVersion(ver);
 
@@ -334,7 +334,7 @@ describe('AppState', () => {
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
       const ver = appState.versions['2.0.2'];
-      ver.state = VersionState.unknown;
+      ver.state = VersionState.absent;
 
       await appState.downloadVersion(ver);
 
@@ -343,7 +343,7 @@ describe('AppState', () => {
 
     it('does not download a version if already ready', async () => {
       const ver = appState.versions['2.0.2'];
-      ver.state = VersionState.ready;
+      ver.state = VersionState.installed;
 
       await appState.downloadVersion(ver);
 

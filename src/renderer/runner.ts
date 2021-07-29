@@ -1,6 +1,8 @@
-import { ChildProcess, spawn } from 'child_process';
+import * as os from 'os';
 import * as path from 'path';
 import isRunning from 'is-running';
+import { ChildProcess } from 'child_process';
+import { Stream } from 'stream';
 
 import {
   EditorValues,
@@ -11,8 +13,6 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
-import { getElectronBinaryPath, getIsDownloaded } from './binary';
-import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
   findModulesInEditors,
@@ -22,22 +22,41 @@ import {
   PMOperationOptions,
 } from './npm';
 import { AppState } from './state';
+import {
+  FiddleFactory,
+  Installer,
+  Paths as RunnerPaths,
+  Runner as FiddleRunner,
+  SpawnSyncOptions,
+  SpawnOptions,
+} from 'electron-fiddle-runner';
+import { USER_DATA_PATH } from './constants';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
 }
 
-const resultString: Record<RunResult, string> = Object.freeze({
-  [RunResult.FAILURE]: '❌ failed',
-  [RunResult.INVALID]: '❓ invalid',
-  [RunResult.SUCCESS]: '✅ passed',
-});
-
 export class Runner {
   public child: ChildProcess | null = null;
+  private runner: FiddleRunner;
+  private readonly fiddleFactory: FiddleFactory;
 
-  constructor(private readonly appState: AppState) {
+  constructor(
+    private readonly appState: AppState,
+    private readonly installer: Installer,
+  ) {
+    const paths: Partial<RunnerPaths> = {
+      versionsCache: path.join(USER_DATA_PATH, 'versions.json'),
+      fiddles: path.join(os.tmpdir(), 'electron-fiddles'),
+    };
+    this.fiddleFactory = new FiddleFactory(paths.fiddles);
+    FiddleRunner.create({
+      fiddleFactory: this.fiddleFactory,
+      installer: this.installer,
+      paths,
+    }).then((runner) => (this.runner = runner));
+
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
 
@@ -87,59 +106,26 @@ export class Runner {
       return RunResult.INVALID;
     }
 
-    const results: Map<string, RunResult> = new Map();
+    // show the console
+    if (appState.isClearingConsoleOnRun) appState.clearConsole();
+    appState.isConsoleShowing = true;
 
-    const runVersion = async (version: string) => {
-      let result = results.get(version);
-      if (result === undefined) {
-        const pre = `${prefix} Electron ${version} -`;
-        appState.pushOutput(`${pre} setting version`);
-        await appState.setVersion(version);
-        appState.pushOutput(`${pre} starting test`);
-        result = await this.run();
-        results.set(version, result);
-        appState.pushOutput(`${pre} finished test ${resultString[result]}`);
-      }
-      return result;
-    };
+    // FIXME: install packages
 
-    const bisector = new Bisector(versions);
-    let targetVersion = bisector.getCurrentVersion();
-    let next;
-    while (true) {
-      const { version } = targetVersion;
+    // autobisect
+    const { pushOutput } = this.appState;
+    const out = new Stream.PassThrough();
+    out.on('readable', () => pushOutput(out.read()));
+    const opts: SpawnSyncOptions = { out, showConfig: false };
+    appState.isRunning = true;
+    await this.runner.bisect(
+      versions[0].version,
+      versions[versions.length - 1].version,
+      Object.entries(await window.ElectronFiddle.app.getEditorValues()),
+      opts,
+    );
+    appState.isRunning = false;
 
-      const result = await runVersion(version);
-      if (result === RunResult.INVALID) {
-        return result;
-      }
-
-      next = bisector.continue(result === RunResult.SUCCESS);
-      if (Array.isArray(next)) {
-        break;
-      }
-
-      targetVersion = next;
-    }
-
-    const [good, bad] = next.map((v) => v.version);
-    const resultGood = await runVersion(good);
-    const resultBad = await runVersion(bad);
-    if (resultGood === resultBad) {
-      appState.pushOutput(
-        `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
-      );
-      return RunResult.INVALID;
-    }
-
-    const msgs = [
-      `${prefix} complete`,
-      `${prefix} ${resultString[RunResult.SUCCESS]} ${good}`,
-      `${prefix} ${resultString[RunResult.FAILURE]} ${bad}`,
-      `${prefix} Commits between versions:`,
-      `https://github.com/electron/electron/compare/v${good}...v${bad}`,
-    ];
-    msgs.forEach((msg) => appState.pushOutput(msg));
     return RunResult.SUCCESS;
   }
 
@@ -149,51 +135,20 @@ export class Runner {
    * @returns {Promise<RunResult>}
    */
   public async run(): Promise<RunResult> {
-    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
-    const options = { includeDependencies: false, includeElectron: false };
-
     const { appState } = this;
-    const { version, localPath } = appState.currentElectronVersion;
+    const { state, version } = appState.currentElectronVersion;
 
-    if (appState.isClearingConsoleOnRun) {
-      appState.clearConsole();
+    if (state !== 'installed') {
+      console.warn(`Runner: Binary ${version} not ready`);
+      const message = `Please wait for ${version} to finish installing before running the fiddle.`;
+      appState.pushOutput(message, { isNotPre: true });
+      return RunResult.INVALID;
     }
+
+    if (appState.isClearingConsoleOnRun) appState.clearConsole();
     appState.isConsoleShowing = true;
 
-    const values = await getEditorValues(options);
-    const dir = await this.saveToTemp(options);
-    const packageManager = appState.packageManager;
-
-    if (!dir) return RunResult.INVALID;
-
-    try {
-      await this.installModulesForEditor(values, { dir, packageManager });
-    } catch (error) {
-      console.error('Runner: Could not install modules', error);
-
-      appState.pushError('Could not install modules', error.message);
-      appState.isInstallingModules = false;
-
-      fileManager.cleanup(dir);
-      return RunResult.INVALID;
-    }
-
-    const isReady = getIsDownloaded(version, localPath);
-
-    if (!isReady) {
-      console.warn(`Runner: Binary ${version} not ready`);
-
-      let message = `Could not start fiddle: `;
-      message += `Electron ${version} not downloaded yet. `;
-      message += `Please wait for it to finish downloading `;
-      message += `before running the fiddle.`;
-
-      appState.pushOutput(message, { isNotPre: true });
-      fileManager.cleanup(dir);
-      return RunResult.INVALID;
-    }
-
-    return this.execute(dir);
+    return this.execute();
   }
 
   /**
@@ -323,29 +278,11 @@ export class Runner {
     }
   }
 
-  /**
-   * Execute Electron.
-   *
-   * @param {string} dir
-   * @param {string} version
-   * @returns {Promise<void>}
-   * @memberof Runner
-   */
-  public async execute(dir: string): Promise<RunResult> {
-    const {
-      currentElectronVersion,
-      isEnablingElectronLogging,
-      flushOutput,
-      pushOutput,
-      executionFlags,
-      environmentVariables,
-    } = this.appState;
-
-    const { version, localPath } = currentElectronVersion;
-    const binaryPath = getElectronBinaryPath(version, localPath);
-    console.log(`Runner: Binary ${binaryPath} ready, launching`);
+  private buildChildEnvVars(): { [x: string]: string | undefined } {
+    const { isEnablingElectronLogging, environmentVariables } = this.appState;
 
     const env = { ...process.env };
+
     if (isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
       env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
@@ -356,36 +293,56 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
-    // Add user-specified environment variables if any have been set.
     for (const v of environmentVariables) {
       const [key, value] = v.split('=');
       env[key] = value;
     }
 
-    // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(executionFlags);
+    return env;
+  }
 
-    return new Promise((resolve, _reject) => {
-      this.child = spawn(binaryPath, options, { cwd: dir, env });
-      this.appState.isRunning = true;
-      pushOutput(`Electron v${version} started.`);
+  /**
+   * Execute Electron.
+   *
+   * @param {string} dir
+   * @param {string} version
+   * @returns {Promise<void>}
+   * @memberof Runner
+   */
+  public async execute(): Promise<RunResult> {
+    // spawn the process
+    const {
+      currentElectronVersion,
+      flushOutput,
+      // isKeepingUserDataDirs,
+      pushOutput,
+    } = this.appState;
+    const { version, localPath } = currentElectronVersion;
 
-      this.child.stdout!.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child.stderr!.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child.on('close', async (code, signal) => {
+    // create the fiddle snapshot
+    const { getEditorValues } = window.ElectronFiddle.app;
+    const values = await getEditorValues();
+    const entries = Object.entries(values) as Iterable<[string, string]>;
+    const fiddle = await this.fiddleFactory.create(entries);
+
+    const env = this.buildChildEnvVars();
+    const opts: SpawnOptions = { env, showConfig: false };
+
+    const child = await this.runner.spawn(localPath || version, fiddle!, opts);
+
+    this.child = child;
+    this.appState.isRunning = true;
+    pushOutput(`Electron v${version} started.`);
+
+    return new Promise((resolve) => {
+      const onData = (str: string) => pushOutput(str, { bypassBuffer: false });
+      child.stdout!.on('data', onData);
+      child.stderr!.on('data', onData);
+      child.on('close', async (code, signal) => {
         flushOutput();
-
         this.appState.isRunning = false;
         this.child = null;
-
-        // Clean older folders
-        await window.ElectronFiddle.app.fileManager.cleanup(dir);
-        await this.deleteUserData();
-
+        // FIXME if (!isKeepingUserDataDirs) await fiddle!.remove();
         if (typeof code !== 'number') {
           pushOutput(`Electron exited with signal ${signal}.`);
           resolve(RunResult.INVALID);
@@ -442,23 +399,5 @@ export class Runner {
     }
 
     return false;
-  }
-
-  /**
-   * Deletes the user data dir after a run.
-   */
-  private async deleteUserData() {
-    if (this.appState.isKeepingUserDataDirs) {
-      console.log(
-        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
-      );
-      return;
-    }
-
-    const name = await this.appState.getName();
-    const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
-
-    console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.app.fileManager.cleanup(appData);
   }
 }

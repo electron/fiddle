@@ -16,6 +16,7 @@ import { activateTheme, getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
 import { ElectronTypes } from './electron-types';
 import { USER_DATA_PATH } from './constants';
+import { Installer, InstallState } from 'electron-fiddle-runner';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -24,21 +25,55 @@ import { USER_DATA_PATH } from './constants';
  * @class App
  */
 export class App {
-  public state = new AppState(getElectronVersions());
-  public fileManager = new FileManager(this.state);
-  public remoteLoader = new RemoteLoader(this.state);
-  public runner = new Runner(this.state);
+  public readonly installer: Installer;
+  public readonly state: AppState;
+  public fileManager: FileManager;
+  public remoteLoader: RemoteLoader;
+  public runner: Runner;
   public readonly taskRunner: TaskRunner;
   public readonly electronTypes: ElectronTypes;
 
   constructor() {
-    this.getEditorValues = this.getEditorValues.bind(this);
+    const electronDir = path.join(USER_DATA_PATH, 'electron-bin');
+    this.installer = new Installer({
+      electronDownloads: path.join(electronDir, 'zips'),
+      electronInstall: path.join(electronDir, 'current'),
+    });
 
+    const versions = getElectronVersions();
+    for (const ver of versions) {
+      // FIXME(ckerr) localPath
+      ver.state = this.installer.state(ver.version) || 'absent';
+    }
+    this.state = new AppState(this.installer, versions);
+
+    this.fileManager = new FileManager(this.state);
+    this.remoteLoader = new RemoteLoader(this.state);
+    this.runner = new Runner(this.state, this.installer);
+    this.getEditorValues = this.getEditorValues.bind(this);
     this.taskRunner = new TaskRunner(this);
 
     this.electronTypes = new ElectronTypes(
       window.ElectronFiddle.monaco,
       path.join(USER_DATA_PATH, 'electron-typedef'),
+    );
+
+    this.setupElectronInstaller();
+  }
+
+  private setupElectronInstaller() {
+    this.installer.on(
+      'state-changed',
+      (version: string, state: InstallState) => {
+        const ver = this.state.versions[version];
+        if (!ver) {
+          console.warn(`Unrecognized version: "${version}"`);
+          return;
+        }
+        ver.state = state;
+        if (ver.state === 'installed' || ver.state === 'installing')
+          this.state.version = version;
+      },
     );
   }
 

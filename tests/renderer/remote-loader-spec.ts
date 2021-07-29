@@ -252,7 +252,7 @@ describe('RemoteLoader', () => {
       expect(store.addNewVersions).toBeCalledWith([
         {
           source: VersionSource.remote,
-          state: VersionState.unknown,
+          state: VersionState.not_downloaded,
           version,
         },
       ]);

@@ -11,7 +11,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
 
-import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
+import { RunnableVersion, VersionSource } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 
@@ -25,21 +25,20 @@ const ElectronVersionSelect = Select.ofType<RunnableVersion>();
  * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
-  let label = '';
+  if (source === VersionSource.local) return name || 'Local';
 
-  if (source === VersionSource.local) {
-    label = name || 'Local';
-  } else {
-    if (state === VersionState.unknown) {
-      label = `Not downloaded`;
-    } else if (state === VersionState.ready) {
-      label = `Downloaded`;
-    } else if (state === VersionState.downloading) {
-      label = `Downloading`;
-    }
+  switch (state) {
+    case 'installed':
+      return 'Ready';
+    case 'installing':
+      return 'Installing';
+    case 'downloaded':
+      return 'Downloaded';
+    case 'downloading':
+      return 'Downloading';
+    case 'absent':
+      return 'Unknown';
   }
-
-  return label;
 }
 
 /**
@@ -51,14 +50,16 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  */
 export function getItemIcon({ state }: RunnableVersion) {
   switch (state) {
-    case VersionState.unknown:
-      return 'cloud';
-    case VersionState.ready:
+    case 'installed':
       return 'saved';
-    case VersionState.downloading:
-      return 'cloud-download';
-    case VersionState.unzipping:
+    case 'installing':
       return 'compressed';
+    case 'downloaded':
+      return 'compressed';
+    case 'downloading':
+      return 'cloud-download';
+    case 'absent':
+      return 'cloud';
   }
 }
 

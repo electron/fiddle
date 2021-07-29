@@ -7,17 +7,18 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as path from 'path';
 import * as React from 'react';
+import * as fs from 'fs-extra';
+import * as path from 'path';
 import * as semver from 'semver';
 
 import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
-import { getIsDownloaded } from '../binary';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { getLocalVersionForPath } from '../versions';
+import { Installer } from 'electron-fiddle-runner';
 
 interface AddVersionDialogProps {
   appState: AppState;
@@ -29,6 +30,10 @@ interface AddVersionDialogState {
   existingLocalVersion?: Version;
   folderPath?: string;
   version: string;
+}
+
+function folderHasElectron(folder: string): boolean {
+  return fs.existsSync(Installer.getExecPath(folder));
 }
 
 /**
@@ -73,7 +78,7 @@ export class AddVersionDialog extends React.Component<
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
   public setFolderPath(folderPath: string) {
-    const isValidElectron = getIsDownloaded('custom', folderPath);
+    const isValidElectron = folderHasElectron(folderPath);
     const existingLocalVersion = getLocalVersionForPath(folderPath);
 
     this.setState({ existingLocalVersion, folderPath, isValidElectron });

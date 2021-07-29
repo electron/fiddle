@@ -27,18 +27,18 @@ describe('Runner component', () => {
     }
 
     it('idle', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = VersionState.installed;
       expectSnapshotToMatch();
     });
 
     it('running', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = VersionState.installed;
       store.isRunning = true;
       expectSnapshotToMatch();
     });
 
     it('installing modules', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = VersionState.installed;
       store.isInstallingModules = true;
       expectSnapshotToMatch();
     });
@@ -49,18 +49,18 @@ describe('Runner component', () => {
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unzipping', () => {
-      store.currentElectronVersion.state = VersionState.unzipping;
+    it('VersionState.installing', () => {
+      store.currentElectronVersion.state = VersionState.installing;
       expectSnapshotToMatch();
     });
 
     it('VersionState.ready', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = VersionState.installed;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unknown', () => {
-      store.currentElectronVersion.state = VersionState.unknown;
+    it('VersionState.not_downloaded', () => {
+      store.currentElectronVersion.state = VersionState.not_downloaded;
       expectSnapshotToMatch();
     });
   });

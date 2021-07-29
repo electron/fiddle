@@ -9,7 +9,7 @@ describe('sort-versions', () => {
   function makeVersion(version: string): RunnableVersion {
     return {
       source: VersionSource.remote,
-      state: VersionState.unknown,
+      state: VersionState.not_downloaded,
       version,
     };
   }

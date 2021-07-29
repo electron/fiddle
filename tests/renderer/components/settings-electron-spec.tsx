@@ -28,10 +28,10 @@ describe('ElectronSettings component', () => {
 
     // Render all the states
     let i = 0;
-    store.versionsToShow[i++].state = VersionState.ready;
+    store.versionsToShow[i++].state = VersionState.installed;
     store.versionsToShow[i++].state = VersionState.downloading;
     store.versionsToShow[i++].state = VersionState.unknown;
-    store.versionsToShow[i++].state = VersionState.unzipping;
+    store.versionsToShow[i++].state = VersionState.installing;
   });
 
   it('renders', () => {
@@ -42,12 +42,12 @@ describe('ElectronSettings component', () => {
     const moreVersions: RunnableVersion[] = [
       {
         source: VersionSource.local,
-        state: VersionState.ready,
+        state: VersionState.installed,
         version: '3.0.0',
       },
       {
         source: VersionSource.remote,
-        state: VersionState.ready,
+        state: VersionState.downloaded,
         version: '3.0.0-nightly.1',
       },
     ];
@@ -65,13 +65,13 @@ describe('ElectronSettings component', () => {
 
   it('handles removing a version', async () => {
     store.versions['3.0.0-nightly.1'] = {
-      state: VersionState.ready,
+      state: VersionState.installed,
       version: '3.0.0-nightly.1',
       source: VersionSource.local,
     };
 
     store.versions['3.0.0'] = {
-      state: VersionState.ready,
+      state: VersionState.downloaded,
       version: '3.0.0',
       source: VersionSource.local,
     };

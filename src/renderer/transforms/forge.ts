@@ -1,6 +1,6 @@
-import { execSync } from 'child_process';
+// import { execSync } from 'child_process';
 import { Files, PACKAGE_NAME } from '../../interfaces';
-import { getElectronBinaryPath } from '../binary';
+// import { getElectronBinaryPath } from '../binary';
 
 /**
  * This transform turns the files into an electron-forge
@@ -36,6 +36,8 @@ export async function forgeTransform(files: Files): Promise<Files> {
       parsed.config.forge = {};
       parsed.config.forge.packagerConfig = {};
 
+      // FIXME(ckerr)
+      /*
       const nightlyVersion = parsed.devDependencies['electron-nightly'];
       if (nightlyVersion) {
         // Fetch forced ABI for nightly.
@@ -48,6 +50,7 @@ export async function forgeTransform(files: Files): Promise<Files> {
           forceABI: abi.toString().trim(),
         };
       }
+      */
 
       // electron-forge makers
       parsed.config.forge.makers = [

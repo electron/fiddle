@@ -13,16 +13,15 @@ import {
   SetFiddleOptions,
   Version,
   VersionSource,
-  VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
 import { normalizeVersion } from '../utils/normalize-version';
-import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { getTemplate } from './content';
 import { ipcRendererManager } from './ipc';
+import { Installer } from 'electron-fiddle-runner';
 
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
@@ -145,7 +144,10 @@ export class AppState {
   private readonly defaultVersion: string;
   public appData: string;
 
-  constructor(versions: RunnableVersion[]) {
+  constructor(
+    private readonly installer: Installer,
+    versions: RunnableVersion[],
+  ) {
     // Bind all actions
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
@@ -286,8 +288,8 @@ export class AppState {
     const filter = (ver: RunnableVersion) =>
       ver &&
       (showUndownloadedVersions ||
-        ver.state === VersionState.unzipping ||
-        ver.state === VersionState.ready) &&
+        ver.state === 'installed' ||
+        ver.state === 'installing') &&
       (showObsoleteVersions ||
         !oldest ||
         oldest <= Number.parseInt(ver.version)) &&
@@ -414,7 +416,7 @@ export class AppState {
   @action public async removeVersion(ver: RunnableVersion) {
     const { version } = ver;
 
-    if (ver.state !== VersionState.ready) {
+    if (ver.state !== 'installed') {
       console.log(`State: Version ${version} already removed, doing nothing`);
       return;
     }
@@ -430,7 +432,7 @@ export class AppState {
       delete this.versions[version];
       saveLocalVersions(Object.values(this.versions));
     } else {
-      await removeBinary(ver);
+      await this.installer.remove(ver.version);
     }
   }
 
@@ -440,18 +442,8 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async downloadVersion(ver: RunnableVersion) {
-    const { source, state, version } = ver;
-
-    const isRemote = source === VersionSource.remote;
-    const isReady = state === VersionState.ready;
-    if (!isRemote || isReady) {
-      console.log(`State: Already have version ${version}; not downloading.`);
-      return;
-    }
-
-    console.log(`State: Downloading Electron ${version}`);
-    await setupBinary(ver);
+  @action public async downloadVersion(ver: RunnableVersion): Promise<void> {
+    await this.installer.ensureDownloaded(ver.version);
   }
 
   public hasVersion(input: string): boolean {
@@ -510,7 +502,7 @@ export class AppState {
     }
 
     // Fetch new binaries, maybe?
-    await this.downloadVersion(ver);
+    if (ver.state !== 'installed') await this.installer.install(ver.version);
   }
 
   /**

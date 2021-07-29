@@ -4,9 +4,7 @@ import {
   RunnableVersion,
   Version,
   VersionSource,
-  VersionState,
 } from '../interfaces';
-import { getVersionState } from './binary';
 import { normalizeVersion } from '../utils/normalize-version';
 
 /**
@@ -113,20 +111,18 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
 }
 
 export function makeRunnable(ver: Version): RunnableVersion {
-  const ret: RunnableVersion = {
+  return {
     ...ver,
     version: normalizeVersion(ver.version),
     source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
-    state: VersionState.unknown,
+    state: 'absent',
   };
-  ret.state = getVersionState(ver);
-  return ret;
 }
 
 /**
  * Return both known as well as local versions.
  *
- * @returns {Array<Version>}
+ * @returns {Array<RunnableVersion>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
   const versions = [...getReleasedVersions(), ...getLocalVersions()];
