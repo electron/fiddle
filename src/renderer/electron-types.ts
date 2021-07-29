@@ -2,7 +2,7 @@ import * as MonacoType from 'monaco-editor';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-import { RunnableVersion, VersionSource } from '../interfaces';
+import { RunnableVersion } from '../interfaces';
 
 const ELECTRON_DTS = 'electron.d.ts';
 
@@ -38,7 +38,7 @@ export class ElectronTypes {
       }
     }
 
-    if (source === VersionSource.remote) {
+    if (source === 'remote') {
       const file = this.getCacheFile(ver);
       await ElectronTypes.ensureVersionIsCachedAt(version, file);
       this.setTypesFromFile(file, ver);
@@ -46,8 +46,7 @@ export class ElectronTypes {
   }
 
   public uncache(ver: RunnableVersion) {
-    if (ver.source === VersionSource.remote)
-      fs.removeSync(this.getCacheFile(ver));
+    if (ver.source === 'remote') fs.removeSync(this.getCacheFile(ver));
   }
 
   private setTypesFromFile(file: string, ver: RunnableVersion) {

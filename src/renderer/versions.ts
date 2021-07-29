@@ -3,7 +3,6 @@ import {
   ElectronReleaseChannel,
   RunnableVersion,
   Version,
-  VersionSource,
   VersionState,
 } from '../interfaces';
 import { getVersionState } from './binary';
@@ -116,7 +115,7 @@ export function makeRunnable(ver: Version): RunnableVersion {
   const ret: RunnableVersion = {
     ...ver,
     version: normalizeVersion(ver.version),
-    source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
+    source: Boolean(ver.localPath) ? 'local' : 'remote',
     state: VersionState.unknown,
   };
   ret.state = getVersionState(ver);
@@ -182,7 +181,7 @@ export function getLocalVersions(): Array<Version> {
 export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
   const filteredVersions = versions.filter((v) => {
     if (isElectronVersion(v)) {
-      return v.source === VersionSource.local;
+      return v.source === 'local';
     }
 
     return true;

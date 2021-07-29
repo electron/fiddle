@@ -4,11 +4,7 @@ import {
   removeBinary,
   setupBinary,
 } from '../../src/renderer/binary';
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
+import { RunnableVersion, VersionState } from '../../src/interfaces';
 import { overridePlatform, resetPlatform, waitFor } from '../utils';
 
 import * as path from 'path';
@@ -35,7 +31,7 @@ describe('binary', () => {
     // prevent state pollution
     version = semver.inc(version, 'patch')!;
     ver = {
-      source: VersionSource.remote,
+      source: 'remote',
       state: VersionState.unknown,
       version,
     };
@@ -113,28 +109,28 @@ describe('binary', () => {
     });
 
     it(`returns ${VersionState.ready} when it is a local version that exists`, async () => {
-      ver.source = VersionSource.local;
+      ver.source = 'local';
       ver.localPath = '/fake/path';
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       expect(getVersionState(ver)).toBe(VersionState.ready);
     });
 
     it(`returns ${VersionState.unknown} when it is a local version that is missing`, async () => {
-      ver.source = VersionSource.local;
+      ver.source = 'local';
       ver.localPath = '/fake/path';
       (fs.existsSync as jest.Mock).mockReturnValue(false);
       expect(getVersionState(ver)).toBe(VersionState.unknown);
     });
 
     it(`returns ${VersionState.ready} when it is a remote version that is downloaded`, async () => {
-      ver.source = VersionSource.remote;
+      ver.source = 'remote';
       ver.localPath = undefined;
       (fs.existsSync as jest.Mock).mockReturnValue(true);
       expect(getVersionState(ver)).toBe(VersionState.ready);
     });
 
     it(`returns ${VersionState.unknown} when it is a remote version is not downloaded`, async () => {
-      ver.source = VersionSource.remote;
+      ver.source = 'remote';
       ver.localPath = undefined;
       (fs.existsSync as jest.Mock).mockReturnValue(false);
       expect(getVersionState(ver)).toBe(VersionState.unknown);
@@ -179,7 +175,7 @@ describe('binary', () => {
       const localPath = '/fake/path';
       (electronDownload as jest.Mock).mockResolvedValue(localPath);
 
-      ver.source = VersionSource.local;
+      ver.source = 'local';
       ver.state = VersionState.unknown;
       await setupBinary(ver);
 
@@ -192,7 +188,7 @@ describe('binary', () => {
       const localPath = '/fake/path';
       (electronDownload as jest.Mock).mockResolvedValue(localPath);
 
-      ver.source = VersionSource.remote;
+      ver.source = 'remote';
       ver.state = VersionState.unknown;
       await setupBinary(ver);
 
@@ -213,7 +209,7 @@ describe('binary', () => {
         },
       );
 
-      ver.source = VersionSource.remote;
+      ver.source = 'remote';
       ver.state = VersionState.unknown;
       setupBinary(ver);
       await waitFor(() => ver.state === VersionState.downloading);
@@ -242,7 +238,7 @@ describe('binary', () => {
       (electronDownload as jest.Mock).mockReturnValue('/fake/path');
       (extract as jest.Mock).mockRejectedValue(new Error('bwap-bwap'));
 
-      ver.source = VersionSource.remote;
+      ver.source = 'remote';
       ver.state = VersionState.unknown;
       await setupBinary(ver);
 

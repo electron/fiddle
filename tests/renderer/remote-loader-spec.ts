@@ -1,7 +1,6 @@
 import {
   DefaultEditorId,
   ElectronReleaseChannel,
-  VersionSource,
   VersionState,
 } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -251,7 +250,7 @@ describe('RemoteLoader', () => {
       expect(result).toBe(true);
       expect(store.addNewVersions).toBeCalledWith([
         {
-          source: VersionSource.remote,
+          source: 'remote',
           state: VersionState.unknown,
           version,
         },

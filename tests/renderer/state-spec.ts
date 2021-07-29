@@ -6,7 +6,6 @@ import {
   MAIN_JS,
   RunnableVersion,
   Version,
-  VersionSource,
   VersionState,
 } from '../../src/interfaces';
 import {
@@ -320,7 +319,7 @@ describe('AppState', () => {
 
       const ver = appState.versions[version];
       ver.localPath = localPath;
-      ver.source = VersionSource.local;
+      ver.source = 'local';
       ver.state = VersionState.ready;
 
       await appState.removeVersion(ver);
@@ -443,7 +442,7 @@ describe('AppState', () => {
     it('updates typescript definitions', async () => {
       const version = '2.0.2';
       const ver = appState.versions[version];
-      ver.source = VersionSource.local;
+      ver.source = 'local';
       appState.setVersion(version);
     });
   });

@@ -9,10 +9,7 @@ export enum VersionState {
   unknown = 'unknown',
 }
 
-export enum VersionSource {
-  remote = 'remote',
-  local = 'local',
-}
+export type VersionSource = 'local' | 'remote';
 
 export enum GistActionType {
   publish = 'Publish',

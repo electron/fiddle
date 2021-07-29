@@ -11,7 +11,7 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
 
-import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
+import { RunnableVersion, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 
@@ -27,7 +27,7 @@ const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
   let label = '';
 
-  if (source === VersionSource.local) {
+  if (source === 'local') {
     label = name || 'Local';
   } else {
     if (state === VersionState.unknown) {

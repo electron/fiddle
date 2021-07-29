@@ -4,7 +4,6 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
-  VersionSource,
   VersionState,
 } from '../../../src/interfaces';
 import {
@@ -18,19 +17,18 @@ import {
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { downloading, ready, unknown, unzipping } = VersionState;
-const { remote, local } = VersionSource;
 
 describe('VersionSelect component', () => {
   let store: StateMock;
 
-  const mockVersion1 = {
-    source: remote,
+  const mockVersion1: RunnableVersion = {
+    source: 'remote',
     state: unknown,
     version: '1.0.0',
   };
 
-  const mockVersion2 = {
-    source: remote,
+  const mockVersion2: RunnableVersion = {
+    source: 'remote',
     state: unknown,
     version: '3.0.0-unsupported',
   };
@@ -91,7 +89,7 @@ describe('VersionSelect component', () => {
     it('returns the correct label for a local version', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        source: local,
+        source: 'local',
       };
 
       expect(getItemLabel(input)).toBe('Local');

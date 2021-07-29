@@ -2,12 +2,7 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import extract from 'extract-zip';
 
-import {
-  RunnableVersion,
-  Version,
-  VersionSource,
-  VersionState,
-} from '../interfaces';
+import { RunnableVersion, Version, VersionState } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
 import { download as electronDownload } from '@electron/get';
 
@@ -50,7 +45,7 @@ export function setupBinary(ver: RunnableVersion): Promise<void> {
   const { version } = ver;
 
   // Only remote versions can be downloaded
-  if (ver.source !== VersionSource.remote) {
+  if (ver.source !== 'remote') {
     return Promise.resolve();
   }
 

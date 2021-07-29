@@ -1,14 +1,10 @@
-import {
-  VersionSource,
-  VersionState,
-  RunnableVersion,
-} from '../../src/interfaces';
+import { RunnableVersion, VersionState } from '../../src/interfaces';
 import { sortVersions } from '../../src/utils/sort-versions';
 
 describe('sort-versions', () => {
   function makeVersion(version: string): RunnableVersion {
     return {
-      source: VersionSource.remote,
+      source: 'remote',
       state: VersionState.unknown,
       version,
     };

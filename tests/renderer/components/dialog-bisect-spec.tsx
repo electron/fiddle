@@ -3,7 +3,7 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunResult,
-  VersionSource,
+  RunnableVersion,
   VersionState,
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
@@ -19,11 +19,13 @@ describe('BisectDialog component', () => {
   let store: StateMock;
 
   const generateVersionRange = (rangeLength: number) =>
-    new Array(rangeLength).fill(0).map((_, i) => ({
-      state: VersionState.ready,
-      version: `${i + 1}.0.0`,
-      source: VersionSource.local,
-    }));
+    new Array(rangeLength).fill(0).map(
+      (_, i): RunnableVersion => ({
+        state: VersionState.ready,
+        version: `${i + 1}.0.0`,
+        source: 'local',
+      }),
+    );
 
   beforeEach(() => {
     ({ runner, state: store } = (window as any).ElectronFiddle.app);

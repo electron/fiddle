@@ -1,10 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import {
-  ElectronReleaseChannel,
-  RunnableVersion,
-  VersionSource,
-} from '../../src/interfaces';
+import { ElectronReleaseChannel, RunnableVersion } from '../../src/interfaces';
 import {
   addLocalVersion,
   fetchVersions,
@@ -111,7 +107,7 @@ describe('versions', () => {
   describe('saveLocalVersions()', () => {
     it('saves local versions', () => {
       const mockLocalVersions = mockVersions.map((v) => {
-        v.source = VersionSource.local;
+        v.source = 'local';
         return v;
       });
 

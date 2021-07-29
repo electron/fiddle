@@ -12,7 +12,6 @@ import {
   RunnableVersion,
   SetFiddleOptions,
   Version,
-  VersionSource,
   VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -426,7 +425,7 @@ export class AppState {
 
     // Actually remove
     console.log(`State: Removing Electron ${version}`);
-    if (ver.source === VersionSource.local) {
+    if (ver.source === 'local') {
       delete this.versions[version];
       saveLocalVersions(Object.values(this.versions));
     } else {
@@ -443,7 +442,7 @@ export class AppState {
   @action public async downloadVersion(ver: RunnableVersion) {
     const { source, state, version } = ver;
 
-    const isRemote = source === VersionSource.remote;
+    const isRemote = source === 'remote';
     const isReady = state === VersionState.ready;
     if (!isRemote || isReady) {
       console.log(`State: Already have version ${version}; not downloading.`);

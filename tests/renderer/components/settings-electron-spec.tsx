@@ -4,7 +4,6 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
-  VersionSource,
   VersionState,
 } from '../../../src/interfaces';
 import * as versions from '../../../src/renderer/versions';
@@ -41,12 +40,12 @@ describe('ElectronSettings component', () => {
 
     const moreVersions: RunnableVersion[] = [
       {
-        source: VersionSource.local,
+        source: 'local',
         state: VersionState.ready,
         version: '3.0.0',
       },
       {
-        source: VersionSource.remote,
+        source: 'remote',
         state: VersionState.ready,
         version: '3.0.0-nightly.1',
       },
@@ -67,13 +66,13 @@ describe('ElectronSettings component', () => {
     store.versions['3.0.0-nightly.1'] = {
       state: VersionState.ready,
       version: '3.0.0-nightly.1',
-      source: VersionSource.local,
+      source: 'local',
     };
 
     store.versions['3.0.0'] = {
       state: VersionState.ready,
       version: '3.0.0',
-      source: VersionSource.local,
+      source: 'local',
     };
 
     const wrapper = mount(<ElectronSettings appState={store as any} />);
@@ -88,11 +87,11 @@ describe('ElectronSettings component', () => {
 
   it('handles downloading a version', async () => {
     const version = '3.0.0';
-    const ver = {
-      source: VersionSource.remote,
+    const ver: RunnableVersion = {
+      source: 'remote',
       state: VersionState.unknown,
       version,
-    };
+    } as const;
     store.versions = { version: ver };
     store.versionsToShow = [ver];
 
@@ -108,11 +107,11 @@ describe('ElectronSettings component', () => {
 
   it('handles missing local versions', () => {
     const version = '99999.0.0';
-    const ver = {
-      source: VersionSource.local,
+    const ver: RunnableVersion = {
+      source: 'local',
       state: VersionState.unknown,
       version,
-    };
+    } as const;
     store.versions = { version: ver };
     store.versionsToShow = [ver];
 

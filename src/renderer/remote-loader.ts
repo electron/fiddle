@@ -2,7 +2,7 @@ import {
   EditorValues,
   ElectronReleaseChannel,
   PACKAGE_NAME,
-  VersionSource,
+  RunnableVersion,
   VersionState,
 } from '../interfaces';
 import { getOctokit } from '../utils/octokit';
@@ -136,8 +136,8 @@ export class RemoteLoader {
     const version = await this.getPackageVersionFromRef(ref);
 
     if (!this.appState.hasVersion(version)) {
-      const versionToDownload = {
-        source: VersionSource.remote,
+      const versionToDownload: RunnableVersion = {
+        source: 'remote',
         state: VersionState.unknown,
         version,
       };

@@ -16,7 +16,6 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
-  VersionSource,
   VersionState,
 } from '../../interfaces';
 import { AppState } from '../state';
@@ -311,7 +310,7 @@ export class ElectronSettings extends React.Component<
    */
   private renderHumanState(item: RunnableVersion): JSX.Element {
     const { state, source } = item;
-    const isLocal = source === VersionSource.local;
+    const isLocal = source === 'local';
     let icon: IconName = 'box';
     let humanState = 'Downloaded';
 
@@ -343,7 +342,7 @@ export class ElectronSettings extends React.Component<
   private renderAction(ver: RunnableVersion): JSX.Element {
     const { state, source } = ver;
     const { appState } = this.props;
-    const isLocal = source === VersionSource.local;
+    const isLocal = source === 'local';
     const buttonProps: ButtonProps = {
       fill: true,
       small: true,

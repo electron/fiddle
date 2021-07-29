@@ -3,11 +3,7 @@ import * as path from 'path';
 import * as tmp from 'tmp';
 
 import { ElectronTypes } from '../../src/renderer/electron-types';
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
+import { RunnableVersion, VersionState } from '../../src/interfaces';
 
 import { MonacoMock } from '../mocks/mocks';
 import { waitFor } from '../utils';
@@ -41,7 +37,7 @@ describe('ElectronTypes', () => {
     remoteVersion = {
       version,
       state: VersionState.ready,
-      source: VersionSource.remote,
+      source: 'remote',
     } as const;
     cacheFile = path.join(cacheDir, remoteVersion.version, 'electron.d.ts');
 
@@ -49,7 +45,7 @@ describe('ElectronTypes', () => {
       version,
       localPath: localDir,
       state: VersionState.ready,
-      source: VersionSource.local,
+      source: 'local',
     } as const;
     localFile = path.join(localDir, 'gen/electron/tsc/typings/electron.d.ts');
 
@@ -72,7 +68,7 @@ describe('ElectronTypes', () => {
       version,
       localPath: '/dev/null',
       state: VersionState.ready,
-      source: VersionSource.local,
+      source: 'local',
     } as const;
 
     function saveTypesFile(content: string) {
@@ -209,7 +205,7 @@ describe('ElectronTypes', () => {
 
     it('does not touch local builds', () => {
       expect(fs.existsSync(cacheFile)).toBe(true);
-      const version = { ...remoteVersion, source: VersionSource.local };
+      const version: RunnableVersion = { ...remoteVersion, source: 'local' };
       electronTypes.uncache(version);
       expect(fs.existsSync(cacheFile)).toBe(true);
     });
