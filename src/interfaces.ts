@@ -20,11 +20,10 @@ export interface Version {
   localPath?: string;
 }
 
-export enum RunResult {
-  SUCCESS = 'success', // exit code === 0
-  FAILURE = 'failure', // ran, but exit code !== 0
-  INVALID = 'invalid', // could not run
-}
+export type RunResult =
+  | 'success' // exit code === 0
+  | 'failure' // ran, but exit code !== 0
+  | 'invalid'; // could not run
 
 export interface RunnableVersion extends Version {
   state: VersionState;

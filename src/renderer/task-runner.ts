@@ -70,7 +70,7 @@ export class TaskRunner {
   private async bisect(req: BisectRequest) {
     const prefix = 'Task: Bisect ';
     const { appState, log } = this;
-    let result = RunResult.INVALID;
+    let result: RunResult = 'invalid';
 
     try {
       await this.setup(req.setup);
@@ -90,7 +90,7 @@ export class TaskRunner {
   }
 
   private async test(req: TestRequest) {
-    let result = RunResult.INVALID;
+    let result: RunResult = 'invalid';
     const { log } = this;
 
     try {

@@ -2,7 +2,6 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 import {
   ElectronReleaseChannel,
-  RunResult,
   RunnableVersion,
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
@@ -152,7 +151,7 @@ describe('BisectDialog component', () => {
         startIndex: 4,
       });
 
-      runner.autobisect.mockResolvedValue(RunResult.SUCCESS);
+      runner.autobisect.mockResolvedValue('success');
 
       // click the 'auto' button
       const instance1: BisectDialog = wrapper.instance() as any;

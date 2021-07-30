@@ -86,7 +86,7 @@ describe('Task Runner component', () => {
     };
 
     it('invokes the runner and returns the result', async () => {
-      const RESULT = RunResult.SUCCESS;
+      const RESULT: RunResult = 'success' as const;
 
       (app.openFiddle as jest.Mock).mockResolvedValue(0);
       (appState.hasVersion as jest.Mock).mockReturnValueOnce(true);
@@ -111,7 +111,7 @@ describe('Task Runner component', () => {
     });
 
     it('returns invalid if an exception is thrown', async () => {
-      const RESULT = RunResult.INVALID;
+      const RESULT = 'invalid';
       (app.openFiddle as jest.Mock).mockRejectedValue('💩');
 
       const result = await requestAndWait(IpcEvents.TASK_BISECT, req);
@@ -136,7 +136,7 @@ describe('Task Runner component', () => {
     };
 
     it('invokes the runner and returns the result', async () => {
-      const RESULT = RunResult.FAILURE;
+      const RESULT = 'failure';
 
       (app.openFiddle as jest.Mock).mockResolvedValue(0);
       (appState.hasVersion as jest.Mock).mockReturnValueOnce(true);
@@ -160,7 +160,7 @@ describe('Task Runner component', () => {
     });
 
     it('returns invalid if an exception is thrown', async () => {
-      const RESULT = RunResult.INVALID;
+      const RESULT = 'invalid';
 
       (app.openFiddle as jest.Mock).mockResolvedValue(0);
       (appState.hasVersion as jest.Mock).mockReturnValueOnce(false);

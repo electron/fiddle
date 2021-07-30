@@ -29,9 +29,9 @@ export enum ForgeCommands {
 }
 
 const resultString: Record<RunResult, string> = Object.freeze({
-  [RunResult.FAILURE]: '❌ failed',
-  [RunResult.INVALID]: '❓ invalid',
-  [RunResult.SUCCESS]: '✅ passed',
+  ['failure']: '❌ failed',
+  ['invalid']: '❓ invalid',
+  ['success']: '✅ passed',
 });
 
 export class Runner {
@@ -84,7 +84,7 @@ export class Runner {
     // precondition: can't bisect unless we have >= 2 versions
     if (versions.length < 2) {
       appState.pushOutput(`${prefix} needs at least two Electron versions`);
-      return RunResult.INVALID;
+      return 'invalid';
     }
 
     const results: Map<string, RunResult> = new Map();
@@ -110,11 +110,11 @@ export class Runner {
       const { version } = targetVersion;
 
       const result = await runVersion(version);
-      if (result === RunResult.INVALID) {
+      if (result === 'invalid') {
         return result;
       }
 
-      next = bisector.continue(result === RunResult.SUCCESS);
+      next = bisector.continue(result === 'success');
       if (Array.isArray(next)) {
         break;
       }
@@ -129,18 +129,18 @@ export class Runner {
       appState.pushOutput(
         `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
       );
-      return RunResult.INVALID;
+      return 'invalid';
     }
 
     const msgs = [
       `${prefix} complete`,
-      `${prefix} ${resultString[RunResult.SUCCESS]} ${good}`,
-      `${prefix} ${resultString[RunResult.FAILURE]} ${bad}`,
+      `${prefix} ${resultString['success']} ${good}`,
+      `${prefix} ${resultString['failure']} ${bad}`,
       `${prefix} Commits between versions:`,
       `https://github.com/electron/electron/compare/v${good}...v${bad}`,
     ];
     msgs.forEach((msg) => appState.pushOutput(msg));
-    return RunResult.SUCCESS;
+    return 'success';
   }
 
   /**
@@ -164,7 +164,7 @@ export class Runner {
     const dir = await this.saveToTemp(options);
     const packageManager = appState.packageManager;
 
-    if (!dir) return RunResult.INVALID;
+    if (!dir) return 'invalid';
 
     try {
       await this.installModulesForEditor(values, { dir, packageManager });
@@ -175,7 +175,7 @@ export class Runner {
       appState.isInstallingModules = false;
 
       fileManager.cleanup(dir);
-      return RunResult.INVALID;
+      return 'invalid';
     }
 
     const isReady = getIsDownloaded(version, localPath);
@@ -190,7 +190,7 @@ export class Runner {
 
       appState.pushOutput(message, { isNotPre: true });
       fileManager.cleanup(dir);
-      return RunResult.INVALID;
+      return 'invalid';
     }
 
     return this.execute(dir);
@@ -388,10 +388,10 @@ export class Runner {
 
         if (typeof code !== 'number') {
           pushOutput(`Electron exited with signal ${signal}.`);
-          resolve(RunResult.INVALID);
+          resolve('invalid');
         } else {
           pushOutput(`Electron exited with code ${code}.`);
-          resolve(!code ? RunResult.SUCCESS : RunResult.FAILURE);
+          resolve(!code ? 'success' : 'failure');
         }
       });
     });

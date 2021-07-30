@@ -72,7 +72,7 @@ describe('Runner component', () => {
       setTimeout(() => mockChild.emit('close', 0));
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
       expect(fileManager.saveToTemp).toHaveBeenCalled();
@@ -97,7 +97,7 @@ describe('Runner component', () => {
       setTimeout(() => mockChild.emit('close', 0));
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
       expect(fileManager.saveToTemp).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('Runner component', () => {
 
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       expect(store.isRunning).toBe(false);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
@@ -144,7 +144,7 @@ describe('Runner component', () => {
       mockChild.emit('close', ARBITRARY_FAIL_CODE);
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.FAILURE);
+      expect(result).toBe('failure');
       expect(store.isRunning).toBe(false);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
@@ -170,7 +170,7 @@ describe('Runner component', () => {
       mockChild.emit('close', null, signal);
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.INVALID);
+      expect(result).toBe('invalid');
       expect(store.isRunning).toBe(false);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
@@ -185,7 +185,7 @@ describe('Runner component', () => {
       setTimeout(() => mockChild.emit('close', 0));
       const result = await instance.run();
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       await process.nextTick;
       const { cleanup } = fileManager;
       expect(cleanup).toHaveBeenCalledTimes(2);
@@ -202,7 +202,7 @@ describe('Runner component', () => {
       setTimeout(() => mockChild.emit('close', 0));
       const result = await instance.run();
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       await process.nextTick;
       const { cleanup } = fileManager;
       expect(cleanup).toHaveBeenCalledTimes(1);
@@ -217,20 +217,20 @@ describe('Runner component', () => {
       setTimeout(() => mockChild.emit('close', 0));
       const result = await instance.run();
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       expect(store.clearConsole).toHaveBeenCalled();
     });
 
     it('does not run version not yet downloaded', async () => {
       (getIsDownloaded as jest.Mock).mockReturnValueOnce(false);
 
-      expect(await instance.run()).toBe(RunResult.INVALID);
+      expect(await instance.run()).toBe('invalid');
     });
 
     it('does not run if writing files fails', async () => {
       (fileManager.saveToTemp as jest.Mock).mockRejectedValueOnce('bwap bwap');
 
-      expect(await instance.run()).toBe(RunResult.INVALID);
+      expect(await instance.run()).toBe('invalid');
     });
 
     it('does not run if installing modules fails', async () => {
@@ -243,7 +243,7 @@ describe('Runner component', () => {
           throw new Error('Bwap-bwap');
         });
 
-      expect(await instance.run()).toBe(RunResult.INVALID);
+      expect(await instance.run()).toBe('invalid');
 
       console.error = oldError;
     });
@@ -267,7 +267,7 @@ describe('Runner component', () => {
       instance.stop();
       const runResult = await runPromise;
 
-      expect(runResult).toBe(RunResult.INVALID);
+      expect(runResult).toBe('invalid');
       expect(store.isRunning).toBe(false);
     });
 
@@ -298,14 +298,14 @@ describe('Runner component', () => {
       instance.run = jest.fn().mockImplementation(() => {
         // test succeeds iff version <= LAST_GOOD
         return semver.compare(store.version, LAST_GOOD) <= 0
-          ? RunResult.SUCCESS
-          : RunResult.FAILURE;
+          ? 'success'
+          : 'failure';
       });
 
       const bisectRange = [...mockVersionsArray].reverse();
       const result = await instance.autobisect(bisectRange);
 
-      expect(result).toBe(RunResult.SUCCESS);
+      expect(result).toBe('success');
       expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(2);
       expect(spy).toHaveBeenNthCalledWith(1, LAST_GOOD);
       expect(spy).toHaveBeenNthCalledWith(2, FIRST_BAD);
@@ -318,12 +318,12 @@ describe('Runner component', () => {
 
     it('returns invalid if unable to run', async () => {
       const spy = jest.spyOn(store, 'setVersion');
-      instance.run = jest.fn().mockImplementation(() => RunResult.INVALID);
+      instance.run = jest.fn().mockImplementation((): RunResult => 'invalid');
 
       const bisectRange = [...mockVersionsArray].reverse();
       const result = await instance.autobisect(bisectRange);
 
-      expect(result).toBe(RunResult.INVALID);
+      expect(result).toBe('invalid');
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Runner: autobisect Electron 2.0.1 - finished test ❓ invalid',
       );
@@ -336,7 +336,7 @@ describe('Runner component', () => {
 
       const result = await instance.autobisect(bisectRange);
 
-      expect(result).toBe(RunResult.INVALID);
+      expect(result).toBe('invalid');
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         'Runner: autobisect needs at least two Electron versions',
       );
@@ -348,7 +348,7 @@ describe('Runner component', () => {
 
       const bisectResult = await instance.autobisect(bisectRange);
 
-      expect(bisectResult).toBe(RunResult.INVALID);
+      expect(bisectResult).toBe('invalid');
       expect(store.pushOutput).toHaveBeenCalled();
       expect((store.pushOutput as jest.Mock).mock.calls.pop()[0]).toMatch(
         'both returned',
@@ -356,11 +356,11 @@ describe('Runner component', () => {
     }
 
     it('returns invalid if a bad version cannot be found', () => {
-      allRunsReturn(RunResult.SUCCESS);
+      allRunsReturn('success');
     });
 
     it('returns invalid if a good version cannot be found', async () => {
-      allRunsReturn(RunResult.FAILURE);
+      allRunsReturn('failure');
     });
   });
 

@@ -68,9 +68,9 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
 }
 
 const exitCodes = Object.freeze({
-  [RunResult.SUCCESS]: 0,
-  [RunResult.FAILURE]: 1,
-  [RunResult.INVALID]: 2,
+  success: 0,
+  failure: 1,
+  invalid: 2,
 });
 
 async function sendTask(type: IpcEvents, task: any) {
@@ -115,7 +115,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
     });
   } catch (err) {
     console.error(err);
-    exitWithCode(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes['invalid']);
   }
 }
 
@@ -127,7 +127,7 @@ async function test(opts: commander.OptionValues) {
     });
   } catch (err) {
     console.error(err);
-    exitWithCode(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes['invalid']);
   }
 }
 
@@ -177,7 +177,7 @@ Example calls:
       await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
-      exitWithCode(exitCodes[RunResult.INVALID]);
+      exitWithCode(exitCodes['invalid']);
     }
   }
 }

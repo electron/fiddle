@@ -209,17 +209,9 @@ describe('processCommandLine()', () => {
         expect(process.exit).toHaveBeenCalledWith(exitCode);
       }
 
-      it(`exits with 0 on ${RunResult.SUCCESS}`, async () => {
-        await expectDoneCausesExit(RunResult.SUCCESS, 0);
-      });
-
-      it(`exits with 1 on ${RunResult.FAILURE}`, async () => {
-        await expectDoneCausesExit(RunResult.FAILURE, 1);
-      });
-
-      it(`exits with 2 on ${RunResult.INVALID}`, async () => {
-        await expectDoneCausesExit(RunResult.INVALID, 2);
-      });
+      it('exits 0 on success', async () => expectDoneCausesExit('success', 0));
+      it('exits 1 on failure', async () => expectDoneCausesExit('failure', 1));
+      it('exits 2 on invalid', async () => expectDoneCausesExit('invalid', 2));
 
       it('sends output messages to the console', async () => {
         const timeString = new Date().toLocaleTimeString();
