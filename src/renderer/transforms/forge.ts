@@ -4,8 +4,8 @@ import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getElectronBinaryPath } from '../binary';
 
 function getForgeVersion(): string {
-  const o = require(path.join(__dirname, '../../package.json'));
-  return o.devDependencies['@electron-forge/cli'];
+  const fiddlePackageJSON = require(path.join(__dirname, '../../package.json'));
+  return fiddlePackageJSON.devDependencies['@electron-forge/cli'];
 }
 
 /**
