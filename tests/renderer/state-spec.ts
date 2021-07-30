@@ -1,7 +1,6 @@
 import { reaction } from 'mobx';
 import {
   BlockableAccelerator,
-  GenericDialogType,
   MAIN_JS,
   RunnableVersion,
   Version,
@@ -473,7 +472,7 @@ describe('AppState', () => {
     const Opts = {
       label: 'foo',
       ok: 'Close',
-      type: GenericDialogType.warning,
+      type: 'warning',
       wantsInput: false,
     } as const;
 
@@ -585,7 +584,7 @@ describe('AppState', () => {
         expect(appState.showGenericDialog).toHaveBeenCalledWith({
           label,
           ok: 'Close',
-          type: GenericDialogType.warning,
+          type: 'warning',
           wantsInput: false,
         });
       });
@@ -602,7 +601,7 @@ describe('AppState', () => {
         expect(appState.showGenericDialog).toHaveBeenCalledWith({
           label,
           ok: 'Close',
-          type: GenericDialogType.success,
+          type: 'success',
           wantsInput: false,
         });
       });

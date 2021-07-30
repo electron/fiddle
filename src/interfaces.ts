@@ -87,11 +87,7 @@ export interface Templates {
   [index: string]: string | Templates;
 }
 
-export const enum GenericDialogType {
-  'confirm' = 'confirm',
-  'warning' = 'warning',
-  'success' = 'success',
-}
+export type GenericDialogType = 'confirm' | 'warning' | 'success';
 
 export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
 

@@ -2,7 +2,6 @@ import { Alert, IconName, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';
 
 interface GenericDialogProps {
@@ -50,15 +49,15 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
     let intent: Intent;
     let icon: IconName;
     switch (type) {
-      case GenericDialogType.warning:
+      case 'warning':
         intent = Intent.DANGER;
         icon = 'warning-sign';
         break;
-      case GenericDialogType.confirm:
+      case 'confirm':
         intent = Intent.PRIMARY;
         icon = 'help';
         break;
-      case GenericDialogType.success:
+      case 'success':
         intent = Intent.SUCCESS;
         icon = 'info-sign';
         break;

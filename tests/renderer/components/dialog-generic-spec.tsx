@@ -32,27 +32,19 @@ describe('GenericDialog component', () => {
       expect(wrapper).toMatchSnapshot();
     }
 
-    it('warning', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.warning);
-    });
-
-    it('confirmation', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
-    });
-
-    it('confirmation', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.success);
-    });
+    it('warning', () => expectDialogTypeToMatchSnapshot('warning'));
+    it('confirmation', () => expectDialogTypeToMatchSnapshot('confirm'));
+    it('confirmation', () => expectDialogTypeToMatchSnapshot('success'));
 
     it('with an input prompt', () => {
       store.genericDialogOptions.wantsInput = true;
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+      expectDialogTypeToMatchSnapshot('confirm');
     });
 
     it('with an input prompt and placeholder', () => {
       store.genericDialogOptions.wantsInput = true;
       store.genericDialogOptions.placeholder = 'placeholder';
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+      expectDialogTypeToMatchSnapshot('confirm');
     });
   });
 

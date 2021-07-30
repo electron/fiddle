@@ -5,7 +5,6 @@ import {
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogOptions,
-  GenericDialogType,
   GistActionState,
   OutputEntry,
   OutputOptions,
@@ -103,7 +102,7 @@ export class AppState {
   @observable public output: Array<OutputEntry> = [];
   @observable public localPath: string | undefined;
   @observable public genericDialogOptions: GenericDialogOptions = {
-    type: GenericDialogType.warning,
+    type: 'warning',
     label: '' as string | JSX.Element,
     ok: 'Okay',
     cancel: 'Cancel',
@@ -543,7 +542,7 @@ export class AppState {
     const { confirm, input } = await this.showGenericDialog({
       ...opts,
       cancel: opts.cancel || 'Cancel',
-      type: GenericDialogType.confirm,
+      type: 'confirm',
       wantsInput: true,
     });
     return confirm ? input : undefined;
@@ -558,7 +557,7 @@ export class AppState {
       ...opts,
       cancel: opts.cancel || 'Cancel',
       wantsInput: false,
-      type: GenericDialogType.confirm,
+      type: 'confirm',
     });
     return confirm;
   }
@@ -569,7 +568,7 @@ export class AppState {
     await this.showGenericDialog({
       label,
       ok: 'Close',
-      type: GenericDialogType.success,
+      type: 'success',
       wantsInput: false,
     });
   }
@@ -580,7 +579,7 @@ export class AppState {
     await this.showGenericDialog({
       label,
       ok: 'Close',
-      type: GenericDialogType.warning,
+      type: 'warning',
       wantsInput: false,
     });
   }
