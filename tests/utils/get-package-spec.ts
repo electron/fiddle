@@ -12,7 +12,7 @@ jest.mock('../../src/renderer/npm', () => ({
 }));
 
 describe('getForgeVersion', () => {
-  it('returns a semver version', () => {
+  it('returns a semver-compatible version constraint', () => {
     const version = getForgeVersion();
     expect(typeof version).toEqual('string');
     expect(version).toBeTruthy();
