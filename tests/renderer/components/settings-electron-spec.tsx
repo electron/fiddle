@@ -4,7 +4,6 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
-  VersionState,
 } from '../../../src/interfaces';
 import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
@@ -27,10 +26,10 @@ describe('ElectronSettings component', () => {
 
     // Render all the states
     let i = 0;
-    store.versionsToShow[i++].state = VersionState.ready;
-    store.versionsToShow[i++].state = VersionState.downloading;
-    store.versionsToShow[i++].state = VersionState.unknown;
-    store.versionsToShow[i++].state = VersionState.unzipping;
+    store.versionsToShow[i++].state = 'installed';
+    store.versionsToShow[i++].state = 'downloading';
+    store.versionsToShow[i++].state = 'absent';
+    store.versionsToShow[i++].state = 'installing';
   });
 
   it('renders', () => {
@@ -41,12 +40,12 @@ describe('ElectronSettings component', () => {
     const moreVersions: RunnableVersion[] = [
       {
         source: 'local',
-        state: VersionState.ready,
+        state: 'installed',
         version: '3.0.0',
       },
       {
         source: 'remote',
-        state: VersionState.ready,
+        state: 'installed',
         version: '3.0.0-nightly.1',
       },
     ];
@@ -64,13 +63,13 @@ describe('ElectronSettings component', () => {
 
   it('handles removing a version', async () => {
     store.versions['3.0.0-nightly.1'] = {
-      state: VersionState.ready,
+      state: 'installed',
       version: '3.0.0-nightly.1',
       source: 'local',
     };
 
     store.versions['3.0.0'] = {
-      state: VersionState.ready,
+      state: 'installed',
       version: '3.0.0',
       source: 'local',
     };
@@ -89,7 +88,7 @@ describe('ElectronSettings component', () => {
     const version = '3.0.0';
     const ver: RunnableVersion = {
       source: 'remote',
-      state: VersionState.unknown,
+      state: 'absent',
       version,
     } as const;
     store.versions = { version: ver };
@@ -109,7 +108,7 @@ describe('ElectronSettings component', () => {
     const version = '99999.0.0';
     const ver: RunnableVersion = {
       source: 'local',
-      state: VersionState.unknown,
+      state: 'absent',
       version,
     } as const;
     store.versions = { version: ver };

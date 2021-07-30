@@ -4,7 +4,6 @@ import {
   ElectronReleaseChannel,
   RunResult,
   RunnableVersion,
-  VersionState,
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
@@ -21,7 +20,7 @@ describe('BisectDialog component', () => {
   const generateVersionRange = (rangeLength: number) =>
     new Array(rangeLength).fill(0).map(
       (_, i): RunnableVersion => ({
-        state: VersionState.ready,
+        state: 'installed',
         version: `${i + 1}.0.0`,
         source: 'local',
       }),

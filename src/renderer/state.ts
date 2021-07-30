@@ -12,7 +12,6 @@ import {
   RunnableVersion,
   SetFiddleOptions,
   Version,
-  VersionState,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
@@ -285,8 +284,8 @@ export class AppState {
     const filter = (ver: RunnableVersion) =>
       ver &&
       (showUndownloadedVersions ||
-        ver.state === VersionState.unzipping ||
-        ver.state === VersionState.ready) &&
+        ver.state === 'installing' ||
+        ver.state === 'installed') &&
       (showObsoleteVersions ||
         !oldest ||
         oldest <= Number.parseInt(ver.version)) &&
@@ -413,7 +412,7 @@ export class AppState {
   @action public async removeVersion(ver: RunnableVersion) {
     const { version } = ver;
 
-    if (ver.state !== VersionState.ready) {
+    if (ver.state !== 'installed') {
       console.log(`State: Version ${version} already removed, doing nothing`);
       return;
     }
@@ -443,7 +442,7 @@ export class AppState {
     const { source, state, version } = ver;
 
     const isRemote = source === 'remote';
-    const isReady = state === VersionState.ready;
+    const isReady = state === 'installed';
     if (!isRemote || isReady) {
       console.log(`State: Already have version ${version}; not downloading.`);
       return;

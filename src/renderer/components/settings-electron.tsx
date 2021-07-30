@@ -13,11 +13,7 @@ import {
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import {
-  ElectronReleaseChannel,
-  RunnableVersion,
-  VersionState,
-} from '../../interfaces';
+import { ElectronReleaseChannel, RunnableVersion } from '../../interfaces';
 import { AppState } from '../state';
 import { getReleaseChannel, getOldestSupportedMajor } from '../versions';
 
@@ -314,10 +310,10 @@ export class ElectronSettings extends React.Component<
     let icon: IconName = 'box';
     let humanState = 'Downloaded';
 
-    if (state === VersionState.downloading) {
+    if (state === 'downloading') {
       icon = 'cloud-download';
       humanState = 'Downloading';
-    } else if (state === VersionState.unknown) {
+    } else if (state === 'absent') {
       // The only way for a local version to be unknown
       // is for it to have been deleted. Mark as unavailable.
       icon = isLocal ? 'issue' : 'cloud';
@@ -349,21 +345,21 @@ export class ElectronSettings extends React.Component<
     };
 
     switch (state) {
-      case VersionState.ready:
+      case 'installed':
         buttonProps.icon = 'trash';
         buttonProps.onClick = () => appState.removeVersion(ver);
         buttonProps.text = isLocal ? 'Remove' : 'Delete';
         break;
 
-      case VersionState.downloading:
-      case VersionState.unzipping:
+      case 'downloading':
+      case 'installing':
         buttonProps.disabled = true;
         buttonProps.icon = 'cloud-download';
         buttonProps.loading = true;
         buttonProps.text = 'Downloading';
         break;
 
-      case VersionState.unknown:
+      case 'absent':
         buttonProps.disabled = false;
         buttonProps.loading = false;
         buttonProps.icon = isLocal ? 'trash' : 'cloud-download';

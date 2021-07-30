@@ -1,6 +1,5 @@
 import { shallow, ShallowWrapper } from 'enzyme';
 import * as React from 'react';
-import { VersionState } from '../../../src/interfaces';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 
 import { RunnerMock, StateMock } from '../../mocks/mocks';
@@ -19,7 +18,7 @@ describe('Bisect commands component', () => {
   });
 
   it('disables helper buttons if Electron binary is downloading', () => {
-    store.currentElectronVersion.state = VersionState.downloading;
+    store.currentElectronVersion.state = 'downloading';
     const wrapper = shallow(<BisectHandler appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });

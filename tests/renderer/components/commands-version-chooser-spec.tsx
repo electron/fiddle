@@ -4,25 +4,22 @@ import * as React from 'react';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
-  VersionState,
 } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
-
-const { unknown } = VersionState;
 
 describe('VersionSelect component', () => {
   let store: StateMock;
 
   const mockVersion1: RunnableVersion = {
     source: 'remote',
-    state: unknown,
+    state: 'absent',
     version: '1.0.0',
   } as const;
 
   const mockVersion2: RunnableVersion = {
     source: 'remote',
-    state: unknown,
+    state: 'absent',
     version: '3.0.0-unsupported',
   } as const;
 

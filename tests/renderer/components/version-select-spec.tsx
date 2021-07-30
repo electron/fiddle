@@ -16,20 +16,18 @@ import {
 
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
-const { downloading, ready, unknown, unzipping } = VersionState;
-
 describe('VersionSelect component', () => {
   let store: StateMock;
 
   const mockVersion1: RunnableVersion = {
     source: 'remote',
-    state: unknown,
+    state: 'absent',
     version: '1.0.0',
   };
 
   const mockVersion2: RunnableVersion = {
     source: 'remote',
-    state: unknown,
+    state: 'absent',
     version: '3.0.0-unsupported',
   };
 
@@ -99,7 +97,7 @@ describe('VersionSelect component', () => {
     it('returns the correct label for a version not downloaded', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: unknown,
+        state: 'absent',
       };
 
       expect(getItemLabel(input)).toBe('Not downloaded');
@@ -108,16 +106,16 @@ describe('VersionSelect component', () => {
     it('returns the correct label for a version downloaded', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: ready,
+        state: 'installed',
       };
 
-      expect(getItemLabel(input)).toBe('Downloaded');
+      expect(getItemLabel(input)).toBe('Installed');
     });
 
     it('returns the correct label for a version downloading', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
-        state: downloading,
+        state: 'downloading',
       };
 
       expect(getItemLabel(input)).toBe('Downloading');
@@ -127,10 +125,10 @@ describe('VersionSelect component', () => {
   describe('getItemIcon()', () => {
     it('returns the correct icon', () => {
       const icons: Array<{ state: VersionState; expected: string }> = [
-        { state: downloading, expected: 'cloud-download' },
-        { state: ready, expected: 'saved' },
-        { state: unknown, expected: 'cloud' },
-        { state: unzipping, expected: 'compressed' },
+        { state: 'downloading', expected: 'cloud-download' },
+        { state: 'installed', expected: 'saved' },
+        { state: 'absent', expected: 'cloud' },
+        { state: 'installing', expected: 'compressed' },
       ];
       icons.forEach(({ state, expected }) => {
         expect(getItemIcon({ ...mockVersion1, state })).toBe(expected);

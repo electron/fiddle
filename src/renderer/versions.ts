@@ -3,7 +3,6 @@ import {
   ElectronReleaseChannel,
   RunnableVersion,
   Version,
-  VersionState,
 } from '../interfaces';
 import { getVersionState } from './binary';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -116,7 +115,7 @@ export function makeRunnable(ver: Version): RunnableVersion {
     ...ver,
     version: normalizeVersion(ver.version),
     source: Boolean(ver.localPath) ? 'local' : 'remote',
-    state: VersionState.unknown,
+    state: 'absent',
   };
   ret.state = getVersionState(ver);
   return ret;

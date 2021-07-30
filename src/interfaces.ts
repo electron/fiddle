@@ -2,14 +2,13 @@ export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
 
-export enum VersionState {
-  ready = 'ready',
-  downloading = 'downloading',
-  unzipping = 'unzipping',
-  unknown = 'unknown',
-}
-
 export type VersionSource = 'local' | 'remote';
+
+export type VersionState =
+  | 'absent'
+  | 'downloading'
+  | 'installing'
+  | 'installed';
 
 export enum GistActionType {
   publish = 'Publish',

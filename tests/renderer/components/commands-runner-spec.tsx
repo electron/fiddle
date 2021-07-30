@@ -2,7 +2,6 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { Runner } from '../../../src/renderer/components/commands-runner';
-import { VersionState } from '../../../src/interfaces';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 
 import { StateMock } from '../../mocks/mocks';
@@ -27,40 +26,40 @@ describe('Runner component', () => {
     }
 
     it('idle', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = 'installed';
       expectSnapshotToMatch();
     });
 
     it('running', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = 'installed';
       store.isRunning = true;
       expectSnapshotToMatch();
     });
 
     it('installing modules', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = 'installed';
       store.isInstallingModules = true;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.downloading', () => {
-      store.currentElectronVersion.state = VersionState.downloading;
+    it('versions that are downloading', () => {
+      store.currentElectronVersion.state = 'downloading';
       store.currentElectronVersion.downloadProgress = 50;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unzipping', () => {
-      store.currentElectronVersion.state = VersionState.unzipping;
+    it('versions that are installing', () => {
+      store.currentElectronVersion.state = 'installing';
       expectSnapshotToMatch();
     });
 
-    it('VersionState.ready', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+    it('versions that are installed', () => {
+      store.currentElectronVersion.state = 'installed';
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unknown', () => {
-      store.currentElectronVersion.state = VersionState.unknown;
+    it('versions that are absent', () => {
+      store.currentElectronVersion.state = 'absent';
       expectSnapshotToMatch();
     });
   });

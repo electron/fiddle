@@ -1,8 +1,4 @@
-import {
-  DefaultEditorId,
-  ElectronReleaseChannel,
-  VersionState,
-} from '../../src/interfaces';
+import { DefaultEditorId, ElectronReleaseChannel } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
@@ -251,7 +247,7 @@ describe('RemoteLoader', () => {
       expect(store.addNewVersions).toBeCalledWith([
         {
           source: 'remote',
-          state: VersionState.unknown,
+          state: 'absent',
           version,
         },
       ]);

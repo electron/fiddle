@@ -2,7 +2,6 @@ import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { VersionState } from '../../interfaces';
 import { AppState } from '../state';
 
 interface RunnerProps {
@@ -28,15 +27,15 @@ export class Runner extends React.Component<RunnerProps> {
     const state = currentElectronVersion && currentElectronVersion.state;
     const props: ButtonProps = { className: 'button-run', disabled: true };
 
-    if (state === VersionState.downloading) {
+    if (state === 'downloading') {
       props.text = 'Downloading';
       props.icon = (
         <Spinner size={16} value={currentElectronVersion?.downloadProgress} />
       );
-    } else if (state === VersionState.unzipping) {
+    } else if (state === 'installing') {
       props.text = 'Unzipping';
       props.icon = <Spinner size={16} />;
-    } else if (state === VersionState.ready) {
+    } else if (state === 'installed') {
       props.disabled = false;
 
       if (isRunning) {

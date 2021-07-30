@@ -21,17 +21,12 @@ const unzipping: Set<string> = new Set();
 export function getVersionState(ver: Version): VersionState {
   const { localPath, version } = ver;
 
-  if (downloading.has(version)) {
-    return VersionState.downloading;
-  }
-
-  if (unzipping.has(version)) {
-    return VersionState.unzipping;
-  }
+  if (downloading.has(version)) return 'downloading';
+  if (unzipping.has(version)) return 'installing';
 
   const dir = localPath || getDownloadPath(version);
   const exec = path.join(dir, execSubpath());
-  return fs.existsSync(exec) ? VersionState.ready : VersionState.unknown;
+  return fs.existsSync(exec) ? 'installed' : 'absent';
 }
 
 /**
@@ -61,7 +56,7 @@ export function setupBinary(ver: RunnableVersion): Promise<void> {
 async function downloadBinary(ver: RunnableVersion): Promise<void> {
   const { version } = ver;
 
-  ver.state = VersionState.downloading;
+  ver.state = 'downloading';
   console.log(`Binary: Downloading Electron ${version}`);
   const zipPath = await download(ver);
 
@@ -71,7 +66,7 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
   try {
     unzipping.add(version);
     downloading.delete(version);
-    ver.state = VersionState.unzipping;
+    ver.state = 'installing';
 
     // Ensure the target path exists
     await fs.mkdirp(extractPath);
@@ -81,10 +76,10 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
 
     await unzip(zipPath, extractPath);
     console.log(`Binary: Unzipped ${version}`);
-    ver.state = VersionState.ready;
+    ver.state = 'installed';
   } catch (error) {
     console.warn(`Binary: Failure while unzipping ${version}`, error);
-    ver.state = VersionState.unknown;
+    ver.state = 'absent';
   } finally {
     // This task is done, so remove it from the pending tasks list
     unzipping.delete(version);
@@ -139,7 +134,7 @@ export async function removeBinary(ver: RunnableVersion) {
   await rerunner(binaryCleaner);
 
   if (isDeleted) {
-    ver.state = VersionState.unknown;
+    ver.state = 'absent';
     await rerunner(typeDefsCleaner);
   }
 }
