@@ -323,6 +323,29 @@ export class Runner {
     }
   }
 
+  private buildChildEnvVars(): { [x: string]: string | undefined } {
+    const { isEnablingElectronLogging, environmentVariables } = this.appState;
+
+    const env = { ...process.env };
+
+    if (isEnablingElectronLogging) {
+      env.ELECTRON_ENABLE_LOGGING = 'true';
+      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
+      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
+    } else {
+      delete env.ELECTRON_ENABLE_LOGGING;
+      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
+      delete env.ELECTRON_ENABLE_STACK_DUMPING;
+    }
+
+    for (const v of environmentVariables) {
+      const [key, value] = v.split('=');
+      env[key] = value;
+    }
+
+    return env;
+  }
+
   /**
    * Execute Electron.
    *
@@ -334,33 +357,16 @@ export class Runner {
   public async execute(dir: string): Promise<RunResult> {
     const {
       currentElectronVersion,
-      isEnablingElectronLogging,
       flushOutput,
       pushOutput,
       executionFlags,
-      environmentVariables,
     } = this.appState;
 
     const { version, localPath } = currentElectronVersion;
     const binaryPath = getElectronBinaryPath(version, localPath);
     console.log(`Runner: Binary ${binaryPath} ready, launching`);
 
-    const env = { ...process.env };
-    if (isEnablingElectronLogging) {
-      env.ELECTRON_ENABLE_LOGGING = 'true';
-      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
-      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
-    } else {
-      delete env.ELECTRON_ENABLE_LOGGING;
-      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
-      delete env.ELECTRON_ENABLE_STACK_DUMPING;
-    }
-
-    // Add user-specified environment variables if any have been set.
-    for (const v of environmentVariables) {
-      const [key, value] = v.split('=');
-      env[key] = value;
-    }
+    const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(executionFlags);
