@@ -1,5 +1,7 @@
+import * as semver from 'semver';
+
 import { DefaultEditorId } from '../../src/interfaces';
-import { getPackageJson } from '../../src/utils/get-package';
+import { getForgeVersion, getPackageJson } from '../../src/utils/get-package';
 
 jest.mock('../../src/utils/get-username', () => ({
   getUsername: () => 'test-user',
@@ -8,6 +10,15 @@ jest.mock('../../src/utils/get-username', () => ({
 jest.mock('../../src/renderer/npm', () => ({
   findModulesInEditors: () => ['say'],
 }));
+
+describe('getForgeVersion', () => {
+  it('returns a semver-compatible version constraint', () => {
+    const version = getForgeVersion();
+    expect(typeof version).toEqual('string');
+    expect(version).toBeTruthy();
+    expect(semver.validRange(version)).toBeTruthy();
+  });
+});
 
 describe('get-package', () => {
   it('getPackageJson() returns a default package.json', async () => {
