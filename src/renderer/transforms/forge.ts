@@ -1,6 +1,12 @@
+import * as path from 'path';
 import { execSync } from 'child_process';
 import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getElectronBinaryPath } from '../binary';
+
+function getForgeVersion(): string {
+  const o = require(path.join(__dirname, '../../package.json'));
+  return o.devDependencies['@electron-forge/cli'];
+}
 
 /**
  * This transform turns the files into an electron-forge
@@ -14,29 +20,31 @@ export async function forgeTransform(files: Files): Promise<Files> {
     try {
       const parsed = JSON.parse(files.get(PACKAGE_NAME)!);
 
-      // devDependencies
-      const forgeVersion = '6.0.0-beta.59';
+      parsed.config ||= {};
       parsed.devDependencies ||= {};
-      parsed.devDependencies['@electron-forge/cli'] = forgeVersion;
-      parsed.devDependencies['@electron-forge/maker-deb'] = forgeVersion;
-      parsed.devDependencies['@electron-forge/maker-rpm'] = forgeVersion;
-      parsed.devDependencies['@electron-forge/maker-squirrel'] = forgeVersion;
-      parsed.devDependencies['@electron-forge/maker-zip'] = forgeVersion;
+      parsed.scripts ||= {};
+      const { config, devDependencies, scripts } = parsed;
+
+      // devDependencies
+      const forgeVersion = getForgeVersion();
+      devDependencies['@electron-forge/cli'] = forgeVersion;
+      devDependencies['@electron-forge/maker-deb'] = forgeVersion;
+      devDependencies['@electron-forge/maker-rpm'] = forgeVersion;
+      devDependencies['@electron-forge/maker-squirrel'] = forgeVersion;
+      devDependencies['@electron-forge/maker-zip'] = forgeVersion;
 
       // Scripts
-      parsed.scripts = parsed.scripts || {};
-      parsed.scripts.start = 'electron-forge start';
-      parsed.scripts.package = 'electron-forge package';
-      parsed.scripts.make = 'electron-forge make';
-      parsed.scripts.publish = 'electron-forge publish';
-      parsed.scripts.lint = 'echo "No linting configured"';
+      scripts.start = 'electron-forge start';
+      scripts.package = 'electron-forge package';
+      scripts.make = 'electron-forge make';
+      scripts.publish = 'electron-forge publish';
+      scripts.lint = 'echo "No linting configured"';
 
       // electron-forge config
-      parsed.config = parsed.config || {};
-      parsed.config.forge = {};
-      parsed.config.forge.packagerConfig = {};
+      config.forge = {};
+      config.forge.packagerConfig = {};
 
-      const nightlyVersion = parsed.devDependencies['electron-nightly'];
+      const nightlyVersion = devDependencies['electron-nightly'];
       if (nightlyVersion) {
         // Fetch forced ABI for nightly.
         const binaryPath = getElectronBinaryPath(nightlyVersion);
@@ -44,13 +52,13 @@ export async function forgeTransform(files: Files): Promise<Files> {
           `ELECTRON_RUN_AS_NODE=1 "${binaryPath}" -p process.versions.modules`,
         );
 
-        parsed.config.forge.electronRebuildConfig = {
+        config.forge.electronRebuildConfig = {
           forceABI: abi.toString().trim(),
         };
       }
 
       // electron-forge makers
-      parsed.config.forge.makers = [
+      config.forge.makers = [
         {
           name: '@electron-forge/maker-squirrel',
         },
