@@ -21,18 +21,20 @@ describe('getForgeVersion', () => {
 });
 
 describe('get-package', () => {
+  const editorValues = {
+    [DefaultEditorId.main]: 'app.goDoTheThing()',
+    [DefaultEditorId.renderer]: `const say = require('say')`,
+    [DefaultEditorId.html]: '<html />',
+    [DefaultEditorId.preload]: 'preload',
+    [DefaultEditorId.css]: 'body { color: black }',
+  } as const;
+
   it('getPackageJson() returns a default package.json', async () => {
     const result = await getPackageJson(
       {
         getName: () => 'test-app',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
     );
 
     expect(result).toEqual(
@@ -65,13 +67,7 @@ describe('get-package', () => {
         getName: () => 'test-app',
         version: '1.0.0-nightly.123456789',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
       {
         includeElectron: true,
         includeDependencies: true,
@@ -110,13 +106,7 @@ describe('get-package', () => {
         getName: () => 'test-app',
         version: '1.0.0',
       } as any,
-      {
-        [DefaultEditorId.main]: 'app.goDoTheThing()',
-        [DefaultEditorId.renderer]: `const say = require('say')`,
-        [DefaultEditorId.html]: '<html />',
-        [DefaultEditorId.preload]: 'preload',
-        [DefaultEditorId.css]: 'body { color: black }',
-      },
+      editorValues,
       {
         includeElectron: true,
         includeDependencies: true,
