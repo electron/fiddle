@@ -15,7 +15,6 @@ import { when } from 'mobx';
 import {
   DEFAULT_EDITORS,
   EditorValues,
-  GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
@@ -152,7 +151,7 @@ export class GistActionButton extends React.Component<
    */
   public async handlePublish() {
     const { appState } = this.props;
-    appState.activeGistAction = GistActionState.publishing;
+    appState.activeGistAction = 'publishing';
 
     const description = await this.getFiddleDescriptionFromUser();
 
@@ -161,7 +160,7 @@ export class GistActionButton extends React.Component<
       appState.editorMosaic.isEdited = false;
     }
 
-    appState.activeGistAction = GistActionState.none;
+    appState.activeGistAction = 'none';
   }
 
   /**
@@ -173,7 +172,7 @@ export class GistActionButton extends React.Component<
     const options = { includeDependencies: true, includeElectron: true };
     const values = await window.ElectronFiddle.app.getEditorValues(options);
 
-    appState.activeGistAction = GistActionState.updating;
+    appState.activeGistAction = 'updating';
 
     try {
       const gist = await octo.gists.update({
@@ -197,7 +196,7 @@ export class GistActionButton extends React.Component<
       ipcRendererManager.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
     }
 
-    appState.activeGistAction = GistActionState.none;
+    appState.activeGistAction = 'none';
     this.setActionType('Update');
   }
 
@@ -208,7 +207,7 @@ export class GistActionButton extends React.Component<
     const { appState } = this.props;
     const octo = await getOctokit(this.props.appState);
 
-    appState.activeGistAction = GistActionState.deleting;
+    appState.activeGistAction = 'deleting';
 
     try {
       const gist = await octo.gists.delete({
@@ -231,7 +230,7 @@ export class GistActionButton extends React.Component<
     }
 
     appState.gistId = undefined;
-    appState.activeGistAction = GistActionState.none;
+    appState.activeGistAction = 'none';
     this.setActionType('Publish');
   }
 
@@ -282,11 +281,11 @@ export class GistActionButton extends React.Component<
       let text;
       if (gistId) {
         text = actionType;
-      } else if (activeGistAction === GistActionState.updating) {
+      } else if (activeGistAction === 'updating') {
         text = 'Updating...';
-      } else if (activeGistAction === GistActionState.publishing) {
+      } else if (activeGistAction === 'publishing') {
         text = 'Publishing...';
-      } else if (activeGistAction === GistActionState.deleting) {
+      } else if (activeGistAction === 'deleting') {
         text = 'Deleting...';
       } else {
         text = 'Publish';
@@ -305,7 +304,7 @@ export class GistActionButton extends React.Component<
       }
     };
 
-    const isPerformingAction = activeGistAction !== GistActionState.none;
+    const isPerformingAction = activeGistAction !== 'none';
     return (
       <>
         <fieldset disabled={isPerformingAction}>

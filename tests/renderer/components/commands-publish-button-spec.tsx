@@ -166,7 +166,7 @@ describe('Action button component', () => {
 
       const { instance } = createActionButton();
       await instance.performGistAction();
-      expect(state.activeGistAction).toBe(GistActionState.none);
+      expect(state.activeGistAction).toBe('none');
     });
 
     it('can publish private gists', async () => {
@@ -264,26 +264,20 @@ describe('Action button component', () => {
   describe('disables itself', () => {
     async function testDisabledWhen(gistActionState: GistActionState) {
       // create a button with no initial state
-      state.activeGistAction = GistActionState.none;
+      state.activeGistAction = 'none';
       const { wrapper } = createActionButton();
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
 
       state.activeGistAction = gistActionState;
       expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
 
-      state.activeGistAction = GistActionState.none;
+      state.activeGistAction = 'none';
       expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
     }
 
-    it('while publishing', async () => {
-      await testDisabledWhen(GistActionState.publishing);
-    });
-    it('while updating', async () => {
-      await testDisabledWhen(GistActionState.updating);
-    });
-    it('while deleting', async () => {
-      await testDisabledWhen(GistActionState.deleting);
-    });
+    it('while publishing', async () => await testDisabledWhen('publishing'));
+    it('while updating', async () => await testDisabledWhen('updating'));
+    it('while deleting', async () => await testDisabledWhen('deleting'));
   });
 
   describe('privacy menu', () => {

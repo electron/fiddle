@@ -2,7 +2,6 @@ import { shallow } from 'enzyme';
 import * as React from 'react';
 
 import { AddressBar } from '../../../src/renderer/components/commands-address-bar';
-import { GistActionState } from '../../../src/interfaces';
 import { urlFromId } from '../../../src/utils/gist';
 
 import { StateMock } from '../../mocks/state';
@@ -61,14 +60,14 @@ describe('AddressBar component', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.publishing } },
+      { appState: { ...store, activeGistAction: 'publishing' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
       },
     );
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.none } },
+      { appState: { ...store, activeGistAction: 'none' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
       },
@@ -79,14 +78,14 @@ describe('AddressBar component', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.updating } },
+      { appState: { ...store, activeGistAction: 'updating' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
       },
     );
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.none } },
+      { appState: { ...store, activeGistAction: 'none' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
       },
@@ -97,14 +96,14 @@ describe('AddressBar component', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.deleting } },
+      { appState: { ...store, activeGistAction: 'deleting' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
       },
     );
 
     wrapper.setProps(
-      { appState: { ...store, activeGistAction: GistActionState.none } },
+      { appState: { ...store, activeGistAction: 'none' } },
       () => {
         expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
       },

@@ -12,12 +12,7 @@ export type VersionState =
 
 export type GistActionType = 'Publish' | 'Update' | 'Delete';
 
-export enum GistActionState {
-  publishing = 'publishing',
-  updating = 'updating',
-  deleting = 'deleting',
-  none = 'none',
-}
+export type GistActionState = 'publishing' | 'updating' | 'deleting' | 'none';
 
 export interface Version {
   version: string;

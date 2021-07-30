@@ -4,7 +4,6 @@ import {
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogOptions,
-  GistActionState,
   RunnableVersion,
 } from '../../src/interfaces';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
@@ -15,7 +14,7 @@ import { VersionsMock } from './electron-versions';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
-  @observable public activeGistAction = GistActionState.none;
+  @observable public activeGistAction = 'none';
   @observable public channelsToShow: ElectronReleaseChannel[] = [];
   @observable public editorMosaic = new EditorMosaic();
   @observable public environmentVariables: string[] = [];

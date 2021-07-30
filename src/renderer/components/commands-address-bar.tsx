@@ -5,7 +5,6 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { IpcEvents } from '../../ipc-events';
-import { GistActionState } from '../../interfaces';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
@@ -140,7 +139,7 @@ export class AddressBar extends React.Component<
     const isCorrect = /https:\/\/gist\.github\.com\/(.+)$/.test(value);
     const className = classnames('address-bar', isEdited, { empty: !value });
 
-    const isPerformingAction = activeGistAction !== GistActionState.none;
+    const isPerformingAction = activeGistAction !== 'none';
     return (
       <form className={className} onSubmit={this.handleSubmit}>
         <fieldset disabled={isPerformingAction}>

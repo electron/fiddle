@@ -119,7 +119,7 @@ export class AppState {
   @observable public templateName: string | undefined;
   @observable public Bisector: Bisector | undefined;
 
-  @observable public activeGistAction: GistActionState = GistActionState.none;
+  @observable public activeGistAction: GistActionState = 'none';
   @observable public isRunning = false;
   @observable public isAutoBisecting = false;
   @observable public isInstallingModules = false;
