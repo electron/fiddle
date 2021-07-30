@@ -25,18 +25,21 @@ const ElectronVersionSelect = Select.ofType<RunnableVersion>();
  * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
-  if (source === 'local') return name || 'Local';
+  let label = '';
 
-  switch (state) {
-    case 'absent':
-      return 'Not downloaded';
-    case 'downloading':
-      return 'Downloading';
-    case 'installing':
-      return 'Installing';
-    case 'installed':
-      return 'Installed';
+  if (source === 'local') {
+    label = name || 'Local';
+  } else {
+    if (state === 'absent') {
+      label = `Not downloaded`;
+    } else if (state === 'installed') {
+      label = `Downloaded`;
+    } else if (state === 'downloading') {
+      label = `Downloading`;
+    }
   }
+
+  return label;
 }
 
 /**
@@ -50,12 +53,12 @@ export function getItemIcon({ state }: RunnableVersion) {
   switch (state) {
     case 'absent':
       return 'cloud';
+    case 'installed':
+      return 'saved';
     case 'downloading':
       return 'cloud-download';
     case 'installing':
       return 'compressed';
-    case 'installed':
-      return 'saved';
   }
 }
 
