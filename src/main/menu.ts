@@ -262,14 +262,14 @@ function getFileMenu(
     {
       label: 'Save',
       click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE),
-      accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.save)
+      accelerator: !acceleratorsToBlock.includes('save')
         ? 'CmdOrCtrl+S'
         : undefined,
     },
     {
       label: 'Save as',
       click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE),
-      accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.saveAs)
+      accelerator: !acceleratorsToBlock.includes('saveAs')
         ? 'CmdOrCtrl+Shift+S'
         : undefined,
     },

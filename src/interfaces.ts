@@ -118,7 +118,4 @@ export const PACKAGE_NAME = 'package.json';
 
 export type ArrowPosition = 'top' | 'left' | 'bottom' | 'right';
 
-export const enum BlockableAccelerator {
-  save = 'save',
-  saveAs = 'saveAs',
-}
+export type BlockableAccelerator = 'save' | 'saveAs';

@@ -56,17 +56,15 @@ export class BlockAcceleratorsSettings extends React.Component<BlockAccelerators
         <Callout>
           <FormGroup label={blockAcceleratorsLabel}>
             <Checkbox
-              checked={acceleratorsToBlock.includes(BlockableAccelerator.save)}
+              checked={acceleratorsToBlock.includes('save')}
               label="Save"
-              value={BlockableAccelerator.save}
+              value="save"
               onChange={this.handleBlockAcceleratorChange}
             />
             <Checkbox
-              checked={acceleratorsToBlock.includes(
-                BlockableAccelerator.saveAs,
-              )}
+              checked={acceleratorsToBlock.includes('saveAs')}
               label="Save as"
-              value={BlockableAccelerator.saveAs}
+              value="saveAs"
               onChange={this.handleBlockAcceleratorChange}
             />
           </FormGroup>

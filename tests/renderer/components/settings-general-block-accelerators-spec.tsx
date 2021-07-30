@@ -1,6 +1,5 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import { BlockableAccelerator } from '../../../src/interfaces';
 
 import { BlockAcceleratorsSettings } from '../../../src/renderer/components/settings-general-block-accelerators';
 
@@ -28,20 +27,16 @@ describe('BlockAcceleratorsSettings component', () => {
       const instance = wrapper.instance() as any;
 
       await instance.handleBlockAcceleratorChange({
-        currentTarget: { checked: false, value: BlockableAccelerator.save },
+        currentTarget: { checked: false, value: 'save' },
       });
 
-      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
-        BlockableAccelerator.save,
-      );
+      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith('save');
 
       await instance.handleBlockAcceleratorChange({
-        currentTarget: { checked: true, value: BlockableAccelerator.save },
+        currentTarget: { checked: true, value: 'save' },
       });
 
-      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
-        BlockableAccelerator.save,
-      );
+      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith('save');
     });
   });
 });

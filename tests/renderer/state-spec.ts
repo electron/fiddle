@@ -1,10 +1,5 @@
 import { reaction } from 'mobx';
-import {
-  BlockableAccelerator,
-  MAIN_JS,
-  RunnableVersion,
-  Version,
-} from '../../src/interfaces';
+import { MAIN_JS, RunnableVersion, Version } from '../../src/interfaces';
 import {
   getVersionState,
   removeBinary,
@@ -684,20 +679,20 @@ describe('AppState', () => {
     it('adds an accelerator to be blocked', () => {
       appState.acceleratorsToBlock = [];
 
-      appState.addAcceleratorToBlock(BlockableAccelerator.save);
-      expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
+      appState.addAcceleratorToBlock('save');
+      expect(appState.acceleratorsToBlock).toEqual(['save']);
 
-      appState.addAcceleratorToBlock(BlockableAccelerator.save);
-      expect(appState.acceleratorsToBlock).toEqual([BlockableAccelerator.save]);
+      appState.addAcceleratorToBlock('save');
+      expect(appState.acceleratorsToBlock).toEqual(['save']);
     });
 
     it('removes an accelerator to be blocked', () => {
-      appState.acceleratorsToBlock = [BlockableAccelerator.save];
+      appState.acceleratorsToBlock = ['save'];
 
-      appState.removeAcceleratorToBlock(BlockableAccelerator.save);
+      appState.removeAcceleratorToBlock('save');
       expect(appState.acceleratorsToBlock).toEqual([]);
 
-      appState.removeAcceleratorToBlock(BlockableAccelerator.save);
+      appState.removeAcceleratorToBlock('save');
       expect(appState.acceleratorsToBlock).toEqual([]);
     });
   });

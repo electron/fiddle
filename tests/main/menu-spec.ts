@@ -3,7 +3,6 @@
  */
 
 import * as electron from 'electron';
-import { BlockableAccelerator } from '../../src/interfaces';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -367,7 +366,7 @@ describe('menu', () => {
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
-        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.save] });
+        setupMenu({ acceleratorsToBlock: ['save'] });
         file.submenu[Idx.SAVE].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_SAVE_FIDDLE,
@@ -375,7 +374,7 @@ describe('menu', () => {
       });
 
       it('saves as a Fiddle with blocked accelerator', () => {
-        setupMenu({ acceleratorsToBlock: [BlockableAccelerator.saveAs] });
+        setupMenu({ acceleratorsToBlock: ['saveAs'] });
         file.submenu[Idx.SAVE_AS].click();
         expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
       });
