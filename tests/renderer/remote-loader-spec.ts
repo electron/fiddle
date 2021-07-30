@@ -1,5 +1,6 @@
 import {
   DefaultEditorId,
+  EditorValues,
   ElectronReleaseChannel,
   VersionSource,
   VersionState,
@@ -7,28 +8,24 @@ import {
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
-import { AppMock, StateMock } from '../mocks/mocks';
+import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 
 jest.mock('../../src/utils/octokit');
 
-const mockGistFiles = {
-  [DefaultEditorId.renderer]: {
-    content: 'renderer-content',
-  },
-  [DefaultEditorId.main]: {
-    content: 'main-content',
-  },
-  [DefaultEditorId.html]: {
-    content: 'html',
-  },
-  [DefaultEditorId.preload]: {
-    content: 'preload',
-  },
-  [DefaultEditorId.css]: {
-    content: 'css',
-  },
-};
+const editorValues: Readonly<EditorValues> = createEditorValues();
+
+const mockGistFiles = Object.fromEntries(
+  Object.entries(editorValues).map(([name, content]) => [
+    name,
+    { content: content as string },
+  ]),
+);
+
+const mockRepos = Object.keys(editorValues).map((name) => ({
+  name,
+  download_url: `https://${name}`,
+}));
 
 const mockGetGists = {
   get: async () => ({
@@ -37,33 +34,6 @@ const mockGetGists = {
     },
   }),
 };
-
-const mockRepos = [
-  {
-    name: DefaultEditorId.main,
-    download_url: 'https://main',
-  },
-  {
-    name: DefaultEditorId.renderer,
-    download_url: 'https://renderer',
-  },
-  {
-    name: DefaultEditorId.html,
-    download_url: 'https://html',
-  },
-  {
-    name: DefaultEditorId.css,
-    download_url: 'https://css',
-  },
-  {
-    name: DefaultEditorId.preload,
-    download_url: 'https://preload',
-  },
-  {
-    name: 'other_stuff',
-    download_url: 'https://google.com',
-  },
-];
 
 const mockGetRepos = {
   getContents: async () => ({
@@ -95,30 +65,22 @@ describe('RemoteLoader', () => {
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
-      store.gistId = 'abcdtestid';
+      const gistId = 'abcdtestid';
+      store.gistId = gistId;
 
-      const result = await instance.fetchGistAndLoad('abcdtestid');
+      const result = await instance.fetchGistAndLoad(gistId);
 
       expect(result).toBe(true);
-      expect(app.replaceFiddle).toBeCalledWith(
-        {
-          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
-          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
-          [DefaultEditorId.renderer]:
-            mockGistFiles[DefaultEditorId.renderer].content,
-          [DefaultEditorId.preload]:
-            mockGistFiles[DefaultEditorId.preload].content,
-          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
-        },
-        { gistId: 'abcdtestid' },
-      );
+      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
     it('loads a fiddle with a custom editor', async () => {
-      store.gistId = 'customtestid';
+      const gistId = 'customtestid';
+      store.gistId = gistId;
 
       const file = 'file.js';
-      mockGistFiles[file] = { content: 'hello' };
+      const content = '// hello';
+      mockGistFiles[file] = { content };
       mockRepos.push({
         name: file,
         download_url: 'https://file',
@@ -127,22 +89,11 @@ describe('RemoteLoader', () => {
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
       instance.verifyCreateCustomEditor = jest.fn().mockResolvedValue(true);
 
-      const result = await instance.fetchGistAndLoad('customtestid');
+      const result = await instance.fetchGistAndLoad(gistId);
 
       expect(result).toBe(true);
-      expect(app.replaceFiddle).toBeCalledWith(
-        {
-          [DefaultEditorId.html]: mockGistFiles[DefaultEditorId.html].content,
-          [DefaultEditorId.main]: mockGistFiles[DefaultEditorId.main].content,
-          [DefaultEditorId.renderer]:
-            mockGistFiles[DefaultEditorId.renderer].content,
-          [DefaultEditorId.preload]:
-            mockGistFiles[DefaultEditorId.preload].content,
-          [DefaultEditorId.css]: mockGistFiles[DefaultEditorId.css].content,
-          [file]: mockGistFiles[file].content,
-        },
-        { gistId: 'customtestid' },
-      );
+      const expectedValues = { ...editorValues, [file]: content };
+      expect(app.replaceFiddle).toBeCalledWith(expectedValues, { gistId });
     });
 
     it('handles an error', async () => {
@@ -220,32 +171,28 @@ describe('RemoteLoader', () => {
 
   describe('setElectronVersionFromRef()', () => {
     it('sets version from ref if release channel enabled', async () => {
+      const version = '4.0.0';
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce('4.0.0');
+      instance.getPackageVersionFromRef = jest.fn().mockResolvedValue(version);
 
-      const result = await instance.setElectronVersionWithRef('4.0.0');
+      const result = await instance.setElectronVersionWithRef(version);
       expect(result).toBe(true);
-      expect(store.setVersion).toBeCalledWith('4.0.0');
+      expect(store.setVersion).toBeCalledWith(version);
     });
 
     it('enables release channel when authorized', async () => {
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce('4.0.0-beta');
+      const version = '4.0.0-beta';
+      instance.getPackageVersionFromRef = jest.fn().mockResolvedValue(version);
       instance.verifyReleaseChannelEnabled = jest.fn().mockReturnValue(true);
 
-      const result = await instance.setElectronVersionWithRef('4.0.0-beta');
+      const result = await instance.setElectronVersionWithRef(version);
       expect(result).toBe(true);
       expect(store.channelsToShow).toContain(ElectronReleaseChannel.beta);
     });
 
     it('tries to download missing versions of Electron', async () => {
       const version = '5.0.0';
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce(version);
+      instance.getPackageVersionFromRef = jest.fn().mockResolvedValue(version);
 
       const result = await instance.setElectronVersionWithRef(version);
       expect(result).toBe(true);
@@ -262,7 +209,8 @@ describe('RemoteLoader', () => {
 
   describe('getPackageFromRef()', () => {
     it('gets Electron version from package.json', async () => {
-      const versionString = JSON.stringify({ version: '4.0.0' });
+      const version = '4.0.0';
+      const versionString = JSON.stringify({ version });
       const content = Buffer.from(versionString).toString('base64');
       const mockGetPackageJson = {
         getContents: async () => ({
@@ -272,8 +220,8 @@ describe('RemoteLoader', () => {
 
       (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetPackageJson });
 
-      const result = await instance.getPackageVersionFromRef('4.0.0');
-      expect(result).toBe('4.0.0');
+      const result = await instance.getPackageVersionFromRef(version);
+      expect(result).toBe(version);
     });
   });
 
@@ -290,20 +238,21 @@ describe('RemoteLoader', () => {
 
   describe('loadFiddleFromElectronExample()', () => {
     it('loads the example with confirmation', async () => {
+      const version = '4.0.0';
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
       instance.verifyReleaseChannelEnabled = jest.fn().mockReturnValue(true);
       instance.fetchExampleAndLoad = jest.fn();
       await instance.loadFiddleFromElectronExample(
         {},
-        { path: 'test/path', ref: '4.0.0' },
+        { path: 'test/path', ref: version },
       );
 
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
-        label: expect.stringMatching(/for version 4.0.0/i),
+        label: expect.stringMatching(version),
         ok: 'Load',
       });
       expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith(
-        '4.0.0',
+        version,
         'test/path',
       );
     });
