@@ -1,12 +1,8 @@
-import * as path from 'path';
 import { execSync } from 'child_process';
+
 import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getElectronBinaryPath } from '../binary';
-
-function getForgeVersion(): string {
-  const fiddlePackageJSON = require(path.join(__dirname, '../../package.json'));
-  return fiddlePackageJSON.devDependencies['@electron-forge/cli'];
-}
+import { getForgeVersion } from '../../utils/get-package';
 
 /**
  * This transform turns the files into an electron-forge
