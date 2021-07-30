@@ -15,13 +15,13 @@ export async function forgeTransform(files: Files): Promise<Files> {
       const parsed = JSON.parse(files.get(PACKAGE_NAME)!);
 
       // devDependencies
-      parsed.devDependencies = parsed.devDependencies || {};
-      parsed.devDependencies['@electron-forge/cli'] = '6.0.0-beta.52';
-      parsed.devDependencies['@electron-forge/maker-deb'] = '6.0.0-beta.52';
-      parsed.devDependencies['@electron-forge/maker-rpm'] = '6.0.0-beta.52';
-      parsed.devDependencies['@electron-forge/maker-squirrel'] =
-        '6.0.0-beta.52';
-      parsed.devDependencies['@electron-forge/maker-zip'] = '6.0.0-beta.52';
+      const forgeVersion = '6.0.0-beta.59';
+      parsed.devDependencies ||= {};
+      parsed.devDependencies['@electron-forge/cli'] = forgeVersion;
+      parsed.devDependencies['@electron-forge/maker-deb'] = forgeVersion;
+      parsed.devDependencies['@electron-forge/maker-rpm'] = forgeVersion;
+      parsed.devDependencies['@electron-forge/maker-squirrel'] = forgeVersion;
+      parsed.devDependencies['@electron-forge/maker-zip'] = forgeVersion;
 
       // Scripts
       parsed.scripts = parsed.scripts || {};
