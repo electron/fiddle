@@ -56,7 +56,7 @@ export class GistActionButton extends React.Component<
     this.state = {
       isUpdating: false,
       isDeleting: false,
-      actionType: GistActionType.publish,
+      actionType: 'Publish',
     };
 
     ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
@@ -133,7 +133,7 @@ export class GistActionButton extends React.Component<
       this.renderToast({ message: 'Publishing completed successfully!' });
 
       // Only set action type to update if publish completed successfully.
-      this.setActionType(GistActionType.update);
+      this.setActionType('Update');
     } catch (error) {
       console.warn(`Could not publish gist`, { error });
 
@@ -198,7 +198,7 @@ export class GistActionButton extends React.Component<
     }
 
     appState.activeGistAction = GistActionState.none;
-    this.setActionType(GistActionType.update);
+    this.setActionType('Update');
   }
 
   /**
@@ -232,7 +232,7 @@ export class GistActionButton extends React.Component<
 
     appState.gistId = undefined;
     appState.activeGistAction = GistActionState.none;
-    this.setActionType(GistActionType.publish);
+    this.setActionType('Publish');
   }
 
   /**
@@ -242,16 +242,16 @@ export class GistActionButton extends React.Component<
   public async performGistAction(): Promise<void> {
     const { gistId } = this.props.appState;
 
-    const actionType = gistId ? this.state.actionType : GistActionType.publish;
+    const actionType = gistId ? this.state.actionType : 'Publish';
 
     switch (actionType) {
-      case GistActionType.delete:
+      case 'Delete':
         return this.handleDelete();
 
-      case GistActionType.publish:
+      case 'Publish':
         return this.handlePublish();
 
-      case GistActionType.update:
+      case 'Update':
         return this.handleUpdate();
     }
   }
@@ -296,11 +296,11 @@ export class GistActionButton extends React.Component<
 
     const getActionIcon = () => {
       switch (actionType) {
-        case GistActionType.publish:
+        case 'Publish':
           return 'upload';
-        case GistActionType.update:
+        case 'Update':
           return 'refresh';
-        case GistActionType.delete:
+        case 'Delete':
           return 'delete';
       }
     };
@@ -340,18 +340,18 @@ export class GistActionButton extends React.Component<
       <Menu>
         <MenuItem
           text="Publish"
-          active={actionType === GistActionType.publish}
-          onClick={() => this.setActionType(GistActionType.publish)}
+          active={actionType === 'Publish'}
+          onClick={() => this.setActionType('Publish')}
         />
         <MenuItem
           text="Update"
-          active={actionType === GistActionType.update}
-          onClick={() => this.setActionType(GistActionType.update)}
+          active={actionType === 'Update'}
+          onClick={() => this.setActionType('Update')}
         />
         <MenuItem
           text="Delete"
-          active={actionType === GistActionType.delete}
-          onClick={() => this.setActionType(GistActionType.delete)}
+          active={actionType === 'Delete'}
+          onClick={() => this.setActionType('Delete')}
         />
       </Menu>
     );
@@ -367,7 +367,7 @@ export class GistActionButton extends React.Component<
     const { gitHubPublishAsPublic, gistId } = this.props.appState;
     const { actionType } = this.state;
 
-    if (gistId && actionType !== GistActionType.publish) {
+    if (gistId && actionType !== 'Publish') {
       return null;
     }
 

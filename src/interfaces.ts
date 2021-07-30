@@ -10,11 +10,7 @@ export type VersionState =
   | 'installing'
   | 'installed';
 
-export enum GistActionType {
-  publish = 'Publish',
-  update = 'Update',
-  delete = 'Delete',
-}
+export type GistActionType = 'Publish' | 'Update' | 'Delete';
 
 export enum GistActionState {
   publishing = 'publishing',

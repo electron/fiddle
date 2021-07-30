@@ -4,7 +4,6 @@ import { shallow } from 'enzyme';
 import {
   DefaultEditorId,
   GistActionState,
-  GistActionType,
   MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
@@ -197,7 +196,7 @@ describe('Action button component', () => {
       state.gistId = gistId;
       ({ instance, wrapper } = createActionButton());
       wrapper.setProps({ appState: state });
-      instance.setState({ actionType: GistActionType.update });
+      instance.setState({ actionType: 'Update' });
     });
 
     it('attempts to update an existing Gist', async () => {
@@ -237,7 +236,7 @@ describe('Action button component', () => {
       // create a button primed to delete gistId
       ({ instance, wrapper } = createActionButton());
       wrapper.setProps({ appState: state });
-      instance.setState({ actionType: GistActionType.delete });
+      instance.setState({ actionType: 'Delete' });
     });
 
     it('attempts to delete an existing Gist', async () => {
