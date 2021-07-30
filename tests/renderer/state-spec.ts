@@ -1,7 +1,6 @@
 import { reaction } from 'mobx';
 import {
   BlockableAccelerator,
-  ElectronReleaseChannel,
   GenericDialogType,
   MAIN_JS,
   RunnableVersion,
@@ -251,33 +250,23 @@ describe('AppState', () => {
 
   describe('showChannels()', () => {
     it('adds channels from `channelsToShow`', () => {
-      appState.channelsToShow = [
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.stable,
-      ];
-      appState.showChannels([
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.nightly,
-      ]);
+      appState.channelsToShow = ['Beta', 'Stable'];
+      appState.showChannels(['Beta', 'Nightly']);
       expect([...appState.channelsToShow].sort()).toEqual([
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.nightly,
-        ElectronReleaseChannel.stable,
+        'Beta',
+        'Nightly',
+        'Stable',
       ]);
     });
   });
 
   describe('hideChannels()', () => {
     it('removes channels from `channelsToShow`', () => {
-      appState.channelsToShow = [
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.nightly,
-        ElectronReleaseChannel.stable,
-      ];
-      appState.hideChannels([ElectronReleaseChannel.beta]);
+      appState.channelsToShow = ['Beta', 'Nightly', 'Stable'];
+      appState.hideChannels(['Beta']);
       expect([...appState.channelsToShow].sort()).toEqual([
-        ElectronReleaseChannel.nightly,
-        ElectronReleaseChannel.stable,
+        'Nightly',
+        'Stable',
       ]);
     });
   });

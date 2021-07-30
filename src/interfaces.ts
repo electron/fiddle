@@ -31,11 +31,7 @@ export interface RunnableVersion extends Version {
   downloadProgress?: number;
 }
 
-export const enum ElectronReleaseChannel {
-  stable = 'Stable',
-  beta = 'Beta',
-  nightly = 'Nightly',
-}
+export type ElectronReleaseChannel = 'Nightly' | 'Beta' | 'Stable';
 
 export interface SetFiddleOptions {
   filePath?: string;

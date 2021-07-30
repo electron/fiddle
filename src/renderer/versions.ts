@@ -42,15 +42,15 @@ export function getReleaseChannel(
   const tag = typeof input === 'string' ? input : input.version || '';
 
   if (tag.includes('beta') || tag.includes('alpha')) {
-    return ElectronReleaseChannel.beta;
+    return 'Beta';
   }
 
   if (tag.includes('nightly')) {
-    return ElectronReleaseChannel.nightly;
+    return 'Nightly';
   }
 
   // Must be a stable version, right?
-  return ElectronReleaseChannel.stable;
+  return 'Stable';
 }
 
 export const enum VersionKeys {

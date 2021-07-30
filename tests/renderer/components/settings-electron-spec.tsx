@@ -19,10 +19,7 @@ describe('ElectronSettings component', () => {
     ({ state: store } = (window as any).ElectronFiddle.app);
 
     store.initVersions('2.0.1', { ...mockVersions });
-    store.channelsToShow = [
-      ElectronReleaseChannel.stable,
-      ElectronReleaseChannel.beta,
-    ];
+    store.channelsToShow = ['Stable', 'Beta'];
 
     // Render all the states
     let i = 0;
@@ -203,22 +200,19 @@ describe('ElectronSettings component', () => {
       const instance = wrapper.instance() as any;
       await instance.handleChannelChange({
         currentTarget: {
-          id: ElectronReleaseChannel.stable,
+          id: 'Stable',
           checked: false,
         },
       });
 
       await instance.handleChannelChange({
         currentTarget: {
-          id: ElectronReleaseChannel.nightly,
+          id: 'Nightly',
           checked: true,
         },
       });
 
-      expect(store.channelsToShow).toEqual([
-        ElectronReleaseChannel.beta,
-        ElectronReleaseChannel.nightly,
-      ]);
+      expect(store.channelsToShow).toEqual(['Beta', 'Nightly']);
     });
   });
 });

@@ -211,10 +211,10 @@ export class ElectronSettings extends React.Component<
       return getReleaseChannel(appState.version) === channel;
     };
 
-    const channels = {
-      stable: ElectronReleaseChannel.stable,
-      beta: ElectronReleaseChannel.beta,
-      nightly: ElectronReleaseChannel.nightly,
+    const channels: { [key: string]: ElectronReleaseChannel } = {
+      stable: 'Stable',
+      beta: 'Beta',
+      nightly: 'Nightly',
     };
 
     return (

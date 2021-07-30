@@ -1,10 +1,7 @@
 import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import {
-  ElectronReleaseChannel,
-  RunnableVersion,
-} from '../../../src/interfaces';
+import { RunnableVersion } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
@@ -33,10 +30,7 @@ describe('VersionSelect component', () => {
       '3.0.0-unsupported': { ...mockVersion2 },
     });
 
-    store.channelsToShow = [
-      ElectronReleaseChannel.stable,
-      ElectronReleaseChannel.beta,
-    ];
+    store.channelsToShow = ['Stable', 'Beta'];
   });
 
   it('renders', () => {

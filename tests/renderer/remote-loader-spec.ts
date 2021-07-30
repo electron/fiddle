@@ -1,4 +1,4 @@
-import { DefaultEditorId, ElectronReleaseChannel } from '../../src/interfaces';
+import { DefaultEditorId } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
@@ -75,7 +75,7 @@ describe('RemoteLoader', () => {
     ({ app } = (window as any).ElectronFiddle);
     ({ state: store } = app);
     ipcRendererManager.send = jest.fn();
-    store.channelsToShow = [ElectronReleaseChannel.stable];
+    store.channelsToShow = ['Stable'];
     store.initVersions('4.0.0', {
       '4.0.0': { version: '4.0.0' },
       '4.0.0-beta': { version: '4.0.0-beta' },
@@ -233,7 +233,7 @@ describe('RemoteLoader', () => {
 
       const result = await instance.setElectronVersionWithRef('4.0.0-beta');
       expect(result).toBe(true);
-      expect(store.channelsToShow).toContain(ElectronReleaseChannel.beta);
+      expect(store.channelsToShow).toContain('Beta');
     });
 
     it('tries to download missing versions of Electron', async () => {
@@ -275,7 +275,7 @@ describe('RemoteLoader', () => {
   describe('verifyReleaseChannelEnabled', () => {
     it('asks the user if they want to enable a release channel', async () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      await instance.verifyReleaseChannelEnabled(ElectronReleaseChannel.beta);
+      await instance.verifyReleaseChannelEnabled('Beta');
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
         label: expect.stringMatching(/enable the release channel/i),
         ok: 'Enable',

@@ -1,11 +1,7 @@
 // use a stable-sorting stringify for comparing expected & actual payloads
 import stringify from 'json-stable-stringify';
 
-import {
-  ElectronReleaseChannel,
-  OutputEntry,
-  RunResult,
-} from '../../src/interfaces';
+import { OutputEntry, RunResult } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 
 import { ipcMainManager } from '../../src/main/ipc';
@@ -132,35 +128,35 @@ describe('processCommandLine()', () => {
 
     it('handles a --full option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--full'];
-      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.beta}","${ElectronReleaseChannel.nightly}","${ElectronReleaseChannel.stable}"],"useObsolete":true}}`;
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${'Beta'}","${'Nightly'}","${'Stable'}"],"useObsolete":true}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
     it('handles a --nightlies option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--nightlies'];
-      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.nightly}"]}}`;
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${'Nightly'}"]}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
     it('handles a --no-nightlies option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--no-nightlies'];
-      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${ElectronReleaseChannel.nightly}"],"showChannels":[]}}`;
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${'Nightly'}"],"showChannels":[]}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
     it('handles a --betas option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--betas'];
-      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.beta}"]}}`;
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${'Beta'}"]}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });
 
     it('handles a --no-betas option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--no-betas'];
-      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${ElectronReleaseChannel.beta}"],"showChannels":[]}}`;
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":["${'Beta'}"],"showChannels":[]}}`;
       await processCommandLine(argv);
       expectBisectCalledOnceWith(expected);
     });

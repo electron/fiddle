@@ -1,9 +1,6 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
-import {
-  ElectronReleaseChannel,
-  RunnableVersion,
-} from '../../../src/interfaces';
+import { RunnableVersion } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
 
@@ -32,7 +29,7 @@ describe('BisectDialog component', () => {
     store.versions = Object.fromEntries(
       store.versionsToShow.map((ver) => [ver.version, ver]),
     );
-    store.channelsToShow = [ElectronReleaseChannel.stable];
+    store.channelsToShow = ['Stable'];
   });
 
   it('renders', () => {

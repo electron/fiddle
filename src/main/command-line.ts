@@ -3,12 +3,7 @@ import * as fs from 'fs-extra';
 import * as os from 'os';
 import getos from 'getos';
 
-import {
-  ElectronReleaseChannel,
-  OutputEntry,
-  RunResult,
-  SetupRequest,
-} from '../interfaces';
+import { OutputEntry, RunResult, SetupRequest } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getGistId } from '../utils/gist';
 import { ipcMainManager } from './ipc';
@@ -43,25 +38,21 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
   }
 
   if (betas) {
-    config.showChannels.push(ElectronReleaseChannel.beta);
+    config.showChannels.push('Beta');
   } else if (betas === false) {
-    config.hideChannels.push(ElectronReleaseChannel.beta);
+    config.hideChannels.push('Beta');
   }
 
   if (nightlies) {
-    config.showChannels.push(ElectronReleaseChannel.nightly);
+    config.showChannels.push('Nightly');
   } else if (nightlies === false) {
-    config.hideChannels.push(ElectronReleaseChannel.nightly);
+    config.hideChannels.push('Nightly');
   }
 
   if (full) {
     config.useObsolete = true;
     config.hideChannels = [];
-    config.showChannels = [
-      ElectronReleaseChannel.beta,
-      ElectronReleaseChannel.nightly,
-      ElectronReleaseChannel.stable,
-    ];
+    config.showChannels = ['Beta', 'Nightly', 'Stable'];
   }
 
   return config;

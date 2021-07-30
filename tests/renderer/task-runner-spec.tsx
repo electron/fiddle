@@ -55,8 +55,8 @@ describe('Task Runner component', () => {
     const GOOD = '10.0.0';
     const BAD = '11.0.2';
     const GIST_ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
-    const SHOW = [ElectronReleaseChannel.stable];
-    const HIDE = [ElectronReleaseChannel.beta, ElectronReleaseChannel.nightly];
+    const SHOW: ElectronReleaseChannel[] = ['Stable'];
+    const HIDE: ElectronReleaseChannel[] = ['Beta', 'Nightly'];
     const USE_OBSOLETE = true;
     const VERSIONS = [
       '12.0.0',

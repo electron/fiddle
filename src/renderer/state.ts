@@ -65,10 +65,7 @@ export class AppState {
   @observable
   public channelsToShow: Array<ElectronReleaseChannel> = (this.retrieve(
     'channelsToShow',
-  ) as Array<ElectronReleaseChannel>) || [
-    ElectronReleaseChannel.stable,
-    ElectronReleaseChannel.beta,
-  ];
+  ) as Array<ElectronReleaseChannel>) || ['Stable', 'Beta'];
   @observable public showObsoleteVersions = !!(
     this.retrieve('showObsoleteVersions') ?? false
   );

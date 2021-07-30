@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { ElectronReleaseChannel, RunnableVersion } from '../../src/interfaces';
+import { RunnableVersion } from '../../src/interfaces';
 import {
   addLocalVersion,
   fetchVersions,
@@ -59,7 +59,7 @@ describe('versions', () => {
         getReleaseChannel({
           version: 'v4.0.0-nightly.20180817',
         } as any),
-      ).toBe(ElectronReleaseChannel.nightly);
+      ).toBe('Nightly');
     });
 
     it('identifies a beta release', () => {
@@ -67,7 +67,7 @@ describe('versions', () => {
         getReleaseChannel({
           version: 'v3.0.0-beta.4',
         } as any),
-      ).toBe(ElectronReleaseChannel.beta);
+      ).toBe('Beta');
     });
 
     it('identifies a stable release', () => {
@@ -75,11 +75,11 @@ describe('versions', () => {
         getReleaseChannel({
           version: 'v3.0.0',
         } as any),
-      ).toBe(ElectronReleaseChannel.stable);
+      ).toBe('Stable');
     });
 
     it('identifies an unknown release as stable', () => {
-      expect(getReleaseChannel({} as any)).toBe(ElectronReleaseChannel.stable);
+      expect(getReleaseChannel({} as any)).toBe('Stable');
     });
   });
 

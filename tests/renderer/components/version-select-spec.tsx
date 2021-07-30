@@ -1,11 +1,7 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import {
-  ElectronReleaseChannel,
-  RunnableVersion,
-  VersionState,
-} from '../../../src/interfaces';
+import { RunnableVersion, VersionState } from '../../../src/interfaces';
 import {
   filterItems,
   getItemIcon,
@@ -40,10 +36,7 @@ describe('VersionSelect component', () => {
       '1.0.0': { ...mockVersion1 },
       '3.0.0-unsupported': { ...mockVersion2 },
     });
-    store.channelsToShow = [
-      ElectronReleaseChannel.stable,
-      ElectronReleaseChannel.beta,
-    ];
+    store.channelsToShow = ['Stable', 'Beta'];
   });
 
   const onVersionSelect = () => ({});
