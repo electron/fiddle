@@ -18,11 +18,8 @@ import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { getElectronVersions } from '../../src/renderer/versions';
-import {
-  getUpdatedElectronVersions,
-  saveLocalVersions,
-} from '../../src/renderer/versions';
+import { getElectronVersions, makeRunnable } from '../../src/renderer/versions';
+import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
@@ -44,14 +41,16 @@ jest.mock('../../src/renderer/versions', () => {
 
   return {
     addLocalVersion: jest.fn(),
+    fetchVersions: jest.fn(mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
     getElectronVersions: jest.fn(),
-    getOldestSupportedVersion: jest.fn(),
+    getOldestSupportedMajor: jest.fn(),
     getReleaseChannel,
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    makeRunnable: jest.fn((v) => v),
     saveLocalVersions: jest.fn(),
   };
 });
+
 jest.mock('../../src/utils/get-name', () => ({
   getName: jest.fn(),
 }));
@@ -65,9 +64,7 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
-      mockVersionsArray,
-    );
+    (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState(mockVersionsArray);
@@ -81,13 +78,23 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
-        async () => {
-          throw new Error('Bwap-bwap');
-        },
-      );
+      (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
+      await appState.updateElectronVersions();
+    });
+
+    it('adds new versions', async () => {
+      const version = '100.0.0';
+      const ver: Version = { version };
+
+      (fetchVersions as jest.Mock).mockResolvedValue([ver]);
+      (makeRunnable as jest.Mock).mockImplementation((v: unknown) => v);
+
+      const oldCount = Object.keys(appState.versions).length;
 
       await appState.updateElectronVersions();
+      const newCount = Object.keys(appState.versions).length;
+      expect(newCount).toBe(oldCount + 1);
+      expect(appState.versions[version]).toStrictEqual(ver);
     });
   });
 
@@ -655,7 +662,7 @@ describe('AppState', () => {
       appState.pushOutput(Buffer.from('hi'));
 
       expect(appState.output[1].text).toBe('hi');
-      expect(appState.output[1].timestamp).toBeTruthy();
+      expect(appState.output[1].timeString).toBeTruthy();
     });
 
     it('ignores the "Debuggeer listening on..." output', () => {

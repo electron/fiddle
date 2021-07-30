@@ -61,22 +61,4 @@ describe('sort-versions', () => {
       makeVersion('v2.0.0-nightly.20200101'),
     ]);
   });
-
-  it('handles invalid versions', () => {
-    const unsorted: RunnableVersion[] = [
-      makeVersion('moreGarbage'),
-      makeVersion('v1.0.0'),
-      makeVersion('v3.0.0'),
-      makeVersion('garbage'),
-    ];
-
-    const sorted = sortVersions([...unsorted]);
-
-    expect(sorted).toStrictEqual<any>([
-      makeVersion('garbage'),
-      makeVersion('moreGarbage'),
-      makeVersion('v3.0.0'),
-      makeVersion('v1.0.0'),
-    ]);
-  });
 });

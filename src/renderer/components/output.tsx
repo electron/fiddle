@@ -1,4 +1,4 @@
-import { autorun } from 'mobx';
+import { autorun, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
@@ -35,16 +35,27 @@ export class Output extends React.Component<CommandsProps> {
   public language = 'consoleOutputLanguage';
 
   private outputRef = React.createRef<HTMLDivElement>();
+  private readonly model: MonacoType.editor.ITextModel;
+
+  // make it wide enough to fit all of OutputEntry's timestamps
+  private readonly lineNumbersMinChars =
+    new Date('2021-12-31T23:59:59').toLocaleTimeString().length + 1;
 
   constructor(props: CommandsProps) {
     super(props);
 
+    const { monaco } = this.props;
     this.language = 'consoleOutputLanguage';
+    this.model = monaco.editor.createModel('', this.language);
+    this.updateModel();
+    reaction(
+      () => props.appState.output.length,
+      () => this.updateModel(),
+    );
   }
 
   public async componentDidMount() {
     autorun(async () => {
-      this.destroyMonacoEditor();
       await this.initMonaco();
       this.toggleConsole();
     });
@@ -56,13 +67,6 @@ export class Output extends React.Component<CommandsProps> {
 
   public componentDidUpdate() {
     this.toggleConsole();
-  }
-
-  /**
-   *  Set Monaco Editor's value.
-   */
-  public async UNSAFE_componentWillReceiveProps(newProps: CommandsProps) {
-    await this.setContent(newProps.appState.output);
   }
 
   /**
@@ -79,11 +83,10 @@ export class Output extends React.Component<CommandsProps> {
         readOnly: true,
         contextmenu: false,
         automaticLayout: true,
-        model: null,
+        model: this.model,
         ...monacoOptions,
+        wordWrap: 'on',
       });
-
-      await this.setContent(this.props.appState.output);
     }
   }
 
@@ -152,50 +155,42 @@ export class Output extends React.Component<CommandsProps> {
    * @private
    * @memberof Output
    */
-  private async setContent(output: OutputEntry[]) {
-    this.setEditorText(this.getOutputLines(output));
-    // have terminal always scroll to the bottom
-    this.editor?.revealLine(this.editor?.getScrollHeight());
+  private async updateModel() {
+    // set the lines
+    const lines = Output.getLines(this.props.appState.output);
+    this.model.setValue(lines.map(({ text }) => text).join('\n'));
+
+    // if we have an editor, tell it the line numbers and scroll to newest
+    const { editor, lineNumbersMinChars } = this;
+    if (!editor) return;
+    const timestrs = lines.map(({ timeString }) => timeString);
+    // adjust `i` here because the value passed in by monaco starts at 1, not 0
+    const lineNumbers = (i: number) => timestrs[i - 1] || '';
+    editor.updateOptions({ lineNumbers, lineNumbersMinChars });
+    console.log(lineNumbersMinChars);
+    editor.revealLine(editor.getScrollHeight());
   }
 
   /**
-   * Processes output entries such that each entry has a timestamp and value text.
+   * An OutputEntry might span multiple lines.
+   * Split it into individual lines to ensure each one has a timestamp.
    *
-   * An individual entry might span multiple lines. To ensure that
-   * each line has a timestamp, this method might split up entries.
-   *
-   * @param {OutputEntry} entry
-   * @returns string
+   * @param {OutputEntry} entries that may include paragraphs
+   * @returns {OutputEntry} single-line entries
    * @memberof Output
    */
-  private getOutputLines(output: OutputEntry[]) {
-    const lines: string[] = [];
-    const outputs = output.slice(-1000);
+  private static getLines(paragraphs: OutputEntry[]): OutputEntry[] {
+    const lines: OutputEntry[] = [];
 
-    for (const output of outputs) {
-      const segments = output.text.split(/\r?\n/);
-      const date = new Date(output.timestamp).toLocaleTimeString();
-      for (const segment of segments) {
-        lines.push(date + ' ' + segment);
+    paragraphs = paragraphs.slice(-1000);
+
+    for (const { text, timeString } of paragraphs) {
+      for (const line of text.split(/\r?\n/)) {
+        lines.push({ text: line, timeString });
       }
     }
-    return lines.join('\n');
-  }
 
-  /**
-   * Create a model and attach it to the editor
-   *
-   * @private
-   * @param {string} value
-   */
-  private setEditorText(value: string) {
-    const { monaco } = this.props;
-    const model = monaco.editor.createModel(value, this.language);
-    model.updateOptions({
-      tabSize: 2,
-    });
-
-    this.editor?.setModel(model);
+    return lines;
   }
 
   public render(): JSX.Element | null {

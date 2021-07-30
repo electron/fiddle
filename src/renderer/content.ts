@@ -1,12 +1,10 @@
-import { EditorValues, VersionSource } from '../interfaces';
+import { EditorValues } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { getElectronVersions } from './versions';
+import { getReleasedVersions } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as semver from 'semver';
-import decompress from 'decompress';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
@@ -40,12 +38,22 @@ async function prepareTemplate(branch: string): Promise<string> {
         throw new Error(`${url} ${response.status} ${response.statusText}`);
       }
 
-      const arrayBuffer = await response.arrayBuffer();
-      await fs.ensureDir(TEMPLATES_DIR);
-      console.log(`Content: ${branch} unzipping template`);
-      await decompress(Buffer.from(arrayBuffer), TEMPLATES_DIR);
+      // save it to a tempfile
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const { tmpNameSync } = await import('tmp');
+      const tempfile = tmpNameSync({ template: 'electron-fiddle-XXXXXX.zip' });
+      console.log(`Content: ${branch} saving template to "${tempfile}"`);
+      await fs.writeFile(tempfile, buffer, { encoding: 'utf8' });
 
-      console.log(`Content: ${branch} finished unzipping`);
+      // unzip it from the tempfile
+      console.log(`Content: ${branch} unzipping template`);
+      await fs.ensureDir(TEMPLATES_DIR);
+      const { default: extract } = await import('extract-zip');
+      await extract(tempfile, { dir: TEMPLATES_DIR });
+
+      // cleanup
+      console.log(`Content: ${branch} unzipped; removing "${tempfile}"`);
+      await fs.remove(tempfile);
     }
   } catch (err) {
     folder = STATIC_TEMPLATE_DIR;
@@ -93,13 +101,9 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
  * @returns {boolean} true if major version is a known release
  */
-function isReleasedMajor(version: semver.SemVer) {
-  const newestRelease = getElectronVersions()
-    .filter((version) => version.source === VersionSource.remote)
-    .map((version) => semver.parse(version.version))
-    .filter((version) => !!version)
-    .reduce((acc, cur) => (acc && acc.compare(cur!) > 0 ? acc : cur));
-  return newestRelease && version.major <= newestRelease.major;
+function isReleasedMajor(major: number) {
+  const prefix = `${major}.`;
+  return getReleasedVersions().some((ver) => ver.version.startsWith(prefix));
 }
 
 /**
@@ -109,8 +113,8 @@ function isReleasedMajor(version: semver.SemVer) {
  * @returns {Promise<EditorValues>}
  */
 export function getTemplate(version: string): Promise<EditorValues> {
-  const sem = semver.parse(version);
-  return sem && isReleasedMajor(sem)
-    ? getQuickStart(`${sem.major}-x-y`)
+  const major = Number.parseInt(version);
+  return major && isReleasedMajor(major)
+    ? getQuickStart(`${major}-x-y`)
     : readFiddle(STATIC_TEMPLATE_DIR);
 }

@@ -4,17 +4,14 @@ import {
   ElectronReleaseChannel,
   RunnableVersion,
   VersionSource,
-  VersionState,
 } from '../../src/interfaces';
-import { getVersionState } from '../../src/renderer/binary';
 import {
   addLocalVersion,
   fetchVersions,
   getDefaultVersion,
-  getKnownVersions,
+  getReleasedVersions,
   getLocalVersions,
   getReleaseChannel,
-  getUpdatedElectronVersions,
   saveLocalVersions,
   VersionKeys,
 } from '../../src/renderer/versions';
@@ -42,30 +39,21 @@ describe('versions', () => {
       expect(output).toBe('2.0.2');
     });
 
-    it('handles a v-prefixed version', () => {
-      (localStorage.getItem as any).mockReturnValue('v2.0.2');
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
-    });
-
-    it('handles garbage data', () => {
-      (localStorage.getItem as any).mockReturnValue('v3.0.0');
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
-    });
-
-    it('handles if no version is set', () => {
+    it('uses the newest stable as a fallback', () => {
       (localStorage.getItem as any).mockReturnValue(null);
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
-      expect(output).toBe('2.0.2');
+      const output = getDefaultVersion([
+        { version: '11.0.0' },
+        { version: '15.0.0-nightly.20210715' },
+        { version: '13.0.0' },
+        { version: '15.0.0-alpha.1' },
+        { version: '12.0.0' },
+        { version: '14.0.0-beta.1' },
+      ] as any);
+      expect(output).toBe('13.0.0');
     });
 
     it('throws if everything goes wrong', () => {
-      const testFn = () => {
-        return getDefaultVersion(null as any);
-      };
-
-      expect(testFn).toThrow();
+      expect(() => getDefaultVersion([])).toThrow();
     });
   });
 
@@ -173,7 +161,7 @@ describe('versions', () => {
   describe('fetchVersions()', () => {
     it('fetches versions >= 0.24.0', async () => {
       const fetchMock = new FetchMock();
-      const url = 'https://electronjs.org/headers/index.json';
+      const url = 'https://releases.electronjs.org/releases.json';
       const filename = path.join(__dirname, '../mocks/versions-mock.json');
       const contents = fs.readFileSync(filename).toString();
       fetchMock.add(url, contents);
@@ -190,19 +178,19 @@ describe('versions', () => {
     });
   });
 
-  describe('getKnownVersions()', () => {
+  describe('getReleasedVersions()', () => {
     it('tries to get versions from localStorage', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(
         `[{ "version": "3.0.5" }]`,
       );
 
-      expect(getKnownVersions()).toEqual([{ version: '3.0.5' }]);
+      expect(getReleasedVersions()).toEqual([{ version: '3.0.5' }]);
     });
 
     it('falls back to a local require', () => {
       (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
 
-      expect(getKnownVersions().length).toBe(expectedVersionCount);
+      expect(getReleasedVersions().length).toBe(expectedVersionCount);
     });
 
     it('falls back to a local require', () => {
@@ -210,42 +198,7 @@ describe('versions', () => {
         `[{ "garbage": "true" }]`,
       );
 
-      expect(getKnownVersions().length).toBe(expectedVersionCount);
-    });
-  });
-
-  describe('getUpdatedElectronVersions()', () => {
-    it('gets known versions', async () => {
-      (getVersionState as jest.Mock).mockImplementation((v: any) => {
-        if (v.version === '3.0.5') return VersionState.ready;
-        if (v.version === '3.0.6') return VersionState.unknown;
-        return v.state;
-      });
-
-      (window as any).localStorage.getItem.mockImplementation((key: string) => {
-        if (key === 'known-electron-versions')
-          return '[{ "version": "3.0.5" }]';
-        if (key === 'local-electron-versions')
-          return '[{ "version": "3.0.6" }]';
-        throw new Error(`unexpected key ${key}`);
-      });
-
-      const fetchMock = new FetchMock();
-      fetchMock.add('getUpdatedElectronVersions', '');
-      const result = await getUpdatedElectronVersions();
-
-      expect(result).toEqual([
-        {
-          source: VersionSource.remote,
-          state: VersionState.ready,
-          version: '3.0.5',
-        },
-        {
-          source: VersionSource.local,
-          state: VersionState.unknown,
-          version: '3.0.6',
-        },
-      ]);
+      expect(getReleasedVersions().length).toBe(expectedVersionCount);
     });
   });
 });

@@ -1,7 +1,8 @@
 import * as commander from 'commander';
 import * as fs from 'fs-extra';
+import * as os from 'os';
+import getos from 'getos';
 
-import { app } from 'electron';
 import {
   ElectronReleaseChannel,
   OutputEntry,
@@ -74,28 +75,39 @@ const exitCodes = Object.freeze({
 
 async function sendTask(type: IpcEvents, task: any) {
   const onOutputEntry = (_: any, msg: OutputEntry) => {
-    console.log(
-      `[${new Date(msg.timestamp).toLocaleTimeString()}] ${msg.text}`,
-    );
+    console.log(`[${msg.timeString}] ${msg.text}`);
   };
-  const onTaskDone = (_: any, r: RunResult) => app.exit(exitCodes[r]);
+  const onTaskDone = (_: any, r: RunResult) => exitWithCode(exitCodes[r]);
   ipcMainManager.on(IpcEvents.OUTPUT_ENTRY, onOutputEntry);
   ipcMainManager.once(IpcEvents.TASK_DONE, onTaskDone);
   ipcMainManager.send(type, [task]);
 }
 
-function logConfig() {
+async function logConfig() {
   const packageJson = require('../../package.json');
+  const osinfo = await new Promise((resolve) =>
+    getos((err, result) => resolve(err || result)),
+  );
+
   console.log(`${packageJson.name} started
    argv: ${JSON.stringify(process.argv)}
    date: ${new Date()}
-   platform: ${process.platform}
-   version: ${packageJson.version}`);
+   fiddle.version: ${packageJson.version}
+   os.arch: ${os.arch()}
+   os.platform: ${os.platform()}
+   os.release: ${os.release()}
+   os.version: ${os.version()}
+   platform: ${JSON.stringify(osinfo)}`);
+}
+
+async function exitWithCode(code: number) {
+  console.log(`Electron Fiddle is exiting with code ${code}`);
+  process.exit(code);
 }
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) logConfig();
+    if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
       setup: getSetup(opts),
       goodVersion: good,
@@ -103,19 +115,19 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
     });
   } catch (err) {
     console.error(err);
-    process.exit(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes[RunResult.INVALID]);
   }
 }
 
 async function test(opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) logConfig();
+    if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
       setup: getSetup(opts),
     });
   } catch (err) {
     console.error(err);
-    process.exit(exitCodes[RunResult.INVALID]);
+    exitWithCode(exitCodes[RunResult.INVALID]);
   }
 }
 
@@ -162,10 +174,10 @@ Example calls:
   if (argv.length > (process.defaultApp ? 2 : 1)) {
     try {
       if (findProtocolArg(argv)) return;
-      program.parse(argv, { from: 'electron' });
+      await program.parseAsync(argv, { from: 'electron' });
     } catch (err) {
       console.error(err);
-      process.exit(exitCodes[RunResult.INVALID]);
+      exitWithCode(exitCodes[RunResult.INVALID]);
     }
   }
 }

@@ -141,7 +141,7 @@ describe('VersionSelect component', () => {
   });
 
   describe('filterItems()', () => {
-    it('correctly matches a query', () => {
+    it('correctly matches a numeric query', () => {
       const versions = [
         { version: '14.3.0' },
         { version: '3.0.0' },
@@ -159,6 +159,30 @@ describe('VersionSelect component', () => {
       ] as RunnableVersion[];
 
       expect(filterItems('3', versions)).toEqual(expected);
+    });
+
+    it('sorts in descending order when the query is non-numeric', () => {
+      const versions = [
+        { version: '3.0.0' },
+        { version: '13.2.0' },
+        { version: '14.3.0' },
+        { version: '12.0.0-beta.3' },
+        { version: '3.0.0-nightly.12345678' },
+        { version: '13.2.0-nightly.12345678' },
+        { version: '14.3.0-nightly.12345678' },
+        { version: '9.0.0-nightly.12345678' },
+        { version: '12.0.0-nightly.20210301' },
+      ] as RunnableVersion[];
+
+      const expected = [
+        { version: '14.3.0-nightly.12345678' },
+        { version: '13.2.0-nightly.12345678' },
+        { version: '12.0.0-nightly.20210301' },
+        { version: '9.0.0-nightly.12345678' },
+        { version: '3.0.0-nightly.12345678' },
+      ] as RunnableVersion[];
+
+      expect(filterItems('nightly', versions)).toEqual(expected);
     });
   });
 });

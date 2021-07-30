@@ -5,7 +5,7 @@ import {
   Checkbox,
   FormGroup,
   HTMLTable,
-  IButtonProps,
+  ButtonProps,
   Icon,
   IconName,
   Tooltip,
@@ -20,7 +20,7 @@ import {
   VersionState,
 } from '../../interfaces';
 import { AppState } from '../state';
-import { getReleaseChannel, getOldestSupportedVersion } from '../versions';
+import { getReleaseChannel, getOldestSupportedMajor } from '../versions';
 
 interface ElectronSettingsProps {
   appState: AppState;
@@ -250,7 +250,7 @@ export class ElectronSettings extends React.Component<
           onChange={this.handleStateChange}
         />
         <Tooltip
-          content={`Include versions that have reached end-of-life (older than ${getOldestSupportedVersion()})`}
+          content={`Include versions that have reached end-of-life (older than ${getOldestSupportedMajor()}.0.0)`}
           position="bottom"
           intent="primary"
         >
@@ -310,7 +310,8 @@ export class ElectronSettings extends React.Component<
    * @returns {JSX.Element}
    */
   private renderHumanState(item: RunnableVersion): JSX.Element {
-    const { state } = item;
+    const { state, source } = item;
+    const isLocal = source === VersionSource.local;
     let icon: IconName = 'box';
     let humanState = 'Downloaded';
 
@@ -318,8 +319,10 @@ export class ElectronSettings extends React.Component<
       icon = 'cloud-download';
       humanState = 'Downloading';
     } else if (state === VersionState.unknown) {
-      icon = 'cloud';
-      humanState = 'Not downloaded';
+      // The only way for a local version to be unknown
+      // is for it to have been deleted. Mark as unavailable.
+      icon = isLocal ? 'issue' : 'cloud';
+      humanState = isLocal ? 'Not available' : 'Not downloaded';
     }
 
     return (
@@ -340,7 +343,8 @@ export class ElectronSettings extends React.Component<
   private renderAction(ver: RunnableVersion): JSX.Element {
     const { state, source } = ver;
     const { appState } = this.props;
-    const buttonProps: IButtonProps = {
+    const isLocal = source === VersionSource.local;
+    const buttonProps: ButtonProps = {
       fill: true,
       small: true,
     };
@@ -349,7 +353,7 @@ export class ElectronSettings extends React.Component<
       case VersionState.ready:
         buttonProps.icon = 'trash';
         buttonProps.onClick = () => appState.removeVersion(ver);
-        buttonProps.text = source === VersionSource.local ? 'Remove' : 'Delete';
+        buttonProps.text = isLocal ? 'Remove' : 'Delete';
         break;
 
       case VersionState.downloading:
@@ -362,10 +366,12 @@ export class ElectronSettings extends React.Component<
 
       case VersionState.unknown:
         buttonProps.disabled = false;
-        buttonProps.icon = 'cloud-download';
         buttonProps.loading = false;
-        buttonProps.onClick = () => appState.downloadVersion(ver);
-        buttonProps.text = 'Download';
+        buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
+        buttonProps.text = isLocal ? 'Remove' : 'Download';
+        buttonProps.onClick = () => {
+          isLocal ? appState.removeVersion(ver) : appState.downloadVersion(ver);
+        };
         break;
     }
 

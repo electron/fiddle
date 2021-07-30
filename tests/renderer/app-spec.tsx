@@ -1,5 +1,6 @@
 import { App } from '../../src/renderer/app';
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { createEditorValues } from '../mocks/mocks';
 import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
@@ -334,6 +335,51 @@ describe('App component', () => {
       (app.state.title as any) = title;
       await waitFor(() => document.title?.length > 0);
       expect(document.title).toMatch(title);
+    });
+  });
+
+  describe('prompting to confirm replacing an unsaved fiddle', () => {
+    // make a second fiddle that differs from the first
+    const editorValues = createEditorValues();
+    const editorValues2: EditorValues = { MAIN_JS: '// hello world' };
+    let editorMosaic: EditorMosaic;
+
+    beforeEach(() => {
+      ({ editorMosaic } = app.state as any);
+    });
+
+    async function testDialog(confirm: boolean) {
+      const localPath = '/etc/passwd';
+      const gistId = '2c24ecd147c9c28c9b2d0cf738d4993a';
+
+      // load up a fiddle...
+      await app.replaceFiddle(editorValues, { filePath: localPath });
+      expect(app.state.gistId).toBeFalsy();
+      expect(app.state.localPath).toBe(localPath);
+
+      // ...mark it as edited so that trying a confirm dialog
+      // will be triggered when we try to replace it
+      editorMosaic.isEdited = true;
+
+      // set up a reaction to confirm the replacement
+      // when it happens
+      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(confirm);
+
+      // now try to replace
+      await app.replaceFiddle(editorValues2, { gistId });
+      expect(app.state.showConfirmDialog).toHaveBeenCalled();
+    }
+
+    it('does not replace the fiddle if not confirmed', async () => {
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
+      await testDialog(false);
+      expect(setSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('replaces the fiddle if confirmed', async () => {
+      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
+      await testDialog(true);
+      expect(setSpy).toHaveBeenCalledTimes(2);
     });
   });
 

@@ -1,5 +1,6 @@
 import { PACKAGE_NAME } from '../../src/interfaces';
 import { forgeTransform } from '../../src/renderer/transforms/forge';
+import { getForgeVersion } from '../../src/utils/get-package';
 
 describe('forgeTransform()', () => {
   it('adds forge dependencies', async () => {
@@ -7,13 +8,14 @@ describe('forgeTransform()', () => {
     filesBefore.set(PACKAGE_NAME, JSON.stringify({}));
 
     const files = await forgeTransform(filesBefore);
+    const forgeVersion = getForgeVersion();
     expect(JSON.parse(files.get(PACKAGE_NAME)!)).toEqual({
       devDependencies: {
-        '@electron-forge/cli': '6.0.0-beta.52',
-        '@electron-forge/maker-deb': '6.0.0-beta.52',
-        '@electron-forge/maker-rpm': '6.0.0-beta.52',
-        '@electron-forge/maker-squirrel': '6.0.0-beta.52',
-        '@electron-forge/maker-zip': '6.0.0-beta.52',
+        '@electron-forge/cli': forgeVersion,
+        '@electron-forge/maker-deb': forgeVersion,
+        '@electron-forge/maker-rpm': forgeVersion,
+        '@electron-forge/maker-squirrel': forgeVersion,
+        '@electron-forge/maker-zip': forgeVersion,
       },
       scripts: {
         start: 'electron-forge start',

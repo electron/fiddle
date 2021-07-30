@@ -1,5 +1,4 @@
 import * as fs from 'fs-extra';
-import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
@@ -29,11 +28,12 @@ import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
+  fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getOldestSupportedVersion,
+  getOldestSupportedMajor,
   getReleaseChannel,
-  getUpdatedElectronVersions,
+  makeRunnable,
   saveLocalVersions,
 } from './versions';
 
@@ -44,6 +44,10 @@ import {
  * @class AppState
  */
 export class AppState {
+  private readonly timeFmt = new Intl.DateTimeFormat([], {
+    timeStyle: 'medium',
+  });
+
   // -- Persisted settings ------------------
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
@@ -277,7 +281,7 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const oldest = semver.parse(getOldestSupportedVersion());
+    const oldest = getOldestSupportedMajor();
 
     const filter = (ver: RunnableVersion) =>
       ver &&
@@ -286,7 +290,7 @@ export class AppState {
         ver.state === VersionState.ready) &&
       (showObsoleteVersions ||
         !oldest ||
-        oldest.compareMain(ver.version) <= 0) &&
+        oldest <= Number.parseInt(ver.version)) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
     return sortVersions(Object.values(versions).filter(filter));
@@ -302,7 +306,11 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      this.addNewVersions(await getUpdatedElectronVersions());
+      this.addNewVersions(
+        (await fetchVersions())
+          .filter((ver) => !(ver.version in this.versions))
+          .map((ver) => makeRunnable(ver)),
+      );
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -626,9 +634,9 @@ export class AppState {
     if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
 
     const entry: OutputEntry = {
-      timestamp: Date.now(),
-      text: strData.trim(),
       isNotPre,
+      text: strData.trim(),
+      timeString: this.timeFmt.format(new Date()),
     };
     ipcRendererManager.send(IpcEvents.OUTPUT_ENTRY, entry);
     this.output.push(entry);

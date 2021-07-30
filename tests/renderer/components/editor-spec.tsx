@@ -112,13 +112,14 @@ describe('Editor component', () => {
     });
 
     it('sets up a listener on focused text editor', async () => {
-      store.editorMosaic.set({ [MAIN_JS]: '// content' });
+      const id = MAIN_JS;
+      store.editorMosaic.set({ [id]: '// content' });
       const wrapper = shallow(
         <Editor
           appState={store as any}
           monaco={monaco}
           monacoOptions={{}}
-          id={MAIN_JS}
+          id={id}
           editorDidMount={() => undefined}
           setFocused={() => undefined}
         />,
@@ -132,6 +133,8 @@ describe('Editor component', () => {
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
+    const id = MAIN_JS;
+    store.editorMosaic.set({ [id]: '// content' });
     const didMount = jest.fn();
 
     store.editorMosaic.set({ [MAIN_JS]: '// content' });
@@ -140,7 +143,7 @@ describe('Editor component', () => {
         appState={store as any}
         monaco={monaco}
         monacoOptions={{}}
-        id={MAIN_JS}
+        id={id}
         editorDidMount={didMount}
         setFocused={() => undefined}
       />,

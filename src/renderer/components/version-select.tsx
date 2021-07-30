@@ -1,7 +1,15 @@
-import { Button, ButtonGroupProps, MenuItem } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroupProps,
+  ContextMenu,
+  Menu,
+  MenuItem,
+} from '@blueprintjs/core';
 import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import semver from 'semver';
 
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
@@ -77,13 +85,51 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
   const q = query.toLowerCase();
 
   return versions
-    .map((version: RunnableVersion) => ({
-      index: version.version.toLowerCase().indexOf(q),
-      version,
-    }))
+    .map((version: RunnableVersion) => {
+      const lowercase = version.version.toLowerCase();
+      return {
+        index: lowercase.indexOf(q),
+        coerced: semver.coerce(lowercase),
+        version,
+      };
+    })
     .filter((item) => item.index !== -1)
-    .sort((a, b) => a.index - b.index)
+    .sort((a, b) => {
+      // If the user is searching for e.g. 'nightly' we
+      // want to sort nightlies by descending major version.
+      if (isNaN(+q)) {
+        if (a.coerced && b.coerced) {
+          return semver.rcompare(a.coerced, b.coerced);
+        }
+      }
+      return a.index - b.index;
+    })
     .map((item) => item.version);
+};
+
+/**
+ * Renders a context menu to copy the current Electron version.
+ *
+ * @param {React.MouseEvent<HTMLButtonElement>} e
+ * @param {string} version the Electron version number to copy.
+ */
+export const renderVersionContextMenu = (
+  e: React.MouseEvent<HTMLButtonElement>,
+  version: string,
+) => {
+  e.preventDefault();
+
+  ContextMenu.show(
+    <Menu>
+      <MenuItem
+        text="Copy Version Number"
+        onClick={() => {
+          clipboard.writeText(version);
+        }}
+      />
+    </Menu>,
+    { left: e.clientX, top: e.clientY },
+  );
 };
 
 /**
@@ -161,6 +207,9 @@ export class VersionSelect extends React.Component<
           className="version-chooser"
           text={`Electron v${version}`}
           icon={getItemIcon(currentVersion)}
+          onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
+            renderVersionContextMenu(e, version);
+          }}
           disabled={!!this.props.disabled}
         />
       </ElectronVersionSelect>
