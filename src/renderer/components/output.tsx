@@ -167,7 +167,6 @@ export class Output extends React.Component<CommandsProps> {
     // adjust `i` here because the value passed in by monaco starts at 1, not 0
     const lineNumbers = (i: number) => timestrs[i - 1] || '';
     editor.updateOptions({ lineNumbers, lineNumbersMinChars });
-    console.log(lineNumbersMinChars);
     editor.revealLine(editor.getScrollHeight());
   }
 
