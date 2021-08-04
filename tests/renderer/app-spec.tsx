@@ -119,23 +119,22 @@ describe('App component', () => {
   });
 
   describe('replaceFiddle()', () => {
+    const editorValues = {
+      [DefaultEditorId.html]: 'html-value',
+      [DefaultEditorId.main]: 'main-value',
+      [DefaultEditorId.renderer]: 'renderer-value',
+    } as const;
+
     it('sets editor values and source info', async () => {
       const { state } = app;
       const setSpy = jest.spyOn(state.editorMosaic, 'set');
-
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [DefaultEditorId.css]: '',
-        [DefaultEditorId.preload]: '',
-      };
 
       await app.replaceFiddle(editorValues, {
         gistId: 'gistId',
         templateName: 'templateName',
         filePath: 'localPath',
       });
+
       expect(setSpy).toHaveBeenCalledWith(editorValues);
       expect(state.gistId).toBe('gistId');
       expect(state.templateName).toBe('templateName');
@@ -147,23 +146,12 @@ describe('App component', () => {
       app.state.localPath = '/fake/path';
 
       app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-      };
 
       await app.replaceFiddle(editorValues, { gistId: 'gistId' });
       expect(app.state.localPath).toBeUndefined();
     });
 
     it('marks the new Fiddle as Saved', async () => {
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-      } as const;
-
       await app.replaceFiddle(editorValues, {
         filePath: 'localPath',
         gistId: 'gistId',
@@ -174,14 +162,10 @@ describe('App component', () => {
 
     it('marks the new Fiddle as Saved with custom editors', async () => {
       const file = 'file.js';
-      const editorValues = {
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-        [DefaultEditorId.renderer]: 'renderer-value',
-        [file]: 'file-value',
-      } as const;
+      const content = '// content';
+      const customValues = { ...editorValues, [file]: content };
 
-      await app.replaceFiddle(editorValues, {
+      await app.replaceFiddle(customValues, {
         filePath: 'localPath',
         gistId: 'gistId',
         templateName: 'templateName',
@@ -217,13 +201,6 @@ describe('App component', () => {
         const setSpy = jest.spyOn(state.editorMosaic, 'set');
 
         state.editorMosaic.isEdited = true;
-
-        const editorValues = {
-          [DefaultEditorId.html]: 'html-value',
-          [DefaultEditorId.main]: 'main-value',
-          [DefaultEditorId.renderer]: 'renderer-value',
-        };
-
         state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
 
         await app.replaceFiddle(editorValues, {
