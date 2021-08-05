@@ -463,34 +463,56 @@ export class AppState {
   }
 
   /**
+   * Private setVersion() helper to test if setVersion(input) would work.
+   *
+   * Returns a RunnableVersion if it would work, or an error string otherwise.
+   */
+  private isVersionUsable(
+    input: string,
+  ): { ver?: RunnableVersion; err?: string } {
+    const ver = this.getVersion(input);
+    if (!ver) {
+      return { err: `Unknown version ${input}` };
+    }
+
+    const { localPath, version } = ver;
+    if (localPath && !fs.existsSync(localPath)) {
+      const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
+      return { err };
+    }
+
+    return { ver };
+  }
+
+  /*
+   * Private setVersion() helper to find a usable fallback version.
+   */
+  private findUsableVersion(): RunnableVersion | undefined {
+    for (const version of this.versionsToShow) {
+      const { ver } = this.isVersionUsable(version.version);
+      if (ver) return ver;
+    }
+    return undefined;
+  }
+
+  /**
    * Select a version of Electron (and download it if necessary).
    *
    * @param {string} input
    * @returns {Promise<void>}
    */
   @action public async setVersion(input: string) {
-    const ver = this.getVersion(input);
+    // make sure we can  use this version
+    const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
-      console.warn(`State: setVersion() got an unknown version ${input}`);
-      await this.setVersion(this.versionsToShow[0].version);
+      console.warn(`setVersion('${input}') failed: ${err}`);
+      this.showErrorDialog(err!);
+      const fallback = this.findUsableVersion();
+      if (fallback) await this.setVersion(fallback.version);
       return;
     }
 
-    const { localPath, version } = ver;
-
-    if (localPath && !fs.existsSync(localPath)) {
-      console.error(
-        `State: setVersion() got a version ${version} with missing binary`,
-      );
-
-      this.showErrorDialog(
-        `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
-      );
-
-      await this.setVersion(this.versionsToShow[0].version);
-      return;
-    }
-
+    const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
     this.version = version;
 
