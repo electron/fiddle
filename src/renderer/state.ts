@@ -488,11 +488,7 @@ export class AppState {
    * Private setVersion() helper to find a usable fallback version.
    */
   private findUsableVersion(): RunnableVersion | undefined {
-    for (const version of this.versionsToShow) {
-      const { ver } = this.isVersionUsable(version.version);
-      if (ver) return ver;
-    }
-    return undefined;
+    return this.versionsToShow.find((ver) => this.isVersionUsable(ver.version));
   }
 
   /**
