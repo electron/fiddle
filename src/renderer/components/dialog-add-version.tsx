@@ -32,6 +32,31 @@ interface AddVersionDialogState {
 }
 
 /**
+ * Build a default name for a local Electron vresion
+ * from its dirname.
+ *
+ * @param {string} dirname
+ * @return {string} human-readable local build name
+ */
+function makeLocalName(folderPath: string) {
+  // take a dirname like '/home/username/electron/gn/main/src/out/testing'
+  // and return something like 'gn/main - testing'
+  const tokens = folderPath.split(path.sep);
+  const buildType = tokens.pop(); // e.g. 'testing' or 'release'
+  const leader = tokens
+    // remove 'src/out/' -- they are in every local build, so make poor names
+    .slice(0, -2)
+    .join(path.sep)
+    // extract about enough for the end result to be about 20 chars
+    .slice(-20 + buildType!.length)
+    // remove any fragment in case the prev slice cut in the middle of a name
+    .split(path.sep)
+    .slice(1)
+    .join(path.sep);
+  return `${leader} - ${buildType}`;
+}
+
+/**
  * The "add version" dialog allows users to add custom builds of Electron.
  *
  * @class AddVersionDialog
@@ -104,12 +129,10 @@ export class AddVersionDialog extends React.Component<
 
     if (!folderPath) return;
 
-    const name = folderPath.slice(-20).split(path.sep).slice(1).join(path.sep);
-
     const toAdd: Version = {
       localPath: folderPath,
       version,
-      name,
+      name: makeLocalName(folderPath),
     };
 
     // swap to old local electron version if the user adds a new one with the same path
