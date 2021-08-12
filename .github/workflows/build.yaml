@@ -28,7 +28,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install
-        run: yarn
+        run: yarn --network-timeout 100000
       - name: lint
         run: yarn lint
       - name: test
