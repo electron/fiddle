@@ -57,7 +57,7 @@ jobs:
           fileName: 'win-certificate.pfx'
           encodedString: ${{ secrets.WINDOWS_CODESIGN_P12 }}
       - name: Install
-        run: yarn
+        run: yarn --network-timeout 100000
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn make --arch=all
