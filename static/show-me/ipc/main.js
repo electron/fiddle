@@ -5,8 +5,8 @@
 // https://electronjs.org/docs/api/ipc-main
 // https://electronjs.org/docs/api/ipc-renderer
 
-const { app, BrowserWindow, ipcMain } = require('electron');
-const path = require('path');
+const { app, BrowserWindow, ipcMain } = require('electron')
+const path = require('path')
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
@@ -15,24 +15,24 @@ app.whenReady().then(() => {
     webPreferences: {
       nodeIntegration: false, // default in Electron >= 5
       contextIsolation: true, // default in Electron >= 12
-      preload: path.join(__dirname, 'preload.js'),
-    },
-  });
+      preload: path.join(__dirname, 'preload.js')
+    }
+  })
 
   ipcMain.on('asynchronous-message', (event, arg) => {
-    console.log(arg); // prints "ping"
-    event.sender.send('asynchronous-reply', 'pong');
-  });
+    console.log(arg) // prints "ping"
+    event.sender.send('asynchronous-reply', 'pong')
+  })
 
   ipcMain.on('synchronous-message', (event, arg) => {
-    console.log(arg); // prints "ping"
-    event.returnValue = 'pong';
-  });
+    console.log(arg) // prints "ping"
+    event.returnValue = 'pong'
+  })
 
   ipcMain.handle('invoke-handle-message', (event, arg) => {
-    console.log(arg);
-    return 'pong';
-  });
+    console.log(arg)
+    return 'pong'
+  })
 
-  mainWindow.loadFile('index.html');
-});
+  mainWindow.loadFile('index.html')
+})

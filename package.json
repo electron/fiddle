@@ -10,7 +10,7 @@
     "less": "node ./tools/lessc.js",
     "lint:style": "stylelint  \"./src/less/*.less\" --fix",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\" --fix",
-    "lint:templates": "standard \"static/show-me/**/*.js\" --fix",
+    "lint:templates": "standard \"static/**/*.js\" --fix",
     "lint:links": "node ./tools/check-links.js",
     "lint": "npm-run-all \"lint:*\"",
     "make": "electron-forge make",
@@ -124,7 +124,7 @@
     "./**/*.{js,ts,tsx}": [
       "eslint --fix"
     ],
-    "./static/show-me/**/*.js": [
+    "./static/**/*.js": [
       "standard --fix"
     ],
     "./src/less/*.less": [
