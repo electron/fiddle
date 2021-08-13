@@ -29,5 +29,10 @@ app.whenReady().then(() => {
     event.returnValue = 'pong';
   });
 
+  ipcMain.handle('invoke-handle-message', (event, arg) => {
+    console.log(arg);
+    return 'pong';
+  });
+
   mainWindow.loadFile('index.html');
 });
