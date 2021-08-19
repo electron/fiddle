@@ -100,6 +100,25 @@ export function getMonacoItems({
       },
     },
     { type: 'separator' },
+    {
+      id: 'font_zoom',
+      label: 'Zoom In Font',
+      click() {
+        const cmd = ['editor.action.fontZoomIn'];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      },
+      accelerator: 'CmdOrCtrl+numadd',
+    },
+    {
+      id: 'font_zoom',
+      label: 'Zoom Out Font',
+      click() {
+        const cmd = ['editor.action.fontZoomOut'];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
+      },
+      accelerator: 'CmdOrCtrl+numsub',
+    },
+    { type: 'separator' },
   ];
 }
 
