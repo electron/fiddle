@@ -412,25 +412,27 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async removeVersion(ver: RunnableVersion) {
-    const { version } = ver;
-
-    if (ver.state !== VersionState.ready) {
-      console.log(`State: Version ${version} already removed, doing nothing`);
-      return;
-    }
+    const { version, state, source } = ver;
 
     if (ver === this.currentElectronVersion) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
 
-    // Actually remove
     console.log(`State: Removing Electron ${version}`);
-    if (ver.source === VersionSource.local) {
-      delete this.versions[version];
-      saveLocalVersions(Object.values(this.versions));
+    if (source === VersionSource.local) {
+      if (version in this.versions) {
+        delete this.versions[version];
+        saveLocalVersions(Object.values(this.versions));
+      } else {
+        console.log(`State: Version ${version} already removed, doing nothing`);
+      }
     } else {
-      await removeBinary(ver);
+      if (state === VersionState.ready) {
+        await removeBinary(ver);
+      } else {
+        console.log(`State: Version ${version} already removed, doing nothing`);
+      }
     }
   }
 
