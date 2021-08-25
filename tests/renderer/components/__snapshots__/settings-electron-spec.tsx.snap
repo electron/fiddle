@@ -272,15 +272,22 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
-              disabled={false}
-              fill={true}
-              icon="cloud-download"
-              loading={false}
-              onClick={[Function]}
-              small={true}
-              text="Download"
-            />
+            <Blueprint3.Tooltip
+              content="Can't remove currently active Electron version (2.0.1)"
+              hoverCloseDelay={0}
+              hoverOpenDelay={100}
+              intent="primary"
+              minimal={false}
+              position="auto"
+              transitionDuration={100}
+            >
+              <Blueprint3.AnchorButton
+                className="disabled-version"
+                disabled={true}
+                icon="cloud-download"
+                text="Download"
+              />
+            </Blueprint3.Tooltip>
           </td>
         </tr>
         <tr
