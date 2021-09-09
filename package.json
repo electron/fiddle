@@ -41,7 +41,7 @@
     "@blueprintjs/select": "^3.15.0",
     "@electron/get": "^1.12.4",
     "@octokit/rest": "^16.43.1",
-    "@sentry/electron": "^2.3.0",
+    "@sentry/electron": "^2.5.3",
     "@types/getos": "^3.0.1",
     "@types/is-running": "^2.1.0",
     "classnames": "^2.2.6",
