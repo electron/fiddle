@@ -8,6 +8,7 @@ import {
   ButtonProps,
   Icon,
   IconName,
+  AnchorButton,
   Tooltip,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
@@ -288,7 +289,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Renders the rows with Electron version, returning an Arary.
+   * Renders the rows with Electron version, returning an Array.
    *
    * @private
    * @returns {Array<JSX.Element>}
@@ -304,7 +305,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Returns a human-readable state indicator for an Electron version
+   * Returns a human-readable state indicator for an Electron version.
    *
    * @param {RunnableVersion} item
    * @returns {JSX.Element}
@@ -333,7 +334,7 @@ export class ElectronSettings extends React.Component<
   }
 
   /**
-   * Renders the action for a single Electron version
+   * Renders the action for a single Electron version.
    *
    * @private
    * @param {string} key
@@ -341,7 +342,7 @@ export class ElectronSettings extends React.Component<
    * @returns {JSX.Element}
    */
   private renderAction(ver: RunnableVersion): JSX.Element {
-    const { state, source } = ver;
+    const { state, source, version } = ver;
     const { appState } = this.props;
     const isLocal = source === VersionSource.local;
     const buttonProps: ButtonProps = {
@@ -373,6 +374,23 @@ export class ElectronSettings extends React.Component<
           isLocal ? appState.removeVersion(ver) : appState.downloadVersion(ver);
         };
         break;
+    }
+
+    if (version === appState.currentElectronVersion.version) {
+      return (
+        <Tooltip
+          position="auto"
+          intent="primary"
+          content={`Can't remove currently active Electron version (${version})`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip>
+      );
     }
 
     return <Button {...buttonProps} type={undefined} />;
