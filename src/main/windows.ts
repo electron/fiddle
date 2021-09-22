@@ -22,6 +22,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
+    show: false,
     webPreferences: {
       webviewTag: false,
       nodeIntegration: true,
