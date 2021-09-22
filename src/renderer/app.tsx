@@ -127,6 +127,7 @@ export class App {
     const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
+    this.setupOfflineListener();
     this.setupThemeListeners();
     this.setupTitleListeners();
     this.setupUnloadListeners();
@@ -218,6 +219,16 @@ export class App {
     } else {
       document.body.classList.remove('bp3-dark');
     }
+  }
+
+  public setupOfflineListener(): void {
+    window.addEventListener('online', async () => {
+      this.state.isOnline = true;
+      this.state.setVersion(this.state.version);
+    });
+    window.addEventListener('offline', () => {
+      this.state.isOnline = false;
+    });
   }
 
   /**
