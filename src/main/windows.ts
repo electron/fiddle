@@ -64,9 +64,9 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindow = null;
   });
 
-  browserWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-    shell.openExternal(url);
+  browserWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
   });
 
   browserWindow.webContents.on('will-navigate', (event, url) => {
