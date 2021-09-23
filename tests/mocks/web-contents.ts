@@ -73,6 +73,7 @@ export class WebContentsMock extends EventEmitter {
   public setSize = jest.fn();
   public setUserAgent = jest.fn();
   public setVisualZoomLevelLimits = jest.fn();
+  public setWindowOpenHandler = jest.fn();
   public setWebRTCIPHandlingPolicy = jest.fn();
   public setZoomFactor = jest.fn();
   public setZoomLevel = jest.fn();
