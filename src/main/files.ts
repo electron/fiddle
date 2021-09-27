@@ -63,8 +63,8 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
  */
 async function isOkToSaveAt(filePath: string): Promise<boolean> {
   return (
-    !fs.existsSync(filePath) ||
-    fs.readdirSync(filePath).filter(isSupportedFile).length === 0 ||
+    !(await fs.pathExists(filePath)) ||
+    (await fs.readdir(filePath)).filter(isSupportedFile).length === 0 ||
     (await confirmFileOverwrite(filePath))
   );
 }
