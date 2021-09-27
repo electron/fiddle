@@ -196,6 +196,13 @@ export class EditorMosaic {
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
   }
 
+  /** Remove the specified file and its editor */
+  @action public remove(id: EditorId) {
+    this.editors.delete(id);
+    this.backups.delete(id);
+    this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
+  }
+
   /** Wire up a newly-mounted Monaco editor */
   @action public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
