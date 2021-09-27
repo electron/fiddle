@@ -34,6 +34,7 @@ describe('windows', () => {
       minWidth: 600,
       acceptFirstMouse: true,
       backgroundColor: '#1d2427',
+      show: false,
       titleBarStyle: undefined,
       webPreferences: {
         webviewTag: false,

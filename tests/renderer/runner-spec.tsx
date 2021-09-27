@@ -434,32 +434,20 @@ describe('Runner component', () => {
   });
 
   describe('installModulesForEditor()', () => {
-    it('does not attempt installation if npm is not installed', async () => {
-      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
+    it.each([
+      ['does not attempt installation if npm is not installed', false, 0],
+      ['does attempt installation if npm is installed', true, 1],
+    ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
       (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
+      (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(haveNpm);
 
-      await instance.installModulesForEditor(
-        {
-          [MAIN_JS]: "const a = require('say')",
-        },
-        { dir: '/fake/path', packageManager: 'npm' },
-      );
+      const editorValues = { [MAIN_JS]: "const a = require('say');" } as const;
+      await instance.installModulesForEditor(editorValues, {
+        dir: '/fake/path',
+        packageManager: 'npm',
+      });
 
-      expect(installModules).toHaveBeenCalledTimes(0);
-    });
-
-    it('does attempt installation if npm is installed', async () => {
-      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(true);
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
-
-      await instance.installModulesForEditor(
-        {
-          [MAIN_JS]: "const a = require('say')",
-        },
-        { dir: '/fake/path', packageManager: 'npm' },
-      );
-
-      expect(installModules).toHaveBeenCalledTimes(1);
+      expect(installModules).toHaveBeenCalledTimes(numCalls);
     });
   });
 });

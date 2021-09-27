@@ -1,10 +1,12 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { MAIN_JS } from '../../../src/interfaces';
+import { EditorId, MAIN_JS } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
 
 import { StateMock } from '../../mocks/mocks';
+
+type DidMount = () => void;
 
 describe('Editor component', () => {
   let store: StateMock;
@@ -15,95 +17,52 @@ describe('Editor component', () => {
     ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
-  it('renders the editor container', () => {
+  function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
     const wrapper = shallow(
       <Editor
         appState={store as any}
+        editorDidMount={didMount}
+        id={id}
         monaco={monaco}
         monacoOptions={{}}
-        id={MAIN_JS}
         setFocused={() => undefined}
       />,
     );
+    const instance = wrapper.instance();
+    return { wrapper, instance: instance as any };
+  }
 
+  it('renders the editor container', () => {
+    const { wrapper } = createEditor(MAIN_JS);
     expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
   });
 
-  it('correctly sets the language', () => {
-    let wrapper = shallow(
-      <Editor
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={MAIN_JS}
-        setFocused={() => undefined}
-      />,
-    );
-
-    expect((wrapper.instance() as any).language).toBe('javascript');
-
-    wrapper = shallow(
-      <Editor
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={'index.html'}
-        setFocused={() => undefined}
-      />,
-    );
-
-    expect((wrapper.instance() as any).language).toBe('html');
-
-    wrapper = shallow(
-      <Editor
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={'foo.css'}
-        setFocused={() => undefined}
-      />,
-    );
-
-    expect((wrapper.instance() as any).language).toBe('css');
+  describe('correctly sets the language', () => {
+    it.each([
+      ['for javascript', 'file.js', 'javascript'],
+      ['for html', 'file.html', 'html'],
+      ['for css', 'file.css', 'css'],
+    ])('%s', (_: unknown, filename: EditorId, language: string) => {
+      const { instance } = createEditor(filename);
+      expect(instance.language).toBe(language);
+    });
   });
 
   it('denies updates', () => {
-    const wrapper = shallow(
-      <Editor
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={MAIN_JS}
-        setFocused={() => undefined}
-      />,
-    );
-
-    expect(
-      (wrapper as any)
-        .instance()
-        .shouldComponentUpdate(null as any, null as any, null as any),
-    ).toBe(false);
+    const { instance } = createEditor(MAIN_JS);
+    expect(instance.shouldComponentUpdate(null, null, null)).toBe(false);
   });
 
   describe('initMonaco()', async () => {
     it('calls editorMosaic.addEditor', async () => {
-      const didMount = jest.fn();
+      const id = MAIN_JS;
       const { editorMosaic } = store;
+      editorMosaic.set({ [id]: '// content' });
       const addEditorSpy = jest.spyOn(editorMosaic, 'addEditor');
 
-      const id = MAIN_JS;
-      editorMosaic.set({ [MAIN_JS]: '// content' });
-      const wrapper = shallow(
-        <Editor
-          appState={store as any}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={id}
-          editorDidMount={didMount}
-          setFocused={() => undefined}
-        />,
-      );
-      const instance: any = wrapper.instance();
+      const didMount = jest.fn();
+      const { instance } = createEditor(id, didMount);
+
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
 
@@ -114,17 +73,7 @@ describe('Editor component', () => {
     it('sets up a listener on focused text editor', async () => {
       const id = MAIN_JS;
       store.editorMosaic.set({ [id]: '// content' });
-      const wrapper = shallow(
-        <Editor
-          appState={store as any}
-          monaco={monaco}
-          monacoOptions={{}}
-          id={id}
-          editorDidMount={() => undefined}
-          setFocused={() => undefined}
-        />,
-      );
-      const instance: any = wrapper.instance();
+      const { instance } = createEditor(id);
 
       instance.containerRef.current = 'ref';
       await instance.initMonaco();
@@ -136,19 +85,7 @@ describe('Editor component', () => {
     const id = MAIN_JS;
     store.editorMosaic.set({ [id]: '// content' });
     const didMount = jest.fn();
-
-    store.editorMosaic.set({ [MAIN_JS]: '// content' });
-    const wrapper = shallow(
-      <Editor
-        appState={store as any}
-        monaco={monaco}
-        monacoOptions={{}}
-        id={id}
-        editorDidMount={didMount}
-        setFocused={() => undefined}
-      />,
-    );
-    const instance: any = wrapper.instance();
+    const { instance } = createEditor(id, didMount);
 
     instance.containerRef.current = 'ref';
     await instance.initMonaco();

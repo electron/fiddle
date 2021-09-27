@@ -1,8 +1,8 @@
 import * as semver from 'semver';
 
-import { EditorValues } from '../../src/interfaces';
-import { createEditorValues } from '../mocks/editor-values';
+import { MAIN_JS } from '../../src/interfaces';
 import { getForgeVersion, getPackageJson } from '../../src/utils/get-package';
+import { StateMock } from '../mocks/mocks';
 
 jest.mock('../../src/utils/get-username', () => ({
   getUsername: () => 'test-user',
@@ -12,129 +12,63 @@ jest.mock('../../src/renderer/npm', () => ({
   findModulesInEditors: () => ['say'],
 }));
 
-describe('getForgeVersion', () => {
-  it('returns a semver-compatible version constraint', () => {
-    const version = getForgeVersion();
-    expect(typeof version).toEqual('string');
-    expect(version).toBeTruthy();
-    expect(semver.validRange(version)).toBeTruthy();
-  });
-});
-
 describe('get-package', () => {
-  let editorValues: EditorValues;
-
-  beforeEach(() => {
-    editorValues = createEditorValues();
+  describe('getForgeVersion', () => {
+    it('returns a semver-compatible version constraint', () => {
+      const version = getForgeVersion();
+      expect(typeof version).toEqual('string');
+      expect(version).toBeTruthy();
+      expect(semver.validRange(version)).toBeTruthy();
+    });
   });
 
-  it('getPackageJson() returns a default package.json', async () => {
-    const result = await getPackageJson(
-      {
-        getName: () => 'test-app',
-      } as any,
-      editorValues,
-    );
+  describe('getPackageJson()', () => {
+    const appState = new StateMock();
+    const defaultName = 'test-app' as const;
 
-    expect(result).toEqual(
-      JSON.stringify(
-        {
-          name: 'test-app',
-          productName: 'test-app',
-          description: 'My Electron application description',
-          keywords: [],
-          main: './main.js',
-          version: '1.0.0',
-          author: 'test-user',
-          scripts: {
-            start: 'electron .',
-          },
-          dependencies: {
-            say: '*',
-          },
-          devDependencies: {},
-        },
-        undefined,
-        2,
-      ),
-    );
-  });
+    const editorValues = {
+      [MAIN_JS]: `const say = require('say')`,
+    } as const;
 
-  it('getPackageJson() includes electron-nightly if needed', async () => {
-    const result = await getPackageJson(
-      {
-        getName: () => 'test-app',
-        version: '1.0.0-nightly.123456789',
-      } as any,
-      editorValues,
-      {
-        includeElectron: true,
-        includeDependencies: true,
+    const defaultPackage = {
+      name: defaultName,
+      productName: defaultName,
+      description: 'My Electron application description',
+      keywords: [],
+      main: `./${MAIN_JS}`,
+      version: '1.0.0',
+      author: 'test-user',
+      scripts: {
+        start: 'electron .',
       },
-    );
-
-    expect(result).toEqual(
-      JSON.stringify(
-        {
-          name: 'test-app',
-          productName: 'test-app',
-          description: 'My Electron application description',
-          keywords: [],
-          main: './main.js',
-          version: '1.0.0',
-          author: 'test-user',
-          scripts: {
-            start: 'electron .',
-          },
-          dependencies: {
-            say: '*',
-          },
-          devDependencies: {
-            'electron-nightly': '1.0.0-nightly.123456789',
-          },
-        },
-        undefined,
-        2,
-      ),
-    );
-  });
-
-  it('getPackageJson() includes electron if needed', async () => {
-    const result = await getPackageJson(
-      {
-        getName: () => 'test-app',
-        version: '1.0.0',
-      } as any,
-      editorValues,
-      {
-        includeElectron: true,
-        includeDependencies: true,
+      dependencies: {
+        say: '*',
       },
-    );
+      devDependencies: {},
+    } as const;
 
-    expect(result).toEqual(
-      JSON.stringify(
-        {
-          name: 'test-app',
-          productName: 'test-app',
-          description: 'My Electron application description',
-          keywords: [],
-          main: './main.js',
-          version: '1.0.0',
-          author: 'test-user',
-          scripts: {
-            start: 'electron .',
-          },
-          dependencies: {
-            say: '*',
-          },
-          devDependencies: {
-            electron: '1.0.0',
-          },
-        },
-        undefined,
-        2,
-      ),
-    );
+    function buildExpectedPackage(opts: Record<string, unknown> = {}) {
+      return JSON.stringify({ ...defaultPackage, ...opts }, null, 2);
+    }
+
+    it('getPackageJson() returns a default package.json', async () => {
+      const name = defaultName;
+      const appState = { getName: () => name };
+      const result = await getPackageJson(appState as any, editorValues);
+      expect(result).toEqual(buildExpectedPackage());
+    });
+
+    it.each([
+      ['can include electron', '13.0.0', 'electron'],
+      ['can include electron-nightly', '13.0.0-nightly.12', 'electron-nightly'],
+    ])('%s', async (_, version: string, electronPkg: string) => {
+      const name = defaultName;
+      appState.getName.mockReturnValue(name);
+      appState.version = version;
+
+      const result = await getPackageJson(appState as any, editorValues);
+      const devDependencies = { [electronPkg]: version };
+      expect(result).toEqual(buildExpectedPackage({ name, devDependencies }));
+    });
   });
 });
