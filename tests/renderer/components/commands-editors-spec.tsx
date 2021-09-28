@@ -185,6 +185,6 @@ describe('EditorDropdown component', () => {
     const dropdown = wrapper.instance() as EditorDropdown;
 
     dropdown.removeFile({ currentTarget: { id: file } } as any);
-    expect(editorMosaic.files.get(file)).toBe(EditorPresence.Hidden);
+    expect(editorMosaic.files.has(file)).toBe(false);
   });
 });

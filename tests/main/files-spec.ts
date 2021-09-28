@@ -17,8 +17,8 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 
 jest.mock('../../src/main/windows');
 jest.mock('fs-extra', () => ({
-  existsSync: jest.fn(),
-  readdirSync: jest.fn(),
+  pathExists: jest.fn(),
+  readdir: jest.fn(),
 }));
 
 const mockTarget = {
@@ -108,15 +108,15 @@ describe('files', () => {
     it('handles not getting a path returned', async () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValueOnce([]);
       await showSaveDialog();
-      expect(fs.existsSync).toHaveBeenCalledTimes(0);
+      expect(fs.pathExists).toHaveBeenCalledTimes(0);
     });
 
     it('ensures that the target is empty on save', async () => {
       const consent = true;
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
       (dialog.showMessageBox as jest.Mock).mockResolvedValue(consent);
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdirSync as jest.Mock).mockReturnValue([MAIN_JS]);
+      (fs.pathExists as jest.Mock).mockReturnValue(true);
+      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
       ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
 
       await showSaveDialog();
@@ -130,8 +130,8 @@ describe('files', () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
       (dialog.showMessageBox as jest.Mock).mockResolvedValue(consent);
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdirSync as jest.Mock).mockReturnValue([MAIN_JS]);
+      (fs.pathExists as jest.Mock).mockReturnValue(true);
+      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
 
       await showSaveDialog();
 
@@ -144,8 +144,8 @@ describe('files', () => {
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
       (dialog.showMessageBox as jest.Mock).mockRejectedValue(err);
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdirSync as jest.Mock).mockReturnValue([MAIN_JS]);
+      (fs.pathExists as jest.Mock).mockReturnValue(true);
+      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
 
       let caughtError: unknown;
       try {
