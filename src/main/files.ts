@@ -1,7 +1,6 @@
 import { dialog, app } from 'electron';
 import * as fs from 'fs-extra';
-import * as path from 'path';
-import { DefaultEditorId } from '../interfaces';
+import { isSupportedFile } from '../utils/editor-utils';
 
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
@@ -51,31 +50,23 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
   console.log(`Asked to save to ${filePaths[0]}`);
 
   // Let's confirm real quick if we want this
-  if (await ensureSaveTargetEmpty(filePaths[0])) {
+  if (await isOkToSaveAt(filePaths[0])) {
     ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
   }
 }
 
 /**
- * Ensures that a folder designated for saving is empty
+ * Confirm it's OK to save files in `folder`
  *
  * @param {string} filePath
  * @returns {Promise<boolean>}
  */
-async function ensureSaveTargetEmpty(filePath: string): Promise<boolean> {
-  const targetPaths = Object.values(DefaultEditorId).map((filename) =>
-    path.join(filePath, filename),
+async function isOkToSaveAt(filePath: string): Promise<boolean> {
+  return (
+    !(await fs.pathExists(filePath)) ||
+    (await fs.readdir(filePath)).filter(isSupportedFile).length === 0 ||
+    (await confirmFileOverwrite(filePath))
   );
-
-  let noFilesOrOverwriteGranted = true;
-
-  for (const targetPath of targetPaths) {
-    if (fs.existsSync(targetPath) && noFilesOrOverwriteGranted) {
-      noFilesOrOverwriteGranted = await confirmFileOverwrite(targetPath);
-    }
-  }
-
-  return noFilesOrOverwriteGranted;
 }
 
 /**

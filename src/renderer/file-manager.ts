@@ -63,14 +63,13 @@ export class FileManager {
    */
   public async openFiddle(filePath: string) {
     const { app } = window.ElectronFiddle;
-    const { verifyCreateCustomEditor } = app.remoteLoader;
 
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
     for (const [name, value] of Object.entries(await readFiddle(filePath))) {
-      if (isKnownFile(name) || (await verifyCreateCustomEditor(name))) {
+      if (isKnownFile(name) || (await app.remoteLoader.confirmAddFile(name))) {
         editorValues[name] = value;
       }
     }
@@ -138,12 +137,7 @@ export class FileManager {
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await app.getEditorValues(pOptions);
 
-    let output: Files = new Map();
-
-    // Get values for all editors.
-    for (const filename in values) {
-      output.set(filename, values[filename]!);
-    }
+    let output: Files = new Map(Object.entries(values));
 
     output.set(PACKAGE_NAME, values[PACKAGE_NAME]!);
 

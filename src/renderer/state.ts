@@ -574,11 +574,11 @@ export class AppState {
     return confirm ? input : undefined;
   }
 
-  @action public async showConfirmDialog(opts: {
+  @action public showConfirmDialog = async (opts: {
     cancel?: string;
     label: string | JSX.Element;
     ok: string;
-  }): Promise<boolean> {
+  }): Promise<boolean> => {
     const { confirm } = await this.showGenericDialog({
       ...opts,
       cancel: opts.cancel || 'Cancel',
@@ -586,7 +586,7 @@ export class AppState {
       type: GenericDialogType.confirm,
     });
     return confirm;
-  }
+  };
 
   @action public async showInfoDialog(
     label: string | JSX.Element,

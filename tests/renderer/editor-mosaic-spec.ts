@@ -1,10 +1,5 @@
 import { reaction } from 'mobx';
-import {
-  DefaultEditorId,
-  EditorId,
-  EditorValues,
-  MAIN_JS,
-} from '../../src/interfaces';
+import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 import {
@@ -191,16 +186,6 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('removeCustomMosaic()', () => {
-    it('removes a given custom mosaic', () => {
-      const file = 'file.js';
-      editorMosaic.customMosaics = [file];
-
-      editorMosaic.removeCustomMosaic(file);
-      expect(editorMosaic.customMosaics).toEqual([]);
-    });
-  });
-
   describe('resetLayout()', () => {
     it('resets editors to their original arrangement', () => {
       const serializeState = () => [...editorMosaic.files.entries()];
@@ -278,15 +263,9 @@ describe('EditorMosaic', () => {
     });
 
     it('does not set a value if none passed in', () => {
-      const id = DefaultEditorId.renderer;
-      const oldValue = editorMosaic.value(id);
-
-      editorMosaic.set({
-        [DefaultEditorId.html]: 'html-value',
-        [DefaultEditorId.main]: 'main-value',
-      });
-
-      expect(editorMosaic.value(id)).toBe(oldValue);
+      const id = MAIN_JS;
+      editorMosaic.set({ [id]: '// content' });
+      expect(editorMosaic.files.has('some-file.js')).toBe(false);
     });
 
     describe('reuses existing editors', () => {
@@ -455,8 +434,8 @@ describe('EditorMosaic', () => {
 
   describe('layout', () => {
     it('layout() calls editor.layout() only once', async () => {
-      const id = DefaultEditorId.html;
-      const content = '<!-- content -->';
+      const id = MAIN_JS;
+      const content = '// content';
       const editor = new MonacoEditorMock();
       editorMosaic.set({ [id]: content });
       await editorMosaic.addEditor(id, editor as any);
@@ -474,7 +453,7 @@ describe('EditorMosaic', () => {
   describe('disposeLayoutAutorun()', () => {
     it('automatically updates the layout when the mosaic arrangement changes', () => {
       const spy = jest.spyOn(editorMosaic, 'layout');
-      editorMosaic.mosaic = DefaultEditorId.main;
+      editorMosaic.mosaic = MAIN_JS;
       expect(spy).toHaveBeenCalledTimes(1);
       spy.mockRestore();
     });

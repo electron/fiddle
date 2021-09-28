@@ -13,14 +13,13 @@ import * as React from 'react';
 
 import { when } from 'mobx';
 import {
-  DEFAULT_EDITORS,
   EditorValues,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
-import { getEmptyContent } from '../../utils/editor-utils';
+import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -409,9 +408,11 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const ids = [...DEFAULT_EDITORS, ...Object.keys(values)];
+    values = ensureRequiredFiles(values);
     return Object.fromEntries(
-      ids.map((id) => [id, { content: values[id] || getEmptyContent(id) }]),
+      Object.entries(values)
+        .filter(([, content]) => Boolean(content))
+        .map(([id, content]) => [id, { content }]),
     );
   };
 }

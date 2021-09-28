@@ -5,7 +5,7 @@ import { Response } from 'cross-fetch';
 
 let fakeUserData: tmp.DirResult | null;
 
-import { DefaultEditorId } from '../../src/interfaces';
+import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { getTemplate, getTestTemplate } from '../../src/renderer/content';
 
 jest.unmock('fs-extra');
@@ -84,7 +84,7 @@ describe('content', () => {
     });
   });
 
-  describe('getTempalte()', () => {
+  describe('getTemplate()', () => {
     beforeEach(() => {
       // @ts-ignore: force 'any'; fetch's param type is private / inaccessible
       jest.spyOn(global, 'fetch').mockImplementation(fetchFromFilesystem);
@@ -99,40 +99,28 @@ describe('content', () => {
       expect(prom1).toEqual(prom2);
     });
 
-    it.each([
-      DefaultEditorId.html,
-      DefaultEditorId.renderer,
-      DefaultEditorId.main,
-    ])('returns content for %p', async (id) => {
+    function expectSaneContent(values: EditorValues) {
+      expect(values[MAIN_JS]).toMatch('app.whenReady');
+    }
+
+    it('returns content', async () => {
       const version = VERSION_IN_FIXTURES;
-      const values = await getTemplate(version);
-      expect(values[id]).toBeTruthy();
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns fallback content for an unparsable version', async () => {
       const version = 'beep';
-      const values = await getTemplate(version);
-      expect(values[DefaultEditorId.main]).toBeTruthy();
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns fallback content for an non-existent version', async () => {
       const version = '999.0.0-beta.1';
-      const values = await getTemplate(version);
-      expect(values[DefaultEditorId.main]).toBeTruthy();
-    });
-
-    it('downloads and returns content for known versions', async () => {
-      const version = VERSION_IN_FIXTURES;
-      const values = await getTemplate(version);
-      expect(lastResponse).toMatchObject({ status: 200 });
-      expect(values[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('provides fallback content if downloads fail', async () => {
       const version = VERSION_NOT_IN_FIXTURES;
-      const content = await getTemplate(version);
-      expect(lastResponse).toMatchObject({ status: 404 });
-      expect(content[DefaultEditorId.html]).toMatch(/^<!DOCTYPE html>/);
+      expectSaneContent(await getTemplate(version));
     });
 
     it('returns the same content when called multiple times', async () => {
@@ -143,6 +131,13 @@ describe('content', () => {
       for (let i = 0; i < numTries; ++i) {
         expect(await getTemplate(curVer)).toEqual(expected);
       }
+    });
+
+    it('returns the same promise if the work is already pending', () => {
+      const version = VERSION_IN_FIXTURES;
+      const a = getTemplate(version);
+      const b = getTemplate(version);
+      expect(a).toBe(b);
     });
   });
 });

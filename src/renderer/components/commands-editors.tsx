@@ -10,9 +10,9 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 
 import { AppState } from '../state';
-import { DEFAULT_EDITORS, EditorId } from '../../interfaces';
+import { EditorId } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
-import { getEditorTitle } from '../../utils/editor-utils';
+import { getEditorTitle, isRequiredFile } from '../../utils/editor-utils';
 
 interface EditorDropdownState {
   value: string;
@@ -35,10 +35,6 @@ export class EditorDropdown extends React.Component<
 > {
   constructor(props: EditorDropdownProps) {
     super(props);
-
-    this.onItemClick = this.onItemClick.bind(this);
-    this.addCustomEditor = this.addCustomEditor.bind(this);
-    this.removeCustomEditor = this.removeCustomEditor.bind(this);
   }
 
   public render() {
@@ -62,11 +58,12 @@ export class EditorDropdown extends React.Component<
     const { files, numVisible } = editorMosaic;
 
     for (const [id, presence] of files) {
-      const visible = presence !== EditorPresence.Hidden;
-      const icon = visible ? 'eye-open' : 'eye-off';
+      const fileIsVisible = presence !== EditorPresence.Hidden;
+      const icon = fileIsVisible ? 'eye-open' : 'eye-off';
       const title = getEditorTitle(id);
 
-      if (!DEFAULT_EDITORS.includes(id as any)) {
+      if (isRequiredFile(id)) {
+        // Can't remove a required file.
         result.push(
           <MenuItem
             icon={icon}
@@ -75,15 +72,8 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={visible && numVisible < 2}
-          >
-            <MenuItem
-              icon={'cross'}
-              id={id}
-              onClick={this.removeCustomEditor}
-              text={'Remove'}
-            />
-          </MenuItem>,
+            disabled={fileIsVisible && numVisible < 2}
+          />,
         );
       } else {
         result.push(
@@ -94,20 +84,27 @@ export class EditorDropdown extends React.Component<
             id={id}
             onClick={this.onItemClick}
             // Can't hide last editor panel.
-            disabled={visible && numVisible < 2}
-          />,
+            disabled={fileIsVisible && numVisible < 2}
+          >
+            <MenuItem
+              icon={'cross'}
+              id={id}
+              onClick={this.removeFile}
+              text={'Remove'}
+            />
+          </MenuItem>,
         );
       }
     }
 
     result.push(
-      <React.Fragment key={'fragment-custom-editor'}>
+      <React.Fragment key={'fragment-add-new-file'}>
         <MenuDivider />
         <MenuItem
           icon="plus"
-          key="add-custom-editor"
-          text="Add Custom Editor"
-          onClick={this.addCustomEditor}
+          key="add-new-file"
+          text="Add New File"
+          onClick={this.addNewFile}
         />
       </React.Fragment>,
     );
@@ -127,11 +124,11 @@ export class EditorDropdown extends React.Component<
     return result;
   }
 
-  public async addCustomEditor() {
+  public addNewFile = async () => {
     const { appState } = this.props;
 
     const filename = await appState.showInputDialog({
-      label: 'Enter a filename for your custom editor',
+      label: 'Enter a name for your new file',
       ok: 'Create',
       placeholder: 'file.js',
     });
@@ -143,24 +140,22 @@ export class EditorDropdown extends React.Component<
       const { editorMosaic } = appState;
       editorMosaic.addNewFile(id);
       editorMosaic.show(id);
-      editorMosaic.customMosaics.push(id);
     } catch (error) {
       appState.showErrorDialog(error.message);
     }
-  }
+  };
 
-  public async removeCustomEditor(event: React.MouseEvent) {
+  public removeFile = (event: React.MouseEvent) => {
     const { id } = event.currentTarget;
     const { editorMosaic } = this.props.appState;
 
-    console.log(`EditorDropdown: Removing custom editor ${id}`);
-    editorMosaic.removeCustomMosaic(id as EditorId);
-  }
+    editorMosaic.remove(id as EditorId);
+  };
 
-  public onItemClick(event: React.MouseEvent) {
+  public onItemClick = (event: React.MouseEvent) => {
     const { id } = event.currentTarget;
     const { editorMosaic } = this.props.appState;
 
     editorMosaic.toggle(id as EditorId);
-  }
+  };
 }
