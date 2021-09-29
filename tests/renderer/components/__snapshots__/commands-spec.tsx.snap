@@ -25,9 +25,6 @@ exports[`Commands component renders 1`] = `
         icon="console"
         text="Console"
       />
-      <EditorDropdown
-        appState={"default StateMock"}
-      />
     </Blueprint3.ControlGroup>
   </div>
   <div>

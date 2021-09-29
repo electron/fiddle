@@ -3,6 +3,7 @@ import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
 import { Editors } from './editors';
+import { SidebarFileTree } from './sidebar-file-tree';
 import { Outputs } from './outputs';
 
 interface WrapperProps {
@@ -13,7 +14,7 @@ interface WrapperState {
   mosaic: MosaicNode<WrapperEditorId>;
 }
 
-export type WrapperEditorId = 'output' | 'editors';
+export type WrapperEditorId = 'output' | 'editors' | 'filetree';
 
 export class OutputEditorsWrapper extends React.Component<
   WrapperProps,
@@ -22,6 +23,7 @@ export class OutputEditorsWrapper extends React.Component<
   private MOSAIC_ELEMENTS = {
     output: <Outputs appState={this.props.appState} />,
     editors: <Editors appState={this.props.appState} />,
+    filetree: <SidebarFileTree appState={this.props.appState} />,
   };
 
   constructor(props: any) {
@@ -30,7 +32,12 @@ export class OutputEditorsWrapper extends React.Component<
       mosaic: {
         direction: 'column',
         first: 'output',
-        second: 'editors',
+        second: {
+          direction: 'row',
+          first: 'filetree',
+          second: 'editors',
+          splitPercentage: 25,
+        },
         splitPercentage: 25,
       },
     };

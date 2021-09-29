@@ -8,7 +8,7 @@ exports[`renderNonIdealState() renders a non-ideal state 1`] = `
       text="Reset editors"
     />
   }
-  description="You have closed all editors. You can open them again with the button below or the \\"Editors\\" button above!"
+  description="You have closed all editors. You can open them again with the button below or in the sidebar menu!"
   icon="applications"
 />
 `;
