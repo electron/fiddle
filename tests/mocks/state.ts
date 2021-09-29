@@ -37,6 +37,7 @@ export class StateMock {
   @observable public isEnablingElectronLogging = false;
   @observable public isGenericDialogShowing = false;
   @observable public isInstallingModules = false;
+  @observable public isOnline = true;
   @observable public isQuitting = false;
   @observable public isRunning = false;
   @observable public isSettingsShowing = false;
