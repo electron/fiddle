@@ -171,14 +171,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   ): JSX.Element {
     const { appState } = this.props;
 
-    // only show toolbar controls if we have more than 1 visible editor
-    const toolbarControlsMaybe = appState.editorMosaic.numVisible > 1 && (
-      <>
-        <MaximizeButton id={id} appState={appState} />
-        <RemoveButton id={id} appState={appState} />
-      </>
-    );
-
     return (
       <div>
         {/* Left */}
@@ -188,7 +180,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {/* Middle */}
         <div />
         {/* Right */}
-        <div className="mosaic-controls">{toolbarControlsMaybe}</div>
+        <div className="mosaic-controls">
+          <MaximizeButton id={id} appState={appState} />
+          <RemoveButton id={id} appState={appState} />
+        </div>
       </div>
     );
   }
