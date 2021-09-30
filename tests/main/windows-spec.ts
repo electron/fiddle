@@ -28,7 +28,7 @@ describe('windows', () => {
 
   describe('getMainWindowOptions()', () => {
     const expectedBase = {
-      width: 1200,
+      width: 1400,
       height: 900,
       minHeight: 600,
       minWidth: 600,

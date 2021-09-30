@@ -36,7 +36,7 @@ export class OutputEditorsWrapper extends React.Component<
           direction: 'row',
           first: 'filetree',
           second: 'editors',
-          splitPercentage: 25,
+          splitPercentage: 15,
         },
         splitPercentage: 25,
       },

@@ -15,7 +15,7 @@ export let browserWindows: Array<BrowserWindow | null> = [];
  */
 export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions {
   return {
-    width: 1200,
+    width: 1400,
     height: 900,
     minHeight: 600,
     minWidth: 600,
