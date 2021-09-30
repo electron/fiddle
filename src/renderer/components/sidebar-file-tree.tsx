@@ -13,6 +13,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import { EditorId } from '../../interfaces';
+import { isRequiredFile } from '../../utils/editor-utils';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
 
@@ -59,6 +60,7 @@ export class SidebarFileTree extends React.Component<
               content={
                 <Menu>
                   <MenuItem
+                    disabled={isRequiredFile(editorId)}
                     icon="remove"
                     text="Delete"
                     intent="danger"

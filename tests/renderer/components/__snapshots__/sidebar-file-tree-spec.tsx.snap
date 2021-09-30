@@ -54,7 +54,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
-                      disabled={false}
+                      disabled={true}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -277,7 +277,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
-                      disabled={false}
+                      disabled={true}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -482,7 +482,7 @@ exports[`SidebarFileTree component renders 1`] = `
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
-                      disabled={false}
+                      disabled={true}
                       icon="remove"
                       intent="danger"
                       multiline={false}
