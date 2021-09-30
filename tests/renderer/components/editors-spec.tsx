@@ -102,16 +102,6 @@ describe('Editors component', () => {
     expect(toolbar).toMatchSnapshot();
   });
 
-  it('does not render toolbar controls if only one editor exists', () => {
-    const id = MAIN_JS;
-    editorMosaic.set({ [id]: '// content' });
-
-    const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
-    const toolbar = instance.renderToolbar({ title: id } as any, id);
-    expect(toolbar).toMatchSnapshot();
-  });
-
   it('onChange() updates the mosaic arrangement in the appState', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;

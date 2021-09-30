@@ -1,19 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Editors component does not render toolbar controls if only one editor exists 1`] = `
-<div>
-  <div>
-    <h5>
-      main.js
-    </h5>
-  </div>
-  <div />
-  <div
-    className="mosaic-controls"
-  />
-</div>
-`;
-
 exports[`Editors component renders 1`] = `
 <div
   className="focused__undefined mosaic mosaic-drop-target"
@@ -911,96 +897,94 @@ exports[`Editors component renders a toolbar 1`] = `
   <div
     className="mosaic-controls"
   >
-    <React.Fragment>
-      <MaximizeButton
-        appState={
-          Object {
-            "editorMosaic": Object {
-              "backups": Object {
-                "index.html": Object {
-                  "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
-                },
-                "main.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
-                },
-                "preload.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
-                },
-                "renderer.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
-                },
-                "styles.css": Object {
-                  "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
-                },
+    <MaximizeButton
+      appState={
+        Object {
+          "editorMosaic": Object {
+            "backups": Object {
+              "index.html": Object {
+                "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
               },
-              "layoutDebounce": 25,
-              "mosaic": Object {
-                "direction": "row",
-                "first": Object {
-                  "direction": "column",
-                  "first": "main.js",
-                  "second": "renderer.js",
-                },
+              "main.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
+              },
+              "preload.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
+              },
+              "renderer.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
+              },
+              "styles.css": Object {
+                "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
+              },
+            },
+            "layoutDebounce": 25,
+            "mosaic": Object {
+              "direction": "row",
+              "first": Object {
+                "direction": "column",
+                "first": "main.js",
+                "second": "renderer.js",
+              },
+              "second": Object {
+                "direction": "column",
+                "first": "index.html",
                 "second": Object {
                   "direction": "column",
-                  "first": "index.html",
-                  "second": Object {
-                    "direction": "column",
-                    "first": "preload.js",
-                    "second": "styles.css",
-                  },
+                  "first": "preload.js",
+                  "second": "styles.css",
                 },
               },
             },
-          }
+          },
         }
-        id="main.js"
-      />
-      <RemoveButton
-        appState={
-          Object {
-            "editorMosaic": Object {
-              "backups": Object {
-                "index.html": Object {
-                  "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
-                },
-                "main.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
-                },
-                "preload.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
-                },
-                "renderer.js": Object {
-                  "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
-                },
-                "styles.css": Object {
-                  "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
-                },
+      }
+      id="main.js"
+    />
+    <RemoveButton
+      appState={
+        Object {
+          "editorMosaic": Object {
+            "backups": Object {
+              "index.html": Object {
+                "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
               },
-              "layoutDebounce": 25,
-              "mosaic": Object {
-                "direction": "row",
-                "first": Object {
-                  "direction": "column",
-                  "first": "main.js",
-                  "second": "renderer.js",
-                },
+              "main.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
+              },
+              "preload.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
+              },
+              "renderer.js": Object {
+                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
+              },
+              "styles.css": Object {
+                "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
+              },
+            },
+            "layoutDebounce": 25,
+            "mosaic": Object {
+              "direction": "row",
+              "first": Object {
+                "direction": "column",
+                "first": "main.js",
+                "second": "renderer.js",
+              },
+              "second": Object {
+                "direction": "column",
+                "first": "index.html",
                 "second": Object {
                   "direction": "column",
-                  "first": "index.html",
-                  "second": Object {
-                    "direction": "column",
-                    "first": "preload.js",
-                    "second": "styles.css",
-                  },
+                  "first": "preload.js",
+                  "second": "styles.css",
                 },
               },
             },
-          }
+          },
         }
-        id="main.js"
-      />
-    </React.Fragment>
+      }
+      id="main.js"
+    />
   </div>
 </div>
 `;

@@ -13,7 +13,7 @@ export function renderNonIdealState(editorMosaic: EditorMosaic) {
     <NonIdealState
       action={resolveButton}
       icon="applications"
-      description='You have closed all editors. You can open them again with the button below or the "Editors" button above!'
+      description="You have closed all editors. You can open them again with the button below or in the sidebar menu!"
     />
   );
 }
