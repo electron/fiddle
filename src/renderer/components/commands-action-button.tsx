@@ -175,9 +175,19 @@ export class GistActionButton extends React.Component<
     appState.activeGistAction = GistActionState.updating;
 
     try {
+      const {
+        data: { files: oldFiles },
+      } = await octo.gists.get({ gist_id: appState.gistId! });
+
+      const files = this.gistFilesList(values);
+      for (const id of Object.keys(oldFiles)) {
+        // Gist files are deleted by setting content to an empty string.
+        if (!Object.keys(files).includes(id)) files[id] = { content: '' };
+      }
+
       const gist = await octo.gists.update({
         gist_id: appState.gistId!,
-        files: this.gistFilesList(values) as any,
+        files,
       });
 
       appState.editorMosaic.isEdited = false;
