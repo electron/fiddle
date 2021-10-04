@@ -251,7 +251,7 @@ export class RemoteLoader {
   private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;
     this.appState.showErrorDialog(
-      navigator.onLine
+      this.appState.isOnline
         ? failedLabel
         : `Your computer seems to be offline. ${failedLabel}`,
     );

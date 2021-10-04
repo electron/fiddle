@@ -36,14 +36,22 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 index.html
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -69,14 +77,22 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 main.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -102,14 +118,22 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 preload.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -135,14 +159,22 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 renderer.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -168,14 +200,22 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 styles.css
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -205,16 +245,32 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Button
-              icon="add"
-              onClick={[Function]}
-              small={true}
-            />
-            <Blueprint3.Button
-              icon="grid-view"
-              onClick={[Function]}
-              small={true}
-            />
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
           </Blueprint3.ButtonGroup>,
         },
       ]
@@ -259,14 +315,22 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 index.html
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-off"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-off"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -292,14 +356,22 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 main.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -325,14 +397,22 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 preload.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -358,14 +438,22 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 renderer.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -391,14 +479,22 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 styles.css
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
           ],
@@ -410,16 +506,32 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Button
-              icon="add"
-              onClick={[Function]}
-              small={true}
-            />
-            <Blueprint3.Button
-              icon="grid-view"
-              onClick={[Function]}
-              small={true}
-            />
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
           </Blueprint3.ButtonGroup>,
         },
       ]
@@ -464,14 +576,22 @@ exports[`SidebarFileTree component renders 1`] = `
                 index.html
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -497,14 +617,22 @@ exports[`SidebarFileTree component renders 1`] = `
                 main.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -530,14 +658,22 @@ exports[`SidebarFileTree component renders 1`] = `
                 preload.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -563,14 +699,22 @@ exports[`SidebarFileTree component renders 1`] = `
                 renderer.js
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
             Object {
@@ -596,14 +740,22 @@ exports[`SidebarFileTree component renders 1`] = `
                 styles.css
               </Blueprint.ContextMenu2>,
               "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Button
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
                   minimal={true}
-                  onClick={[Function]}
+                  transitionDuration={100}
                 >
-                  <Blueprint3.Icon
-                    icon="eye-open"
-                  />
-                </Blueprint3.Button>
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
           ],
@@ -615,16 +767,32 @@ exports[`SidebarFileTree component renders 1`] = `
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Button
-              icon="add"
-              onClick={[Function]}
-              small={true}
-            />
-            <Blueprint3.Button
-              icon="grid-view"
-              onClick={[Function]}
-              small={true}
-            />
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
           </Blueprint3.ButtonGroup>,
         },
       ]
