@@ -148,9 +148,13 @@ export class SidebarFileTree extends React.Component<
   };
 
   public createEditor = (editorId: EditorId) => {
-    const { editorMosaic } = this.props.appState;
-    editorMosaic.addNewFile(editorId);
-    editorMosaic.show(editorId);
+    const { appState } = this.props;
+    try {
+      appState.editorMosaic.addNewFile(editorId);
+      appState.editorMosaic.show(editorId);
+    } catch (err) {
+      appState.showErrorDialog(err.message);
+    }
   };
 
   public resetLayout = () => {
