@@ -182,7 +182,7 @@ export class GistActionButton extends React.Component<
       const files = this.gistFilesList(values);
       for (const id of Object.keys(oldFiles)) {
         // Gist files are deleted by setting content to an empty string.
-        if (!Object.keys(files).includes(id)) files[id] = { content: '' };
+        if (!(id in files)) files[id] = { content: '' };
       }
 
       const gist = await octo.gists.update({
