@@ -8,7 +8,7 @@ import {
   Tree,
   TreeNodeInfo,
 } from '@blueprintjs/core';
-import { ContextMenu2 } from '@blueprintjs/popover2';
+import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 import * as React from 'react';
@@ -74,9 +74,15 @@ export class SidebarFileTree extends React.Component<
           ),
           secondaryLabel: (
             <ButtonGroup>
-              <Button minimal onClick={() => this.toggleVisibility(editorId)}>
-                <Icon icon={visibilityIcon} />
-              </Button>
+              <Tooltip2
+                content="Toggle Visibility"
+                minimal={true}
+                hoverOpenDelay={1000}
+              >
+                <Button minimal onClick={() => this.toggleVisibility(editorId)}>
+                  <Icon icon={visibilityIcon} />
+                </Button>
+              </Tooltip2>
             </ButtonGroup>
           ),
         };
@@ -119,12 +125,24 @@ export class SidebarFileTree extends React.Component<
         label: 'Editors',
         secondaryLabel: (
           <ButtonGroup minimal>
-            <Button
-              small
-              icon="add"
-              onClick={() => this.setState({ action: 'add' })}
-            />
-            <Button small icon="grid-view" onClick={this.resetLayout} />
+            <Tooltip2
+              content="Add New File"
+              minimal={true}
+              hoverOpenDelay={1000}
+            >
+              <Button
+                small
+                icon="add"
+                onClick={() => this.setState({ action: 'add' })}
+              />
+            </Tooltip2>
+            <Tooltip2
+              content="Reset Layout"
+              minimal={true}
+              hoverOpenDelay={1000}
+            >
+              <Button small icon="grid-view" onClick={this.resetLayout} />
+            </Tooltip2>
           </ButtonGroup>
         ),
       },
