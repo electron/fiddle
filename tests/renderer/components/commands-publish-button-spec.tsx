@@ -27,6 +27,7 @@ class OctokitMock {
     })),
     delete: jest.fn(),
     update: jest.fn(),
+    get: jest.fn(),
   };
 }
 
@@ -221,6 +222,12 @@ describe('Action button component', () => {
       ({ instance, wrapper } = createActionButton());
       wrapper.setProps({ appState: state });
       instance.setState({ actionType: GistActionType.update });
+
+      mocktokit.gists.get.mockImplementation(() => {
+        return {
+          data: expectedGistOpts,
+        };
+      });
     });
 
     it('attempts to update an existing Gist', async () => {
