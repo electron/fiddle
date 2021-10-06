@@ -14,7 +14,7 @@ interface ChromeMacProps {
  *
  * @returns Whether or not macOS is Big Sur or later.
  */
-const isBigSurOrLater = () =>
+export const isBigSurOrLater = () =>
   Number(require('os').release().split('.')[0]) >= 20;
 
 @observer
