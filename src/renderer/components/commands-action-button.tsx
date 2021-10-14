@@ -10,7 +10,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-
+import { clipboard } from 'electron';
 import { when } from 'mobx';
 import {
   EditorValues,
@@ -129,7 +129,10 @@ export class GistActionButton extends React.Component<
       appState.localPath = undefined;
 
       console.log(`Publish Button: Publishing complete`, { gist });
-      this.renderToast({ message: 'Publishing completed successfully!' });
+      clipboard.writeText(gist.data.html_url);
+      this.renderToast({
+        message: 'Sucessfully published! Gist link copied to clipboard.',
+      });
 
       // Only set action type to update if publish completed successfully.
       this.setActionType(GistActionType.update);
