@@ -130,7 +130,7 @@ export class GistActionButton extends React.Component<
 
       console.log(`Publish Button: Publishing complete`, { gist });
       this.renderToast({
-        message: 'Sucessfully published gist!',
+        message: 'Successfully published gist!',
         action: {
           text: 'Copy link',
           icon: 'clipboard',
