@@ -341,7 +341,7 @@ describe('App component', () => {
   describe('prompting to confirm replacing an unsaved fiddle', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
-    const editorValues2: EditorValues = { MAIN_JS: '// hello world' };
+    const editorValues2: EditorValues = { [MAIN_JS]: '// hello world' };
     let editorMosaic: EditorMosaic;
 
     beforeEach(() => {
