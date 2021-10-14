@@ -10,7 +10,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-
+import { clipboard } from 'electron';
 import { when } from 'mobx';
 import {
   EditorValues,
@@ -129,7 +129,14 @@ export class GistActionButton extends React.Component<
       appState.localPath = undefined;
 
       console.log(`Publish Button: Publishing complete`, { gist });
-      this.renderToast({ message: 'Publishing completed successfully!' });
+      this.renderToast({
+        message: 'Successfully published gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
+      });
 
       // Only set action type to update if publish completed successfully.
       this.setActionType(GistActionType.update);
@@ -192,7 +199,14 @@ export class GistActionButton extends React.Component<
 
       appState.editorMosaic.isEdited = false;
       console.log('Updating: Updating done', { gist });
-      this.renderToast({ message: 'Successfully updated gist!' });
+      this.renderToast({
+        message: 'Successfully updated gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
+      });
     } catch (error) {
       console.warn(`Could not update gist`, { error });
 
