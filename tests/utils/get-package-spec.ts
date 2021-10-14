@@ -51,7 +51,7 @@ describe('get-package', () => {
       const name = defaultName;
       const appState = {
         getName: () => name,
-        packages: new Map<string, string>([['say', '*']]),
+        modules: new Map<string, string>([['say', '*']]),
       };
       const result = await getPackageJson(appState as any);
       expect(result).toEqual(buildExpectedPackage());
@@ -63,7 +63,7 @@ describe('get-package', () => {
     ])('%s', async (_, version: string, electronPkg: string) => {
       const name = defaultName;
       appState.getName.mockReturnValue(name);
-      appState.packages = new Map<string, string>([['say', '*']]);
+      appState.modules = new Map<string, string>([['say', '*']]);
       appState.version = version;
 
       const result = await getPackageJson(appState as any);

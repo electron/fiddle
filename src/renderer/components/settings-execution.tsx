@@ -331,8 +331,7 @@ export class ExecutionSettings extends React.Component<
         <Callout>
           <FormGroup>
             <span style={{ marginRight: 4 }}>
-              Electron Fiddle will install packages on runtime if they are
-              imported within your fiddle with <code>require</code>. It uses{' '}
+              Electron Fiddle will install packages if you specify them. It uses{' '}
               <a href="https://www.npmjs.com/" target="_blank" rel="noreferrer">
                 npm
               </a>{' '}

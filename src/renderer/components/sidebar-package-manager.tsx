@@ -25,7 +25,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
     const { appState } = this.props;
     if (event.key === 'Enter' && !!search) {
       // TODO: allow users to specify the package version
-      appState.packages.set(search, '*');
+      appState.modules.set(search, '*');
       this.setState({ search: '' });
     }
   };
@@ -51,12 +51,12 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
                   />
                 ),
               },
-              ...this.renderPackages(),
+              ...this.renderModules(),
             ],
-            id: 'packages',
+            id: 'modules',
             hasCaret: false,
             icon: 'code-block',
-            label: 'Packages',
+            label: 'Modules',
             isExpanded: true,
           },
         ]}
@@ -64,10 +64,10 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
     );
   }
 
-  public renderPackages = (): TreeNodeInfo[] => {
+  public renderModules = (): TreeNodeInfo[] => {
     const values: TreeNodeInfo[] = [];
     const { appState } = this.props;
-    for (const pkg of appState.packages.keys()) {
+    for (const pkg of appState.modules.keys()) {
       values.push({
         id: pkg,
         label: pkg,
@@ -75,7 +75,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
           <Button
             minimal
             icon="remove"
-            onClick={() => appState.packages.delete(pkg)}
+            onClick={() => appState.modules.delete(pkg)}
           />
         ),
       });

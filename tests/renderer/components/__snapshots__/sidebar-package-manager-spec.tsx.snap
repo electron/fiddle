@@ -42,9 +42,9 @@ exports[`SidebarPackageManager component renders 1`] = `
         ],
         "hasCaret": false,
         "icon": "code-block",
-        "id": "packages",
+        "id": "modules",
         "isExpanded": true,
-        "label": "Packages",
+        "label": "Modules",
       },
     ]
   }

@@ -277,7 +277,7 @@ export class Runner {
    * @returns {Promise<void>}
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
-    const modules = Array.from(this.appState.packages.keys());
+    const modules = Array.from(this.appState.modules.keys());
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {

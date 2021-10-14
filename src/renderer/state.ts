@@ -120,7 +120,7 @@ export class AppState {
   @observable public genericDialogLastInput: string | null = null;
   @observable public templateName: string | undefined;
   @observable public Bisector: Bisector | undefined;
-  @observable public packages: Map<string, string> = new Map();
+  @observable public modules: Map<string, string> = new Map();
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
 

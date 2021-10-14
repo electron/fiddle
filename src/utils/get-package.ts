@@ -45,8 +45,8 @@ export async function getPackageJson(
   }
 
   if (includeDependencies) {
-    const { packages } = appState;
-    for (const [module, version] of packages.entries()) {
+    const { modules } = appState;
+    for (const [module, version] of modules.entries()) {
       dependencies[module] = version;
     }
   }

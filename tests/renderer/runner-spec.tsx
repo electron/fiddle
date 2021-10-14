@@ -43,7 +43,7 @@ describe('Runner component', () => {
     ({ fileManager, state: store } = (window as any).ElectronFiddle.app);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
-    store.packages = new Map<string, string>([['cow', '*']]);
+    store.modules = new Map<string, string>([['cow', '*']]);
 
     mockChild = new ChildProcessMock();
     ipcRendererManager.removeAllListeners();

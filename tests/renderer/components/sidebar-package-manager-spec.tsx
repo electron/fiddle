@@ -7,7 +7,7 @@ describe('SidebarPackageManager component', () => {
   let store: any;
   beforeEach(() => {
     store = {
-      packages: new Map<string, string>([['cow', '*']]),
+      modules: new Map<string, string>([['cow', '*']]),
     };
   });
 
@@ -28,7 +28,7 @@ describe('SidebarPackageManager component', () => {
     });
 
     expect(
-      Array.from((store.packages as Map<string, string>).entries()),
+      Array.from((store.modules as Map<string, string>).entries()),
     ).toMatchSnapshot([
       ['cow', '*'],
       ['say', '*'],
@@ -44,6 +44,6 @@ describe('SidebarPackageManager component', () => {
 
     const btn = wrapper.find(Button);
     btn.simulate('click');
-    expect((store.packages as Map<string, string>).size).toBe(0);
+    expect((store.modules as Map<string, string>).size).toBe(0);
   });
 });

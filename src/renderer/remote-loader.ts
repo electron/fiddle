@@ -117,7 +117,7 @@ export class RemoteLoader {
         if (id === PACKAGE_NAME) {
           const { dependencies } = JSON.parse(data.content);
           for (const [dep, version] of Object.entries(dependencies)) {
-            this.appState.packages.set(dep, version as string);
+            this.appState.modules.set(dep, version as string);
           }
         }
         if (!isSupportedFile(id)) {

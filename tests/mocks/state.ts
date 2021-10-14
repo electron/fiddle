@@ -45,8 +45,8 @@ export class StateMock {
   @observable public isTourShowing = false;
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
+  @observable public modules = new Map<string, string>();
   @observable public output = [];
-  @observable public packages = new Map<string, string>();
   @observable public showObsoleteVersions = false;
   @observable public showUndownloadedVersions = false;
   @observable public theme: string | null;
