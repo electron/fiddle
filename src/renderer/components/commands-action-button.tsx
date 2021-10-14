@@ -129,9 +129,13 @@ export class GistActionButton extends React.Component<
       appState.localPath = undefined;
 
       console.log(`Publish Button: Publishing complete`, { gist });
-      clipboard.writeText(gist.data.html_url);
       this.renderToast({
-        message: 'Sucessfully published! Gist link copied to clipboard.',
+        message: 'Sucessfully published gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
       });
 
       // Only set action type to update if publish completed successfully.
@@ -195,7 +199,14 @@ export class GistActionButton extends React.Component<
 
       appState.editorMosaic.isEdited = false;
       console.log('Updating: Updating done', { gist });
-      this.renderToast({ message: 'Successfully updated gist!' });
+      this.renderToast({
+        message: 'Successfully updated gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
+      });
     } catch (error) {
       console.warn(`Could not update gist`, { error });
 
