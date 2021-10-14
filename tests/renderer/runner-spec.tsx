@@ -5,9 +5,8 @@ import * as semver from 'semver';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { MAIN_JS, RunResult, RunnableVersion } from '../../src/interfaces';
+import { RunResult, RunnableVersion } from '../../src/interfaces';
 import {
-  findModulesInEditors,
   getIsPackageManagerInstalled,
   addModules,
   packageRun,
@@ -44,6 +43,7 @@ describe('Runner component', () => {
     ({ fileManager, state: store } = (window as any).ElectronFiddle.app);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
+    store.packages = new Map<string, string>([['cow', '*']]);
 
     mockChild = new ChildProcessMock();
     ipcRendererManager.removeAllListeners();
@@ -56,7 +56,6 @@ describe('Runner component', () => {
 
   describe('run()', () => {
     it('runs', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
 
       // wait for run() to get running
@@ -77,7 +76,6 @@ describe('Runner component', () => {
 
     it('runs with logging when enabled', async () => {
       store.isEnablingElectronLogging = true;
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as jest.Mock).mockImplementationOnce((_, __, opts) => {
         expect(opts.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
         expect(opts.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
@@ -101,7 +99,6 @@ describe('Runner component', () => {
     });
 
     it('emits output with exitCode', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
 
       // wait for run() to get running
@@ -127,7 +124,6 @@ describe('Runner component', () => {
     });
 
     it('returns failure when app exits nonzero', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
       const ARBITRARY_FAIL_CODE = 50;
 
@@ -149,7 +145,6 @@ describe('Runner component', () => {
     });
 
     it('emits output without exitCode', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
 
       // wait for run() to get running
@@ -206,7 +201,6 @@ describe('Runner component', () => {
 
     it('automatically cleans the console when enabled', async () => {
       store.isClearingConsoleOnRun = true;
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
 
       // get run() out of the way
       (spawn as any).mockReturnValueOnce(mockChild);
@@ -233,11 +227,9 @@ describe('Runner component', () => {
       const oldError = console.error;
       console.error = jest.fn();
 
-      instance.installModulesForEditor = jest
-        .fn()
-        .mockImplementationOnce(async () => {
-          throw new Error('Bwap-bwap');
-        });
+      instance.installModules = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('Bwap-bwap');
+      });
 
       expect(await instance.run()).toBe(RunResult.INVALID);
 
@@ -247,7 +239,6 @@ describe('Runner component', () => {
 
   describe('stop()', () => {
     it('stops a running session', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
       mockChild.kill.mockImplementationOnce(() => {
         mockChild.emit('close');
@@ -268,7 +259,6 @@ describe('Runner component', () => {
     });
 
     it('fails if killing child process fails', async () => {
-      (findModulesInEditors as any).mockReturnValueOnce(['fake-module']);
       (spawn as any).mockReturnValueOnce(mockChild);
       mockChild.kill.mockReturnValueOnce(false);
 
@@ -433,16 +423,13 @@ describe('Runner component', () => {
     });
   });
 
-  describe('installModulesForEditor()', () => {
+  describe('installModules()', () => {
     it.each([
       ['does not attempt installation if npm is not installed', false, 0],
       ['does attempt installation if npm is installed', true, 1],
     ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      (findModulesInEditors as jest.Mock).mockReturnValueOnce(['fake-module']);
       (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(haveNpm);
-
-      const editorValues = { [MAIN_JS]: "const a = require('say');" } as const;
-      await instance.installModulesForEditor(editorValues, {
+      await instance.installModules({
         dir: '/fake/path',
         packageManager: 'npm',
       });
