@@ -9,7 +9,7 @@ import { MAIN_JS, RunResult, RunnableVersion } from '../../src/interfaces';
 import {
   findModulesInEditors,
   getIsPackageManagerInstalled,
-  installModules,
+  addModules,
   packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
@@ -72,7 +72,7 @@ describe('Runner component', () => {
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
       expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(installModules).toHaveBeenCalled();
+      expect(addModules).toHaveBeenCalled();
     });
 
     it('runs with logging when enabled', async () => {
@@ -97,7 +97,7 @@ describe('Runner component', () => {
       expect(store.isRunning).toBe(false);
       expect(getIsDownloaded).toHaveBeenCalled();
       expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(installModules).toHaveBeenCalled();
+      expect(addModules).toHaveBeenCalled();
     });
 
     it('emits output with exitCode', async () => {
@@ -365,16 +365,16 @@ describe('Runner component', () => {
       expect(
         await instance.packageInstall({ dir: '', packageManager: 'npm' }),
       ).toBe(true);
-      expect(installModules).toHaveBeenCalled();
+      expect(addModules).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
-      (installModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (addModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
 
       expect(
         await instance.packageInstall({ dir: '', packageManager: 'npm' }),
       ).toBe(false);
-      expect(installModules).toHaveBeenCalled();
+      expect(addModules).toHaveBeenCalled();
     });
   });
 
@@ -409,7 +409,7 @@ describe('Runner component', () => {
     });
 
     it('handles an error in packageInstall()', async () => {
-      (installModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (addModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -447,7 +447,7 @@ describe('Runner component', () => {
         packageManager: 'npm',
       });
 
-      expect(installModules).toHaveBeenCalledTimes(numCalls);
+      expect(addModules).toHaveBeenCalledTimes(numCalls);
     });
   });
 });

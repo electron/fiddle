@@ -64,7 +64,6 @@
     "react-mosaic-component": "^4.1.1",
     "semver": "^7.3.4",
     "shell-path": "^2.1.0",
-    "strip-comments": "^2.0.1",
     "tmp": "0.2.1",
     "tslib": "^2.1.0",
     "update-electron-app": "^2.0.1"
@@ -88,7 +87,6 @@
     "@types/react": "^16.14.0",
     "@types/react-dom": "^16.9.11",
     "@types/semver": "^7.3.4",
-    "@types/strip-comments": "^2.0.1",
     "@types/tmp": "0.2.0",
     "@types/valid-url": "^1.0.3",
     "@typescript-eslint/eslint-plugin": "^4.15.2",

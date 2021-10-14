@@ -2,12 +2,7 @@ import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
 import isRunning from 'is-running';
 
-import {
-  EditorValues,
-  FileTransform,
-  RunResult,
-  RunnableVersion,
-} from '../interfaces';
+import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -15,9 +10,8 @@ import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
-  findModulesInEditors,
   getIsPackageManagerInstalled,
-  installModules,
+  addModules,
   packageRun,
   PMOperationOptions,
 } from './npm';
@@ -149,7 +143,7 @@ export class Runner {
    * @returns {Promise<RunResult>}
    */
   public async run(): Promise<RunResult> {
-    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
+    const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
     const { appState } = this;
@@ -160,14 +154,13 @@ export class Runner {
     }
     appState.isConsoleShowing = true;
 
-    const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
     const packageManager = appState.packageManager;
 
     if (!dir) return RunResult.INVALID;
 
     try {
-      await this.installModulesForEditor(values, { dir, packageManager });
+      await this.installModules({ dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
 
@@ -277,18 +270,14 @@ export class Runner {
   }
 
   /**
-   * Analyzes the editor's JavaScript contents for modules
-   * and installs them.
+   * Installs the specified modules
    *
    * @param {EditorValues} values
    * @param {string} dir
    * @returns {Promise<void>}
    */
-  public async installModulesForEditor(
-    values: EditorValues,
-    pmOptions: PMOperationOptions,
-  ): Promise<void> {
-    const modules = await findModulesInEditors(values);
+  public async installModules(pmOptions: PMOperationOptions): Promise<void> {
+    const modules = Array.from(this.appState.packages.keys());
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
@@ -316,7 +305,7 @@ export class Runner {
         { isNotPre: true },
       );
 
-      const result = await installModules(pmOptions, ...modules);
+      const result = await addModules(pmOptions, ...modules);
       pushOutput(result);
 
       this.appState.isInstallingModules = false;
@@ -441,7 +430,7 @@ export class Runner {
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     try {
       this.appState.pushOutput(`Now running "npm install..."`);
-      this.appState.pushOutput(await installModules(options));
+      this.appState.pushOutput(await addModules(options));
       return true;
     } catch (error) {
       this.appState.pushError('Failed to run "npm install".', error);

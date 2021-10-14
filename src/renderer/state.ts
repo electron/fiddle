@@ -120,25 +120,26 @@ export class AppState {
   @observable public genericDialogLastInput: string | null = null;
   @observable public templateName: string | undefined;
   @observable public Bisector: Bisector | undefined;
+  @observable public packages: Map<string, string> = new Map();
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
-  @observable public isRunning = false;
-  @observable public isOnline = navigator.onLine;
-  @observable public isAutoBisecting = false;
-  @observable public isInstallingModules = false;
-  @observable public isUpdatingElectronVersions = false;
-  @observable public isQuitting = false;
 
   // -- Various "isShowing" settings ------------------
   @observable public isAddVersionDialogShowing = false;
+  @observable public isAutoBisecting = false;
   @observable public isBisectCommandShowing: boolean;
   @observable public isBisectDialogShowing = false;
   @observable public isConsoleShowing = false;
   @observable public isGenericDialogShowing = false;
+  @observable public isInstallingModules = false;
+  @observable public isOnline = navigator.onLine;
+  @observable public isQuitting = false;
+  @observable public isRunning = false;
   @observable public isSettingsShowing = false;
   @observable public isThemeDialogShowing = false;
   @observable public isTokenDialogShowing = false;
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
+  @observable public isUpdatingElectronVersions = false;
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';

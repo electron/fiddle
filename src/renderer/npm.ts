@@ -1,9 +1,4 @@
-import { EditorValues } from '../interfaces';
 import { exec } from '../utils/exec';
-import stripComments from 'strip-comments';
-
-// Making TypeScript happy and avoiding "esModuleInterop" issues
-const { builtinModules } = require('module');
 
 export type IPackageManager = 'npm' | 'yarn';
 
@@ -14,26 +9,6 @@ export interface PMOperationOptions {
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
-
-/* add other modules to automatically ignore here */
-/* perhaps we can expose this to the settings module?*/
-const ignoredModules: Array<string> = [
-  'electron',
-  'original-fs',
-  ...builtinModules,
-];
-
-/* regular expression to both match and extract module names */
-const requiregx = /require\(['"](.*?)['"]\)/gm;
-
-/*
- Quick and dirty filter functions for filtering module names
-*/
-const isIgnored = (str: string): boolean => ignoredModules.includes(str);
-const isLocalModule = (str: string): boolean => /^[,/~\.]/.test(str);
-const isUnique = (item: any, idx: number, arr: Array<any>): boolean => {
-  return arr.lastIndexOf(item) === idx;
-};
 
 /**
  * Checks if package manager is installed by checking if a binary
@@ -73,70 +48,13 @@ export async function getIsPackageManagerInstalled(
 }
 
 /**
- * Finds npm modules in editor values, returning an array of modules.
- */
-export async function findModulesInEditors(values: EditorValues) {
-  const modules: Array<string> = [];
-
-  // Filter out all editor values which aren't JavaScript files.
-  const contents = Object.entries(values)
-    .filter(([filename]) => filename.endsWith('.js'))
-    .map(([_, content]) => content) as string[];
-
-  for (const content of contents) {
-    const found = await findModules(content);
-    modules.push(...found);
-  }
-
-  console.log('Modules Found:', modules);
-
-  return Array.from(new Set(modules));
-}
-
-/**
- * Finds `require()` statements in a string.
- * Tries to exclude electron and Node built-ins as well as file-path
- * references. Also will try to install base packages of modules
- * that have a slash in them, for example: `lodash/fp` as the actual package
- * is just `lodash`.
- *
- * However, it WILL try to add packages that are part of a huge
- * monorepo that are named `@<group>/<package>`
- *
- * @param {string} input
- * @returns {Array<string>}
- */
-export async function findModules(code: string) {
-  /* container definitions */
-  const modules: Array<string> = [];
-  let match: RegExpMatchArray | null;
-
-  code = stripComments(code);
-
-  /* grab all global require matches in the text */
-  while ((match = requiregx.exec(code) || null)) {
-    const mod = match[1];
-    modules.push(mod);
-  }
-
-  /* map and reduce */
-  return modules
-    .map((mod) =>
-      mod.includes('/') && !mod.startsWith('@') ? mod.split('/')[0] : mod,
-    )
-    .filter((m) => !isIgnored(m))
-    .filter((m) => !isLocalModule(m))
-    .filter(isUnique);
-}
-
-/**
  * Installs given modules to a given folder.
  *
  * @param {PMOperationOptions} { dir, packageManager }
  * @param {...Array<string>} names
  * @returns {Promise<string>}
  */
-export async function installModules(
+export async function addModules(
   { dir, packageManager }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {

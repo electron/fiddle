@@ -1,6 +1,5 @@
 import * as path from 'path';
-import { EditorValues, MAIN_JS } from '../interfaces';
-import { findModulesInEditors } from '../renderer/npm';
+import { MAIN_JS } from '../interfaces';
 import { AppState } from '../renderer/state';
 import { getUsername } from './get-username';
 
@@ -30,7 +29,6 @@ export function getForgeVersion(): string {
  */
 export async function getPackageJson(
   appState: AppState,
-  values?: EditorValues,
   options?: PackageJsonOptions,
 ): Promise<string> {
   const { includeElectron, includeDependencies } = options || DEFAULT_OPTIONS;
@@ -46,11 +44,11 @@ export async function getPackageJson(
     devDependencies[packageName] = appState.version;
   }
 
-  if (includeDependencies && values) {
-    const modules = await findModulesInEditors(values);
-    modules.forEach((mod) => {
-      dependencies[mod] = '*';
-    });
+  if (includeDependencies) {
+    const { packages } = appState;
+    for (const [module, version] of packages.entries()) {
+      dependencies[module] = version;
+    }
   }
 
   return JSON.stringify(

@@ -1,4 +1,3 @@
-import WorkerMock from './worker';
 import { AppMock } from './app';
 import { BisectorMock } from './bisector';
 import { BrowserWindowMock } from './browser-window';
@@ -42,6 +41,5 @@ export {
   StateMock,
   VersionsMock,
   WebContentsMock,
-  WorkerMock,
   createEditorValues,
 };
