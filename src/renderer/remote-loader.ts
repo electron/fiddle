@@ -116,9 +116,7 @@ export class RemoteLoader {
       for (const [id, data] of Object.entries(gist.data.files)) {
         if (id === PACKAGE_NAME) {
           const { dependencies } = JSON.parse(data.content);
-          for (const [dep, version] of Object.entries(dependencies)) {
-            this.appState.modules.set(dep, version as string);
-          }
+          this.appState.modules = new Map(Object.entries(dependencies));
         }
         if (!isSupportedFile(id)) {
           continue;
