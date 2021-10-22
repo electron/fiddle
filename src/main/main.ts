@@ -41,7 +41,6 @@ export async function onReady() {
   setupDialogs();
   setupDevTools();
   setupTitleBarClickMac();
-
   processCommandLine(argv);
 }
 
