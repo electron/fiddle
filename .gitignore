@@ -25,7 +25,6 @@ compile_commands.json
 .envrc
 .cache
 yarn-error.log
-.DS_Store
 
 # Coverage
 coverage
