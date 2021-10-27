@@ -1,0 +1,52 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SidebarPackageManager component can add a package 1`] = `
+Array [
+  Array [
+    "cow",
+    "*",
+  ],
+  Array [
+    "say",
+    "*",
+  ],
+]
+`;
+
+exports[`SidebarPackageManager component renders 1`] = `
+<Blueprint3.Tree
+  contents={
+    Array [
+      Object {
+        "childNodes": Array [
+          Object {
+            "id": "-1",
+            "label": <Blueprint3.InputGroup
+              fill={true}
+              leftIcon="search"
+              onChange={[Function]}
+              onKeyPress={[Function]}
+              placeholder="Add package"
+              value=""
+            />,
+          },
+          Object {
+            "id": "cow",
+            "label": "cow",
+            "secondaryLabel": <Blueprint3.Button
+              icon="remove"
+              minimal={true}
+              onClick={[Function]}
+            />,
+          },
+        ],
+        "hasCaret": false,
+        "icon": "code-block",
+        "id": "modules",
+        "isExpanded": true,
+        "label": "Modules",
+      },
+    ]
+  }
+/>
+`;

@@ -1,42 +1,13 @@
-import { mocked } from 'ts-jest/utils';
-import stripComments from 'strip-comments';
-
 import {
-  findModules,
-  findModulesInEditors,
   getIsPackageManagerInstalled,
-  installModules,
+  addModules,
   packageRun,
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-jest.mock('strip-comments');
 jest.mock('../../src/utils/exec');
 
 describe('npm', () => {
-  const mockBuiltins = `
-    function hello() {
-      const electron = require('electron');
-      const originalFs = require('original-fs');
-      const fs = require('fs');
-      const privateModule = require('./hi');
-    }
-  `;
-
-  const mockPackages = `
-    const cow = require('cow');
-    const say = require('say');
-  `;
-
-  const mockComments = `
-    // const cow = require('cow');
-    /* const say = require('say'); */
-    /**
-     * const hello = require('hello');
-     * const world = require('world');
-    */
-  `;
-
   describe('getIsPackageManagerInstalled()', () => {
     describe('npm()', () => {
       beforeEach(() => {
@@ -161,44 +132,10 @@ describe('npm', () => {
     });
   });
 
-  describe('findModules()', () => {
-    it('returns required modules in a JS file', async () => {
-      mocked(stripComments).mockReturnValue(mockPackages);
-      const modules = await findModules(mockPackages);
-      expect(modules).toEqual(['cow', 'say']);
-    });
-
-    it('ignores node and electron builtins', async () => {
-      mocked(stripComments).mockReturnValue(mockBuiltins);
-      const modules = await findModules(mockBuiltins);
-      expect(modules).toHaveLength(0);
-    });
-
-    it('ignores commented modules', async () => {
-      mocked(stripComments).mockReturnValue('');
-      const modules = await findModules(mockComments);
-      expect(modules).toHaveLength(0);
-    });
-  });
-
-  describe('findModulesInEditors()', () => {
-    it('installs modules across all JavaScript files only once', async () => {
-      mocked(stripComments).mockReturnValue(mockPackages);
-      const result = await findModulesInEditors({
-        'file1.js': mockPackages,
-        'file2.js': mockPackages,
-        'file3.js': mockPackages,
-      });
-
-      expect(result).toHaveLength(2);
-      expect(result).toEqual(['cow', 'say']);
-    });
-  });
-
-  describe('installModules()', () => {
+  describe('addModules()', () => {
     describe('npm', () => {
       it('attempts to install a single module', async () => {
-        installModules(
+        addModules(
           { dir: '/my/directory', packageManager: 'npm' },
           'say',
           'thing',
@@ -211,7 +148,7 @@ describe('npm', () => {
       });
 
       it('attempts to installs all modules', async () => {
-        installModules({ dir: '/my/directory', packageManager: 'npm' });
+        addModules({ dir: '/my/directory', packageManager: 'npm' });
 
         expect(exec).toHaveBeenCalledWith<any>(
           '/my/directory',
@@ -222,7 +159,7 @@ describe('npm', () => {
 
     describe('yarn', () => {
       it('attempts to install a single module', async () => {
-        installModules(
+        addModules(
           { dir: '/my/directory', packageManager: 'yarn' },
           'say',
           'thing',
@@ -235,7 +172,7 @@ describe('npm', () => {
       });
 
       it('attempts to installs all modules', async () => {
-        installModules({ dir: '/my/directory', packageManager: 'yarn' });
+        addModules({ dir: '/my/directory', packageManager: 'yarn' });
 
         expect(exec).toHaveBeenCalledWith<any>('/my/directory', 'yarn add');
       });

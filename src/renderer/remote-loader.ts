@@ -106,9 +106,6 @@ export class RemoteLoader {
 
   /**
    * Load a fiddle
-   *
-   * @returns {Promise<boolean>}
-   * @memberof RemoteLoader
    */
   public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
@@ -117,6 +114,10 @@ export class RemoteLoader {
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
+        if (id === PACKAGE_NAME) {
+          const { dependencies } = JSON.parse(data.content);
+          this.appState.modules = new Map(Object.entries(dependencies));
+        }
         if (!isSupportedFile(id)) {
           continue;
         }

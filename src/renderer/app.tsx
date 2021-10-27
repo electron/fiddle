@@ -90,7 +90,7 @@ export class App {
     const values = this.state.editorMosaic.values();
 
     if (options && options.include !== false) {
-      values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);
+      values[PACKAGE_NAME] = await getPackageJson(this.state, options);
     }
 
     return values;

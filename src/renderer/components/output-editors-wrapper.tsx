@@ -3,8 +3,8 @@ import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
 import { Editors } from './editors';
-import { SidebarFileTree } from './sidebar-file-tree';
 import { Outputs } from './outputs';
+import { Sidebar } from './sidebar';
 
 interface WrapperProps {
   appState: AppState;
@@ -14,7 +14,7 @@ interface WrapperState {
   mosaic: MosaicNode<WrapperEditorId>;
 }
 
-export type WrapperEditorId = 'output' | 'editors' | 'filetree';
+export type WrapperEditorId = 'output' | 'editors' | 'sidebar';
 
 export class OutputEditorsWrapper extends React.Component<
   WrapperProps,
@@ -23,7 +23,7 @@ export class OutputEditorsWrapper extends React.Component<
   private MOSAIC_ELEMENTS = {
     output: <Outputs appState={this.props.appState} />,
     editors: <Editors appState={this.props.appState} />,
-    filetree: <SidebarFileTree appState={this.props.appState} />,
+    sidebar: <Sidebar appState={this.props.appState} />,
   };
 
   constructor(props: any) {
@@ -34,7 +34,7 @@ export class OutputEditorsWrapper extends React.Component<
         first: 'output',
         second: {
           direction: 'row',
-          first: 'filetree',
+          first: 'sidebar',
           second: 'editors',
           splitPercentage: 15,
         },
@@ -45,14 +45,12 @@ export class OutputEditorsWrapper extends React.Component<
 
   public render() {
     return (
-      <>
-        <Mosaic<WrapperEditorId>
-          renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
-          resize={{ minimumPaneSizePercentage: 0 }}
-          value={this.state.mosaic}
-          onChange={this.onChange}
-        />
-      </>
+      <Mosaic<WrapperEditorId>
+        renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
+        resize={{ minimumPaneSizePercentage: 0 }}
+        value={this.state.mosaic}
+        onChange={this.onChange}
+      />
     );
   }
 

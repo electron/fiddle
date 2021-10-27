@@ -13,7 +13,7 @@ jest.mock('../../src/renderer/npm', () => ({
 }));
 
 describe('get-package', () => {
-  describe('getForgeVersion', () => {
+  describe('getForgeVersion()', () => {
     it('returns a semver-compatible version constraint', () => {
       const version = getForgeVersion();
       expect(typeof version).toEqual('string');
@@ -25,10 +25,6 @@ describe('get-package', () => {
   describe('getPackageJson()', () => {
     const appState = new StateMock();
     const defaultName = 'test-app' as const;
-
-    const editorValues = {
-      [MAIN_JS]: `const say = require('say')`,
-    } as const;
 
     const defaultPackage = {
       name: defaultName,
@@ -53,8 +49,11 @@ describe('get-package', () => {
 
     it('getPackageJson() returns a default package.json', async () => {
       const name = defaultName;
-      const appState = { getName: () => name };
-      const result = await getPackageJson(appState as any, editorValues);
+      const appState = {
+        getName: () => name,
+        modules: new Map<string, string>([['say', '*']]),
+      };
+      const result = await getPackageJson(appState as any);
       expect(result).toEqual(buildExpectedPackage());
     });
 
@@ -64,9 +63,10 @@ describe('get-package', () => {
     ])('%s', async (_, version: string, electronPkg: string) => {
       const name = defaultName;
       appState.getName.mockReturnValue(name);
+      appState.modules = new Map<string, string>([['say', '*']]);
       appState.version = version;
 
-      const result = await getPackageJson(appState as any, editorValues);
+      const result = await getPackageJson(appState as any);
       const devDependencies = { [electronPkg]: version };
       expect(result).toEqual(buildExpectedPackage({ name, devDependencies }));
     });
