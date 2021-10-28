@@ -16,7 +16,8 @@ app.whenReady().then(() => {
 
   const view = new BrowserView({
     webPreferences: {
-      nodeIntegration: false
+      nodeIntegration: false, // default in Electron >= 5
+      contextIsolation: true // default in Electron >= 12
     }
   })
 

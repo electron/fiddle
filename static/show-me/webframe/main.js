@@ -10,7 +10,8 @@ app.whenReady().then(() => {
     width: 600,
     height: 600,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: false, // default in Electron >= 5
+      contextIsolation: true // default in Electron >= 12
     }
   })
   mainWindow.loadFile('index.html')
