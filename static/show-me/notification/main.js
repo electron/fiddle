@@ -11,8 +11,7 @@ app.whenReady().then(() => {
     height: 600,
     width: 600,
     webPreferences: {
-      nodeIntegration: false, // default in Electron >= 5
-      contextIsolation: true // default in Electron >= 12
+      nodeIntegration: true
     }
   })
 
