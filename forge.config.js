@@ -56,6 +56,7 @@ const config = {
       'entitlements-inherit': 'static/entitlements.plist',
       'signature-flags': 'library',
     },
+    override: true,
   },
   makers: [
     {
