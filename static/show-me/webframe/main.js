@@ -11,8 +11,8 @@ app.whenReady().then(() => {
     width: 600,
     height: 600,
     webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
+      nodeIntegration: false, // default in Electron >= 5
+      contextIsolation: true, // default in Electron >= 12
       preload: path.join(__dirname, 'preload.js')
     }
   })
