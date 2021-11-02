@@ -4,7 +4,7 @@
   "version": "0.26.0",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
-  "main": "./dist/src/main/main",
+  "main": "./dist/src/main/main.js",
   "scripts": {
     "contributors": "node ./tools/contributors.js",
     "less": "node ./tools/lessc.js",
