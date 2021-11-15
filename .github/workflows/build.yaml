@@ -35,7 +35,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ macOS-latest, ubuntu-latest, windows-latest ]
+        os: [ macos-10.15, ubuntu-latest, windows-latest ]
     steps:
       - uses: actions/checkout@v2.4.0
       - name: Setup Node.js
@@ -44,7 +44,7 @@ jobs:
           node-version: 12.x
           cache: yarn
       - name: Set MacOS signing certs
-        if: matrix.os == 'macOS-latest'
+        if: matrix.os == 'macos-10.15'
         run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
