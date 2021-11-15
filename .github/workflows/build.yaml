@@ -61,7 +61,7 @@ jobs:
         run: yarn --network-timeout 100000
       - name: Make
         # if: startsWith(github.ref, 'refs/tags/')
-        run: yarn make --arch=all
+        run: yarn make --arch=x64
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
