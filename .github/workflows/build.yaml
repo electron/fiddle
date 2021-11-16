@@ -38,7 +38,7 @@ jobs:
         os: [ macOS-latest, ubuntu-latest, windows-latest ]
         # https://electron.github.io/electron-packager/main/interfaces/electronpackager.options.html#arch
         # TODO: add platform-specific ia32 and armv7l arch
-        arch: [ x64, arm64 ] 
+        arch: [ x64, arm64 ]
         
     steps:
       - uses: actions/checkout@v2.4.0
@@ -65,7 +65,7 @@ jobs:
         run: yarn --network-timeout 100000
       - name: Make
         # if: startsWith(github.ref, 'refs/tags/')
-        run: yarn make --arch={{ matrix.arch }}
+        run: yarn make --arch=${{ matrix.arch }}
         env:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
