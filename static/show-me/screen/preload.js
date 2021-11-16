@@ -1,6 +1,9 @@
 const { ipcRenderer } = require('electron')
 
 window.addEventListener('DOMContentLoaded', () => {
-  const screens = ipcRenderer.sendSync('get-displays')
-  document.querySelector('pre').innerText = JSON.stringify(screens, undefined, 2)
+  ipcRenderer
+    .invoke('get-displays')
+    .then((screens) => {
+      document.querySelector('pre').innerText = JSON.stringify(screens, undefined, 2)
+    })
 })

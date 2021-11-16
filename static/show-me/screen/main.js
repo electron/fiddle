@@ -26,8 +26,8 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.on('get-displays', (event) => {
-    event.returnValue = screen.getAllDisplays()
+  ipcMain.handle('get-displays', () => {
+    return screen.getAllDisplays()
   })
   mainWindow.loadFile('index.html')
 })
