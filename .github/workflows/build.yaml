@@ -44,7 +44,7 @@ jobs:
         - os: windows-latest
           arch: ia32
         - os: ubuntu-latest
-          arch: arm7vl
+          arch: armv7l
         
     steps:
       - uses: actions/checkout@v2.4.0
