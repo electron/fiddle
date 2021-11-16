@@ -31,14 +31,20 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   build:
     needs: test
-    name: Build (${{ matrix.os }})
+    name: Build (${{ matrix.os }} - ${{ matrix.arch }})
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        # Build for supported platforms
+        # https://github.com/electron/electron-packager/blob/ebcbd439ff3e0f6f92fa880ff28a8670a9bcf2ab/src/targets.js#L9
+        # 32-bit Linux unsupported as of 2019: https://www.electronjs.org/blog/linux-32bit-support
         os: [ macOS-latest, ubuntu-latest, windows-latest ]
-        # https://electron.github.io/electron-packager/main/interfaces/electronpackager.options.html#arch
-        # TODO: add platform-specific ia32 and armv7l arch
         arch: [ x64, arm64 ]
+        include:
+        - os: windows-latest
+          arch: ia32
+        - os: ubuntu-latest
+          arch: arm7vl
         
     steps:
       - uses: actions/checkout@v2.4.0
