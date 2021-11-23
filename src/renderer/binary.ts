@@ -220,7 +220,12 @@ async function download(ver: RunnableVersion): Promise<string> {
     downloadOptions: {
       quiet: true,
       getProgressCallback,
-      timeout: 10000,
+      timeout: {
+        lookup: 15000,
+        connect: 15000,
+        response: 15000,
+        socket: 15000,
+      },
     },
   });
 
