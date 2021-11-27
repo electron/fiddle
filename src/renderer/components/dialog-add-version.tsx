@@ -32,7 +32,7 @@ interface AddVersionDialogState {
 }
 
 /**
- * Build a default name for a local Electron vresion
+ * Build a default name for a local Electron version
  * from its dirname.
  *
  * @param {string} dirname

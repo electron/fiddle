@@ -27,7 +27,7 @@
 // update if list of Editor ID changes
 @editor-ids: main, renderer, html, preload;
 
-// takes each editor ID and increase its z-index if the parent Mosiac root
+// takes each editor ID and increase its z-index if the parent Mosaic root
 // has focused__id class for that specific id.
 each(@editor-ids, {
   .focused__@{value}.mosaic .mosaic-window.@{value} {
