@@ -119,6 +119,9 @@
     "ts-jest": "^26.5.2",
     "typescript": "^4.2.2"
   },
+  "resolutions": {
+    "macos-release": "^2.5.0"
+  },
   "lint-staged": {
     "./**/*.{js,ts,tsx}": [
       "eslint --fix"
