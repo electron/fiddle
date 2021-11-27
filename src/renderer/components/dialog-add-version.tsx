@@ -138,7 +138,7 @@ export class AddVersionDialog extends React.Component<
     // swap to old local electron version if the user adds a new one with the same path
     if (isValidElectron && existingLocalVersion?.localPath) {
       // set previous version as active version
-      this.props.appState.setVersion(existingLocalVersion.localPath);
+      this.props.appState.setVersion(existingLocalVersion.version);
     } else {
       this.props.appState.addLocalVersion(toAdd);
     }
