@@ -665,7 +665,7 @@ describe('AppState', () => {
       expect(appState.output[1].timeString).toBeTruthy();
     });
 
-    it('ignores the "Debuggeer listening on..." output', () => {
+    it('ignores the "Debugger listening on..." output', () => {
       appState.pushOutput('Debugger listening on ws://localhost:123');
       expect(appState.output.length).toBe(1);
     });

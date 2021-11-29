@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 /**
- * Hightlights part of a string
+ * Highlights part of a string
  *
  * Inspired by https://github.com/palantir/blueprint/blob/develop/packages/docs-app/src/examples/select-examples/films.tsx
  * License: https://github.com/palantir/blueprint/blob/develop/LICENSE

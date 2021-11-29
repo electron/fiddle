@@ -59,7 +59,7 @@ export class EditorMosaic {
 
   constructor() {
     // whenever the mosaics are changed,
-    // upate the editor layout
+    // update the editor layout
     reaction(
       () => this.mosaic,
       () => this.layout(),
@@ -107,7 +107,7 @@ export class EditorMosaic {
     if (!isSupportedFile(id))
       throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
 
-    // create a moncao model with the file's contents
+    // create a monaco model with the file's contents
     const { monaco } = window.ElectronFiddle;
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);

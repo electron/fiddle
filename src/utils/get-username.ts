@@ -3,7 +3,7 @@ import * as os from 'os';
 let username = '';
 
 /**
- * Returns the curren username
+ * Returns the current username
  *
  * @export
  * @returns {string}
