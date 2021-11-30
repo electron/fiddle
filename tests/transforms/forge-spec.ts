@@ -46,6 +46,7 @@ describe('forgeTransform()', () => {
           ],
         },
       },
+      license: 'MIT',
     });
   });
 
