@@ -18,6 +18,7 @@ export async function forgeTransform(files: Files): Promise<Files> {
 
       parsed.config ||= {};
       parsed.devDependencies ||= {};
+      parsed.license ||= 'MIT';
       parsed.scripts ||= {};
       const { config, devDependencies, scripts } = parsed;
 
