@@ -9,7 +9,7 @@ jobs:
     - uses: actions/checkout@v2.4.0
     - name: Fetch git branches
       run: git fetch --no-tags --prune --depth=1 origin +refs/heads/*:refs/remotes/origin/*
-    - uses: actions/setup-node@v2.4.1
+    - uses: actions/setup-node@v2.5.0
       with:
         node-version: '12.x'
         cache: yarn
