@@ -653,7 +653,8 @@ export class AppState {
     }
 
     if (strData.startsWith('Debugger listening on ws://')) return;
-    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
+    if (strData === 'For help, see: https://nodejs.org/en/docs/inspector')
+      return;
 
     const entry: OutputEntry = {
       isNotPre,
