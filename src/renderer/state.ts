@@ -619,7 +619,7 @@ export class AppState {
    * @returns {void}
    */
   @action public flushOutput(): void {
-    this.pushOutput('\r\n', { bypassBuffer: false });
+    this.pushOutput('\n', { bypassBuffer: false });
   }
 
   /**
@@ -638,7 +638,7 @@ export class AppState {
     if (process.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
-      const parts = strData.split('\r\n');
+      const parts = strData.split(/\r?\n/);
       for (let partIndex = 0; partIndex < parts.length; partIndex++) {
         const part = parts[partIndex];
         if (partIndex === parts.length - 1) {
