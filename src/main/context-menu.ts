@@ -36,8 +36,7 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
  * Our check for "are we in the Monaco editor" is pretty crude -
  * we just assume that we are if we can paste text.
  *
- * @param {BrowserWindow} browserWindow
- * @param {ContextMenuParams} { x, y }
+ * @param {ContextMenuParams} { pageURL, editFlags }
  * @returns {Array<MenuItemConstructorOptions>}
  */
 export function getMonacoItems({
