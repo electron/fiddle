@@ -1,6 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
-import isRunning from 'is-running';
 
 import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -196,16 +195,18 @@ export class Runner {
    * @memberof Runner
    */
   public stop(): void {
-    this.appState.isRunning = !!this.child && !this.child.kill();
+    const child = this.child;
+    this.appState.isRunning = !!child && !child.kill();
 
-    // If the child process is still alive 1 second after we've
-    // attempted to kill it by normal means, kill it forcefully.
-    setTimeout(() => {
-      const pid = this.child?.pid;
-      if (pid && isRunning(pid)) {
-        this.child?.kill('SIGKILL');
-      }
-    }, 1000);
+    if (child) {
+      // If the child process is still alive 1 second after we've
+      // attempted to kill it by normal means, kill it forcefully.
+      setTimeout(() => {
+        if (child.exitCode === null) {
+          child.kill('SIGKILL');
+        }
+      }, 1000);
+    }
   }
 
   /**
