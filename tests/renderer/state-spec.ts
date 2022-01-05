@@ -670,8 +670,10 @@ describe('AppState', () => {
       expect(appState.output.length).toBe(1);
     });
 
-    it('ignores the "For help see..." output', () => {
-      appState.pushOutput('For help see https://nodejs.org/en/docs/inspector');
+    it('ignores the "For help, see: ..." output', () => {
+      appState.pushOutput(
+        'For help, see: https://nodejs.org/en/docs/inspector',
+      );
       expect(appState.output.length).toBe(1);
     });
 
