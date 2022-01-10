@@ -136,6 +136,11 @@ export async function processCommandLine(argv: string[]) {
   program.exitOverride();
 
   program
+    .command('start', { isDefault: true })
+    .description('Start Fiddle')
+    .allowUnknownOption();
+
+  program
     .command('bisect <goodVersion> <badVersion>')
     .description('Find where regressions were introduced')
     .option('--fiddle <dir|gist>', 'Open a fiddle', process.cwd())
