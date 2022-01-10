@@ -209,8 +209,8 @@ function getReleasedVersions(): Array<Version> {
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
- * @returns {boolean} true if major version is a known release
+ * @param {number} version - Electron major version number
+ * @returns {boolean} true if there are releases with that major version
  */
 export function isReleasedMajor(major: number) {
   const prefix = `${major}.`;
