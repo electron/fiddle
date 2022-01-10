@@ -1,6 +1,6 @@
 import { EditorValues } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { getReleasedVersions } from './versions';
+import { isReleasedMajor } from './versions';
 import { readFiddle } from '../utils/read-fiddle';
 
 import * as fs from 'fs-extra';
@@ -90,20 +90,6 @@ function getQuickStart(branch: string): Promise<EditorValues> {
  */
 export function getTestTemplate(): Promise<EditorValues> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
-}
-
-/**
- * Helper to check if this version is from a released major branch.
- *
- * This way when we have a local version of Electron like '999.0.0'
- * we'll know to not try & download 999-x-y.zip from GitHub :D
- *
- * @param {semver.SemVer} version - Electron version, e.g. 12.0.0
- * @returns {boolean} true if major version is a known release
- */
-function isReleasedMajor(major: number) {
-  const prefix = `${major}.`;
-  return getReleasedVersions().some((ver) => ver.version.startsWith(prefix));
 }
 
 /**
