@@ -30,6 +30,11 @@ describe('processCommandLine()', () => {
     expect(ipcMainManager.send).not.toHaveBeenCalled();
   });
 
+  it('does nothing when passed flags for electron binary', async () => {
+    await processCommandLine([...ARGV_PREFIX, '--no-sandbox']);
+    expect(ipcMainManager.send).not.toHaveBeenCalled();
+  });
+
   it('exits with 2 if called with invalid parameters', async () => {
     const argv = [...ARGV_PREFIX, 'test', '--this-option-is-unknown=true'];
     const exitCode = 2;

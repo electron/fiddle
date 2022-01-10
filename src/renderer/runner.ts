@@ -1,6 +1,5 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
-import isRunning from 'is-running';
 
 import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -141,6 +140,7 @@ export class Runner {
    * Actually run the fiddle.
    *
    * @returns {Promise<RunResult>}
+   * @memberof Runner
    */
   public async run(): Promise<RunResult> {
     const { fileManager } = window.ElectronFiddle.app;
@@ -192,20 +192,21 @@ export class Runner {
   /**
    * Stop a currently running Electron fiddle.
    *
-   * @returns {boolean} true if runner is now idle
    * @memberof Runner
    */
   public stop(): void {
-    this.appState.isRunning = !!this.child && !this.child.kill();
+    const child = this.child;
+    this.appState.isRunning = !!child && !child.kill();
 
-    // If the child process is still alive 1 second after we've
-    // attempted to kill it by normal means, kill it forcefully.
-    setTimeout(() => {
-      const pid = this.child?.pid;
-      if (pid && isRunning(pid)) {
-        this.child?.kill('SIGKILL');
-      }
-    }, 1000);
+    if (child) {
+      // If the child process is still alive 1 second after we've
+      // attempted to kill it by normal means, kill it forcefully.
+      setTimeout(() => {
+        if (child.exitCode === null) {
+          child.kill('SIGKILL');
+        }
+      }, 1000);
+    }
   }
 
   /**
@@ -272,9 +273,9 @@ export class Runner {
   /**
    * Installs the specified modules
    *
-   * @param {EditorValues} values
-   * @param {string} dir
+   * @param {PMOperationOptions} pmOptions
    * @returns {Promise<void>}
+   * @memberof Runner
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
     const modules = Array.from(this.appState.modules.keys());
@@ -339,8 +340,7 @@ export class Runner {
    * Execute Electron.
    *
    * @param {string} dir
-   * @param {string} version
-   * @returns {Promise<void>}
+   * @returns {Promise<RunResult>}
    * @memberof Runner
    */
   public async execute(dir: string): Promise<RunResult> {
@@ -424,7 +424,7 @@ export class Runner {
    * just running "{packageManager} install")
    *
    * @param {PMOperationOptions} options
-   * @returns
+   * @returns {Promise<boolean>}
    * @memberof Runner
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
