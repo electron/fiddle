@@ -141,6 +141,7 @@ export class Runner {
    * Actually run the fiddle.
    *
    * @returns {Promise<RunResult>}
+   * @memberof Runner
    */
   public async run(): Promise<RunResult> {
     const { fileManager } = window.ElectronFiddle.app;
@@ -192,7 +193,6 @@ export class Runner {
   /**
    * Stop a currently running Electron fiddle.
    *
-   * @returns {boolean} true if runner is now idle
    * @memberof Runner
    */
   public stop(): void {
@@ -272,9 +272,9 @@ export class Runner {
   /**
    * Installs the specified modules
    *
-   * @param {EditorValues} values
-   * @param {string} dir
+   * @param {PMOperationOptions} pmOptions
    * @returns {Promise<void>}
+   * @memberof Runner
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
     const modules = Array.from(this.appState.modules.keys());
@@ -339,8 +339,7 @@ export class Runner {
    * Execute Electron.
    *
    * @param {string} dir
-   * @param {string} version
-   * @returns {Promise<void>}
+   * @returns {Promise<RunResult>}
    * @memberof Runner
    */
   public async execute(dir: string): Promise<RunResult> {
@@ -424,7 +423,7 @@ export class Runner {
    * just running "{packageManager} install")
    *
    * @param {PMOperationOptions} options
-   * @returns
+   * @returns {Promise<boolean>}
    * @memberof Runner
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
