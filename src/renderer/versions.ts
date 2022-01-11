@@ -197,10 +197,24 @@ export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
  *
  * @returns {Array<Version>}
  */
-export function getReleasedVersions(): Array<Version> {
+function getReleasedVersions(): Array<Version> {
   return getVersions(VersionKeys.known, () =>
     require('../../static/releases.json'),
   );
+}
+
+/**
+ * Helper to check if this version is from a released major branch.
+ *
+ * This way when we have a local version of Electron like '999.0.0'
+ * we'll know to not try & download 999-x-y.zip from GitHub :D
+ *
+ * @param {number} version - Electron major version number
+ * @returns {boolean} true if there are releases with that major version
+ */
+export function isReleasedMajor(major: number) {
+  const prefix = `${major}.`;
+  return getReleasedVersions().some((ver) => ver.version.startsWith(prefix));
 }
 
 /**
@@ -275,12 +289,12 @@ function isElectronVersion(
 }
 
 export function getOldestSupportedMajor(): number | undefined {
-  const NUM_STABLE_BRANCHES = process.env.NUM_STABLE_BRANCHES || 4;
+  const NUM_BRANCHES = parseInt(process.env.NUM_STABLE_BRANCHES || '') || 4;
 
   return getReleasedVersions()
     .filter((ver) => ver.version.endsWith('.0.0'))
     .map((ver) => Number.parseInt(ver.version))
     .sort((a, b) => a - b)
-    .slice(-NUM_STABLE_BRANCHES)
+    .slice(-NUM_BRANCHES)
     .shift();
 }
