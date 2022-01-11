@@ -19,42 +19,57 @@ interface RunnerProps {
 @observer
 export class Runner extends React.Component<RunnerProps> {
   public render() {
+    const { downloading, unknown, unzipping, ready } = VersionState;
     const {
       isRunning,
       isInstallingModules,
       currentElectronVersion,
+      isOnline,
     } = this.props.appState;
 
-    const state = currentElectronVersion && currentElectronVersion.state;
+    const state = currentElectronVersion?.state;
     const props: ButtonProps = { className: 'button-run', disabled: true };
 
-    if (state === VersionState.downloading) {
-      props.text = 'Downloading';
-      props.icon = (
-        <Spinner size={16} value={currentElectronVersion?.downloadProgress} />
-      );
-    } else if (state === VersionState.unzipping) {
-      props.text = 'Unzipping';
-      props.icon = <Spinner size={16} />;
-    } else if (state === VersionState.ready) {
-      props.disabled = false;
+    if ([downloading, unknown].includes(state) && !isOnline) {
+      props.text = 'Offline';
+      props.icon = 'satellite';
+      return <Button {...props} type={undefined} />;
+    }
 
-      if (isRunning) {
-        props.active = true;
-        props.text = 'Stop';
-        props.onClick = window.ElectronFiddle.app.runner.stop;
-        props.icon = 'stop';
-      } else if (isInstallingModules) {
-        props.text = 'Installing modules';
-        props.icon = <Spinner size={16} />;
-      } else {
-        props.text = 'Run';
-        props.onClick = window.ElectronFiddle.app.runner.run;
-        props.icon = 'play';
+    switch (state) {
+      case downloading: {
+        props.text = 'Downloading';
+        props.icon = (
+          <Spinner size={16} value={currentElectronVersion?.downloadProgress} />
+        );
+        break;
       }
-    } else {
-      props.text = 'Checking status';
-      props.icon = <Spinner size={16} />;
+      case unzipping: {
+        props.text = 'Unzipping';
+        props.icon = <Spinner size={16} />;
+        break;
+      }
+      case ready: {
+        props.disabled = false;
+        if (isRunning) {
+          props.active = true;
+          props.text = 'Stop';
+          props.onClick = window.ElectronFiddle.app.runner.stop;
+          props.icon = 'stop';
+        } else if (isInstallingModules) {
+          props.text = 'Installing modules';
+          props.icon = <Spinner size={16} />;
+        } else {
+          props.text = 'Run';
+          props.onClick = window.ElectronFiddle.app.runner.run;
+          props.icon = 'play';
+        }
+        break;
+      }
+      default: {
+        props.text = 'Checking status';
+        props.icon = <Spinner size={16} />;
+      }
     }
 
     return <Button {...props} type={undefined} />;

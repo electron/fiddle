@@ -2,7 +2,7 @@ import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
-import { GenericDialogType, VersionState } from '../../../src/interfaces';
+import { VersionState } from '../../../src/interfaces';
 import { AppState } from '../state';
 
 interface BisectHandlerProps {
@@ -44,12 +44,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
       );
 
       appState.pushOutput(`[BISECT] Complete: ${minVer}...${maxVer}`);
-      appState.setGenericDialogOptions({
-        type: GenericDialogType.success,
-        label,
-        cancel: undefined,
-      });
-      appState.isGenericDialogShowing = true;
+      appState.showInfoDialog(label);
     } else {
       appState.setVersion(response.version);
     }

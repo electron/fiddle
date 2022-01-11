@@ -1,6 +1,5 @@
-import * as semver from 'semver';
-
 import { RunnableVersion } from '../interfaces';
+import { semverCompare } from './sort-versions';
 
 /**
  * An subset of `versions` sorted from oldest to newest and bounded in the range of [oldVersion..newVersion]
@@ -17,7 +16,7 @@ export function getVersionRange(
   versions: RunnableVersion[],
 ): RunnableVersion[] {
   // ensure that oldVersion is old than newVersion
-  if (semver.compare(oldVersion, newVersion) > 0) {
+  if (semverCompare(oldVersion, newVersion) > 0) {
     [oldVersion, newVersion] = [newVersion, oldVersion];
   }
 

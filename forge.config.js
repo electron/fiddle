@@ -14,6 +14,13 @@ if (process.env['WINDOWS_CODESIGN_FILE']) {
   }
 }
 
+const commonLinuxConfig = {
+  icon: {
+    scalable: path.resolve(iconDir, 'fiddle.svg'),
+  },
+  mimeType: ['x-scheme-handler/electron-fiddle'],
+};
+
 const config = {
   hooks: {
     generateAssets: require('./tools/generateAssets'),
@@ -87,15 +94,12 @@ const config = {
     {
       name: '@electron-forge/maker-deb',
       platforms: ['linux'],
-      config: {
-        icon: {
-          scalable: path.resolve(iconDir, 'fiddle.svg'),
-        },
-      },
+      config: commonLinuxConfig,
     },
     {
       name: '@electron-forge/maker-rpm',
       platforms: ['linux'],
+      config: commonLinuxConfig,
     },
   ],
   publishers: [

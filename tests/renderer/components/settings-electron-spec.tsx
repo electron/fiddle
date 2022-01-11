@@ -36,8 +36,8 @@ describe('ElectronSettings component', () => {
 
   it('renders', () => {
     const spy = jest
-      .spyOn(versions, 'getOldestSupportedVersion')
-      .mockReturnValue('9.0.0');
+      .spyOn(versions, 'getOldestSupportedMajor')
+      .mockReturnValue(9);
 
     const moreVersions: RunnableVersion[] = [
       {
@@ -104,6 +104,26 @@ describe('ElectronSettings component', () => {
       .simulate('click');
 
     expect(store.downloadVersion).toHaveBeenCalledTimes(1);
+  });
+
+  it('handles missing local versions', () => {
+    const version = '99999.0.0';
+    const ver = {
+      source: VersionSource.local,
+      state: VersionState.unknown,
+      version,
+    };
+    store.versions = { version: ver };
+    store.versionsToShow = [ver];
+
+    const wrapper = mount(<ElectronSettings appState={store as any} />);
+
+    wrapper
+      .find('.electron-versions-table .bp3-button')
+      .first()
+      .simulate('click');
+
+    expect(store.removeVersion).toHaveBeenCalledTimes(1);
   });
 
   it('handles the deleteAll()', async () => {

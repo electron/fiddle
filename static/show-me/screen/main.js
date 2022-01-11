@@ -3,7 +3,8 @@
 // For more info, see:
 // https://electronjs.org/docs/api/screen
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
+const path = require('path')
 
 app.whenReady().then(() => {
   // We cannot require the screen module until the
@@ -19,9 +20,14 @@ app.whenReady().then(() => {
     width,
     height,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: false, // default in Electron >= 5
+      contextIsolation: true, // default in Electron >= 12
+      preload: path.join(__dirname, 'preload.js')
     }
   })
 
+  ipcMain.handle('get-displays', () => {
+    return screen.getAllDisplays()
+  })
   mainWindow.loadFile('index.html')
 })

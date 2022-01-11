@@ -7,4 +7,6 @@ function notifyMe () {
   notification.onclose = () => console.log('Closed')
 }
 
-document.querySelector('button').onclick = notifyMe
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('button').onclick = notifyMe
+})

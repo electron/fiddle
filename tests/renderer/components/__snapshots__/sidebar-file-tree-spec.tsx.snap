@@ -1,0 +1,802 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SidebarFileTree component can bring up the Add File input 1`] = `
+<div
+  style={
+    Object {
+      "overflow": "hidden",
+    }
+  }
+>
+  <Blueprint3.Tree
+    contents={
+      Array [
+        Object {
+          "childNodes": Array [
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 0,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                index.html
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 1,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={true}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                main.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 2,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                preload.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 3,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                renderer.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 4,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                styles.css
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "className": "add-file-input",
+              "icon": "document",
+              "id": "add",
+              "label": <input
+                autoFocus={true}
+                className="bp3-input bp3-fill bp3-small"
+                id="new-file-input"
+                onBlur={[Function]}
+                onKeyDown={[Function]}
+                style={
+                  Object {
+                    "padding": 0,
+                    "width": "100%",
+                  }
+                }
+              />,
+            },
+          ],
+          "hasCaret": false,
+          "icon": "folder-open",
+          "id": "files",
+          "isExpanded": true,
+          "label": "Editors",
+          "secondaryLabel": <Blueprint3.ButtonGroup
+            minimal={true}
+          >
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+          </Blueprint3.ButtonGroup>,
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`SidebarFileTree component reflects the visibility state of all icons 1`] = `
+<div
+  style={
+    Object {
+      "overflow": "hidden",
+    }
+  }
+>
+  <Blueprint3.Tree
+    contents={
+      Array [
+        Object {
+          "childNodes": Array [
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 0,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                index.html
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-off"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 1,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={true}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                main.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 2,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                preload.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 3,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                renderer.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 4,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                styles.css
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+          ],
+          "hasCaret": false,
+          "icon": "folder-open",
+          "id": "files",
+          "isExpanded": true,
+          "label": "Editors",
+          "secondaryLabel": <Blueprint3.ButtonGroup
+            minimal={true}
+          >
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+          </Blueprint3.ButtonGroup>,
+        },
+      ]
+    }
+  />
+</div>
+`;
+
+exports[`SidebarFileTree component renders 1`] = `
+<div
+  style={
+    Object {
+      "overflow": "hidden",
+    }
+  }
+>
+  <Blueprint3.Tree
+    contents={
+      Array [
+        Object {
+          "childNodes": Array [
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 0,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                index.html
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 1,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={true}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                main.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 2,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                preload.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 3,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                renderer.js
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+            Object {
+              "hasCaret": false,
+              "icon": "document",
+              "id": 4,
+              "label": <Blueprint.ContextMenu2
+                content={
+                  <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="remove"
+                      intent="danger"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Delete"
+                    />
+                  </Blueprint3.Menu>
+                }
+              >
+                styles.css
+              </Blueprint.ContextMenu2>,
+              "secondaryLabel": <Blueprint3.ButtonGroup>
+                <Blueprint3.Tooltip2
+                  content="Toggle Visibility"
+                  hoverCloseDelay={0}
+                  hoverOpenDelay={1000}
+                  minimal={true}
+                  transitionDuration={100}
+                >
+                  <Blueprint3.Button
+                    minimal={true}
+                    onClick={[Function]}
+                  >
+                    <Blueprint3.Icon
+                      icon="eye-open"
+                    />
+                  </Blueprint3.Button>
+                </Blueprint3.Tooltip2>
+              </Blueprint3.ButtonGroup>,
+            },
+          ],
+          "hasCaret": false,
+          "icon": "folder-open",
+          "id": "files",
+          "isExpanded": true,
+          "label": "Editors",
+          "secondaryLabel": <Blueprint3.ButtonGroup
+            minimal={true}
+          >
+            <Blueprint3.Tooltip2
+              content="Add New File"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="add"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+            <Blueprint3.Tooltip2
+              content="Reset Layout"
+              hoverCloseDelay={0}
+              hoverOpenDelay={1000}
+              minimal={true}
+              transitionDuration={100}
+            >
+              <Blueprint3.Button
+                icon="grid-view"
+                onClick={[Function]}
+                small={true}
+              />
+            </Blueprint3.Tooltip2>
+          </Blueprint3.ButtonGroup>,
+        },
+      ]
+    }
+  />
+</div>
+`;

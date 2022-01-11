@@ -3,6 +3,7 @@ import {
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogType,
+  MAIN_JS,
   RunnableVersion,
   Version,
   VersionSource,
@@ -14,30 +15,22 @@ import {
   setupBinary,
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
-import { getTemplate, isContentUnchanged } from '../../src/renderer/content';
+import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
-import { getElectronVersions } from '../../src/renderer/versions';
-import {
-  getUpdatedElectronVersions,
-  saveLocalVersions,
-} from '../../src/renderer/versions';
+import { getElectronVersions, makeRunnable } from '../../src/renderer/versions';
+import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
-import { VersionsMock } from '../mocks/mocks';
+import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
-  isContentUnchanged: jest.fn(),
   getTemplate: jest.fn(),
 }));
 jest.mock('../../src/renderer/binary', () => ({
   removeBinary: jest.fn(),
   setupBinary: jest.fn(),
   getVersionState: jest.fn().mockImplementation((v) => v.state),
-}));
-jest.mock('../../src/renderer/fetch-types', () => ({
-  getLocalTypePathForVersion: jest.fn(),
-  updateEditorTypeDefinitions: jest.fn(),
 }));
 jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
@@ -48,14 +41,16 @@ jest.mock('../../src/renderer/versions', () => {
 
   return {
     addLocalVersion: jest.fn(),
+    fetchVersions: jest.fn(mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
     getElectronVersions: jest.fn(),
-    getOldestSupportedVersion: jest.fn(),
+    getOldestSupportedMajor: jest.fn(),
     getReleaseChannel,
-    getUpdatedElectronVersions: jest.fn().mockResolvedValue(mockVersionsArray),
+    makeRunnable: jest.fn((v) => v),
     saveLocalVersions: jest.fn(),
   };
 });
+
 jest.mock('../../src/utils/get-name', () => ({
   getName: jest.fn(),
 }));
@@ -69,9 +64,7 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (getUpdatedElectronVersions as jest.Mock).mockResolvedValue(
-      mockVersionsArray,
-    );
+    (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
     (getVersionState as jest.Mock).mockImplementation((v) => v.state);
 
     appState = new AppState(mockVersionsArray);
@@ -85,13 +78,23 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (getUpdatedElectronVersions as jest.Mock).mockImplementationOnce(
-        async () => {
-          throw new Error('Bwap-bwap');
-        },
-      );
+      (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
+      await appState.updateElectronVersions();
+    });
+
+    it('adds new versions', async () => {
+      const version = '100.0.0';
+      const ver: Version = { version };
+
+      (fetchVersions as jest.Mock).mockResolvedValue([ver]);
+      (makeRunnable as jest.Mock).mockImplementation((v: unknown) => v);
+
+      const oldCount = Object.keys(appState.versions).length;
 
       await appState.updateElectronVersions();
+      const newCount = Object.keys(appState.versions).length;
+      expect(newCount).toBe(oldCount + 1);
+      expect(appState.versions[version]).toStrictEqual(ver);
     });
   });
 
@@ -190,19 +193,6 @@ describe('AppState', () => {
       expect(appState.isAddVersionDialogShowing).toBe(true);
       appState.toggleAddVersionDialog();
       expect(appState.isAddVersionDialogShowing).toBe(false);
-    });
-  });
-
-  describe('toggleGenericDialog()', () => {
-    it('toggles the warning dialog', () => {
-      appState.genericDialogLastResult = true;
-
-      appState.toggleGenericDialog();
-      expect(appState.isGenericDialogShowing).toBe(true);
-      expect(appState.genericDialogLastResult).toBe(null);
-
-      appState.toggleGenericDialog();
-      expect(appState.isGenericDialogShowing).toBe(false);
     });
   });
 
@@ -387,18 +377,67 @@ describe('AppState', () => {
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
 
-    it('possibly updates the editors', async () => {
-      appState.versions['1.0.0'] = { version: '1.0.0' } as any;
-      (isContentUnchanged as jest.Mock).mockReturnValueOnce(true);
-      (getTemplate as jest.Mock).mockResolvedValueOnce({
-        defaultMosaics: {},
-        customMosaics: {},
+    describe('loads the template for the new version', () => {
+      let newVersion: string;
+      let oldVersion: string;
+      let replaceSpy: ReturnType<typeof jest.spyOn>;
+      const nextValues = createEditorValues();
+
+      beforeEach(() => {
+        // pick some version that differs from the current version
+        oldVersion = appState.version;
+        newVersion = Object.keys(appState.versions)
+          .filter((version) => version !== oldVersion)
+          .shift()!;
+        expect(newVersion).not.toStrictEqual(oldVersion);
+        expect(newVersion).toBeTruthy();
+
+        // spy on app.replaceFiddle
+        replaceSpy = jest.spyOn(
+          (window as any).ElectronFiddle.app,
+          'replaceFiddle',
+        );
+        replaceSpy.mockReset();
+
+        (getTemplate as jest.Mock).mockResolvedValue(nextValues);
       });
 
-      await appState.setVersion('v1.0.0');
+      it('if there is no current fiddle', async () => {
+        // setup: current fiddle is empty
+        appState.editorMosaic.set({});
 
-      expect(getTemplate).toHaveBeenCalledTimes(1);
-      expect(window.ElectronFiddle.app.replaceFiddle).toHaveBeenCalledTimes(1);
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).toHaveBeenCalledTimes(1);
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
+      });
+
+      it('if the current fiddle is an unedited template', async () => {
+        appState.templateName = oldVersion;
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = false;
+
+        await appState.setVersion(newVersion);
+        const templateName = newVersion;
+        expect(replaceSpy).toHaveBeenCalledWith(nextValues, { templateName });
+      });
+
+      it('but not if the current fiddle is edited', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.editorMosaic.isEdited = true;
+        appState.templateName = oldVersion;
+
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).not.toHaveBeenCalled();
+      });
+
+      it('but not if the current fiddle is not a template', async () => {
+        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        appState.localPath = '/some/path/to/a/fiddle';
+
+        await appState.setVersion(newVersion);
+        expect(replaceSpy).not.toHaveBeenCalled();
+      });
     });
 
     it('updates typescript definitions', async () => {
@@ -425,60 +464,162 @@ describe('AppState', () => {
     });
   });
 
-  describe('runConfirmationDialog()', () => {
+  describe('dialog helpers', () => {
     let dispose: any;
 
     afterEach(() => {
       if (dispose) dispose();
     });
 
-    function registerDialogHandler(
-      description: string | null,
-      result: boolean,
-    ) {
+    function registerDialogHandler(input: string | null, result: boolean) {
       dispose = reaction(
         () => appState.isGenericDialogShowing,
         () => {
-          appState.genericDialogLastInput = description;
+          appState.genericDialogLastInput = input;
           appState.genericDialogLastResult = result;
           appState.isGenericDialogShowing = false;
         },
       );
     }
 
-    const Description = 'some non-default description';
+    const Input = 'Entropy requires no maintenance.';
+    const DefaultInput = 'default input';
 
     const Opts = {
-      type: GenericDialogType.warning,
       label: 'foo',
+      ok: 'Close',
+      type: GenericDialogType.warning,
+      wantsInput: false,
     } as const;
 
-    it('returns true if confirmed by user', async () => {
-      registerDialogHandler(Description, true);
-      const response = await appState.runConfirmationDialog(Opts);
-      expect(response).toBe(true);
-    });
-
-    it('returns false if rejected by user', async () => {
-      registerDialogHandler(Description, false);
-      const response = await appState.runConfirmationDialog(Opts);
-      expect(response).toBe(false);
-    });
-  });
-
-  describe('setGenericDialogOptions()', () => {
-    it('sets the warning dialog options', () => {
-      appState.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: 'foo',
+    describe('showGenericDialog()', () => {
+      it('shows a dialog', async () => {
+        const promise = appState.showGenericDialog(Opts);
+        expect(appState.isGenericDialogShowing).toBe(true);
+        appState.isGenericDialogShowing = false;
+        await promise;
       });
-      expect(appState.genericDialogOptions).toEqual({
-        type: GenericDialogType.warning,
-        label: 'foo',
-        ok: 'Okay',
-        placeholder: '',
-        cancel: 'Cancel',
-        wantsInput: false,
+
+      it('resolves when the dialog is dismissed', async () => {
+        registerDialogHandler(Input, true);
+        const promise = appState.showGenericDialog(Opts);
+        await promise;
+        expect(appState).toHaveProperty('isGenericDialogShowing', false);
+      });
+
+      it('returns true if confirmed by user', async () => {
+        registerDialogHandler(Input, true);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('confirm', true);
+      });
+
+      it('returns false if rejected by user', async () => {
+        registerDialogHandler(Input, false);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('confirm', false);
+      });
+
+      it('returns the user-inputted text', async () => {
+        registerDialogHandler(Input, true);
+        const result = await appState.showGenericDialog({
+          ...Opts,
+          defaultInput: DefaultInput,
+        });
+        expect(result).toHaveProperty('input', Input);
+      });
+
+      it('returns defaultInput as a fallback', async () => {
+        registerDialogHandler(null, true);
+        const result = await appState.showGenericDialog({
+          ...Opts,
+          defaultInput: DefaultInput,
+        });
+        expect(result).toHaveProperty('input', DefaultInput);
+      });
+
+      it('returns an empty string as a last resort', async () => {
+        registerDialogHandler(null, true);
+        const result = await appState.showGenericDialog(Opts);
+        expect(result).toHaveProperty('input', '');
+      });
+    });
+
+    describe('showInputDialog', () => {
+      const input = 'fnord' as const;
+      const inputOpts = {
+        label: 'label',
+        ok: 'Close',
+        placeholder: 'Placeholder',
+      } as const;
+
+      it('returns text when confirmed', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+          input,
+        });
+        const result = await appState.showInputDialog(inputOpts);
+        expect(result).toBe(input);
+      });
+
+      it('returns undefined when canceled', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: false,
+          input,
+        });
+        const result = await appState.showInputDialog(inputOpts);
+        expect(result).toBeUndefined();
+      });
+    });
+
+    describe('showConfirmDialog', () => {
+      const label = 'Do you want to confirm this dialog?';
+      async function testConfirmDialog(confirm: boolean) {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm,
+          input: undefined,
+        });
+        const result = await appState.showConfirmDialog({
+          label,
+          ok: 'Confirm',
+        });
+        expect(result).toBe(confirm);
+      }
+
+      it('returns true when confirmed', () => testConfirmDialog(true));
+      it('returns false when canceled', () => testConfirmDialog(false));
+    });
+
+    describe('showErrorDialog', () => {
+      const label = 'This is an error message.';
+
+      it('shows an error dialog', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+        });
+        await appState.showErrorDialog(label);
+        expect(appState.showGenericDialog).toHaveBeenCalledWith({
+          label,
+          ok: 'Close',
+          type: GenericDialogType.warning,
+          wantsInput: false,
+        });
+      });
+    });
+
+    describe('showInfoDialog', () => {
+      const label = 'This is an informational message.';
+
+      it('shows an error dialog', async () => {
+        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+          confirm: true,
+        });
+        await appState.showInfoDialog(label);
+        expect(appState.showGenericDialog).toHaveBeenCalledWith({
+          label,
+          ok: 'Close',
+          type: GenericDialogType.success,
+          wantsInput: false,
+        });
       });
     });
   });
@@ -521,26 +662,29 @@ describe('AppState', () => {
       appState.pushOutput(Buffer.from('hi'));
 
       expect(appState.output[1].text).toBe('hi');
-      expect(appState.output[1].timestamp).toBeTruthy();
+      expect(appState.output[1].timeString).toBeTruthy();
     });
 
-    it('ignores the "Debuggeer listening on..." output', () => {
+    it('ignores the "Debugger listening on..." output', () => {
       appState.pushOutput('Debugger listening on ws://localhost:123');
       expect(appState.output.length).toBe(1);
     });
 
-    it('ignores the "For help see..." output', () => {
-      appState.pushOutput('For help see https://nodejs.org/en/docs/inspector');
+    it('ignores the "For help, see: ..." output', () => {
+      appState.pushOutput(
+        'For help, see: https://nodejs.org/en/docs/inspector',
+      );
       expect(appState.output.length).toBe(1);
     });
 
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
-      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), {
+      appState.pushOutput(Buffer.from('Buffer\r\nStuff\nMore'), {
         bypassBuffer: false,
       });
       expect(appState.output[1].text).toBe('Buffer');
+      expect(appState.output[2].text).toBe('Stuff');
 
       resetPlatform();
     });

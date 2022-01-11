@@ -1,6 +1,5 @@
 // use a stable-sorting stringify for comparing expected & actual payloads
 import stringify from 'json-stable-stringify';
-import { app } from 'electron';
 
 import {
   ElectronReleaseChannel,
@@ -28,6 +27,11 @@ describe('processCommandLine()', () => {
 
   it('does nothing when passed no arguments', async () => {
     await processCommandLine(ARGV_PREFIX);
+    expect(ipcMainManager.send).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when passed flags for electron binary', async () => {
+    await processCommandLine([...ARGV_PREFIX, '--no-sandbox']);
     expect(ipcMainManager.send).not.toHaveBeenCalled();
   });
 
@@ -131,6 +135,13 @@ describe('processCommandLine()', () => {
       expectBisectCalledOnceWith(expected);
     });
 
+    it('handles a --full option', async () => {
+      const argv = [...ARGV, GOOD, BAD, '--full'];
+      const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.beta}","${ElectronReleaseChannel.nightly}","${ElectronReleaseChannel.stable}"],"useObsolete":true}}`;
+      await processCommandLine(argv);
+      expectBisectCalledOnceWith(expected);
+    });
+
     it('handles a --nightlies option', async () => {
       const argv = [...ARGV, GOOD, BAD, '--nightlies'];
       const expected = `{"badVersion":"${BAD}","goodVersion":"${GOOD}","setup":{"fiddle":${DEFAULT_FIDDLE},"hideChannels":[],"showChannels":["${ElectronReleaseChannel.nightly}"]}}`;
@@ -200,7 +211,7 @@ describe('processCommandLine()', () => {
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
         await processCommandLine(argv);
-        expect(app.exit).toHaveBeenCalledWith(exitCode);
+        expect(process.exit).toHaveBeenCalledWith(exitCode);
       }
 
       it(`exits with 0 on ${RunResult.SUCCESS}`, async () => {
@@ -216,13 +227,13 @@ describe('processCommandLine()', () => {
       });
 
       it('sends output messages to the console', async () => {
-        const now = Date.now();
+        const timeString = new Date().toLocaleTimeString();
         const text = 'asieoniezi';
-        const expected = `[${new Date(now).toLocaleTimeString()}] ${text}`;
+        const expected = `[${timeString}] ${text}`;
         const spy = jest.spyOn(console, 'log').mockReturnValue();
 
         const fakeEvent = {};
-        const entry: OutputEntry = { text, timestamp: now };
+        const entry: OutputEntry = { text, timeString };
         (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
           ipcMainManager.emit(IpcEvents.OUTPUT_ENTRY, fakeEvent, entry);
         });

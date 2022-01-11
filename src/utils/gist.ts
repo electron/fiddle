@@ -9,7 +9,7 @@
  *-  https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f
  *-  https://gist.github.com/ckerr/8c5fc0c6a5153d49b5a4a56d3ed9da8f/
  *
- * @pararm {string} rawInput
+ * @param {string} rawInput
  * returns {(string | null)}
  */
 export function getGistId(rawInput: string): string | null {

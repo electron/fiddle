@@ -10,18 +10,16 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-
+import { clipboard } from 'electron';
 import { when } from 'mobx';
 import {
-  DEFAULT_EDITORS,
   EditorValues,
-  GenericDialogType,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
-import { getEmptyContent } from '../../utils/editor-utils';
+import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -102,27 +100,14 @@ export class GistActionButton extends React.Component<
     }
   }
 
-  public async getFiddleDescriptionFromUser(): Promise<string | null> {
-    const { appState } = this.props;
-
-    // Reset potentially non-null last description.
-    appState.genericDialogLastInput = null;
-
-    appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
+  private getFiddleDescriptionFromUser(): Promise<string | undefined> {
+    const placeholder = 'Electron Fiddle Gist' as const;
+    return this.props.appState.showInputDialog({
+      defaultInput: placeholder,
       label: 'Please provide a brief description for your Fiddle Gist',
-      wantsInput: true,
       ok: 'Publish',
-      cancel: 'Cancel',
-      placeholder: 'Electron Fiddle Gist',
+      placeholder,
     });
-    appState.isGenericDialogShowing = true;
-    await when(() => !appState.isGenericDialogShowing);
-
-    const cancelled = !appState.genericDialogLastResult;
-    return cancelled
-      ? null
-      : appState.genericDialogLastInput ?? 'Electron Fiddle Gist';
   }
 
   private async publishGist(description: string) {
@@ -144,7 +129,14 @@ export class GistActionButton extends React.Component<
       appState.localPath = undefined;
 
       console.log(`Publish Button: Publishing complete`, { gist });
-      this.renderToast({ message: 'Publishing completed successfully!' });
+      this.renderToast({
+        message: 'Successfully published gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
+      });
 
       // Only set action type to update if publish completed successfully.
       this.setActionType(GistActionType.update);
@@ -175,7 +167,6 @@ export class GistActionButton extends React.Component<
       appState.editorMosaic.isEdited = false;
     }
 
-    appState.genericDialogLastInput = null;
     appState.activeGistAction = GistActionState.none;
   }
 
@@ -191,14 +182,31 @@ export class GistActionButton extends React.Component<
     appState.activeGistAction = GistActionState.updating;
 
     try {
+      const {
+        data: { files: oldFiles },
+      } = await octo.gists.get({ gist_id: appState.gistId! });
+
+      const files = this.gistFilesList(values);
+      for (const id of Object.keys(oldFiles)) {
+        // Gist files are deleted by setting content to an empty string.
+        if (!(id in files)) files[id] = { content: '' };
+      }
+
       const gist = await octo.gists.update({
         gist_id: appState.gistId!,
-        files: this.gistFilesList(values) as any,
+        files,
       });
 
       appState.editorMosaic.isEdited = false;
       console.log('Updating: Updating done', { gist });
-      this.renderToast({ message: 'Successfully updated gist!' });
+      this.renderToast({
+        message: 'Successfully updated gist!',
+        action: {
+          text: 'Copy link',
+          icon: 'clipboard',
+          onClick: () => clipboard.writeText(gist.data.html_url),
+        },
+      });
     } catch (error) {
       console.warn(`Could not update gist`, { error });
 
@@ -424,22 +432,11 @@ export class GistActionButton extends React.Component<
   };
 
   private gistFilesList = (values: EditorValues) => {
-    const { customMosaics } = this.props.appState.editorMosaic;
-
-    const filesList = {};
-
-    // Add files for default editors.
-    for (const editor of DEFAULT_EDITORS) {
-      filesList[editor] = {
-        content: values[editor] || getEmptyContent(editor),
-      };
-    }
-
-    // Add files for any custom editors created by the user.
-    for (const mosaic of customMosaics) {
-      filesList[mosaic] = { content: values[mosaic] };
-    }
-
-    return filesList;
+    values = ensureRequiredFiles(values);
+    return Object.fromEntries(
+      Object.entries(values)
+        .filter(([, content]) => Boolean(content))
+        .map(([id, content]) => [id, { content }]),
+    );
   };
 }

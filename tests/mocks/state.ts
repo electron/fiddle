@@ -2,24 +2,22 @@ import { observable } from 'mobx';
 
 import {
   BlockableAccelerator,
-  DefaultEditorId,
   ElectronReleaseChannel,
   GenericDialogOptions,
   GistActionState,
   RunnableVersion,
 } from '../../src/interfaces';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
-import { EditorMosaicMock } from './editor-mosaic';
-import { MonacoEditorMock } from './monaco-editor';
 import { VersionsMock } from './electron-versions';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
   @observable public activeGistAction = GistActionState.none;
   @observable public channelsToShow: ElectronReleaseChannel[] = [];
-  @observable public editorMosaic = new EditorMosaicMock();
+  @observable public editorMosaic = new EditorMosaic();
   @observable public environmentVariables: string[] = [];
   @observable public executionFlags: string[] = [];
   @observable public genericDialogLastInput: string | null = null;
@@ -39,6 +37,7 @@ export class StateMock {
   @observable public isEnablingElectronLogging = false;
   @observable public isGenericDialogShowing = false;
   @observable public isInstallingModules = false;
+  @observable public isOnline = true;
   @observable public isQuitting = false;
   @observable public isRunning = false;
   @observable public isSettingsShowing = false;
@@ -46,6 +45,7 @@ export class StateMock {
   @observable public isTourShowing = false;
   @observable public isUsingSystemTheme = true;
   @observable public isWarningDialogShowing = false;
+  @observable public modules = new Map<string, string>();
   @observable public output = [];
   @observable public showObsoleteVersions = false;
   @observable public showUndownloadedVersions = false;
@@ -74,20 +74,20 @@ export class StateMock {
   public removeAcceleratorToBlock = jest.fn();
   public removeVersion = jest.fn();
   public resetView = jest.fn();
-  public runConfirmationDialog = jest.fn();
-  public setGenericDialogOptions = jest.fn().mockReturnValue({});
   public setTheme = jest.fn();
   public setVersion = jest.fn().mockImplementation((version: string) => {
-    this.version = version;
     this.currentElectronVersion = this.versions[version];
+    this.version = version;
   });
   public showChannels = jest.fn();
-  public showCustomEditorDialog = jest.fn();
+  public showConfirmDialog = jest.fn();
+  public showErrorDialog = jest.fn();
+  public showGenericDialog = jest.fn();
+  public showInfoDialog = jest.fn();
+  public showInputDialog = jest.fn();
   public signOutGitHub = jest.fn();
   public toggleAddVersionDialog = jest.fn();
   public toggleAuthDialog = jest.fn();
-  public toggleGenericDialog = jest.fn();
-  public toggleWarningDialog = jest.fn();
   public updateElectronVersions = jest.fn();
 
   constructor() {
@@ -95,15 +95,6 @@ export class StateMock {
     this.versions = obj;
     this.currentElectronVersion = arr[arr.length - 1];
     this.version = this.currentElectronVersion.version;
-
-    for (const filename of [
-      DefaultEditorId.main,
-      DefaultEditorId.renderer,
-      DefaultEditorId.html,
-      DefaultEditorId.preload,
-    ]) {
-      this.editorMosaic.addEditor(filename, new MonacoEditorMock());
-    }
   }
 
   public initVersions(

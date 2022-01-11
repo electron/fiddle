@@ -2,7 +2,7 @@ import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
 import * as content from '../../../src/renderer/content';
-import { DefaultEditorId, EditorValues } from '../../../src/interfaces';
+import { EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
@@ -35,11 +35,11 @@ describe('Editors component', () => {
   beforeEach(() => {
     ({ app, monaco } = (window as any).ElectronFiddle);
     ({ state: store } = app);
-    editorMosaic = new EditorMosaic();
-    store.editorMosaic = editorMosaic as any;
-
     editorValues = createEditorValues();
-    store.editorMosaic.set(editorValues);
+    editorMosaic = new EditorMosaic();
+    editorMosaic.set(editorValues);
+
+    store.editorMosaic = editorMosaic as any;
   });
 
   it('renders', () => {
@@ -65,7 +65,7 @@ describe('Editors component', () => {
   });
 
   describe('toggleEditorOption()', () => {
-    const filename = DefaultEditorId.html;
+    const filename = MAIN_JS;
 
     it('handles an error', () => {
       const editor = new MonacoEditorMock();
@@ -97,22 +97,7 @@ describe('Editors component', () => {
   it('renders a toolbar', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
-    const toolbar = instance.renderToolbar(
-      { title: DefaultEditorId.main } as any,
-      DefaultEditorId.main,
-    );
-
-    expect(toolbar).toMatchSnapshot();
-  });
-
-  it('does not render toolbar controls if only one editor exists', () => {
-    store.editorMosaic.mosaicArrangement = DefaultEditorId.main;
-    const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
-    const toolbar = instance.renderToolbar(
-      { title: DefaultEditorId.main } as any,
-      DefaultEditorId.main,
-    );
+    const toolbar = instance.renderToolbar({ title: MAIN_JS } as any, MAIN_JS);
 
     expect(toolbar).toMatchSnapshot();
   });
@@ -121,11 +106,9 @@ describe('Editors component', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
     const instance: Editors = wrapper.instance() as any;
 
-    instance.onChange({ testArrangement: true } as any);
-
-    expect(store.editorMosaic.mosaicArrangement).toEqual({
-      testArrangement: true,
-    });
+    const arrangement = { testArrangement: true };
+    instance.onChange(arrangement as any);
+    expect(editorMosaic.mosaic).toStrictEqual(arrangement);
   });
 
   describe('IPC commands', () => {
@@ -144,13 +127,7 @@ describe('Editors component', () => {
       expect(action.run).toHaveBeenCalled();
     });
 
-    const fakeValues = {
-      [DefaultEditorId.css]: '',
-      [DefaultEditorId.html]: '',
-      [DefaultEditorId.main]: 'hi',
-      [DefaultEditorId.preload]: '',
-      [DefaultEditorId.renderer]: '',
-    } as const;
+    const fakeValues = { [MAIN_JS]: 'hi' } as const;
 
     it('handles an FS_NEW_FIDDLE command', async () => {
       let resolve: any;
@@ -256,13 +233,13 @@ describe('Editors component', () => {
     });
 
     it('handles the monaco editor option commands', () => {
+      const id = MAIN_JS;
+      const editor = new MonacoEditorMock();
+      editorMosaic.addEditor(id, editor as any);
+
       shallow(<Editors appState={store as any} />);
-
       ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
-
-      for (const editor of editorMosaic.editors.values()) {
-        expect(editor.updateOptions).toHaveBeenCalled();
-      }
+      expect(editor.updateOptions).toHaveBeenCalled();
     });
   });
 
@@ -272,7 +249,7 @@ describe('Editors component', () => {
       const instance: Editors = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
-      const id = DefaultEditorId.html;
+      const id = MAIN_JS;
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
     });

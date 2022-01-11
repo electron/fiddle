@@ -1,13 +1,7 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
-import isRunning from 'is-running';
 
-import {
-  EditorValues,
-  FileTransform,
-  RunResult,
-  RunnableVersion,
-} from '../interfaces';
+import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -15,9 +9,8 @@ import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
-  findModulesInEditors,
   getIsPackageManagerInstalled,
-  installModules,
+  addModules,
   packageRun,
   PMOperationOptions,
 } from './npm';
@@ -147,9 +140,10 @@ export class Runner {
    * Actually run the fiddle.
    *
    * @returns {Promise<RunResult>}
+   * @memberof Runner
    */
   public async run(): Promise<RunResult> {
-    const { fileManager, getEditorValues } = window.ElectronFiddle.app;
+    const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
     const { appState } = this;
@@ -160,14 +154,13 @@ export class Runner {
     }
     appState.isConsoleShowing = true;
 
-    const values = await getEditorValues(options);
     const dir = await this.saveToTemp(options);
     const packageManager = appState.packageManager;
 
     if (!dir) return RunResult.INVALID;
 
     try {
-      await this.installModulesForEditor(values, { dir, packageManager });
+      await this.installModules({ dir, packageManager });
     } catch (error) {
       console.error('Runner: Could not install modules', error);
 
@@ -199,20 +192,21 @@ export class Runner {
   /**
    * Stop a currently running Electron fiddle.
    *
-   * @returns {boolean} true if runner is now idle
    * @memberof Runner
    */
   public stop(): void {
-    this.appState.isRunning = !!this.child && !this.child.kill();
+    const child = this.child;
+    this.appState.isRunning = !!child && !child.kill();
 
-    // If the child process is still alive 1 second after we've
-    // attempted to kill it by normal means, kill it forcefully.
-    setTimeout(() => {
-      const pid = this.child?.pid;
-      if (pid && isRunning(pid)) {
-        this.child?.kill('SIGKILL');
-      }
-    }, 1000);
+    if (child) {
+      // If the child process is still alive 1 second after we've
+      // attempted to kill it by normal means, kill it forcefully.
+      setTimeout(() => {
+        if (child.exitCode === null) {
+          child.kill('SIGKILL');
+        }
+      }, 1000);
+    }
   }
 
   /**
@@ -277,18 +271,14 @@ export class Runner {
   }
 
   /**
-   * Analyzes the editor's JavaScript contents for modules
-   * and installs them.
+   * Installs the specified modules
    *
-   * @param {EditorValues} values
-   * @param {string} dir
+   * @param {PMOperationOptions} pmOptions
    * @returns {Promise<void>}
+   * @memberof Runner
    */
-  public async installModulesForEditor(
-    values: EditorValues,
-    pmOptions: PMOperationOptions,
-  ): Promise<void> {
-    const modules = await findModulesInEditors(values);
+  public async installModules(pmOptions: PMOperationOptions): Promise<void> {
+    const modules = Array.from(this.appState.modules.keys());
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
@@ -316,36 +306,18 @@ export class Runner {
         { isNotPre: true },
       );
 
-      const result = await installModules(pmOptions, ...modules);
+      const result = await addModules(pmOptions, ...modules);
       pushOutput(result);
 
       this.appState.isInstallingModules = false;
     }
   }
 
-  /**
-   * Execute Electron.
-   *
-   * @param {string} dir
-   * @param {string} version
-   * @returns {Promise<void>}
-   * @memberof Runner
-   */
-  public async execute(dir: string): Promise<RunResult> {
-    const {
-      currentElectronVersion,
-      isEnablingElectronLogging,
-      flushOutput,
-      pushOutput,
-      executionFlags,
-      environmentVariables,
-    } = this.appState;
-
-    const { version, localPath } = currentElectronVersion;
-    const binaryPath = getElectronBinaryPath(version, localPath);
-    console.log(`Runner: Binary ${binaryPath} ready, launching`);
+  private buildChildEnvVars(): { [x: string]: string | undefined } {
+    const { isEnablingElectronLogging, environmentVariables } = this.appState;
 
     const env = { ...process.env };
+
     if (isEnablingElectronLogging) {
       env.ELECTRON_ENABLE_LOGGING = 'true';
       env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
@@ -356,11 +328,34 @@ export class Runner {
       delete env.ELECTRON_ENABLE_STACK_DUMPING;
     }
 
-    // Add user-specified environment variables if any have been set.
     for (const v of environmentVariables) {
       const [key, value] = v.split('=');
       env[key] = value;
     }
+
+    return env;
+  }
+
+  /**
+   * Execute Electron.
+   *
+   * @param {string} dir
+   * @returns {Promise<RunResult>}
+   * @memberof Runner
+   */
+  public async execute(dir: string): Promise<RunResult> {
+    const {
+      currentElectronVersion,
+      flushOutput,
+      pushOutput,
+      executionFlags,
+    } = this.appState;
+
+    const { version, localPath } = currentElectronVersion;
+    const binaryPath = getElectronBinaryPath(version, localPath);
+    console.log(`Runner: Binary ${binaryPath} ready, launching`);
+
+    const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(executionFlags);
@@ -429,13 +424,13 @@ export class Runner {
    * just running "{packageManager} install")
    *
    * @param {PMOperationOptions} options
-   * @returns
+   * @returns {Promise<boolean>}
    * @memberof Runner
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     try {
       this.appState.pushOutput(`Now running "npm install..."`);
-      this.appState.pushOutput(await installModules(options));
+      this.appState.pushOutput(await addModules(options));
       return true;
     } catch (error) {
       this.appState.pushError('Failed to run "npm install".', error);

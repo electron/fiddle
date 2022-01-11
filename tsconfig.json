@@ -10,7 +10,7 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "lib": [
-      "es2019",
+      "es2020",
       "dom",
       "WebWorker"
     ],
@@ -34,7 +34,8 @@
     "baseUrl": "."
   },
   "include": [
-    "src/**/*"
+    "src/**/*",
+    "tests/**/*"
   ],
   "exclude": [
     "node_modules/**/*"

@@ -9,7 +9,6 @@ import {
   VersionState,
 } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { removeTypeDefsForVersion } from './fetch-types';
 import { download as electronDownload } from '@electron/get';
 
 // versions that are currently being downloaded
@@ -69,7 +68,16 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
 
   ver.state = VersionState.downloading;
   console.log(`Binary: Downloading Electron ${version}`);
-  const zipPath = await download(ver);
+
+  let zipPath;
+  try {
+    zipPath = await download(ver);
+  } catch (error) {
+    console.warn(`Binary: Failure to download ${version}`, error);
+    ver.state = VersionState.unknown;
+    downloading.delete(version);
+    return;
+  }
 
   const extractPath = getDownloadPath(version);
   console.log(`Binary: Unpacking ${version} to ${extractPath}`);
@@ -91,6 +99,7 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
   } catch (error) {
     console.warn(`Binary: Failure while unzipping ${version}`, error);
     ver.state = VersionState.unknown;
+    downloading.delete(version);
   } finally {
     // This task is done, so remove it from the pending tasks list
     unzipping.delete(version);
@@ -139,7 +148,7 @@ export async function removeBinary(ver: RunnableVersion) {
   };
 
   const typeDefsCleaner = async () => {
-    await removeTypeDefsForVersion(version);
+    window.ElectronFiddle.app.electronTypes.uncache(ver);
   };
 
   await rerunner(binaryCleaner);
@@ -211,6 +220,12 @@ async function download(ver: RunnableVersion): Promise<string> {
     downloadOptions: {
       quiet: true,
       getProgressCallback,
+      timeout: {
+        lookup: 15000,
+        connect: 15000,
+        response: 15000,
+        socket: 15000,
+      },
     },
   });
 

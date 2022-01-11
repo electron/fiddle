@@ -62,7 +62,7 @@
     height: 100%;
     width: 100%;
     padding: 20px;
-    overflow: scroll;
+    overflow: auto;
     color: @text-color-3;
     box-sizing: border-box;
   }
@@ -83,6 +83,14 @@
       > div:last-of-type {
         margin-right: 0;
       }
+    }
+
+    .bp3-popover-target {
+      display: inherit;
+    }
+
+    .disabled-version {
+      width: 100%;
     }
 
     .versions-to-show {
@@ -161,7 +169,7 @@
 
       .details {
         max-width: 190px;
-        overflow: scroll;
+        overflow: auto;
       }
     }
   }

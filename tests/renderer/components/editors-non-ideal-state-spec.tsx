@@ -1,14 +1,13 @@
 import { mount } from 'enzyme';
 
-import { StateMock } from '../../mocks/mocks';
-
+import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { renderNonIdealState } from '../../../src/renderer/components/editors-non-ideal-state';
 
 describe('renderNonIdealState()', () => {
-  let state: StateMock;
+  let editorMosaic: EditorMosaic;
 
   beforeEach(() => {
-    ({ state } = (window as any).ElectronFiddle.app);
+    ({ editorMosaic } = (window as any).ElectronFiddle.app.state);
   });
 
   it('renders a non-ideal state', () => {
@@ -16,9 +15,9 @@ describe('renderNonIdealState()', () => {
   });
 
   it('handles a click', () => {
-    const wrapper = mount(renderNonIdealState(state as any));
+    const resetLayoutSpy = jest.spyOn(editorMosaic, 'resetLayout');
+    const wrapper = mount(renderNonIdealState(editorMosaic as any));
     wrapper.find('button').simulate('click');
-
-    expect(state.editorMosaic.setVisibleMosaics).toHaveBeenCalledTimes(1);
+    expect(resetLayoutSpy).toHaveBeenCalledTimes(1);
   });
 });

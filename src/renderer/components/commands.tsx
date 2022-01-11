@@ -5,7 +5,6 @@ import * as React from 'react';
 import { AppState } from '../state';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
-import { EditorDropdown } from './commands-editors';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
@@ -50,7 +49,6 @@ export class Commands extends React.Component<CommandsProps> {
               text="Console"
               onClick={appState.toggleConsole}
             />
-            <EditorDropdown appState={appState} />
           </ControlGroup>
         </div>
         <div>

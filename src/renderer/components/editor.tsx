@@ -5,7 +5,6 @@ import * as MonacoType from 'monaco-editor';
 import * as React from 'react';
 
 import { EditorId } from '../../interfaces';
-import { getContent } from '../content';
 import { AppState } from '../state';
 import { monacoLanguage } from '../../utils/editor-utils';
 
@@ -56,9 +55,6 @@ export class Editor extends React.Component<EditorProps> {
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { appState, editorDidMount, id } = this.props;
 
-    // Set the content on the editor.
-    await this.setContent();
-
     appState.editorMosaic.addEditor(id, editor);
 
     // And notify others
@@ -76,6 +72,7 @@ export class Editor extends React.Component<EditorProps> {
 
     if (ref) {
       this.editor = monaco.editor.create(ref, {
+        automaticLayout: true,
         language: this.language,
         theme: 'main',
         contextmenu: false,
@@ -105,53 +102,5 @@ export class Editor extends React.Component<EditorProps> {
 
   public render() {
     return <div className="editorContainer" ref={this.containerRef} />;
-  }
-
-  /**
-   * Create a model and attach it to the editor
-   *
-   * @private
-   * @param {string} value
-   */
-  private createModel(value: string) {
-    const { monaco } = this.props;
-
-    const model = monaco.editor.createModel(value, this.language);
-    model.updateOptions({
-      tabSize: 2,
-    });
-
-    this.editor.setModel(model);
-  }
-
-  /**
-   * Sets the content on the editor, including the model and the view state.
-   *
-   * @private
-   * @memberof Editor
-   */
-  private async setContent() {
-    const { appState, id } = this.props;
-    const { version } = appState;
-
-    const backup = appState.editorMosaic.getAndRemoveEditorValueBackup(id);
-
-    if (backup) {
-      console.log(`Editor: Backup found, restoring state`);
-
-      if (backup.viewState) {
-        this.editor.restoreViewState(backup.viewState);
-      }
-
-      // If there's a model, use the model. No model? Use the value
-      if (backup.model) {
-        this.editor.setModel(backup.model);
-      } else {
-        this.createModel(backup.value ?? '');
-      }
-    } else {
-      const value = await getContent(id, version);
-      this.createModel(value);
-    }
   }
 }

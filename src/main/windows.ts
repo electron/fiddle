@@ -15,13 +15,14 @@ export let browserWindows: Array<BrowserWindow | null> = [];
  */
 export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions {
   return {
-    width: 1200,
+    width: 1400,
     height: 900,
     minHeight: 600,
     minWidth: 600,
     titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
+    show: false,
     webPreferences: {
       webviewTag: false,
       nodeIntegration: true,
@@ -63,9 +64,9 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindow = null;
   });
 
-  browserWindow.webContents.on('new-window', (event, url) => {
-    event.preventDefault();
-    shell.openExternal(url);
+  browserWindow.webContents.setWindowOpenHandler((details) => {
+    shell.openExternal(details.url);
+    return { action: 'deny' };
   });
 
   browserWindow.webContents.on('will-navigate', (event, url) => {

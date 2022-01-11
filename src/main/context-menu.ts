@@ -36,8 +36,7 @@ export function getRunItems(): Array<MenuItemConstructorOptions> {
  * Our check for "are we in the Monaco editor" is pretty crude -
  * we just assume that we are if we can paste text.
  *
- * @param {BrowserWindow} browserWindow
- * @param {ContextMenuParams} { x, y }
+ * @param {ContextMenuParams} { pageURL, editFlags }
  * @returns {Array<MenuItemConstructorOptions>}
  */
 export function getMonacoItems({
@@ -53,7 +52,7 @@ export function getMonacoItems({
       id: 'go_to_definition',
       label: 'Go to Definition',
       click() {
-        const cmd = ['editor.action.goToDeclaration'];
+        const cmd = ['editor.action.revealDefinition'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       },
     },
@@ -61,7 +60,7 @@ export function getMonacoItems({
       id: 'peek_definition',
       label: 'Peek Definition',
       click() {
-        const cmd = ['editor.action.previewDeclaration'];
+        const cmd = ['editor.action.peekDefinition'];
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       },
     },

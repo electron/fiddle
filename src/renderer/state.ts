@@ -1,6 +1,4 @@
 import * as fs from 'fs-extra';
-import * as MonacoType from 'monaco-editor';
-import semver from 'semver';
 import { action, autorun, computed, observable, when } from 'mobx';
 
 import {
@@ -9,7 +7,6 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
-  MAIN_JS,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
@@ -24,26 +21,21 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
-import { getTemplate, isContentUnchanged } from './content';
-import {
-  getLocalTypePathForVersion,
-  updateEditorTypeDefinitions,
-} from './fetch-types';
+import { getTemplate } from './content';
 import { ipcRendererManager } from './ipc';
 
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
+  fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getOldestSupportedVersion,
+  getOldestSupportedMajor,
   getReleaseChannel,
-  getUpdatedElectronVersions,
+  makeRunnable,
   saveLocalVersions,
 } from './versions';
-
-export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
 /**
  * The application's state. Exported as a singleton below.
@@ -52,6 +44,10 @@ export type Editor = MonacoType.editor.IStandaloneCodeEditor;
  * @class AppState
  */
 export class AppState {
+  private readonly timeFmt = new Intl.DateTimeFormat([], {
+    timeStyle: 'medium',
+  });
+
   // -- Persisted settings ------------------
   @observable public theme: string | null = localStorage.getItem('theme');
   @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
@@ -123,26 +119,27 @@ export class AppState {
   @observable public genericDialogLastResult: boolean | null = null;
   @observable public genericDialogLastInput: string | null = null;
   @observable public templateName: string | undefined;
-  @observable public localTypeWatcher: fs.FSWatcher | undefined;
   @observable public Bisector: Bisector | undefined;
+  @observable public modules: Map<string, string> = new Map();
 
   @observable public activeGistAction: GistActionState = GistActionState.none;
-  @observable public isRunning = false;
-  @observable public isAutoBisecting = false;
-  @observable public isInstallingModules = false;
-  @observable public isUpdatingElectronVersions = false;
-  @observable public isQuitting = false;
 
   // -- Various "isShowing" settings ------------------
   @observable public isAddVersionDialogShowing = false;
+  @observable public isAutoBisecting = false;
   @observable public isBisectCommandShowing: boolean;
   @observable public isBisectDialogShowing = false;
   @observable public isConsoleShowing = false;
   @observable public isGenericDialogShowing = false;
+  @observable public isInstallingModules = false;
+  @observable public isOnline = navigator.onLine;
+  @observable public isQuitting = false;
+  @observable public isRunning = false;
   @observable public isSettingsShowing = false;
   @observable public isThemeDialogShowing = false;
   @observable public isTokenDialogShowing = false;
   @observable public isTourShowing = !localStorage.getItem('hasShownTour');
+  @observable public isUpdatingElectronVersions = false;
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';
@@ -286,7 +283,7 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const oldest = semver.parse(getOldestSupportedVersion());
+    const oldest = getOldestSupportedMajor();
 
     const filter = (ver: RunnableVersion) =>
       ver &&
@@ -295,7 +292,7 @@ export class AppState {
         ver.state === VersionState.ready) &&
       (showObsoleteVersions ||
         !oldest ||
-        oldest.compareMain(ver.version) <= 0) &&
+        oldest <= Number.parseInt(ver.version)) &&
       channelsToShow.includes(getReleaseChannel(ver));
 
     return sortVersions(Object.values(versions).filter(filter));
@@ -311,7 +308,11 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
-      this.addNewVersions(await getUpdatedElectronVersions());
+      this.addNewVersions(
+        (await fetchVersions())
+          .filter((ver) => !(ver.version in this.versions))
+          .map((ver) => makeRunnable(ver)),
+      );
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -365,14 +366,6 @@ export class AppState {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toggleGenericDialog() {
-    this.isGenericDialogShowing = !this.isGenericDialogShowing;
-
-    if (this.isGenericDialogShowing) {
-      this.genericDialogLastResult = null;
-    }
-  }
-
   @action public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
   }
@@ -403,16 +396,6 @@ export class AppState {
     window.ElectronFiddle.app.loadTheme(this.theme);
   }
 
-  @action public setGenericDialogOptions(opts: GenericDialogOptions) {
-    this.genericDialogOptions = {
-      ok: 'Okay',
-      cancel: 'Cancel',
-      wantsInput: false,
-      placeholder: '',
-      ...opts,
-    };
-  }
-
   @action public addLocalVersion(input: Version) {
     addLocalVersion(input);
     this.addNewVersions(getElectronVersions());
@@ -431,25 +414,27 @@ export class AppState {
    * @returns {Promise<void>}
    */
   @action public async removeVersion(ver: RunnableVersion) {
-    const { version } = ver;
-
-    if (ver.state !== VersionState.ready) {
-      console.log(`State: Version ${version} already removed, doing nothing`);
-      return;
-    }
+    const { version, state, source } = ver;
 
     if (ver === this.currentElectronVersion) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
 
-    // Actually remove
     console.log(`State: Removing Electron ${version}`);
-    if (ver.source === VersionSource.local) {
-      delete this.versions[version];
-      saveLocalVersions(Object.values(this.versions));
+    if (source === VersionSource.local) {
+      if (version in this.versions) {
+        delete this.versions[version];
+        saveLocalVersions(Object.values(this.versions));
+      } else {
+        console.log(`State: Version ${version} already removed, doing nothing`);
+      }
     } else {
-      await removeBinary(ver);
+      if (state === VersionState.ready) {
+        await removeBinary(ver);
+      } else {
+        console.log(`State: Version ${version} already removed, doing nothing`);
+      }
     }
   }
 
@@ -482,73 +467,69 @@ export class AppState {
   }
 
   /**
+   * Private setVersion() helper to test if setVersion(input) would work.
+   *
+   * Returns a RunnableVersion if it would work, or an error string otherwise.
+   */
+  private isVersionUsable(
+    input: string,
+  ): { ver?: RunnableVersion; err?: string } {
+    const ver = this.getVersion(input);
+    if (!ver) {
+      return { err: `Unknown version ${input}` };
+    }
+
+    const { localPath, version } = ver;
+    if (localPath && !fs.existsSync(localPath)) {
+      const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
+      return { err };
+    }
+
+    return { ver };
+  }
+
+  /*
+   * Private setVersion() helper to find a usable fallback version.
+   */
+  private findUsableVersion(): RunnableVersion | undefined {
+    return this.versionsToShow.find((ver) => this.isVersionUsable(ver.version));
+  }
+
+  /**
    * Select a version of Electron (and download it if necessary).
    *
    * @param {string} input
    * @returns {Promise<void>}
    */
   @action public async setVersion(input: string) {
-    const ver = this.getVersion(input);
+    // make sure we can  use this version
+    const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
-      console.warn(`State: setVersion() got an unknown version ${input}`);
-      await this.setVersion(this.versionsToShow[0].version);
+      console.warn(`setVersion('${input}') failed: ${err}`);
+      this.showErrorDialog(err!);
+      const fallback = this.findUsableVersion();
+      if (fallback) await this.setVersion(fallback.version);
       return;
     }
 
-    const { localPath, version } = ver;
-
-    if (localPath && !fs.existsSync(localPath)) {
-      console.error(
-        `State: setVersion() got a version ${version} with missing binary`,
-      );
-
-      this.setGenericDialogOptions({
-        type: GenericDialogType.warning,
-        label: `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`,
-        cancel: undefined,
-      });
-      this.toggleGenericDialog();
-
-      await this.setVersion(this.versionsToShow[0].version);
-      return;
-    }
-
+    const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
-
-    // Should we update the editor?
-    if (await isContentUnchanged(MAIN_JS, this.version)) {
-      const editorValues = await getTemplate(version);
-
-      const options: SetFiddleOptions = { templateName: version };
-      await window.ElectronFiddle.app.replaceFiddle(editorValues, options);
-    }
-
     this.version = version;
 
-    // Update TypeScript definitions
-    if (ver.source === VersionSource.local) {
-      const typePath = getLocalTypePathForVersion(ver);
-      console.info(
-        `TypeDefs: Watching file for local version ${version} at path ${typePath}`,
-      );
-      try {
-        this.localTypeWatcher = fs.watch(typePath!, async () => {
-          console.info(
-            `TypeDefs: Noticed file change at ${typePath}. Updating editor typedefs.`,
-          );
-          await updateEditorTypeDefinitions(ver);
-        });
-      } catch (err) {
-        console.info('TypeDefs: Unable to start watching.');
+    // If there's no current fiddle,
+    // or if the current fiddle is the previous version's template,
+    // then load the new version's template.
+    const shouldReplace = () =>
+      this.editorMosaic.files.size === 0 || // no current fiddle
+      (this.templateName && !this.editorMosaic.isEdited); // unedited template
+    if (shouldReplace()) {
+      const options: SetFiddleOptions = { templateName: version };
+      const values = await getTemplate(version);
+      // test again just in case something happened while we awaited
+      if (shouldReplace()) {
+        await window.ElectronFiddle.app.replaceFiddle(values, options);
       }
-    } else if (!!this.localTypeWatcher) {
-      console.info(
-        `TypeDefs: Switched to downloaded version ${version}. Unwatching local typedefs.`,
-      );
-      this.localTypeWatcher.close();
-      this.localTypeWatcher = undefined;
     }
-    await updateEditorTypeDefinitions(ver);
 
     // Fetch new binaries, maybe?
     await this.downloadVersion(ver);
@@ -566,13 +547,69 @@ export class AppState {
     this.gitHubName = null;
   }
 
-  @action public async runConfirmationDialog(
+  @action public async showGenericDialog(
     opts: GenericDialogOptions,
-  ): Promise<boolean> {
-    this.setGenericDialogOptions(opts);
+  ): Promise<{ confirm: boolean; input: string }> {
+    this.genericDialogLastResult = null;
+    this.genericDialogOptions = opts;
     this.isGenericDialogShowing = true;
     await when(() => !this.isGenericDialogShowing);
-    return !!this.genericDialogLastResult;
+    return {
+      confirm: Boolean(this.genericDialogLastResult),
+      input: this.genericDialogLastInput || opts.defaultInput || '',
+    };
+  }
+
+  @action public async showInputDialog(opts: {
+    cancel?: string;
+    defaultInput?: string;
+    label: string | JSX.Element;
+    ok: string;
+    placeholder: string;
+  }): Promise<string | undefined> {
+    const { confirm, input } = await this.showGenericDialog({
+      ...opts,
+      cancel: opts.cancel || 'Cancel',
+      type: GenericDialogType.confirm,
+      wantsInput: true,
+    });
+    return confirm ? input : undefined;
+  }
+
+  @action public showConfirmDialog = async (opts: {
+    cancel?: string;
+    label: string | JSX.Element;
+    ok: string;
+  }): Promise<boolean> => {
+    const { confirm } = await this.showGenericDialog({
+      ...opts,
+      cancel: opts.cancel || 'Cancel',
+      wantsInput: false,
+      type: GenericDialogType.confirm,
+    });
+    return confirm;
+  };
+
+  @action public async showInfoDialog(
+    label: string | JSX.Element,
+  ): Promise<void> {
+    await this.showGenericDialog({
+      label,
+      ok: 'Close',
+      type: GenericDialogType.success,
+      wantsInput: false,
+    });
+  }
+
+  @action public async showErrorDialog(
+    label: string | JSX.Element,
+  ): Promise<void> {
+    await this.showGenericDialog({
+      label,
+      ok: 'Close',
+      type: GenericDialogType.warning,
+      wantsInput: false,
+    });
   }
 
   /**
@@ -582,7 +619,7 @@ export class AppState {
    * @returns {void}
    */
   @action public flushOutput(): void {
-    this.pushOutput('\r\n', { bypassBuffer: false });
+    this.pushOutput('\n', { bypassBuffer: false });
   }
 
   /**
@@ -601,7 +638,7 @@ export class AppState {
     if (process.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
-      const parts = strData.split('\r\n');
+      const parts = strData.split(/\r?\n/);
       for (let partIndex = 0; partIndex < parts.length; partIndex++) {
         const part = parts[partIndex];
         if (partIndex === parts.length - 1) {
@@ -616,12 +653,13 @@ export class AppState {
     }
 
     if (strData.startsWith('Debugger listening on ws://')) return;
-    if (strData === 'For help see https://nodejs.org/en/docs/inspector') return;
+    if (strData === 'For help, see: https://nodejs.org/en/docs/inspector')
+      return;
 
     const entry: OutputEntry = {
-      timestamp: Date.now(),
-      text: strData.trim(),
       isNotPre,
+      text: strData.trim(),
+      timeString: this.timeFmt.format(new Date()),
     };
     ipcRendererManager.send(IpcEvents.OUTPUT_ENTRY, entry);
     this.output.push(entry);

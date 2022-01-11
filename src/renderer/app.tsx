@@ -1,14 +1,9 @@
-import { autorun, reaction } from 'mobx';
-import * as MonacoType from 'monaco-editor';
+import { autorun, reaction, when } from 'mobx';
+import * as path from 'path';
 
 import { ipcRenderer } from 'electron';
 import { ipcRendererManager } from './ipc';
-import {
-  EditorValues,
-  GenericDialogType,
-  PACKAGE_NAME,
-  SetFiddleOptions,
-} from '../interfaces';
+import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';
 import { FileManager } from './file-manager';
@@ -19,6 +14,8 @@ import { getElectronVersions } from './versions';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getTheme } from './themes';
 import { defaultDark, defaultLight } from './themes-defaults';
+import { ElectronTypes } from './electron-types';
+import { USER_DATA_PATH } from './constants';
 
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
@@ -27,32 +24,35 @@ import { defaultDark, defaultLight } from './themes-defaults';
  * @class App
  */
 export class App {
-  public typeDefDisposable: MonacoType.IDisposable | null = null;
   public state = new AppState(getElectronVersions());
   public fileManager = new FileManager(this.state);
   public remoteLoader = new RemoteLoader(this.state);
   public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
+  public readonly electronTypes: ElectronTypes;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
 
     this.taskRunner = new TaskRunner(this);
+
+    this.electronTypes = new ElectronTypes(
+      window.ElectronFiddle.monaco,
+      path.join(USER_DATA_PATH, 'electron-typedef'),
+    );
   }
 
-  private async confirmReplaceUnsaved() {
-    return this.state.runConfirmationDialog({
+  private confirmReplaceUnsaved(): Promise<boolean> {
+    return this.state.showConfirmDialog({
       label: `Opening this Fiddle will replace your unsaved changes. Do you want to proceed?`,
-      ok: 'Yes',
-      type: GenericDialogType.warning,
+      ok: 'Open',
     });
   }
 
-  private async confirmExitUnsaved() {
-    return this.state.runConfirmationDialog({
+  private confirmExitUnsaved(): Promise<boolean> {
+    return this.state.showConfirmDialog({
       label: 'The current Fiddle is unsaved. Do you want to exit anyway?',
       ok: 'Exit',
-      type: GenericDialogType.warning,
     });
   }
 
@@ -90,7 +90,7 @@ export class App {
     const values = this.state.editorMosaic.values();
 
     if (options && options.include !== false) {
-      values[PACKAGE_NAME] = await getPackageJson(this.state, values, options);
+      values[PACKAGE_NAME] = await getPackageJson(this.state, options);
     }
 
     return values;
@@ -111,6 +111,10 @@ export class App {
     );
     const { Header } = await import('./components/header');
 
+    // The AppState constructor started loading a fiddle.
+    // Wait for it here so the UI doesn't start life in `nonIdealState`.
+    await when(() => this.state.editorMosaic.files.size !== 0);
+
     const className = `${process.platform} container`;
     const app = (
       <div className={className}>
@@ -123,9 +127,11 @@ export class App {
     const rendered = render(app, document.getElementById('app'));
 
     this.setupResizeListener();
+    this.setupOfflineListener();
     this.setupThemeListeners();
     this.setupTitleListeners();
     this.setupUnloadListeners();
+    this.setupTypeListeners();
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
@@ -134,6 +140,16 @@ export class App {
     });
 
     return rendered;
+  }
+
+  private setupTypeListeners() {
+    const updateTypes = () =>
+      this.electronTypes.setVersion(this.state.currentElectronVersion);
+    reaction(
+      () => this.state.version,
+      () => updateTypes(),
+    );
+    updateTypes();
   }
 
   public async setupThemeListeners() {
@@ -203,6 +219,16 @@ export class App {
     } else {
       document.body.classList.remove('bp3-dark');
     }
+  }
+
+  public setupOfflineListener(): void {
+    window.addEventListener('online', async () => {
+      this.state.isOnline = true;
+      this.state.setVersion(this.state.version);
+    });
+    window.addEventListener('offline', () => {
+      this.state.isOnline = false;
+    });
   }
 
   /**

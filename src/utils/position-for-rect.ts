@@ -7,22 +7,6 @@ interface PositionResult {
 }
 
 /**
- * Invert an arrow position
- *
- * @param {ArrowPosition} input
- * @returns {ArrowPosition}
- */
-export function invertPosition(input: ArrowPosition): ArrowPosition {
-  if (input === 'left') return 'right';
-  if (input === 'right') return 'left';
-  if (input === 'top') return 'bottom';
-  if (input === 'bottom') return 'top';
-
-  // Should be impossible
-  return 'top';
-}
-
-/**
  * This method takes a ClientRect and returns a solid
  * position for, say, a dialog, tooltip, or popover.
  *

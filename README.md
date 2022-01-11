@@ -13,7 +13,7 @@ address bar.
 **[Download Fiddle now!](https://www.electronjs.org/fiddle)**
 
 
-<img src="https://user-images.githubusercontent.com/1426799/52155868-d3357c80-2639-11e9-9496-fa97b1dc7897.jpg" width="880px" alt="Electron Fiddle screenshot">
+<img src="./assets/screenshots/fiddle-screenshot.png" width="880px" alt="Electron Fiddle screenshot">
 
 ## Features
 

@@ -126,11 +126,15 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     if (editor) {
       const command = editor.getAction(commandId);
 
+      if (!command) return;
+
       console.log(
-        `Editors: Trying to run ${command.id}. Supported: ${command.isSupported}`,
+        `Editors: Trying to run ${
+          command.id
+        }. Supported: ${command.isSupported()}`,
       );
 
-      if (command && command.isSupported()) {
+      if (command.isSupported()) {
         command.run();
       }
     }
@@ -167,16 +171,6 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   ): JSX.Element {
     const { appState } = this.props;
 
-    // only show toolbar controls if we have more than 1 visible editor
-    // Mosaic arrangement is type string if 1 editor, object otherwise
-    const toolbarControlsMaybe = typeof appState.editorMosaic
-      .mosaicArrangement !== 'string' && (
-      <>
-        <MaximizeButton id={id} appState={appState} />
-        <RemoveButton id={id} appState={appState} />
-      </>
-    );
-
     return (
       <div>
         {/* Left */}
@@ -186,7 +180,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
         {/* Middle */}
         <div />
         {/* Right */}
-        <div className="mosaic-controls">{toolbarControlsMaybe}</div>
+        <div className="mosaic-controls">
+          <MaximizeButton id={id} appState={appState} />
+          <RemoveButton id={id} appState={appState} />
+        </div>
       </div>
     );
   }
@@ -239,14 +236,14 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   }
 
   public render() {
-    const { appState } = this.props;
+    const { editorMosaic } = this.props.appState;
 
     return (
       <Mosaic<EditorId>
         className={`focused__${this.state.focused}`}
         onChange={this.onChange}
-        value={appState.editorMosaic.mosaicArrangement}
-        zeroStateView={renderNonIdealState(appState)}
+        value={editorMosaic.mosaic}
+        zeroStateView={renderNonIdealState(editorMosaic)}
         renderTile={this.renderTile}
       />
     );
@@ -258,7 +255,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
   public onChange(currentNode: MosaicNode<EditorId> | null) {
-    this.props.appState.editorMosaic.mosaicArrangement = currentNode;
+    this.props.appState.editorMosaic.mosaic = currentNode;
   }
 
   /**

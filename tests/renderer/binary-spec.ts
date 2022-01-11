@@ -9,9 +9,7 @@ import {
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
-import { removeTypeDefsForVersion } from '../../src/renderer/fetch-types';
-import { overridePlatform, resetPlatform } from '../utils';
-import { waitFor } from '../../src/utils/wait-for';
+import { overridePlatform, resetPlatform, waitFor } from '../utils';
 
 import * as path from 'path';
 import * as semver from 'semver';
@@ -24,9 +22,6 @@ jest.mock('@electron/get');
 jest.mock('../../src/renderer/ipc', () => ({}));
 jest.mock('../../src/renderer/constants', () => ({
   USER_DATA_PATH: 'user/data/',
-}));
-jest.mock('../../src/renderer/fetch-types', () => ({
-  removeTypeDefsForVersion: jest.fn(),
 }));
 
 describe('binary', () => {
@@ -69,22 +64,23 @@ describe('binary', () => {
     });
 
     it("attempts to clean up the version's associated typedefs", async () => {
+      const { electronTypes } = window.ElectronFiddle.app;
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
-
       await removeBinary(ver);
-      expect(fs.remove).toHaveBeenCalled();
-      expect(removeTypeDefsForVersion).toHaveBeenCalled();
+      expect(electronTypes.uncache).toHaveBeenCalledWith(ver);
     });
 
     it('retries typedef cleanup upon failure', async () => {
-      (removeTypeDefsForVersion as jest.Mock).mockImplementation(() => {
-        throw new Error('Bwap bwap');
-      });
-
       (fs.existsSync as jest.Mock<any>).mockReturnValue(true);
+      const { electronTypes } = window.ElectronFiddle.app;
+      const uncacheSpy = jest
+        .spyOn(electronTypes, 'uncache')
+        .mockImplementation(() => {
+          throw new Error('Bwap bwap');
+        });
 
       await removeBinary(ver);
-      expect(removeTypeDefsForVersion).toHaveBeenCalledTimes(4);
+      expect(uncacheSpy).toHaveBeenCalledTimes(4);
     });
   });
 

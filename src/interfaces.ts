@@ -82,7 +82,7 @@ export interface TestRequest {
 
 export interface OutputEntry {
   text: string;
-  timestamp: number;
+  timeString: string;
   isNotPre?: boolean;
 }
 
@@ -93,9 +93,10 @@ export interface OutputOptions {
 
 export interface GenericDialogOptions {
   type: GenericDialogType;
-  ok?: string;
+  ok: string;
   cancel?: string;
-  wantsInput?: boolean;
+  wantsInput: boolean;
+  defaultInput?: string;
   label: string | JSX.Element;
   placeholder?: string;
 }
@@ -114,26 +115,9 @@ export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
 
 export type EditorValues = Record<EditorId, string>;
 
-// Default Editors
-export enum DefaultEditorId {
-  'main' = 'main.js',
-  'renderer' = 'renderer.js',
-  'html' = 'index.html',
-  'preload' = 'preload.js',
-  'css' = 'styles.css',
-}
-
-export const DEFAULT_EDITORS = [
-  DefaultEditorId.main,
-  DefaultEditorId.renderer,
-  DefaultEditorId.preload,
-  DefaultEditorId.html,
-  DefaultEditorId.css,
-];
-
 // main.js gets special treatment: it is required as the entry point
 // when we run fiddles or create a package.json to package fiddles.
-export const MAIN_JS = DefaultEditorId.main;
+export const MAIN_JS = 'main.js';
 
 export const PACKAGE_NAME = 'package.json';
 

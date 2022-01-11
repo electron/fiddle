@@ -1,8 +1,6 @@
-import { when } from 'mobx';
 import {
   EditorValues,
   ElectronReleaseChannel,
-  GenericDialogType,
   PACKAGE_NAME,
   VersionSource,
   VersionState,
@@ -25,7 +23,6 @@ export class RemoteLoader {
       'loadFiddleFromElectronExample',
       'loadFiddleFromGist',
       'setElectronVersionWithRef',
-      'verifyCreateCustomEditor',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
     ]) {
@@ -109,9 +106,6 @@ export class RemoteLoader {
 
   /**
    * Load a fiddle
-   *
-   * @returns {Promise<boolean>}
-   * @memberof RemoteLoader
    */
   public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
@@ -120,10 +114,14 @@ export class RemoteLoader {
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
+        if (id === PACKAGE_NAME) {
+          const { dependencies } = JSON.parse(data.content);
+          this.appState.modules = new Map(Object.entries(dependencies));
+        }
         if (!isSupportedFile(id)) {
           continue;
         }
-        if (isKnownFile(id) || (await this.verifyCreateCustomEditor(id))) {
+        if (isKnownFile(id) || (await this.confirmAddFile(id))) {
           values[id] = data.content;
         }
       }
@@ -200,46 +198,33 @@ export class RemoteLoader {
     }
   }
 
-  public async verifyCreateCustomEditor(editorName: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
-      label: `Do you want to create a custom editor with name: ${editorName}?`,
+  public confirmAddFile = (filename: string): Promise<boolean> => {
+    return this.appState.showConfirmDialog({
       cancel: 'Skip',
+      label: `Do you want to add "${filename}"?`,
+      ok: 'Add',
     });
-
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
-  }
+  };
 
   /**
    * Verifies from the user that we should be loading this fiddle.
    *
    * @param {string} what What are we loading from (gist, example, etc.)
    */
-  public async verifyRemoteLoad(what: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.confirm,
+  public verifyRemoteLoad(what: string): Promise<boolean> {
+    return this.appState.showConfirmDialog({
       label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`,
+      ok: 'Load',
     });
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
-  public async verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.warning,
+  public verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
+    return this.appState.showConfirmDialog({
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
               version of Electron from the example?`,
+      ok: 'Enable',
     });
-    this.appState.isGenericDialogShowing = true;
-    await when(() => !this.appState.isGenericDialogShowing);
-
-    return !!this.appState.genericDialogLastResult;
   }
 
   /**
@@ -266,15 +251,11 @@ export class RemoteLoader {
    */
   private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;
-    this.appState.setGenericDialogOptions({
-      type: GenericDialogType.warning,
-      label: navigator.onLine
+    this.appState.showErrorDialog(
+      this.appState.isOnline
         ? failedLabel
         : `Your computer seems to be offline. ${failedLabel}`,
-      cancel: undefined,
-    });
-
-    this.appState.toggleGenericDialog();
+    );
 
     console.warn(`Loading Fiddle failed`, error);
     return false;
