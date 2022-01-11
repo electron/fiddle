@@ -1,19 +1,22 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import * as semver from 'semver';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
 import {
+  VersionKeys,
   addLocalVersion,
   fetchVersions,
   getDefaultVersion,
-  getReleasedVersions,
+  getElectronVersions,
   getLocalVersions,
+  getOldestSupportedMajor,
   getReleaseChannel,
+  isReleasedMajor,
   saveLocalVersions,
-  VersionKeys,
 } from '../../src/renderer/versions';
 import { FetchMock } from '../utils';
 
@@ -22,8 +25,6 @@ jest.mock('../../src/renderer/binary', () => ({
     .fn()
     .mockImplementation((v: RunnableVersion) => v.state),
 }));
-
-const { expectedVersionCount } = require('../fixtures/releases-metadata.json');
 
 const mockVersions: Array<Partial<RunnableVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
@@ -178,19 +179,33 @@ describe('versions', () => {
     });
   });
 
-  describe('getReleasedVersions()', () => {
-    it('tries to get versions from localStorage', () => {
+  describe('getOldestSupportedMajor()', () => {
+    it('uses localStorage versions if available', () => {
+      // inject versions into localstorage
       (window as any).localStorage.getItem.mockReturnValueOnce(
-        `[{ "version": "3.0.5" }]`,
+        `[
+          { "version": "10.0.0" },
+          { "version": "9.0.0" },
+          { "version": "8.0.0" },
+          { "version": "7.0.0" },
+          { "version": "6.0.0" }
+        ]`,
       );
-
-      expect(getReleasedVersions()).toEqual([{ version: '3.0.5' }]);
+      expect(getOldestSupportedMajor()).toEqual(7);
     });
 
-    it('falls back to a local require', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(`garbage`);
+    function getExpectedOldestSupportedVersion() {
+      const versions = getElectronVersions();
+      const major = semver.parse(getDefaultVersion(versions))!.major;
+      const NUM_BRANCHES = parseInt(process.env.NUM_STABLE_BRANCHES || '') || 4;
+      return major + 1 - NUM_BRANCHES;
+    }
 
-      expect(getReleasedVersions().length).toBe(expectedVersionCount);
+    it('falls back to a local require', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce('garbage');
+
+      const expected = getExpectedOldestSupportedVersion();
+      expect(getOldestSupportedMajor()).toBe(expected);
     });
 
     it('falls back to a local require', () => {
@@ -198,7 +213,32 @@ describe('versions', () => {
         `[{ "garbage": "true" }]`,
       );
 
-      expect(getReleasedVersions().length).toBe(expectedVersionCount);
+      const expected = getExpectedOldestSupportedVersion();
+      expect(getOldestSupportedMajor()).toBe(expected);
+    });
+
+    it('honors process.env.NUM_STABLE_BRANCHES', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce('garbage');
+
+      process.env.NUM_STABLE_BRANCHES = '2';
+      const expected = getExpectedOldestSupportedVersion();
+      expect(getOldestSupportedMajor()).toBe(expected);
+    });
+  });
+
+  describe('isReleasedMajor()', () => {
+    it('returns true for recognized releases', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce(
+        `[{ "version": "3.0.5" }]`,
+      );
+      expect(isReleasedMajor(3)).toBe(true);
+    });
+
+    it('returns false for unrecognized releases', () => {
+      (window as any).localStorage.getItem.mockReturnValueOnce(
+        `[{ "version": "3.0.5" }]`,
+      );
+      expect(isReleasedMajor(1000)).toBe(false);
     });
   });
 });

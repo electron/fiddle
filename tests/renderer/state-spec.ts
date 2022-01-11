@@ -670,18 +670,21 @@ describe('AppState', () => {
       expect(appState.output.length).toBe(1);
     });
 
-    it('ignores the "For help see..." output', () => {
-      appState.pushOutput('For help see https://nodejs.org/en/docs/inspector');
+    it('ignores the "For help, see: ..." output', () => {
+      appState.pushOutput(
+        'For help, see: https://nodejs.org/en/docs/inspector',
+      );
       expect(appState.output.length).toBe(1);
     });
 
     it('handles a complex buffer on Win32', () => {
       overridePlatform('win32');
 
-      appState.pushOutput(Buffer.from('Buffer\r\nStuff'), {
+      appState.pushOutput(Buffer.from('Buffer\r\nStuff\nMore'), {
         bypassBuffer: false,
       });
       expect(appState.output[1].text).toBe('Buffer');
+      expect(appState.output[2].text).toBe('Stuff');
 
       resetPlatform();
     });
