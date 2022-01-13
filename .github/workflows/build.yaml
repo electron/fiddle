@@ -3,7 +3,7 @@ name: Build & Release
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - v*
   pull_request:
