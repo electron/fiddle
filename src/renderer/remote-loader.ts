@@ -232,7 +232,7 @@ export class RemoteLoader {
    *
    * @param {EditorValues} values
    * @param {string} gistId
-   * @returns {boolean}
+   * @returns {Promise<boolean>}
    */
   private async handleLoadingSuccess(
     values: EditorValues,

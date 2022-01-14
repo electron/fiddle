@@ -187,7 +187,7 @@ export class App {
   /**
    * Opens a fiddle from the specified location.
    *
-   * @param {SetFiddleOptions} the fiddle to open
+   * @param {SetFiddleOptions} fiddle The fiddle to open
    */
   public async openFiddle(fiddle: SetFiddleOptions) {
     const { filePath, gistId } = fiddle;
@@ -201,6 +201,7 @@ export class App {
   /**
    * Loads theme CSS into the HTML document.
    *
+   * @param {string} name
    * @returns {Promise<void>}
    */
   public async loadTheme(name: string): Promise<void> {

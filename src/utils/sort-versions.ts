@@ -7,8 +7,8 @@ const preTags = ['nightly', 'alpha', 'beta'];
 /**
  * Sorts prerelease tags such that nightly -> alpha -> beta.
  *
- * @param a Prerelease tag data for the old version.
- * @param b Prerelease tag data for the new version.
+ * @param {Array<string>} a Prerelease tag data for the old version.
+ * @param {Array<string>} b Prerelease tag data for the new version.
  * @returns 0 | 1 | -1
  */
 const preCompare = (a: string[], b: string[]) => {
@@ -30,8 +30,8 @@ const preCompare = (a: string[], b: string[]) => {
  *
  * Sorts in ascending order when passed to Array.sort().
  *
- * @param a The old Electron version.
- * @param b The new Electron version.
+ * @param {(string | semver.SemVer)} a The old Electron version.
+ * @param {(string | semver.SemVer)} b The new Electron version.
  * @returns 0 | 1 | -1
  */
 export function semverCompare(

@@ -142,6 +142,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
    * Get the settings icons
    *
    * @param {SettingsSections} section
+   * @returns {IconName}
    * @memberof Settings
    */
   private getIconForSection(section: SettingsSections): IconName {
@@ -159,6 +160,8 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
   /**
    * Trigger closing of the settings panel upon Esc
    * If hasPopoverOpen is set to true, settings will not close as only the popover should close
+   *
+   * @param {KeyboardEvent} event
    */
   private closeSettingsPanel(event: KeyboardEvent) {
     const { appState } = this.props;

@@ -12,7 +12,10 @@ interface PositionResult {
  *
  * TODO: Make this a lot smarter!
  *
- * @param {ClientRect} rect
+ * @param {ClientRect} target
+ * @param {number} margin
+ * @param {{ width: number, height: number }} size
+ * @returns {PositionResult}
  */
 export function positionForRect(
   target: ClientRect,

@@ -126,7 +126,7 @@ export function makeRunnable(ver: Version): RunnableVersion {
 /**
  * Return both known as well as local versions.
  *
- * @returns {Array<Version>}
+ * @returns {Array<RunnableVersion>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
   const versions = [...getReleasedVersions(), ...getLocalVersions()];
@@ -154,7 +154,7 @@ export function addLocalVersion(input: Version): Array<Version> {
 /**
  * Get the Version (if any) that is located at localPath.
  *
- * @param {string} input
+ * @param {string} folderPath
  * @returns {Version | undefined}
  */
 export function getLocalVersionForPath(
@@ -177,7 +177,7 @@ export function getLocalVersions(): Array<Version> {
 /**
  * Saves local versions to localStorage.
  *
- * @param {Array<Version>} versions
+ * @param {Array<Version | RunnableVersion>} versions
  */
 export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
   const filteredVersions = versions.filter((v) => {
@@ -209,7 +209,7 @@ function getReleasedVersions(): Array<Version> {
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {number} version - Electron major version number
+ * @param {number} major - Electron major version number
  * @returns {boolean} true if there are releases with that major version
  */
 export function isReleasedMajor(major: number) {

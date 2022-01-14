@@ -8,7 +8,7 @@ let _octo: Octokit;
  * is available, we'll token-authenticate.
  *
  * @export
- * @returns {Promise<typeof GitHubType>}
+ * @returns {Promise<typeof Octokit>}
  */
 export async function getOctokit(appState?: AppState): Promise<Octokit> {
   // It's possible to load Gists without being authenticated,

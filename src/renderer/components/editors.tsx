@@ -191,9 +191,9 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
   /**
    * Renders a Mosaic tile
    *
-   * @param {string} id
-   * @param {string} path
-   * @returns {JSX.Element | null}
+   * @param {EditorId} id
+   * @param {Array<MosaicBranch>} path
+   * @returns {JSX.Element}
    */
   public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
     const content = this.renderEditor(id);
@@ -262,7 +262,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * Sets the currently-focused editor. This will impact the editor's
    * z-index, ensuring that its intellisense menus don't get clipped
    * by the other editor windows.
-   * @param id Editor ID
+   * @param {EditorId} id
    */
   public setFocused(id: EditorId): void {
     this.setState({ focused: id });

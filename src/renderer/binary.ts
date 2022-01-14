@@ -20,7 +20,7 @@ const unzipping: Set<string> = new Set();
 /**
  * Determine by inspection the VersionState of this version
  *
- * @param {Version} version
+ * @param {Version} ver
  * @returns {VersionState} the state of the version
  */
 export function getVersionState(ver: Version): VersionState {
@@ -159,10 +159,11 @@ export async function removeBinary(ver: RunnableVersion) {
   }
 }
 
-/* Did we already download a given version?
+/**
+ * Did we already download a given version?
  *
  * @param {string} version
- * @param {string} dir
+ * @param {string} [dir]
  * @returns {boolean}
  */
 export function getIsDownloaded(version: string, dir?: string): boolean {

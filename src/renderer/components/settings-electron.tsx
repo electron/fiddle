@@ -36,7 +36,7 @@ interface ElectronSettingsState {
  * Settings content to manage Electron-related preferences.
  *
  * @class ElectronSettings
- * @extends {React.Component<ElectronSettingsProps, {}>}
+ * @extends {React.Component<ElectronSettingsProps, ElectronSettingsState>}
  */
 @observer
 export class ElectronSettings extends React.Component<
@@ -67,7 +67,7 @@ export class ElectronSettings extends React.Component<
   /**
    * Toggles visibility of non-downloaded versions
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
     const { appState } = this.props;
@@ -78,7 +78,7 @@ export class ElectronSettings extends React.Component<
   /**
    * Toggles visibility of obsolete versions
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleShowObsoleteChange(event: React.FormEvent<HTMLInputElement>) {
     const { appState } = this.props;
@@ -89,7 +89,7 @@ export class ElectronSettings extends React.Component<
   /**
    * Handles a change in which channels should be displayed.
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
     const { id, checked } = event.currentTarget;
@@ -337,7 +337,6 @@ export class ElectronSettings extends React.Component<
    * Renders the action for a single Electron version.
    *
    * @private
-   * @param {string} key
    * @param {RunnableVersion} ver
    * @returns {JSX.Element}
    */

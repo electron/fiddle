@@ -21,7 +21,7 @@ const ElectronVersionSelect = Select.ofType<RunnableVersion>();
  * Helper method: Returns the <Select /> label for an Electron
  * version.
  *
- * @param {RunnableVersion} { source, state }
+ * @param {RunnableVersion} { source, state, name }
  * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
