@@ -89,7 +89,7 @@ export class App {
   ): Promise<EditorValues> {
     const values = this.state.editorMosaic.values();
 
-    if (options && options.include !== false) {
+    if (options) {
       values[PACKAGE_NAME] = await getPackageJson(this.state, options);
     }
 

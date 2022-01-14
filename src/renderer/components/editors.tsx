@@ -70,9 +70,12 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
     );
 
     ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
-      const { version } = this.props.appState;
+      const { modules, version } = this.props.appState;
       const values = await getTemplate(version);
       const options: SetFiddleOptions = { templateName: version };
+
+      // Clear previously installed modules.
+      modules.clear();
 
       await window.ElectronFiddle.app.replaceFiddle(values, options);
     });
