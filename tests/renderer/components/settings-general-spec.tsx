@@ -29,6 +29,13 @@ jest.mock(
   }),
 );
 
+jest.mock(
+  '../../../src/renderer/components/settings-general-package-author',
+  () => ({
+    PackageAuthorSettings: 'settings-package-author',
+  }),
+);
+
 describe('GeneralSettings component', () => {
   const store: any = {};
 

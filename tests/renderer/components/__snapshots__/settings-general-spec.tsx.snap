@@ -21,5 +21,9 @@ exports[`GeneralSettings component renders 1`] = `
   <settings-block-accelerators
     appState={Object {}}
   />
+  <Blueprint3.Divider />
+  <settings-package-author
+    appState={Object {}}
+  />
 </div>
 `;

@@ -54,6 +54,7 @@ export class StateMock {
   @observable public version: string;
   @observable public versions: Record<string, RunnableVersion>;
   @observable public versionsToShow: RunnableVersion[] = [];
+  @observable public packageAuthor = 'electron<electron@electron.org>';
 
   public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();

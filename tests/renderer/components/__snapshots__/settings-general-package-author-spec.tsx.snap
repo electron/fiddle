@@ -1,0 +1,20 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PackageAuthorSettings component renders 1`] = `
+<div>
+  <h4>
+    Package Author
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Set package.json author field"
+    >
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        placeholder="electron<electron@electron.org>"
+        value="electron<electron@electron.org>"
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;

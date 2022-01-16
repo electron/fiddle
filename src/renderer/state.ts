@@ -36,6 +36,7 @@ import {
   makeRunnable,
   saveLocalVersions,
 } from './versions';
+import { getUsername } from '../utils/get-username';
 
 /**
  * The application's state. Exported as a singleton below.
@@ -101,6 +102,8 @@ export class AppState {
     (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
   @observable public acceleratorsToBlock: Array<BlockableAccelerator> =
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
+  @observable public packageAuthor =
+    (localStorage.getItem('packageAuthor') as string) ?? getUsername();
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
   @observable public readonly versions: Record<string, RunnableVersion>;
@@ -221,6 +224,7 @@ export class AppState {
     autorun(() => this.save('showObsoleteVersions', this.showObsoleteVersions));
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
+    autorun(() => this.save('packageAuthor', this.packageAuthor));
 
     // Update our known versions
     this.updateElectronVersions();
