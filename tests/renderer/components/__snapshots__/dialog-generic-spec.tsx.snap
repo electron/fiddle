@@ -59,6 +59,7 @@ exports[`GenericDialog component renders with an input prompt 1`] = `
   <p />
   <Blueprint3.InputGroup
     id="input"
+    onKeyDown={[Function]}
   />
 </Blueprint3.Alert>
 `;
@@ -77,6 +78,7 @@ exports[`GenericDialog component renders with an input prompt and placeholder 1`
   <p />
   <Blueprint3.InputGroup
     id="input"
+    onKeyDown={[Function]}
     placeholder="placeholder"
   />
 </Blueprint3.Alert>
