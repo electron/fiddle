@@ -64,4 +64,16 @@ describe('GenericDialog component', () => {
     instance.onClose(true);
     expect(store.isGenericDialogShowing).toBe(false);
   });
+
+  it('enter submit', () => {
+    const wrapper = shallow(<GenericDialog appState={store as any} />);
+    const instance: GenericDialog = wrapper.instance() as any;
+    const event = { key: 'Enter' };
+
+    store.isGenericDialogShowing = true;
+
+    instance.enterSubmit(event as any);
+
+    expect(store.isGenericDialogShowing).toBe(false);
+  });
 });

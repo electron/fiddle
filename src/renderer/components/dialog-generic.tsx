@@ -22,6 +22,7 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
     super(props);
 
     this.onClose = this.onClose.bind(this);
+    this.enterSubmit = this.enterSubmit.bind(this);
   }
 
   public onClose(result: boolean) {
@@ -31,6 +32,12 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
       input && input.value !== '' ? input.value : null;
     this.props.appState.genericDialogLastResult = result;
     this.props.appState.isGenericDialogShowing = false;
+  }
+
+  public enterSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === 'Enter') {
+      this.onClose(true);
+    }
   }
 
   public render() {
@@ -71,9 +78,13 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
     let dialogInput;
     if (wantsInput) {
       dialogInput = placeholder ? (
-        <InputGroup id="input" placeholder={placeholder} />
+        <InputGroup
+          id="input"
+          placeholder={placeholder}
+          onKeyDown={this.enterSubmit}
+        />
       ) : (
-        <InputGroup id="input" />
+        <InputGroup id="input" onKeyDown={this.enterSubmit} />
       );
     }
 
