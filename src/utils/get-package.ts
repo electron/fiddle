@@ -4,7 +4,6 @@ import { AppState } from '../renderer/state';
 import { getUsername } from './get-username';
 
 export interface PackageJsonOptions {
-  include?: boolean;
   includeElectron?: boolean;
   includeDependencies?: boolean;
 }
