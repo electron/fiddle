@@ -1,5 +1,6 @@
 import { shallow } from 'enzyme';
 import * as React from 'react';
+import { InputGroup } from '@blueprintjs/core';
 
 import { PackageAuthorSettings } from '../../../src/renderer/components/settings-general-package-author';
 
@@ -34,11 +35,17 @@ describe('PackageAuthorSettings component', () => {
       expect(instance.state.value).toEqual(author);
 
       await instance.handlePackageAuthorChange({
-        currentTarget: { value: `test` },
+        currentTarget: { value: 'test' },
       });
 
       expect(store.packageAuthor).toEqual('test');
       expect(instance.state.value).toEqual('test');
+
+      const event = { currentTarget: { value: 'test-onchange' } };
+      wrapper.find(InputGroup).simulate('change', event);
+
+      expect(store.packageAuthor).toEqual('test-onchange');
+      expect(instance.state.value).toEqual('test-onchange');
     });
   });
 });
