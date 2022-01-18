@@ -26,7 +26,7 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
  * version.
  *
  * @param {string} query
- * @param {RunnableVersion} { version }
+ * @param {RunnableVersion} { name }
  * @returns
  */
 export const filterItem: ItemPredicate<LoadedFiddleTheme> = (
@@ -78,7 +78,7 @@ interface AppearanceSettingsState {
  * Settings content to manage GitHub-related preferences.
  *
  * @class GitHubSettings
- * @extends {React.Component<AppearanceSettingsProps, {}>}
+ * @extends {React.Component<AppearanceSettingsProps, AppearanceSettingsState>}
  */
 @observer
 export class AppearanceSettings extends React.Component<

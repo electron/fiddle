@@ -29,7 +29,7 @@ export class BlockAcceleratorsSettings extends React.Component<BlockAccelerators
    * Handles a change on whether a keyboard shortcut should be blocked
    * before fiddle is executed.
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleBlockAcceleratorChange(
     event: React.FormEvent<HTMLInputElement>,

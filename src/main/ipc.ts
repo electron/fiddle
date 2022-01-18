@@ -51,7 +51,7 @@ class IpcMainManager extends EventEmitter {
    * If none is specified, we'll automatically go with the main window.
    *
    * @param {IpcEvents} channel
-   * @param {Array<any>} args
+   * @param {Array<any>} [args]
    * @param {Electron.WebContents} [target]
    */
   public send(

@@ -22,7 +22,6 @@ export function getForgeVersion(): string {
  * Returns the package.json for the current Fiddle
  *
  * @param {AppState} appState
- * @param {EditorValues} [values]
  * @param {PackageJsonOptions} [options]
  * @returns {string}
  */

@@ -488,7 +488,7 @@ export class AppState {
     return { ver };
   }
 
-  /*
+  /**
    * Private setVersion() helper to find a usable fallback version.
    */
   private findUsableVersion(): RunnableVersion | undefined {
@@ -627,6 +627,7 @@ export class AppState {
    * attaches a timestamp, and pushes into the store.
    *
    * @param {(string | Buffer)} data
+   * @param {OutputOptions} options
    */
   @action public pushOutput(
     data: string | Buffer,
@@ -748,7 +749,7 @@ export class AppState {
    * Save a key/value to localStorage.
    *
    * @param {string} key
-   * @param {(string | number | object)} [value]
+   * @param {(string | number | Array<any> | Record<string, unknown> | null | boolean)} [value]
    */
   private save(
     key: string,

@@ -15,8 +15,7 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
 /**
  * Activate a given theme (or the default)
  *
- * @param {typeof MonacoType} [monaco]
- * @param {LoadedFiddleTheme} [theme]
+ * @param {LoadedFiddleTheme} theme
  */
 export function activateTheme(theme: LoadedFiddleTheme) {
   const { monaco } = window.ElectronFiddle;
@@ -29,7 +28,7 @@ export function activateTheme(theme: LoadedFiddleTheme) {
  *
  * @export
  * @param {string} [name]
- * @returns {Promise<FiddleTheme>}
+ * @returns {Promise<FiddleTheme | null>}
  */
 export async function readThemeFile(
   name?: string,
@@ -56,7 +55,7 @@ export async function readThemeFile(
 /**
  * Reads and then returns all available themes.
  *
- * @returns {Promise<Array<FiddleTheme>>}
+ * @returns {Promise<Array<LoadedFiddleTheme>>}
  */
 export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
   const themes: Array<LoadedFiddleTheme> = [
@@ -91,7 +90,7 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
  *
  * @export
  * @param {string} [name]
- * @returns {Promise<FiddleTheme>}
+ * @returns {Promise<LoadedFiddleTheme>}
  */
 export async function getTheme(
   name?: string | null,
@@ -106,7 +105,7 @@ export async function getTheme(
  * Get the CSS string for a theme.
  *
  * @param {FiddleTheme} theme
- * @returns {string}
+ * @returns {Promise<string>}
  */
 async function getCssStringForTheme(theme: FiddleTheme): Promise<string> {
   let cssContent = '';

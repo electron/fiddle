@@ -81,7 +81,8 @@ export class FileManager {
    * Saves the current Fiddle to disk. If we never saved before,
    * we'll first open the "Save" dialog.
    *
-   * @param {string} filePath
+   * @param {string} [filePath]
+   * @param {...Array<FileTransform>} transforms
    * @memberof FileManager
    */
   public async saveFiddle(
@@ -160,7 +161,7 @@ export class FileManager {
    * Attempts to clean a given directory. Used to manually
    * clean temp directories.
    *
-   * @param {string} dir
+   * @param {string} [dir]
    */
   public async cleanup(dir?: string): Promise<boolean> {
     if (dir) {
@@ -211,7 +212,8 @@ export class FileManager {
    * it fails.
    *
    * @param {string} filePath
-   * @returns {string}
+   * @param {string} content
+   * @returns {Promise<void>}
    * @memberof FileManager
    */
   private async saveFile(filePath: string, content: string): Promise<void> {
@@ -228,7 +230,7 @@ export class FileManager {
    * it fails.
    *
    * @param {string} filePath
-   * @returns {string}
+   * @returns {Promise<void>}
    * @memberof FileManager
    */
   private async removeFile(filePath: string): Promise<void> {

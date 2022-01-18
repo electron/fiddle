@@ -10,7 +10,7 @@ import * as React from 'react';
  * @export
  * @param {string} text
  * @param {string} query
- * @returns
+ * @returns {(Array<React.ReactNode | string> | null)}
  */
 export function highlightText(
   text: string,

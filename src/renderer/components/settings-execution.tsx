@@ -31,7 +31,7 @@ interface ExecutionSettingsState {
  * Settings content to manage execution-related preferences.
  *
  * @class ExecutionSettings
- * @extends {React.Component<ExecutionSettingsProps, {}>}
+ * @extends {React.Component<ExecutionSettingsProps, ExecutionSettingsState>}
  */
 @observer
 export class ExecutionSettings extends React.Component<
@@ -90,7 +90,7 @@ export class ExecutionSettings extends React.Component<
    * Handles a change on whether or not the user data dir should be deleted
    * after a run.
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleDeleteDataChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
@@ -100,7 +100,7 @@ export class ExecutionSettings extends React.Component<
   /**
    * Handles a change on whether or not electron should log more things
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleElectronLoggingChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;

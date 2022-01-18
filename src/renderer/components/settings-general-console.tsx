@@ -26,7 +26,7 @@ export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
    * Handles a change on whether or not the console should be cleared
    * before fiddle is executed.
    *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleClearOnRunChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
