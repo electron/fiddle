@@ -25,6 +25,7 @@ describe('get-package', () => {
   describe('getPackageJson()', () => {
     const appState = new StateMock();
     const defaultName = 'test-app' as const;
+    const defaultAuthor = 'test-user' as const;
 
     const defaultPackage = {
       name: defaultName,
@@ -33,7 +34,7 @@ describe('get-package', () => {
       keywords: [],
       main: `./${MAIN_JS}`,
       version: '1.0.0',
-      author: 'test-user',
+      author: defaultAuthor,
       scripts: {
         start: 'electron .',
       },
@@ -52,6 +53,7 @@ describe('get-package', () => {
       const appState = {
         getName: () => name,
         modules: new Map<string, string>([['say', '*']]),
+        packageAuthor: defaultAuthor,
       };
       const result = await getPackageJson(appState as any);
       expect(result).toEqual(buildExpectedPackage());
@@ -65,6 +67,7 @@ describe('get-package', () => {
       appState.getName.mockReturnValue(name);
       appState.modules = new Map<string, string>([['say', '*']]);
       appState.version = version;
+      appState.packageAuthor = defaultAuthor;
 
       const result = await getPackageJson(appState as any);
       const devDependencies = { [electronPkg]: version };

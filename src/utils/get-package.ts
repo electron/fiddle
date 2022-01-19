@@ -1,7 +1,6 @@
 import * as path from 'path';
 import { MAIN_JS } from '../interfaces';
 import { AppState } from '../renderer/state';
-import { getUsername } from './get-username';
 
 export interface PackageJsonOptions {
   includeElectron?: boolean;
@@ -57,7 +56,7 @@ export async function getPackageJson(
       keywords: [],
       main: `./${MAIN_JS}`,
       version: '1.0.0',
-      author: getUsername(),
+      author: appState.packageAuthor,
       scripts: {
         start: 'electron .',
       },

@@ -7,6 +7,7 @@ import { AppearanceSettings } from './settings-general-appearance';
 import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
 import { GitHubSettings } from './settings-general-github';
+import { PackageAuthorSettings } from './settings-general-package-author';
 
 interface GeneralSettingsProps {
   appState: AppState;
@@ -35,6 +36,8 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps> {
         <GitHubSettings appState={this.props.appState} />
         <Divider />
         <BlockAcceleratorsSettings appState={this.props.appState} />
+        <Divider />
+        <PackageAuthorSettings appState={this.props.appState} />
       </div>
     );
   }
