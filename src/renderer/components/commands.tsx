@@ -8,6 +8,8 @@ import { BisectHandler } from './commands-bisect';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
+import { ipcRendererManager } from '../ipc';
+import { IpcEvents } from '../../ipc-events';
 
 interface CommandsProps {
   appState: AppState;
@@ -26,12 +28,16 @@ export class Commands extends React.Component<CommandsProps> {
     super(props);
   }
 
+  private handleDoubleClick = () => {
+    ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+  };
+
   public render() {
     const { appState } = this.props;
-    const { isBisectCommandShowing: isBisectCommandShowing } = appState;
+    const { isBisectCommandShowing: isBisectCommandShowing, title } = appState;
 
     return (
-      <div className="commands">
+      <div className="commands" onDoubleClick={this.handleDoubleClick}>
         <div>
           <ControlGroup fill={true} vertical={false}>
             <VersionChooser appState={appState} />
@@ -51,6 +57,9 @@ export class Commands extends React.Component<CommandsProps> {
             />
           </ControlGroup>
         </div>
+        {process.platform === 'darwin' ? (
+          <div className="title">{title}</div>
+        ) : undefined}
         <div>
           <AddressBar appState={appState} />
           <GistActionButton appState={appState} />

@@ -10,7 +10,11 @@ header {
   display: flex;
   justify-content: space-between;
   height: 50px;
-  padding: 10px;
+  padding:
+    10px
+    calc(100vw - (env(titlebar-area-x, 0) + env(titlebar-area-width, 0)))
+    10px
+    env(titlebar-area-x, 0);
   box-sizing: border-box;
   font-family: @fonts-common;
 
@@ -35,6 +39,7 @@ header {
   }
 
   & > div {
+
     display: flex;
 
     &:last-of-type {
@@ -69,5 +74,16 @@ header {
         border-color: @foreground-2;
       }
     }
+  }
+
+  & > .title {
+    align-self: stretch;
+    flex-shrink: 0;
+
+    flex-flow: column nowrap;
+    justify-content: center;
+    user-select: none;
+
+    margin: 0 10px;
   }
 }

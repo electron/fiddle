@@ -14,12 +14,20 @@ export let browserWindows: Array<BrowserWindow | null> = [];
  * @returns {Electron.BrowserWindowConstructorOptions}
  */
 export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions {
+  const HEADER_COMMANDS_HEIGHT = 50;
+  const MACOS_TRAFFIC_LIGHTS_HEIGHT = 16;
+
   return {
     width: 1400,
     height: 900,
     minHeight: 600,
     minWidth: 600,
-    titleBarStyle: process.platform === 'darwin' ? 'hidden' : undefined,
+    titleBarStyle: process.platform === 'darwin' ? 'hiddenInset' : undefined,
+    titleBarOverlay: process.platform === 'darwin',
+    trafficLightPosition: {
+      x: 20,
+      y: HEADER_COMMANDS_HEIGHT / 2 - MACOS_TRAFFIC_LIGHTS_HEIGHT / 2,
+    },
     acceptFirstMouse: true,
     backgroundColor: '#1d2427',
     show: false,
