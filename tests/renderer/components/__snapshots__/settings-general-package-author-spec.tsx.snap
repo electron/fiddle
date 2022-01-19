@@ -7,11 +7,10 @@ exports[`PackageAuthorSettings component renders 1`] = `
   </h4>
   <Blueprint3.Callout>
     <Blueprint3.FormGroup
-      label="Set package.json author field"
+      label="Set the package.json author field for your exported Fiddle projects."
     >
       <Blueprint3.InputGroup
         onChange={[Function]}
-        placeholder="electron<electron@electron.org>"
         value="electron<electron@electron.org>"
       />
     </Blueprint3.FormGroup>

@@ -49,9 +49,8 @@ export class PackageAuthorSettings extends React.Component<
   }
 
   public render() {
-    const { packageAuthor } = this.props.appState;
-
-    const packageAuthorLabel = 'Set package.json author field';
+    const packageAuthorLabel =
+      'Set the package.json author field for your exported Fiddle projects.';
 
     return (
       <div>
@@ -59,7 +58,6 @@ export class PackageAuthorSettings extends React.Component<
         <Callout>
           <FormGroup label={packageAuthorLabel}>
             <InputGroup
-              placeholder={packageAuthor}
               value={this.state.value}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 this.handlePackageAuthorChange(e)
