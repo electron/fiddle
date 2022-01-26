@@ -47,7 +47,7 @@ export class OutputEditorsWrapper extends React.Component<
     return (
       <Mosaic<WrapperEditorId>
         renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
-        resize={{ minimumPaneSizePercentage: 0 }}
+        resize={{ minimumPaneSizePercentage: 15 }}
         value={this.state.mosaic}
         onChange={this.onChange}
       />
