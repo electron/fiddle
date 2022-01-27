@@ -278,7 +278,9 @@ export class Runner {
    * @memberof Runner
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
-    const modules = Array.from(this.appState.modules.keys());
+    const modules = Array.from(this.appState.modules.entries()).map(
+      ([pkg, version]) => `${pkg}@${version}`,
+    );
     const { pushOutput } = this.appState;
 
     if (modules && modules.length > 0) {
