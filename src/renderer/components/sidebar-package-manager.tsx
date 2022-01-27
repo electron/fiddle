@@ -56,11 +56,11 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
       <div>
         <Suggest
           fill={true}
-          initialContent={null}
           inputValueRenderer={(item) => item.name}
           items={this.state.suggestions}
-          itemRenderer={(item, { handleClick }) => (
+          itemRenderer={(item, { modifiers, handleClick }) => (
             <MenuItem
+              active={modifiers.active}
               key={item.name}
               text={
                 <span
