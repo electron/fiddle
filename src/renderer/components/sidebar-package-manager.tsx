@@ -145,7 +145,9 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
           firstMatch.name,
           Object.keys(firstMatch.versions),
         );
-        this.setState({ versionsCache: new Map(this.state.versionsCache) });
+        this.setState((prevState) => ({
+          versionsCache: new Map(prevState.versionsCache),
+        }));
       }
     }
   };
