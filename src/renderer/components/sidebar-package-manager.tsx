@@ -54,9 +54,10 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
     console.log(this.state.suggestions);
     return (
       <div>
+        <h5>Modules</h5>
         <Suggest
           fill={true}
-          inputValueRenderer={(item) => item.name}
+          inputValueRenderer={() => ''}
           items={this.state.suggestions}
           itemRenderer={(item, { modifiers, handleClick }) => (
             <MenuItem
@@ -73,14 +74,17 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
               onClick={handleClick}
             />
           )}
+          noResults={<></>}
           onItemSelect={this.addPackageToFiddle}
           onQueryChange={pDebounce(async (query) => {
             const { hits } = await index.search<AlgoliaHit>(query);
             this.setState({
               suggestions: hits,
             });
-          }, 200)}
+          }, 75)}
           popoverProps={{ minimal: true, usePortal: false }}
+          resetOnClose={true}
+          resetOnSelect={true}
         />
         <Tree contents={this.getModuleNodes()} />
       </div>
@@ -102,6 +106,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
         secondaryLabel: (
           <div>
             <select
+              style={{ width: '80px', textOverflow: 'ellipsis' }}
               name={pkg}
               value={activeVersion}
               onChange={({ target }) =>
