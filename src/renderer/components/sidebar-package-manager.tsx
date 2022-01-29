@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
+import { SearchResponse } from '@algolia/client-search';
 import algoliasearch from 'algoliasearch/lite';
 import pDebounce from 'p-debounce';
 import { observer } from 'mobx-react';
@@ -11,6 +12,7 @@ const client = algoliasearch('OFCNCOG2CU', '4efa2042cf4dba11be6e96e5c394e1a4');
 const index = client.initIndex('npm-search');
 
 interface IState {
+  searchCache: Map<string, SearchResponse<AlgoliaHit>>;
   suggestions: Array<AlgoliaHit>;
   versionsCache: Map<string, string[]>;
 }
@@ -36,6 +38,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
+      searchCache: new Map(),
       suggestions: [],
       versionsCache: new Map(),
     };
@@ -51,7 +54,6 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
   };
 
   public render() {
-    console.log(this.state.suggestions);
     return (
       <div>
         <h5>Modules</h5>
@@ -74,15 +76,31 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
               onClick={handleClick}
             />
           )}
-          noResults={<></>}
+          noResults={<em>Search for modules here...</em>}
           onItemSelect={this.addPackageToFiddle}
           onQueryChange={pDebounce(async (query) => {
-            const { hits } = await index.search<AlgoliaHit>(query);
-            this.setState({
-              suggestions: hits,
-            });
-          }, 75)}
-          popoverProps={{ minimal: true, usePortal: false }}
+            if (query !== '') {
+              let searchResult: SearchResponse<AlgoliaHit>;
+
+              // Cache Algolia hits
+              if (this.state.searchCache.has(query)) {
+                searchResult = this.state.searchCache.get(query)!;
+              } else {
+                searchResult = await index.search<AlgoliaHit>(query, {
+                  hitsPerPage: 5,
+                });
+                this.state.searchCache.set(query, searchResult);
+              }
+              this.setState({
+                suggestions: searchResult.hits,
+              });
+            } else {
+              this.setState({
+                suggestions: [],
+              });
+            }
+          }, 200)}
+          popoverProps={{ minimal: true, usePortal: false, fill: true }}
           resetOnClose={true}
           resetOnSelect={true}
         />
