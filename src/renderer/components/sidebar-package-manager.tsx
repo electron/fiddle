@@ -1,18 +1,13 @@
 import * as React from 'react';
 import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
-import { SearchResponse } from '@algolia/client-search';
-import algoliasearch from 'algoliasearch/lite';
 import pDebounce from 'p-debounce';
+import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
-
-const client = algoliasearch('OFCNCOG2CU', '4efa2042cf4dba11be6e96e5c394e1a4');
-const index = client.initIndex('npm-search');
-
+import { npmSearch } from '../npm-search';
 interface IState {
-  searchCache: Map<string, SearchResponse<AlgoliaHit>>;
   suggestions: Array<AlgoliaHit>;
   versionsCache: Map<string, string[]>;
 }
@@ -38,10 +33,15 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
   constructor(props: IProps) {
     super(props);
     this.state = {
-      searchCache: new Map(),
       suggestions: [],
       versionsCache: new Map(),
     };
+  }
+
+  public componentDidMount() {
+    autorun(async () => {
+      await this.refreshVersionsCache();
+    });
   }
 
   public addPackageToFiddle = (item: AlgoliaHit) => {
@@ -80,19 +80,9 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
           onItemSelect={this.addPackageToFiddle}
           onQueryChange={pDebounce(async (query) => {
             if (query !== '') {
-              let searchResult: SearchResponse<AlgoliaHit>;
-
-              // Cache Algolia hits
-              if (this.state.searchCache.has(query)) {
-                searchResult = this.state.searchCache.get(query)!;
-              } else {
-                searchResult = await index.search<AlgoliaHit>(query, {
-                  hitsPerPage: 5,
-                });
-                this.state.searchCache.set(query, searchResult);
-              }
+              const { hits } = await npmSearch.search(query);
               this.setState({
-                suggestions: searchResult.hits,
+                suggestions: hits,
               });
             } else {
               this.setState({
@@ -114,7 +104,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
    * conforming to the BlueprintJS tree schema.
    * @returns TreeNodeInfo[]
    */
-  public getModuleNodes = (): TreeNodeInfo[] => {
+  private getModuleNodes = (): TreeNodeInfo[] => {
     const values: TreeNodeInfo[] = [];
     const { appState } = this.props;
     for (const [pkg, activeVersion] of appState.modules.entries()) {
@@ -151,13 +141,14 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
 
   /**
    * Attempt to fetch the list of all versions for
-   * all installed modules.
+   * all installed modules. We need this list of versions
+   * for the version selector.
    */
-  public refreshVersionsCache = async () => {
-    const cache = this.props.appState.modules;
-    for (const pkg of cache.keys()) {
-      const { hits } = await index.search<AlgoliaHit>(pkg);
-      const firstMatch = hits.pop();
+  private refreshVersionsCache = async () => {
+    const { modules } = this.props.appState;
+    for (const pkg of modules.keys()) {
+      const { hits } = await npmSearch.search(pkg);
+      const firstMatch = hits[0];
       if (firstMatch === undefined || !firstMatch.versions) {
         console.error(
           `Attempted to fetch version list for ${pkg} from Algolia but failed!`,
