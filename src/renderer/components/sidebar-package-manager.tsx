@@ -1,9 +1,10 @@
 import * as React from 'react';
 import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
-import pDebounce from 'p-debounce';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
+import pDebounce from 'p-debounce';
+import semver from 'semver';
 
 import { AppState } from '../state';
 import { npmSearch } from '../npm-search';
@@ -41,10 +42,11 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
   public componentDidMount() {
     autorun(async () => {
       await this.refreshVersionsCache();
+      this.coerceInvalidVersionNumbers();
     });
   }
 
-  public addPackageToFiddle = (item: AlgoliaHit) => {
+  public addModuleToFiddle = (item: AlgoliaHit) => {
     const { appState } = this.props;
     appState.modules.set(item.name, item.version);
     // copy state so react can re-render
@@ -77,7 +79,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
             />
           )}
           noResults={<em>Search for modules here...</em>}
-          onItemSelect={this.addPackageToFiddle}
+          onItemSelect={this.addModuleToFiddle}
           onQueryChange={pDebounce(async (query) => {
             if (query !== '') {
               const { hits } = await npmSearch.search(query);
@@ -146,22 +148,53 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
    */
   private refreshVersionsCache = async () => {
     const { modules } = this.props.appState;
+
     for (const pkg of modules.keys()) {
-      const { hits } = await npmSearch.search(pkg);
-      const firstMatch = hits[0];
-      if (firstMatch === undefined || !firstMatch.versions) {
-        console.error(
-          `Attempted to fetch version list for ${pkg} from Algolia but failed!`,
-        );
-        return;
-      } else {
-        this.state.versionsCache.set(
-          firstMatch.name,
-          Object.keys(firstMatch.versions),
-        );
-        this.setState((prevState) => ({
-          versionsCache: new Map(prevState.versionsCache),
-        }));
+      if (!this.state.versionsCache.has(pkg)) {
+        const { hits } = await npmSearch.search(pkg);
+        const firstMatch = hits[0];
+        if (firstMatch === undefined || !firstMatch.versions) {
+          console.warn(
+            `Attempted to fetch version list for ${pkg} from Algolia but failed!`,
+          );
+        } else {
+          this.state.versionsCache.set(
+            firstMatch.name,
+            Object.keys(firstMatch.versions),
+          );
+          this.setState((prevState) => ({
+            versionsCache: new Map(prevState.versionsCache),
+          }));
+        }
+      }
+    }
+  };
+
+  /**
+   * Coerces any invalid semver versions to the latest
+   * version detected in the versionsCache. This is particularly
+   * useful for loading gists created with older versions of
+   * Fiddle that have wildcard (*) versions in their package.json
+   *
+   * This function should only be run after the versions cache
+   * is updated so we have an updated list of all deps and their
+   * versions.
+   */
+  private coerceInvalidVersionNumbers = () => {
+    const { modules } = this.props.appState;
+
+    for (const [pkg, version] of modules.entries()) {
+      if (!semver.valid(version)) {
+        const packageVersions = this.state.versionsCache.get(pkg);
+
+        if (Array.isArray(packageVersions) && packageVersions.length > 0) {
+          const latestVersion = packageVersions[packageVersions.length - 1];
+          modules.set(pkg, latestVersion);
+        } else {
+          console.warn(
+            `Attempted to coerce latest version for package '${pkg}' but failed.`,
+          );
+        }
       }
     }
   };
