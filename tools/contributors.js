@@ -1,4 +1,4 @@
-const fetch = require('node-fetch');
+const fetch = require('cross-fetch');
 const fs = require('fs-extra');
 const util = require('util');
 const path = require('path');
