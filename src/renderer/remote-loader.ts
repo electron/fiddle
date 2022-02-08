@@ -115,8 +115,18 @@ export class RemoteLoader {
 
       for (const [id, data] of Object.entries(gist.data.files)) {
         if (id === PACKAGE_NAME) {
-          const { dependencies } = JSON.parse(data.content);
-          this.appState.modules = new Map(Object.entries(dependencies));
+          const { dependencies, devDependencies } = JSON.parse(data.content);
+          const allDeps: Record<string, string> = {
+            ...dependencies,
+            ...devDependencies,
+          };
+
+          // We want to include all dependencies except Electron.
+          const parsedDeps = Object.entries(allDeps).filter(
+            ([key, _]) => key !== 'electron',
+          );
+
+          this.appState.modules = new Map(parsedDeps);
         }
         if (!isSupportedFile(id)) {
           continue;
