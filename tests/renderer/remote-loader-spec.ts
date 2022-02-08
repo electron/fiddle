@@ -1,6 +1,7 @@
 import {
   EditorValues,
   ElectronReleaseChannel,
+  PACKAGE_NAME,
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
@@ -75,6 +76,61 @@ describe('RemoteLoader', () => {
 
       expect(result).toBe(true);
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
+    });
+
+    it('handles gist fiddle devDependencies', async () => {
+      const gistId = 'pjsontestid';
+      const pj = {
+        main: 'main.js',
+        devDependencies: {
+          electron: '17.0.0',
+        },
+      };
+
+      store.gistId = gistId;
+      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
+      mockRepos.push({
+        name: PACKAGE_NAME,
+        download_url: `https://${PACKAGE_NAME}`,
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(true);
+      expect(store.modules.size).toEqual(0);
+    });
+
+    it('handles extra gist fiddle dependencies', async () => {
+      const gistId = 'pjsontestid';
+      const pj = {
+        main: 'main.js',
+        dependencies: {
+          'meaning-of-life': '*',
+        },
+        devDependencies: {
+          electron: '17.0.0',
+          chalk: '*',
+        },
+      };
+
+      store.gistId = gistId;
+      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
+      mockRepos.push({
+        name: PACKAGE_NAME,
+        download_url: `https://${PACKAGE_NAME}`,
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(true);
+      expect(store.modules.size).toEqual(2);
+      expect(store.modules.get('meaning-of-life')).toEqual('*');
+      expect(store.modules.get('chalk')).toEqual('*');
+      expect(store.modules.has('electron')).toEqual(false);
     });
 
     it('loads a fiddle with a new file', async () => {
