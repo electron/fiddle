@@ -3,10 +3,6 @@ import * as React from 'react';
 
 import { Header } from '../../../src/renderer/components/header';
 
-jest.mock('../../../src/renderer/components/chrome-mac', () => ({
-  ChromeMac: 'chrome-mac',
-}));
-
 jest.mock('../../../src/renderer/components/commands', () => ({
   Commands: 'commands',
 }));
