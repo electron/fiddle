@@ -102,6 +102,31 @@ describe('RemoteLoader', () => {
       expect(store.modules.size).toEqual(0);
     });
 
+    it('sets the Electron version from package.json', async () => {
+      const gistId = 'pjsontestid';
+      const pj = {
+        main: 'main.js',
+        devDependencies: {
+          electron: '17.0.0',
+        },
+      };
+
+      store.gistId = gistId;
+      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
+      mockRepos.push({
+        name: PACKAGE_NAME,
+        download_url: `https://${PACKAGE_NAME}`,
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(true);
+      expect(store.modules.size).toEqual(0);
+      expect(store.setVersion).toBeCalledWith('17.0.0');
+    });
+
     it('handles extra gist fiddle dependencies', async () => {
       const gistId = 'pjsontestid';
       const pj = {
@@ -177,7 +202,10 @@ describe('RemoteLoader', () => {
     let fetchMock: FetchMock;
 
     beforeEach(() => {
-      instance.setElectronVersionWithRef = jest.fn().mockReturnValueOnce(true);
+      instance.setElectronVersion = jest.fn().mockReturnValueOnce(true);
+      instance.getPackageVersionFromRef = jest
+        .fn()
+        .mockReturnValueOnce('4.0.0');
       fetchMock = new FetchMock();
       for (const { name, download_url } of mockRepos) {
         fetchMock.add(download_url, name);
@@ -231,36 +259,27 @@ describe('RemoteLoader', () => {
     });
   });
 
-  describe('setElectronVersionFromRef()', () => {
+  describe('setElectronVersion()', () => {
     it('sets version from ref if release channel enabled', async () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce('4.0.0');
 
-      const result = await instance.setElectronVersionWithRef('4.0.0');
+      const result = await instance.setElectronVersion('4.0.0');
       expect(result).toBe(true);
       expect(store.setVersion).toBeCalledWith('4.0.0');
     });
 
     it('enables release channel when authorized', async () => {
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce('4.0.0-beta');
       instance.verifyReleaseChannelEnabled = jest.fn().mockReturnValue(true);
 
-      const result = await instance.setElectronVersionWithRef('4.0.0-beta');
+      const result = await instance.setElectronVersion('4.0.0-beta');
       expect(result).toBe(true);
       expect(store.channelsToShow).toContain(ElectronReleaseChannel.beta);
     });
 
     it('tries to download missing versions of Electron', async () => {
       const version = '5.0.0';
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce(version);
 
-      const result = await instance.setElectronVersionWithRef(version);
+      const result = await instance.setElectronVersion(version);
       expect(result).toBe(true);
       expect(store.addNewVersions).toBeCalledWith([
         {
@@ -273,7 +292,7 @@ describe('RemoteLoader', () => {
     });
   });
 
-  describe('getPackageFromRef()', () => {
+  describe('getPackageVersionFromRef()', () => {
     it('gets Electron version from package.json', async () => {
       const versionString = JSON.stringify({ version: '4.0.0' });
       const content = Buffer.from(versionString).toString('base64');

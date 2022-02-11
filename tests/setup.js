@@ -7,7 +7,7 @@ configure({ adapter: new Adapter() });
 
 global.confirm = jest.fn();
 
-if (!process.env.hasOwnProperty('FIDDLE_VERBOSE_TESTS')) {
+if (!process.env.FIDDLE_VERBOSE_TESTS) {
   jest.spyOn(global.console, 'error').mockImplementation(() => jest.fn());
   jest.spyOn(global.console, 'info').mockImplementation(() => jest.fn());
   jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());

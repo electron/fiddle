@@ -11,6 +11,7 @@ import { getTemplate } from './content';
 import { AppState } from './state';
 import { getReleaseChannel } from './versions';
 import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
+import semver from 'semver';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -22,7 +23,7 @@ export class RemoteLoader {
       'handleLoadingSuccess',
       'loadFiddleFromElectronExample',
       'loadFiddleFromGist',
-      'setElectronVersionWithRef',
+      'setElectronVersion',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
     ]) {
@@ -59,7 +60,6 @@ export class RemoteLoader {
   ): Promise<boolean> {
     try {
       const octo = await getOctokit(this.appState);
-
       const folder = await octo.repos.getContents({
         owner: ELECTRON_REPO,
         repo: ELECTRON_ORG,
@@ -67,7 +67,8 @@ export class RemoteLoader {
         path,
       });
 
-      const ok = await this.setElectronVersionWithRef(ref);
+      const version = await this.getPackageVersionFromRef(ref);
+      const ok = await this.setElectronVersion(version);
       if (!ok) return false;
 
       const values = await getTemplate(this.appState.version);
@@ -116,21 +117,35 @@ export class RemoteLoader {
       for (const [id, data] of Object.entries(gist.data.files)) {
         if (id === PACKAGE_NAME) {
           const { dependencies, devDependencies } = JSON.parse(data.content);
-          const allDeps: Record<string, string> = {
+          const deps: Record<string, string> = {
             ...dependencies,
             ...devDependencies,
           };
 
-          // We want to include all dependencies except Electron.
-          const parsedDeps = Object.entries(allDeps).filter(
-            ([key, _]) => key !== 'electron',
-          );
+          // If the gist specifies an Electron version, we want to tell Fiddle to run
+          // it with that version by default.
+          if (deps.electron) {
+            // Strip off semver range prefixes.
+            const index = deps.electron.search(/\d/);
+            const version = deps.electron.substring(index);
 
-          this.appState.modules = new Map(parsedDeps);
+            if (!semver.valid(version)) {
+              throw new Error(
+                "This gist's package.json contains an invalid Electron version.",
+              );
+            }
+
+            this.setElectronVersion(version);
+
+            // We want to include all dependencies except Electron.
+            delete deps.electron;
+          }
+
+          this.appState.modules = new Map(Object.entries(deps));
         }
-        if (!isSupportedFile(id)) {
-          continue;
-        }
+
+        if (!isSupportedFile(id)) continue;
+
         if (isKnownFile(id) || (await this.confirmAddFile(id))) {
           values[id] = data.content;
         }
@@ -142,9 +157,7 @@ export class RemoteLoader {
     }
   }
 
-  public async setElectronVersionWithRef(ref: string): Promise<boolean> {
-    const version = await this.getPackageVersionFromRef(ref);
-
+  public async setElectronVersion(version: string): Promise<boolean> {
     if (!this.appState.hasVersion(version)) {
       const versionToDownload = {
         source: VersionSource.remote,
