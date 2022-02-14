@@ -82,7 +82,9 @@ export class FileManager {
         };
 
         if (deps.electron) {
-          // Strip off semver range prefixes.
+          // Strip off semver range prefixes, e.g:
+          // ^1.2.0 -> 1.2.0
+          // ~2.3.4 -> 2.3.4
           const index = deps.electron.search(/\d/);
           const version = deps.electron.substring(index);
 
