@@ -155,7 +155,7 @@ export class RemoteLoader {
       // contain any supported files. Throw an error to let the user know.
       if (Object.keys(values).length === 0) {
         throw new Error(
-          'This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html',
+          'This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html.',
         );
       }
 
