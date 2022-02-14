@@ -102,6 +102,32 @@ describe('RemoteLoader', () => {
       expect(store.modules.size).toEqual(0);
     });
 
+    it('throws an error when a user loads a gist with no supported files', async () => {
+      const gistId = 'abcdtestid';
+
+      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+      const errorGetGists = {
+        get: jest.fn().mockResolvedValue({
+          data: {
+            files: {
+              'blah.blah': { content: '' },
+              'yes.no': { content: '' },
+            },
+          },
+        }),
+      };
+      (getOctokit as jest.Mock).mockReturnValue({ gists: errorGetGists });
+      store.gistId = gistId;
+
+      const result = await instance.fetchGistAndLoad(gistId);
+      expect(result).toBe(false);
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html/i,
+        ),
+      );
+    });
+
     it('sets the Electron version from package.json', async () => {
       const gistId = 'pjsontestid';
       const pj = {

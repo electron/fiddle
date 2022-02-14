@@ -151,6 +151,14 @@ export class RemoteLoader {
         }
       }
 
+      // If no files were populated into values, the Fiddle did not
+      // contain any supported files. Throw an error to let the user know.
+      if (Object.keys(values).length === 0) {
+        throw new Error(
+          'This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html',
+        );
+      }
+
       return this.handleLoadingSuccess(values, gistId);
     } catch (error) {
       return this.handleLoadingFailed(error);
