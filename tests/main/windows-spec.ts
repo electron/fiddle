@@ -35,7 +35,12 @@ describe('windows', () => {
       acceptFirstMouse: true,
       backgroundColor: '#1d2427',
       show: false,
+      titleBarOverlay: false,
       titleBarStyle: undefined,
+      trafficLightPosition: {
+        x: 20,
+        y: 17,
+      },
       webPreferences: {
         webviewTag: false,
         nodeIntegration: true,
@@ -66,7 +71,8 @@ describe('windows', () => {
       overridePlatform('darwin');
       expect(getMainWindowOptions()).toEqual({
         ...expectedBase,
-        titleBarStyle: 'hidden',
+        titleBarOverlay: true,
+        titleBarStyle: 'hiddenInset',
       });
     });
   });

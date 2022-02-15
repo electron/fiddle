@@ -3,6 +3,7 @@
 exports[`Commands component renders 1`] = `
 <div
   className="commands"
+  onDoubleClick={[Function]}
 >
   <div>
     <Blueprint3.ControlGroup

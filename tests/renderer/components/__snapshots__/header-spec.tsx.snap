@@ -2,9 +2,6 @@
 
 exports[`Header component renders 1`] = `
 <Fragment>
-  <chrome-mac
-    appState={Object {}}
-  />
   <header
     id="header"
   >
