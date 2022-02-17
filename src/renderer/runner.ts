@@ -383,10 +383,10 @@ export class Runner {
 
         if (typeof code !== 'number') {
           pushOutput(`Electron exited with signal ${signal}.`);
-          resolve(RunResult.INVALID);
+          resolve(RunResult.FAILURE);
         } else {
           pushOutput(`Electron exited with code ${code}.`);
-          resolve(!code ? RunResult.SUCCESS : RunResult.FAILURE);
+          resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
         }
       });
     });
