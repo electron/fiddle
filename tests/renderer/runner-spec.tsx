@@ -161,7 +161,7 @@ describe('Runner component', () => {
       mockChild.emit('close', null, signal);
       const result = await runPromise;
 
-      expect(result).toBe(RunResult.INVALID);
+      expect(result).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenCalledTimes(8);
@@ -254,7 +254,7 @@ describe('Runner component', () => {
       instance.stop();
       const runResult = await runPromise;
 
-      expect(runResult).toBe(RunResult.INVALID);
+      expect(runResult).toBe(RunResult.FAILURE);
       expect(store.isRunning).toBe(false);
     });
 
