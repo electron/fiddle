@@ -1,0 +1,464 @@
+[
+  {
+      "path": "/LICENSE",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-yWgCRx67lpqaSTXwZCh+wBD99dMrZpUCSCioemYwrmohaFB5gXhsuOgT76ezQKOv",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 1141
+  },
+  {
+      "path": "/README.md",
+      "type": "file",
+      "contentType": "text/markdown",
+      "integrity": "sha384-dIIngn2EIZkAJj3AaDHuGptA7IlfbE5NYs+PL36pRpw1hvONz82b4e4m8y1vaADO",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 2482
+  },
+  {
+      "path": "/assert.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-aVDpKnDCrODPmsYC+nG5u88KejmDfpHuH47auur+7vQpidt26FTffEDQdrWiQT77",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 38561
+  },
+  {
+      "path": "/async_hooks.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-779C6cx/lwi/y9KcMilZTWD5sAv+Io4H3A5umjL9Vd1UZvArhX46pUBigXbJL9VV",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 20764
+  },
+  {
+      "path": "/buffer.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-6zqAkHHkgUecgYj7PcSOq0nHGDPAN2/FLXS/1Yk0D/MraKZqnmo1b8tmhB1gJ+OD",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 102086
+  },
+  {
+      "path": "/child_process.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-wP8rsAv01nin361bDlnIfYHICSbR0QlMTon6iuqEeexnAglbPz8mxV3v7tU/OAuP",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 66120
+  },
+  {
+      "path": "/cluster.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-o1bofDyeh6lzsS89Tg6CU+RQXOoagQJBW0xbCsbS7s/+iyv23glQNeIPRmn1QVDn",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 20539
+  },
+  {
+      "path": "/console.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-xyzuf7Zku3CPqbl2rJ5VlZZoHufrdBByGcRjH2GjphX1RwNyQ17KGPkxB9943DiA",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 18331
+  },
+  {
+      "path": "/constants.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-OFa2LcDjpUEulO2UQ2ODaBH4cKnp2M16CJnI+yiYRi+SfRTn0WMwQ4r/CJDsxNCn",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 613
+  },
+  {
+      "path": "/crypto.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-CbSqhgy8JKXc4mTBZ/QJkGXZUQX+fC0x/Cs8V3xojyH6Lrq5t8htyqSQRJokEyIp",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 152388
+  },
+  {
+      "path": "/dgram.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-zx2NcwTt/P4kr38B+vK88hBBWHqPYsDqrrsY/bQXkefbLpA/DzUK/LamLCI5K8+Y",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 26733
+  },
+  {
+      "path": "/diagnostics_channel.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-jEfeQTk8mC1P2h3kG6VbIqa14rjrVBEKAOktGOLdF45zgmmBtZ1X0sQs2emSUwW6",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 5936
+  },
+  {
+      "path": "/dns.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-n0D8X2QZenDyPGYWNtFrEDgL0airfA4er6EmanrgAxQv6sdnHfJnW5Rzqhcs2BSk",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 29576
+  },
+  {
+      "path": "/domain.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-hmyKHE8ZplUeHoU0ZXRZdXoP0RIp7DRHWR2BJn+dtDJsxgKzNqbhzhyuSKIulRXE",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 7809
+  },
+  {
+      "path": "/events.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-6oLm5EXlnRFBjhWqCQXh1JD9iJ4+PThdNvFl7vsxKqvhbByO/ZtMj9dk8P2ZoP4g",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 27849
+  },
+  {
+      "path": "/fs.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-dIg9GDCVelFJCmd4FW3FTVnGOGavivOlM0YJDAey2xgIZcdGrcqL8HTg7lpFhmA3",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 172480
+  },
+  {
+      "path": "/globals.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-QTpU5c8wJ3EzhE4xKXUe4hhMn8FLWJ+awa8HFl4DzbyxaaCIl6kmZwxhZJV5wrOe",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 9040
+  },
+  {
+      "path": "/globals.global.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-D3Zgwr8vn7w6zsEw3mR9reGjcelPGd3kReXiewwqT9FVhYE9RNFHxYzV0cFeAMcR",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 39
+  },
+  {
+      "path": "/http.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-4NiB4h02evZQUrYmjd9iqz0/KQGld+7LBQzNNQEzWOdp1h7FPBat2vjXlMmNvHAA",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 63884
+  },
+  {
+      "path": "/http2.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-85Wv25qZ+Zmz33y6VJ0505d39SpUcEpsO7leK8O9WNqIC95OHaJ2au9n0qUrZePu",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 112377
+  },
+  {
+      "path": "/https.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-7MiscC8x9DClXE4xfpwH/6QPnCcncnXLnuk4uHh2E1Fe6fytg0Xo0ErzQAf7Vhq0",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 21371
+  },
+  {
+      "path": "/index.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-M6q+PEt2iCk9rwHvaYRAzkRA12LRHln8d1iJunnHwHu63dPPqZirIP4ut0q1dqfF",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 6393
+  },
+  {
+      "path": "/inspector.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-l+zYLENXsahu/19jOiUEExDx78jZWsnV+jcgt+s6cnm4YRh/zKbzJCleHFr48AYu",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 125429
+  },
+  {
+      "path": "/module.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-pUfNXtfxoXWZ3V+2B4moLoDpDxTwb30c3focVDqUH5UnpdlScIo1m9scGiWqaVaM",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 4089
+  },
+  {
+      "path": "/net.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-cdmhKKSzUJOoEzqnX2RjhoMYCf7+cDka4+DsIPNpr592/HGpP3S2InknVLwrpjax",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 36666
+  },
+  {
+      "path": "/os.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-D8A9d7G3BPsO+2bO+FWTPDSdcsUshAnnhnnsNprR+NuHt7cLyoCMl24sp0B12zsP",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 16674
+  },
+  {
+      "path": "/package.json",
+      "type": "file",
+      "contentType": "application/json",
+      "integrity": "sha384-XF1p5s5zHrJxDG6Vuv0G7FV5EV5/HK6JIH0SKHYnh+JLPz67Xa8Qcq5w+dKQvKbI",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 6785
+  },
+  {
+      "path": "/path.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-u3jZr0EMkdi4QnTJ0R08uPt2P4rpYjvgGhSWX4/7z04DWdg4xm7TgQ3QugrN2svv",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 7064
+  },
+  {
+      "path": "/perf_hooks.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-6XDpMYytR9j8xUvQjki2FMSodzXV5VGCyyji8CtcO22l7xiCJeonhVkTSnbP1c42",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 21006
+  },
+  {
+      "path": "/process.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-azscyY6LckF3yyd4+otuBLBG0KAy3oPq3CIN+YVFJ55nYXlNtoqQ15qyJWUOrXSV",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 72913
+  },
+  {
+      "path": "/punycode.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-9Q8PERMwTcZ2DVzYyoYQBbtI3NGGVIpH3lGiOUOZ6SkP2Wa/Rq7OzvmuhDXei6WA",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 5482
+  },
+  {
+      "path": "/querystring.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-rV2dCE1fIL2A9AcF2GerQfi5vtY5zViOMmkOnixXev3RJ0MGzkYj7IWTOzOZfbSb",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 6487
+  },
+  {
+      "path": "/readline.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-KG02+zYaJ8x5zs7eXT9ptz+Q/CaG92mTJ6Zh0s55Jkh+fy9i8ijF9ZPmb9a54hgX",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 23319
+  },
+  {
+      "path": "/repl.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-jEK+QcDiW8WCxx/Ck7z1CCNaEtvexcpSBgkK7O0TOxADuv2GAeylyEO8Oh+C5KQv",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 19463
+  },
+  {
+      "path": "/stream.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-ZRsdRpdp90yAF/NHNK/Y3yeI23TyXi9wL2mXtcVk2hiNbB3QBtJLIFPXnkCyEQiT",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 64195
+  },
+  {
+      "path": "/string_decoder.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-LgRkg/n9oSaM+mkt6+znfLwpBgLTBl/KUqS8ZQw25yXvn49t/tP4WT6R8diQ7CCR",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 2818
+  },
+  {
+      "path": "/timers.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-BcgqsL3K7iJsxigxRviXoxFTUZAyHfY8A09ma/yGf5Ss+9MMtOggAPBmFCysEdF3",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 4604
+  },
+  {
+      "path": "/tls.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-LrNEgIGRJ6LRyDY/3LaUcOFXjtcRJhcISk4LqCbATGWXdS7sdrHkau/ttQQHU+lf",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 50719
+  },
+  {
+      "path": "/trace_events.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-TI5ZIzl9v7X23uS2t71XtAMyTtv0UcVlD3UHfkPiCcbyfH9yOxToobIwve1N/Bl4",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 6780
+  },
+  {
+      "path": "/tty.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-A8eu7v4Umkt/2CXT52ZOwmbFMDseVus8DWgnVOk0DE2N13yRXEtHGERnftVS28d9",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 9854
+  },
+  {
+      "path": "/url.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-QB/VKEKiQ34G0yk4L5ajeXwKiy4O3GY5B3yle2KSkRnjBwI1XCjjGzmz+e/EE65S",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 36480
+  },
+  {
+      "path": "/util.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-gYZc8ldwlDNVfPzcPwskL3YthdXbDA1EJPdfvElh9nBfMTJdQSyp8xyaeRGD97qc",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 64278
+  },
+  {
+      "path": "/v8.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-0DwB9Ky1fJmpQcBmMxyhlX8+shSA+QsCQwqVC9qWZ7BSZ10Btek7qsDNKntd4dhb",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 15249
+  },
+  {
+      "path": "/vm.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-8L9Q1uF34uJFaLBJGuhMbaoTb8Ymguu+uGseSxSRa3cN93vNYr1JKCvF7PBYegrg",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 20970
+  },
+  {
+      "path": "/wasi.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-pdMvWz6jvpa2b/TKJonrhiALPv1SkMruQsB3192Qn3gs1qqnsN+/XBMIdaAIqUpx",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 7051
+  },
+  {
+      "path": "/worker_threads.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-/wT+uq/EggMBIVbC6xNUh/4xtj4pspT9BVQPIRYs12bsOrAGdc1Ditb19mAGNSmZ",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 32204
+  },
+  {
+      "path": "/zlib.d.ts",
+      "type": "file",
+      "contentType": "text/plain",
+      "integrity": "sha384-B0NXKiIeISWaAm+9y2FHYDM6S+EKyA3dvRFpZ+zfmld3tXU2bq1dch3ubLUJGH8D",
+      "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+      "size": 19520
+  },
+  {
+      "path": "/assert",
+      "type": "directory",
+      "files": [
+          {
+              "path": "/assert/strict.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-hPKOzyKqYRa3itWbeXHu4ICyoyJsZetRnsF/XMwlGG5jhkbAW4I9o+D/S/vAShZv",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 201
+          }
+      ]
+  },
+  {
+      "path": "/dns",
+      "type": "directory",
+      "files": [
+          {
+              "path": "/dns/promises.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-WCfGD97bIYOwKyEXa5LuYjgXR25ytou8uDZvoSwQQvw8/5bc3kgXZasPmdqWDxLp",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 15584
+          }
+      ]
+  },
+  {
+      "path": "/fs",
+      "type": "directory",
+      "files": [
+          {
+              "path": "/fs/promises.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-HfIuD5zly5XTjjzdos0Ws9lqoLZqoCzbKKbGG2cgyK9qAa1D8ygPWze9OOImp/9R",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 49731
+          }
+      ]
+  },
+  {
+      "path": "/stream",
+      "type": "directory",
+      "files": [
+          {
+              "path": "/stream/consumers.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-taj+b9yxduQCdUGWNmyyLTdKXtMqbQIARVngE/hx0M+UYAeNN8AgDATbj9YSBCuZ",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 1196
+          },
+          {
+              "path": "/stream/promises.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-oOLBPzo/WclEJl0G9y8OIRQKrUpswZQK3YFNUcZZKTMWjXFAOagSr+uU93yILWCK",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 2374
+          },
+          {
+              "path": "/stream/web.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-43zv2RgZyP8QI75DkUIrGD3m7nkWER8UMdryhJf5CZNcFu/jRgTf8L6VTOL5+S9R",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 13927
+          }
+      ]
+  },
+  {
+      "path": "/timers",
+      "type": "directory",
+      "files": [
+          {
+              "path": "/timers/promises.d.ts",
+              "type": "file",
+              "contentType": "text/plain",
+              "integrity": "sha384-H5VV0TH88hZ2iHYxlAdsC/qAt6bTz/jwLQ1fFQr1ooVHkiMldiK7YH/XTFDctYIf",
+              "lastModified": "Wed, 15 Jun 2022 15:01:36 GMT",
+              "size": 1954
+          }
+      ]
+  }
+]

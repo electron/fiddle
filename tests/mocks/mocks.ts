@@ -8,7 +8,7 @@ import { MonacoEditorMock, MonacoMock, MonacoModelMock } from './monaco';
 import { RemoteLoaderMock } from './remote-loader';
 import { RunnerMock } from './runner';
 import { StateMock } from './state';
-import { ElectronTypesMock } from './electron-types';
+import { ElectronTypesMock, NodeTypesMock } from './electron-types';
 import { VersionsMock } from './electron-versions';
 import { WebContentsMock } from './web-contents';
 import { createEditorValues } from './editor-values';
@@ -36,6 +36,7 @@ export {
   MonacoMock,
   MonacoModelMock,
   NativeImageMock,
+  NodeTypesMock,
   RemoteLoaderMock,
   RunnerMock,
   StateMock,
