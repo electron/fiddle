@@ -1,8 +1,10 @@
 import * as MonacoType from 'monaco-editor';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import releases from 'electron-releases/lite.json';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
+import { normalizeVersion } from '../utils/normalize-version';
 
 const ELECTRON_DTS = 'electron.d.ts';
 
@@ -26,23 +28,65 @@ export class ElectronTypes {
     this.clear();
 
     if (!ver) return;
+
+    await this.setElectronTypes(ver);
+    await this.setNodeTypes(ver.version);
+  }
+
+  public async setElectronTypes(ver: RunnableVersion): Promise<void> {
     const { localPath: dir, source, version } = ver;
 
+    // If it's a local development version, pull Electron types from out directory.
     if (dir) {
       const file = path.join(dir, 'gen/electron/tsc/typings', ELECTRON_DTS);
-      this.setTypesFromFile(file, ver);
+      this.setTypesFromFile(file, ver.version);
       try {
-        this.watcher = fs.watch(file, () => this.setTypesFromFile(file, ver));
+        this.watcher = fs.watch(file, () =>
+          this.setTypesFromFile(file, ver.version),
+        );
       } catch (err) {
         console.debug(`Unable to watch "${file}" for changes: ${err}`);
       }
     }
 
+    // If it's a published version, pull from cached file.
     if (source === VersionSource.remote) {
       const file = this.getCacheFile(ver);
       await ElectronTypes.ensureVersionIsCachedAt(version, file);
-      this.setTypesFromFile(file, ver);
+      this.setTypesFromFile(file, ver.version);
     }
+  }
+
+  public async setNodeTypes(version: string): Promise<void> {
+    // Get the Node.js version corresponding to the current Electron version.
+    const v = releases.find((release: any) => {
+      return normalizeVersion(release.tag_name) === version;
+    })?.deps?.node;
+
+    if (!v) return;
+
+    this.dispose();
+    const fileResponse = await fetch(
+      `https://unpkg.com/@types/node@${v}/?meta`,
+    );
+    const { files: fileJson } = await fileResponse.json();
+    fileJson
+      .flatMap((item: any) => {
+        return item.type === 'file'
+          ? item.path
+          : item.files.map((f: any) => f.path);
+      })
+      .filter((i: any) => {
+        return i.endsWith('.d.ts');
+      })
+      .map(async (path: any) => {
+        const res = await fetch(`https://unpkg.com/@types/node@${v}${path}`);
+        const text = await res.text();
+        await fs.outputFileSync(`electron-node-types-${v}${path}`, text);
+        this.disposable = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          text,
+        );
+      });
   }
 
   public uncache(ver: RunnableVersion) {
@@ -50,10 +94,10 @@ export class ElectronTypes {
       fs.removeSync(this.getCacheFile(ver));
   }
 
-  private setTypesFromFile(file: string, ver: RunnableVersion) {
+  private setTypesFromFile(file: string, version: string) {
     this.dispose();
     try {
-      console.log(`Updating Monaco with "${ELECTRON_DTS}@${ver.version}"`);
+      console.log(`Updating Monaco with "${ELECTRON_DTS}@${version}"`);
       this.disposable = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
         fs.readFileSync(file, 'utf8'),
       );
