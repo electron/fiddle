@@ -39,6 +39,7 @@ export class App {
     this.electronTypes = new ElectronTypes(
       window.ElectronFiddle.monaco,
       path.join(USER_DATA_PATH, 'electron-typedef'),
+      path.join(USER_DATA_PATH, 'nodejs-typedef'),
     );
   }
 

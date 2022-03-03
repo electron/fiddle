@@ -2,6 +2,7 @@ import * as MonacoType from 'monaco-editor';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import releases from 'electron-releases/lite.json';
+import readdir from 'recursive-readdir';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -21,7 +22,8 @@ export class ElectronTypes {
 
   constructor(
     private readonly monaco: typeof MonacoType,
-    private readonly cacheDir: string,
+    private readonly electronCacheDir: string,
+    private readonly nodeCacheDir: string,
   ) {}
 
   public async setVersion(ver?: RunnableVersion): Promise<void> {
@@ -51,8 +53,8 @@ export class ElectronTypes {
 
     // If it's a published version, pull from cached file.
     if (source === VersionSource.remote) {
-      const file = this.getCacheFile(ver);
-      await ElectronTypes.ensureVersionIsCachedAt(version, file);
+      const file = this.getCacheFile(ver.version);
+      await ElectronTypes.ensureElectronVersionIsCachedAt(version, file);
       this.setTypesFromFile(file, ver.version);
     }
   }
@@ -65,33 +67,34 @@ export class ElectronTypes {
 
     if (!v) return;
 
-    this.dispose();
-    const fileResponse = await fetch(
-      `https://unpkg.com/@types/node@${v}/?meta`,
-    );
-    const { files: fileJson } = await fileResponse.json();
-    fileJson
-      .flatMap((item: any) => {
-        return item.type === 'file'
-          ? item.path
-          : item.files.map((f: any) => f.path);
-      })
-      .filter((i: any) => {
-        return i.endsWith('.d.ts');
-      })
-      .map(async (path: any) => {
-        const res = await fetch(`https://unpkg.com/@types/node@${v}${path}`);
-        const text = await res.text();
-        await fs.outputFileSync(`electron-node-types-${v}${path}`, text);
-        this.disposable = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-          text,
-        );
-      });
+    const dir = this.getCacheDir(v);
+    await ElectronTypes.ensureNodeVersionIsCachedAt(v, dir);
+    await this.setTypesFromDir(dir, v);
   }
 
   public uncache(ver: RunnableVersion) {
     if (ver.source === VersionSource.remote)
-      fs.removeSync(this.getCacheFile(ver));
+      fs.removeSync(this.getCacheFile(ver.version));
+  }
+
+  private async setTypesFromDir(dir: string, version: string) {
+    console.log('setTypesFromDir');
+    this.dispose();
+
+    try {
+      const files = await readdir(dir);
+      for (const file of files) {
+        if (file.endsWith('.d.ts')) {
+          const { base: filename } = path.parse(file);
+          console.log(`Updating Monaco with "${filename}@${version}"`);
+          this.disposable = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+            fs.readFileSync(file, 'utf8'),
+          );
+        }
+      }
+    } catch (err) {
+      console.debug(`Unable to read types from "${dir}": ${err.message}`);
+    }
   }
 
   private setTypesFromFile(file: string, version: string) {
@@ -106,8 +109,12 @@ export class ElectronTypes {
     }
   }
 
-  private getCacheFile(ver: RunnableVersion) {
-    return path.join(this.cacheDir, ver.version, ELECTRON_DTS);
+  private getCacheFile(version: string) {
+    return path.join(this.electronCacheDir, version, ELECTRON_DTS);
+  }
+
+  private getCacheDir(version: string) {
+    return path.join(this.nodeCacheDir, version);
   }
 
   private clear() {
@@ -129,7 +136,34 @@ export class ElectronTypes {
     }
   }
 
-  private static async ensureVersionIsCachedAt(version: string, file: string) {
+  private static async ensureNodeVersionIsCachedAt(
+    version: string,
+    dir: string,
+  ) {
+    if (fs.existsSync(dir)) return;
+
+    const fileResponse = await fetch(
+      `https://unpkg.com/@types/node@${version}/?meta`,
+    );
+    const { files: fileJson } = await fileResponse.json();
+    fileJson
+      .flatMap((item: { files?: { path: string }[]; path: string }) => {
+        return item.files ? item.files.map((f: any) => f.path) : item.path;
+      })
+      .filter((path: string) => path.endsWith('.d.ts'))
+      .map(async (path: string) => {
+        const res = await fetch(
+          `https://unpkg.com/@types/node@${version}${path}`,
+        );
+        const text = await res.text();
+        await fs.outputFileSync(`${dir}${path}`, text);
+      });
+  }
+
+  private static async ensureElectronVersionIsCachedAt(
+    version: string,
+    file: string,
+  ) {
     if (fs.existsSync(file)) return;
 
     const name = version.includes('nightly') ? 'electron-nightly' : 'electron';

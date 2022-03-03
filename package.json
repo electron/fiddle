@@ -110,6 +110,7 @@
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.2.1",
     "react-test-renderer": "^17.0.1",
+    "recursive-readdir": "^2.2.2",
     "rimraf": "^3.0.2",
     "standard": "^16.0.3",
     "stylelint": "^13.11.0",
