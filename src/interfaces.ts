@@ -31,6 +31,7 @@ export interface Version {
   version: string;
   name?: string;
   localPath?: string;
+  node?: string;
 }
 
 export enum RunResult {

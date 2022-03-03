@@ -6,7 +6,7 @@ import readdir from 'recursive-readdir';
 import packageJson from 'package-json';
 import semver from 'semver';
 
-import { RunnableVersion, VersionSource } from '../interfaces';
+import { RunnableVersion, Version, VersionSource } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 
 const ELECTRON_DTS = 'electron.d.ts';
@@ -63,7 +63,7 @@ export class ElectronTypes {
 
   public async setNodeTypes(version: string): Promise<void> {
     // Get the Node.js version corresponding to the current Electron version.
-    const v = releases.find((release: any) => {
+    const v = releases.find((release: Version) => {
       return normalizeVersion(release.version) === version;
     })?.node;
 
