@@ -1,8 +1,9 @@
 import * as MonacoType from 'monaco-editor';
 import * as fs from 'fs-extra';
 import * as path from 'path';
-import releases from 'electron-releases/lite.json';
+import releases from '../../static/releases.json';
 import readdir from 'recursive-readdir';
+import latestVersion from 'latest-version';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -62,8 +63,8 @@ export class ElectronTypes {
   public async setNodeTypes(version: string): Promise<void> {
     // Get the Node.js version corresponding to the current Electron version.
     const v = releases.find((release: any) => {
-      return normalizeVersion(release.tag_name) === version;
-    })?.deps?.node;
+      return normalizeVersion(release.version) === version;
+    })?.node;
 
     if (!v) return;
 
@@ -78,7 +79,6 @@ export class ElectronTypes {
   }
 
   private async setTypesFromDir(dir: string, version: string) {
-    console.log('setTypesFromDir');
     this.dispose();
 
     try {
