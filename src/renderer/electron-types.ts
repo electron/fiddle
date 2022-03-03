@@ -3,7 +3,8 @@ import * as fs from 'fs-extra';
 import * as path from 'path';
 import releases from '../../static/releases.json';
 import readdir from 'recursive-readdir';
-import latestVersion from 'latest-version';
+import packageJson from 'package-json';
+import semver from 'semver';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -142,10 +143,27 @@ export class ElectronTypes {
   ) {
     if (fs.existsSync(dir)) return;
 
-    const fileResponse = await fetch(
+    let downloadVersion = version;
+    let response = await fetch(
       `https://unpkg.com/@types/node@${version}/?meta`,
     );
-    const { files: fileJson } = await fileResponse.json();
+
+    if (response.status === 404) {
+      const types = await packageJson('@types/node', {
+        version: semver.major(version).toString(),
+        fullMetadata: false,
+      });
+
+      downloadVersion = types.version as string;
+      console.log(
+        `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
+      );
+      response = await fetch(
+        `https://unpkg.com/@types/node@${downloadVersion}/?meta`,
+      );
+    }
+
+    const { files: fileJson } = await response.json();
     fileJson
       .flatMap((item: { files?: { path: string }[]; path: string }) => {
         return item.files ? item.files.map((f: any) => f.path) : item.path;
@@ -153,7 +171,7 @@ export class ElectronTypes {
       .filter((path: string) => path.endsWith('.d.ts'))
       .map(async (path: string) => {
         const res = await fetch(
-          `https://unpkg.com/@types/node@${version}${path}`,
+          `https://unpkg.com/@types/node@${downloadVersion}${path}`,
         );
         const text = await res.text();
         await fs.outputFileSync(`${dir}${path}`, text);
