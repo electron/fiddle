@@ -28,6 +28,11 @@ exports[`Commands component renders 1`] = `
       />
     </Blueprint3.ControlGroup>
   </div>
+  <div
+    className="title"
+  >
+    Electron Fiddle
+  </div>
   <div>
     <address-bar
       appState={"default StateMock"}
