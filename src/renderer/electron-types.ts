@@ -56,7 +56,7 @@ export class ElectronTypes {
     // If it's a published version, pull from cached file.
     if (source === VersionSource.remote) {
       const file = this.getCacheFile(ver.version);
-      await ElectronTypes.ensureElectronVersionIsCachedAt(version, file);
+      await this.ensureElectronVersionIsCachedAt(version, file);
       this.setTypesFromFile(file, ver.version);
     }
   }
@@ -70,8 +70,8 @@ export class ElectronTypes {
     if (!v) return;
 
     const dir = this.getCacheDir(v);
-    await ElectronTypes.ensureNodeVersionIsCachedAt(v, dir);
-    await this.setTypesFromDir(dir, v);
+    const ver = await this.cacheAndReturnNodeTypesVersion(v, dir);
+    await this.setTypesFromDir(dir, ver);
   }
 
   public uncache(ver: RunnableVersion) {
@@ -137,11 +137,20 @@ export class ElectronTypes {
     }
   }
 
-  private static async ensureNodeVersionIsCachedAt(
-    version: string,
-    dir: string,
-  ) {
-    if (fs.existsSync(dir)) return;
+  /**
+   * This function ensures that the Node.js version for a given version of
+   * Electron is downloaded and cached. It can be the case that DefinitelyTyped
+   * doesn't have specific Node.js versions, and if it's missing a certain version,
+   * we instead download the most recent version of Node.js in that release line older
+   * than the target version and return that. This also allows Electron versions to share
+   * versions of Node.js types.
+   *
+   * @param version - version of Node.js to fetch types for.
+   * @param dir - directory where the Node.js types version may be stored.
+   * @returns the version of Node.js types for this version of Electron.
+   */
+  private async cacheAndReturnNodeTypesVersion(version: string, dir: string) {
+    if (fs.existsSync(dir)) return version;
 
     let downloadVersion = version;
     let response = await fetch(
@@ -158,6 +167,10 @@ export class ElectronTypes {
       console.log(
         `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
       );
+
+      const maybeCachedDir = path.join(this.nodeCacheDir, downloadVersion);
+      if (fs.existsSync(maybeCachedDir)) return downloadVersion;
+
       response = await fetch(
         `https://unpkg.com/@types/node@${downloadVersion}/?meta`,
       );
@@ -176,12 +189,11 @@ export class ElectronTypes {
         const text = await res.text();
         await fs.outputFileSync(`${dir}${path}`, text);
       });
+
+    return downloadVersion;
   }
 
-  private static async ensureElectronVersionIsCachedAt(
-    version: string,
-    file: string,
-  ) {
+  private async ensureElectronVersionIsCachedAt(version: string, file: string) {
     if (fs.existsSync(file)) return;
 
     const name = version.includes('nightly') ? 'electron-nightly' : 'electron';
