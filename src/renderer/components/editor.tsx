@@ -61,6 +61,8 @@ export class Editor extends React.Component<EditorProps> {
     if (editorDidMount) {
       editorDidMount(editor);
     }
+
+    this.editor.focus();
   }
 
   /**
