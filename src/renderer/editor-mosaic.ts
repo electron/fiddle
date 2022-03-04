@@ -36,14 +36,6 @@ export class EditorMosaic {
   @observable public isEdited = false;
   @observable public focusedFile: EditorId | null = null;
 
-  @action public setFocusedFile(id: EditorId) {
-    this.focusedFile = id;
-    if (this.files.get(this.focusedFile) === EditorPresence.Hidden) {
-      this.show(this.focusedFile);
-    }
-    this.editors.get(id)?.focus();
-  }
-
   @computed public get files() {
     const files = new Map<EditorId, EditorPresence>();
 
@@ -85,6 +77,16 @@ export class EditorMosaic {
         }
       },
     );
+  }
+
+  /** File is visible, focus file content */
+  /** File is hidden, show the file and focus the file content */
+  @action public setFocusedFile(id: EditorId) {
+    this.focusedFile = id;
+    if (this.files.get(this.focusedFile) === EditorPresence.Hidden) {
+      this.show(this.focusedFile);
+    }
+    this.editors.get(id)?.focus();
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
