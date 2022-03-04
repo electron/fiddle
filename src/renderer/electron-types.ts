@@ -37,16 +37,16 @@ export class ElectronTypes {
     await this.setNodeTypes(ver.version);
   }
 
-  public async setElectronTypes(ver: RunnableVersion): Promise<void> {
+  private async setElectronTypes(ver: RunnableVersion): Promise<void> {
     const { localPath: dir, source, version } = ver;
 
     // If it's a local development version, pull Electron types from out directory.
     if (dir) {
       const file = path.join(dir, 'gen/electron/tsc/typings', ELECTRON_DTS);
-      this.setTypesFromFile(file, ver.version);
+      this.setTypesFromFile(file, version);
       try {
         this.watcher = fs.watch(file, () =>
-          this.setTypesFromFile(file, ver.version),
+          this.setTypesFromFile(file, version),
         );
       } catch (err) {
         console.debug(`Unable to watch "${file}" for changes: ${err}`);
@@ -55,13 +55,13 @@ export class ElectronTypes {
 
     // If it's a published version, pull from cached file.
     if (source === VersionSource.remote) {
-      const file = this.getCacheFile(ver.version);
+      const file = this.getCacheFile(version);
       await this.ensureElectronVersionIsCachedAt(version, file);
-      this.setTypesFromFile(file, ver.version);
+      this.setTypesFromFile(file, version);
     }
   }
 
-  public async setNodeTypes(version: string): Promise<void> {
+  private async setNodeTypes(version: string): Promise<void> {
     // Get the Node.js version corresponding to the current Electron version.
     const v = releases.find((release: Version) => {
       return normalizeVersion(release.version) === version;
