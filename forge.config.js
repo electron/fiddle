@@ -61,31 +61,19 @@ const config = {
     {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
-      config: (arch) => {
-        const certificateFile = process.env.CI
-          ? path.join(__dirname, 'cert.p12')
-          : process.env.WINDOWS_CERTIFICATE_FILE;
-
-        if (!certificateFile || !fs.existsSync(certificateFile)) {
-          console.warn(
-            `Warning: Could not find certificate file at ${certificateFile}`,
-          );
-        }
-
-        return {
-          name: 'electron-fiddle',
-          authors: 'Electron Community',
-          exe: 'electron-fiddle.exe',
-          iconUrl:
-            'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
-          loadingGif: './assets/loading.gif',
-          noMsi: true,
-          setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
-          setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-          certificateFile: process.env['WINDOWS_CODESIGN_FILE'],
-          certificatePassword: process.env['WINDOWS_CODESIGN_PASSWORD'],
-        };
-      },
+      config: (arch) => ({
+        name: 'electron-fiddle',
+        authors: 'Electron Community',
+        exe: 'electron-fiddle.exe',
+        iconUrl:
+          'https://raw.githubusercontent.com/electron/fiddle/0119f0ce697f5ff7dec4fe51f17620c78cfd488b/assets/icons/fiddle.ico',
+        loadingGif: './assets/loading.gif',
+        noMsi: true,
+        setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
+        setupIcon: path.resolve(iconDir, 'fiddle.ico'),
+        certificateFile: process.env['WINDOWS_CODESIGN_FILE'],
+        certificatePassword: process.env['WINDOWS_CODESIGN_PASSWORD'],
+      }),
     },
     {
       name: '@electron-forge/maker-zip',
