@@ -36,6 +36,10 @@ jest.mock(
   }),
 );
 
+jest.mock('../../../src/renderer/components/settings-general-mirror', () => ({
+  MirrorSettings: 'settings-general-mirror',
+}));
+
 describe('GeneralSettings component', () => {
   const store: any = {};
 

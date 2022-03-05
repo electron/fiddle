@@ -8,6 +8,7 @@ import { BlockAcceleratorsSettings } from './settings-general-block-accelerators
 import { ConsoleSettings } from './settings-general-console';
 import { GitHubSettings } from './settings-general-github';
 import { PackageAuthorSettings } from './settings-general-package-author';
+import { MirrorSettings } from './settings-general-mirror';
 
 interface GeneralSettingsProps {
   appState: AppState;
@@ -38,6 +39,8 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps> {
         <BlockAcceleratorsSettings appState={this.props.appState} />
         <Divider />
         <PackageAuthorSettings appState={this.props.appState} />
+        <Divider />
+        <MirrorSettings appState={this.props.appState} />
       </div>
     );
   }

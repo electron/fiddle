@@ -5,6 +5,7 @@ import {
   ElectronReleaseChannel,
   GenericDialogOptions,
   GistActionState,
+  Mirrors,
   RunnableVersion,
 } from '../../src/interfaces';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
@@ -12,6 +13,7 @@ import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
+import { ELECTRON_MIRRORS } from '../../src/renderer/mirror-constants';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
@@ -55,6 +57,7 @@ export class StateMock {
   @observable public versions: Record<string, RunnableVersion>;
   @observable public versionsToShow: RunnableVersion[] = [];
   @observable public packageAuthor = 'electron<electron@electron.org>';
+  @observable public electronMirrors: Mirrors = ELECTRON_MIRRORS.DEFAULT;
 
   public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();

@@ -23,6 +23,7 @@ import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
+import { ELECTRON_MIRRORS } from '../../src/renderer/mirror-constants';
 
 jest.mock('../../src/renderer/content', () => ({
   getTemplate: jest.fn(),
@@ -338,7 +339,10 @@ describe('AppState', () => {
 
       await appState.downloadVersion(ver);
 
-      expect(setupBinary).toHaveBeenCalledWith<any>(ver);
+      expect(setupBinary).toHaveBeenCalledWith<any>(
+        ver,
+        ELECTRON_MIRRORS.DEFAULT,
+      );
     });
 
     it('does not download a version if already ready', async () => {

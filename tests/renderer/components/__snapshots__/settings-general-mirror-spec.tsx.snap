@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MirrorSettings component renders 1`] = `
+<div>
+  <h4>
+    ELectron Mirrors
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Set the base URL of the mirror(nightly) to download from."
+    >
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        rightElement={
+          <Blueprint3.Popover2
+            boundary="clippingParents"
+            captureDismiss={false}
+            content={
+              <Blueprint3.Menu>
+                <Blueprint3.MenuItem
+                  disabled={false}
+                  multiline={false}
+                  onClick={[Function]}
+                  popoverProps={Object {}}
+                  shouldDismissPopover={true}
+                  text="Default"
+                />
+                <Blueprint3.MenuItem
+                  disabled={false}
+                  multiline={false}
+                  onClick={[Function]}
+                  popoverProps={Object {}}
+                  shouldDismissPopover={true}
+                  text="Chain"
+                />
+              </Blueprint3.Menu>
+            }
+            defaultIsOpen={false}
+            disabled={false}
+            fill={false}
+            hasBackdrop={false}
+            hoverCloseDelay={300}
+            hoverOpenDelay={150}
+            inheritDarkTheme={true}
+            interactionKind="click"
+            minimal={false}
+            openOnTargetFocus={true}
+            placement="bottom-end"
+            positioningStrategy="absolute"
+            shouldReturnFocusOnClose={false}
+            targetTagName="span"
+            transitionDuration={300}
+            usePortal={true}
+          >
+            <Blueprint3.Button
+              minimal={true}
+              rightIcon="caret-down"
+            >
+              Select 
+              
+               Mirror
+            </Blueprint3.Button>
+          </Blueprint3.Popover2>
+        }
+        value="https://github.com/electron/electron/releases/download/"
+      />
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        rightElement={
+          <Blueprint3.Popover2
+            boundary="clippingParents"
+            captureDismiss={false}
+            content={
+              <Blueprint3.Menu>
+                <Blueprint3.MenuItem
+                  disabled={false}
+                  multiline={false}
+                  onClick={[Function]}
+                  popoverProps={Object {}}
+                  shouldDismissPopover={true}
+                  text="Default"
+                />
+                <Blueprint3.MenuItem
+                  disabled={false}
+                  multiline={false}
+                  onClick={[Function]}
+                  popoverProps={Object {}}
+                  shouldDismissPopover={true}
+                  text="Chain"
+                />
+              </Blueprint3.Menu>
+            }
+            defaultIsOpen={false}
+            disabled={false}
+            fill={false}
+            hasBackdrop={false}
+            hoverCloseDelay={300}
+            hoverOpenDelay={150}
+            inheritDarkTheme={true}
+            interactionKind="click"
+            minimal={false}
+            openOnTargetFocus={true}
+            placement="bottom-end"
+            positioningStrategy="absolute"
+            shouldReturnFocusOnClose={false}
+            targetTagName="span"
+            transitionDuration={300}
+            usePortal={true}
+          >
+            <Blueprint3.Button
+              minimal={true}
+              rightIcon="caret-down"
+            >
+              Select 
+              Nightly
+               Mirror
+            </Blueprint3.Button>
+          </Blueprint3.Popover2>
+        }
+        value="https://github.com/electron/nightlies/releases/download/"
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;
