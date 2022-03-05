@@ -67,7 +67,7 @@ export class MirrorSettings extends React.Component<
               }}
             />
             <MenuItem
-              text="Chain"
+              text="China"
               onClick={() => {
                 this.setMirror(isNightly, ELECTRON_MIRRORS.CHINA[mirrorKey]);
               }}
