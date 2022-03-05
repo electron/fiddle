@@ -57,7 +57,7 @@ export class Commands extends React.Component<CommandsProps> {
             />
           </ControlGroup>
         </div>
-        {process.platform === 'darwin' ? (
+        {!process.env.JEST && process.platform === 'darwin' ? (
           <div className="title">{title}</div>
         ) : undefined}
         <div>
