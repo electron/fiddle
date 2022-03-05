@@ -56,8 +56,8 @@ exports[`MirrorSettings component renders 1`] = `
               minimal={true}
               rightIcon="caret-down"
             >
-              Select
-
+              Select 
+              
                Mirror
             </Blueprint3.Button>
           </Blueprint3.Popover2>
@@ -111,7 +111,7 @@ exports[`MirrorSettings component renders 1`] = `
               minimal={true}
               rightIcon="caret-down"
             >
-              Select
+              Select 
               Nightly
                Mirror
             </Blueprint3.Button>
