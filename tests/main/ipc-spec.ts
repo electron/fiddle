@@ -30,6 +30,7 @@ describe('IpcMainManager', () => {
       const mockTarget = {
         webContents: {
           send: jest.fn(),
+          isDestroyed: () => false,
         },
       };
 
@@ -46,6 +47,7 @@ describe('IpcMainManager', () => {
     it('sends an event to a target window', () => {
       const mockTarget = {
         send: jest.fn(),
+        isDestroyed: () => false,
       };
 
       (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
