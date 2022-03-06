@@ -67,7 +67,7 @@ class IpcMainManager extends EventEmitter {
       return;
     }
 
-    _target.send(channel, ..._args);
+    _target.isDestroyed() || _target.send(channel, ..._args);
   }
 
   public handle(
