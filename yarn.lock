@@ -8619,6 +8619,11 @@ node-releases@^1.1.71:
   resolved "https://registry.yarnpkg.com/node-releases/-/node-releases-1.1.71.tgz#cb1334b179896b1c89ecfdd4b725fb7bbdfc7dbb"
   integrity sha512-zR6HoT6LrLCRBwukmrVbHv0EpEQjksO6GmFcZQQuCAy139BEsoVKPYnf3jongYW83fAa1torLGYwxxky/p28sg==
 
+node-watch@^0.7.3:
+  version "0.7.3"
+  resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.7.3.tgz#6d4db88e39c8d09d3ea61d6568d80e5975abc7ab"
+  integrity sha512-3l4E8uMPY1HdMMryPRUAl+oIHtXtyiTlIiESNSVSNxcPfzAFzeTbXFQkZfAwBbo0B1qMSG8nUABx+Gd+YrbKrQ==
+
 nopt@^4.0.1:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/nopt/-/nopt-4.0.3.tgz#a375cad9d02fd921278d954c2254d5aa57e15e48"
