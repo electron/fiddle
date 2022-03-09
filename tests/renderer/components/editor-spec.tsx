@@ -93,4 +93,16 @@ describe('Editor component', () => {
 
     expect(monaco.latestEditor.dispose).toHaveBeenCalled();
   });
+
+  it('focus editor file', async () => {
+    const id = MAIN_JS;
+    store.editorMosaic.set({ [id]: '// content' });
+    const didMount = jest.fn();
+    const { instance } = createEditor(id, didMount);
+
+    instance.containerRef.current = 'ref';
+    await instance.initMonaco();
+    instance.componentWillUnmount();
+    expect(instance.props.id).toBe(id);
+  });
 });
