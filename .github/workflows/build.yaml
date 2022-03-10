@@ -10,7 +10,12 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    name: Test (${{ matrix.os }} - ${{ matrix.arch }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ macOS-latest, ubuntu-latest, windows-latest ]
+        arch: [ x64 ]
     steps:
       - uses: actions/checkout@v3
       - name: Setup Node.js
@@ -25,6 +30,7 @@ jobs:
       - name: test
         run: yarn test:ci
       - name: Coveralls
+        if: matrix.os == 'ubuntu-latest'
         uses: coverallsapp/github-action@1.1.3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +50,7 @@ jobs:
           arch: ia32
         - os: ubuntu-latest
           arch: armv7l
-        
+
     steps:
       - uses: actions/checkout@v3
       - name: Setup Node.js
