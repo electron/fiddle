@@ -57,6 +57,7 @@
     "monaco-editor": "^0.21.3",
     "monaco-loader": "1.0.0",
     "namor": "^2.0.2",
+    "node-watch": "^0.7.3",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-mosaic-component": "^4.1.1",
