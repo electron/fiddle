@@ -53,7 +53,7 @@ describe('processCommandLine()', () => {
     expect(ev).toBe(event);
     expect(params.length).toBe(1);
     const [request] = params;
-    expect(stringify(request)).toBe(payload);
+    expect(stringify(request).replace(/\\\\/g, '\\')).toBe(payload);
   }
 
   async function expectLogConfigOptionWorks(argv: string[]) {
