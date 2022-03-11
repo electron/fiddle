@@ -143,7 +143,9 @@ export function main(argv_in: string[]) {
   app.whenReady().then(onReady);
   app.on('before-quit', onBeforeQuit);
   app.on('window-all-closed', onWindowsAllClosed);
-  app.on('activate', getOrCreateMainWindow);
+  app.on('activate', () => {
+    app.whenReady().then(getOrCreateMainWindow);
+  });
 }
 
 // only call main() if this is the main module
