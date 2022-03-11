@@ -57,7 +57,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
 
   public render() {
     return (
-      <div>
+      <div className="package-tree">
         <h5>Modules</h5>
         <Suggest
           fill={true}
@@ -116,7 +116,10 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
         secondaryLabel: (
           <div>
             <select
-              style={{ width: '80px', textOverflow: 'ellipsis' }}
+              style={{
+                maxWidth: 80,
+                textOverflow: 'ellipsis',
+              }}
               name={pkg}
               value={activeVersion}
               onChange={({ target }) =>
