@@ -24,6 +24,7 @@ jest.mock('fs-extra', () => ({
 const mockTarget = {
   webContents: {
     send: jest.fn(),
+    isDestroyed: () => false,
   },
 };
 
