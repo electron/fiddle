@@ -115,6 +115,7 @@ describe('SidebarFileTree component', () => {
     expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Hidden);
 
     sidebarFileTreeInstance.setFocusedFile('index.html');
+
     setTimeout(() => {
       expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Visible);
       expect(editorsInstance.state.focused).toBe('index.html');

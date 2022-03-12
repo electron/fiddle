@@ -268,6 +268,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {EditorId} id
    */
   public setFocused(id: EditorId): void {
+    this.props.appState.editorMosaic.setFocusedFile(id);
     this.setState({ focused: id });
   }
 }

@@ -67,6 +67,7 @@ export class Editor extends React.Component<EditorProps> {
     // Because you can't focus immediately after redisplay, you must wait until the mount is complete
     if (editorMosaic.focusedFile === id) {
       editor.focus();
+      this.props.setFocused(id);
     }
   }
 
