@@ -6,7 +6,7 @@ const LINK_RGX = /(http|ftp|https):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:/
 
 async function retryFetch(link) {
   let retryCount = 2;
-  const watingTime = 1000;
+  const waitingTime = 1000;
 
   const execute = async () => {
     const response = await fetch(link, { method: 'HEAD' });
@@ -27,7 +27,7 @@ async function retryFetch(link) {
       );
     }
 
-    await new Promise((r) => setTimeout(r, watingTime));
+    await new Promise((r) => setTimeout(r, waitingTime));
 
     await execute();
   };
