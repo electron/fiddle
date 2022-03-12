@@ -36,7 +36,7 @@ describe('Commands component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('show bisect command', () => {
+  it('can show the bisect command tools', () => {
     store.isBisectCommandShowing = true;
     const wrapper = shallow(<Commands appState={store as any} />);
 
