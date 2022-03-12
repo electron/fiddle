@@ -1,25 +1,15 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import { AppState } from '../state';
-import {
-  Button,
-  Callout,
-  FormGroup,
-  InputGroup,
-  Menu,
-  MenuItem,
-} from '@blueprintjs/core';
-import { Popover2 } from '@blueprintjs/popover2';
-import { ELECTRON_MIRRORS } from '../mirror-constants';
+import { Callout, InputGroup, Radio, RadioGroup } from '@blueprintjs/core';
+import { FormEvent } from 'react';
+import { Mirrors, Sources } from '../mirror-constants';
 
 interface MirrorSettingsProps {
   appState: AppState;
 }
 
-interface IMirrorSettingsState {
-  electronMirror: string;
-  electronNightlyMirror: string;
-}
+type IMirrorSettingsState = Mirrors;
 
 /**
  * Settings electron mirror
@@ -35,78 +25,56 @@ export class MirrorSettings extends React.Component<
   constructor(props: MirrorSettingsProps) {
     super(props);
 
-    this.state = {
-      ...props.appState.electronMirrors,
-    };
+    this.changeSourceType = this.changeSourceType.bind(this);
   }
 
-  private setMirror(isNightly: boolean, value: string) {
-    if (isNightly) {
-      this.setState({
-        electronNightlyMirror: value,
-      });
-      this.props.appState.electronMirrors.electronNightlyMirror = value;
-    } else {
-      this.setState({
-        electronMirror: value,
-      });
-      this.props.appState.electronMirrors.electronMirror = value;
-    }
+  private modifyMirror(isNightly: boolean, value: string) {
+    this.props.appState.electronMirrors.sources.CUSTOM[
+      isNightly ? 'electronNightlyMirror' : 'electronMirror'
+    ] = value;
   }
 
-  private selectMirrorMenu(isNightly: boolean) {
-    const mirrorKey = isNightly ? 'electronNightlyMirror' : 'electronMirror';
-    return (
-      <Popover2
-        content={
-          <Menu>
-            <MenuItem
-              text="Default"
-              onClick={() => {
-                this.setMirror(isNightly, ELECTRON_MIRRORS.DEFAULT[mirrorKey]);
-              }}
-            />
-            <MenuItem
-              text="China"
-              onClick={() => {
-                this.setMirror(isNightly, ELECTRON_MIRRORS.CHINA[mirrorKey]);
-              }}
-            />
-          </Menu>
-        }
-        placement="bottom-end"
-      >
-        <Button minimal={true} rightIcon="caret-down">
-          Select {isNightly ? 'Nightly' : ''} Mirror
-        </Button>
-      </Popover2>
-    );
+  private changeSourceType(e: FormEvent<HTMLInputElement>) {
+    this.props.appState.electronMirrors.sourceType = (e.target as HTMLInputElement)
+      .value as Sources;
+  }
+
+  private get notCustomSource() {
+    return this.props.appState.electronMirrors.sourceType !== 'CUSTOM';
   }
 
   public render() {
-    const electronMirrorsLabel =
-      'Set the base URL of the mirror(nightly) to download from.';
+    const { sourceType, sources } = this.props.appState.electronMirrors;
+    const electronMirrorsLabel = `If you don't have access to Electron's GitHub releases, you can tell Fiddle to download Electron binaries from an alternate source.`;
 
     return (
       <div>
-        <h4>ELectron Mirrors</h4>
+        <h4>Electron Mirrors</h4>
         <Callout>
-          <FormGroup label={electronMirrorsLabel}>
-            <InputGroup
-              value={this.state.electronMirror}
-              rightElement={this.selectMirrorMenu(false)}
-              onChange={(e) => {
-                this.setMirror(false, e.currentTarget.value);
-              }}
-            />
-            <InputGroup
-              value={this.state.electronNightlyMirror}
-              rightElement={this.selectMirrorMenu(true)}
-              onChange={(e) => {
-                this.setMirror(true, e.currentTarget.value);
-              }}
-            />
-          </FormGroup>
+          <RadioGroup
+            label={electronMirrorsLabel}
+            inline={true}
+            onChange={this.changeSourceType}
+            selectedValue={sourceType}
+          >
+            <Radio label="Default" value="DEFAULT" />
+            <Radio label="China" value="CHINA" />
+            <Radio label="Custom" value="CUSTOM" />
+          </RadioGroup>
+          <InputGroup
+            value={sources[sourceType].electronMirror}
+            disabled={this.notCustomSource}
+            onChange={(e) => {
+              this.modifyMirror(false, e.target.value);
+            }}
+          />
+          <InputGroup
+            value={sources[sourceType].electronNightlyMirror}
+            disabled={this.notCustomSource}
+            onChange={(e) => {
+              this.modifyMirror(true, e.target.value);
+            }}
+          />
         </Callout>
       </div>
     );

@@ -4,8 +4,8 @@ import * as React from 'react';
 import { MirrorSettings } from '../../../src/renderer/components/settings-general-mirror';
 
 import { StateMock } from '../../mocks/mocks';
-import { InputGroup, MenuItem } from '@blueprintjs/core';
-import { ELECTRON_MIRRORS } from '../../../src/renderer/mirror-constants';
+import { FormEvent } from 'react';
+import { InputGroup, Radio } from '@blueprintjs/core';
 
 describe('MirrorSettings component', () => {
   let store: StateMock;
@@ -19,105 +19,87 @@ describe('MirrorSettings component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  describe('setMirror()', () => {
-    it('set mirror', async () => {
+  describe('modifyMirror()', () => {
+    it('modify mirror', async () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
       const instance = wrapper.instance() as any;
 
       const [mirror, nightlyMirror] = ['mirror_test1', 'nightly_test2'];
 
-      instance.setMirror(false, mirror);
-      instance.setMirror(true, nightlyMirror);
+      instance.modifyMirror(false, mirror);
+      instance.modifyMirror(true, nightlyMirror);
 
-      expect(store.electronMirrors.electronMirror).toEqual(mirror);
-      expect(instance.state.electronMirror).toEqual(mirror);
-
-      expect(store.electronMirrors.electronNightlyMirror).toEqual(
-        nightlyMirror,
+      expect(store.electronMirrors.sources.CUSTOM.electronMirror).toEqual(
+        mirror,
       );
-      expect(instance.state.electronNightlyMirror).toEqual(nightlyMirror);
+
+      expect(
+        store.electronMirrors.sources.CUSTOM.electronNightlyMirror,
+      ).toEqual(nightlyMirror);
     });
   });
 
-  describe('onChange()', () => {
-    it('change input', async () => {
+  describe('changeSourceType()', () => {
+    it('change source type', () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
       const instance = wrapper.instance() as any;
 
-      const [mirror, nightlyMirror] = ['mirror_test3', 'nightly_test4'];
+      store.electronMirrors.sourceType = 'DEFAULT';
+      const event = { target: { value: 'CUSTOM' } };
+      instance.changeSourceType(
+        (event as unknown) as FormEvent<HTMLInputElement>,
+      );
 
-      {
-        const event = { currentTarget: { value: mirror } };
-        wrapper.find(InputGroup).at(0).simulate('change', event);
+      expect(store.electronMirrors.sourceType).toEqual('CUSTOM');
+    });
+  });
 
-        expect(store.electronMirrors.electronMirror).toEqual(mirror);
-        expect(instance.state.electronMirror).toEqual(mirror);
-      }
+  describe('radio', () => {
+    it('count should is 3', () => {
+      const wrapper = shallow(<MirrorSettings appState={store as any} />);
 
-      {
-        const event = { currentTarget: { value: nightlyMirror } };
-        wrapper.find(InputGroup).at(1).simulate('change', event);
+      expect(wrapper.find(Radio)).toHaveLength(3);
+    });
 
-        expect(store.electronMirrors.electronNightlyMirror).toEqual(
-          nightlyMirror,
-        );
-        expect(instance.state.electronNightlyMirror).toEqual(nightlyMirror);
-      }
+    it('order should is default -> china -> custom', () => {
+      const wrapper = shallow(<MirrorSettings appState={store as any} />);
+
+      expect(wrapper.find(Radio).at(0).props().label).toEqual('Default');
+      expect(wrapper.find(Radio).at(0).props().value).toEqual('DEFAULT');
+
+      expect(wrapper.find(Radio).at(1).props().label).toEqual('China');
+      expect(wrapper.find(Radio).at(1).props().value).toEqual('CHINA');
+
+      expect(wrapper.find(Radio).at(2).props().label).toEqual('Custom');
+      expect(wrapper.find(Radio).at(2).props().value).toEqual('CUSTOM');
     });
   });
 
   describe('onClick()', () => {
-    it('click preset values', async () => {
+    it('change electron mirror', () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
-      const instance = wrapper.instance() as any;
 
-      {
-        const MenuWrapper = shallow(
-          instance.selectMirrorMenu(false).props.content,
-        ).find(MenuItem);
+      store.electronMirrors.sourceType = 'CUSTOM';
 
-        MenuWrapper.at(1).simulate('click');
+      const event = { target: { value: 'test_mirror' } };
+      wrapper.find(InputGroup).at(0).simulate('change', event);
 
-        expect(store.electronMirrors.electronMirror).toEqual(
-          ELECTRON_MIRRORS.CHINA.electronMirror,
-        );
-        expect(instance.state.electronMirror).toEqual(
-          ELECTRON_MIRRORS.CHINA.electronMirror,
-        );
+      expect(store.electronMirrors.sources.CUSTOM.electronMirror).toEqual(
+        'test_mirror',
+      );
+    });
 
-        MenuWrapper.at(0).simulate('click');
+    it('change electron nightly mirror', () => {
+      const wrapper = shallow(<MirrorSettings appState={store as any} />);
 
-        expect(store.electronMirrors.electronMirror).toEqual(
-          ELECTRON_MIRRORS.DEFAULT.electronMirror,
-        );
-        expect(instance.state.electronMirror).toEqual(
-          ELECTRON_MIRRORS.DEFAULT.electronMirror,
-        );
-      }
+      store.electronMirrors.sourceType = 'CUSTOM';
 
-      {
-        const MenuWrapper = shallow(
-          instance.selectMirrorMenu(true).props.content,
-        ).find(MenuItem);
+      const event = { target: { value: 'test_nightly_mirror' } };
+      wrapper.find(InputGroup).at(1).simulate('change', event);
 
-        MenuWrapper.at(1).simulate('click');
-
-        expect(store.electronMirrors.electronNightlyMirror).toEqual(
-          ELECTRON_MIRRORS.CHINA.electronNightlyMirror,
-        );
-        expect(instance.state.electronNightlyMirror).toEqual(
-          ELECTRON_MIRRORS.CHINA.electronNightlyMirror,
-        );
-
-        MenuWrapper.at(0).simulate('click');
-
-        expect(store.electronMirrors.electronNightlyMirror).toEqual(
-          ELECTRON_MIRRORS.DEFAULT.electronNightlyMirror,
-        );
-        expect(instance.state.electronNightlyMirror).toEqual(
-          ELECTRON_MIRRORS.DEFAULT.electronNightlyMirror,
-        );
-      }
+      expect(
+        store.electronMirrors.sources.CUSTOM.electronNightlyMirror,
+      ).toEqual('test_nightly_mirror');
     });
   });
 });

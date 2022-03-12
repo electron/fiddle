@@ -14,7 +14,6 @@ import {
   Version,
   VersionSource,
   VersionState,
-  Mirrors,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
@@ -106,12 +105,13 @@ export class AppState {
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   @observable public packageAuthor =
     (localStorage.getItem('packageAuthor') as string) ?? getUsername();
-  @observable public electronMirrors =
-    (this.retrieve('electronMirrors') as Mirrors) === null
-      ? navigator.language === 'zh-CN'
-        ? ELECTRON_MIRRORS.CHINA
-        : ELECTRON_MIRRORS.DEFAULT
-      : (this.retrieve('electronMirrors') as Mirrors);
+  @observable public electronMirrors: typeof ELECTRON_MIRRORS =
+    (this.retrieve('electronMirrors') as typeof ELECTRON_MIRRORS) === null
+      ? {
+          ...ELECTRON_MIRRORS,
+          sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
+        }
+      : (this.retrieve('electronMirrors') as typeof ELECTRON_MIRRORS);
 
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
@@ -455,7 +455,7 @@ export class AppState {
   /**
    * Download a version of Electron.
    *
-   * @param {string} input
+   * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
   @action public async downloadVersion(ver: RunnableVersion) {
@@ -469,7 +469,10 @@ export class AppState {
     }
 
     console.log(`State: Downloading Electron ${version}`);
-    await setupBinary(ver, this.electronMirrors);
+    await setupBinary(
+      ver,
+      this.electronMirrors.sources[this.electronMirrors.sourceType],
+    );
   }
 
   public hasVersion(input: string): boolean {

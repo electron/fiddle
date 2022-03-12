@@ -93,7 +93,7 @@ describe('binary', () => {
         new Promise((r) => (downloadResolve = r)),
       );
 
-      setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
 
       expect(getVersionState(ver)).toBe(VersionState.downloading);
       downloadResolve();
@@ -106,7 +106,7 @@ describe('binary', () => {
       const unzipPromise = new Promise((r) => (unzipResolve = r));
       (extract as jest.Mock).mockReturnValueOnce(unzipPromise);
 
-      setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
       await waitFor(() => getVersionState(ver) === VersionState.unzipping);
 
       expect(getVersionState(ver)).toBe(VersionState.unzipping);
@@ -182,7 +182,7 @@ describe('binary', () => {
 
       ver.source = VersionSource.local;
       ver.state = VersionState.unknown;
-      await setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      await setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
 
       expect(electronDownload).not.toHaveBeenCalled();
       expect(ver.state).toBe(VersionState.unknown);
@@ -195,7 +195,7 @@ describe('binary', () => {
 
       ver.source = VersionSource.remote;
       ver.state = VersionState.unknown;
-      await setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      await setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
 
       expect(electronDownload).toHaveBeenCalled();
       expect(ver.state).toBe(VersionState.ready);
@@ -216,7 +216,7 @@ describe('binary', () => {
 
       ver.source = VersionSource.remote;
       ver.state = VersionState.unknown;
-      setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
       await waitFor(() => ver.state === VersionState.downloading);
 
       expect(ver.downloadProgress).not.toBe(percent);
@@ -233,8 +233,8 @@ describe('binary', () => {
     it(`returns the same promise if called twice for the same version`, async () => {
       (fs.existsSync as jest.Mock).mockReturnValue(false);
 
-      const prom1 = setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
-      const prom2 = setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      const prom1 = setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
+      const prom2 = setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
 
       expect(prom1).toBe(prom2);
     });
@@ -245,7 +245,7 @@ describe('binary', () => {
 
       ver.source = VersionSource.remote;
       ver.state = VersionState.unknown;
-      await setupBinary(ver, ELECTRON_MIRRORS.DEFAULT);
+      await setupBinary(ver, ELECTRON_MIRRORS.sources.DEFAULT);
 
       expect(extract as jest.Mock).toHaveBeenCalledTimes(1);
     });

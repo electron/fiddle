@@ -3,7 +3,6 @@ import * as path from 'path';
 import extract from 'extract-zip';
 
 import {
-  Mirrors,
   RunnableVersion,
   Version,
   VersionSource,
@@ -11,6 +10,7 @@ import {
 } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
 import { download as electronDownload } from '@electron/get';
+import { Mirrors } from './mirror-constants';
 
 // versions that are currently being downloaded
 const downloading: Map<string, Promise<void>> = new Map();
@@ -232,7 +232,7 @@ async function download(
   return await electronDownload(version, {
     mirrorOptions: {
       mirror: mirror.electronMirror,
-      nightly_mirror: mirror.electronNightlyMirror,
+      nightlyMirror: mirror.electronNightlyMirror,
     },
     downloadOptions: {
       quiet: true,

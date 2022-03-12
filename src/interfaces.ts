@@ -27,11 +27,6 @@ export enum GistActionState {
   none = 'none',
 }
 
-export interface Mirrors {
-  electronMirror: string;
-  electronNightlyMirror: string;
-}
-
 export interface Version {
   version: string;
   name?: string;

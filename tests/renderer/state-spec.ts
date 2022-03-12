@@ -341,7 +341,7 @@ describe('AppState', () => {
 
       expect(setupBinary).toHaveBeenCalledWith<any>(
         ver,
-        ELECTRON_MIRRORS.DEFAULT,
+        ELECTRON_MIRRORS.sources.DEFAULT,
       );
     });
 
