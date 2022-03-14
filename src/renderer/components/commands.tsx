@@ -34,7 +34,7 @@ export class Commands extends React.Component<CommandsProps> {
 
   public render() {
     const { appState } = this.props;
-    const { isBisectCommandShowing: isBisectCommandShowing, title } = appState;
+    const { isBisectCommandShowing, title } = appState;
 
     return (
       <div className="commands" onDoubleClick={this.handleDoubleClick}>
