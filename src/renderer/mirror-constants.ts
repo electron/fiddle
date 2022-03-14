@@ -14,7 +14,7 @@ const sources = {
   },
 };
 
-export const ELECTRON_MIRRORS = {
+export const ELECTRON_MIRROR = {
   sourceType: 'DEFAULT' as keyof typeof sources,
   sources,
 };

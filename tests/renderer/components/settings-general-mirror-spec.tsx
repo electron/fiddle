@@ -29,13 +29,13 @@ describe('MirrorSettings component', () => {
       instance.modifyMirror(false, mirror);
       instance.modifyMirror(true, nightlyMirror);
 
-      expect(store.electronMirrors.sources.CUSTOM.electronMirror).toEqual(
+      expect(store.electronMirror.sources.CUSTOM.electronMirror).toEqual(
         mirror,
       );
 
-      expect(
-        store.electronMirrors.sources.CUSTOM.electronNightlyMirror,
-      ).toEqual(nightlyMirror);
+      expect(store.electronMirror.sources.CUSTOM.electronNightlyMirror).toEqual(
+        nightlyMirror,
+      );
     });
   });
 
@@ -44,13 +44,13 @@ describe('MirrorSettings component', () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
       const instance = wrapper.instance() as any;
 
-      store.electronMirrors.sourceType = 'DEFAULT';
+      store.electronMirror.sourceType = 'DEFAULT';
       const event = { target: { value: 'CUSTOM' } };
       instance.changeSourceType(
         (event as unknown) as FormEvent<HTMLInputElement>,
       );
 
-      expect(store.electronMirrors.sourceType).toEqual('CUSTOM');
+      expect(store.electronMirror.sourceType).toEqual('CUSTOM');
     });
   });
 
@@ -79,12 +79,12 @@ describe('MirrorSettings component', () => {
     it('change electron mirror', () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
 
-      store.electronMirrors.sourceType = 'CUSTOM';
+      store.electronMirror.sourceType = 'CUSTOM';
 
       const event = { target: { value: 'test_mirror' } };
       wrapper.find(InputGroup).at(0).simulate('change', event);
 
-      expect(store.electronMirrors.sources.CUSTOM.electronMirror).toEqual(
+      expect(store.electronMirror.sources.CUSTOM.electronMirror).toEqual(
         'test_mirror',
       );
     });
@@ -92,14 +92,14 @@ describe('MirrorSettings component', () => {
     it('change electron nightly mirror', () => {
       const wrapper = shallow(<MirrorSettings appState={store as any} />);
 
-      store.electronMirrors.sourceType = 'CUSTOM';
+      store.electronMirror.sourceType = 'CUSTOM';
 
       const event = { target: { value: 'test_nightly_mirror' } };
       wrapper.find(InputGroup).at(1).simulate('change', event);
 
-      expect(
-        store.electronMirrors.sources.CUSTOM.electronNightlyMirror,
-      ).toEqual('test_nightly_mirror');
+      expect(store.electronMirror.sources.CUSTOM.electronNightlyMirror).toEqual(
+        'test_nightly_mirror',
+      );
     });
   });
 });

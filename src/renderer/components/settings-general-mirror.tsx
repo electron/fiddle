@@ -29,30 +29,30 @@ export class MirrorSettings extends React.Component<
   }
 
   private modifyMirror(isNightly: boolean, value: string) {
-    this.props.appState.electronMirrors.sources.CUSTOM[
+    this.props.appState.electronMirror.sources.CUSTOM[
       isNightly ? 'electronNightlyMirror' : 'electronMirror'
     ] = value;
   }
 
   private changeSourceType(e: FormEvent<HTMLInputElement>) {
-    this.props.appState.electronMirrors.sourceType = (e.target as HTMLInputElement)
+    this.props.appState.electronMirror.sourceType = (e.target as HTMLInputElement)
       .value as Sources;
   }
 
   private get notCustomSource() {
-    return this.props.appState.electronMirrors.sourceType !== 'CUSTOM';
+    return this.props.appState.electronMirror.sourceType !== 'CUSTOM';
   }
 
   public render() {
-    const { sourceType, sources } = this.props.appState.electronMirrors;
-    const electronMirrorsLabel = `If you don't have access to Electron's GitHub releases, you can tell Fiddle to download Electron binaries from an alternate source.`;
+    const { sourceType, sources } = this.props.appState.electronMirror;
+    const electronMirrorLabel = `If you don't have access to Electron's GitHub releases, you can tell Fiddle to download Electron binaries from an alternate source.`;
 
     return (
       <div>
         <h4>Electron Mirrors</h4>
         <Callout>
           <RadioGroup
-            label={electronMirrorsLabel}
+            label={electronMirrorLabel}
             inline={true}
             onChange={this.changeSourceType}
             selectedValue={sourceType}

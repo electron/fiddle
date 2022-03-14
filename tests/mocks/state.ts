@@ -12,7 +12,7 @@ import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
-import { ELECTRON_MIRRORS } from '../../src/renderer/mirror-constants';
+import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
@@ -57,7 +57,7 @@ export class StateMock {
   @observable public versionsToShow: RunnableVersion[] = [];
   @observable public packageAuthor = 'electron<electron@electron.org>';
   @observable
-  public electronMirrors = ELECTRON_MIRRORS;
+  public electronMirror = ELECTRON_MIRROR;
 
   public Bisector = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();

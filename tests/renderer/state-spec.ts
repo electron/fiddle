@@ -23,7 +23,7 @@ import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
-import { ELECTRON_MIRRORS } from '../../src/renderer/mirror-constants';
+import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 
 jest.mock('../../src/renderer/content', () => ({
   getTemplate: jest.fn(),
@@ -341,7 +341,7 @@ describe('AppState', () => {
 
       expect(setupBinary).toHaveBeenCalledWith<any>(
         ver,
-        ELECTRON_MIRRORS.sources.DEFAULT,
+        ELECTRON_MIRROR.sources.DEFAULT,
       );
     });
 
