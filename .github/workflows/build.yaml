@@ -19,7 +19,7 @@ jobs:
           node-version: 15.x
           cache: yarn
       - name: Install
-        run: yarn --frozen-lockfile --network-timeout 100000
+        run: yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000
       - name: lint
         run: yarn lint
       - name: test
@@ -67,7 +67,7 @@ jobs:
           fileName: 'win-certificate.pfx'
           encodedString: ${{ secrets.WINDOWS_CODESIGN_P12 }}
       - name: Install
-        run: yarn --network-timeout 100000
+        run: yarn --network-timeout 100000 || yarn --network-timeout 100000 || yarn --network-timeout 100000
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn make --arch=${{ matrix.arch }}
