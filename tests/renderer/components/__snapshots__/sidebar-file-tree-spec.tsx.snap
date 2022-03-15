@@ -17,7 +17,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 0,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -32,6 +34,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
@@ -58,7 +61,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 1,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -73,6 +78,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
@@ -99,7 +105,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 2,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -114,6 +122,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
@@ -140,7 +149,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 3,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -155,6 +166,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
@@ -181,7 +193,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 4,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -196,6 +210,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,
@@ -296,7 +311,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "hasCaret": false,
               "icon": "document",
               "id": 0,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -311,6 +328,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
@@ -337,7 +355,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "hasCaret": false,
               "icon": "document",
               "id": 1,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -352,6 +372,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
@@ -378,7 +399,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "hasCaret": false,
               "icon": "document",
               "id": 2,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -393,6 +416,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
@@ -419,7 +443,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "hasCaret": false,
               "icon": "document",
               "id": 3,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -434,6 +460,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
@@ -460,7 +487,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "hasCaret": false,
               "icon": "document",
               "id": 4,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -475,6 +504,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,
@@ -557,7 +587,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 0,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -572,6 +604,7 @@ exports[`SidebarFileTree component renders 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
@@ -598,7 +631,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 1,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -613,6 +648,7 @@ exports[`SidebarFileTree component renders 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
@@ -639,7 +675,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 2,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -654,6 +692,7 @@ exports[`SidebarFileTree component renders 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
@@ -680,7 +719,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 3,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -695,6 +736,7 @@ exports[`SidebarFileTree component renders 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
@@ -721,7 +763,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "hasCaret": false,
               "icon": "document",
               "id": 4,
+              "isSelected": false,
               "label": <Blueprint.ContextMenu2
+                className="pointer"
                 content={
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
@@ -736,6 +780,7 @@ exports[`SidebarFileTree component renders 1`] = `
                     />
                   </Blueprint3.Menu>
                 }
+                onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,

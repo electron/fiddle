@@ -43,7 +43,7 @@ export class SidebarFileTree extends React.Component<
 
   public render() {
     const { editorMosaic } = this.props.appState;
-    const { files } = editorMosaic;
+    const { files, focusedFile } = editorMosaic;
 
     const fileList: TreeNodeInfo[] = Array.from(files)
       .sort((a, b) => a[0].localeCompare(b[0]))
@@ -52,11 +52,14 @@ export class SidebarFileTree extends React.Component<
           presence !== EditorPresence.Hidden ? 'eye-open' : 'eye-off';
 
         return {
+          isSelected: focusedFile === editorId,
           id: index,
           hasCaret: false,
           icon: 'document',
           label: (
             <ContextMenu2
+              className="pointer"
+              onClick={() => this.setFocusedFile(editorId)}
               content={
                 <Menu>
                   <MenuItem
@@ -158,6 +161,11 @@ export class SidebarFileTree extends React.Component<
   public toggleVisibility = (editorId: EditorId) => {
     const { editorMosaic } = this.props.appState;
     editorMosaic.toggle(editorId);
+  };
+
+  public setFocusedFile = (editorId: EditorId) => {
+    const { editorMosaic } = this.props.appState;
+    editorMosaic.setFocusedFile(editorId);
   };
 
   public removeEditor = (editorId: EditorId) => {
