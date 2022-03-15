@@ -34,7 +34,7 @@ export class Commands extends React.Component<CommandsProps> {
 
   public render() {
     const { appState } = this.props;
-    const { isBisectCommandShowing: isBisectCommandShowing, title } = appState;
+    const { isBisectCommandShowing, title } = appState;
 
     return (
       <div className="commands" onDoubleClick={this.handleDoubleClick}>
@@ -57,7 +57,7 @@ export class Commands extends React.Component<CommandsProps> {
             />
           </ControlGroup>
         </div>
-        {process.platform === 'darwin' ? (
+        {!process.env.JEST && process.platform === 'darwin' ? (
           <div className="title">{title}</div>
         ) : undefined}
         <div>

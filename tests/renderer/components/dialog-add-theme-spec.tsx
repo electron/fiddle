@@ -2,6 +2,7 @@ import { shell } from 'electron';
 import { shallow } from 'enzyme';
 import * as React from 'react';
 import * as fs from 'fs-extra';
+import * as path from 'path';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { overridePlatform, resetPlatform } from '../../utils';
@@ -74,7 +75,12 @@ describe('AddThemeDialog component', () => {
       expect(args[1].common).toBeDefined();
       expect(args[1].file).toBeDefined();
 
-      const themePath = '~/.electron-fiddle/themes/testingLight';
+      const themePath = path.join(
+        '~',
+        '.electron-fiddle',
+        'themes',
+        'testingLight',
+      );
       expect(store.setTheme).toHaveBeenCalledWith(themePath);
       expect(shell.showItemInFolder).toHaveBeenCalledWith(themePath);
     });

@@ -1,6 +1,7 @@
 import * as MonacoType from 'monaco-editor';
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import watch from 'node-watch';
 
 import { RunnableVersion, VersionSource } from '../interfaces';
 
@@ -32,7 +33,7 @@ export class ElectronTypes {
       const file = path.join(dir, 'gen/electron/tsc/typings', ELECTRON_DTS);
       this.setTypesFromFile(file, ver);
       try {
-        this.watcher = fs.watch(file, () => this.setTypesFromFile(file, ver));
+        this.watcher = watch(file, () => this.setTypesFromFile(file, ver));
       } catch (err) {
         console.debug(`Unable to watch "${file}" for changes: ${err}`);
       }
