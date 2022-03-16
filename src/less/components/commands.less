@@ -11,7 +11,10 @@ header {
   justify-content: space-between;
   height: 50px;
   padding:
-    10px;
+  10px
+  calc(100vw - (env(titlebar-area-x, 0) + env(titlebar-area-width, 0)))
+  10px
+  env(titlebar-area-x, 0);
   box-sizing: border-box;
   font-family: @fonts-common;
 
