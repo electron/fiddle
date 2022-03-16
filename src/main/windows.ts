@@ -104,6 +104,10 @@ export function createMainWindow(): Electron.BrowserWindow {
     return paths;
   });
 
+  ipcMainManager.handle(IpcEvents.GET_PROCESS_PLATFORM, () => {
+    return process.platform;
+  });
+
   browserWindows.push(browserWindow);
 
   return browserWindow;

@@ -10,6 +10,9 @@ export async function setupFiddleGlobal() {
   window.ElectronFiddle = {
     app: null as any, // will be set in main.tsx
     appPaths: await ipcRendererManager.invoke(IpcEvents.GET_APP_PATHS),
+    processPlatform: await ipcRendererManager.invoke(
+      IpcEvents.GET_PROCESS_PLATFORM,
+    ),
     monaco: null as any, // will be set in main.tsx
   };
 }

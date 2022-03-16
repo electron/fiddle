@@ -115,7 +115,7 @@ export class App {
     // Wait for it here so the UI doesn't start life in `nonIdealState`.
     await when(() => this.state.editorMosaic.files.size !== 0);
 
-    const className = `${process.platform} container`;
+    const className = `${window.ElectronFiddle.processPlatform} container`;
     const app = (
       <div className={className}>
         <Dialogs appState={this.state} />

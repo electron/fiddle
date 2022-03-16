@@ -6,6 +6,7 @@ declare global {
     ElectronFiddle: {
       app: App;
       appPaths: Record<string, string>;
+      processPlatform: string;
       monaco: typeof MonacoType;
     };
   }
