@@ -640,7 +640,10 @@ export class AppState {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
-    if (process.platform === 'win32' && bypassBuffer === false) {
+    if (
+      window.ElectronFiddle.processPlatform === 'win32' &&
+      bypassBuffer === false
+    ) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split(/\r?\n/);
