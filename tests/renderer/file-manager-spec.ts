@@ -63,6 +63,50 @@ describe('FileManager', () => {
       expect(app.replaceFiddle).toHaveBeenCalledWith(values, { filePath });
     });
 
+    it('respects the Electron version specified in package.json', async () => {
+      const pj = {
+        main: 'main.js',
+        devDependencies: {
+          electron: '17.0.0',
+        },
+      };
+
+      const values = {
+        ...editorValues,
+        [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
+      };
+      (readFiddle as jest.Mock).mockResolvedValue(values);
+
+      await fm.openFiddle(filePath);
+      expect(app.remoteLoader.setElectronVersion).toBeCalledWith('17.0.0');
+      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
+        filePath,
+      });
+    });
+
+    it('correctly adds modules specified in package.json', async () => {
+      const pj = {
+        main: 'main.js',
+        dependencies: {
+          'meaning-of-life': '*',
+        },
+      };
+
+      const values = {
+        ...editorValues,
+        [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
+      };
+      (readFiddle as jest.Mock).mockResolvedValue(values);
+
+      await fm.openFiddle(filePath);
+      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(app.state.modules.get('meaning-of-life')).toBe('*');
+      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
+        filePath,
+      });
+    });
+
     it('runs it on IPC event', () => {
       fm.openFiddle = jest.fn();
       ipcRendererManager.emit(IpcEvents.FS_OPEN_FIDDLE);
