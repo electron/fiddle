@@ -6,6 +6,7 @@ import * as nodeUrl from 'url';
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { ipcMainManager } from './ipc';
+import { getOrCreateMainWindow } from './windows';
 
 const PROTOCOL = 'electron-fiddle';
 const squirrelPath = path.resolve(
@@ -66,6 +67,8 @@ const handlePotentialProtocolLaunch = (url: string) => {
     default:
       return;
   }
+  const win = getOrCreateMainWindow();
+  win.show();
 };
 
 const isProtocolString = (arg: string) => arg.startsWith(`${PROTOCOL}://`);
