@@ -150,7 +150,11 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
     return null;
   }
 
-  if (process.platform == 'linux' && semver.lt(item.version, '15.0.0')) {
+  if (
+    process.platform === 'darwin' &&
+    process.arch === 'arm64' &&
+    semver.lt(item.version, '11.0.0')
+  ) {
     return (
       <Tooltip
         className="disabled-menu-tooltip"

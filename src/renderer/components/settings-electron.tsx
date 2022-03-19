@@ -297,7 +297,9 @@ export class ElectronSettings extends React.Component<
    */
   private renderTableRows(): Array<JSX.Element | null> {
     return this.props.appState.versionsToShow.map((item) =>
-      process.platform == 'linux' && semver.lt(item.version, '15.0.0') ? (
+      process.platform === 'darwin' &&
+      process.arch === 'arm64' &&
+      semver.lt(item.version, '11.0.0') ? (
         <tr key={item.version}>
           <td>{item.version}</td>
           <td>{this.renderHumanState(item)}</td>
@@ -399,7 +401,11 @@ export class ElectronSettings extends React.Component<
           />
         </Tooltip>
       );
-    } else if (process.platform === 'linux' && semver.lt(version, '15.0.0')) {
+    } else if (
+      process.platform === 'darwin' &&
+      process.arch === 'arm64' &&
+      semver.lt(version, '11.0.0')
+    ) {
       return (
         <Tooltip
           position="auto"
