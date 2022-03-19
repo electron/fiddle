@@ -391,7 +391,11 @@ export class ElectronSettings extends React.Component<
           />
         </Tooltip>
       );
-    } else if (process.platform === 'linux' && semver.lt(version, '15.0.0')) {
+    } else if (
+      process.platform === 'darwin' &&
+      process.arch === 'arm64' &&
+      semver.lt(version, '15.0.0')
+    ) {
       return (
         <Tooltip
           position="auto"
