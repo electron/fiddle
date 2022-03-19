@@ -150,7 +150,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
     return null;
   }
 
-  if (modifiers.disabled) {
+  if (process.platform == 'linux' && semver.lt(item.version, '15.0.0')) {
     return (
       <Tooltip
         className="disabled-menu-tooltip"
@@ -159,11 +159,11 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           preventOverflow: { enabled: false },
         }}
         intent={Intent.PRIMARY}
-        content={'Version not available on current OS'}
+        content={`Version is not available on current OS`}
       >
         <MenuItem
           active={modifiers.active}
-          disabled={modifiers.disabled}
+          disabled={true}
           text={highlightText(item.version, query)}
           key={item.version}
           onClick={handleClick}
@@ -202,14 +202,6 @@ interface VersionSelectProps {
     | ((item: RunnableVersion, index: number) => boolean);
 }
 
-export const disableItems = (item: RunnableVersion, index: number): boolean => {
-  return (
-    process.platform === 'darwin' &&
-    process.arch === 'arm64' &&
-    semver.lt(item.version, '11.0.0')
-  );
-};
-
 /**
  * A dropdown allowing the selection of Electron versions. The actual
  * download is managed in the state.
@@ -223,7 +215,7 @@ export class VersionSelect extends React.Component<
   VersionSelectState
 > {
   public render() {
-    const { currentVersion } = this.props;
+    const { currentVersion, itemDisabled } = this.props;
     const { version } = currentVersion;
 
     return (
@@ -232,7 +224,7 @@ export class VersionSelect extends React.Component<
         items={this.props.appState.versionsToShow}
         itemRenderer={renderItem}
         itemListPredicate={filterItems}
-        itemDisabled={disableItems}
+        itemDisabled={itemDisabled}
         onItemSelect={this.props.onVersionSelect}
         noResults={<MenuItem disabled={true} text="No results." />}
         disabled={!!this.props.disabled}

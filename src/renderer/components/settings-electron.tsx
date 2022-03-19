@@ -13,6 +13,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import semver from 'semver';
 
 import {
   ElectronReleaseChannel,
@@ -295,13 +296,21 @@ export class ElectronSettings extends React.Component<
    * @returns {Array<JSX.Element>}
    */
   private renderTableRows(): Array<JSX.Element | null> {
-    return this.props.appState.versionsToShow.map((item) => (
-      <tr key={item.version}>
-        <td>{item.version}</td>
-        <td>{this.renderHumanState(item)}</td>
-        <td className="action">{this.renderAction(item)}</td>
-      </tr>
-    ));
+    return this.props.appState.versionsToShow.map((item) =>
+      process.platform == 'linux' && semver.lt(item.version, '15.0.0') ? (
+        <tr key={item.version}>
+          <td>{item.version}</td>
+          <td>{this.renderHumanState(item)}</td>
+          <td className="action">{this.renderAction(item)}</td>
+        </tr>
+      ) : (
+        <tr key={item.version}>
+          <td>{item.version}</td>
+          <td>{this.renderHumanState(item)}</td>
+          <td className="action">{this.renderAction(item)}</td>
+        </tr>
+      ),
+    );
   }
 
   /**
@@ -381,6 +390,21 @@ export class ElectronSettings extends React.Component<
           position="auto"
           intent="primary"
           content={`Can't remove currently active Electron version (${version})`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip>
+      );
+    } else if (process.platform === 'linux' && semver.lt(version, '15.0.0')) {
+      return (
+        <Tooltip
+          position="auto"
+          intent="primary"
+          content={`Version is not available on your current OS`}
         >
           <AnchorButton
             className={'disabled-version'}
