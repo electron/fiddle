@@ -6,15 +6,20 @@ header {
   -webkit-app-region: drag;
 }
 
-.commands {
-  display: flex;
-  justify-content: space-between;
-  height: 50px;
+.commands.is-mac {
   padding:
     10px
     calc(100vw - (env(titlebar-area-x, 0) + env(titlebar-area-width, 0)))
     10px
     env(titlebar-area-x, 0);
+}
+
+.commands {
+  display: flex;
+  justify-content: space-between;
+  height: 50px;
+  padding:
+    10px;
   box-sizing: border-box;
   font-family: @fonts-common;
 
