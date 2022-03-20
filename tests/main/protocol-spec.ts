@@ -4,6 +4,7 @@
 
 import { app } from 'electron';
 import * as fs from 'fs';
+import { getOrCreateMainWindow } from '../../src/main/windows';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -175,6 +176,16 @@ describe('protocol', () => {
       handler({}, 'electron-fiddle://');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
+    });
+
+    it('focuses window when loading a fiddle', () => {
+      listenForProtocolHandler();
+      getOrCreateMainWindow().blur();
+      const handler = (app.on as any).mock.calls[0][1];
+
+      handler({}, 'electron-fiddle://electron/4.0.0/test/path');
+
+      expect(getOrCreateMainWindow().focus).toHaveBeenCalled();
     });
   });
 });

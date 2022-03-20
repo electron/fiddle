@@ -67,8 +67,7 @@ const handlePotentialProtocolLaunch = (url: string) => {
     default:
       return;
   }
-  const win = getOrCreateMainWindow();
-  win.show();
+  getOrCreateMainWindow().focus();
 };
 
 const isProtocolString = (arg: string) => arg.startsWith(`${PROTOCOL}://`);
