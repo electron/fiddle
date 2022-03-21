@@ -36,6 +36,12 @@ const config = {
         'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Camera',
       Microphone:
         'Access is needed by certain built-in fiddles in addition to any custom fiddles that use the Microphone',
+      Calendars:
+        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Calendars',
+      Contacts:
+        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Contacts',
+      Reminders:
+        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Reminders',
     },
     appCategoryType: 'public.app-category.developer-tools',
     protocols: [
