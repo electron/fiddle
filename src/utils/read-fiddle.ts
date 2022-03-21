@@ -1,4 +1,4 @@
-import { EditorValues } from '../interfaces';
+import { EditorValues, PACKAGE_NAME } from '../interfaces';
 import { ensureRequiredFiles, isSupportedFile } from './editor-utils';
 
 import * as fs from 'fs-extra';
@@ -14,7 +14,8 @@ export async function readFiddle(folder: string): Promise<EditorValues> {
   let got: EditorValues = {};
 
   try {
-    const names = (await fs.readdir(folder)).filter(isSupportedFile);
+    const files = await fs.readdir(folder);
+    const names = files.filter((f) => isSupportedFile(f) || f === PACKAGE_NAME);
     const values = await Promise.allSettled(
       names.map((name) => fs.readFile(path.join(folder, name), 'utf8')),
     );

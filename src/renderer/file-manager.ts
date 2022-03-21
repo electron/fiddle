@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
+import semver from 'semver';
 
 import { Files, FileTransform, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -68,7 +69,41 @@ export class FileManager {
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues = {};
-    for (const [name, value] of Object.entries(await readFiddle(filePath))) {
+    const files: [string, string][] = Object.entries(
+      await readFiddle(filePath),
+    );
+    for (const [name, value] of files) {
+      if (name === PACKAGE_NAME) {
+        const { remoteLoader } = window.ElectronFiddle.app;
+        const { dependencies, devDependencies } = JSON.parse(value);
+        const deps: Record<string, string> = {
+          ...dependencies,
+          ...devDependencies,
+        };
+
+        if (deps.electron) {
+          // Strip off semver range prefixes, e.g:
+          // ^1.2.0 -> 1.2.0
+          // ~2.3.4 -> 2.3.4
+          const index = deps.electron.search(/\d/);
+          const version = deps.electron.substring(index);
+
+          if (!semver.valid(version)) {
+            throw new Error(
+              "This Fiddle's package.json contains an invalid Electron version.",
+            );
+          }
+
+          remoteLoader.setElectronVersion(version);
+
+          // We want to include all dependencies except Electron.
+          delete deps.electron;
+        }
+
+        this.appState.modules = new Map(Object.entries(deps));
+        continue;
+      }
+
       if (isKnownFile(name) || (await app.remoteLoader.confirmAddFile(name))) {
         editorValues[name] = value;
       }

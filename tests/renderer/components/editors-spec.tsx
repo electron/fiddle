@@ -253,5 +253,16 @@ describe('Editors component', () => {
       instance.setFocused(id);
       expect(spy).toHaveBeenCalledWith({ focused: id });
     });
+
+    it('focus sidebar file', () => {
+      const wrapper = shallow(<Editors appState={store as any} />);
+      const instance: Editors = wrapper.instance() as any;
+      const spy = jest.spyOn(instance, 'setState');
+
+      const id = MAIN_JS;
+      instance.setFocused(id);
+      expect(spy).toHaveBeenCalledWith({ focused: id });
+      expect(instance.props.appState.editorMosaic.focusedFile).toBe(id);
+    });
   });
 });

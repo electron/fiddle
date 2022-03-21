@@ -34,10 +34,15 @@ export class Commands extends React.Component<CommandsProps> {
 
   public render() {
     const { appState } = this.props;
-    const { isBisectCommandShowing: isBisectCommandShowing, title } = appState;
+    const { isBisectCommandShowing, title } = appState;
 
     return (
-      <div className="commands" onDoubleClick={this.handleDoubleClick}>
+      <div
+        className={
+          process.platform === 'darwin' ? 'commands is-mac' : 'commands'
+        }
+        onDoubleClick={this.handleDoubleClick}
+      >
         <div>
           <ControlGroup fill={true} vertical={false}>
             <VersionChooser appState={appState} />

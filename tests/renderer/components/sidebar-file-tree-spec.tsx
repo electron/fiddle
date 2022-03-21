@@ -8,18 +8,25 @@ import {
   EditorPresence,
 } from '../../../src/renderer/editor-mosaic';
 import { createEditorValues } from '../../mocks/editor-values';
+import { Editors } from '../../../src/renderer/components/editors';
+import { AppMock, StateMock } from '../../mocks/mocks';
 
 describe('SidebarFileTree component', () => {
+  let app: AppMock;
   let store: any;
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
+  let stateMock: StateMock;
 
   beforeEach(() => {
+    ({ app } = (window as any).ElectronFiddle);
+    ({ state: stateMock } = app);
     store = {};
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
     store.editorMosaic = editorMosaic as any;
+    stateMock.editorMosaic = editorMosaic as any;
   });
 
   it('renders', () => {
@@ -81,5 +88,37 @@ describe('SidebarFileTree component', () => {
     instance.resetLayout();
 
     expect(editorMosaic.resetLayout).toHaveBeenCalledTimes(1);
+  });
+
+  it('file is visible, click files tree, focus file content', async () => {
+    const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
+    const editors = shallow(<Editors appState={stateMock as any} />);
+    const sidebarFileTreeInstance: SidebarFileTree = sidebarFileTree.instance() as any;
+    const editorsInstance: Editors = editors.instance() as any;
+
+    sidebarFileTreeInstance.setFocusedFile('index.html');
+
+    setTimeout(() => {
+      expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Visible);
+      expect(editorsInstance.state.focused).toBe('index.html');
+    });
+  });
+
+  it('file is hidden, click files tree, make file visible and focus file content', function () {
+    const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
+    const editors = shallow(<Editors appState={stateMock as any} />);
+    const sidebarFileTreeInstance: SidebarFileTree = sidebarFileTree.instance() as any;
+    const editorsInstance: Editors = editors.instance() as any;
+
+    sidebarFileTreeInstance.toggleVisibility('index.html');
+
+    expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Hidden);
+
+    sidebarFileTreeInstance.setFocusedFile('index.html');
+
+    setTimeout(() => {
+      expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Visible);
+      expect(editorsInstance.state.focused).toBe('index.html');
+    });
   });
 });

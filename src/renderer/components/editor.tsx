@@ -54,12 +54,20 @@ export class Editor extends React.Component<EditorProps> {
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { appState, editorDidMount, id } = this.props;
+    const { editorMosaic } = appState;
 
-    appState.editorMosaic.addEditor(id, editor);
+    editorMosaic.addEditor(id, editor);
 
     // And notify others
     if (editorDidMount) {
       editorDidMount(editor);
+    }
+
+    // Click file tree, if the file is hidden, focus it
+    // Because you can't focus immediately after redisplay, you must wait until the mount is complete
+    if (editorMosaic.focusedFile === id) {
+      editor.focus();
+      this.props.setFocused(id);
     }
   }
 
