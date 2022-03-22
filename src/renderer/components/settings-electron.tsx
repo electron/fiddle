@@ -13,7 +13,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import semver from 'semver';
+import { disableDownload } from '../../utils/disable-download';
 
 import {
   ElectronReleaseChannel,
@@ -391,11 +391,7 @@ export class ElectronSettings extends React.Component<
           />
         </Tooltip>
       );
-    } else if (
-      process.platform === 'darwin' &&
-      process.arch === 'arm64' &&
-      semver.lt(version, '11.0.0')
-    ) {
+    } else if (disableDownload(version)) {
       return (
         <Tooltip
           position="auto"

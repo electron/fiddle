@@ -12,6 +12,7 @@ import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
+import { disableDownload } from '../../utils/disable-download';
 
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
@@ -150,11 +151,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
     return null;
   }
 
-  if (
-    process.platform === 'darwin' &&
-    process.arch === 'arm64' &&
-    semver.lt(item.version, '11.0.0')
-  ) {
+  if (disableDownload(item.version)) {
     return (
       <Tooltip
         className="disabled-menu-tooltip"
