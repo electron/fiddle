@@ -25,5 +25,9 @@ exports[`GeneralSettings component renders 1`] = `
   <settings-package-author
     appState={Object {}}
   />
+  <Blueprint3.Divider />
+  <settings-general-mirror
+    appState={Object {}}
+  />
 </div>
 `;

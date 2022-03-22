@@ -10,6 +10,7 @@ import {
 } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
 import { download as electronDownload } from '@electron/get';
+import { Mirrors } from './mirror-constants';
 
 // versions that are currently being downloaded
 const downloading: Map<string, Promise<void>> = new Map();
@@ -44,9 +45,13 @@ export function getVersionState(ver: Version): VersionState {
  * to ensure that we always have or download at least one version.
  *
  * @param {RunnableVersion} ver
+ * @param {Mirrors} mirror
  * @returns {Promise<void>}
  */
-export function setupBinary(ver: RunnableVersion): Promise<void> {
+export function setupBinary(
+  ver: RunnableVersion,
+  mirror: Mirrors,
+): Promise<void> {
   const { version } = ver;
 
   // Only remote versions can be downloaded
@@ -57,13 +62,16 @@ export function setupBinary(ver: RunnableVersion): Promise<void> {
   // Return a promise that resolves when the download completes
   let pending = downloading.get(version);
   if (!pending) {
-    pending = downloadBinary(ver);
+    pending = downloadBinary(ver, mirror);
     downloading.set(version, pending);
   }
   return pending;
 }
 
-async function downloadBinary(ver: RunnableVersion): Promise<void> {
+async function downloadBinary(
+  ver: RunnableVersion,
+  mirror: Mirrors,
+): Promise<void> {
   const { version } = ver;
 
   ver.state = VersionState.downloading;
@@ -71,7 +79,7 @@ async function downloadBinary(ver: RunnableVersion): Promise<void> {
 
   let zipPath;
   try {
-    zipPath = await download(ver);
+    zipPath = await download(ver, mirror);
   } catch (error) {
     console.warn(`Binary: Failure to download ${version}`, error);
     ver.state = VersionState.unknown;
@@ -204,9 +212,13 @@ export function getElectronBinaryPath(
  * Download an Electron version.
  *
  * @param {RunnableVersion} ver
+ * @param {Mirrors} mirror
  * @returns {Promise<string>} path to the downloaded file
  */
-async function download(ver: RunnableVersion): Promise<string> {
+async function download(
+  ver: RunnableVersion,
+  mirror: Mirrors,
+): Promise<string> {
   const { version } = ver;
 
   const getProgressCallback = (progress: Progress) => {
@@ -217,7 +229,11 @@ async function download(ver: RunnableVersion): Promise<string> {
     }
   };
 
-  const zipFilePath = await electronDownload(version, {
+  return await electronDownload(version, {
+    mirrorOptions: {
+      mirror: mirror.electronMirror,
+      nightlyMirror: mirror.electronNightlyMirror,
+    },
     downloadOptions: {
       quiet: true,
       getProgressCallback,
@@ -229,8 +245,6 @@ async function download(ver: RunnableVersion): Promise<string> {
       },
     },
   });
-
-  return zipFilePath;
 }
 
 /**
