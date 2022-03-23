@@ -167,7 +167,6 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           disabled={true}
           text={highlightText(item.version, query)}
           key={item.version}
-          onClick={handleClick}
           label={getItemLabel(item)}
           icon={getItemIcon(item)}
         />
