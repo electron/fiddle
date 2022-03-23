@@ -37,6 +37,7 @@ import {
   saveLocalVersions,
 } from './versions';
 import { getUsername } from '../utils/get-username';
+import { ELECTRON_MIRROR } from './mirror-constants';
 
 /**
  * The application's state. Exported as a singleton below.
@@ -104,6 +105,14 @@ export class AppState {
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   @observable public packageAuthor =
     (localStorage.getItem('packageAuthor') as string) ?? getUsername();
+  @observable public electronMirror: typeof ELECTRON_MIRROR =
+    (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR) === null
+      ? {
+          ...ELECTRON_MIRROR,
+          sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
+        }
+      : (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR);
+
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
   @observable public readonly versions: Record<string, RunnableVersion>;
@@ -225,6 +234,7 @@ export class AppState {
     autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
     autorun(() => this.save('packageAuthor', this.packageAuthor));
+    autorun(() => this.save('electronMirror', this.electronMirror as any));
 
     // Update our known versions
     this.updateElectronVersions();
@@ -445,7 +455,7 @@ export class AppState {
   /**
    * Download a version of Electron.
    *
-   * @param {string} input
+   * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
   @action public async downloadVersion(ver: RunnableVersion) {
@@ -459,7 +469,10 @@ export class AppState {
     }
 
     console.log(`State: Downloading Electron ${version}`);
-    await setupBinary(ver);
+    await setupBinary(
+      ver,
+      this.electronMirror.sources[this.electronMirror.sourceType],
+    );
   }
 
   public hasVersion(input: string): boolean {

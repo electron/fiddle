@@ -1,0 +1,40 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MirrorSettings component renders 1`] = `
+<div>
+  <h4>
+    Electron Mirrors
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.RadioGroup
+      inline={true}
+      label="If you don't have access to Electron's GitHub releases, you can tell Fiddle to download Electron binaries from an alternate source."
+      onChange={[Function]}
+      selectedValue="DEFAULT"
+    >
+      <Blueprint3.Radio
+        label="Default"
+        value="DEFAULT"
+      />
+      <Blueprint3.Radio
+        label="China"
+        value="CHINA"
+      />
+      <Blueprint3.Radio
+        label="Custom"
+        value="CUSTOM"
+      />
+    </Blueprint3.RadioGroup>
+    <Blueprint3.InputGroup
+      disabled={true}
+      onChange={[Function]}
+      value="https://github.com/electron/electron/releases/download/"
+    />
+    <Blueprint3.InputGroup
+      disabled={true}
+      onChange={[Function]}
+      value="https://github.com/electron/nightlies/releases/download/"
+    />
+  </Blueprint3.Callout>
+</div>
+`;

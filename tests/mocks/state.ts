@@ -12,6 +12,7 @@ import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
+import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 
 export class StateMock {
   @observable public acceleratorsToBlock: BlockableAccelerator[] = [];
@@ -55,6 +56,7 @@ export class StateMock {
   @observable public versions: Record<string, RunnableVersion>;
   @observable public versionsToShow: RunnableVersion[] = [];
   @observable public packageAuthor = 'electron<electron@electron.org>';
+  @observable public electronMirror = ELECTRON_MIRROR;
   @observable public isBisectCommandShowing = false;
 
   public Bisector = new BisectorMock();
