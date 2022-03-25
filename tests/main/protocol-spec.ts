@@ -11,6 +11,7 @@ import {
   listenForProtocolHandler,
   setupProtocolHandler,
 } from '../../src/main/protocol';
+import { getOrCreateMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('fs');
@@ -175,6 +176,17 @@ describe('protocol', () => {
       handler({}, 'electron-fiddle://');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
+    });
+
+    it('focuses window when loading a fiddle', () => {
+      listenForProtocolHandler();
+
+      const mainWindow = getOrCreateMainWindow();
+      const handler = (app.on as any).mock.calls[0][1];
+
+      handler({}, 'electron-fiddle://electron/4.0.0/test/path');
+
+      expect(mainWindow.focus).toHaveBeenCalled();
     });
   });
 });
