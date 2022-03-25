@@ -180,12 +180,13 @@ describe('protocol', () => {
 
     it('focuses window when loading a fiddle', () => {
       listenForProtocolHandler();
-      getOrCreateMainWindow().blur();
+
+      const mainWindow = getOrCreateMainWindow();
       const handler = (app.on as any).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://electron/4.0.0/test/path');
 
-      expect(getOrCreateMainWindow().focus).toHaveBeenCalled();
+      expect(mainWindow.focus).toHaveBeenCalled();
     });
   });
 });
