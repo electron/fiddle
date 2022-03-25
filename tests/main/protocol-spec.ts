@@ -4,7 +4,6 @@
 
 import { app } from 'electron';
 import * as fs from 'fs';
-import { getOrCreateMainWindow } from '../../src/main/windows';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -12,6 +11,7 @@ import {
   listenForProtocolHandler,
   setupProtocolHandler,
 } from '../../src/main/protocol';
+import { getOrCreateMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('fs');
