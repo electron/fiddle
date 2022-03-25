@@ -228,25 +228,7 @@ describe('ElectronSettings component', () => {
   });
 
   describe('disableDownload()', () => {
-    it('disables download button when return value is true', () => {
-      (disableDownload as any).mockReturnValueOnce(true);
-
-      const version = '3.0.0';
-      const ver = {
-        source: VersionSource.remote,
-        state: VersionState.unknown,
-        version,
-      };
-
-      store.versions = { version: ver };
-      store.versionsToShow = [ver];
-
-      const wrapper = shallow(<ElectronSettings appState={store as any} />);
-
-      expect(wrapper.find('.disabled-version')).toHaveLength(1);
-    });
-
-    it('disables download button when return value is true', () => {
+    it('disables download buttons where return values are true', () => {
       (disableDownload as any).mockReturnValue(true);
 
       const version = '3.0.0';
