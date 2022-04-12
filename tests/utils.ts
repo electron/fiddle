@@ -16,6 +16,22 @@ export function resetPlatform() {
   });
 }
 
+const arch = process.arch;
+
+export function overrideArch(value: string) {
+  Object.defineProperty(process, 'arch', {
+    value,
+    writable: true,
+  });
+}
+
+export function resetArch() {
+  Object.defineProperty(process, 'arch', {
+    value: arch,
+    writable: true,
+  });
+}
+
 export function flushPromises() {
   return new Promise((resolve) => setImmediate(resolve));
 }

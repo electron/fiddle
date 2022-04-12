@@ -10,6 +10,9 @@ import {
 import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
+import { disableDownload } from '../../../src/utils/disable-download';
+
+jest.mock('../../../src/utils/disable-download.ts');
 
 describe('ElectronSettings component', () => {
   let store: StateMock;
@@ -221,6 +224,27 @@ describe('ElectronSettings component', () => {
         ElectronReleaseChannel.beta,
         ElectronReleaseChannel.nightly,
       ]);
+    });
+  });
+
+  describe('disableDownload()', () => {
+    it('disables download buttons where return values are true', () => {
+      (disableDownload as any).mockReturnValue(true);
+
+      const version = '3.0.0';
+      const ver = {
+        source: VersionSource.remote,
+        state: VersionState.unknown,
+        version,
+      };
+
+      store.versions = { version: ver };
+
+      store.versionsToShow = [ver, { ...ver }, { ...ver }];
+
+      const wrapper = shallow(<ElectronSettings appState={store as any} />);
+
+      expect(wrapper.find('.disabled-version')).toHaveLength(3);
     });
   });
 });

@@ -13,6 +13,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import { disableDownload } from '../../utils/disable-download';
 
 import {
   ElectronReleaseChannel,
@@ -381,6 +382,21 @@ export class ElectronSettings extends React.Component<
           position="auto"
           intent="primary"
           content={`Can't remove currently active Electron version (${version})`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip>
+      );
+    } else if (disableDownload(version)) {
+      return (
+        <Tooltip
+          position="auto"
+          intent="primary"
+          content={`Version is not available on your current OS`}
         >
           <AnchorButton
             className={'disabled-version'}

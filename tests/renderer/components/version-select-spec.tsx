@@ -14,11 +14,14 @@ import {
   renderItem,
   VersionSelect,
 } from '../../../src/renderer/components/version-select';
+import { disableDownload } from '../../../src/utils/disable-download';
 
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { downloading, ready, unknown, unzipping } = VersionState;
 const { remote, local } = VersionSource;
+
+jest.mock('../../../src/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
   let store: StateMock;
@@ -84,6 +87,38 @@ describe('VersionSelect component', () => {
       });
 
       expect(item).toBe(null);
+    });
+  });
+
+  describe('disableDownload', () => {
+    it('disables download buttons when return value is true', () => {
+      (disableDownload as any).mockReturnValueOnce(true);
+
+      const item = renderItem(mockVersion1, {
+        handleClick: () => ({}),
+        index: 0,
+        modifiers: { active: true, disabled: false, matchesPredicate: true },
+        query: '',
+      })!;
+
+      const ItemWrapper = shallow(item);
+
+      expect(ItemWrapper.find('.disabled-menu-tooltip')).toHaveLength(1);
+    });
+
+    it('does not disable enabled download buttons when return value is false', () => {
+      (disableDownload as any).mockReturnValueOnce(false);
+
+      const item = renderItem(mockVersion1, {
+        handleClick: () => ({}),
+        index: 0,
+        modifiers: { active: true, disabled: false, matchesPredicate: true },
+        query: '',
+      })!;
+
+      const ItemWrapper = shallow(item);
+
+      expect(ItemWrapper.exists('.disabled-menu-tooltip')).toBe(false);
     });
   });
 

@@ -2,14 +2,17 @@ import {
   Button,
   ButtonGroupProps,
   ContextMenu,
+  Intent,
   Menu,
   MenuItem,
+  Tooltip,
 } from '@blueprintjs/core';
 import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
+import { disableDownload } from '../../utils/disable-download';
 
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
@@ -146,6 +149,29 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
 ) => {
   if (!modifiers.matchesPredicate) {
     return null;
+  }
+
+  if (disableDownload(item.version)) {
+    return (
+      <Tooltip
+        className="disabled-menu-tooltip"
+        modifiers={{
+          flip: { enabled: false },
+          preventOverflow: { enabled: false },
+        }}
+        intent={Intent.PRIMARY}
+        content={`Version is not available on current OS`}
+      >
+        <MenuItem
+          active={modifiers.active}
+          disabled={true}
+          text={highlightText(item.version, query)}
+          key={item.version}
+          label={getItemLabel(item)}
+          icon={getItemIcon(item)}
+        />
+      </Tooltip>
+    );
   }
 
   return (
