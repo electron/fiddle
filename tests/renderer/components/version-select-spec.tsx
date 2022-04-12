@@ -91,7 +91,7 @@ describe('VersionSelect component', () => {
   });
 
   describe('disableDownload', () => {
-    it('diables download buttons when return value is true', () => {
+    it('disables download buttons when return value is true', () => {
       (disableDownload as any).mockReturnValueOnce(true);
 
       const item = renderItem(mockVersion1, {
