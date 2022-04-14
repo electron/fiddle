@@ -70,7 +70,7 @@ export class FileManager {
 
     const editorValues = {};
     const files: [string, string][] = Object.entries(
-      await readFiddle(filePath),
+      await readFiddle(filePath, true),
     );
     for (const [name, value] of files) {
       if (name === PACKAGE_NAME) {

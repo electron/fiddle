@@ -8,14 +8,21 @@ import * as path from 'path';
  * Reads a Fiddle from a directory.
  *
  * @param {string} folder
+ * @param {boolean} includePackageJson
  * @returns {Promise<EditorValues>} the loaded Fiddle
  */
-export async function readFiddle(folder: string): Promise<EditorValues> {
+export async function readFiddle(
+  folder: string,
+  includePackageJson = false,
+): Promise<EditorValues> {
   let got: EditorValues = {};
 
   try {
     const files = await fs.readdir(folder);
-    const names = files.filter((f) => isSupportedFile(f) || f === PACKAGE_NAME);
+    const names = files.filter(
+      (f) => isSupportedFile(f) || (includePackageJson && f === PACKAGE_NAME),
+    );
+
     const values = await Promise.allSettled(
       names.map((name) => fs.readFile(path.join(folder, name), 'utf8')),
     );

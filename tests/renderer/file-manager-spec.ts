@@ -59,7 +59,7 @@ describe('FileManager', () => {
       app.remoteLoader.confirmAddFile.mockResolvedValue(true);
 
       await fm.openFiddle(filePath);
-      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
       expect(app.replaceFiddle).toHaveBeenCalledWith(values, { filePath });
     });
 
@@ -79,7 +79,7 @@ describe('FileManager', () => {
 
       await fm.openFiddle(filePath);
       expect(app.remoteLoader.setElectronVersion).toBeCalledWith('17.0.0');
-      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
         filePath,
       });
@@ -100,7 +100,7 @@ describe('FileManager', () => {
       (readFiddle as jest.Mock).mockResolvedValue(values);
 
       await fm.openFiddle(filePath);
-      expect(readFiddle).toHaveBeenCalledWith(filePath);
+      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
       expect(app.state.modules.get('meaning-of-life')).toBe('*');
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
         filePath,
