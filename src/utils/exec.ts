@@ -1,4 +1,6 @@
-// Singleton: We don't want to do this more than once
+import shellEnv from 'shell-env';
+
+// Singleton: We don't want to do this more than once.
 let _shellPathCalled = false;
 
 /**
@@ -12,9 +14,8 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
   return new Promise<string>(async (resolve, reject) => {
     await maybeFixPath();
 
-    const { exec: cpExec } = await import('child_process');
-
-    cpExec(
+    const { exec } = await import('child_process');
+    exec(
       cliArgs,
       {
         cwd: dir,
@@ -39,10 +40,9 @@ export async function exec(dir: string, cliArgs: string): Promise<string> {
  */
 export async function maybeFixPath(): Promise<void> {
   if (!_shellPathCalled && process.platform !== 'win32') {
-    const shellPaths = require('shell-path');
-    const paths = await shellPaths();
-    if (paths) {
-      process.env.PATH = paths;
+    const { PATH } = await shellEnv();
+    if (PATH) {
+      process.env.PATH = PATH;
     }
   }
 

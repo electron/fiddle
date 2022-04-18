@@ -1,7 +1,7 @@
 jest.mock('child_process');
 
-const mockShellPath = jest.fn();
-jest.mock('shell-path', () => mockShellPath);
+const mockShellEnv = jest.fn();
+jest.mock('shell-env', () => mockShellEnv);
 
 describe('exec', () => {
   const oldPlatform = process.platform;
@@ -12,6 +12,7 @@ describe('exec', () => {
   beforeEach(() => {
     jest.resetModules();
     execModule = require('../../src/utils/exec');
+    mockShellEnv.mockResolvedValue({ PATH: '/some/path' });
   });
 
   afterEach(() => {
@@ -68,27 +69,27 @@ describe('exec', () => {
 
       await execModule.maybeFixPath();
 
-      expect(mockShellPath).toHaveBeenCalledTimes(0);
+      expect(mockShellEnv).toHaveBeenCalledTimes(0);
     });
 
-    it('calls shell-path on macOS', async () => {
+    it('calls shell-env on macOS', async () => {
       Object.defineProperty(process, 'platform', {
         value: 'darwin',
       });
 
       await execModule.maybeFixPath();
 
-      expect(mockShellPath).toHaveBeenCalledTimes(1);
+      expect(mockShellEnv).toHaveBeenCalledTimes(1);
     });
 
-    it('calls shell-path on Linux', async () => {
+    it('calls shell-env on Linux', async () => {
       Object.defineProperty(process, 'platform', {
         value: 'linux',
       });
 
       await execModule.maybeFixPath();
 
-      expect(mockShellPath).toHaveBeenCalledTimes(1);
+      expect(mockShellEnv).toHaveBeenCalledTimes(1);
     });
   });
 });
