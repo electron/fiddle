@@ -12,6 +12,7 @@ describe('exec', () => {
   beforeEach(() => {
     jest.resetModules();
     execModule = require('../../src/utils/exec');
+    mockShellEnv.mockResolvedValue({ PATH: '/some/path' });
   });
 
   afterEach(() => {
