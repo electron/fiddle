@@ -93,7 +93,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
             }
           }, 200)}
           popoverProps={{ minimal: true, usePortal: false, fill: true }}
-          resetOnClose={true}
+          resetOnClose={false}
           resetOnSelect={true}
         />
         <Tree contents={this.getModuleNodes()} />
