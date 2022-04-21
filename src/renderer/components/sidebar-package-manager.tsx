@@ -117,7 +117,8 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
           <div>
             <select
               style={{
-                maxWidth: 80,
+                fontSize: 10,
+                width: 60,
                 textOverflow: 'ellipsis',
               }}
               name={pkg}
