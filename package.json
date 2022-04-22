@@ -7,7 +7,6 @@
   "main": "./dist/src/main/main",
   "scripts": {
     "contributors": "node ./tools/contributors.js",
-    "less": "node ./tools/lessc.js",
     "lint:style": "stylelint  \"./src/less/*.less\" --fix",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\" --fix",
     "lint:templates": "standard \"static/**/*.js\" --fix",
