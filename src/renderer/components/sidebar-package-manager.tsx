@@ -116,11 +116,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
         secondaryLabel: (
           <div>
             <select
-              style={{
-                fontSize: 10,
-                width: 60,
-                textOverflow: 'ellipsis',
-              }}
+              className="package-tree-version-select"
               name={pkg}
               value={activeVersion}
               onChange={({ target }) =>
