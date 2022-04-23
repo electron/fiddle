@@ -18,33 +18,6 @@ const HEADERS =
       }
     : {};
 
-// 💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖
-// 💖                                                     💖
-// 💖  If you're a contributor, we'd love to say          💖
-// 💖  "thanks" on the app's credits page! Add            💖
-// 💖  your GitHub username here to have it included.     💖
-// 💖  We'll pull your details automatically from there.  💖
-// 💖                                                     💖
-// 💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖💖
-const CONTRIBUTORS_WHITELIST = [
-  'zeke',
-  'charliehess',
-  'marshallofsound',
-  'codebytere',
-  'felixrieseberg',
-  'nctl144',
-  'benicheni',
-  'hashimotoyt',
-  'ada-lovecraft',
-  'ajphukan',
-  'deermichel',
-  'erickzhao',
-  'issacgerges',
-  'ckerr',
-  'BlackHole1',
-  'Spencer17x',
-];
-
 async function maybeFetchContributors() {
   try {
     const stats = fs.statSync(CONTRIBUTORS_FILE_PATH);
@@ -127,20 +100,22 @@ function fetchContributors() {
     .then((response) => response.json())
     .then(async (data) => {
       if (data && data.forEach) {
-        data.forEach(({ html_url, url, login, avatar_url }) => {
-          if (
-            CONTRIBUTORS_WHITELIST.find(
-              (name) => name.toLowerCase() === login.toLowerCase(),
-            )
-          ) {
-            contributors.push({
-              url: html_url,
-              api: url,
-              login: login,
-              avatar: avatar_url,
-            });
-          }
-        });
+        data.forEach(
+          ({ html_url, url, login, avatar_url, type, contributions }) => {
+            if (
+              type !== 'Bot' &&
+              login !== 'electron-bot' &&
+              contributions >= 2
+            ) {
+              contributors.push({
+                url: html_url,
+                api: url,
+                login: login,
+                avatar: avatar_url,
+              });
+            }
+          },
+        );
       }
 
       return fetchDetailsContributors(contributors);
