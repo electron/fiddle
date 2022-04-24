@@ -39,9 +39,7 @@ export class Commands extends React.Component<CommandsProps> {
     return (
       <div
         className={
-          !process.env.JEST && process.platform === 'darwin'
-            ? 'commands is-mac'
-            : 'commands'
+          process.platform === 'darwin' ? 'commands is-mac' : 'commands'
         }
         onDoubleClick={this.handleDoubleClick}
       >
@@ -64,7 +62,7 @@ export class Commands extends React.Component<CommandsProps> {
             />
           </ControlGroup>
         </div>
-        {!process.env.JEST && process.platform === 'darwin' ? (
+        {process.platform === 'darwin' ? (
           <div className="title">{title}</div>
         ) : undefined}
         <div>
