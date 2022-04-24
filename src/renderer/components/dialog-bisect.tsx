@@ -1,6 +1,7 @@
 import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { RunnableVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
@@ -32,15 +33,6 @@ export class BisectDialog extends React.Component<
   constructor(props: BisectDialogProps) {
     super(props);
 
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onAuto = this.onAuto.bind(this);
-    this.onClose = this.onClose.bind(this);
-    this.onBeginSelect = this.onBeginSelect.bind(this);
-    this.onEndSelect = this.onEndSelect.bind(this);
-    this.showHelp = this.showHelp.bind(this);
-    this.isEarliestItemDisabled = this.isEarliestItemDisabled.bind(this);
-    this.isLatestItemDisabled = this.isLatestItemDisabled.bind(this);
-
     this.state = {
       allVersions: this.props.appState.versionsToShow,
       startIndex: 10,
@@ -48,11 +40,11 @@ export class BisectDialog extends React.Component<
     };
   }
 
-  public onBeginSelect(version: RunnableVersion) {
+  @bind public onBeginSelect(version: RunnableVersion) {
     this.setState({ startIndex: this.state.allVersions.indexOf(version) });
   }
 
-  public onEndSelect(version: RunnableVersion) {
+  @bind public onEndSelect(version: RunnableVersion) {
     this.setState({ endIndex: this.state.allVersions.indexOf(version) });
   }
 
@@ -68,7 +60,7 @@ export class BisectDialog extends React.Component<
    *
    * @returns {Promise<void>}
    */
-  public async onSubmit(): Promise<void> {
+  @bind public async onSubmit(): Promise<void> {
     const range = this.getBisectRange();
     if (range.length > 1) {
       const { appState } = this.props;
@@ -79,7 +71,7 @@ export class BisectDialog extends React.Component<
     }
   }
 
-  public async onAuto(): Promise<void> {
+  @bind public async onAuto(): Promise<void> {
     const range = this.getBisectRange();
     if (range.length > 1) {
       window.ElectronFiddle.app.runner.autobisect(range);
@@ -90,14 +82,14 @@ export class BisectDialog extends React.Component<
   /**
    * Closes the dialog
    */
-  public onClose() {
+  @bind public onClose() {
     this.props.appState.isBisectDialogShowing = false;
   }
 
   /**
    * Shows the additional help
    */
-  public showHelp() {
+  @bind public showHelp() {
     this.setState({ showHelp: true });
   }
 
@@ -234,7 +226,7 @@ export class BisectDialog extends React.Component<
    * @param {RunnableVersion} version
    * @returns {boolean}
    */
-  public isEarliestItemDisabled(version: RunnableVersion): boolean {
+  @bind public isEarliestItemDisabled(version: RunnableVersion): boolean {
     const { allVersions, endIndex } = this.state;
 
     // In the array, "newer" versions will have a lower index.
@@ -251,7 +243,7 @@ export class BisectDialog extends React.Component<
    * @param {RunnableVersion} version
    * @returns {boolean}
    */
-  public isLatestItemDisabled(version: RunnableVersion): boolean {
+  @bind public isLatestItemDisabled(version: RunnableVersion): boolean {
     const { allVersions, startIndex } = this.state;
 
     return allVersions.indexOf(version) > startIndex - 1;

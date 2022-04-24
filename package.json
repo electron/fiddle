@@ -43,6 +43,7 @@
     "@octokit/rest": "^16.43.1",
     "@sentry/electron": "^2.5.3",
     "@types/getos": "^3.0.1",
+    "bind-decorator": "^1.0.11",
     "classnames": "^2.2.6",
     "commander": "^7.1.0",
     "electron-default-menu": "^1.0.2",

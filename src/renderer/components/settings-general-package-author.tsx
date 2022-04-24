@@ -1,6 +1,7 @@
 import { Callout, FormGroup, InputGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { AppState } from '../state';
 
@@ -29,8 +30,6 @@ export class PackageAuthorSettings extends React.Component<
     this.state = {
       value: this.props.appState.packageAuthor,
     };
-
-    this.handlePackageAuthorChange = this.handlePackageAuthorChange.bind(this);
   }
 
   /**
@@ -38,6 +37,7 @@ export class PackageAuthorSettings extends React.Component<
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
+  @bind
   public handlePackageAuthorChange(event: React.FormEvent<HTMLInputElement>) {
     const { value } = event.currentTarget;
 

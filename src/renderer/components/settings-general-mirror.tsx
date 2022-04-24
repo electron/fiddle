@@ -1,8 +1,10 @@
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { AppState } from '../state';
 import { Callout, InputGroup, Radio, RadioGroup } from '@blueprintjs/core';
 import { FormEvent } from 'react';
+import bind from 'bind-decorator';
+
+import { AppState } from '../state';
 import { Mirrors, Sources } from '../mirror-constants';
 
 interface MirrorSettingsProps {
@@ -22,18 +24,13 @@ export class MirrorSettings extends React.Component<
   MirrorSettingsProps,
   IMirrorSettingsState
 > {
-  constructor(props: MirrorSettingsProps) {
-    super(props);
-
-    this.changeSourceType = this.changeSourceType.bind(this);
-  }
-
   private modifyMirror(isNightly: boolean, value: string) {
     this.props.appState.electronMirror.sources.CUSTOM[
       isNightly ? 'electronNightlyMirror' : 'electronMirror'
     ] = value;
   }
 
+  @bind
   private changeSourceType(e: FormEvent<HTMLInputElement>) {
     this.props.appState.electronMirror.sourceType = (e.target as HTMLInputElement)
       .value as Sources;

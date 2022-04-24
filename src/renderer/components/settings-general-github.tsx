@@ -1,6 +1,7 @@
 import { Button, Callout } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { AppState } from '../state';
 
@@ -16,12 +17,6 @@ interface GitHubSettingsProps {
  */
 @observer
 export class GitHubSettings extends React.Component<GitHubSettingsProps> {
-  constructor(props: GitHubSettingsProps) {
-    super(props);
-
-    this.signIn = this.signIn.bind(this);
-  }
-
   /**
    * Render the "logged out" settings experience.
    *
@@ -78,6 +73,7 @@ export class GitHubSettings extends React.Component<GitHubSettingsProps> {
   /**
    * Simply shows the GitHub Token dialog.``
    */
+  @bind
   private signIn() {
     this.props.appState.isTokenDialogShowing = true;
   }

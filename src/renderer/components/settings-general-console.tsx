@@ -1,6 +1,7 @@
 import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { AppState } from '../state';
 
@@ -16,18 +17,13 @@ interface ConsoleSettingsProps {
  */
 @observer
 export class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
-  constructor(props: ConsoleSettingsProps) {
-    super(props);
-
-    this.handleClearOnRunChange = this.handleClearOnRunChange.bind(this);
-  }
-
   /**
    * Handles a change on whether or not the console should be cleared
    * before fiddle is executed.
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
+  @bind
   public handleClearOnRunChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isClearingConsoleOnRun = checked;

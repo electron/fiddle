@@ -1,3 +1,5 @@
+import bind from 'bind-decorator';
+
 import {
   BisectRequest,
   ElectronReleaseChannel,
@@ -21,12 +23,12 @@ export class TaskRunner {
   private readonly appState: AppState;
   private readonly autobisect: (v: RunnableVersion[]) => Promise<RunResult>;
   private readonly done: (r: RunResult) => void;
-  private readonly hide: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly hide: (channels: ElectronReleaseChannel[]) => void;
   private readonly log: (message: string) => void;
   private readonly open: (o: SetFiddleOptions) => Promise<void>;
   private readonly run: () => Promise<RunResult>;
   private readonly setVersion: (ver: string) => Promise<void>;
-  private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly show: (channels: ElectronReleaseChannel[]) => void;
   private readonly showObsoleteVersions: (show: boolean) => void;
 
   constructor(app: App) {
@@ -34,14 +36,12 @@ export class TaskRunner {
     const ipc = ipcRendererManager;
 
     this.appState = state;
-    this.autobisect = runner.autobisect.bind(runner);
     this.done = (r: RunResult) => ipc.send(IpcEvents.TASK_DONE, r);
-    this.hide = state.hideChannels.bind(state);
+    this.hide = state.hideChannels;
     this.showObsoleteVersions = (use: boolean) =>
       (state.showObsoleteVersions = use);
-    this.log = state.pushOutput.bind(state);
-    this.open = app.openFiddle.bind(app);
-    this.run = runner.run.bind(runner);
+    this.open = app.openFiddle;
+    this.run = runner.run;
     this.setVersion = (ver) => {
       console.log('setVersion', ver);
       if (state.hasVersion(ver)) {
@@ -52,22 +52,20 @@ export class TaskRunner {
         throw new Error(`Version "${ver}" not found`);
       }
     };
-    this.show = state.showChannels.bind(state);
+    this.show = state.showChannels;
 
-    this.bisect = this.bisect.bind(this);
     let event = IpcEvents.TASK_BISECT;
     ipc.removeAllListeners(event);
     ipc.on(event, (_, r: BisectRequest) => {
       this.bisect(r);
     });
 
-    this.test = this.test.bind(this);
     event = IpcEvents.TASK_TEST;
     ipc.removeAllListeners(event);
     ipc.on(event, (_, r: TestRequest) => this.test(r));
   }
 
-  private async bisect(req: BisectRequest) {
+  @bind private async bisect(req: BisectRequest) {
     const prefix = 'Task: Bisect ';
     const { appState, log } = this;
     let result = RunResult.INVALID;
@@ -89,7 +87,7 @@ export class TaskRunner {
     this.done(result);
   }
 
-  private async test(req: TestRequest) {
+  @bind private async test(req: TestRequest) {
     let result = RunResult.INVALID;
     const { log } = this;
 

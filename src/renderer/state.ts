@@ -1,5 +1,6 @@
 import * as fs from 'fs-extra';
 import { action, autorun, computed, observable, when } from 'mobx';
+import bind from 'bind-decorator';
 
 import {
   BlockableAccelerator,
@@ -160,31 +161,6 @@ export class AppState {
   public appData: string;
 
   constructor(versions: RunnableVersion[]) {
-    // Bind all actions
-    this.downloadVersion = this.downloadVersion.bind(this);
-    this.pushError = this.pushError.bind(this);
-    this.pushOutput = this.pushOutput.bind(this);
-    this.flushOutput = this.flushOutput.bind(this);
-    this.getVersion = this.getVersion.bind(this);
-    this.hasVersion = this.hasVersion.bind(this);
-    this.removeVersion = this.removeVersion.bind(this);
-    this.setVersion = this.setVersion.bind(this);
-    this.showTour = this.showTour.bind(this);
-    this.signOutGitHub = this.signOutGitHub.bind(this);
-    this.toggleBisectCommands = this.toggleBisectCommands.bind(this);
-    this.toggleAuthDialog = this.toggleAuthDialog.bind(this);
-    this.toggleConsole = this.toggleConsole.bind(this);
-    this.clearConsole = this.clearConsole.bind(this);
-    this.toggleSettings = this.toggleSettings.bind(this);
-    this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
-    this.updateElectronVersions = this.updateElectronVersions.bind(this);
-    this.setIsQuitting = this.setIsQuitting.bind(this);
-    this.setShowMeMenu = this.setShowMeMenu.bind(this);
-    this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
-    this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
-    this.hideChannels = this.hideChannels.bind(this);
-    this.showChannels = this.showChannels.bind(this);
-
     // init fields
     this.versions = Object.fromEntries(versions.map((v) => [v.version, v]));
     this.defaultVersion = getDefaultVersion(versions);
@@ -318,7 +294,7 @@ export class AppState {
    *
    * Fails silently.
    */
-  @action public async updateElectronVersions() {
+  @bind @action public async updateElectronVersions() {
     this.isUpdatingElectronVersions = true;
 
     try {
@@ -339,13 +315,13 @@ export class AppState {
     return this.name;
   }
 
-  @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
+  @bind @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
     this.channelsToShow = this.channelsToShow.filter(
       (ch) => !channels.includes(ch),
     );
   }
 
-  @action public showChannels(channels: Array<ElectronReleaseChannel>) {
+  @bind @action public showChannels(channels: Array<ElectronReleaseChannel>) {
     const s = new Set<ElectronReleaseChannel>([
       ...this.channelsToShow,
       ...channels,
@@ -353,15 +329,15 @@ export class AppState {
     this.channelsToShow = [...s.values()];
   }
 
-  @action public toggleConsole() {
+  @bind @action public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
   }
 
-  @action public clearConsole() {
+  @bind @action public clearConsole() {
     this.output = [];
   }
 
-  @action public toggleBisectCommands() {
+  @bind @action public toggleBisectCommands() {
     // guard against hiding the commands when executing a bisect
     if (!this.Bisector && !this.isBisectDialogShowing) {
       this.isBisectCommandShowing = !this.isBisectCommandShowing;
@@ -376,15 +352,15 @@ export class AppState {
     this.isThemeDialogShowing = !this.isThemeDialogShowing;
   }
 
-  @action public toggleAuthDialog() {
+  @bind @action public toggleAuthDialog() {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toggleBisectDialog() {
+  @bind @action public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
   }
 
-  @action public toggleSettings() {
+  @bind @action public toggleSettings() {
     // We usually don't lose editor focus,
     // so you can still type. Let's force-blur.
     (document.activeElement as HTMLInputElement).blur();
@@ -392,7 +368,7 @@ export class AppState {
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
 
-  @action public setIsQuitting() {
+  @bind @action public setIsQuitting() {
     this.isQuitting = true;
   }
 
@@ -401,7 +377,7 @@ export class AppState {
     localStorage.setItem('hasShownTour', 'true');
   }
 
-  @action public showTour() {
+  @bind @action public showTour() {
     this.resetView({ isTourShowing: true });
   }
 
@@ -427,7 +403,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async removeVersion(ver: RunnableVersion) {
+  @bind @action public async removeVersion(ver: RunnableVersion) {
     const { version, state, source } = ver;
 
     if (ver === this.currentElectronVersion) {
@@ -458,7 +434,7 @@ export class AppState {
    * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
-  @action public async downloadVersion(ver: RunnableVersion) {
+  @bind @action public async downloadVersion(ver: RunnableVersion) {
     const { source, state, version } = ver;
 
     const isRemote = source === VersionSource.remote;
@@ -475,11 +451,11 @@ export class AppState {
     );
   }
 
-  public hasVersion(input: string): boolean {
+  @bind public hasVersion(input: string): boolean {
     return !!this.getVersion(input);
   }
 
-  public getVersion(input: string): RunnableVersion | null {
+  @bind public getVersion(input: string): RunnableVersion | null {
     return this.versions[normalizeVersion(input)];
   }
 
@@ -518,7 +494,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async setVersion(input: string) {
+  @bind @action public async setVersion(input: string) {
     // make sure we can  use this version
     const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
@@ -557,7 +533,7 @@ export class AppState {
    *
    * @returns {void}
    */
-  @action public signOutGitHub(): void {
+  @bind @action public signOutGitHub(): void {
     this.gitHubAvatarUrl = null;
     this.gitHubLogin = null;
     this.gitHubToken = null;
@@ -635,7 +611,7 @@ export class AppState {
    *
    * @returns {void}
    */
-  @action public flushOutput(): void {
+  @bind @action public flushOutput(): void {
     this.pushOutput('\n', { bypassBuffer: false });
   }
 
@@ -646,7 +622,7 @@ export class AppState {
    * @param {(string | Buffer)} data
    * @param {OutputOptions} options
    */
-  @action public pushOutput(
+  @bind @action public pushOutput(
     data: string | Buffer,
     options: OutputOptions = { isNotPre: false, bypassBuffer: true },
   ) {
@@ -689,17 +665,17 @@ export class AppState {
    * @param {string} message
    * @param {Error} error
    */
-  @action public pushError(message: string, error: Error) {
+  @bind @action public pushError(message: string, error: Error) {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
   }
 
-  @action public async setShowMeMenu() {
+  @bind @action public async setShowMeMenu() {
     ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
   }
 
-  @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {
+  @bind @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {
     if (!this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
       ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
@@ -708,7 +684,9 @@ export class AppState {
     }
   }
 
-  @action public async removeAcceleratorToBlock(acc: BlockableAccelerator) {
+  @bind @action public async removeAcceleratorToBlock(
+    acc: BlockableAccelerator,
+  ) {
     if (this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
         (a) => a !== acc,

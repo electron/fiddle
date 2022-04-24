@@ -1,6 +1,7 @@
 import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { VersionState } from '../../../src/interfaces';
 import { AppState } from '../state';
@@ -11,14 +12,7 @@ interface BisectHandlerProps {
 
 @observer
 export class BisectHandler extends React.Component<BisectHandlerProps> {
-  constructor(props: BisectHandlerProps) {
-    super(props);
-
-    this.continueBisect = this.continueBisect.bind(this);
-    this.terminateBisect = this.terminateBisect.bind(this);
-  }
-
-  public continueBisect(isGood: boolean) {
+  @bind public continueBisect(isGood: boolean) {
     window.ElectronFiddle.app.runner.stop();
 
     const { appState } = this.props;
@@ -50,7 +44,7 @@ export class BisectHandler extends React.Component<BisectHandlerProps> {
     }
   }
 
-  public terminateBisect() {
+  @bind public terminateBisect() {
     const { appState } = this.props;
     appState.Bisector = undefined;
   }

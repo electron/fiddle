@@ -13,6 +13,8 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
+
 import { disableDownload } from '../../utils/disable-download';
 
 import {
@@ -47,21 +49,13 @@ export class ElectronSettings extends React.Component<
   constructor(props: ElectronSettingsProps) {
     super(props);
 
-    this.handleAddVersion = this.handleAddVersion.bind(this);
-    this.handleChannelChange = this.handleChannelChange.bind(this);
-    this.handleDeleteAll = this.handleDeleteAll.bind(this);
-    this.handleDownloadAll = this.handleDownloadAll.bind(this);
-    this.handleDownloadClick = this.handleDownloadClick.bind(this);
-    this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
-    this.handleStateChange = this.handleStateChange.bind(this);
-
     this.state = {
       isDownloadingAll: false,
       isDeletingAll: false,
     };
   }
 
-  public handleDownloadClick() {
+  @bind public handleDownloadClick() {
     this.props.appState.updateElectronVersions();
   }
 
@@ -70,7 +64,7 @@ export class ElectronSettings extends React.Component<
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
-  public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
+  @bind public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
     const { appState } = this.props;
     const { checked } = event.currentTarget;
     appState.showUndownloadedVersions = checked;
@@ -81,7 +75,9 @@ export class ElectronSettings extends React.Component<
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
-  public handleShowObsoleteChange(event: React.FormEvent<HTMLInputElement>) {
+  @bind public handleShowObsoleteChange(
+    event: React.FormEvent<HTMLInputElement>,
+  ) {
     const { appState } = this.props;
     const { checked } = event.currentTarget;
     appState.showObsoleteVersions = checked;
@@ -92,7 +88,7 @@ export class ElectronSettings extends React.Component<
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
-  public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
+  @bind public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
     const { id, checked } = event.currentTarget;
     const { appState } = this.props;
 
@@ -108,7 +104,7 @@ export class ElectronSettings extends React.Component<
    *
    * @returns {Promise<void>}
    */
-  public async handleDownloadAll(): Promise<void> {
+  @bind public async handleDownloadAll(): Promise<void> {
     this.setState({ isDownloadingAll: true });
 
     const { downloadVersion, versionsToShow } = this.props.appState;
@@ -125,7 +121,7 @@ export class ElectronSettings extends React.Component<
    *
    * @returns {Promise<void>}
    */
-  public async handleDeleteAll(): Promise<void> {
+  @bind public async handleDeleteAll(): Promise<void> {
     this.setState({ isDeletingAll: true });
 
     const { versions, removeVersion } = this.props.appState;
@@ -140,7 +136,7 @@ export class ElectronSettings extends React.Component<
   /**
    * Opens the "add local version" dialog
    */
-  public handleAddVersion(): void {
+  @bind public handleAddVersion(): void {
     this.props.appState.toggleAddVersionDialog();
   }
 

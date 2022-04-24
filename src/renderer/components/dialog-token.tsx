@@ -2,6 +2,7 @@ import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { clipboard, shell } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
@@ -41,12 +42,6 @@ export class TokenDialog extends React.Component<
       error: false,
       tokenInput: '',
     };
-
-    this.onSubmitToken = this.onSubmitToken.bind(this);
-    this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
-    this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.onClose = this.onClose.bind(this);
   }
 
   /**
@@ -55,7 +50,7 @@ export class TokenDialog extends React.Component<
    * @returns {Promise<void>}
    * @memberof TokenDialog
    */
-  public async onSubmitToken(): Promise<void> {
+  @bind public async onSubmitToken(): Promise<void> {
     if (!this.state.tokenInput) return;
     this.setState({ verifying: true });
     this.props.appState.gitHubToken = this.state.tokenInput;
@@ -81,7 +76,7 @@ export class TokenDialog extends React.Component<
   /**
    * Closes the dialog
    */
-  public onClose() {
+  @bind public onClose() {
     this.props.appState.isTokenDialogShowing = false;
     this.reset();
   }
@@ -102,7 +97,7 @@ export class TokenDialog extends React.Component<
    *
    * @memberof TokenDialog
    */
-  public openGenerateTokenExternal() {
+  @bind public openGenerateTokenExternal() {
     shell.openExternal(GENERATE_TOKEN_URL);
   }
 
@@ -113,7 +108,7 @@ export class TokenDialog extends React.Component<
    * @returns
    * @memberof TokenDialog
    */
-  public onTokenInputFocused() {
+  @bind public onTokenInputFocused() {
     const text = (clipboard.readText() || '').trim();
 
     if (text.length !== 40) return;
@@ -128,7 +123,7 @@ export class TokenDialog extends React.Component<
    * @param {React.ChangeEvent<HTMLInputElement>} event
    * @memberof AddressBar
    */
-  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  @bind public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ tokenInput: event.target.value });
   }
 

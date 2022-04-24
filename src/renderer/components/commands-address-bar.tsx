@@ -3,6 +3,7 @@ import classnames from 'classnames';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
@@ -29,10 +30,6 @@ export class AddressBar extends React.Component<
 > {
   constructor(props: AddressBarProps) {
     super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleBlur = this.handleBlur.bind(this);
-    this.submit = this.submit.bind(this);
 
     const { gistId } = this.props.appState;
     const value = urlFromId(gistId);
@@ -42,8 +39,8 @@ export class AddressBar extends React.Component<
     this.state = {
       value,
       loaders: {
-        gist: remoteLoader.loadFiddleFromGist.bind(remoteLoader),
-        example: remoteLoader.loadFiddleFromElectronExample.bind(remoteLoader),
+        gist: remoteLoader.loadFiddleFromGist,
+        example: remoteLoader.loadFiddleFromElectronExample,
       },
     };
   }
@@ -54,7 +51,7 @@ export class AddressBar extends React.Component<
    *
    * @param {React.SyntheticEvent<HTMLFormElement>} event
    */
-  public handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
+  @bind public handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     this.submit();
   }
@@ -64,7 +61,7 @@ export class AddressBar extends React.Component<
    *
    * @memberof AddressBar
    */
-  public submit() {
+  @bind public submit() {
     const { remoteLoader } = window.ElectronFiddle.app;
     if (this.state.value) {
       remoteLoader.fetchGistAndLoad(
@@ -107,11 +104,11 @@ export class AddressBar extends React.Component<
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  @bind public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ value: event.target.value });
   }
 
-  public handleBlur(event: React.FocusEvent<HTMLInputElement>) {
+  @bind public handleBlur(event: React.FocusEvent<HTMLInputElement>) {
     const { gistId } = this.props.appState;
     const url = urlFromId(gistId);
 

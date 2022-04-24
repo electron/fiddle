@@ -1,5 +1,6 @@
 import { ChildProcess, spawn } from 'child_process';
 import * as path from 'path';
+import bind from 'bind-decorator';
 
 import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -31,9 +32,6 @@ export class Runner {
   public child: ChildProcess | null = null;
 
   constructor(private readonly appState: AppState) {
-    this.run = this.run.bind(this);
-    this.stop = this.stop.bind(this);
-
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_RUN);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
     ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_MAKE);
@@ -54,7 +52,9 @@ export class Runner {
    * @returns {Promise<RunResult>}
    * @memberof Runner
    */
-  public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
+  @bind public autobisect(
+    versions: Array<RunnableVersion>,
+  ): Promise<RunResult> {
     const { appState } = this;
     appState.isAutoBisecting = true;
     const done = () => (appState.isAutoBisecting = false);
@@ -142,7 +142,7 @@ export class Runner {
    * @returns {Promise<RunResult>}
    * @memberof Runner
    */
-  public async run(): Promise<RunResult> {
+  @bind public async run(): Promise<RunResult> {
     const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
@@ -194,7 +194,7 @@ export class Runner {
    *
    * @memberof Runner
    */
-  public stop(): void {
+  @bind public stop(): void {
     const child = this.child;
     this.appState.isRunning = !!child && !child.kill();
 

@@ -1,6 +1,7 @@
 import * as fs from 'fs-extra';
 import * as path from 'path';
 import semver from 'semver';
+import bind from 'bind-decorator';
 
 import { Files, FileTransform, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
@@ -15,9 +16,6 @@ import { isKnownFile } from '../utils/editor-utils';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {
-    this.openFiddle = this.openFiddle.bind(this);
-    this.saveFiddle = this.saveFiddle.bind(this);
-
     ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_FIDDLE);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_TEMPLATE);
     ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE);
@@ -62,7 +60,7 @@ export class FileManager {
    * @param {string} filePath
    * @memberof FileManager
    */
-  public async openFiddle(filePath: string) {
+  @bind public async openFiddle(filePath: string) {
     const { app } = window.ElectronFiddle;
 
     console.log(`FileManager: Asked to open`, filePath);
@@ -120,7 +118,7 @@ export class FileManager {
    * @param {...Array<FileTransform>} transforms
    * @memberof FileManager
    */
-  public async saveFiddle(
+  @bind public async saveFiddle(
     filePath?: string,
     ...transforms: Array<FileTransform>
   ) {

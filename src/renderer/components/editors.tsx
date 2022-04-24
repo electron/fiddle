@@ -8,6 +8,7 @@ import {
   MosaicWindow,
   MosaicWindowProps,
 } from 'react-mosaic-component';
+import bind from 'bind-decorator';
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
@@ -42,11 +43,6 @@ interface EditorsState {
 export class Editors extends React.Component<EditorsProps, EditorsState> {
   constructor(props: EditorsProps) {
     super(props);
-
-    this.onChange = this.onChange.bind(this);
-    this.renderEditor = this.renderEditor.bind(this);
-    this.renderTile = this.renderTile.bind(this);
-    this.setFocused = this.setFocused.bind(this);
 
     this.state = {
       monaco: window.ElectronFiddle.monaco,
@@ -198,7 +194,10 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @param {Array<MosaicBranch>} path
    * @returns {JSX.Element}
    */
-  public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
+  @bind public renderTile(
+    id: EditorId,
+    path: Array<MosaicBranch>,
+  ): JSX.Element {
     const content = this.renderEditor(id);
     const title = getEditorTitle(id as EditorId);
 
@@ -223,7 +222,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * @returns {(JSX.Element | null)}
    * @memberof Editors
    */
-  public renderEditor(id: EditorId): JSX.Element | null {
+  @bind public renderEditor(id: EditorId): JSX.Element | null {
     const { appState } = this.props;
     const { monaco } = this.state;
 
@@ -257,7 +256,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    *
    * @param {(MosaicNode<EditorId> | null)} currentNode
    */
-  public onChange(currentNode: MosaicNode<EditorId> | null) {
+  @bind public onChange(currentNode: MosaicNode<EditorId> | null) {
     this.props.appState.editorMosaic.mosaic = currentNode;
   }
 
@@ -267,7 +266,7 @@ export class Editors extends React.Component<EditorsProps, EditorsState> {
    * by the other editor windows.
    * @param {EditorId} id
    */
-  public setFocused(id: EditorId): void {
+  @bind public setFocused(id: EditorId): void {
     this.props.appState.editorMosaic.setFocusedFile(id);
     this.setState({ focused: id });
   }

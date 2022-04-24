@@ -5,8 +5,9 @@ import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import * as path from 'path';
 import * as React from 'react';
-import { getTheme, THEMES_PATH } from '../themes';
+import bind from 'bind-decorator';
 
+import { getTheme, THEMES_PATH } from '../themes';
 import { AppState } from '../state';
 import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
 
@@ -34,11 +35,6 @@ export class AddThemeDialog extends React.Component<
   constructor(props: AddThemeDialogProps) {
     super(props);
     this.state = this.resetState;
-
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onClose = this.onClose.bind(this);
-    this.onChangeFile = this.onChangeFile.bind(this);
-    this.reset = this.reset.bind(this);
   }
 
   /**
@@ -46,7 +42,7 @@ export class AddThemeDialog extends React.Component<
    *
    * @param {React.ChangeEvent<HTMLInputElement>} event
    */
-  public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
+  @bind public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
     const { files } = event.target as any;
     const file = files?.[0];
 
@@ -58,7 +54,7 @@ export class AddThemeDialog extends React.Component<
    *
    * @returns {Promise<void>}
    */
-  public async onSubmit(): Promise<void> {
+  @bind public async onSubmit(): Promise<void> {
     const { file } = this.state;
     const { appState } = this.props;
 
@@ -123,7 +119,7 @@ export class AddThemeDialog extends React.Component<
     ];
   }
 
-  public onClose() {
+  @bind public onClose() {
     this.props.appState.isThemeDialogShowing = false;
     this.reset();
   }
@@ -159,7 +155,7 @@ export class AddThemeDialog extends React.Component<
   /**
    * Reset this component's state
    */
-  private reset(): void {
+  @bind private reset(): void {
     this.setState(this.resetState);
     return;
   }

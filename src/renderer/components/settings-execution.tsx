@@ -10,6 +10,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { IPackageManager } from '../npm';
 import { AppState } from '../state';
@@ -55,14 +56,6 @@ export class ExecutionSettings extends React.Component<
         }),
       ),
     };
-
-    this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
-    this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
-      this,
-    );
-
-    this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
-    this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
   }
 
   public componentDidMount() {
@@ -92,6 +85,7 @@ export class ExecutionSettings extends React.Component<
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
+  @bind
   public handleDeleteDataChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isKeepingUserDataDirs = checked;
@@ -102,6 +96,7 @@ export class ExecutionSettings extends React.Component<
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
+  @bind
   public handleElectronLoggingChange(event: React.FormEvent<HTMLInputElement>) {
     const { checked } = event.currentTarget;
     this.props.appState.isEnablingElectronLogging = checked;
@@ -114,6 +109,7 @@ export class ExecutionSettings extends React.Component<
    * @param {React.ChangeEvent<HTMLInputElement>} event
    * @param {SettingItemType} type
    */
+  @bind
   public handleSettingsItemChange(
     event: React.ChangeEvent<HTMLInputElement>,
     type: SettingItemType,
@@ -133,6 +129,7 @@ export class ExecutionSettings extends React.Component<
    *
    * @param {SettingItemType} type
    */
+  @bind
   private addNewSettingsItem(type: SettingItemType) {
     const array = Object.entries(this.state[type]);
 

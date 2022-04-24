@@ -10,6 +10,7 @@ import { observer } from 'mobx-react';
 import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
+import bind from 'bind-decorator';
 
 import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
@@ -76,10 +77,6 @@ export class AddVersionDialog extends React.Component<
       version: '',
     };
 
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onClose = this.onClose.bind(this);
-    this.onChangeVersion = this.onChangeVersion.bind(this);
-
     ipcRendererManager.on(
       IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
       (_event, [file]) => {
@@ -104,7 +101,7 @@ export class AddVersionDialog extends React.Component<
     this.setState({ existingLocalVersion, folderPath, isValidElectron });
   }
 
-  public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
+  @bind public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
     const version = event.target.value || '';
     const isValidVersion = !!semver.valid(version);
 
@@ -119,7 +116,7 @@ export class AddVersionDialog extends React.Component<
    *
    * @returns {Promise<void>}
    */
-  public async onSubmit(): Promise<void> {
+  @bind public async onSubmit(): Promise<void> {
     const {
       folderPath,
       version,
@@ -148,7 +145,7 @@ export class AddVersionDialog extends React.Component<
   /**
    * Closes the dialog
    */
-  public onClose() {
+  @bind public onClose() {
     this.props.appState.isAddVersionDialogShowing = false;
     this.reset();
   }

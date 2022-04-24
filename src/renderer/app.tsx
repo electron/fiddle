@@ -1,5 +1,6 @@
 import { autorun, reaction, when } from 'mobx';
 import * as path from 'path';
+import bind from 'bind-decorator';
 
 import { ipcRenderer } from 'electron';
 import { ipcRendererManager } from './ipc';
@@ -32,8 +33,6 @@ export class App {
   public readonly electronTypes: ElectronTypes;
 
   constructor() {
-    this.getEditorValues = this.getEditorValues.bind(this);
-
     this.taskRunner = new TaskRunner(this);
 
     this.electronTypes = new ElectronTypes(
@@ -84,7 +83,7 @@ export class App {
    *
    * @returns {EditorValues}
    */
-  public async getEditorValues(
+  @bind public async getEditorValues(
     options?: PackageJsonOptions,
   ): Promise<EditorValues> {
     const values = this.state.editorMosaic.values();
@@ -189,7 +188,7 @@ export class App {
    *
    * @param {SetFiddleOptions} fiddle The fiddle to open
    */
-  public async openFiddle(fiddle: SetFiddleOptions) {
+  @bind public async openFiddle(fiddle: SetFiddleOptions) {
     const { filePath, gistId } = fiddle;
     if (filePath) {
       await this.fileManager.openFiddle(filePath);

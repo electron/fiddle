@@ -1,3 +1,5 @@
+import bind from 'bind-decorator';
+
 import { RunnableVersion } from '../interfaces';
 
 export class Bisector {
@@ -7,21 +9,17 @@ export class Bisector {
   private pivot: number;
 
   constructor(revList: Array<RunnableVersion>) {
-    this.getCurrentVersion = this.getCurrentVersion.bind(this);
-    this.continue = this.continue.bind(this);
-    this.calculatePivot = this.calculatePivot.bind(this);
-
     this.revList = revList;
     this.minRev = 0;
     this.maxRev = revList.length - 1;
     this.calculatePivot();
   }
 
-  public getCurrentVersion() {
+  @bind public getCurrentVersion() {
     return this.revList[this.pivot];
   }
 
-  public continue(isGoodVersion: boolean) {
+  @bind public continue(isGoodVersion: boolean) {
     let isBisectOver = false;
     if (this.maxRev - this.minRev <= 1) {
       isBisectOver = true;
@@ -53,7 +51,7 @@ export class Bisector {
     }
   }
 
-  private calculatePivot() {
+  @bind private calculatePivot() {
     this.pivot = Math.floor((this.maxRev - this.minRev) / 2);
   }
 }

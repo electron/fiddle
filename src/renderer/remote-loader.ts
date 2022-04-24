@@ -1,3 +1,5 @@
+import bind from 'bind-decorator';
+
 import {
   EditorValues,
   ElectronReleaseChannel,
@@ -14,24 +16,9 @@ import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import semver from 'semver';
 
 export class RemoteLoader {
-  constructor(private readonly appState: AppState) {
-    for (const name of [
-      'fetchExampleAndLoad',
-      'fetchGistAndLoad',
-      'getPackageVersionFromRef',
-      'handleLoadingFailed',
-      'handleLoadingSuccess',
-      'loadFiddleFromElectronExample',
-      'loadFiddleFromGist',
-      'setElectronVersion',
-      'verifyReleaseChannelEnabled',
-      'verifyRemoteLoad',
-    ]) {
-      this[name] = this[name].bind(this);
-    }
-  }
+  constructor(private readonly appState: AppState) {}
 
-  public async loadFiddleFromElectronExample(
+  @bind public async loadFiddleFromElectronExample(
     _: any,
     exampleInfo: { path: string; ref: string },
   ) {
@@ -46,7 +33,7 @@ export class RemoteLoader {
     this.fetchExampleAndLoad(ref, path);
   }
 
-  public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
+  @bind public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
     const { id } = gistInfo;
     const ok = await this.verifyRemoteLoad(`gist`);
     if (!ok) return;
@@ -54,7 +41,7 @@ export class RemoteLoader {
     this.fetchGistAndLoad(id);
   }
 
-  public async fetchExampleAndLoad(
+  @bind public async fetchExampleAndLoad(
     ref: string,
     path: string,
   ): Promise<boolean> {
@@ -108,7 +95,7 @@ export class RemoteLoader {
   /**
    * Load a fiddle
    */
-  public async fetchGistAndLoad(gistId: string): Promise<boolean> {
+  @bind public async fetchGistAndLoad(gistId: string): Promise<boolean> {
     try {
       const octo = await getOctokit(this.appState);
       const gist = await octo.gists.get({ gist_id: gistId });
@@ -165,7 +152,7 @@ export class RemoteLoader {
     }
   }
 
-  public async setElectronVersion(version: string): Promise<boolean> {
+  @bind public async setElectronVersion(version: string): Promise<boolean> {
     if (!this.appState.hasVersion(version)) {
       const versionToDownload = {
         source: VersionSource.remote,
@@ -201,7 +188,7 @@ export class RemoteLoader {
     return true;
   }
 
-  public async getPackageVersionFromRef(ref: string): Promise<string> {
+  @bind public async getPackageVersionFromRef(ref: string): Promise<string> {
     const octo = await getOctokit(this.appState);
     const { data: packageJsonData } = await octo.repos.getContents({
       owner: ELECTRON_ORG,
@@ -229,27 +216,27 @@ export class RemoteLoader {
     }
   }
 
-  public confirmAddFile = (filename: string): Promise<boolean> => {
+  @bind public confirmAddFile(filename: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
       cancel: 'Skip',
       label: `Do you want to add "${filename}"?`,
       ok: 'Add',
     });
-  };
+  }
 
   /**
    * Verifies from the user that we should be loading this fiddle.
    *
    * @param {string} what What are we loading from (gist, example, etc.)
    */
-  public verifyRemoteLoad(what: string): Promise<boolean> {
+  @bind public verifyRemoteLoad(what: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
       label: `Are you sure you want to load this ${what}? Only load and run it if you trust the source.`,
       ok: 'Load',
     });
   }
 
-  public verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
+  @bind public verifyReleaseChannelEnabled(channel: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
       label: `You're loading an example with a version of Electron with an unincluded release
               channel (${channel}). Do you want to enable the release channel to load the
@@ -265,7 +252,7 @@ export class RemoteLoader {
    * @param {string} gistId
    * @returns {Promise<boolean>}
    */
-  private async handleLoadingSuccess(
+  @bind private async handleLoadingSuccess(
     values: EditorValues,
     gistId: string,
   ): Promise<boolean> {
@@ -280,7 +267,7 @@ export class RemoteLoader {
    * @param {Error} error
    * @returns {boolean}
    */
-  private handleLoadingFailed(error: Error): false {
+  @bind private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;
     this.appState.showErrorDialog(
       this.appState.isOnline

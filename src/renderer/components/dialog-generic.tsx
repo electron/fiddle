@@ -1,6 +1,7 @@
 import { Alert, IconName, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';
@@ -18,14 +19,7 @@ interface GenericDialogProps {
  */
 @observer
 export class GenericDialog extends React.Component<GenericDialogProps> {
-  constructor(props: GenericDialogProps) {
-    super(props);
-
-    this.onClose = this.onClose.bind(this);
-    this.enterSubmit = this.enterSubmit.bind(this);
-  }
-
-  public onClose(result: boolean) {
+  @bind public onClose(result: boolean) {
     const input = document.getElementById('input') as HTMLInputElement;
 
     this.props.appState.genericDialogLastInput =
@@ -34,7 +28,7 @@ export class GenericDialog extends React.Component<GenericDialogProps> {
     this.props.appState.isGenericDialogShowing = false;
   }
 
-  public enterSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
+  @bind public enterSubmit(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === 'Enter') {
       this.onClose(true);
     }

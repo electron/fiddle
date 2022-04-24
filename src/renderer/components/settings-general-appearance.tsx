@@ -13,6 +13,7 @@ import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import { reaction } from 'mobx';
 import { shell } from 'electron';
+import bind from 'bind-decorator';
 
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
@@ -88,11 +89,6 @@ export class AppearanceSettings extends React.Component<
   public constructor(props: AppearanceSettingsProps) {
     super(props);
 
-    this.handleChange = this.handleChange.bind(this);
-    this.openThemeFolder = this.openThemeFolder.bind(this);
-    this.handleAddTheme = this.handleAddTheme.bind(this);
-    this.handleThemeSource = this.handleThemeSource.bind(this);
-
     this.state = {
       themes: [],
     };
@@ -113,9 +109,6 @@ export class AppearanceSettings extends React.Component<
         },
       );
     });
-
-    this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(this);
-    this.openThemeFolder = this.openThemeFolder.bind(this);
   }
 
   /**
@@ -124,6 +117,7 @@ export class AppearanceSettings extends React.Component<
    *
    * @param {LoadedFiddleTheme} theme
    */
+  @bind
   public handleChange(theme: LoadedFiddleTheme) {
     this.setState({ selectedTheme: theme });
     this.props.appState.setTheme(theme.file);
@@ -135,6 +129,7 @@ export class AppearanceSettings extends React.Component<
    * @returns {Promise<boolean>}
    * @memberof AppearanceSettings
    */
+  @bind
   public async createNewThemeFromCurrent(): Promise<boolean> {
     const { appState } = this.props;
     const theme = await getTheme(appState.theme);
@@ -172,6 +167,7 @@ export class AppearanceSettings extends React.Component<
    *
    * @returns {Promise<boolean>}
    */
+  @bind
   public async openThemeFolder(): Promise<boolean> {
     try {
       await fs.ensureDir(THEMES_PATH);
@@ -255,10 +251,12 @@ export class AppearanceSettings extends React.Component<
   /**
    * Opens the "add monaco theme" dialog
    */
+  @bind
   public handleAddTheme(): void {
     this.props.appState.toggleAddMonacoThemeDialog();
   }
 
+  @bind
   public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
     const { appState } = this.props;
     const { checked } = event.currentTarget;

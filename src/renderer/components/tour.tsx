@@ -1,5 +1,6 @@
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { positionForRect } from '../../utils/position-for-rect';
 
@@ -33,10 +34,6 @@ export class Tour extends React.Component<TourProps, TourState> {
   constructor(props: TourProps) {
     super(props);
 
-    this.advance = this.advance.bind(this);
-    this.stop = this.stop.bind(this);
-    this.onResize = this.onResize.bind(this);
-
     this.state = {
       tour: props.tour.entries(),
       step: null,
@@ -47,6 +44,7 @@ export class Tour extends React.Component<TourProps, TourState> {
   /**
    * Handles a resize of the window.
    */
+  @bind
   public onResize() {
     if (!this.resizeHandle) {
       this.resizeHandle = window.setTimeout(() => {
@@ -73,6 +71,7 @@ export class Tour extends React.Component<TourProps, TourState> {
   /**
    * Moves the tour to the next step
    */
+  @bind
   public advance() {
     const { done, value } = this.state.tour.next();
     const step = done ? null : value[0];
@@ -83,6 +82,7 @@ export class Tour extends React.Component<TourProps, TourState> {
   /**
    * Stops the tour
    */
+  @bind
   public stop() {
     this.props.onStop();
   }

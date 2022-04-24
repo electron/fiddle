@@ -1,6 +1,7 @@
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { AppState } from '../state';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
@@ -187,9 +188,6 @@ export class WelcomeTour extends React.Component<
   constructor(props: WelcomeTourProps) {
     super(props);
 
-    this.stopTour = this.stopTour.bind(this);
-    this.startTour = this.startTour.bind(this);
-
     this.state = {
       isTourStarted: false,
     };
@@ -198,14 +196,14 @@ export class WelcomeTour extends React.Component<
   /**
    * Stops the tour, closing it.
    */
-  public stopTour() {
+  @bind public stopTour() {
     this.props.appState.disableTour();
   }
 
   /**
    * Starts the tour.
    */
-  public startTour() {
+  @bind public startTour() {
     this.setState({ isTourStarted: true });
   }
 

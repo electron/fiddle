@@ -12,6 +12,8 @@ import { observer } from 'mobx-react';
 import * as React from 'react';
 import { clipboard } from 'electron';
 import { when } from 'mobx';
+import bind from 'bind-decorator';
+
 import {
   EditorValues,
   GistActionState,
@@ -47,10 +49,6 @@ export class GistActionButton extends React.Component<
 > {
   public constructor(props: GistActionButtonProps) {
     super(props);
-    this.handleClick = this.handleClick.bind(this);
-    this.performGistAction = this.performGistAction.bind(this);
-    this.setPrivate = this.setPrivate.bind(this);
-    this.setPublic = this.setPublic.bind(this);
 
     this.state = {
       isUpdating: false,
@@ -85,7 +83,7 @@ export class GistActionButton extends React.Component<
    * @returns {Promise<void>}
    * @memberof GistActionButton
    */
-  public async handleClick(): Promise<void> {
+  @bind public async handleClick(): Promise<void> {
     const { appState } = this.props;
 
     if (!appState.gitHubToken) {
@@ -262,7 +260,7 @@ export class GistActionButton extends React.Component<
    * Connect with GitHub, perform a publish/update/delete action,
    * and update all related properties in the app state.
    */
-  public async performGistAction(): Promise<void> {
+  @bind public async performGistAction(): Promise<void> {
     const { gistId } = this.props.appState;
 
     const actionType = gistId ? this.state.actionType : GistActionType.publish;
@@ -284,7 +282,7 @@ export class GistActionButton extends React.Component<
    *
    * @memberof GistActionButton
    */
-  public setPrivate() {
+  @bind public setPrivate() {
     this.setPrivacy(false);
   }
 
@@ -293,7 +291,7 @@ export class GistActionButton extends React.Component<
    *
    * @memberof GistActionButton
    */
-  public setPublic() {
+  @bind public setPublic() {
     this.setPrivacy(true);
   }
 

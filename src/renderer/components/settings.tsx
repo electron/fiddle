@@ -1,6 +1,7 @@
 import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import bind from 'bind-decorator';
 
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
@@ -46,8 +47,6 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
       section: SettingsSections.General,
       hasPopoverOpen: false,
     };
-
-    this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
   }
 
   public componentDidMount() {
@@ -163,6 +162,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
    *
    * @param {KeyboardEvent} event
    */
+  @bind
   private closeSettingsPanel(event: KeyboardEvent) {
     const { appState } = this.props;
     if (event.code === 'Escape' && !this.state.hasPopoverOpen) {

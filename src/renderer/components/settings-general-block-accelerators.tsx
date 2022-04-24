@@ -1,8 +1,9 @@
 import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { BlockableAccelerator } from '../../interfaces';
+import bind from 'bind-decorator';
 
+import { BlockableAccelerator } from '../../interfaces';
 import { AppState } from '../state';
 
 interface BlockAcceleratorsSettingsProps {
@@ -17,21 +18,13 @@ interface BlockAcceleratorsSettingsProps {
  */
 @observer
 export class BlockAcceleratorsSettings extends React.Component<BlockAcceleratorsSettingsProps> {
-  constructor(props: BlockAcceleratorsSettingsProps) {
-    super(props);
-
-    this.handleBlockAcceleratorChange = this.handleBlockAcceleratorChange.bind(
-      this,
-    );
-  }
-
   /**
    * Handles a change on whether a keyboard shortcut should be blocked
    * before fiddle is executed.
    *
    * @param {React.FormEvent<HTMLInputElement>} event
    */
-  public handleBlockAcceleratorChange(
+  @bind public handleBlockAcceleratorChange(
     event: React.FormEvent<HTMLInputElement>,
   ) {
     const { checked, value } = event.currentTarget;
