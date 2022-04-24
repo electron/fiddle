@@ -12,12 +12,24 @@ describe('disableDownload', () => {
     resetArch();
   });
 
-  it('always return false when the system is windows', () => {
+  it('always return false when the system is windows and the arch is not arm64', () => {
     overridePlatform('win32');
+    overrideArch('x64');
 
-    expect(disableDownload('10.0.0')).toBe(false);
-    expect(disableDownload('11.0.0')).toBe(false);
-    expect(disableDownload('12.0.0')).toBe(false);
+    expect(disableDownload('6.0.0')).toBe(false);
+    expect(disableDownload('6.0.8')).toBe(false);
+    expect(disableDownload('7.0.0')).toBe(false);
+    expect(disableDownload('8.0.0')).toBe(false);
+  });
+
+  it('returns true if the system is windows and the arch is arm64', () => {
+    overridePlatform('win32');
+    overrideArch('arm64');
+
+    expect(disableDownload('6.0.0')).toBe(true);
+    expect(disableDownload('6.0.8')).toBe(false);
+    expect(disableDownload('7.0.0')).toBe(false);
+    expect(disableDownload('8.0.0')).toBe(false);
   });
 
   it('always return false when the system is linux', () => {
