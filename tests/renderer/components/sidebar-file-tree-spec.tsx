@@ -44,7 +44,7 @@ describe('SidebarFileTree component', () => {
 
   it('can bring up the Add File input', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: SidebarFileTree = wrapper.instance() as any;
+    const instance: typeofSidebarFileTree = wrapper.instance() as any;
 
     instance.setState({ action: 'add' });
 

@@ -18,54 +18,57 @@ interface IPackageAuthorSettingsState {
  * @class PackageAuthorSettings
  * @extends {React.Component<PackageAuthorSettingsProps, IPackageAuthorSettingsState>}
  */
-@observer
-export class PackageAuthorSettings extends React.Component<
-  PackageAuthorSettingsProps,
-  IPackageAuthorSettingsState
-> {
-  constructor(props: PackageAuthorSettingsProps) {
-    super(props);
+export const PackageAuthorSettings = observer(
+  class PackageAuthorSettings extends React.Component<
+    PackageAuthorSettingsProps,
+    IPackageAuthorSettingsState
+  > {
+    constructor(props: PackageAuthorSettingsProps) {
+      super(props);
 
-    this.state = {
-      value: this.props.appState.packageAuthor,
-    };
+      this.state = {
+        value: this.props.appState.packageAuthor,
+      };
 
-    this.handlePackageAuthorChange = this.handlePackageAuthorChange.bind(this);
-  }
+      this.handlePackageAuthorChange = this.handlePackageAuthorChange.bind(
+        this,
+      );
+    }
 
-  /**
-   * Set the author information in package.json when processing uploads to gist
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
-   */
-  public handlePackageAuthorChange(event: React.FormEvent<HTMLInputElement>) {
-    const { value } = event.currentTarget;
+    /**
+     * Set the author information in package.json when processing uploads to gist
+     *
+     * @param {React.ChangeEvent<HTMLInputElement>} event
+     */
+    public handlePackageAuthorChange(event: React.FormEvent<HTMLInputElement>) {
+      const { value } = event.currentTarget;
 
-    this.setState({
-      value,
-    });
+      this.setState({
+        value,
+      });
 
-    this.props.appState.packageAuthor = value;
-  }
+      this.props.appState.packageAuthor = value;
+    }
 
-  public render() {
-    const packageAuthorLabel =
-      'Set the package.json author field for your exported Fiddle projects.';
+    public render() {
+      const packageAuthorLabel =
+        'Set the package.json author field for your exported Fiddle projects.';
 
-    return (
-      <div>
-        <h4>Package Author</h4>
-        <Callout>
-          <FormGroup label={packageAuthorLabel}>
-            <InputGroup
-              value={this.state.value}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                this.handlePackageAuthorChange(e)
-              }
-            />
-          </FormGroup>
-        </Callout>
-      </div>
-    );
-  }
-}
+      return (
+        <div>
+          <h4>Package Author</h4>
+          <Callout>
+            <FormGroup label={packageAuthorLabel}>
+              <InputGroup
+                value={this.state.value}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  this.handlePackageAuthorChange(e)
+                }
+              />
+            </FormGroup>
+          </Callout>
+        </div>
+      );
+    }
+  },
+);

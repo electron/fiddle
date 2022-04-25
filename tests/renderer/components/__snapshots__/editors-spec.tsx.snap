@@ -901,23 +901,6 @@ exports[`Editors component renders a toolbar 1`] = `
       appState={
         Object {
           "editorMosaic": Object {
-            "backups": Object {
-              "index.html": Object {
-                "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
-              },
-              "main.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
-              },
-              "preload.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
-              },
-              "renderer.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
-              },
-              "styles.css": Object {
-                "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
-              },
-            },
             "layoutDebounce": 25,
             "mosaic": Object {
               "direction": "row",
@@ -945,23 +928,6 @@ exports[`Editors component renders a toolbar 1`] = `
       appState={
         Object {
           "editorMosaic": Object {
-            "backups": Object {
-              "index.html": Object {
-                "model": "{\\"language\\":\\"html\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"<!-- index.html -->\\"}",
-              },
-              "main.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// main.js\\"}",
-              },
-              "preload.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// preload.js\\"}",
-              },
-              "renderer.js": Object {
-                "model": "{\\"language\\":\\"javascript\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"// renderer.js\\"}",
-              },
-              "styles.css": Object {
-                "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
-              },
-            },
             "layoutDebounce": 25,
             "mosaic": Object {
               "direction": "row",

@@ -22,63 +22,57 @@ interface CommandsProps {
  * @class Commands
  * @extends {React.Component<CommandsProps>}
  */
-@observer
-export class Commands extends React.Component<CommandsProps> {
-  constructor(props: CommandsProps) {
-    super(props);
-  }
-
-  private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target['tagName'] !== 'INPUT') {
-      ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+export const Commands = observer(
+  class Commands extends React.Component<CommandsProps> {
+    constructor(props: CommandsProps) {
+      super(props);
     }
-  };
 
-  public render() {
-    const { appState } = this.props;
-    const { isBisectCommandShowing, title } = appState;
+    private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+      if (e.target['tagName'] !== 'INPUT') {
+        ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+      }
+    };
 
-    return (
-      <div
-        className={
-          process.platform === 'darwin' ? 'commands is-mac' : 'commands'
-        }
-        onDoubleClick={this.handleDoubleClick}
-      >
-        <div>
-          <ControlGroup fill={true} vertical={false}>
-            <Button
-              icon="cog"
-              title="Setting"
-              onClick={appState.toggleSettings}
-            />
-          </ControlGroup>
-          <ControlGroup fill={true} vertical={false}>
-            <VersionChooser appState={appState} />
-            <Runner appState={appState} />
-          </ControlGroup>
-          {isBisectCommandShowing && (
+    public render() {
+      const { appState } = this.props;
+      const { isBisectCommandShowing, title } = appState;
+
+      return (
+        <div
+          className={
+            process.platform === 'darwin' ? 'commands is-mac' : 'commands'
+          }
+          onDoubleClick={this.handleDoubleClick}
+        >
+          <div>
             <ControlGroup fill={true} vertical={false}>
-              <BisectHandler appState={appState} />
+              <VersionChooser appState={appState} />
+              <Runner appState={appState} />
             </ControlGroup>
-          )}
-          <ControlGroup fill={true} vertical={false}>
-            <Button
-              active={appState.isConsoleShowing}
-              icon="console"
-              text="Console"
-              onClick={appState.toggleConsole}
-            />
-          </ControlGroup>
+            {isBisectCommandShowing && (
+              <ControlGroup fill={true} vertical={false}>
+                <BisectHandler appState={appState} />
+              </ControlGroup>
+            )}
+            <ControlGroup fill={true} vertical={false}>
+              <Button
+                active={appState.isConsoleShowing}
+                icon="console"
+                text="Console"
+                onClick={appState.toggleConsole}
+              />
+            </ControlGroup>
+          </div>
+          {process.platform === 'darwin' ? (
+            <div className="title">{title}</div>
+          ) : undefined}
+          <div>
+            <AddressBar appState={appState} />
+            <GistActionButton appState={appState} />
+          </div>
         </div>
-        {process.platform === 'darwin' ? (
-          <div className="title">{title}</div>
-        ) : undefined}
-        <div>
-          <AddressBar appState={appState} />
-          <GistActionButton appState={appState} />
-        </div>
-      </div>
-    );
-  }
-}
+      );
+    }
+  },
+);
