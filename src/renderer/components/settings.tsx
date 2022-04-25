@@ -130,7 +130,7 @@ export class Settings extends React.Component<SettingsProps, SettingsState> {
         </div>
         <div className="settings-content">
           <div className="settings-close" onClick={appState.toggleSettings}>
-            <Icon icon="cross" />
+            <Icon icon="cross" iconSize={25} />
           </div>
           {this.renderContent()}
         </div>

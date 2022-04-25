@@ -66,6 +66,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
   </div>
@@ -138,6 +139,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
     <settings-credits
@@ -217,6 +219,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
     <settings-electron
@@ -296,6 +299,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
     <settings-general
@@ -376,6 +380,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
     <ExecutionSettings
@@ -455,6 +460,7 @@ exports[`Settings component renders the General page after a click 1`] = `
     >
       <Blueprint3.Icon
         icon="cross"
+        iconSize={25}
       />
     </div>
     <settings-general
