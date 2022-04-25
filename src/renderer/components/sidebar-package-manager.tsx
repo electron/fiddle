@@ -162,9 +162,10 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
             firstMatch.name,
             Object.keys(firstMatch.versions),
           );
-          this.setState((prevState) => ({
-            versionsCache: new Map(prevState.versionsCache),
-          }));
+          // React won't re-render when we're adding
+          // elements to an ES6 Map element. Trigger
+          // the re-render manually.
+          this.forceUpdate();
         }
       }
     }
