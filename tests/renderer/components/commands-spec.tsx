@@ -7,6 +7,7 @@ import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { IpcEvents } from '../../../src/ipc-events';
 
 import { StateMock } from '../../mocks/mocks';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
@@ -28,10 +29,22 @@ describe('Commands component', () => {
   let store: StateMock;
 
   beforeEach(() => {
+    overridePlatform('linux');
     ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
-  it('renders', () => {
+  afterEach(() => {
+    resetPlatform();
+  });
+
+  it('renders when system is darwin', () => {
+    overridePlatform('darwin');
+    const wrapper = shallow(<Commands appState={store as any} />);
+    expect(wrapper).toMatchSnapshot();
+  });
+
+  it('renders when system not is darwin', () => {
+    overridePlatform('win32');
     const wrapper = shallow(<Commands appState={store as any} />);
     expect(wrapper).toMatchSnapshot();
   });
