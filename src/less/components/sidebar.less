@@ -20,3 +20,33 @@
 .pointer {
   cursor: pointer;
 }
+
+.package-manager-result {
+  em {
+    font-weight: bold;
+  }
+}
+
+.package-tree {
+  .bp3-tree-node-content {
+    .bp3-tree-node-secondary-label {
+      min-width: 100px;
+    }
+  }
+
+  .bp3-tree-node-list {
+    margin: 5px 0;
+  }
+}
+
+.package-tree-version-select {
+  font-size: 10px;
+  width: 60px;
+  text-overflow: 'ellipsis';
+  background: @background-1;
+  color: @dark-gray1;
+
+  .bp3-dark & {
+    color: @white;
+  }
+}

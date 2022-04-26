@@ -4,49 +4,68 @@ exports[`SidebarPackageManager component can add a package 1`] = `
 Array [
   Array [
     "cow",
-    "*",
+    "1.0.0",
   ],
   Array [
     "say",
-    "*",
+    "2.0.0",
   ],
 ]
 `;
 
 exports[`SidebarPackageManager component renders 1`] = `
-<Blueprint3.Tree
-  contents={
-    Array [
+<div
+  className="package-tree"
+>
+  <h5>
+    Modules
+  </h5>
+  <Blueprint3.Suggest
+    closeOnSelect={true}
+    fill={true}
+    inputValueRenderer={[Function]}
+    itemRenderer={[Function]}
+    items={Array []}
+    noResults={
+      <em>
+        Search for modules here...
+      </em>
+    }
+    onItemSelect={[Function]}
+    onQueryChange={[Function]}
+    openOnKeyDown={false}
+    popoverProps={
       Object {
-        "childNodes": Array [
-          Object {
-            "id": "-1",
-            "label": <Blueprint3.InputGroup
-              fill={true}
-              leftIcon="search"
+        "fill": true,
+        "minimal": true,
+        "usePortal": false,
+      }
+    }
+    resetOnClose={false}
+    resetOnSelect={true}
+  />
+  <Blueprint3.Tree
+    contents={
+      Array [
+        Object {
+          "id": "cow",
+          "label": "cow",
+          "secondaryLabel": <div>
+            <select
+              className="package-tree-version-select"
+              name="cow"
               onChange={[Function]}
-              onKeyPress={[Function]}
-              placeholder="Add package"
-              value=""
-            />,
-          },
-          Object {
-            "id": "cow",
-            "label": "cow",
-            "secondaryLabel": <Blueprint3.Button
+              value="1.0.0"
+            />
+            <Blueprint3.Button
               icon="remove"
               minimal={true}
               onClick={[Function]}
-            />,
-          },
-        ],
-        "hasCaret": false,
-        "icon": "code-block",
-        "id": "modules",
-        "isExpanded": true,
-        "label": "Modules",
-      },
-    ]
-  }
-/>
+            />
+          </div>,
+        },
+      ]
+    }
+  />
+</div>
 `;
