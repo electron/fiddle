@@ -177,6 +177,23 @@ describe('versions', () => {
       expect(result).toEqual(expected);
       expect(window.localStorage.setItem).toHaveBeenCalled();
     });
+
+    it('fetches versions < 0.24.0', async () => {
+      const fetchMock = new FetchMock();
+      const url = 'https://releases.electronjs.org/releases.json';
+      fetchMock.add(
+        url,
+        JSON.stringify([
+          {
+            version: '0.23.0',
+          },
+        ]),
+      );
+
+      const result = await fetchVersions();
+
+      expect(result).toHaveLength(0);
+    });
   });
 
   describe('getOldestSupportedMajor()', () => {
