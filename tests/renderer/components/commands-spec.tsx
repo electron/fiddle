@@ -63,9 +63,21 @@ describe('Commands component', () => {
     const wrapper = shallow(<Commands appState={store as any} />);
     const instance = wrapper.instance() as any;
 
-    instance.handleDoubleClick();
+    instance.handleDoubleClick({ target: {} });
 
     expect(spy).toHaveBeenCalledWith(IpcEvents.CLICK_TITLEBAR_MAC);
+    spy.mockRestore();
+  });
+
+  it('handleDoubleClick() should not handle input tag', () => {
+    const spy = jest.spyOn(ipcRendererManager, 'send');
+
+    const wrapper = shallow(<Commands appState={store as any} />);
+    const instance = wrapper.instance() as any;
+
+    instance.handleDoubleClick({ target: { tagName: 'INPUT' } });
+
+    expect(spy).toHaveBeenCalledTimes(0);
     spy.mockRestore();
   });
 
