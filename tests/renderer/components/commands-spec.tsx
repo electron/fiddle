@@ -8,6 +8,7 @@ import { IpcEvents } from '../../../src/ipc-events';
 
 import { StateMock } from '../../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../../utils';
+import { Button, ControlGroup } from '@blueprintjs/core';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
@@ -66,5 +67,13 @@ describe('Commands component', () => {
 
     expect(spy).toHaveBeenCalledWith(IpcEvents.CLICK_TITLEBAR_MAC);
     spy.mockRestore();
+  });
+
+  it('show setting', () => {
+    const wrapper = shallow(<Commands appState={store as any} />);
+
+    wrapper.find(ControlGroup).at(0).find(Button).simulate('click');
+
+    expect(store.toggleSettings).toHaveBeenCalled();
   });
 });
