@@ -92,6 +92,7 @@ export class StateMock {
   public signOutGitHub = jest.fn();
   public toggleAddVersionDialog = jest.fn();
   public toggleAuthDialog = jest.fn();
+  public toggleSettings = jest.fn();
   public updateElectronVersions = jest.fn();
 
   constructor() {
