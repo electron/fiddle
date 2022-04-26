@@ -308,6 +308,11 @@ describe('Runner component', () => {
       const spy = jest.spyOn(store, 'setVersion');
       instance.run = jest.fn().mockImplementation(() => {
         // test succeeds iff version <= LAST_GOOD
+        if (typeof store.version !== 'string') {
+          throw new Error(
+            'Need to pass version string into this implementation!',
+          );
+        }
         return semver.compare(store.version, LAST_GOOD) <= 0
           ? RunResult.SUCCESS
           : RunResult.FAILURE;
