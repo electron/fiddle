@@ -10,6 +10,16 @@ exports[`Commands component renders when system is darwin 1`] = `
       fill={true}
       vertical={false}
     >
+      <Blueprint3.Button
+        icon="cog"
+        onClick={[MockFunction]}
+        title="Setting"
+      />
+    </Blueprint3.ControlGroup>
+    <Blueprint3.ControlGroup
+      fill={true}
+      vertical={false}
+    >
       <version-chooser
         appState={"default StateMock"}
       />
