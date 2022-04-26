@@ -29,39 +29,40 @@ exports[`CreditsSettings component renders 1`] = `
   >
     <Blueprint3.Card
       className="contributor"
-      elevation={0}
+      elevation={2}
       interactive={true}
       key="felixrieseberg"
       onClick={[Function]}
     >
       <div
-        className="avatar"
-        style={
-          Object {
-            "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
-          }
-        }
-      />
-      <div
-        className="details"
+        className="header"
       >
-        <h5
-          className="name"
+        <img
+          alt="avatar"
+          className="avatar"
+          src="https://avatars3.githubusercontent.com/u/1426799?v=4"
+        />
+        <div
+          className="info"
         >
-          Felix Rieseberg
-        </h5>
-        <p
-          className="location"
-        >
-          📍 
-          San Francisco
-        </p>
-        <small
-          className="bio"
-        >
-          🙇 ✨🌳 
-        </small>
+          <p
+            className="name"
+          >
+            Felix Rieseberg
+          </p>
+          <p
+            className="location"
+          >
+            📍 
+            San Francisco
+          </p>
+        </div>
       </div>
+      <p
+        className="bio"
+      >
+        🙇 ✨🌳 
+      </p>
     </Blueprint3.Card>
   </div>
 </div>
@@ -81,27 +82,28 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
   >
     <Blueprint3.Card
       className="contributor"
-      elevation={0}
+      elevation={2}
       interactive={true}
       key="felixrieseberg"
       onClick={[Function]}
     >
       <div
-        className="avatar"
-        style={
-          Object {
-            "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
-          }
-        }
-      />
-      <div
-        className="details"
+        className="header"
       >
-        <h5
-          className="name"
+        <img
+          alt="avatar"
+          className="avatar"
+          src="https://avatars3.githubusercontent.com/u/1426799?v=4"
+        />
+        <div
+          className="info"
         >
-          felixrieseberg
-        </h5>
+          <p
+            className="name"
+          >
+            felixrieseberg
+          </p>
+        </div>
       </div>
     </Blueprint3.Card>
   </div>
