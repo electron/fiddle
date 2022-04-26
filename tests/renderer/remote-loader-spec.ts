@@ -18,7 +18,7 @@ type GistFile = { content: string };
 type GistFiles = { [id: string]: GistFile };
 
 describe('RemoteLoader', () => {
-  let instance: RemoteLoader;
+  let instance: any;
   let app: AppMock;
   let store: StateMock;
   let mockGistFiles: GistFiles;

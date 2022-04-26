@@ -46,7 +46,7 @@ describe('CreditsSettings component', () => {
     });
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
-    const instance: CreditsSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     await instance.getContributors();
 
     expect(wrapper).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('CreditsSettings component', () => {
     });
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
-    const instance: CreditsSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     await instance.getContributors();
 
     expect(wrapper).toMatchSnapshot();
@@ -70,7 +70,7 @@ describe('CreditsSettings component', () => {
     });
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
-    const instance: CreditsSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     await instance.getContributors();
 
     expect(wrapper).toMatchSnapshot();
@@ -82,7 +82,7 @@ describe('CreditsSettings component', () => {
     });
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
-    const instance: CreditsSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     await instance.getContributors();
 
     expect(wrapper).toMatchSnapshot();
@@ -94,7 +94,7 @@ describe('CreditsSettings component', () => {
     });
 
     const wrapper = shallow(<CreditsSettings appState={store} />);
-    const instance: CreditsSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     await instance.getContributors();
 
     wrapper.find('.contributor').simulate('click');

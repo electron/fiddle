@@ -44,7 +44,7 @@ describe('SidebarFileTree component', () => {
 
   it('can bring up the Add File input', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: typeofSidebarFileTree = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.setState({ action: 'add' });
 
@@ -54,7 +54,7 @@ describe('SidebarFileTree component', () => {
 
   it('can toggle editor visibility', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: SidebarFileTree = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.toggleVisibility('index.html');
 
@@ -63,7 +63,7 @@ describe('SidebarFileTree component', () => {
 
   it('can create new editors', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: SidebarFileTree = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     expect(editorMosaic.files.get('tester.js')).toBe(undefined);
     instance.createEditor('tester.js');
@@ -72,7 +72,7 @@ describe('SidebarFileTree component', () => {
 
   it('can delete editors', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: SidebarFileTree = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Pending);
     instance.removeEditor('index.html');
@@ -81,7 +81,7 @@ describe('SidebarFileTree component', () => {
 
   it('can reset the editor layout', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
-    const instance: SidebarFileTree = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     editorMosaic.resetLayout = jest.fn();
 
@@ -93,8 +93,8 @@ describe('SidebarFileTree component', () => {
   it('file is visible, click files tree, focus file content', async () => {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(<Editors appState={stateMock as any} />);
-    const sidebarFileTreeInstance: SidebarFileTree = sidebarFileTree.instance() as any;
-    const editorsInstance: Editors = editors.instance() as any;
+    const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
+    const editorsInstance: any = editors.instance() as any;
 
     sidebarFileTreeInstance.setFocusedFile('index.html');
 
@@ -107,8 +107,8 @@ describe('SidebarFileTree component', () => {
   it('file is hidden, click files tree, make file visible and focus file content', function () {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(<Editors appState={stateMock as any} />);
-    const sidebarFileTreeInstance: SidebarFileTree = sidebarFileTree.instance() as any;
-    const editorsInstance: Editors = editors.instance() as any;
+    const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
+    const editorsInstance: any = editors.instance() as any;
 
     sidebarFileTreeInstance.toggleVisibility('index.html');
 

@@ -38,7 +38,7 @@ jest.mock('path');
 describe('Runner component', () => {
   let mockChild: ChildProcessMock;
   let store: StateMock;
-  let instance: Runner;
+  let instance: any;
   let fileManager: FileManagerMock;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];

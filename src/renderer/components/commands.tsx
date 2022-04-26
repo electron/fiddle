@@ -47,6 +47,13 @@ export const Commands = observer(
         >
           <div>
             <ControlGroup fill={true} vertical={false}>
+              <Button
+                icon="cog"
+                title="Setting"
+                onClick={appState.toggleSettings}
+              />
+            </ControlGroup>
+            <ControlGroup fill={true} vertical={false}>
               <VersionChooser appState={appState} />
               <Runner appState={appState} />
             </ControlGroup>

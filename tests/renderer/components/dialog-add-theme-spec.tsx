@@ -46,7 +46,7 @@ describe('AddThemeDialog component', () => {
   describe('createNewThemeFromMonaco()', () => {
     it('handles invalid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
-      const instance: AddThemeDialog = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       try {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
@@ -60,7 +60,7 @@ describe('AddThemeDialog component', () => {
 
     it('handles valid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
-      const instance: AddThemeDialog = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       wrapper.setState({ file: '/test/file' });
 
       (fs.outputJSON as jest.Mock).mockResolvedValue({});
@@ -89,7 +89,7 @@ describe('AddThemeDialog component', () => {
   describe('onSubmit()', () => {
     it('does nothing if there is no file currently set', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
-      const instance: AddThemeDialog = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       instance.createNewThemeFromMonaco = jest.fn();
       instance.onClose = jest.fn();
@@ -103,7 +103,7 @@ describe('AddThemeDialog component', () => {
 
     it('loads a theme if a file is currently set', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
-      const instance: AddThemeDialog = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       wrapper.setState({ file: '/test/file' });
 
@@ -122,7 +122,7 @@ describe('AddThemeDialog component', () => {
     it('shows an error dialog for a malformed theme', async () => {
       store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
       const wrapper = shallow(<AddThemeDialog appState={store as any} />);
-      const instance: AddThemeDialog = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       wrapper.setState({ file: '/test/file' });
 

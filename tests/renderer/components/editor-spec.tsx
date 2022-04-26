@@ -28,8 +28,8 @@ describe('Editor component', () => {
         setFocused={() => undefined}
       />,
     );
-    const instance = wrapper.instance();
-    return { wrapper, instance: instance as any };
+    const instance: any = wrapper.instance();
+    return { wrapper, instance };
   }
 
   it('renders the editor container', () => {

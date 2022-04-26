@@ -33,7 +33,7 @@ describe('Header component', () => {
 
   it('renders the tour once started', () => {
     const wrapper = shallow(<WelcomeTour appState={store as any} />);
-    const instance: WelcomeTour = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.startTour();
 
@@ -43,7 +43,7 @@ describe('Header component', () => {
 
   it('stops the tour on stopTour()', () => {
     const wrapper = shallow(<WelcomeTour appState={store as any} />);
-    const instance: WelcomeTour = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.stopTour();
 

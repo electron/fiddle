@@ -31,7 +31,7 @@ describe('AddressBar component', () => {
 
   it('handles change', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
-    const instance: AddressBar = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     instance.handleChange({ target: { value: 'hi' } } as any);
 
     expect(wrapper.state('value')).toBe('hi');
@@ -48,7 +48,7 @@ describe('AddressBar component', () => {
   it('handles submit', () => {
     const preventDefault = jest.fn();
     const wrapper = shallow(<AddressBar appState={store as any} />);
-    const instance: AddressBar = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     wrapper.find('form').simulate('submit', { preventDefault });
