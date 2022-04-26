@@ -28,8 +28,10 @@ export class Commands extends React.Component<CommandsProps> {
     super(props);
   }
 
-  private handleDoubleClick = () => {
-    ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+  private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target['tagName'] !== 'INPUT') {
+      ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+    }
   };
 
   public render() {
