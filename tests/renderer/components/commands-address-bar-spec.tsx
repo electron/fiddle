@@ -31,7 +31,7 @@ describe('AddressBar component', () => {
 
   it('handles change', () => {
     const wrapper = shallow(<AddressBar appState={store as any} />);
-    const instance: any = wrapper.instance() as any;
+    const instance = wrapper.instance() as any;
     instance.handleChange({ target: { value: 'hi' } } as any);
 
     expect(wrapper.state('value')).toBe('hi');
