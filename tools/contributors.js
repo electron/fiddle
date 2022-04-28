@@ -10,7 +10,7 @@ const CONTRIBUTORS_FILE_PATH = path.join(
   '../static/contributors.json',
 );
 const CONTRIBUTORS_URL =
-  'https://api.github.com/repos/electron/fiddle/contributors';
+  'https://api.github.com/repos/electron/fiddle/contributors?per_page=100';
 const HEADERS =
   GITHUB_TOKEN || GH_TOKEN
     ? {
