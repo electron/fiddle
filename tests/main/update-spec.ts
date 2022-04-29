@@ -3,6 +3,7 @@
  */
 
 jest.useFakeTimers();
+jest.spyOn(global, 'setTimeout');
 
 const mockUpdateApp = jest.fn();
 jest.mock('update-electron-app', () => mockUpdateApp);
@@ -16,7 +17,6 @@ describe('update', () => {
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
     ((setTimeout as unknown) as jest.Mock).mock.calls[0][0]();
-
     expect(updateElectronApp).toHaveBeenCalled();
   });
 });

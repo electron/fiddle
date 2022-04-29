@@ -83,7 +83,7 @@
     "@types/classnames": "^2.2.11",
     "@types/enzyme": "^3.10.8",
     "@types/fs-extra": "^9.0.7",
-    "@types/jest": "^26.0.20",
+    "@types/jest": "^27.4.1",
     "@types/json-stable-stringify": "^1.0.32",
     "@types/log-symbols": "^3.0.0",
     "@types/node": "^14.16.0",

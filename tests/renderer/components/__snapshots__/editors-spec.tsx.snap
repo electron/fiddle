@@ -918,7 +918,7 @@ exports[`Editors component renders a toolbar 1`] = `
                 "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
               },
             },
-            "layoutDebounce": 25,
+            "layoutDebounce": 26,
             "mosaic": Object {
               "direction": "row",
               "first": Object {
@@ -962,7 +962,7 @@ exports[`Editors component renders a toolbar 1`] = `
                 "model": "{\\"language\\":\\"css\\",\\"options\\":{\\"tabSize\\":2},\\"value\\":\\"/* style.css */\\"}",
               },
             },
-            "layoutDebounce": 25,
+            "layoutDebounce": 26,
             "mosaic": Object {
               "direction": "row",
               "first": Object {
