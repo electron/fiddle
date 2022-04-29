@@ -30,7 +30,7 @@ describe('devtools', () => {
     expect(devtools.default).toHaveBeenCalledTimes(1);
   });
 
-  it('catch error in setting up developer tools', async (done) => {
+  it('catch error in setting up developer tools', async () => {
     const devtools = require('electron-devtools-installer');
     // throw devtool error
     devtools.default.mockRejectedValue(new Error('devtool error'));
@@ -38,7 +38,6 @@ describe('devtools', () => {
 
     try {
       await setupDevTools();
-      done();
     } catch (e) {
       expect(e).toMatch('error');
     }
