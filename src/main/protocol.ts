@@ -1,7 +1,6 @@
 import { app } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as nodeUrl from 'url';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
@@ -21,7 +20,7 @@ const handlePotentialProtocolLaunch = (url: string) => {
     return;
   }
 
-  const parsed = nodeUrl.parse(url.replace(/\/$/, ''));
+  const parsed = new URL(url.replace(/\/$/, ''));
   if (!parsed.pathname || !parsed.hostname) return;
 
   const pathParts = parsed.pathname.split('/').slice(1);
