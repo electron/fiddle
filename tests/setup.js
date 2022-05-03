@@ -3,6 +3,8 @@ const Adapter = require('enzyme-adapter-react-16');
 const { ElectronFiddleMock } = require('./mocks/mocks');
 const { createSerializer } = require('enzyme-to-json');
 
+require('@testing-library/jest-dom/extend-expect');
+
 configure({ adapter: new Adapter() });
 
 global.confirm = jest.fn();
