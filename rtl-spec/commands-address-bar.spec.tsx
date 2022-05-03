@@ -1,7 +1,5 @@
 import { StateMock } from '../tests/mocks/state';
 
-// jest.mock('../../../src/utils/octokit');
-
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
