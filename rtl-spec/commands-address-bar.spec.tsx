@@ -34,7 +34,6 @@ describe('AddressBar component', () => {
     fireEvent.click(btn);
 
     const { fetchGistAndLoad } = window.ElectronFiddle.app.remoteLoader;
-
     expect(fetchGistAndLoad).toBeCalledWith(gistId);
   });
 
