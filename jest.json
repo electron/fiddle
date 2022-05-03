@@ -4,7 +4,7 @@
   },
   "testEnvironment": "jsdom",
   "testURL": "http://localhost",
-  "testRegex": "(-spec)\\.(ts|tsx)$",
+  "testMatch": ["**/rtl-spec/*.spec.*"],
   "resetMocks": true,
   "bail": true,
   "resetModules": true,
