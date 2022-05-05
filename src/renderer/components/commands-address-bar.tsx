@@ -48,23 +48,12 @@ export class AddressBar extends React.Component<
     };
   }
 
-  /**
-   * Handle the form's submit event, trying to load whatever
-   * URL was entered.
-   *
-   * @param {React.SyntheticEvent<HTMLFormElement>} event
-   */
-  public handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
+  private handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
     event.preventDefault();
     this.submit();
   }
 
-  /**
-   * Commit the address bar's value to app state and load the fiddle.
-   *
-   * @memberof AddressBar
-   */
-  public submit() {
+  private submit() {
     const { remoteLoader } = window.ElectronFiddle.app;
     if (this.state.value) {
       remoteLoader.fetchGistAndLoad(
@@ -102,16 +91,11 @@ export class AddressBar extends React.Component<
     );
   }
 
-  /**
-   * Handle the change event, which usually just updates the address bar's value
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
-   */
-  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+  private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     this.setState({ value: event.target.value });
   }
 
-  public handleBlur(event: React.FocusEvent<HTMLInputElement>) {
+  private handleBlur(event: React.FocusEvent<HTMLInputElement>) {
     const { gistId } = this.props.appState;
     const url = urlFromId(gistId);
 
@@ -122,7 +106,7 @@ export class AddressBar extends React.Component<
     }
   }
 
-  public renderLoadButton(isValueCorrect: boolean): JSX.Element {
+  private renderLoadButton(isValueCorrect: boolean): JSX.Element {
     return (
       <Button
         disabled={!isValueCorrect}
