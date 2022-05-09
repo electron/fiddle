@@ -5,7 +5,12 @@ import * as semver from 'semver';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { RunResult, RunnableVersion } from '../../src/interfaces';
+import {
+  RunResult,
+  RunnableVersion,
+  VersionState,
+  VersionSource,
+} from '../../src/interfaces';
 import {
   getIsPackageManagerInstalled,
   addModules,
@@ -141,6 +146,26 @@ describe('Runner component', () => {
       expect(store.flushOutput).toHaveBeenCalledTimes(1);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
         `Electron exited with code ${ARBITRARY_FAIL_CODE}.`,
+      );
+    });
+
+    it('shows a dialog and returns invalid when the current version is missing', async () => {
+      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+      store.currentElectronVersion = {
+        version: 'test-0',
+        localPath: '/i/definitely/do/not/exist',
+        state: VersionState.ready,
+        source: VersionSource.local,
+      } as const;
+
+      const err = `Local Electron build missing for version ${store.currentElectronVersion.version} - please verify it is in the correct location or remove and re-add it.`;
+      store.isVersionUsable = jest.fn().mockReturnValueOnce({ err });
+
+      const result = await instance.run();
+      expect(result).toBe(RunResult.INVALID);
+
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(err),
       );
     });
 
