@@ -18,6 +18,7 @@ export const VersionChooser = observer((props: VersionChooserProps) => {
     Bisector,
     currentElectronVersion,
     isAutoBisecting,
+    isSettingsShowing,
     setVersion,
   } = props.appState;
 
@@ -27,7 +28,7 @@ export const VersionChooser = observer((props: VersionChooserProps) => {
         appState={props.appState}
         onVersionSelect={({ version }) => setVersion(version)}
         currentVersion={currentElectronVersion}
-        disabled={!!Bisector || isAutoBisecting}
+        disabled={!!Bisector || isAutoBisecting || isSettingsShowing}
       />
     </ButtonGroup>
   );
