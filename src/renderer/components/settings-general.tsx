@@ -4,6 +4,7 @@ import * as React from 'react';
 
 import { AppState } from '../state';
 import { AppearanceSettings } from './settings-general-appearance';
+import { FontSettings } from './settings-general-font';
 import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
 import { GitHubSettings } from './settings-general-github';
@@ -31,6 +32,8 @@ export class GeneralSettings extends React.Component<GeneralSettingsProps> {
           appState={this.props.appState}
           toggleHasPopoverOpen={() => this.props.toggleHasPopoverOpen()}
         />
+        <Divider />
+        <FontSettings appState={this.props.appState} />
         <Divider />
         <ConsoleSettings appState={this.props.appState} />
         <Divider />

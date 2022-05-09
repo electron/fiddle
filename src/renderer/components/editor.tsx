@@ -75,14 +75,18 @@ export class Editor extends React.Component<EditorProps> {
    * Initialize Monaco.
    */
   public async initMonaco() {
-    const { monaco, monacoOptions: monacoOptions } = this.props;
+    const { monaco, monacoOptions: monacoOptions, appState } = this.props;
     const ref = this.containerRef.current;
+
+    const { fontFamily, fontSize } = appState;
 
     if (ref) {
       this.editor = monaco.editor.create(ref, {
         automaticLayout: true,
         language: this.language,
         theme: 'main',
+        ...(fontFamily && { fontFamily }),
+        ...(fontSize && { fontSize }),
         contextmenu: false,
         model: null,
         ...monacoOptions,

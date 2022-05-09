@@ -167,6 +167,24 @@ export class AppearanceSettings extends React.Component<
   }
 
   /**
+   * Opens the "add monaco theme" dialog
+   */
+  public handleAddTheme(): void {
+    this.props.appState.toggleAddMonacoThemeDialog();
+  }
+
+  /**
+   * Handles a change from system to manually set theme.
+   *
+   * @param {React.FormEvent<HTMLInputElement>} event
+   */
+  public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
+    const { appState } = this.props;
+    const { checked } = event.currentTarget;
+    appState.isUsingSystemTheme = checked;
+  }
+
+  /**
    * Creates the themes folder in .electron-fiddle if one does not
    * exist yet, then shows that folder in the Finder/Explorer.
    *
@@ -250,18 +268,5 @@ export class AppearanceSettings extends React.Component<
         </Callout>
       </div>
     );
-  }
-
-  /**
-   * Opens the "add monaco theme" dialog
-   */
-  public handleAddTheme(): void {
-    this.props.appState.toggleAddMonacoThemeDialog();
-  }
-
-  public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
-    const { appState } = this.props;
-    const { checked } = event.currentTarget;
-    appState.isUsingSystemTheme = checked;
   }
 }
