@@ -83,6 +83,9 @@ export class StateMock {
     this.currentElectronVersion = this.versions[version];
     this.version = version;
   });
+  public isVersionUsable = jest.fn().mockImplementation(() => {
+    return { ver: this.currentElectronVersion };
+  });
   public showChannels = jest.fn();
   public showConfirmDialog = jest.fn();
   public showErrorDialog = jest.fn();
