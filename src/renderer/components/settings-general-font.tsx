@@ -16,10 +16,10 @@ interface FontSettingsState {
 }
 
 /**
- * Settings content to manage GitHub-related preferences.
+ * Settings font family and size.
  *
- * @class GitHubSettings
- * @extends {React.Component<AppearanceSettingsProps, AppearanceSettingsState>}
+ * @class FontSettings
+ * @extends {React.Component<FontSettingsProps, FontSettingsState>}
  */
 @observer
 export class FontSettings extends React.Component<
