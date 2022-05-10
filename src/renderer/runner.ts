@@ -149,6 +149,17 @@ export class Runner {
     const { appState } = this;
     const { version, localPath } = appState.currentElectronVersion;
 
+    // If the current active version is unavailable when we try to run
+    // the fiddle, show an error and fall back.
+    const { err, ver } = appState.isVersionUsable(version);
+    if (!ver) {
+      console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
+      appState.showErrorDialog(err!);
+      const fallback = appState.findUsableVersion();
+      if (fallback) await appState.setVersion(fallback.version);
+      return RunResult.INVALID;
+    }
+
     if (appState.isClearingConsoleOnRun) {
       appState.clearConsole();
     }

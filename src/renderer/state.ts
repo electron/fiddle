@@ -490,11 +490,11 @@ export class AppState {
   }
 
   /**
-   * Private setVersion() helper to test if setVersion(input) would work.
+   * Helper to test if the current version is available and would work.
    *
    * Returns a RunnableVersion if it would work, or an error string otherwise.
    */
-  private isVersionUsable(
+  public isVersionUsable(
     input: string,
   ): { ver?: RunnableVersion; err?: string } {
     const ver = this.getVersion(input);
@@ -512,9 +512,9 @@ export class AppState {
   }
 
   /**
-   * Private setVersion() helper to find a usable fallback version.
+   * Helper to find a usable fallback version.
    */
-  private findUsableVersion(): RunnableVersion | undefined {
+  public findUsableVersion(): RunnableVersion | undefined {
     return this.versionsToShow.find((ver) => this.isVersionUsable(ver.version));
   }
 
