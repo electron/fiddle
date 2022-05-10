@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FontSettings component renders 1`] = `
+<div>
+  <h4>
+    Font Settings
+  </h4>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup
+      label="Set a font family and size for your editors. Reload or restart for changes to take effect."
+    >
+      <h4>
+        Font Family
+      </h4>
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+      />
+      <h4>
+        Font Size
+      </h4>
+      <Blueprint3.InputGroup
+        onChange={[Function]}
+        value=""
+      />
+      <Blueprint3.Button
+        icon="repeat"
+        onClick={[Function]}
+        text="Reload Window"
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
+</div>
+`;

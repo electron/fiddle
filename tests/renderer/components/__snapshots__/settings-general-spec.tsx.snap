@@ -10,6 +10,10 @@ exports[`GeneralSettings component renders 1`] = `
     toggleHasPopoverOpen={[Function]}
   />
   <Blueprint3.Divider />
+  <FontSettings
+    appState={Object {}}
+  />
+  <Blueprint3.Divider />
   <settings-console
     appState={Object {}}
   />

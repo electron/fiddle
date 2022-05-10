@@ -36,6 +36,7 @@ export enum IpcEvents {
   TASK_TEST = 'TASK_TEST',
   TASK_DONE = 'TASK_DONE',
   OUTPUT_ENTRY = 'OUTPUT_ENTRY',
+  RELOAD_WINDOW = 'RELOAD_WINDOW',
 }
 
 export const ipcMainEvents = [
@@ -51,6 +52,7 @@ export const ipcMainEvents = [
   IpcEvents.CLICK_TITLEBAR_MAC,
   IpcEvents.OUTPUT_ENTRY,
   IpcEvents.TASK_DONE,
+  IpcEvents.RELOAD_WINDOW,
 ];
 
 export const ipcRendererEvents = [

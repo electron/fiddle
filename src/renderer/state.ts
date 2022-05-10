@@ -112,6 +112,10 @@ export class AppState {
           sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
         }
       : (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR);
+  @observable public fontFamily: string | undefined =
+    (localStorage.getItem('fontFamily') as string) || undefined;
+  @observable public fontSize: number | undefined =
+    ((localStorage.getItem('fontSize') as any) as number) || undefined;
 
   // -- Various session-only state ------------------
   @observable public gistId: string | undefined;
@@ -235,6 +239,8 @@ export class AppState {
     autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
     autorun(() => this.save('packageAuthor', this.packageAuthor));
     autorun(() => this.save('electronMirror', this.electronMirror as any));
+    autorun(() => this.save('fontFamily', this.fontFamily as any));
+    autorun(() => this.save('fontSize', this.fontSize as any));
 
     // Update our known versions
     this.updateElectronVersions();

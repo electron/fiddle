@@ -82,6 +82,10 @@ export function createMainWindow(): Electron.BrowserWindow {
     shell.openExternal(url);
   });
 
+  ipcMainManager.on(IpcEvents.RELOAD_WINDOW, () => {
+    browserWindow?.reload();
+  });
+
   ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
     if (browserWindow) {
       browserWindow.showInactive();
