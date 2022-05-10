@@ -83,9 +83,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   ipcMainManager.on(IpcEvents.RELOAD_WINDOW, () => {
-    if (browserWindow) {
-      browserWindow.reload();
-    }
+    browserWindow?.reload();
   });
 
   ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
