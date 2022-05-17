@@ -233,7 +233,9 @@ function saveKnownVersions(versions: Array<Version>) {
  */
 export async function fetchVersions(): Promise<Version[]> {
   const url = 'https://releases.electronjs.org/releases.json';
-  const response = await window.fetch(url);
+  const response = await window.fetch(url, {
+    cache: 'no-store',
+  });
   const data = (await response.json()) as { version: string }[];
 
   const versions: Version[] = data
