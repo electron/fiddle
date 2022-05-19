@@ -48,7 +48,7 @@ describe('AddressBar component', () => {
   it('handles submit', () => {
     const preventDefault = jest.fn();
     const wrapper = shallow(<AddressBar appState={store as any} />);
-    const instance: any = wrapper.instance() as any;
+    const instance = wrapper.instance() as any;
 
     instance.handleChange({ target: { value: 'abcdtestid' } } as any);
     wrapper.find('form').simulate('submit', { preventDefault });
