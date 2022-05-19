@@ -111,7 +111,7 @@ describe('Settings component', () => {
 
     // Set the theme selector showing to true
     const wrapper = shallow(<Settings appState={store} />);
-    const instance = wrapper.instance() as Settings;
+    const instance: any = wrapper.instance();
 
     // Toggle the state of the variable
     instance.toggleHasPopoverOpen();

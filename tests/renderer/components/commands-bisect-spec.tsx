@@ -32,7 +32,7 @@ describe('Bisect commands component', () => {
 
   describe('buttons', () => {
     let wrapper: ShallowWrapper;
-    let instance: BisectHandler;
+    let instance: any;
     beforeEach(() => {
       wrapper = shallow(<BisectHandler appState={store as any} />);
       instance = wrapper.instance() as any;
@@ -53,7 +53,7 @@ describe('Bisect commands component', () => {
   describe('continueBisect()', () => {
     it('closes the currently running app', () => {
       const wrapper = shallow(<BisectHandler appState={store as any} />);
-      const instance: BisectHandler = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
         version: '2.0.0',
@@ -65,7 +65,7 @@ describe('Bisect commands component', () => {
 
     it('sets version assigned by bisect algorithm', () => {
       const wrapper = shallow(<BisectHandler appState={store as any} />);
-      const instance: BisectHandler = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       store.Bisector.continue.mockReturnValue({
         version: '2.0.0',
@@ -76,7 +76,7 @@ describe('Bisect commands component', () => {
 
     it('terminates bisect if algorithm returns array', () => {
       const wrapper = shallow(<BisectHandler appState={store as any} />);
-      const instance: BisectHandler = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       instance.terminateBisect = jest.fn();
       store.showInfoDialog = jest.fn().mockResolvedValueOnce(undefined);
 
@@ -108,7 +108,7 @@ describe('Bisect commands component', () => {
   describe('terminateBisect()', () => {
     it('removes the bisect instance from the app state', () => {
       const wrapper = shallow(<BisectHandler appState={store as any} />);
-      const instance: BisectHandler = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       instance.terminateBisect();
       expect(store.Bisector).toBeUndefined();

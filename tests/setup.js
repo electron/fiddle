@@ -1,9 +1,14 @@
-const { configure } = require('enzyme');
+const { configure: enzymeConfigure } = require('enzyme');
+const { configure: mobxConfigure } = require('mobx');
 const Adapter = require('enzyme-adapter-react-16');
 const { ElectronFiddleMock } = require('./mocks/mocks');
 const { createSerializer } = require('enzyme-to-json');
 
-configure({ adapter: new Adapter() });
+enzymeConfigure({ adapter: new Adapter() });
+
+// allow jest fns to overwrite readonly mobx stuff
+// https://mobx.js.org/configuration.html#safedescriptors-boolean
+mobxConfigure({ safeDescriptors: false });
 
 global.confirm = jest.fn();
 

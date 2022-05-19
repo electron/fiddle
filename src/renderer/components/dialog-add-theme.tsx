@@ -24,143 +24,149 @@ interface AddThemeDialogState {
  * @class AddThemeDialog
  * @extends {React.Component<AddThemeDialogProps, AddThemeDialogState>}
  */
-@observer
-export class AddThemeDialog extends React.Component<
-  AddThemeDialogProps,
-  AddThemeDialogState
-> {
-  public resetState = { file: undefined };
+export const AddThemeDialog = observer(
+  class AddThemeDialog extends React.Component<
+    AddThemeDialogProps,
+    AddThemeDialogState
+  > {
+    public resetState = { file: undefined };
 
-  constructor(props: AddThemeDialogProps) {
-    super(props);
-    this.state = this.resetState;
+    constructor(props: AddThemeDialogProps) {
+      super(props);
+      this.state = this.resetState;
 
-    this.onSubmit = this.onSubmit.bind(this);
-    this.onClose = this.onClose.bind(this);
-    this.onChangeFile = this.onChangeFile.bind(this);
-    this.reset = this.reset.bind(this);
-  }
+      this.onSubmit = this.onSubmit.bind(this);
+      this.onClose = this.onClose.bind(this);
+      this.onChangeFile = this.onChangeFile.bind(this);
+      this.reset = this.reset.bind(this);
+    }
 
-  /**
-   * Handles a change of the file input.
-   *
-   * @param {React.ChangeEvent<HTMLInputElement>} event
-   */
-  public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
-    const { files } = event.target as any;
-    const file = files?.[0];
+    /**
+     * Handles a change of the file input.
+     *
+     * @param {React.ChangeEvent<HTMLInputElement>} event
+     */
+    public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
+      const { files } = event.target as any;
+      const file = files?.[0];
 
-    this.setState({ file });
-  }
+      this.setState({ file });
+    }
 
-  /**
-   * Handles the submission of the dialog.
-   *
-   * @returns {Promise<void>}
-   */
-  public async onSubmit(): Promise<void> {
-    const { file } = this.state;
-    const { appState } = this.props;
+    /**
+     * Handles the submission of the dialog.
+     *
+     * @returns {Promise<void>}
+     */
+    public async onSubmit(): Promise<void> {
+      const { file } = this.state;
+      const { appState } = this.props;
 
-    const defaultTheme = !!appState.theme
-      ? await getTheme(appState.theme)
-      : defaultDark;
+      const defaultTheme = !!appState.theme
+        ? await getTheme(appState.theme)
+        : defaultDark;
 
-    if (!file) return;
+      if (!file) return;
 
-    try {
-      const editor = fs.readJSONSync(file.path);
-      if (!editor.base && !editor.rules)
-        throw Error('File does not match specifications'); // has to have these attributes
-      defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
-      const newTheme = defaultTheme;
-      const name = editor.name ? editor.name : file.name;
-      await this.createNewThemeFromMonaco(name, newTheme);
-    } catch (error) {
-      appState.showErrorDialog(`${error}, please pick a different file.`);
+      try {
+        const editor = fs.readJSONSync(file.path);
+        if (!editor.base && !editor.rules)
+          throw Error('File does not match specifications'); // has to have these attributes
+        defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+        const newTheme = defaultTheme;
+        const name = editor.name ? editor.name : file.name;
+        await this.createNewThemeFromMonaco(name, newTheme);
+      } catch (error) {
+        appState.showErrorDialog(`${error}, please pick a different file.`);
+        return;
+      }
+
+      this.onClose();
       return;
     }
 
-    this.onClose();
-    return;
-  }
+    public async createNewThemeFromMonaco(
+      name: string,
+      newTheme: LoadedFiddleTheme,
+    ): Promise<void> {
+      if (!name) {
+        throw new Error(`Filename ${name} not found`);
+      }
 
-  public async createNewThemeFromMonaco(
-    name: string,
-    newTheme: LoadedFiddleTheme,
-  ): Promise<void> {
-    if (!name) {
-      throw new Error(`Filename ${name} not found`);
+      const themePath = path.join(THEMES_PATH, `${name}`);
+
+      await fs.outputJSON(
+        themePath,
+        {
+          ...newTheme,
+          name,
+        },
+        { spaces: 2 },
+      );
+
+      this.props.appState.setTheme(themePath);
+      shell.showItemInFolder(themePath);
     }
 
-    const themePath = path.join(THEMES_PATH, `${name}`);
+    get buttons() {
+      const canSubmit = !!this.state.file;
 
-    await fs.outputJSON(
-      themePath,
-      {
-        ...newTheme,
-        name,
-      },
-      { spaces: 2 },
-    );
+      return [
+        <Button
+          icon="add"
+          key="submit"
+          disabled={!canSubmit}
+          onClick={this.onSubmit}
+          text="Add"
+        />,
+        <Button
+          icon="cross"
+          key="cancel"
+          onClick={this.onClose}
+          text="Cancel"
+        />,
+      ];
+    }
 
-    this.props.appState.setTheme(themePath);
-    shell.showItemInFolder(themePath);
-  }
+    public onClose() {
+      this.props.appState.isThemeDialogShowing = false;
+      this.reset();
+    }
 
-  get buttons() {
-    const canSubmit = !!this.state.file;
+    public render() {
+      const { isThemeDialogShowing } = this.props.appState;
+      const inputProps = { accept: '.json' };
+      const { file } = this.state;
 
-    return [
-      <Button
-        icon="add"
-        key="submit"
-        disabled={!canSubmit}
-        onClick={this.onSubmit}
-        text="Add"
-      />,
-      <Button icon="cross" key="cancel" onClick={this.onClose} text="Cancel" />,
-    ];
-  }
+      const text = file && file.path ? file.path : `Select the Monaco file...`;
+      return (
+        <Dialog
+          isOpen={isThemeDialogShowing}
+          onClose={this.onClose}
+          title="Add theme"
+          className="dialog-add-version"
+        >
+          <div className="bp3-dialog-body">
+            <FileInput
+              onInputChange={this.onChangeFile}
+              inputProps={inputProps as any}
+              text={text}
+            />
+            <br />
+          </div>
+          <div className="bp3-dialog-footer">
+            <div className="bp3-dialog-footer-actions">{this.buttons}</div>
+          </div>
+        </Dialog>
+      );
+    }
 
-  public onClose() {
-    this.props.appState.isThemeDialogShowing = false;
-    this.reset();
-  }
-
-  public render() {
-    const { isThemeDialogShowing } = this.props.appState;
-    const inputProps = { accept: '.json' };
-    const { file } = this.state;
-
-    const text = file && file.path ? file.path : `Select the Monaco file...`;
-    return (
-      <Dialog
-        isOpen={isThemeDialogShowing}
-        onClose={this.onClose}
-        title="Add theme"
-        className="dialog-add-version"
-      >
-        <div className="bp3-dialog-body">
-          <FileInput
-            onInputChange={this.onChangeFile}
-            inputProps={inputProps as any}
-            text={text}
-          />
-          <br />
-        </div>
-        <div className="bp3-dialog-footer">
-          <div className="bp3-dialog-footer-actions">{this.buttons}</div>
-        </div>
-      </Dialog>
-    );
-  }
-
-  /**
-   * Reset this component's state
-   */
-  private reset(): void {
-    this.setState(this.resetState);
-    return;
-  }
-}
+    /**
+     * Reset this component's state
+     */
+    private reset(): void {
+      this.setState(this.resetState);
+      return;
+    }
+  },
+);

@@ -22,29 +22,30 @@ interface GeneralSettingsProps {
  * @class GitHubSettings
  * @extends {React.Component<GeneralSettingsProps>}
  */
-@observer
-export class GeneralSettings extends React.Component<GeneralSettingsProps> {
-  public render() {
-    return (
-      <div>
-        <h2>General Settings</h2>
-        <AppearanceSettings
-          appState={this.props.appState}
-          toggleHasPopoverOpen={() => this.props.toggleHasPopoverOpen()}
-        />
-        <Divider />
-        <FontSettings appState={this.props.appState} />
-        <Divider />
-        <ConsoleSettings appState={this.props.appState} />
-        <Divider />
-        <GitHubSettings appState={this.props.appState} />
-        <Divider />
-        <BlockAcceleratorsSettings appState={this.props.appState} />
-        <Divider />
-        <PackageAuthorSettings appState={this.props.appState} />
-        <Divider />
-        <MirrorSettings appState={this.props.appState} />
-      </div>
-    );
-  }
-}
+export const GeneralSettings = observer(
+  class GeneralSettings extends React.Component<GeneralSettingsProps> {
+    public render() {
+      return (
+        <div>
+          <h2>General Settings</h2>
+          <AppearanceSettings
+            appState={this.props.appState}
+            toggleHasPopoverOpen={() => this.props.toggleHasPopoverOpen()}
+          />
+          <Divider />
+          <FontSettings appState={this.props.appState} />
+          <Divider />
+          <ConsoleSettings appState={this.props.appState} />
+          <Divider />
+          <GitHubSettings appState={this.props.appState} />
+          <Divider />
+          <BlockAcceleratorsSettings appState={this.props.appState} />
+          <Divider />
+          <PackageAuthorSettings appState={this.props.appState} />
+          <Divider />
+          <MirrorSettings appState={this.props.appState} />
+        </div>
+      );
+    }
+  },
+);

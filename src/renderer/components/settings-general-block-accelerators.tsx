@@ -15,63 +15,68 @@ interface BlockAcceleratorsSettingsProps {
  * @class BlockAcceleratorsSettings
  * @extends {React.Component<BlockAcceleratorsSettingsProps>}
  */
-@observer
-export class BlockAcceleratorsSettings extends React.Component<BlockAcceleratorsSettingsProps> {
-  constructor(props: BlockAcceleratorsSettingsProps) {
-    super(props);
+export const BlockAcceleratorsSettings = observer(
+  class BlockAcceleratorsSettings extends React.Component<BlockAcceleratorsSettingsProps> {
+    constructor(props: BlockAcceleratorsSettingsProps) {
+      super(props);
 
-    this.handleBlockAcceleratorChange = this.handleBlockAcceleratorChange.bind(
-      this,
-    );
-  }
-
-  /**
-   * Handles a change on whether a keyboard shortcut should be blocked
-   * before fiddle is executed.
-   *
-   * @param {React.FormEvent<HTMLInputElement>} event
-   */
-  public handleBlockAcceleratorChange(
-    event: React.FormEvent<HTMLInputElement>,
-  ) {
-    const { checked, value } = event.currentTarget;
-    if (checked) {
-      this.props.appState.addAcceleratorToBlock(value as BlockableAccelerator);
-    } else {
-      this.props.appState.removeAcceleratorToBlock(
-        value as BlockableAccelerator,
+      this.handleBlockAcceleratorChange = this.handleBlockAcceleratorChange.bind(
+        this,
       );
     }
-  }
 
-  public render() {
-    const { acceleratorsToBlock } = this.props.appState;
+    /**
+     * Handles a change on whether a keyboard shortcut should be blocked
+     * before fiddle is executed.
+     *
+     * @param {React.FormEvent<HTMLInputElement>} event
+     */
+    public handleBlockAcceleratorChange(
+      event: React.FormEvent<HTMLInputElement>,
+    ) {
+      const { checked, value } = event.currentTarget;
+      if (checked) {
+        this.props.appState.addAcceleratorToBlock(
+          value as BlockableAccelerator,
+        );
+      } else {
+        this.props.appState.removeAcceleratorToBlock(
+          value as BlockableAccelerator,
+        );
+      }
+    }
 
-    const blockAcceleratorsLabel = `
-      Any keyboard shortcuts checked below will be disabled.`.trim();
+    public render() {
+      const { acceleratorsToBlock } = this.props.appState;
 
-    return (
-      <div>
-        <h4>Block Keyboard Shortcuts</h4>
-        <Callout>
-          <FormGroup label={blockAcceleratorsLabel}>
-            <Checkbox
-              checked={acceleratorsToBlock.includes(BlockableAccelerator.save)}
-              label="Save"
-              value={BlockableAccelerator.save}
-              onChange={this.handleBlockAcceleratorChange}
-            />
-            <Checkbox
-              checked={acceleratorsToBlock.includes(
-                BlockableAccelerator.saveAs,
-              )}
-              label="Save as"
-              value={BlockableAccelerator.saveAs}
-              onChange={this.handleBlockAcceleratorChange}
-            />
-          </FormGroup>
-        </Callout>
-      </div>
-    );
-  }
-}
+      const blockAcceleratorsLabel = `
+        Any keyboard shortcuts checked below will be disabled.`.trim();
+
+      return (
+        <div>
+          <h4>Block Keyboard Shortcuts</h4>
+          <Callout>
+            <FormGroup label={blockAcceleratorsLabel}>
+              <Checkbox
+                checked={acceleratorsToBlock.includes(
+                  BlockableAccelerator.save,
+                )}
+                label="Save"
+                value={BlockableAccelerator.save}
+                onChange={this.handleBlockAcceleratorChange}
+              />
+              <Checkbox
+                checked={acceleratorsToBlock.includes(
+                  BlockableAccelerator.saveAs,
+                )}
+                label="Save as"
+                value={BlockableAccelerator.saveAs}
+                onChange={this.handleBlockAcceleratorChange}
+              />
+            </FormGroup>
+          </Callout>
+        </div>
+      );
+    }
+  },
+);

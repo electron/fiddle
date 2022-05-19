@@ -50,7 +50,7 @@ describe('Editors component', () => {
 
   it('does not execute command if not supported', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     const editor = new MonacoEditorMock();
     const action = editor.getAction();
@@ -75,14 +75,14 @@ describe('Editors component', () => {
       });
 
       const wrapper = shallow(<Editors appState={store as any} />);
-      const instance: Editors = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
     });
 
     it('updates a setting', () => {
       const wrapper = shallow(<Editors appState={store as any} />);
-      const instance: Editors = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
 
       const editor = new MonacoEditorMock();
       editorMosaic.addEditor(filename, editor as any);
@@ -96,7 +96,7 @@ describe('Editors component', () => {
 
   it('renders a toolbar', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     const toolbar = instance.renderToolbar({ title: MAIN_JS } as any, MAIN_JS);
 
     expect(toolbar).toMatchSnapshot();
@@ -104,7 +104,7 @@ describe('Editors component', () => {
 
   it('onChange() updates the mosaic arrangement in the appState', () => {
     const wrapper = shallow(<Editors appState={store as any} />);
-    const instance: Editors = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     const arrangement = { testArrangement: true };
     instance.onChange(arrangement as any);
@@ -246,7 +246,7 @@ describe('Editors component', () => {
   describe('setFocused()', () => {
     it('sets the "focused" property', () => {
       const wrapper = shallow(<Editors appState={store as any} />);
-      const instance: Editors = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
@@ -256,7 +256,7 @@ describe('Editors component', () => {
 
     it('focus sidebar file', () => {
       const wrapper = shallow(<Editors appState={store as any} />);
-      const instance: Editors = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
       const id = MAIN_JS;

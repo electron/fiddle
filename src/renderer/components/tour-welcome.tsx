@@ -179,84 +179,87 @@ export function getWelcomeTour(): Set<TourScriptStep> {
  * @class WelcomeTour
  * @extends {React.Component<WelcomeTourProps, WelcomeTourState>}
  */
-@observer
-export class WelcomeTour extends React.Component<
-  WelcomeTourProps,
-  WelcomeTourState
-> {
-  constructor(props: WelcomeTourProps) {
-    super(props);
+export const WelcomeTour = observer(
+  class WelcomeTour extends React.Component<
+    WelcomeTourProps,
+    WelcomeTourState
+  > {
+    constructor(props: WelcomeTourProps) {
+      super(props);
 
-    this.stopTour = this.stopTour.bind(this);
-    this.startTour = this.startTour.bind(this);
+      this.stopTour = this.stopTour.bind(this);
+      this.startTour = this.startTour.bind(this);
 
-    this.state = {
-      isTourStarted: false,
-    };
-  }
-
-  /**
-   * Stops the tour, closing it.
-   */
-  public stopTour() {
-    this.props.appState.disableTour();
-  }
-
-  /**
-   * Starts the tour.
-   */
-  public startTour() {
-    this.setState({ isTourStarted: true });
-  }
-
-  get buttons() {
-    return (
-      <>
-        <Button
-          key="cancel"
-          onClick={this.stopTour}
-          icon="cross"
-          text={`I'll figure it out`}
-        />
-        <Button
-          key="ok"
-          onClick={this.startTour}
-          icon="presentation"
-          text="Show me around"
-        />
-      </>
-    );
-  }
-
-  public render() {
-    const { isTourShowing } = this.props.appState;
-    const { isTourStarted } = this.state;
-
-    if (!isTourShowing) return null;
-
-    if (!isTourStarted) {
-      return (
-        <Dialog key="welcome-tour-dialog" isOpen={true}>
-          <div className={Classes.DIALOG_HEADER}>
-            <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
-          </div>
-          <div className={Classes.DIALOG_BODY}>
-            <p>
-              Welcome to Electron Fiddle! If you&apos;re new to the app,
-              we&apos;d like to give you a brief tour of its features.
-            </p>
-            <p>
-              We won&apos;t show this dialog again, but you can always find the
-              tour in the Help menu.
-            </p>
-          </div>
-          <div className={Classes.DIALOG_FOOTER}>
-            <div className={Classes.DIALOG_FOOTER_ACTIONS}>{this.buttons}</div>
-          </div>
-        </Dialog>
-      );
-    } else {
-      return <Tour tour={getWelcomeTour()} onStop={this.stopTour} />;
+      this.state = {
+        isTourStarted: false,
+      };
     }
-  }
-}
+
+    /**
+     * Stops the tour, closing it.
+     */
+    public stopTour() {
+      this.props.appState.disableTour();
+    }
+
+    /**
+     * Starts the tour.
+     */
+    public startTour() {
+      this.setState({ isTourStarted: true });
+    }
+
+    get buttons() {
+      return (
+        <>
+          <Button
+            key="cancel"
+            onClick={this.stopTour}
+            icon="cross"
+            text={`I'll figure it out`}
+          />
+          <Button
+            key="ok"
+            onClick={this.startTour}
+            icon="presentation"
+            text="Show me around"
+          />
+        </>
+      );
+    }
+
+    public render() {
+      const { isTourShowing } = this.props.appState;
+      const { isTourStarted } = this.state;
+
+      if (!isTourShowing) return null;
+
+      if (!isTourStarted) {
+        return (
+          <Dialog key="welcome-tour-dialog" isOpen={true}>
+            <div className={Classes.DIALOG_HEADER}>
+              <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
+            </div>
+            <div className={Classes.DIALOG_BODY}>
+              <p>
+                Welcome to Electron Fiddle! If you&apos;re new to the app,
+                we&apos;d like to give you a brief tour of its features.
+              </p>
+              <p>
+                We won&apos;t show this dialog again, but you can always find
+                the tour in the Help menu.
+              </p>
+            </div>
+            <div className={Classes.DIALOG_FOOTER}>
+              <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                {this.buttons}
+              </div>
+            </div>
+          </Dialog>
+        );
+      } else {
+        return <Tour tour={getWelcomeTour()} onStop={this.stopTour} />;
+      }
+    }
+  },
+);

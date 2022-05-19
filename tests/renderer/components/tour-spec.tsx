@@ -131,7 +131,7 @@ describe('VersionChooser component', () => {
 
     const mockStop = jest.fn();
     const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: Tour = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.componentWillUnmount();
     expect(window.removeEventListener).toHaveBeenCalled();

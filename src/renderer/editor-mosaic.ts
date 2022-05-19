@@ -1,6 +1,6 @@
 import * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
-import { action, computed, observable, reaction } from 'mobx';
+import { action, computed, observable, reaction, makeObservable } from 'mobx';
 import { EditorId, EditorValues } from '../interfaces';
 
 import {
@@ -33,10 +33,10 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
-  @observable public isEdited = false;
-  @observable public focusedFile: EditorId | null = null;
+  public isEdited = false;
+  public focusedFile: EditorId | null = null;
 
-  @computed public get files() {
+  public get files() {
     const files = new Map<EditorId, EditorPresence>();
 
     const { backups, editors, mosaic } = this;
@@ -47,18 +47,43 @@ export class EditorMosaic {
     return files;
   }
 
-  @computed public get numVisible() {
+  public get numVisible() {
     return getLeaves(this.mosaic).length;
   }
 
   // You probably want EditorMosaic.files instead.
   // This is only public because components/editors.tsx needs it
-  @observable public mosaic: MosaicNode<EditorId> | null = null;
+  public mosaic: MosaicNode<EditorId> | null = null;
 
-  @observable private readonly backups = new Map<EditorId, EditorBackup>();
-  @observable private readonly editors = new Map<EditorId, Editor>();
+  private readonly backups = new Map<EditorId, EditorBackup>();
+  private readonly editors = new Map<EditorId, Editor>();
 
   constructor() {
+    makeObservable<
+      EditorMosaic,
+      'backups' | 'editors' | 'addFile' | 'setVisible' | 'setEditorFromBackup'
+    >(this, {
+      isEdited: observable,
+      focusedFile: observable,
+      files: computed,
+      numVisible: computed,
+      mosaic: observable,
+      backups: observable,
+      editors: observable,
+      setFocusedFile: action,
+      resetLayout: action,
+      set: action,
+      addFile: action,
+      show: action,
+      setVisible: action,
+      toggle: action,
+      hide: action,
+      remove: action,
+      addEditor: action,
+      setEditorFromBackup: action,
+      addNewFile: action,
+    });
+
     // whenever the mosaics are changed,
     // update the editor layout
     reaction(
@@ -81,7 +106,7 @@ export class EditorMosaic {
 
   /** File is visible, focus file content */
   /** File is hidden, show the file and focus the file content */
-  @action public setFocusedFile(id: EditorId) {
+  public setFocusedFile(id: EditorId) {
     this.focusedFile = id;
     if (this.files.get(this.focusedFile) === EditorPresence.Hidden) {
       this.show(this.focusedFile);
@@ -90,14 +115,14 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  @action resetLayout = () => {
+  resetLayout = () => {
     this.set(this.values());
   };
 
   /// set / add / get the files in the model
 
   /** Set the contents of the mosaic */
-  @action public set(valuesIn: EditorValues) {
+  public set(valuesIn: EditorValues) {
     // set() clears out the previous Fiddle, so clear our previous state
     // except for this.editors -- we recycle editors below in setFile()
     this.backups.clear();
@@ -114,7 +139,7 @@ export class EditorMosaic {
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
-  @action private addFile(id: EditorId, value: string) {
+  private addFile(id: EditorId, value: string) {
     if (!isSupportedFile(id))
       throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
 
@@ -145,11 +170,11 @@ export class EditorMosaic {
   /// show or hide files in the view
 
   /** Show the specified file's editor */
-  @action public show(id: EditorId) {
+  public show(id: EditorId) {
     this.setVisible([...getLeaves(this.mosaic), id]);
   }
 
-  @action private setVisible(visible: EditorId[]) {
+  private setVisible(visible: EditorId[]) {
     // Sort the files and remove duplicates
     visible = [...new Set(visible)].sort(compareEditors);
 
@@ -185,7 +210,7 @@ export class EditorMosaic {
   }
 
   /** Helper to toggle visibility of the specified file's editor */
-  @action public toggle(id: EditorId) {
+  public toggle(id: EditorId) {
     if (this.files.get(id) === EditorPresence.Hidden) {
       this.show(id);
     } else {
@@ -194,7 +219,7 @@ export class EditorMosaic {
   }
 
   /** Hide the specified file's editor */
-  @action public hide(id: EditorId) {
+  public hide(id: EditorId) {
     const editor = this.editors.get(id);
     if (editor) {
       this.editors.delete(id);
@@ -208,14 +233,14 @@ export class EditorMosaic {
   }
 
   /** Remove the specified file and its editor */
-  @action public remove(id: EditorId) {
+  public remove(id: EditorId) {
     this.editors.delete(id);
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
   }
 
   /** Wire up a newly-mounted Monaco editor */
-  @action public addEditor(id: EditorId, editor: Editor) {
+  public addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
     if (!backup) throw new Error(`added Editor for unexpected file "${id}"`);
 
@@ -225,7 +250,7 @@ export class EditorMosaic {
   }
 
   /** Populate a MonacoEditor with the file's contents */
-  @action private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
+  private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
     this.ignoreEdits(editor); // pause this so that isEdited doesn't get set
     if (backup.viewState) editor.restoreViewState(backup.viewState);
     editor.setModel(backup.model);
@@ -233,7 +258,7 @@ export class EditorMosaic {
   }
 
   /** Add a new file to the mosaic */
-  @action public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
+  public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
     if (this.files.has(id))
       throw new Error(`Cannot add file "${id}": File already exists`);
 

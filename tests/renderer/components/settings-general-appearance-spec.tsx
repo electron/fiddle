@@ -75,7 +75,7 @@ describe('AppearanceSettings component', () => {
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
-    const instance: AppearanceSettings = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     instance.handleChange({ file: 'defaultLight' } as any);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
@@ -110,7 +110,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: AppearanceSettings = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       await instance.openThemeFolder();
 
       expect(shell.showItemInFolder).toHaveBeenCalled();
@@ -123,7 +123,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: AppearanceSettings = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       (shell as any).showItemInFolder.mockImplementationOnce(() => {
         throw new Error('Bwap');
       });
@@ -140,7 +140,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: AppearanceSettings = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
 
       expect(shell.showItemInFolder).toHaveBeenCalled();
@@ -169,7 +169,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       expect(wrapper.state('themes')).toHaveLength(0);
-      const instance: AppearanceSettings = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
       expect(wrapper.state('themes')).toHaveLength(1);
     });
@@ -181,7 +181,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: AppearanceSettings = wrapper.instance() as any;
+      const instance: any = wrapper.instance() as any;
       (shell as any).showItemInFolder.mockImplementationOnce(() => {
         throw new Error('Bwap');
       });

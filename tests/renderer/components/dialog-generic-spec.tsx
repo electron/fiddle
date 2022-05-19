@@ -59,7 +59,7 @@ describe('GenericDialog component', () => {
   it('onClose() closes itself', () => {
     store.isGenericDialogShowing = true;
     const wrapper = shallow(<GenericDialog appState={store as any} />);
-    const instance: GenericDialog = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
 
     instance.onClose(true);
     expect(store.isGenericDialogShowing).toBe(false);
@@ -67,7 +67,7 @@ describe('GenericDialog component', () => {
 
   it('enter submit', () => {
     const wrapper = shallow(<GenericDialog appState={store as any} />);
-    const instance: GenericDialog = wrapper.instance() as any;
+    const instance: any = wrapper.instance() as any;
     const event = { key: 'Enter' };
 
     store.isGenericDialogShowing = true;

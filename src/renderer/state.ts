@@ -1,5 +1,12 @@
 import * as fs from 'fs-extra';
-import { action, autorun, computed, observable, when } from 'mobx';
+import {
+  action,
+  autorun,
+  computed,
+  observable,
+  when,
+  makeObservable,
+} from 'mobx';
 
 import {
   BlockableAccelerator,
@@ -51,79 +58,66 @@ export class AppState {
   });
 
   // -- Persisted settings ------------------
-  @observable public theme: string | null = localStorage.getItem('theme');
-  @observable public gitHubAvatarUrl: string | null = localStorage.getItem(
+  public theme: string | null = localStorage.getItem('theme');
+  public gitHubAvatarUrl: string | null = localStorage.getItem(
     'gitHubAvatarUrl',
   );
-  @observable public gitHubName: string | null = localStorage.getItem(
-    'gitHubName',
-  );
-  @observable public gitHubLogin: string | null = localStorage.getItem(
-    'gitHubLogin',
-  );
-  @observable public gitHubToken: string | null =
+  public gitHubName: string | null = localStorage.getItem('gitHubName');
+  public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
+  public gitHubToken: string | null =
     localStorage.getItem('gitHubToken') || null;
-  @observable public gitHubPublishAsPublic = !!this.retrieve(
-    'gitHubPublishAsPublic',
-  );
-  @observable
+  public gitHubPublishAsPublic = !!this.retrieve('gitHubPublishAsPublic');
   public channelsToShow: Array<ElectronReleaseChannel> = (this.retrieve(
     'channelsToShow',
   ) as Array<ElectronReleaseChannel>) || [
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
-  @observable public showObsoleteVersions = !!(
+  public showObsoleteVersions = !!(
     this.retrieve('showObsoleteVersions') ?? false
   );
-  @observable public showUndownloadedVersions = !!(
+  public showUndownloadedVersions = !!(
     this.retrieve('showUndownloadedVersions') ?? true
   );
-  @observable public isKeepingUserDataDirs = !!this.retrieve(
-    'isKeepingUserDataDirs',
-  );
-  @observable public isEnablingElectronLogging = !!this.retrieve(
+  public isKeepingUserDataDirs = !!this.retrieve('isKeepingUserDataDirs');
+  public isEnablingElectronLogging = !!this.retrieve(
     'isEnablingElectronLogging',
   );
-  @observable public isClearingConsoleOnRun = !!this.retrieve(
-    'isClearingConsoleOnRun',
-  );
-  @observable public isUsingSystemTheme = !!(
-    this.retrieve('isUsingSystemTheme') ?? true
-  );
-  @observable public executionFlags: Array<string> =
+  public isClearingConsoleOnRun = !!this.retrieve('isClearingConsoleOnRun');
+  public isUsingSystemTheme = !!(this.retrieve('isUsingSystemTheme') ?? true);
+  public executionFlags: Array<string> =
     (this.retrieve('executionFlags') as Array<string>) === null
       ? []
       : (this.retrieve('executionFlags') as Array<string>);
-  @observable public environmentVariables: Array<string> =
+  public environmentVariables: Array<string> =
     (this.retrieve('environmentVariables') as Array<string>) === null
       ? []
       : (this.retrieve('environmentVariables') as Array<string>);
-  @observable public packageManager: IPackageManager =
+  public packageManager: IPackageManager =
     (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
-  @observable public acceleratorsToBlock: Array<BlockableAccelerator> =
+  public acceleratorsToBlock: Array<BlockableAccelerator> =
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
-  @observable public packageAuthor =
+  public packageAuthor =
     (localStorage.getItem('packageAuthor') as string) ?? getUsername();
-  @observable public electronMirror: typeof ELECTRON_MIRROR =
+  public electronMirror: typeof ELECTRON_MIRROR =
     (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR) === null
       ? {
           ...ELECTRON_MIRROR,
           sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
         }
       : (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR);
-  @observable public fontFamily: string | undefined =
+  public fontFamily: string | undefined =
     (localStorage.getItem('fontFamily') as string) || undefined;
-  @observable public fontSize: number | undefined =
+  public fontSize: number | undefined =
     ((localStorage.getItem('fontSize') as any) as number) || undefined;
 
   // -- Various session-only state ------------------
-  @observable public gistId: string | undefined;
-  @observable public readonly versions: Record<string, RunnableVersion>;
-  @observable public version: string;
-  @observable public output: Array<OutputEntry> = [];
-  @observable public localPath: string | undefined;
-  @observable public genericDialogOptions: GenericDialogOptions = {
+  public gistId: string | undefined = undefined;
+  public readonly versions: Record<string, RunnableVersion> = {};
+  public version = '';
+  public output: Array<OutputEntry> = [];
+  public localPath: string | undefined = undefined;
+  public genericDialogOptions: GenericDialogOptions = {
     type: GenericDialogType.warning,
     label: '' as string | JSX.Element,
     ok: 'Okay',
@@ -131,31 +125,31 @@ export class AppState {
     wantsInput: false,
     placeholder: '',
   };
-  @observable public readonly editorMosaic = new EditorMosaic();
-  @observable public genericDialogLastResult: boolean | null = null;
-  @observable public genericDialogLastInput: string | null = null;
-  @observable public templateName: string | undefined;
-  @observable public Bisector: Bisector | undefined;
-  @observable public modules: Map<string, string> = new Map();
+  public readonly editorMosaic = new EditorMosaic();
+  public genericDialogLastResult: boolean | null = null;
+  public genericDialogLastInput: string | null = null;
+  public templateName: string | undefined = undefined;
+  public Bisector: Bisector | undefined = undefined;
+  public modules: Map<string, string> = new Map();
 
-  @observable public activeGistAction: GistActionState = GistActionState.none;
+  public activeGistAction: GistActionState = GistActionState.none;
 
   // -- Various "isShowing" settings ------------------
-  @observable public isAddVersionDialogShowing = false;
-  @observable public isAutoBisecting = false;
-  @observable public isBisectCommandShowing: boolean;
-  @observable public isBisectDialogShowing = false;
-  @observable public isConsoleShowing = false;
-  @observable public isGenericDialogShowing = false;
-  @observable public isInstallingModules = false;
-  @observable public isOnline = navigator.onLine;
-  @observable public isQuitting = false;
-  @observable public isRunning = false;
-  @observable public isSettingsShowing = false;
-  @observable public isThemeDialogShowing = false;
-  @observable public isTokenDialogShowing = false;
-  @observable public isTourShowing = !localStorage.getItem('hasShownTour');
-  @observable public isUpdatingElectronVersions = false;
+  public isAddVersionDialogShowing = false;
+  public isAutoBisecting = false;
+  public isBisectCommandShowing = false;
+  public isBisectDialogShowing = false;
+  public isConsoleShowing = false;
+  public isGenericDialogShowing = false;
+  public isInstallingModules = false;
+  public isOnline = navigator.onLine;
+  public isQuitting = false;
+  public isRunning = false;
+  public isSettingsShowing = false;
+  public isThemeDialogShowing = false;
+  public isTokenDialogShowing = false;
+  public isTourShowing = !localStorage.getItem('hasShownTour');
+  public isUpdatingElectronVersions = false;
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';
@@ -164,6 +158,93 @@ export class AppState {
   public appData: string;
 
   constructor(versions: RunnableVersion[]) {
+    makeObservable<AppState, 'setPageHash'>(this, {
+      theme: observable,
+      gitHubAvatarUrl: observable,
+      gitHubName: observable,
+      gitHubLogin: observable,
+      gitHubToken: observable,
+      gitHubPublishAsPublic: observable,
+      channelsToShow: observable,
+      showObsoleteVersions: observable,
+      showUndownloadedVersions: observable,
+      isKeepingUserDataDirs: observable,
+      isEnablingElectronLogging: observable,
+      isClearingConsoleOnRun: observable,
+      isUsingSystemTheme: observable,
+      executionFlags: observable,
+      environmentVariables: observable,
+      packageManager: observable,
+      acceleratorsToBlock: observable,
+      packageAuthor: observable,
+      electronMirror: observable,
+      gistId: observable,
+      versions: observable,
+      version: observable,
+      output: observable,
+      localPath: observable,
+      genericDialogOptions: observable,
+      editorMosaic: observable,
+      genericDialogLastResult: observable,
+      genericDialogLastInput: observable,
+      templateName: observable,
+      Bisector: observable,
+      modules: observable,
+      activeGistAction: observable,
+      isAddVersionDialogShowing: observable,
+      isAutoBisecting: observable,
+      isBisectCommandShowing: observable,
+      isBisectDialogShowing: observable,
+      isConsoleShowing: observable,
+      isGenericDialogShowing: observable,
+      isInstallingModules: observable,
+      isOnline: observable,
+      isQuitting: observable,
+      isRunning: observable,
+      isSettingsShowing: observable,
+      isThemeDialogShowing: observable,
+      isTokenDialogShowing: observable,
+      isTourShowing: observable,
+      isUpdatingElectronVersions: observable,
+      title: computed,
+      currentElectronVersion: computed,
+      versionsToShow: computed,
+      updateElectronVersions: action,
+      hideChannels: action,
+      showChannels: action,
+      toggleConsole: action,
+      clearConsole: action,
+      toggleBisectCommands: action,
+      toggleAddVersionDialog: action,
+      toggleAddMonacoThemeDialog: action,
+      toggleAuthDialog: action,
+      toggleBisectDialog: action,
+      toggleSettings: action,
+      setIsQuitting: action,
+      disableTour: action,
+      showTour: action,
+      setTheme: action,
+      addLocalVersion: action,
+      addNewVersions: action,
+      removeVersion: action,
+      downloadVersion: action,
+      setVersion: action,
+      signOutGitHub: action,
+      showGenericDialog: action,
+      showInputDialog: action,
+      showConfirmDialog: action,
+      showInfoDialog: action,
+      showErrorDialog: action,
+      flushOutput: action,
+      pushOutput: action,
+      pushError: action,
+      setShowMeMenu: action,
+      addAcceleratorToBlock: action,
+      removeAcceleratorToBlock: action,
+      resetView: action,
+      setPageHash: action,
+    });
+
     // Bind all actions
     this.downloadVersion = this.downloadVersion.bind(this);
     this.pushError = this.pushError.bind(this);
@@ -259,7 +340,7 @@ export class AppState {
   /**
    * @returns {string} the title, e.g. appname, fiddle name, state
    */
-  @computed get title(): string {
+  get title(): string {
     const { gistId, localPath, templateName } = this;
     const { isEdited } = this.editorMosaic;
     const tokens = [];
@@ -288,7 +369,7 @@ export class AppState {
    * Returns the current RunnableVersion or the first
    * one that can be found.
    */
-  @computed get currentElectronVersion(): RunnableVersion {
+  get currentElectronVersion(): RunnableVersion {
     return this.versions[this.version] || this.versions[this.defaultVersion];
   }
 
@@ -296,7 +377,7 @@ export class AppState {
    * Returns an array of Electron versions to show given the
    * current settings for states and channels to display
    */
-  @computed get versionsToShow(): Array<RunnableVersion> {
+  get versionsToShow(): Array<RunnableVersion> {
     const {
       channelsToShow,
       showObsoleteVersions,
@@ -324,7 +405,7 @@ export class AppState {
    *
    * Fails silently.
    */
-  @action public async updateElectronVersions() {
+  public async updateElectronVersions() {
     this.isUpdatingElectronVersions = true;
 
     try {
@@ -345,13 +426,13 @@ export class AppState {
     return this.name;
   }
 
-  @action public hideChannels(channels: Array<ElectronReleaseChannel>) {
+  public hideChannels(channels: Array<ElectronReleaseChannel>) {
     this.channelsToShow = this.channelsToShow.filter(
       (ch) => !channels.includes(ch),
     );
   }
 
-  @action public showChannels(channels: Array<ElectronReleaseChannel>) {
+  public showChannels(channels: Array<ElectronReleaseChannel>) {
     const s = new Set<ElectronReleaseChannel>([
       ...this.channelsToShow,
       ...channels,
@@ -359,38 +440,38 @@ export class AppState {
     this.channelsToShow = [...s.values()];
   }
 
-  @action public toggleConsole() {
+  public toggleConsole() {
     this.isConsoleShowing = !this.isConsoleShowing;
   }
 
-  @action public clearConsole() {
+  public clearConsole() {
     this.output = [];
   }
 
-  @action public toggleBisectCommands() {
+  public toggleBisectCommands() {
     // guard against hiding the commands when executing a bisect
     if (!this.Bisector && !this.isBisectDialogShowing) {
       this.isBisectCommandShowing = !this.isBisectCommandShowing;
     }
   }
 
-  @action public toggleAddVersionDialog() {
+  public toggleAddVersionDialog() {
     this.isAddVersionDialogShowing = !this.isAddVersionDialogShowing;
   }
 
-  @action public toggleAddMonacoThemeDialog() {
+  public toggleAddMonacoThemeDialog() {
     this.isThemeDialogShowing = !this.isThemeDialogShowing;
   }
 
-  @action public toggleAuthDialog() {
+  public toggleAuthDialog() {
     this.isTokenDialogShowing = !this.isTokenDialogShowing;
   }
 
-  @action public toggleBisectDialog() {
+  public toggleBisectDialog() {
     this.isBisectDialogShowing = !this.isBisectDialogShowing;
   }
 
-  @action public toggleSettings() {
+  public toggleSettings() {
     // We usually don't lose editor focus,
     // so you can still type. Let's force-blur.
     (document.activeElement as HTMLInputElement).blur();
@@ -398,30 +479,30 @@ export class AppState {
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
 
-  @action public setIsQuitting() {
+  public setIsQuitting() {
     this.isQuitting = true;
   }
 
-  @action public disableTour() {
+  public disableTour() {
     this.resetView();
     localStorage.setItem('hasShownTour', 'true');
   }
 
-  @action public showTour() {
+  public showTour() {
     this.resetView({ isTourShowing: true });
   }
 
-  @action public setTheme(fileName?: string) {
+  public setTheme(fileName?: string) {
     this.theme = fileName || '';
     window.ElectronFiddle.app.loadTheme(this.theme);
   }
 
-  @action public addLocalVersion(input: Version) {
+  public addLocalVersion(input: Version) {
     addLocalVersion(input);
     this.addNewVersions(getElectronVersions());
   }
 
-  @action public addNewVersions(versions: RunnableVersion[]) {
+  public addNewVersions(versions: RunnableVersion[]) {
     for (const ver of versions) {
       this.versions[ver.version] ||= ver;
     }
@@ -433,7 +514,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async removeVersion(ver: RunnableVersion) {
+  public async removeVersion(ver: RunnableVersion) {
     const { version, state, source } = ver;
 
     if (ver === this.currentElectronVersion) {
@@ -464,7 +545,7 @@ export class AppState {
    * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
-  @action public async downloadVersion(ver: RunnableVersion) {
+  public async downloadVersion(ver: RunnableVersion) {
     const { source, state, version } = ver;
 
     const isRemote = source === VersionSource.remote;
@@ -524,7 +605,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  @action public async setVersion(input: string) {
+  public async setVersion(input: string) {
     // make sure we can  use this version
     const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
@@ -563,14 +644,14 @@ export class AppState {
    *
    * @returns {void}
    */
-  @action public signOutGitHub(): void {
+  public signOutGitHub(): void {
     this.gitHubAvatarUrl = null;
     this.gitHubLogin = null;
     this.gitHubToken = null;
     this.gitHubName = null;
   }
 
-  @action public async showGenericDialog(
+  public async showGenericDialog(
     opts: GenericDialogOptions,
   ): Promise<{ confirm: boolean; input: string }> {
     this.genericDialogLastResult = null;
@@ -583,7 +664,7 @@ export class AppState {
     };
   }
 
-  @action public async showInputDialog(opts: {
+  public async showInputDialog(opts: {
     cancel?: string;
     defaultInput?: string;
     label: string | JSX.Element;
@@ -599,7 +680,7 @@ export class AppState {
     return confirm ? input : undefined;
   }
 
-  @action public showConfirmDialog = async (opts: {
+  public showConfirmDialog = async (opts: {
     cancel?: string;
     label: string | JSX.Element;
     ok: string;
@@ -613,9 +694,7 @@ export class AppState {
     return confirm;
   };
 
-  @action public async showInfoDialog(
-    label: string | JSX.Element,
-  ): Promise<void> {
+  public async showInfoDialog(label: string | JSX.Element): Promise<void> {
     await this.showGenericDialog({
       label,
       ok: 'Close',
@@ -624,9 +703,7 @@ export class AppState {
     });
   }
 
-  @action public async showErrorDialog(
-    label: string | JSX.Element,
-  ): Promise<void> {
+  public async showErrorDialog(label: string | JSX.Element): Promise<void> {
     await this.showGenericDialog({
       label,
       ok: 'Close',
@@ -641,7 +718,7 @@ export class AppState {
    *
    * @returns {void}
    */
-  @action public flushOutput(): void {
+  public flushOutput(): void {
     this.pushOutput('\n', { bypassBuffer: false });
   }
 
@@ -652,7 +729,7 @@ export class AppState {
    * @param {(string | Buffer)} data
    * @param {OutputOptions} options
    */
-  @action public pushOutput(
+  public pushOutput(
     data: string | Buffer,
     options: OutputOptions = { isNotPre: false, bypassBuffer: true },
   ) {
@@ -695,17 +772,17 @@ export class AppState {
    * @param {string} message
    * @param {Error} error
    */
-  @action public pushError(message: string, error: Error) {
+  public pushError(message: string, error: Error) {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
     this.pushOutput(error.toString());
     console.warn(error);
   }
 
-  @action public async setShowMeMenu() {
+  public async setShowMeMenu() {
     ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
   }
 
-  @action public async addAcceleratorToBlock(acc: BlockableAccelerator) {
+  public async addAcceleratorToBlock(acc: BlockableAccelerator) {
     if (!this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
       ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
@@ -714,7 +791,7 @@ export class AppState {
     }
   }
 
-  @action public async removeAcceleratorToBlock(acc: BlockableAccelerator) {
+  public async removeAcceleratorToBlock(acc: BlockableAccelerator) {
     if (this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
         (a) => a !== acc,
@@ -728,7 +805,7 @@ export class AppState {
   /**
    * Show or close secondary windows such as settings and dialogs.
    */
-  @action public resetView(
+  public resetView(
     opts: {
       isAddVersionDialogShowing?: boolean;
       isBisectDialogShowing?: boolean;
@@ -758,7 +835,7 @@ export class AppState {
    * @private
    * @memberof AppState
    */
-  @action private setPageHash() {
+  private setPageHash() {
     let hash = '';
 
     if (this.isSettingsShowing) {
