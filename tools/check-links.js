@@ -40,7 +40,7 @@ async function main() {
   const readme = await fs.readFile(readmePath, 'utf-8');
   const links = readme
     .match(LINK_RGX)
-    .filter((link) => !link.startsWith('https://img.shields.io')); // img.shields.io gives 403 in CI
+    .filter((link) => new URL(link).hostname !== 'img.shields.io'); // img.shields.io gives 403 in CI
   let failed = false;
 
   for (const link of links) {
