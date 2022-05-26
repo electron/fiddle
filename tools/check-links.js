@@ -38,7 +38,9 @@ async function retryFetch(link) {
 async function main() {
   const readmePath = path.join(__dirname, '../README.md');
   const readme = await fs.readFile(readmePath, 'utf-8');
-  const links = readme.match(LINK_RGX);
+  const links = readme
+    .match(LINK_RGX)
+    .filter((link) => !link.includes('img.shields.io')); // img.shields.io gives 403 in CI
   let failed = false;
 
   for (const link of links) {
