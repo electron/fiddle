@@ -343,28 +343,9 @@ export class AppState {
    * @returns {string} the title, e.g. appname, fiddle name, state
    */
   get title(): string {
-    const { gistId, localPath, templateName } = this;
     const { isEdited } = this.editorMosaic;
-    const tokens = [];
 
-    if (localPath) {
-      tokens.push(localPath);
-    } else if (templateName) {
-      tokens.push(templateName);
-    } else if (gistId) {
-      tokens.push(`gist.github.com/${gistId}`);
-    }
-
-    if (isEdited) {
-      tokens.push('Unsaved');
-    }
-
-    if (tokens.length > 0) {
-      tokens.unshift('-');
-    }
-
-    tokens.unshift('Electron Fiddle');
-    return tokens.join(' ');
+    return isEdited ? 'Electron Fiddle - Unsaved' : 'Electron Fiddle';
   }
 
   /**

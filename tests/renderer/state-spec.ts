@@ -734,40 +734,6 @@ describe('AppState', () => {
       expect(actual).toBe(expected);
     });
 
-    it('shows the name of local fiddles', () => {
-      const localPath = 'path/to/fiddle';
-      const expected = `${APPNAME} - ${localPath}`;
-      appState.localPath = localPath;
-      const actual = appState.title;
-      expect(actual).toBe(expected);
-    });
-
-    it('shows the name of gist fiddles', () => {
-      const gistId = 'abcdef';
-      const expected = `${APPNAME} - gist.github.com/${gistId}`;
-      appState.gistId = gistId;
-      const actual = appState.title;
-      expect(actual).toBe(expected);
-    });
-
-    it('prefers to display localPath', () => {
-      const gistId = 'abcdef';
-      const templateName = 'BrowserWindow';
-      const localPath = 'path/to/fiddle';
-      const expected = `${APPNAME} - ${localPath}`;
-      Object.assign(appState, { gistId, localPath, templateName });
-      const actual = appState.title;
-      expect(actual).toBe(expected);
-    });
-
-    it('shows the name of template fiddles', () => {
-      const templateName = 'BrowserWindow';
-      const expected = `${APPNAME} - ${templateName}`;
-      appState.templateName = templateName;
-      const actual = appState.title;
-      expect(actual).toBe(expected);
-    });
-
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
       appState.editorMosaic.isEdited = true;
