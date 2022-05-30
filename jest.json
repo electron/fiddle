@@ -4,7 +4,7 @@
   },
   "testEnvironment": "jsdom",
   "testURL": "http://localhost",
-  "testMatch": ["**/rtl-spec/*.spec.*"],
+  "testMatch": ["**/rtl-spec/*.spec.*", "**/tests/**/*-spec.{ts,tsx}"],
   "resetMocks": true,
   "bail": true,
   "resetModules": true,
