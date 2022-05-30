@@ -17,7 +17,6 @@
     "parcel:build": "node ./tools/parcel-build.js",
     "parcel:watch": "node ./tools/parcel-watch.js",
     "publish": "electron-forge publish",
-    "rtl": "",
     "start": "rimraf ./dist && electron-forge start --",
     "test": "jest --config=jest.json",
     "test:ci": "jest --config=jest.json --coverage --runInBand",
