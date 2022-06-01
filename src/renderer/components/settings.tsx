@@ -129,9 +129,12 @@ export const Settings = observer(
             <ul>{this.renderOptions()}</ul>
           </div>
           <div className="settings-content">
-            <div className="settings-close" onClick={appState.toggleSettings}>
+            <button
+              className="settings-close"
+              onClick={appState.toggleSettings}
+            >
               <Icon icon="cross" iconSize={25} />
-            </div>
+            </button>
             {this.renderContent()}
           </div>
         </div>

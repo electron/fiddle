@@ -61,14 +61,14 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
   </div>
 </div>
 `;
@@ -134,14 +134,14 @@ exports[`Settings component renders the Credits page after a click 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
     <settings-credits
       appState={
         Object {
@@ -214,14 +214,14 @@ exports[`Settings component renders the Electron page after a click 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
     <settings-electron
       appState={
         Object {
@@ -294,14 +294,14 @@ exports[`Settings component renders the Electron page by default 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
     <settings-general
       appState={
         Object {
@@ -375,14 +375,14 @@ exports[`Settings component renders the Execution page after a click 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
     <ExecutionSettings
       appState={
         Object {
@@ -455,14 +455,14 @@ exports[`Settings component renders the General page after a click 1`] = `
   <div
     className="settings-content"
   >
-    <div
+    <button
       className="settings-close"
     >
       <Blueprint3.Icon
         icon="cross"
         iconSize={25}
       />
-    </div>
+    </button>
     <settings-general
       appState={
         Object {
