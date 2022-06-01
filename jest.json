@@ -2,8 +2,9 @@
   "transform": {
     "\\.(js|jsx|ts|tsx)$": "ts-jest"
   },
+  "testEnvironment": "jsdom",
   "testURL": "http://localhost",
-  "testRegex": "(-spec)\\.(ts|tsx)$",
+  "testMatch": ["**/rtl-spec/*.spec.*", "**/tests/**/*-spec.{ts,tsx}"],
   "resetMocks": true,
   "bail": true,
   "resetModules": true,

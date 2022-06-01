@@ -53,7 +53,7 @@ describe('Editor component', () => {
     expect(instance.shouldComponentUpdate(null, null, null)).toBe(false);
   });
 
-  describe('initMonaco()', async () => {
+  describe('initMonaco()', () => {
     it('calls editorMosaic.addEditor', async () => {
       const id = MAIN_JS;
       const { editorMosaic } = store;

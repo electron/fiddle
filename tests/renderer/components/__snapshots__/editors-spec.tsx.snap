@@ -901,7 +901,7 @@ exports[`Editors component renders a toolbar 1`] = `
       appState={
         Object {
           "editorMosaic": Object {
-            "layoutDebounce": 25,
+            "layoutDebounce": 26,
             "mosaic": Object {
               "direction": "row",
               "first": Object {
@@ -928,7 +928,7 @@ exports[`Editors component renders a toolbar 1`] = `
       appState={
         Object {
           "editorMosaic": Object {
-            "layoutDebounce": 25,
+            "layoutDebounce": 26,
             "mosaic": Object {
               "direction": "row",
               "first": Object {

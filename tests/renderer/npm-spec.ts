@@ -11,7 +11,7 @@ describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {
     describe('npm()', () => {
       beforeEach(() => {
-        jest.resetModuleRegistry();
+        jest.resetModules();
       });
 
       afterEach(() => resetPlatform());
@@ -72,7 +72,7 @@ describe('npm', () => {
 
     describe('yarn()', () => {
       beforeEach(() => {
-        jest.resetModuleRegistry();
+        jest.resetModules();
       });
 
       afterEach(() => resetPlatform());
