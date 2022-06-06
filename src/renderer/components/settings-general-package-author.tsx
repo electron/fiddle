@@ -58,8 +58,9 @@ export const PackageAuthorSettings = observer(
         <div>
           <h4>Package Author</h4>
           <Callout>
-            <FormGroup label={packageAuthorLabel}>
+            <FormGroup label={packageAuthorLabel} labelFor="package-author">
               <InputGroup
+                id="package-author"
                 value={this.state.value}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                   this.handlePackageAuthorChange(e)
