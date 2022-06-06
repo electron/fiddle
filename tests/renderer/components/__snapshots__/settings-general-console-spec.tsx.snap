@@ -6,10 +6,11 @@ exports[`ConsoleSettings component renders 1`] = `
     Console
   </h4>
   <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="Enable this option to automatically clear the console whenever you run your
-      fiddle."
-    >
+    <Blueprint3.FormGroup>
+      <p>
+        Enable this option to automatically clear the console whenever you run your
+      fiddle.
+      </p>
       <Blueprint3.Checkbox
         label="Clear on run."
         onChange={[Function]}

@@ -33,6 +33,7 @@ exports[`AppearanceSettings component renders 1`] = `
     disabled={true}
     inline={true}
     label="Choose your theme"
+    labelFor="open-theme-selector"
   >
     <Blueprint3.Select
       disabled={true}

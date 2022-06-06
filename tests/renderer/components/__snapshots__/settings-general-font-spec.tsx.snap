@@ -6,19 +6,24 @@ exports[`FontSettings component renders 1`] = `
     Font Settings
   </h4>
   <Blueprint3.Callout>
+    <p>
+      Set a font family and size for your editors. Reload or restart for changes to take effect.
+    </p>
     <Blueprint3.FormGroup
-      label="Set a font family and size for your editors. Reload or restart for changes to take effect."
+      label="Font Family"
+      labelFor="font-family"
     >
-      <h4>
-        Font Family
-      </h4>
       <Blueprint3.InputGroup
+        id="font-family"
         onChange={[Function]}
       />
-      <h4>
-        Font Size
-      </h4>
+    </Blueprint3.FormGroup>
+    <Blueprint3.FormGroup
+      label="Font Size"
+      labelFor="font-size"
+    >
       <Blueprint3.InputGroup
+        id="font-size"
         onChange={[Function]}
         value=""
       />
