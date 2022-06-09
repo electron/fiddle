@@ -59,7 +59,7 @@ export class StateMock {
   public electronMirror = ELECTRON_MIRROR;
   public isBisectCommandShowing = false;
 
-  public Bisector = new BisectorMock();
+  public Bisector: BisectorMock | undefined = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();
   public addLocalVersion = jest.fn();
   public addNewVersions = jest.fn();

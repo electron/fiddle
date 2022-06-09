@@ -64,15 +64,21 @@ export const BisectHandler = observer(
           <>
             <Button
               icon={'thumbs-up'}
+              aria-label={'Mark commit as good'}
               onClick={() => this.continueBisect(true)}
               disabled={isDownloading}
             />
             <Button
               icon={'thumbs-down'}
+              aria-label={'Mark commit as bad'}
               onClick={() => this.continueBisect(false)}
               disabled={isDownloading}
             />
-            <Button icon={'cross'} onClick={this.terminateBisect}>
+            <Button
+              aria-label={'Cancel bisect'}
+              icon={'cross'}
+              onClick={this.terminateBisect}
+            >
               Cancel Bisect
             </Button>
           </>

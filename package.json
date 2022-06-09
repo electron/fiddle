@@ -79,6 +79,7 @@
     "@octokit/action": "^2.0.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.5",
+    "@testing-library/user-event": "^14.2.0",
     "@types/classnames": "^2.2.11",
     "@types/enzyme": "^3.10.8",
     "@types/fs-extra": "^9.0.7",
