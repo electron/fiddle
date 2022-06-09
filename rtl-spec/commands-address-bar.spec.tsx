@@ -6,6 +6,7 @@ import { render, fireEvent } from '@testing-library/react';
 import { AddressBar } from '../src/renderer/components/commands-address-bar';
 import { AppState } from '../src/renderer/state';
 import { GistActionState } from '../src/interfaces';
+import { runInAction } from 'mobx';
 
 describe('AddressBar component', () => {
   let store: StateMock;
@@ -62,10 +63,17 @@ describe('AddressBar component', () => {
     GistActionState.publishing,
     GistActionState.updating,
   ])('disables during active gist action (%s)', (action) => {
-    const { getByRole } = render(
+    const gistId = '159cb99a70a201bd5e08194674f4c571';
+    const gistUrl = `https://gist.github.com/ghost/${gistId}`;
+    const { getByPlaceholderText, getByRole } = render(
       <AddressBar appState={(store as unknown) as AppState} />,
     );
-    store.activeGistAction = action;
+    fireEvent.change(getByPlaceholderText('https://gist.github.com/...'), {
+      target: { value: gistUrl },
+    });
+    runInAction(() => {
+      store.activeGistAction = action;
+    });
     const btn = getByRole('button');
     expect(btn).toBeDisabled();
   });
