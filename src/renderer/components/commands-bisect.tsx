@@ -18,7 +18,7 @@ export const BisectHandler = observer(
       this.terminateBisect = this.terminateBisect.bind(this);
     }
 
-    public continueBisect(isGood: boolean) {
+    private continueBisect(isGood: boolean) {
       window.ElectronFiddle.app.runner.stop();
 
       const { appState } = this.props;
@@ -50,7 +50,7 @@ export const BisectHandler = observer(
       }
     }
 
-    public terminateBisect() {
+    private terminateBisect() {
       const { appState } = this.props;
       appState.Bisector = undefined;
     }
