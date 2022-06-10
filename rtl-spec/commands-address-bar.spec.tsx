@@ -1,7 +1,8 @@
 import { StateMock } from '../tests/mocks/state';
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import { AddressBar } from '../src/renderer/components/commands-address-bar';
 import { AppState } from '../src/renderer/state';
@@ -23,14 +24,15 @@ describe('AddressBar component', () => {
       <AddressBar appState={(store as unknown) as AppState} />,
     );
 
-    fireEvent.change(getByPlaceholderText('https://gist.github.com/...'), {
-      target: { value: gistUrl },
-    });
+    await userEvent.type(
+      getByPlaceholderText('https://gist.github.com/...'),
+      gistUrl,
+    );
 
     const btn = getByRole('button');
     expect(btn).not.toBeDisabled();
 
-    fireEvent.click(btn);
+    await userEvent.click(btn);
 
     const { fetchGistAndLoad } = window.ElectronFiddle.app.remoteLoader;
     expect(fetchGistAndLoad).toBeCalledWith(gistId);
@@ -45,15 +47,16 @@ describe('AddressBar component', () => {
     expect(btn).toBeDisabled();
   });
 
-  it('is disabled if the URL is invalid', () => {
+  it('is disabled if the URL is invalid', async () => {
     const { getByRole, getByPlaceholderText } = render(
       <AddressBar appState={(store as unknown) as AppState} />,
     );
     const btn = getByRole('button');
 
-    fireEvent.change(getByPlaceholderText('https://gist.github.com/...'), {
-      target: { value: 'bad url' },
-    });
+    await userEvent.type(
+      getByPlaceholderText('https://gist.github.com/...'),
+      'bad url',
+    );
 
     expect(btn).toBeDisabled();
   });
@@ -62,15 +65,16 @@ describe('AddressBar component', () => {
     GistActionState.deleting,
     GistActionState.publishing,
     GistActionState.updating,
-  ])('disables during active gist action (%s)', (action) => {
+  ])('disables during active gist action (%s)', async (action) => {
     const gistId = '159cb99a70a201bd5e08194674f4c571';
     const gistUrl = `https://gist.github.com/ghost/${gistId}`;
     const { getByPlaceholderText, getByRole } = render(
       <AddressBar appState={(store as unknown) as AppState} />,
     );
-    fireEvent.change(getByPlaceholderText('https://gist.github.com/...'), {
-      target: { value: gistUrl },
-    });
+    await userEvent.type(
+      getByPlaceholderText('https://gist.github.com/...'),
+      gistUrl,
+    );
     runInAction(() => {
       store.activeGistAction = action;
     });
