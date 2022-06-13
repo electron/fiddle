@@ -147,7 +147,7 @@ export const ElectronSettings = observer(
     public render() {
       return (
         <div className="settings-electron">
-          <h2>Electron Settings</h2>
+          <h1>Electron Settings</h1>
           <Callout>{this.renderVersionShowOptions()}</Callout>
           <br />
           <Callout>

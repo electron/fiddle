@@ -2,9 +2,9 @@
 
 exports[`ExecutionSettings component renders 1`] = `
 <div>
-  <h2>
+  <h1>
     Execution
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     These advanced settings control how Electron Fiddle executes your fiddles.
   </Blueprint3.Callout>

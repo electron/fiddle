@@ -27,7 +27,7 @@ export const GeneralSettings = observer(
     public render() {
       return (
         <div>
-          <h2>General Settings</h2>
+          <h1>General Settings</h1>
           <AppearanceSettings
             appState={this.props.appState}
             toggleHasPopoverOpen={() => this.props.toggleHasPopoverOpen()}

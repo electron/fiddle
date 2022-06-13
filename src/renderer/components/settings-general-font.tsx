@@ -74,17 +74,17 @@ export class FontSettings extends React.Component<
 
     return (
       <div>
-        <h4>Font Settings</h4>
+        <h1>Font Settings</h1>
         <Callout>
           <FormGroup label={fontSettingsLabel}>
-            <h4>Font Family</h4>
+            <h2>Font Family</h2>
             <InputGroup
               value={fontFamily}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 this.handleSetFontFamily(e)
               }
             />
-            <h4>Font Size</h4>
+            <h2>Font Size</h2>
             <InputGroup
               value={`${fontSize || ''}`}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>

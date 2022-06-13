@@ -2,9 +2,9 @@
 
 exports[`CreditsSettings component handles a read error 1`] = `
 <div>
-  <h2>
+  <h1>
     Credits
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
   </Blueprint3.Callout>
@@ -17,9 +17,9 @@ exports[`CreditsSettings component handles a read error 1`] = `
 
 exports[`CreditsSettings component renders 1`] = `
 <div>
-  <h2>
+  <h1>
     Credits
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
   </Blueprint3.Callout>
@@ -45,11 +45,11 @@ exports[`CreditsSettings component renders 1`] = `
       <div
         className="details"
       >
-        <h5
+        <h2
           className="name"
         >
           Felix Rieseberg
-        </h5>
+        </h2>
         <p
           className="location"
         >
@@ -69,9 +69,9 @@ exports[`CreditsSettings component renders 1`] = `
 
 exports[`CreditsSettings component renders for contributors with less data 1`] = `
 <div>
-  <h2>
+  <h1>
     Credits
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
   </Blueprint3.Callout>
@@ -97,11 +97,11 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
       <div
         className="details"
       >
-        <h5
+        <h2
           className="name"
         >
           felixrieseberg
-        </h5>
+        </h2>
       </div>
     </Blueprint3.Card>
   </div>
@@ -110,9 +110,9 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
 
 exports[`CreditsSettings component renders nothing if we do not have contributors 1`] = `
 <div>
-  <h2>
+  <h1>
     Credits
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
   </Blueprint3.Callout>

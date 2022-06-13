@@ -206,7 +206,7 @@ export const AppearanceSettings = observer(
 
       return (
         <div className="settings-appearance">
-          <h4>Appearance</h4>
+          <h3>Appearance</h3>
           <Checkbox
             label="Sync theme with system setting"
             checked={isUsingSystemTheme}
