@@ -81,12 +81,17 @@ export class FileManager {
           ...devDependencies,
         };
 
-        if (deps.electron) {
+        // If the project specifies an Electron version, we want to tell Fiddle to run
+        // it with that version by default.
+        const electronDeps = Object.keys(deps).filter((d) =>
+          ['electron-nightly', 'electron'].includes(d),
+        );
+        for (const dep of electronDeps) {
           // Strip off semver range prefixes, e.g:
           // ^1.2.0 -> 1.2.0
           // ~2.3.4 -> 2.3.4
-          const index = deps.electron.search(/\d/);
-          const version = deps.electron.substring(index);
+          const index = deps[dep].search(/\d/);
+          const version = deps[dep].substring(index);
 
           if (!semver.valid(version)) {
             throw new Error(
@@ -94,10 +99,10 @@ export class FileManager {
             );
           }
 
+          // We want to include all dependencies except Electron.
           remoteLoader.setElectronVersion(version);
 
-          // We want to include all dependencies except Electron.
-          delete deps.electron;
+          delete deps[dep];
         }
 
         this.appState.modules = new Map(Object.entries(deps));
