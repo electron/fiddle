@@ -16,7 +16,6 @@
 *.vcxproj.user
 *.xcodeproj
 /.idea/
-/dist/
 /external_binaries/
 /out/
 node_modules/
@@ -39,3 +38,6 @@ report.json
 # Electron Fiddle-Specific
 /static/contributors.json
 /static/css/root.css
+
+# Webpack configurations
+.webpack
