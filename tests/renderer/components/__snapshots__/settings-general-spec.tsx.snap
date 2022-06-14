@@ -2,9 +2,9 @@
 
 exports[`GeneralSettings component renders 1`] = `
 <div>
-  <h2>
+  <h1>
     General Settings
-  </h2>
+  </h1>
   <settings-appearance
     appState={Object {}}
     toggleHasPopoverOpen={[Function]}

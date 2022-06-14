@@ -4,9 +4,9 @@ exports[`ElectronSettings component renders 1`] = `
 <div
   className="settings-electron"
 >
-  <h2>
+  <h1>
     Electron Settings
-  </h2>
+  </h1>
   <Blueprint3.Callout>
     <Blueprint3.FormGroup
       label="Include Electron versions:"

@@ -262,7 +262,7 @@ export const ExecutionSettings = observer(
 
       return (
         <div>
-          <h2>Execution</h2>
+          <h1>Execution</h1>
           <Callout>
             These advanced settings control how Electron Fiddle executes your
             fiddles.
