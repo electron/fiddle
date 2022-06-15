@@ -2,9 +2,9 @@
 
 exports[`ConsoleSettings component renders 1`] = `
 <div>
-  <h4>
+  <h1>
     Console
-  </h4>
+  </h1>
   <Blueprint3.Callout>
     <Blueprint3.FormGroup>
       <p>

@@ -18,7 +18,7 @@ export const BisectHandler = observer(
       this.terminateBisect = this.terminateBisect.bind(this);
     }
 
-    public continueBisect(isGood: boolean) {
+    private continueBisect(isGood: boolean) {
       window.ElectronFiddle.app.runner.stop();
 
       const { appState } = this.props;
@@ -50,7 +50,7 @@ export const BisectHandler = observer(
       }
     }
 
-    public terminateBisect() {
+    private terminateBisect() {
       const { appState } = this.props;
       appState.Bisector = undefined;
     }
@@ -64,15 +64,21 @@ export const BisectHandler = observer(
           <>
             <Button
               icon={'thumbs-up'}
+              aria-label={'Mark commit as good'}
               onClick={() => this.continueBisect(true)}
               disabled={isDownloading}
             />
             <Button
               icon={'thumbs-down'}
+              aria-label={'Mark commit as bad'}
               onClick={() => this.continueBisect(false)}
               disabled={isDownloading}
             />
-            <Button icon={'cross'} onClick={this.terminateBisect}>
+            <Button
+              aria-label={'Cancel bisect'}
+              icon={'cross'}
+              onClick={this.terminateBisect}
+            >
               Cancel Bisect
             </Button>
           </>

@@ -74,7 +74,7 @@ export class FontSettings extends React.Component<
 
     return (
       <div>
-        <h4>Font Settings</h4>
+        <h1>Font Settings</h1>
         <Callout>
           <p>{fontSettingsInstructions}</p>
           <FormGroup label="Font Family" labelFor="font-family">

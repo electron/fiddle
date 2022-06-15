@@ -42,7 +42,7 @@ export const ConsoleSettings = observer(
 
       return (
         <div>
-          <h4>Console</h4>
+          <h1>Console</h1>
           <Callout>
             <FormGroup>
               <p>{clearOnRunInstructions}</p>

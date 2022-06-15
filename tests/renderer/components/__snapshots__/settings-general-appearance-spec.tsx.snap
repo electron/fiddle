@@ -21,9 +21,9 @@ exports[`AppearanceSettings component renders 1`] = `
 <div
   className="settings-appearance"
 >
-  <h4>
+  <h3>
     Appearance
-  </h4>
+  </h3>
   <Blueprint3.Checkbox
     checked={true}
     label="Sync theme with system setting"

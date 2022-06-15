@@ -2,9 +2,9 @@
 
 exports[`FontSettings component renders 1`] = `
 <div>
-  <h4>
+  <h1>
     Font Settings
-  </h4>
+  </h1>
   <Blueprint3.Callout>
     <p>
       Set a font family and size for your editors. Reload or restart for changes to take effect.

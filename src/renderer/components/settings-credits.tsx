@@ -71,7 +71,7 @@ export class CreditsSettings extends React.Component<
         >
           <div className="avatar" style={style} />
           <div className="details">
-            <h5 className="name">{name || login}</h5>
+            <h2 className="name">{name || login}</h2>
             {maybeLocation}
             {maybeBio}
           </div>
@@ -83,7 +83,7 @@ export class CreditsSettings extends React.Component<
   public render() {
     return (
       <div>
-        <h2>Credits</h2>
+        <h1>Credits</h1>
         <Callout>
           Electron Fiddle is, just like Electron, a free open source project
           welcoming contributors of all genders, cultures, and backgrounds. We
