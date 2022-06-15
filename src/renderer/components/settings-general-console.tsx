@@ -36,7 +36,7 @@ export const ConsoleSettings = observer(
     public render() {
       const { isClearingConsoleOnRun } = this.props.appState;
 
-      const clearOnRunLabel = `
+      const clearOnRunInstructions = `
       Enable this option to automatically clear the console whenever you run your
       fiddle.`.trim();
 
@@ -44,7 +44,8 @@ export const ConsoleSettings = observer(
         <div>
           <h1>Console</h1>
           <Callout>
-            <FormGroup label={clearOnRunLabel}>
+            <FormGroup>
+              <p>{clearOnRunInstructions}</p>
               <Checkbox
                 checked={isClearingConsoleOnRun}
                 label="Clear on run."

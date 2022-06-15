@@ -69,23 +69,26 @@ export class FontSettings extends React.Component<
 
   public render() {
     const { fontFamily, fontSize } = this.state;
-    const fontSettingsLabel =
+    const fontSettingsInstructions =
       'Set a font family and size for your editors. Reload or restart for changes to take effect.';
 
     return (
       <div>
         <h1>Font Settings</h1>
         <Callout>
-          <FormGroup label={fontSettingsLabel}>
-            <h2>Font Family</h2>
+          <p>{fontSettingsInstructions}</p>
+          <FormGroup label="Font Family" labelFor="font-family">
             <InputGroup
+              id="font-family"
               value={fontFamily}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 this.handleSetFontFamily(e)
               }
             />
-            <h2>Font Size</h2>
+          </FormGroup>
+          <FormGroup label="Font Size" labelFor="font-size">
             <InputGroup
+              id="font-size"
               value={`${fontSize || ''}`}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                 this.handleSetFontSize(e)

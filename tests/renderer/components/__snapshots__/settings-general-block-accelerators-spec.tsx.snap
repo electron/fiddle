@@ -6,9 +6,10 @@ exports[`BlockAcceleratorsSettings component renders 1`] = `
     Block Keyboard Shortcuts
   </h4>
   <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="Any keyboard shortcuts checked below will be disabled."
-    >
+    <Blueprint3.FormGroup>
+      <p>
+        Any keyboard shortcuts checked below will be disabled.
+      </p>
       <Blueprint3.Checkbox
         checked={false}
         label="Save"

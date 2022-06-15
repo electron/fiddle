@@ -49,14 +49,15 @@ export const BlockAcceleratorsSettings = observer(
     public render() {
       const { acceleratorsToBlock } = this.props.appState;
 
-      const blockAcceleratorsLabel = `
+      const blockAcceleratorsInstructions = `
         Any keyboard shortcuts checked below will be disabled.`.trim();
 
       return (
         <div>
           <h4>Block Keyboard Shortcuts</h4>
           <Callout>
-            <FormGroup label={blockAcceleratorsLabel}>
+            <FormGroup>
+              <p>{blockAcceleratorsInstructions}</p>
               <Checkbox
                 checked={acceleratorsToBlock.includes(
                   BlockableAccelerator.save,

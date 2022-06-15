@@ -214,6 +214,7 @@ export const AppearanceSettings = observer(
           />
           <FormGroup
             label="Choose your theme"
+            labelFor="open-theme-selector"
             disabled={isUsingSystemTheme}
             inline={true}
           >
