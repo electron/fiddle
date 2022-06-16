@@ -579,7 +579,10 @@ export class AppState {
    * Helper to find a usable fallback version.
    */
   public findUsableVersion(): RunnableVersion | undefined {
-    return this.versionsToShow.find((ver) => this.isVersionUsable(ver.version));
+    return this.versionsToShow.find((version) => {
+      const { ver } = this.isVersionUsable(version.version);
+      return !!ver;
+    });
   }
 
   /**
