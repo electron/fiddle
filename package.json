@@ -11,7 +11,7 @@
     "lint:ts": "eslint \"./**/*.{ts,tsx}\" --fix",
     "lint:templates": "standard \"static/**/*.js\" --fix",
     "lint:links": "node ./tools/check-links.js",
-    "lint": "npm-run-all \"lint:*\"",
+    "lint": "yarn lint:style; yarn lint:ts; yarn lint:templates; yarn lint:links",
     "make": "electron-forge make",
     "package": "electron-forge package",
     "parcel:build": "node ./tools/parcel-build.js",
@@ -110,7 +110,6 @@
     "less": "^4.1.1",
     "lint-staged": "^10.5.4",
     "log-symbols": "^4.0.0",
-    "npm-run-all": "^4.1.5",
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.2.1",
     "rimraf": "^3.0.2",
@@ -130,5 +129,6 @@
     "./src/less/*.less": [
       "stylelint --fix"
     ]
-  }
+  },
+  "packageManager": "yarn@3.2.1"
 }

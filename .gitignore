@@ -39,3 +39,12 @@ report.json
 # Electron Fiddle-Specific
 /static/contributors.json
 /static/css/root.css
+
+# Yarn Specific
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
