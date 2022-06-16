@@ -343,11 +343,7 @@ export const ExecutionSettings = observer(
                   npm
                 </a>{' '}
                 as its package manager by default, but{' '}
-                <a
-                  href="https://classic.yarnpkg.com/lang/en/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
+                <a href="https://yarnpkg.com/" target="_blank" rel="noreferrer">
                   Yarn
                 </a>{' '}
                 is also available.

@@ -248,7 +248,7 @@ export class Runner {
     if (!pmInstalled) {
       let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
-      message += `Node.js and npm, or https://classic.yarnpkg.com/lang/en/ `;
+      message += `Node.js and npm, or https://yarnpkg.com `;
       message += `to install Yarn`;
 
       this.appState.pushOutput(message, { isNotPre: true });
@@ -305,7 +305,7 @@ export class Runner {
         message += `but we could not find ${packageManager}. Fiddle requires Node.js and npm `;
         message += `to support the installation of modules not included in `;
         message += `Electron. Please visit https://nodejs.org to install Node.js `;
-        message += `and npm, or https://classic.yarnpkg.com/lang/en/ to install Yarn`;
+        message += `and npm, or https://yarnpkg.com to install Yarn`;
 
         pushOutput(message, { isNotPre: true });
         this.appState.isInstallingModules = false;

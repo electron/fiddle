@@ -160,7 +160,7 @@ exports[`ExecutionSettings component renders 1`] = `
         as its package manager by default, but
          
         <a
-          href="https://classic.yarnpkg.com/lang/en/"
+          href="https://yarnpkg.com"
           rel="noreferrer"
           target="_blank"
         >

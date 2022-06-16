@@ -81,7 +81,7 @@ environment variable `FIDDLE_VERBOSE_TESTS` when running.
 
 First, create a new branch for your release.
 
-Then, run the [`yarn version`](https://classic.yarnpkg.com/en/docs/cli/version/)
+Then, run the [`yarn version`](https://yarnpkg.com/en/docs/cli/version/)
 command, which will guide you through an interactive prompt to update the package
 version number.
 

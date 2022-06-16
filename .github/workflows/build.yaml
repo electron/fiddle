@@ -27,7 +27,7 @@ jobs:
           node-version: 15.x
           cache: yarn
       - name: Install
-        run: yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000
+        run: yarn --network-timeout 100000 || yarn --network-timeout 100000 || yarn --network-timeout 100000
       - name: lint
         run: yarn lint
       - name: test
