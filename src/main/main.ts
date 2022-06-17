@@ -149,6 +149,7 @@ export function main(argv_in: string[]) {
 }
 
 // only call main() if this is the main module
-if (typeof module !== 'undefined' && require.main !== module) {
-  main(process.argv);
-}
+// FIXME: figure out why this code path is bad
+// if (typeof module !== 'undefined' && require.main !== module) {
+main(process.argv);
+// }

@@ -35,7 +35,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       webviewTag: false,
       nodeIntegration: true,
       contextIsolation: false,
-      preload: path.join(__dirname, '..', 'preload', 'preload'),
+      preload: path.join(__dirname, '..', 'renderer', 'main_window', 'preload'),
     },
   };
 }

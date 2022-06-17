@@ -8,8 +8,8 @@ import { app } from 'electron';
  * @returns
  */
 export function setupAboutPanel(): void {
-  const contribFile = path.join(__dirname, '../../../static/contributors.json');
-  const iconPath = path.resolve(__dirname, '../../../assets/icons/fiddle.png');
+  const contribFile = path.join(__dirname, '../../static/contributors.json');
+  const iconPath = path.resolve(__dirname, '../../assets/icons/fiddle.png');
 
   app.setAboutPanelOptions({
     applicationName: 'Electron Fiddle',
