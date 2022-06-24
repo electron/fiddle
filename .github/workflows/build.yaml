@@ -24,7 +24,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3.3.0
         with:
-          node-version: 15.x
+          node-version: 16.x
           cache: yarn
       - name: Install
         run: yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000
@@ -65,7 +65,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v3.3.0
         with:
-          node-version: 12.x
+          node-version: 16.x
           cache: yarn
       - name: Set MacOS signing certs
         if: matrix.os == 'macOS-latest'
