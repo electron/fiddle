@@ -41,9 +41,11 @@ export const BisectDialog = observer(
       this.isEarliestItemDisabled = this.isEarliestItemDisabled.bind(this);
       this.isLatestItemDisabled = this.isLatestItemDisabled.bind(this);
 
+      const allVersions = this.props.appState.versionsToShow;
+
       this.state = {
-        allVersions: this.props.appState.versionsToShow,
-        startIndex: 10,
+        allVersions,
+        startIndex: allVersions.length > 10 ? 10 : allVersions.length - 1,
         endIndex: 0,
       };
     }
