@@ -23,6 +23,7 @@ exports[`VersionSelect component renders 1`] = `
   disabled={false}
   filterable={true}
   itemListPredicate={[Function]}
+  itemListRenderer={[Function]}
   itemRenderer={[Function]}
   items={
     Array [

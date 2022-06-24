@@ -7,18 +7,53 @@ import {
   MenuItem,
   Tooltip,
 } from '@blueprintjs/core';
-import { ItemListPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import {
+  ItemListPredicate,
+  ItemListRenderer,
+  ItemRenderer,
+  Select,
+} from '@blueprintjs/select';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
 import { disableDownload } from '../../utils/disable-download';
-
+import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
+
+const FixedSizeListItem = ({ index, style, data }: ListChildComponentProps) => {
+  const { filteredItems, renderItem } = data;
+  const renderedItem = renderItem(filteredItems[index], index);
+  return <MenuItem {...renderedItem?.props} style={{ ...style }} />;
+};
+
+const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
+  filteredItems,
+  renderItem,
+  itemsParentRef,
+}) => {
+  const InnerElement = React.forwardRef((props, ref: React.RefObject<Menu>) => {
+    return <Menu ref={ref} ulRef={itemsParentRef} {...props} />;
+  });
+  InnerElement.displayName = 'Menu';
+
+  return (
+    <FixedSizeList
+      innerElementType={InnerElement}
+      height={300}
+      width={400}
+      itemCount={filteredItems.length}
+      itemSize={30}
+      itemData={{ renderItem, filteredItems }}
+    >
+      {FixedSizeListItem}
+    </FixedSizeList>
+  );
+};
 
 /**
  * Helper method: Returns the <Select /> label for an Electron
@@ -224,6 +259,7 @@ export const VersionSelect = observer(
           items={this.props.appState.versionsToShow}
           itemRenderer={renderItem}
           itemListPredicate={filterItems}
+          itemListRenderer={itemListRenderer}
           itemDisabled={itemDisabled}
           onItemSelect={this.props.onVersionSelect}
           noResults={<MenuItem disabled={true} text="No results." />}
