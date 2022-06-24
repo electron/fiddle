@@ -13,8 +13,7 @@ import { RunnerMock, StateMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/renderer/bisect');
 
-describe('BisectDialog component', () => {
-  const NUM_VERSIONS = 10;
+describe.each([8, 15])('BisectDialog component', (numVersions) => {
   let runner: RunnerMock;
   let store: StateMock;
 
@@ -28,7 +27,7 @@ describe('BisectDialog component', () => {
   beforeEach(() => {
     ({ runner, state: store } = (window as any).ElectronFiddle.app);
 
-    store.versionsToShow = generateVersionRange(NUM_VERSIONS);
+    store.versionsToShow = generateVersionRange(numVersions);
     store.versions = Object.fromEntries(
       store.versionsToShow.map((ver) => [ver.version, ver]),
     );
@@ -41,7 +40,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: 0,
-      allVersions: generateVersionRange(NUM_VERSIONS),
+      allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -49,7 +48,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: undefined,
       endIndex: undefined,
-      allVersions: generateVersionRange(NUM_VERSIONS),
+      allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -57,7 +56,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: undefined,
-      allVersions: generateVersionRange(NUM_VERSIONS),
+      allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -65,7 +64,7 @@ describe('BisectDialog component', () => {
     wrapper.setState({
       startIndex: 3,
       endIndex: 4,
-      allVersions: generateVersionRange(NUM_VERSIONS),
+      allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
 
@@ -79,7 +78,9 @@ describe('BisectDialog component', () => {
       const wrapper = shallow(<BisectDialog appState={store as any} />);
       const instance: any = wrapper.instance() as any;
 
-      expect(instance.state.startIndex).toBe(NUM_VERSIONS - 1);
+      expect(instance.state.startIndex).toBe(
+        numVersions > 10 ? 10 : numVersions - 1,
+      );
       instance.onBeginSelect(store.versionsToShow[2]);
       expect(instance.state.startIndex).toBe(2);
     });
@@ -103,7 +104,7 @@ describe('BisectDialog component', () => {
         getCurrentVersion: () => ({ version }),
       });
 
-      const versions = generateVersionRange(NUM_VERSIONS);
+      const versions = generateVersionRange(numVersions);
 
       const wrapper = shallow(<BisectDialog appState={store as any} />);
       wrapper.setState({
@@ -146,7 +147,7 @@ describe('BisectDialog component', () => {
       // setup: dialog state
       const wrapper = shallow(<BisectDialog appState={store as any} />);
       wrapper.setState({
-        allVersions: generateVersionRange(NUM_VERSIONS),
+        allVersions: generateVersionRange(numVersions),
         endIndex: 0,
         startIndex: 4,
       });
