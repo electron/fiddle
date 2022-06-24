@@ -79,7 +79,7 @@ describe('BisectDialog component', () => {
       const wrapper = shallow(<BisectDialog appState={store as any} />);
       const instance: any = wrapper.instance() as any;
 
-      expect(instance.state.startIndex).toBe(NUM_VERSIONS);
+      expect(instance.state.startIndex).toBe(NUM_VERSIONS - 1);
       instance.onBeginSelect(store.versionsToShow[2]);
       expect(instance.state.startIndex).toBe(2);
     });
