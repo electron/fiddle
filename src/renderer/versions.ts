@@ -8,6 +8,7 @@ import {
 } from '../interfaces';
 import { getVersionState } from './binary';
 import { normalizeVersion } from '../utils/normalize-version';
+import releasesJSON from '../../static/releases.json';
 
 /**
  * Returns a sensible default version string.
@@ -198,9 +199,9 @@ export function saveLocalVersions(versions: Array<Version | RunnableVersion>) {
  * @returns {Array<Version>}
  */
 function getReleasedVersions(): Array<Version> {
-  return getVersions(VersionKeys.known, () =>
-    require('../../static/releases.json'),
-  );
+  return getVersions(VersionKeys.known, () => {
+    return releasesJSON as Array<Version>;
+  });
 }
 
 /**

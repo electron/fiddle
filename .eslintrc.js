@@ -28,7 +28,7 @@ const config = {
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
   },
   // the static folder is linted by standard
-  ignorePatterns: ['/out', '/dist', '/coverage', '/static'],
+  ignorePatterns: ['/out', '/.webpack', '/coverage', '/static'],
 };
 
 module.exports = config;

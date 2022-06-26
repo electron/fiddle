@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
     "esModuleInterop": true,
-    "outDir": "./dist",
     "allowJs": true,
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "removeComments": false,
+    "resolveJsonModule": true,
     "preserveConstEnums": true,
     "sourceMap": true,
     "lib": [

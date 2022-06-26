@@ -3,6 +3,7 @@ const { configure: mobxConfigure } = require('mobx');
 const Adapter = require('enzyme-adapter-react-16');
 const { ElectronFiddleMock } = require('./mocks/mocks');
 const { createSerializer } = require('enzyme-to-json');
+const path = require('path');
 
 enzymeConfigure({ adapter: new Adapter() });
 
@@ -46,6 +47,7 @@ window.ElectronFiddle = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
+window.STATIC_DIR = path.join(__dirname, '../static');
 
 beforeEach(() => {
   process.env.JEST = true;

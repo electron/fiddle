@@ -101,6 +101,16 @@ export interface GenericDialogOptions {
   placeholder?: string;
 }
 
+export interface Contributor {
+  url: string;
+  api: string;
+  login: string;
+  avatar: string;
+  name: string;
+  bio: string;
+  location: string;
+}
+
 export interface Templates {
   [index: string]: string | Templates;
 }

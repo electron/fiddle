@@ -1,8 +1,8 @@
 import { Callout, Card } from '@blueprintjs/core';
 import { shell } from 'electron';
-import * as fs from 'fs-extra';
-import * as path from 'path';
 import * as React from 'react';
+import contributorsJSON from '../../../static/contributors.json';
+import { Contributor } from 'src/interfaces';
 
 import { AppState } from '../state';
 
@@ -12,16 +12,6 @@ interface CreditsSettingsProps {
 
 interface CreditsSettingsState {
   contributors: Array<Contributor>;
-}
-
-interface Contributor {
-  url: string;
-  api: string;
-  login: string;
-  avatar: string;
-  name: string;
-  bio: string;
-  location: string;
 }
 
 /**
@@ -38,10 +28,8 @@ export class CreditsSettings extends React.Component<
     super(props);
 
     this.state = {
-      contributors: [],
+      contributors: contributorsJSON as Array<Contributor>,
     };
-
-    this.getContributors();
   }
 
   /**
@@ -93,18 +81,5 @@ export class CreditsSettings extends React.Component<
         <div className="contributors">{this.renderContributors()}</div>
       </div>
     );
-  }
-
-  public async getContributors() {
-    try {
-      const contributorsFile = path.join(
-        __dirname,
-        '../../static/contributors.json',
-      );
-      const contributors = await fs.readJSON(contributorsFile);
-      this.setState({ contributors });
-    } catch (error) {
-      console.warn(`CreditsSettings: Fetching contributors failed`, error);
-    }
   }
 }

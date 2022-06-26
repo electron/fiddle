@@ -6,14 +6,13 @@ import { readFiddle } from '../utils/read-fiddle';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
+// Defined in webpack plugins.
+declare const STATIC_DIR: string;
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
 
 // location of the fallback template fiddle used iff downloading failed
-const STATIC_TEMPLATE_DIR = path.resolve(
-  __dirname,
-  '../../static/electron-quick-start',
-);
+const STATIC_TEMPLATE_DIR = path.join(STATIC_DIR, 'electron-quick-start');
 
 // electron-quick-start branch that holds the test template
 const TEST_TEMPLATE_BRANCH = 'test-template';

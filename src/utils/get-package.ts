@@ -1,6 +1,6 @@
-import * as path from 'path';
 import { MAIN_JS } from '../interfaces';
 import { AppState } from '../renderer/state';
+import * as fiddlePackageJSON from '../../package.json';
 
 export interface PackageJsonOptions {
   includeElectron?: boolean;
@@ -13,7 +13,6 @@ export const DEFAULT_OPTIONS = {
 };
 
 export function getForgeVersion(): string {
-  const fiddlePackageJSON = require(path.join(__dirname, '../../package.json'));
   return fiddlePackageJSON.devDependencies['@electron-forge/cli'];
 }
 

@@ -17,6 +17,9 @@ import { defaultDark, defaultLight } from './themes-defaults';
 import { ElectronTypes } from './electron-types';
 import { USER_DATA_PATH } from './constants';
 
+// Importing styles files
+import '../less/root.less';
+
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
  * but it does eventually render all components.
