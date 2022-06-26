@@ -18,9 +18,9 @@ export async function readFiddle(
   let got: EditorValues = {};
 
   try {
-    // TODO(dsanders11): Remove empty options once issue fixed:
+    // TODO(dsanders11): Remove options once issue fixed:
     // https://github.com/isaacs/node-graceful-fs/issues/223
-    const files = await fs.readdir(folder, {});
+    const files = await fs.readdir(folder, { encoding: 'utf8' });
     const names = files.filter(
       (f) => isSupportedFile(f) || (includePackageJson && f === PACKAGE_NAME),
     );
