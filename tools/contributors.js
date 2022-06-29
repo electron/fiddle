@@ -95,10 +95,12 @@ function fetchDetailsContributors(contributors) {
  */
 function fetchContributors() {
   const contributors = [];
+  console.error("Fetching");
 
   return fetch(CONTRIBUTORS_URL, { headers: HEADERS })
     .then((response) => response.json())
     .then(async (data) => {
+      console.error("Response", data);
       if (data && data.forEach) {
         data.forEach(
           ({ html_url, url, login, avatar_url, type, contributions }) => {
