@@ -83,6 +83,8 @@ jobs:
           encodedString: ${{ secrets.WINDOWS_CODESIGN_P12 }}
       - name: Install
         run: yarn --network-timeout 100000 || yarn --network-timeout 100000 || yarn --network-timeout 100000
+      - name: Load contributors
+        run: yarn contributors
       - name: Make
         if: startsWith(github.ref, 'refs/tags/')
         run: yarn make --arch=${{ matrix.arch }}
