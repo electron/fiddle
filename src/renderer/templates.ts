@@ -2,6 +2,8 @@ import * as path from 'path';
 import { EditorValues } from '../interfaces';
 import { readFiddle } from '../utils/read-fiddle';
 
+// Defined in webpack plugins.
+declare const STATIC_DIR: string;
 /**
  * Returns expected content for a given name.
  *
@@ -9,10 +11,7 @@ import { readFiddle } from '../utils/read-fiddle';
  * @returns {Promise<EditorValues>}
  */
 export function getTemplateValues(name: string): Promise<EditorValues> {
-  const folder = path.join(
-    __dirname,
-    '../../static/show-me',
-    name.toLowerCase(),
-  );
-  return readFiddle(folder);
+  const templatePath = path.join(STATIC_DIR, 'show-me', name.toLowerCase());
+
+  return readFiddle(templatePath);
 }

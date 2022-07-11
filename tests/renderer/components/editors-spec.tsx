@@ -15,12 +15,6 @@ import {
   createEditorValues,
 } from '../../mocks/mocks';
 
-jest.mock('monaco-loader', () =>
-  jest.fn(async () => {
-    return { monaco: true };
-  }),
-);
-
 jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
 }));

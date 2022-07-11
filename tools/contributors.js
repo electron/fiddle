@@ -32,7 +32,16 @@ async function maybeFetchContributors() {
       );
       await fetchAndWriteContributorsFile();
     } else {
-      console.log(logSymbols.success, 'Contributors file on disk and recent.');
+      const contributors = await fs.readJson(CONTRIBUTORS_FILE_PATH);
+      if (contributors.length === 0) {
+        // File exists, but is empty
+        await fetchAndWriteContributorsFile();
+      } else {
+        console.log(
+          logSymbols.success,
+          'Contributors file on disk and recent.',
+        );
+      }
     }
   } catch (error) {
     if (error.code === 'ENOENT') {
@@ -185,4 +194,8 @@ module.exports = {
   maybeFetchContributors,
 };
 
-if (require.main === module) maybeFetchContributors();
+if (require.main === module) {
+  (async () => {
+    await maybeFetchContributors();
+  })();
+}

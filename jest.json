@@ -11,6 +11,7 @@
   "snapshotSerializers": [
     "enzyme-to-json/serializer"
   ],
+  "globalSetup": "<rootDir>/tests/globalSetup.js",
   "setupFilesAfterEnv": [
     "<rootDir>/tests/setup.js"
   ],
@@ -39,6 +40,7 @@
     "/tests/.*\\.(ts|js)$"
   ],
   "moduleNameMapper": {
-    ".*releases.json$": "<rootDir>/static/releases.json"
+    ".*releases.json$": "<rootDir>/static/releases.json",
+    "\\.(css|less|scss)$": "<rootDir>/tests/mocks/styles.ts"
   }
 }

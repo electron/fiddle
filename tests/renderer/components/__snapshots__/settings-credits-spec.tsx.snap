@@ -1,20 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`CreditsSettings component handles a read error 1`] = `
-<div>
-  <h1>
-    Credits
-  </h1>
-  <Blueprint3.Callout>
-    Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
-  </Blueprint3.Callout>
-  <br />
-  <div
-    className="contributors"
-  />
-</div>
-`;
-
 exports[`CreditsSettings component renders 1`] = `
 <div>
   <h1>

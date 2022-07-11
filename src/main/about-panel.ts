@@ -1,6 +1,7 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
 import { app } from 'electron';
+import { Contributor } from 'src/interfaces';
+import contributorsJSON from '../../static/contributors.json';
 
 /**
  * Sets Fiddle's About panel options on Linux and macOS
@@ -8,15 +9,19 @@ import { app } from 'electron';
  * @returns
  */
 export function setupAboutPanel(): void {
-  const contribFile = path.join(__dirname, '../../../static/contributors.json');
-  const iconPath = path.resolve(__dirname, '../../../assets/icons/fiddle.png');
+  const contributors: Array<string> = [];
+  contributorsJSON.forEach((userData: Contributor) => {
+    if (userData.name !== null && userData.name !== undefined) {
+      contributors.push(userData.name);
+    }
+  });
+
+  const iconPath = path.resolve(__dirname, '../assets/icons/fiddle.png');
 
   app.setAboutPanelOptions({
     applicationName: 'Electron Fiddle',
     applicationVersion: app.getVersion(),
-    authors: fs
-      .readJSONSync(contribFile)
-      .map(({ name }: { name: string }) => name),
+    authors: contributors,
     copyright: '© Electron Authors',
     credits: 'https://github.com/electron/fiddle/graphs/contributors',
     iconPath,
