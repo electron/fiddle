@@ -1,9 +1,6 @@
 import { Button, Dialog, FileInput } from '@blueprintjs/core';
-import { shell } from 'electron';
-import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
-import * as path from 'path';
 import * as React from 'react';
 import { getTheme, THEMES_PATH } from '../themes';
 
@@ -69,7 +66,7 @@ export const AddThemeDialog = observer(
       if (!file) return;
 
       try {
-        const editor = fs.readJSONSync(file.path);
+        const editor = window.NodeAPI.readJSONSync(file.path);
         if (!editor.base && !editor.rules)
           throw Error('File does not match specifications'); // has to have these attributes
         defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
@@ -93,9 +90,9 @@ export const AddThemeDialog = observer(
         throw new Error(`Filename ${name} not found`);
       }
 
-      const themePath = path.join(THEMES_PATH, `${name}`);
+      const themePath = window.NodeAPI.joinPaths(THEMES_PATH, `${name}`);
 
-      await fs.outputJSON(
+      await window.NodeAPI.outputJSON(
         themePath,
         {
           ...newTheme,
@@ -105,7 +102,7 @@ export const AddThemeDialog = observer(
       );
 
       this.props.appState.setTheme(themePath);
-      shell.showItemInFolder(themePath);
+      window.ElectronAPI.showItemInFolder(themePath);
     }
 
     get buttons() {

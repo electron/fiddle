@@ -1,5 +1,4 @@
 import { Callout, Card } from '@blueprintjs/core';
-import { shell } from 'electron';
 import * as React from 'react';
 import contributorsJSON from '../../../static/contributors.json';
 import { Contributor } from 'src/interfaces';
@@ -48,7 +47,7 @@ export class CreditsSettings extends React.Component<
       const style: React.CSSProperties = {
         backgroundImage: `url(${avatar})`,
       };
-      const onClick = () => shell.openExternal(url);
+      const onClick = () => window.ElectronAPI.openExternalURL(url);
 
       return (
         <Card

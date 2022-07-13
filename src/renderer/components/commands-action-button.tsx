@@ -10,7 +10,6 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as React from 'react';
-import { clipboard } from 'electron';
 import { when } from 'mobx';
 import {
   EditorValues,
@@ -20,7 +19,6 @@ import {
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
-import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 
 interface GistActionButtonProps {
@@ -58,7 +56,7 @@ export const GistActionButton = observer(
         actionType: GistActionType.publish,
       };
 
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
+      window.IPC.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
     }
 
     private toaster: Toaster;
@@ -67,11 +65,11 @@ export const GistActionButton = observer(
     };
 
     public componentDidMount() {
-      ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      window.IPC.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
     }
 
     public componentWillUnmount() {
-      ipcRendererManager.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      window.IPC.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
     }
 
     /**
@@ -136,7 +134,8 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () => clipboard.writeText(gist.data.html_url),
+            onClick: () =>
+              window.ElectronAPI.setClipboardText(gist.data.html_url),
           },
         });
 
@@ -151,10 +150,7 @@ export const GistActionButton = observer(
           detail: `GitHub encountered the following error: ${error.message}`,
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        window.IPC.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
       }
     }
 
@@ -209,7 +205,8 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () => clipboard.writeText(gist.data.html_url),
+            onClick: () =>
+              window.ElectronAPI.setClipboardText(gist.data.html_url),
           },
         });
       } catch (error) {
@@ -222,10 +219,7 @@ export const GistActionButton = observer(
           buttons: ['Ok'],
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        window.IPC.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
       }
 
       appState.activeGistAction = GistActionState.none;
@@ -258,10 +252,7 @@ export const GistActionButton = observer(
           detail: `GitHub encountered the following error: ${error.message}`,
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        window.IPC.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
       }
 
       appState.gistId = undefined;

@@ -13,7 +13,6 @@ import {
   ItemRenderer,
   Select,
 } from '@blueprintjs/select';
-import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 import semver from 'semver';
@@ -162,7 +161,7 @@ export const renderVersionContextMenu = (
       <MenuItem
         text="Copy Version Number"
         onClick={() => {
-          clipboard.writeText(version);
+          window.ElectronAPI.setClipboardText(version);
         }}
       />
     </Menu>,

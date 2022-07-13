@@ -8,7 +8,6 @@ import { BisectHandler } from './commands-bisect';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
-import { ipcRendererManager } from '../../preload/ipc';
 import { IpcEvents } from '../../ipc-events';
 
 interface CommandsProps {
@@ -30,7 +29,7 @@ export const Commands = observer(
 
     private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       if (e.target['tagName'] !== 'INPUT') {
-        ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
+        window.IPC.send(IpcEvents.CLICK_TITLEBAR_MAC);
       }
     };
 
@@ -41,7 +40,9 @@ export const Commands = observer(
       return (
         <div
           className={
-            process.platform === 'darwin' ? 'commands is-mac' : 'commands'
+            window.NodeAPI.getPlatform() === 'darwin'
+              ? 'commands is-mac'
+              : 'commands'
           }
           onDoubleClick={this.handleDoubleClick}
         >
@@ -71,7 +72,7 @@ export const Commands = observer(
               />
             </ControlGroup>
           </div>
-          {process.platform === 'darwin' ? (
+          {window.NodeAPI.getPlatform() === 'darwin' ? (
             <div className="title">{title}</div>
           ) : undefined}
           <div>

@@ -1,5 +1,4 @@
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
-import { clipboard, shell } from 'electron';
 import { observer } from 'mobx-react';
 import * as React from 'react';
 
@@ -105,7 +104,7 @@ export const TokenDialog = observer(
      * @memberof TokenDialog
      */
     public openGenerateTokenExternal() {
-      shell.openExternal(GENERATE_TOKEN_URL);
+      window.ElectronAPI.openExternalURL(GENERATE_TOKEN_URL);
     }
 
     /**
@@ -116,7 +115,7 @@ export const TokenDialog = observer(
      * @memberof TokenDialog
      */
     public onTokenInputFocused() {
-      const text = (clipboard.readText() || '').trim();
+      const text = (window.ElectronAPI.getClipboardText() || '').trim();
 
       if (text.length !== 40) return;
       if (!/^[a-z0-9]+$/.test(text)) return;

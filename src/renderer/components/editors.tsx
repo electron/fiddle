@@ -15,7 +15,6 @@ import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
 import { getEditorTitle } from '../../utils/editor-utils';
 import { getTemplate, getTestTemplate } from '../content';
-import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
@@ -62,14 +61,11 @@ export const Editors = observer(
     public async componentDidMount() {
       this.stopListening();
 
-      ipcRendererManager.on(
-        IpcEvents.MONACO_EXECUTE_COMMAND,
-        (_event, cmd: string) => {
-          this.executeCommand(cmd);
-        },
-      );
+      window.IPC.on(IpcEvents.MONACO_EXECUTE_COMMAND, (_event, cmd: string) => {
+        this.executeCommand(cmd);
+      });
 
-      ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
+      window.IPC.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
         const { modules, version } = this.props.appState;
         const values = await getTemplate(version);
         const options: SetFiddleOptions = { templateName: version };
@@ -80,21 +76,18 @@ export const Editors = observer(
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
+      window.IPC.on(IpcEvents.FS_NEW_TEST, async (_event) => {
         const values = await getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRendererManager.on(
-        IpcEvents.MONACO_TOGGLE_OPTION,
-        (_event, cmd: string) => {
-          this.toggleEditorOption(cmd);
-        },
-      );
+      window.IPC.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {
+        this.toggleEditorOption(cmd);
+      });
 
-      ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
+      window.IPC.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -110,11 +103,11 @@ export const Editors = observer(
     }
 
     private stopListening() {
-      ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
-      ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
-      ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
+      window.IPC.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
+      window.IPC.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+      window.IPC.removeAllListeners(IpcEvents.FS_NEW_TEST);
+      window.IPC.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
+      window.IPC.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
     }
 
     /**

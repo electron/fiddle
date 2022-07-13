@@ -7,7 +7,6 @@ import * as React from 'react';
 import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
 import { idFromUrl, urlFromId } from '../../utils/gist';
-import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 
 interface AddressBarProps {
@@ -82,20 +81,14 @@ export const AddressBar = observer(
         () => appState.gistId,
         (gistId: string) => this.setState({ value: urlFromId(gistId) }),
       );
-      ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
-      ipcRendererManager.on(
-        IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
-        loaders.example,
-      );
+      window.IPC.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
+      window.IPC.on(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, loaders.example);
     }
 
     public componentWillUnmount() {
       const { loaders } = this.state;
-      ipcRendererManager.removeListener(
-        IpcEvents.LOAD_GIST_REQUEST,
-        loaders.gist,
-      );
-      ipcRendererManager.removeListener(
+      window.IPC.removeListener(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
+      window.IPC.removeListener(
         IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
         loaders.example,
       );

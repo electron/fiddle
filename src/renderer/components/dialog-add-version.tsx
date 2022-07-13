@@ -7,7 +7,6 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as path from 'path';
 import * as React from 'react';
 import * as semver from 'semver';
 
@@ -15,7 +14,6 @@ import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
-import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 import { getLocalVersionForPath } from '../versions';
 
@@ -41,18 +39,19 @@ interface AddVersionDialogState {
 function makeLocalName(folderPath: string) {
   // take a dirname like '/home/username/electron/gn/main/src/out/testing'
   // and return something like 'gn/main - testing'
-  const tokens = folderPath.split(path.sep);
+  const pathSeparator = window.NodeAPI.getpathSeparator();
+  const tokens = folderPath.split(pathSeparator);
   const buildType = tokens.pop(); // e.g. 'testing' or 'release'
   const leader = tokens
     // remove 'src/out/' -- they are in every local build, so make poor names
     .slice(0, -2)
-    .join(path.sep)
+    .join(pathSeparator)
     // extract about enough for the end result to be about 20 chars
     .slice(-20 + buildType!.length)
     // remove any fragment in case the prev slice cut in the middle of a name
-    .split(path.sep)
+    .split(pathSeparator)
     .slice(1)
-    .join(path.sep);
+    .join(pathSeparator);
   return `${leader} - ${buildType}`;
 }
 
@@ -80,18 +79,13 @@ export const AddVersionDialog = observer(
       this.onClose = this.onClose.bind(this);
       this.onChangeVersion = this.onChangeVersion.bind(this);
 
-      ipcRendererManager.on(
-        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-        (_event, [file]) => {
-          this.setFolderPath(file);
-        },
-      );
+      window.IPC.on(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, (_event, [file]) => {
+        this.setFolderPath(file);
+      });
     }
 
     public componentWillUnmount() {
-      ipcRendererManager.removeAllListeners(
-        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-      );
+      window.IPC.removeAllListeners(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
     }
 
     /**
@@ -186,7 +180,7 @@ export const AddVersionDialog = observer(
       const inputProps = {
         onClick: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
           e.preventDefault();
-          ipcRendererManager.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+          window.IPC.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
         },
       };
       const { folderPath } = this.state;

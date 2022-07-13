@@ -6,13 +6,10 @@ import {
   MenuItem,
 } from '@blueprintjs/core';
 import * as React from 'react';
-import * as fs from 'fs-extra';
 import * as namor from 'namor';
-import * as path from 'path';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { observer } from 'mobx-react';
 import { reaction } from 'mobx';
-import { shell } from 'electron';
 
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
@@ -143,9 +140,9 @@ export const AppearanceSettings = observer(
 
       try {
         const name = namor.generate({ words: 2, numbers: 0 });
-        const themePath = path.join(THEMES_PATH, `${name}.json`);
+        const themePath = window.NodeAPI.joinPaths(THEMES_PATH, `${name}.json`);
 
-        await fs.outputJSON(
+        await window.NodeAPI.outputJSON(
           themePath,
           {
             ...theme,
@@ -156,7 +153,7 @@ export const AppearanceSettings = observer(
           { spaces: 2 },
         );
 
-        shell.showItemInFolder(themePath);
+        window.ElectronAPI.showItemInFolder(themePath);
 
         this.setState({ themes: await getAvailableThemes() });
 
@@ -176,8 +173,8 @@ export const AppearanceSettings = observer(
      */
     public async openThemeFolder(): Promise<boolean> {
       try {
-        await fs.ensureDir(THEMES_PATH);
-        await shell.showItemInFolder(THEMES_PATH);
+        await window.NodeAPI.ensureDir(THEMES_PATH);
+        await window.ElectronAPI.showItemInFolder(THEMES_PATH);
         return true;
       } catch (error) {
         console.warn(`Appearance Settings: Could not open themes folder`);
