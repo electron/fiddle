@@ -29,37 +29,37 @@ exports[`VersionSelect component renders 1`] = `
     Array [
       Object {
         "source": "remote",
-        "state": "ready",
+        "state": "installed",
         "version": "2.0.3",
       },
       Object {
         "source": "remote",
-        "state": "ready",
+        "state": "installed",
         "version": "2.0.2",
       },
       Object {
         "source": "remote",
-        "state": "ready",
+        "state": "installed",
         "version": "2.0.1",
       },
       Object {
         "source": "remote",
-        "state": "ready",
+        "state": "installed",
         "version": "2.0.0",
       },
       Object {
         "source": "remote",
-        "state": "ready",
+        "state": "installed",
         "version": "1.8.7",
       },
       Object {
         "source": "remote",
-        "state": "unknown",
+        "state": "missing",
         "version": "1.0.0",
       },
       Object {
         "source": "remote",
-        "state": "unknown",
+        "state": "missing",
         "version": "3.0.0-unsupported",
       },
     ]

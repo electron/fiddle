@@ -1,9 +1,9 @@
 import * as React from 'react';
 
+import { InstallState } from '@aryanshridhar/fiddle-core';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { VersionState } from '../src/interfaces';
 import { BisectHandler } from '../src/renderer/components/commands-bisect';
 import { AppState } from '../src/renderer/state';
 import { StateMock } from '../tests/mocks/state';
@@ -16,7 +16,7 @@ describe('Bisect commands component', () => {
   });
 
   it('is disabled if an electron version is currently downloading', () => {
-    store.currentElectronVersion.state = VersionState.downloading;
+    store.currentElectronVersion.state = InstallState.downloading;
     const { getByRole } = render(
       <BisectHandler appState={(store as unknown) as AppState} />,
     );
