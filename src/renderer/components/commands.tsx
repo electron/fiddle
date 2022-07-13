@@ -8,7 +8,7 @@ import { BisectHandler } from './commands-bisect';
 import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
-import { ipcRendererManager } from '../ipc';
+import { ipcRendererManager } from '../../preload/ipc';
 import { IpcEvents } from '../../ipc-events';
 
 interface CommandsProps {

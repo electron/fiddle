@@ -15,7 +15,7 @@ import { AppState } from './state';
 import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
 
-import { ipcRendererManager } from './ipc';
+import { ipcRendererManager } from '../preload/ipc';
 
 export class TaskRunner {
   private readonly appState: AppState;

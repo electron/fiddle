@@ -3,7 +3,7 @@ import * as React from 'react';
 
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { VersionState } from '../../../src/interfaces';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { ipcRendererManager } from '../../../src/preload/ipc';
 
 import { StateMock } from '../../mocks/mocks';
 

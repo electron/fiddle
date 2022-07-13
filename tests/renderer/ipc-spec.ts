@@ -1,6 +1,6 @@
 import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 
 describe('ipcRendererManager', () => {
   afterEach(() => {

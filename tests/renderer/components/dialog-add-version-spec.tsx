@@ -4,7 +4,7 @@ import * as React from 'react';
 import { IpcEvents } from '../../../src/ipc-events';
 import { getIsDownloaded } from '../../../src/renderer/binary';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { ipcRendererManager } from '../../../src/preload/ipc';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 import { StateMock } from '../../mocks/mocks';

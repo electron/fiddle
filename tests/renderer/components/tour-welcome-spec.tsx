@@ -5,7 +5,7 @@ import {
   getWelcomeTour,
   WelcomeTour,
 } from '../../../src/renderer/components/tour-welcome';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { ipcRendererManager } from '../../../src/preload/ipc';
 
 import { StateMock } from '../../mocks/mocks';
 

@@ -7,7 +7,7 @@ import * as React from 'react';
 import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
 import { idFromUrl, urlFromId } from '../../utils/gist';
-import { ipcRendererManager } from '../ipc';
+import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 
 interface AddressBarProps {

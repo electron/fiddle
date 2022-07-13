@@ -11,7 +11,7 @@ import { IpcEvents } from '../../src/ipc-events';
 
 import { App } from '../../src/renderer/app';
 import { TaskRunner } from '../../src/renderer/task-runner';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import { AppMock } from '../mocks/app';
 import { StateMock } from '../mocks/state';
 

@@ -4,7 +4,7 @@ import * as semver from 'semver';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import {
   RunResult,
   RunnableVersion,

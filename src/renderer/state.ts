@@ -29,7 +29,7 @@ import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
 import { EditorMosaic } from './editor-mosaic';
 import { getTemplate } from './content';
-import { ipcRendererManager } from './ipc';
+import { ipcRendererManager } from '../preload/ipc';
 
 import { sortVersions } from '../utils/sort-versions';
 import { IPackageManager } from './npm';

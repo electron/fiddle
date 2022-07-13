@@ -16,7 +16,7 @@ import {
 } from '../../src/renderer/binary';
 import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import { AppState } from '../../src/renderer/state';
 import { getElectronVersions, makeRunnable } from '../../src/renderer/versions';
 import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';

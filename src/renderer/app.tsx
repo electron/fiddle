@@ -2,7 +2,7 @@ import { autorun, reaction, when } from 'mobx';
 import * as path from 'path';
 
 import { ipcRenderer } from 'electron';
-import { ipcRendererManager } from './ipc';
+import { ipcRendererManager } from '../preload/ipc';
 import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
 import { WEBCONTENTS_READY_FOR_IPC_SIGNAL, IpcEvents } from '../ipc-events';
 import { getPackageJson, PackageJsonOptions } from '../utils/get-package';

@@ -4,7 +4,7 @@ import { AppState } from '../../src/renderer/state';
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import { readFiddle } from '../../src/utils/read-fiddle';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 

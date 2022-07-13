@@ -3,7 +3,7 @@ import { shallow } from 'enzyme';
 
 import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { ipcRendererManager } from '../../../src/preload/ipc';
 import { IpcEvents } from '../../../src/ipc-events';
 
 import { StateMock } from '../../mocks/mocks';

@@ -20,7 +20,7 @@ import {
 import { IpcEvents } from '../../ipc-events';
 import { getOctokit } from '../../utils/octokit';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
-import { ipcRendererManager } from '../ipc';
+import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 
 interface GistActionButtonProps {

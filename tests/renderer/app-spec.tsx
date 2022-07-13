@@ -4,7 +4,7 @@ import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { createEditorValues } from '../mocks/mocks';
 import { IpcEvents } from '../../src/ipc-events';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import { waitFor } from '../utils';
 import { setupBinary } from '../../src/renderer/binary';
 

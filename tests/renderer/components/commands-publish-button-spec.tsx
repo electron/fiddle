@@ -8,7 +8,7 @@ import {
   MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { ipcRendererManager } from '../../../src/preload/ipc';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { getOctokit } from '../../../src/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../../mocks/mocks';

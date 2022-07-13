@@ -15,7 +15,7 @@ import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { getIsDownloaded } from '../binary';
-import { ipcRendererManager } from '../ipc';
+import { ipcRendererManager } from '../../preload/ipc';
 import { AppState } from '../state';
 import { getLocalVersionForPath } from '../versions';
 

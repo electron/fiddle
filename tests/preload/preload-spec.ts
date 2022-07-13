@@ -3,7 +3,7 @@
  */
 import * as electron from 'electron';
 import { IpcEvents } from '../../src/ipc-events';
-import { setupFiddleGlobal } from '../../src/preload/preload';
+import { setupFiddleGlobal } from '../../src/preload/setup-fiddle';
 
 describe('preload', () => {
   // We instantiate this in `tests/setup.js` for the main and

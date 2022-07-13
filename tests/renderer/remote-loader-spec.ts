@@ -9,7 +9,7 @@ import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { getOctokit } from '../../src/utils/octokit';
-import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ipcRendererManager } from '../../src/preload/ipc';
 import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
 
 jest.mock('../../src/utils/octokit');

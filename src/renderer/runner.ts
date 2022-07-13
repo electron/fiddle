@@ -7,7 +7,7 @@ import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { Bisector } from './bisect';
-import { ipcRendererManager } from './ipc';
+import { ipcRendererManager } from '../preload/ipc';
 import {
   getIsPackageManagerInstalled,
   addModules,
