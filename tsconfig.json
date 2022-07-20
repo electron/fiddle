@@ -23,6 +23,7 @@
     "noUnusedParameters": true,
     "importHelpers": true,
     "noEmitHelpers": true,
+    "resolveJsonModule": true,
     "module": "commonjs",
     "moduleResolution": "node",
     "pretty": true,

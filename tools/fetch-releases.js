@@ -16,7 +16,7 @@ async function getReleases() {
 
 async function main() {
   const data = await getReleases();
-  const releases = data.map(({ version }) => ({ version }));
+  const releases = data.map(({ version, node }) => ({ version, node }));
 
   console.log(`Updating local releases.json with ${releases.length} versions.`);
 
