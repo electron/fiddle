@@ -6,8 +6,11 @@ import { readFiddle } from '../utils/read-fiddle';
 import * as fs from 'fs-extra';
 import * as path from 'path';
 
-// Defined in webpack plugins.
-declare const STATIC_DIR: string;
+const STATIC_DIR =
+  process.env.NODE_ENV === 'production'
+    ? path.join(__dirname, '../../static')
+    : path.join(process.cwd(), './static');
+
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
 
