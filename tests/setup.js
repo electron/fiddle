@@ -47,7 +47,6 @@ window.ElectronFiddle = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
-window.STATIC_DIR = path.join(__dirname, '../static');
 
 beforeEach(() => {
   process.env.JEST = true;
