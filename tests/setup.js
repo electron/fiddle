@@ -3,7 +3,6 @@ const { configure: mobxConfigure } = require('mobx');
 const Adapter = require('enzyme-adapter-react-16');
 const { ElectronFiddleMock } = require('./mocks/mocks');
 const { createSerializer } = require('enzyme-to-json');
-const path = require('path');
 
 enzymeConfigure({ adapter: new Adapter() });
 
