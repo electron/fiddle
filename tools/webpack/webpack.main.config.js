@@ -2,6 +2,7 @@ const plugins = require('./common/webpack.plugins');
 const rules = require('./common/webpack.rules');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+const nodeExternals = require('webpack-node-externals');
 
 module.exports = {
   /**
@@ -28,6 +29,11 @@ module.exports = {
         { from: 'static/show-me', to: '../static/show-me' },
         { from: 'assets/icons/fiddle.png', to: '../assets/icons/fiddle.png' },
       ],
+    }),
+  ],
+  externals: [
+    nodeExternals({
+      modulesFromFile: true,
     }),
   ],
   optimization: {
