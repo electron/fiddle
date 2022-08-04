@@ -1,14 +1,16 @@
+import * as React from 'react';
+
+import * as path from 'path';
+
 import { Button, Dialog, FileInput } from '@blueprintjs/core';
 import { shell } from 'electron';
 import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
-import * as path from 'path';
-import * as React from 'react';
-import { getTheme, THEMES_PATH } from '../themes';
 
 import { AppState } from '../state';
-import { defaultDark, LoadedFiddleTheme } from '../themes-defaults';
+import { THEMES_PATH, getTheme } from '../themes';
+import { LoadedFiddleTheme, defaultDark } from '../themes-defaults';
 
 interface AddThemeDialogProps {
   appState: AppState;

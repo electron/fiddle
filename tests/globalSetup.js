@@ -1,4 +1,5 @@
 const path = require('path');
+
 const fs = require('fs-extra');
 
 const CONTRIBUTORS_FILE_PATH = path.join(

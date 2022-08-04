@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+
 import { AppState } from '../renderer/state';
 
 let _octo: Octokit;

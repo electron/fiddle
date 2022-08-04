@@ -1,4 +1,4 @@
-import { observable, makeObservable } from 'mobx';
+import { makeObservable, observable } from 'mobx';
 
 import {
   BlockableAccelerator,
@@ -8,11 +8,10 @@ import {
   RunnableVersion,
 } from '../../src/interfaces';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
-
+import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
-import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 
 export class StateMock {
   public acceleratorsToBlock: BlockableAccelerator[] = [];

@@ -1,21 +1,22 @@
+import * as path from 'path';
+
+import { download as electronDownload } from '@electron/get';
+import extract from 'extract-zip';
+import * as semver from 'semver';
+
+import {
+  RunnableVersion,
+  VersionSource,
+  VersionState,
+} from '../../src/interfaces';
 import {
   getElectronBinaryPath,
   getVersionState,
   removeBinary,
   setupBinary,
 } from '../../src/renderer/binary';
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
-import { overridePlatform, resetPlatform, waitFor } from '../utils';
-
-import * as path from 'path';
-import * as semver from 'semver';
-import extract from 'extract-zip';
-import { download as electronDownload } from '@electron/get';
 import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
+import { overridePlatform, resetPlatform, waitFor } from '../utils';
 
 jest.mock('fs-extra');
 jest.mock('extract-zip');

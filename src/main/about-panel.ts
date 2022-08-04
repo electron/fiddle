@@ -1,6 +1,9 @@
 import * as path from 'path';
+
 import { app } from 'electron';
+
 import { Contributor } from 'src/interfaces';
+
 import contributorsJSON from '../../static/contributors.json';
 
 /**

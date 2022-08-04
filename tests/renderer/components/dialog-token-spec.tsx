@@ -1,12 +1,12 @@
+import * as React from 'react';
+
 import * as electron from 'electron';
 import { shallow } from 'enzyme';
-import * as React from 'react';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { getOctokit } from '../../../src/utils/octokit';
-import { overridePlatform, resetPlatform } from '../../utils';
-
 import { StateMock } from '../../mocks/mocks';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/utils/octokit');
 

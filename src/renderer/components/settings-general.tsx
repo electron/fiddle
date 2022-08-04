@@ -1,15 +1,16 @@
+import * as React from 'react';
+
 import { Divider } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { AppState } from '../state';
 import { AppearanceSettings } from './settings-general-appearance';
-import { FontSettings } from './settings-general-font';
 import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
+import { FontSettings } from './settings-general-font';
 import { GitHubSettings } from './settings-general-github';
-import { PackageAuthorSettings } from './settings-general-package-author';
 import { MirrorSettings } from './settings-general-mirror';
+import { PackageAuthorSettings } from './settings-general-package-author';
 
 interface GeneralSettingsProps {
   appState: AppState;

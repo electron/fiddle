@@ -1,5 +1,6 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
 
 import {
   ElectronReleaseChannel,
@@ -8,14 +9,13 @@ import {
   VersionState,
 } from '../../../src/interfaces';
 import {
+  VersionSelect,
   filterItems,
   getItemIcon,
   getItemLabel,
   renderItem,
-  VersionSelect,
 } from '../../../src/renderer/components/version-select';
 import { disableDownload } from '../../../src/utils/disable-download';
-
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { downloading, ready, unknown, unzipping } = VersionState;

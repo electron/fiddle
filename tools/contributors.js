@@ -1,7 +1,8 @@
+const path = require('path');
+const util = require('util');
+
 const fetch = require('cross-fetch');
 const fs = require('fs-extra');
-const util = require('util');
-const path = require('path');
 const logSymbols = require('log-symbols');
 
 const { GITHUB_TOKEN, GH_TOKEN } = process.env;

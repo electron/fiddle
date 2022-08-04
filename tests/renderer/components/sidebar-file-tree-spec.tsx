@@ -1,14 +1,15 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
-import { EditorValues } from '../../../src/interfaces';
 
+import { shallow } from 'enzyme';
+
+import { EditorValues } from '../../../src/interfaces';
+import { Editors } from '../../../src/renderer/components/editors';
 import { SidebarFileTree } from '../../../src/renderer/components/sidebar-file-tree';
 import {
   EditorMosaic,
   EditorPresence,
 } from '../../../src/renderer/editor-mosaic';
 import { createEditorValues } from '../../mocks/editor-values';
-import { Editors } from '../../../src/renderer/components/editors';
 import { AppMock, StateMock } from '../../mocks/mocks';
 
 describe('SidebarFileTree component', () => {

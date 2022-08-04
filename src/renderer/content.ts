@@ -1,10 +1,11 @@
-import { EditorValues } from '../interfaces';
-import { USER_DATA_PATH } from './constants';
-import { isReleasedMajor } from './versions';
-import { readFiddle } from '../utils/read-fiddle';
+import * as path from 'path';
 
 import * as fs from 'fs-extra';
-import * as path from 'path';
+
+import { EditorValues } from '../interfaces';
+import { readFiddle } from '../utils/read-fiddle';
+import { USER_DATA_PATH } from './constants';
+import { isReleasedMajor } from './versions';
 
 const STATIC_DIR =
   process.env.NODE_ENV === 'production'

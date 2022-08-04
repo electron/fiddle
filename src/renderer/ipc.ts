@@ -1,5 +1,7 @@
-import { ipcRenderer } from 'electron';
 import { EventEmitter } from 'events';
+
+import { ipcRenderer } from 'electron';
+
 import { IpcEvents, ipcRendererEvents } from '../ipc-events';
 
 /**

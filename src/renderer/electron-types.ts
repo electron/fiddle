@@ -1,12 +1,13 @@
-import * as MonacoType from 'monaco-editor';
-import * as fs from 'fs-extra';
 import * as path from 'path';
+
+import * as fs from 'fs-extra';
+import * as MonacoType from 'monaco-editor';
 import watch from 'node-watch';
-import releases from '../../static/releases.json';
-import readdir from 'recursive-readdir';
 import packageJson from 'package-json';
+import readdir from 'recursive-readdir';
 import semver from 'semver';
 
+import releases from '../../static/releases.json';
 import { RunnableVersion, Version, VersionSource } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
 

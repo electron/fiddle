@@ -3,9 +3,9 @@ import {
   action,
   autorun,
   computed,
+  makeObservable,
   observable,
   when,
-  makeObservable,
 } from 'mobx';
 
 import {
@@ -24,14 +24,15 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
+import { getUsername } from '../utils/get-username';
 import { normalizeVersion } from '../utils/normalize-version';
+import { sortVersions } from '../utils/sort-versions';
 import { removeBinary, setupBinary } from './binary';
 import { Bisector } from './bisect';
-import { EditorMosaic } from './editor-mosaic';
 import { getTemplate } from './content';
+import { EditorMosaic } from './editor-mosaic';
 import { ipcRendererManager } from './ipc';
-
-import { sortVersions } from '../utils/sort-versions';
+import { ELECTRON_MIRROR } from './mirror-constants';
 import { IPackageManager } from './npm';
 import {
   addLocalVersion,
@@ -43,8 +44,6 @@ import {
   makeRunnable,
   saveLocalVersions,
 } from './versions';
-import { getUsername } from '../utils/get-username';
-import { ELECTRON_MIRROR } from './mirror-constants';
 
 /**
  * The application's state. Exported as a singleton below.

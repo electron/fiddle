@@ -1,7 +1,8 @@
+import * as React from 'react';
+
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { clipboard, shell } from 'electron';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';

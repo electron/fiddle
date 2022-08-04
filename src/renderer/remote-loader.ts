@@ -1,3 +1,5 @@
+import semver from 'semver';
+
 import {
   EditorValues,
   ElectronReleaseChannel,
@@ -5,13 +7,12 @@ import {
   VersionSource,
   VersionState,
 } from '../interfaces';
+import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
 import { AppState } from './state';
 import { getReleaseChannel } from './versions';
-import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
-import semver from 'semver';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {

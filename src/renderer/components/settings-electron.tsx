@@ -1,19 +1,19 @@
+import * as React from 'react';
+
 import {
+  AnchorButton,
   Button,
   ButtonGroup,
+  ButtonProps,
   Callout,
   Checkbox,
   FormGroup,
   HTMLTable,
-  ButtonProps,
   Icon,
   IconName,
-  AnchorButton,
   Tooltip,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
-import { disableDownload } from '../../utils/disable-download';
 
 import {
   ElectronReleaseChannel,
@@ -21,8 +21,9 @@ import {
   VersionSource,
   VersionState,
 } from '../../interfaces';
+import { disableDownload } from '../../utils/disable-download';
 import { AppState } from '../state';
-import { getReleaseChannel, getOldestSupportedMajor } from '../versions';
+import { getOldestSupportedMajor, getReleaseChannel } from '../versions';
 
 interface ElectronSettingsProps {
   appState: AppState;

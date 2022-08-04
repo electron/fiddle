@@ -1,4 +1,5 @@
 import { reaction } from 'mobx';
+
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -17,13 +18,17 @@ import {
 import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 import { AppState } from '../../src/renderer/state';
-import { getElectronVersions, makeRunnable } from '../../src/renderer/versions';
-import { fetchVersions, saveLocalVersions } from '../../src/renderer/versions';
+import {
+  fetchVersions,
+  getElectronVersions,
+  makeRunnable,
+  saveLocalVersions,
+} from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../utils';
-import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 
 jest.mock('../../src/renderer/content', () => ({
   getTemplate: jest.fn(),

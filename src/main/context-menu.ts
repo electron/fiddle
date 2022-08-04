@@ -4,6 +4,7 @@ import {
   Menu,
   MenuItemConstructorOptions,
 } from 'electron';
+
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { ipcMainManager } from './ipc';

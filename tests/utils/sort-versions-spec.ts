@@ -1,7 +1,7 @@
 import {
+  RunnableVersion,
   VersionSource,
   VersionState,
-  RunnableVersion,
 } from '../../src/interfaces';
 import { sortVersions } from '../../src/utils/sort-versions';
 

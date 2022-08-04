@@ -2,11 +2,11 @@
  * @jest-environment node
  */
 
+import { dialog } from 'electron';
+
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
-
-import { dialog } from 'electron';
 import { flushPromises } from '../utils';
 
 jest.mock('../../src/main/windows');

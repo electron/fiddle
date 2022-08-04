@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Button,
   ButtonGroup,
@@ -8,18 +10,18 @@ import {
   Position,
   Toaster,
 } from '@blueprintjs/core';
-import { observer } from 'mobx-react';
-import * as React from 'react';
 import { clipboard } from 'electron';
 import { when } from 'mobx';
+import { observer } from 'mobx-react';
+
 import {
   EditorValues,
   GistActionState,
   GistActionType,
 } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
-import { getOctokit } from '../../utils/octokit';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
+import { getOctokit } from '../../utils/octokit';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 

@@ -1,9 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
+
 import { BlockableAccelerator } from '../../../src/interfaces';
-
 import { BlockAcceleratorsSettings } from '../../../src/renderer/components/settings-general-block-accelerators';
-
 import { StateMock } from '../../mocks/mocks';
 
 describe('BlockAcceleratorsSettings component', () => {

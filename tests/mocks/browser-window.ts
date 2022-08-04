@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+
 import { WebContentsMock } from './web-contents';
 
 export class BrowserWindowMock extends EventEmitter {

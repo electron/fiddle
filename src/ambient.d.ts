@@ -1,5 +1,6 @@
-import { App } from './renderer/app';
 import * as MonacoType from 'monaco-editor';
+
+import { App } from './renderer/app';
 
 declare global {
   interface Window {

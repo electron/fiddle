@@ -1,4 +1,5 @@
 import * as path from 'path';
+
 import { EditorId, EditorValues, MAIN_JS } from '../interfaces';
 
 // The order of these fields is the order that

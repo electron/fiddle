@@ -1,14 +1,14 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
+
+import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 
-import { ElectronTypes } from '../../src/renderer/electron-types';
 import {
   RunnableVersion,
   VersionSource,
   VersionState,
 } from '../../src/interfaces';
-
+import { ElectronTypes } from '../../src/renderer/electron-types';
 import { MonacoMock, NodeTypesMock } from '../mocks/mocks';
 import { waitFor } from '../utils';
 

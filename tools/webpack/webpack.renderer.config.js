@@ -1,7 +1,8 @@
-const rules = require('./common/webpack.rules');
-const plugins = require('./common/webpack.plugins');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+
+const plugins = require('./common/webpack.plugins');
+const rules = require('./common/webpack.rules');
 
 module.exports = {
   module: {

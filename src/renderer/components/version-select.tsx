@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Button,
   ButtonGroupProps,
@@ -15,11 +17,11 @@ import {
 } from '@blueprintjs/select';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
-import * as React from 'react';
-import semver from 'semver';
-import { disableDownload } from '../../utils/disable-download';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
+import semver from 'semver';
+
 import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
+import { disableDownload } from '../../utils/disable-download';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 

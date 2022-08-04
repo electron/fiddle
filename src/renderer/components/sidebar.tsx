@@ -1,5 +1,7 @@
 import * as React from 'react';
+
 import { Mosaic } from 'react-mosaic-component';
+
 import { AppState } from '../state';
 import { SidebarFileTree } from './sidebar-file-tree';
 import { SidebarPackageManager } from './sidebar-package-manager';

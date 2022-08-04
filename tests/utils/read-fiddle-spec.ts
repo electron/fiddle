@@ -1,14 +1,15 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
 
+import * as fs from 'fs-extra';
+
 import { EditorValues, MAIN_JS } from '../../src/interfaces';
-import { createEditorValues } from '../mocks/editor-values';
 import {
   ensureRequiredFiles,
   getEmptyContent,
   isSupportedFile,
 } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
+import { createEditorValues } from '../mocks/editor-values';
 
 describe('read-fiddle', () => {
   const folder = '/some/place';

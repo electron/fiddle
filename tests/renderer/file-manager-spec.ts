@@ -1,13 +1,12 @@
 import * as fs from 'fs-extra';
 
-import { AppState } from '../../src/renderer/state';
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { readFiddle } from '../../src/utils/read-fiddle';
+import { AppState } from '../../src/renderer/state';
 import { isSupportedFile } from '../../src/utils/editor-utils';
-
+import { readFiddle } from '../../src/utils/read-fiddle';
 import { AppMock, createEditorValues } from '../mocks/mocks';
 
 jest.mock('fs-extra');

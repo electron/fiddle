@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import * as electron from 'electron';
 import { shallow } from 'enzyme';
 

@@ -1,8 +1,9 @@
+import * as React from 'react';
+
 import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
-import { BlockableAccelerator } from '../../interfaces';
 
+import { BlockableAccelerator } from '../../interfaces';
 import { AppState } from '../state';
 
 interface BlockAcceleratorsSettingsProps {

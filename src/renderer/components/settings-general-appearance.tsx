@@ -1,3 +1,7 @@
+import * as React from 'react';
+
+import * as path from 'path';
+
 import {
   Button,
   Callout,
@@ -5,18 +9,16 @@ import {
   FormGroup,
   MenuItem,
 } from '@blueprintjs/core';
-import * as React from 'react';
-import * as fs from 'fs-extra';
-import * as namor from 'namor';
-import * as path from 'path';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { observer } from 'mobx-react';
-import { reaction } from 'mobx';
 import { shell } from 'electron';
+import * as fs from 'fs-extra';
+import { reaction } from 'mobx';
+import { observer } from 'mobx-react';
+import * as namor from 'namor';
 
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
-import { getAvailableThemes, getTheme, THEMES_PATH } from '../themes';
+import { THEMES_PATH, getAvailableThemes, getTheme } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();

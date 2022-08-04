@@ -1,13 +1,13 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { IpcEvents } from '../../../src/ipc-events';
 import { getIsDownloaded } from '../../../src/renderer/binary';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { overridePlatform, resetPlatform } from '../../utils';
-
 import { StateMock } from '../../mocks/mocks';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 jest.mock('../../../src/renderer/binary');

@@ -1,13 +1,13 @@
-import { mount, shallow } from 'enzyme';
 import * as React from 'react';
 
-import * as content from '../../../src/renderer/content';
+import { mount, shallow } from 'enzyme';
+
 import { EditorValues, MAIN_JS } from '../../../src/interfaces';
-import { Editors } from '../../../src/renderer/components/editors';
 import { IpcEvents } from '../../../src/ipc-events';
+import { Editors } from '../../../src/renderer/components/editors';
+import * as content from '../../../src/renderer/content';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-
 import {
   AppMock,
   MonacoEditorMock,

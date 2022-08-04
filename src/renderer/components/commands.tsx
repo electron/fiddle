@@ -1,15 +1,16 @@
-import { Button, ControlGroup } from '@blueprintjs/core';
-import { observer } from 'mobx-react';
 import * as React from 'react';
 
+import { Button, ControlGroup } from '@blueprintjs/core';
+import { observer } from 'mobx-react';
+
+import { IpcEvents } from '../../ipc-events';
+import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
+import { GistActionButton } from './commands-action-button';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
-import { GistActionButton } from './commands-action-button';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
-import { ipcRendererManager } from '../ipc';
-import { IpcEvents } from '../../ipc-events';
 
 interface CommandsProps {
   appState: AppState;

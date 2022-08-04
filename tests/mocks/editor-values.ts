@@ -1,4 +1,4 @@
-import { MAIN_JS, EditorValues } from '../../src/interfaces';
+import { EditorValues, MAIN_JS } from '../../src/interfaces';
 
 export function createEditorValues(): EditorValues {
   return {

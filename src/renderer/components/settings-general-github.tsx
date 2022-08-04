@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Button, Callout } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { AppState } from '../state';
 

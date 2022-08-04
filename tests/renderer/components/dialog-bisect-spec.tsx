@@ -1,5 +1,7 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
+
 import {
   ElectronReleaseChannel,
   RunResult,
@@ -8,7 +10,6 @@ import {
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
-
 import { RunnerMock, StateMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/renderer/bisect');

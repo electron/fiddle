@@ -1,7 +1,8 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
-import * as tmp from 'tmp';
+
 import { Response } from 'cross-fetch';
+import * as fs from 'fs-extra';
+import * as tmp from 'tmp';
 
 let fakeUserData: tmp.DirResult | null;
 

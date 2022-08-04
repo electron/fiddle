@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
-import * as React from 'react';
 import {
   Mosaic,
   MosaicBranch,
@@ -11,9 +12,9 @@ import {
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
+import { getEditorTitle } from '../../utils/editor-utils';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
-import { getEditorTitle } from '../../utils/editor-utils';
 import { getTemplate, getTestTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';

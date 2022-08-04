@@ -1,9 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { EditorId, MAIN_JS } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
-
 import { StateMock } from '../../mocks/mocks';
 
 type DidMount = () => void;

@@ -1,11 +1,12 @@
+import * as React from 'react';
+
 import { Button, InputGroup, Intent } from '@blueprintjs/core';
 import classnames from 'classnames';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
-import { IpcEvents } from '../../ipc-events';
 import { GistActionState } from '../../interfaces';
+import { IpcEvents } from '../../ipc-events';
 import { idFromUrl, urlFromId } from '../../utils/gist';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';

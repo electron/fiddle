@@ -1,4 +1,6 @@
 import semver from 'semver';
+
+import releasesJSON from '../../static/releases.json';
 import {
   ElectronReleaseChannel,
   RunnableVersion,
@@ -6,9 +8,8 @@ import {
   VersionSource,
   VersionState,
 } from '../interfaces';
-import { getVersionState } from './binary';
 import { normalizeVersion } from '../utils/normalize-version';
-import releasesJSON from '../../static/releases.json';
+import { getVersionState } from './binary';
 
 /**
  * Returns a sensible default version string.

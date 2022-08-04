@@ -1,6 +1,8 @@
+import * as React from 'react';
+
 import { Button } from '@blueprintjs/core';
 import { mount, shallow } from 'enzyme';
-import * as React from 'react';
+
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
 
 jest.mock('../../../src/renderer/npm-search', () => ({
