@@ -27,10 +27,9 @@ import { AppState } from '../state';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
-const FixedSizeListItem = ({ index, style, data }: ListChildComponentProps) => {
+const FixedSizeListItem = ({ index, data }: ListChildComponentProps) => {
   const { filteredItems, renderItem } = data;
-  const renderedItem = renderItem(filteredItems[index], index);
-  return <MenuItem {...renderedItem?.props} style={{ ...style }} />;
+  return renderItem(filteredItems[index], index);
 };
 
 const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
@@ -195,6 +194,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
         modifiers={{
           flip: { enabled: false },
           preventOverflow: { enabled: false },
+          hide: { enabled: false },
         }}
         intent={Intent.PRIMARY}
         content={`Version is not available on current OS`}
