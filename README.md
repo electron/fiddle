@@ -13,13 +13,13 @@ address bar.
 **[Download Fiddle now!](https://www.electronjs.org/fiddle)**
 
 
-<img src="./assets/screenshots/fiddle-screenshot.png" width="880px" alt="Electron Fiddle screenshot">
+<img src="https://user-images.githubusercontent.com/8198408/183111969-f25e202f-b7d8-45d2-ae89-89df965c6c8f.png" width="880px" alt="Electron Fiddle screenshot">
 
 ## Features
 
 ### Explore Electron
 
-![Screenshot: Electron App running](https://user-images.githubusercontent.com/1426799/52155856-c0bb4300-2639-11e9-9962-a6354d08dc5a.jpg)
+<img width="1493" alt="Screenshot: Electron App running" src="https://user-images.githubusercontent.com/8198408/183112940-370c7535-1d71-40f3-ba8f-fad5f60ed2e9.png">
 
 Try Electron without installing any dependencies: Fiddle includes everything
 you'll need to explore the platform. It also includes examples for every API
@@ -38,7 +38,7 @@ all Electron APIs only a few keystrokes away.
 
 ### Compile and Package
 
-![Screenshot: Fiddle's Tasks Menu](https://user-images.githubusercontent.com/1426799/52155857-c0bb4300-2639-11e9-8776-e05dc528439c.png)
+<img width="895" alt="Screenshot: Fiddle's Tasks Menu" src="https://user-images.githubusercontent.com/8198408/183113871-5774174a-da63-4d9b-87fa-239512c843e6.png">
 
 Fiddle can automatically turn your experiment into binaries you can share with
 your friends, coworkers, or grandparents. It does so thanks to
@@ -47,7 +47,7 @@ app for Windows, macOS, or Linux.
 
 ### Start with Fiddle, Continue Wherever
 
-![Screenshot: Visual Studio Code with Fiddle Export](https://user-images.githubusercontent.com/1426799/43874411-9cfd5946-9b40-11e8-8797-dd4138e31933.png)
+<img width="1916" alt="Screenshot: Visual Studio Code with Fiddle Export" src="https://user-images.githubusercontent.com/8198408/183117021-25c044a8-5a3b-4ff0-97ea-b6ae16d488ea.png">
 
 Fiddle is not an IDE – it is however an excellent starting point. Once your
 fiddle has grown up, export it as a project with or without
