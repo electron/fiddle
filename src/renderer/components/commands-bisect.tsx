@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Button } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { VersionState } from '../../../src/interfaces';
 import { AppState } from '../state';

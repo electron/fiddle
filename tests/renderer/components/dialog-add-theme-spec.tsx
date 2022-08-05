@@ -1,17 +1,18 @@
-import { shell } from 'electron';
-import { shallow } from 'enzyme';
 import * as React from 'react';
-import * as fs from 'fs-extra';
+
 import * as path from 'path';
 
-import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
-import { overridePlatform, resetPlatform } from '../../utils';
-import {
-  defaultLight,
-  LoadedFiddleTheme,
-} from '../../../src/renderer/themes-defaults';
+import { shell } from 'electron';
+import { shallow } from 'enzyme';
+import * as fs from 'fs-extra';
 
+import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
+import {
+  LoadedFiddleTheme,
+  defaultLight,
+} from '../../../src/renderer/themes-defaults';
 import { StateMock } from '../../mocks/mocks';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 jest.mock('../../../src/renderer/binary');

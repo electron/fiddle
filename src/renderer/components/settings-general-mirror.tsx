@@ -1,9 +1,11 @@
-import { observer } from 'mobx-react';
 import * as React from 'react';
-import { AppState } from '../state';
-import { Callout, InputGroup, Radio, RadioGroup } from '@blueprintjs/core';
 import { FormEvent } from 'react';
+
+import { Callout, InputGroup, Radio, RadioGroup } from '@blueprintjs/core';
+import { observer } from 'mobx-react';
+
 import { Mirrors, Sources } from '../mirror-constants';
+import { AppState } from '../state';
 
 interface MirrorSettingsProps {
   appState: AppState;

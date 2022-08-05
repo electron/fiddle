@@ -1,4 +1,5 @@
 import * as Sentry from '@sentry/electron';
+
 import { isDevMode } from './utils/devmode';
 
 export function initSentry() {

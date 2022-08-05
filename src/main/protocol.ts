@@ -1,6 +1,7 @@
-import { app } from 'electron';
 import * as fs from 'fs';
 import * as path from 'path';
+
+import { app } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';

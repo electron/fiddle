@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { AppState } from '../state';
 

@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import * as electron from 'electron';
+
 import { IpcEvents } from '../../src/ipc-events';
 import { setupFiddleGlobal } from '../../src/preload/preload';
 

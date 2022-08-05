@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';

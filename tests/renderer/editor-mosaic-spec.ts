@@ -1,4 +1,5 @@
 import { reaction } from 'mobx';
+
 import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { getEmptyContent } from '../../src/utils/editor-utils';

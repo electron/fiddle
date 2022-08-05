@@ -1,9 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
 
-import { StateMock } from '../../mocks/mocks';
+import { shallow } from 'enzyme';
 
 import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
+import { StateMock } from '../../mocks/mocks';
 
 describe('GitHubSettings component', () => {
   let store: StateMock;

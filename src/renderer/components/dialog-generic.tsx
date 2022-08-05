@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Alert, IconName, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { GenericDialogType } from '../../../src/interfaces';
 import { AppState } from '../state';

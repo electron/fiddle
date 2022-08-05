@@ -1,7 +1,8 @@
-const plugins = require('./common/webpack.plugins');
-const rules = require('./common/webpack.rules');
 const CopyPlugin = require('copy-webpack-plugin');
 const TerserPlugin = require('terser-webpack-plugin');
+
+const plugins = require('./common/webpack.plugins');
+const rules = require('./common/webpack.rules');
 
 module.exports = {
   /**

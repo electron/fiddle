@@ -2,6 +2,8 @@
  * @jest-environment node
  */
 
+import { Menu } from 'electron';
+
 import {
   createContextMenu,
   getInspectItems,
@@ -11,8 +13,6 @@ import {
 import { ipcMainManager } from '../../src/main/ipc';
 import { isDevMode } from '../../src/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
-
-import { Menu } from 'electron';
 import { WebContentsMock } from '../mocks/web-contents';
 
 jest.mock('../../src/utils/devmode');

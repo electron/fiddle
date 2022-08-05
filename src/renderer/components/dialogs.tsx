@@ -1,5 +1,6 @@
-import { observer } from 'mobx-react';
 import * as React from 'react';
+
+import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
 import { AddThemeDialog } from './dialog-add-theme';

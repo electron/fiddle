@@ -7,9 +7,8 @@ import {
   RunResult,
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
-
-import { ipcMainManager } from '../../src/main/ipc';
 import { processCommandLine } from '../../src/main/command-line';
+import { ipcMainManager } from '../../src/main/ipc';
 
 jest.unmock('fs-extra');
 

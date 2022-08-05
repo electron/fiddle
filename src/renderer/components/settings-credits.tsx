@@ -1,9 +1,11 @@
+import * as React from 'react';
+
 import { Callout, Card } from '@blueprintjs/core';
 import { shell } from 'electron';
-import * as React from 'react';
-import contributorsJSON from '../../../static/contributors.json';
+
 import { Contributor } from 'src/interfaces';
 
+import contributorsJSON from '../../../static/contributors.json';
 import { AppState } from '../state';
 
 interface CreditsSettingsProps {

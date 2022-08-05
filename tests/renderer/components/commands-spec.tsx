@@ -1,14 +1,14 @@
 import * as React from 'react';
+
+import { Button, ControlGroup } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
 
+import { IpcEvents } from '../../../src/ipc-events';
 import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { IpcEvents } from '../../../src/ipc-events';
-
 import { StateMock } from '../../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../../utils';
-import { Button, ControlGroup } from '@blueprintjs/core';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',

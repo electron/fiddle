@@ -1,8 +1,8 @@
+import { action, computed, makeObservable, observable, reaction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
-import { action, computed, observable, reaction, makeObservable } from 'mobx';
-import { EditorId, EditorValues } from '../interfaces';
 
+import { EditorId, EditorValues } from '../interfaces';
 import {
   compareEditors,
   getEmptyContent,

@@ -2,9 +2,10 @@
  * @jest-environment node
  */
 
-import { app, BrowserWindow, systemPreferences } from 'electron';
+import { BrowserWindow, app, systemPreferences } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
+import { setupAboutPanel } from '../../src/main/about-panel';
 import { ipcMainManager } from '../../src/main/ipc';
 import {
   main,
@@ -17,9 +18,8 @@ import {
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
-import { setupAboutPanel } from '../../src/main/about-panel';
-import { overridePlatform } from '../utils';
 import { BrowserWindowMock } from '../mocks/browser-window';
+import { overridePlatform } from '../utils';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),

@@ -1,8 +1,8 @@
-import { dialog, app } from 'electron';
+import { app, dialog } from 'electron';
 import * as fs from 'fs-extra';
-import { isSupportedFile } from '../utils/editor-utils';
 
 import { IpcEvents } from '../ipc-events';
+import { isSupportedFile } from '../utils/editor-utils';
 import { ipcMainManager } from './ipc';
 
 /**

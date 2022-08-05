@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
 import { autorun } from 'mobx';
@@ -6,8 +7,8 @@ import { observer } from 'mobx-react';
 import pDebounce from 'p-debounce';
 import semver from 'semver';
 
-import { AppState } from '../state';
 import { npmSearch } from '../npm-search';
+import { AppState } from '../state';
 interface IState {
   suggestions: Array<AlgoliaHit>;
   versionsCache: Map<string, string[]>;

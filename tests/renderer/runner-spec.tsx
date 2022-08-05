@@ -1,29 +1,30 @@
 import { spawn } from 'child_process';
 import * as path from 'path';
+
 import * as semver from 'semver';
 
+import {
+  RunResult,
+  RunnableVersion,
+  VersionSource,
+  VersionState,
+} from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { getIsDownloaded } from '../../src/renderer/binary';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
-  RunResult,
-  RunnableVersion,
-  VersionState,
-  VersionSource,
-} from '../../src/interfaces';
-import {
-  getIsPackageManagerInstalled,
   addModules,
+  getIsPackageManagerInstalled,
   packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
-import { waitFor } from '../utils';
 import {
   ChildProcessMock,
   FileManagerMock,
   StateMock,
   VersionsMock,
 } from '../mocks/mocks';
+import { waitFor } from '../utils';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');

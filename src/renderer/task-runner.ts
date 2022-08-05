@@ -8,14 +8,11 @@ import {
   TestRequest,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-
-import { App } from './app';
-import { AppState } from './state';
-
 import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
-
+import { App } from './app';
 import { ipcRendererManager } from './ipc';
+import { AppState } from './state';
 
 export class TaskRunner {
   private readonly appState: AppState;

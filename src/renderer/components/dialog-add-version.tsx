@@ -1,3 +1,7 @@
+import * as React from 'react';
+
+import * as path from 'path';
+
 import {
   Button,
   Callout,
@@ -7,8 +11,6 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as path from 'path';
-import * as React from 'react';
 import * as semver from 'semver';
 
 import { Version } from '../../interfaces';

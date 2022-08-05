@@ -1,8 +1,8 @@
 import { execSync } from 'child_process';
 
 import { Files, PACKAGE_NAME } from '../../interfaces';
-import { getElectronBinaryPath } from '../binary';
 import { getForgeVersion } from '../../utils/get-package';
+import { getElectronBinaryPath } from '../binary';
 
 /**
  * This transform turns the files into an electron-forge

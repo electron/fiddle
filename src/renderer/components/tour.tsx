@@ -1,5 +1,6 @@
-import { Button, Classes, Dialog } from '@blueprintjs/core';
 import * as React from 'react';
+
+import { Button, Classes, Dialog } from '@blueprintjs/core';
 
 import { positionForRect } from '../../utils/position-for-rect';
 

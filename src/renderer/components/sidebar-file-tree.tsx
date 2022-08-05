@@ -1,3 +1,5 @@
+import * as React from 'react';
+
 import {
   Button,
   ButtonGroup,
@@ -11,7 +13,7 @@ import {
 import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
-import * as React from 'react';
+
 import { EditorId } from '../../interfaces';
 import { isRequiredFile } from '../../utils/editor-utils';
 import { EditorPresence } from '../editor-mosaic';

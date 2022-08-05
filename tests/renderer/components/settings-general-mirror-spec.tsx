@@ -1,11 +1,11 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+import { FormEvent } from 'react';
+
+import { InputGroup, Radio } from '@blueprintjs/core';
+import { shallow } from 'enzyme';
 
 import { MirrorSettings } from '../../../src/renderer/components/settings-general-mirror';
-
 import { StateMock } from '../../mocks/mocks';
-import { FormEvent } from 'react';
-import { InputGroup, Radio } from '@blueprintjs/core';
 
 describe('MirrorSettings component', () => {
   let store: StateMock;

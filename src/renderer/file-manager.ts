@@ -1,9 +1,11 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
+
+import * as fs from 'fs-extra';
 import semver from 'semver';
 
-import { Files, FileTransform, PACKAGE_NAME } from '../interfaces';
+import { FileTransform, Files, PACKAGE_NAME } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
+import { isKnownFile } from '../utils/editor-utils';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
 import { ipcRendererManager } from './ipc';
@@ -11,7 +13,6 @@ import { AppState } from './state';
 import { getTemplateValues } from './templates';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
-import { isKnownFile } from '../utils/editor-utils';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {

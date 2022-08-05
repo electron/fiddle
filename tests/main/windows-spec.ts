@@ -2,6 +2,10 @@
  * @jest-environment node
  */
 
+import * as path from 'path';
+
+import * as electron from 'electron';
+
 import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -11,8 +15,6 @@ import {
   getOrCreateMainWindow,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
-import * as path from 'path';
-import * as electron from 'electron';
 
 jest.mock('../../src/main/context-menu');
 jest.mock('path');

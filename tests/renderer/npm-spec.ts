@@ -1,6 +1,6 @@
 import {
-  getIsPackageManagerInstalled,
   addModules,
+  getIsPackageManagerInstalled,
   packageRun,
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';

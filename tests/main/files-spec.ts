@@ -2,17 +2,17 @@
  * @jest-environment node
  */
 
-import { IpcEvents } from '../../src/ipc-events';
+import { app, dialog } from 'electron';
+import * as fs from 'fs-extra';
+
 import { MAIN_JS } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
 import {
   setupFileListeners,
   showOpenDialog,
   showSaveDialog,
 } from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
-
-import { app, dialog } from 'electron';
-import * as fs from 'fs-extra';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
 jest.mock('../../src/main/windows');

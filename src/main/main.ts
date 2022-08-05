@@ -1,21 +1,22 @@
+// eslint-disable-next-line import/order
 import { initSentry } from '../sentry';
 initSentry();
-
-import { app, BrowserWindow, systemPreferences } from 'electron';
+import { BrowserWindow, app, systemPreferences } from 'electron';
+// eslint-disable-next-line import/no-unresolved
+import { IpcMainEvent } from 'electron/main';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from './about-panel';
+import { processCommandLine } from './command-line';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
-import { processCommandLine } from './command-line';
 import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
-import { IpcMainEvent } from 'electron/main';
 
 let argv: string[] = [];
 

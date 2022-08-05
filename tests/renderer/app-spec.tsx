@@ -1,12 +1,12 @@
-import { App } from '../../src/renderer/app';
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
-import { EditorMosaic } from '../../src/renderer/editor-mosaic';
-import { createEditorValues } from '../mocks/mocks';
 import { IpcEvents } from '../../src/ipc-events';
-import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
-import { ipcRendererManager } from '../../src/renderer/ipc';
-import { waitFor } from '../utils';
+import { App } from '../../src/renderer/app';
 import { setupBinary } from '../../src/renderer/binary';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
+import { ipcRendererManager } from '../../src/renderer/ipc';
+import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { createEditorValues } from '../mocks/mocks';
+import { waitFor } from '../utils';
 
 global.fetch = window.fetch = jest.fn();
 

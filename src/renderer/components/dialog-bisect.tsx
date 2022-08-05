@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { RunnableVersion } from '../../interfaces';
 import { Bisector } from '../bisect';

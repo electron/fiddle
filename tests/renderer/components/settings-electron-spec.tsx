@@ -1,5 +1,6 @@
-import { mount, shallow } from 'enzyme';
 import * as React from 'react';
+
+import { mount, shallow } from 'enzyme';
 
 import {
   ElectronReleaseChannel,
@@ -7,10 +8,10 @@ import {
   VersionSource,
   VersionState,
 } from '../../../src/interfaces';
-import * as versions from '../../../src/renderer/versions';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
-import { StateMock, VersionsMock } from '../../mocks/mocks';
+import * as versions from '../../../src/renderer/versions';
 import { disableDownload } from '../../../src/utils/disable-download';
+import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/utils/disable-download.ts');
 

@@ -1,4 +1,5 @@
 import * as React from 'react';
+
 import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';

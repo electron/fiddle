@@ -1,7 +1,8 @@
+import * as React from 'react';
+
 import { IItemRendererProps } from '@blueprintjs/select';
 import { shell } from 'electron';
 import { shallow } from 'enzyme';
-import * as React from 'react';
 import * as fs from 'fs-extra';
 
 import {
@@ -11,7 +12,6 @@ import {
 } from '../../../src/renderer/components/settings-general-appearance';
 import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
-
 import { StateMock } from '../../mocks/mocks';
 
 const mockThemes = [

@@ -1,9 +1,9 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
 import { InputGroup } from '@blueprintjs/core';
+import { shallow } from 'enzyme';
 
 import { PackageAuthorSettings } from '../../../src/renderer/components/settings-general-package-author';
-
 import { StateMock } from '../../mocks/mocks';
 
 describe('PackageAuthorSettings component', () => {

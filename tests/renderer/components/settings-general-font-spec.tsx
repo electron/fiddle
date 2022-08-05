@@ -1,5 +1,6 @@
-import { shallow } from 'enzyme';
 import * as React from 'react';
+
+import { shallow } from 'enzyme';
 
 import { FontSettings } from '../../../src/renderer/components/settings-general-font';
 

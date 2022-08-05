@@ -1,6 +1,8 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
+
+import { download as electronDownload } from '@electron/get';
 import extract from 'extract-zip';
+import * as fs from 'fs-extra';
 
 import {
   RunnableVersion,
@@ -9,7 +11,6 @@ import {
   VersionState,
 } from '../interfaces';
 import { USER_DATA_PATH } from './constants';
-import { download as electronDownload } from '@electron/get';
 import { Mirrors } from './mirror-constants';
 
 // versions that are currently being downloaded

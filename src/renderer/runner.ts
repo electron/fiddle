@@ -9,10 +9,10 @@ import { getElectronBinaryPath, getIsDownloaded } from './binary';
 import { Bisector } from './bisect';
 import { ipcRendererManager } from './ipc';
 import {
-  getIsPackageManagerInstalled,
-  addModules,
-  packageRun,
   PMOperationOptions,
+  addModules,
+  getIsPackageManagerInstalled,
+  packageRun,
 } from './npm';
 import { AppState } from './state';
 

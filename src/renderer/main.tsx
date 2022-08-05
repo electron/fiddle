@@ -1,6 +1,7 @@
 import * as monaco from 'monaco-editor';
-import { App } from './app';
+
 import { initSentry } from '../sentry';
+import { App } from './app';
 
 initSentry();
 

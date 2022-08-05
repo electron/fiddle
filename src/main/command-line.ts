@@ -1,6 +1,7 @@
+import * as os from 'os';
+
 import * as commander from 'commander';
 import * as fs from 'fs-extra';
-import * as os from 'os';
 import getos from 'getos';
 
 import {

@@ -1,8 +1,8 @@
 import {
-  app,
   BrowserWindow,
   Menu,
   MenuItemConstructorOptions,
+  app,
   shell,
 } from 'electron';
 

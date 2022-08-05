@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
-import * as React from 'react';
 
 import { AppState } from '../state';
 import { Output } from './output';

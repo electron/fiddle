@@ -1,5 +1,5 @@
-import * as fs from 'fs-extra';
 import * as electron from 'electron';
+import * as fs from 'fs-extra';
 
 import { isFirstRun } from '../../src/utils/check-first-run';
 

@@ -2,8 +2,9 @@
  * @jest-environment node
  */
 
-import { app } from 'electron';
 import * as fs from 'fs';
+
+import { app } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';

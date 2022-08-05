@@ -1,10 +1,11 @@
-import { Button, Callout, FormGroup, InputGroup } from '@blueprintjs/core';
 import * as React from 'react';
+
+import { Button, Callout, FormGroup, InputGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
-import { ipcRendererManager } from '../ipc';
 import { IpcEvents } from '../../ipc-events';
+import { ipcRendererManager } from '../ipc';
+import { AppState } from '../state';
 
 interface FontSettingsProps {
   appState: AppState;

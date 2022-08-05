@@ -1,6 +1,7 @@
+import * as React from 'react';
+
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as React from 'react';
 
 import { AppState } from '../state';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';

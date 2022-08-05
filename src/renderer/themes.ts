@@ -1,13 +1,14 @@
-import * as fs from 'fs-extra';
 import * as path from 'path';
+
+import * as fs from 'fs-extra';
 
 import { CONFIG_PATH } from './constants';
 import {
-  defaultDark,
-  defaultLight,
   DefaultThemes,
   FiddleTheme,
   LoadedFiddleTheme,
+  defaultDark,
+  defaultLight,
 } from './themes-defaults';
 
 export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');

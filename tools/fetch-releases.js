@@ -1,6 +1,7 @@
 const path = require('path');
-const fs = require('fs-extra');
+
 const fetch = require('cross-fetch');
+const fs = require('fs-extra');
 
 const file = path.join(__dirname, '..', 'static', 'releases.json');
 

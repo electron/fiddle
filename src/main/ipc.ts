@@ -1,10 +1,11 @@
-import { ipcMain } from 'electron';
 import { EventEmitter } from 'events';
+
+import { ipcMain } from 'electron';
 
 import {
   IpcEvents,
-  ipcMainEvents,
   WEBCONTENTS_READY_FOR_IPC_SIGNAL,
+  ipcMainEvents,
 } from '../ipc-events';
 import { getOrCreateMainWindow } from './windows';
 
