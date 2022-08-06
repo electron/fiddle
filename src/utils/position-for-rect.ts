@@ -75,7 +75,7 @@ function isResultOkay(
   input: PositionResult,
   size: { width: number; height: number },
 ): boolean {
-  return !!(
+  return (
     !isTooFarRight(input, size) &&
     !isTooFarLeft(input) &&
     !isTooFarUp(input) &&
