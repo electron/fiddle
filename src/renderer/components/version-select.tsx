@@ -27,9 +27,11 @@ import { AppState } from '../state';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
-const FixedSizeListItem = ({ index, data }: ListChildComponentProps) => {
+const FixedSizeListItem = ({ index, data, style }: ListChildComponentProps) => {
   const { filteredItems, renderItem } = data;
-  return renderItem(filteredItems[index], index);
+  const renderedItem = renderItem(filteredItems[index], index);
+
+  return <div style={style}>{renderedItem}</div>;
 };
 
 const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
