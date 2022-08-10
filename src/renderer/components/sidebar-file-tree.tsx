@@ -15,7 +15,7 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
 import { EditorId } from '../../interfaces';
-import { isRequiredFile } from '../../utils/editor-utils';
+import { isRequiredFile, isSupportedFile } from '../../utils/editor-utils';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
 
@@ -61,6 +61,12 @@ export const SidebarFileTree = observer(
                 onClick={() => this.setFocusedFile(editorId)}
                 content={
                   <Menu>
+                    <MenuItem
+                      icon="redo"
+                      text="Rename"
+                      intent="primary"
+                      onClick={() => this.renameEditor(editorId)}
+                    />
                     <MenuItem
                       disabled={isRequiredFile(editorId)}
                       icon="remove"
@@ -168,6 +174,33 @@ export const SidebarFileTree = observer(
     public setFocusedFile = (editorId: EditorId) => {
       const { editorMosaic } = this.props.appState;
       editorMosaic.setFocusedFile(editorId);
+    };
+
+    public renameEditor = async (editorId: EditorId) => {
+      const { appState } = this.props;
+
+      const visible =
+        appState.editorMosaic.files.get(editorId) === EditorPresence.Visible;
+      const id = (await appState.showInputDialog({
+        label: 'Enter New Filename',
+        ok: 'Rename',
+        placeholder: 'New Name',
+      })) as EditorId;
+
+      if (!id) return;
+
+      if (!isSupportedFile(id)) {
+        await appState.showErrorDialog(
+          `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
+        );
+        return;
+      }
+
+      const contents = appState.editorMosaic.value(editorId).trim();
+      appState.editorMosaic.remove(editorId);
+      appState.editorMosaic.addNewFile(id, contents);
+
+      if (visible) appState.editorMosaic.show(id);
     };
 
     public removeEditor = (editorId: EditorId) => {

@@ -80,6 +80,25 @@ describe('SidebarFileTree component', () => {
     expect(editorMosaic.files.get('index.html')).toBe(undefined);
   });
 
+  it('can rename editors', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance() as any;
+
+    const EDITOR_NAME = 'index.html';
+    const EDITOR_NEW_NAME = 'new_index.html';
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
+
+    await instance.renameEditor(EDITOR_NAME);
+
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(undefined);
+    expect(editorMosaic.files.get(EDITOR_NEW_NAME)).toBe(
+      EditorPresence.Pending,
+    );
+  });
+
   it('can reset the editor layout', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
     const instance: any = wrapper.instance() as any;
