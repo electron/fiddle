@@ -6,17 +6,17 @@ exports[`Commands component renders when system is darwin 1`] = `
   onDoubleClick={[Function]}
 >
   <div>
-    <Blueprint3.ControlGroup
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cog"
         onClick={[MockFunction]}
         title="Setting"
       />
-    </Blueprint3.ControlGroup>
-    <Blueprint3.ControlGroup
+    </Blueprint4.ControlGroup>
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
@@ -26,17 +26,17 @@ exports[`Commands component renders when system is darwin 1`] = `
       <runner
         appState={"default StateMock"}
       />
-    </Blueprint3.ControlGroup>
-    <Blueprint3.ControlGroup
+    </Blueprint4.ControlGroup>
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         active={true}
         icon="console"
         text="Console"
       />
-    </Blueprint3.ControlGroup>
+    </Blueprint4.ControlGroup>
   </div>
   <div
     className="title"
@@ -60,17 +60,17 @@ exports[`Commands component renders when system not is darwin 1`] = `
   onDoubleClick={[Function]}
 >
   <div>
-    <Blueprint3.ControlGroup
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cog"
         onClick={[MockFunction]}
         title="Setting"
       />
-    </Blueprint3.ControlGroup>
-    <Blueprint3.ControlGroup
+    </Blueprint4.ControlGroup>
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
@@ -80,17 +80,17 @@ exports[`Commands component renders when system not is darwin 1`] = `
       <runner
         appState={"default StateMock"}
       />
-    </Blueprint3.ControlGroup>
-    <Blueprint3.ControlGroup
+    </Blueprint4.ControlGroup>
+    <Blueprint4.ControlGroup
       fill={true}
       vertical={false}
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         active={true}
         icon="console"
         text="Console"
       />
-    </Blueprint3.ControlGroup>
+    </Blueprint4.ControlGroup>
   </div>
   <div>
     <address-bar

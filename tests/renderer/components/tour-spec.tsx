@@ -76,7 +76,8 @@ describe('VersionChooser component', () => {
     const mockStop = jest.fn();
     const wrapper = mount(<Tour tour={singleItemTour} onStop={mockStop} />);
 
-    expect(wrapper.find('button').text()).toBe('tick-circleFinish Tour');
+    expect(wrapper.exists('.bp4-icon-tick-circle')).toBe(true);
+    expect(wrapper.find('button').text()).toBe('Finish Tour');
   });
 
   it('handles a missing target', () => {

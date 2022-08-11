@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`VersionSelect component renderItem() renders an item 1`] = `
-<Blueprint3.MenuItem
+<Blueprint4.MenuItem2
   active={true}
   disabled={false}
   icon="cloud"
@@ -19,68 +19,85 @@ exports[`VersionSelect component renderItem() renders an item 1`] = `
 `;
 
 exports[`VersionSelect component renders 1`] = `
-<Blueprint3.Select
+<Blueprint.ContextMenu2
+  content={
+    <Blueprint4.Menu>
+      <Blueprint4.MenuItem2
+        active={false}
+        disabled={false}
+        multiline={false}
+        onClick={[Function]}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="Copy Version Number"
+      />
+    </Blueprint4.Menu>
+  }
   disabled={false}
-  filterable={true}
-  itemListPredicate={[Function]}
-  itemListRenderer={[Function]}
-  itemRenderer={[Function]}
-  items={
-    Array [
-      Object {
-        "source": "remote",
-        "state": "installed",
-        "version": "2.0.3",
-      },
-      Object {
-        "source": "remote",
-        "state": "installed",
-        "version": "2.0.2",
-      },
-      Object {
-        "source": "remote",
-        "state": "installed",
-        "version": "2.0.1",
-      },
-      Object {
-        "source": "remote",
-        "state": "installed",
-        "version": "2.0.0",
-      },
-      Object {
-        "source": "remote",
-        "state": "installed",
-        "version": "1.8.7",
-      },
-      Object {
-        "source": "remote",
-        "state": "missing",
-        "version": "1.0.0",
-      },
-      Object {
-        "source": "remote",
-        "state": "missing",
-        "version": "3.0.0-unsupported",
-      },
-    ]
-  }
-  noResults={
-    <Blueprint3.MenuItem
-      disabled={true}
-      multiline={false}
-      popoverProps={Object {}}
-      shouldDismissPopover={true}
-      text="No results."
-    />
-  }
-  onItemSelect={[Function]}
 >
-  <Blueprint3.Button
-    className="version-chooser"
+  <Blueprint4.Select2
     disabled={false}
-    icon="cloud"
-    onContextMenu={[Function]}
-    text="Electron v1.0.0"
-  />
-</Blueprint3.Select>
+    filterable={true}
+    itemListPredicate={[Function]}
+    itemListRenderer={[Function]}
+    itemRenderer={[Function]}
+    items={
+      Array [
+        Object {
+          "source": "remote",
+          "state": "installed",
+          "version": "2.0.3",
+        },
+        Object {
+          "source": "remote",
+          "state": "installed",
+          "version": "2.0.2",
+        },
+        Object {
+          "source": "remote",
+          "state": "installed",
+          "version": "2.0.1",
+        },
+        Object {
+          "source": "remote",
+          "state": "installed",
+          "version": "2.0.0",
+        },
+        Object {
+          "source": "remote",
+          "state": "installed",
+          "version": "1.8.7",
+        },
+        Object {
+          "source": "remote",
+          "state": "missing",
+          "version": "1.0.0",
+        },
+        Object {
+          "source": "remote",
+          "state": "missing",
+          "version": "3.0.0-unsupported",
+        },
+      ]
+    }
+    noResults={
+      <Blueprint4.MenuItem2
+        active={false}
+        disabled={true}
+        multiline={false}
+        popoverProps={Object {}}
+        shouldDismissPopover={true}
+        text="No results."
+      />
+    }
+    onItemSelect={[Function]}
+  >
+    <Blueprint4.Button
+      className="version-chooser"
+      disabled={false}
+      icon="cloud"
+      text="Electron v1.0.0"
+    />
+  </Blueprint4.Select2>
+</Blueprint.ContextMenu2>
 `;

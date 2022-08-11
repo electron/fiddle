@@ -5,15 +5,15 @@ exports[`Action button component renders 1`] = `
   <fieldset
     disabled={false}
   >
-    <Blueprint3.ButtonGroup
+    <Blueprint4.ButtonGroup
       className="button-gist-action"
     >
-      <Blueprint3.Popover
-        boundary="scrollParent"
+      <Blueprint4.Popover2
+        boundary="clippingParents"
         captureDismiss={false}
         content={
-          <Blueprint3.Menu>
-            <Blueprint3.MenuItem
+          <Blueprint4.Menu>
+            <Blueprint4.MenuItem2
               active={false}
               disabled={false}
               icon="lock"
@@ -23,7 +23,7 @@ exports[`Action button component renders 1`] = `
               shouldDismissPopover={true}
               text="Private"
             />
-            <Blueprint3.MenuItem
+            <Blueprint4.MenuItem2
               active={true}
               disabled={false}
               icon="unlock"
@@ -33,7 +33,7 @@ exports[`Action button component renders 1`] = `
               shouldDismissPopover={true}
               text="Public"
             />
-          </Blueprint3.Menu>
+          </Blueprint4.Menu>
         }
         defaultIsOpen={false}
         disabled={false}
@@ -43,28 +43,29 @@ exports[`Action button component renders 1`] = `
         hoverOpenDelay={150}
         inheritDarkTheme={true}
         interactionKind="click"
+        matchTargetWidth={false}
         minimal={false}
-        modifiers={Object {}}
         openOnTargetFocus={true}
-        position="bottom"
+        placement="bottom"
+        positioningStrategy="absolute"
+        shouldReturnFocusOnClose={false}
         targetTagName="span"
         transitionDuration={300}
         usePortal={true}
-        wrapperTagName="span"
       >
-        <Blueprint3.Button
+        <Blueprint4.Button
           icon="unlock"
         />
-      </Blueprint3.Popover>
-      <Blueprint3.Button
+      </Blueprint4.Popover2>
+      <Blueprint4.Button
         icon="upload"
         loading={false}
         onClick={[Function]}
         text="Publish"
       />
-    </Blueprint3.ButtonGroup>
+    </Blueprint4.ButtonGroup>
   </fieldset>
-  <Blueprint3.Toaster
+  <Blueprint4.Toaster
     autoFocus={false}
     canEscapeKeyClear={true}
     position="bottom-right"

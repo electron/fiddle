@@ -48,7 +48,7 @@ export class MaximizeButton extends ToolbarButton {
       mosaicActions.expand(this.context.mosaicWindowActions.getPath());
     };
 
-    return <Button icon="maximize" className="bp3-small" onClick={onClick} />;
+    return <Button icon="maximize" className="bp4-small" onClick={onClick} />;
   }
 }
 
@@ -59,6 +59,6 @@ export class RemoveButton extends ToolbarButton {
   public createButton(_mosaicActions: MosaicRootActions<any>) {
     const onClick = () => this.props.appState.editorMosaic.hide(this.props.id);
 
-    return <Button icon="cross" className="bp3-small" onClick={onClick} />;
+    return <Button icon="cross" className="bp4-small" onClick={onClick} />;
   }
 }

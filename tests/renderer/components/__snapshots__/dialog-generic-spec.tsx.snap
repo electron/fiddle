@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`GenericDialog component renders confirmation 1`] = `
-<Blueprint3.Alert
+<Blueprint4.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
   confirmButtonText="OK"
@@ -12,11 +12,11 @@ exports[`GenericDialog component renders confirmation 1`] = `
   onClose={[Function]}
 >
   <p />
-</Blueprint3.Alert>
+</Blueprint4.Alert>
 `;
 
 exports[`GenericDialog component renders confirmation 2`] = `
-<Blueprint3.Alert
+<Blueprint4.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
   confirmButtonText="OK"
@@ -27,11 +27,11 @@ exports[`GenericDialog component renders confirmation 2`] = `
   onClose={[Function]}
 >
   <p />
-</Blueprint3.Alert>
+</Blueprint4.Alert>
 `;
 
 exports[`GenericDialog component renders warning 1`] = `
-<Blueprint3.Alert
+<Blueprint4.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
   confirmButtonText="OK"
@@ -42,11 +42,11 @@ exports[`GenericDialog component renders warning 1`] = `
   onClose={[Function]}
 >
   <p />
-</Blueprint3.Alert>
+</Blueprint4.Alert>
 `;
 
 exports[`GenericDialog component renders with an input prompt 1`] = `
-<Blueprint3.Alert
+<Blueprint4.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
   confirmButtonText="OK"
@@ -57,15 +57,15 @@ exports[`GenericDialog component renders with an input prompt 1`] = `
   onClose={[Function]}
 >
   <p />
-  <Blueprint3.InputGroup
+  <Blueprint4.InputGroup
     id="input"
     onKeyDown={[Function]}
   />
-</Blueprint3.Alert>
+</Blueprint4.Alert>
 `;
 
 exports[`GenericDialog component renders with an input prompt and placeholder 1`] = `
-<Blueprint3.Alert
+<Blueprint4.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
   confirmButtonText="OK"
@@ -76,10 +76,10 @@ exports[`GenericDialog component renders with an input prompt and placeholder 1`
   onClose={[Function]}
 >
   <p />
-  <Blueprint3.InputGroup
+  <Blueprint4.InputGroup
     id="input"
     onKeyDown={[Function]}
     placeholder="placeholder"
   />
-</Blueprint3.Alert>
+</Blueprint4.Alert>
 `;

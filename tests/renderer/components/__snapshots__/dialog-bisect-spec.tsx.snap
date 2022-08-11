@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`BisectDialog component renders 1`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -9,9 +9,9 @@ exports[`BisectDialog component renders 1`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -35,15 +35,15 @@ exports[`BisectDialog component renders 1`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -84,11 +84,11 @@ exports[`BisectDialog component renders 1`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -129,30 +129,30 @@ exports[`BisectDialog component renders 1`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -160,11 +160,11 @@ exports[`BisectDialog component renders 1`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 2`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -172,9 +172,9 @@ exports[`BisectDialog component renders 2`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -198,15 +198,15 @@ exports[`BisectDialog component renders 2`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -240,11 +240,11 @@ exports[`BisectDialog component renders 2`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -278,30 +278,30 @@ exports[`BisectDialog component renders 2`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -309,11 +309,11 @@ exports[`BisectDialog component renders 2`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 3`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -321,9 +321,9 @@ exports[`BisectDialog component renders 3`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -347,15 +347,15 @@ exports[`BisectDialog component renders 3`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -396,11 +396,11 @@ exports[`BisectDialog component renders 3`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -434,30 +434,30 @@ exports[`BisectDialog component renders 3`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -465,11 +465,11 @@ exports[`BisectDialog component renders 3`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 4`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -477,9 +477,9 @@ exports[`BisectDialog component renders 4`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -503,15 +503,15 @@ exports[`BisectDialog component renders 4`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -552,11 +552,11 @@ exports[`BisectDialog component renders 4`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -597,30 +597,30 @@ exports[`BisectDialog component renders 4`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -628,11 +628,11 @@ exports[`BisectDialog component renders 4`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 5`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -640,9 +640,9 @@ exports[`BisectDialog component renders 5`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -672,10 +672,10 @@ exports[`BisectDialog component renders 5`] = `
       <p>
         Once you begin your bisect, Fiddle will run your fiddle with a number of Electron versions, closing in on the version that introduced the bug. Once completed, you will know which Electron version introduced your issue.
       </p>
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -716,11 +716,11 @@ exports[`BisectDialog component renders 5`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -761,30 +761,30 @@ exports[`BisectDialog component renders 5`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -792,11 +792,11 @@ exports[`BisectDialog component renders 5`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 6`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -804,9 +804,9 @@ exports[`BisectDialog component renders 6`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -830,15 +830,15 @@ exports[`BisectDialog component renders 6`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -893,11 +893,11 @@ exports[`BisectDialog component renders 6`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -952,30 +952,30 @@ exports[`BisectDialog component renders 6`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -983,11 +983,11 @@ exports[`BisectDialog component renders 6`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 7`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -995,9 +995,9 @@ exports[`BisectDialog component renders 7`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -1021,15 +1021,15 @@ exports[`BisectDialog component renders 7`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1077,11 +1077,11 @@ exports[`BisectDialog component renders 7`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1129,30 +1129,30 @@ exports[`BisectDialog component renders 7`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -1160,11 +1160,11 @@ exports[`BisectDialog component renders 7`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 8`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -1172,9 +1172,9 @@ exports[`BisectDialog component renders 8`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -1198,15 +1198,15 @@ exports[`BisectDialog component renders 8`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1261,11 +1261,11 @@ exports[`BisectDialog component renders 8`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1313,30 +1313,30 @@ exports[`BisectDialog component renders 8`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -1344,11 +1344,11 @@ exports[`BisectDialog component renders 8`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 9`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -1356,9 +1356,9 @@ exports[`BisectDialog component renders 9`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -1382,15 +1382,15 @@ exports[`BisectDialog component renders 9`] = `
          
         for learning which version of Electron introduced a bug. This tool helps you perform a bisect.
       </p>
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="help"
         onClick={[Function]}
         text="Show help"
       />
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1445,11 +1445,11 @@ exports[`BisectDialog component renders 9`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1504,30 +1504,30 @@ exports[`BisectDialog component renders 9`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -1535,11 +1535,11 @@ exports[`BisectDialog component renders 9`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`BisectDialog component renders 10`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
   isOpen={false}
@@ -1547,9 +1547,9 @@ exports[`BisectDialog component renders 10`] = `
   title="Start a bisect session"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body dialog-bisect-popover"
   >
-    <Blueprint3.Callout
+    <Blueprint4.Callout
       style={
         Object {
           "marginBottom": "1rem",
@@ -1579,10 +1579,10 @@ exports[`BisectDialog component renders 10`] = `
       <p>
         Once you begin your bisect, Fiddle will run your fiddle with a number of Electron versions, closing in on the version that introduced the bug. Once completed, you will know which Electron version introduced your issue.
       </p>
-    </Blueprint3.Callout>
+    </Blueprint4.Callout>
     <Component>
       Earliest Version (Last "known good" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1637,11 +1637,11 @@ exports[`BisectDialog component renders 10`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
     <Component>
       Latest Version (First "known bad" version)
-      <Blueprint3.ButtonGroup
+      <Blueprint4.ButtonGroup
         fill={true}
       >
         <VersionSelect
@@ -1696,30 +1696,30 @@ exports[`BisectDialog component renders 10`] = `
           itemDisabled={[Function]}
           onVersionSelect={[Function]}
         />
-      </Blueprint3.ButtonGroup>
+      </Blueprint4.ButtonGroup>
     </Component>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="play"
         key="submit"
         onClick={[Function]}
         text="Begin"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="lab-test"
         key="auto"
         onClick={[Function]}
         text="Auto"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
@@ -1727,5 +1727,5 @@ exports[`BisectDialog component renders 10`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;

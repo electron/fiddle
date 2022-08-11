@@ -5,24 +5,24 @@ exports[`ExecutionSettings component renders 1`] = `
   <h1>
     Execution
   </h1>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     These advanced settings control how Electron Fiddle executes your fiddles.
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         Whenever Electron runs, it creates a user data directory for cookies, the cache, and various other things that it needs to keep around. Since fiddles are usually just run once, we delete this directory after your fiddle exits. Enable this setting to keep the user data directories around.
       </p>
-      <Blueprint3.Checkbox
+      <Blueprint4.Checkbox
         label="Do not delete user data directories."
         onChange={[Function]}
       />
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         There are some flags that Electron uses to log extra information both internally and through Chromium. Enable this option to make Fiddle produce those logs. Enabling advanced Electron logging will set the 
         <code>
@@ -48,15 +48,15 @@ exports[`ExecutionSettings component renders 1`] = `
          
         for more information about what they do.
       </p>
-      <Blueprint3.Checkbox
+      <Blueprint4.Checkbox
         label="Enable advanced Electron logging."
         onChange={[Function]}
       />
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         Electron allows starting the executable with
          
@@ -72,14 +72,14 @@ exports[`ExecutionSettings component renders 1`] = `
         . Those can be added to run when you start your Fiddles.
       </p>
       <br />
-      <Blueprint3.InputGroup
+      <Blueprint4.InputGroup
         aria-label="Set user-provided flags"
         key="0"
         name="0"
         onChange={[Function]}
         placeholder="--js-flags=--expose-gc"
         rightElement={
-          <Blueprint3.Button
+          <Blueprint4.Button
             disabled={true}
             icon="cross"
             onClick={[Function]}
@@ -87,18 +87,18 @@ exports[`ExecutionSettings component renders 1`] = `
         }
         value=""
       />
-    </Blueprint3.FormGroup>
-    <Blueprint3.ButtonGroup>
-      <Blueprint3.Button
+    </Blueprint4.FormGroup>
+    <Blueprint4.ButtonGroup>
+      <Blueprint4.Button
         onClick={[Function]}
       >
         Add New Flag
-      </Blueprint3.Button>
-    </Blueprint3.ButtonGroup>
-  </Blueprint3.Callout>
+      </Blueprint4.Button>
+    </Blueprint4.ButtonGroup>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         Electron allows starting the executable with
          
@@ -115,14 +115,14 @@ exports[`ExecutionSettings component renders 1`] = `
         . Those can be added here to run when you start your Fiddles.
       </p>
       <br />
-      <Blueprint3.InputGroup
+      <Blueprint4.InputGroup
         aria-label="Set user-provided environment variables"
         key="0"
         name="0"
         onChange={[Function]}
         placeholder="NODE_OPTIONS=\\"--no-warnings --max-old-space-size=2048\\""
         rightElement={
-          <Blueprint3.Button
+          <Blueprint4.Button
             disabled={true}
             icon="cross"
             onClick={[Function]}
@@ -130,18 +130,18 @@ exports[`ExecutionSettings component renders 1`] = `
         }
         value=""
       />
-    </Blueprint3.FormGroup>
-    <Blueprint3.ButtonGroup>
-      <Blueprint3.Button
+    </Blueprint4.FormGroup>
+    <Blueprint4.ButtonGroup>
+      <Blueprint4.Button
         onClick={[Function]}
       >
         Add New Variable
-      </Blueprint3.Button>
-    </Blueprint3.ButtonGroup>
-  </Blueprint3.Callout>
+      </Blueprint4.Button>
+    </Blueprint4.ButtonGroup>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <span
         style={
           Object {
@@ -171,20 +171,20 @@ exports[`ExecutionSettings component renders 1`] = `
          
         is also available.
       </span>
-      <Blueprint3.RadioGroup
+      <Blueprint4.RadioGroup
         inline={true}
         onChange={[Function]}
       >
-        <Blueprint3.Radio
+        <Blueprint4.Radio
           label="npm"
           value="npm"
         />
-        <Blueprint3.Radio
+        <Blueprint4.Radio
           label="yarn"
           value="yarn"
         />
-      </Blueprint3.RadioGroup>
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+      </Blueprint4.RadioGroup>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
 </div>
 `;

@@ -83,7 +83,7 @@ describe('ElectronSettings component', () => {
     const wrapper = mount(<ElectronSettings appState={store as any} />);
 
     wrapper
-      .find('.electron-versions-table .bp3-button')
+      .find('.electron-versions-table .bp4-button')
       .first()
       .simulate('click');
 
@@ -103,7 +103,7 @@ describe('ElectronSettings component', () => {
     const wrapper = mount(<ElectronSettings appState={store as any} />);
 
     wrapper
-      .find('.electron-versions-table .bp3-button')
+      .find('.electron-versions-table .bp4-button')
       .first()
       .simulate('click');
 
@@ -123,7 +123,7 @@ describe('ElectronSettings component', () => {
     const wrapper = mount(<ElectronSettings appState={store as any} />);
 
     wrapper
-      .find('.electron-versions-table .bp3-button')
+      .find('.electron-versions-table .bp4-button')
       .first()
       .simulate('click');
 

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Icon, IconName, MenuItem } from '@blueprintjs/core';
+import { Icon, IconName } from '@blueprintjs/core';
+import { MenuItem2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
@@ -106,7 +107,7 @@ export const Settings = observer(
         const onClick = () => this.setState({ section: name });
 
         return (
-          <MenuItem
+          <MenuItem2
             onClick={onClick}
             active={isSelected}
             key={name}

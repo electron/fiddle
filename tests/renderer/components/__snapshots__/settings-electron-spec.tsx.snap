@@ -7,11 +7,11 @@ exports[`ElectronSettings component renders 1`] = `
   <h1>
     Electron Settings
   </h1>
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup
       label="Include Electron versions:"
     >
-      <Blueprint3.Tooltip
+      <Blueprint4.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={false}
         hoverCloseDelay={0}
@@ -19,10 +19,10 @@ exports[`ElectronSettings component renders 1`] = `
         intent="primary"
         key="Stable"
         minimal={false}
-        position="bottom"
+        placement="bottom"
         transitionDuration={100}
       >
-        <Blueprint3.Checkbox
+        <Blueprint4.Checkbox
           checked={true}
           disabled={true}
           id="Stable"
@@ -30,8 +30,8 @@ exports[`ElectronSettings component renders 1`] = `
           label="Stable"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Tooltip
+      </Blueprint4.Tooltip2>
+      <Blueprint4.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={true}
         hoverCloseDelay={0}
@@ -39,10 +39,10 @@ exports[`ElectronSettings component renders 1`] = `
         intent="primary"
         key="Beta"
         minimal={false}
-        position="bottom"
+        placement="bottom"
         transitionDuration={100}
       >
-        <Blueprint3.Checkbox
+        <Blueprint4.Checkbox
           checked={true}
           disabled={false}
           id="Beta"
@@ -50,8 +50,8 @@ exports[`ElectronSettings component renders 1`] = `
           label="Beta"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Tooltip
+      </Blueprint4.Tooltip2>
+      <Blueprint4.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={true}
         hoverCloseDelay={0}
@@ -59,10 +59,10 @@ exports[`ElectronSettings component renders 1`] = `
         intent="primary"
         key="Nightly"
         minimal={false}
-        position="bottom"
+        placement="bottom"
         transitionDuration={100}
       >
-        <Blueprint3.Checkbox
+        <Blueprint4.Checkbox
           checked={false}
           disabled={false}
           id="Nightly"
@@ -70,61 +70,61 @@ exports[`ElectronSettings component renders 1`] = `
           label="Nightly"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Checkbox
+      </Blueprint4.Tooltip2>
+      <Blueprint4.Checkbox
         checked={false}
         id="showUndownloadedVersions"
         inline={true}
         label="Not downloaded"
         onChange={[Function]}
       />
-      <Blueprint3.Tooltip
+      <Blueprint4.Tooltip2
         content="Include versions that have reached end-of-life (older than 9.0.0)"
         hoverCloseDelay={0}
         hoverOpenDelay={100}
         intent="primary"
         minimal={false}
-        position="bottom"
+        placement="bottom"
         transitionDuration={100}
       >
-        <Blueprint3.Checkbox
+        <Blueprint4.Checkbox
           checked={false}
           id="showObsoleteVersions"
           inline={true}
           label="Obsolete"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+      </Blueprint4.Tooltip2>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
   <br />
-  <Blueprint3.Callout>
-    <Blueprint3.ButtonGroup
+  <Blueprint4.Callout>
+    <Blueprint4.ButtonGroup
       fill={true}
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="numbered-list"
         onClick={[Function]}
         text="Update Electron Release List"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="download"
         onClick={[Function]}
         text="Download All Versions"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={false}
         icon="trash"
         onClick={[Function]}
         text="Delete All Downloads"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="document-open"
         onClick={[Function]}
         text="Add Local Electron Build"
       />
-    </Blueprint3.ButtonGroup>
+    </Blueprint4.ButtonGroup>
     <HTMLTable
       className="electron-versions-table"
       striped={true}
@@ -153,7 +153,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="box"
               />
                
@@ -163,7 +163,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               fill={true}
               icon="trash"
               onClick={[Function]}
@@ -180,7 +180,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="box"
               />
                
@@ -190,7 +190,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               fill={true}
               icon="trash"
               onClick={[Function]}
@@ -207,7 +207,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="box"
               />
                
@@ -217,7 +217,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               fill={true}
               icon="trash"
               onClick={[Function]}
@@ -234,7 +234,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="cloud-download"
               />
                
@@ -244,7 +244,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               disabled={true}
               fill={true}
               icon="cloud-download"
@@ -262,7 +262,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="cloud"
               />
                
@@ -272,22 +272,22 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Tooltip
+            <Blueprint4.Tooltip2
               content="Can't remove currently active Electron version (2.0.1)"
               hoverCloseDelay={0}
               hoverOpenDelay={100}
               intent="primary"
               minimal={false}
-              position="auto"
+              placement="auto"
               transitionDuration={100}
             >
-              <Blueprint3.AnchorButton
+              <Blueprint4.AnchorButton
                 className="disabled-version"
                 disabled={true}
                 icon="cloud-download"
                 text="Download"
               />
-            </Blueprint3.Tooltip>
+            </Blueprint4.Tooltip2>
           </td>
         </tr>
         <tr
@@ -298,7 +298,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="box"
               />
                
@@ -308,7 +308,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               disabled={true}
               fill={true}
               icon="cloud-download"
@@ -326,7 +326,7 @@ exports[`ElectronSettings component renders 1`] = `
           </td>
           <td>
             <span>
-              <Blueprint3.Icon
+              <Blueprint4.Icon
                 icon="box"
               />
                
@@ -336,7 +336,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Button
+            <Blueprint4.Button
               fill={true}
               icon="trash"
               onClick={[Function]}
@@ -347,6 +347,6 @@ exports[`ElectronSettings component renders 1`] = `
         </tr>
       </tbody>
     </HTMLTable>
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
 </div>
 `;

@@ -221,9 +221,9 @@ export class App {
     }
 
     if (theme.isDark || theme.name.includes('dark')) {
-      document.body.classList.add('bp3-dark');
+      document.body.classList.add('bp4-dark');
     } else {
-      document.body.classList.remove('bp3-dark');
+      document.body.classList.remove('bp4-dark');
     }
   }
 
