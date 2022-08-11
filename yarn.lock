@@ -997,7 +997,7 @@
     global-agent "^2.0.2"
     global-tunnel-ng "^2.7.1"
 
-"@electron/get@^1.14.1", "@electron/get@^1.6.0", "@electron/get@^1.9.0":
+"@electron/get@^1.6.0", "@electron/get@^1.9.0":
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
   integrity sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==
@@ -1006,6 +1006,22 @@
     env-paths "^2.2.0"
     fs-extra "^8.1.0"
     got "^9.6.0"
+    progress "^2.0.3"
+    semver "^6.2.0"
+    sumchecker "^3.0.1"
+  optionalDependencies:
+    global-agent "^3.0.0"
+    global-tunnel-ng "^2.7.1"
+
+"@electron/get@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@electron/get/-/get-2.0.0.tgz#d991e68dc089fc66b521ec3ca4021515482bef91"
+  integrity sha512-d0XfNGayKLrYRqddW4f2Zdjaj71LfvZlCnUN8ojyNMr7WD8v6B+fqdCV8Etnwn/vUfFWFwMk/HtLEFZy01h4tQ==
+  dependencies:
+    debug "^4.1.1"
+    env-paths "^2.2.0"
+    fs-extra "^8.1.0"
+    got "^11.8.5"
     progress "^2.0.3"
     semver "^6.2.0"
     sumchecker "^3.0.1"
@@ -6045,7 +6061,7 @@ gonzales-pe@^4.3.0:
   dependencies:
     minimist "^1.2.5"
 
-got@^11.7.0, got@^11.8.2:
+got@^11.7.0, got@^11.8.2, got@^11.8.5:
   version "11.8.5"
   resolved "https://registry.yarnpkg.com/got/-/got-11.8.5.tgz#ce77d045136de56e8f024bebb82ea349bc730046"
   integrity sha512-o0Je4NvQObAuZPHLFoRSkdG2lTgtcynqymzg2Vupdx6PorhaT5MCbIyXG6d4D94kk8ZG57QeosgdiqfJWhEhlQ==
