@@ -1,3 +1,6 @@
+import { exec as cp_exec } from 'child_process';
+import { promisify } from 'util';
+
 import shellEnv from 'shell-env';
 
 /**
@@ -36,21 +39,10 @@ export const maybeFixPath = (() => {
 export async function exec(dir: string, cliArgs: string): Promise<string> {
   await maybeFixPath();
 
-  return new Promise<string>(async (resolve, reject) => {
-    const { exec } = await import('child_process');
-    exec(
-      cliArgs,
-      {
-        cwd: dir,
-        maxBuffer: 200 * 1024 * 100, // 100 times the default
-      },
-      (error, result) => {
-        if (error) {
-          return reject(error);
-        }
-
-        resolve(String(result));
-      },
-    );
+  const { stdout } = await promisify(cp_exec)(cliArgs, {
+    cwd: dir,
+    maxBuffer: 200 * 1024 * 100, // 100 times the default
   });
+
+  return stdout.trim();
 }

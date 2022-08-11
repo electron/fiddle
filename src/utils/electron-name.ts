@@ -4,13 +4,15 @@
  * @returns {string}
  */
 export function getElectronNameForPlatform(): string {
-  if (process.platform === 'win32') {
-    return 'electron.exe';
+  switch (process.platform) {
+    case 'win32': {
+      return 'electron.exe';
+    }
+    case 'darwin': {
+      return 'Electron.app';
+    }
+    default: {
+      return 'electron';
+    }
   }
-
-  if (process.platform === 'darwin') {
-    return 'Electron.app';
-  }
-
-  return 'electron';
 }
