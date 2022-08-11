@@ -82,5 +82,10 @@ describe('gist', () => {
       const actual = getGistId(input);
       expect(actual).toBe(expected);
     });
+
+    it('should return null when gist id incorrect', () => {
+      const actual = getGistId('xx');
+      expect(actual).toBe(null);
+    });
   });
 });
