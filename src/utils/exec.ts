@@ -1,7 +1,33 @@
+import { exec as cp_exec } from 'child_process';
+import { promisify } from 'util';
+
 import shellEnv from 'shell-env';
 
-// Singleton: We don't want to do this more than once.
-let _shellPathCalled = false;
+/**
+ * On macOS & Linux, we need to fix the $PATH environment variable
+ * so that we can call `npm`.
+ *
+ * @returns {Promise<void>}
+ */
+export const maybeFixPath = (() => {
+  // Singleton: We don't want to do this more than once.
+  let _shellPathCalled = false;
+
+  return async (): Promise<void> => {
+    if (_shellPathCalled) {
+      return;
+    }
+
+    if (process.platform !== 'win32') {
+      const { PATH } = await shellEnv();
+      if (PATH) {
+        process.env.PATH = PATH;
+      }
+    }
+
+    _shellPathCalled = true;
+  };
+})();
 
 /**
  * Execute a command in a directory.
@@ -11,40 +37,12 @@ let _shellPathCalled = false;
  * @returns {Promise<string>}
  */
 export async function exec(dir: string, cliArgs: string): Promise<string> {
-  return new Promise<string>(async (resolve, reject) => {
-    await maybeFixPath();
+  await maybeFixPath();
 
-    const { exec } = await import('child_process');
-    exec(
-      cliArgs,
-      {
-        cwd: dir,
-        maxBuffer: 200 * 1024 * 100, // 100 times the default
-      },
-      (error, result) => {
-        if (error) {
-          reject(error);
-        }
-
-        resolve(typeof result === 'string' ? result : `${result}`);
-      },
-    );
+  const { stdout } = await promisify(cp_exec)(cliArgs, {
+    cwd: dir,
+    maxBuffer: 200 * 1024 * 100, // 100 times the default
   });
-}
 
-/**
- * On macOS & Linux, we need to fix the $PATH environment variable
- * so that we can call `npm`.
- *
- * @returns {Promise<void>}
- */
-export async function maybeFixPath(): Promise<void> {
-  if (!_shellPathCalled && process.platform !== 'win32') {
-    const { PATH } = await shellEnv();
-    if (PATH) {
-      process.env.PATH = PATH;
-    }
-  }
-
-  _shellPathCalled = true;
+  return stdout.trim();
 }
