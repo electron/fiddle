@@ -24,6 +24,16 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -66,6 +76,16 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={true}
                       icon="remove"
@@ -112,6 +132,16 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -156,6 +186,16 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -198,6 +238,16 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={false}
                       icon="remove"
@@ -318,6 +368,16 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -360,6 +420,16 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={true}
                       icon="remove"
@@ -406,6 +476,16 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -450,6 +530,16 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -492,6 +582,16 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={false}
                       icon="remove"
@@ -594,6 +694,16 @@ exports[`SidebarFileTree component renders 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -636,6 +746,16 @@ exports[`SidebarFileTree component renders 1`] = `
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={true}
                       icon="remove"
@@ -682,6 +802,16 @@ exports[`SidebarFileTree component renders 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -726,6 +856,16 @@ exports[`SidebarFileTree component renders 1`] = `
                   <Blueprint3.Menu>
                     <Blueprint3.MenuItem
                       disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
+                    <Blueprint3.MenuItem
+                      disabled={false}
                       icon="remove"
                       intent="danger"
                       multiline={false}
@@ -768,6 +908,16 @@ exports[`SidebarFileTree component renders 1`] = `
                 className="pointer"
                 content={
                   <Blueprint3.Menu>
+                    <Blueprint3.MenuItem
+                      disabled={false}
+                      icon="redo"
+                      intent="primary"
+                      multiline={false}
+                      onClick={[Function]}
+                      popoverProps={Object {}}
+                      shouldDismissPopover={true}
+                      text="Rename"
+                    />
                     <Blueprint3.MenuItem
                       disabled={false}
                       icon="remove"
