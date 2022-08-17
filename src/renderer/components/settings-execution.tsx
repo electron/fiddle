@@ -296,7 +296,7 @@ export const ExecutionSettings = observer(
                 <code>ELECTRON_DEBUG_NOTIFICATION</code>, and{' '}
                 <code>ELECTRON_ENABLE_STACK_DUMPING</code> environment variables
                 to true. See{' '}
-                <a href="https://www.electronjs.org/docs/api/environnment-variables">
+                <a href="https://www.electronjs.org/docs/api/environment-variables">
                   documentation
                 </a>{' '}
                 for more information about what they do.

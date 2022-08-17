@@ -41,7 +41,7 @@ exports[`ExecutionSettings component renders 1`] = `
          environment variables to true. See
          
         <a
-          href="https://www.electronjs.org/docs/api/environnment-variables"
+          href="https://www.electronjs.org/docs/api/environment-variables"
         >
           documentation
         </a>
