@@ -2173,10 +2173,15 @@
   resolved "https://registry.yarnpkg.com/@types/node/-/node-15.0.2.tgz#51e9c0920d1b45936ea04341aa3e2e58d339fb67"
   integrity sha512-p68+a+KoxpoB47015IeYZYRrdqMUcpbK8re/zpFB8Ld46LHC1lPEbp3EXgkEhAYEcPvjJF6ZO+869SQ0aH1dcA==
 
-"@types/node@^14.16.0", "@types/node@^14.6.2":
+"@types/node@^14.16.0":
   version "14.17.5"
   resolved "https://registry.yarnpkg.com/@types/node/-/node-14.17.5.tgz#b59daf6a7ffa461b5648456ca59050ba8e40ed54"
   integrity sha512-bjqH2cX/O33jXT/UmReo2pM7DIJREPMnarixbQ57DOOzzFaI6D2+IcwaJQaJpv0M1E9TIhPCYVxrkcityLjlqA==
+
+"@types/node@^16.11.26":
+  version "16.11.56"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.56.tgz#dcbb617669481e158e0f1c6204d1c768cd675901"
+  integrity sha512-aFcUkv7EddxxOa/9f74DINReQ/celqH8DiB3fRYgVDM2Xm5QJL8sl80QKuAnGvwAsMn+H3IFA6WCrQh1CY7m1A==
 
 "@types/normalize-package-data@^2.4.0":
   version "2.4.0"
@@ -4572,13 +4577,13 @@ electron-winstaller@^5.0.0:
     lodash.template "^4.2.2"
     temp "^0.9.0"
 
-electron@17.4.1:
-  version "17.4.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-17.4.1.tgz#203961ca7551553d6497a1ec61d5f85d64d7e2ef"
-  integrity sha512-0qX+DbiNXlVSUxXq4lWVTis8QYqC4Q7R/Xkk3YZQbHMXZ90bWilypC3gBZAcN4MQD4AYUIebphBOpRPxlXY3nQ==
+electron@18.3.9:
+  version "18.3.9"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-18.3.9.tgz#a2e8301f0bdf5a7a867793bd64441ae49f42499e"
+  integrity sha512-59m2yyHNeFxMjbMyYoRxyNWhdEwK0UOzbhGXGbAoYx/f95cVd9AduWL1G2TSUNgpwugm5Ia7hRs6GlZSPbbJtQ==
   dependencies:
     "@electron/get" "^1.13.0"
-    "@types/node" "^14.6.2"
+    "@types/node" "^16.11.26"
     extract-zip "^1.0.3"
 
 emittery@^0.8.1:
