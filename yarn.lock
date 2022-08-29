@@ -114,10 +114,10 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aryanshridhar/fiddle-core@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@aryanshridhar/fiddle-core/-/fiddle-core-1.0.0.tgz#ce8b55ff045416eaa93a812793f909bb7d64bff0"
-  integrity sha512-4oBvDm1OxiPcpqqlWJrM2PmFzFKxRnJWwaBaqloc2Zh/YYjMdMTUzahsSCwAJaUdBV2M2HjU6yNh3MwHBTwSIQ==
+"@aryanshridhar/fiddle-core@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@aryanshridhar/fiddle-core/-/fiddle-core-1.1.0.tgz#d4b825482238636df3e1511ffbb27d5acc881866"
+  integrity sha512-dTnmnsdCHhtUd1acJzujgoFlglwnXgG01Yi94Son/bUkeFFSLI4u3cf7xWXgxWmoTdVppSRw1mTXw+UZdNV7wg==
   dependencies:
     "@electron/get" "^2.0.0"
     debug "^4.3.3"
