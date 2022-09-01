@@ -73,6 +73,7 @@ exports[`ExecutionSettings component renders 1`] = `
       </p>
       <br />
       <Blueprint3.InputGroup
+        aria-label="Set user-provided flags"
         key="0"
         name="0"
         onChange={[Function]}
@@ -115,6 +116,7 @@ exports[`ExecutionSettings component renders 1`] = `
       </p>
       <br />
       <Blueprint3.InputGroup
+        aria-label="Set user-provided environment variables"
         key="0"
         name="0"
         onChange={[Function]}

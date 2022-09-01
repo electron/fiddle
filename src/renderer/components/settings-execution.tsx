@@ -205,6 +205,7 @@ export const ExecutionSettings = observer(
           {varsArray.map(([idx, envVar]) => {
             return (
               <InputGroup
+                aria-label={'Set user-provided environment variables'}
                 placeholder='NODE_OPTIONS="--no-warnings --max-old-space-size=2048"'
                 value={envVar}
                 name={idx}
@@ -240,6 +241,7 @@ export const ExecutionSettings = observer(
           {flagsArray.map(([idx, flag]) => {
             return (
               <InputGroup
+                aria-label={'Set user-provided flags'}
                 placeholder="--js-flags=--expose-gc"
                 value={flag}
                 name={idx}
