@@ -142,7 +142,11 @@ export const AddressBar = observer(
 
       const isPerformingAction = activeGistAction !== GistActionState.none;
       return (
-        <form className={className} onSubmit={this.handleSubmit}>
+        <form
+          className={className}
+          aria-label={'Enter Fiddle Gist URL'}
+          onSubmit={this.handleSubmit}
+        >
           <fieldset disabled={isPerformingAction}>
             <InputGroup
               key="addressbar"
