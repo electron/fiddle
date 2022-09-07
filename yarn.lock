@@ -114,21 +114,6 @@
     "@jridgewell/gen-mapping" "^0.1.0"
     "@jridgewell/trace-mapping" "^0.3.9"
 
-"@aryanshridhar/fiddle-core@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@aryanshridhar/fiddle-core/-/fiddle-core-1.1.0.tgz#d4b825482238636df3e1511ffbb27d5acc881866"
-  integrity sha512-dTnmnsdCHhtUd1acJzujgoFlglwnXgG01Yi94Son/bUkeFFSLI4u3cf7xWXgxWmoTdVppSRw1mTXw+UZdNV7wg==
-  dependencies:
-    "@electron/get" "^2.0.0"
-    debug "^4.3.3"
-    env-paths "^2.2.1"
-    extract-zip "^2.0.1"
-    fs-extra "^10.0.0"
-    getos "^3.2.1"
-    node-fetch "^2.6.1"
-    semver "^7.3.5"
-    simple-git "^2.48.0"
-
 "@babel/code-frame@7.12.11":
   version "7.12.11"
   resolved "https://registry.yarnpkg.com/@babel/code-frame/-/code-frame-7.12.11.tgz#f4ad435aa263db935b8f10f2c552d23fb716a63f"
@@ -2461,6 +2446,21 @@
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@vercel/webpack-asset-relocator-loader/-/webpack-asset-relocator-loader-1.7.2.tgz#0210abd8d53b2799d53156dd0c18a4ef4e3b51cb"
   integrity sha512-pdMwUawmAtH/LScbjKJq/y2+gZFggFMc2tlJrlPSrgKajvYPEis3L9QKcMyC9RN1Xos4ezAP5AJfRCNN6RMKCQ==
+
+"@vertedinde/fiddle-core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@vertedinde/fiddle-core/-/fiddle-core-1.0.3.tgz#18fb416dbe9ff7a4443b30e765ca85df74b823dd"
+  integrity sha512-0LlSI3E3Iag/vsBJ+eEg88MfQcRWAUVHrZpo+7fAMycfbwH+DHtrjGSxpZ8+QbUJyCzYrFW2M+4MQfxnNO0RIg==
+  dependencies:
+    "@electron/get" "^2.0.0"
+    debug "^4.3.3"
+    env-paths "^2.2.1"
+    extract-zip "^2.0.1"
+    fs-extra "^10.0.0"
+    getos "^3.2.1"
+    node-fetch "^2.6.1"
+    semver "^7.3.5"
+    simple-git "^2.48.0"
 
 "@webassemblyjs/ast@1.11.1":
   version "1.11.1"

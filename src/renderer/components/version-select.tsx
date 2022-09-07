@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { InstallState } from '@aryanshridhar/fiddle-core';
 import {
   Button,
   ButtonGroupProps,
@@ -16,6 +15,7 @@ import {
   ItemRenderer,
   Select,
 } from '@blueprintjs/select';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';

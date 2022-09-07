@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { InstallState } from '@aryanshridhar/fiddle-core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 

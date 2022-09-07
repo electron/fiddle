@@ -1,7 +1,7 @@
 import { ChildProcess } from 'child_process';
 import * as path from 'path';
 
-import { InstallState, Installer } from '@aryanshridhar/fiddle-core';
+import { InstallState, Installer } from '@vertedinde/fiddle-core';
 
 import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';

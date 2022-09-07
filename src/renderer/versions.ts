@@ -1,4 +1,4 @@
-import { InstallState, Installer } from '@aryanshridhar/fiddle-core';
+import { InstallState, Installer } from '@vertedinde/fiddle-core';
 import * as fs from 'fs-extra';
 import semver from 'semver';
 

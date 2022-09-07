@@ -1,4 +1,4 @@
-import { InstallState } from '@aryanshridhar/fiddle-core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import semver from 'semver';
 
 import {

@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { InstallState } from '@aryanshridhar/fiddle-core';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { InstallState } from '@vertedinde/fiddle-core';
 
 import { BisectHandler } from '../src/renderer/components/commands-bisect';
 import { AppState } from '../src/renderer/state';

@@ -4,7 +4,7 @@ import {
   Installer,
   ProgressObject,
   Runner,
-} from '@aryanshridhar/fiddle-core';
+} from '@vertedinde/fiddle-core';
 import * as fs from 'fs-extra';
 import {
   action,

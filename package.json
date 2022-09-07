@@ -35,12 +35,12 @@
     "forge": "./forge.config.js"
   },
   "dependencies": {
-    "@aryanshridhar/fiddle-core": "^1.1.0",
     "@blueprintjs/core": "^3.36.0",
     "@blueprintjs/popover2": "^0.12.2",
     "@blueprintjs/select": "^3.15.0",
     "@octokit/rest": "^16.43.1",
     "@sentry/electron": "^2.5.3",
+    "@vertedinde/fiddle-core": "^1.0.3",
     "algoliasearch": "^4.12.0",
     "classnames": "^2.2.6",
     "commander": "^7.1.0",

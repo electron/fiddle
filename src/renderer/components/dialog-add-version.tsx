@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import * as path from 'path';
 
-import { Installer } from '@aryanshridhar/fiddle-core';
 import {
   Button,
   Callout,
@@ -11,6 +10,7 @@ import {
   InputGroup,
   Intent,
 } from '@blueprintjs/core';
+import { Installer } from '@vertedinde/fiddle-core';
 import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as semver from 'semver';

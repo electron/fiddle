@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { InstallState } from '@aryanshridhar/fiddle-core';
 import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';

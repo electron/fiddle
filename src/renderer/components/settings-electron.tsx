@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { InstallState } from '@aryanshridhar/fiddle-core';
 import {
   AnchorButton,
   Button,
@@ -14,6 +13,7 @@ import {
   IconName,
   Tooltip,
 } from '@blueprintjs/core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { observer } from 'mobx-react';
 
 import {
