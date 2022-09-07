@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Button } from '@blueprintjs/core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { observer } from 'mobx-react';
 
-import { VersionState } from '../../../src/interfaces';
 import { AppState } from '../state';
 
 interface BisectHandlerProps {
@@ -60,7 +60,7 @@ export const BisectHandler = observer(
       const { appState } = this.props;
       if (!!appState.Bisector) {
         const isDownloading =
-          appState.currentElectronVersion.state === VersionState.downloading;
+          appState.currentElectronVersion.state === InstallState.downloading;
         return (
           <>
             <Button

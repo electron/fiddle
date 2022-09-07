@@ -13,13 +13,13 @@ import {
   IconName,
   Tooltip,
 } from '@blueprintjs/core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { observer } from 'mobx-react';
 
 import {
   ElectronReleaseChannel,
   RunnableVersion,
   VersionSource,
-  VersionState,
 } from '../../interfaces';
 import { disableDownload } from '../../utils/disable-download';
 import { AppState } from '../state';
@@ -318,11 +318,11 @@ export const ElectronSettings = observer(
       let icon: IconName = 'box';
       let humanState = 'Downloaded';
 
-      if (state === VersionState.downloading) {
+      if (state === InstallState.downloading) {
         icon = 'cloud-download';
         humanState = 'Downloading';
-      } else if (state === VersionState.unknown) {
-        // The only way for a local version to be unknown
+      } else if (state === InstallState.missing) {
+        // The only way for a local version to be missing
         // is for it to have been deleted. Mark as unavailable.
         icon = isLocal ? 'issue' : 'cloud';
         humanState = isLocal ? 'Not available' : 'Not downloaded';
@@ -352,21 +352,22 @@ export const ElectronSettings = observer(
       };
 
       switch (state) {
-        case VersionState.ready:
+        case InstallState.installed:
+        case InstallState.downloaded:
           buttonProps.icon = 'trash';
           buttonProps.onClick = () => appState.removeVersion(ver);
           buttonProps.text = isLocal ? 'Remove' : 'Delete';
           break;
 
-        case VersionState.downloading:
-        case VersionState.unzipping:
+        case InstallState.installing:
+        case InstallState.downloading:
           buttonProps.disabled = true;
           buttonProps.icon = 'cloud-download';
           buttonProps.loading = true;
           buttonProps.text = 'Downloading';
           break;
 
-        case VersionState.unknown:
+        case InstallState.missing:
           buttonProps.disabled = false;
           buttonProps.loading = false;
           buttonProps.icon = isLocal ? 'trash' : 'cloud-download';

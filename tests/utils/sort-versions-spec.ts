@@ -1,15 +1,13 @@
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
+import { InstallState } from '@vertedinde/fiddle-core';
+
+import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import { sortVersions } from '../../src/utils/sort-versions';
 
 describe('sort-versions', () => {
   function makeVersion(version: string): RunnableVersion {
     return {
       source: VersionSource.remote,
-      state: VersionState.unknown,
+      state: InstallState.missing,
       version,
     };
   }

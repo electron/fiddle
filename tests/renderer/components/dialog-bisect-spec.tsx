@@ -1,12 +1,12 @@
 import * as React from 'react';
 
+import { InstallState } from '@vertedinde/fiddle-core';
 import { shallow } from 'enzyme';
 
 import {
   ElectronReleaseChannel,
   RunResult,
   VersionSource,
-  VersionState,
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
@@ -20,7 +20,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
   const generateVersionRange = (rangeLength: number) =>
     new Array(rangeLength).fill(0).map((_, i) => ({
-      state: VersionState.ready,
+      state: InstallState.installed,
       version: `${i + 1}.0.0`,
       source: VersionSource.local,
     }));

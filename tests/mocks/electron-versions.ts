@@ -1,8 +1,6 @@
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
+import { InstallState } from '@vertedinde/fiddle-core';
+
+import { RunnableVersion, VersionSource } from '../../src/interfaces';
 
 export class VersionsMock {
   public readonly mockVersions: Record<string, RunnableVersion>;
@@ -13,7 +11,7 @@ export class VersionsMock {
 
     const arr = versions.map((version) => ({
       source: VersionSource.remote,
-      state: VersionState.ready,
+      state: InstallState.installed,
       version,
     }));
 

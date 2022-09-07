@@ -1,9 +1,10 @@
+import { InstallState } from '@vertedinde/fiddle-core';
+
 import {
   EditorValues,
   ElectronReleaseChannel,
   PACKAGE_NAME,
   VersionSource,
-  VersionState,
 } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
@@ -310,7 +311,7 @@ describe('RemoteLoader', () => {
       expect(store.addNewVersions).toBeCalledWith([
         {
           source: VersionSource.remote,
-          state: VersionState.unknown,
+          state: InstallState.missing,
           version,
         },
       ]);

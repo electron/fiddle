@@ -1,3 +1,4 @@
+import { InstallState } from '@vertedinde/fiddle-core';
 import semver from 'semver';
 
 import {
@@ -5,7 +6,6 @@ import {
   ElectronReleaseChannel,
   PACKAGE_NAME,
   VersionSource,
-  VersionState,
 } from '../interfaces';
 import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
@@ -175,7 +175,7 @@ export class RemoteLoader {
     if (!this.appState.hasVersion(version)) {
       const versionToDownload = {
         source: VersionSource.remote,
-        state: VersionState.unknown,
+        state: InstallState.missing,
         version,
       };
 

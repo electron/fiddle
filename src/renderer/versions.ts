@@ -1,3 +1,5 @@
+import { InstallState, Installer } from '@vertedinde/fiddle-core';
+import * as fs from 'fs-extra';
 import semver from 'semver';
 
 import releasesJSON from '../../static/releases.json';
@@ -6,10 +8,8 @@ import {
   RunnableVersion,
   Version,
   VersionSource,
-  VersionState,
 } from '../interfaces';
 import { normalizeVersion } from '../utils/normalize-version';
-import { getVersionState } from './binary';
 
 /**
  * Returns a sensible default version string.
@@ -114,14 +114,33 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
   window.localStorage.setItem(key, stringified);
 }
 
+/**
+ * Gets the current state of a specific version
+ * Valid local electron builds are marked as `installed`
+ *
+ * @param {Version} ver
+ * @returns {InstallState}
+ */
+export function getVersionState(ver: Version): InstallState {
+  const { localPath } = ver;
+  if (localPath !== undefined) {
+    const dir = Installer.getExecPath(localPath);
+    if (fs.existsSync(dir)) {
+      return InstallState.installed;
+    }
+  }
+
+  return InstallState.missing;
+}
+
 export function makeRunnable(ver: Version): RunnableVersion {
   const ret: RunnableVersion = {
     ...ver,
     version: normalizeVersion(ver.version),
     source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
-    state: VersionState.unknown,
+    state: getVersionState(ver),
   };
-  ret.state = getVersionState(ver);
+
   return ret;
 }
 

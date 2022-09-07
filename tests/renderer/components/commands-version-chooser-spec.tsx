@@ -1,16 +1,13 @@
 import * as React from 'react';
 
+import { InstallState } from '@vertedinde/fiddle-core';
 import { mount, shallow } from 'enzyme';
 
-import {
-  ElectronReleaseChannel,
-  VersionSource,
-  VersionState,
-} from '../../../src/interfaces';
+import { ElectronReleaseChannel, VersionSource } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
-const { unknown } = VersionState;
+const { missing } = InstallState;
 const { remote } = VersionSource;
 
 describe('VersionSelect component', () => {
@@ -18,13 +15,13 @@ describe('VersionSelect component', () => {
 
   const mockVersion1 = {
     source: remote,
-    state: unknown,
+    state: missing,
     version: '1.0.0',
   };
 
   const mockVersion2 = {
     source: remote,
-    state: unknown,
+    state: missing,
     version: '3.0.0-unsupported',
   };
 

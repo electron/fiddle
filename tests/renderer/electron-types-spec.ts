@@ -1,13 +1,10 @@
 import * as path from 'path';
 
+import { InstallState } from '@vertedinde/fiddle-core';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 
-import {
-  RunnableVersion,
-  VersionSource,
-  VersionState,
-} from '../../src/interfaces';
+import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import { ElectronTypes } from '../../src/renderer/electron-types';
 import { MonacoMock, NodeTypesMock } from '../mocks/mocks';
 import { waitFor } from '../utils';
@@ -48,7 +45,7 @@ describe('ElectronTypes', () => {
 
     remoteVersion = {
       version,
-      state: VersionState.ready,
+      state: InstallState.installed,
       source: VersionSource.remote,
     } as const;
     cacheFile = path.join(
@@ -60,7 +57,7 @@ describe('ElectronTypes', () => {
     localVersion = {
       version,
       localPath: localDir,
-      state: VersionState.ready,
+      state: InstallState.installed,
       source: VersionSource.local,
     } as const;
     localFile = path.join(localDir, 'gen/electron/tsc/typings/electron.d.ts');
@@ -89,7 +86,7 @@ describe('ElectronTypes', () => {
     const missingLocalVersion = {
       version,
       localPath: '/dev/null',
-      state: VersionState.ready,
+      state: InstallState.installed,
       source: VersionSource.local,
     } as const;
 

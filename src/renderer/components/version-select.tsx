@@ -15,12 +15,13 @@ import {
   ItemRenderer,
   Select,
 } from '@blueprintjs/select';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import semver from 'semver';
 
-import { RunnableVersion, VersionSource, VersionState } from '../../interfaces';
+import { RunnableVersion, VersionSource } from '../../interfaces';
 import { disableDownload } from '../../utils/disable-download';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
@@ -71,11 +72,14 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
   if (source === VersionSource.local) {
     label = name || 'Local';
   } else {
-    if (state === VersionState.unknown) {
+    if (state === InstallState.missing) {
       label = `Not downloaded`;
-    } else if (state === VersionState.ready) {
+    } else if (
+      state === InstallState.installed ||
+      state === InstallState.downloaded
+    ) {
       label = `Downloaded`;
-    } else if (state === VersionState.downloading) {
+    } else if (state === InstallState.downloading) {
       label = `Downloading`;
     }
   }
@@ -92,14 +96,15 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  */
 export function getItemIcon({ state }: RunnableVersion) {
   switch (state) {
-    case VersionState.unknown:
+    case InstallState.missing:
       return 'cloud';
-    case VersionState.ready:
-      return 'saved';
-    case VersionState.downloading:
-      return 'cloud-download';
-    case VersionState.unzipping:
+    case InstallState.installing:
       return 'compressed';
+    case InstallState.installed:
+    case InstallState.downloaded:
+      return 'saved';
+    case InstallState.downloading:
+      return 'cloud-download';
   }
 }
 

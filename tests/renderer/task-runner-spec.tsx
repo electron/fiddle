@@ -1,3 +1,5 @@
+import { InstallState } from '@vertedinde/fiddle-core';
+
 import {
   BisectRequest,
   ElectronReleaseChannel,
@@ -5,7 +7,6 @@ import {
   RunnableVersion,
   TestRequest,
   VersionSource,
-  VersionState,
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
@@ -23,7 +24,7 @@ describe('Task Runner component', () => {
   function makeRunnables(versions: string[]): RunnableVersion[] {
     return versions.map((version) => ({
       source: VersionSource.remote,
-      state: VersionState.unknown,
+      state: InstallState.missing,
       version,
     }));
   }

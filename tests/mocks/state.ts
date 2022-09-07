@@ -12,6 +12,7 @@ import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 import { objectDifference } from '../utils';
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
+import { FiddleRunnerMock, InstallerMock } from './fiddle-core';
 
 export class StateMock {
   public acceleratorsToBlock: BlockableAccelerator[] = [];
@@ -100,6 +101,8 @@ export class StateMock {
   public toggleAuthDialog = jest.fn();
   public toggleSettings = jest.fn();
   public updateElectronVersions = jest.fn();
+  public installer = new InstallerMock();
+  public versionRunner = new FiddleRunnerMock();
 
   constructor() {
     makeObservable(this, {

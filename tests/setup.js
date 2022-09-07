@@ -23,7 +23,6 @@ if (!process.env.FIDDLE_VERBOSE_TESTS) {
 }
 jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
-jest.mock('@electron/get');
 
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 

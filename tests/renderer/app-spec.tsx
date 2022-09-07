@@ -1,7 +1,6 @@
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
-import { setupBinary } from '../../src/renderer/binary';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
@@ -20,14 +19,6 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
-// TODO(ckerr): this `jest.mock` call is required because
-// instantiating a new App instantiates a new State, which
-// calls setVersion(), which tries to fetch binary & types.
-jest.mock('../../src/renderer/binary', () => ({
-  getVersionState: jest.fn(),
-  setupBinary: jest.fn(),
-}));
-
 describe('App component', () => {
   let app: App;
   let ElectronFiddle: any;
@@ -37,13 +28,13 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
-    (setupBinary as jest.Mock).mockReturnValue(() => Promise.resolve());
-
-    // make a real App and inject it into the mocks
     ({ ElectronFiddle } = window as any);
     const { app: appMock } = ElectronFiddle;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
+    jest
+      .spyOn(app.state, 'downloadVersion')
+      .mockImplementation(() => Promise.resolve());
     Object.assign(app, {
       electronTypes,
       fileManager,

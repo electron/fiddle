@@ -1,8 +1,8 @@
 import * as React from 'react';
 
+import { InstallState } from '@vertedinde/fiddle-core';
 import { shallow } from 'enzyme';
 
-import { VersionState } from '../../../src/interfaces';
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { StateMock } from '../../mocks/mocks';
@@ -27,40 +27,40 @@ describe('Runner component', () => {
     }
 
     it('idle', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = InstallState.installed;
       expectSnapshotToMatch();
     });
 
     it('running', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = InstallState.installed;
       store.isRunning = true;
       expectSnapshotToMatch();
     });
 
     it('installing modules', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+      store.currentElectronVersion.state = InstallState.installed;
       store.isInstallingModules = true;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.downloading', () => {
-      store.currentElectronVersion.state = VersionState.downloading;
+    it('InstallState.downloading', () => {
+      store.currentElectronVersion.state = InstallState.downloading;
       store.currentElectronVersion.downloadProgress = 50;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unzipping', () => {
-      store.currentElectronVersion.state = VersionState.unzipping;
+    it('InstallState.installing', () => {
+      store.currentElectronVersion.state = InstallState.installing;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.ready', () => {
-      store.currentElectronVersion.state = VersionState.ready;
+    it('InstallState.installed', () => {
+      store.currentElectronVersion.state = InstallState.installed;
       expectSnapshotToMatch();
     });
 
-    it('VersionState.unknown', () => {
-      store.currentElectronVersion.state = VersionState.unknown;
+    it('InstallState.missing', () => {
+      store.currentElectronVersion.state = InstallState.missing;
       expectSnapshotToMatch();
     });
   });

@@ -15,7 +15,6 @@ import { StateMock } from '../../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
-jest.mock('../../../src/renderer/binary');
 
 describe('AddThemeDialog component', () => {
   let store: StateMock;

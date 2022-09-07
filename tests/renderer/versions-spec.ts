@@ -22,12 +22,6 @@ import {
 } from '../../src/renderer/versions';
 import { FetchMock } from '../utils';
 
-jest.mock('../../src/renderer/binary', () => ({
-  getVersionState: jest
-    .fn()
-    .mockImplementation((v: RunnableVersion) => v.state),
-}));
-
 const mockVersions: Array<Partial<RunnableVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
   { version: 'test-1', localPath: '/test/path/1' },

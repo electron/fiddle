@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
+import { InstallState } from '@vertedinde/fiddle-core';
 import { observer } from 'mobx-react';
 
-import { VersionState } from '../../interfaces';
 import { AppState } from '../state';
 
 interface RunnerProps {
@@ -20,7 +20,7 @@ interface RunnerProps {
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
     public render() {
-      const { downloading, unknown, unzipping, ready } = VersionState;
+      const { downloading, missing, installing, installed } = InstallState;
       const {
         isRunning,
         isInstallingModules,
@@ -31,7 +31,7 @@ export const Runner = observer(
       const state = currentElectronVersion?.state;
       const props: ButtonProps = { className: 'button-run', disabled: true };
 
-      if ([downloading, unknown].includes(state) && !isOnline) {
+      if ([downloading, missing].includes(state) && !isOnline) {
         props.text = 'Offline';
         props.icon = 'satellite';
         return <Button {...props} type={undefined} />;
@@ -48,12 +48,12 @@ export const Runner = observer(
           );
           break;
         }
-        case unzipping: {
+        case installing: {
           props.text = 'Unzipping';
           props.icon = <Spinner size={16} />;
           break;
         }
-        case ready: {
+        case installed: {
           props.disabled = false;
           if (isRunning) {
             props.active = true;

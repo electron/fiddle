@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`Runner component renders VersionState.downloading 1`] = `
+exports[`Runner component renders InstallState.downloading 1`] = `
 <Blueprint3.Button
   className="button-run"
   disabled={true}
@@ -14,7 +14,7 @@ exports[`Runner component renders VersionState.downloading 1`] = `
 />
 `;
 
-exports[`Runner component renders VersionState.ready 1`] = `
+exports[`Runner component renders InstallState.installed 1`] = `
 <Blueprint3.Button
   className="button-run"
   disabled={false}
@@ -24,7 +24,7 @@ exports[`Runner component renders VersionState.ready 1`] = `
 />
 `;
 
-exports[`Runner component renders VersionState.unknown 1`] = `
+exports[`Runner component renders InstallState.missing 1`] = `
 <Blueprint3.Button
   className="button-run"
   disabled={true}
@@ -37,7 +37,7 @@ exports[`Runner component renders VersionState.unknown 1`] = `
 />
 `;
 
-exports[`Runner component renders VersionState.unzipping 1`] = `
+exports[`Runner component renders InstallState.installing 1`] = `
 <Blueprint3.Button
   className="button-run"
   disabled={true}

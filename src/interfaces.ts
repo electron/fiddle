@@ -1,13 +1,8 @@
+import { InstallState } from '@vertedinde/fiddle-core';
+
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
-
-export enum VersionState {
-  ready = 'ready',
-  downloading = 'downloading',
-  unzipping = 'unzipping',
-  unknown = 'unknown',
-}
 
 export enum VersionSource {
   remote = 'remote',
@@ -41,7 +36,7 @@ export enum RunResult {
 }
 
 export interface RunnableVersion extends Version {
-  state: VersionState;
+  state: InstallState;
   source: VersionSource;
   downloadProgress?: number;
 }
