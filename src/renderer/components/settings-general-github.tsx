@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { Button, Callout } from '@blueprintjs/core';
+import { Button, Callout, Checkbox, FormGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
 import { AppState } from '../state';
@@ -21,6 +21,9 @@ export const GitHubSettings = observer(
       super(props);
 
       this.signIn = this.signIn.bind(this);
+      this.handlePublishGistAsRevisionChange = this.handlePublishGistAsRevisionChange.bind(
+        this,
+      );
     }
 
     /**
@@ -61,17 +64,46 @@ export const GitHubSettings = observer(
       );
     }
 
+    /**
+     * Handles a change on whether or not the gist should be published
+     * as a revision on top of the default fiddle gist.
+     *
+     * @param {React.FormEvent<HTMLInputElement>} event
+     */
+    public handlePublishGistAsRevisionChange(
+      event: React.FormEvent<HTMLInputElement>,
+    ) {
+      const { checked } = event.currentTarget;
+      this.props.appState.isPublishingGistAsRevision = checked;
+    }
+
     public render() {
       const { gitHubToken } = this.props.appState;
+      const { isPublishingGistAsRevision } = this.props.appState;
 
       const maybeSignedIn = !!gitHubToken
         ? this.renderSignedIn()
         : this.renderNotSignedIn();
 
+      const publishGistAsRevisionInstructions = `
+        Enable this option to always publish your fiddle as a revision of the
+        default fiddle gist values.`.trim();
+
       return (
         <div>
           <h4>GitHub</h4>
           {maybeSignedIn}
+          <Callout>
+            <FormGroup>
+              <p>{publishGistAsRevisionInstructions}</p>
+              <Checkbox
+                checked={isPublishingGistAsRevision}
+                label="Publish as revision."
+                onChange={this.handlePublishGistAsRevisionChange}
+                defaultChecked={true}
+              />
+            </FormGroup>
+          </Callout>
         </div>
       );
     }
