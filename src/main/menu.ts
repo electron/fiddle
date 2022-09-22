@@ -339,6 +339,28 @@ export function setupMenu(options?: SetUpMenuOptions) {
           Menu.sendActionToFirstResponder('selectAll:');
         }
       };
+
+      const undo = item.submenu.find((i) => i.label === 'Undo')!;
+      delete undo.role; // override default role
+      undo.click = () => {
+        ipcMainManager.send(IpcEvents.UNDO_IN_EDITOR);
+
+        // Allow undo to occur in text fields outside the editors.
+        if (process.platform === 'darwin') {
+          Menu.sendActionToFirstResponder('undo:');
+        }
+      };
+
+      const redo = item.submenu.find((i) => i.label === 'Redo')!;
+      delete redo.role; // override default role
+      redo.click = () => {
+        ipcMainManager.send(IpcEvents.REDO_IN_EDITOR);
+
+        // Allow redo to occur in text fields outside the editors.
+        if (process.platform === 'darwin') {
+          Menu.sendActionToFirstResponder('redo:');
+        }
+      };
     }
 
     // Tweak "View" menu
