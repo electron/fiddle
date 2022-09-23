@@ -95,6 +95,22 @@ export const Editors = observer(
         },
       );
 
+      ipcRendererManager.on(IpcEvents.REDO_IN_EDITOR, (_event) => {
+        const editor = this.props.appState.editorMosaic.focusedEditor();
+        if (editor) {
+          const model = editor.getModel();
+          if (model) (model as any).redo();
+        }
+      });
+
+      ipcRendererManager.on(IpcEvents.UNDO_IN_EDITOR, (_event) => {
+        const editor = this.props.appState.editorMosaic.focusedEditor();
+        if (editor) {
+          const model = editor.getModel();
+          if (model) (model as any).undo();
+        }
+      });
+
       ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
@@ -116,6 +132,8 @@ export const Editors = observer(
       ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
       ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
       ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
+      ipcRendererManager.removeAllListeners(IpcEvents.UNDO_IN_EDITOR);
+      ipcRendererManager.removeAllListeners(IpcEvents.REDO_IN_EDITOR);
     }
 
     /**
