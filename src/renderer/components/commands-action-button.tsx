@@ -127,14 +127,14 @@ export const GistActionButton = observer(
       );
 
       try {
-        const filesList = appState.isPublishingGistAsRevision
+        const gistFilesList = appState.isPublishingGistAsRevision
           ? this.gistFilesList(defaultGistValues)
           : this.gistFilesList(currentEditorValues);
 
         const gist = await octo.gists.create({
           public: !!gitHubPublishAsPublic,
           description,
-          files: filesList as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+          files: gistFilesList as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
         });
 
         if (appState.isPublishingGistAsRevision) {
