@@ -15,6 +15,20 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
       text="Sign in"
     />
   </Blueprint3.Callout>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <p>
+        Enable this option to always publish your fiddle as a revision of the
+        default fiddle gist values.
+      </p>
+      <Blueprint3.Checkbox
+        checked={true}
+        defaultChecked={true}
+        label="Publish as revision."
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
+  </Blueprint3.Callout>
 </div>
 `;
 
@@ -37,6 +51,20 @@ exports[`GitHubSettings component renders when signed in 1`] = `
       onClick={[MockFunction]}
       text="Sign out"
     />
+  </Blueprint3.Callout>
+  <Blueprint3.Callout>
+    <Blueprint3.FormGroup>
+      <p>
+        Enable this option to always publish your fiddle as a revision of the
+        default fiddle gist values.
+      </p>
+      <Blueprint3.Checkbox
+        checked={true}
+        defaultChecked={true}
+        label="Publish as revision."
+        onChange={[Function]}
+      />
+    </Blueprint3.FormGroup>
   </Blueprint3.Callout>
 </div>
 `;
