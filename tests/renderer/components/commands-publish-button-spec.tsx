@@ -124,6 +124,7 @@ describe('Action button component', () => {
     beforeEach(() => {
       // create a button that's primed to publish a new gist
       ({ instance } = createActionButton());
+      state.isPublishingGistAsRevision = false;
     });
 
     it('publishes a gist', async () => {

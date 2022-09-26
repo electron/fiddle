@@ -31,4 +31,23 @@ describe('GitHubSettings component', () => {
     wrapper.childAt(1).childAt(1).simulate('click');
     expect(store.isTokenDialogShowing).toBe(true);
   });
+
+  describe('Gist publish as revision component', () => {
+    it('state changes', async () => {
+      const wrapper = shallow(<GitHubSettings appState={store as any} />);
+      const instance = wrapper.instance() as any;
+
+      await instance.handlePublishGistAsRevisionChange({
+        currentTarget: { checked: false },
+      });
+
+      expect(store.isPublishingGistAsRevision).toBe(false);
+
+      await instance.handlePublishGistAsRevisionChange({
+        currentTarget: { checked: true },
+      });
+
+      expect(store.isPublishingGistAsRevision).toBe(true);
+    });
+  });
 });

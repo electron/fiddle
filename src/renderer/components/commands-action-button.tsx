@@ -25,7 +25,6 @@ import { getOctokit } from '../../utils/octokit';
 import { getTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
-// import { FIDDLE_GIST_DESCRIPTION_PLACEHOLDER } from '../constants';
 
 interface GistActionButtonProps {
   appState: AppState;
