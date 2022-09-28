@@ -185,7 +185,7 @@ describe('Action button component', () => {
         const spy = jest.spyOn(instance, 'handleUpdate');
 
         await instance.performGistAction();
-        expect(spy).toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(true);
       });
     });
 
