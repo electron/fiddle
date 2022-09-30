@@ -131,6 +131,7 @@ export const GistActionButton = observer(
           ? this.gistFilesList(defaultGistValues)
           : this.gistFilesList(currentEditorValues);
 
+        // TODO: remove as any when octo is fixed
         const gist = await octo.gists.create({
           public: !!gitHubPublishAsPublic,
           description,

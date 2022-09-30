@@ -26,6 +26,10 @@ export const GitHubSettings = observer(
       );
     }
 
+    private static publishGistAsRevisionInstructions = `
+    Enable this option to always publish your fiddle as a revision of the
+    default fiddle gist values.`.trim();
+
     /**
      * Render the "logged out" settings experience.
      *
@@ -85,17 +89,13 @@ export const GitHubSettings = observer(
         ? this.renderSignedIn()
         : this.renderNotSignedIn();
 
-      const publishGistAsRevisionInstructions = `
-        Enable this option to always publish your fiddle as a revision of the
-        default fiddle gist values.`.trim();
-
       return (
         <div>
           <h4>GitHub</h4>
           {maybeSignedIn}
           <Callout>
             <FormGroup>
-              <p>{publishGistAsRevisionInstructions}</p>
+              <p>{GitHubSettings.publishGistAsRevisionInstructions}</p>
               <Checkbox
                 checked={isPublishingGistAsRevision}
                 label="Publish as revision."
