@@ -19,7 +19,7 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
     <Blueprint3.FormGroup>
       <p>
         Enable this option to always publish your fiddle as a revision of the
-        default fiddle gist values.
+    default fiddle gist values.
       </p>
       <Blueprint3.Checkbox
         checked={true}
@@ -56,7 +56,7 @@ exports[`GitHubSettings component renders when signed in 1`] = `
     <Blueprint3.FormGroup>
       <p>
         Enable this option to always publish your fiddle as a revision of the
-        default fiddle gist values.
+    default fiddle gist values.
       </p>
       <Blueprint3.Checkbox
         checked={true}
