@@ -47,7 +47,6 @@ exports[`Action button component renders 1`] = `
         modifiers={Object {}}
         openOnTargetFocus={true}
         position="bottom"
-        shouldReturnFocusOnClose={false}
         targetTagName="span"
         transitionDuration={300}
         usePortal={true}
