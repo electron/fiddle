@@ -91,8 +91,8 @@ export class AppState {
   );
   public isClearingConsoleOnRun = !!this.retrieve('isClearingConsoleOnRun');
   public isUsingSystemTheme = !!(this.retrieve('isUsingSystemTheme') ?? true);
-  public isPublishingGistAsRevision = !!this.retrieve(
-    'isPublishingGistAsRevision',
+  public isPublishingGistAsRevision = !!(
+    this.retrieve('isPublishingGistAsRevision') ?? true
   );
   public executionFlags: Array<string> =
     (this.retrieve('executionFlags') as Array<string>) === null

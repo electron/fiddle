@@ -23,7 +23,6 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
       </p>
       <Blueprint3.Checkbox
         checked={true}
-        defaultChecked={true}
         label="Publish as revision."
         onChange={[Function]}
       />
@@ -60,7 +59,6 @@ exports[`GitHubSettings component renders when signed in 1`] = `
       </p>
       <Blueprint3.Checkbox
         checked={true}
-        defaultChecked={true}
         label="Publish as revision."
         onChange={[Function]}
       />

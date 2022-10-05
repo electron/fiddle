@@ -126,6 +126,8 @@ export const GistActionButton = observer(
         options,
       );
 
+      defaultGistValues['package.json'] = currentEditorValues['package.json'];
+
       try {
         const gistFilesList = appState.isPublishingGistAsRevision
           ? this.gistFilesList(defaultGistValues)
@@ -139,7 +141,7 @@ export const GistActionButton = observer(
         });
 
         if (appState.isPublishingGistAsRevision) {
-          this.handleUpdate(appState.isPublishingGistAsRevision);
+          await this.handleUpdate(appState.isPublishingGistAsRevision);
         }
 
         appState.gistId = gist.data.id;
@@ -192,15 +194,19 @@ export const GistActionButton = observer(
 
     /**
      * Update an existing GitHub gist.
+     * silently updates the gist when publishing as a revision
      */
-    public async handleUpdate(isPublishingGistAsRevision = false) {
+    public async handleUpdate(silent = false) {
       const { appState } = this.props;
       const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
       const values = await window.ElectronFiddle.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
+      console.log('hi i am here');
+      await new Promise((r) => setTimeout(r, 5000));
 
+      console.log('hi i am here 2');
       try {
         const {
           data: { files: oldFiles },
@@ -220,7 +226,7 @@ export const GistActionButton = observer(
         appState.editorMosaic.isEdited = false;
         console.log('Updating: Updating done', { gist });
 
-        if (!isPublishingGistAsRevision) {
+        if (!silent) {
           this.renderToast({
             message: 'Successfully updated gist!',
             action: {

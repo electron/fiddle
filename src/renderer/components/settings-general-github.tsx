@@ -100,7 +100,6 @@ export const GitHubSettings = observer(
                 checked={isPublishingGistAsRevision}
                 label="Publish as revision."
                 onChange={this.handlePublishGistAsRevisionChange}
-                defaultChecked={true}
               />
             </FormGroup>
           </Callout>
