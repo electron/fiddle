@@ -1,5 +1,90 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`VersionSelect component disableDownload disables download buttons when return value is true 1`] = `
+<Blueprint3.Popover
+  autoFocus={false}
+  boundary="scrollParent"
+  canEscapeKeyClose={false}
+  captureDismiss={false}
+  className="disabled-menu-tooltip"
+  content="Version is not available on current OS"
+  defaultIsOpen={false}
+  disabled={false}
+  enforceFocus={false}
+  fill={false}
+  hasBackdrop={false}
+  hoverCloseDelay={0}
+  hoverOpenDelay={100}
+  inheritDarkTheme={true}
+  interactionKind="hover-target"
+  lazy={true}
+  minimal={false}
+  modifiers={
+    Object {
+      "flip": Object {
+        "enabled": false,
+      },
+      "hide": Object {
+        "enabled": false,
+      },
+      "preventOverflow": Object {
+        "enabled": false,
+      },
+    }
+  }
+  openOnTargetFocus={true}
+  popoverClassName="bp3-tooltip bp3-intent-primary"
+  targetTagName="span"
+  transitionDuration={100}
+  usePortal={true}
+  wrapperTagName="span"
+>
+  <Blueprint3.MenuItem
+    active={true}
+    disabled={true}
+    icon="cloud"
+    key="1.0.0"
+    label="Not downloaded"
+    multiline={false}
+    popoverProps={Object {}}
+    shouldDismissPopover={true}
+    text={
+      Array [
+        "1.0.0",
+      ]
+    }
+  />
+</Blueprint3.Popover>
+`;
+
+exports[`VersionSelect component disableDownload does not disable enabled download buttons when return value is false 1`] = `
+<li
+  className=""
+>
+  <a
+    className="bp3-menu-item bp3-active bp3-intent-primary bp3-popover-dismiss"
+    label="Not downloaded"
+    onClick={[Function]}
+  >
+    <Blueprint3.Icon
+      icon="cloud"
+    />
+    <Blueprint3.Text
+      className="bp3-fill"
+      ellipsize={true}
+      tagName="div"
+    >
+      1.0.0
+    </Blueprint3.Text>
+    <span
+      className="bp3-menu-item-label"
+    >
+      Not downloaded
+    </span>
+  </a>
+</li>
+`;
+
 exports[`VersionSelect component renderItem() renders an item 1`] = `
 <Blueprint3.MenuItem
   active={true}

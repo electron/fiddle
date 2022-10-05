@@ -102,8 +102,7 @@ describe('VersionSelect component', () => {
       })!;
 
       const ItemWrapper = shallow(item);
-
-      expect(ItemWrapper.find('.disabled-menu-tooltip')).toHaveLength(1);
+      expect(ItemWrapper).toMatchSnapshot();
     });
 
     it('does not disable enabled download buttons when return value is false', () => {
@@ -117,8 +116,7 @@ describe('VersionSelect component', () => {
       })!;
 
       const ItemWrapper = shallow(item);
-
-      expect(ItemWrapper.exists('.disabled-menu-tooltip')).toBe(false);
+      expect(ItemWrapper).toMatchSnapshot();
     });
   });
 
