@@ -140,12 +140,12 @@ export const GistActionButton = observer(
           files: gistFilesList as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
         });
 
+        appState.gistId = gist.data.id;
+        appState.localPath = undefined;
+
         if (appState.isPublishingGistAsRevision) {
           await this.handleUpdate(appState.isPublishingGistAsRevision);
         }
-
-        appState.gistId = gist.data.id;
-        appState.localPath = undefined;
 
         console.log(`Publish Button: Publishing complete`, { gist });
         this.renderToast({
@@ -203,10 +203,7 @@ export const GistActionButton = observer(
       const values = await window.ElectronFiddle.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
-      console.log('hi i am here');
-      await new Promise((r) => setTimeout(r, 5000));
 
-      console.log('hi i am here 2');
       try {
         const {
           data: { files: oldFiles },
@@ -217,6 +214,8 @@ export const GistActionButton = observer(
           // Gist files are deleted by setting content to an empty string.
           if (!(id in files)) files[id] = { content: '' };
         }
+
+        console.log({ gist_id: appState.gistId! });
 
         const gist = await octo.gists.update({
           gist_id: appState.gistId!,
