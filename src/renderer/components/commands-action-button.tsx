@@ -215,8 +215,6 @@ export const GistActionButton = observer(
           if (!(id in files)) files[id] = { content: '' };
         }
 
-        console.log({ gist_id: appState.gistId! });
-
         const gist = await octo.gists.update({
           gist_id: appState.gistId!,
           files,
