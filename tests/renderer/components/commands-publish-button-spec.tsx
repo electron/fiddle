@@ -124,6 +124,7 @@ describe('Action button component', () => {
     beforeEach(() => {
       // create a button that's primed to publish a new gist
       ({ instance } = createActionButton());
+      state.isPublishingGistAsRevision = false;
     });
 
     it('publishes a gist', async () => {
@@ -174,6 +175,17 @@ describe('Action button component', () => {
         const files = getGistFiles(required);
         const expected = { ...expectedGistOpts, files };
         expect(mocktokit.gists.create).toHaveBeenCalledWith(expected);
+      });
+
+      it('calls update() if isPublishingGistAsRevision is true', async () => {
+        state.isPublishingGistAsRevision = true;
+        state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+
+        const { instance } = createActionButton();
+        const spy = jest.spyOn(instance, 'handleUpdate');
+
+        await instance.performGistAction();
+        expect(spy).toHaveBeenCalledWith(true);
       });
     });
 

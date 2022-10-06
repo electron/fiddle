@@ -38,6 +38,7 @@ export class StateMock {
   public isEnablingElectronLogging = false;
   public isGenericDialogShowing = false;
   public isInstallingModules = false;
+  public isPublishingGistAsRevision = true;
   public isOnline = true;
   public isQuitting = false;
   public isRunning = false;
@@ -130,6 +131,7 @@ export class StateMock {
       isGenericDialogShowing: observable,
       isInstallingModules: observable,
       isOnline: observable,
+      isPublishingGistAsRevision: observable,
       isQuitting: observable,
       isRunning: observable,
       isSettingsShowing: observable,

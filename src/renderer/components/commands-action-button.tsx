@@ -22,6 +22,7 @@ import {
 import { IpcEvents } from '../../ipc-events';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { getOctokit } from '../../utils/octokit';
+import { getTemplate } from '../content';
 import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
@@ -120,17 +121,31 @@ export const GistActionButton = observer(
       const octo = await getOctokit(appState);
       const { gitHubPublishAsPublic } = appState;
       const options = { includeDependencies: true, includeElectron: true };
-      const values = await window.ElectronFiddle.app.getEditorValues(options);
+      const defaultGistValues = await getTemplate(appState.version);
+      const currentEditorValues = await window.ElectronFiddle.app.getEditorValues(
+        options,
+      );
+
+      defaultGistValues['package.json'] = currentEditorValues['package.json'];
 
       try {
+        const gistFilesList = appState.isPublishingGistAsRevision
+          ? this.gistFilesList(defaultGistValues)
+          : this.gistFilesList(currentEditorValues);
+
+        // TODO: remove as any when octo is fixed
         const gist = await octo.gists.create({
           public: !!gitHubPublishAsPublic,
           description,
-          files: this.gistFilesList(values) as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+          files: gistFilesList as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
         });
 
         appState.gistId = gist.data.id;
         appState.localPath = undefined;
+
+        if (appState.isPublishingGistAsRevision) {
+          await this.handleUpdate(appState.isPublishingGistAsRevision);
+        }
 
         console.log(`Publish Button: Publishing complete`, { gist });
         this.renderToast({
@@ -179,8 +194,9 @@ export const GistActionButton = observer(
 
     /**
      * Update an existing GitHub gist.
+     * silently updates the gist when publishing as a revision
      */
-    public async handleUpdate() {
+    public async handleUpdate(silent = false) {
       const { appState } = this.props;
       const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
@@ -206,14 +222,17 @@ export const GistActionButton = observer(
 
         appState.editorMosaic.isEdited = false;
         console.log('Updating: Updating done', { gist });
-        this.renderToast({
-          message: 'Successfully updated gist!',
-          action: {
-            text: 'Copy link',
-            icon: 'clipboard',
-            onClick: () => clipboard.writeText(gist.data.html_url),
-          },
-        });
+
+        if (!silent) {
+          this.renderToast({
+            message: 'Successfully updated gist!',
+            action: {
+              text: 'Copy link',
+              icon: 'clipboard',
+              onClick: () => clipboard.writeText(gist.data.html_url),
+            },
+          });
+        }
       } catch (error) {
         console.warn(`Could not update gist`, { error });
 

@@ -91,6 +91,9 @@ export class AppState {
   );
   public isClearingConsoleOnRun = !!this.retrieve('isClearingConsoleOnRun');
   public isUsingSystemTheme = !!(this.retrieve('isUsingSystemTheme') ?? true);
+  public isPublishingGistAsRevision = !!(
+    this.retrieve('isPublishingGistAsRevision') ?? true
+  );
   public executionFlags: Array<string> =
     (this.retrieve('executionFlags') as Array<string>) === null
       ? []
@@ -219,6 +222,7 @@ export class AppState {
       isInstallingModules: observable,
       isKeepingUserDataDirs: observable,
       isOnline: observable,
+      isPublishingGistAsRevision: observable,
       isQuitting: observable,
       isRunning: observable,
       isSettingsShowing: observable,
@@ -330,6 +334,9 @@ export class AppState {
       this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun),
     );
     autorun(() => this.save('isUsingSystemTheme', this.isUsingSystemTheme));
+    autorun(() =>
+      this.save('isPublishingGistAsRevision', this.isPublishingGistAsRevision),
+    );
     autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
     autorun(() => this.save('gitHubLogin', this.gitHubLogin));
     autorun(() => this.save('gitHubName', this.gitHubName));
