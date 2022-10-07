@@ -1,4 +1,4 @@
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 
 import { VersionSource } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';

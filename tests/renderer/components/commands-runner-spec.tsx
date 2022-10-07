@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 import { shallow } from 'enzyme';
 
 import { Runner } from '../../../src/renderer/components/commands-runner';
