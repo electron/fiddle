@@ -4,7 +4,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/desktop-capturer
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, desktopCapturer } = require('electron')
 const path = require('path')
 
 app.whenReady().then(() => {
@@ -19,4 +19,14 @@ app.whenReady().then(() => {
   })
 
   mainWindow.loadFile('index.html')
+  if (parseInt(process.versions.electron) >= 17) {
+    desktopCapturer.getSources({ types: ['window', 'screen'] }).then(async sources => {
+      for (const source of sources) {
+        if (source.id.startsWith('screen')) {
+          mainWindow.webContents.send('SET_SOURCE', source.id)
+          return
+        }
+      }
+    })
+  }
 })
