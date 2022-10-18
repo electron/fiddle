@@ -5,14 +5,14 @@ exports[`CreditsSettings component renders 1`] = `
   <h1>
     Credits
   </h1>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
   <br />
   <div
     className="contributors"
   >
-    <Blueprint3.Card
+    <Blueprint4.Card
       className="contributor"
       elevation={0}
       interactive={true}
@@ -47,7 +47,7 @@ exports[`CreditsSettings component renders 1`] = `
           🙇 ✨🌳 
         </small>
       </div>
-    </Blueprint3.Card>
+    </Blueprint4.Card>
   </div>
 </div>
 `;
@@ -57,14 +57,14 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
   <h1>
     Credits
   </h1>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
   <br />
   <div
     className="contributors"
   >
-    <Blueprint3.Card
+    <Blueprint4.Card
       className="contributor"
       elevation={0}
       interactive={true}
@@ -88,7 +88,7 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
           felixrieseberg
         </h2>
       </div>
-    </Blueprint3.Card>
+    </Blueprint4.Card>
   </div>
 </div>
 `;
@@ -98,9 +98,9 @@ exports[`CreditsSettings component renders nothing if we do not have contributor
   <h1>
     Credits
   </h1>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     Electron Fiddle is, just like Electron, a free open source project welcoming contributors of all genders, cultures, and backgrounds. We would like to thank those who helped to make Electron Fiddle:
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
   <br />
   <div
     className="contributors"

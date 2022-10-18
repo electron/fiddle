@@ -5,17 +5,17 @@ exports[`PackageAuthorSettings component renders 1`] = `
   <h4>
     Package Author
   </h4>
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup
       label="Set the package.json author field for your exported Fiddle projects."
       labelFor="package-author"
     >
-      <Blueprint3.InputGroup
+      <Blueprint4.InputGroup
         id="package-author"
         onChange={[Function]}
         value="electron<electron@electron.org>"
       />
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
 </div>
 `;

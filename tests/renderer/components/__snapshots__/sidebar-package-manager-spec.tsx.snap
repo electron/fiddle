@@ -20,7 +20,7 @@ exports[`SidebarPackageManager component renders 1`] = `
   <h5>
     Modules
   </h5>
-  <Blueprint3.Suggest
+  <Blueprint4.Suggest2
     closeOnSelect={true}
     fill={true}
     inputValueRenderer={[Function]}
@@ -36,7 +36,6 @@ exports[`SidebarPackageManager component renders 1`] = `
     openOnKeyDown={false}
     popoverProps={
       Object {
-        "fill": true,
         "minimal": true,
         "usePortal": false,
       }
@@ -44,7 +43,7 @@ exports[`SidebarPackageManager component renders 1`] = `
     resetOnClose={false}
     resetOnSelect={true}
   />
-  <Blueprint3.Tree
+  <Blueprint4.Tree
     contents={
       Array [
         Object {
@@ -57,7 +56,7 @@ exports[`SidebarPackageManager component renders 1`] = `
               onChange={[Function]}
               value="1.0.0"
             />
-            <Blueprint3.Button
+            <Blueprint4.Button
               icon="remove"
               minimal={true}
               onClick={[Function]}

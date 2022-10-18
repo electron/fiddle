@@ -222,7 +222,7 @@ describe('App component', () => {
     });
 
     it('removes the dark theme option if required', async () => {
-      document.body.classList.add('bp3-dark');
+      document.body.classList.add('bp4-dark');
 
       await app.loadTheme('defaultLight');
 
@@ -232,7 +232,7 @@ describe('App component', () => {
     it('adds the dark theme option if required', async () => {
       await app.loadTheme('custom-dark');
 
-      expect(document.body.classList.value).toBe('bp3-dark');
+      expect(document.body.classList.value).toBe('bp4-dark');
     });
   });
 

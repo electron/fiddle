@@ -4,7 +4,7 @@ exports[`VersionChooser component renders 1`] = `
 <div
   className="tour"
 >
-  <Blueprint3.Dialog
+  <Blueprint4.Dialog
     backdropProps={
       Object {
         "style": Object {
@@ -28,16 +28,16 @@ exports[`VersionChooser component renders 1`] = `
     }
   >
     <div
-      className="bp3-dialog-header"
+      className="bp4-dialog-header"
     >
       <h4
-        className="bp3-heading"
+        className="bp4-heading"
       >
         Step 1
       </h4>
     </div>
     <div
-      className="bp3-dialog-body"
+      className="bp4-dialog-body"
     >
       <span
         key="1"
@@ -46,18 +46,18 @@ exports[`VersionChooser component renders 1`] = `
       </span>
     </div>
     <div
-      className="bp3-dialog-footer"
+      className="bp4-dialog-footer"
     >
       <div
-        className="bp3-dialog-footer-actions"
+        className="bp4-dialog-footer-actions"
       >
-        <Blueprint3.Button
+        <Blueprint4.Button
           icon="stop"
           key="btn-stop"
           onClick={[Function]}
           text="Stop Tour"
         />
-        <Blueprint3.Button
+        <Blueprint4.Button
           icon="step-forward"
           key="btn-adv"
           onClick={[Function]}
@@ -65,7 +65,7 @@ exports[`VersionChooser component renders 1`] = `
         />
       </div>
     </div>
-  </Blueprint3.Dialog>
+  </Blueprint4.Dialog>
   <svg
     height="100%"
     width="100%"

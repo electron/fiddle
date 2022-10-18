@@ -3,17 +3,16 @@ import * as React from 'react';
 import {
   Button,
   ButtonGroupProps,
-  ContextMenu,
   Intent,
   Menu,
-  MenuItem,
-  Tooltip,
+  Position,
 } from '@blueprintjs/core';
+import { ContextMenu2, MenuItem2, Tooltip2 } from '@blueprintjs/popover2';
 import {
   ItemListPredicate,
   ItemListRenderer,
   ItemRenderer,
-  Select,
+  Select2,
 } from '@blueprintjs/select';
 import { InstallState } from '@vertedinde/fiddle-core';
 import { clipboard } from 'electron';
@@ -26,7 +25,7 @@ import { disableDownload } from '../../utils/disable-download';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 
-const ElectronVersionSelect = Select.ofType<RunnableVersion>();
+const ElectronVersionSelect = Select2.ofType<RunnableVersion>();
 
 const FixedSizeListItem = ({ index, data, style }: ListChildComponentProps) => {
   const { filteredItems, renderItem } = data;
@@ -60,7 +59,7 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
 };
 
 /**
- * Helper method: Returns the <Select /> label for an Electron
+ * Helper method: Returns the <Select2 /> label for an Electron
  * version.
  *
  * @param {RunnableVersion} { source, state, name }
@@ -88,7 +87,7 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
 }
 
 /**
- * Helper method: Returns the <Select /> icon for an Electron
+ * Helper method: Returns the <Select2 /> icon for an Electron
  * version.
  *
  * @param {RunnableVersion} { state }
@@ -109,7 +108,7 @@ export function getItemIcon({ state }: RunnableVersion) {
 }
 
 /**
- * Helper method: Returns the <Select /> predicate for an Electron
+ * Helper method: Returns the <Select2 /> predicate for an Electron
  * version.
  *
  * Sorts by index of the chosen query.
@@ -154,32 +153,7 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
 };
 
 /**
- * Renders a context menu to copy the current Electron version.
- *
- * @param {React.MouseEvent<HTMLButtonElement>} e
- * @param {string} version the Electron version number to copy.
- */
-export const renderVersionContextMenu = (
-  e: React.MouseEvent<HTMLButtonElement>,
-  version: string,
-) => {
-  e.preventDefault();
-
-  ContextMenu.show(
-    <Menu>
-      <MenuItem
-        text="Copy Version Number"
-        onClick={() => {
-          clipboard.writeText(version);
-        }}
-      />
-    </Menu>,
-    { left: e.clientX, top: e.clientY },
-  );
-};
-
-/**
- * Helper method: Returns the <Select /> <MenuItem /> for Electron
+ * Helper method: Returns the <Select2 /> <MenuItem2 /> for Electron
  * versions.
  *
  * @param {RunnableVersion} item
@@ -196,8 +170,9 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
 
   if (disableDownload(item.version)) {
     return (
-      <Tooltip
+      <Tooltip2
         className="disabled-menu-tooltip"
+        placement={Position.TOP}
         modifiers={{
           flip: { enabled: false },
           preventOverflow: { enabled: false },
@@ -206,7 +181,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
         intent={Intent.PRIMARY}
         content={`Version is not available on current OS`}
       >
-        <MenuItem
+        <MenuItem2
           active={modifiers.active}
           disabled={true}
           text={highlightText(item.version, query)}
@@ -214,12 +189,12 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           label={getItemLabel(item)}
           icon={getItemIcon(item)}
         />
-      </Tooltip>
+      </Tooltip2>
     );
   }
 
   return (
-    <MenuItem
+    <MenuItem2
       active={modifiers.active}
       disabled={modifiers.disabled}
       text={highlightText(item.version, query)}
@@ -263,27 +238,38 @@ export const VersionSelect = observer(
       const { version } = currentVersion;
 
       return (
-        <ElectronVersionSelect
-          filterable={true}
-          items={this.props.appState.versionsToShow}
-          itemRenderer={renderItem}
-          itemListPredicate={filterItems}
-          itemListRenderer={itemListRenderer}
-          itemDisabled={itemDisabled}
-          onItemSelect={this.props.onVersionSelect}
-          noResults={<MenuItem disabled={true} text="No results." />}
+        <ContextMenu2
           disabled={!!this.props.disabled}
+          content={
+            <Menu>
+              <MenuItem2
+                text="Copy Version Number"
+                onClick={() => {
+                  clipboard.writeText(version);
+                }}
+              />
+            </Menu>
+          }
         >
-          <Button
-            className="version-chooser"
-            text={`Electron v${version}`}
-            icon={getItemIcon(currentVersion)}
-            onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
-              renderVersionContextMenu(e, version);
-            }}
+          <ElectronVersionSelect
+            filterable={true}
+            items={this.props.appState.versionsToShow}
+            itemRenderer={renderItem}
+            itemListPredicate={filterItems}
+            itemListRenderer={itemListRenderer}
+            itemDisabled={itemDisabled}
+            onItemSelect={this.props.onVersionSelect}
+            noResults={<MenuItem2 disabled={true} text="No results." />}
             disabled={!!this.props.disabled}
-          />
-        </ElectronVersionSelect>
+          >
+            <Button
+              className="version-chooser"
+              text={`Electron v${version}`}
+              icon={getItemIcon(currentVersion)}
+              disabled={!!this.props.disabled}
+            />
+          </ElectronVersionSelect>
+        </ContextMenu2>
       );
     }
   },

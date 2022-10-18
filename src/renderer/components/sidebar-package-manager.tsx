@@ -1,7 +1,8 @@
 import * as React from 'react';
 
-import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
-import { Suggest } from '@blueprintjs/select';
+import { Button, Tree, TreeNodeInfo } from '@blueprintjs/core';
+import { MenuItem2 } from '@blueprintjs/popover2';
+import { Suggest2 } from '@blueprintjs/select';
 import { autorun } from 'mobx';
 import { observer } from 'mobx-react';
 import pDebounce from 'p-debounce';
@@ -60,12 +61,12 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
     return (
       <div className="package-tree">
         <h5>Modules</h5>
-        <Suggest
+        <Suggest2
           fill={true}
           inputValueRenderer={() => ''}
           items={this.state.suggestions}
           itemRenderer={(item, { modifiers, handleClick }) => (
-            <MenuItem
+            <MenuItem2
               active={modifiers.active}
               key={item.name}
               text={
@@ -93,7 +94,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
               });
             }
           }, 200)}
-          popoverProps={{ minimal: true, usePortal: false, fill: true }}
+          popoverProps={{ minimal: true, usePortal: false }}
           resetOnClose={false}
           resetOnSelect={true}
         />

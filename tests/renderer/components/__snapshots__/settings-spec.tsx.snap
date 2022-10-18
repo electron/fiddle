@@ -8,7 +8,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="cog"
@@ -20,7 +20,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="floppy-disk"
@@ -32,7 +32,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="play"
@@ -44,7 +44,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="heart"
@@ -64,7 +64,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />
@@ -81,7 +81,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="cog"
@@ -93,7 +93,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="floppy-disk"
@@ -105,7 +105,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="play"
@@ -117,7 +117,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={true}
         disabled={false}
         icon="heart"
@@ -137,7 +137,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />
@@ -161,7 +161,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="cog"
@@ -173,7 +173,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={true}
         disabled={false}
         icon="floppy-disk"
@@ -185,7 +185,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="play"
@@ -197,7 +197,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="heart"
@@ -217,7 +217,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />
@@ -241,7 +241,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={true}
         disabled={false}
         icon="cog"
@@ -253,7 +253,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="floppy-disk"
@@ -265,7 +265,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="play"
@@ -277,7 +277,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="heart"
@@ -297,7 +297,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />
@@ -322,7 +322,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="cog"
@@ -334,7 +334,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="floppy-disk"
@@ -346,7 +346,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={true}
         disabled={false}
         icon="play"
@@ -358,7 +358,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="heart"
@@ -378,7 +378,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />
@@ -402,7 +402,7 @@ exports[`Settings component renders the General page after a click 1`] = `
     className="settings-menu"
   >
     <ul>
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={true}
         disabled={false}
         icon="cog"
@@ -414,7 +414,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         shouldDismissPopover={true}
         text="General"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="floppy-disk"
@@ -426,7 +426,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         shouldDismissPopover={true}
         text="Electron"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="play"
@@ -438,7 +438,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         shouldDismissPopover={true}
         text="Execution"
       />
-      <Blueprint3.MenuItem
+      <Blueprint4.MenuItem2
         active={false}
         disabled={false}
         icon="heart"
@@ -458,7 +458,7 @@ exports[`Settings component renders the General page after a click 1`] = `
     <button
       className="settings-close"
     >
-      <Blueprint3.Icon
+      <Blueprint4.Icon
         icon="cross"
         iconSize={25}
       />

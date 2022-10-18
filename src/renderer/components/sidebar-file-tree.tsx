@@ -6,11 +6,11 @@ import {
   Classes,
   Icon,
   Menu,
-  MenuItem,
+  Position,
   Tree,
   TreeNodeInfo,
 } from '@blueprintjs/core';
-import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
+import { ContextMenu2, MenuItem2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
@@ -61,13 +61,13 @@ export const SidebarFileTree = observer(
                 onClick={() => this.setFocusedFile(editorId)}
                 content={
                   <Menu>
-                    <MenuItem
+                    <MenuItem2
                       icon="redo"
                       text="Rename"
                       intent="primary"
                       onClick={() => this.renameEditor(editorId)}
                     />
-                    <MenuItem
+                    <MenuItem2
                       disabled={isRequiredFile(editorId)}
                       icon="remove"
                       text="Delete"
@@ -84,6 +84,7 @@ export const SidebarFileTree = observer(
               <ButtonGroup>
                 <Tooltip2
                   content="Toggle Visibility"
+                  placement={Position.RIGHT}
                   minimal={true}
                   hoverOpenDelay={1000}
                 >
@@ -138,6 +139,7 @@ export const SidebarFileTree = observer(
             <ButtonGroup minimal>
               <Tooltip2
                 content="Add New File"
+                placement={Position.RIGHT}
                 minimal={true}
                 hoverOpenDelay={1000}
               >
@@ -149,6 +151,7 @@ export const SidebarFileTree = observer(
               </Tooltip2>
               <Tooltip2
                 content="Reset Layout"
+                placement={Position.RIGHT}
                 minimal={true}
                 hoverOpenDelay={1000}
               >

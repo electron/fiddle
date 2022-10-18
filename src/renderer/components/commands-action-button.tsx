@@ -5,11 +5,10 @@ import {
   ButtonGroup,
   IToastProps,
   Menu,
-  MenuItem,
-  Popover,
   Position,
   Toaster,
 } from '@blueprintjs/core';
+import { MenuItem2, Popover2 } from '@blueprintjs/popover2';
 import { clipboard } from 'electron';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
@@ -395,17 +394,17 @@ export const GistActionButton = observer(
 
       const menu = (
         <Menu>
-          <MenuItem
+          <MenuItem2
             text="Publish"
             active={actionType === GistActionType.publish}
             onClick={() => this.setActionType(GistActionType.publish)}
           />
-          <MenuItem
+          <MenuItem2
             text="Update"
             active={actionType === GistActionType.update}
             onClick={() => this.setActionType(GistActionType.update)}
           />
-          <MenuItem
+          <MenuItem2
             text="Delete"
             active={actionType === GistActionType.delete}
             onClick={() => this.setActionType(GistActionType.delete)}
@@ -414,9 +413,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={menu} position={Position.BOTTOM}>
+        <Popover2 content={menu} placement={Position.BOTTOM}>
           <Button icon="wrench" />
-        </Popover>
+        </Popover2>
       );
     };
 
@@ -431,13 +430,13 @@ export const GistActionButton = observer(
       const privacyIcon = gitHubPublishAsPublic ? 'unlock' : 'lock';
       const privacyMenu = (
         <Menu>
-          <MenuItem
+          <MenuItem2
             text="Private"
             icon="lock"
             active={!gitHubPublishAsPublic}
             onClick={this.setPrivate}
           />
-          <MenuItem
+          <MenuItem2
             text="Public"
             icon="unlock"
             active={gitHubPublishAsPublic}
@@ -447,9 +446,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={privacyMenu} position={Position.BOTTOM}>
+        <Popover2 content={privacyMenu} placement={Position.BOTTOM}>
           <Button icon={privacyIcon} />
-        </Popover>
+        </Popover2>
       );
     };
 

@@ -5,29 +5,29 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
   <h4>
     GitHub
   </h4>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     <p>
       Your fiddles can be published as GitHub Gists - that way you can share your fiddles with the world!
     </p>
-    <Blueprint3.Button
+    <Blueprint4.Button
       icon="log-in"
       onClick={[Function]}
       text="Sign in"
     />
-  </Blueprint3.Callout>
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  </Blueprint4.Callout>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         Enable this option to always publish your fiddle as a revision of the
     default fiddle gist values.
       </p>
-      <Blueprint3.Checkbox
+      <Blueprint4.Checkbox
         checked={true}
         label="Publish as revision."
         onChange={[Function]}
       />
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
 </div>
 `;
 
@@ -36,7 +36,7 @@ exports[`GitHubSettings component renders when signed in 1`] = `
   <h4>
     GitHub
   </h4>
-  <Blueprint3.Callout>
+  <Blueprint4.Callout>
     <p>
       Your fiddles can be published as public GitHub Gists. Using the personal access token you gave us, we logged you into GitHub as
        
@@ -45,24 +45,24 @@ exports[`GitHubSettings component renders when signed in 1`] = `
       </code>
       .
     </p>
-    <Blueprint3.Button
+    <Blueprint4.Button
       icon="log-out"
       onClick={[MockFunction]}
       text="Sign out"
     />
-  </Blueprint3.Callout>
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup>
+  </Blueprint4.Callout>
+  <Blueprint4.Callout>
+    <Blueprint4.FormGroup>
       <p>
         Enable this option to always publish your fiddle as a revision of the
     default fiddle gist values.
       </p>
-      <Blueprint3.Checkbox
+      <Blueprint4.Checkbox
         checked={true}
         label="Publish as revision."
         onChange={[Function]}
       />
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
+    </Blueprint4.FormGroup>
+  </Blueprint4.Callout>
 </div>
 `;

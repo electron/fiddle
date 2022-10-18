@@ -176,7 +176,7 @@ export const TokenDialog = observer(
           onClose={this.onClose}
           title="GitHub Token"
         >
-          <div className="bp3-dialog-body">
+          <div className="bp4-dialog-body">
             <p>
               Generate a{' '}
               <a onClick={this.openGenerateTokenExternal}>
@@ -193,8 +193,8 @@ export const TokenDialog = observer(
               onChange={this.handleChange}
             />
           </div>
-          <div className="bp3-dialog-footer">
-            <div className="bp3-dialog-footer-actions">{this.buttons}</div>
+          <div className="bp4-dialog-footer">
+            <div className="bp4-dialog-footer-actions">{this.buttons}</div>
           </div>
         </Dialog>
       );

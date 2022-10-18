@@ -8,7 +8,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
     }
   }
 >
-  <Blueprint3.Tree
+  <Blueprint4.Tree
     contents={
       Array [
         Object {
@@ -21,8 +21,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -32,7 +33,8 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -42,30 +44,31 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -75,8 +78,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -86,7 +90,8 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={true}
                       icon="remove"
                       intent="danger"
@@ -96,30 +101,31 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -129,8 +135,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -140,7 +147,8 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -150,30 +158,31 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -183,8 +192,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -194,7 +204,8 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -204,30 +215,31 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -237,8 +249,9 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -248,7 +261,8 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -258,30 +272,31 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "className": "add-file-input",
@@ -289,7 +304,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
               "id": "add",
               "label": <input
                 autoFocus={true}
-                className="bp3-input bp3-fill bp3-small"
+                className="bp4-input bp4-fill bp4-small"
                 id="new-file-input"
                 onBlur={[Function]}
                 onKeyDown={[Function]}
@@ -307,36 +322,38 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
           "id": "files",
           "isExpanded": true,
           "label": "Editors",
-          "secondaryLabel": <Blueprint3.ButtonGroup
+          "secondaryLabel": <Blueprint4.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Tooltip2
+            <Blueprint4.Tooltip2
               content="Add New File"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="add"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-            <Blueprint3.Tooltip2
+            </Blueprint4.Tooltip2>
+            <Blueprint4.Tooltip2
               content="Reset Layout"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="grid-view"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-          </Blueprint3.ButtonGroup>,
+            </Blueprint4.Tooltip2>
+          </Blueprint4.ButtonGroup>,
         },
       ]
     }
@@ -352,7 +369,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
     }
   }
 >
-  <Blueprint3.Tree
+  <Blueprint4.Tree
     contents={
       Array [
         Object {
@@ -365,8 +382,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -376,7 +394,8 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -386,30 +405,31 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-off"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -419,8 +439,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -430,7 +451,8 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={true}
                       icon="remove"
                       intent="danger"
@@ -440,30 +462,31 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -473,8 +496,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -484,7 +508,8 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -494,30 +519,31 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -527,8 +553,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -538,7 +565,8 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -548,30 +576,31 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -581,8 +610,9 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -592,7 +622,8 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -602,30 +633,31 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
           ],
           "hasCaret": false,
@@ -633,36 +665,38 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
           "id": "files",
           "isExpanded": true,
           "label": "Editors",
-          "secondaryLabel": <Blueprint3.ButtonGroup
+          "secondaryLabel": <Blueprint4.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Tooltip2
+            <Blueprint4.Tooltip2
               content="Add New File"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="add"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-            <Blueprint3.Tooltip2
+            </Blueprint4.Tooltip2>
+            <Blueprint4.Tooltip2
               content="Reset Layout"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="grid-view"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-          </Blueprint3.ButtonGroup>,
+            </Blueprint4.Tooltip2>
+          </Blueprint4.ButtonGroup>,
         },
       ]
     }
@@ -678,7 +712,7 @@ exports[`SidebarFileTree component renders 1`] = `
     }
   }
 >
-  <Blueprint3.Tree
+  <Blueprint4.Tree
     contents={
       Array [
         Object {
@@ -691,8 +725,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -702,7 +737,8 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -712,30 +748,31 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 index.html
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -745,8 +782,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -756,7 +794,8 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={true}
                       icon="remove"
                       intent="danger"
@@ -766,30 +805,31 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 main.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -799,8 +839,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -810,7 +851,8 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -820,30 +862,31 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 preload.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -853,8 +896,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -864,7 +908,8 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -874,30 +919,31 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 renderer.js
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
             Object {
               "hasCaret": false,
@@ -907,8 +953,9 @@ exports[`SidebarFileTree component renders 1`] = `
               "label": <Blueprint.ContextMenu2
                 className="pointer"
                 content={
-                  <Blueprint3.Menu>
-                    <Blueprint3.MenuItem
+                  <Blueprint4.Menu>
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="redo"
                       intent="primary"
@@ -918,7 +965,8 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Rename"
                     />
-                    <Blueprint3.MenuItem
+                    <Blueprint4.MenuItem2
+                      active={false}
                       disabled={false}
                       icon="remove"
                       intent="danger"
@@ -928,30 +976,31 @@ exports[`SidebarFileTree component renders 1`] = `
                       shouldDismissPopover={true}
                       text="Delete"
                     />
-                  </Blueprint3.Menu>
+                  </Blueprint4.Menu>
                 }
                 onClick={[Function]}
               >
                 styles.css
               </Blueprint.ContextMenu2>,
-              "secondaryLabel": <Blueprint3.ButtonGroup>
-                <Blueprint3.Tooltip2
+              "secondaryLabel": <Blueprint4.ButtonGroup>
+                <Blueprint4.Tooltip2
                   content="Toggle Visibility"
                   hoverCloseDelay={0}
                   hoverOpenDelay={1000}
                   minimal={true}
+                  placement="right"
                   transitionDuration={100}
                 >
-                  <Blueprint3.Button
+                  <Blueprint4.Button
                     minimal={true}
                     onClick={[Function]}
                   >
-                    <Blueprint3.Icon
+                    <Blueprint4.Icon
                       icon="eye-open"
                     />
-                  </Blueprint3.Button>
-                </Blueprint3.Tooltip2>
-              </Blueprint3.ButtonGroup>,
+                  </Blueprint4.Button>
+                </Blueprint4.Tooltip2>
+              </Blueprint4.ButtonGroup>,
             },
           ],
           "hasCaret": false,
@@ -959,36 +1008,38 @@ exports[`SidebarFileTree component renders 1`] = `
           "id": "files",
           "isExpanded": true,
           "label": "Editors",
-          "secondaryLabel": <Blueprint3.ButtonGroup
+          "secondaryLabel": <Blueprint4.ButtonGroup
             minimal={true}
           >
-            <Blueprint3.Tooltip2
+            <Blueprint4.Tooltip2
               content="Add New File"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="add"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-            <Blueprint3.Tooltip2
+            </Blueprint4.Tooltip2>
+            <Blueprint4.Tooltip2
               content="Reset Layout"
               hoverCloseDelay={0}
               hoverOpenDelay={1000}
               minimal={true}
+              placement="right"
               transitionDuration={100}
             >
-              <Blueprint3.Button
+              <Blueprint4.Button
                 icon="grid-view"
                 onClick={[Function]}
                 small={true}
               />
-            </Blueprint3.Tooltip2>
-          </Blueprint3.ButtonGroup>,
+            </Blueprint4.Tooltip2>
+          </Blueprint4.ButtonGroup>,
         },
       ]
     }

@@ -1,22 +1,22 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Header component renders 1`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   isOpen={true}
   key="welcome-tour-dialog"
 >
   <div
-    className="bp3-dialog-header"
+    className="bp4-dialog-header"
   >
     <h4
-      className="bp3-heading"
+      className="bp4-heading"
     >
       🙋‍ Hey There!
     </h4>
   </div>
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body"
   >
     <p>
       Welcome to Electron Fiddle! If you're new to the app, we'd like to give you a brief tour of its features.
@@ -26,18 +26,18 @@ exports[`Header component renders 1`] = `
     </p>
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="cross"
         key="cancel"
         onClick={[Function]}
         text="I'll figure it out"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="presentation"
         key="ok"
         onClick={[Function]}
@@ -45,7 +45,7 @@ exports[`Header component renders 1`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;
 
 exports[`Header component renders the tour once started 1`] = `

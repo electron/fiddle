@@ -1,14 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`TokenDialog component renders 1`] = `
-<Blueprint3.Dialog
+<Blueprint4.Dialog
   canOutsideClickClose={true}
   isOpen={false}
   onClose={[Function]}
   title="GitHub Token"
 >
   <div
-    className="bp3-dialog-body"
+    className="bp4-dialog-body"
   >
     <p>
       Generate a
@@ -21,19 +21,19 @@ exports[`TokenDialog component renders 1`] = `
        
       and paste it here:
     </p>
-    <Blueprint3.InputGroup
+    <Blueprint4.InputGroup
       onChange={[Function]}
       onFocus={[Function]}
       value=""
     />
   </div>
   <div
-    className="bp3-dialog-footer"
+    className="bp4-dialog-footer"
   >
     <div
-      className="bp3-dialog-footer-actions"
+      className="bp4-dialog-footer-actions"
     >
-      <Blueprint3.Button
+      <Blueprint4.Button
         disabled={true}
         icon="log-in"
         key="done"
@@ -41,7 +41,7 @@ exports[`TokenDialog component renders 1`] = `
         onClick={[Function]}
         text="Done"
       />
-      <Blueprint3.Button
+      <Blueprint4.Button
         icon="log-out"
         key="cancel"
         onClick={[Function]}
@@ -49,5 +49,5 @@ exports[`TokenDialog component renders 1`] = `
       />
     </div>
   </div>
-</Blueprint3.Dialog>
+</Blueprint4.Dialog>
 `;

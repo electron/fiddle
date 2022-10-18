@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
+import classnames from 'classnames';
 import { observer } from 'mobx-react';
 
 import { RunnableVersion } from '../../interfaces';
@@ -197,6 +198,7 @@ export const BisectDialog = observer(
     public render() {
       const { isBisectDialogShowing } = this.props.appState;
       const { startIndex, endIndex, allVersions } = this.state;
+      const className = classnames('bp4-dialog-body', 'dialog-bisect-popover');
 
       return (
         <Dialog
@@ -205,7 +207,7 @@ export const BisectDialog = observer(
           title="Start a bisect session"
           className="dialog-add-version"
         >
-          <div className="bp3-dialog-body">
+          <div className={className}>
             {this.help}
             <Label>
               Earliest Version (Last &quot;known good&quot; version)
@@ -230,8 +232,8 @@ export const BisectDialog = observer(
               </ButtonGroup>
             </Label>
           </div>
-          <div className="bp3-dialog-footer">
-            <div className="bp3-dialog-footer-actions">{this.buttons}</div>
+          <div className="bp4-dialog-footer">
+            <div className="bp4-dialog-footer-actions">{this.buttons}</div>
           </div>
         </Dialog>
       );

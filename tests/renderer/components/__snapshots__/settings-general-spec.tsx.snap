@@ -9,27 +9,27 @@ exports[`GeneralSettings component renders 1`] = `
     appState={Object {}}
     toggleHasPopoverOpen={[Function]}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <FontSettings
     appState={Object {}}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <settings-console
     appState={Object {}}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <settings-github
     appState={Object {}}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <settings-block-accelerators
     appState={Object {}}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <settings-package-author
     appState={Object {}}
   />
-  <Blueprint3.Divider />
+  <Blueprint4.Divider />
   <settings-general-mirror
     appState={Object {}}
   />

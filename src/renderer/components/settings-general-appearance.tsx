@@ -2,14 +2,9 @@ import * as React from 'react';
 
 import * as path from 'path';
 
-import {
-  Button,
-  Callout,
-  Checkbox,
-  FormGroup,
-  MenuItem,
-} from '@blueprintjs/core';
-import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
+import { Button, Callout, Checkbox, FormGroup } from '@blueprintjs/core';
+import { MenuItem2 } from '@blueprintjs/popover2';
+import { ItemPredicate, ItemRenderer, Select2 } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fs from 'fs-extra';
 import { reaction } from 'mobx';
@@ -21,10 +16,10 @@ import { AppState } from '../state';
 import { THEMES_PATH, getAvailableThemes, getTheme } from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 
-const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
+const ThemeSelect = Select2.ofType<LoadedFiddleTheme>();
 
 /**
- * Helper method: Returns the <Select /> predicate for an Electron
+ * Helper method: Returns the <Select2 /> predicate for an Electron
  * version.
  *
  * @param {string} query
@@ -39,7 +34,7 @@ export const filterItem: ItemPredicate<LoadedFiddleTheme> = (
 };
 
 /**
- * Helper method: Returns the <Select /> <MenuItem /> for Electron
+ * Helper method: Returns the <Select2 /> <MenuItem2 /> for Electron
  * versions.
  *
  * @param {RunnableVersion} item
@@ -55,7 +50,7 @@ export const renderItem: ItemRenderer<LoadedFiddleTheme> = (
   }
 
   return (
-    <MenuItem
+    <MenuItem2
       active={modifiers.active}
       disabled={modifiers.disabled}
       text={highlightText(item.name, query)}
@@ -231,7 +226,7 @@ export const AppearanceSettings = observer(
               popoverProps={{
                 onClosed: () => this.props.toggleHasPopoverOpen(),
               }}
-              noResults={<MenuItem disabled={true} text="No results." />}
+              noResults={<MenuItem2 disabled={true} text="No results." />}
             >
               <Button
                 id="open-theme-selector"

@@ -5,36 +5,36 @@ exports[`MirrorSettings component renders 1`] = `
   <h4>
     Electron Mirrors
   </h4>
-  <Blueprint3.Callout>
-    <Blueprint3.RadioGroup
+  <Blueprint4.Callout>
+    <Blueprint4.RadioGroup
       inline={true}
       label="If you don't have access to Electron's GitHub releases, you can tell Fiddle to download Electron binaries from an alternate source."
       onChange={[Function]}
       selectedValue="DEFAULT"
     >
-      <Blueprint3.Radio
+      <Blueprint4.Radio
         label="Default"
         value="DEFAULT"
       />
-      <Blueprint3.Radio
+      <Blueprint4.Radio
         label="China"
         value="CHINA"
       />
-      <Blueprint3.Radio
+      <Blueprint4.Radio
         label="Custom"
         value="CUSTOM"
       />
-    </Blueprint3.RadioGroup>
-    <Blueprint3.InputGroup
+    </Blueprint4.RadioGroup>
+    <Blueprint4.InputGroup
       disabled={true}
       onChange={[Function]}
       value="https://github.com/electron/electron/releases/download/"
     />
-    <Blueprint3.InputGroup
+    <Blueprint4.InputGroup
       disabled={true}
       onChange={[Function]}
       value="https://github.com/electron/nightlies/releases/download/"
     />
-  </Blueprint3.Callout>
+  </Blueprint4.Callout>
 </div>
 `;
