@@ -15,7 +15,7 @@ import {
   ItemRenderer,
   Select,
 } from '@blueprintjs/select';
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';

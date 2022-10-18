@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
 import {

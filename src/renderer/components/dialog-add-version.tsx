@@ -10,7 +10,7 @@ import {
   InputGroup,
   Intent,
 } from '@blueprintjs/core';
-import { Installer } from '@vertedinde/fiddle-core';
+import { Installer } from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as semver from 'semver';

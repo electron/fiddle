@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 import { mount, shallow } from 'enzyme';
 
 import {
