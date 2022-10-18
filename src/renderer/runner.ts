@@ -387,31 +387,44 @@ export class Runner {
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(executionFlags);
 
+    const cleanup = async () => {
+      flushOutput();
+
+      this.appState.isRunning = false;
+      this.child = null;
+
+      // Clean older folders
+      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await this.deleteUserData();
+    };
+
     return new Promise(async (resolve, _reject) => {
-      this.child = await fiddleRunner.spawn(
-        isValidBuild && localPath ? Installer.getExecPath(localPath) : version,
-        dir,
-        { args: options, cwd: dir, env },
-      );
+      try {
+        this.child = await fiddleRunner.spawn(
+          isValidBuild && localPath
+            ? Installer.getExecPath(localPath)
+            : version,
+          dir,
+          { args: options, cwd: dir, env },
+        );
+      } catch (e) {
+        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
+        await cleanup();
+        return resolve(RunResult.FAILURE);
+      }
+
       this.appState.isRunning = true;
 
       pushOutput(`Electron v${version} started.`);
 
-      this.child.stdout!.on('data', (data) =>
+      this.child?.stdout?.on('data', (data) =>
         pushOutput(data, { bypassBuffer: false }),
       );
-      this.child.stderr!.on('data', (data) =>
+      this.child?.stderr?.on('data', (data) =>
         pushOutput(data, { bypassBuffer: false }),
       );
-      this.child.on('close', async (code, signal) => {
-        flushOutput();
-
-        this.appState.isRunning = false;
-        this.child = null;
-
-        // Clean older folders
-        await window.ElectronFiddle.app.fileManager.cleanup(dir);
-        await this.deleteUserData();
+      this.child?.on('close', async (code, signal) => {
+        await cleanup();
 
         if (typeof code !== 'number') {
           pushOutput(`Electron exited with signal ${signal}.`);
