@@ -4,7 +4,7 @@ import {
   Installer,
   ProgressObject,
   Runner,
-} from '@vertedinde/fiddle-core';
+} from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
 import {
   action,

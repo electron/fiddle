@@ -1,7 +1,7 @@
 import { execSync } from 'child_process';
 import * as path from 'path';
 
-import { Installer } from '@vertedinde/fiddle-core';
+import { Installer } from '@electron/fiddle-core';
 
 import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getForgeVersion } from '../../utils/get-package';

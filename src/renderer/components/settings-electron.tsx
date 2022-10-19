@@ -13,7 +13,7 @@ import {
   IconName,
   Tooltip,
 } from '@blueprintjs/core';
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 import { observer } from 'mobx-react';
 
 import {

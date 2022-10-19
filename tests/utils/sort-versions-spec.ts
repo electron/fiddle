@@ -1,4 +1,4 @@
-import { InstallState } from '@vertedinde/fiddle-core';
+import { InstallState } from '@electron/fiddle-core';
 
 import { RunnableVersion, VersionSource } from '../../src/interfaces';
 import { sortVersions } from '../../src/utils/sort-versions';
