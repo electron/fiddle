@@ -167,7 +167,6 @@ export class AppState {
   public appData: string;
 
   // Populating versions in fiddle-core
-  // TODO(aryanshridhar): Docs recommends not to use this in production!
   public baseVersions: BaseVersions = new BaseVersions(getElectronVersions());
 
   // For managing downloads and versions for electron
