@@ -49,14 +49,17 @@ export const Settings = observer(
       };
 
       this.closeSettingsPanel = this.closeSettingsPanel.bind(this);
+      this.disableContextMenu = this.disableContextMenu.bind(this);
     }
 
     public componentDidMount() {
       window.addEventListener('keyup', this.closeSettingsPanel, true);
+      window.addEventListener('contextmenu', this.disableContextMenu, true);
     }
 
     public componentWillUnmount() {
       window.removeEventListener('keyup', this.closeSettingsPanel, true);
+      window.removeEventListener('contextmenu', this.disableContextMenu, true);
     }
 
     /**
@@ -172,6 +175,13 @@ export const Settings = observer(
       if (event.code === 'Escape' && !this.state.hasPopoverOpen) {
         appState.isSettingsShowing = false;
       }
+    }
+
+    /**
+     * Disable the right-click contextmenu when the settings page is mounted.
+     */
+    private disableContextMenu(event: MouseEvent) {
+      event.preventDefault();
     }
 
     /**

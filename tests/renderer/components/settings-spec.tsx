@@ -90,10 +90,37 @@ describe('Settings component', () => {
 
     // trigger mock 'keyup' event
     map.keyup({ code: 'Escape' });
-    expect(Object.keys(map)).toHaveLength(1);
+    expect(Object.keys(map)).toContain('keyup');
+    expect(Object.keys(map)).toHaveLength(2); // ['keyup','contextmenu']
     expect(store.isSettingsShowing).toBe(false);
 
-    // check if event listener is removed upon unmount
+    // check if the event listeners are removed upon unmount
+    wrapper.unmount();
+    expect(Object.keys(map)).toHaveLength(0);
+  });
+
+  it('makes sure the contextmenu is disabled', () => {
+    expect(store.isSettingsShowing).toBe(true);
+    // mock event listener API
+    const map: any = {};
+    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+      map[event] = cb;
+    });
+
+    window.removeEventListener = jest.fn().mockImplementation((event) => {
+      delete map[event];
+    });
+
+    const wrapper = shallow(<Settings appState={store} />);
+
+    // trigger mock 'contextmenu' event
+    const preventDefault = jest.fn();
+    map.contextmenu({ preventDefault });
+    expect(Object.keys(map)).toContain('contextmenu');
+    expect(Object.keys(map)).toHaveLength(2); // ['keyup','contextmenu']
+    expect(preventDefault).toHaveBeenCalledTimes(1);
+
+    // check if the event listeners are removed upon unmount
     wrapper.unmount();
     expect(Object.keys(map)).toHaveLength(0);
   });
@@ -119,7 +146,7 @@ describe('Settings component', () => {
 
     // trigger mock 'keyup' event
     map.keyup({ code: 'Escape' });
-    expect(Object.keys(map)).toHaveLength(1);
+    expect(Object.keys(map)).toHaveLength(2); // ['keyup','contextmenu']
     expect(store.isSettingsShowing).toBe(true);
 
     // Toggle the setting again as if it was closed
@@ -127,10 +154,10 @@ describe('Settings component', () => {
 
     // trigger mock 'keyup' event
     map.keyup({ code: 'Escape' });
-    expect(Object.keys(map)).toHaveLength(1);
+    expect(Object.keys(map)).toHaveLength(2); // ['keyup','contextmenu']
     expect(store.isSettingsShowing).toBe(false);
 
-    // check if event listener is removed upon unmount
+    // check if the event listeners are removed upon unmount
     wrapper.unmount();
     expect(Object.keys(map)).toHaveLength(0);
   });
