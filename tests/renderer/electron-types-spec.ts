@@ -70,8 +70,8 @@ describe('ElectronTypes', () => {
     nodeTypesData = require('../fixtures/node-types.json');
   });
 
-  afterEach(() => {
-    electronTypes.setVersion();
+  afterEach(async () => {
+    await electronTypes.setVersion();
     tmpdir.removeCallback();
   });
 
