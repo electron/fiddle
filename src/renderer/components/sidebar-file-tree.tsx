@@ -160,7 +160,7 @@ export const SidebarFileTree = observer(
       ];
 
       return (
-        <div style={{ overflow: 'auto' }}>
+        <div className="fiddle-scrollbar">
           <Tree contents={editorsTree} />
         </div>
       );

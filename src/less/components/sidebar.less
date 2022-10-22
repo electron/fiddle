@@ -50,3 +50,24 @@
     color: @white;
   }
 }
+
+.fiddle-scrollbar {
+  overflow: auto;
+}
+
+.fiddle-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.fiddle-scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background-color: rgba(172, 172, 172, 0.6);
+
+  .bp3-dark & {
+    background-color: rgba(172, 172, 172, 0.4);
+  }
+}
+
+.fiddle-scrollbar::-webkit-scrollbar-track {
+  background-color: transparent;
+}
