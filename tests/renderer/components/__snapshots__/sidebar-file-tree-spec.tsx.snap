@@ -2,11 +2,7 @@
 
 exports[`SidebarFileTree component can bring up the Add File input 1`] = `
 <div
-  style={
-    Object {
-      "overflow": "auto",
-    }
-  }
+  className="fiddle-scrollbar"
 >
   <Blueprint3.Tree
     contents={
@@ -346,11 +342,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
 
 exports[`SidebarFileTree component reflects the visibility state of all icons 1`] = `
 <div
-  style={
-    Object {
-      "overflow": "auto",
-    }
-  }
+  className="fiddle-scrollbar"
 >
   <Blueprint3.Tree
     contents={
@@ -672,11 +664,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
 
 exports[`SidebarFileTree component renders 1`] = `
 <div
-  style={
-    Object {
-      "overflow": "auto",
-    }
-  }
+  className="fiddle-scrollbar"
 >
   <Blueprint3.Tree
     contents={
