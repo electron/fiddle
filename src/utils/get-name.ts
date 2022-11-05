@@ -1,3 +1,7 @@
+import * as path from 'path';
+
+import namor from 'namor';
+
 import { AppState } from '../renderer/state';
 
 /**
@@ -6,12 +10,10 @@ import { AppState } from '../renderer/state';
  * @param {AppState} appState
  * @returns {Promise<string>}
  */
-export async function getName(appState: AppState): Promise<string> {
+export function getName(appState: AppState) {
   if (appState.localPath) {
-    const path = await import('path');
     return path.basename(appState.localPath);
   }
 
-  const namor = await import('namor');
   return namor.generate({ words: 3, numbers: 0 });
 }

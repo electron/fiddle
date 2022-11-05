@@ -1,8 +1,6 @@
 import { execSync } from 'child_process';
 import * as path from 'path';
 
-import { Installer } from '@electron/fiddle-core';
-
 import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getForgeVersion } from '../../utils/get-package';
 import { ELECTRON_DOWNLOAD_PATH } from '../constants';
@@ -15,6 +13,17 @@ import { ELECTRON_DOWNLOAD_PATH } from '../constants';
  * @returns {Promise<Files>}
  */
 export async function forgeTransform(files: Files): Promise<Files> {
+  function execSubpath(platform = process.platform) {
+    switch (platform) {
+      case 'darwin':
+        return 'Electron.app/Contents/MacOS/Electron';
+      case 'win32':
+        return 'electron.exe';
+      default:
+        return 'electron';
+    }
+  }
+
   if (files.get(PACKAGE_NAME)) {
     try {
       const parsed = JSON.parse(files.get(PACKAGE_NAME)!);
@@ -47,9 +56,10 @@ export async function forgeTransform(files: Files): Promise<Files> {
       const nightlyVersion = devDependencies['electron-nightly'];
       if (nightlyVersion) {
         // Fetch forced ABI for nightly.
-        const binaryPath = Installer.getExecPath(
-          path.join(ELECTRON_DOWNLOAD_PATH, nightlyVersion),
-        );
+
+        const nightlyPath = path.join(ELECTRON_DOWNLOAD_PATH, nightlyVersion);
+        const binaryPath = path.join(nightlyPath, execSubpath());
+
         const abi = execSync(
           `ELECTRON_RUN_AS_NODE=1 "${binaryPath}" -p process.versions.modules`,
         );

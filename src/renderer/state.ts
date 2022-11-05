@@ -1,10 +1,3 @@
-import {
-  BaseVersions,
-  InstallState,
-  Installer,
-  ProgressObject,
-  Runner,
-} from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
 import {
   action,
@@ -12,16 +5,18 @@ import {
   computed,
   makeObservable,
   observable,
-  runInAction,
+  toJS,
   when,
 } from 'mobx';
 
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
+  FiddleProcessParams,
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  InstallState,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
@@ -166,20 +161,6 @@ export class AppState {
   private readonly defaultVersion: string;
   public appData: string;
 
-  // Populating versions in fiddle-core
-  public baseVersions: BaseVersions = new BaseVersions(getElectronVersions());
-
-  // For managing downloads and versions for electron
-  public installer: Installer = new Installer({
-    electronDownloads: ELECTRON_DOWNLOAD_PATH,
-    electronInstall: ELECTRON_INSTALL_PATH,
-  });
-
-  public versionRunner: Promise<Runner> = Runner.create({
-    installer: this.installer,
-    versions: this.baseVersions,
-  });
-
   constructor(versions: RunnableVersion[]) {
     makeObservable<AppState, 'setPageHash'>(this, {
       Bisector: observable,
@@ -270,6 +251,8 @@ export class AppState {
       versions: observable,
       versionsToShow: computed,
       changeRunnableState: action,
+      updateDownloadProgress: action,
+      setRunningState: action,
     });
 
     // Bind all actions
@@ -297,13 +280,25 @@ export class AppState {
     this.hideChannels = this.hideChannels.bind(this);
     this.showChannels = this.showChannels.bind(this);
     this.changeRunnableState = this.changeRunnableState.bind(this);
+    this.updateDownloadProgress = this.updateDownloadProgress.bind(this);
+    this.setRunningState = this.setRunningState.bind(this);
+
+    // We initialize this at start to keep a consistent fiddle-core
+    // installer instance throughout the appState
+    const paths = {
+      electronDownloads: ELECTRON_DOWNLOAD_PATH,
+      electronInstalls: ELECTRON_INSTALL_PATH,
+    };
+    ipcRendererManager.send(IpcEvents.INITIALIZE_FIDDLE_INSTALLER, paths);
 
     // Populating the current state of every version present
     versions.forEach((ver: RunnableVersion) => {
       // A local electron build's `state` is setup in versions.ts
       if (ver.source !== 'local') {
         const { version } = ver;
-        ver.state = this.getVersionState(version);
+        this.getVersionState(version).then((state) => {
+          this.changeRunnableState(version, state);
+        });
       }
     });
 
@@ -317,6 +312,12 @@ export class AppState {
     ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
     ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
     ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
+    ipcRendererManager.removeAllListeners(IpcEvents.SET_FIDDLE_RUNNING_STATE);
+    ipcRendererManager.removeAllListeners(IpcEvents.DOWNLOAD_ELECTRON_CALLBACK);
+    ipcRendererManager.removeAllListeners(
+      IpcEvents.INSTALLER_STATE_CHANGE_EVENT,
+    );
+    ipcRendererManager.removeAllListeners(IpcEvents.PUSH_OUTPUT_TO_CONSOLE);
 
     ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
     ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
@@ -326,6 +327,25 @@ export class AppState {
       this.toggleBisectCommands,
     );
     ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
+    ipcRendererManager.on(
+      IpcEvents.DOWNLOAD_ELECTRON_CALLBACK,
+      this.updateDownloadProgress,
+    );
+    ipcRendererManager.on(
+      IpcEvents.SET_FIDDLE_RUNNING_STATE,
+      this.setRunningState,
+    );
+    ipcRendererManager.on(
+      IpcEvents.PUSH_OUTPUT_TO_CONSOLE,
+      this.pushOutputWrapper.bind(this),
+    );
+    ipcRendererManager.on(
+      IpcEvents.INSTALLER_STATE_CHANGE_EVENT,
+      (_, version: string, state: InstallState) => {
+        this.changeRunnableState(version, state);
+      },
+    );
+    this.initializeFiddleProcess(versions);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -375,11 +395,6 @@ export class AppState {
     ]);
 
     this.setVersion(this.version);
-
-    // Trigger the change state event
-    this.installer.on('state-changed', ({ version, state }) => {
-      this.changeRunnableState(version, state);
-    });
   }
 
   /**
@@ -448,8 +463,8 @@ export class AppState {
     this.isUpdatingElectronVersions = false;
   }
 
-  public async getName() {
-    this.name ||= await getName(this);
+  public getName() {
+    this.name ||= getName(this);
     return this.name;
   }
 
@@ -504,6 +519,21 @@ export class AppState {
     (document.activeElement as HTMLInputElement).blur();
 
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
+  }
+
+  public updateDownloadProgress(_: unknown, version: string, percent: number) {
+    const ver = this.versions[version];
+    // Stop if its undefined or has same downloadProgress percent
+    if (ver === undefined || ver.downloadProgress === percent) {
+      return;
+    }
+
+    ver.downloadProgress = percent;
+    this.versions[version] = ver;
+  }
+
+  public setRunningState(_: unknown, state: boolean) {
+    this.isRunning = state;
   }
 
   public setIsQuitting() {
@@ -562,8 +592,11 @@ export class AppState {
         state === InstallState.installed ||
         state == InstallState.downloaded
       ) {
-        await this.installer.remove(version);
-        if (this.installer.state(version) === InstallState.missing) {
+        const state = await ipcRendererManager.invoke(
+          IpcEvents.UNINSTALL_ELECTRON_VERSION,
+          version,
+        );
+        if (state === InstallState.missing) {
           const typeDefsCleaner = async () => {
             window.ElectronFiddle.app.electronTypes.uncache(ver);
           };
@@ -588,6 +621,10 @@ export class AppState {
       electronMirror,
       electronNightlyMirror,
     } = this.electronMirror.sources[this.electronMirror.sourceType];
+    const mirror = {
+      electronMirror,
+      electronNightlyMirror,
+    };
 
     const isRemote = source === VersionSource.remote;
     const isDownloaded = state === InstallState.downloaded;
@@ -606,26 +643,15 @@ export class AppState {
 
     if (isDownloaded) {
       // The electron zip needs to be unzipped as well
-      await this.installer.install(version);
+      ipcRendererManager.send(IpcEvents.INSTALL_ELECTRON_VERSION, version);
       return;
     }
 
     console.log(`State: Downloading Electron ${version}`);
-    await this.installer.install(version, {
-      mirror: {
-        electronMirror,
-        electronNightlyMirror,
-      },
-      progressCallback(progress: ProgressObject) {
-        // https://mobx.js.org/actions.html#runinaction
-        runInAction(() => {
-          const percent = Math.round(progress.percent * 100) / 100;
-          if (ver.downloadProgress !== percent) {
-            ver.downloadProgress = percent;
-          }
-        });
-      },
-    });
+    ipcRendererManager.send(IpcEvents.DOWNLOAD_ELECTRON_VERSION, [
+      version,
+      mirror,
+    ]);
   }
 
   /**
@@ -911,6 +937,26 @@ export class AppState {
   }
 
   /**
+   * Handles the Buffer data coming from main process
+   * through IPC event
+   *
+   * @private
+   * @memberof AppState
+   */
+  private pushOutputWrapper(
+    _: unknown,
+    data: ArrayBufferView | string,
+    opts: OutputOptions = { isNotPre: false, bypassBuffer: true },
+  ) {
+    if (ArrayBuffer.isView(data)) {
+      const dataString = new TextDecoder().decode(data);
+      this.pushOutput(dataString, opts);
+      return;
+    }
+    this.pushOutput(data, opts);
+  }
+
+  /**
    * Updates the pages url with a hash element that allows the main
    * process to quickly determine if there's a view open.
    *
@@ -933,8 +979,31 @@ export class AppState {
    * @param {string} version
    * @returns {InstallState}
    */
-  public getVersionState(version: string): InstallState {
-    return this.installer.state(version);
+  public getVersionState(version: string): Promise<InstallState> {
+    return ipcRendererManager.invoke(
+      IpcEvents.GET_ELECTRON_VERSION_STATE,
+      version,
+    );
+  }
+
+  /**
+   * Initializes the fiddle-core by sending IPC event
+   * to the main process (FiddleProcess)
+   *
+   * @param {RunnableVersion[]} versions
+   */
+  private initializeFiddleProcess(versions: RunnableVersion[]) {
+    const projectName = this.getName();
+    const fiddleOpts: FiddleProcessParams = {
+      versions,
+      projectName,
+      executionFlags: toJS(this.executionFlags),
+      environmentVariables: toJS(this.environmentVariables),
+      isEnablingElectronLogging: this.isEnablingElectronLogging,
+      isKeepingUserDataDirs: this.isKeepingUserDataDirs,
+    };
+
+    ipcRendererManager.send(IpcEvents.INITIALIZE_FIDDLE_PROCESS, fiddleOpts);
   }
 
   /**

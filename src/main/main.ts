@@ -33,6 +33,7 @@ export async function onReady() {
 
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
+  const { setupFiddleListeners } = await import('./fiddle-process');
 
   setupMenu();
   setupMenuHandler();
@@ -42,6 +43,7 @@ export async function onReady() {
   setupDialogs();
   setupDevTools();
   setupTitleBarClickMac();
+  setupFiddleListeners();
 
   processCommandLine(argv);
 }

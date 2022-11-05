@@ -1,10 +1,12 @@
-import { InstallState, Installer } from '@electron/fiddle-core';
+import * as path from 'path';
+
 import * as fs from 'fs-extra';
 import semver from 'semver';
 
 import releasesJSON from '../../static/releases.json';
 import {
   ElectronReleaseChannel,
+  InstallState,
   RunnableVersion,
   Version,
   VersionSource,
@@ -115,16 +117,30 @@ function saveVersions(key: VersionKeys, versions: Array<Version>) {
 }
 
 /**
- * Gets the current state of a specific version
- * Valid local electron builds are marked as `installed`
+ * Gets the current state of a user added local
+ * electron build
  *
- * @param {Version} ver
+ * @param {string | undefined} localPath
  * @returns {InstallState}
  */
-export function getVersionState(ver: Version): InstallState {
-  const { localPath } = ver;
+// Future work (aryanshridhar): Migrate this code to
+// preload scripts
+export function getLocalElectronState(
+  localPath: string | undefined,
+): InstallState {
+  function execSubpath(platform = process.platform) {
+    switch (platform) {
+      case 'darwin':
+        return 'Electron.app/Contents/MacOS/Electron';
+      case 'win32':
+        return 'electron.exe';
+      default:
+        return 'electron';
+    }
+  }
+
   if (localPath !== undefined) {
-    const dir = Installer.getExecPath(localPath);
+    const dir = path.join(localPath, execSubpath());
     if (fs.existsSync(dir)) {
       return InstallState.installed;
     }
@@ -138,7 +154,7 @@ export function makeRunnable(ver: Version): RunnableVersion {
     ...ver,
     version: normalizeVersion(ver.version),
     source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
-    state: getVersionState(ver),
+    state: getLocalElectronState(ver.localPath),
   };
 
   return ret;

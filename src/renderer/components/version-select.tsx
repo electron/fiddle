@@ -15,13 +15,12 @@ import {
   ItemRenderer,
   Select,
 } from '@blueprintjs/select';
-import { InstallState } from '@electron/fiddle-core';
 import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import semver from 'semver';
 
-import { RunnableVersion, VersionSource } from '../../interfaces';
+import { InstallState, RunnableVersion, VersionSource } from '../../interfaces';
 import { disableDownload } from '../../utils/disable-download';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';

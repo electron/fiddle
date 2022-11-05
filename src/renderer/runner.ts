@@ -1,9 +1,11 @@
-import { ChildProcess } from 'child_process';
 import * as path from 'path';
 
-import { InstallState, Installer } from '@electron/fiddle-core';
-
-import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
+import {
+  FileTransform,
+  InstallState,
+  RunResult,
+  RunnableVersion,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
@@ -16,18 +18,11 @@ import {
   packageRun,
 } from './npm';
 import { AppState } from './state';
-import { getVersionState } from './versions';
+import { getLocalElectronState } from './versions';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
-}
-
-interface RunFiddleParams {
-  localPath: string | undefined;
-  isValidBuild: boolean; // If the localPath is a valid Electron build
-  version: string; // The user selected version
-  dir: string;
 }
 
 const resultString: Record<RunResult, string> = Object.freeze({
@@ -37,8 +32,6 @@ const resultString: Record<RunResult, string> = Object.freeze({
 });
 
 export class Runner {
-  public child: ChildProcess | null = null;
-
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
@@ -159,8 +152,7 @@ export class Runner {
     const currentRunnable = appState.currentElectronVersion;
     const { version, state, localPath } = currentRunnable;
     const isValidBuild =
-      getVersionState(currentRunnable) === InstallState.installed;
-
+      getLocalElectronState(localPath) === InstallState.installed;
     // If the current active version is unavailable when we try to run
     // the fiddle, show an error and fall back.
     const { err, ver } = appState.isVersionUsable(version);
@@ -212,7 +204,7 @@ export class Runner {
       return RunResult.INVALID;
     }
 
-    return this.runFiddle({
+    return ipcRendererManager.invoke(IpcEvents.FIDDLE_START, {
       localPath,
       isValidBuild,
       dir,
@@ -226,18 +218,7 @@ export class Runner {
    * @memberof Runner
    */
   public stop(): void {
-    const child = this.child;
-    this.appState.isRunning = !!child && !child.kill();
-
-    if (child) {
-      // If the child process is still alive 1 second after we've
-      // attempted to kill it by normal means, kill it forcefully.
-      setTimeout(() => {
-        if (child.exitCode === null) {
-          child.kill('SIGKILL');
-        }
-      }, 1000);
-    }
+    ipcRendererManager.send(IpcEvents.FIDDLE_STOP);
   }
 
   /**
@@ -346,97 +327,6 @@ export class Runner {
     }
   }
 
-  private buildChildEnvVars(): { [x: string]: string | undefined } {
-    const { isEnablingElectronLogging, environmentVariables } = this.appState;
-
-    const env = { ...process.env };
-
-    if (isEnablingElectronLogging) {
-      env.ELECTRON_ENABLE_LOGGING = 'true';
-      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
-      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
-    } else {
-      delete env.ELECTRON_ENABLE_LOGGING;
-      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
-      delete env.ELECTRON_ENABLE_STACK_DUMPING;
-    }
-
-    for (const v of environmentVariables) {
-      const [key, value] = v.split('=');
-      env[key] = value;
-    }
-
-    return env;
-  }
-
-  /**
-   * Executes the fiddle with either local electron build
-   * or the user selected electron version
-   */
-  private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { localPath, isValidBuild, version, dir } = params;
-    const {
-      versionRunner,
-      pushOutput,
-      flushOutput,
-      executionFlags,
-    } = this.appState;
-    const fiddleRunner = await versionRunner;
-    const env = this.buildChildEnvVars();
-
-    // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(executionFlags);
-
-    const cleanup = async () => {
-      flushOutput();
-
-      this.appState.isRunning = false;
-      this.child = null;
-
-      // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
-      await this.deleteUserData();
-    };
-
-    return new Promise(async (resolve, _reject) => {
-      try {
-        this.child = await fiddleRunner.spawn(
-          isValidBuild && localPath
-            ? Installer.getExecPath(localPath)
-            : version,
-          dir,
-          { args: options, cwd: dir, env },
-        );
-      } catch (e) {
-        pushOutput(`Failed to spawn Fiddle: ${e.message}`);
-        await cleanup();
-        return resolve(RunResult.FAILURE);
-      }
-
-      this.appState.isRunning = true;
-
-      pushOutput(`Electron v${version} started.`);
-
-      this.child?.stdout?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.stderr?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.on('close', async (code, signal) => {
-        await cleanup();
-
-        if (typeof code !== 'number') {
-          pushOutput(`Electron exited with signal ${signal}.`);
-          resolve(RunResult.FAILURE);
-        } else {
-          pushOutput(`Electron exited with code ${code}.`);
-          resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
-        }
-      });
-    });
-  }
-
   /**
    * Save files to temp, logging to the Fiddle terminal while doing so
    *
@@ -482,23 +372,5 @@ export class Runner {
     }
 
     return false;
-  }
-
-  /**
-   * Deletes the user data dir after a run.
-   */
-  private async deleteUserData() {
-    if (this.appState.isKeepingUserDataDirs) {
-      console.log(
-        `Cleanup: Not deleting data dir due to isKeepingUserDataDirs setting`,
-      );
-      return;
-    }
-
-    const name = await this.appState.getName();
-    const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
-
-    console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.app.fileManager.cleanup(appData);
   }
 }

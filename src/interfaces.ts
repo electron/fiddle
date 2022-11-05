@@ -1,5 +1,3 @@
-import { InstallState } from '@electron/fiddle-core';
-
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
@@ -13,6 +11,14 @@ export enum GistActionType {
   publish = 'Publish',
   update = 'Update',
   delete = 'Delete',
+}
+
+export enum InstallState {
+  missing = 'missing',
+  downloading = 'downloading',
+  downloaded = 'downloaded',
+  installing = 'installing',
+  installed = 'installed',
 }
 
 export enum GistActionState {
@@ -115,6 +121,15 @@ export const enum GenericDialogType {
   'confirm' = 'confirm',
   'warning' = 'warning',
   'success' = 'success',
+}
+
+export interface FiddleProcessParams {
+  versions: Array<RunnableVersion>;
+  executionFlags: Array<string>;
+  environmentVariables: Array<string>;
+  projectName: string;
+  isEnablingElectronLogging: boolean;
+  isKeepingUserDataDirs: boolean;
 }
 
 export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
