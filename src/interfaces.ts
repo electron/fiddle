@@ -132,6 +132,11 @@ export interface FiddleProcessParams {
   isKeepingUserDataDirs: boolean;
 }
 
+export interface InstallerPaths {
+  electronDownloads: string;
+  electronInstall: string;
+}
+
 export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
 
 export type EditorValues = Record<EditorId, string>;

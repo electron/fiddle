@@ -17,6 +17,7 @@ import {
   GenericDialogType,
   GistActionState,
   InstallState,
+  InstallerPaths,
   OutputEntry,
   OutputOptions,
   RunnableVersion,
@@ -285,9 +286,9 @@ export class AppState {
 
     // We initialize this at start to keep a consistent fiddle-core
     // installer instance throughout the appState
-    const paths = {
+    const paths: InstallerPaths = {
       electronDownloads: ELECTRON_DOWNLOAD_PATH,
-      electronInstalls: ELECTRON_INSTALL_PATH,
+      electronInstall: ELECTRON_INSTALL_PATH,
     };
     ipcRendererManager.send(IpcEvents.INITIALIZE_FIDDLE_INSTALLER, paths);
 
@@ -616,6 +617,9 @@ export class AppState {
    * @returns {Promise<void>}
    */
   public async downloadVersion(ver: RunnableVersion) {
+    // We change the state manually as soon as electron is installed/downloaded
+    // as the IPC state change event is async and in the meantime
+    // further code may execute with stale state of version.
     const { source, state, version } = ver;
     const {
       electronMirror,
@@ -643,15 +647,20 @@ export class AppState {
 
     if (isDownloaded) {
       // The electron zip needs to be unzipped as well
-      ipcRendererManager.send(IpcEvents.INSTALL_ELECTRON_VERSION, version);
+      await ipcRendererManager.invoke(
+        IpcEvents.INSTALL_ELECTRON_VERSION,
+        version,
+      );
+      this.changeRunnableState(version, InstallState.installed);
       return;
     }
 
     console.log(`State: Downloading Electron ${version}`);
-    ipcRendererManager.send(IpcEvents.DOWNLOAD_ELECTRON_VERSION, [
+    await ipcRendererManager.invoke(IpcEvents.DOWNLOAD_ELECTRON_VERSION, [
       version,
       mirror,
     ]);
+    this.changeRunnableState(version, InstallState.installed);
   }
 
   /**
@@ -660,7 +669,7 @@ export class AppState {
    */
   public changeRunnableState(version: string, state: InstallState) {
     const ver = this.versions[version];
-    if (ver === undefined) {
+    if (ver === undefined || ver.state === state) {
       return;
     }
     ver.state = state;

@@ -204,7 +204,7 @@ export class Runner {
       return RunResult.INVALID;
     }
 
-    return ipcRendererManager.invoke(IpcEvents.FIDDLE_START, {
+    return await ipcRendererManager.invoke(IpcEvents.FIDDLE_START, {
       localPath,
       isValidBuild,
       dir,

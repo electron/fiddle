@@ -4,14 +4,13 @@ import * as path from 'path';
 import {
   BaseVersions,
   Installer,
-  Paths,
   ProgressObject,
   Runner,
 } from '@electron/fiddle-core';
 import { app } from 'electron';
 import * as fs from 'fs-extra';
 
-import { FiddleProcessParams, RunResult } from '../interfaces';
+import { FiddleProcessParams, InstallerPaths, RunResult } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
 
@@ -243,7 +242,7 @@ class FiddleProcess {
 export function setupFiddleListeners() {
   let installer: Installer;
 
-  function initializeInstaller(_: unknown, paths: Partial<Paths>) {
+  function initializeInstaller(_: unknown, paths: InstallerPaths) {
     installer = new Installer(paths);
   }
 
@@ -270,11 +269,11 @@ export function setupFiddleListeners() {
       await runner.downloadVersion(version, mirrors);
     };
 
+    ipcMainManager.handle(IpcEvents.INSTALL_ELECTRON_VERSION, installVersion);
     ipcMainManager.handle(IpcEvents.UNINSTALL_ELECTRON_VERSION, removeVersion);
+    ipcMainManager.handle(IpcEvents.DOWNLOAD_ELECTRON_VERSION, downloadVersion);
     ipcMainManager.handle(IpcEvents.FIDDLE_START, fiddleStart);
     ipcMainManager.on(IpcEvents.FIDDLE_STOP, fiddleStop);
-    ipcMainManager.on(IpcEvents.DOWNLOAD_ELECTRON_VERSION, downloadVersion);
-    ipcMainManager.on(IpcEvents.INSTALL_ELECTRON_VERSION, installVersion);
   }
 
   function initializeFiddleProcess(_: unknown, args: FiddleProcessParams) {
