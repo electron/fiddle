@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import { BrowserWindow, app, shell } from 'electron';
+import { BrowserWindow, app, dialog, shell } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
@@ -14,6 +14,9 @@ export let browserWindows: Array<BrowserWindow | null> = [];
 // the entry point of preload and index.html over http://
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
+
+// this is required as it will re-run close event on confirmation
+let forceQuit = false;
 
 /**
  * Gets default options for the main window
@@ -77,6 +80,20 @@ export function createMainWindow(): Electron.BrowserWindow {
   browserWindow.on('focus', () => {
     if (browserWindow) {
       ipcMainManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+    }
+  });
+
+  browserWindow.on('close', (e) => {
+    if (browserWindow && !forceQuit) {
+      const choice = dialog.showMessageBoxSync(browserWindow, {
+        type: 'question',
+        buttons: ['Yes', 'No'],
+        title: 'Confirm',
+        message: 'Are you sure you want to quit?',
+      });
+      if (choice === 1) return e.preventDefault();
+
+      forceQuit = true;
     }
   });
 
