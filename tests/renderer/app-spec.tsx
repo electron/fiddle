@@ -1,8 +1,14 @@
-import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
+import {
+  EditorValues,
+  InstallState,
+  MAIN_JS,
+  SetFiddleOptions,
+} from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../src/renderer/ipc';
+import { AppState } from '../../src/renderer/state';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 import { waitFor } from '../utils';
@@ -28,6 +34,9 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
+    jest
+      .spyOn(AppState.prototype, 'getVersionState')
+      .mockResolvedValue(InstallState.installed);
     ({ ElectronFiddle } = window as any);
     const { app: appMock } = ElectronFiddle;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;

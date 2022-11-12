@@ -26,11 +26,11 @@ interface Mirrors {
   electronNightlyMirror: string;
 }
 
-class FiddleProcess {
+export class FiddleProcess {
   // Populating versions in fiddle-core
   private versions: BaseVersions;
-  private runner: Promise<Runner>;
-  private child: ChildProcess | null = null;
+  public runner: Promise<Runner>;
+  public child: ChildProcess | null = null;
 
   constructor(
     private readonly installer: Installer,
@@ -213,7 +213,7 @@ class FiddleProcess {
    *
    * @param {string} [dir]
    */
-  private async cleanup(dir?: string): Promise<boolean> {
+  public async cleanup(dir?: string): Promise<boolean> {
     if (dir) {
       if (fs.existsSync(dir)) {
         try {
@@ -234,7 +234,7 @@ class FiddleProcess {
    *
    * @param {string} [data]
    */
-  private pushOutput(data: string, opts?: { bypassBuffer: boolean }) {
+  public pushOutput(data: string, opts?: { bypassBuffer: boolean }) {
     ipcMainManager.send(IpcEvents.PUSH_OUTPUT_TO_CONSOLE, [data, opts]);
   }
 }

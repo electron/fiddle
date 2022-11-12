@@ -2,14 +2,16 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { InstallState } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { getLocalElectronState } from '../../../src/renderer/versions';
 import { StateMock } from '../../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
-
+jest.mock('../../../src/renderer/versions');
 describe('AddVersionDialog component', () => {
   let store: StateMock;
 
@@ -76,9 +78,10 @@ describe('AddVersionDialog component', () => {
 
   describe('setFolderPath()', () => {
     it('does something', async () => {
-      // (getIsDownloaded as jest.Mock).mockReturnValue(true);
+      (getLocalElectronState as jest.Mock).mockReturnValue(
+        InstallState.installed,
+      );
       const wrapper = shallow(<AddVersionDialog appState={store as any} />);
-      (wrapper.instance() as any).isValidElectronPath = () => true;
       await (wrapper.instance() as any).setFolderPath('/test/');
 
       expect(wrapper.state('isValidElectron')).toBe(true);

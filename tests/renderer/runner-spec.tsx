@@ -1,5 +1,3 @@
-import * as path from 'path';
-
 import { InstallState } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
@@ -17,7 +15,6 @@ import {
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { FileManagerMock, StateMock, VersionsMock } from '../mocks/mocks';
-import { waitFor } from '../utils';
 
 jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
@@ -39,94 +36,26 @@ describe('Runner component', () => {
     store.modules = new Map<string, string>([['cow', '*']]);
 
     ipcRendererManager.removeAllListeners();
-
+    jest
+      .spyOn(ipcRendererManager, 'invoke')
+      .mockResolvedValue(RunResult.SUCCESS);
     (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
 
     instance = new Runner(store as any);
   });
 
   describe('run()', () => {
+    // Check if basic runner funcationalities runs
+    // if the run result is success
     it('runs', async () => {
       // wait for run() to get running
       const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // child process exits with success
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
       const result = await runPromise;
 
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(fileManager.saveToTemp).toHaveBeenCalled();
       expect(addModules).toHaveBeenCalled();
-    });
-
-    it('runs with logging when enabled', async () => {
-      store.isEnablingElectronLogging = true;
-      const spyChildProcess = jest.spyOn(store.versionRunner, 'spawn');
-      (spyChildProcess as jest.Mock).mockImplementationOnce((_, __, opts) => {
-        expect(opts.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
-        expect(opts.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
-        return store.versionRunner.child;
-      });
-
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // child process exits with success
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.isRunning).toBe(false);
-      expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(addModules).toHaveBeenCalled();
-    });
-
-    it('emits output with exitCode', async () => {
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // mock child process gives output,
-      // then exits with exitCode 0
-      store.versionRunner.child.stdout.emit('data', 'hi');
-      store.versionRunner.child.stderr.emit('data', 'hi');
-      store.versionRunner.child.emit('close', 0);
-
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.SUCCESS);
-      expect(store.isRunning).toBe(false);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
-      expect(store.flushOutput).toHaveBeenCalledTimes(1);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        'Electron exited with code 0.',
-      );
-    });
-
-    it('returns failure when app exits nonzero', async () => {
-      const ARBITRARY_FAIL_CODE = 50;
-
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // mock child process exits with ARBITRARY_FAIL_CODE
-      store.versionRunner.child.emit('close', ARBITRARY_FAIL_CODE);
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-      expect(store.flushOutput).toHaveBeenCalledTimes(1);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        `Electron exited with code ${ARBITRARY_FAIL_CODE}.`,
-      );
     });
 
     it('shows a dialog and returns invalid when the current version is missing', async () => {
@@ -149,59 +78,8 @@ describe('Runner component', () => {
       );
     });
 
-    it('emits output without exitCode', async () => {
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      const signal = 'SIGTERM';
-
-      // mock child process gives output,
-      // then exits without an explicit exitCode
-      store.versionRunner.child.stdout.emit('data', 'hi');
-      store.versionRunner.child.stderr.emit('data', 'hi');
-      store.versionRunner.child.emit('close', null, signal);
-      const result = await runPromise;
-
-      expect(result).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-      expect(store.flushOutput).toHaveBeenCalledTimes(1);
-      expect(store.pushOutput).toHaveBeenCalledTimes(8);
-      expect(store.pushOutput).toHaveBeenLastCalledWith(
-        `Electron exited with signal ${signal}.`,
-      );
-    });
-
-    it('cleans the app data dir after a run', async () => {
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(2);
-      expect(cleanup).toHaveBeenLastCalledWith(
-        path.join(`/test-path/test-app-name`),
-      );
-    });
-
-    it('does not clean the app data dir after a run if configured', async () => {
-      (instance as any).appState.isKeepingUserDataDirs = true;
-
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
-      const result = await instance.run();
-
-      expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(1);
-    });
-
     it('automatically cleans the console when enabled', async () => {
       store.isClearingConsoleOnRun = true;
-
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -230,39 +108,6 @@ describe('Runner component', () => {
       expect(await instance.run()).toBe(RunResult.INVALID);
 
       console.error = oldError;
-    });
-  });
-
-  describe('stop()', () => {
-    it('stops a running session', async () => {
-      store.versionRunner.child.kill.mockImplementationOnce(() => {
-        store.versionRunner.child.emit('close');
-        return true;
-      });
-
-      // wait for run() to get running
-      const runPromise = instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      // call stop and wait for run() to resolve
-      instance.stop();
-      const runResult = await runPromise;
-
-      expect(runResult).toBe(RunResult.FAILURE);
-      expect(store.isRunning).toBe(false);
-    });
-
-    it('fails if killing child process fails', async () => {
-      store.versionRunner.child.kill.mockReturnValueOnce(false);
-
-      // wait for run() to get running
-      instance.run();
-      await waitFor(() => store.isRunning);
-      expect(store.isRunning).toBe(true);
-
-      instance.stop();
-      expect(store.isRunning).toBe(true);
     });
   });
 

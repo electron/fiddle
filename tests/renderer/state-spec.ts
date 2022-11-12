@@ -10,6 +10,7 @@ import {
   Version,
   VersionSource,
 } from '../../src/interfaces';
+import { IpcEvents } from '../../src/ipc-events';
 import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
 import { ipcRendererManager } from '../../src/renderer/ipc';
@@ -55,8 +56,6 @@ describe('AppState', () => {
   let appState: AppState;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
-  let removeSpy: any;
-  let installSpy: any;
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
@@ -64,16 +63,9 @@ describe('AppState', () => {
     (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
     jest
       .spyOn(AppState.prototype, 'getVersionState')
-      .mockImplementation(() => InstallState.installed);
+      .mockImplementation(() => Promise.resolve(InstallState.installed));
 
     appState = new AppState(mockVersionsArray);
-    removeSpy = jest
-      .spyOn(appState.installer, 'remove')
-      .mockImplementation(() => Promise.resolve());
-    installSpy = jest
-      .spyOn(appState.installer, 'install')
-      .mockImplementation(() => Promise.resolve(''));
-
     ipcRendererManager.removeAllListeners();
   });
 
@@ -307,26 +299,38 @@ describe('AppState', () => {
     });
 
     it('does not remove the active version', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
       const ver = appState.versions[active];
       await appState.removeVersion(ver);
-      expect(removeSpy).not.toHaveBeenCalled();
+      expect(ipcRendererSpy).not.toHaveBeenCalled();
+      ipcRendererSpy.mockRestore();
     });
 
     it('removes a version', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
       const ver = appState.versions[version];
       ver.state = InstallState.installed;
       await appState.removeVersion(ver);
-      expect(removeSpy).toHaveBeenCalledWith<any>(ver.version);
+      expect(ipcRendererSpy).toHaveBeenCalledWith(
+        IpcEvents.UNINSTALL_ELECTRON_VERSION,
+        ver.version,
+      );
+      console.log(ipcRendererSpy);
+      ipcRendererSpy.mockReset();
     });
 
     it('does not remove it if not necessary', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
       const ver = appState.versions[version];
       ver.state = InstallState.missing;
       await appState.removeVersion(ver);
-      expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(ipcRendererSpy).toHaveBeenCalledTimes(0);
+      ipcRendererSpy.mockReset();
     });
 
     it('removes (but does not delete) a local version', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
+
       const localPath = '/fake/path';
 
       const ver = appState.versions[version];
@@ -338,27 +342,34 @@ describe('AppState', () => {
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
       expect(appState.versions[version]).toBeUndefined();
-      expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(ipcRendererSpy).toHaveBeenCalledTimes(0);
+      ipcRendererSpy.mockReset();
     });
   });
 
   describe('downloadVersion()', () => {
     it('downloads a version', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
       const ver = appState.versions['2.0.2'];
       ver.state = InstallState.missing;
 
       await appState.downloadVersion(ver);
-
-      expect(installSpy).toHaveBeenCalled();
+      expect(ipcRendererSpy).toHaveBeenCalledWith(
+        IpcEvents.DOWNLOAD_ELECTRON_VERSION,
+        expect.arrayContaining([ver.version]),
+      );
+      ipcRendererSpy.mockRestore();
     });
 
     it('does not download a version if already ready', async () => {
+      const ipcRendererSpy = jest.spyOn(ipcRendererManager, 'invoke');
       const ver = appState.versions['2.0.2'];
       ver.state = InstallState.installed;
 
       await appState.downloadVersion(ver);
 
-      expect(installSpy).not.toHaveBeenCalled();
+      expect(ipcRendererSpy).not.toHaveBeenCalled();
+      ipcRendererSpy.mockRestore();
     });
   });
 
@@ -648,9 +659,7 @@ describe('AppState', () => {
 
       await appState.addLocalVersion(ver);
 
-      // `getElectronVersions` is called when the AppState is initialized
-      // as well
-      expect(getElectronVersions).toHaveBeenCalledTimes(2);
+      expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);
     });
   });
