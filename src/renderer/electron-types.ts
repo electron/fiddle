@@ -28,15 +28,14 @@ export class ElectronTypes {
     private readonly monaco: typeof MonacoType,
     private readonly electronCacheDir: string,
     private readonly nodeCacheDir: string,
-  ) {}
+  ) { }
 
   public async setVersion(ver?: RunnableVersion): Promise<void> {
     this.clear();
 
     if (!ver) return;
 
-    await this.setElectronTypes(ver);
-    await this.setNodeTypes(ver.version);
+    await Promise.all([this.setElectronTypes(ver), this.setNodeTypes(ver.version)])
   }
 
   private async setElectronTypes(ver: RunnableVersion): Promise<void> {

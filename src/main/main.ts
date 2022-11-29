@@ -31,8 +31,10 @@ export async function onReady() {
   getOrCreateMainWindow();
   setupAboutPanel();
 
-  const { setupMenu } = await import('./menu');
-  const { setupFileListeners } = await import('./files');
+  const [{ setupMenu }, { setupFileListeners }] = await Promise.all([
+    import('./menu'),
+    import('./files')
+  ])
 
   setupMenu();
   setupMenuHandler();

@@ -125,8 +125,7 @@ export class Runner {
     }
 
     const [good, bad] = next.map((v) => v.version);
-    const resultGood = await runVersion(good);
-    const resultBad = await runVersion(bad);
+    const [resultGood, resultBad] = await Promise.all([runVersion(good), runVersion(bad)]);
     if (resultGood === resultBad) {
       appState.pushOutput(
         `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
@@ -251,8 +250,10 @@ export class Runner {
     operation: ForgeCommands,
   ): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
-    const { dotfilesTransform } = await import('./transforms/dotfiles');
-    const { forgeTransform } = await import('./transforms/forge');
+    const [{ dotfilesTransform }, { forgeTransform }] = await Promise.all([
+      import('./transforms/dotfiles'),
+      import('./transforms/forge')
+    ])
     const { pushError, pushOutput } = this.appState;
 
     const strings =
@@ -333,8 +334,7 @@ export class Runner {
       }
 
       pushOutput(
-        `Installing node modules using ${
-          pmOptions.packageManager
+        `Installing node modules using ${pmOptions.packageManager
         }: ${modules.join(', ')}...`,
         { isNotPre: true },
       );

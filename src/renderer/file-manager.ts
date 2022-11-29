@@ -231,8 +231,7 @@ export class FileManager {
     options: PackageJsonOptions,
     ...transforms: Array<FileTransform>
   ): Promise<string> {
-    const tmp = await import('tmp');
-    const files = await this.getFiles(options, ...transforms);
+    const [tmp, files] = await Promise.all([import('tmp'), this.getFiles(options, ...transforms)]);
     const dir = tmp.dirSync();
 
     tmp.setGracefulCleanup();

@@ -108,12 +108,14 @@ async function exitWithCode(code: number) {
 
 async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) await logConfig();
-    await sendTask(IpcEvents.TASK_BISECT, {
-      setup: getSetup(opts),
-      goodVersion: good,
-      badVersion: bad,
-    });
+    await Promise.all([
+      opts.logConfig && logConfig(),
+      sendTask(IpcEvents.TASK_BISECT, {
+        setup: getSetup(opts),
+        goodVersion: good,
+        badVersion: bad,
+      })
+    ])
   } catch (err) {
     console.error(err);
     exitWithCode(exitCodes[RunResult.INVALID]);
@@ -122,10 +124,12 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
 
 async function test(opts: commander.OptionValues) {
   try {
-    if (opts.logConfig) await logConfig();
-    await sendTask(IpcEvents.TASK_TEST, {
-      setup: getSetup(opts),
-    });
+    await Promise.all([
+      opts.logConfig && logConfig(),
+      sendTask(IpcEvents.TASK_TEST, {
+        setup: getSetup(opts),
+      })
+    ])
   } catch (err) {
     console.error(err);
     exitWithCode(exitCodes[RunResult.INVALID]);
