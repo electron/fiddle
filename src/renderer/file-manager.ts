@@ -233,7 +233,9 @@ export class FileManager {
   ): Promise<string> {
     const tmp = await import('tmp');
     const files = await this.getFiles(options, ...transforms);
-    const dir = tmp.dirSync();
+    const dir = tmp.dirSync({
+      prefix: 'electron-fiddle',
+    });
 
     tmp.setGracefulCleanup();
 
