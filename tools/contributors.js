@@ -19,7 +19,7 @@ const HEADERS =
       }
     : {};
 
-async function maybeFetchContributors() {
+async function maybeFetchContributors(silent) {
   try {
     const stats = fs.statSync(CONTRIBUTORS_FILE_PATH);
     const mtime = new Date(util.inspect(stats.mtime));
@@ -27,10 +27,12 @@ async function maybeFetchContributors() {
 
     if (mtime < maxAge) {
       // File exists, but is too old
-      console.log(
-        logSymbols.warning,
-        'Contributors file on disk, but older than 24 hours.',
-      );
+      if (!silent) {
+        console.log(
+          logSymbols.warning,
+          'Contributors file on disk, but older than 24 hours.',
+        );
+      }
       await fetchAndWriteContributorsFile();
     } else {
       const contributors = await fs.readJson(CONTRIBUTORS_FILE_PATH);
@@ -38,10 +40,12 @@ async function maybeFetchContributors() {
         // File exists, but is empty
         await fetchAndWriteContributorsFile();
       } else {
-        console.log(
-          logSymbols.success,
-          'Contributors file on disk and recent.',
-        );
+        if (!silent) {
+          console.log(
+            logSymbols.success,
+            'Contributors file on disk and recent.',
+          );
+        }
       }
     }
   } catch (error) {
