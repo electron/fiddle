@@ -134,18 +134,18 @@ describe('protocol', () => {
     });
 
     it('handles an electron path url', () => {
-      // electron-fiddle://electron/{ref}/{path}
+      // electron-fiddle://electron/{tag}/{path}
       listenForProtocolHandler();
 
       const handler = (app.on as any).mock.calls[0][1];
 
-      handler({}, 'electron-fiddle://electron/4.0.0/test/path');
+      handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
       expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
         IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
         [
           {
-            ref: '4.0.0',
+            tag: 'v4.0.0',
             path: 'test/path',
           },
         ],
@@ -156,7 +156,7 @@ describe('protocol', () => {
       listenForProtocolHandler();
 
       const handler = (app.on as any).mock.calls[0][1];
-      handler({}, 'electron-fiddle://electron/4.0.0');
+      handler({}, 'electron-fiddle://electron/v4.0.0');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
     });
@@ -185,7 +185,7 @@ describe('protocol', () => {
       const mainWindow = getOrCreateMainWindow();
       const handler = (app.on as any).mock.calls[0][1];
 
-      handler({}, 'electron-fiddle://electron/4.0.0/test/path');
+      handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
       expect(mainWindow.focus).toHaveBeenCalled();
     });
