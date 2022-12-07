@@ -80,7 +80,6 @@ export class ElectronTypes {
   }
 
   private async setTypesFromDir(dir: string, version: string) {
-    this.dispose();
     try {
       const files = await readdir(dir);
       for (const file of files) {
@@ -99,7 +98,6 @@ export class ElectronTypes {
   }
 
   private setTypesFromFile(file: string, version: string) {
-    this.dispose();
     try {
       console.log(`Updating Monaco with "${ELECTRON_DTS}@${version}"`);
       const lib = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
