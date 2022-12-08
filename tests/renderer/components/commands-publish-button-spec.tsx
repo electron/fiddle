@@ -108,6 +108,25 @@ describe('Action button component', () => {
     expect(state.toggleAuthDialog).toHaveBeenCalled();
   });
 
+  it('toggles the publish method on click only after authing if not authed', async () => {
+    state.toggleAuthDialog = jest.fn();
+    const { instance } = createActionButton();
+    instance.performGistAction = jest.fn();
+
+    // If not authed, don't continue to performGistAction
+    await instance.handleClick();
+    expect(state.toggleAuthDialog).toHaveBeenCalled();
+    expect(instance.performGistAction).not.toHaveBeenCalled();
+
+    // If authed, continue to performGistAction
+    state.toggleAuthDialog.mockImplementationOnce(
+      () => (state.gitHubToken = 'github-token'),
+    );
+    await instance.handleClick();
+    expect(state.toggleAuthDialog).toHaveBeenCalled();
+    expect(instance.performGistAction).toHaveBeenCalled();
+  });
+
   it('toggles the publish method on click if authed', async () => {
     state.gitHubToken = 'github-token';
 
