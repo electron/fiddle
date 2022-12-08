@@ -179,19 +179,23 @@ export class ElectronTypes {
       );
     }
 
-    const { files: fileJson } = await response.json();
-    fileJson
-      .flatMap((item: { files?: { path: string }[]; path: string }) => {
-        return item.files ? item.files.map((f: any) => f.path) : item.path;
-      })
-      .filter((path: string) => path.endsWith('.d.ts'))
-      .map(async (path: string) => {
-        const res = await fetch(
-          `https://unpkg.com/@types/node@${downloadVersion}${path}`,
-        );
-        const text = await res.text();
-        await fs.outputFileSync(`${dir}${path}`, text);
-      });
+    const { files: fileJson } = (await response.json()) as {
+      files: { path: string }[];
+    };
+    await Promise.all(
+      fileJson
+        .flatMap((item: { files?: { path: string }[]; path: string }) => {
+          return item.files ? item.files.map((f: any) => f.path) : item.path;
+        })
+        .filter((path: string) => path.endsWith('.d.ts'))
+        .map(async (path: string) => {
+          const res = await fetch(
+            `https://unpkg.com/@types/node@${downloadVersion}${path}`,
+          );
+          const text = await res.text();
+          fs.outputFileSync(`${dir}${path}`, text);
+        }),
+    );
 
     return downloadVersion;
   }
