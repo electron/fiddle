@@ -133,11 +133,10 @@ export const GistActionButton = observer(
           ? this.gistFilesList(defaultGistValues)
           : this.gistFilesList(currentEditorValues);
 
-        // TODO: remove as any when octo is fixed
         const gist = await octo.gists.create({
           public: !!gitHubPublishAsPublic,
           description,
-          files: gistFilesList as any, // Note: GitHub messed up, GistsCreateParamsFiles is an incorrect interface
+          files: gistFilesList,
         });
 
         appState.gistId = gist.data.id;
