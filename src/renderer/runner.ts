@@ -125,7 +125,8 @@ export class Runner {
     }
 
     const [good, bad] = next.map((v) => v.version);
-    const [resultGood, resultBad] = await Promise.all([runVersion(good), runVersion(bad)]);
+    const resultGood = await runVersion(good);
+    const resultBad = await runVersion(bad);
     if (resultGood === resultBad) {
       appState.pushOutput(
         `${prefix} 'good' ${good} and 'bad' ${bad} both returned ${resultString[resultGood]}`,
