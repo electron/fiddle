@@ -133,6 +133,14 @@ describe('Action button component', () => {
       expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
     });
 
+    it('resets editorMosaic.isEdited state', async () => {
+      state.editorMosaic.isEdited = true;
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+      expect(state.editorMosaic.isEdited).toBe(false);
+    });
+
     it('asks the user for a description', async () => {
       const description = 'some non-default description';
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
@@ -194,11 +202,15 @@ describe('Action button component', () => {
         throw new Error(errorMessage);
       });
 
+      state.editorMosaic.isEdited = true;
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 
       const { instance } = createActionButton();
       await instance.performGistAction();
       expect(state.activeGistAction).toBe(GistActionState.none);
+
+      // On failure the editor should still be considered edited
+      expect(state.editorMosaic.isEdited).toBe(true);
     });
 
     it('can publish private gists', async () => {

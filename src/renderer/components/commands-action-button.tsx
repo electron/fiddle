@@ -115,7 +115,7 @@ export const GistActionButton = observer(
       });
     }
 
-    private async publishGist(description: string) {
+    private async publishGist(description: string): Promise<boolean> {
       const { appState } = this.props;
 
       const octo = await getOctokit(appState);
@@ -158,6 +158,8 @@ export const GistActionButton = observer(
 
         // Only set action type to update if publish completed successfully.
         this.setActionType(GistActionType.update);
+
+        return true;
       } catch (error) {
         console.warn(`Could not publish gist`, { error });
 
@@ -171,6 +173,8 @@ export const GistActionButton = observer(
           IpcEvents.SHOW_WARNING_DIALOG,
           messageBoxOptions,
         );
+
+        return false;
       }
     }
 
@@ -181,14 +185,17 @@ export const GistActionButton = observer(
       const { appState } = this.props;
       appState.activeGistAction = GistActionState.publishing;
 
-      const description = await this.getFiddleDescriptionFromUser();
+      try {
+        const description = await this.getFiddleDescriptionFromUser();
 
-      if (description) {
-        await this.publishGist(description);
-        appState.editorMosaic.isEdited = false;
+        if (description) {
+          if (await this.publishGist(description)) {
+            appState.editorMosaic.isEdited = false;
+          }
+        }
+      } finally {
+        appState.activeGistAction = GistActionState.none;
       }
-
-      appState.activeGistAction = GistActionState.none;
     }
 
     /**
