@@ -96,9 +96,7 @@ export const GistActionButton = observer(
       }
 
       // Wait for the dialog to be closed again
-      await when(
-        () => !!appState.gitHubToken || !appState.isTokenDialogShowing,
-      );
+      await when(() => !appState.isTokenDialogShowing);
 
       if (appState.gitHubToken) {
         return this.performGistAction();
