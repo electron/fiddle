@@ -996,7 +996,7 @@
     semver "^7.3.5"
     simple-git "^2.48.0"
 
-"@electron/get@^1.14.1", "@electron/get@^1.6.0", "@electron/get@^1.9.0":
+"@electron/get@^1.6.0", "@electron/get@^1.9.0":
   version "1.14.1"
   resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
   integrity sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==
@@ -4573,12 +4573,12 @@ electron-winstaller@^5.0.0:
     lodash.template "^4.2.2"
     temp "^0.9.0"
 
-electron@20.1.1:
-  version "20.1.1"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-20.1.1.tgz#511ae795b57c5683f22b733d5bf2ba7663136850"
-  integrity sha512-cFTfP4R2O5onaXiu+S20xK7eLpyX/H7PYk7lj9mlHS0ui1+w1jDDWD3RhvjmPgeksPfMAZiRLK8lAQvzSBAKdg==
+electron@22.0.1:
+  version "22.0.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-22.0.1.tgz#32a8533848e41f07e53f6feb0656207da57d8707"
+  integrity sha512-05X/UmQOtUYwFmytY4/rc+4Iz+LYzHhftRZDkx1GQzyX/BxopStddG8LMcx3SESNk25F2J93oHv1Lzs6QWeCjA==
   dependencies:
-    "@electron/get" "^1.14.1"
+    "@electron/get" "^2.0.0"
     "@types/node" "^16.11.26"
     extract-zip "^2.0.1"
 
