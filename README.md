@@ -65,6 +65,6 @@ Electron Fiddle is a community-driven project that welcomes all sorts of contrib
 When using the Electron or other GitHub logos, be sure to follow the [GitHub
 logo guidelines](https://github.com/logos).
 
-[BrowserView]: https://electronjs.org/docs/api/browser-view
-[desktopCapturer]: https://electronjs.org/docs/api/desktop-capturer
+[BrowserView]: https://electronjs.org/docs/latest/api/browser-view
+[desktopCapturer]: https://electronjs.org/docs/latest/api/desktop-capturer
 [electron-forge]:  https://electronforge.io/
