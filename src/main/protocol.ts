@@ -48,14 +48,14 @@ const handlePotentialProtocolLaunch = (url: string) => {
         return;
       }
       break;
-    // electron-fiddle://electron/{ref}/{path}
+    // electron-fiddle://electron/{tag}/{path}
     case 'electron':
       if (pathParts.length > 1) {
-        // First part of the commit HASH / ref / branch
+        // First part is the tag name (e.g. v22.0.0)
         // Rest is the path to the example
         ipcMainManager.send(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, [
           {
-            ref: pathParts[0],
+            tag: pathParts[0],
             path: pathParts.slice(1).join('/'),
           },
         ]);

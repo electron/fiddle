@@ -1,7 +1,7 @@
 # Contributing to Electron Fiddle
 
 Electron Fiddle is a community-driven project, overseen by the [Electron Ecosystem Working
-Group](https://github.com/electron/governance/tree/master/wg-ecosystem#readme). As such, we welcome
+Group](https://github.com/electron/governance/tree/main/wg-ecosystem#readme). As such, we welcome
 and encourage all sorts of contributions. They include, but are not limited to:
 
 - Constructive feedback
@@ -14,7 +14,7 @@ We strongly suggest that before filing an issue, you search through the existing
 if it has already been filed by someone else.
 
 This project is a part of the Electron ecosystem. As such, all contributions to this project follow
-[Electron's code of conduct](https://github.com/electron/electron/blob/master/CODE_OF_CONDUCT.md)
+[Electron's code of conduct](https://github.com/electron/electron/blob/main/CODE_OF_CONDUCT.md)
 where appropriate.
 
 ## Contribution Suggestions
@@ -26,7 +26,7 @@ We use the label [`good first issue`](https://github.com/electron/fiddle/issues?
 Here are some things to keep in mind as you file pull requests to fix bugs, add new features, etc.:
 
 * If you're unfamiliar with forking, branching, and pull requests, please see [GitHub's extensive
-  documentation](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests).
+  documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests).
 * GitHub Actions is used to make sure that any new or changed code meets the project's
   style guidelines, and that the project's test suite passes for each new commit.
 * Unless it's impractical, please write tests for your changes. This will help us so that we can
@@ -35,7 +35,7 @@ Here are some things to keep in mind as you file pull requests to fix bugs, add 
   commits](https://www.conventionalcommits.org/en/v1.0.0/) standard.
 * Please **do not** bump the version number in your pull requests, the maintainers will do that.
   Feel free to indicate whether the changes require a major, minor, or patch version bump, as
-  prescribed by the [semantic versioning specification](http://semver.org/).
+  prescribed by the [semantic versioning specification](https://semver.org/).
 
 ### Running Fiddle From Source
 

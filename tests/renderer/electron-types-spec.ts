@@ -174,7 +174,7 @@ describe('ElectronTypes', () => {
         expect(fetchSpy).toHaveBeenCalledWith(expect.stringMatching(file.path));
       }
 
-      expect(addExtraLib).toHaveBeenCalledTimes(1);
+      expect(addExtraLib).toHaveBeenCalledTimes(52);
       expect(addExtraLib).toHaveBeenCalledWith(types);
     });
 

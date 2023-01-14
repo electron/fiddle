@@ -108,6 +108,25 @@ describe('Action button component', () => {
     expect(state.toggleAuthDialog).toHaveBeenCalled();
   });
 
+  it('toggles the publish method on click only after authing if not authed', async () => {
+    state.toggleAuthDialog = jest.fn();
+    const { instance } = createActionButton();
+    instance.performGistAction = jest.fn();
+
+    // If not authed, don't continue to performGistAction
+    await instance.handleClick();
+    expect(state.toggleAuthDialog).toHaveBeenCalled();
+    expect(instance.performGistAction).not.toHaveBeenCalled();
+
+    // If authed, continue to performGistAction
+    state.toggleAuthDialog.mockImplementationOnce(
+      () => (state.gitHubToken = 'github-token'),
+    );
+    await instance.handleClick();
+    expect(state.toggleAuthDialog).toHaveBeenCalled();
+    expect(instance.performGistAction).toHaveBeenCalled();
+  });
+
   it('toggles the publish method on click if authed', async () => {
     state.gitHubToken = 'github-token';
 
@@ -131,6 +150,14 @@ describe('Action button component', () => {
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
       await instance.performGistAction();
       expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+    });
+
+    it('resets editorMosaic.isEdited state', async () => {
+      state.editorMosaic.isEdited = true;
+      state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+      expect(state.editorMosaic.isEdited).toBe(false);
     });
 
     it('asks the user for a description', async () => {
@@ -194,11 +221,15 @@ describe('Action button component', () => {
         throw new Error(errorMessage);
       });
 
+      state.editorMosaic.isEdited = true;
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 
       const { instance } = createActionButton();
       await instance.performGistAction();
       expect(state.activeGistAction).toBe(GistActionState.none);
+
+      // On failure the editor should still be considered edited
+      expect(state.editorMosaic.isEdited).toBe(true);
     });
 
     it('can publish private gists', async () => {

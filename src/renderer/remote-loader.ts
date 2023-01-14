@@ -19,7 +19,6 @@ export class RemoteLoader {
     for (const name of [
       'fetchExampleAndLoad',
       'fetchGistAndLoad',
-      'getPackageVersionFromRef',
       'handleLoadingFailed',
       'handleLoadingSuccess',
       'loadFiddleFromElectronExample',
@@ -34,17 +33,17 @@ export class RemoteLoader {
 
   public async loadFiddleFromElectronExample(
     _: any,
-    exampleInfo: { path: string; ref: string },
+    exampleInfo: { path: string; tag: string },
   ) {
     console.log(`Loading fiddle from Electron example`, _, exampleInfo);
-    const { path, ref } = exampleInfo;
+    const { path, tag } = exampleInfo;
     const prettyName = path.replace('docs/fiddles/', '');
     const ok = await this.verifyRemoteLoad(
-      `'${prettyName}' example from the Electron docs for version ${ref}`,
+      `'${prettyName}' example from the Electron docs for version ${tag}`,
     );
     if (!ok) return;
 
-    this.fetchExampleAndLoad(ref, path);
+    this.fetchExampleAndLoad(tag, path);
   }
 
   public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
@@ -56,7 +55,7 @@ export class RemoteLoader {
   }
 
   public async fetchExampleAndLoad(
-    ref: string,
+    tag: string,
     path: string,
   ): Promise<boolean> {
     try {
@@ -64,11 +63,17 @@ export class RemoteLoader {
       const folder = await octo.repos.getContents({
         owner: ELECTRON_REPO,
         repo: ELECTRON_ORG,
-        ref,
+        ref: tag,
         path,
       });
 
-      const version = await this.getPackageVersionFromRef(ref);
+      const index = tag.search(/\d/);
+      const version = tag.substring(index);
+
+      if (!semver.valid(version)) {
+        throw new Error('Could not determine Electron version for example');
+      }
+
       const ok = await this.setElectronVersion(version);
       if (!ok) return false;
 
@@ -205,34 +210,6 @@ export class RemoteLoader {
 
     this.appState.setVersion(version);
     return true;
-  }
-
-  public async getPackageVersionFromRef(ref: string): Promise<string> {
-    const octo = await getOctokit(this.appState);
-    const { data: packageJsonData } = await octo.repos.getContents({
-      owner: ELECTRON_ORG,
-      repo: ELECTRON_REPO,
-      ref,
-      path: PACKAGE_NAME,
-    });
-
-    if (!Array.isArray(packageJsonData) && !!packageJsonData.content) {
-      const packageJsonString = Buffer.from(
-        packageJsonData.content,
-        'base64',
-      ).toString('utf8');
-      const { version } = JSON.parse(packageJsonString);
-      return version;
-    } else {
-      console.error(
-        `getPackageVersionFromRef: Received unexpected response from GitHub, could not parse version`,
-        {
-          packageJsonData,
-        },
-      );
-
-      return '0.0.0';
-    }
   }
 
   public confirmAddFile = (filename: string): Promise<boolean> => {

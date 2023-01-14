@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3.6.0
         with:
           node-version: 16.x
           cache: yarn
@@ -69,10 +69,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Setup Node.js
-        uses: actions/setup-node@v3.5.1
+        uses: actions/setup-node@v3.6.0
         with:
           node-version: 16.x
           cache: yarn
+      - name: Set Forge RPM workaround
+        # Tracking issue: https://github.com/electron/forge/issues/3102
+        if: matrix.os == 'ubuntu-latest'
+        run: echo "%__strip /bin/true" >> ~/.rpmmacros
       - name: Set MacOS signing certs
         if: matrix.os == 'macOS-latest'
         run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh

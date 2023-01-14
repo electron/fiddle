@@ -1,7 +1,7 @@
 {
   "name": "electron-fiddle",
   "productName": "Electron Fiddle",
-  "version": "0.31.0",
+  "version": "0.32.0",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "main": "./.webpack/main",
@@ -102,6 +102,7 @@
     "cross-fetch": "^3.1.0",
     "css-loader": "^6.7.1",
     "electron": "22.0.0",
+    "electron": "22.0.1",
     "enzyme": "^3.11.0",
     "enzyme-adapter-react-16": "^1.15.6",
     "enzyme-to-json": "^3.6.1",

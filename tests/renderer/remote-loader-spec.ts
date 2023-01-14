@@ -230,9 +230,6 @@ describe('RemoteLoader', () => {
 
     beforeEach(() => {
       instance.setElectronVersion = jest.fn().mockReturnValueOnce(true);
-      instance.getPackageVersionFromRef = jest
-        .fn()
-        .mockReturnValueOnce('4.0.0');
       fetchMock = new FetchMock();
       for (const { name, download_url } of mockRepos) {
         fetchMock.add(download_url, name);
@@ -242,7 +239,7 @@ describe('RemoteLoader', () => {
     it('loads an Electron example', async () => {
       (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
 
-      await instance.fetchExampleAndLoad('4.0.0', 'test/path');
+      await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
 
       const expectedValues = {};
       for (const filename of Object.keys(mockGistFiles)) {
@@ -253,6 +250,7 @@ describe('RemoteLoader', () => {
         expectedValues,
         expect.anything(),
       );
+      expect(instance.setElectronVersion).toBeCalledWith('4.0.0');
     });
 
     it('handles an error', async () => {
@@ -264,7 +262,7 @@ describe('RemoteLoader', () => {
         },
       });
 
-      const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
+      const result = await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
       expect(result).toBe(false);
     });
 
@@ -278,7 +276,7 @@ describe('RemoteLoader', () => {
         },
       });
 
-      const result = await instance.fetchExampleAndLoad('4.0.0', 'test/path');
+      const result = await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
       expect(result).toBe(false);
       expect(store.showErrorDialog).toHaveBeenCalledWith(
         expect.stringMatching(/not a valid/i),
@@ -319,23 +317,6 @@ describe('RemoteLoader', () => {
     });
   });
 
-  describe('getPackageVersionFromRef()', () => {
-    it('gets Electron version from package.json', async () => {
-      const versionString = JSON.stringify({ version: '4.0.0' });
-      const content = Buffer.from(versionString).toString('base64');
-      const mockGetPackageJson = {
-        getContents: async () => ({
-          data: { content },
-        }),
-      };
-
-      (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetPackageJson });
-
-      const result = await instance.getPackageVersionFromRef('4.0.0');
-      expect(result).toBe('4.0.0');
-    });
-  });
-
   describe('verifyReleaseChannelEnabled', () => {
     it('asks the user if they want to enable a release channel', async () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
@@ -354,15 +335,15 @@ describe('RemoteLoader', () => {
       instance.fetchExampleAndLoad = jest.fn();
       await instance.loadFiddleFromElectronExample(
         {},
-        { path: 'test/path', ref: '4.0.0' },
+        { path: 'test/path', tag: 'v4.0.0' },
       );
 
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
-        label: expect.stringMatching(/for version 4.0.0/i),
+        label: expect.stringMatching(/for version v4.0.0/i),
         ok: 'Load',
       });
       expect(instance.fetchExampleAndLoad).toHaveBeenCalledWith(
-        '4.0.0',
+        'v4.0.0',
         'test/path',
       );
     });
@@ -373,7 +354,7 @@ describe('RemoteLoader', () => {
       instance.fetchExampleAndLoad = jest.fn();
       await instance.loadFiddleFromElectronExample(
         {},
-        { path: 'test/path', ref: '4.0.0' },
+        { path: 'test/path', tag: 'v4.0.0' },
       );
 
       expect(store.showConfirmDialog).toHaveBeenCalled();
