@@ -27,13 +27,13 @@ const commonLinuxConfig = {
 const config = {
   hooks: {
     generateAssets: async () => {
-      await maybeFetchContributors();
+      await maybeFetchContributors(true);
     },
   },
   plugins: [
-    [
-      '@electron-forge/plugin-webpack',
-      {
+    {
+      name: '@electron-forge/plugin-webpack',
+      config: {
         devContentSecurityPolicy:
           "default-src 'none'; img-src 'self' https: data:; media-src 'none'; child-src 'self'; object-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' https:; font-src 'self' https:;",
         devServer: {
@@ -58,7 +58,7 @@ const config = {
           ],
         },
       },
-    ],
+    },
   ],
   packagerConfig: {
     name: 'Electron Fiddle',
@@ -91,11 +91,14 @@ const config = {
     },
     osxSign: {
       identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
-      hardenedRuntime: true,
-      'gatekeeper-assess': false,
-      entitlements: 'static/entitlements.plist',
-      'entitlements-inherit': 'static/entitlements.plist',
-      'signature-flags': 'library',
+      optionsForFile: (filePath) =>
+        ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
+          filePath.includes(helper),
+        )
+          ? {}
+          : {
+              entitlements: 'static/entitlements.plist',
+            },
     },
   },
   makers: [
@@ -152,7 +155,7 @@ function notarizeMaybe() {
   }
 
   if (!process.env.CI) {
-    console.log(`Not in CI, skipping notarization`);
+    // Not in CI, skipping notarization
     return;
   }
 
