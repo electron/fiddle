@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { reaction } from 'mobx';
 import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
 import { AppState } from '../state';
@@ -13,6 +14,7 @@ interface WrapperProps {
 
 interface WrapperState {
   mosaic: MosaicNode<WrapperEditorId>;
+  focusable: boolean;
 }
 
 export type WrapperEditorId = 'output' | 'editors' | 'sidebar';
@@ -41,7 +43,12 @@ export class OutputEditorsWrapper extends React.Component<
         },
         splitPercentage: 25,
       },
+      focusable: true,
     };
+    reaction(
+      () => this.props.appState.isSettingsShowing,
+      (isSettingsShowing) => this.setState({ focusable: !isSettingsShowing }),
+    );
   }
 
   public render() {
@@ -51,6 +58,7 @@ export class OutputEditorsWrapper extends React.Component<
         resize={{ minimumPaneSizePercentage: 15 }}
         value={this.state.mosaic}
         onChange={this.onChange}
+        className={!this.state.focusable ? 'tabbing-hidden' : undefined}
       />
     );
   }
