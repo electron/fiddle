@@ -167,10 +167,10 @@ function notarizeMaybe() {
   }
 
   config.packagerConfig.osxNotarize = {
-    appBundleId: 'com.electron.fiddle',
+    tool: 'notarytool',
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_ID_PASSWORD,
-    ascProvider: 'LT94ZKYDCJ',
+    teamId: 'LT94ZKYDCJ',
   };
 }
 
