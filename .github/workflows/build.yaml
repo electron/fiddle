@@ -52,7 +52,7 @@ jobs:
         # Build for supported platforms
         # https://github.com/electron/electron-packager/blob/ebcbd439ff3e0f6f92fa880ff28a8670a9bcf2ab/src/targets.js#L9
         # 32-bit Linux unsupported as of 2019: https://www.electronjs.org/blog/linux-32bit-support
-        os: [macOS-latest, ubuntu-latest, windows-latest]
+        os: [macos-11, ubuntu-latest, windows-latest]
         arch: [x64, arm64]
         include:
           - os: windows-latest
@@ -78,7 +78,7 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: echo "%__strip /bin/true" >> ~/.rpmmacros
       - name: Set MacOS signing certs
-        if: matrix.os == 'macOS-latest'
+        if: matrix.os == 'macos-11'
         run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
         env:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
