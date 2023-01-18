@@ -3,9 +3,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const pasteButton = document.querySelector('#paste')
   const textarea = document.querySelector('textarea')
   copyButton.onclick = () => {
-    clipboard.writeText('Hello from Electron!')
+    window.clipboard.writeText('Hello from Electron!')
   }
   pasteButton.onclick = async () => {
-    textarea.value = await clipboard.readText()
+    textarea.value = await window.clipboard.readText()
   }
 })
