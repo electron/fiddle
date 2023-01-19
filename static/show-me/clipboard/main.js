@@ -3,8 +3,16 @@
 // For more info, see:
 // https://electronjs.org/docs/api/clipboard
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain, clipboard } = require('electron')
 const path = require('path')
+
+ipcMain.handle('clipboard:readText', () => {
+  return clipboard.readText()
+})
+
+ipcMain.handle('clipboard:writeText', (event, text) => {
+  clipboard.writeText(text)
+})
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
