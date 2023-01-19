@@ -11,6 +11,7 @@ import {
   HTMLTable,
   Icon,
   IconName,
+  Spinner,
   Tooltip,
 } from '@blueprintjs/core';
 import { InstallState } from '@electron/fiddle-core';
@@ -370,8 +371,7 @@ export const ElectronSettings = observer(
         case InstallState.installing:
         case InstallState.downloading:
           buttonProps.disabled = true;
-          buttonProps.icon = 'cloud-download';
-          buttonProps.loading = true;
+          buttonProps.icon = <Spinner size={16} value={ver.downloadProgress} />;
           buttonProps.text = 'Downloading';
           break;
 
