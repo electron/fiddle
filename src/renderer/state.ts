@@ -582,7 +582,10 @@ export class AppState {
    * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
-  public async downloadVersion(ver: RunnableVersion) {
+  public async downloadVersion(
+    ver: RunnableVersion,
+    opts?: { noActivate: boolean },
+  ) {
     const { source, state, version } = ver;
     const {
       electronMirror,
@@ -607,6 +610,12 @@ export class AppState {
     if (isDownloaded) {
       // The electron zip needs to be unzipped as well
       await this.installer.install(version);
+      return;
+    }
+
+    // Download the version without setting it as the current version.
+    if (opts?.noActivate) {
+      await this.installer.ensureDownloaded(version);
       return;
     }
 
