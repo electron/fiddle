@@ -107,7 +107,7 @@ function getVersions(
  * Save an array of GitHubVersions to localStorage.
  *
  * @param {VersionKeys} key
- * @param {Array<Version} versions
+ * @param {Array<Version>} versions
  */
 function saveVersions(key: VersionKeys, versions: Array<Version>) {
   const stringified = JSON.stringify(versions);

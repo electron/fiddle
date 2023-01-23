@@ -577,14 +577,17 @@ export class AppState {
   }
 
   /**
-   * Download a version of Electron.
+   * Download a version of Electron and set it as the current
+   * version in use unless otherwise specified.
    *
    * @param {RunnableVersion} ver
+   * @param {Object} opts
+   * @param {Boolean} [options.activate=100] - Whether to set ver as current
    * @returns {Promise<void>}
    */
   public async downloadVersion(
     ver: RunnableVersion,
-    opts?: { noActivate: boolean },
+    opts: { activate: boolean } = { activate: true },
   ) {
     const { source, state, version } = ver;
     const {
@@ -613,13 +616,14 @@ export class AppState {
       return;
     }
 
+    console.log(`State: Downloading Electron ${version}`);
+
     // Download the version without setting it as the current version.
-    if (opts?.noActivate) {
+    if (!opts.activate) {
       await this.installer.ensureDownloaded(version);
       return;
     }
 
-    console.log(`State: Downloading Electron ${version}`);
     await this.installer.install(version, {
       mirror: {
         electronMirror,
