@@ -30,7 +30,8 @@ export const Commands = observer(
     }
 
     private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target['tagName'] !== 'INPUT') {
+      // Only maximize if the toolbar itself is clicked (ignore for buttons, input, etc)
+      if (e.currentTarget === e.target) {
         ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
       }
     };
