@@ -63,7 +63,8 @@ describe('Commands component', () => {
     const wrapper = shallow(<Commands appState={store as any} />);
     const instance = wrapper.instance() as any;
 
-    instance.handleDoubleClick({ target: {} });
+    const tag = { tagName: 'DIV' };
+    instance.handleDoubleClick({ target: tag, currentTarget: tag });
 
     expect(spy).toHaveBeenCalledWith(IpcEvents.CLICK_TITLEBAR_MAC);
     spy.mockRestore();
@@ -75,7 +76,10 @@ describe('Commands component', () => {
     const wrapper = shallow(<Commands appState={store as any} />);
     const instance = wrapper.instance() as any;
 
-    instance.handleDoubleClick({ target: { tagName: 'INPUT' } });
+    instance.handleDoubleClick({
+      target: { tagName: 'INPUT' },
+      currentTarget: { tagName: 'DIV' },
+    });
 
     expect(spy).toHaveBeenCalledTimes(0);
     spy.mockRestore();
