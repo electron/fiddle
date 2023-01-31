@@ -12,7 +12,7 @@ import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { getTemplate } from './content';
 import { AppState } from './state';
-import { getReleaseChannel } from './versions';
+import { getReleaseChannel, isReleasedMajor } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -140,7 +140,10 @@ export class RemoteLoader {
             const index = deps[dep].search(/\d/);
             const version = deps[dep].substring(index);
 
-            if (!semver.valid(version)) {
+            if (
+              !semver.valid(version) ||
+              !isReleasedMajor(semver.major(version))
+            ) {
               throw new Error(
                 "This gist's package.json contains an invalid Electron version.",
               );
