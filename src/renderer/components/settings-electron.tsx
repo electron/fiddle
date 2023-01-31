@@ -383,7 +383,7 @@ export const ElectronSettings = observer(
           buttonProps.onClick = () => {
             isLocal
               ? appState.removeVersion(ver)
-              : appState.downloadVersion(ver, { activate: true });
+              : appState.downloadVersion(ver, { activate: false });
           };
           break;
       }
