@@ -154,6 +154,33 @@ describe('RemoteLoader', () => {
       expect(store.setVersion).toBeCalledWith('17.0.0');
     });
 
+    it('does not set an invalid Electron version from package.json', async () => {
+      const gistId = 'pjsontestid';
+      const pj = {
+        main: 'main.js',
+        devDependencies: {
+          electron: '99999.0.0',
+        },
+      };
+
+      store.gistId = gistId;
+      mockGistFiles[PACKAGE_NAME] = { content: JSON.stringify(pj, null, 2) };
+      mockRepos.push({
+        name: PACKAGE_NAME,
+        download_url: `https://${PACKAGE_NAME}`,
+      });
+
+      (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(false);
+      expect(store.modules.size).toEqual(0);
+      expect(store.showErrorDialog).toBeCalledWith(
+        "Loading the fiddle failed: This gist's package.json contains an invalid Electron version.",
+      );
+    });
+
     it('handles extra gist fiddle dependencies', async () => {
       const gistId = 'pjsontestid';
       const pj = {
