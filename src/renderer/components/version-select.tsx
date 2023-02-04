@@ -16,7 +16,6 @@ import {
   Select,
 } from '@blueprintjs/select';
 import { InstallState } from '@electron/fiddle-core';
-import { clipboard } from 'electron';
 import { observer } from 'mobx-react';
 import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import semver from 'semver';
@@ -170,7 +169,7 @@ export const renderVersionContextMenu = (
       <MenuItem
         text="Copy Version Number"
         onClick={() => {
-          clipboard.writeText(version);
+          navigator.clipboard.writeText(version);
         }}
       />
     </Menu>,

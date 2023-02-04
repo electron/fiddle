@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
-import { clipboard, shell } from 'electron';
+import { shell } from 'electron';
 import { observer } from 'mobx-react';
 
 import { getOctokit } from '../../utils/octokit';
@@ -116,8 +116,8 @@ export const TokenDialog = observer(
      * @returns
      * @memberof TokenDialog
      */
-    public onTokenInputFocused() {
-      const text = (clipboard.readText() || '').trim();
+    public async onTokenInputFocused() {
+      const text = ((await navigator.clipboard.readText()) || '').trim();
 
       if (text.length !== 40) return;
       if (!/^[a-z0-9]+$/.test(text)) return;

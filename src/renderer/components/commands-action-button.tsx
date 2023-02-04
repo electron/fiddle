@@ -10,7 +10,6 @@ import {
   Position,
   Toaster,
 } from '@blueprintjs/core';
-import { clipboard } from 'electron';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
@@ -150,7 +149,7 @@ export const GistActionButton = observer(
           action: {
             text: 'Copy link',
             icon: 'clipboard',
-            onClick: () => clipboard.writeText(gist.data.html_url),
+            onClick: () => navigator.clipboard.writeText(gist.data.html_url),
           },
         });
 
@@ -233,7 +232,7 @@ export const GistActionButton = observer(
             action: {
               text: 'Copy link',
               icon: 'clipboard',
-              onClick: () => clipboard.writeText(gist.data.html_url),
+              onClick: () => navigator.clipboard.writeText(gist.data.html_url),
             },
           });
         }

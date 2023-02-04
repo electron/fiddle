@@ -37,6 +37,9 @@ global.fetch = window.fetch = jest.fn();
 delete window.localStorage;
 window.localStorage = {};
 
+window.navigator = window.navigator ?? {};
+window.navigator.clipboard = {};
+
 /**
  * Mock these properties twice so that they're available
  * both at the top-level of files and also within the
@@ -46,6 +49,8 @@ window.ElectronFiddle = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
+window.navigator.clipboard.readText = jest.fn();
+window.navigator.clipboard.writeText = jest.fn();
 
 beforeEach(() => {
   process.env.JEST = true;

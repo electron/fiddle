@@ -40,49 +40,55 @@ describe('TokenDialog component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('tries to read the clipboard on focus and enters it if valid', () => {
+  it('tries to read the clipboard on focus and enters it if valid', async () => {
     const wrapper = shallow(<TokenDialog appState={store as any} />);
     const instance: any = wrapper.instance() as any;
 
-    (electron as any).clipboard.readText.mockReturnValueOnce(mockValidToken);
-    instance.onTokenInputFocused();
+    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
+      mockValidToken,
+    );
+    await instance.onTokenInputFocused();
 
-    expect((electron as any).clipboard.readText).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe(mockValidToken);
   });
 
-  it('tries to read the clipboard on focus and does not enter it if too short', () => {
+  it('tries to read the clipboard on focus and does not enter it if too short', async () => {
     const wrapper = shallow(<TokenDialog appState={store as any} />);
     const instance: any = wrapper.instance() as any;
 
-    (electron as any).clipboard.readText.mockReturnValueOnce(mockInvalidToken);
-    instance.onTokenInputFocused();
+    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
+      mockInvalidToken,
+    );
+    await instance.onTokenInputFocused();
 
-    expect((electron as any).clipboard.readText).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
-  it('tries to read the clipboard on focus and does not enter it if invalid', () => {
+  it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
     const wrapper = shallow(<TokenDialog appState={store as any} />);
     const instance: any = wrapper.instance() as any;
 
-    (electron as any).clipboard.readText.mockReturnValueOnce(
+    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
       'String with the right length not a token',
     );
-    instance.onTokenInputFocused();
+    await instance.onTokenInputFocused();
 
-    expect((electron as any).clipboard.readText).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
-  it('tries to read the clipboard on focus and does not enter it if invalid', () => {
+  it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
     const wrapper = shallow(<TokenDialog appState={store as any} />);
     const instance: any = wrapper.instance() as any;
 
-    (electron as any).clipboard.readText.mockReturnValueOnce(undefined);
-    instance.onTokenInputFocused();
+    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
+      'invalid',
+    );
+    await instance.onTokenInputFocused();
 
-    expect((electron as any).clipboard.readText).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
