@@ -44,6 +44,7 @@ export enum IpcEvents {
 export const ipcMainEvents = [
   IpcEvents.FS_SAVE_FIDDLE_DIALOG,
   IpcEvents.FS_SAVE_FIDDLE,
+  IpcEvents.GET_APP_PATHS,
   IpcEvents.SHOW_WARNING_DIALOG,
   IpcEvents.SHOW_CONFIRMATION_DIALOG,
   IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
@@ -79,7 +80,6 @@ export const ipcRendererEvents = [
   IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
   IpcEvents.BISECT_COMMANDS_TOGGLE,
   IpcEvents.BEFORE_QUIT,
-  IpcEvents.GET_APP_PATHS,
   IpcEvents.SELECT_ALL_IN_EDITOR,
   IpcEvents.UNDO_IN_EDITOR,
   IpcEvents.REDO_IN_EDITOR,

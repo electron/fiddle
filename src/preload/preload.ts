@@ -1,17 +1,14 @@
-// Remember to update ambient.d.ts for extending window object
+import { contextBridge, ipcRenderer } from 'electron';
+
 import { IpcEvents } from '../ipc-events';
-import { ipcRendererManager } from '../renderer/ipc';
 
-async function preload() {
-  await setupFiddleGlobal();
+export function setupFiddleGlobal() {
+  // Remember to update ambient.d.ts for extending window object
+  contextBridge.exposeInMainWorld('ElectronFiddle', {
+    app: null, // will be set in main.tsx
+    appPaths: ipcRenderer.sendSync(IpcEvents.GET_APP_PATHS),
+    monaco: null, // will be set in main.tsx
+  });
 }
 
-export async function setupFiddleGlobal() {
-  window.ElectronFiddle = {
-    app: null as any, // will be set in main.tsx
-    appPaths: await ipcRendererManager.invoke(IpcEvents.GET_APP_PATHS),
-    monaco: null as any, // will be set in main.tsx
-  };
-}
-
-preload();
+setupFiddleGlobal();

@@ -42,7 +42,6 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
       webviewTag: false,
       nodeIntegration: true,
       nodeIntegrationInWorker: true,
-      contextIsolation: false,
       preload: !!process.env.JEST
         ? path.join(process.cwd(), './.webpack/renderer/main_window/preload.js')
         : MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
@@ -106,7 +105,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     }
   });
 
-  ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
+  ipcMainManager.on(IpcEvents.GET_APP_PATHS, (event) => {
     const paths = {};
     const pathsToQuery = [
       'home',
@@ -119,7 +118,7 @@ export function createMainWindow(): Electron.BrowserWindow {
     for (const path of pathsToQuery) {
       paths[path] = app.getPath(path as any);
     }
-    return paths;
+    event.returnValue = paths;
   });
 
   browserWindows.push(browserWindow);

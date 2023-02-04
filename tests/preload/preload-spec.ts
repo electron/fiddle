@@ -7,32 +7,37 @@ import { IpcEvents } from '../../src/ipc-events';
 import { setupFiddleGlobal } from '../../src/preload/preload';
 
 describe('preload', () => {
-  // We instantiate this in `tests/setup.js` for the main and
-  // renderer processes, but we don't need these mocks since
-  // these things are being instantiated within the preload
-  beforeEach(() => {
-    delete (window as any).ElectronFiddle;
-  });
-
-  describe('setupGlobalWindow()', () => {
-    it('sets up a window.ElectronFiddle object', async () => {
+  describe('setupFiddleGlobal()', () => {
+    it('exposes an ElectronFiddle object via the contextBridge', async () => {
+      (electron.contextBridge.exposeInMainWorld as jest.Mock).mockReturnValue(
+        undefined,
+      );
       await setupFiddleGlobal();
 
-      expect((window as any).ElectronFiddle).toMatchObject({ app: null });
+      expect(electron.contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
+        'ElectronFiddle',
+        expect.objectContaining({ app: null }),
+      );
     });
 
     it('sets app paths', async () => {
       const obj = {
         appPath: '/fake/path',
       };
-      (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(obj);
+      (electron.ipcRenderer.sendSync as jest.Mock).mockReturnValue(obj);
+      (electron.contextBridge.exposeInMainWorld as jest.Mock).mockReturnValue(
+        undefined,
+      );
 
       await setupFiddleGlobal();
 
-      expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
+      expect(electron.ipcRenderer.sendSync).toHaveBeenCalledWith(
         IpcEvents.GET_APP_PATHS,
       );
-      expect((window as any).ElectronFiddle.appPaths).toBe(obj);
+      expect(electron.contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
+        'ElectronFiddle',
+        expect.objectContaining({ appPaths: obj }),
+      );
     });
   });
 });

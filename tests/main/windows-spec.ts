@@ -4,7 +4,7 @@
 
 import * as path from 'path';
 
-import * as electron from 'electron';
+import { app } from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
@@ -47,7 +47,6 @@ describe('windows', () => {
         webviewTag: false,
         nodeIntegration: true,
         nodeIntegrationInWorker: true,
-        contextIsolation: false,
         preload: '/fake/path',
       },
     };
@@ -136,19 +135,20 @@ describe('windows', () => {
 
       // can't .emit() to trigger .handleOnce() so instead we mock
       // to instantly call the listener.
-      let result: any;
-      (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
-      (electron.ipcMain.handle as jest.Mock).mockImplementation(
-        (event, listener) => {
-          if (event === IpcEvents.GET_APP_PATHS) {
-            result = listener();
+      const event: any = {};
+      jest
+        .spyOn(ipcMainManager, 'on')
+        .mockImplementation((channel, listener) => {
+          if (channel === IpcEvents.GET_APP_PATHS) {
+            listener(event);
           }
-        },
-      );
+          return ipcMainManager;
+        });
+      (app.getPath as jest.Mock).mockImplementation((name) => name);
       getOrCreateMainWindow();
-      expect(Object.values(result).length).toBeGreaterThan(0);
-      for (const prop in result) {
-        expect(prop).toBe(result[prop]);
+      expect(Object.values(event.returnValue).length).toBeGreaterThan(0);
+      for (const prop in event.returnValue) {
+        expect(prop).toBe(event.returnValue[prop]);
       }
     });
   });
