@@ -120,7 +120,7 @@ export const TokenDialog = observer(
       const text = (clipboard.readText() || '').trim();
 
       if (text.length !== 40) return;
-      if (!/^[a-z0-9]+$/.test(text)) return;
+      if (!/^[a-zA-Z0-9_]+$/.test(text)) return;
 
       this.setState({ tokenInput: text });
     }
