@@ -146,11 +146,11 @@ describe('ElectronSettings component', () => {
     expect(store.downloadVersion).toHaveBeenCalled();
   });
 
-  describe('handleDownloadClick()', () => {
+  describe('handleUpdateElectronVersions()', () => {
     it('kicks off an update of Electron versions', async () => {
       const wrapper = shallow(<ElectronSettings appState={store as any} />);
       const instance = wrapper.instance() as any;
-      await instance.handleDownloadClick();
+      await instance.handleUpdateElectronVersions();
 
       expect(store.updateElectronVersions).toHaveBeenCalled();
     });

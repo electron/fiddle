@@ -53,7 +53,7 @@ export const ElectronSettings = observer(
       this.handleChannelChange = this.handleChannelChange.bind(this);
       this.handleDeleteAll = this.handleDeleteAll.bind(this);
       this.handleDownloadAll = this.handleDownloadAll.bind(this);
-      this.handleDownloadClick = this.handleDownloadClick.bind(this);
+      this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(this);
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
 
@@ -63,7 +63,7 @@ export const ElectronSettings = observer(
       };
     }
 
-    public handleDownloadClick() {
+    public handleUpdateElectronVersions() {
       this.props.appState.updateElectronVersions();
     }
 
@@ -177,7 +177,7 @@ export const ElectronSettings = observer(
         <ButtonGroup fill={true}>
           <Button
             disabled={isUpdatingElectronVersions}
-            onClick={this.handleDownloadClick}
+            onClick={this.handleUpdateElectronVersions}
             loading={isUpdatingElectronVersions}
             icon="numbered-list"
             text="Update Electron Release List"
