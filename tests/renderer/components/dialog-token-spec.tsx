@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import * as electron from 'electron';
 import { shallow } from 'enzyme';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
@@ -137,7 +136,7 @@ describe('TokenDialog component', () => {
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
     instance.openGenerateTokenExternal();
 
-    expect(electron.shell.openExternal).toHaveBeenCalled();
+    expect(window.open as jest.Mock).toHaveBeenCalled();
   });
 
   describe('onSubmitToken()', () => {

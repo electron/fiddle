@@ -49,6 +49,7 @@ window.ElectronFiddle = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
+window.open = jest.fn();
 window.navigator.clipboard.readText = jest.fn();
 window.navigator.clipboard.writeText = jest.fn();
 
@@ -61,4 +62,5 @@ beforeEach(() => {
   window.localStorage.setItem.mockReset();
   window.localStorage.getItem.mockReset();
   window.localStorage.removeItem.mockReset();
+  window.open.mockReset();
 });

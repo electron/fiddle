@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
-import { shell } from 'electron';
 import { observer } from 'mobx-react';
 
 import { getOctokit } from '../../utils/octokit';
@@ -106,7 +105,7 @@ export const TokenDialog = observer(
      * @memberof TokenDialog
      */
     public openGenerateTokenExternal() {
-      shell.openExternal(GENERATE_TOKEN_URL);
+      window.open(GENERATE_TOKEN_URL);
     }
 
     /**

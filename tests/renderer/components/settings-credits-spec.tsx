@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import * as electron from 'electron';
 import { shallow } from 'enzyme';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
@@ -62,6 +61,6 @@ describe('CreditsSettings component', () => {
     wrapper.setState({ contributors: mockContributors });
 
     wrapper.find('.contributor').simulate('click');
-    expect(electron.shell.openExternal).toHaveBeenCalled();
+    expect(window.open as jest.Mock).toHaveBeenCalled();
   });
 });
