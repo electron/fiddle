@@ -1,9 +1,9 @@
 import { getElectronNameForPlatform } from '../../src/utils/electron-name';
-import { overridePlatform, resetPlatform } from '../utils';
+import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
 describe('electron-name', () => {
   afterAll(() => {
-    resetPlatform();
+    resetRendererPlatform();
   });
 
   it('returns the right name for each platform', () => {
@@ -14,7 +14,7 @@ describe('electron-name', () => {
     ];
 
     platforms.forEach(({ platform, expected }) => {
-      overridePlatform(platform);
+      overrideRendererPlatform(platform);
       expect(getElectronNameForPlatform()).toBe(expected);
     });
   });

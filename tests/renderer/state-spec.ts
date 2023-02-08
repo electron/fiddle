@@ -22,7 +22,7 @@ import {
 } from '../../src/renderer/versions';
 import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
-import { overridePlatform, resetPlatform } from '../utils';
+import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
 jest.mock('../../src/renderer/content', () => ({
   getTemplate: jest.fn(),
@@ -691,7 +691,7 @@ describe('AppState', () => {
     });
 
     it('handles a complex buffer on Win32', () => {
-      overridePlatform('win32');
+      overrideRendererPlatform('win32');
 
       appState.pushOutput(Buffer.from('Buffer\r\nStuff\nMore'), {
         bypassBuffer: false,
@@ -699,7 +699,7 @@ describe('AppState', () => {
       expect(appState.output[1].text).toBe('Buffer');
       expect(appState.output[2].text).toBe('Stuff');
 
-      resetPlatform();
+      resetRendererPlatform();
     });
   });
 

@@ -5,23 +5,17 @@ import { shallow } from 'enzyme';
 import { GenericDialogType } from '../../../src/interfaces';
 import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
 import { StateMock } from '../../mocks/mocks';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 describe('GenericDialog component', () => {
   let store: StateMock;
 
-  beforeAll(() => {
+  beforeEach(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+    overrideRendererPlatform('darwin');
 
-  beforeEach(() => {
     ({ state: store } = (window as any).ElectronFiddle.app);
-  });
-
-  afterAll(() => {
-    resetPlatform();
   });
 
   describe('renders', () => {

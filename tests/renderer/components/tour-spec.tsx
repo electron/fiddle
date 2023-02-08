@@ -3,7 +3,7 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 
 import { Tour } from '../../../src/renderer/components/tour';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
@@ -22,15 +22,9 @@ describe('VersionChooser component', () => {
     },
   ]);
 
-  beforeAll(() => {
-    overridePlatform('darwin');
-  });
-
-  afterAll(() => {
-    resetPlatform();
-  });
-
   beforeEach(() => {
+    overrideRendererPlatform('darwin');
+
     document.querySelector = jest.fn(() => ({
       getBoundingClientRect: jest.fn(() => ({
         top: 20,

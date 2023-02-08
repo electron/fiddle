@@ -12,24 +12,18 @@ import {
   defaultLight,
 } from '../../../src/renderer/themes-defaults';
 import { StateMock } from '../../mocks/mocks';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 
 describe('AddThemeDialog component', () => {
   let store: StateMock;
 
-  beforeAll(() => {
+  beforeEach(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+    overrideRendererPlatform('darwin');
 
-  afterAll(() => {
-    resetPlatform();
-  });
-
-  beforeEach(() => {
     ({ state: store } = (window as any).ElectronFiddle.app);
   });
 
