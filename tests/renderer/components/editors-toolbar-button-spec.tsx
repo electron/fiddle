@@ -8,7 +8,6 @@ import {
   RemoveButton,
 } from '../../../src/renderer/components/editors-toolbar-button';
 import { AppState } from '../../../src/renderer/state';
-import { StateMock } from '../../mocks/mocks';
 
 let mockContext: any = {};
 
@@ -29,7 +28,7 @@ jest.mock('react-mosaic-component', () => {
 });
 
 describe('Editor toolbar button component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeAll(() => {
     mockContext = {
@@ -51,13 +50,13 @@ describe('Editor toolbar button component', () => {
       mosaicId: 'test',
     };
 
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   describe('MaximizeButton', () => {
     function createMaximizeButton(id: EditorId) {
       const wrapper = shallow(
-        <MaximizeButton id={id} appState={(store as unknown) as AppState} />,
+        <MaximizeButton id={id} appState={store} />,
         {
           context: mockContext,
         },
@@ -82,7 +81,7 @@ describe('Editor toolbar button component', () => {
   describe('RemoveButton', () => {
     function createRemoveButton(id: EditorId) {
       const wrapper = shallow(
-        <RemoveButton id={id} appState={(store as unknown) as AppState} />,
+        <RemoveButton id={id} appState={store} />,
         {
           context: mockContext,
         },

@@ -9,25 +9,24 @@ import {
   EditorMosaic,
   EditorPresence,
 } from '../../../src/renderer/editor-mosaic';
+import { AppState } from '../../../src/renderer/state';
 import { createEditorValues } from '../../mocks/editor-values';
 import { AppMock, StateMock } from '../../mocks/mocks';
 
 describe('SidebarFileTree component', () => {
-  let app: AppMock;
-  let store: any;
+  let store: AppState;
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
   let stateMock: StateMock;
 
   beforeEach(() => {
-    ({ app } = (window as any).ElectronFiddle);
-    ({ state: stateMock } = app);
-    store = {};
+    ({ state: stateMock } = window.ElectronFiddle.app as unknown as AppMock);
+    store = {} as unknown as AppState;
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
-    store.editorMosaic = editorMosaic as any;
-    stateMock.editorMosaic = editorMosaic as any;
+    (store as unknown as StateMock).editorMosaic = editorMosaic;
+    stateMock.editorMosaic = editorMosaic;
   });
 
   it('renders', () => {
@@ -112,7 +111,7 @@ describe('SidebarFileTree component', () => {
 
   it('file is visible, click files tree, focus file content', async () => {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
-    const editors = shallow(<Editors appState={stateMock as any} />);
+    const editors = shallow(<Editors appState={stateMock as unknown as AppState} />);
     const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
     const editorsInstance: any = editors.instance() as any;
 
@@ -126,7 +125,7 @@ describe('SidebarFileTree component', () => {
 
   it('file is hidden, click files tree, make file visible and focus file content', function () {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
-    const editors = shallow(<Editors appState={stateMock as any} />);
+    const editors = shallow(<Editors appState={stateMock as unknown as AppState} />);
     const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
     const editorsInstance: any = editors.instance() as any;
 

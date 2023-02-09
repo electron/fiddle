@@ -8,6 +8,7 @@ import {
 } from '../../src/interfaces';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
+import { AppState } from '../../src/renderer/state';
 import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
 import { getOctokit } from '../../src/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
@@ -19,7 +20,7 @@ type GistFile = { content: string };
 type GistFiles = { [id: string]: GistFile };
 
 describe('RemoteLoader', () => {
-  let instance: any;
+  let instance: RemoteLoader;
   let app: AppMock;
   let store: StateMock;
   let mockGistFiles: GistFiles;
@@ -29,7 +30,7 @@ describe('RemoteLoader', () => {
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    ({ app } = (window as any).ElectronFiddle);
+    app = window.ElectronFiddle.app as unknown as AppMock;
     ({ state: store } = app);
     ipcRendererManager.send = jest.fn();
     store.channelsToShow = [ElectronReleaseChannel.stable];
@@ -37,7 +38,7 @@ describe('RemoteLoader', () => {
       '4.0.0': { version: '4.0.0' },
       '4.0.0-beta': { version: '4.0.0-beta' },
     } as any);
-    instance = new RemoteLoader(store as any);
+    instance = new RemoteLoader(store as unknown as AppState);
 
     editorValues = createEditorValues();
 

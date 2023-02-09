@@ -4,11 +4,11 @@ import { shallow } from 'enzyme';
 
 import { GenericDialogType } from '../../../src/interfaces';
 import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 describe('GenericDialog component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -17,7 +17,7 @@ describe('GenericDialog component', () => {
   });
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   afterAll(() => {
@@ -28,7 +28,7 @@ describe('GenericDialog component', () => {
     function expectDialogTypeToMatchSnapshot(type: GenericDialogType) {
       store.genericDialogOptions.type = type;
       store.isGenericDialogShowing = true;
-      const wrapper = shallow(<GenericDialog appState={store as any} />);
+      const wrapper = shallow(<GenericDialog appState={store} />);
       expect(wrapper).toMatchSnapshot();
     }
 
@@ -58,7 +58,7 @@ describe('GenericDialog component', () => {
 
   it('onClose() closes itself', () => {
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
+    const wrapper = shallow(<GenericDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     instance.onClose(true);
@@ -66,7 +66,7 @@ describe('GenericDialog component', () => {
   });
 
   it('enter submit', () => {
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
+    const wrapper = shallow(<GenericDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
     const event = { key: 'Enter' };
 

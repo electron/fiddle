@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { Menu } from 'electron';
+import { BrowserWindow, ContextMenuParams, Menu } from 'electron';
 
 import {
   createContextMenu,
@@ -19,7 +19,7 @@ jest.mock('../../src/utils/devmode');
 jest.mock('../../src/main/ipc');
 
 describe('context-menu', () => {
-  let mockWindow: any;
+  let mockWindow: BrowserWindow;
   const mockFlags = {
     editFlags: {
       canCopy: false,
@@ -32,8 +32,8 @@ describe('context-menu', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    mockWindow = new BrowserWindowMock();
-    createContextMenu(mockWindow as any);
+    mockWindow = new BrowserWindowMock() as unknown as BrowserWindow;
+    createContextMenu(mockWindow);
   });
 
   describe('getContextMenu()', () => {
@@ -43,14 +43,14 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu with inspect for dev mode', () => {
-      (Menu as any).buildFromTemplate.mockReturnValue({
+      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
         popup: jest.fn(),
       });
-      (isDevMode as any).mockReturnValueOnce(true);
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
-      const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
+      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
 
       expect(template).toHaveLength(8);
       expect(template[0].id).toBe('run');
@@ -64,26 +64,26 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu without inspect in production', () => {
-      (Menu as any).buildFromTemplate.mockReturnValue({
+      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
         popup: jest.fn(),
       });
-      (isDevMode as any).mockReturnValueOnce(false);
+      (isDevMode as jest.Mock).mockReturnValueOnce(false);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
-      const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
+      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
 
       expect(template).toHaveLength(7);
     });
 
     it('disables cut/copy/paste if not in editFlags', () => {
-      (Menu as any).buildFromTemplate.mockReturnValue({
+      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
         popup: jest.fn(),
       });
-      (isDevMode as any).mockReturnValueOnce(true);
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
-      const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
+      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
 
       expect(template[3].id).toBe('cut');
       expect(template[3].enabled).toBe(false);
@@ -94,10 +94,10 @@ describe('context-menu', () => {
     });
 
     it('enables cut/copy/paste if in editFlags', () => {
-      (Menu as any).buildFromTemplate.mockReturnValue({
+      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
         popup: jest.fn(),
       });
-      (isDevMode as any).mockReturnValueOnce(true);
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, {
         ...mockFlags,
@@ -108,7 +108,7 @@ describe('context-menu', () => {
         },
       });
 
-      const template = (Menu.buildFromTemplate as any).mock.calls[0][0];
+      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
 
       expect(template[3].id).toBe('cut');
       expect(template[3].enabled).toBe(true);
@@ -121,44 +121,44 @@ describe('context-menu', () => {
 
   describe('getInspectItems()', () => {
     it('returns an empty array if not in devMode', () => {
-      (isDevMode as any).mockReturnValueOnce(false);
-      const result = getInspectItems(mockWindow, {} as any);
+      (isDevMode as jest.Mock).mockReturnValueOnce(false);
+      const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(0);
     });
 
     it('returns an inspect item if in devMode', () => {
-      (isDevMode as any).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, {} as any);
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(1);
     });
 
     it('inspects on click', () => {
-      (isDevMode as any).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
     });
 
     it('focuses the dev tools if already open', () => {
-      (isDevMode as any).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
-      mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
-      mockWindow.webContents.devToolsWebContents = new WebContentsMock();
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
+      (mockWindow.webContents.isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
+      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
       expect(
-        mockWindow.webContents.devToolsWebContents.focus,
+        mockWindow.webContents.devToolsWebContents!.focus as jest.Mock,
       ).toHaveBeenCalled();
     });
 
     it('catches an error', () => {
-      (isDevMode as any).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as any);
-      mockWindow.webContents.isDevToolsOpened.mockReturnValueOnce(true);
-      mockWindow.webContents.devToolsWebContents = new WebContentsMock();
-      mockWindow.webContents.devToolsWebContents.focus.mockImplementationOnce(
+      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
+      (mockWindow.webContents.isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
+      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
+      (mockWindow.webContents.devToolsWebContents!.focus as jest.Mock).mockImplementationOnce(
         () => {
           throw new Error('💩');
         },

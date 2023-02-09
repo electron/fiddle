@@ -3,17 +3,17 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 
 describe('GitHubSettings component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   it('renders when not signed in', () => {
-    const wrapper = shallow(<GitHubSettings appState={store as any} />);
+    const wrapper = shallow(<GitHubSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
@@ -21,12 +21,12 @@ describe('GitHubSettings component', () => {
     store.gitHubToken = '123';
     store.gitHubLogin = 'Test User';
 
-    const wrapper = shallow(<GitHubSettings appState={store as any} />);
+    const wrapper = shallow(<GitHubSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('opens the token dialog on click', () => {
-    const wrapper = shallow(<GitHubSettings appState={store as any} />);
+    const wrapper = shallow(<GitHubSettings appState={store} />);
 
     wrapper.childAt(1).childAt(1).simulate('click');
     expect(store.isTokenDialogShowing).toBe(true);
@@ -34,7 +34,7 @@ describe('GitHubSettings component', () => {
 
   describe('Gist publish as revision component', () => {
     it('state changes', async () => {
-      const wrapper = shallow(<GitHubSettings appState={store as any} />);
+      const wrapper = shallow(<GitHubSettings appState={store} />);
       const instance = wrapper.instance() as any;
 
       await instance.handlePublishGistAsRevisionChange({

@@ -18,7 +18,7 @@ describe('preload', () => {
     it('sets up a window.ElectronFiddle object', async () => {
       await setupFiddleGlobal();
 
-      expect((window as any).ElectronFiddle).toMatchObject({ app: null });
+      expect(window.ElectronFiddle).toMatchObject({ app: null });
     });
 
     it('sets app paths', async () => {
@@ -32,7 +32,7 @@ describe('preload', () => {
       expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
         IpcEvents.GET_APP_PATHS,
       );
-      expect((window as any).ElectronFiddle.appPaths).toBe(obj);
+      expect(window.ElectronFiddle.appPaths).toBe(obj);
     });
   });
 });

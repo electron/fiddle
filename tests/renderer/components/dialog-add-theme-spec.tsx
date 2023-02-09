@@ -11,13 +11,13 @@ import {
   LoadedFiddleTheme,
   defaultLight,
 } from '../../../src/renderer/themes-defaults';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 
 describe('AddThemeDialog component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -30,11 +30,11 @@ describe('AddThemeDialog component', () => {
   });
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   it('renders', () => {
-    const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+    const wrapper = shallow(<AddThemeDialog appState={store} />);
 
     wrapper.setState({
       file: '/test/file',
@@ -45,7 +45,7 @@ describe('AddThemeDialog component', () => {
 
   describe('createNewThemeFromMonaco()', () => {
     it('handles invalid input', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       try {
@@ -53,13 +53,13 @@ describe('AddThemeDialog component', () => {
       } catch (err) {
         expect(err.message).toEqual(`Filename  not found`);
         expect(fs.outputJSON).toHaveBeenCalledTimes(0);
-        expect(store.setTheme).toHaveBeenCalledTimes(0);
+        expect(store.setTheme as jest.Mock).toHaveBeenCalledTimes(0);
         expect(shell.showItemInFolder).toHaveBeenCalledTimes(0);
       }
     });
 
     it('handles valid input', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
       wrapper.setState({ file: '/test/file' });
 
@@ -81,14 +81,14 @@ describe('AddThemeDialog component', () => {
         'themes',
         'testingLight',
       );
-      expect(store.setTheme).toHaveBeenCalledWith(themePath);
+      expect(store.setTheme as jest.Mock).toHaveBeenCalledWith(themePath);
       expect(shell.showItemInFolder).toHaveBeenCalledWith(themePath);
     });
   });
 
   describe('onSubmit()', () => {
     it('does nothing if there is no file currently set', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       instance.createNewThemeFromMonaco = jest.fn();
@@ -102,7 +102,7 @@ describe('AddThemeDialog component', () => {
     });
 
     it('loads a theme if a file is currently set', async () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       wrapper.setState({ file: '/test/file' });
@@ -121,7 +121,7 @@ describe('AddThemeDialog component', () => {
 
     it('shows an error dialog for a malformed theme', async () => {
       store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       wrapper.setState({ file: '/test/file' });
@@ -141,7 +141,7 @@ describe('AddThemeDialog component', () => {
 
   describe('onChangeFile()', () => {
     it('handles valid input', () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
 
       const files = ['one', 'two'];
       (wrapper.instance() as any).onChangeFile({
@@ -151,7 +151,7 @@ describe('AddThemeDialog component', () => {
     });
 
     it('handles no input', () => {
-      const wrapper = shallow(<AddThemeDialog appState={store as any} />);
+      const wrapper = shallow(<AddThemeDialog appState={store} />);
 
       (wrapper.instance() as any).onChangeFile({
         target: { files: null },

@@ -7,7 +7,7 @@ describe('renderNonIdealState()', () => {
   let editorMosaic: EditorMosaic;
 
   beforeEach(() => {
-    ({ editorMosaic } = (window as any).ElectronFiddle.app.state);
+    ({ editorMosaic } = window.ElectronFiddle.app.state);
   });
 
   it('renders a non-ideal state', () => {

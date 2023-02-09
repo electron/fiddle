@@ -5,13 +5,13 @@ import { shallow } from 'enzyme';
 import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 
 describe('AddVersionDialog component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   const mockFile = '/test/file';
 
@@ -26,11 +26,11 @@ describe('AddVersionDialog component', () => {
   });
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   it('renders', () => {
-    const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+    const wrapper = shallow(<AddVersionDialog appState={store} />);
 
     wrapper.setState({
       isValidVersion: true,
@@ -64,7 +64,7 @@ describe('AddVersionDialog component', () => {
   it('overrides default input with Electron dialog', () => {
     const preventDefault = jest.fn();
 
-    const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+    const wrapper = shallow(<AddVersionDialog appState={store} />);
     const inp = wrapper.find('#custom-electron-version');
     inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
 
@@ -77,7 +77,7 @@ describe('AddVersionDialog component', () => {
   describe('setFolderPath()', () => {
     it('does something', async () => {
       // (getIsDownloaded as jest.Mock).mockReturnValue(true);
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
       (wrapper.instance() as any).isValidElectronPath = () => true;
       await (wrapper.instance() as any).setFolderPath('/test/');
 
@@ -88,7 +88,7 @@ describe('AddVersionDialog component', () => {
 
   describe('onChangeVersion()', () => {
     it('handles valid input', () => {
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       (wrapper.instance() as any).onChangeVersion({
         target: { value: '3.3.3' },
@@ -98,7 +98,7 @@ describe('AddVersionDialog component', () => {
     });
 
     it('handles invalid input', () => {
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       (wrapper.instance() as any).onChangeVersion({ target: { value: 'foo' } });
       expect(wrapper.state('isValidVersion')).toBe(false);
@@ -112,15 +112,15 @@ describe('AddVersionDialog component', () => {
 
   describe('onSubmit', () => {
     it('does not do anything without a file', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       await (wrapper.instance() as any).onSubmit();
 
-      expect(store.addLocalVersion).toHaveBeenCalledTimes(0);
+      expect(store.addLocalVersion as jest.Mock).toHaveBeenCalledTimes(0);
     });
 
     it('adds a local version using the given data', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       wrapper.setState({
         version: '3.3.3',
@@ -129,16 +129,16 @@ describe('AddVersionDialog component', () => {
 
       await (wrapper.instance() as any).onSubmit();
 
-      expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
+      expect(store.addLocalVersion as jest.Mock).toHaveBeenCalledTimes(1);
 
-      const result = store.addLocalVersion.mock.calls[0][0];
+      const result = (store.addLocalVersion as jest.Mock).mock.calls[0][0];
 
       expect(result.localPath).toBe('/test/path');
       expect(result.version).toBe('3.3.3');
     });
 
     it('shows dialog warning when adding duplicate local versions', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store as any} />);
+      const wrapper = shallow(<AddVersionDialog appState={store} />);
 
       wrapper.setState({
         isValidElectron: true,

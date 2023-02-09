@@ -3,8 +3,8 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
+import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/utils/octokit';
-import { StateMock } from '../../mocks/mocks';
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('../../../src/utils/octokit');
@@ -12,7 +12,7 @@ jest.mock('../../../src/utils/octokit');
 describe('TokenDialog component', () => {
   const mockValidToken = 'testtoken1234567890123456789012345678901';
   const mockInvalidToken = 'testtoken';
-  let store: StateMock;
+  let store: AppState;
 
   beforeAll(() => {
     // We render the buttons different depending on the
@@ -25,7 +25,7 @@ describe('TokenDialog component', () => {
   });
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
     /*
     store = {
       isTokenDialogShowing: true,
@@ -34,13 +34,13 @@ describe('TokenDialog component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
 
     expect(wrapper).toMatchSnapshot();
   });
 
   it('tries to read the clipboard on focus and enters it if valid', async () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
@@ -53,7 +53,7 @@ describe('TokenDialog component', () => {
   });
 
   it('tries to read the clipboard on focus and does not enter it if too short', async () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
@@ -66,7 +66,7 @@ describe('TokenDialog component', () => {
   });
 
   it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
@@ -79,7 +79,7 @@ describe('TokenDialog component', () => {
   });
 
   it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
@@ -92,7 +92,7 @@ describe('TokenDialog component', () => {
   });
 
   it('reset() resets the component', () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
@@ -106,7 +106,7 @@ describe('TokenDialog component', () => {
   });
 
   it('onClose() resets the component', () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
@@ -120,7 +120,7 @@ describe('TokenDialog component', () => {
   });
 
   it('handleChange() handles the change event', () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
 
     const instance: any = wrapper.instance() as any;
@@ -130,7 +130,7 @@ describe('TokenDialog component', () => {
   });
 
   it('openGenerateTokenExternal() tries to open the link', () => {
-    const wrapper = shallow(<TokenDialog appState={store as any} />);
+    const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
@@ -155,11 +155,11 @@ describe('TokenDialog component', () => {
         },
       };
 
-      (getOctokit as any).mockReturnValue(mockOctokit);
+      (getOctokit as jest.Mock).mockReturnValue(mockOctokit);
     });
 
     it('handles missing input', async () => {
-      const wrapper = shallow(<TokenDialog appState={store as any} />);
+      const wrapper = shallow(<TokenDialog appState={store} />);
       wrapper.setState({ tokenInput: '' });
       const instance: any = wrapper.instance() as any;
 
@@ -169,7 +169,7 @@ describe('TokenDialog component', () => {
     });
 
     it('tries to sign the user in', async () => {
-      const wrapper = shallow(<TokenDialog appState={store as any} />);
+      const wrapper = shallow(<TokenDialog appState={store} />);
       wrapper.setState({ tokenInput: mockValidToken });
       const instance: any = wrapper.instance() as any;
 
@@ -184,7 +184,7 @@ describe('TokenDialog component', () => {
     it('handles an error', async () => {
       mockOctokit.users.getAuthenticated.mockReturnValue({ data: null });
 
-      const wrapper = shallow(<TokenDialog appState={store as any} />);
+      const wrapper = shallow(<TokenDialog appState={store} />);
       wrapper.setState({ tokenInput: mockValidToken });
       const instance: any = wrapper.instance() as any;
 

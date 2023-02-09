@@ -4,23 +4,23 @@ import { shallow } from 'enzyme';
 
 import { EditorId, MAIN_JS } from '../../../src/interfaces';
 import { Editor } from '../../../src/renderer/components/editor';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 
 type DidMount = () => void;
 
 describe('Editor component', () => {
-  let store: StateMock;
+  let store: AppState;
   let monaco: any;
 
   beforeEach(() => {
     ({ monaco } = window.ElectronFiddle);
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
     const wrapper = shallow(
       <Editor
-        appState={store as any}
+        appState={store}
         editorDidMount={didMount}
         id={id}
         monaco={monaco}
