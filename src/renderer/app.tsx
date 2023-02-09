@@ -120,9 +120,8 @@ export class App {
     // Wait for it here so the UI doesn't start life in `nonIdealState`.
     await when(() => this.state.editorMosaic.files.size !== 0);
 
-    const className = `${process.platform} container`;
     const app = (
-      <div className={className}>
+      <div className="container">
         <Dialogs appState={this.state} />
         <Header appState={this.state} />
         <OutputEditorsWrapper appState={this.state} />
