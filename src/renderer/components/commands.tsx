@@ -43,7 +43,7 @@ export const Commands = observer(
       return (
         <div
           className={
-            process.platform === 'darwin' ? 'commands is-mac' : 'commands'
+            window.ElectronFiddle.platform === 'darwin' ? 'commands is-mac' : 'commands'
           }
           onDoubleClick={this.handleDoubleClick}
         >
@@ -73,7 +73,7 @@ export const Commands = observer(
               />
             </ControlGroup>
           </div>
-          {process.platform === 'darwin' ? (
+          {window.ElectronFiddle.platform === 'darwin' ? (
             <div className="title">{title}</div>
           ) : undefined}
           <div>

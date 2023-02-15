@@ -4,7 +4,7 @@
  * @returns {string}
  */
 export function getElectronNameForPlatform(): string {
-  switch (process.platform) {
+  switch (window.ElectronFiddle.platform) {
     case 'win32': {
       return 'electron.exe';
     }

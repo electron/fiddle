@@ -7,7 +7,9 @@ declare global {
     ElectronFiddle: {
       app: App;
       appPaths: Record<string, string>;
+      arch: string;
       monaco: typeof MonacoType;
+      platform: string;
     };
   }
 }
