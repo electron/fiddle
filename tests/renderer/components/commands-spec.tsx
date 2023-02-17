@@ -8,7 +8,7 @@ import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
@@ -30,22 +30,22 @@ describe('Commands component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    overridePlatform('linux');
+    overrideRendererPlatform('linux');
     ({ state: store } = window.ElectronFiddle.app);
   });
 
   afterEach(() => {
-    resetPlatform();
+    resetRendererPlatform();
   });
 
   it('renders when system is darwin', () => {
-    overridePlatform('darwin');
+    overrideRendererPlatform('darwin');
     const wrapper = shallow(<Commands appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('renders when system not is darwin', () => {
-    overridePlatform('win32');
+    overrideRendererPlatform('win32');
     const wrapper = shallow(<Commands appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });

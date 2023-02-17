@@ -4,24 +4,18 @@ import { shallow } from 'enzyme';
 
 import { Dialogs } from '../../../src/renderer/components/dialogs';
 import { AppState } from '../../../src/renderer/state';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 describe('Dialogs component', () => {
   let store: AppState;
 
-  beforeAll(() => {
+  beforeEach(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+    overrideRendererPlatform('darwin');
 
-  beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
     store.isGenericDialogShowing = true;
-  });
-
-  afterAll(() => {
-    resetPlatform();
   });
 
   it('renders the token dialog', () => {

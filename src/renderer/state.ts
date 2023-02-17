@@ -52,6 +52,12 @@ import {
   saveLocalVersions,
 } from './versions';
 
+class UpdateableBaseVersions extends BaseVersions {
+  public updateVersions(val: unknown): void {
+    this.setVersions(val);
+  }
+}
+
 /**
  * The application's state. Exported as a singleton below.
  *
@@ -167,7 +173,7 @@ export class AppState {
   public appData: string;
 
   // Populating versions in fiddle-core
-  public baseVersions: BaseVersions = new BaseVersions(getElectronVersions());
+  public baseVersions = new UpdateableBaseVersions(getElectronVersions());
 
   // For managing downloads and versions for electron
   public installer: Installer = new Installer({
@@ -436,11 +442,13 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
+      const fullVersions = await fetchVersions();
       this.addNewVersions(
-        (await fetchVersions())
+        fullVersions
           .filter((ver) => !(ver.version in this.versions))
           .map((ver) => makeRunnable(ver)),
       );
+      this.baseVersions.updateVersions(fullVersions);
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -833,7 +841,7 @@ export class AppState {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
-    if (process.platform === 'win32' && bypassBuffer === false) {
+    if (window.ElectronFiddle.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split(/\r?\n/);

@@ -5,7 +5,7 @@ import { shallow } from 'enzyme';
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/utils/octokit';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 jest.mock('../../../src/utils/octokit');
 
@@ -14,17 +14,11 @@ describe('TokenDialog component', () => {
   const mockInvalidToken = 'testtoken';
   let store: AppState;
 
-  beforeAll(() => {
+  beforeEach(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+    overrideRendererPlatform('darwin');
 
-  afterAll(() => {
-    resetPlatform();
-  });
-
-  beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
     /*
     store = {

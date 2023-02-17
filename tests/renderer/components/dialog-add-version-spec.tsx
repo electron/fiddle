@@ -6,7 +6,7 @@ import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { overrideRendererPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');
 
@@ -15,17 +15,11 @@ describe('AddVersionDialog component', () => {
 
   const mockFile = '/test/file';
 
-  beforeAll(() => {
+  beforeEach(() => {
     // We render the buttons different depending on the
     // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+    overrideRendererPlatform('darwin');
 
-  afterAll(() => {
-    resetPlatform();
-  });
-
-  beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
   });
 
