@@ -405,7 +405,7 @@ describe('AppState', () => {
 
         // spy on app.replaceFiddle
         replaceSpy = jest.spyOn(
-          (window as any).ElectronFiddle.app,
+          window.ElectronFiddle.app,
           'replaceFiddle',
         );
         replaceSpy.mockReset();

@@ -16,7 +16,8 @@ import {
   packageRun,
 } from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
-import { FileManagerMock, StateMock, VersionsMock } from '../mocks/mocks';
+import { AppState } from '../../src/renderer/state';
+import { AppMock, FileManagerMock, StateMock, VersionsMock } from '../mocks/mocks';
 import { waitFor } from '../utils';
 
 jest.mock('../../src/renderer/npm');
@@ -33,7 +34,7 @@ describe('Runner component', () => {
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ fileManager, state: store } = (window as any).ElectronFiddle.app);
+    ({ fileManager, state: store } = window.ElectronFiddle.app as unknown as AppMock);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
@@ -42,7 +43,7 @@ describe('Runner component', () => {
 
     (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
 
-    instance = new Runner(store as any);
+    instance = new Runner(store as unknown as AppState);
   });
 
   describe('run()', () => {

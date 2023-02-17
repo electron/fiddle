@@ -4,13 +4,15 @@ import { mount, shallow } from 'enzyme';
 
 import { EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
+import { App } from '../../../src/renderer/app';
 import { Editors } from '../../../src/renderer/components/editors';
 import * as content from '../../../src/renderer/content';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { AppState } from '../../../src/renderer/state';
 import {
-  AppMock,
   MonacoEditorMock,
+  MonacoMock,
   StateMock,
   createEditorValues,
 } from '../../mocks/mocks';
@@ -20,30 +22,31 @@ jest.mock('../../../src/renderer/components/editor', () => ({
 }));
 
 describe('Editors component', () => {
-  let app: AppMock;
-  let monaco: any;
-  let store: StateMock;
+  let app: App;
+  let monaco: MonacoMock;
+  let store: AppState;
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    ({ app, monaco } = (window as any).ElectronFiddle);
-    ({ state: store } = app);
+    ({ app }) = window.ElectronFiddle;
+    monaco = window.ElectronFiddle.monaco as unknown as MonacoMock;
+    ({ state: store } = window.ElectronFiddle.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
 
-    store.editorMosaic = editorMosaic as any;
+    (store as unknown as StateMock).editorMosaic = editorMosaic;
   });
 
   it('renders', () => {
-    const wrapper = mount(<Editors appState={store as any} />);
+    const wrapper = mount(<Editors appState={store} />);
     wrapper.setState({ monaco });
     expect(wrapper).toMatchSnapshot();
   });
 
   it('does not execute command if not supported', () => {
-    const wrapper = shallow(<Editors appState={store as any} />);
+    const wrapper = shallow(<Editors appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     const editor = new MonacoEditorMock();
@@ -68,14 +71,14 @@ describe('Editors component', () => {
         throw new Error('Bwap bwap');
       });
 
-      const wrapper = shallow(<Editors appState={store as any} />);
+      const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
     });
 
     it('updates a setting', () => {
-      const wrapper = shallow(<Editors appState={store as any} />);
+      const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance() as any;
 
       const editor = new MonacoEditorMock();
@@ -89,7 +92,7 @@ describe('Editors component', () => {
   });
 
   it('renders a toolbar', () => {
-    const wrapper = shallow(<Editors appState={store as any} />);
+    const wrapper = shallow(<Editors appState={store} />);
     const instance: any = wrapper.instance() as any;
     const toolbar = instance.renderToolbar({ title: MAIN_JS } as any, MAIN_JS);
 
@@ -97,7 +100,7 @@ describe('Editors component', () => {
   });
 
   it('onChange() updates the mosaic arrangement in the appState', () => {
-    const wrapper = shallow(<Editors appState={store as any} />);
+    const wrapper = shallow(<Editors appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     const arrangement = { testArrangement: true };
@@ -107,7 +110,7 @@ describe('Editors component', () => {
 
   describe('IPC commands', () => {
     it('handles a MONACO_EXECUTE_COMMAND command', () => {
-      shallow(<Editors appState={store as any} />);
+      shallow(<Editors appState={store} />);
 
       const editor = new MonacoEditorMock();
       const action = editor.getAction();
@@ -152,7 +155,7 @@ describe('Editors component', () => {
 
     describe('SELECT_ALL_IN_EDITOR handler', () => {
       it('selects all in the focused editor', async () => {
-        shallow(<Editors appState={store as any} />);
+        shallow(<Editors appState={store} />);
 
         const range = 'range';
         const editor = new MonacoEditorMock();
@@ -167,7 +170,7 @@ describe('Editors component', () => {
       });
 
       it('does not change selection if the selected editor has no model', async () => {
-        shallow(<Editors appState={store as any} />);
+        shallow(<Editors appState={store} />);
 
         const editor = new MonacoEditorMock();
         delete (editor as any).model;
@@ -181,7 +184,7 @@ describe('Editors component', () => {
       });
 
       it('does not crash if there is no selected editor', () => {
-        shallow(<Editors appState={store as any} />);
+        shallow(<Editors appState={store} />);
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(null);
         ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
       });
@@ -213,7 +216,7 @@ describe('Editors component', () => {
       replaceFiddleSpy.mockRestore();
     });
     it('handles a SELECT_ALL_IN_EDITOR command', async () => {
-      shallow(<Editors appState={store as any} />);
+      shallow(<Editors appState={store} />);
 
       const range = 'range';
       const editor = new MonacoEditorMock();
@@ -231,7 +234,7 @@ describe('Editors component', () => {
       const editor = new MonacoEditorMock();
       editorMosaic.addEditor(id, editor as any);
 
-      shallow(<Editors appState={store as any} />);
+      shallow(<Editors appState={store} />);
       ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
       expect(editor.updateOptions).toHaveBeenCalled();
     });
@@ -239,7 +242,7 @@ describe('Editors component', () => {
 
   describe('setFocused()', () => {
     it('sets the "focused" property', () => {
-      const wrapper = shallow(<Editors appState={store as any} />);
+      const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
@@ -249,7 +252,7 @@ describe('Editors component', () => {
     });
 
     it('focus sidebar file', () => {
-      const wrapper = shallow(<Editors appState={store as any} />);
+      const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance() as any;
       const spy = jest.spyOn(instance, 'setState');
 
