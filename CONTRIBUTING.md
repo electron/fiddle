@@ -25,15 +25,15 @@ We use the label [`good first issue`](https://github.com/electron/fiddle/issues?
 
 Here are some things to keep in mind as you file pull requests to fix bugs, add new features, etc.:
 
-* If you're unfamiliar with forking, branching, and pull requests, please see [GitHub's extensive
+- If you're unfamiliar with forking, branching, and pull requests, please see [GitHub's extensive
   documentation](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests).
-* GitHub Actions is used to make sure that any new or changed code meets the project's
+- GitHub Actions is used to make sure that any new or changed code meets the project's
   style guidelines, and that the project's test suite passes for each new commit.
-* Unless it's impractical, please write tests for your changes. This will help us so that we can
+- Unless it's impractical, please write tests for your changes. This will help us so that we can
   spot regressions much easier.
-* When creating commit messages and pull request titles, please adhere to the [conventional
+- When creating commit messages and pull request titles, please adhere to the [conventional
   commits](https://www.conventionalcommits.org/en/v1.0.0/) standard.
-* Please **do not** bump the version number in your pull requests, the maintainers will do that.
+- Please **do not** bump the version number in your pull requests, the maintainers will do that.
   Feel free to indicate whether the changes require a major, minor, or patch version bump, as
   prescribed by the [semantic versioning specification](https://semver.org/).
 
@@ -41,27 +41,27 @@ Here are some things to keep in mind as you file pull requests to fix bugs, add 
 
 1. Clone the Electron Fiddle repository locally.
 
-```sh
-git clone https://github.com/electron/fiddle.git
-```
+    ```sh
+    git clone https://github.com/electron/fiddle.git
+    ```
 
 2. Change directory to where Fiddle has been cloned.
 
-```sh
-cd fiddle
-```
+    ```sh
+    cd fiddle
+    ```
 
 3. Install dependencies.
 
-```sh
-yarn
-```
+    ```sh
+    yarn
+    ```
 
 4. Start Fiddle and explore!
 
-```sh
-yarn start
-```
+    ```sh
+    yarn start
+    ```
 
 ### Running Tests
 
