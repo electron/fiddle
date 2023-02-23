@@ -30,7 +30,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(8);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -46,7 +47,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -62,7 +64,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -78,7 +81,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
 
@@ -100,7 +104,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
 
@@ -116,7 +121,8 @@ describe('menu', () => {
     it('overwrites Select All command', () => {
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       // use find here because the index is platform-specific
       const submenu = result.find((r: any) => r.label === 'Edit')
         .submenu as Array<Electron.MenuItemConstructorOptions>;

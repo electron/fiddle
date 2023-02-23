@@ -34,8 +34,6 @@ jobs:
           fileDir: 'static'
           fileName: 'contributors.json'
           encodedString: "W10="
-      - name: lint
-        run: yarn lint
       - name: test
         run: yarn test:ci
       - name: Coveralls

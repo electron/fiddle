@@ -32,7 +32,7 @@ describe('context-menu', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    mockWindow = new BrowserWindowMock() as unknown as BrowserWindow;
+    mockWindow = (new BrowserWindowMock() as unknown) as BrowserWindow;
     createContextMenu(mockWindow);
   });
 
@@ -134,7 +134,10 @@ describe('context-menu', () => {
 
     it('inspects on click', () => {
       (isDevMode as jest.Mock).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
+      const result = getInspectItems(mockWindow, {
+        x: 5,
+        y: 10,
+      } as ContextMenuParams);
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
@@ -142,8 +145,12 @@ describe('context-menu', () => {
 
     it('focuses the dev tools if already open', () => {
       (isDevMode as jest.Mock).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
-      (mockWindow.webContents.isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, {
+        x: 5,
+        y: 10,
+      } as ContextMenuParams);
+      (mockWindow.webContents
+        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
       (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
 
       (result[0] as any).click();
@@ -155,14 +162,17 @@ describe('context-menu', () => {
 
     it('catches an error', () => {
       (isDevMode as jest.Mock).mockReturnValueOnce(true);
-      const result = getInspectItems(mockWindow, { x: 5, y: 10 } as ContextMenuParams);
-      (mockWindow.webContents.isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
+      const result = getInspectItems(mockWindow, {
+        x: 5,
+        y: 10,
+      } as ContextMenuParams);
+      (mockWindow.webContents
+        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
       (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
-      (mockWindow.webContents.devToolsWebContents!.focus as jest.Mock).mockImplementationOnce(
-        () => {
-          throw new Error('💩');
-        },
-      );
+      (mockWindow.webContents.devToolsWebContents!
+        .focus as jest.Mock).mockImplementationOnce(() => {
+        throw new Error('💩');
+      });
 
       (result[0] as any).click();
     });

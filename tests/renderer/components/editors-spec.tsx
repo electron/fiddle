@@ -29,14 +29,14 @@ describe('Editors component', () => {
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    ({ app }) = window.ElectronFiddle;
-    monaco = window.ElectronFiddle.monaco as unknown as MonacoMock;
+    ({ app } = window.ElectronFiddle);
+    monaco = (window.ElectronFiddle.monaco as unknown) as MonacoMock;
     ({ state: store } = window.ElectronFiddle.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
 
-    (store as unknown as StateMock).editorMosaic = editorMosaic;
+    ((store as unknown) as StateMock).editorMosaic = editorMosaic;
   });
 
   it('renders', () => {

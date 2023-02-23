@@ -43,7 +43,9 @@ export const Commands = observer(
       return (
         <div
           className={
-            window.ElectronFiddle.platform === 'darwin' ? 'commands is-mac' : 'commands'
+            window.ElectronFiddle.platform === 'darwin'
+              ? 'commands is-mac'
+              : 'commands'
           }
           onDoubleClick={this.handleDoubleClick}
         >

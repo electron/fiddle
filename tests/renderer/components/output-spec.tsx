@@ -70,7 +70,9 @@ describe('Output component', () => {
     await instance.initMonaco();
     instance.componentWillUnmount();
 
-    expect((monaco as unknown as MonacoMock).latestEditor.dispose as jest.Mock).toHaveBeenCalled();
+    expect(
+      ((monaco as unknown) as MonacoMock).latestEditor.dispose as jest.Mock,
+    ).toHaveBeenCalled();
   });
 
   it('hides the console with react-mosaic-component', async () => {

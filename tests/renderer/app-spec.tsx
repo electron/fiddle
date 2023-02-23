@@ -21,7 +21,7 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 
 describe('App component', () => {
   let app: App;
-  let ElectronFiddle: Window["ElectronFiddle"];
+  let ElectronFiddle: Window['ElectronFiddle'];
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';

@@ -16,9 +16,7 @@ describe('Bisect commands component', () => {
 
   it('is disabled if an electron version is currently downloading', () => {
     store.currentElectronVersion.state = InstallState.downloading;
-    const { getByRole } = render(
-      <BisectHandler appState={store} />,
-    );
+    const { getByRole } = render(<BisectHandler appState={store} />);
 
     const goodCommitButton = getByRole('button', {
       name: 'Mark commit as good',
@@ -32,9 +30,7 @@ describe('Bisect commands component', () => {
 
   it('can cancel the active bisect', async () => {
     const user = userEvent.setup();
-    const { getByRole } = render(
-      <BisectHandler appState={store} />,
-    );
+    const { getByRole } = render(<BisectHandler appState={store} />);
     const cancelButton = getByRole('button', {
       name: 'Cancel bisect',
     });
@@ -45,9 +41,7 @@ describe('Bisect commands component', () => {
 
   it('renders bisect dialog button if no bisect instance', () => {
     store.Bisector = undefined;
-    const { getByRole } = render(
-      <BisectHandler appState={store} />,
-    );
+    const { getByRole } = render(<BisectHandler appState={store} />);
     const btn = getByRole('button');
     expect(btn).toHaveTextContent('Bisect');
   });
@@ -59,9 +53,7 @@ describe('Bisect commands component', () => {
     'can tell the Bisect instance that the current version is %s',
     async (label, bisectorValue) => {
       const user = userEvent.setup();
-      const { getByRole } = render(
-        <BisectHandler appState={store} />,
-      );
+      const { getByRole } = render(<BisectHandler appState={store} />);
       const goodButton = getByRole('button', {
         name: `Mark commit as ${label}`,
       });
@@ -72,15 +64,15 @@ describe('Bisect commands component', () => {
       });
       await user.click(goodButton);
       expect(store.Bisector).toBeTruthy();
-      expect(store.Bisector!.continue as jest.Mock).toBeCalledWith(bisectorValue);
+      expect(store.Bisector!.continue as jest.Mock).toBeCalledWith(
+        bisectorValue,
+      );
     },
   );
 
   it('resets the bisector once the bisect is terminated', async () => {
     const user = userEvent.setup();
-    const { getByRole } = render(
-      <BisectHandler appState={store} />,
-    );
+    const { getByRole } = render(<BisectHandler appState={store} />);
     const goodButton = getByRole('button', {
       name: `Mark commit as good`,
     });

@@ -30,7 +30,7 @@ describe('Task Runner component', () => {
   }
 
   beforeEach(() => {
-    app = window.ElectronFiddle.app as unknown as AppMock;
+    app = (window.ElectronFiddle.app as unknown) as AppMock;
     appState = app.state;
     runner = app.runner;
     runner.autobisect.foo = 'a';

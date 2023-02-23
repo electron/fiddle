@@ -24,7 +24,8 @@ export function positionForRect(
 ): PositionResult {
   const result: PositionResult = { left: 0, top: 0, type: 'top' };
   const middle = target.left + target.width / 2 - size.width / 2;
-  const darwinTop = window.ElectronFiddle.platform === 'darwin' ? margin * 1.5 : 0;
+  const darwinTop =
+    window.ElectronFiddle.platform === 'darwin' ? margin * 1.5 : 0;
   const topPlusMargin = target.top - darwinTop;
 
   // Okay, let's try top right

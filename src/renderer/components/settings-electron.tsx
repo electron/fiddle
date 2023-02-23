@@ -53,7 +53,9 @@ export const ElectronSettings = observer(
       this.handleChannelChange = this.handleChannelChange.bind(this);
       this.handleDeleteAll = this.handleDeleteAll.bind(this);
       this.handleDownloadAll = this.handleDownloadAll.bind(this);
-      this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(this);
+      this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(
+        this,
+      );
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
 

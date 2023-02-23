@@ -10,9 +10,9 @@ import {
 } from '../../../src/interfaces';
 import { Bisector } from '../../../src/renderer/bisect';
 import { BisectDialog } from '../../../src/renderer/components/dialog-bisect';
-import { StateMock } from '../../mocks/mocks';
 import { Runner } from '../../../src/renderer/runner';
 import { AppState } from '../../../src/renderer/state';
+import { StateMock } from '../../mocks/mocks';
 
 jest.mock('../../../src/renderer/bisect');
 
@@ -30,11 +30,15 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   beforeEach(() => {
     ({ runner, state: store } = window.ElectronFiddle.app);
 
-    (store as unknown as StateMock).versionsToShow = generateVersionRange(numVersions);
-    (store as unknown as StateMock).versions = Object.fromEntries(
+    ((store as unknown) as StateMock).versionsToShow = generateVersionRange(
+      numVersions,
+    );
+    ((store as unknown) as StateMock).versions = Object.fromEntries(
       store.versionsToShow.map((ver) => [ver.version, ver]),
     );
-    (store as unknown as StateMock).channelsToShow = [ElectronReleaseChannel.stable];
+    ((store as unknown) as StateMock).channelsToShow = [
+      ElectronReleaseChannel.stable,
+    ];
   });
 
   it('renders', () => {

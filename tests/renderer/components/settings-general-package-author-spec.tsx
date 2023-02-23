@@ -20,9 +20,7 @@ describe('PackageAuthorSettings component', () => {
 
   describe('handlePackageAuthorChange()', () => {
     it('handles package author', async () => {
-      const wrapper = shallow(
-        <PackageAuthorSettings appState={store} />,
-      );
+      const wrapper = shallow(<PackageAuthorSettings appState={store} />);
       const instance = wrapper.instance() as any;
 
       const author = 'electron<electron@electron.org>';

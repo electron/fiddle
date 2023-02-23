@@ -20,12 +20,12 @@ describe('SidebarFileTree component', () => {
   let stateMock: StateMock;
 
   beforeEach(() => {
-    ({ state: stateMock } = window.ElectronFiddle.app as unknown as AppMock);
-    store = {} as unknown as AppState;
+    ({ state: stateMock } = (window.ElectronFiddle.app as unknown) as AppMock);
+    store = ({} as unknown) as AppState;
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
-    (store as unknown as StateMock).editorMosaic = editorMosaic;
+    ((store as unknown) as StateMock).editorMosaic = editorMosaic;
     stateMock.editorMosaic = editorMosaic;
   });
 
@@ -111,7 +111,9 @@ describe('SidebarFileTree component', () => {
 
   it('file is visible, click files tree, focus file content', async () => {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
-    const editors = shallow(<Editors appState={stateMock as unknown as AppState} />);
+    const editors = shallow(
+      <Editors appState={(stateMock as unknown) as AppState} />,
+    );
     const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
     const editorsInstance: any = editors.instance() as any;
 
@@ -125,7 +127,9 @@ describe('SidebarFileTree component', () => {
 
   it('file is hidden, click files tree, make file visible and focus file content', function () {
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
-    const editors = shallow(<Editors appState={stateMock as unknown as AppState} />);
+    const editors = shallow(
+      <Editors appState={(stateMock as unknown) as AppState} />,
+    );
     const sidebarFileTreeInstance: any = sidebarFileTree.instance() as any;
     const editorsInstance: any = editors.instance() as any;
 

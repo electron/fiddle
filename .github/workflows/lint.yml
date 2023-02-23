@@ -1,0 +1,32 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c # v3.3.0
+    - name: Setup Node.js
+      uses: actions/setup-node@64ed1c7eab4cce3362f8c340dee64e5eaeef8f7c # v3.6.0
+      with:
+        node-version: 18.x
+    - name: Install
+      run: yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000
+    - name: Create fake contributors
+      uses: timheuer/base64-to-file@48657ba25c726c2e3dcf02efa3639fff9b3d587e # v1.2
+      with:
+        fileDir: 'static'
+        fileName: 'contributors.json'
+        encodedString: "W10="
+    - name: Lint
+      run: yarn run lint

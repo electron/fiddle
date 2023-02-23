@@ -38,9 +38,7 @@ describe('AddressBar component', () => {
   });
 
   it('is disabled if address is empty', () => {
-    const { getByRole } = render(
-      <AddressBar appState={store} />,
-    );
+    const { getByRole } = render(<AddressBar appState={store} />);
 
     const btn = getByRole('button');
     expect(btn).toBeDisabled();
