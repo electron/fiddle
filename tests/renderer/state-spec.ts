@@ -404,10 +404,7 @@ describe('AppState', () => {
         expect(newVersion).toBeTruthy();
 
         // spy on app.replaceFiddle
-        replaceSpy = jest.spyOn(
-          window.ElectronFiddle.app,
-          'replaceFiddle',
-        );
+        replaceSpy = jest.spyOn(window.ElectronFiddle.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
         (getTemplate as jest.Mock).mockResolvedValue(nextValues);

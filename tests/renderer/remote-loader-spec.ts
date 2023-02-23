@@ -30,7 +30,7 @@ describe('RemoteLoader', () => {
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    app = window.ElectronFiddle.app as unknown as AppMock;
+    app = (window.ElectronFiddle.app as unknown) as AppMock;
     ({ state: store } = app);
     ipcRendererManager.send = jest.fn();
     store.channelsToShow = [ElectronReleaseChannel.stable];
@@ -38,7 +38,7 @@ describe('RemoteLoader', () => {
       '4.0.0': { version: '4.0.0' },
       '4.0.0-beta': { version: '4.0.0-beta' },
     } as any);
-    instance = new RemoteLoader(store as unknown as AppState);
+    instance = new RemoteLoader((store as unknown) as AppState);
 
     editorValues = createEditorValues();
 

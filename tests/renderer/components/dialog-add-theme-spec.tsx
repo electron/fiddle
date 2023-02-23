@@ -7,11 +7,11 @@ import { shallow } from 'enzyme';
 import * as fs from 'fs-extra';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
+import { AppState } from '../../../src/renderer/state';
 import {
   LoadedFiddleTheme,
   defaultLight,
 } from '../../../src/renderer/themes-defaults';
-import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform } from '../../utils';
 
 jest.mock('../../../src/renderer/ipc');

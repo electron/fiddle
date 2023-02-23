@@ -7,7 +7,7 @@
   "main": "./.webpack/main",
   "scripts": {
     "contributors": "node ./tools/contributors.js",
-    "lint:style": "stylelint  \"./src/less/*.less\"",
+    "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
     "lint:templates": "standard \"static/**/*.js\"",

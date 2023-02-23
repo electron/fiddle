@@ -9,9 +9,9 @@ import {
   MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
+import { App } from '../../../src/renderer/app';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
-import { App } from '../../../src/renderer/app';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/utils/octokit';
 import { createEditorValues } from '../../mocks/mocks';
@@ -196,7 +196,10 @@ describe('Action button component', () => {
         const required = { [MAIN_JS]: '// fnord' };
         const optional = { 'foo.js': '' };
 
-        (app.getEditorValues as jest.Mock).mockReturnValueOnce({ ...required, ...optional });
+        (app.getEditorValues as jest.Mock).mockReturnValueOnce({
+          ...required,
+          ...optional,
+        });
         const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();

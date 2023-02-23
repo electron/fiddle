@@ -215,7 +215,7 @@ describe('versions', () => {
     }
 
     it('falls back to a local require', () => {
-      (window.localStorage.getItem  as jest.Mock).mockReturnValueOnce('garbage');
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce('garbage');
 
       const expected = getExpectedOldestSupportedVersion();
       expect(getOldestSupportedMajor()).toBe(expected);

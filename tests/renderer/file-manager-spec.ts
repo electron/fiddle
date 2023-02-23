@@ -2,8 +2,8 @@ import * as fs from 'fs-extra';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
-import { FileManager } from '../../src/renderer/file-manager';
 import { App } from '../../src/renderer/app';
+import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
@@ -31,8 +31,8 @@ describe('FileManager', () => {
     (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
 
     // create a real FileManager and insert it into our mocks
-    app = window.ElectronFiddle.app as unknown as AppMock;
-    fm = new FileManager((app as unknown as App).state);
+    app = (window.ElectronFiddle.app as unknown) as AppMock;
+    fm = new FileManager(((app as unknown) as App).state);
     app.fileManager = fm as any;
   });
 

@@ -55,12 +55,9 @@ describe('Editor toolbar button component', () => {
 
   describe('MaximizeButton', () => {
     function createMaximizeButton(id: EditorId) {
-      const wrapper = shallow(
-        <MaximizeButton id={id} appState={store} />,
-        {
-          context: mockContext,
-        },
-      );
+      const wrapper = shallow(<MaximizeButton id={id} appState={store} />, {
+        context: mockContext,
+      });
       const instance = wrapper.instance();
       return { instance, wrapper };
     }
@@ -80,12 +77,9 @@ describe('Editor toolbar button component', () => {
 
   describe('RemoveButton', () => {
     function createRemoveButton(id: EditorId) {
-      const wrapper = shallow(
-        <RemoveButton id={id} appState={store} />,
-        {
-          context: mockContext,
-        },
-      );
+      const wrapper = shallow(<RemoveButton id={id} appState={store} />, {
+        context: mockContext,
+      });
       return { wrapper };
     }
 

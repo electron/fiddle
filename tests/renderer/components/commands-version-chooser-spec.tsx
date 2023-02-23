@@ -30,7 +30,7 @@ describe('VersionSelect component', () => {
     ({ state: store } = window.ElectronFiddle.app);
 
     const { mockVersions } = new VersionsMock();
-    (store as unknown as StateMock).initVersions('2.0.2', {
+    ((store as unknown) as StateMock).initVersions('2.0.2', {
       ...mockVersions,
       '1.0.0': { ...mockVersion1 },
       '3.0.0-unsupported': { ...mockVersion2 },
@@ -54,6 +54,8 @@ describe('VersionSelect component', () => {
       .find('VersionSelect')
       .prop('onVersionSelect');
     onVersionSelect(mockVersion1);
-    expect(store.setVersion as jest.Mock).toHaveBeenCalledWith(mockVersion1.version);
+    expect(store.setVersion as jest.Mock).toHaveBeenCalledWith(
+      mockVersion1.version,
+    );
   });
 });

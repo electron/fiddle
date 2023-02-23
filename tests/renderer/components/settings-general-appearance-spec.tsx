@@ -10,8 +10,8 @@ import {
   filterItem,
   renderItem,
 } from '../../../src/renderer/components/settings-general-appearance';
-import { getAvailableThemes } from '../../../src/renderer/themes';
 import { AppState } from '../../../src/renderer/state';
+import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
 
 const mockThemes = [
@@ -84,10 +84,7 @@ describe('AppearanceSettings component', () => {
   it('toggles popover toggle event', () => {
     const toggleFunc = jest.fn();
     const wrapper = shallow(
-      <AppearanceSettings
-        appState={store}
-        toggleHasPopoverOpen={toggleFunc}
-      />,
+      <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
 
     // Find the button

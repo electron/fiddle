@@ -14,17 +14,13 @@ describe('BlockAcceleratorsSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(
-      <BlockAcceleratorsSettings appState={store} />,
-    );
+    const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   describe('handleBlockAcceleratorChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(
-        <BlockAcceleratorsSettings appState={store} />,
-      );
+      const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
       const instance = wrapper.instance() as any;
 
       await instance.handleBlockAcceleratorChange({
