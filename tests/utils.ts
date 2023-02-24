@@ -16,18 +16,43 @@ export function resetPlatform() {
   });
 }
 
-const arch = process.arch;
+const rendererOverrides = {
+  arch: '',
+  platform: '',
+};
 
-export function overrideArch(value: string) {
-  Object.defineProperty(process, 'arch', {
+export function overrideRendererPlatform(value: NodeJS.Platform) {
+  if (!rendererOverrides.platform) {
+    rendererOverrides.platform = window.ElectronFiddle.platform;
+  }
+
+  Object.defineProperty(window.ElectronFiddle, 'platform', {
     value,
     writable: true,
   });
 }
 
-export function resetArch() {
-  Object.defineProperty(process, 'arch', {
-    value: arch,
+export function resetRendererPlatform() {
+  Object.defineProperty(window.ElectronFiddle, 'platform', {
+    value: rendererOverrides.platform,
+    writable: true,
+  });
+}
+
+export function overrideRendererArch(value: string) {
+  if (!rendererOverrides.arch) {
+    rendererOverrides.arch = window.ElectronFiddle.arch;
+  }
+
+  Object.defineProperty(window.ElectronFiddle, 'arch', {
+    value,
+    writable: true,
+  });
+}
+
+export function resetRendererArch() {
+  Object.defineProperty(window.ElectronFiddle, 'arch', {
+    value: rendererOverrides.arch,
     writable: true,
   });
 }

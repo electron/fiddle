@@ -1,5 +1,5 @@
 import { positionForRect } from '../../src/utils/position-for-rect';
-import { overridePlatform } from '../utils';
+import { overrideRendererPlatform } from '../utils';
 
 describe('position-for-rect', () => {
   describe('positionForRect()', () => {
@@ -14,7 +14,7 @@ describe('position-for-rect', () => {
 
     describe('positionForRect() (Windows, Linux)', () => {
       beforeEach(() => {
-        overridePlatform('win32');
+        overrideRendererPlatform('win32');
       });
 
       it('returns a position on the top right if doable', () => {
@@ -38,7 +38,7 @@ describe('position-for-rect', () => {
 
     describe('positionForRect() (macOS)', () => {
       beforeEach(() => {
-        overridePlatform('darwin');
+        overrideRendererPlatform('darwin');
       });
 
       it('returns a position on the top right if doable', () => {

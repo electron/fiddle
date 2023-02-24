@@ -15,6 +15,7 @@ import {
   getItemLabel,
   renderItem,
 } from '../../../src/renderer/components/version-select';
+import { AppState } from '../../../src/renderer/state';
 import { disableDownload } from '../../../src/utils/disable-download';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
@@ -24,7 +25,7 @@ const { remote, local } = VersionSource;
 jest.mock('../../../src/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   const mockVersion1 = {
     source: remote,
@@ -39,10 +40,10 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
 
     const { mockVersions } = new VersionsMock();
-    store.initVersions('2.0.2', {
+    ((store as unknown) as StateMock).initVersions('2.0.2', {
       ...mockVersions,
       '1.0.0': { ...mockVersion1 },
       '3.0.0-unsupported': { ...mockVersion2 },
@@ -58,7 +59,7 @@ describe('VersionSelect component', () => {
   it('renders', () => {
     const wrapper = shallow(
       <VersionSelect
-        appState={store as any}
+        appState={store}
         currentVersion={mockVersion1}
         onVersionSelect={onVersionSelect}
       />,
@@ -92,7 +93,7 @@ describe('VersionSelect component', () => {
 
   describe('disableDownload', () => {
     it('disables download buttons when return value is true', () => {
-      (disableDownload as any).mockReturnValueOnce(true);
+      (disableDownload as jest.Mock).mockReturnValueOnce(true);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
@@ -107,7 +108,7 @@ describe('VersionSelect component', () => {
     });
 
     it('does not disable enabled download buttons when return value is false', () => {
-      (disableDownload as any).mockReturnValueOnce(false);
+      (disableDownload as jest.Mock).mockReturnValueOnce(false);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),

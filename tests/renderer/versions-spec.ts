@@ -31,13 +31,13 @@ const mockVersions: Array<Partial<RunnableVersion>> = [
 describe('versions', () => {
   describe('getDefaultVersion()', () => {
     it('handles a stored version', () => {
-      (localStorage.getItem as any).mockReturnValue('2.0.2');
+      (localStorage.getItem as jest.Mock).mockReturnValue('2.0.2');
       const output = getDefaultVersion([{ version: '2.0.2' }] as any);
       expect(output).toBe('2.0.2');
     });
 
     it('uses the newest stable as a fallback', () => {
-      (localStorage.getItem as any).mockReturnValue(null);
+      (localStorage.getItem as jest.Mock).mockReturnValue(null);
       const output = getDefaultVersion([
         { version: '11.0.0' },
         { version: '15.0.0-nightly.20210715' },
@@ -86,7 +86,7 @@ describe('versions', () => {
 
   describe('addLocalVersion()', () => {
     beforeEach(() => {
-      (window.localStorage.getItem as jest.Mock<any>).mockReturnValue(
+      (window.localStorage.getItem as jest.Mock).mockReturnValue(
         JSON.stringify([mockVersions[0]]),
       );
     });
@@ -128,7 +128,7 @@ describe('versions', () => {
     });
 
     it('migrates an old format if necessary', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
         `
         [{
           "url": "/Users/felixr/Code/electron/src/out/Debug",
@@ -171,7 +171,7 @@ describe('versions', () => {
       ];
 
       expect(result).toEqual(expected);
-      expect(window.localStorage.setItem).toHaveBeenCalled();
+      expect(window.localStorage.setItem as jest.Mock).toHaveBeenCalled();
     });
 
     it('fetches versions < 0.24.0', async () => {
@@ -195,7 +195,7 @@ describe('versions', () => {
   describe('getOldestSupportedMajor()', () => {
     it('uses localStorage versions if available', () => {
       // inject versions into localstorage
-      (window as any).localStorage.getItem.mockReturnValueOnce(
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
         `[
           { "version": "10.0.0" },
           { "version": "9.0.0" },
@@ -215,14 +215,14 @@ describe('versions', () => {
     }
 
     it('falls back to a local require', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce('garbage');
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce('garbage');
 
       const expected = getExpectedOldestSupportedVersion();
       expect(getOldestSupportedMajor()).toBe(expected);
     });
 
     it('falls back to a local require', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
         `[{ "garbage": "true" }]`,
       );
 
@@ -231,7 +231,7 @@ describe('versions', () => {
     });
 
     it('honors process.env.NUM_STABLE_BRANCHES', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce('garbage');
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce('garbage');
 
       process.env.NUM_STABLE_BRANCHES = '2';
       const expected = getExpectedOldestSupportedVersion();
@@ -241,14 +241,14 @@ describe('versions', () => {
 
   describe('isReleasedMajor()', () => {
     it('returns true for recognized releases', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
         `[{ "version": "3.0.5" }]`,
       );
       expect(isReleasedMajor(3)).toBe(true);
     });
 
     it('returns false for unrecognized releases', () => {
-      (window as any).localStorage.getItem.mockReturnValueOnce(
+      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
         `[{ "version": "3.0.5" }]`,
       );
       expect(isReleasedMajor(1000)).toBe(false);

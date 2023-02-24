@@ -1,7 +1,7 @@
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
-import { EditorMosaic } from '../../src/renderer/editor-mosaic';
+import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { ipcRendererManager } from '../../src/renderer/ipc';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
@@ -21,14 +21,14 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 
 describe('App component', () => {
   let app: App;
-  let ElectronFiddle: any;
+  let ElectronFiddle: Window['ElectronFiddle'];
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
   });
 
   beforeEach(() => {
-    ({ ElectronFiddle } = window as any);
+    ({ ElectronFiddle } = window);
     const { app: appMock } = ElectronFiddle;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
@@ -45,7 +45,7 @@ describe('App component', () => {
     ElectronFiddle.app = app;
 
     state.editorMosaic.set({ [MAIN_JS]: '// content' });
-    state.editorMosaic.files.set(MAIN_JS, 'pending');
+    state.editorMosaic.files.set(MAIN_JS, EditorPresence.Pending);
   });
 
   describe('setup()', () => {

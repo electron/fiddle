@@ -4,25 +4,23 @@ import { InputGroup } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
 
 import { PackageAuthorSettings } from '../../../src/renderer/components/settings-general-package-author';
-import { StateMock } from '../../mocks/mocks';
+import { AppState } from '../../../src/renderer/state';
 
 describe('PackageAuthorSettings component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   it('renders', () => {
-    const wrapper = shallow(<PackageAuthorSettings appState={store as any} />);
+    const wrapper = shallow(<PackageAuthorSettings appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   describe('handlePackageAuthorChange()', () => {
     it('handles package author', async () => {
-      const wrapper = shallow(
-        <PackageAuthorSettings appState={store as any} />,
-      );
+      const wrapper = shallow(<PackageAuthorSettings appState={store} />);
       const instance = wrapper.instance() as any;
 
       const author = 'electron<electron@electron.org>';

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { Callout, Card } from '@blueprintjs/core';
-import { shell } from 'electron';
 
 import { Contributor } from 'src/interfaces';
 
@@ -50,7 +49,7 @@ export class CreditsSettings extends React.Component<
       const style: React.CSSProperties = {
         backgroundImage: `url(${avatar})`,
       };
-      const onClick = () => shell.openExternal(url);
+      const onClick = () => window.open(url);
 
       return (
         <Card

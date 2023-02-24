@@ -1,17 +1,18 @@
 {
   "name": "electron-fiddle",
   "productName": "Electron Fiddle",
-  "version": "0.32.0",
+  "version": "0.32.1",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
   "main": "./.webpack/main",
   "scripts": {
     "contributors": "node ./tools/contributors.js",
-    "lint:style": "stylelint  \"./src/less/*.less\" --fix",
-    "lint:ts": "eslint \"./**/*.{ts,tsx}\" --fix",
-    "lint:js": "eslint \"./**/*.js\" --fix",
-    "lint:templates": "standard \"static/**/*.js\" --fix",
+    "lint:style": "stylelint \"./src/less/*.less\"",
+    "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
+    "lint:js": "eslint \"./**/*.js\"",
+    "lint:templates": "standard \"static/**/*.js\"",
     "lint:links": "node ./tools/check-links.js",
+    "lint:fix": "npm-run-all \"lint:!(fix) -- --fix\"",
     "lint": "npm-run-all \"lint:*\"",
     "make": "electron-forge make",
     "package": "electron-forge package",
@@ -136,14 +137,17 @@
     "typescript": "^4.2.2"
   },
   "lint-staged": {
-    "./**/*.{js,ts,tsx}": [
-      "eslint --fix"
+    "./**/*.js": [
+      "npm run lint:js -- --fix"
+    ],
+    "./**/*.{ts,tsx}": [
+      "npm run lint:ts -- --fix"
     ],
     "./static/**/*.js": [
-      "standard --fix"
+      "npm run lint:templates -- --fix"
     ],
     "./src/less/*.less": [
-      "stylelint --fix"
+      "npm run lint:style -- --fix"
     ]
   }
 }

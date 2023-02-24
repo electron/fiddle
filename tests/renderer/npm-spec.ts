@@ -4,7 +4,7 @@ import {
   packageRun,
 } from '../../src/renderer/npm';
 import { exec } from '../../src/utils/exec';
-import { overridePlatform, resetPlatform } from '../utils';
+import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 jest.mock('../../src/utils/exec');
 
 describe('npm', () => {
@@ -14,10 +14,10 @@ describe('npm', () => {
         jest.resetModules();
       });
 
-      afterEach(() => resetPlatform());
+      afterEach(() => resetRendererPlatform());
 
       it('returns true if npm installed', async () => {
-        overridePlatform('darwin');
+        overrideRendererPlatform('darwin');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.resolve('/usr/bin/fake-npm'),
@@ -30,7 +30,7 @@ describe('npm', () => {
       });
 
       it('returns true if npm installed', async () => {
-        overridePlatform('win32');
+        overrideRendererPlatform('win32');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.resolve('/usr/bin/fake-npm'),
@@ -43,7 +43,7 @@ describe('npm', () => {
       });
 
       it('returns false if npm not installed', async () => {
-        overridePlatform('darwin');
+        overrideRendererPlatform('darwin');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.reject('/usr/bin/fake-npm'),
@@ -75,10 +75,10 @@ describe('npm', () => {
         jest.resetModules();
       });
 
-      afterEach(() => resetPlatform());
+      afterEach(() => resetRendererPlatform());
 
       it('returns true if yarn installed', async () => {
-        overridePlatform('darwin');
+        overrideRendererPlatform('darwin');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.resolve('/usr/bin/fake-yarn'),
@@ -91,7 +91,7 @@ describe('npm', () => {
       });
 
       it('returns true if yarn installed', async () => {
-        overridePlatform('win32');
+        overrideRendererPlatform('win32');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.resolve('/usr/bin/fake-yarn'),
@@ -104,7 +104,7 @@ describe('npm', () => {
       });
 
       it('returns false if yarn not installed', async () => {
-        overridePlatform('darwin');
+        overrideRendererPlatform('darwin');
 
         (exec as jest.Mock).mockReturnValueOnce(
           Promise.reject('/usr/bin/fake-yarn'),

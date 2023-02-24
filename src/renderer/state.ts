@@ -52,6 +52,12 @@ import {
   saveLocalVersions,
 } from './versions';
 
+class UpdateableBaseVersions extends BaseVersions {
+  public updateVersions(val: unknown): void {
+    this.setVersions(val);
+  }
+}
+
 /**
  * The application's state. Exported as a singleton below.
  *
@@ -167,7 +173,7 @@ export class AppState {
   public appData: string;
 
   // Populating versions in fiddle-core
-  public baseVersions: BaseVersions = new BaseVersions(getElectronVersions());
+  public baseVersions = new UpdateableBaseVersions(getElectronVersions());
 
   // For managing downloads and versions for electron
   public installer: Installer = new Installer({
@@ -436,11 +442,13 @@ export class AppState {
     this.isUpdatingElectronVersions = true;
 
     try {
+      const fullVersions = await fetchVersions();
       this.addNewVersions(
-        (await fetchVersions())
+        fullVersions
           .filter((ver) => !(ver.version in this.versions))
           .map((ver) => makeRunnable(ver)),
       );
+      this.baseVersions.updateVersions(fullVersions);
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -577,12 +585,18 @@ export class AppState {
   }
 
   /**
-   * Download a version of Electron.
+   * Download a version of Electron and set it as the current
+   * version in use unless otherwise specified.
    *
    * @param {RunnableVersion} ver
+   * @param {Object} opts
+   * @param {Boolean} [options.activate=true] - Whether to set ver as current
    * @returns {Promise<void>}
    */
-  public async downloadVersion(ver: RunnableVersion) {
+  public async downloadVersion(
+    ver: RunnableVersion,
+    opts: { activate: boolean } = { activate: true },
+  ) {
     const { source, state, version } = ver;
     const {
       electronMirror,
@@ -611,7 +625,8 @@ export class AppState {
     }
 
     console.log(`State: Downloading Electron ${version}`);
-    await this.installer.install(version, {
+
+    const options = {
       mirror: {
         electronMirror,
         electronNightlyMirror,
@@ -625,7 +640,15 @@ export class AppState {
           }
         });
       },
-    });
+    };
+
+    // Download the version without setting it as the current version.
+    if (!opts.activate) {
+      await this.installer.ensureDownloaded(version, options);
+      return;
+    }
+
+    await this.installer.install(version, options);
   }
 
   /**
@@ -818,7 +841,7 @@ export class AppState {
     let strData = data.toString();
     const { isNotPre, bypassBuffer } = options;
 
-    if (process.platform === 'win32' && bypassBuffer === false) {
+    if (window.ElectronFiddle.platform === 'win32' && bypassBuffer === false) {
       this.outputBuffer += strData;
       strData = this.outputBuffer;
       const parts = strData.split(/\r?\n/);

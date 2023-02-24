@@ -7,13 +7,12 @@ import { runInAction } from 'mobx';
 import { GistActionState } from '../src/interfaces';
 import { AddressBar } from '../src/renderer/components/commands-address-bar';
 import { AppState } from '../src/renderer/state';
-import { StateMock } from '../tests/mocks/state';
 
 describe('AddressBar component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeEach(() => {
-    store = (window.ElectronFiddle.app.state as unknown) as StateMock;
+    store = window.ElectronFiddle.app.state;
   });
 
   it('loads a remote gist from a gist URL', async () => {
@@ -21,7 +20,7 @@ describe('AddressBar component', () => {
     const gistUrl = `https://gist.github.com/ghost/${gistId}`;
 
     const { getByRole, getByPlaceholderText } = render(
-      <AddressBar appState={(store as unknown) as AppState} />,
+      <AddressBar appState={store} />,
     );
 
     await userEvent.type(
@@ -39,9 +38,7 @@ describe('AddressBar component', () => {
   });
 
   it('is disabled if address is empty', () => {
-    const { getByRole } = render(
-      <AddressBar appState={(store as unknown) as AppState} />,
-    );
+    const { getByRole } = render(<AddressBar appState={store} />);
 
     const btn = getByRole('button');
     expect(btn).toBeDisabled();
@@ -49,7 +46,7 @@ describe('AddressBar component', () => {
 
   it('is disabled if the URL is invalid', async () => {
     const { getByRole, getByPlaceholderText } = render(
-      <AddressBar appState={(store as unknown) as AppState} />,
+      <AddressBar appState={store} />,
     );
     const btn = getByRole('button');
 
@@ -69,7 +66,7 @@ describe('AddressBar component', () => {
     const gistId = '159cb99a70a201bd5e08194674f4c571';
     const gistUrl = `https://gist.github.com/ghost/${gistId}`;
     const { getByPlaceholderText, getByRole } = render(
-      <AddressBar appState={(store as unknown) as AppState} />,
+      <AddressBar appState={store} />,
     );
     await userEvent.type(
       getByPlaceholderText('https://gist.github.com/...'),

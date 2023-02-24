@@ -4,31 +4,25 @@ import { shallow } from 'enzyme';
 
 import { GenericDialogType } from '../../../src/interfaces';
 import { GenericDialog } from '../../../src/renderer/components/dialog-generic';
-import { StateMock } from '../../mocks/mocks';
-import { overridePlatform, resetPlatform } from '../../utils';
+import { AppState } from '../../../src/renderer/state';
+import { overrideRendererPlatform } from '../../utils';
 
 describe('GenericDialog component', () => {
-  let store: StateMock;
-
-  beforeAll(() => {
-    // We render the buttons different depending on the
-    // platform, so let' have a uniform platform for unit tests
-    overridePlatform('darwin');
-  });
+  let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
-  });
+    // We render the buttons different depending on the
+    // platform, so let' have a uniform platform for unit tests
+    overrideRendererPlatform('darwin');
 
-  afterAll(() => {
-    resetPlatform();
+    ({ state: store } = window.ElectronFiddle.app);
   });
 
   describe('renders', () => {
     function expectDialogTypeToMatchSnapshot(type: GenericDialogType) {
       store.genericDialogOptions.type = type;
       store.isGenericDialogShowing = true;
-      const wrapper = shallow(<GenericDialog appState={store as any} />);
+      const wrapper = shallow(<GenericDialog appState={store} />);
       expect(wrapper).toMatchSnapshot();
     }
 
@@ -58,7 +52,7 @@ describe('GenericDialog component', () => {
 
   it('onClose() closes itself', () => {
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
+    const wrapper = shallow(<GenericDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
 
     instance.onClose(true);
@@ -66,7 +60,7 @@ describe('GenericDialog component', () => {
   });
 
   it('enter submit', () => {
-    const wrapper = shallow(<GenericDialog appState={store as any} />);
+    const wrapper = shallow(<GenericDialog appState={store} />);
     const instance: any = wrapper.instance() as any;
     const event = { key: 'Enter' };
 

@@ -9,10 +9,12 @@ import {
   MAIN_JS,
 } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
+import { App } from '../../../src/renderer/app';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { ipcRendererManager } from '../../../src/renderer/ipc';
+import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/utils/octokit';
-import { AppMock, StateMock, createEditorValues } from '../../mocks/mocks';
+import { createEditorValues } from '../../mocks/mocks';
 
 jest.mock('../../../src/utils/octokit');
 
@@ -43,9 +45,9 @@ type GistCreateOpts = {
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
   const errorMessage = '💀';
-  let app: AppMock;
+  let app: App;
   let mocktokit: OctokitMock;
-  let state: StateMock;
+  let state: AppState;
   let expectedGistOpts: GistCreateOpts;
 
   function getGistFiles(values: EditorValues): GistFiles {
@@ -58,12 +60,12 @@ describe('Action button component', () => {
   }
 
   beforeEach(() => {
-    ({ app } = (window as any).ElectronFiddle);
+    ({ app } = window.ElectronFiddle);
     ({ state } = app);
 
     // have the octokit getter use our mock
     mocktokit = new OctokitMock();
-    (getOctokit as any).mockImplementation(() => mocktokit);
+    (getOctokit as jest.Mock).mockImplementation(() => mocktokit);
 
     // listen for generated ipc traffic
     ipcRendererManager.send = jest.fn();
@@ -75,7 +77,7 @@ describe('Action button component', () => {
   });
 
   function createActionButton() {
-    const wrapper = shallow(<GistActionButton appState={state as any} />);
+    const wrapper = shallow(<GistActionButton appState={state} />);
     const instance = wrapper.instance() as any;
     return { wrapper, instance };
   }
@@ -119,11 +121,11 @@ describe('Action button component', () => {
     expect(instance.performGistAction).not.toHaveBeenCalled();
 
     // If authed, continue to performGistAction
-    state.toggleAuthDialog.mockImplementationOnce(
+    (state.toggleAuthDialog as jest.Mock).mockImplementationOnce(
       () => (state.gitHubToken = 'github-token'),
     );
     await instance.handleClick();
-    expect(state.toggleAuthDialog).toHaveBeenCalled();
+    expect(state.toggleAuthDialog as jest.Mock).toHaveBeenCalled();
     expect(instance.performGistAction).toHaveBeenCalled();
   });
 
@@ -180,7 +182,7 @@ describe('Action button component', () => {
       it('are replaced with default content for required files', async () => {
         const values = { [MAIN_JS]: '' } as const;
 
-        app.getEditorValues.mockReturnValueOnce(values);
+        (app.getEditorValues as jest.Mock).mockReturnValueOnce(values);
         const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();
@@ -194,7 +196,10 @@ describe('Action button component', () => {
         const required = { [MAIN_JS]: '// fnord' };
         const optional = { 'foo.js': '' };
 
-        app.getEditorValues.mockReturnValueOnce({ ...required, ...optional });
+        (app.getEditorValues as jest.Mock).mockReturnValueOnce({
+          ...required,
+          ...optional,
+        });
         const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();

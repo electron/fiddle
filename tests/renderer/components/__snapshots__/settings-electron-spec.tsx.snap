@@ -253,8 +253,11 @@ exports[`ElectronSettings component renders 1`] = `
             <Blueprint3.Button
               disabled={true}
               fill={true}
-              icon="cloud-download"
-              loading={true}
+              icon={
+                <Blueprint3.Spinner
+                  size={16}
+                />
+              }
               small={true}
               text="Downloading"
             />
@@ -317,8 +320,11 @@ exports[`ElectronSettings component renders 1`] = `
             <Blueprint3.Button
               disabled={true}
               fill={true}
-              icon="cloud-download"
-              loading={true}
+              icon={
+                <Blueprint3.Spinner
+                  size={16}
+                />
+              }
               small={true}
               text="Downloading"
             />

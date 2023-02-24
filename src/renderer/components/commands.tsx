@@ -30,7 +30,8 @@ export const Commands = observer(
     }
 
     private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target['tagName'] !== 'INPUT') {
+      // Only maximize if the toolbar itself is clicked (ignore for buttons, input, etc)
+      if (e.currentTarget === e.target) {
         ipcRendererManager.send(IpcEvents.CLICK_TITLEBAR_MAC);
       }
     };
@@ -42,7 +43,9 @@ export const Commands = observer(
       return (
         <div
           className={
-            process.platform === 'darwin' ? 'commands is-mac' : 'commands'
+            window.ElectronFiddle.platform === 'darwin'
+              ? 'commands is-mac'
+              : 'commands'
           }
           onDoubleClick={this.handleDoubleClick}
         >
@@ -72,7 +75,7 @@ export const Commands = observer(
               />
             </ControlGroup>
           </div>
-          {process.platform === 'darwin' ? (
+          {window.ElectronFiddle.platform === 'darwin' ? (
             <div className="title">{title}</div>
           ) : undefined}
           <div>

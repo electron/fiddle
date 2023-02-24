@@ -10,9 +10,9 @@ import {
   filterItem,
   renderItem,
 } from '../../../src/renderer/components/settings-general-appearance';
+import { AppState } from '../../../src/renderer/state';
 import { getAvailableThemes } from '../../../src/renderer/themes';
 import { FiddleTheme } from '../../../src/renderer/themes-defaults';
-import { StateMock } from '../../mocks/mocks';
 
 const mockThemes = [
   {
@@ -36,10 +36,10 @@ jest.mock('../../../src/renderer/themes', () => ({
 }));
 
 describe('AppearanceSettings component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
 
     (getAvailableThemes as jest.Mock).mockResolvedValue(mockThemes);
   });
@@ -47,7 +47,7 @@ describe('AppearanceSettings component', () => {
   it('renders', () => {
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store as any}
+        appState={store}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
@@ -59,7 +59,7 @@ describe('AppearanceSettings component', () => {
     store.theme = 'defaultDark';
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store as any}
+        appState={store}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
@@ -71,23 +71,20 @@ describe('AppearanceSettings component', () => {
   it('handles a theme change', () => {
     const wrapper = shallow(
       <AppearanceSettings
-        appState={store as any}
+        appState={store}
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
     const instance: any = wrapper.instance() as any;
     instance.handleChange({ file: 'defaultLight' } as any);
 
-    expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
+    expect(store.setTheme as jest.Mock).toHaveBeenCalledWith('defaultLight');
   });
 
   it('toggles popover toggle event', () => {
     const toggleFunc = jest.fn();
     const wrapper = shallow(
-      <AppearanceSettings
-        appState={store as any}
-        toggleHasPopoverOpen={toggleFunc}
-      />,
+      <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
 
     // Find the button
@@ -106,7 +103,7 @@ describe('AppearanceSettings component', () => {
     it('attempts to open the folder', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store as any}
+          appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -119,12 +116,12 @@ describe('AppearanceSettings component', () => {
     it('handles an error', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store as any}
+          appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
       const instance: any = wrapper.instance() as any;
-      (shell as any).showItemInFolder.mockImplementationOnce(() => {
+      (shell.showItemInFolder as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Bwap');
       });
 
@@ -136,7 +133,7 @@ describe('AppearanceSettings component', () => {
     it('creates a new file from the current theme', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store as any}
+          appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -164,7 +161,7 @@ describe('AppearanceSettings component', () => {
       );
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store as any}
+          appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
@@ -177,12 +174,12 @@ describe('AppearanceSettings component', () => {
     it('handles an error', async () => {
       const wrapper = shallow(
         <AppearanceSettings
-          appState={store as any}
+          appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
       const instance: any = wrapper.instance() as any;
-      (shell as any).showItemInFolder.mockImplementationOnce(() => {
+      (shell.showItemInFolder as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Bwap');
       });
 

@@ -2,9 +2,9 @@ import * as fs from 'fs-extra';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
+import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
 import { ipcRendererManager } from '../../src/renderer/ipc';
-import { AppState } from '../../src/renderer/state';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
 import { AppMock, createEditorValues } from '../mocks/mocks';
@@ -31,8 +31,8 @@ describe('FileManager', () => {
     (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
 
     // create a real FileManager and insert it into our mocks
-    ({ app } = (window as any).ElectronFiddle);
-    fm = new FileManager((app.state as unknown) as AppState);
+    app = (window.ElectronFiddle.app as unknown) as AppMock;
+    fm = new FileManager(((app as unknown) as App).state);
     app.fileManager = fm as any;
   });
 
@@ -118,7 +118,7 @@ describe('FileManager', () => {
     });
 
     it('does not do anything if cancelled', async () => {
-      (app.replaceFiddle as jest.Mock).mockResolvedValueOnce(false);
+      app.replaceFiddle.mockResolvedValueOnce(false);
       await fm.openFiddle('/fake/path');
     });
   });

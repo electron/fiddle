@@ -30,7 +30,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(8);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -46,7 +47,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -62,7 +64,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       expect(result.length).toBe(7);
 
       result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
@@ -78,7 +81,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
 
@@ -100,7 +104,8 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
 
@@ -116,7 +121,8 @@ describe('menu', () => {
     it('overwrites Select All command', () => {
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as any).mock.calls[0][0];
+      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        .calls[0][0];
       // use find here because the index is platform-specific
       const submenu = result.find((r: any) => r.label === 'Edit')
         .submenu as Array<Electron.MenuItemConstructorOptions>;
@@ -133,7 +139,7 @@ describe('menu', () => {
         overridePlatform('darwin');
         setupMenu();
 
-        const result = (electron.Menu.buildFromTemplate as any).mock
+        const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
@@ -146,7 +152,7 @@ describe('menu', () => {
         // simulate the menu rebuild after click that sends correct templateName
         setupMenu({ activeTemplate: 'App' });
 
-        const result = (electron.Menu.buildFromTemplate as any).mock
+        const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
@@ -168,7 +174,7 @@ describe('menu', () => {
       let help: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         help = menu[menu.length - 1];
       });
@@ -185,7 +191,7 @@ describe('menu', () => {
           toggleDevTools: jest.fn(),
         };
 
-        (electron.BrowserWindow.getFocusedWindow as any).mockReturnValue({
+        (electron.BrowserWindow.getFocusedWindow as jest.Mock).mockReturnValue({
           isDestroyed: () => false,
           webContents: mocks,
         });
@@ -220,7 +226,7 @@ describe('menu', () => {
       let preferences: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         preferences = menu[0];
       });
@@ -237,7 +243,7 @@ describe('menu', () => {
       let quit: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         quit = menu[0];
       });
@@ -252,7 +258,7 @@ describe('menu', () => {
       let showMe: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         showMe = menu[menu.length - 2];
       });
@@ -270,7 +276,7 @@ describe('menu', () => {
       let tasks: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         tasks = menu[menu.length - 3];
       });
@@ -312,7 +318,7 @@ describe('menu', () => {
       }
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as any).mock;
+        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
         const menu = mock.calls[0][0];
         file = menu[1];
       });

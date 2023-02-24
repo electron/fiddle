@@ -6,5 +6,7 @@ export class ElectronFiddleMock {
     userData: '/fake/path',
     home: `~`,
   };
+  public arch = process.arch;
   public monaco = new MonacoMock();
+  public platform = process.platform;
 }

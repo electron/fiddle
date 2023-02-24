@@ -15,13 +15,15 @@ jest.mock('fs-extra');
 describe('themes', () => {
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = (window as any).ElectronFiddle.monaco;
+      const { editor } = window.ElectronFiddle.monaco;
 
       activateTheme(await getTheme());
 
       expect(editor.defineTheme).toHaveBeenCalled();
       expect(editor.setTheme).toHaveBeenCalled();
-      expect(editor.defineTheme.mock.calls[0][1].base).toBe('vs-dark');
+      expect((editor.defineTheme as jest.Mock).mock.calls[0][1].base).toBe(
+        'vs-dark',
+      );
     });
   });
 

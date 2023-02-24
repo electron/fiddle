@@ -1,10 +1,15 @@
 import { reaction } from 'mobx';
 
 import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
-import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
+import {
+  Editor,
+  EditorMosaic,
+  EditorPresence,
+} from '../../src/renderer/editor-mosaic';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 import {
   AppMock,
+  ElectronFiddleMock,
   MonacoEditorMock,
   MonacoMock,
   createEditorValues,
@@ -15,17 +20,20 @@ describe('EditorMosaic', () => {
   let editorMosaic: EditorMosaic;
   let valuesIn: EditorValues;
   let monaco: MonacoMock;
-  let editor: MonacoEditorMock;
+  let editor: Editor;
   let app: AppMock;
 
   beforeEach(() => {
-    ({ app, monaco } = (window as any).ElectronFiddle);
+    ({
+      app,
+      monaco,
+    } = (window.ElectronFiddle as unknown) as ElectronFiddleMock);
 
     // inject a real EditorMosaic into our mock scaffolding
     editorMosaic = new EditorMosaic();
     app.state.editorMosaic = editorMosaic as any;
 
-    editor = new MonacoEditorMock();
+    editor = (new MonacoEditorMock() as unknown) as Editor;
     valuesIn = createEditorValues();
   });
 
@@ -40,13 +48,13 @@ describe('EditorMosaic', () => {
 
     it('throws when called on an unexpected file', () => {
       const otherId = 'file.js';
-      expect(() => editorMosaic.addEditor(otherId, editor as any)).toThrow(
+      expect(() => editorMosaic.addEditor(otherId, editor)).toThrow(
         /unexpected file/i,
       );
     });
 
     it('makes a file visible', () => {
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
     });
 
@@ -58,7 +66,7 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.isEdited).toBe(false);
 
       // test that isEdited is affected by editors that have been added
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.isEdited).toBe(false);
       editor.setValue('💩');
       expect(editorMosaic.isEdited).toBe(true);
@@ -69,7 +77,7 @@ describe('EditorMosaic', () => {
         // test that isEdited does not change when adding editors
         editorMosaic.isEdited = value;
         expect(editorMosaic.isEdited).toBe(value);
-        editorMosaic.addEditor(id, editor as any);
+        editorMosaic.addEditor(id, editor);
         expect(editorMosaic.isEdited).toBe(value);
       });
     });
@@ -78,22 +86,22 @@ describe('EditorMosaic', () => {
       // setup: put visible file into the mosaic and then hide it.
       // this should cause EditorMosaic to cache the viewstate offscreen.
       const viewState = Symbol('some unique viewstate');
-      editor.saveViewState.mockReturnValueOnce(viewState);
-      editorMosaic.addEditor(id, editor as any);
+      (editor.saveViewState as jest.Mock).mockReturnValueOnce(viewState);
+      editorMosaic.addEditor(id, editor);
       editorMosaic.hide(id);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
 
       // now try to re-show the file
-      const editor2 = new MonacoEditorMock();
+      const editor2: Editor = (new MonacoEditorMock() as unknown) as Editor;
       editorMosaic.show(id);
-      editorMosaic.addEditor(id, editor2 as any);
+      editorMosaic.addEditor(id, editor2);
 
       // test that the viewState was reused in the new editor
       expect(editor2.restoreViewState).toHaveBeenCalledWith(viewState);
     });
 
     it('restores values when possible', () => {
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(monaco.editor.createModel).toHaveBeenCalledWith(
         content,
         expect.anything(),
@@ -101,7 +109,7 @@ describe('EditorMosaic', () => {
     });
 
     it('sets a fixed tab size', () => {
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
         expect.objectContaining({ tabSize: 2 }),
       );
@@ -127,7 +135,7 @@ describe('EditorMosaic', () => {
 
     it('includes visible files', () => {
       editorMosaic.set({ [id]: visibleContent });
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
       expect(editorMosaic.numVisible).toBe(1);
     });
@@ -137,7 +145,7 @@ describe('EditorMosaic', () => {
     it('hides an editor', () => {
       const id = MAIN_JS;
       editorMosaic.set(valuesIn);
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
 
       editorMosaic.hide(MAIN_JS);
@@ -171,7 +179,7 @@ describe('EditorMosaic', () => {
 
     it('hides files that were visible', () => {
       editorMosaic.set({ [id]: visibleContent });
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
 
       editorMosaic.toggle(id);
@@ -224,9 +232,9 @@ describe('EditorMosaic', () => {
 
       // and then add Monaco editors
       for (const [file, value] of Object.entries(values)) {
-        const editor = new MonacoEditorMock();
-        editorMosaic.addEditor(file as any, editor as any);
-        editor.setValue(value);
+        const editor = (new MonacoEditorMock() as unknown) as Editor;
+        editorMosaic.addEditor(file as any, editor);
+        editor.setValue(value as string);
       }
 
       // values() should match the modified values
@@ -275,7 +283,7 @@ describe('EditorMosaic', () => {
         const id = MAIN_JS;
         let content = '// first content';
         editorMosaic.set({ [id]: content });
-        editorMosaic.addEditor(id, editor as any);
+        editorMosaic.addEditor(id, editor);
 
         // now call set again, same filename DIFFERENT content
         content = '// second content';
@@ -304,7 +312,10 @@ describe('EditorMosaic', () => {
         editorMosaic.set(valuesIn);
         for (const [id, presence] of editorMosaic.files) {
           if (presence === EditorPresence.Pending) {
-            editorMosaic.addEditor(id, new MonacoEditorMock() as any);
+            editorMosaic.addEditor(
+              id,
+              (new MonacoEditorMock() as unknown) as Editor,
+            );
           }
         }
 
@@ -343,7 +354,7 @@ describe('EditorMosaic', () => {
       it('even if the file was visible', () => {
         const content = '// fnord';
         editorMosaic.set({ [id]: content });
-        editorMosaic.addEditor(id, editor as any);
+        editorMosaic.addEditor(id, editor);
         expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
       });
 
@@ -406,7 +417,7 @@ describe('EditorMosaic', () => {
     it('returns values for files that are visible', () => {
       const value = content;
       editorMosaic.set({ [id]: value });
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
 
       expect(editorMosaic.value(id)).toBe(value);
@@ -421,8 +432,8 @@ describe('EditorMosaic', () => {
     it('finds the focused editor if there is one', () => {
       const id = MAIN_JS;
       editorMosaic.set(valuesIn);
-      editorMosaic.addEditor(id, editor as any);
-      editor.hasTextFocus.mockReturnValue(true);
+      editorMosaic.addEditor(id, editor);
+      (editor.hasTextFocus as jest.Mock).mockReturnValue(true);
 
       expect(editorMosaic.focusedEditor()).toBe(editor);
     });
@@ -437,15 +448,15 @@ describe('EditorMosaic', () => {
     it('layout() calls editor.layout() only once', async () => {
       const id = MAIN_JS;
       const content = '// content';
-      const editor = new MonacoEditorMock();
+      const editor = (new MonacoEditorMock() as unknown) as Editor;
       editorMosaic.set({ [id]: content });
-      await editorMosaic.addEditor(id, editor as any);
+      await editorMosaic.addEditor(id, editor);
 
       editorMosaic.layout();
       editorMosaic.layout();
       editorMosaic.layout();
       editorMosaic.layout();
-      await waitFor(() => editor.layout.mock.calls.length > 0);
+      await waitFor(() => (editor.layout as jest.Mock).mock.calls.length > 0);
 
       expect(editor.layout).toHaveBeenCalledTimes(1);
     });
@@ -462,12 +473,12 @@ describe('EditorMosaic', () => {
 
   describe('isEdited', () => {
     const id = MAIN_JS;
-    let editor: MonacoEditorMock;
+    let editor: Editor;
 
     beforeEach(() => {
-      editor = new MonacoEditorMock();
+      editor = (new MonacoEditorMock() as unknown) as Editor;
       editorMosaic.set(valuesIn);
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, editor);
       expect(editorMosaic.isEdited).toBe(false);
     });
 

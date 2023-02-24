@@ -24,7 +24,7 @@ export async function getIsPackageManagerInstalled(
     return isYarnInstalled;
 
   const command =
-    process.platform === 'win32'
+    window.ElectronFiddle.platform === 'win32'
       ? `where.exe ${packageManager}`
       : `which ${packageManager}`;
 

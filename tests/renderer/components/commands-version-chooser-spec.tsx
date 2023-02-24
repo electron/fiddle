@@ -5,13 +5,14 @@ import { mount, shallow } from 'enzyme';
 
 import { ElectronReleaseChannel, VersionSource } from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
+import { AppState } from '../../../src/renderer/state';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { missing } = InstallState;
 const { remote } = VersionSource;
 
 describe('VersionSelect component', () => {
-  let store: StateMock;
+  let store: AppState;
 
   const mockVersion1 = {
     source: remote,
@@ -26,10 +27,10 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    ({ state: store } = (window as any).ElectronFiddle.app);
+    ({ state: store } = window.ElectronFiddle.app);
 
     const { mockVersions } = new VersionsMock();
-    store.initVersions('2.0.2', {
+    ((store as unknown) as StateMock).initVersions('2.0.2', {
       ...mockVersions,
       '1.0.0': { ...mockVersion1 },
       '3.0.0-unsupported': { ...mockVersion2 },
@@ -42,17 +43,19 @@ describe('VersionSelect component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<VersionChooser appState={store as any} />);
+    const wrapper = shallow(<VersionChooser appState={store} />);
     expect(wrapper).toMatchSnapshot();
   });
 
   it('selects a new version', () => {
-    const wrapper = mount(<VersionChooser appState={store as any} />);
+    const wrapper = mount(<VersionChooser appState={store} />);
 
     const onVersionSelect: any = wrapper
       .find('VersionSelect')
       .prop('onVersionSelect');
     onVersionSelect(mockVersion1);
-    expect(store.setVersion).toHaveBeenCalledWith(mockVersion1.version);
+    expect(store.setVersion as jest.Mock).toHaveBeenCalledWith(
+      mockVersion1.version,
+    );
   });
 });
