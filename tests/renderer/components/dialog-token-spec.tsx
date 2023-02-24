@@ -11,7 +11,7 @@ import { overridePlatform, resetPlatform } from '../../utils';
 jest.mock('../../../src/utils/octokit');
 
 describe('TokenDialog component', () => {
-  const mockValidToken = 'tEsTtOkEn_123456789012345678901234567890';
+  const mockValidToken = 'ghp_muuHkYenGrOHrTBQKDALW8WtSD929EXMz63n';
   const mockInvalidToken = 'testtoken';
   let store: StateMock;
 

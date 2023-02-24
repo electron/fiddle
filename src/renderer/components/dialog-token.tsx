@@ -119,8 +119,7 @@ export const TokenDialog = observer(
     public onTokenInputFocused() {
       const text = (clipboard.readText() || '').trim();
 
-      if (text.length !== 40) return;
-      if (!/^[a-zA-Z0-9_]+$/.test(text)) return;
+      if (!/^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/.test(text)) return;
 
       this.setState({ tokenInput: text });
     }
