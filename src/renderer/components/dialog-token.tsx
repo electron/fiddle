@@ -20,6 +20,7 @@ interface TokenDialogState {
 const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
+const TOKEN_PATTERN = /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
@@ -116,12 +117,12 @@ export const TokenDialog = observer(
      * @returns
      * @memberof TokenDialog
      */
-    public onTokenInputFocused() {
-      const text = (clipboard.readText() || '').trim();
+    public async onTokenInputFocused() {
+      const text = ((await navigator.clipboard.readText()) || '').trim();
 
-      if (!/^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/.test(text)) return;
-
-      this.setState({ tokenInput: text });
+      if (TOKEN_PATTERN.test(text)) {
+        this.setState({ tokenInput: text });
+      }
     }
 
     /**
