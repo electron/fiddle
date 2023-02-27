@@ -38,7 +38,7 @@ jobs:
         run: yarn test:ci
       - name: Coveralls
         if: matrix.os == 'ubuntu-latest'
-        uses: coverallsapp/github-action@9ba913c152ae4be1327bfb9085dc806cedb44057 # v1.1.3
+        uses: coverallsapp/github-action@0363cd28f449b7e5d3b6c6d269d31fe7c1201b68 # v1.2.0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
   build:
