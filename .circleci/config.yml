@@ -1,0 +1,135 @@
+version: 2.1
+
+orbs:
+  github: circleci/github-cli@2.2.0
+  node: circleci/node@5.1.0
+  # win: circleci/windows@4.1.1
+
+executors:
+  linux:
+    docker:
+      - image: cimg/base:stable
+  macos-monterey:
+    macos:
+      xcode: '13.4.0'
+    resource_class: macos.x86.medium.gen2
+  windows:
+    machine:
+      image: windows-server-2022-vs2022:stable
+      resource_class: windows.medium
+      shell: powershell.exe -ExecutionPolicy Bypass
+
+commands:
+  install:
+    steps:
+      - run: git config --global core.autocrlf input
+      - node/install:
+          node-version: '18.4.0'
+      - run: nvm use 18.4.0
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+            - v1-dependencies-{{ arch }}
+      - run: npx yarn install --frozen-lockfile --network-timeout 100000
+      - run: npx yarn run lint
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+
+jobs:
+  test:
+    parameters:
+      os:
+        type: executor
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64' ]
+    executor: << parameters.os >>
+    steps:
+      - install
+      - run: yarn test:ci
+  # TODO: We need to use electron oidc here and avoid using circle contexts
+  build:
+    parameters:
+      os:
+        type: executor
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64', 'ia32', 'armv7l' ]
+    executor: << parameters.os >>
+    environment:
+      ARCH: << parameters.arch >>
+    steps:
+      - install
+      - when:
+          condition:
+            equal: [ 'macos-monterey', << parameters.os >> ]
+          steps:
+            - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
+            #   MACOS_CERT_P12, MACOS_CERT_PASSWORD
+      - when:
+          condition:
+            equal: [ 'windows', << parameters.os >> ]
+          steps:
+            - run: echo "load .pfx file from base64 and write it to the repo"
+            - run: $env:WINDOWS_CODESIGN_FILE = node add-windows-cert.js
+      - run: npx yarn make --arch=$ARCH
+      #   APPLE_ID, APPLE_ID_PASSWORD, GITHUB_TOKEN, WINDOWS_CODESIGN_FILE, WINDOWS_CODESIGN_PASSWORD
+      - store_artifacts:
+          path: out/*
+
+workflows:
+  test:
+    jobs:
+      - test:
+          matrix:
+            parameters:
+              os: [ windows, linux, macos-monterey ]
+              arch: [ x64, arm64 ]
+            exclude:
+              - os: windows
+                arch: arm64
+  #  TODO: Only run this job on tags
+  build-and-release:
+    when:
+      and:
+        - equal: [ << pipeline.git.branch >>, 'main' ]
+        - equal: [ << pipeline.git.tag >>, '/.*/' ]
+    jobs:
+      - build:
+          context:
+            - releases
+          matrix:
+            # windows: x64, ia32 mac: x64, arm64 linux: x64, arm64, armv7l
+            parameters:
+              os: [ windows, linux, macos-monterey ]
+              arch: [ x64, arm64, ia32 ]
+            exclude:
+              - os: windows
+                arch: arm64
+              - os: macos-monterey
+                arch: ia32
+              - os: linux
+                arch: ia32
+      # - github/release:
+      #     context:
+      #       - GITHUB_TOKEN
+      #     filters:
+      #       tags:
+      #         only:
+      #           - /^v[0-9]+(\.[0-9]+)*$/
+      #     requires:
+      #       - build
+      #     tag: << pipeline.parameters.tag >>
+      #     title: << pipeline.parameters.tag >>
+      #     draft: true
+      #     files: |
+      #       out/**/*.deb
+      #       out/**/*.dmg
+      #       out/**/*setup*.exe
+      #       out/**/*.nupkg
+      #       out/**/*.rpm
+      #       out/**/*.zip
+      #       out/**/RELEASES
