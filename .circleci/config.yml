@@ -3,20 +3,7 @@ version: 2.1
 orbs:
   github: circleci/github-cli@2.2.0
   node: circleci/node@5.1.0
-
-executors:
-  linux:
-    docker:
-      - image: cimg/base:stable
-  macos:
-    macos:
-      xcode: '13.4.0'
-    resource_class: macos.x86.medium.gen2
-  windows:
-    machine:
-      image: windows-server-2019-vs2019:stable
-      resource_class: windows.medium
-      shell: bash.exe
+  win: circleci/windows@5.0.0
 
 commands:
   install:
@@ -24,6 +11,7 @@ commands:
       - run: git config --global core.autocrlf input
       - node/install:
           node-version: '18.4.0'
+      - run: nvm use 18.4.0
       - checkout
       - restore_cache:
           keys:
@@ -38,101 +26,69 @@ commands:
           key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
 
 jobs:
-  test:
+  mac-build:
     parameters:
-      os:
-        type: executor
       arch:
         type: enum
         enum: [ 'x64', 'arm64' ]
-    executor: << parameters.os >>
+    macos:
+      xcode: '13.4.0'
+    resource_class: macos.x86.medium.gen2
     steps:
       - install
       - run: yarn test:ci
-  build:
+      - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
+        #   MACOS_CERT_P12, MACOS_CERT_PASSWORD
+      - run: npx yarn make --arch=$ARCH
+      - store_artifacts:
+          path: out/*
+  win-build:
     parameters:
-      os:
-        type: executor
       arch:
         type: enum
-        enum: [ 'x64', 'arm64', 'ia32', 'armv7l' ]
-    executor: << parameters.os >>
-    environment:
-      ARCH: << parameters.arch >>
+        enum: [ 'x64', 'arm64', 'ia32' ]
+    executor: win/default
     steps:
       - install
-      - when:
-          condition:
-            equal: [ 'macos', << parameters.os >> ]
-          steps:
-            - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
-            #   MACOS_CERT_P12, MACOS_CERT_PASSWORD
-      - when:
-          condition:
-            equal: [ 'windows', << parameters.os >> ]
-          steps:
-            - run: echo "load .pfx file from base64 and write it to the repo"
-            - run: $env:WINDOWS_CODESIGN_FILE = node add-windows-cert.js
+      - run: yarn test:ci
+      - run: echo "load .pfx file from base64 and write it to the repo"
+      - run: $env:WINDOWS_CODESIGN_FILE = node add-windows-cert.js
       - run: npx yarn make --arch=$ARCH
       #   APPLE_ID, APPLE_ID_PASSWORD, GITHUB_TOKEN, WINDOWS_CODESIGN_FILE, WINDOWS_CODESIGN_PASSWORD
       - store_artifacts:
           path: out/*
+  linux-build:
+    parameters:
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64','armv7l' ]
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - install
+      - run: yarn test:ci
+      - run: npx yarn make --arch=$ARCH
+      - store_artifacts:
+          path: out/*
 
 workflows:
-  test-macos:
-    jobs:
-      - test:
-          matrix:
-            parameters:
-              os: [ macos ]
-              arch: [ x64, arm64 ]
-  test-windows:
-    jobs:
-      - test:
-          matrix:
-            parameters:
-              os: [ windows ]
-              arch: [ x64, arm64 ]
-  test-linux:
-    jobs:
-      - test:
-          matrix:
-            parameters:
-              os: [ linux ]
-              arch: [ x64, arm64 ]
-  #  BUILD: Only run this when manually triggered
   build-macos:
-    when:
-      and:
-        - equal: [ << pipeline.git.branch >>, 'main' ]
-        - equal: [ << pipeline.git.tag >>, '/.*/' ]
     jobs:
-      - test:
+      - mac-build:
           matrix:
             parameters:
-              os: [ macos ]
               arch: [ x64, arm64 ]
   build-windows:
-    when:
-      and:
-        - equal: [ << pipeline.git.branch >>, 'main' ]
-        - equal: [ << pipeline.git.tag >>, '/.*/' ]
     jobs:
-      - test:
+      - win-build:
           matrix:
             parameters:
-              os: [ windows ]
               arch: [ x64, ia32 ]
   build-linux:
-    when:
-      and:
-        - equal: [ << pipeline.git.branch >>, 'main' ]
-        - equal: [ << pipeline.git.tag >>, '/.*/' ]
     jobs:
-      - test:
+      - linux-build:
           matrix:
             parameters:
-              os: [ linux ]
               arch: [ x64, arm64, armv7l ]
       # - github/release:
       #     context:
