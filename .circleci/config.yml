@@ -47,7 +47,9 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64', 'ia32' ]
-    executor: win/default
+    executor:
+      name: win/default
+      shell: bash.exe
     steps:
       - install
       - run: yarn test:ci
