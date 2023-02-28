@@ -38,8 +38,8 @@ jobs:
       - install
       - run: yarn test:ci
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
-        #   MACOS_CERT_P12, MACOS_CERT_PASSWORD
-      - run: npx yarn make --arch=$ARCH
+        # MACOS_CERT_P12, MACOS_CERT_PASSWORD
+      - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
           path: out/*
   win-build:
@@ -53,10 +53,9 @@ jobs:
     steps:
       - install
       - run: yarn test:ci
-      - run: echo "load .pfx file from base64 and write it to the repo"
-      - run: $env:WINDOWS_CODESIGN_FILE = node add-windows-cert.js
-      - run: npx yarn make --arch=$ARCH
-      #   APPLE_ID, APPLE_ID_PASSWORD, GITHUB_TOKEN, WINDOWS_CODESIGN_FILE, WINDOWS_CODESIGN_PASSWORD
+      - run: export WINDOWS_CODESIGN_FILE=$(node add-windows-cert.js)
+      - run: npx yarn make --arch=<< parameters.arch >>
+      # APPLE_ID, APPLE_ID_PASSWORD, GITHUB_TOKEN, WINDOWS_CODESIGN_FILE, WINDOWS_CODESIGN_PASSWORD
       - store_artifacts:
           path: out/*
   linux-build:
@@ -67,27 +66,24 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - run: sudo apt-get update && sudo apt install rpm
       - install
       - run: yarn test:ci
-      - run: npx yarn make --arch=$ARCH
+      - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
           path: out/*
 
 workflows:
-  build-macos:
+  build-and-release:
     jobs:
       - mac-build:
           matrix:
             parameters:
               arch: [ x64, arm64 ]
-  build-windows:
-    jobs:
       - win-build:
           matrix:
             parameters:
               arch: [ x64, ia32 ]
-  build-linux:
-    jobs:
       - linux-build:
           matrix:
             parameters:
@@ -100,11 +96,11 @@ workflows:
       #         only:
       #           - /^v[0-9]+(\.[0-9]+)*$/
       #     requires:
-      #       - build-macos
-      #       - build-windows
-      #       - build-linux
-      #     tag: << pipeline.parameters.tag >>
-      #     title: << pipeline.parameters.tag >>
+      #       - mac-build
+      #       - win-build
+      #       - linux-build
+      #     tag: << pipeline.git.tag >>
+      #     title: << pipeline.git.tag >>
       #     draft: true
       #     files: |
       #       out/**/*.deb
