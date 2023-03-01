@@ -5,7 +5,7 @@ const fetch = require('cross-fetch');
 const fs = require('fs-extra');
 const logSymbols = require('log-symbols');
 
-// const { GITHUB_TOKEN, GH_TOKEN } = process.env;
+const { GITHUB_TOKEN, GH_TOKEN } = process.env;
 const CONTRIBUTORS_FILE_PATH = path.join(
   __dirname,
   '../static/contributors.json',
@@ -13,11 +13,11 @@ const CONTRIBUTORS_FILE_PATH = path.join(
 const CONTRIBUTORS_URL =
   'https://api.github.com/repos/electron/fiddle/contributors?per_page=100';
 const HEADERS = {};
-// GITHUB_TOKEN || GH_TOKEN
-//   ? {
-//       Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
-//     }
-//   : {};
+GITHUB_TOKEN || GH_TOKEN
+  ? {
+      Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
+    }
+  : {};
 
 async function maybeFetchContributors(silent) {
   try {

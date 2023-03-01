@@ -40,7 +40,7 @@ jobs:
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/*
+          path: out/make/*
   win-build:
     parameters:
       arch:
@@ -55,7 +55,7 @@ jobs:
       - run: export WINDOWS_CODESIGN_FILE=$(node add-windows-cert.js)
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/*
+          path: out/make/*
   linux-build:
     parameters:
       arch:
@@ -69,10 +69,10 @@ jobs:
       - run: yarn test:ci
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/*
+          path: out/make/*
 
 workflows:
-  build-and-release:
+  build-and-test:
     jobs:
       - mac-build:
           matrix:
@@ -87,8 +87,6 @@ workflows:
             parameters:
               arch: [ x64, arm64, armv7l ]
       # - github/release:
-      #     context:
-      #       - GITHUB_TOKEN
       #     filters:
       #       tags:
       #         only:
