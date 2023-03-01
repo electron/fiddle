@@ -79,13 +79,13 @@ jobs:
       - install
       # - load-gh-token
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
-      - run: npx yarn make --arch=<< parameters.arch >>
+      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
-          path: out/make
+          path: out
       - persist_to_workspace:
           root: .
           paths:
-            - out/make
+            - out
   win-build:
     parameters:
       arch:
@@ -98,13 +98,13 @@ jobs:
       - install
       # - load-gh-token
       - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
-      - run: npx yarn make --arch=<< parameters.arch >>
+      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
-          path: out/make
+          path: out
       - persist_to_workspace:
           root: .
           paths:
-            - out/make
+            - out
   linux-build:
     parameters:
       arch:
@@ -116,20 +116,20 @@ jobs:
       - run: sudo apt-get update && sudo apt install rpm
       - install
       # - load-gh-token
-      - run: npx yarn make --arch=<< parameters.arch >>
+      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
-          path: out/make
+          path: out
       - persist_to_workspace:
           root: .
           paths:
-            - out/make
+            - out
   publish-to-github:
     docker:
       - image: cimg/base:stable
     steps:
       - install
       - attach_workspace:
-          at: .
+          at: out/publish-dry-run
       # - load-gh-token
       - run: yarn run publish --from-dry-run
 
