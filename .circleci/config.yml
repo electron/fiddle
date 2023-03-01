@@ -127,9 +127,9 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
+      - install
       - attach_workspace:
           at: .
-      - install
       # - load-gh-token
       - run: yarn run publish
 
