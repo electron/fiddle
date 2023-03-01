@@ -12,12 +12,12 @@ const CONTRIBUTORS_FILE_PATH = path.join(
 );
 const CONTRIBUTORS_URL =
   'https://api.github.com/repos/electron/fiddle/contributors?per_page=100';
-const HEADERS = {};
-GITHUB_TOKEN || GH_TOKEN
-  ? {
-      Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
-    }
-  : {};
+const HEADERS =
+  GITHUB_TOKEN || GH_TOKEN
+    ? {
+        Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
+      }
+    : {};
 
 async function maybeFetchContributors(silent) {
   try {

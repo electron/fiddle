@@ -1,7 +1,6 @@
 version: 2.1
 
 orbs:
-  github: circleci/github-cli@2.2.0
   node: circleci/node@5.1.0
   win: circleci/windows@5.0.0
 
@@ -19,13 +18,18 @@ commands:
             - v1-dependencies-{{ arch }}
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile
-      - run: yarn run lint
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
 
 jobs:
+  lint:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - install
+      - run: yarn run lint
   mac-build:
     parameters:
       arch:
@@ -82,10 +86,18 @@ jobs:
           root: '*'
           paths:
             - out
+  maybe-publish-to-github:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - run: sudo apt-get update && sudo apt install rpm
+      - install
+      - run: yarn run publish
 
 workflows:
   build-and-test:
     jobs:
+      - lint
       - mac-build:
           matrix:
             parameters:
@@ -98,23 +110,14 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-      - github/release:
-          filters:
-            tags:
-              only:
-                - /^v[0-9]+(\.[0-9]+)*$/
+      - maybe-publish-to-github:
           requires:
             - mac-build
             - win-build
             - linux-build
-          tag: << pipeline.git.tag >>
-          title: << pipeline.git.tag >>
-          draft: true
-          files: |
-            out/**/*.deb
-            out/**/*.dmg
-            out/**/*setup*.exe
-            out/**/*.nupkg
-            out/**/*.rpm
-            out/**/*.zip
-            out/**/RELEASES
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
