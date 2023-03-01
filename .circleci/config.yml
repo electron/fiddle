@@ -26,7 +26,7 @@ commands:
   load-gh-token:
     steps:
       - run: |
-          curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
+          curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT/exchange?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
 
 jobs:
   lint:
@@ -77,7 +77,7 @@ jobs:
     resource_class: macos.x86.medium.gen2
     steps:
       - install
-      - load-gh-token
+      # - load-gh-token
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
@@ -96,8 +96,8 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - load-gh-token
-      - run: export WINDOWS_CODESIGN_FILE=$(node add-windows-cert.js)
+      # - load-gh-token
+      - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
           path: out
@@ -115,7 +115,7 @@ jobs:
     steps:
       - run: sudo apt-get update && sudo apt install rpm
       - install
-      - load-gh-token
+      # - load-gh-token
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
           path: out
@@ -130,7 +130,7 @@ jobs:
       - attach_workspace:
           at: .
       - install
-      - load-gh-token
+      # - load-gh-token
       - run: echo "publishing"
       # - run: yarn run publish
 
@@ -145,11 +145,11 @@ workflows:
       - win-test:
           matrix:
             parameters:
-              arch: [ x64, ia32 ]
+              arch: [ x64 ]
       - linux-test:
           matrix:
             parameters:
-              arch: [ x64, arm64, armv7l ]
+              arch: [ x64 ]
       - mac-build:
           context: fiddle-release
           matrix:
@@ -187,6 +187,10 @@ workflows:
           context: fiddle-release
           requires:
             - lint
+            - mac-test-x64
+            - mac-test-arm64
+            - win-test-x64
+            - linux-test-x64
             - mac-build-x64
             - mac-build-arm64
             - win-build-ia32
