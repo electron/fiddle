@@ -81,11 +81,11 @@ jobs:
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out
+          path: out/make
       - persist_to_workspace:
-          root: '*'
+          root: .
           paths:
-            - out
+            - out/make
   win-build:
     parameters:
       arch:
@@ -100,11 +100,11 @@ jobs:
       - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out
+          path: out/make
       - persist_to_workspace:
-          root: '*'
+          root: .
           paths:
-            - out
+            - out/make
   linux-build:
     parameters:
       arch:
@@ -118,11 +118,11 @@ jobs:
       # - load-gh-token
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out
+          path: out/make
       - persist_to_workspace:
-          root: '*'
+          root: .
           paths:
-            - out
+            - out/make
   publish-to-github:
     docker:
       - image: cimg/base:stable
@@ -131,8 +131,7 @@ jobs:
           at: .
       - install
       # - load-gh-token
-      - run: echo "publishing"
-      # - run: yarn run publish
+      - run: yarn run publish
 
 workflows:
   build-and-test:
