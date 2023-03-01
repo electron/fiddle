@@ -40,7 +40,11 @@ jobs:
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/make/*
+          path: out
+      - persist_to_workspace:
+          root: '*'
+          paths:
+            - out
   win-build:
     parameters:
       arch:
@@ -55,7 +59,11 @@ jobs:
       - run: export WINDOWS_CODESIGN_FILE=$(node add-windows-cert.js)
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/make/*
+          path: out
+      - persist_to_workspace:
+          root: '*'
+          paths:
+            - out
   linux-build:
     parameters:
       arch:
@@ -69,7 +77,11 @@ jobs:
       - run: yarn test:ci
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
-          path: out/make/*
+          path: out
+      - persist_to_workspace:
+          root: '*'
+          paths:
+            - out
 
 workflows:
   build-and-test:
@@ -86,23 +98,23 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-      # - github/release:
-      #     filters:
-      #       tags:
-      #         only:
-      #           - /^v[0-9]+(\.[0-9]+)*$/
-      #     requires:
-      #       - mac-build
-      #       - win-build
-      #       - linux-build
-      #     tag: << pipeline.git.tag >>
-      #     title: << pipeline.git.tag >>
-      #     draft: true
-      #     files: |
-      #       out/**/*.deb
-      #       out/**/*.dmg
-      #       out/**/*setup*.exe
-      #       out/**/*.nupkg
-      #       out/**/*.rpm
-      #       out/**/*.zip
-      #       out/**/RELEASES
+      - github/release:
+          filters:
+            tags:
+              only:
+                - /^v[0-9]+(\.[0-9]+)*$/
+          requires:
+            - mac-build
+            - win-build
+            - linux-build
+          tag: << pipeline.git.tag >>
+          title: << pipeline.git.tag >>
+          draft: true
+          files: |
+            out/**/*.deb
+            out/**/*.dmg
+            out/**/*setup*.exe
+            out/**/*.nupkg
+            out/**/*.rpm
+            out/**/*.zip
+            out/**/RELEASES
