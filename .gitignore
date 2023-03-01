@@ -36,7 +36,7 @@ report.json
 /npm/path.txt
 
 # Electron Fiddle-Specific
-# /static/contributors.json
+/static/contributors.json
 /static/css/root.css
 
 # Webpack configurations

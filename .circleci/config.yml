@@ -17,11 +17,16 @@ commands:
             - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
             - v1-dependencies-{{ arch }}
       - run: npm install --global yarn
+      - run: echo "[]" > static/contributors.json
       - run: yarn install --frozen-lockfile
       - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+  load-gh-token:
+    steps:
+      - run: |
+          curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
 
 jobs:
   lint:
@@ -30,7 +35,7 @@ jobs:
     steps:
       - install
       - run: yarn run lint
-  mac-build:
+  mac-test:
     parameters:
       arch:
         type: enum
@@ -41,6 +46,38 @@ jobs:
     steps:
       - install
       - run: yarn test:ci
+  win-test:
+    parameters:
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64', 'ia32' ]
+    executor:
+      name: win/default
+      shell: bash.exe
+    steps:
+      - install
+      - run: yarn test:ci
+  linux-test:
+    parameters:
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64','armv7l' ]
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - install
+      - run: yarn test:ci
+  mac-build:
+    parameters:
+      arch:
+        type: enum
+        enum: [ 'x64', 'arm64' ]
+    macos:
+      xcode: '13.4.0'
+    resource_class: macos.x86.medium.gen2
+    steps:
+      - install
+      - load-gh-token
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
@@ -59,7 +96,7 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - run: yarn test:ci
+      - load-gh-token
       - run: export WINDOWS_CODESIGN_FILE=$(node add-windows-cert.js)
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
@@ -78,7 +115,7 @@ jobs:
     steps:
       - run: sudo apt-get update && sudo apt install rpm
       - install
-      - run: yarn test:ci
+      - load-gh-token
       - run: npx yarn make --arch=<< parameters.arch >>
       - store_artifacts:
           path: out
@@ -86,38 +123,80 @@ jobs:
           root: '*'
           paths:
             - out
-  maybe-publish-to-github:
+  publish-to-github:
     docker:
       - image: cimg/base:stable
     steps:
-      - run: sudo apt-get update && sudo apt install rpm
+      - attach_workspace:
+          at: .
       - install
-      - run: yarn run publish
+      - load-gh-token
+      - run: echo "publishing"
+      # - run: yarn run publish
 
 workflows:
   build-and-test:
     jobs:
       - lint
-      - mac-build:
+      - mac-test:
           matrix:
             parameters:
               arch: [ x64, arm64 ]
-      - win-build:
+      - win-test:
           matrix:
             parameters:
               arch: [ x64, ia32 ]
-      - linux-build:
+      - linux-test:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-      - maybe-publish-to-github:
+      - mac-build:
+          context: fiddle-release
+          matrix:
+            parameters:
+              arch: [ x64, arm64 ]
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
+      - win-build:
+          context: fiddle-release
+          matrix:
+            parameters:
+              arch: [ x64, ia32 ]
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
+      - linux-build:
+          context: fiddle-release
+          matrix:
+            parameters:
+              arch: [ x64, arm64, armv7l ]
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+              # ignore: /.*/
+      - publish-to-github:
+          context: fiddle-release
           requires:
-            - mac-build
-            - win-build
-            - linux-build
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+            - lint
+            - mac-build-x64
+            - mac-build-arm64
+            - win-build-ia32
+            - win-build-x64
+            - linux-build-x64
+            - linux-build-arm64
+            - linux-build-armv7l
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
