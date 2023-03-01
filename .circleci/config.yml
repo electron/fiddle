@@ -131,7 +131,7 @@ jobs:
       - attach_workspace:
           at: .
       # - load-gh-token
-      - run: yarn run publish
+      - run: yarn run publish --from-dry-run
 
 workflows:
   build-and-test:
@@ -181,7 +181,7 @@ workflows:
           #     only: 
           #       - /^v.*/
           #   branches:
-              # ignore: /.*/
+          #     ignore: /.*/
       - publish-to-github:
           context: fiddle-release
           requires:
