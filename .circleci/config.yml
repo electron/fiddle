@@ -99,8 +99,6 @@ jobs:
       - load-gh-token
       - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
-      - run: mkdir out/make/squirrel.windows/<< parameters.arch >>
-      - run: cp out\make\squirrel.windows\<< parameters.arch >>\* out/make/squirrel.windows/<< parameters.arch >>/
       - store_artifacts:
           path: out
       - persist_to_workspace:

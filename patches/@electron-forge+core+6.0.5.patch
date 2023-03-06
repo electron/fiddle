@@ -1,0 +1,16 @@
+diff --git a/node_modules/@electron-forge/core/src/api/publish.ts b/node_modules/@electron-forge/core/src/api/publish.ts
+index ca1e6d5..859d59f 100644
+--- a/node_modules/@electron-forge/core/src/api/publish.ts
++++ b/node_modules/@electron-forge/core/src/api/publish.ts
+@@ -218,8 +218,9 @@ const publish = async ({
+ 
+                     for (const makeResult of restoredMakeResults) {
+                       for (const makePath of makeResult.artifacts) {
+-                        if (!(await fs.pathExists(makePath))) {
+-                          throw new Error(`Attempted to resume a dry run but an artifact (${makePath}) could not be found`);
++                        const normalizedPath = path.normalize(makePath);
++                        if (!(await fs.pathExists(normalizedPath))) {
++                          throw new Error(`Attempted to resume a dry run but an artifact (${normalizedPath}) could not be found`);
+                         }
+                       }
+                     }
