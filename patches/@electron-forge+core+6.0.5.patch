@@ -1,5 +1,5 @@
 diff --git a/node_modules/@electron-forge/core/src/api/publish.ts b/node_modules/@electron-forge/core/src/api/publish.ts
-index ca1e6d5..859d59f 100644
+index ca1e6d5..0ef93f5 100644
 --- a/node_modules/@electron-forge/core/src/api/publish.ts
 +++ b/node_modules/@electron-forge/core/src/api/publish.ts
 @@ -218,8 +218,9 @@ const publish = async ({
@@ -8,9 +8,9 @@ index ca1e6d5..859d59f 100644
                        for (const makePath of makeResult.artifacts) {
 -                        if (!(await fs.pathExists(makePath))) {
 -                          throw new Error(`Attempted to resume a dry run but an artifact (${makePath}) could not be found`);
-+                        const normalizedPath = path.normalize(makePath);
++                        const normalizedPath = path.resolve(makePath).split(path.sep).join(path.sep);
 +                        if (!(await fs.pathExists(normalizedPath))) {
-+                          throw new Error(`Attempted to resume a dry run but an artifact (${normalizedPath}) could not be found`);
++                          throw new Error(`Attempted to resume a dry run but an artifact (${normalizedPath}) could not be found - original path: (${makePath})`);
                          }
                        }
                      }

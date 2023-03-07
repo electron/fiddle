@@ -19,6 +19,7 @@ commands:
       - run: npm install --global yarn
       - run: echo "[]" > static/contributors.json
       - run: yarn install --frozen-lockfile
+      - run: yarn patch-package
       - save_cache:
           paths:
             - node_modules
