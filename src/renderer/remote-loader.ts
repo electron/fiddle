@@ -4,9 +4,11 @@ import semver from 'semver';
 import {
   EditorValues,
   ElectronReleaseChannel,
+  GenericDialogType,
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';
+import { disableDownload } from '../utils/disable-download';
 import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
@@ -147,9 +149,16 @@ export class RemoteLoader {
               throw new Error(
                 "This gist's package.json contains an invalid Electron version.",
               );
+            } else if (disableDownload(version)) {
+              await this.appState.showGenericDialog({
+                label: `This gist's Electron version (${version}) is not available on your current OS. Falling back to last used version.`,
+                ok: 'Close',
+                type: GenericDialogType.warning,
+                wantsInput: false,
+              });
+            } else {
+              this.setElectronVersion(version);
             }
-
-            this.setElectronVersion(version);
 
             // We want to include all dependencies except Electron.
             delete deps[dep];
