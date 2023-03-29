@@ -274,6 +274,9 @@ export class App {
       }
 
       window.onbeforeunload = async () => {
+        // On Mac OS, quitting can be triggered from the dock,
+        // focus the app before presenting the dialog
+        ipcRendererManager.send(IpcEvents.FOCUS_APP)
         if (await this.confirmExitUnsaved()) {
           // isQuitting checks if we're trying to quit the app
           // or just close the window

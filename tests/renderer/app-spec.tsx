@@ -390,6 +390,9 @@ describe('App component', () => {
       expect(window.onbeforeunload).toBeTruthy();
       const result = await window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FOCUS_APP,
+      );
       expect(window.close).toHaveBeenCalled();
     });
 
@@ -404,6 +407,9 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FOCUS_APP,
+      );
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
         IpcEvents.CONFIRM_QUIT,
       );
@@ -420,7 +426,21 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).not.toHaveBeenCalled();
-      expect(ipcRendererManager.send).not.toHaveBeenCalled();
+      expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FOCUS_APP,
+      );
+    });
+
+    it('sends FOCUS_APP event when there are unsaved changes', async () => {
+      app.state.editorMosaic.isEdited = true;
+      expect(window.onbeforeunload).toBeTruthy();
+      const result = await window.onbeforeunload!(undefined as any);
+
+      expect(result).toBe(false);
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.FOCUS_APP,
+      );
     });
   });
 });
