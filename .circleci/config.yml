@@ -156,34 +156,34 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64 ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
       - win-build:
           context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, ia32 ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
       - linux-build:
           context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
       - publish-to-github:
           context: fiddle-release
           requires:
@@ -199,9 +199,9 @@ workflows:
             - linux-build-x64
             - linux-build-arm64
             - linux-build-armv7l
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
