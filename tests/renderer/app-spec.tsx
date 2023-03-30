@@ -234,6 +234,24 @@ describe('App component', () => {
 
       expect(document.body.classList.value).toBe('bp3-dark');
     });
+
+    it('sets native theme', async () => {
+      app.state.isUsingSystemTheme = false;
+
+      ipcRendererManager.send = jest.fn();
+      await app.loadTheme('defaultLight');
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.SET_NATIVE_THEME,
+        'light',
+      );
+
+      ipcRendererManager.send = jest.fn();
+      await app.loadTheme('custom-dark');
+      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        IpcEvents.SET_NATIVE_THEME,
+        'dark',
+      );
+    });
   });
 
   describe('setupThemeListeners()', () => {
@@ -256,6 +274,10 @@ describe('App component', () => {
     });
 
     describe('isUsingSystemTheme reaction', () => {
+      beforeEach(() => {
+        ipcRendererManager.send = jest.fn();
+      });
+
       it('ignores system theme changes when not isUsingSystemTheme', () => {
         app.state.isUsingSystemTheme = true;
         app.setupThemeListeners();
@@ -281,6 +303,17 @@ describe('App component', () => {
         });
         app.state.isUsingSystemTheme = true;
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
+
+      it('sets native theme to system', () => {
+        app.state.isUsingSystemTheme = false;
+        app.setupThemeListeners();
+        app.state.isUsingSystemTheme = true;
+
+        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+          IpcEvents.SET_NATIVE_THEME,
+          'system',
+        );
       });
     });
 

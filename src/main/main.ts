@@ -1,7 +1,7 @@
 // eslint-disable-next-line import/order
 import { initSentry } from '../sentry';
 initSentry();
-import { BrowserWindow, app, systemPreferences } from 'electron';
+import { BrowserWindow, app, nativeTheme, systemPreferences } from 'electron';
 // eslint-disable-next-line import/no-unresolved
 import { IpcMainEvent } from 'electron/main';
 
@@ -42,6 +42,7 @@ export async function onReady() {
   setupDialogs();
   setupDevTools();
   setupTitleBarClickMac();
+  setupNativeTheme();
 
   processCommandLine(argv);
 }
@@ -102,6 +103,23 @@ export function setupTitleBarClickMac() {
           win.unmaximize();
         }
       }
+    }
+  });
+}
+
+function isNativeThemeSource(
+  val: unknown,
+): val is typeof nativeTheme.themeSource {
+  return typeof val === 'string' && ['dark', 'light', 'system'].includes(val);
+}
+
+/**
+ * Handle theme changes.
+ */
+export function setupNativeTheme() {
+  ipcMainManager.on(IpcEvents.SET_NATIVE_THEME, async (_, source: string) => {
+    if (isNativeThemeSource(source)) {
+      nativeTheme.themeSource = source;
     }
   });
 }
