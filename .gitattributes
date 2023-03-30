@@ -1,1 +1,7 @@
 * text=auto
+
+# Source code should always use LF as line ending
+*.d.ts text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
