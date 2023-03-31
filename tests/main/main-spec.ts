@@ -13,8 +13,8 @@ import {
   onReady,
   onWindowsAllClosed,
   setupMenuHandler,
+  setupShowWindow,
   setupTitleBarClickMac,
-  setupFocusApp,
 } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
@@ -130,23 +130,25 @@ describe('main', () => {
     });
   });
 
-  describe('setupFocusApp()', () => {
-   beforeEach(() => {
-        // Since ipcMainManager is mocked, we can't just .emit to trigger
-        // the event. Instead, call the callback as soon as the listener
-        // is instantiated.
-        (ipcMainManager.on as jest.Mock).mockImplementationOnce(
-          (channel, callback) => {
-            if (channel === IpcEvents.FOCUS_APP) {
-              callback({});
-            }
-          },
-        );
+  describe('setupShowWindow()', () => {
+    beforeEach(() => {
+      // Since ipcMainManager is mocked, we can't just .emit to trigger
+      // the event. Instead, call the callback as soon as the listener
+      // is instantiated.
+      (ipcMainManager.on as jest.Mock).mockImplementationOnce(
+        (channel, callback) => {
+          if (channel === IpcEvents.SHOW_WINDOW) {
+            callback({});
+          }
+        },
+      );
     });
 
-    it('focuses the app on FOCUS_APP', () => {
-      setupFocusApp();
-      expect(app.focus).toHaveBeenCalledWith({ steal: true })
+    it('shows the window', () => {
+      const mockWindow = new BrowserWindowMock();
+      (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(mockWindow);
+      setupShowWindow();
+      expect(mockWindow.show).toHaveBeenCalled();
     });
   });
 

@@ -391,7 +391,7 @@ describe('App component', () => {
       const result = await window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.FOCUS_APP,
+        IpcEvents.SHOW_WINDOW,
       );
       expect(window.close).toHaveBeenCalled();
     });
@@ -408,7 +408,7 @@ describe('App component', () => {
       expect(result).toBe(false);
       expect(window.close).toHaveBeenCalledTimes(1);
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.FOCUS_APP,
+        IpcEvents.SHOW_WINDOW,
       );
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
         IpcEvents.CONFIRM_QUIT,
@@ -428,18 +428,18 @@ describe('App component', () => {
       expect(window.close).not.toHaveBeenCalled();
       expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.FOCUS_APP,
+        IpcEvents.SHOW_WINDOW,
       );
     });
 
-    it('sends FOCUS_APP event when there are unsaved changes', async () => {
+    it('sends SHOW_WINDOW event if there are unsaved changes', async () => {
       app.state.editorMosaic.isEdited = true;
       expect(window.onbeforeunload).toBeTruthy();
       const result = await window.onbeforeunload!(undefined as any);
 
       expect(result).toBe(false);
       expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.FOCUS_APP,
+        IpcEvents.SHOW_WINDOW,
       );
     });
   });

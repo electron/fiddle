@@ -34,7 +34,7 @@ export async function onReady() {
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
 
-  setupFocusApp()
+  setupShowWindow();
   setupMenu();
   setupMenuHandler();
   setupProtocolHandler();
@@ -57,9 +57,12 @@ export function onBeforeQuit() {
   ipcMainManager.on(IpcEvents.CONFIRM_QUIT, app.quit);
 }
 
-export function setupFocusApp() {
-  ipcMainManager.on(IpcEvents.FOCUS_APP, () => {
-    app.focus({ steal: true })
+export function setupShowWindow() {
+  ipcMainManager.on(IpcEvents.SHOW_WINDOW, (event: IpcMainEvent) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      win.show();
+    }
   });
 }
 

@@ -39,7 +39,7 @@ export enum IpcEvents {
   TASK_DONE = 'TASK_DONE',
   OUTPUT_ENTRY = 'OUTPUT_ENTRY',
   RELOAD_WINDOW = 'RELOAD_WINDOW',
-  FOCUS_APP = 'FOCUS_APP',
+  SHOW_WINDOW = 'SHOW_WINDOW',
 }
 
 export const ipcMainEvents = [
@@ -56,7 +56,7 @@ export const ipcMainEvents = [
   IpcEvents.OUTPUT_ENTRY,
   IpcEvents.TASK_DONE,
   IpcEvents.RELOAD_WINDOW,
-  IpcEvents.FOCUS_APP,
+  IpcEvents.SHOW_WINDOW,
 ];
 
 export const ipcRendererEvents = [
