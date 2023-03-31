@@ -1,5 +1,6 @@
 import * as path from 'path';
 
+import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import semver from 'semver';
 
@@ -8,7 +9,6 @@ import { IpcEvents } from '../ipc-events';
 import { isKnownFile } from '../utils/editor-utils';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
-import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
 import { getTemplateValues } from './templates';
 import { dotfilesTransform } from './transforms/dotfiles';
@@ -19,29 +19,26 @@ export class FileManager {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_FIDDLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_OPEN_TEMPLATE);
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+    ipcRenderer.removeAllListeners(IpcEvents.FS_OPEN_FIDDLE);
+    ipcRenderer.removeAllListeners(IpcEvents.FS_OPEN_TEMPLATE);
+    ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE);
+    ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_FORGE);
 
-    ipcRendererManager.on(IpcEvents.FS_OPEN_FIDDLE, (_event, filePath) => {
+    ipcRenderer.on(IpcEvents.FS_OPEN_FIDDLE, (_event, filePath) => {
       this.openFiddle(filePath);
     });
 
-    ipcRendererManager.on(IpcEvents.FS_OPEN_TEMPLATE, (_event, name) => {
+    ipcRenderer.on(IpcEvents.FS_OPEN_TEMPLATE, (_event, name) => {
       this.openTemplate(name);
     });
 
-    ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
+    ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
       this.saveFiddle(filePath, dotfilesTransform);
     });
 
-    ipcRendererManager.on(
-      IpcEvents.FS_SAVE_FIDDLE_FORGE,
-      (_event, filePath) => {
-        this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
-      },
-    );
+    ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE_FORGE, (_event, filePath) => {
+      this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
+    });
   }
 
   /**
@@ -136,7 +133,7 @@ export class FileManager {
     console.log(`FileManager: Asked to save to ${pathToSave}`);
 
     if (!pathToSave) {
-      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
+      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     } else {
       const files = await this.getFiles(undefined, ...transforms);
 
@@ -157,7 +154,7 @@ export class FileManager {
         this.appState.localPath = pathToSave;
         this.appState.gistId = undefined;
       }
-      ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
       this.appState.editorMosaic.isEdited = false;
     }
   }
@@ -264,7 +261,7 @@ export class FileManager {
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
-      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
+      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
 
@@ -281,7 +278,7 @@ export class FileManager {
       return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);
-      ipcRendererManager.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
+      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
 }

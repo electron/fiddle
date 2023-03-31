@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ipcRenderer } from 'electron';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import {
@@ -16,7 +17,6 @@ import { getEditorTitle } from '../../utils/editor-utils';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
 import { getTemplate, getTestTemplate } from '../content';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
@@ -63,14 +63,14 @@ export const Editors = observer(
     public async componentDidMount() {
       this.stopListening();
 
-      ipcRendererManager.on(
+      ipcRenderer.on(
         IpcEvents.MONACO_EXECUTE_COMMAND,
         (_event, cmd: string) => {
           this.executeCommand(cmd);
         },
       );
 
-      ipcRendererManager.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
+      ipcRenderer.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
         const { modules, version } = this.props.appState;
         const values = await getTemplate(version);
         const options: SetFiddleOptions = { templateName: version };
@@ -81,21 +81,18 @@ export const Editors = observer(
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRendererManager.on(IpcEvents.FS_NEW_TEST, async (_event) => {
+      ipcRenderer.on(IpcEvents.FS_NEW_TEST, async (_event) => {
         const values = await getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRendererManager.on(
-        IpcEvents.MONACO_TOGGLE_OPTION,
-        (_event, cmd: string) => {
-          this.toggleEditorOption(cmd);
-        },
-      );
+      ipcRenderer.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {
+        this.toggleEditorOption(cmd);
+      });
 
-      ipcRendererManager.on(IpcEvents.REDO_IN_EDITOR, (_event) => {
+      ipcRenderer.on(IpcEvents.REDO_IN_EDITOR, (_event) => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -103,7 +100,7 @@ export const Editors = observer(
         }
       });
 
-      ipcRendererManager.on(IpcEvents.UNDO_IN_EDITOR, (_event) => {
+      ipcRenderer.on(IpcEvents.UNDO_IN_EDITOR, (_event) => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -111,7 +108,7 @@ export const Editors = observer(
         }
       });
 
-      ipcRendererManager.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
+      ipcRenderer.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -127,13 +124,13 @@ export const Editors = observer(
     }
 
     private stopListening() {
-      ipcRendererManager.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_NEW_TEST);
-      ipcRendererManager.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
-      ipcRendererManager.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
-      ipcRendererManager.removeAllListeners(IpcEvents.UNDO_IN_EDITOR);
-      ipcRendererManager.removeAllListeners(IpcEvents.REDO_IN_EDITOR);
+      ipcRenderer.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
+      ipcRenderer.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
+      ipcRenderer.removeAllListeners(IpcEvents.FS_NEW_TEST);
+      ipcRenderer.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
+      ipcRenderer.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
+      ipcRenderer.removeAllListeners(IpcEvents.UNDO_IN_EDITOR);
+      ipcRenderer.removeAllListeners(IpcEvents.REDO_IN_EDITOR);
     }
 
     /**

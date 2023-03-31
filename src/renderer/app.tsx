@@ -9,7 +9,6 @@ import { PackageJsonOptions, getPackageJson } from '../utils/get-package';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
-import { ipcRendererManager } from './ipc';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
@@ -278,7 +277,7 @@ export class App {
           // isQuitting checks if we're trying to quit the app
           // or just close the window
           if (state.isQuitting) {
-            ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
+            ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
           }
           window.onbeforeunload = null;
           window.close();

@@ -1,10 +1,10 @@
+import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
 import { AppMock, createEditorValues } from '../mocks/mocks';
@@ -27,17 +27,13 @@ describe('FileManager', () => {
   let fm: FileManager;
 
   beforeEach(() => {
-    ipcRendererManager.send = jest.fn();
+    ipcRenderer.send = jest.fn();
     (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
 
     // create a real FileManager and insert it into our mocks
     app = (window.ElectronFiddle.app as unknown) as AppMock;
     fm = new FileManager(((app as unknown) as App).state);
     app.fileManager = fm as any;
-  });
-
-  afterEach(() => {
-    ipcRendererManager.removeAllListeners();
   });
 
   describe('openFiddle()', () => {
@@ -108,7 +104,7 @@ describe('FileManager', () => {
 
     it('runs it on IPC event', () => {
       fm.openFiddle = jest.fn();
-      ipcRendererManager.emit(IpcEvents.FS_OPEN_FIDDLE);
+      ipcRenderer.emit(IpcEvents.FS_OPEN_FIDDLE);
       expect(fm.openFiddle).toHaveBeenCalled();
     });
 
@@ -159,7 +155,7 @@ describe('FileManager', () => {
       // ipc calls for each editor value + one for SET_SHOW_ME_TEMPLATE
       const ipcCalls = n + 1;
       expect(fs.outputFile).toHaveBeenCalledTimes(n);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(ipcCalls);
+      expect(ipcRenderer.send).toHaveBeenCalledTimes(ipcCalls);
     });
 
     it('handles an error (remove)', async () => {
@@ -169,25 +165,25 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(2);
+      expect(ipcRenderer.send).toHaveBeenCalledTimes(2);
     });
 
     it('runs saveFiddle (normal) on IPC event', () => {
       fm.saveFiddle = jest.fn();
-      ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE);
+      ipcRenderer.emit(IpcEvents.FS_SAVE_FIDDLE);
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
 
     it('runs saveFiddle (forge) on IPC event', () => {
       fm.saveFiddle = jest.fn();
-      ipcRendererManager.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+      ipcRenderer.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
 
     it('asks for a path via IPC if none can  be found', async () => {
       await fm.saveFiddle();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcRenderer.send).toHaveBeenCalledWith<any>(
         IpcEvents.FS_SAVE_FIDDLE_DIALOG,
       );
     });
@@ -240,7 +236,7 @@ describe('FileManager', () => {
 
     it('runs openTemplate on IPC event', () => {
       fm.openTemplate = jest.fn();
-      ipcRendererManager.emit(IpcEvents.FS_OPEN_TEMPLATE);
+      ipcRenderer.emit(IpcEvents.FS_OPEN_TEMPLATE);
       expect(fm.openTemplate).toHaveBeenCalled();
     });
   });

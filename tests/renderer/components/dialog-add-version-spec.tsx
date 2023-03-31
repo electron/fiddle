@@ -1,14 +1,12 @@
 import * as React from 'react';
 
+import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
 import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform } from '../../utils';
-
-jest.mock('../../../src/renderer/ipc');
 
 describe('AddVersionDialog component', () => {
   let store: AppState;
@@ -62,7 +60,7 @@ describe('AddVersionDialog component', () => {
     const inp = wrapper.find('#custom-electron-version');
     inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
 
-    expect(ipcRendererManager.send as jest.Mock).toHaveBeenCalledWith(
+    expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
       IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
     );
     expect(preventDefault).toHaveBeenCalled();

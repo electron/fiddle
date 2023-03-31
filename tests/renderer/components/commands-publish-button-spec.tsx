@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
 import {
@@ -11,7 +12,6 @@ import {
 import { IpcEvents } from '../../../src/ipc-events';
 import { App } from '../../../src/renderer/app';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/utils/octokit';
 import { createEditorValues } from '../../mocks/mocks';
@@ -68,7 +68,7 @@ describe('Action button component', () => {
     (getOctokit as jest.Mock).mockImplementation(() => mocktokit);
 
     // listen for generated ipc traffic
-    ipcRendererManager.send = jest.fn();
+    ipcRenderer.send = jest.fn();
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
@@ -91,16 +91,16 @@ describe('Action button component', () => {
     const event = IpcEvents.FS_SAVE_FIDDLE_GIST;
 
     // confirm that it starts listening when mounted
-    let spy = jest.spyOn(ipcRendererManager, 'on');
+    const onSpy = jest.spyOn(ipcRenderer, 'on');
     const { instance, wrapper } = createActionButton();
-    expect(spy).toHaveBeenCalledWith(event, instance.handleClick);
-    spy.mockRestore();
+    expect(onSpy).toHaveBeenCalledWith(event, instance.handleClick);
+    onSpy.mockRestore();
 
     // confirm that it stops listening when unmounted
-    spy = jest.spyOn(ipcRendererManager, 'off');
+    const offSpy = jest.spyOn(ipcRenderer, 'off');
     wrapper.unmount();
-    expect(spy).toHaveBeenCalledWith(event, instance.handleClick);
-    spy.mockRestore();
+    expect(offSpy).toHaveBeenCalledWith(event, instance.handleClick);
+    offSpy.mockRestore();
   });
 
   it('toggles the auth dialog on click if not authed', async () => {
@@ -295,7 +295,7 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
         IpcEvents.SHOW_WARNING_DIALOG,
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
@@ -331,7 +331,7 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
         IpcEvents.SHOW_WARNING_DIALOG,
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
