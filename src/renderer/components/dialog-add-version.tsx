@@ -93,9 +93,9 @@ export const AddVersionDialog = observer(
     }
 
     /**
-     * Handles a change of the file input
+     * Sets the local folder path
      *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
+     * @param {string} folderPath
      */
     public setFolderPath(folderPath: string) {
       const isValidElectron = this.isValidElectronPath(folderPath);
@@ -104,6 +104,11 @@ export const AddVersionDialog = observer(
       this.setState({ existingLocalVersion, folderPath, isValidElectron });
     }
 
+    /**
+     * Handles a change of the file input
+     *
+     * @param {React.ChangeEvent<HTMLInputElement>} event
+     */
     public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
       const version = event.target.value || '';
       const isValidVersion = !!semver.valid(version);

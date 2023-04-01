@@ -9,7 +9,7 @@ import semver from 'semver';
  * @param {string} version - electron version
  * @returns {boolean}
  */
-export function disableDownload(version: string) {
+export function disableDownload(version: string): boolean {
   return (
     (window.ElectronFiddle.platform === 'darwin' &&
       window.ElectronFiddle.arch === 'arm64' &&

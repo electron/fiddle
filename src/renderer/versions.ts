@@ -14,7 +14,7 @@ import { normalizeVersion } from '../utils/normalize-version';
 /**
  * Returns a sensible default version string.
  *
- * @param {Array<RunnableVersion>} knownVersions
+ * @param {Array<RunnableVersion>} versions
  * @returns {string}
  */
 export function getDefaultVersion(versions: RunnableVersion[]): string {
@@ -233,7 +233,7 @@ function getReleasedVersions(): Array<Version> {
  * @param {number} major - Electron major version number
  * @returns {boolean} true if there are releases with that major version
  */
-export function isReleasedMajor(major: number) {
+export function isReleasedMajor(major: number): boolean {
   const prefix = `${major}.`;
   return getReleasedVersions().some((ver) => ver.version.startsWith(prefix));
 }

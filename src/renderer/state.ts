@@ -543,10 +543,10 @@ export class AppState {
   /**
    * Remove a version of Electron
    *
-   * @param {string} input
+   * @param {RunnableVersion} ver
    * @returns {Promise<void>}
    */
-  public async removeVersion(ver: RunnableVersion) {
+  public async removeVersion(ver: RunnableVersion): Promise<void> {
     const { version, state, source } = ver;
 
     if (ver === this.currentElectronVersion) {
@@ -593,7 +593,7 @@ export class AppState {
   public async downloadVersion(
     ver: RunnableVersion,
     opts: { activate: boolean } = { activate: true },
-  ) {
+  ): Promise<void> {
     const { source, state, version } = ver;
     const {
       electronMirror,
@@ -707,7 +707,7 @@ export class AppState {
    * @param {string} input
    * @returns {Promise<void>}
    */
-  public async setVersion(input: string) {
+  public async setVersion(input: string): Promise<void> {
     // make sure we can  use this version
     const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
