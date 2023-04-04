@@ -86,7 +86,7 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  * version.
  *
  * @param {RunnableVersion} { state }
- * @returns
+ * @returns {IconName}
  */
 export function getItemIcon({ state }: RunnableVersion): IconName {
   const installStateIcons: Record<InstallState, IconName> = {
