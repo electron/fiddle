@@ -100,12 +100,6 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindow?.reload();
   });
 
-  ipcMainManager.on(IpcEvents.SHOW_INACTIVE, () => {
-    if (browserWindow) {
-      browserWindow.showInactive();
-    }
-  });
-
   ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
     const paths = {};
     const pathsToQuery = [

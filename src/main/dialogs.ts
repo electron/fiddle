@@ -14,10 +14,6 @@ export function setupDialogs() {
     showWarningDialog(args);
   });
 
-  ipcMainManager.on(IpcEvents.SHOW_CONFIRMATION_DIALOG, (_event, args) => {
-    showConfirmationDialog(args);
-  });
-
   ipcMainManager.on(
     IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
     async (event) => {
@@ -32,18 +28,6 @@ export function setupDialogs() {
  * @param {Electron.MessageBoxOptions} args
  */
 function showWarningDialog(args: Electron.MessageBoxOptions) {
-  dialog.showMessageBox(getOrCreateMainWindow(), {
-    type: 'warning',
-    ...args,
-  });
-}
-
-/**
- * Shows a confirmation dialog
- *
- * @param {Electron.MessageBoxOptions} args
- */
-function showConfirmationDialog(args: Electron.MessageBoxOptions) {
   dialog.showMessageBox(getOrCreateMainWindow(), {
     type: 'warning',
     ...args,
