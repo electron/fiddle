@@ -12,17 +12,17 @@ commands:
           node-version: '18.4.0'
       - run: nvm use 18.4.0
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
-            - v1-dependencies-{{ arch }}
+      # - restore_cache:
+      #     keys:
+      #       - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+      #       - v1-dependencies-{{ arch }}
       - run: npm install --global yarn
       - run: echo "[]" > static/contributors.json
       - run: yarn install --frozen-lockfile
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
+      # - save_cache:
+      #     paths:
+      #       - node_modules
+      #     key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
   load-gh-token:
     steps:
       - run: |
@@ -133,7 +133,7 @@ jobs:
       - attach_workspace:
           at: .
       - load-gh-token
-      - run: yarn run publish --from-dry-run
+      - run: DEBUG=electron-forge* yarn run publish --from-dry-run
 
 workflows:
   build-and-test:
