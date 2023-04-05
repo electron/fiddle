@@ -17,6 +17,9 @@ export async function setupFiddleGlobal() {
     },
     monaco: null as any, // will be set in main.tsx
     platform: process.platform,
+    selectLocalVersion: () => {
+      return ipcRenderer.invoke(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
+    },
   };
 }
 
