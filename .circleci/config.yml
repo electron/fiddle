@@ -1,6 +1,7 @@
 version: 2.1
 
 orbs:
+  coveralls: coveralls/coveralls@2.2.1
   node: electronjs/node@1.4.1
 
 commands:
@@ -60,6 +61,7 @@ jobs:
     steps:
       - install
       - test
+      - coveralls/upload
   mac-build:
     parameters:
       arch:
