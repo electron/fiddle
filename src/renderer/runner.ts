@@ -2,13 +2,13 @@ import { ChildProcess } from 'child_process';
 import * as path from 'path';
 
 import { InstallState, Installer } from '@electron/fiddle-core';
+import { ipcRenderer } from 'electron';
 
 import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { Bisector } from './bisect';
-import { ipcRendererManager } from './ipc';
 import {
   PMOperationOptions,
   addModules,
@@ -43,15 +43,15 @@ export class Runner {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
 
-    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_RUN);
-    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
-    ipcRendererManager.removeAllListeners(IpcEvents.FIDDLE_MAKE);
+    ipcRenderer.removeAllListeners(IpcEvents.FIDDLE_RUN);
+    ipcRenderer.removeAllListeners(IpcEvents.FIDDLE_PACKAGE);
+    ipcRenderer.removeAllListeners(IpcEvents.FIDDLE_MAKE);
 
-    ipcRendererManager.on(IpcEvents.FIDDLE_RUN, this.run);
-    ipcRendererManager.on(IpcEvents.FIDDLE_PACKAGE, () => {
+    ipcRenderer.on(IpcEvents.FIDDLE_RUN, this.run);
+    ipcRenderer.on(IpcEvents.FIDDLE_PACKAGE, () => {
       this.performForgeOperation(ForgeCommands.PACKAGE);
     });
-    ipcRendererManager.on(IpcEvents.FIDDLE_MAKE, () => {
+    ipcRenderer.on(IpcEvents.FIDDLE_MAKE, () => {
       this.performForgeOperation(ForgeCommands.MAKE);
     });
   }

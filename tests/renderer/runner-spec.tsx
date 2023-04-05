@@ -1,6 +1,7 @@
 import * as path from 'path';
 
 import { InstallState } from '@electron/fiddle-core';
+import { ipcRenderer } from 'electron';
 import * as semver from 'semver';
 
 import {
@@ -9,7 +10,6 @@ import {
   VersionSource,
 } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import {
   addModules,
   getIsPackageManagerInstalled,
@@ -44,8 +44,6 @@ describe('Runner component', () => {
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
-
-    ipcRendererManager.removeAllListeners();
 
     (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
 
@@ -377,10 +375,10 @@ describe('Runner component', () => {
   describe('performForgeOperation()', () => {
     it('runs in response to an IPC event', () => {
       instance.performForgeOperation = jest.fn();
-      ipcRendererManager.emit(IpcEvents.FIDDLE_PACKAGE);
+      ipcRenderer.emit(IpcEvents.FIDDLE_PACKAGE);
       expect(instance.performForgeOperation).toHaveBeenCalledTimes(1);
 
-      ipcRendererManager.emit(IpcEvents.FIDDLE_MAKE);
+      ipcRenderer.emit(IpcEvents.FIDDLE_MAKE);
       expect(instance.performForgeOperation).toHaveBeenCalledTimes(2);
     });
 

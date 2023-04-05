@@ -1,8 +1,9 @@
+import { ipcRenderer } from 'electron';
+
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 import { waitFor } from '../utils';
@@ -234,6 +235,24 @@ describe('App component', () => {
 
       expect(document.body.classList.value).toBe('bp3-dark');
     });
+
+    it('sets native theme', async () => {
+      app.state.isUsingSystemTheme = false;
+
+      ipcRenderer.send = jest.fn();
+      await app.loadTheme('defaultLight');
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
+        IpcEvents.SET_NATIVE_THEME,
+        'light',
+      );
+
+      ipcRenderer.send = jest.fn();
+      await app.loadTheme('custom-dark');
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
+        IpcEvents.SET_NATIVE_THEME,
+        'dark',
+      );
+    });
   });
 
   describe('setupThemeListeners()', () => {
@@ -256,6 +275,10 @@ describe('App component', () => {
     });
 
     describe('isUsingSystemTheme reaction', () => {
+      beforeEach(() => {
+        ipcRenderer.send = jest.fn();
+      });
+
       it('ignores system theme changes when not isUsingSystemTheme', () => {
         app.state.isUsingSystemTheme = true;
         app.setupThemeListeners();
@@ -281,6 +304,17 @@ describe('App component', () => {
         });
         app.state.isUsingSystemTheme = true;
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+      });
+
+      it('sets native theme to system', () => {
+        app.state.isUsingSystemTheme = false;
+        app.setupThemeListeners();
+        app.state.isUsingSystemTheme = true;
+
+        expect(ipcRenderer.send).toHaveBeenCalledWith(
+          IpcEvents.SET_NATIVE_THEME,
+          'system',
+        );
       });
     });
 
@@ -378,7 +412,7 @@ describe('App component', () => {
     beforeEach(() => {
       // setup: mock close & ipc
       window.close = jest.fn();
-      ipcRendererManager.send = jest.fn();
+      ipcRenderer.send = jest.fn();
       app.setupUnloadListeners();
     });
 
@@ -390,9 +424,7 @@ describe('App component', () => {
       expect(window.onbeforeunload).toBeTruthy();
       const result = await window.onbeforeunload!(undefined as any);
       expect(result).toBe(false);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WINDOW,
-      );
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.SHOW_WINDOW);
       expect(window.close).toHaveBeenCalled();
     });
 
@@ -407,12 +439,8 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WINDOW,
-      );
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.CONFIRM_QUIT,
-      );
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.SHOW_WINDOW);
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT);
     });
 
     it('does nothing if user cancels the dialog', async () => {
@@ -426,10 +454,8 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).not.toHaveBeenCalled();
-      expect(ipcRendererManager.send).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WINDOW,
-      );
+      expect(ipcRenderer.send).toHaveBeenCalledTimes(1);
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.SHOW_WINDOW);
     });
 
     it('sends SHOW_WINDOW event if there are unsaved changes', async () => {
@@ -438,9 +464,7 @@ describe('App component', () => {
       const result = await window.onbeforeunload!(undefined as any);
 
       expect(result).toBe(false);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WINDOW,
-      );
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.SHOW_WINDOW);
     });
   });
 });

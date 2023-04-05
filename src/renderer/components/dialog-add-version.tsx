@@ -11,6 +11,7 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { Installer } from '@electron/fiddle-core';
+import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as semver from 'semver';
@@ -18,7 +19,6 @@ import * as semver from 'semver';
 import { Version } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 import { getLocalVersionForPath } from '../versions';
 
@@ -83,18 +83,13 @@ export const AddVersionDialog = observer(
       this.onClose = this.onClose.bind(this);
       this.onChangeVersion = this.onChangeVersion.bind(this);
 
-      ipcRendererManager.on(
-        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-        (_event, [file]) => {
-          this.setFolderPath(file);
-        },
-      );
+      ipcRenderer.on(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, (_event, [file]) => {
+        this.setFolderPath(file);
+      });
     }
 
     public componentWillUnmount() {
-      ipcRendererManager.removeAllListeners(
-        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-      );
+      ipcRenderer.removeAllListeners(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
     }
 
     /**
@@ -199,7 +194,7 @@ export const AddVersionDialog = observer(
       const inputProps = {
         onClick: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
           e.preventDefault();
-          ipcRendererManager.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+          ipcRenderer.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
         },
       };
       const { folderPath } = this.state;

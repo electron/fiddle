@@ -4,6 +4,7 @@ import {
   Button,
   ButtonGroupProps,
   ContextMenu,
+  IconName,
   Intent,
   Menu,
   MenuItem,
@@ -66,24 +67,18 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
  * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
-  let label = '';
-
   if (source === VersionSource.local) {
-    label = name || 'Local';
-  } else {
-    if (state === InstallState.missing) {
-      label = `Not downloaded`;
-    } else if (
-      state === InstallState.installed ||
-      state === InstallState.downloaded
-    ) {
-      label = `Downloaded`;
-    } else if (state === InstallState.downloading) {
-      label = `Downloading`;
-    }
+    return name || 'Local';
   }
 
-  return label;
+  const installStateLabels: Record<InstallState, string> = {
+    missing: 'Not downloaded',
+    downloading: 'Downloading',
+    downloaded: 'Downloaded',
+    installing: 'Downloaded',
+    installed: 'Downloaded',
+  } as const;
+  return installStateLabels[state] || '';
 }
 
 /**
@@ -91,20 +86,18 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  * version.
  *
  * @param {RunnableVersion} { state }
- * @returns
+ * @returns {IconName}
  */
-export function getItemIcon({ state }: RunnableVersion) {
-  switch (state) {
-    case InstallState.missing:
-      return 'cloud';
-    case InstallState.installing:
-      return 'compressed';
-    case InstallState.installed:
-    case InstallState.downloaded:
-      return 'saved';
-    case InstallState.downloading:
-      return 'cloud-download';
-  }
+export function getItemIcon({ state }: RunnableVersion): IconName {
+  const installStateIcons: Record<InstallState, IconName> = {
+    missing: 'cloud',
+    downloading: 'cloud-download',
+    downloaded: 'compressed',
+    installing: 'compressed',
+    installed: 'saved',
+  } as const;
+
+  return installStateIcons[state] || '';
 }
 
 /**

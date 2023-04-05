@@ -39,6 +39,7 @@ export enum IpcEvents {
   TASK_DONE = 'TASK_DONE',
   OUTPUT_ENTRY = 'OUTPUT_ENTRY',
   RELOAD_WINDOW = 'RELOAD_WINDOW',
+  SET_NATIVE_THEME = 'SET_NATIVE_THEME',
   SHOW_WINDOW = 'SHOW_WINDOW',
 }
 
@@ -56,38 +57,8 @@ export const ipcMainEvents = [
   IpcEvents.OUTPUT_ENTRY,
   IpcEvents.TASK_DONE,
   IpcEvents.RELOAD_WINDOW,
+  IpcEvents.SET_NATIVE_THEME,
   IpcEvents.SHOW_WINDOW,
-];
-
-export const ipcRendererEvents = [
-  IpcEvents.OPEN_SETTINGS,
-  IpcEvents.LOAD_GIST_REQUEST,
-  IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
-  IpcEvents.FIDDLE_RUN,
-  IpcEvents.FIDDLE_PACKAGE,
-  IpcEvents.FIDDLE_MAKE,
-  IpcEvents.MONACO_EXECUTE_COMMAND,
-  IpcEvents.MONACO_TOGGLE_OPTION,
-  IpcEvents.FS_NEW_FIDDLE,
-  IpcEvents.FS_NEW_TEST,
-  IpcEvents.FS_OPEN_FIDDLE,
-  IpcEvents.FS_OPEN_TEMPLATE,
-  IpcEvents.FS_SAVE_FIDDLE,
-  IpcEvents.FS_SAVE_FIDDLE_AS,
-  IpcEvents.FS_SAVE_FIDDLE_FORGE,
-  IpcEvents.FS_SAVE_FIDDLE_GIST,
-  IpcEvents.SHOW_WELCOME_TOUR,
-  IpcEvents.CLEAR_CONSOLE,
-  IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-  IpcEvents.BISECT_COMMANDS_TOGGLE,
-  IpcEvents.BEFORE_QUIT,
-  IpcEvents.GET_APP_PATHS,
-  IpcEvents.SELECT_ALL_IN_EDITOR,
-  IpcEvents.UNDO_IN_EDITOR,
-  IpcEvents.REDO_IN_EDITOR,
-  IpcEvents.SET_SHOW_ME_TEMPLATE,
-  IpcEvents.TASK_BISECT,
-  IpcEvents.TASK_TEST,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

@@ -12,7 +12,6 @@ import {
 } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';
 import { getTemplate } from '../../src/renderer/content';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import { AppState } from '../../src/renderer/state';
 import {
   fetchVersions,
@@ -49,7 +48,6 @@ jest.mock('../../src/renderer/versions', () => {
 jest.mock('../../src/utils/get-name', () => ({
   getName: jest.fn(),
 }));
-jest.mock('../../src/renderer/ipc');
 
 describe('AppState', () => {
   let appState: AppState;
@@ -73,8 +71,6 @@ describe('AppState', () => {
     installSpy = jest
       .spyOn(appState.installer, 'install')
       .mockImplementation(() => Promise.resolve(''));
-
-    ipcRendererManager.removeAllListeners();
   });
 
   it('exists', () => {

@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { Button, InputGroup, Intent } from '@blueprintjs/core';
 import classnames from 'classnames';
+import { ipcRenderer } from 'electron';
 import { reaction } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { GistActionState } from '../../interfaces';
 import { IpcEvents } from '../../ipc-events';
 import { idFromUrl, urlFromId } from '../../utils/gist';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 interface AddressBarProps {
@@ -83,20 +83,14 @@ export const AddressBar = observer(
         () => appState.gistId,
         (gistId: string) => this.setState({ value: urlFromId(gistId) }),
       );
-      ipcRendererManager.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
-      ipcRendererManager.on(
-        IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
-        loaders.example,
-      );
+      ipcRenderer.on(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
+      ipcRenderer.on(IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST, loaders.example);
     }
 
     public componentWillUnmount() {
       const { loaders } = this.state;
-      ipcRendererManager.removeListener(
-        IpcEvents.LOAD_GIST_REQUEST,
-        loaders.gist,
-      );
-      ipcRendererManager.removeListener(
+      ipcRenderer.removeListener(IpcEvents.LOAD_GIST_REQUEST, loaders.gist);
+      ipcRenderer.removeListener(
         IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
         loaders.example,
       );

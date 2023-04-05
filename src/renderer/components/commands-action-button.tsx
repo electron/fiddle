@@ -10,6 +10,7 @@ import {
   Position,
   Toaster,
 } from '@blueprintjs/core';
+import { ipcRenderer } from 'electron';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
@@ -22,7 +23,6 @@ import { IpcEvents } from '../../ipc-events';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { getOctokit } from '../../utils/octokit';
 import { getTemplate } from '../content';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 interface GistActionButtonProps {
@@ -60,7 +60,7 @@ export const GistActionButton = observer(
         actionType: GistActionType.publish,
       };
 
-      ipcRendererManager.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
+      ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
     }
 
     private toaster: Toaster;
@@ -69,11 +69,11 @@ export const GistActionButton = observer(
     };
 
     public componentDidMount() {
-      ipcRendererManager.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
     }
 
     public componentWillUnmount() {
-      ipcRendererManager.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      ipcRenderer.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
     }
 
     /**
@@ -166,10 +166,7 @@ export const GistActionButton = observer(
           detail: `GitHub encountered the following error: ${error.message}`,
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
 
         return false;
       }
@@ -246,10 +243,7 @@ export const GistActionButton = observer(
           buttons: ['Ok'],
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
       }
 
       appState.activeGistAction = GistActionState.none;
@@ -282,10 +276,7 @@ export const GistActionButton = observer(
           detail: `GitHub encountered the following error: ${error.message}`,
         };
 
-        ipcRendererManager.send(
-          IpcEvents.SHOW_WARNING_DIALOG,
-          messageBoxOptions,
-        );
+        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
       }
 
       appState.gistId = undefined;

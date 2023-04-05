@@ -6,7 +6,6 @@ import {
   WelcomeTour,
   getWelcomeTour,
 } from '../../../src/renderer/components/tour-welcome';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 
 describe('Header component', () => {
@@ -15,8 +14,6 @@ describe('Header component', () => {
   beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
     store.isTourShowing = true;
-
-    ipcRendererManager.removeAllListeners();
   });
 
   it('renders', () => {

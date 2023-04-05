@@ -1,17 +1,12 @@
 import * as electron from 'electron';
 
 import { IpcEvents } from '../../src/ipc-events';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 
-describe('ipcRendererManager', () => {
-  afterEach(() => {
-    ipcRendererManager.removeAllListeners();
-  });
-
+describe('ipcRenderer', () => {
   describe('emit()', () => {
     it('emits an Electron IPC event', () => {
       const mockListener = jest.fn();
-      ipcRendererManager.on(IpcEvents.FIDDLE_RUN, mockListener);
+      electron.ipcRenderer.on(IpcEvents.FIDDLE_RUN, mockListener);
       electron.ipcRenderer.emit(IpcEvents.FIDDLE_RUN);
 
       expect(mockListener).toHaveBeenCalled();
@@ -20,7 +15,7 @@ describe('ipcRendererManager', () => {
 
   describe('send()', () => {
     it('sends an event', () => {
-      ipcRendererManager.send(IpcEvents.FIDDLE_RUN, 'hello');
+      electron.ipcRenderer.send(IpcEvents.FIDDLE_RUN, 'hello');
       expect(electron.ipcRenderer.send).toHaveBeenCalledWith<any>(
         IpcEvents.FIDDLE_RUN,
         'hello',
@@ -31,7 +26,7 @@ describe('ipcRendererManager', () => {
   describe('invoke()', () => {
     it('returns the value of ipcRenderer.invoke', async () => {
       (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(1);
-      const result = await ipcRendererManager.invoke(
+      const result = await electron.ipcRenderer.invoke(
         IpcEvents.FIDDLE_RUN,
         'hello',
       );

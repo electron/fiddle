@@ -9,7 +9,6 @@ import { PackageJsonOptions, getPackageJson } from '../utils/get-package';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
-import { ipcRendererManager } from './ipc';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
@@ -169,9 +168,15 @@ export class App {
     reaction(
       () => this.state.isUsingSystemTheme,
       () => {
-        if (this.state.isUsingSystemTheme && !!window.matchMedia) {
-          const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
-          setSystemTheme(matches);
+        if (this.state.isUsingSystemTheme) {
+          ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'system');
+
+          if (!!window.matchMedia) {
+            const { matches } = window.matchMedia(
+              '(prefers-color-scheme: dark)',
+            );
+            setSystemTheme(matches);
+          }
         }
       },
     );
@@ -221,8 +226,14 @@ export class App {
 
     if (theme.isDark || theme.name.includes('dark')) {
       document.body.classList.add('bp3-dark');
+      if (!this.state.isUsingSystemTheme) {
+        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'dark');
+      }
     } else {
       document.body.classList.remove('bp3-dark');
+      if (!this.state.isUsingSystemTheme) {
+        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'light');
+      }
     }
   }
 
@@ -276,12 +287,12 @@ export class App {
       window.onbeforeunload = async () => {
         // On Mac OS, quitting can be triggered from the dock,
         // show the window before presenting the dialog
-        ipcRendererManager.send(IpcEvents.SHOW_WINDOW);
+        ipcRenderer.send(IpcEvents.SHOW_WINDOW);
         if (await this.confirmExitUnsaved()) {
           // isQuitting checks if we're trying to quit the app
           // or just close the window
           if (state.isQuitting) {
-            ipcRendererManager.send(IpcEvents.CONFIRM_QUIT);
+            ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
           }
           window.onbeforeunload = null;
           window.close();
