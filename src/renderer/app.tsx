@@ -169,7 +169,7 @@ export class App {
       () => this.state.isUsingSystemTheme,
       () => {
         if (this.state.isUsingSystemTheme) {
-          ipcRendererManager.send(IpcEvents.SET_NATIVE_THEME, 'system');
+          ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'system');
 
           if (!!window.matchMedia) {
             const { matches } = window.matchMedia(
@@ -227,12 +227,12 @@ export class App {
     if (theme.isDark || theme.name.includes('dark')) {
       document.body.classList.add('bp3-dark');
       if (!this.state.isUsingSystemTheme) {
-        ipcRendererManager.send(IpcEvents.SET_NATIVE_THEME, 'dark');
+        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'dark');
       }
     } else {
       document.body.classList.remove('bp3-dark');
       if (!this.state.isUsingSystemTheme) {
-        ipcRendererManager.send(IpcEvents.SET_NATIVE_THEME, 'light');
+        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'light');
       }
     }
   }

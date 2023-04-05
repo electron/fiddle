@@ -239,16 +239,16 @@ describe('App component', () => {
     it('sets native theme', async () => {
       app.state.isUsingSystemTheme = false;
 
-      ipcRendererManager.send = jest.fn();
+      ipcRenderer.send = jest.fn();
       await app.loadTheme('defaultLight');
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
         IpcEvents.SET_NATIVE_THEME,
         'light',
       );
 
-      ipcRendererManager.send = jest.fn();
+      ipcRenderer.send = jest.fn();
       await app.loadTheme('custom-dark');
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
+      expect(ipcRenderer.send).toHaveBeenCalledWith(
         IpcEvents.SET_NATIVE_THEME,
         'dark',
       );
@@ -276,7 +276,7 @@ describe('App component', () => {
 
     describe('isUsingSystemTheme reaction', () => {
       beforeEach(() => {
-        ipcRendererManager.send = jest.fn();
+        ipcRenderer.send = jest.fn();
       });
 
       it('ignores system theme changes when not isUsingSystemTheme', () => {
@@ -311,7 +311,7 @@ describe('App component', () => {
         app.setupThemeListeners();
         app.state.isUsingSystemTheme = true;
 
-        expect(ipcRendererManager.send).toHaveBeenCalledWith(
+        expect(ipcRenderer.send).toHaveBeenCalledWith(
           IpcEvents.SET_NATIVE_THEME,
           'system',
         );
