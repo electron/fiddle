@@ -5,6 +5,7 @@ import {
   ProgressObject,
   Runner,
 } from '@electron/fiddle-core';
+import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import {
   action,
@@ -38,7 +39,6 @@ import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { getTemplate } from './content';
 import { EditorMosaic } from './editor-mosaic';
-import { ipcRendererManager } from './ipc';
 import { ELECTRON_MIRROR } from './mirror-constants';
 import { IPackageManager } from './npm';
 import {
@@ -318,20 +318,17 @@ export class AppState {
     this.defaultVersion = getDefaultVersion(versions);
     this.version = this.defaultVersion;
 
-    ipcRendererManager.removeAllListeners(IpcEvents.BEFORE_QUIT);
-    ipcRendererManager.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
-    ipcRendererManager.removeAllListeners(IpcEvents.OPEN_SETTINGS);
-    ipcRendererManager.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
+    ipcRenderer.removeAllListeners(IpcEvents.BEFORE_QUIT);
+    ipcRenderer.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
+    ipcRenderer.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
+    ipcRenderer.removeAllListeners(IpcEvents.OPEN_SETTINGS);
+    ipcRenderer.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
 
-    ipcRendererManager.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
-    ipcRendererManager.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
-    ipcRendererManager.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
-    ipcRendererManager.on(
-      IpcEvents.BISECT_COMMANDS_TOGGLE,
-      this.toggleBisectCommands,
-    );
-    ipcRendererManager.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
+    ipcRenderer.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
+    ipcRenderer.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
+    ipcRenderer.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
+    ipcRenderer.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
+    ipcRenderer.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));
@@ -376,7 +373,7 @@ export class AppState {
     this.pushOutput('Console ready 🔬');
 
     // set blocked shortcuts
-    ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+    ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
       ...this.acceleratorsToBlock,
     ]);
 
@@ -867,7 +864,7 @@ export class AppState {
       text: strData.trim(),
       timeString: this.timeFmt.format(new Date()),
     };
-    ipcRendererManager.send(IpcEvents.OUTPUT_ENTRY, entry);
+    ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
     this.output.push(entry);
   }
 
@@ -884,13 +881,13 @@ export class AppState {
   }
 
   public async setShowMeMenu() {
-    ipcRendererManager.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
+    ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
   }
 
   public async addAcceleratorToBlock(acc: BlockableAccelerator) {
     if (!this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
-      ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+      ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
         ...this.acceleratorsToBlock,
       ]);
     }
@@ -901,7 +898,7 @@ export class AppState {
       this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
         (a) => a !== acc,
       );
-      ipcRendererManager.send(IpcEvents.BLOCK_ACCELERATORS, [
+      ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
         ...this.acceleratorsToBlock,
       ]);
     }

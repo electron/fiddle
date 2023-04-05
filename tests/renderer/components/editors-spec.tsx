@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ipcRenderer } from 'electron';
 import { mount, shallow } from 'enzyme';
 
 import { EditorValues, MAIN_JS } from '../../../src/interfaces';
@@ -8,7 +9,6 @@ import { App } from '../../../src/renderer/app';
 import { Editors } from '../../../src/renderer/components/editors';
 import * as content from '../../../src/renderer/content';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 import {
   MonacoEditorMock,
@@ -118,7 +118,7 @@ describe('Editors component', () => {
 
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-      ipcRendererManager.emit(IpcEvents.MONACO_EXECUTE_COMMAND, null, 'hello');
+      ipcRenderer.emit(IpcEvents.MONACO_EXECUTE_COMMAND, null, 'hello');
       expect(editor.getAction).toHaveBeenCalled();
       expect(action.isSupported).toHaveBeenCalled();
       expect(action.run).toHaveBeenCalled();
@@ -141,7 +141,7 @@ describe('Editors component', () => {
         .mockImplementation(() => resolve());
 
       // invoke the call
-      ipcRendererManager.emit(IpcEvents.FS_NEW_FIDDLE, null);
+      ipcRenderer.emit(IpcEvents.FS_NEW_FIDDLE, null);
       await replacePromise;
 
       // check the results
@@ -163,7 +163,7 @@ describe('Editors component', () => {
         model.getFullModelRange.mockReturnValue(range);
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
 
         await process.nextTick;
         expect(editor.setSelection).toHaveBeenCalledWith('range');
@@ -176,7 +176,7 @@ describe('Editors component', () => {
         delete (editor as any).model;
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
 
         await process.nextTick;
         expect(editor.getModel).toHaveBeenCalledTimes(1);
@@ -186,7 +186,7 @@ describe('Editors component', () => {
       it('does not crash if there is no selected editor', () => {
         shallow(<Editors appState={store} />);
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(null);
-        ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
       });
     });
 
@@ -204,7 +204,7 @@ describe('Editors component', () => {
         .mockImplementation(() => replaceResolve());
 
       // invoke the call
-      ipcRendererManager.emit(IpcEvents.FS_NEW_TEST);
+      ipcRenderer.emit(IpcEvents.FS_NEW_TEST);
       await replacePromise;
 
       // check the results
@@ -223,7 +223,7 @@ describe('Editors component', () => {
       editor.getModel().getFullModelRange.mockReturnValue(range);
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-      ipcRendererManager.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+      ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
       await process.nextTick;
 
       expect(editor.setSelection).toHaveBeenCalledWith(range);
@@ -235,7 +235,7 @@ describe('Editors component', () => {
       editorMosaic.addEditor(id, editor as any);
 
       shallow(<Editors appState={store} />);
-      ipcRendererManager.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
+      ipcRenderer.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
       expect(editor.updateOptions).toHaveBeenCalled();
     });
   });

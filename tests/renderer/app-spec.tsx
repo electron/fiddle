@@ -1,8 +1,9 @@
+import { ipcRenderer } from 'electron';
+
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 import { waitFor } from '../utils';
@@ -411,7 +412,7 @@ describe('App component', () => {
     beforeEach(() => {
       // setup: mock close & ipc
       window.close = jest.fn();
-      ipcRendererManager.send = jest.fn();
+      ipcRenderer.send = jest.fn();
       app.setupUnloadListeners();
     });
 
@@ -437,9 +438,7 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).toHaveBeenCalledTimes(1);
-      expect(ipcRendererManager.send).toHaveBeenCalledWith(
-        IpcEvents.CONFIRM_QUIT,
-      );
+      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT);
     });
 
     it('does nothing if user cancels the dialog', async () => {
@@ -453,7 +452,7 @@ describe('App component', () => {
 
       expect(result).toBe(false);
       expect(window.close).not.toHaveBeenCalled();
-      expect(ipcRendererManager.send).not.toHaveBeenCalled();
+      expect(ipcRenderer.send).not.toHaveBeenCalled();
     });
   });
 });

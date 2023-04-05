@@ -4,7 +4,6 @@ import { InstallState } from '@electron/fiddle-core';
 import { shallow } from 'enzyme';
 
 import { Runner } from '../../../src/renderer/components/commands-runner';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 
 jest.mock('../../../src/renderer/file-manager');
@@ -17,7 +16,6 @@ describe('Runner component', () => {
 
   beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
-    ipcRendererManager.removeAllListeners();
   });
 
   describe('renders', () => {

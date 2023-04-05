@@ -1,4 +1,5 @@
 import { InstallState } from '@electron/fiddle-core';
+import { ipcRenderer } from 'electron';
 
 import {
   EditorValues,
@@ -6,7 +7,6 @@ import {
   PACKAGE_NAME,
   VersionSource,
 } from '../../src/interfaces';
-import { ipcRendererManager } from '../../src/renderer/ipc';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { AppState } from '../../src/renderer/state';
 import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
@@ -32,7 +32,7 @@ describe('RemoteLoader', () => {
   beforeEach(() => {
     app = (window.ElectronFiddle.app as unknown) as AppMock;
     ({ state: store } = app);
-    ipcRendererManager.send = jest.fn();
+    ipcRenderer.send = jest.fn();
     store.channelsToShow = [ElectronReleaseChannel.stable];
     store.initVersions('4.0.0', {
       '4.0.0': { version: '4.0.0' },
@@ -62,10 +62,6 @@ describe('RemoteLoader', () => {
     mockGetRepos = {
       getContents: jest.fn().mockResolvedValue({ data: mockRepos }),
     };
-  });
-
-  afterEach(() => {
-    ipcRendererManager.removeAllListeners();
   });
 
   describe('fetchGistAndLoad()', () => {

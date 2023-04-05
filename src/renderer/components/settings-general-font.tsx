@@ -1,10 +1,10 @@
 import * as React from 'react';
 
 import { Button, Callout, FormGroup, InputGroup } from '@blueprintjs/core';
+import { ipcRenderer } from 'electron';
 import { observer } from 'mobx-react';
 
 import { IpcEvents } from '../../ipc-events';
-import { ipcRendererManager } from '../ipc';
 import { AppState } from '../state';
 
 interface FontSettingsProps {
@@ -65,7 +65,7 @@ export class FontSettings extends React.Component<
    * Reloads the BrowserWindow.
    */
   private reloadWindow() {
-    ipcRendererManager.send(IpcEvents.RELOAD_WINDOW);
+    ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
   }
 
   public render() {

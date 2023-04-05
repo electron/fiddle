@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 import {
   BisectRequest,
   ElectronReleaseChannel,
@@ -11,7 +13,6 @@ import { IpcEvents } from '../ipc-events';
 import { getVersionRange } from '../utils/get-version-range';
 import { normalizeVersion } from '../utils/normalize-version';
 import { App } from './app';
-import { ipcRendererManager } from './ipc';
 import { AppState } from './state';
 
 export class TaskRunner {
@@ -28,7 +29,7 @@ export class TaskRunner {
 
   constructor(app: App) {
     const { runner, state } = app;
-    const ipc = ipcRendererManager;
+    const ipc = ipcRenderer;
 
     this.appState = state;
     this.autobisect = runner.autobisect.bind(runner);

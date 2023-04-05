@@ -1,12 +1,12 @@
 import * as React from 'react';
 
 import { Button, ControlGroup } from '@blueprintjs/core';
+import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
 import { IpcEvents } from '../../../src/ipc-events';
 import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
-import { ipcRendererManager } from '../../../src/renderer/ipc';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
@@ -58,7 +58,7 @@ describe('Commands component', () => {
   });
 
   it('handleDoubleClick()', () => {
-    const spy = jest.spyOn(ipcRendererManager, 'send');
+    const spy = jest.spyOn(ipcRenderer, 'send');
 
     const wrapper = shallow(<Commands appState={store} />);
     const instance = wrapper.instance() as any;
@@ -71,7 +71,7 @@ describe('Commands component', () => {
   });
 
   it('handleDoubleClick() should not handle input tag', () => {
-    const spy = jest.spyOn(ipcRendererManager, 'send');
+    const spy = jest.spyOn(ipcRenderer, 'send');
 
     const wrapper = shallow(<Commands appState={store} />);
     const instance = wrapper.instance() as any;

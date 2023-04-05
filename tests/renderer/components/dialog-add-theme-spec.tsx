@@ -14,8 +14,6 @@ import {
 } from '../../../src/renderer/themes-defaults';
 import { overrideRendererPlatform } from '../../utils';
 
-jest.mock('../../../src/renderer/ipc');
-
 describe('AddThemeDialog component', () => {
   let store: AppState;
 
