@@ -284,19 +284,26 @@ export class App {
         return;
       }
 
-      window.onbeforeunload = async () => {
-        if (await this.confirmExitUnsaved()) {
-          // isQuitting checks if we're trying to quit the app
-          // or just close the window
-          if (state.isQuitting) {
-            ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
-          }
-          window.onbeforeunload = null;
-          window.close();
-        }
+      window.onbeforeunload = (e: BeforeUnloadEvent) => {
+        // On Mac OS, quitting can be triggered from the dock,
+        // show the window so the dialog is visible
+        setTimeout(() => {
+          this.confirmExitUnsaved().then((quit) => {
+            if (quit) {
+              // isQuitting checks if we're trying to quit the app
+              // or just close the window
+              if (state.isQuitting) {
+                ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
+              }
+              window.onbeforeunload = null;
+              window.close();
+            }
+          });
+          ipcRenderer.send(IpcEvents.SHOW_WINDOW);
+        });
 
         // return value doesn't matter, we just want to cancel the event
-        return false;
+        e.returnValue = false;
       };
     });
   }

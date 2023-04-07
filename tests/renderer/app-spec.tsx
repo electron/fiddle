@@ -422,8 +422,18 @@ describe('App component', () => {
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
       expect(window.onbeforeunload).toBeTruthy();
-      const result = await window.onbeforeunload!(undefined as any);
-      expect(result).toBe(false);
+
+      const e = {
+        returnValue: Boolean,
+      };
+      window.onbeforeunload!(e as any);
+      expect(e.returnValue).toBe(false);
+
+      await waitFor(() =>
+        (ipcRenderer.send as jest.Mock).mock.calls.find(
+          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
+        ),
+      );
       expect(window.close).toHaveBeenCalled();
     });
 
@@ -434,11 +444,20 @@ describe('App component', () => {
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
       expect(window.onbeforeunload).toBeTruthy();
-      const result = await window.onbeforeunload!(undefined as any);
 
-      expect(result).toBe(false);
-      expect(window.close).toHaveBeenCalledTimes(1);
+      const e = {
+        returnValue: Boolean,
+      };
+      window.onbeforeunload!(e as any);
+      expect(e.returnValue).toBe(false);
+
+      await waitFor(() =>
+        (ipcRenderer.send as jest.Mock).mock.calls.find(
+          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
+        ),
+      );
       expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT);
+      expect(window.close).toHaveBeenCalledTimes(1);
     });
 
     it('does nothing if user cancels the dialog', async () => {
@@ -448,11 +467,20 @@ describe('App component', () => {
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
       expect(window.onbeforeunload).toBeTruthy();
-      const result = await window.onbeforeunload!(undefined as any);
 
-      expect(result).toBe(false);
+      const e = {
+        returnValue: Boolean,
+      };
+      window.onbeforeunload!(e as any);
+      expect(e.returnValue).toBe(false);
+
+      await waitFor(() =>
+        (ipcRenderer.send as jest.Mock).mock.calls.find(
+          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
+        ),
+      );
+      expect(ipcRenderer.send).toHaveBeenCalledTimes(1);
       expect(window.close).not.toHaveBeenCalled();
-      expect(ipcRenderer.send).not.toHaveBeenCalled();
     });
   });
 });

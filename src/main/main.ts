@@ -34,6 +34,7 @@ export async function onReady() {
   const { setupMenu } = await import('./menu');
   const { setupFileListeners } = await import('./files');
 
+  setupShowWindow();
   setupMenu();
   setupMenuHandler();
   setupProtocolHandler();
@@ -55,6 +56,15 @@ export async function onReady() {
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);
   ipcMainManager.on(IpcEvents.CONFIRM_QUIT, app.quit);
+}
+
+export function setupShowWindow() {
+  ipcMainManager.on(IpcEvents.SHOW_WINDOW, (event: IpcMainEvent) => {
+    const win = BrowserWindow.fromWebContents(event.sender);
+    if (win) {
+      win.show();
+    }
+  });
 }
 
 export function setupMenuHandler() {

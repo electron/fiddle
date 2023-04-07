@@ -13,6 +13,7 @@ import {
   onReady,
   onWindowsAllClosed,
   setupMenuHandler,
+  setupShowWindow,
   setupTitleBarClickMac,
 } from '../../src/main/main';
 import { shouldQuit } from '../../src/main/squirrel';
@@ -126,6 +127,28 @@ describe('main', () => {
         IpcEvents.BLOCK_ACCELERATORS,
         expect.anything(),
       );
+    });
+  });
+
+  describe('setupShowWindow()', () => {
+    beforeEach(() => {
+      // Since ipcMainManager is mocked, we can't just .emit to trigger
+      // the event. Instead, call the callback as soon as the listener
+      // is instantiated.
+      (ipcMainManager.on as jest.Mock).mockImplementationOnce(
+        (channel, callback) => {
+          if (channel === IpcEvents.SHOW_WINDOW) {
+            callback({});
+          }
+        },
+      );
+    });
+
+    it('shows the window', () => {
+      const mockWindow = new BrowserWindowMock();
+      (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(mockWindow);
+      setupShowWindow();
+      expect(mockWindow.show).toHaveBeenCalled();
     });
   });
 
