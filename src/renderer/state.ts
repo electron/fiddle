@@ -37,7 +37,6 @@ import { normalizeVersion } from '../utils/normalize-version';
 import { sortVersions } from '../utils/sort-versions';
 import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
-import { getTemplate } from './content';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
 import { IPackageManager } from './npm';
@@ -730,7 +729,7 @@ export class AppState {
       (this.templateName && !this.editorMosaic.isEdited); // unedited template
     if (shouldReplace()) {
       const options: SetFiddleOptions = { templateName: version };
-      const values = await getTemplate(version);
+      const values = await window.ElectronFiddle.getTemplate(version);
       // test again just in case something happened while we awaited
       if (shouldReplace()) {
         await window.ElectronFiddle.app.replaceFiddle(values, options);

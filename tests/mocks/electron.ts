@@ -41,6 +41,22 @@ export class MenuMock {
   }
 }
 
+export class MessageChannelMainMock {
+  public port1: MessagePortMainMock;
+  public port2: MessagePortMainMock;
+
+  constructor() {
+    this.port1 = new MessagePortMainMock();
+    this.port2 = new MessagePortMainMock();
+  }
+}
+
+export class MessagePortMainMock {
+  public once = jest.fn();
+  public postMessage = jest.fn();
+  public start = jest.fn();
+}
+
 export class NativeImageMock {
   public readonly args: Array<any>;
   constructor(...args: Array<any>) {
@@ -181,6 +197,7 @@ const electronMock = {
   match: jest.fn(),
   Menu: MenuMock,
   MenuItem: MenuItemMock,
+  MessageChannelMain: MessageChannelMainMock,
   Notification: NotificationMock,
   _notifications: createdNotifications,
   protocol: {

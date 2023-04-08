@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 
-import { ipcMain } from 'electron';
+import { MessagePortMain, ipcMain } from 'electron';
 
 import {
   IpcEvents,
@@ -85,6 +85,16 @@ class IpcMainManager extends EventEmitter {
     listener: (event: Electron.IpcMainInvokeEvent, ...args: any[]) => any,
   ) {
     ipcMain.handleOnce(channel, listener);
+  }
+
+  public postMessage(
+    channel: IpcEvents,
+    message: any,
+    transfer?: MessagePortMain[],
+    target?: Electron.WebContents,
+  ) {
+    const _target = target || getOrCreateMainWindow().webContents;
+    _target.postMessage(channel, message, transfer);
   }
 }
 

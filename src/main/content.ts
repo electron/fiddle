@@ -1,10 +1,13 @@
 import * as path from 'path';
 
+import fetch from 'cross-fetch';
+import { IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 
 import { EditorValues } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 import { readFiddle } from '../utils/read-fiddle';
-import { USER_DATA_PATH } from './constants';
+import { ipcMainManager } from './ipc';
 import { isReleasedMajor } from './versions';
 
 const STATIC_DIR =
@@ -13,7 +16,7 @@ const STATIC_DIR =
     : path.join(process.cwd(), './static');
 
 // parent directory of all the downloaded template fiddles
-const TEMPLATES_DIR = path.join(USER_DATA_PATH, 'Templates');
+const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');
 
 // location of the fallback template fiddle used iff downloading failed
 const STATIC_TEMPLATE_DIR = path.join(STATIC_DIR, 'electron-quick-start');
@@ -101,9 +104,19 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<EditorValues>}
  */
-export function getTemplate(version: string): Promise<EditorValues> {
+export async function getTemplate(version: string): Promise<EditorValues> {
   const major = Number.parseInt(version);
-  return major && isReleasedMajor(major)
+  return major && (await isReleasedMajor(major))
     ? getQuickStart(`${major}-x-y`)
     : readFiddle(STATIC_TEMPLATE_DIR);
+}
+
+export async function setupContent() {
+  ipcMainManager.handle(
+    IpcEvents.GET_TEMPLATE,
+    (_: IpcMainEvent, version: string) => getTemplate(version),
+  );
+  ipcMainManager.handle(IpcEvents.GET_TEST_TEMPLATE, (_: IpcMainEvent) =>
+    getTestTemplate(),
+  );
 }

@@ -9,7 +9,9 @@ declare global {
       app: App;
       appPaths: Record<string, string>;
       arch: string;
+      getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
+      getTestTemplate(): Promise<EditorValues>;
       monaco: typeof MonacoType;
       platform: string;
     };

@@ -4,6 +4,7 @@ import { ipcRenderer } from 'electron';
 import {
   EditorValues,
   ElectronReleaseChannel,
+  MAIN_JS,
   PACKAGE_NAME,
   VersionSource,
 } from '../../src/interfaces';
@@ -264,6 +265,10 @@ describe('RemoteLoader', () => {
     });
 
     it('loads an Electron example', async () => {
+      (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
+        [MAIN_JS]: '// content',
+      });
+
       (getOctokit as jest.Mock).mockReturnValue({ repos: mockGetRepos });
 
       await instance.fetchExampleAndLoad('v4.0.0', 'test/path');

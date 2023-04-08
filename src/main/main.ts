@@ -9,6 +9,7 @@ import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from './about-panel';
 import { processCommandLine } from './command-line';
+import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
@@ -46,6 +47,7 @@ export async function onReady() {
   setupTitleBarClickMac();
   setupNativeTheme();
   setupTemplates();
+  setupContent();
 
   processCommandLine(argv);
 }

@@ -16,7 +16,6 @@ import { IpcEvents } from '../../ipc-events';
 import { getEditorTitle } from '../../utils/editor-utils';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
-import { getTemplate, getTestTemplate } from '../content';
 import { AppState } from '../state';
 import { Editor } from './editor';
 import { renderNonIdealState } from './editors-non-ideal-state';
@@ -72,7 +71,7 @@ export const Editors = observer(
 
       ipcRenderer.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
         const { modules, version } = this.props.appState;
-        const values = await getTemplate(version);
+        const values = await window.ElectronFiddle.getTemplate(version);
         const options: SetFiddleOptions = { templateName: version };
 
         // Clear previously installed modules.
@@ -82,7 +81,7 @@ export const Editors = observer(
       });
 
       ipcRenderer.on(IpcEvents.FS_NEW_TEST, async (_event) => {
-        const values = await getTestTemplate();
+        const values = await window.ElectronFiddle.getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
         await window.ElectronFiddle.app.replaceFiddle(values, options);

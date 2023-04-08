@@ -39,6 +39,9 @@ export enum IpcEvents {
   SET_NATIVE_THEME = 'SET_NATIVE_THEME',
   SHOW_WINDOW = 'SHOW_WINDOW',
   GET_TEMPLATE_VALUES = 'GET_TEMPLATE_VALUES',
+  GET_TEMPLATE = 'GET_TEMPLATE',
+  GET_TEST_TEMPLATE = 'GET_TEST_TEMPLATE',
+  IS_RELEASED_MAJOR = 'IS_RELEASED_MAJOR',
 }
 
 export const ipcMainEvents = [
@@ -56,6 +59,8 @@ export const ipcMainEvents = [
   IpcEvents.SET_NATIVE_THEME,
   IpcEvents.SHOW_WINDOW,
   IpcEvents.GET_TEMPLATE_VALUES,
+  IpcEvents.GET_TEMPLATE,
+  IpcEvents.GET_TEST_TEMPLATE,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

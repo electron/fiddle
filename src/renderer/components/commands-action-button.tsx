@@ -22,7 +22,6 @@ import {
 import { IpcEvents } from '../../ipc-events';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { getOctokit } from '../../utils/octokit';
-import { getTemplate } from '../content';
 import { AppState } from '../state';
 
 interface GistActionButtonProps {
@@ -118,7 +117,9 @@ export const GistActionButton = observer(
       const octo = await getOctokit(appState);
       const { gitHubPublishAsPublic } = appState;
       const options = { includeDependencies: true, includeElectron: true };
-      const defaultGistValues = await getTemplate(appState.version);
+      const defaultGistValues = await window.ElectronFiddle.getTemplate(
+        appState.version,
+      );
       const currentEditorValues = await window.ElectronFiddle.app.getEditorValues(
         options,
       );
