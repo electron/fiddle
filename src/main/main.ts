@@ -15,6 +15,7 @@ import { onFirstRunMaybe } from './first-run';
 import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
+import { setupTemplates } from './templates';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 
@@ -44,6 +45,7 @@ export async function onReady() {
   setupDevTools();
   setupTitleBarClickMac();
   setupNativeTheme();
+  setupTemplates();
 
   processCommandLine(argv);
 }
