@@ -19,7 +19,6 @@ describe('dialogs', () => {
   it('sets up dialogs', () => {
     expect(ipcMainManager.eventNames()).toEqual([
       IpcEvents.SHOW_WARNING_DIALOG,
-      IpcEvents.SHOW_CONFIRMATION_DIALOG,
       IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
     ]);
   });
@@ -27,20 +26,6 @@ describe('dialogs', () => {
   describe('warning dialog', () => {
     it('shows dialog when triggering IPC event', () => {
       ipcMainManager.emit(IpcEvents.SHOW_WARNING_DIALOG, {}, { hi: 'hello' });
-      expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
-        type: 'warning',
-        hi: 'hello',
-      });
-    });
-  });
-
-  describe('confirmation dialog', () => {
-    it('shows dialog when triggering IPC event', () => {
-      ipcMainManager.emit(
-        IpcEvents.SHOW_CONFIRMATION_DIALOG,
-        {},
-        { hi: 'hello' },
-      );
       expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
         type: 'warning',
         hi: 'hello',
