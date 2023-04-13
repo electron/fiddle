@@ -481,6 +481,7 @@ describe('App component', () => {
       );
       expect(ipcRenderer.send).toHaveBeenCalledTimes(1);
       expect(window.close).not.toHaveBeenCalled();
+      expect(!app.state.isQuitting);
     });
   });
 });
