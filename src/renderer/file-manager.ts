@@ -10,7 +10,6 @@ import { isKnownFile } from '../utils/editor-utils';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
 import { AppState } from './state';
-import { getTemplateValues } from './templates';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 
@@ -48,7 +47,9 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openTemplate(templateName: string) {
-    const editorValues = await getTemplateValues(templateName);
+    const editorValues = await window.ElectronFiddle.getTemplateValues(
+      templateName,
+    );
     await window.ElectronFiddle.app.replaceFiddle(editorValues, {
       templateName,
     });

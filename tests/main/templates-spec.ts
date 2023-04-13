@@ -1,5 +1,5 @@
 import { MAIN_JS } from '../../src/interfaces';
-import { getTemplateValues } from '../../src/renderer/templates';
+import { getTemplateValues } from '../../src/main/templates';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 
 jest.unmock('fs-extra');

@@ -29,6 +29,9 @@ describe('FileManager', () => {
   beforeEach(() => {
     ipcRenderer.send = jest.fn();
     (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
+    (window.ElectronFiddle.getTemplateValues as jest.Mock).mockResolvedValue(
+      editorValues,
+    );
 
     // create a real FileManager and insert it into our mocks
     app = (window.ElectronFiddle.app as unknown) as AppMock;

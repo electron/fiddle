@@ -38,6 +38,7 @@ export enum IpcEvents {
   RELOAD_WINDOW = 'RELOAD_WINDOW',
   SET_NATIVE_THEME = 'SET_NATIVE_THEME',
   SHOW_WINDOW = 'SHOW_WINDOW',
+  GET_TEMPLATE_VALUES = 'GET_TEMPLATE_VALUES',
 }
 
 export const ipcMainEvents = [
@@ -54,6 +55,7 @@ export const ipcMainEvents = [
   IpcEvents.RELOAD_WINDOW,
   IpcEvents.SET_NATIVE_THEME,
   IpcEvents.SHOW_WINDOW,
+  IpcEvents.GET_TEMPLATE_VALUES,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =
