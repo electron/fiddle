@@ -297,6 +297,8 @@ export class App {
               }
               window.onbeforeunload = null;
               window.close();
+            } else {
+              state.isQuitting = false;
             }
           });
           ipcRenderer.send(IpcEvents.SHOW_WINDOW);

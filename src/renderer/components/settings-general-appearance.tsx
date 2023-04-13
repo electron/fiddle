@@ -77,9 +77,9 @@ interface AppearanceSettingsState {
 }
 
 /**
- * Settings content to manage GitHub-related preferences.
+ * Settings content to manage appearance-related preferences.
  *
- * @class GitHubSettings
+ * @class AppearanceSettings
  * @extends {React.Component<AppearanceSettingsProps, AppearanceSettingsState>}
  */
 export const AppearanceSettings = observer(
