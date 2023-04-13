@@ -58,9 +58,7 @@ describe('themes', () => {
 
     it('handles a readdir error', async () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
-      (fs.readdir as jest.Mock).mockImplementationOnce(() =>
-        Promise.reject('Bwap'),
-      );
+      (fs.readdir as jest.Mock).mockRejectedValueOnce('Bwap');
 
       const themes = await getAvailableThemes();
       expect(themes).toHaveLength(2);
@@ -69,9 +67,7 @@ describe('themes', () => {
     it('handles a readJSON error', async () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
       (fs.readdir as jest.Mock).mockImplementationOnce(() => ['hi']);
-      (fs.readJSON as jest.Mock).mockImplementationOnce(() =>
-        Promise.reject('Bwap'),
-      );
+      (fs.readJSON as jest.Mock).mockRejectedValueOnce('Bwap');
 
       const themes = await getAvailableThemes();
       expect(themes).toHaveLength(2);
@@ -100,9 +96,7 @@ describe('themes', () => {
     });
 
     it('handles a read error', async () => {
-      (fs.readJSON as jest.Mock).mockImplementationOnce(() =>
-        Promise.reject('Bwap'),
-      );
+      (fs.readJSON as jest.Mock).mockRejectedValueOnce('Bwap');
 
       const theme = await getTheme('test');
       expect(theme.name).toBe('Fiddle (Dark)');

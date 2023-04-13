@@ -67,10 +67,10 @@ describe('AppState', () => {
     appState = new AppState(mockVersionsArray);
     removeSpy = jest
       .spyOn(appState.installer, 'remove')
-      .mockImplementation(() => Promise.resolve());
+      .mockResolvedValue(undefined);
     installSpy = jest
       .spyOn(appState.installer, 'install')
-      .mockImplementation(() => Promise.resolve(''));
+      .mockResolvedValue('');
   });
 
   it('exists', () => {

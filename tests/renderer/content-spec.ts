@@ -32,7 +32,7 @@ let lastResponse = new Response(null, {
 
 // instead of downloading fixtures,
 // pull the files from tests/fixtures/templates/
-const fetchFromFilesystem = (url: string) => {
+const fetchFromFilesystem = async (url: string) => {
   let arrayBuffer = null;
   let status = 404;
   let statusText = 'Not Found';
@@ -52,7 +52,7 @@ const fetchFromFilesystem = (url: string) => {
     console.log(err);
   }
   lastResponse = new Response(arrayBuffer, { status, statusText });
-  return Promise.resolve(lastResponse);
+  return lastResponse;
 };
 
 describe('content', () => {

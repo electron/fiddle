@@ -135,7 +135,7 @@ describe('Editors component', () => {
       // setup
       const getTemplateSpy = jest
         .spyOn(content, 'getTemplate')
-        .mockImplementation(() => Promise.resolve(fakeValues));
+        .mockResolvedValue(fakeValues);
       const replaceFiddleSpy = jest
         .spyOn(app, 'replaceFiddle')
         .mockImplementation(() => resolve());
@@ -194,7 +194,7 @@ describe('Editors component', () => {
       // setup
       const getTestTemplateSpy = jest
         .spyOn(content, 'getTestTemplate')
-        .mockImplementation(() => Promise.resolve(fakeValues));
+        .mockResolvedValue(fakeValues);
       let replaceResolve: any;
       const replacePromise = new Promise((r) => {
         replaceResolve = r;
