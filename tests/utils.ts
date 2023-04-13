@@ -62,11 +62,9 @@ export function flushPromises() {
 }
 
 export function mockFetchOnce(text: string) {
-  (window.fetch as jest.Mock).mockImplementationOnce(() => {
-    return Promise.resolve({
-      text: jest.fn().mockResolvedValue(text),
-      json: jest.fn().mockResolvedValue(JSON.parse(text)),
-    });
+  (window.fetch as jest.Mock).mockResolvedValueOnce({
+    text: jest.fn().mockResolvedValue(text),
+    json: jest.fn().mockImplementation(async () => JSON.parse(text)),
   });
 }
 
@@ -76,7 +74,7 @@ export class FetchMock {
     this.urls.set(url, content);
   }
   constructor() {
-    window.fetch = jest.fn().mockImplementation((url: string) => {
+    window.fetch = jest.fn().mockImplementation(async (url: string) => {
       const content = this.urls.get(url);
       if (!content) {
         console.trace('Unhandled mock URL:', url);
@@ -84,13 +82,11 @@ export class FetchMock {
           ok: false,
         };
       }
-      return Promise.resolve({
-        text: jest.fn().mockImplementation(() => Promise.resolve(content)),
-        json: jest
-          .fn()
-          .mockImplementation(() => Promise.resolve(JSON.parse(content))),
+      return {
+        text: jest.fn().mockResolvedValue(content),
+        json: jest.fn().mockImplementation(async () => JSON.parse(content)),
         ok: true,
-      });
+      };
     });
   }
 }

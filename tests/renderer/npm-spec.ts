@@ -19,9 +19,7 @@ describe('npm', () => {
       it('returns true if npm installed', async () => {
         overrideRendererPlatform('darwin');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-npm'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-npm');
 
         const result = await getIsPackageManagerInstalled('npm');
 
@@ -32,9 +30,7 @@ describe('npm', () => {
       it('returns true if npm installed', async () => {
         overrideRendererPlatform('win32');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-npm'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-npm');
 
         const result = await getIsPackageManagerInstalled('npm', true);
 
@@ -45,9 +41,7 @@ describe('npm', () => {
       it('returns false if npm not installed', async () => {
         overrideRendererPlatform('darwin');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.reject('/usr/bin/fake-npm'),
-        );
+        (exec as jest.Mock).mockRejectedValueOnce('/usr/bin/fake-npm');
 
         const result = await getIsPackageManagerInstalled('npm', true);
 
@@ -56,9 +50,7 @@ describe('npm', () => {
       });
 
       it('uses the cache', async () => {
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-npm'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-npm');
 
         const one = await getIsPackageManagerInstalled('npm', true);
         expect(one).toBe(true);
@@ -80,9 +72,7 @@ describe('npm', () => {
       it('returns true if yarn installed', async () => {
         overrideRendererPlatform('darwin');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-yarn'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-yarn');
 
         const result = await getIsPackageManagerInstalled('yarn');
 
@@ -93,9 +83,7 @@ describe('npm', () => {
       it('returns true if yarn installed', async () => {
         overrideRendererPlatform('win32');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-yarn'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-yarn');
 
         const result = await getIsPackageManagerInstalled('yarn', true);
 
@@ -106,9 +94,7 @@ describe('npm', () => {
       it('returns false if yarn not installed', async () => {
         overrideRendererPlatform('darwin');
 
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.reject('/usr/bin/fake-yarn'),
-        );
+        (exec as jest.Mock).mockRejectedValueOnce('/usr/bin/fake-yarn');
 
         const result = await getIsPackageManagerInstalled('yarn', true);
 
@@ -117,9 +103,7 @@ describe('npm', () => {
       });
 
       it('uses the cache', async () => {
-        (exec as jest.Mock).mockReturnValueOnce(
-          Promise.resolve('/usr/bin/fake-yarn'),
-        );
+        (exec as jest.Mock).mockResolvedValueOnce('/usr/bin/fake-yarn');
 
         const one = await getIsPackageManagerInstalled('yarn', true);
         expect(one).toBe(true);

@@ -33,9 +33,7 @@ describe('App component', () => {
     const { app: appMock } = ElectronFiddle;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
-    jest
-      .spyOn(app.state, 'downloadVersion')
-      .mockImplementation(() => Promise.resolve());
+    jest.spyOn(app.state, 'downloadVersion').mockResolvedValue(undefined);
     Object.assign(app, {
       electronTypes,
       fileManager,
@@ -93,7 +91,7 @@ describe('App component', () => {
 
     it('understands files', async () => {
       const { openFiddle } = app.fileManager;
-      (openFiddle as jest.Mock).mockImplementationOnce(() => Promise.resolve());
+      (openFiddle as jest.Mock).mockResolvedValueOnce(undefined);
 
       const filePath = '/fake/path';
       await app.openFiddle({ filePath });

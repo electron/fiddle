@@ -77,8 +77,8 @@ describe('ElectronTypes', () => {
 
   function makeFetchSpy(text: string) {
     return jest.spyOn(global, 'fetch').mockResolvedValue({
-      text: () => Promise.resolve(text),
-      json: () => Promise.resolve({ files: nodeTypesData }),
+      text: async () => text,
+      json: async () => ({ files: nodeTypesData }),
     } as any);
   }
 

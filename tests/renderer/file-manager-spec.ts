@@ -28,7 +28,7 @@ describe('FileManager', () => {
 
   beforeEach(() => {
     ipcRenderer.send = jest.fn();
-    (readFiddle as jest.Mock).mockReturnValue(Promise.resolve(editorValues));
+    (readFiddle as jest.Mock).mockResolvedValue(editorValues);
     (window.ElectronFiddle.getTemplateValues as jest.Mock).mockResolvedValue(
       editorValues,
     );
@@ -265,7 +265,7 @@ describe('FileManager', () => {
 
     it('handles an error', async () => {
       (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
-      (fs.remove as jest.Mock).mockReturnValueOnce(Promise.reject('bwapbwap'));
+      (fs.remove as jest.Mock).mockRejectedValueOnce('bwapbwap');
 
       const result = await fm.cleanup('/fake/dir');
 

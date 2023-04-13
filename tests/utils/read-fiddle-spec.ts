@@ -15,9 +15,7 @@ describe('read-fiddle', () => {
   const folder = '/some/place';
 
   beforeEach(() => {
-    (fs.readFile as jest.Mock).mockImplementation((filename) =>
-      Promise.resolve(filename),
-    );
+    (fs.readFile as jest.Mock).mockImplementation(async (filename) => filename);
     console.warn = jest.fn();
   });
 
@@ -27,8 +25,8 @@ describe('read-fiddle', () => {
 
   function setupFSMocks(editorValues: EditorValues) {
     (fs.readdir as jest.Mock).mockResolvedValue(Object.keys(editorValues));
-    (fs.readFile as jest.Mock).mockImplementation((filename) =>
-      Promise.resolve(editorValues[path.basename(filename)]),
+    (fs.readFile as jest.Mock).mockImplementation(
+      async (filename) => editorValues[path.basename(filename)],
     );
   }
 
