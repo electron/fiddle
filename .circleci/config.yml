@@ -19,6 +19,7 @@ commands:
       - run: npm install --global yarn
       - run: yarn install --frozen-lockfile
       - run: yarn run contributors
+      - run: yarn run electron-releases
       - save_cache:
           paths:
             - node_modules

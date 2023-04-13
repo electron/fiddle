@@ -38,6 +38,7 @@ report.json
 # Electron Fiddle-Specific
 /static/contributors.json
 /static/css/root.css
+/static/releases.json
 
 # Webpack configurations
 .webpack

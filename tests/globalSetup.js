@@ -1,7 +1,8 @@
 const { maybeFetchContributors } = require('../tools/contributors');
+const { populateReleases } = require('../tools/fetch-releases');
 
 async function globalSetup() {
-  await maybeFetchContributors(true);
+  await Promise.all([maybeFetchContributors(true), populateReleases()]);
 }
 
 module.exports = globalSetup;
