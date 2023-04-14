@@ -146,9 +146,12 @@ export class RemoteLoader {
               !semver.valid(version) ||
               !isReleasedMajor(semver.major(version))
             ) {
-              throw new Error(
-                "This gist's package.json contains an invalid Electron version.",
-              );
+              await this.appState.showGenericDialog({
+                label: `The Electron version (${version}) in this gist's package.json is invalid. Falling back to last used version.`,
+                ok: 'Close',
+                type: GenericDialogType.warning,
+                wantsInput: false,
+              });
             } else if (disableDownload(version)) {
               await this.appState.showGenericDialog({
                 label: `This gist's Electron version (${version}) is not available on your current OS. Falling back to last used version.`,

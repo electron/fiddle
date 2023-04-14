@@ -4,7 +4,12 @@ import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import semver from 'semver';
 
-import { FileTransform, Files, PACKAGE_NAME } from '../interfaces';
+import {
+  FileTransform,
+  Files,
+  GenericDialogType,
+  PACKAGE_NAME,
+} from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isKnownFile } from '../utils/editor-utils';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
@@ -93,14 +98,17 @@ export class FileManager {
           const version = deps[dep].substring(index);
 
           if (!semver.valid(version)) {
-            throw new Error(
-              "This Fiddle's package.json contains an invalid Electron version.",
-            );
+            await this.appState.showGenericDialog({
+              label: `The Electron version (${version}) in this Fiddle's package.json is invalid. Falling back to last used version.`,
+              ok: 'Close',
+              type: GenericDialogType.warning,
+              wantsInput: false,
+            });
+          } else {
+            remoteLoader.setElectronVersion(version);
           }
 
           // We want to include all dependencies except Electron.
-          remoteLoader.setElectronVersion(version);
-
           delete deps[dep];
         }
 

@@ -171,11 +171,14 @@ describe('RemoteLoader', () => {
 
       const result = await instance.fetchGistAndLoad(gistId);
 
-      expect(result).toBe(false);
+      expect(result).toBe(true);
       expect(store.modules.size).toEqual(0);
-      expect(store.showErrorDialog).toBeCalledWith(
-        "Loading the fiddle failed: This gist's package.json contains an invalid Electron version.",
-      );
+      expect(store.showGenericDialog).toBeCalledWith({
+        label: `The Electron version (99999.0.0) in this gist's package.json is invalid. Falling back to last used version.`,
+        ok: 'Close',
+        type: 'warning',
+        wantsInput: false,
+      });
     });
 
     it('handles extra gist fiddle dependencies', async () => {
