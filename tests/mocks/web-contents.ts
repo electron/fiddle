@@ -54,6 +54,7 @@ export class WebContentsMock extends EventEmitter {
   public openDevTools = jest.fn();
   public paste = jest.fn();
   public pasteAndMatchStyle = jest.fn();
+  public postMessage = jest.fn();
   public print = jest.fn();
   public printToPDF = jest.fn();
   public redo = jest.fn();

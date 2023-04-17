@@ -12,7 +12,6 @@ import { disableDownload } from '../utils/disable-download';
 import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
-import { getTemplate } from './content';
 import { AppState } from './state';
 import { getReleaseChannel, isReleasedMajor } from './versions';
 
@@ -79,7 +78,9 @@ export class RemoteLoader {
       const ok = await this.setElectronVersion(version);
       if (!ok) return false;
 
-      const values = await getTemplate(this.appState.version);
+      const values = await window.ElectronFiddle.getTemplate(
+        this.appState.version,
+      );
       if (!Array.isArray(folder.data)) {
         throw new Error(
           'The example Fiddle tried to launch is not a valid Electron example',

@@ -74,6 +74,10 @@ describe('Action button component', () => {
     const editorValues = createEditorValues();
     const files = getGistFiles(editorValues);
     expectedGistOpts = { description, files, public: true } as const;
+
+    (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
+      [MAIN_JS]: '// content',
+    });
   });
 
   function createActionButton() {

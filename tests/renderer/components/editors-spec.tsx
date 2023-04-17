@@ -7,7 +7,6 @@ import { EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { IpcEvents } from '../../../src/ipc-events';
 import { App } from '../../../src/renderer/app';
 import { Editors } from '../../../src/renderer/components/editors';
-import * as content from '../../../src/renderer/content';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { AppState } from '../../../src/renderer/state';
 import {
@@ -134,7 +133,7 @@ describe('Editors component', () => {
 
       // setup
       const getTemplateSpy = jest
-        .spyOn(content, 'getTemplate')
+        .spyOn(window.ElectronFiddle, 'getTemplate')
         .mockResolvedValue(fakeValues);
       const replaceFiddleSpy = jest
         .spyOn(app, 'replaceFiddle')
@@ -193,7 +192,7 @@ describe('Editors component', () => {
     it('handles an FS_NEW_TEST command', async () => {
       // setup
       const getTestTemplateSpy = jest
-        .spyOn(content, 'getTestTemplate')
+        .spyOn(window.ElectronFiddle, 'getTestTemplate')
         .mockResolvedValue(fakeValues);
       let replaceResolve: any;
       const replacePromise = new Promise((r) => {

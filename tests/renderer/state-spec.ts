@@ -11,7 +11,6 @@ import {
   VersionSource,
 } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';
-import { getTemplate } from '../../src/renderer/content';
 import { AppState } from '../../src/renderer/state';
 import {
   fetchVersions,
@@ -23,9 +22,6 @@ import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
-jest.mock('../../src/renderer/content', () => ({
-  getTemplate: jest.fn(),
-}));
 jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
     '../../src/renderer/versions',
@@ -403,7 +399,9 @@ describe('AppState', () => {
         replaceSpy = jest.spyOn(window.ElectronFiddle.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
-        (getTemplate as jest.Mock).mockResolvedValue(nextValues);
+        (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue(
+          nextValues,
+        );
       });
 
       it('if there is no current fiddle', async () => {

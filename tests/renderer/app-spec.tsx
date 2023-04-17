@@ -29,6 +29,10 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
+    (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
+      [MAIN_JS]: '// content',
+    });
+
     ({ ElectronFiddle } = window);
     const { app: appMock } = ElectronFiddle;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
