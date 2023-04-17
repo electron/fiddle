@@ -77,7 +77,6 @@ jobs:
     resource_class: macos.x86.medium.gen2
     steps:
       - install
-      - load-gh-token
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
@@ -96,7 +95,6 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - load-gh-token
       - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
@@ -115,7 +113,6 @@ jobs:
     steps:
       - run: sudo apt-get update && sudo apt install rpm
       - install
-      - load-gh-token
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
@@ -127,8 +124,6 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - node/install:
-          node-version: '18.4.0'
       - install
       - attach_workspace:
           at: .
@@ -152,7 +147,6 @@ workflows:
             parameters:
               arch: [ x64 ]
       - mac-build:
-          context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, arm64 ]
@@ -163,7 +157,6 @@ workflows:
             branches:
               ignore: /.*/
       - win-build:
-          context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, ia32 ]
@@ -174,7 +167,6 @@ workflows:
             branches:
               ignore: /.*/
       - linux-build:
-          context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
