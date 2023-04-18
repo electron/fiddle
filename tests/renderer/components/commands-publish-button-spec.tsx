@@ -91,20 +91,24 @@ describe('Action button component', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
-  it('registers for FS_SAVE_FIDDLE_GIST events', () => {
-    const event = IpcEvents.FS_SAVE_FIDDLE_GIST;
-
+  it('registers for "save-fiddle-gist" events', () => {
     // confirm that it starts listening when mounted
-    const onSpy = jest.spyOn(ipcRenderer, 'on');
+    const listenSpy = jest.spyOn(window.ElectronFiddle, 'addEventListener');
     const { instance, wrapper } = createActionButton();
-    expect(onSpy).toHaveBeenCalledWith(event, instance.handleClick);
-    onSpy.mockRestore();
+    expect(listenSpy).toHaveBeenCalledWith(
+      'save-fiddle-gist',
+      instance.handleClick,
+    );
+    listenSpy.mockRestore();
 
     // confirm that it stops listening when unmounted
-    const offSpy = jest.spyOn(ipcRenderer, 'off');
+    const removeListenerSpy = jest.spyOn(
+      window.ElectronFiddle,
+      'removeAllListeners',
+    );
     wrapper.unmount();
-    expect(offSpy).toHaveBeenCalledWith(event, instance.handleClick);
-    offSpy.mockRestore();
+    expect(removeListenerSpy).toHaveBeenCalledWith('save-fiddle-gist');
+    removeListenerSpy.mockRestore();
   });
 
   it('toggles the auth dialog on click if not authed', async () => {

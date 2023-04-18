@@ -1,11 +1,16 @@
 import * as MonacoType from 'monaco-editor';
 
-import { EditorValues, SelectedLocalVersion } from './interfaces';
+import { EditorValues, FiddleEvent, SelectedLocalVersion } from './interfaces';
 import { App } from './renderer/app';
 
 declare global {
   interface Window {
     ElectronFiddle: {
+      addEventListener(
+        type: FiddleEvent,
+        listener: (...args: any[]) => void,
+        options?: { signal: AbortSignal },
+      ): void;
       app: App;
       appPaths: Record<string, string>;
       arch: string;
@@ -14,6 +19,7 @@ declare global {
       getTestTemplate(): Promise<EditorValues>;
       monaco: typeof MonacoType;
       platform: string;
+      removeAllListeners(type: FiddleEvent): void;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
     };
   }

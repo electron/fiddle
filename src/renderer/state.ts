@@ -317,17 +317,23 @@ export class AppState {
     this.defaultVersion = getDefaultVersion(versions);
     this.version = this.defaultVersion;
 
-    ipcRenderer.removeAllListeners(IpcEvents.BEFORE_QUIT);
-    ipcRenderer.removeAllListeners(IpcEvents.BISECT_COMMANDS_TOGGLE);
-    ipcRenderer.removeAllListeners(IpcEvents.CLEAR_CONSOLE);
-    ipcRenderer.removeAllListeners(IpcEvents.OPEN_SETTINGS);
-    ipcRenderer.removeAllListeners(IpcEvents.SHOW_WELCOME_TOUR);
+    window.ElectronFiddle.removeAllListeners('before-quit');
+    window.ElectronFiddle.removeAllListeners('toggle-bisect');
+    window.ElectronFiddle.removeAllListeners('clear-console');
+    window.ElectronFiddle.removeAllListeners('open-settings');
+    window.ElectronFiddle.removeAllListeners('show-welcome-tour');
 
-    ipcRenderer.on(IpcEvents.OPEN_SETTINGS, this.toggleSettings);
-    ipcRenderer.on(IpcEvents.SHOW_WELCOME_TOUR, this.showTour);
-    ipcRenderer.on(IpcEvents.CLEAR_CONSOLE, this.clearConsole);
-    ipcRenderer.on(IpcEvents.BISECT_COMMANDS_TOGGLE, this.toggleBisectCommands);
-    ipcRenderer.on(IpcEvents.BEFORE_QUIT, this.setIsQuitting);
+    window.ElectronFiddle.addEventListener(
+      'open-settings',
+      this.toggleSettings,
+    );
+    window.ElectronFiddle.addEventListener('show-welcome-tour', this.showTour);
+    window.ElectronFiddle.addEventListener('clear-console', this.clearConsole);
+    window.ElectronFiddle.addEventListener(
+      'toggle-bisect',
+      this.toggleBisectCommands,
+    );
+    window.ElectronFiddle.addEventListener('before-quit', this.setIsQuitting);
 
     // Setup auto-runs
     autorun(() => this.save('theme', this.theme));

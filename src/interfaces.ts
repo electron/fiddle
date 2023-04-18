@@ -139,3 +139,28 @@ export interface SelectedLocalVersion {
   isValidElectron: boolean;
   localName?: string;
 }
+
+export type FiddleEvent =
+  | 'before-quit'
+  | 'clear-console'
+  | 'execute-monaco-command'
+  | 'load-example'
+  | 'load-gist'
+  | 'make-fiddle'
+  | 'new-fiddle'
+  | 'new-test'
+  | 'open-fiddle'
+  | 'open-settings'
+  | 'open-template'
+  | 'package-fiddle'
+  | 'redo-in-editor'
+  | 'run-fiddle'
+  | 'save-fiddle'
+  | 'save-fiddle-forge'
+  | 'save-fiddle-gist'
+  | 'select-all-in-editor'
+  | 'set-show-me-template'
+  | 'show-welcome-tour'
+  | 'toggle-bisect'
+  | 'toggle-monaco-option'
+  | 'undo-in-editor';

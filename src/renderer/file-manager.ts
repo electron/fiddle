@@ -23,24 +23,24 @@ export class FileManager {
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
-    ipcRenderer.removeAllListeners(IpcEvents.FS_OPEN_FIDDLE);
-    ipcRenderer.removeAllListeners(IpcEvents.FS_OPEN_TEMPLATE);
-    ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE);
-    ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+    window.ElectronFiddle.removeAllListeners('open-fiddle');
+    window.ElectronFiddle.removeAllListeners('open-template');
+    window.ElectronFiddle.removeAllListeners('save-fiddle');
+    window.ElectronFiddle.removeAllListeners('save-fiddle-forge');
 
-    ipcRenderer.on(IpcEvents.FS_OPEN_FIDDLE, (_event, filePath) => {
+    window.ElectronFiddle.addEventListener('open-fiddle', (filePath) => {
       this.openFiddle(filePath);
     });
 
-    ipcRenderer.on(IpcEvents.FS_OPEN_TEMPLATE, (_event, name) => {
+    window.ElectronFiddle.addEventListener('open-template', (name) => {
       this.openTemplate(name);
     });
 
-    ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE, (_event, filePath) => {
+    window.ElectronFiddle.addEventListener('save-fiddle', (filePath) => {
       this.saveFiddle(filePath, dotfilesTransform);
     });
 
-    ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE_FORGE, (_event, filePath) => {
+    window.ElectronFiddle.addEventListener('save-fiddle-forge', (filePath) => {
       this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
     });
   }

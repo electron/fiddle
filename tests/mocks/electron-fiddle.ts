@@ -1,6 +1,7 @@
 import { AppMock, MonacoMock } from './mocks';
 
 export class ElectronFiddleMock {
+  public addEventListener = jest.fn();
   public app = new AppMock();
   public appPaths = {
     userData: '/fake/path',
@@ -12,5 +13,6 @@ export class ElectronFiddleMock {
   public getTestTemplate = jest.fn();
   public monaco = new MonacoMock();
   public platform = process.platform;
+  public removeAllListeners = jest.fn();
   public selectLocalVersion = jest.fn();
 }

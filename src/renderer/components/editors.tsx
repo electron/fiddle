@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { ipcRenderer } from 'electron';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import {
@@ -12,7 +11,6 @@ import {
 } from 'react-mosaic-component';
 
 import { EditorId, SetFiddleOptions } from '../../interfaces';
-import { IpcEvents } from '../../ipc-events';
 import { getEditorTitle } from '../../utils/editor-utils';
 import { getAtPath, setAtPath } from '../../utils/js-path';
 import { toggleMonaco } from '../../utils/toggle-monaco';
@@ -62,14 +60,14 @@ export const Editors = observer(
     public async componentDidMount() {
       this.stopListening();
 
-      ipcRenderer.on(
-        IpcEvents.MONACO_EXECUTE_COMMAND,
-        (_event, cmd: string) => {
+      window.ElectronFiddle.addEventListener(
+        'execute-monaco-command',
+        (cmd: string) => {
           this.executeCommand(cmd);
         },
       );
 
-      ipcRenderer.on(IpcEvents.FS_NEW_FIDDLE, async (_event) => {
+      window.ElectronFiddle.addEventListener('new-fiddle', async () => {
         const { modules, version } = this.props.appState;
         const values = await window.ElectronFiddle.getTemplate(version);
         const options: SetFiddleOptions = { templateName: version };
@@ -80,18 +78,21 @@ export const Editors = observer(
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRenderer.on(IpcEvents.FS_NEW_TEST, async (_event) => {
+      window.ElectronFiddle.addEventListener('new-test', async () => {
         const values = await window.ElectronFiddle.getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
         await window.ElectronFiddle.app.replaceFiddle(values, options);
       });
 
-      ipcRenderer.on(IpcEvents.MONACO_TOGGLE_OPTION, (_event, cmd: string) => {
-        this.toggleEditorOption(cmd);
-      });
+      window.ElectronFiddle.addEventListener(
+        'toggle-monaco-option',
+        (cmd: string) => {
+          this.toggleEditorOption(cmd);
+        },
+      );
 
-      ipcRenderer.on(IpcEvents.REDO_IN_EDITOR, (_event) => {
+      window.ElectronFiddle.addEventListener('redo-in-editor', () => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -99,7 +100,7 @@ export const Editors = observer(
         }
       });
 
-      ipcRenderer.on(IpcEvents.UNDO_IN_EDITOR, (_event) => {
+      window.ElectronFiddle.addEventListener('undo-in-editor', () => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -107,7 +108,7 @@ export const Editors = observer(
         }
       });
 
-      ipcRenderer.on(IpcEvents.SELECT_ALL_IN_EDITOR, (_event) => {
+      window.ElectronFiddle.addEventListener('select-all-in-editor', () => {
         const editor = this.props.appState.editorMosaic.focusedEditor();
         if (editor) {
           const model = editor.getModel();
@@ -123,13 +124,13 @@ export const Editors = observer(
     }
 
     private stopListening() {
-      ipcRenderer.removeAllListeners(IpcEvents.MONACO_EXECUTE_COMMAND);
-      ipcRenderer.removeAllListeners(IpcEvents.FS_NEW_FIDDLE);
-      ipcRenderer.removeAllListeners(IpcEvents.FS_NEW_TEST);
-      ipcRenderer.removeAllListeners(IpcEvents.MONACO_TOGGLE_OPTION);
-      ipcRenderer.removeAllListeners(IpcEvents.SELECT_ALL_IN_EDITOR);
-      ipcRenderer.removeAllListeners(IpcEvents.UNDO_IN_EDITOR);
-      ipcRenderer.removeAllListeners(IpcEvents.REDO_IN_EDITOR);
+      window.ElectronFiddle.removeAllListeners('execute-monaco-command');
+      window.ElectronFiddle.removeAllListeners('new-fiddle');
+      window.ElectronFiddle.removeAllListeners('new-test');
+      window.ElectronFiddle.removeAllListeners('toggle-monaco-option');
+      window.ElectronFiddle.removeAllListeners('select-all-in-editor');
+      window.ElectronFiddle.removeAllListeners('undo-in-editor');
+      window.ElectronFiddle.removeAllListeners('redo-in-editor');
     }
 
     /**

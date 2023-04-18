@@ -1,5 +1,7 @@
 import { toJS } from 'mobx';
 
+import { FiddleEvent } from '../src/interfaces';
+
 const platform = process.platform;
 
 export function overridePlatform(value: NodeJS.Platform) {
@@ -133,4 +135,14 @@ export async function waitFor(
       setTimeout(check, interval);
     })();
   });
+}
+
+export function emitEvent(type: FiddleEvent, ...args: any[]) {
+  (window.ElectronFiddle.addEventListener as jest.Mock).mock.calls.forEach(
+    (call) => {
+      if (call[0] === type) {
+        call[1](...args);
+      }
+    },
+  );
 }
