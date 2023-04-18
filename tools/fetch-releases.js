@@ -15,7 +15,7 @@ async function getReleases() {
   return await response.json();
 }
 
-async function main() {
+async function populateReleases() {
   const data = await getReleases();
   const releases = data.map(({ version, node }) => ({ version, node }));
 
@@ -27,4 +27,12 @@ async function main() {
   console.log('Updating tests with new expected version count.');
 }
 
-main();
+module.exports = {
+  populateReleases,
+};
+
+if (require.main === module) {
+  (async () => {
+    await populateReleases();
+  })();
+}

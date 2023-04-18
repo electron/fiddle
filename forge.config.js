@@ -3,6 +3,7 @@ const path = require('path');
 
 const packageJson = require('./package.json');
 const { maybeFetchContributors } = require('./tools/contributors');
+const { populateReleases } = require('./tools/fetch-releases');
 
 const { version } = packageJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
@@ -27,7 +28,7 @@ const commonLinuxConfig = {
 const config = {
   hooks: {
     generateAssets: async () => {
-      await maybeFetchContributors(true);
+      await Promise.all([populateReleases(), maybeFetchContributors(true)]);
     },
   },
   plugins: [
