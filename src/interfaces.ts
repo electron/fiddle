@@ -133,3 +133,9 @@ export const enum BlockableAccelerator {
   save = 'save',
   saveAs = 'saveAs',
 }
+
+export interface SelectedLocalVersion {
+  folderPath: string;
+  isValidElectron: boolean;
+  localName?: string;
+}

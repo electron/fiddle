@@ -3,24 +3,29 @@
  */
 
 import { dialog } from 'electron';
+import * as fs from 'fs-extra';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
-import { flushPromises } from '../utils';
 
+jest.mock('fs-extra');
 jest.mock('../../src/main/windows');
 
 describe('dialogs', () => {
   beforeEach(() => {
+    ipcMainManager.handle = jest.fn();
     setupDialogs();
   });
 
   it('sets up dialogs', () => {
     expect(ipcMainManager.eventNames()).toEqual([
       IpcEvents.SHOW_WARNING_DIALOG,
-      IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
     ]);
+    expect(ipcMainManager.handle).toHaveBeenCalledWith(
+      IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
+      expect.anything(),
+    );
   });
 
   describe('warning dialog', () => {
@@ -34,14 +39,22 @@ describe('dialogs', () => {
   });
 
   describe('local version folder dialog', () => {
-    it('shows dialog when triggering IPC event', () => {
+    let ipcHandler: () => Promise<any>;
+
+    beforeAll(() => {
+      // Manually invoke handler to simulate IPC event
+      const call = (ipcMainManager.handle as jest.Mock).mock.calls.find(
+        ([channelName]) => channelName === IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
+      );
+      ipcHandler = call[1];
+    });
+
+    it('shows dialog when triggering IPC event', async () => {
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
         filePaths: [],
       });
 
-      ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: jest.fn(),
-      });
+      await ipcHandler();
       expect(dialog.showOpenDialog).toHaveBeenCalledWith<any>(
         expect.objectContaining({
           properties: ['openDirectory'],
@@ -49,47 +62,31 @@ describe('dialogs', () => {
       );
     });
 
-    it('triggers IPC load local version event', async () => {
-      const replyFn = jest.fn();
+    it('returns a SelectedLocalVersion for the path', () => {
       const paths = ['/test/path/'];
 
+      (fs.existsSync as jest.Mock).mockReturnValue(false);
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
         filePaths: paths,
       });
 
-      ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn,
+      expect(ipcHandler()).resolves.toStrictEqual({
+        folderPath: paths[0],
+        isValidElectron: false,
+        localName: undefined,
       });
-
-      await flushPromises();
-      expect(replyFn).toHaveBeenCalledWith<any>(
-        IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-        paths,
-      );
     });
 
-    it('does nothing if not given a path', async () => {
-      const replyFn = jest.fn();
-
+    it('returns nothing if not given a path', async () => {
       // empty array
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
         filePaths: [],
       });
-      ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn,
-      });
-
-      await flushPromises();
-      expect(replyFn).not.toHaveBeenCalled();
+      expect(ipcHandler()).resolves.toBe(undefined);
 
       // nothing in response
       (dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
-      ipcMainManager.emit(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG, {
-        reply: replyFn,
-      });
-
-      await flushPromises();
-      expect(replyFn).not.toHaveBeenCalled();
+      expect(ipcHandler()).resolves.toBe(undefined);
     });
   });
 });

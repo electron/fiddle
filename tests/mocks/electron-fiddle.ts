@@ -12,4 +12,5 @@ export class ElectronFiddleMock {
   public getTestTemplate = jest.fn();
   public monaco = new MonacoMock();
   public platform = process.platform;
+  public selectLocalVersion = jest.fn();
 }

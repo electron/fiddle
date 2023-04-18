@@ -1,6 +1,6 @@
 import * as MonacoType from 'monaco-editor';
 
-import { EditorValues } from './interfaces';
+import { EditorValues, SelectedLocalVersion } from './interfaces';
 import { App } from './renderer/app';
 
 declare global {
@@ -14,6 +14,7 @@ declare global {
       getTestTemplate(): Promise<EditorValues>;
       monaco: typeof MonacoType;
       platform: string;
+      selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
     };
   }
 }

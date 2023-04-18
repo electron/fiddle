@@ -21,6 +21,9 @@ export async function setupFiddleGlobal() {
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
     monaco: null as any, // will be set in main.tsx
     platform: process.platform,
+    selectLocalVersion: () => {
+      return ipcRenderer.invoke(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
+    },
   };
 
   // TODO(dsanders11): Remove this when Electron versions move to main process

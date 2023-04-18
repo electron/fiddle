@@ -1,9 +1,7 @@
 import * as React from 'react';
 
-import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
-import { IpcEvents } from '../../../src/ipc-events';
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform } from '../../utils';
@@ -60,21 +58,25 @@ describe('AddVersionDialog component', () => {
     const inp = wrapper.find('#custom-electron-version');
     inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
 
-    expect(ipcRenderer.send as jest.Mock).toHaveBeenCalledWith(
-      IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG,
-    );
+    expect(
+      window.ElectronFiddle.selectLocalVersion as jest.Mock,
+    ).toHaveBeenCalled();
     expect(preventDefault).toHaveBeenCalled();
   });
 
-  describe('setFolderPath()', () => {
-    it('does something', async () => {
-      // (getIsDownloaded as jest.Mock).mockReturnValue(true);
+  describe('selectLocalVersion()', () => {
+    it('updates state', async () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
-      (wrapper.instance() as any).isValidElectronPath = () => true;
-      await (wrapper.instance() as any).setFolderPath('/test/');
+      (window.ElectronFiddle.selectLocalVersion as jest.Mock).mockReturnValue({
+        folderPath: '/test/',
+        isValidElectron: true,
+        localName: 'Test',
+      });
+      await (wrapper.instance() as any).selectLocalVersion();
 
       expect(wrapper.state('isValidElectron')).toBe(true);
       expect(wrapper.state('folderPath')).toBe('/test/');
+      expect(wrapper.state('localName')).toBe('Test');
     });
   });
 

@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import * as path from 'path';
-
 import {
   Button,
   Callout,
@@ -10,14 +8,10 @@ import {
   InputGroup,
   Intent,
 } from '@blueprintjs/core';
-import { Installer } from '@electron/fiddle-core';
-import { ipcRenderer } from 'electron';
-import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as semver from 'semver';
 
 import { Version } from '../../interfaces';
-import { IpcEvents } from '../../ipc-events';
 import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
 import { getLocalVersionForPath } from '../versions';
@@ -31,32 +25,8 @@ interface AddVersionDialogState {
   isValidVersion: boolean;
   existingLocalVersion?: Version;
   folderPath?: string;
+  localName?: string;
   version: string;
-}
-
-/**
- * Build a default name for a local Electron version
- * from its dirname.
- *
- * @param {string} dirname
- * @return {string} human-readable local build name
- */
-function makeLocalName(folderPath: string) {
-  // take a dirname like '/home/username/electron/gn/main/src/out/testing'
-  // and return something like 'gn/main - testing'
-  const tokens = folderPath.split(path.sep);
-  const buildType = tokens.pop(); // e.g. 'testing' or 'release'
-  const leader = tokens
-    // remove 'src/out/' -- they are in every local build, so make poor names
-    .slice(0, -2)
-    .join(path.sep)
-    // extract about enough for the end result to be about 20 chars
-    .slice(-20 + buildType!.length)
-    // remove any fragment in case the prev slice cut in the middle of a name
-    .split(path.sep)
-    .slice(1)
-    .join(path.sep);
-  return `${leader} - ${buildType}`;
 }
 
 /**
@@ -82,26 +52,24 @@ export const AddVersionDialog = observer(
       this.onSubmit = this.onSubmit.bind(this);
       this.onClose = this.onClose.bind(this);
       this.onChangeVersion = this.onChangeVersion.bind(this);
-
-      ipcRenderer.on(IpcEvents.LOAD_LOCAL_VERSION_FOLDER, (_event, [file]) => {
-        this.setFolderPath(file);
-      });
-    }
-
-    public componentWillUnmount() {
-      ipcRenderer.removeAllListeners(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
     }
 
     /**
-     * Sets the local folder path
-     *
-     * @param {string} folderPath
+     * Show dialog to select a local version and update state
      */
-    public setFolderPath(folderPath: string) {
-      const isValidElectron = this.isValidElectronPath(folderPath);
-      const existingLocalVersion = getLocalVersionForPath(folderPath);
+    public async selectLocalVersion(): Promise<void> {
+      const selected = await window.ElectronFiddle.selectLocalVersion();
+      if (selected) {
+        const { folderPath, isValidElectron, localName } = selected;
+        const existingLocalVersion = getLocalVersionForPath(folderPath);
 
-      this.setState({ existingLocalVersion, folderPath, isValidElectron });
+        this.setState({
+          existingLocalVersion,
+          folderPath,
+          isValidElectron,
+          localName,
+        });
+      }
     }
 
     /**
@@ -120,16 +88,6 @@ export const AddVersionDialog = observer(
     }
 
     /**
-     * Verifies if the local electron path is valid
-     *
-     * @param {string} folderPath
-     */
-    public isValidElectronPath(folderPath: string) {
-      const execPath = Installer.getExecPath(folderPath);
-      return fs.existsSync(execPath);
-    }
-
-    /**
      * Handles the submission of the dialog
      *
      * @returns {Promise<void>}
@@ -140,6 +98,7 @@ export const AddVersionDialog = observer(
         version,
         isValidElectron,
         existingLocalVersion,
+        localName,
       } = this.state;
 
       if (!folderPath) return;
@@ -147,7 +106,7 @@ export const AddVersionDialog = observer(
       const toAdd: Version = {
         localPath: folderPath,
         version,
-        name: makeLocalName(folderPath),
+        name: localName,
       };
 
       // swap to old local electron version if the user adds a new one with the same path
@@ -197,9 +156,9 @@ export const AddVersionDialog = observer(
     public render() {
       const { isAddVersionDialogShowing } = this.props.appState;
       const inputProps = {
-        onClick: (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
+        onClick: async (e: React.MouseEvent<HTMLInputElement, MouseEvent>) => {
           e.preventDefault();
-          ipcRenderer.send(IpcEvents.SHOW_LOCAL_VERSION_FOLDER_DIALOG);
+          await this.selectLocalVersion();
         },
       };
       const { folderPath } = this.state;
@@ -288,6 +247,7 @@ export const AddVersionDialog = observer(
         isValidVersion: false,
         version: '',
         folderPath: undefined,
+        localName: undefined,
       });
     }
   },
