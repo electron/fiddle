@@ -1,10 +1,8 @@
 import * as React from 'react';
 
 import { Button, Callout, FormGroup, InputGroup } from '@blueprintjs/core';
-import { ipcRenderer } from 'electron';
 import { observer } from 'mobx-react';
 
-import { IpcEvents } from '../../ipc-events';
 import { AppState } from '../state';
 
 interface FontSettingsProps {
@@ -62,13 +60,6 @@ export class FontSettings extends React.Component<
     this.props.appState.fontSize = fontSize;
   }
 
-  /**
-   * Reloads the BrowserWindow.
-   */
-  private reloadWindow() {
-    ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
-  }
-
   public render() {
     const { fontFamily, fontSize } = this.state;
     const fontSettingsInstructions =
@@ -97,7 +88,7 @@ export class FontSettings extends React.Component<
               }
             />
             <Button
-              onClick={this.reloadWindow}
+              onClick={window.ElectronFiddle.reloadWindows}
               icon="repeat"
               text="Reload Window"
             />

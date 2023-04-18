@@ -142,6 +142,7 @@ export interface SelectedLocalVersion {
 
 export type FiddleEvent =
   | 'before-quit'
+  | 'bisect-task'
   | 'clear-console'
   | 'execute-monaco-command'
   | 'load-example'
@@ -161,6 +162,13 @@ export type FiddleEvent =
   | 'select-all-in-editor'
   | 'set-show-me-template'
   | 'show-welcome-tour'
+  | 'test-task'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
   | 'undo-in-editor';
+
+export interface MessageOptions {
+  message: string;
+  detail?: string;
+  buttons?: string[];
+}

@@ -1,8 +1,6 @@
-import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
 import { isSupportedFile } from '../../src/utils/editor-utils';
@@ -28,7 +26,6 @@ describe('FileManager', () => {
   let fm: FileManager;
 
   beforeEach(() => {
-    ipcRenderer.send = jest.fn();
     (readFiddle as jest.Mock).mockResolvedValue(editorValues);
     (window.ElectronFiddle.getTemplateValues as jest.Mock).mockResolvedValue(
       editorValues,
@@ -156,10 +153,8 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       const n = Object.keys(editorValues).length;
-      // ipc calls for each editor value + one for SET_SHOW_ME_TEMPLATE
-      const ipcCalls = n + 1;
       expect(fs.outputFile).toHaveBeenCalledTimes(n);
-      expect(ipcRenderer.send).toHaveBeenCalledTimes(ipcCalls);
+      expect(window.ElectronFiddle.setShowMeTemplate).toHaveBeenCalled();
     });
 
     it('handles an error (remove)', async () => {
@@ -169,7 +164,6 @@ describe('FileManager', () => {
       await fm.saveFiddle('/fake/path');
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
-      expect(ipcRenderer.send).toHaveBeenCalledTimes(2);
     });
 
     it('runs saveFiddle (normal) on event', () => {
@@ -184,12 +178,10 @@ describe('FileManager', () => {
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
 
-    it('asks for a path via IPC if none can  be found', async () => {
+    it('asks for a path if none can  be found', async () => {
       await fm.saveFiddle();
 
-      expect(ipcRenderer.send).toHaveBeenCalledWith<any>(
-        IpcEvents.FS_SAVE_FIDDLE_DIALOG,
-      );
+      expect(window.ElectronFiddle.showSaveDialog).toHaveBeenCalled();
     });
   });
 

@@ -1,7 +1,4 @@
-import { ipcRenderer } from 'electron';
-
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
@@ -241,19 +238,15 @@ describe('App component', () => {
     it('sets native theme', async () => {
       app.state.isUsingSystemTheme = false;
 
-      ipcRenderer.send = jest.fn();
       await app.loadTheme('defaultLight');
-      expect(ipcRenderer.send).toHaveBeenCalledWith(
-        IpcEvents.SET_NATIVE_THEME,
-        'light',
-      );
+      expect(
+        window.ElectronFiddle.setNativeTheme as jest.Mock,
+      ).toHaveBeenCalledWith('light');
 
-      ipcRenderer.send = jest.fn();
       await app.loadTheme('custom-dark');
-      expect(ipcRenderer.send).toHaveBeenCalledWith(
-        IpcEvents.SET_NATIVE_THEME,
-        'dark',
-      );
+      expect(
+        window.ElectronFiddle.setNativeTheme as jest.Mock,
+      ).toHaveBeenCalledWith('dark');
     });
   });
 
@@ -278,7 +271,7 @@ describe('App component', () => {
 
     describe('isUsingSystemTheme reaction', () => {
       beforeEach(() => {
-        ipcRenderer.send = jest.fn();
+        window.ElectronFiddle.setNativeTheme = jest.fn();
       });
 
       it('ignores system theme changes when not isUsingSystemTheme', () => {
@@ -313,10 +306,9 @@ describe('App component', () => {
         app.setupThemeListeners();
         app.state.isUsingSystemTheme = true;
 
-        expect(ipcRenderer.send).toHaveBeenCalledWith(
-          IpcEvents.SET_NATIVE_THEME,
-          'system',
-        );
+        expect(
+          window.ElectronFiddle.setNativeTheme as jest.Mock,
+        ).toHaveBeenCalledWith('system');
       });
     });
 
@@ -412,9 +404,9 @@ describe('App component', () => {
 
   describe('prompting to confirm exiting an unsaved fiddle', () => {
     beforeEach(() => {
-      // setup: mock close & ipc
+      // setup: mock close & setNativeTheme
       window.close = jest.fn();
-      ipcRenderer.send = jest.fn();
+      window.ElectronFiddle.setNativeTheme = jest.fn();
       app.setupUnloadListeners();
     });
 
@@ -431,10 +423,9 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(() =>
-        (ipcRenderer.send as jest.Mock).mock.calls.find(
-          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
-        ),
+      await waitFor(
+        () =>
+          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
       );
       expect(window.close).toHaveBeenCalled();
     });
@@ -453,12 +444,11 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(() =>
-        (ipcRenderer.send as jest.Mock).mock.calls.find(
-          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
-        ),
+      await waitFor(
+        () =>
+          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
       );
-      expect(ipcRenderer.send).toHaveBeenCalledWith(IpcEvents.CONFIRM_QUIT);
+      expect(window.ElectronFiddle.confirmQuit).toHaveBeenCalled();
       expect(window.close).toHaveBeenCalledTimes(1);
     });
 
@@ -476,12 +466,10 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(() =>
-        (ipcRenderer.send as jest.Mock).mock.calls.find(
-          ([channelName]) => channelName === IpcEvents.SHOW_WINDOW,
-        ),
+      await waitFor(
+        () =>
+          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
       );
-      expect(ipcRenderer.send).toHaveBeenCalledTimes(1);
       expect(window.close).not.toHaveBeenCalled();
       expect(!app.state.isQuitting);
     });

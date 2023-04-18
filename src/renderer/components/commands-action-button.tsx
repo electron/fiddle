@@ -10,7 +10,6 @@ import {
   Position,
   Toaster,
 } from '@blueprintjs/core';
-import { ipcRenderer } from 'electron';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
@@ -19,7 +18,6 @@ import {
   GistActionState,
   GistActionType,
 } from '../../interfaces';
-import { IpcEvents } from '../../ipc-events';
 import { ensureRequiredFiles } from '../../utils/editor-utils';
 import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
@@ -164,13 +162,11 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not publish gist`, { error });
 
-        const messageBoxOptions: Electron.MessageBoxOptions = {
+        window.ElectronFiddle.showWarningDialog({
           message:
             'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
           detail: `GitHub encountered the following error: ${error.message}`,
-        };
-
-        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+        });
 
         return false;
       }
@@ -240,14 +236,12 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not update gist`, { error });
 
-        const messageBoxOptions: Electron.MessageBoxOptions = {
+        window.ElectronFiddle.showWarningDialog({
           message:
             'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
           detail: `GitHub encountered the following error: ${error.message}`,
           buttons: ['Ok'],
-        };
-
-        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+        });
       }
 
       appState.activeGistAction = GistActionState.none;
@@ -274,13 +268,11 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not delete gist`, { error });
 
-        const messageBoxOptions: Electron.MessageBoxOptions = {
+        window.ElectronFiddle.showWarningDialog({
           message:
             'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
           detail: `GitHub encountered the following error: ${error.message}`,
-        };
-
-        ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageBoxOptions);
+        });
       }
 
       appState.gistId = undefined;

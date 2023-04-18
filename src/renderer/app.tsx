@@ -1,10 +1,8 @@
 import * as path from 'path';
 
-import { ipcRenderer } from 'electron';
 import { autorun, reaction, when } from 'mobx';
 
 import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
-import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { PackageJsonOptions, getPackageJson } from '../utils/get-package';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
@@ -78,7 +76,7 @@ export class App {
     this.state.templateName = templateName;
 
     // update menu when a new Fiddle is loaded
-    ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, templateName);
+    window.ElectronFiddle.setShowMeTemplate(templateName);
 
     return true;
   }
@@ -136,10 +134,10 @@ export class App {
     this.setupUnloadListeners();
     this.setupTypeListeners();
 
-    ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
+    window.ElectronFiddle.sendReady();
 
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {
-      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.state.templateName);
+      window.ElectronFiddle.setShowMeTemplate(this.state.templateName);
     });
 
     return rendered;
@@ -169,7 +167,7 @@ export class App {
       () => this.state.isUsingSystemTheme,
       () => {
         if (this.state.isUsingSystemTheme) {
-          ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'system');
+          window.ElectronFiddle.setNativeTheme('system');
 
           if (!!window.matchMedia) {
             const { matches } = window.matchMedia(
@@ -227,12 +225,12 @@ export class App {
     if (theme.isDark || theme.name.includes('dark')) {
       document.body.classList.add('bp3-dark');
       if (!this.state.isUsingSystemTheme) {
-        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'dark');
+        window.ElectronFiddle.setNativeTheme('dark');
       }
     } else {
       document.body.classList.remove('bp3-dark');
       if (!this.state.isUsingSystemTheme) {
-        ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, 'light');
+        window.ElectronFiddle.setNativeTheme('light');
       }
     }
   }
@@ -293,7 +291,7 @@ export class App {
               // isQuitting checks if we're trying to quit the app
               // or just close the window
               if (state.isQuitting) {
-                ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
+                window.ElectronFiddle.confirmQuit();
               }
               window.onbeforeunload = null;
               window.close();
@@ -301,7 +299,7 @@ export class App {
               state.isQuitting = false;
             }
           });
-          ipcRenderer.send(IpcEvents.SHOW_WINDOW);
+          window.ElectronFiddle.showWindow();
         });
 
         // return value doesn't matter, we just want to cancel the event

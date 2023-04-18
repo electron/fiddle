@@ -2,11 +2,12 @@
 import { IpcRendererEvent, ipcRenderer } from 'electron';
 
 import { FiddleEvent } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
+import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { isReleasedMajor } from '../renderer/versions';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'before-quit': IpcEvents.BEFORE_QUIT,
+  'bisect-task': IpcEvents.TASK_BISECT,
   'clear-console': IpcEvents.CLEAR_CONSOLE,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
@@ -26,6 +27,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'select-all-in-editor': IpcEvents.SELECT_ALL_IN_EDITOR,
   'set-show-me-template': IpcEvents.SET_SHOW_ME_TEMPLATE,
   'show-welcome-tour': IpcEvents.SHOW_WELCOME_TOUR,
+  'test-task': IpcEvents.TASK_TEST,
   'toggle-bisect': IpcEvents.BISECT_COMMANDS_TOGGLE,
   'toggle-monaco-option': IpcEvents.MONACO_TOGGLE_OPTION,
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
@@ -58,14 +60,29 @@ export async function setupFiddleGlobal() {
     app: null as any, // will be set in main.tsx
     appPaths: await ipcRenderer.invoke(IpcEvents.GET_APP_PATHS),
     arch: process.arch,
+    blockAccelerators(acceleratorsToBlock) {
+      ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
+    },
+    confirmQuit() {
+      ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
+    },
     getTemplate: (version: string) =>
       ipcRenderer.invoke(IpcEvents.GET_TEMPLATE, version),
     getTemplateValues: (name: string) => {
       return ipcRenderer.invoke(IpcEvents.GET_TEMPLATE_VALUES, name);
     },
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
+    macTitlebarClicked() {
+      ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
+    },
     monaco: null as any, // will be set in main.tsx
     platform: process.platform,
+    pushOutputEntry(entry) {
+      ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
+    },
+    reloadWindows() {
+      ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
+    },
     removeAllListeners(type: FiddleEvent) {
       const channel = channelMapping[type];
       if (channel) {
@@ -74,6 +91,27 @@ export async function setupFiddleGlobal() {
     },
     selectLocalVersion: () => {
       return ipcRenderer.invoke(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
+    },
+    sendReady() {
+      ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
+    },
+    setNativeTheme(theme) {
+      ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, theme);
+    },
+    setShowMeTemplate() {
+      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+    },
+    showSaveDialog() {
+      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
+    },
+    showWarningDialog(messageOptions) {
+      ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageOptions);
+    },
+    showWindow() {
+      ipcRenderer.send(IpcEvents.SHOW_WINDOW);
+    },
+    taskDone(result) {
+      ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
   };
 

@@ -5,7 +5,6 @@ import {
   ProgressObject,
   Runner,
 } from '@electron/fiddle-core';
-import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import {
   action,
@@ -30,7 +29,6 @@ import {
   Version,
   VersionSource,
 } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { getName } from '../utils/get-name';
 import { getUsername } from '../utils/get-username';
 import { normalizeVersion } from '../utils/normalize-version';
@@ -247,7 +245,6 @@ export class AppState {
       resetView: action,
       setIsQuitting: action,
       setPageHash: action,
-      setShowMeMenu: action,
       setTheme: action,
       setVersion: action,
       showChannels: action,
@@ -296,7 +293,6 @@ export class AppState {
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
-    this.setShowMeMenu = this.setShowMeMenu.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
     this.removeAcceleratorToBlock = this.removeAcceleratorToBlock.bind(this);
     this.hideChannels = this.hideChannels.bind(this);
@@ -378,9 +374,7 @@ export class AppState {
     this.pushOutput('Console ready 🔬');
 
     // set blocked shortcuts
-    ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
-      ...this.acceleratorsToBlock,
-    ]);
+    window.ElectronFiddle.blockAccelerators([...this.acceleratorsToBlock]);
 
     this.setVersion(this.version);
 
@@ -869,7 +863,7 @@ export class AppState {
       text: strData.trim(),
       timeString: this.timeFmt.format(new Date()),
     };
-    ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
+    window.ElectronFiddle.pushOutputEntry(entry);
     this.output.push(entry);
   }
 
@@ -885,16 +879,10 @@ export class AppState {
     console.warn(error);
   }
 
-  public async setShowMeMenu() {
-    ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.templateName);
-  }
-
   public async addAcceleratorToBlock(acc: BlockableAccelerator) {
     if (!this.acceleratorsToBlock.includes(acc)) {
       this.acceleratorsToBlock = [...this.acceleratorsToBlock, acc];
-      ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
-        ...this.acceleratorsToBlock,
-      ]);
+      window.ElectronFiddle.blockAccelerators([...this.acceleratorsToBlock]);
     }
   }
 
@@ -903,9 +891,7 @@ export class AppState {
       this.acceleratorsToBlock = this.acceleratorsToBlock.filter(
         (a) => a !== acc,
       );
-      ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, [
-        ...this.acceleratorsToBlock,
-      ]);
+      window.ElectronFiddle.blockAccelerators([...this.acceleratorsToBlock]);
     }
   }
 

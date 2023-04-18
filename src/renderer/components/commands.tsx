@@ -1,10 +1,8 @@
 import * as React from 'react';
 
 import { Button, ControlGroup } from '@blueprintjs/core';
-import { ipcRenderer } from 'electron';
 import { observer } from 'mobx-react';
 
-import { IpcEvents } from '../../ipc-events';
 import { AppState } from '../state';
 import { GistActionButton } from './commands-action-button';
 import { AddressBar } from './commands-address-bar';
@@ -32,7 +30,7 @@ export const Commands = observer(
     private handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
       // Only maximize if the toolbar itself is clicked (ignore for buttons, input, etc)
       if (e.currentTarget === e.target) {
-        ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
+        window.ElectronFiddle.macTitlebarClicked();
       }
     };
 
