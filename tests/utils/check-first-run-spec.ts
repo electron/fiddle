@@ -20,7 +20,7 @@ describe('isFirstRun', () => {
   it('reports a first run', () => {
     (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
     expect(isFirstRun()).toBe(true);
-    expect(fs.outputFileSync as jest.Mock).toHaveBeenCalledTimes(1);
+    expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
   });
 
   it('handles an error', () => {

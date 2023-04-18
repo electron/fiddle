@@ -45,7 +45,7 @@ describe('AddThemeDialog component', () => {
       } catch (err) {
         expect(err.message).toEqual(`Filename  not found`);
         expect(fs.outputJSON).toHaveBeenCalledTimes(0);
-        expect(store.setTheme as jest.Mock).toHaveBeenCalledTimes(0);
+        expect(store.setTheme).toHaveBeenCalledTimes(0);
         expect(shell.showItemInFolder).toHaveBeenCalledTimes(0);
       }
     });
@@ -73,7 +73,7 @@ describe('AddThemeDialog component', () => {
         'themes',
         'testingLight',
       );
-      expect(store.setTheme as jest.Mock).toHaveBeenCalledWith(themePath);
+      expect(store.setTheme).toHaveBeenCalledWith(themePath);
       expect(shell.showItemInFolder).toHaveBeenCalledWith(themePath);
     });
   });

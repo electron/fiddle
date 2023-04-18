@@ -64,9 +64,7 @@ describe('Bisect commands component', () => {
       });
       await user.click(goodButton);
       expect(store.Bisector).toBeTruthy();
-      expect(store.Bisector!.continue as jest.Mock).toBeCalledWith(
-        bisectorValue,
-      );
+      expect(store.Bisector!.continue).toBeCalledWith(bisectorValue);
     },
   );
 

@@ -54,8 +54,6 @@ describe('VersionSelect component', () => {
       .find('VersionSelect')
       .prop('onVersionSelect');
     onVersionSelect(mockVersion1);
-    expect(store.setVersion as jest.Mock).toHaveBeenCalledWith(
-      mockVersion1.version,
-    );
+    expect(store.setVersion).toHaveBeenCalledWith(mockVersion1.version);
   });
 });

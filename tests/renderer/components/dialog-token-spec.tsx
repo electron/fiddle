@@ -42,7 +42,7 @@ describe('TokenDialog component', () => {
     );
     await instance.onTokenInputFocused();
 
-    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe(mockValidToken);
   });
 
@@ -55,7 +55,7 @@ describe('TokenDialog component', () => {
     );
     await instance.onTokenInputFocused();
 
-    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
@@ -68,7 +68,7 @@ describe('TokenDialog component', () => {
     );
     await instance.onTokenInputFocused();
 
-    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
@@ -81,7 +81,7 @@ describe('TokenDialog component', () => {
     );
     await instance.onTokenInputFocused();
 
-    expect(window.navigator.clipboard.readText as jest.Mock).toHaveBeenCalled();
+    expect(window.navigator.clipboard.readText).toHaveBeenCalled();
     expect(wrapper.state('tokenInput')).toBe('');
   });
 
@@ -130,7 +130,7 @@ describe('TokenDialog component', () => {
     wrapper.setState({ verifying: true, tokenInput: 'hello' });
     instance.openGenerateTokenExternal();
 
-    expect(window.open as jest.Mock).toHaveBeenCalled();
+    expect(window.open).toHaveBeenCalled();
   });
 
   describe('onSubmitToken()', () => {

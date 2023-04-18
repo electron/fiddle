@@ -129,7 +129,7 @@ describe('Action button component', () => {
       () => (state.gitHubToken = 'github-token'),
     );
     await instance.handleClick();
-    expect(state.toggleAuthDialog as jest.Mock).toHaveBeenCalled();
+    expect(state.toggleAuthDialog).toHaveBeenCalled();
     expect(instance.performGistAction).toHaveBeenCalled();
   });
 

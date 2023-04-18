@@ -124,7 +124,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       await instance.onSubmit();
       expect(Bisector).toHaveBeenCalledWith(versions.reverse());
       expect(store.Bisector).toBeDefined();
-      expect(store.setVersion as jest.Mock).toHaveBeenCalledWith(version);
+      expect(store.setVersion).toHaveBeenCalledWith(version);
     });
 
     it('does nothing if endIndex or startIndex are falsy', async () => {

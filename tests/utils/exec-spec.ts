@@ -32,10 +32,15 @@ describe('exec', () => {
       );
 
       const result = await execModule.exec('a/dir', 'echo hi');
-      const call = cpExec.mock.calls[0];
 
-      expect(call[0]).toBe('echo hi');
-      expect(call[1]).toEqual({ cwd: 'a/dir', maxBuffer: 20480000 });
+      expect(cpExec).toBeCalledWith(
+        'echo hi',
+        {
+          cwd: 'a/dir',
+          maxBuffer: 20480000,
+        },
+        expect.anything(),
+      );
       expect(result).toBe('hi');
     });
 
