@@ -1,6 +1,8 @@
 import * as path from 'path';
 
+import { shell } from 'electron';
 import * as fs from 'fs-extra';
+import * as namor from 'namor';
 
 import { CONFIG_PATH } from './constants';
 import {
@@ -54,6 +56,47 @@ export async function readThemeFile(
 }
 
 /**
+ * Create theme file and show in folder.
+ *
+ * @param {FiddleTheme} theme
+ * @param {string} [name]
+ * @returns {Promise<LoadedFiddleTheme>}
+ */
+export async function createThemeFile(
+  theme: FiddleTheme | LoadedFiddleTheme,
+  name?: string,
+): Promise<LoadedFiddleTheme> {
+  // Filter out file and css keys if they exist
+  theme = Object.fromEntries(
+    Object.entries(theme).filter(([key]) => !['file', 'css'].includes(key)),
+  ) as FiddleTheme;
+
+  if (!name) {
+    name = namor.generate({ words: 2, numbers: 0 });
+  }
+
+  const file = name.endsWith('.json') ? name : `${name}.json`;
+  const themePath = path.join(THEMES_PATH, file);
+
+  await fs.outputJSON(
+    themePath,
+    {
+      ...theme,
+      name,
+    },
+    { spaces: 2 },
+  );
+
+  shell.showItemInFolder(themePath);
+
+  return {
+    ...theme,
+    name,
+    file,
+  };
+}
+
+/**
  * Reads and then returns all available themes.
  *
  * @returns {Promise<Array<LoadedFiddleTheme>>}
@@ -72,6 +115,10 @@ export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
     const themeFiles = await fs.readdir(THEMES_PATH);
 
     for (const file of themeFiles) {
+      if (!file.endsWith('.json')) {
+        continue;
+      }
+
       const theme = await readThemeFile(file);
 
       if (theme) {

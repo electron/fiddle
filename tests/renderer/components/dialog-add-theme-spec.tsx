@@ -2,17 +2,37 @@ import * as React from 'react';
 
 import * as path from 'path';
 
-import { shell } from 'electron';
 import { shallow } from 'enzyme';
 import * as fs from 'fs-extra';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
+import { createThemeFile } from '../../../src/renderer/themes';
 import {
   LoadedFiddleTheme,
   defaultLight,
 } from '../../../src/renderer/themes-defaults';
 import { overrideRendererPlatform } from '../../utils';
+
+jest.mock('../../../src/renderer/themes', () => ({
+  createThemeFile: jest.fn(),
+}));
+
+class FileMock {
+  private bits: string[];
+  public readonly name: string;
+  public readonly path: string;
+
+  constructor(bits: string[], name: string, path: string) {
+    this.bits = bits;
+    this.name = name;
+    this.path = path;
+  }
+
+  async text() {
+    return this.bits.join('');
+  }
+}
 
 describe('AddThemeDialog component', () => {
   let store: AppState;
@@ -25,6 +45,7 @@ describe('AddThemeDialog component', () => {
     ({ state: store } = window.ElectronFiddle.app);
   });
 
+  // TODO(dsanders11): Update this test to be accurate
   it('renders', () => {
     const wrapper = shallow(<AddThemeDialog appState={store} />);
 
@@ -44,28 +65,21 @@ describe('AddThemeDialog component', () => {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
       } catch (err) {
         expect(err.message).toEqual(`Filename  not found`);
-        expect(fs.outputJSON).toHaveBeenCalledTimes(0);
+        expect(createThemeFile).toHaveBeenCalledTimes(0);
         expect(store.setTheme).toHaveBeenCalledTimes(0);
-        expect(shell.showItemInFolder).toHaveBeenCalledTimes(0);
       }
     });
 
     it('handles valid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
-      wrapper.setState({ file: '/test/file' });
-
-      (fs.outputJSON as jest.Mock).mockResolvedValue({});
-
-      await instance.createNewThemeFromMonaco('testingLight', defaultLight);
-
-      expect(fs.outputJSON).toHaveBeenCalled();
-
-      const args = (fs.outputJSON as jest.Mock).mock.calls[0];
-      expect(args[0].includes(`.electron-fiddle`)).toBe(true);
-      expect(args[1].name).toEqual('testingLight');
-      expect(args[1].common).toBeDefined();
-      expect(args[1].file).toBeDefined();
+      wrapper.setState({
+        file: new FileMock(
+          [JSON.stringify(defaultLight.editor)],
+          'file.json',
+          '/test/file.json',
+        ),
+      });
 
       const themePath = path.join(
         '~',
@@ -73,8 +87,19 @@ describe('AddThemeDialog component', () => {
         'themes',
         'testingLight',
       );
+      (createThemeFile as jest.Mock).mockResolvedValue({ file: themePath });
+
+      await instance.createNewThemeFromMonaco('testingLight', defaultLight);
+
+      expect(createThemeFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'Fiddle (Light)',
+          common: expect.anything(),
+          file: 'defaultLight',
+        }),
+        'testingLight',
+      );
       expect(store.setTheme).toHaveBeenCalledWith(themePath);
-      expect(shell.showItemInFolder).toHaveBeenCalledWith(themePath);
     });
   });
 
@@ -97,7 +122,13 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
-      wrapper.setState({ file: '/test/file' });
+      wrapper.setState({
+        file: new FileMock(
+          [JSON.stringify(defaultLight.editor)],
+          'file.json',
+          '/test/file.json',
+        ),
+      });
 
       (fs.readJSONSync as jest.Mock).mockReturnValue(defaultLight.editor);
 
@@ -116,7 +147,13 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
-      wrapper.setState({ file: '/test/file' });
+      wrapper.setState({
+        file: new FileMock(
+          [JSON.stringify(defaultLight.editor)],
+          'file.json',
+          '/test/file.json',
+        ),
+      });
 
       (fs.readJSONSync as jest.Mock).mockReturnValue({});
 

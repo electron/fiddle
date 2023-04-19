@@ -98,6 +98,7 @@ export class StateMock {
   public showInfoDialog = jest.fn();
   public showInputDialog = jest.fn();
   public signOutGitHub = jest.fn();
+  public toggleAddMonacoThemeDialog = jest.fn();
   public toggleAddVersionDialog = jest.fn();
   public toggleAuthDialog = jest.fn();
   public toggleSettings = jest.fn();

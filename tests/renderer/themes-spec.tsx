@@ -1,9 +1,12 @@
 import * as path from 'path';
 
+import { shell } from 'electron';
 import * as fs from 'fs-extra';
 
 import {
+  THEMES_PATH,
   activateTheme,
+  createThemeFile,
   getAvailableThemes,
   getTheme,
   readThemeFile,
@@ -53,6 +56,24 @@ describe('themes', () => {
         file: 'test-theme2.json',
         name: 'test-theme2',
         test: true,
+      });
+    });
+
+    it('only reads files ending in .json', async () => {
+      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      (fs.readdir as jest.Mock).mockReturnValueOnce([
+        'test-theme1.json',
+        '.DS_Store',
+      ]);
+      (fs.readJSON as jest.Mock).mockReturnValue({ test: true });
+
+      const themes = await getAvailableThemes();
+
+      expect(themes).toHaveLength(3);
+      expect(themes[2]).toEqual({
+        test: true,
+        name: 'test-theme1',
+        file: 'test-theme1.json',
       });
     });
 
@@ -137,6 +158,59 @@ describe('themes', () => {
 
       expect(theme).toBeTruthy();
       expect(fs.readJSON).toHaveBeenCalledWith(expected);
+    });
+  });
+
+  describe('createThemeFile()', () => {
+    it('filters out file and css keys', async () => {
+      const themeToSave = await getTheme();
+      const theme = await createThemeFile(
+        { ...themeToSave, file: '/path/file', css: '' },
+        'theme-name',
+      );
+      expect(theme.name).toBe('theme-name');
+      expect(theme.css).not.toBeDefined();
+      expect(theme.file).toMatch(/theme-name.json$/);
+    });
+
+    it('uses the name provided', async () => {
+      const theme = await createThemeFile(await getTheme(), 'theme-name');
+      expect(theme.name).toBe('theme-name');
+      expect(theme.file).toMatch(/theme-name.json$/);
+    });
+
+    it('generates a name if not provided', async () => {
+      const theme = await createThemeFile(await getTheme());
+      expect(theme.name).toBeDefined();
+      expect(theme.file.endsWith(`${theme.name}.json`)).toBe(true);
+    });
+
+    it('appends .json to name if needed', async () => {
+      const { file } = await createThemeFile(await getTheme(), 'theme-name');
+      expect(file).toEqual('theme-name.json');
+    });
+
+    it('writes the file', async () => {
+      const theme = await getTheme();
+      const name = 'theme-name';
+      await createThemeFile(theme, name);
+      delete (theme as any).file;
+      delete theme.css;
+      expect(fs.outputJSON).toHaveBeenCalledWith(
+        path.join(THEMES_PATH, `${name}.json`),
+        expect.objectContaining({
+          ...theme,
+          name,
+        }),
+        expect.anything(),
+      );
+    });
+
+    it('calls shell.showItemInFolder', async () => {
+      await createThemeFile(await getTheme(), 'theme-name');
+      expect(shell.showItemInFolder).toHaveBeenCalledWith(
+        path.join(THEMES_PATH, 'theme-name.json'),
+      );
     });
   });
 });

@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import * as path from 'path';
-
 import {
   Button,
   Callout,
@@ -12,13 +10,17 @@ import {
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
 import { shell } from 'electron';
 import * as fs from 'fs-extra';
-import { reaction } from 'mobx';
+import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
-import * as namor from 'namor';
 
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
-import { THEMES_PATH, getAvailableThemes, getTheme } from '../themes';
+import {
+  THEMES_PATH,
+  createThemeFile,
+  getAvailableThemes,
+  getTheme,
+} from '../themes';
 import { LoadedFiddleTheme } from '../themes-defaults';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
@@ -144,22 +146,7 @@ export const AppearanceSettings = observer(
       const theme = await getTheme(appState.theme);
 
       try {
-        const name = namor.generate({ words: 2, numbers: 0 });
-        const themePath = path.join(THEMES_PATH, `${name}.json`);
-
-        await fs.outputJSON(
-          themePath,
-          {
-            ...theme,
-            name,
-            file: undefined,
-            css: undefined,
-          },
-          { spaces: 2 },
-        );
-
-        shell.showItemInFolder(themePath);
-
+        await createThemeFile(theme);
         this.setState({ themes: await getAvailableThemes() });
 
         return true;
@@ -190,8 +177,13 @@ export const AppearanceSettings = observer(
     /**
      * Opens the "add monaco theme" dialog
      */
-    public handleAddTheme(): void {
+    public async handleAddTheme(): Promise<void> {
       this.props.appState.toggleAddMonacoThemeDialog();
+
+      // Wait for the dialog to be closed again
+      await when(() => !this.props.appState.isTokenDialogShowing);
+
+      this.setState({ themes: await getAvailableThemes() });
     }
 
     public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
