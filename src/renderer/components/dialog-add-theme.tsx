@@ -37,7 +37,6 @@ export const AddThemeDialog = observer(
       this.onSubmit = this.onSubmit.bind(this);
       this.onClose = this.onClose.bind(this);
       this.onChangeFile = this.onChangeFile.bind(this);
-      this.reset = this.reset.bind(this);
     }
 
     /**
@@ -120,8 +119,9 @@ export const AddThemeDialog = observer(
     }
 
     public onClose() {
-      this.props.appState.isThemeDialogShowing = false;
-      this.reset();
+      this.setState(this.resetState, () => {
+        this.props.appState.isThemeDialogShowing = false;
+      });
     }
 
     public render() {
@@ -150,14 +150,6 @@ export const AddThemeDialog = observer(
           </div>
         </Dialog>
       );
-    }
-
-    /**
-     * Reset this component's state
-     */
-    private reset(): void {
-      this.setState(this.resetState);
-      return;
     }
   },
 );
