@@ -57,7 +57,7 @@ export class FontSettings extends React.Component<
    */
   public handleSetFontSize(event: React.FormEvent<HTMLInputElement>): void {
     const parsedFontSize = parseInt(event.currentTarget.value, 10);
-    const fontSize = isNaN(parsedFontSize) ? undefined : parsedFontSize;
+    const fontSize = Number.isNaN(parsedFontSize) ? undefined : parsedFontSize;
     this.setState({ fontSize });
     this.props.appState.fontSize = fontSize;
   }
