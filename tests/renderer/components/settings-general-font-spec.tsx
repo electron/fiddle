@@ -60,5 +60,16 @@ describe('FontSettings component', () => {
       expect(store.fontSize).toBe(10);
       expect(instance.state.fontSize).toEqual(10);
     });
+
+    it('handles being cleared', async () => {
+      const wrapper = shallow(<FontSettings appState={store} />);
+      const instance = wrapper.instance() as any;
+      await instance.handleSetFontSize({
+        currentTarget: { value: '' },
+      });
+
+      expect(store.fontSize).toBeUndefined();
+      expect(instance.state.fontSize).toBeUndefined();
+    });
   });
 });
