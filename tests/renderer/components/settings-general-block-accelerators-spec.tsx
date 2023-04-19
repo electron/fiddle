@@ -27,7 +27,7 @@ describe('BlockAcceleratorsSettings component', () => {
         currentTarget: { checked: false, value: BlockableAccelerator.save },
       });
 
-      expect(store.removeAcceleratorToBlock as jest.Mock).toHaveBeenCalledWith(
+      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
 
@@ -35,7 +35,7 @@ describe('BlockAcceleratorsSettings component', () => {
         currentTarget: { checked: true, value: BlockableAccelerator.save },
       });
 
-      expect(store.addAcceleratorToBlock as jest.Mock).toHaveBeenCalledWith(
+      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
     });

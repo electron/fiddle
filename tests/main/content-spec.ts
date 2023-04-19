@@ -83,8 +83,8 @@ describe('content', () => {
 
     it('loads a test template', async () => {
       await getTestTemplate();
-      expect(fetch as jest.Mock).toHaveBeenCalledTimes(1);
-      expect(fetch as jest.Mock).toHaveBeenLastCalledWith(
+      expect(fetch).toHaveBeenCalledTimes(1);
+      expect(fetch).toHaveBeenLastCalledWith(
         'https://github.com/electron/electron-quick-start/archive/test-template.zip',
       );
     });

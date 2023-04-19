@@ -45,7 +45,7 @@ describe('Header component', () => {
     instance.stopTour();
 
     expect(wrapper.state('isTourStarted')).toBe(false);
-    expect(store.disableTour as jest.Mock).toHaveBeenCalled();
+    expect(store.disableTour).toHaveBeenCalled();
   });
 
   describe('getWelcomeTour()', () => {

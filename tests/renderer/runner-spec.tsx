@@ -296,7 +296,7 @@ describe('Runner component', () => {
       const result = await instance.autobisect(bisectRange);
 
       expect(result).toBe(RunResult.SUCCESS);
-      expect((store.setVersion as jest.Mock).mock.calls).toHaveLength(2);
+      expect(store.setVersion).toHaveBeenCalledTimes(2);
       expect(spy).toHaveBeenNthCalledWith(1, LAST_GOOD);
       expect(spy).toHaveBeenNthCalledWith(2, FIRST_BAD);
       expect(store.pushOutput).toHaveBeenLastCalledWith(
@@ -339,9 +339,8 @@ describe('Runner component', () => {
       const bisectResult = await instance.autobisect(bisectRange);
 
       expect(bisectResult).toBe(RunResult.INVALID);
-      expect(store.pushOutput).toHaveBeenCalled();
-      expect((store.pushOutput as jest.Mock).mock.calls.pop()[0]).toMatch(
-        'both returned',
+      expect(store.pushOutput).toHaveBeenLastCalledWith(
+        expect.stringMatching('both returned'),
       );
     }
 

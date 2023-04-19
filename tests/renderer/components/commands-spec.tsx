@@ -90,6 +90,6 @@ describe('Commands component', () => {
 
     wrapper.find(ControlGroup).at(0).find(Button).simulate('click');
 
-    expect(store.toggleSettings as jest.Mock).toHaveBeenCalled();
+    expect(store.toggleSettings).toHaveBeenCalled();
   });
 });

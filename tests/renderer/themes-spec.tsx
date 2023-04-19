@@ -19,10 +19,10 @@ describe('themes', () => {
 
       activateTheme(await getTheme());
 
-      expect(editor.defineTheme).toHaveBeenCalled();
       expect(editor.setTheme).toHaveBeenCalled();
-      expect((editor.defineTheme as jest.Mock).mock.calls[0][1].base).toBe(
-        'vs-dark',
+      expect(editor.defineTheme).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ base: 'vs-dark' }),
       );
     });
   });

@@ -110,7 +110,7 @@ describe('AddVersionDialog component', () => {
 
       await (wrapper.instance() as any).onSubmit();
 
-      expect(store.addLocalVersion as jest.Mock).toHaveBeenCalledTimes(0);
+      expect(store.addLocalVersion).toHaveBeenCalledTimes(0);
     });
 
     it('adds a local version using the given data', async () => {
@@ -123,12 +123,13 @@ describe('AddVersionDialog component', () => {
 
       await (wrapper.instance() as any).onSubmit();
 
-      expect(store.addLocalVersion as jest.Mock).toHaveBeenCalledTimes(1);
-
-      const result = (store.addLocalVersion as jest.Mock).mock.calls[0][0];
-
-      expect(result.localPath).toBe('/test/path');
-      expect(result.version).toBe('3.3.3');
+      expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
+      expect(store.addLocalVersion).toHaveBeenCalledWith(
+        expect.objectContaining({
+          localPath: '/test/path',
+          version: '3.3.3',
+        }),
+      );
     });
 
     it('shows dialog warning when adding duplicate local versions', async () => {

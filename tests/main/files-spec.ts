@@ -55,10 +55,7 @@ describe('files', () => {
     it('tries to open an "open" dialog', async () => {
       await showOpenDialog();
 
-      const call = (dialog.showOpenDialog as jest.Mock).mock.calls[0];
-
-      expect(dialog.showOpenDialog).toHaveBeenCalled();
-      expect(call[0]).toEqual({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
         title: 'Open Fiddle',
         properties: ['openDirectory'],
       });
@@ -73,7 +70,6 @@ describe('files', () => {
     });
 
     it('adds the opened file path to recent files', async () => {
-      (app.addRecentDocument as jest.Mock).mock.calls[0];
       await showOpenDialog();
       expect(app.addRecentDocument).toHaveBeenCalled();
     });
@@ -83,10 +79,7 @@ describe('files', () => {
     it('tries to open an "open" dialog to be used as a save dialog', async () => {
       await showSaveDialog();
 
-      const call = (dialog.showOpenDialogSync as jest.Mock).mock.calls[0];
-
-      expect(dialog.showOpenDialogSync).toHaveBeenCalled();
-      expect(call[0]).toEqual({
+      expect(dialog.showOpenDialogSync).toHaveBeenCalledWith({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle',
@@ -96,10 +89,7 @@ describe('files', () => {
     it('tries to open an "open" dialog to be used as a save as dialog', async () => {
       await showSaveDialog(IpcEvents.FS_SAVE_FIDDLE, 'hello');
 
-      const call = (dialog.showOpenDialogSync as jest.Mock).mock.calls[0];
-
-      expect(dialog.showOpenDialogSync).toHaveBeenCalled();
-      expect(call[0]).toEqual({
+      expect(dialog.showOpenDialogSync).toHaveBeenCalledWith({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle as hello',

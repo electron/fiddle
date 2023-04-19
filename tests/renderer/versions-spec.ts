@@ -114,11 +114,10 @@ describe('versions', () => {
 
       saveLocalVersions(mockLocalVersions as Array<RunnableVersion>);
 
-      const key = (window.localStorage.setItem as jest.Mock).mock.calls[0][0];
-      const value = (window.localStorage.setItem as jest.Mock).mock.calls[0][1];
-
-      expect(key).toBe(VersionKeys.local);
-      expect(value).toBe(JSON.stringify(mockLocalVersions));
+      expect(window.localStorage.setItem).toBeCalledWith(
+        VersionKeys.local,
+        JSON.stringify(mockLocalVersions),
+      );
     });
   });
 
@@ -171,7 +170,7 @@ describe('versions', () => {
       ];
 
       expect(result).toEqual(expected);
-      expect(window.localStorage.setItem as jest.Mock).toHaveBeenCalled();
+      expect(window.localStorage.setItem).toHaveBeenCalled();
     });
 
     it('fetches versions < 0.24.0', async () => {

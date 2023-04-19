@@ -24,7 +24,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('npm');
 
         expect(result).toBe(true);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('which npm');
+        expect(exec).toBeCalledWith(expect.anything(), 'which npm');
       });
 
       it('returns true if npm installed', async () => {
@@ -35,7 +35,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('npm', true);
 
         expect(result).toBe(true);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('where.exe npm');
+        expect(exec).toBeCalledWith(expect.anything(), 'where.exe npm');
       });
 
       it('returns false if npm not installed', async () => {
@@ -46,7 +46,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('npm', true);
 
         expect(result).toBe(false);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('which npm');
+        expect(exec).toBeCalledWith(expect.anything(), 'which npm');
       });
 
       it('uses the cache', async () => {
@@ -54,11 +54,11 @@ describe('npm', () => {
 
         const one = await getIsPackageManagerInstalled('npm', true);
         expect(one).toBe(true);
-        expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+        expect(exec).toHaveBeenCalledTimes(1);
 
         const two = await getIsPackageManagerInstalled('npm');
         expect(two).toBe(true);
-        expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+        expect(exec).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -77,7 +77,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('yarn');
 
         expect(result).toBe(true);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('which yarn');
+        expect(exec).toBeCalledWith(expect.anything(), 'which yarn');
       });
 
       it('returns true if yarn installed', async () => {
@@ -88,7 +88,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('yarn', true);
 
         expect(result).toBe(true);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('where.exe yarn');
+        expect(exec).toBeCalledWith(expect.anything(), 'where.exe yarn');
       });
 
       it('returns false if yarn not installed', async () => {
@@ -99,7 +99,7 @@ describe('npm', () => {
         const result = await getIsPackageManagerInstalled('yarn', true);
 
         expect(result).toBe(false);
-        expect((exec as jest.Mock).mock.calls[0][1]).toBe('which yarn');
+        expect(exec).toBeCalledWith(expect.anything(), 'which yarn');
       });
 
       it('uses the cache', async () => {
@@ -107,11 +107,11 @@ describe('npm', () => {
 
         const one = await getIsPackageManagerInstalled('yarn', true);
         expect(one).toBe(true);
-        expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+        expect(exec).toHaveBeenCalledTimes(1);
 
         const two = await getIsPackageManagerInstalled('yarn');
         expect(two).toBe(true);
-        expect(exec as jest.Mock).toHaveBeenCalledTimes(1);
+        expect(exec).toHaveBeenCalledTimes(1);
       });
     });
   });

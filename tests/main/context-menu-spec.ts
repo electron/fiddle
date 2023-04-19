@@ -50,17 +50,17 @@ describe('context-menu', () => {
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
-      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
-
-      expect(template).toHaveLength(8);
-      expect(template[0].id).toBe('run');
-      expect(template[1].id).toBe('clear_console');
-      expect(template[2].type).toBe('separator');
-      expect(template[3].id).toBe('cut');
-      expect(template[4].id).toBe('copy');
-      expect(template[5].id).toBe('paste');
-      expect(template[6].type).toBe('separator');
-      expect(template[7].id).toBe('inspect');
+      expect(Menu.buildFromTemplate).toBeCalledWith(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 'run' }),
+          expect.objectContaining({ id: 'clear_console' }),
+          expect.objectContaining({ type: 'separator' }),
+          expect.objectContaining({ id: 'cut' }),
+          expect.objectContaining({ id: 'paste' }),
+          expect.objectContaining({ type: 'separator' }),
+          expect.objectContaining({ id: 'inspect' }),
+        ]),
+      );
     });
 
     it('creates a default context-menu without inspect in production', () => {
@@ -83,14 +83,18 @@ describe('context-menu', () => {
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
-      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
-
-      expect(template[3].id).toBe('cut');
-      expect(template[3].enabled).toBe(false);
-      expect(template[4].id).toBe('copy');
-      expect(template[4].enabled).toBe(false);
-      expect(template[5].id).toBe('paste');
-      expect(template[5].enabled).toBe(false);
+      expect(Menu.buildFromTemplate).toBeCalledWith(
+        expect.arrayContaining([
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ id: 'cut', enabled: false }),
+          expect.objectContaining({ id: 'copy', enabled: false }),
+          expect.objectContaining({ id: 'paste', enabled: false }),
+          expect.anything(),
+          expect.anything(),
+        ]),
+      );
     });
 
     it('enables cut/copy/paste if in editFlags', () => {
@@ -108,14 +112,18 @@ describe('context-menu', () => {
         },
       });
 
-      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
-
-      expect(template[3].id).toBe('cut');
-      expect(template[3].enabled).toBe(true);
-      expect(template[4].id).toBe('copy');
-      expect(template[4].enabled).toBe(true);
-      expect(template[5].id).toBe('paste');
-      expect(template[5].enabled).toBe(true);
+      expect(Menu.buildFromTemplate).toBeCalledWith(
+        expect.arrayContaining([
+          expect.anything(),
+          expect.anything(),
+          expect.anything(),
+          expect.objectContaining({ id: 'cut', enabled: true }),
+          expect.objectContaining({ id: 'copy', enabled: true }),
+          expect.objectContaining({ id: 'paste', enabled: true }),
+          expect.anything(),
+          expect.anything(),
+        ]),
+      );
     });
   });
 

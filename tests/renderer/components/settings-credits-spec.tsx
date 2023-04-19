@@ -61,6 +61,6 @@ describe('CreditsSettings component', () => {
     wrapper.setState({ contributors: mockContributors });
 
     wrapper.find('.contributor').simulate('click');
-    expect(window.open as jest.Mock).toHaveBeenCalled();
+    expect(window.open).toHaveBeenCalled();
   });
 });

@@ -78,7 +78,7 @@ describe('AppearanceSettings component', () => {
     const instance: any = wrapper.instance() as any;
     instance.handleChange({ file: 'defaultLight' } as any);
 
-    expect(store.setTheme as jest.Mock).toHaveBeenCalledWith('defaultLight');
+    expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
   it('toggles popover toggle event', () => {
