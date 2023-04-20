@@ -365,10 +365,10 @@ describe('RemoteLoader', () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
       instance.verifyReleaseChannelEnabled = jest.fn().mockReturnValue(true);
       instance.fetchExampleAndLoad = jest.fn();
-      await instance.loadFiddleFromElectronExample(
-        {},
-        { path: 'test/path', tag: 'v4.0.0' },
-      );
+      await instance.loadFiddleFromElectronExample({
+        path: 'test/path',
+        tag: 'v4.0.0',
+      });
 
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
         label: expect.stringMatching(/for version v4.0.0/i),
@@ -384,10 +384,10 @@ describe('RemoteLoader', () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
       instance.verifyReleaseChannelEnabled = jest.fn();
       instance.fetchExampleAndLoad = jest.fn();
-      await instance.loadFiddleFromElectronExample(
-        {},
-        { path: 'test/path', tag: 'v4.0.0' },
-      );
+      await instance.loadFiddleFromElectronExample({
+        path: 'test/path',
+        tag: 'v4.0.0',
+      });
 
       expect(store.showConfirmDialog).toHaveBeenCalled();
       expect(instance.fetchExampleAndLoad).toHaveBeenCalledTimes(0);
@@ -398,7 +398,7 @@ describe('RemoteLoader', () => {
     it('loads the example with confirmation', async () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
       instance.fetchGistAndLoad = jest.fn();
-      await instance.loadFiddleFromGist({}, { id: 'gist' });
+      await instance.loadFiddleFromGist({ id: 'gist' });
 
       expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
@@ -410,7 +410,7 @@ describe('RemoteLoader', () => {
     it('does not load the example without confirmation', async () => {
       store.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
       instance.fetchGistAndLoad = jest.fn();
-      await instance.loadFiddleFromGist({}, { id: 'gist' });
+      await instance.loadFiddleFromGist({ id: 'gist' });
 
       expect(instance.fetchGistAndLoad).not.toHaveBeenCalled();
       expect(store.showConfirmDialog).toHaveBeenCalled();
