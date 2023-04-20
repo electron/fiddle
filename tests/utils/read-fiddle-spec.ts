@@ -2,7 +2,7 @@ import * as path from 'node:path';
 
 import * as fs from 'fs-extra';
 
-import { EditorValues, MAIN_JS } from '../../src/interfaces';
+import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import {
   ensureRequiredFiles,
   getEmptyContent,
@@ -26,7 +26,7 @@ describe('read-fiddle', () => {
   function setupFSMocks(editorValues: EditorValues) {
     (fs.readdir as jest.Mock).mockResolvedValue(Object.keys(editorValues));
     (fs.readFile as jest.Mock).mockImplementation(
-      async (filename) => editorValues[path.basename(filename)],
+      async (filename) => editorValues[path.basename(filename) as EditorId],
     );
   }
 

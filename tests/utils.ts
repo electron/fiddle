@@ -90,10 +90,10 @@ export class FetchMock {
 }
 
 // return an object containing props in 'a' that are different from in 'b'
-export function objectDifference<Type>(a: Type, b: Type): Type {
+export function objectDifference(a: any, b: any): Record<string, unknown> {
   const serialize = (input: any) => JSON.stringify(toJS(input));
 
-  const o = {};
+  const o: Record<string, unknown> = {};
   for (const entry of Object.entries(a)) {
     const key = entry[0];
     const val = toJS(entry[1]);
@@ -101,7 +101,7 @@ export function objectDifference<Type>(a: Type, b: Type): Type {
 
     o[key] = key === 'editorMosaic' ? objectDifference(val, b[key]) : toJS(val);
   }
-  return o as Type;
+  return o;
 }
 
 /**

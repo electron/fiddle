@@ -17,7 +17,7 @@ export class VersionsMock {
       version,
     }));
 
-    const obj = {};
+    const obj: Record<string, RunnableVersion> = {};
     for (const ver of arr) {
       obj[ver.version] = ver;
     }

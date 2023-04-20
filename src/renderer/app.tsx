@@ -2,7 +2,12 @@ import * as path from 'node:path';
 
 import { autorun, reaction, when } from 'mobx';
 
-import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
+import {
+  EditorId,
+  EditorValues,
+  PACKAGE_NAME,
+  SetFiddleOptions,
+} from '../interfaces';
 import { defaultDark, defaultLight } from '../themes-defaults';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
@@ -92,7 +97,10 @@ export class App {
     const values = this.state.editorMosaic.values();
 
     if (options) {
-      values[PACKAGE_NAME] = await getPackageJson(this.state, options);
+      values[PACKAGE_NAME as EditorId] = await getPackageJson(
+        this.state,
+        options,
+      );
     }
 
     return values;

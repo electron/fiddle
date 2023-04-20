@@ -1,6 +1,7 @@
 import semver from 'semver';
 
 import {
+  EditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -27,7 +28,7 @@ export class RemoteLoader {
       'setElectronVersion',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
-    ]) {
+    ] as const) {
       this[name] = this[name].bind(this);
     }
   }
@@ -100,7 +101,7 @@ export class RemoteLoader {
             fetch(child.download_url)
               .then((r) => r.text())
               .then((t) => {
-                values[child.name] = t;
+                values[child.name as EditorId] = t;
               }),
           );
         }

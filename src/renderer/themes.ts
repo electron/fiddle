@@ -43,7 +43,7 @@ export async function getTheme(
 async function getCssStringForTheme(theme: FiddleTheme): Promise<string> {
   let cssContent = '';
 
-  Object.keys(theme.common).forEach((key) => {
+  Object.keys(theme.common).forEach((key: keyof typeof theme.common) => {
     cssContent += `    --${key}: ${theme.common[key]};\n`;
   });
 

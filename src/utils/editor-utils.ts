@@ -9,7 +9,11 @@ const EMPTY_EDITOR_CONTENT = {
 } as const;
 
 export function getEmptyContent(filename: string): string {
-  return EMPTY_EDITOR_CONTENT[getSuffix(filename)] || '';
+  return (
+    EMPTY_EDITOR_CONTENT[
+      getSuffix(filename) as keyof typeof EMPTY_EDITOR_CONTENT
+    ] || ''
+  );
 }
 
 export function isRequiredFile(id: EditorId) {
@@ -27,6 +31,6 @@ export function getSuffix(filename: string) {
   return filename.slice(filename.lastIndexOf('.') + 1);
 }
 
-export function isSupportedFile(filename: string): boolean {
+export function isSupportedFile(filename: string): filename is EditorId {
   return /\.(css|html|js)$/i.test(filename);
 }

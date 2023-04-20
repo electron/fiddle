@@ -4,6 +4,8 @@ import * as fs from 'fs-extra';
 import semver from 'semver';
 
 import {
+  EditorId,
+  EditorValues,
   FileTransform,
   Files,
   GenericDialogType,
@@ -70,7 +72,7 @@ export class FileManager {
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
 
-    const editorValues = {};
+    const editorValues: EditorValues = {};
     const files: [string, string][] = Object.entries(
       await readFiddle(filePath, true),
     );
@@ -115,7 +117,7 @@ export class FileManager {
       }
 
       if (isKnownFile(name) || (await app.remoteLoader.confirmAddFile(name))) {
-        editorValues[name] = value;
+        editorValues[name as EditorId] = value;
       }
     }
 
@@ -185,7 +187,7 @@ export class FileManager {
 
     let output: Files = new Map(Object.entries(values));
 
-    output.set(PACKAGE_NAME, values[PACKAGE_NAME]!);
+    output.set(PACKAGE_NAME, values[PACKAGE_NAME as EditorId]!);
 
     for (const transform of transforms) {
       try {
