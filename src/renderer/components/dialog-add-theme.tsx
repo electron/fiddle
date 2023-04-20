@@ -75,7 +75,7 @@ export const AddThemeDialog = observer(
         // Use file.name if no editor.name, and strip file extension (should be .json)
         const name: string = editor.name
           ? editor.name
-          : file.name.split('.').reverse().slice(1).reverse().join('.');
+          : file.name.slice(0, file.name.lastIndexOf('.'));
         await this.createNewThemeFromMonaco(name, newTheme);
       } catch (error) {
         appState.showErrorDialog(`${error}, please pick a different file.`);
