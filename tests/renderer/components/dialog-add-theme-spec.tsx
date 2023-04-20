@@ -19,15 +19,11 @@ jest.mock('../../../src/renderer/themes', () => ({
 }));
 
 class FileMock {
-  private bits: string[];
-  public readonly name: string;
-  public readonly path: string;
-
-  constructor(bits: string[], name: string, path: string) {
-    this.bits = bits;
-    this.name = name;
-    this.path = path;
-  }
+  constructor(
+    private bits: string[],
+    public name: string,
+    public path: string,
+  ) {}
 
   async text() {
     return this.bits.join('');
