@@ -86,7 +86,6 @@ jobs:
           root: .
           paths:
             - out
-            - .webpack
   win-build:
     parameters:
       arch:
@@ -105,7 +104,6 @@ jobs:
           root: .
           paths:
             - out
-            - .webpack
   linux-build:
     parameters:
       arch:
@@ -123,7 +121,7 @@ jobs:
           root: .
           paths:
             - out
-            - .webpack
+            - .webpack  # Only persist on one job, output is identical
   publish-to-github:
     docker:
       - image: cimg/base:stable
