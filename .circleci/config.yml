@@ -136,6 +136,10 @@ jobs:
   notify-sentry-deploy:
     docker:
       - image: cimg/base:stable
+    environment:
+      SENTRY_ORG: electronjs
+      SENTRY_PROJECT: electron-fiddle
+      SENTRY_ENVIRONMENT: production
     steps:
       - install
       - attach_workspace:
