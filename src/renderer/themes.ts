@@ -71,9 +71,7 @@ export async function createThemeFile(
     Object.entries(theme).filter(([key]) => !['file', 'css'].includes(key)),
   ) as FiddleTheme;
 
-  if (!name) {
-    name = namor.generate({ words: 2, numbers: 0 });
-  }
+  name = name || namor.generate({ words: 2, numbers: 0 });
 
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
