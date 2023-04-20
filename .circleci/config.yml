@@ -115,13 +115,21 @@ jobs:
       - run: sudo apt-get update && sudo apt install rpm
       - install
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
+      # CircleCI doesn't let you persist files with the same name from multiple
+      # jobs, so only persist the .webpack path from the x64 linux-build job
+      - when:
+          condition:
+            not:
+              equal: [ << parameters.arch >>, x64 ]
+          steps:
+            - run: rm -rf .webpack/*
       - store_artifacts:
           path: out
       - persist_to_workspace:
           root: .
           paths:
             - out
-            - .webpack  # Only persist on one job, output is identical
+            - .webpack
   publish-to-github:
     docker:
       - image: cimg/base:stable
