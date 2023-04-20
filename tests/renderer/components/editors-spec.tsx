@@ -1,10 +1,8 @@
 import * as React from 'react';
 
-import { ipcRenderer } from 'electron';
 import { mount, shallow } from 'enzyme';
 
 import { EditorValues, MAIN_JS } from '../../../src/interfaces';
-import { IpcEvents } from '../../../src/ipc-events';
 import { App } from '../../../src/renderer/app';
 import { Editors } from '../../../src/renderer/components/editors';
 import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
@@ -15,6 +13,7 @@ import {
   StateMock,
   createEditorValues,
 } from '../../mocks/mocks';
+import { emitEvent } from '../../utils';
 
 jest.mock('../../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
@@ -107,8 +106,8 @@ describe('Editors component', () => {
     expect(editorMosaic.mosaic).toStrictEqual(arrangement);
   });
 
-  describe('IPC commands', () => {
-    it('handles a MONACO_EXECUTE_COMMAND command', () => {
+  describe('events', () => {
+    it('handles a "execute-monaco-command" event', () => {
       shallow(<Editors appState={store} />);
 
       const editor = new MonacoEditorMock();
@@ -117,7 +116,7 @@ describe('Editors component', () => {
 
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-      ipcRenderer.emit(IpcEvents.MONACO_EXECUTE_COMMAND, null, 'hello');
+      emitEvent('execute-monaco-command', 'hello');
       expect(editor.getAction).toHaveBeenCalled();
       expect(action.isSupported).toHaveBeenCalled();
       expect(action.run).toHaveBeenCalled();
@@ -125,7 +124,9 @@ describe('Editors component', () => {
 
     const fakeValues = { [MAIN_JS]: 'hi' } as const;
 
-    it('handles an FS_NEW_FIDDLE command', async () => {
+    it('handles a "new-fiddle" event', async () => {
+      shallow(<Editors appState={store} />);
+
       let resolve: any;
       const replacePromise = new Promise((r) => {
         resolve = r;
@@ -140,7 +141,7 @@ describe('Editors component', () => {
         .mockImplementation(() => resolve());
 
       // invoke the call
-      ipcRenderer.emit(IpcEvents.FS_NEW_FIDDLE, null);
+      emitEvent('new-fiddle');
       await replacePromise;
 
       // check the results
@@ -152,7 +153,7 @@ describe('Editors component', () => {
       replaceFiddleSpy.mockRestore();
     });
 
-    describe('SELECT_ALL_IN_EDITOR handler', () => {
+    describe('"select-all-in-editor" handler', () => {
       it('selects all in the focused editor', async () => {
         shallow(<Editors appState={store} />);
 
@@ -162,7 +163,7 @@ describe('Editors component', () => {
         model.getFullModelRange.mockReturnValue(range);
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        emitEvent('select-all-in-editor');
 
         await process.nextTick;
         expect(editor.setSelection).toHaveBeenCalledWith('range');
@@ -175,7 +176,7 @@ describe('Editors component', () => {
         delete (editor as any).model;
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        emitEvent('select-all-in-editor');
 
         await process.nextTick;
         expect(editor.getModel).toHaveBeenCalledTimes(1);
@@ -185,11 +186,13 @@ describe('Editors component', () => {
       it('does not crash if there is no selected editor', () => {
         shallow(<Editors appState={store} />);
         editorMosaic.focusedEditor = jest.fn().mockReturnValue(null);
-        ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+        emitEvent('select-all-in-editor');
       });
     });
 
-    it('handles an FS_NEW_TEST command', async () => {
+    it('handles a "new-test" event', async () => {
+      shallow(<Editors appState={store} />);
+
       // setup
       const getTestTemplateSpy = jest
         .spyOn(window.ElectronFiddle, 'getTestTemplate')
@@ -203,7 +206,7 @@ describe('Editors component', () => {
         .mockImplementation(() => replaceResolve());
 
       // invoke the call
-      ipcRenderer.emit(IpcEvents.FS_NEW_TEST);
+      emitEvent('new-test');
       await replacePromise;
 
       // check the results
@@ -214,7 +217,8 @@ describe('Editors component', () => {
       getTestTemplateSpy.mockRestore();
       replaceFiddleSpy.mockRestore();
     });
-    it('handles a SELECT_ALL_IN_EDITOR command', async () => {
+
+    it('handles a "select-all-in-editor" event', async () => {
       shallow(<Editors appState={store} />);
 
       const range = 'range';
@@ -222,19 +226,19 @@ describe('Editors component', () => {
       editor.getModel().getFullModelRange.mockReturnValue(range);
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
-      ipcRenderer.emit(IpcEvents.SELECT_ALL_IN_EDITOR, null);
+      emitEvent('select-all-in-editor');
       await process.nextTick;
 
       expect(editor.setSelection).toHaveBeenCalledWith(range);
     });
 
-    it('handles the monaco editor option commands', () => {
+    it('handles the monaco editor option event', () => {
       const id = MAIN_JS;
       const editor = new MonacoEditorMock();
       editorMosaic.addEditor(id, editor as any);
 
       shallow(<Editors appState={store} />);
-      ipcRenderer.emit(IpcEvents.MONACO_TOGGLE_OPTION, null, 'wordWrap');
+      emitEvent('toggle-monaco-option', 'wordWrap');
       expect(editor.updateOptions).toHaveBeenCalled();
     });
   });

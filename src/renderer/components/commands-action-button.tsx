@@ -59,7 +59,7 @@ export const GistActionButton = observer(
         actionType: GistActionType.publish,
       };
 
-      ipcRenderer.removeAllListeners(IpcEvents.FS_SAVE_FIDDLE_GIST);
+      window.ElectronFiddle.removeAllListeners('save-fiddle-gist');
     }
 
     private toaster: Toaster;
@@ -68,11 +68,14 @@ export const GistActionButton = observer(
     };
 
     public componentDidMount() {
-      ipcRenderer.on(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      window.ElectronFiddle.addEventListener(
+        'save-fiddle-gist',
+        this.handleClick,
+      );
     }
 
     public componentWillUnmount() {
-      ipcRenderer.off(IpcEvents.FS_SAVE_FIDDLE_GIST, this.handleClick);
+      window.ElectronFiddle.removeAllListeners('save-fiddle-gist');
     }
 
     /**

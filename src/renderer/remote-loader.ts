@@ -32,11 +32,11 @@ export class RemoteLoader {
     }
   }
 
-  public async loadFiddleFromElectronExample(
-    _: any,
-    exampleInfo: { path: string; tag: string },
-  ) {
-    console.log(`Loading fiddle from Electron example`, _, exampleInfo);
+  public async loadFiddleFromElectronExample(exampleInfo: {
+    path: string;
+    tag: string;
+  }) {
+    console.log(`Loading fiddle from Electron example`, exampleInfo);
     const { path, tag } = exampleInfo;
     const prettyName = path.replace('docs/fiddles/', '');
     const ok = await this.verifyRemoteLoad(
@@ -47,7 +47,7 @@ export class RemoteLoader {
     this.fetchExampleAndLoad(tag, path);
   }
 
-  public async loadFiddleFromGist(_: any, gistInfo: { id: string }) {
+  public async loadFiddleFromGist(gistInfo: { id: string }) {
     const { id } = gistInfo;
     const ok = await this.verifyRemoteLoad(`gist`);
     if (!ok) return;

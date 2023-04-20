@@ -138,7 +138,7 @@ export class App {
 
     ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
 
-    ipcRenderer.on(IpcEvents.SET_SHOW_ME_TEMPLATE, () => {
+    window.ElectronFiddle.addEventListener('set-show-me-template', () => {
       ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, this.state.templateName);
     });
 

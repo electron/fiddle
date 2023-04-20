@@ -8,6 +8,7 @@ import { FileManager } from '../../src/renderer/file-manager';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 import { readFiddle } from '../../src/utils/read-fiddle';
 import { AppMock, createEditorValues } from '../mocks/mocks';
+import { emitEvent } from '../utils';
 
 jest.mock('fs-extra');
 jest.mock('tmp', () => ({
@@ -105,9 +106,9 @@ describe('FileManager', () => {
       });
     });
 
-    it('runs it on IPC event', () => {
+    it('runs it on an event', () => {
       fm.openFiddle = jest.fn();
-      ipcRenderer.emit(IpcEvents.FS_OPEN_FIDDLE);
+      emitEvent('open-fiddle');
       expect(fm.openFiddle).toHaveBeenCalled();
     });
 
@@ -171,15 +172,15 @@ describe('FileManager', () => {
       expect(ipcRenderer.send).toHaveBeenCalledTimes(2);
     });
 
-    it('runs saveFiddle (normal) on IPC event', () => {
+    it('runs saveFiddle (normal) on event', () => {
       fm.saveFiddle = jest.fn();
-      ipcRenderer.emit(IpcEvents.FS_SAVE_FIDDLE);
+      emitEvent('save-fiddle');
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
 
-    it('runs saveFiddle (forge) on IPC event', () => {
+    it('runs saveFiddle (forge) on event', () => {
       fm.saveFiddle = jest.fn();
-      ipcRenderer.emit(IpcEvents.FS_SAVE_FIDDLE_FORGE);
+      emitEvent('save-fiddle-forge');
       expect(fm.saveFiddle).toHaveBeenCalled();
     });
 
@@ -237,9 +238,9 @@ describe('FileManager', () => {
       });
     });
 
-    it('runs openTemplate on IPC event', () => {
+    it('runs openTemplate on an event', () => {
       fm.openTemplate = jest.fn();
-      ipcRenderer.emit(IpcEvents.FS_OPEN_TEMPLATE);
+      emitEvent('open-template');
       expect(fm.openTemplate).toHaveBeenCalled();
     });
   });
