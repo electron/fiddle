@@ -1,16 +1,13 @@
 import * as React from 'react';
 
-import * as path from 'path';
-
 import { Button, Dialog, FileInput } from '@blueprintjs/core';
-import { shell } from 'electron';
 import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 
 import { AppState } from '../state';
-import { THEMES_PATH, getTheme } from '../themes';
-import { LoadedFiddleTheme, defaultDark } from '../themes-defaults';
+import { createThemeFile, getTheme } from '../themes';
+import { FiddleTheme, defaultDark } from '../themes-defaults';
 
 interface AddThemeDialogProps {
   appState: AppState;
@@ -40,7 +37,6 @@ export const AddThemeDialog = observer(
       this.onSubmit = this.onSubmit.bind(this);
       this.onClose = this.onClose.bind(this);
       this.onChangeFile = this.onChangeFile.bind(this);
-      this.reset = this.reset.bind(this);
     }
 
     /**
@@ -74,9 +70,12 @@ export const AddThemeDialog = observer(
         const editor = fs.readJSONSync(file.path);
         if (!editor.base && !editor.rules)
           throw Error('File does not match specifications'); // has to have these attributes
-        defaultTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
-        const newTheme = defaultTheme;
-        const name = editor.name ? editor.name : file.name;
+        const newTheme: FiddleTheme = { ...defaultTheme };
+        newTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+        // Use file.name if no editor.name, and strip file extension (should be .json)
+        const name: string = editor.name
+          ? editor.name
+          : file.name.slice(0, file.name.lastIndexOf('.'));
         await this.createNewThemeFromMonaco(name, newTheme);
       } catch (error) {
         appState.showErrorDialog(`${error}, please pick a different file.`);
@@ -89,25 +88,14 @@ export const AddThemeDialog = observer(
 
     public async createNewThemeFromMonaco(
       name: string,
-      newTheme: LoadedFiddleTheme,
+      newTheme: FiddleTheme,
     ): Promise<void> {
       if (!name) {
         throw new Error(`Filename ${name} not found`);
       }
 
-      const themePath = path.join(THEMES_PATH, `${name}`);
-
-      await fs.outputJSON(
-        themePath,
-        {
-          ...newTheme,
-          name,
-        },
-        { spaces: 2 },
-      );
-
-      this.props.appState.setTheme(themePath);
-      shell.showItemInFolder(themePath);
+      const theme = await createThemeFile(newTheme, name);
+      this.props.appState.setTheme(theme.file);
     }
 
     get buttons() {
@@ -131,8 +119,9 @@ export const AddThemeDialog = observer(
     }
 
     public onClose() {
-      this.props.appState.isThemeDialogShowing = false;
-      this.reset();
+      this.setState(this.resetState, () => {
+        this.props.appState.isThemeDialogShowing = false;
+      });
     }
 
     public render() {
@@ -161,14 +150,6 @@ export const AddThemeDialog = observer(
           </div>
         </Dialog>
       );
-    }
-
-    /**
-     * Reset this component's state
-     */
-    private reset(): void {
-      this.setState(this.resetState);
-      return;
     }
   },
 );

@@ -3,7 +3,6 @@ import * as React from 'react';
 import { IItemRendererProps } from '@blueprintjs/select';
 import { shell } from 'electron';
 import { shallow } from 'enzyme';
-import * as fs from 'fs-extra';
 
 import {
   AppearanceSettings,
@@ -11,8 +10,14 @@ import {
   renderItem,
 } from '../../../src/renderer/components/settings-general-appearance';
 import { AppState } from '../../../src/renderer/state';
-import { getAvailableThemes } from '../../../src/renderer/themes';
-import { FiddleTheme } from '../../../src/renderer/themes-defaults';
+import {
+  createThemeFile,
+  getAvailableThemes,
+} from '../../../src/renderer/themes';
+import {
+  FiddleTheme,
+  LoadedFiddleTheme,
+} from '../../../src/renderer/themes-defaults';
 
 const mockThemes = [
   {
@@ -24,10 +29,9 @@ const doNothingFunc = () => {
   // Do Nothing
 };
 
-jest.mock('fs-extra');
-
 jest.mock('../../../src/renderer/themes', () => ({
   THEMES_PATH: '~/.electron-fiddle/themes',
+  createThemeFile: jest.fn(),
   getAvailableThemes: jest.fn(),
   getTheme: () =>
     Promise.resolve({
@@ -140,22 +144,18 @@ describe('AppearanceSettings component', () => {
       const instance: any = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
 
-      expect(shell.showItemInFolder).toHaveBeenCalled();
-      expect(fs.outputJSON).toHaveBeenCalled();
-
-      const args = (fs.outputJSON as jest.Mock).mock.calls[0];
-      expect(args[0].includes(`.electron-fiddle`)).toBe(true);
-      expect(args[1].name).toBeDefined();
-      expect(args[1].name === 'defaultDark').toBe(false);
-      expect(args[1].common).toBeDefined();
-      expect(args[1].file).toBeUndefined();
+      expect(createThemeFile).toHaveBeenCalledWith(
+        expect.objectContaining({
+          common: expect.anything(),
+        }),
+      );
     });
 
     it('adds the newly created theme to the Themes dropdown', async () => {
       const arr: Array<FiddleTheme> = [];
       (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
-      (fs.outputJSON as jest.Mock).mockImplementation(
-        (_, theme: FiddleTheme) => {
+      (createThemeFile as jest.Mock).mockImplementation(
+        (theme: FiddleTheme) => {
           arr.push(theme);
         },
       );
@@ -179,12 +179,31 @@ describe('AppearanceSettings component', () => {
         />,
       );
       const instance: any = wrapper.instance() as any;
-      (shell.showItemInFolder as jest.Mock).mockImplementationOnce(() => {
+      (createThemeFile as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Bwap');
       });
 
       const result = await instance.createNewThemeFromCurrent();
       expect(result).toBe(false);
+    });
+  });
+
+  describe('handleAddTheme()', () => {
+    it('refreshes the Themes dropdown', async () => {
+      const arr: Array<LoadedFiddleTheme> = [];
+      (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
+      const wrapper = shallow(
+        <AppearanceSettings
+          appState={store}
+          toggleHasPopoverOpen={doNothingFunc}
+        />,
+      );
+      expect(getAvailableThemes).toHaveBeenCalledTimes(1);
+      const instance: any = wrapper.instance() as any;
+      const promise = instance.handleAddTheme();
+      store.isTokenDialogShowing = false;
+      await promise;
+      expect(getAvailableThemes).toHaveBeenCalledTimes(2);
     });
   });
 
