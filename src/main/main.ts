@@ -21,6 +21,7 @@ import { ipcMainManager } from './ipc';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
+import { setupThemes } from './themes';
 import { setupUpdates } from './update';
 import { getOrCreateMainWindow } from './windows';
 
@@ -52,6 +53,7 @@ export async function onReady() {
   setupNativeTheme();
   setupTemplates();
   setupContent();
+  setupThemes();
 
   processCommandLine(argv);
 }

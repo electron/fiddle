@@ -93,6 +93,7 @@ export class IPCMainMock extends EventEmitter {
 
 export class IPCRendererMock extends EventEmitter {
   public send = jest.fn();
+  public sendSync = jest.fn();
   public invoke = jest.fn();
 }
 

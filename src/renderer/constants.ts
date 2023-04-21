@@ -6,10 +6,6 @@ export const ELECTRON_INSTALL_PATH = path.join(
   ELECTRON_DOWNLOAD_PATH,
   'current',
 );
-export const CONFIG_PATH = path.join(
-  window.ElectronFiddle.appPaths.home,
-  '.electron-fiddle',
-);
 
 export const ELECTRON_ORG = 'electron';
 export const ELECTRON_REPO = 'electron';

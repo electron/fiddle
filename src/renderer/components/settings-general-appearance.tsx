@@ -8,20 +8,13 @@ import {
   MenuItem,
 } from '@blueprintjs/core';
 import { ItemPredicate, ItemRenderer, Select } from '@blueprintjs/select';
-import { shell } from 'electron';
-import * as fs from 'fs-extra';
 import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
 
+import { LoadedFiddleTheme } from '../../themes-defaults';
 import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
-import {
-  THEMES_PATH,
-  createThemeFile,
-  getAvailableThemes,
-  getTheme,
-} from '../themes';
-import { LoadedFiddleTheme } from '../themes-defaults';
+import { getTheme } from '../themes';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 
@@ -101,7 +94,7 @@ export const AppearanceSettings = observer(
         themes: [],
       };
 
-      getAvailableThemes().then((themes) => {
+      window.ElectronFiddle.getAvailableThemes().then((themes) => {
         const { theme } = this.props.appState;
         const selectedTheme =
           (theme && themes.find(({ file }) => file === theme)) || themes[0];
@@ -146,8 +139,10 @@ export const AppearanceSettings = observer(
       const theme = await getTheme(appState.theme);
 
       try {
-        await createThemeFile(theme);
-        this.setState({ themes: await getAvailableThemes() });
+        await window.ElectronFiddle.createThemeFile(theme);
+        this.setState({
+          themes: await window.ElectronFiddle.getAvailableThemes(),
+        });
 
         return true;
       } catch (error) {
@@ -165,8 +160,7 @@ export const AppearanceSettings = observer(
      */
     public async openThemeFolder(): Promise<boolean> {
       try {
-        await fs.ensureDir(THEMES_PATH);
-        await shell.showItemInFolder(THEMES_PATH);
+        await window.ElectronFiddle.openThemeFolder();
         return true;
       } catch (error) {
         console.warn(`Appearance Settings: Could not open themes folder`);
@@ -183,7 +177,9 @@ export const AppearanceSettings = observer(
       // Wait for the dialog to be closed again
       await when(() => !this.props.appState.isTokenDialogShowing);
 
-      this.setState({ themes: await getAvailableThemes() });
+      this.setState({
+        themes: await window.ElectronFiddle.getAvailableThemes(),
+      });
     }
 
     public handleThemeSource(event: React.FormEvent<HTMLInputElement>): void {
@@ -238,7 +234,7 @@ export const AppearanceSettings = observer(
             <p>
               To add themes, add JSON theme files to{' '}
               <a id="open-theme-folder" onClick={this.openThemeFolder}>
-                <code>{THEMES_PATH}</code>
+                <code>{window.ElectronFiddle.themePath}</code>
               </a>
               . The easiest way to get started is to clone one of the two
               existing themes and to add your own colors.
