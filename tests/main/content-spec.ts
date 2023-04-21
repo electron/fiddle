@@ -12,6 +12,9 @@ import { getTemplate, getTestTemplate } from '../../src/main/content';
 
 jest.mock('cross-fetch');
 jest.unmock('fs-extra');
+jest.mock('../../src/main/constants', () => ({
+  STATIC_DIR: path.join(__dirname, '../../static'),
+}));
 jest.mock('../../src/main/versions', () => ({
   isReleasedMajor: jest.fn().mockResolvedValue(true),
 }));

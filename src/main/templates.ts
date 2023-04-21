@@ -6,12 +6,8 @@ import { IpcMainEvent } from 'electron/main';
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { readFiddle } from '../utils/read-fiddle';
+import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
-
-const STATIC_DIR =
-  process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, '../../static')
-    : path.join(process.cwd(), './static');
 
 /**
  * Returns expected content for a given name.
