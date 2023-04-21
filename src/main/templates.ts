@@ -1,7 +1,6 @@
 import * as path from 'path';
 
-// eslint-disable-next-line import/no-unresolved
-import { IpcMainEvent } from 'electron/main';
+import { IpcMainEvent } from 'electron';
 
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
