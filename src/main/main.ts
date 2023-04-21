@@ -1,9 +1,13 @@
 // eslint-disable-next-line import/order
 import { initSentry } from '../sentry';
 initSentry();
-import { BrowserWindow, app, nativeTheme, systemPreferences } from 'electron';
-// eslint-disable-next-line import/no-unresolved
-import { IpcMainEvent } from 'electron/main';
+import {
+  BrowserWindow,
+  IpcMainEvent,
+  app,
+  nativeTheme,
+  systemPreferences,
+} from 'electron';
 
 import { IpcEvents } from '../ipc-events';
 import { isDevMode } from '../utils/devmode';
