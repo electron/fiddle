@@ -1,8 +1,13 @@
+import * as path from 'path';
+
 import { MAIN_JS } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/main/templates';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 
 jest.unmock('fs-extra');
+jest.mock('../../src/main/constants', () => ({
+  STATIC_DIR: path.join(__dirname, '../../static'),
+}));
 
 describe('templates', () => {
   const KNOWN_GOOD_TEMPLATE = 'clipboard';

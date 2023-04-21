@@ -7,13 +7,9 @@ import * as fs from 'fs-extra';
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { readFiddle } from '../utils/read-fiddle';
+import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
 import { isReleasedMajor } from './versions';
-
-const STATIC_DIR =
-  process.env.NODE_ENV === 'production'
-    ? path.join(__dirname, '../../static')
-    : path.join(process.cwd(), './static');
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');
