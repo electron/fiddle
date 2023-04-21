@@ -15,36 +15,36 @@ declare global {
         type: 'execute-monaco-command',
         listener: (commandId: string) => void,
         options?: { signal: AbortSignal },
-      ): this;
+      ): void;
       addEventListener(
         type: 'load-example',
         listener: (exampleInfo: { path: string; tag: string }) => void,
         options?: { signal: AbortSignal },
-      ): this;
+      ): void;
       addEventListener(
         type: 'load-gist',
         listener: (gistInfo: { id: string }) => void,
-      ): this;
+      ): void;
       addEventListener(
         type: 'open-fiddle',
         listener: (filePath: string) => void,
-      ): this;
+      ): void;
       addEventListener(
         type: 'open-template',
         listener: (name: string) => void,
-      ): this;
+      ): void;
       addEventListener(
         type: 'save-fiddle',
         listener: (filePath: string) => void,
-      ): this;
+      ): void;
       addEventListener(
         type: 'save-fiddle-forge',
         listener: (filePath: string) => void,
-      ): this;
+      ): void;
       addEventListener(
         type: 'toggle-monaco-option',
         listener: (path: string) => void,
-      ): this;
+      ): void;
       app: App;
       appPaths: Record<string, string>;
       arch: string;
