@@ -1,6 +1,5 @@
 import * as React from 'react';
 
-import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
 import {
@@ -9,7 +8,6 @@ import {
   GistActionType,
   MAIN_JS,
 } from '../../../src/interfaces';
-import { IpcEvents } from '../../../src/ipc-events';
 import { App } from '../../../src/renderer/app';
 import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
 import { AppState } from '../../../src/renderer/state';
@@ -66,9 +64,6 @@ describe('Action button component', () => {
     // have the octokit getter use our mock
     mocktokit = new OctokitMock();
     (getOctokit as jest.Mock).mockImplementation(() => mocktokit);
-
-    // listen for generated ipc traffic
-    ipcRenderer.send = jest.fn();
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
@@ -303,8 +298,9 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(ipcRenderer.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WARNING_DIALOG,
+      expect(
+        window.ElectronFiddle.showWarningDialog as jest.Mock,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Updating Fiddle Gist failed.'),
@@ -339,8 +335,9 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(ipcRenderer.send).toHaveBeenCalledWith(
-        IpcEvents.SHOW_WARNING_DIALOG,
+      expect(
+        window.ElectronFiddle.showWarningDialog as jest.Mock,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Deleting Fiddle Gist failed.'),

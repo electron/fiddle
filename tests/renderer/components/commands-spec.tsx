@@ -1,10 +1,8 @@
 import * as React from 'react';
 
 import { Button, ControlGroup } from '@blueprintjs/core';
-import { ipcRenderer } from 'electron';
 import { shallow } from 'enzyme';
 
-import { IpcEvents } from '../../../src/ipc-events';
 import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 import { AppState } from '../../../src/renderer/state';
@@ -58,21 +56,18 @@ describe('Commands component', () => {
   });
 
   it('handleDoubleClick()', () => {
-    const spy = jest.spyOn(ipcRenderer, 'send');
-
     const wrapper = shallow(<Commands appState={store} />);
     const instance = wrapper.instance() as any;
 
     const tag = { tagName: 'DIV' };
     instance.handleDoubleClick({ target: tag, currentTarget: tag });
 
-    expect(spy).toHaveBeenCalledWith(IpcEvents.CLICK_TITLEBAR_MAC);
-    spy.mockRestore();
+    expect(
+      window.ElectronFiddle.macTitlebarClicked as jest.Mock,
+    ).toHaveBeenCalled();
   });
 
   it('handleDoubleClick() should not handle input tag', () => {
-    const spy = jest.spyOn(ipcRenderer, 'send');
-
     const wrapper = shallow(<Commands appState={store} />);
     const instance = wrapper.instance() as any;
 
@@ -81,8 +76,9 @@ describe('Commands component', () => {
       currentTarget: { tagName: 'DIV' },
     });
 
-    expect(spy).toHaveBeenCalledTimes(0);
-    spy.mockRestore();
+    expect(
+      window.ElectronFiddle.macTitlebarClicked as jest.Mock,
+    ).toHaveBeenCalledTimes(0);
   });
 
   it('show setting', () => {

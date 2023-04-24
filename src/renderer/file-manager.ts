@@ -1,6 +1,5 @@
 import * as path from 'path';
 
-import { ipcRenderer } from 'electron';
 import * as fs from 'fs-extra';
 import semver from 'semver';
 
@@ -10,7 +9,6 @@ import {
   GenericDialogType,
   PACKAGE_NAME,
 } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { isKnownFile } from '../utils/editor-utils';
 import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
@@ -142,7 +140,7 @@ export class FileManager {
     console.log(`FileManager: Asked to save to ${pathToSave}`);
 
     if (!pathToSave) {
-      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
+      window.ElectronFiddle.showSaveDialog();
     } else {
       const files = await this.getFiles(undefined, ...transforms);
 
@@ -163,7 +161,7 @@ export class FileManager {
         this.appState.localPath = pathToSave;
         this.appState.gistId = undefined;
       }
-      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+      window.ElectronFiddle.setShowMeTemplate();
       this.appState.editorMosaic.isEdited = false;
     }
   }
@@ -270,7 +268,6 @@ export class FileManager {
       return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
     } catch (error) {
       console.log(`FileManager: Could not save ${filePath}`, error);
-      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
 
@@ -287,7 +284,6 @@ export class FileManager {
       return await fs.remove(filePath);
     } catch (error) {
       console.log(`FileManager: Could not remove ${filePath}`, error);
-      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_ERROR, [filePath]);
     }
   }
 }

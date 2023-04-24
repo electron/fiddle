@@ -1,25 +1,24 @@
 import { InstallState } from '@electron/fiddle-core';
-import { ipcRenderer } from 'electron';
 
 import {
   BisectRequest,
   ElectronReleaseChannel,
+  FiddleEvent,
   RunResult,
   RunnableVersion,
   TestRequest,
   VersionSource,
 } from '../../src/interfaces';
-import { IpcEvents } from '../../src/ipc-events';
 import { App } from '../../src/renderer/app';
 import { TaskRunner } from '../../src/renderer/task-runner';
 import { AppMock } from '../mocks/app';
 import { StateMock } from '../mocks/state';
+import { emitEvent, waitFor } from '../utils';
 
 describe('Task Runner component', () => {
   let app: AppMock;
   let appState: StateMock;
   let runner: any;
-  let ipc: any;
 
   function makeRunnables(versions: string[]): RunnableVersion[] {
     return versions.map((version) => ({
@@ -34,24 +33,17 @@ describe('Task Runner component', () => {
     appState = app.state;
     runner = app.runner;
     runner.autobisect.foo = 'a';
-    ipc = ipcRenderer;
     app.taskRunner = new TaskRunner((app as unknown) as App);
   });
 
-  async function requestAndWait(ipcEvent: IpcEvents, req: any) {
-    let resolve: any;
-    const fakeEvent = {};
-    const taskPromise = new Promise((r) => (resolve = r));
-    const sendSpy = jest
-      .spyOn(ipc, 'send')
-      .mockImplementationOnce((...params) => resolve(params));
-    ipc.emit(ipcEvent, fakeEvent, req);
-    const result: any = await taskPromise;
-    sendSpy.mockReset();
-    return result;
+  async function requestAndWait(event: FiddleEvent, req: any) {
+    emitEvent(event, req);
+    await waitFor(
+      () => (window.ElectronFiddle.taskDone as jest.Mock).mock.calls.length > 0,
+    );
   }
 
-  describe('ipc bisect request handler', () => {
+  describe('bisect request handler', () => {
     const GOOD = '10.0.0';
     const BAD = '11.0.2';
     const GIST_ID = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
@@ -96,7 +88,7 @@ describe('Task Runner component', () => {
       (appState.versionsToShow as any) = makeRunnables(VERSIONS);
       (runner.autobisect as jest.Mock).mockResolvedValueOnce(RESULT);
 
-      const result = await requestAndWait(IpcEvents.TASK_BISECT, req);
+      await requestAndWait('bisect-task', req);
 
       expect(app.openFiddle).toHaveBeenCalledTimes(1);
       expect(app.openFiddle).toHaveBeenCalledWith(req.setup.fiddle);
@@ -104,8 +96,7 @@ describe('Task Runner component', () => {
       expect(appState.setVersion).not.toHaveBeenCalled();
       expect(appState.showChannels).toHaveBeenCalledTimes(1);
       expect(appState.showChannels).toHaveBeenCalledWith(SHOW);
-      expect(result[0]).toBe(IpcEvents.TASK_DONE);
-      expect(result[1]).toBe(RESULT);
+      expect(window.ElectronFiddle.taskDone).toHaveBeenCalledWith(RESULT);
       expect(runner.autobisect).toHaveBeenCalledTimes(1);
       expect(runner.autobisect).toHaveBeenCalledWith(EXPECTED_VERSIONS);
     });
@@ -114,14 +105,13 @@ describe('Task Runner component', () => {
       const RESULT = RunResult.INVALID;
       (app.openFiddle as jest.Mock).mockRejectedValue('💩');
 
-      const result = await requestAndWait(IpcEvents.TASK_BISECT, req);
+      await requestAndWait('bisect-task', req);
 
-      expect(result[0]).toBe(IpcEvents.TASK_DONE);
-      expect(result[1]).toBe(RESULT);
+      expect(window.ElectronFiddle.taskDone).toHaveBeenCalledWith(RESULT);
     });
   });
 
-  describe('ipc test request handler', () => {
+  describe('test request handler', () => {
     const VERSION = '10.0.0';
     const PATH = '/path/to/fiddle';
     const req: TestRequest = {
@@ -146,7 +136,7 @@ describe('Task Runner component', () => {
       (appState.versionsToShow as any) = makeRunnables([VERSION]);
       (runner.run as jest.Mock).mockResolvedValueOnce(RESULT);
 
-      const result = await requestAndWait(IpcEvents.TASK_TEST, req);
+      await requestAndWait('test-task', req);
 
       expect(app.openFiddle).toHaveBeenCalledTimes(1);
       expect(app.openFiddle).toHaveBeenCalledWith(req.setup.fiddle);
@@ -154,8 +144,7 @@ describe('Task Runner component', () => {
       expect(appState.hideChannels).not.toHaveBeenCalled();
       expect(appState.setVersion).toHaveBeenCalledWith(VERSION);
       expect(appState.showChannels).not.toHaveBeenCalled();
-      expect(result[0]).toBe(IpcEvents.TASK_DONE);
-      expect(result[1]).toBe(RESULT);
+      expect(window.ElectronFiddle.taskDone).toHaveBeenCalledWith(RESULT);
       expect(runner.run).toHaveBeenCalledTimes(1);
     });
 
@@ -169,10 +158,9 @@ describe('Task Runner component', () => {
       (appState.showChannels as jest.Mock).mockResolvedValue(0);
       (runner.run as jest.Mock).mockResolvedValueOnce(RESULT);
 
-      const result = await requestAndWait(IpcEvents.TASK_TEST, req);
+      await requestAndWait('test-task', req);
 
-      expect(result[0]).toBe(IpcEvents.TASK_DONE);
-      expect(result[1]).toBe(RESULT);
+      expect(window.ElectronFiddle.taskDone).toHaveBeenCalledWith(RESULT);
       expect(appState.hasVersion).toHaveBeenCalledWith(VERSION);
       expect(appState.setVersion).not.toHaveBeenCalled();
     });

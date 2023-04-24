@@ -1,5 +1,4 @@
 import { InstallState } from '@electron/fiddle-core';
-import { ipcRenderer } from 'electron';
 
 import {
   EditorValues,
@@ -33,7 +32,6 @@ describe('RemoteLoader', () => {
   beforeEach(() => {
     app = (window.ElectronFiddle.app as unknown) as AppMock;
     ({ state: store } = app);
-    ipcRenderer.send = jest.fn();
     store.channelsToShow = [ElectronReleaseChannel.stable];
     store.initVersions('4.0.0', {
       '4.0.0': { version: '4.0.0' },

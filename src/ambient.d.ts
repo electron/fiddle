@@ -1,6 +1,16 @@
 import * as MonacoType from 'monaco-editor';
 
-import { EditorValues, FiddleEvent, SelectedLocalVersion } from './interfaces';
+import {
+  BisectRequest,
+  BlockableAccelerator,
+  EditorValues,
+  FiddleEvent,
+  MessageOptions,
+  OutputEntry,
+  RunResult,
+  SelectedLocalVersion,
+  TestRequest,
+} from './interfaces';
 import { App } from './renderer/app';
 
 declare global {
@@ -9,6 +19,11 @@ declare global {
       addEventListener(
         type: FiddleEvent,
         listener: () => void,
+        options?: { signal: AbortSignal },
+      ): void;
+      addEventListener(
+        type: 'bisect-task',
+        listener: (request: BisectRequest) => void,
         options?: { signal: AbortSignal },
       ): void;
       addEventListener(
@@ -42,19 +57,36 @@ declare global {
         listener: (filePath: string) => void,
       ): void;
       addEventListener(
+        type: 'test-task',
+        listener: (request: TestRequest) => void,
+        options?: { signal: AbortSignal },
+      ): void;
+      addEventListener(
         type: 'toggle-monaco-option',
         listener: (path: string) => void,
       ): void;
       app: App;
       appPaths: Record<string, string>;
       arch: string;
+      blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
+      confirmQuit(): void;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
+      macTitlebarClicked(): void;
       monaco: typeof MonacoType;
       platform: string;
+      pushOutputEntry(entry: OutputEntry): void;
+      reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
+      sendReady(): void;
+      setNativeTheme(theme: 'dark' | 'light' | 'system'): void;
+      setShowMeTemplate(template?: string): void;
+      showSaveDialog(): void;
+      showWarningDialog(messageOptions: MessageOptions): void;
+      showWindow(): void;
+      taskDone(result: RunResult): void;
     };
   }
 }
