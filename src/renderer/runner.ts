@@ -1,9 +1,14 @@
 import { ChildProcess } from 'child_process';
 import * as path from 'path';
 
-import { InstallState, Installer } from '@electron/fiddle-core';
+import { Installer } from '@electron/fiddle-core';
 
-import { FileTransform, RunResult, RunnableVersion } from '../interfaces';
+import {
+  FileTransform,
+  InstallState,
+  RunResult,
+  RunnableVersion,
+} from '../interfaces';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { Bisector } from './bisect';

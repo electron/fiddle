@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-import { InstallState } from '@electron/fiddle-core';
 import { shallow } from 'enzyme';
 
 import {
   ElectronReleaseChannel,
+  InstallState,
   RunResult,
   VersionSource,
 } from '../../../src/interfaces';

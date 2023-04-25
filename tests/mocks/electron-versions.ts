@@ -1,6 +1,8 @@
-import { InstallState } from '@electron/fiddle-core';
-
-import { RunnableVersion, VersionSource } from '../../src/interfaces';
+import {
+  InstallState,
+  RunnableVersion,
+  VersionSource,
+} from '../../src/interfaces';
 
 export class VersionsMock {
   public readonly mockVersions: Record<string, RunnableVersion>;

@@ -14,11 +14,11 @@ import {
   Spinner,
   Tooltip,
 } from '@blueprintjs/core';
-import { InstallState } from '@electron/fiddle-core';
 import { observer } from 'mobx-react';
 
 import {
   ElectronReleaseChannel,
+  InstallState,
   RunnableVersion,
   VersionSource,
 } from '../../interfaces';

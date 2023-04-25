@@ -1,8 +1,8 @@
 import * as React from 'react';
 
-import { InstallState } from '@electron/fiddle-core';
 import { shallow } from 'enzyme';
 
+import { InstallState } from '../../../src/interfaces';
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { AppState } from '../../../src/renderer/state';
 

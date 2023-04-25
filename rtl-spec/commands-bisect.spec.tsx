@@ -1,9 +1,9 @@
 import * as React from 'react';
 
-import { InstallState } from '@electron/fiddle-core';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
+import { InstallState } from '../src/interfaces';
 import { BisectHandler } from '../src/renderer/components/commands-bisect';
 import { AppState } from '../src/renderer/state';
 

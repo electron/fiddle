@@ -1,9 +1,9 @@
 import * as path from 'path';
 
-import { InstallState } from '@electron/fiddle-core';
 import * as semver from 'semver';
 
 import {
+  InstallState,
   RunResult,
   RunnableVersion,
   VersionSource,

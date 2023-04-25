@@ -1,10 +1,13 @@
 import * as path from 'path';
 
-import { InstallState } from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 
-import { RunnableVersion, VersionSource } from '../../src/interfaces';
+import {
+  InstallState,
+  RunnableVersion,
+  VersionSource,
+} from '../../src/interfaces';
 import { ElectronTypes } from '../../src/renderer/electron-types';
 import { MonacoMock, NodeTypesMock } from '../mocks/mocks';
 import { waitFor } from '../utils';

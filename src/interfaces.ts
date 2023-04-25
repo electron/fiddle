@@ -1,5 +1,3 @@
-import { InstallState } from '@electron/fiddle-core';
-
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
@@ -27,6 +25,14 @@ export interface Version {
   name?: string;
   localPath?: string;
   node?: string;
+}
+
+export enum InstallState {
+  missing = 'missing',
+  downloading = 'downloading',
+  downloaded = 'downloaded',
+  installing = 'installing',
+  installed = 'installed',
 }
 
 export enum RunResult {
