@@ -1,10 +1,10 @@
-import { InstallState } from '@electron/fiddle-core';
 import { reaction } from 'mobx';
 
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogType,
+  InstallState,
   MAIN_JS,
   RunnableVersion,
   Version,

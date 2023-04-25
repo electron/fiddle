@@ -1,9 +1,9 @@
 import * as React from 'react';
 
 import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
-import { InstallState } from '@electron/fiddle-core';
 import { observer } from 'mobx-react';
 
+import { InstallState } from '../../interfaces';
 import { AppState } from '../state';
 
 interface RunnerProps {

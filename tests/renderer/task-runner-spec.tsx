@@ -1,9 +1,8 @@
-import { InstallState } from '@electron/fiddle-core';
-
 import {
   BisectRequest,
   ElectronReleaseChannel,
   FiddleEvent,
+  InstallState,
   RunResult,
   RunnableVersion,
   TestRequest,

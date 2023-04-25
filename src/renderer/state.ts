@@ -1,6 +1,5 @@
 import {
   BaseVersions,
-  InstallState,
   Installer,
   ProgressObject,
   Runner,
@@ -22,6 +21,7 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  InstallState,
   OutputEntry,
   OutputOptions,
   RunnableVersion,

@@ -1,8 +1,7 @@
-import { InstallState } from '@electron/fiddle-core';
-
 import {
   EditorValues,
   ElectronReleaseChannel,
+  InstallState,
   MAIN_JS,
   PACKAGE_NAME,
   VersionSource,

@@ -1,10 +1,10 @@
-import { InstallState } from '@electron/fiddle-core';
 import semver from 'semver';
 
 import {
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
+  InstallState,
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';

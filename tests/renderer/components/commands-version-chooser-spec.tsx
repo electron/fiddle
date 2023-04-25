@@ -1,9 +1,12 @@
 import * as React from 'react';
 
-import { InstallState } from '@electron/fiddle-core';
 import { mount, shallow } from 'enzyme';
 
-import { ElectronReleaseChannel, VersionSource } from '../../../src/interfaces';
+import {
+  ElectronReleaseChannel,
+  InstallState,
+  VersionSource,
+} from '../../../src/interfaces';
 import { VersionChooser } from '../../../src/renderer/components/commands-version-chooser';
 import { AppState } from '../../../src/renderer/state';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
