@@ -4,6 +4,7 @@ import { IpcRendererEvent, ipcRenderer } from 'electron';
 import { FiddleEvent } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { isReleasedMajor } from '../renderer/versions';
+import { FiddleTheme } from '../themes-defaults';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'before-quit': IpcEvents.BEFORE_QUIT,
@@ -66,6 +67,12 @@ export async function setupFiddleGlobal() {
     confirmQuit() {
       ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
     },
+    createThemeFile(newTheme: FiddleTheme, name?: string) {
+      return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
+    },
+    getAvailableThemes() {
+      return ipcRenderer.invoke(IpcEvents.GET_AVAILABLE_THEMES);
+    },
     getTemplate: (version: string) =>
       ipcRenderer.invoke(IpcEvents.GET_TEMPLATE, version),
     getTemplateValues: (name: string) => {
@@ -76,12 +83,18 @@ export async function setupFiddleGlobal() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
     },
     monaco: null as any, // will be set in main.tsx
+    async openThemeFolder() {
+      await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
+    },
     platform: process.platform,
     pushOutputEntry(entry) {
       ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
     },
     reloadWindows() {
       ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
+    },
+    readThemeFile(name?: string) {
+      return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
     },
     removeAllListeners(type: FiddleEvent) {
       const channel = channelMapping[type];
@@ -113,6 +126,7 @@ export async function setupFiddleGlobal() {
     taskDone(result) {
       ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
+    themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
   };
 
   // TODO(dsanders11): Remove this when Electron versions move to main process

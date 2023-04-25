@@ -1,22 +1,11 @@
 import * as React from 'react';
 
-import * as path from 'path';
-
 import { shallow } from 'enzyme';
-import * as fs from 'fs-extra';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
-import { createThemeFile } from '../../../src/renderer/themes';
-import {
-  LoadedFiddleTheme,
-  defaultLight,
-} from '../../../src/renderer/themes-defaults';
+import { LoadedFiddleTheme, defaultLight } from '../../../src/themes-defaults';
 import { overrideRendererPlatform } from '../../utils';
-
-jest.mock('../../../src/renderer/themes', () => ({
-  createThemeFile: jest.fn(),
-}));
 
 class FileMock {
   constructor(
@@ -61,7 +50,7 @@ describe('AddThemeDialog component', () => {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
       } catch (err) {
         expect(err.message).toEqual(`Filename  not found`);
-        expect(createThemeFile).toHaveBeenCalledTimes(0);
+        expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledTimes(0);
         expect(store.setTheme).toHaveBeenCalledTimes(0);
       }
     });
@@ -77,17 +66,14 @@ describe('AddThemeDialog component', () => {
         ),
       });
 
-      const themePath = path.join(
-        '~',
-        '.electron-fiddle',
-        'themes',
-        'testingLight',
-      );
-      (createThemeFile as jest.Mock).mockResolvedValue({ file: themePath });
+      const themePath = '~/.electron-fiddle/themes/testingLight';
+      (window.ElectronFiddle.createThemeFile as jest.Mock).mockResolvedValue({
+        file: themePath,
+      });
 
       await instance.createNewThemeFromMonaco('testingLight', defaultLight);
 
-      expect(createThemeFile).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
         expect.objectContaining({
           name: 'Fiddle (Light)',
           common: expect.anything(),
@@ -109,7 +95,6 @@ describe('AddThemeDialog component', () => {
 
       await instance.onSubmit();
 
-      expect(fs.readJSONSync).toHaveBeenCalledTimes(0);
       expect(instance.createNewThemeFromMonaco).toHaveBeenCalledTimes(0);
       expect(instance.onClose).toHaveBeenCalledTimes(0);
     });
@@ -118,22 +103,20 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
-      wrapper.setState({
-        file: new FileMock(
-          [JSON.stringify(defaultLight.editor)],
-          'file.json',
-          '/test/file.json',
-        ),
-      });
-
-      (fs.readJSONSync as jest.Mock).mockReturnValue(defaultLight.editor);
+      const file = new FileMock(
+        [JSON.stringify(defaultLight.editor)],
+        'file.json',
+        '/test/file.json',
+      );
+      const spy = jest.spyOn(file, 'text');
+      wrapper.setState({ file });
 
       instance.createNewThemeFromMonaco = jest.fn();
       instance.onClose = jest.fn();
 
       await instance.onSubmit();
 
-      expect(fs.readJSONSync).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
       expect(instance.createNewThemeFromMonaco).toHaveBeenCalledTimes(1);
       expect(instance.onClose).toHaveBeenCalledTimes(1);
     });
@@ -143,21 +126,19 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance() as any;
 
-      wrapper.setState({
-        file: new FileMock(
-          [JSON.stringify(defaultLight.editor)],
-          'file.json',
-          '/test/file.json',
-        ),
-      });
-
-      (fs.readJSONSync as jest.Mock).mockReturnValue({});
+      const file = new FileMock(
+        [JSON.stringify(defaultLight.editor)],
+        'file.json',
+        '/test/file.json',
+      );
+      const spy = jest.spyOn(file, 'text').mockResolvedValue('{}');
+      wrapper.setState({ file });
 
       instance.onClose = jest.fn();
 
       await instance.onSubmit();
 
-      expect(fs.readJSONSync).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(1);
       expect(store.showErrorDialog).toHaveBeenCalledWith(
         expect.stringMatching(/file does not match specifications/i),
       );

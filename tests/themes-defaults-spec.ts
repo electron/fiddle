@@ -1,4 +1,4 @@
-import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { defaultDark, defaultLight } from '../src/themes-defaults';
 
 describe('themes defaults', () => {
   it('exports defaultDark', () => {

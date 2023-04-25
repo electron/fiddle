@@ -1,13 +1,12 @@
 import * as React from 'react';
 
 import { Button, Dialog, FileInput } from '@blueprintjs/core';
-import * as fs from 'fs-extra';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 
+import { FiddleTheme, defaultDark } from '../../themes-defaults';
 import { AppState } from '../state';
-import { createThemeFile, getTheme } from '../themes';
-import { FiddleTheme, defaultDark } from '../themes-defaults';
+import { getTheme } from '../themes';
 
 interface AddThemeDialogProps {
   appState: AppState;
@@ -67,7 +66,7 @@ export const AddThemeDialog = observer(
       if (!file) return;
 
       try {
-        const editor = fs.readJSONSync(file.path);
+        const editor = JSON.parse(await file.text());
         if (!editor.base && !editor.rules)
           throw Error('File does not match specifications'); // has to have these attributes
         const newTheme: FiddleTheme = { ...defaultTheme };
@@ -94,7 +93,7 @@ export const AddThemeDialog = observer(
         throw new Error(`Filename ${name} not found`);
       }
 
-      const theme = await createThemeFile(newTheme, name);
+      const theme = await window.ElectronFiddle.createThemeFile(newTheme, name);
       this.props.appState.setTheme(theme.file);
     }
 

@@ -1,7 +1,7 @@
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
-import { defaultDark, defaultLight } from '../../src/renderer/themes-defaults';
+import { defaultDark, defaultLight } from '../../src/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 import { waitFor } from '../utils';
 
@@ -29,6 +29,9 @@ describe('App component', () => {
     (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
+    (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+      defaultDark,
+    );
 
     ({ ElectronFiddle } = window);
     const { app: appMock } = ElectronFiddle;
@@ -222,6 +225,9 @@ describe('App component', () => {
     });
 
     it('removes the dark theme option if required', async () => {
+      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+        defaultLight,
+      );
       document.body.classList.add('bp3-dark');
 
       await app.loadTheme('defaultLight');
@@ -238,11 +244,17 @@ describe('App component', () => {
     it('sets native theme', async () => {
       app.state.isUsingSystemTheme = false;
 
+      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+        defaultLight,
+      );
       await app.loadTheme('defaultLight');
       expect(
         window.ElectronFiddle.setNativeTheme as jest.Mock,
       ).toHaveBeenCalledWith('light');
 
+      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+        defaultDark,
+      );
       await app.loadTheme('custom-dark');
       expect(
         window.ElectronFiddle.setNativeTheme as jest.Mock,

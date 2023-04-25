@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import { IItemRendererProps } from '@blueprintjs/select';
-import { shell } from 'electron';
 import { shallow } from 'enzyme';
 
 import {
@@ -10,14 +9,7 @@ import {
   renderItem,
 } from '../../../src/renderer/components/settings-general-appearance';
 import { AppState } from '../../../src/renderer/state';
-import {
-  createThemeFile,
-  getAvailableThemes,
-} from '../../../src/renderer/themes';
-import {
-  FiddleTheme,
-  LoadedFiddleTheme,
-} from '../../../src/renderer/themes-defaults';
+import { FiddleTheme, LoadedFiddleTheme } from '../../../src/themes-defaults';
 
 const mockThemes = [
   {
@@ -29,23 +21,15 @@ const doNothingFunc = () => {
   // Do Nothing
 };
 
-jest.mock('../../../src/renderer/themes', () => ({
-  THEMES_PATH: '~/.electron-fiddle/themes',
-  createThemeFile: jest.fn(),
-  getAvailableThemes: jest.fn(),
-  getTheme: () =>
-    Promise.resolve({
-      common: {},
-    }),
-}));
-
 describe('AppearanceSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
     ({ state: store } = window.ElectronFiddle.app);
 
-    (getAvailableThemes as jest.Mock).mockResolvedValue(mockThemes);
+    (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+      mockThemes,
+    );
   });
 
   it('renders', () => {
@@ -114,7 +98,7 @@ describe('AppearanceSettings component', () => {
       const instance: any = wrapper.instance() as any;
       await instance.openThemeFolder();
 
-      expect(shell.showItemInFolder).toHaveBeenCalled();
+      expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
@@ -125,9 +109,9 @@ describe('AppearanceSettings component', () => {
         />,
       );
       const instance: any = wrapper.instance() as any;
-      (shell.showItemInFolder as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('Bwap');
-      });
+      (window.ElectronFiddle.openThemeFolder as jest.Mock).mockRejectedValue(
+        new Error('Bwap'),
+      );
 
       expect(await instance.openThemeFolder()).toBe(false);
     });
@@ -144,7 +128,7 @@ describe('AppearanceSettings component', () => {
       const instance: any = wrapper.instance() as any;
       await instance.createNewThemeFromCurrent();
 
-      expect(createThemeFile).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
         expect.objectContaining({
           common: expect.anything(),
         }),
@@ -153,8 +137,10 @@ describe('AppearanceSettings component', () => {
 
     it('adds the newly created theme to the Themes dropdown', async () => {
       const arr: Array<FiddleTheme> = [];
-      (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
-      (createThemeFile as jest.Mock).mockImplementation(
+      (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+        arr,
+      );
+      (window.ElectronFiddle.createThemeFile as jest.Mock).mockImplementation(
         (theme: FiddleTheme) => {
           arr.push(theme);
         },
@@ -179,9 +165,9 @@ describe('AppearanceSettings component', () => {
         />,
       );
       const instance: any = wrapper.instance() as any;
-      (createThemeFile as jest.Mock).mockImplementationOnce(() => {
-        throw new Error('Bwap');
-      });
+      (window.ElectronFiddle.createThemeFile as jest.Mock).mockRejectedValue(
+        new Error('Bwap'),
+      );
 
       const result = await instance.createNewThemeFromCurrent();
       expect(result).toBe(false);
@@ -191,19 +177,21 @@ describe('AppearanceSettings component', () => {
   describe('handleAddTheme()', () => {
     it('refreshes the Themes dropdown', async () => {
       const arr: Array<LoadedFiddleTheme> = [];
-      (getAvailableThemes as jest.Mock).mockResolvedValue(arr);
+      (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+        arr,
+      );
       const wrapper = shallow(
         <AppearanceSettings
           appState={store}
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      expect(getAvailableThemes).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
       const instance: any = wrapper.instance() as any;
       const promise = instance.handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
-      expect(getAvailableThemes).toHaveBeenCalledTimes(2);
+      expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(2);
     });
   });
 

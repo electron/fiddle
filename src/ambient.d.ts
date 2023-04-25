@@ -12,6 +12,7 @@ import {
   TestRequest,
 } from './interfaces';
 import { App } from './renderer/app';
+import { FiddleTheme, LoadedFiddleTheme } from './themes-defaults';
 
 declare global {
   interface Window {
@@ -70,13 +71,20 @@ declare global {
       arch: string;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
       confirmQuit(): void;
+      createThemeFile(
+        newTheme: FiddleTheme,
+        name?: string,
+      ): Promise<LoadedFiddleTheme>;
+      getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
       macTitlebarClicked(): void;
       monaco: typeof MonacoType;
+      openThemeFolder(): Promise<void>;
       platform: string;
       pushOutputEntry(entry: OutputEntry): void;
+      readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
@@ -87,6 +95,7 @@ declare global {
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
       taskDone(result: RunResult): void;
+      themePath: string;
     };
   }
 }
