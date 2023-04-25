@@ -24,6 +24,14 @@ if (!process.env.FIDDLE_VERBOSE_TESTS) {
 jest.mock('electron', () => require('./mocks/electron'));
 jest.mock('fs-extra');
 
+// Disable Sentry in tests
+jest.mock('@sentry/electron/main', () => ({
+  init: jest.fn(),
+}));
+jest.mock('@sentry/electron/renderer', () => ({
+  init: jest.fn(),
+}));
+
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
 // We want to detect jest sometimes

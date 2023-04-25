@@ -79,6 +79,7 @@ export async function setupFiddleGlobal() {
       return ipcRenderer.invoke(IpcEvents.GET_TEMPLATE_VALUES, name);
     },
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
+    isDevMode: ipcRenderer.sendSync(IpcEvents.IS_DEV_MODE),
     macTitlebarClicked() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
     },
