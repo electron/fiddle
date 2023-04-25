@@ -28,6 +28,14 @@ commands:
     steps:
       - run: |
           curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
+  test:
+    steps:
+      - run:
+          command: yarn test:ci
+          environment:
+            JEST_JUNIT_OUTPUT_DIR: ./reports/
+      - store_test_results:
+          path: ./reports/
 
 jobs:
   lint:
@@ -46,7 +54,7 @@ jobs:
     resource_class: macos.x86.medium.gen2
     steps:
       - install
-      - run: yarn test:ci
+      - test
   win-test:
     parameters:
       arch:
@@ -57,7 +65,7 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - run: yarn test:ci
+      - test
   linux-test:
     parameters:
       arch:
@@ -67,7 +75,7 @@ jobs:
       - image: cimg/base:stable
     steps:
       - install
-      - run: yarn test:ci
+      - test
   mac-build:
     parameters:
       arch:
