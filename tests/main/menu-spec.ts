@@ -330,7 +330,7 @@ describe('menu', () => {
         );
       });
 
-      it('creates a new fiddle', () => {
+      it('creates a new test fiddle', () => {
         file.submenu[Idx.NEW_TEST].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
           IpcEvents.FS_NEW_TEST,

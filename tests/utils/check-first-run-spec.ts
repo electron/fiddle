@@ -12,7 +12,8 @@ describe('isFirstRun', () => {
   beforeEach(() => {
     (electron.app.getPath as jest.Mock).mockReturnValue('path');
   });
-  it('reports a first run', () => {
+
+  it('reports a non-first run', () => {
     (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
     expect(isFirstRun()).toBe(false);
   });
