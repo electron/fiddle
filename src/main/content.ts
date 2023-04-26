@@ -100,9 +100,9 @@ export function getTestTemplate(): Promise<EditorValues> {
  * @param {string} version - Electron version, e.g. 12.0.0
  * @returns {Promise<EditorValues>}
  */
-export async function getTemplate(version: string): Promise<EditorValues> {
+export function getTemplate(version: string): Promise<EditorValues> {
   const major = Number.parseInt(version);
-  return major && (await isReleasedMajor(major))
+  return major && isReleasedMajor(major)
     ? getQuickStart(`${major}-x-y`)
     : readFiddle(STATIC_TEMPLATE_DIR);
 }

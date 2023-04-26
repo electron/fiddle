@@ -10,7 +10,6 @@ import {
 } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { AppState } from '../../../src/renderer/state';
-import * as versions from '../../../src/renderer/versions';
 import { disableDownload } from '../../../src/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
@@ -41,7 +40,7 @@ describe('ElectronSettings component', () => {
 
   it('renders', () => {
     const spy = jest
-      .spyOn(versions, 'getOldestSupportedMajor')
+      .spyOn(window.ElectronFiddle, 'getOldestSupportedMajor')
       .mockReturnValue(9);
 
     const moreVersions: RunnableVersion[] = [

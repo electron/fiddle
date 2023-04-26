@@ -6,12 +6,14 @@ import {
   EditorValues,
   FiddleEvent,
   IPackageManager,
+  InstallState,
   MessageOptions,
   OutputEntry,
   PMOperationOptions,
   RunResult,
   SelectedLocalVersion,
   TestRequest,
+  Version,
 } from './interfaces';
 import { App } from './renderer/app';
 import { FiddleTheme, LoadedFiddleTheme } from './themes-defaults';
@@ -81,6 +83,7 @@ declare global {
         newTheme: FiddleTheme,
         name?: string,
       ): Promise<LoadedFiddleTheme>;
+      fetchVersions(): Promise<Version[]>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getIsPackageManagerInstalled(
         packageManager: IPackageManager,
@@ -89,7 +92,12 @@ declare global {
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
+      getLatestStable(): SemVer | undefined;
+      getLocalVersionState(ver: Version): InstallState;
+      getOldestSupportedMajor(): number | undefined;
+      getReleasedVersions(): Array<Version>;
       isDevMode: boolean;
+      isReleasedMajor(major: number): Promise<boolean>;
       macTitlebarClicked(): void;
       monaco: typeof MonacoType;
       openThemeFolder(): Promise<void>;

@@ -13,7 +13,7 @@ import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { AppState } from './state';
-import { getReleaseChannel, isReleasedMajor } from './versions';
+import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -145,7 +145,9 @@ export class RemoteLoader {
 
             if (
               !semver.valid(version) ||
-              !isReleasedMajor(semver.major(version))
+              !(await window.ElectronFiddle.isReleasedMajor(
+                semver.major(version),
+              ))
             ) {
               await this.appState.showGenericDialog({
                 label: `The Electron version (${version}) in this gist's package.json is invalid. Falling back to last used version.`,

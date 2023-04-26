@@ -3,7 +3,6 @@ import { IpcRendererEvent, ipcRenderer } from 'electron';
 
 import { FiddleEvent } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
-import { isReleasedMajor } from '../renderer/versions';
 import { FiddleTheme } from '../themes-defaults';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
@@ -77,6 +76,24 @@ export async function setupFiddleGlobal() {
     createThemeFile(newTheme: FiddleTheme, name?: string) {
       return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
     },
+    fetchVersions() {
+      return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
+    },
+    getLatestStable() {
+      return ipcRenderer.sendSync(IpcEvents.GET_LATEST_STABLE);
+    },
+    getLocalVersionState(ver) {
+      // Destructure ver into a copy, as the object sometimes can't be cloned
+      return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSION_STATE, {
+        ...ver,
+      });
+    },
+    getOldestSupportedMajor() {
+      return ipcRenderer.sendSync(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR);
+    },
+    getReleasedVersions() {
+      return ipcRenderer.sendSync(IpcEvents.GET_RELEASED_VERSIONS);
+    },
     getAvailableThemes() {
       return ipcRenderer.invoke(IpcEvents.GET_AVAILABLE_THEMES);
     },
@@ -91,6 +108,9 @@ export async function setupFiddleGlobal() {
       ipcRenderer.invoke(IpcEvents.GET_TEMPLATE, version),
     getTemplateValues: (name: string) => {
       return ipcRenderer.invoke(IpcEvents.GET_TEMPLATE_VALUES, name);
+    },
+    isReleasedMajor(major: number) {
+      return ipcRenderer.invoke(IpcEvents.IS_RELEASED_MAJOR, major);
     },
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
     isDevMode: ipcRenderer.sendSync(IpcEvents.IS_DEV_MODE),
@@ -150,11 +170,6 @@ export async function setupFiddleGlobal() {
     },
     themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
   };
-
-  // TODO(dsanders11): Remove this when Electron versions move to main process
-  ipcRenderer.on(IpcEvents.IS_RELEASED_MAJOR, (e, { major }) => {
-    e.ports[0].postMessage(isReleasedMajor(major));
-  });
 }
 
 preload();
