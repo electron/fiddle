@@ -58,6 +58,13 @@ export async function setupFiddleGlobal() {
         }
       }
     },
+    addModules({ dir, packageManager }, ...names) {
+      return ipcRenderer.invoke(
+        IpcEvents.NPM_ADD_MODULES,
+        { dir, packageManager },
+        ...names,
+      );
+    },
     app: null as any, // will be set in main.tsx
     appPaths: await ipcRenderer.invoke(IpcEvents.GET_APP_PATHS),
     arch: process.arch,
@@ -73,6 +80,13 @@ export async function setupFiddleGlobal() {
     getAvailableThemes() {
       return ipcRenderer.invoke(IpcEvents.GET_AVAILABLE_THEMES);
     },
+    getIsPackageManagerInstalled(packageManager, ignoreCache) {
+      return ipcRenderer.invoke(
+        IpcEvents.NPM_IS_PM_INSTALLED,
+        packageManager,
+        ignoreCache,
+      );
+    },
     getTemplate: (version: string) =>
       ipcRenderer.invoke(IpcEvents.GET_TEMPLATE, version),
     getTemplateValues: (name: string) => {
@@ -85,6 +99,13 @@ export async function setupFiddleGlobal() {
     monaco: null as any, // will be set in main.tsx
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
+    },
+    packageRun({ dir, packageManager }, command) {
+      return ipcRenderer.invoke(
+        IpcEvents.NPM_PACKAGE_RUN,
+        { dir, packageManager },
+        command,
+      );
     },
     platform: process.platform,
     pushOutputEntry(entry) {

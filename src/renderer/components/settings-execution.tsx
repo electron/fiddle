@@ -12,7 +12,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { IPackageManager } from '../npm';
+import { IPackageManager } from '../../interfaces';
 import { AppState } from '../state';
 
 export enum SettingItemType {

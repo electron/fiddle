@@ -21,6 +21,7 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  IPackageManager,
   InstallState,
   OutputEntry,
   OutputOptions,
@@ -37,7 +38,6 @@ import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
-import { IPackageManager } from './npm';
 import {
   addLocalVersion,
   fetchVersions,
