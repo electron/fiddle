@@ -98,6 +98,10 @@ export async function setupVersions() {
   ipcMainManager.on(IpcEvents.GET_RELEASED_VERSIONS, (event) => {
     event.returnValue = getReleasedVersions();
   });
+  ipcMainManager.handle(
+    IpcEvents.GET_RELEASE_INFO,
+    (_: IpcMainEvent, version) => knownVersions.getReleaseInfo(version),
+  );
 
   return knownVersions;
 }

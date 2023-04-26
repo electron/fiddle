@@ -1,3 +1,4 @@
+import { ReleaseInfo } from '@electron/fiddle-core';
 import * as MonacoType from 'monaco-editor';
 
 import {
@@ -95,6 +96,7 @@ declare global {
       getLatestStable(): SemVer | undefined;
       getLocalVersionState(ver: Version): InstallState;
       getOldestSupportedMajor(): number | undefined;
+      getReleaseInfo(version: string): Promise<ReleaseInfo | undefined>;
       getReleasedVersions(): Array<Version>;
       isDevMode: boolean;
       isReleasedMajor(major: number): Promise<boolean>;

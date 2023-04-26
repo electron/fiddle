@@ -7,9 +7,7 @@ import packageJson from 'package-json';
 import readdir from 'recursive-readdir';
 import semver from 'semver';
 
-import releases from '../../static/releases.json';
-import { RunnableVersion, Version, VersionSource } from '../interfaces';
-import { normalizeVersion } from '../utils/normalize-version';
+import { RunnableVersion, VersionSource } from '../interfaces';
 
 const ELECTRON_DTS = 'electron.d.ts';
 
@@ -63,9 +61,7 @@ export class ElectronTypes {
 
   private async setNodeTypes(version: string): Promise<void> {
     // Get the Node.js version corresponding to the current Electron version.
-    const v = releases.find((release: Version) => {
-      return normalizeVersion(release.version) === version;
-    })?.node;
+    const v = (await window.ElectronFiddle.getReleaseInfo(version))?.node;
 
     if (!v) return;
 

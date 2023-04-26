@@ -18,6 +18,7 @@ export class ElectronFiddleMock {
   public getLatestStable = jest.fn();
   public getLocalVersionState = jest.fn();
   public getOldestSupportedMajor = jest.fn();
+  public getReleaseInfo = jest.fn();
   public getReleasedVersions = jest.fn();
   public getTemplate = jest.fn();
   public getTemplateValues = jest.fn();

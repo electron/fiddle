@@ -160,6 +160,10 @@ describe('ElectronTypes', () => {
     });
 
     it('fetches types', async () => {
+      (window.ElectronFiddle.getReleaseInfo as jest.Mock).mockResolvedValue({
+        node: '16.2.0',
+      });
+
       const types = 'here are the types';
       const fetchSpy = makeFetchSpy(types);
 
@@ -214,6 +218,15 @@ describe('ElectronTypes', () => {
       const spy = makeFetchSpy('Cannot find package');
       await electronTypes.setVersion(remoteVersion);
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(addExtraLib).not.toHaveBeenCalled();
+    });
+
+    it('does not crash if no release info', async () => {
+      (window.ElectronFiddle.getReleaseInfo as jest.Mock).mockResolvedValue(
+        undefined,
+      );
+
+      await electronTypes.setVersion(remoteVersion);
       expect(addExtraLib).not.toHaveBeenCalled();
     });
   });
