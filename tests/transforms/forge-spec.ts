@@ -57,4 +57,31 @@ describe('forgeTransform()', () => {
     const files = await forgeTransform(filesBefore);
     expect(files.get(PACKAGE_NAME)).toBe('garbage');
   });
+
+  it('forces ABI for nightly builds', async () => {
+    (window.ElectronFiddle.getReleaseInfo as jest.Mock).mockResolvedValue({
+      version: '26.0.0-nightly.20230411',
+      modules: '116',
+    });
+    const filesBefore = new Map();
+    filesBefore.set(
+      PACKAGE_NAME,
+      JSON.stringify({
+        devDependencies: {
+          'electron-nightly': '26.0.0-nightly.20230411',
+        },
+      }),
+    );
+
+    const files = await forgeTransform(filesBefore);
+    expect(JSON.parse(files.get(PACKAGE_NAME)!)).toMatchObject({
+      config: {
+        forge: {
+          electronRebuildConfig: {
+            forceABI: 116,
+          },
+        },
+      },
+    });
+  });
 });
