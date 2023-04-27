@@ -89,6 +89,7 @@ declare global {
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
+      isDevMode: boolean;
       macTitlebarClicked(): void;
       monaco: typeof MonacoType;
       openThemeFolder(): Promise<void>;

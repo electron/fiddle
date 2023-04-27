@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/order
-import { initSentry } from '../sentry';
+import { initSentry } from './sentry';
 initSentry();
 import {
   BrowserWindow,
@@ -55,6 +55,7 @@ export async function onReady() {
   setupTemplates();
   setupContent();
   setupThemes();
+  setupIsDevMode();
   setupNpm();
 
   processCommandLine(argv);
@@ -143,6 +144,15 @@ export function setupNativeTheme() {
     if (isNativeThemeSource(source)) {
       nativeTheme.themeSource = source;
     }
+  });
+}
+
+/**
+ * Handle isDevMode for renderer.
+ */
+export function setupIsDevMode() {
+  ipcMainManager.on(IpcEvents.IS_DEV_MODE, (event) => {
+    event.returnValue = isDevMode();
   });
 }
 
