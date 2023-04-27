@@ -46,6 +46,7 @@ export enum IpcEvents {
   OPEN_THEME_FOLDER = 'OPEN_THEME_FOLDER',
   READ_THEME_FILE = 'READ_THEME_FILE',
   GET_THEME_PATH = 'GET_THEME_PATH',
+  IS_DEV_MODE = 'IS_DEV_MODE',
 }
 
 export const ipcMainEvents = [
@@ -70,6 +71,7 @@ export const ipcMainEvents = [
   IpcEvents.OPEN_THEME_FOLDER,
   IpcEvents.READ_THEME_FILE,
   IpcEvents.GET_THEME_PATH,
+  IpcEvents.IS_DEV_MODE,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =
