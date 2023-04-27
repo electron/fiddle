@@ -34,7 +34,7 @@ describe('GenericDialog component', () => {
       expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
     });
 
-    it('confirmation', () => {
+    it('success', () => {
       expectDialogTypeToMatchSnapshot(GenericDialogType.success);
     });
 

@@ -91,7 +91,7 @@ describe('themes', () => {
       expect(theme!.name).toBe('Fiddle (Dark)');
     });
 
-    it('returns the default (Dark) theme', async () => {
+    it('returns the default (Dark) theme if no name provided', async () => {
       const theme = await readThemeFile();
       expect(theme!.name).toBe('Fiddle (Dark)');
     });

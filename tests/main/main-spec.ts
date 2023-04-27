@@ -187,20 +187,6 @@ describe('main', () => {
         setupTitleBarClickMac();
 
         expect(mockWindow.minimize).toHaveBeenCalled();
-      });
-
-      it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
-        const mockWindow = new BrowserWindowMock();
-        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
-          mockWindow,
-        );
-        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
-          'Minimize',
-        );
-
-        setupTitleBarClickMac();
-
-        expect(mockWindow.minimize).toHaveBeenCalled();
         expect(mockWindow.maximize).not.toHaveBeenCalled();
         expect(mockWindow.unmaximize).not.toHaveBeenCalled();
       });

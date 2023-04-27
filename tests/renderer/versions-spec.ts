@@ -214,19 +214,12 @@ describe('versions', () => {
     }
 
     it('falls back to a local require', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce('garbage');
+      for (const garbage of ['garbage', '[{ "garbage": "true" }]']) {
+        (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(garbage);
 
-      const expected = getExpectedOldestSupportedVersion();
-      expect(getOldestSupportedMajor()).toBe(expected);
-    });
-
-    it('falls back to a local require', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
-        `[{ "garbage": "true" }]`,
-      );
-
-      const expected = getExpectedOldestSupportedVersion();
-      expect(getOldestSupportedMajor()).toBe(expected);
+        const expected = getExpectedOldestSupportedVersion();
+        expect(getOldestSupportedMajor()).toBe(expected);
+      }
     });
 
     it('honors process.env.NUM_STABLE_BRANCHES', () => {

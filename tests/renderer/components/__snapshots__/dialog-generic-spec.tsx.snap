@@ -15,7 +15,7 @@ exports[`GenericDialog component renders confirmation 1`] = `
 </Blueprint3.Alert>
 `;
 
-exports[`GenericDialog component renders confirmation 2`] = `
+exports[`GenericDialog component renders success 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
