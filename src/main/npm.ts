@@ -1,11 +1,9 @@
+import { IpcMainEvent } from 'electron';
+
+import { IPackageManager, PMOperationOptions } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 import { exec } from '../utils/exec';
-
-export type IPackageManager = 'npm' | 'yarn';
-
-export interface PMOperationOptions {
-  dir: string;
-  packageManager: IPackageManager;
-}
+import { ipcMainManager } from './ipc';
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
@@ -24,7 +22,7 @@ export async function getIsPackageManagerInstalled(
     return isYarnInstalled;
 
   const command =
-    window.ElectronFiddle.platform === 'win32'
+    process.platform === 'win32'
       ? `where.exe ${packageManager}`
       : `which ${packageManager}`;
 
@@ -83,4 +81,28 @@ export function packageRun(
   command: string,
 ): Promise<string> {
   return exec(dir, `${packageManager} run ${command}`);
+}
+
+export async function setupNpm() {
+  ipcMainManager.handle(
+    IpcEvents.NPM_ADD_MODULES,
+    (
+      _: IpcMainEvent,
+      { dir, packageManager }: PMOperationOptions,
+      ...names: Array<string>
+    ) => addModules({ dir, packageManager }, ...names),
+  );
+  ipcMainManager.handle(
+    IpcEvents.NPM_IS_PM_INSTALLED,
+    (_: IpcMainEvent, packageManager: IPackageManager, ignoreCache?: boolean) =>
+      getIsPackageManagerInstalled(packageManager, ignoreCache),
+  );
+  ipcMainManager.handle(
+    IpcEvents.NPM_PACKAGE_RUN,
+    (
+      _: IpcMainEvent,
+      { dir, packageManager }: PMOperationOptions,
+      command: string,
+    ) => packageRun({ dir, packageManager }, command),
+  );
 }

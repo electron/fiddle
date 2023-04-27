@@ -5,8 +5,10 @@ import {
   BlockableAccelerator,
   EditorValues,
   FiddleEvent,
+  IPackageManager,
   MessageOptions,
   OutputEntry,
+  PMOperationOptions,
   RunResult,
   SelectedLocalVersion,
   TestRequest,
@@ -66,6 +68,10 @@ declare global {
         type: 'toggle-monaco-option',
         listener: (path: string) => void,
       ): void;
+      addModules(
+        { dir, packageManager }: PMOperationOptions,
+        ...names: Array<string>
+      ): Promise<string>;
       app: App;
       appPaths: Record<string, string>;
       arch: string;
@@ -76,6 +82,10 @@ declare global {
         name?: string,
       ): Promise<LoadedFiddleTheme>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
+      getIsPackageManagerInstalled(
+        packageManager: IPackageManager,
+        ignoreCache?: boolean,
+      ): Promise<boolean>;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
@@ -83,6 +93,10 @@ declare global {
       macTitlebarClicked(): void;
       monaco: typeof MonacoType;
       openThemeFolder(): Promise<void>;
+      packageRun(
+        { dir, packageManager }: PMOperationOptions,
+        command: string,
+      ): Promise<string>;
       platform: string;
       pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;

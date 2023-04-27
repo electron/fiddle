@@ -178,3 +178,10 @@ export interface MessageOptions {
   detail?: string;
   buttons?: string[];
 }
+
+export type IPackageManager = 'npm' | 'yarn';
+
+export interface PMOperationOptions {
+  dir: string;
+  packageManager: IPackageManager;
+}

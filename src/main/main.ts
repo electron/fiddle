@@ -18,6 +18,7 @@ import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { onFirstRunMaybe } from './first-run';
 import { ipcMainManager } from './ipc';
+import { setupNpm } from './npm';
 import { listenForProtocolHandler, setupProtocolHandler } from './protocol';
 import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
@@ -55,6 +56,7 @@ export async function onReady() {
   setupContent();
   setupThemes();
   setupIsDevMode();
+  setupNpm();
 
   processCommandLine(argv);
 }

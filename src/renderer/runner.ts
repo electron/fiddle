@@ -6,18 +6,13 @@ import { Installer } from '@electron/fiddle-core';
 import {
   FileTransform,
   InstallState,
+  PMOperationOptions,
   RunResult,
   RunnableVersion,
 } from '../interfaces';
 import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { Bisector } from './bisect';
-import {
-  PMOperationOptions,
-  addModules,
-  getIsPackageManagerInstalled,
-  packageRun,
-} from './npm';
 import { AppState } from './state';
 import { getVersionState } from './versions';
 
@@ -267,7 +262,9 @@ export class Runner {
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     const packageManager = this.appState.packageManager;
-    const pmInstalled = await getIsPackageManagerInstalled(packageManager);
+    const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
+      packageManager,
+    );
     if (!pmInstalled) {
       let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
@@ -292,7 +289,12 @@ export class Runner {
     // Cool, let's run "package"
     try {
       console.log(`Now creating ${strings[1].toLowerCase()}...`);
-      pushOutput(await packageRun({ dir, packageManager }, operation));
+      pushOutput(
+        await window.ElectronFiddle.packageRun(
+          { dir, packageManager },
+          operation,
+        ),
+      );
       pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
     } catch (error) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
@@ -320,7 +322,9 @@ export class Runner {
     if (modules && modules.length > 0) {
       this.appState.isInstallingModules = true;
       const packageManager = pmOptions.packageManager;
-      const pmInstalled = await getIsPackageManagerInstalled(packageManager);
+      const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
+        packageManager,
+      );
       if (!pmInstalled) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(
           ', ',
@@ -342,7 +346,10 @@ export class Runner {
         { isNotPre: true },
       );
 
-      const result = await addModules(pmOptions, ...modules);
+      const result = await window.ElectronFiddle.addModules(
+        pmOptions,
+        ...modules,
+      );
       pushOutput(result);
 
       this.appState.isInstallingModules = false;
@@ -478,7 +485,7 @@ export class Runner {
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     try {
       this.appState.pushOutput(`Now running "npm install..."`);
-      this.appState.pushOutput(await addModules(options));
+      this.appState.pushOutput(await window.ElectronFiddle.addModules(options));
       return true;
     } catch (error) {
       this.appState.pushError('Failed to run "npm install".', error);

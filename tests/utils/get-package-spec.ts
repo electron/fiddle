@@ -8,10 +8,6 @@ jest.mock('../../src/utils/get-username', () => ({
   getUsername: () => 'test-user',
 }));
 
-jest.mock('../../src/renderer/npm', () => ({
-  findModulesInEditors: () => ['say'],
-}));
-
 describe('get-package', () => {
   describe('getForgeVersion()', () => {
     it('returns a semver-compatible version constraint', () => {

@@ -8,11 +8,6 @@ import {
   RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
-import {
-  addModules,
-  getIsPackageManagerInstalled,
-  packageRun,
-} from '../../src/renderer/npm';
 import { ForgeCommands, Runner } from '../../src/renderer/runner';
 import { AppState } from '../../src/renderer/state';
 import {
@@ -23,7 +18,6 @@ import {
 } from '../mocks/mocks';
 import { emitEvent, waitFor } from '../utils';
 
-jest.mock('../../src/renderer/npm');
 jest.mock('../../src/renderer/file-manager');
 jest.mock('fs-extra');
 jest.mock('path');
@@ -43,7 +37,8 @@ describe('Runner component', () => {
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
 
-    (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
+    (window.ElectronFiddle
+      .getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
 
     instance = new Runner((store as unknown) as AppState);
   });
@@ -62,7 +57,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
     });
 
     it('runs with logging when enabled', async () => {
@@ -86,7 +81,7 @@ describe('Runner component', () => {
       expect(result).toBe(RunResult.SUCCESS);
       expect(store.isRunning).toBe(false);
       expect(fileManager.saveToTemp).toHaveBeenCalled();
-      expect(addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
     });
 
     it('emits output with exitCode', async () => {
@@ -356,16 +351,18 @@ describe('Runner component', () => {
       expect(
         await instance.packageInstall({ dir: '', packageManager: 'npm' }),
       ).toBe(true);
-      expect(addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
-      (addModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (window.ElectronFiddle.addModules as jest.Mock).mockRejectedValueOnce(
+        'bwap bwap',
+      );
 
       expect(
         await instance.packageInstall({ dir: '', packageManager: 'npm' }),
       ).toBe(false);
-      expect(addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
     });
   });
 
@@ -400,7 +397,9 @@ describe('Runner component', () => {
     });
 
     it('handles an error in packageInstall()', async () => {
-      (addModules as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (window.ElectronFiddle.addModules as jest.Mock).mockRejectedValueOnce(
+        'bwap bwap',
+      );
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -408,7 +407,9 @@ describe('Runner component', () => {
     });
 
     it('handles an error in packageRun()', async () => {
-      (packageRun as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      (window.ElectronFiddle.packageRun as jest.Mock).mockRejectedValueOnce(
+        'bwap bwap',
+      );
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -416,7 +417,8 @@ describe('Runner component', () => {
     });
 
     it('does attempt a forge operation if npm is not installed', async () => {
-      (getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
+      (window.ElectronFiddle
+        .getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -429,13 +431,14 @@ describe('Runner component', () => {
       ['does not attempt installation if npm is not installed', false, 0],
       ['does attempt installation if npm is installed', true, 1],
     ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      (getIsPackageManagerInstalled as jest.Mock).mockReturnValue(haveNpm);
+      (window.ElectronFiddle
+        .getIsPackageManagerInstalled as jest.Mock).mockReturnValue(haveNpm);
       await instance.installModules({
         dir: '/fake/path',
         packageManager: 'npm',
       });
 
-      expect(addModules).toHaveBeenCalledTimes(numCalls);
+      expect(window.ElectronFiddle.addModules).toHaveBeenCalledTimes(numCalls);
     });
   });
 });
