@@ -922,10 +922,10 @@
   optionalDependencies:
     "@types/glob" "^7.1.1"
 
-"@electron/fiddle-core@^1.2.2":
-  version "1.2.2"
-  resolved "https://registry.yarnpkg.com/@electron/fiddle-core/-/fiddle-core-1.2.2.tgz#33a89618505c4918fd339f7f08ba8f1155551d84"
-  integrity sha512-3YVgKCFQrJ5KHy9CYxtUSO97FVXDPcTFJhQcifDuSh2gTiGRHvXY1sVVp59kUGdwa2kl0sNMhRkJCmHDR88tfw==
+"@electron/fiddle-core@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@electron/fiddle-core/-/fiddle-core-1.3.0.tgz#8303629badc72c2a0d5029d13e0cb701fd06d6a1"
+  integrity sha512-RlH4j0RtcRHMVQCaiC/xS8UmvmmgTqCJI8Iw+GIUTswzA7WrXRPCTX+izvb2NiBmpf0Ll/+GPuQ1VtV9v3P7pA==
   dependencies:
     "@electron/get" "^2.0.0"
     debug "^4.3.3"
