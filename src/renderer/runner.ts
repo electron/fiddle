@@ -483,12 +483,13 @@ export class Runner {
    * @memberof Runner
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
+    const pm = options.packageManager;
     try {
-      this.appState.pushOutput(`Now running "npm install..."`);
+      this.appState.pushOutput(`Now running "${pm} install..."`);
       this.appState.pushOutput(await window.ElectronFiddle.addModules(options));
       return true;
     } catch (error) {
-      this.appState.pushError('Failed to run "npm install".', error);
+      this.appState.pushError(`Failed to run "${pm} install".`, error);
     }
 
     return false;

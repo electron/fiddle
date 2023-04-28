@@ -57,14 +57,15 @@ export async function addModules(
   ...names: Array<string>
 ): Promise<string> {
   let nameArgs: Array<string> = [];
+  let installCommand: string;
 
   if (packageManager === 'npm') {
+    installCommand = 'npm install';
     nameArgs = names.length > 0 ? ['-S', ...names] : ['--also=dev --prod'];
   } else {
+    installCommand = names.length > 0 ? 'yarn add' : 'yarn install';
     nameArgs = [...names];
   }
-
-  const installCommand = packageManager === 'npm' ? 'npm install' : 'yarn add';
 
   return exec(dir, [installCommand].concat(nameArgs).join(' '));
 }
