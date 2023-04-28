@@ -6,6 +6,7 @@ import { app, dialog } from 'electron';
 
 import { onFirstRunMaybe } from '../../src/main/first-run';
 import { isFirstRun } from '../../src/utils/check-first-run';
+import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/utils/check-first-run', () => ({
   isFirstRun: jest.fn(),
@@ -17,12 +18,9 @@ const mockDialogResponse = {
 
 describe('first-run', () => {
   const oldDefaultApp = process.defaultApp;
-  const oldPlatform = process.platform;
 
   beforeEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: 'darwin',
-    });
+    overridePlatform('darwin');
 
     (dialog.showMessageBox as jest.Mock<any>).mockResolvedValue(
       mockDialogResponse,
@@ -30,9 +28,7 @@ describe('first-run', () => {
   });
 
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: oldPlatform,
-    });
+    resetPlatform();
   });
 
   afterEach(() => {
@@ -65,9 +61,7 @@ describe('first-run', () => {
     });
 
     it(`doesn't run unless required (Windows, Linux)`, () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-      });
+      overridePlatform('win32');
 
       (isFirstRun as jest.Mock).mockReturnValueOnce(true);
       (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);

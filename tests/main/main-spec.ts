@@ -20,7 +20,7 @@ import { shouldQuit } from '../../src/main/squirrel';
 import { setupUpdates } from '../../src/main/update';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
-import { overridePlatform } from '../utils';
+import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
@@ -47,18 +47,12 @@ jest.mock('../../src/main/ipc');
  * for CI to know that the app is still opening a window.
  */
 describe('main', () => {
-  const oldPlatform = process.platform;
-
   beforeAll(() => {
-    Object.defineProperty(process, 'platform', {
-      value: 'win32',
-    });
+    overridePlatform('win32');
   });
 
   afterAll(() => {
-    Object.defineProperty(process, 'platform', {
-      value: oldPlatform,
-    });
+    resetPlatform();
   });
 
   beforeEach(() => {
@@ -109,9 +103,7 @@ describe('main', () => {
     });
 
     it('does not quit the app on macOS', () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'darwin',
-      });
+      overridePlatform('darwin');
 
       onWindowsAllClosed();
 

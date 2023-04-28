@@ -1,11 +1,11 @@
+import { overridePlatform, resetPlatform } from '../utils';
+
 jest.mock('child_process');
 
 const mockShellEnv = jest.fn();
 jest.mock('shell-env', () => mockShellEnv);
 
 describe('exec', () => {
-  const oldPlatform = process.platform;
-
   // Allow us to reset the module between each run
   let execModule = require('../../src/utils/exec');
 
@@ -16,9 +16,7 @@ describe('exec', () => {
   });
 
   afterEach(() => {
-    Object.defineProperty(process, 'platform', {
-      value: oldPlatform,
-    });
+    resetPlatform();
   });
 
   describe('exec()', () => {
@@ -76,9 +74,7 @@ describe('exec', () => {
 
   describe('maybeFixPath()', () => {
     it('does not do anything on Windows', async () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'win32',
-      });
+      overridePlatform('win32');
 
       await execModule.maybeFixPath();
 
@@ -86,9 +82,7 @@ describe('exec', () => {
     });
 
     it('calls shell-env on macOS', async () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'darwin',
-      });
+      overridePlatform('darwin');
 
       await execModule.maybeFixPath();
 
@@ -96,9 +90,7 @@ describe('exec', () => {
     });
 
     it('calls shell-env on Linux', async () => {
-      Object.defineProperty(process, 'platform', {
-        value: 'linux',
-      });
+      overridePlatform('linux');
 
       await execModule.maybeFixPath();
 
