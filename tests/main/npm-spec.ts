@@ -158,7 +158,7 @@ describe('npm', () => {
       it('attempts to installs all modules', async () => {
         addModules({ dir: '/my/directory', packageManager: 'yarn' });
 
-        expect(exec).toHaveBeenCalledWith<any>('/my/directory', 'yarn add');
+        expect(exec).toHaveBeenCalledWith<any>('/my/directory', 'yarn install');
       });
     });
   });
