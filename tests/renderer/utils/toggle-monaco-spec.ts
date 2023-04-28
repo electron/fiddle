@@ -1,4 +1,4 @@
-import { toggleMonaco } from '../../src/utils/toggle-monaco';
+import { toggleMonaco } from '../../../src/renderer/utils/toggle-monaco';
 
 describe('toggleMonaco()', () => {
   it('toggles a boolean', () => {

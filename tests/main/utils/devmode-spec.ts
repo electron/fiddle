@@ -1,4 +1,4 @@
-import { isDevMode } from '../../src/utils/devmode';
+import { isDevMode } from '../../../src/main/utils/devmode';
 
 describe('devMode', () => {
   const old = (process as any).defaultApp; // for tsconfig error

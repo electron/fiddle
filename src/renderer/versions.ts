@@ -5,7 +5,7 @@ import {
   Version,
   VersionSource,
 } from '../interfaces';
-import { normalizeVersion } from '../utils/normalize-version';
+import { normalizeVersion } from './utils/normalize-version';
 
 /**
  * Returns a sensible default version string.

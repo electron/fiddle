@@ -11,11 +11,11 @@ import {
   getRunItems,
 } from '../../src/main/context-menu';
 import { ipcMainManager } from '../../src/main/ipc';
-import { isDevMode } from '../../src/utils/devmode';
+import { isDevMode } from '../../src/main/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { WebContentsMock } from '../mocks/web-contents';
 
-jest.mock('../../src/utils/devmode');
+jest.mock('../../src/main/utils/devmode');
 jest.mock('../../src/main/ipc');
 
 describe('context-menu', () => {

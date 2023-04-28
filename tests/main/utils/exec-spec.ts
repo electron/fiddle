@@ -1,4 +1,4 @@
-import { overridePlatform, resetPlatform } from '../utils';
+import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('child_process');
 
@@ -7,11 +7,11 @@ jest.mock('shell-env', () => mockShellEnv);
 
 describe('exec', () => {
   // Allow us to reset the module between each run
-  let execModule = require('../../src/utils/exec');
+  let execModule = require('../../../src/main/utils/exec');
 
   beforeEach(() => {
     jest.resetModules();
-    execModule = require('../../src/utils/exec');
+    execModule = require('../../../src/main/utils/exec');
     mockShellEnv.mockResolvedValue({ PATH: '/some/path' });
   });
 

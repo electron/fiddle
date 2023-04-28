@@ -8,7 +8,7 @@ import {
   getEmptyContent,
   isSupportedFile,
   monacoLanguage,
-} from '../utils/editor-utils';
+} from './utils/editor-utils';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 

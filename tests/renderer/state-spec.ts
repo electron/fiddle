@@ -18,7 +18,6 @@ import {
   makeRunnable,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import { getName } from '../../src/utils/get-name';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
@@ -39,10 +38,6 @@ jest.mock('../../src/renderer/versions', () => {
     saveLocalVersions: jest.fn(),
   };
 });
-
-jest.mock('../../src/utils/get-name', () => ({
-  getName: jest.fn(),
-}));
 
 describe('AppState', () => {
   let appState: AppState;
@@ -107,7 +102,9 @@ describe('AppState', () => {
     });
 
     it('returns the name, even if none exists', async () => {
-      (getName as jest.Mock).mockReturnValue('test');
+      (window.ElectronFiddle.getProjectName as jest.Mock).mockReturnValue(
+        'test',
+      );
       (appState as any).name = undefined;
       expect(await appState.getName()).toBe('test');
     });

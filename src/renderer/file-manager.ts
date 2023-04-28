@@ -9,12 +9,12 @@ import {
   GenericDialogType,
   PACKAGE_NAME,
 } from '../interfaces';
-import { isKnownFile } from '../utils/editor-utils';
-import { DEFAULT_OPTIONS, PackageJsonOptions } from '../utils/get-package';
 import { readFiddle } from '../utils/read-fiddle';
 import { AppState } from './state';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
+import { isKnownFile } from './utils/editor-utils';
+import { DEFAULT_OPTIONS, PackageJsonOptions } from './utils/get-package';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {

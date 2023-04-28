@@ -1,4 +1,4 @@
-import { getAtPath, setAtPath } from '../../src/utils/js-path';
+import { getAtPath, setAtPath } from '../../../src/renderer/utils/js-path';
 
 describe('js-path', () => {
   describe('getAtPath()', () => {

@@ -90,6 +90,7 @@ declare global {
         packageManager: IPackageManager,
         ignoreCache?: boolean,
       ): Promise<boolean>;
+      getProjectName(localPath?: string): Promise<string>;
       getTemplate(version: string): Promise<EditorValues>;
       getTemplateValues: (name: string) => Promise<EditorValues>;
       getTestTemplate(): Promise<EditorValues>;
@@ -98,6 +99,7 @@ declare global {
       getOldestSupportedMajor(): number | undefined;
       getReleaseInfo(version: string): Promise<ReleaseInfo | undefined>;
       getReleasedVersions(): Array<Version>;
+      getUsername(): string;
       isDevMode: boolean;
       isReleasedMajor(major: number): Promise<boolean>;
       macTitlebarClicked(): void;

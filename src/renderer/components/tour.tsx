@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 
-import { positionForRect } from '../../utils/position-for-rect';
+import { positionForRect } from '../utils/position-for-rect';
 
 export interface TourScriptStep {
   name: string;

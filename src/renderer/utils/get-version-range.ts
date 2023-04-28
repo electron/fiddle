@@ -1,4 +1,4 @@
-import { RunnableVersion } from '../interfaces';
+import { RunnableVersion } from '../../interfaces';
 import { semverCompare } from './sort-versions';
 
 /**

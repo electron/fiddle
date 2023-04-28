@@ -15,9 +15,9 @@ import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
 import { EditorId } from '../../interfaces';
-import { isRequiredFile, isSupportedFile } from '../../utils/editor-utils';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
+import { isRequiredFile, isSupportedFile } from '../utils/editor-utils';
 
 interface FileTreeProps {
   appState: AppState;

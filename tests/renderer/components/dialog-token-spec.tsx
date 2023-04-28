@@ -4,10 +4,10 @@ import { shallow } from 'enzyme';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
-import { getOctokit } from '../../../src/utils/octokit';
+import { getOctokit } from '../../../src/renderer/utils/octokit';
 import { overrideRendererPlatform } from '../../utils';
 
-jest.mock('../../../src/utils/octokit');
+jest.mock('../../../src/renderer/utils/octokit');
 
 describe('TokenDialog component', () => {
   const mockValidToken = 'ghp_muuHkYenGrOHrTBQKDALW8WtSD929EXMz63n';

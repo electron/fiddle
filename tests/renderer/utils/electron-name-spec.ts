@@ -1,5 +1,5 @@
-import { getElectronNameForPlatform } from '../../src/utils/electron-name';
-import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
+import { getElectronNameForPlatform } from '../../../src/renderer/utils/electron-name';
+import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
 describe('electron-name', () => {
   afterAll(() => {

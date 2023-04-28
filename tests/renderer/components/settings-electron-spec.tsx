@@ -10,10 +10,10 @@ import {
 } from '../../../src/interfaces';
 import { ElectronSettings } from '../../../src/renderer/components/settings-electron';
 import { AppState } from '../../../src/renderer/state';
-import { disableDownload } from '../../../src/utils/disable-download';
+import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
-jest.mock('../../../src/utils/disable-download.ts');
+jest.mock('../../../src/renderer/utils/disable-download.ts');
 
 describe('ElectronSettings component', () => {
   let store: StateMock;

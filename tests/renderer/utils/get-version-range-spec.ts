@@ -1,7 +1,7 @@
 import * as semver from 'semver';
 
-import { getVersionRange } from '../../src/utils/get-version-range';
-import { VersionsMock } from '../mocks/electron-versions';
+import { getVersionRange } from '../../../src/renderer/utils/get-version-range';
+import { VersionsMock } from '../../mocks/electron-versions';
 
 describe('getVersionRange', () => {
   const { mockVersionsArray } = new VersionsMock();

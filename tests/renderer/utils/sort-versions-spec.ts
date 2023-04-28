@@ -2,8 +2,8 @@ import {
   InstallState,
   RunnableVersion,
   VersionSource,
-} from '../../src/interfaces';
-import { sortVersions } from '../../src/utils/sort-versions';
+} from '../../../src/interfaces';
+import { sortVersions } from '../../../src/renderer/utils/sort-versions';
 
 describe('sort-versions', () => {
   function makeVersion(version: string): RunnableVersion {

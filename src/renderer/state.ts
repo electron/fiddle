@@ -30,14 +30,12 @@ import {
   Version,
   VersionSource,
 } from '../interfaces';
-import { getName } from '../utils/get-name';
-import { getUsername } from '../utils/get-username';
-import { normalizeVersion } from '../utils/normalize-version';
-import { sortVersions } from '../utils/sort-versions';
 import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
+import { normalizeVersion } from './utils/normalize-version';
+import { sortVersions } from './utils/sort-versions';
 import {
   addLocalVersion,
   fetchVersions,
@@ -109,7 +107,8 @@ export class AppState {
   public acceleratorsToBlock: Array<BlockableAccelerator> =
     (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
   public packageAuthor =
-    (localStorage.getItem('packageAuthor') as string) ?? getUsername();
+    (localStorage.getItem('packageAuthor') as string) ??
+    window.ElectronFiddle.getUsername();
   public electronMirror: typeof ELECTRON_MIRROR =
     (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR) === null
       ? {
@@ -452,7 +451,7 @@ export class AppState {
   }
 
   public async getName() {
-    this.name ||= await getName(this);
+    this.name ||= await window.ElectronFiddle.getProjectName(this.localPath);
     return this.name;
   }
 

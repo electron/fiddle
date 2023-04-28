@@ -1,4 +1,4 @@
-import { maybePlural } from '../../src/utils/plural-maybe';
+import { maybePlural } from '../../../src/renderer/utils/plural-maybe';
 
 describe('maybePlural', () => {
   describe('maybePlural()', () => {

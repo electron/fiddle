@@ -1,4 +1,4 @@
-import { normalizeVersion } from '../../src/utils/normalize-version';
+import { normalizeVersion } from '../../../src/renderer/utils/normalize-version';
 
 describe('normalize-version', () => {
   it('normalizes a version with a leading v', () => {

@@ -1,5 +1,5 @@
-import { positionForRect } from '../../src/utils/position-for-rect';
-import { overrideRendererPlatform } from '../utils';
+import { positionForRect } from '../../../src/renderer/utils/position-for-rect';
+import { overrideRendererPlatform } from '../../utils';
 
 describe('position-for-rect', () => {
   describe('positionForRect()', () => {

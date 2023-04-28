@@ -8,11 +8,11 @@ import {
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';
-import { disableDownload } from '../utils/disable-download';
-import { isKnownFile, isSupportedFile } from '../utils/editor-utils';
-import { getOctokit } from '../utils/octokit';
 import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
 import { AppState } from './state';
+import { disableDownload } from './utils/disable-download';
+import { isKnownFile, isSupportedFile } from './utils/editor-utils';
+import { getOctokit } from './utils/octokit';
 import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {

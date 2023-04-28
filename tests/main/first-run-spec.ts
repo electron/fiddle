@@ -5,10 +5,10 @@
 import { app, dialog } from 'electron';
 
 import { onFirstRunMaybe } from '../../src/main/first-run';
-import { isFirstRun } from '../../src/utils/check-first-run';
+import { isFirstRun } from '../../src/main/utils/check-first-run';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('../../src/utils/check-first-run', () => ({
+jest.mock('../../src/main/utils/check-first-run', () => ({
   isFirstRun: jest.fn(),
 }));
 

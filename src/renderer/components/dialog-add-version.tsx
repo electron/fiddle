@@ -12,8 +12,8 @@ import { observer } from 'mobx-react';
 import * as semver from 'semver';
 
 import { Version } from '../../interfaces';
-import { getElectronNameForPlatform } from '../../utils/electron-name';
 import { AppState } from '../state';
+import { getElectronNameForPlatform } from '../utils/electron-name';
 import { getLocalVersionForPath } from '../versions';
 
 interface AddVersionDialogProps {

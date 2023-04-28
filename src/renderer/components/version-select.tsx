@@ -21,9 +21,9 @@ import { FixedSizeList, ListChildComponentProps } from 'react-window';
 import semver from 'semver';
 
 import { InstallState, RunnableVersion, VersionSource } from '../../interfaces';
-import { disableDownload } from '../../utils/disable-download';
-import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
+import { disableDownload } from '../utils/disable-download';
+import { highlightText } from '../utils/highlight-text';
 
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 

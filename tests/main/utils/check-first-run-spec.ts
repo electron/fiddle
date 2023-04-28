@@ -1,7 +1,7 @@
 import * as electron from 'electron';
 import * as fs from 'fs-extra';
 
-import { isFirstRun } from '../../src/utils/check-first-run';
+import { isFirstRun } from '../../../src/main/utils/check-first-run';
 
 jest.mock('fs-extra', () => ({
   existsSync: jest.fn(),

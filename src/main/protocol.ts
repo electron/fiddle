@@ -4,8 +4,8 @@ import * as path from 'path';
 import { app } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
-import { isDevMode } from '../utils/devmode';
 import { ipcMainManager } from './ipc';
+import { isDevMode } from './utils/devmode';
 import { getOrCreateMainWindow } from './windows';
 
 const PROTOCOL = 'electron-fiddle';

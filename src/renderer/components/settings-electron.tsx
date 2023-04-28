@@ -22,8 +22,8 @@ import {
   RunnableVersion,
   VersionSource,
 } from '../../interfaces';
-import { disableDownload } from '../../utils/disable-download';
 import { AppState } from '../state';
+import { disableDownload } from '../utils/disable-download';
 import { getReleaseChannel } from '../versions';
 
 interface ElectronSettingsProps {

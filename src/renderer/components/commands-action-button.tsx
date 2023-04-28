@@ -18,9 +18,9 @@ import {
   GistActionState,
   GistActionType,
 } from '../../interfaces';
-import { ensureRequiredFiles } from '../../utils/editor-utils';
-import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
+import { ensureRequiredFiles } from '../utils/editor-utils';
+import { getOctokit } from '../utils/octokit';
 
 interface GistActionButtonProps {
   appState: AppState;

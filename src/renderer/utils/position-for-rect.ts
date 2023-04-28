@@ -1,4 +1,4 @@
-import { ArrowPosition } from '../interfaces';
+import { ArrowPosition } from '../../interfaces';
 
 interface PositionResult {
   top: number;

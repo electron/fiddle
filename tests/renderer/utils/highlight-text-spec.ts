@@ -1,4 +1,4 @@
-import { highlightText } from '../../src/utils/highlight-text';
+import { highlightText } from '../../../src/renderer/utils/highlight-text';
 
 describe('highlightText', () => {
   it('highlights text', () => {
