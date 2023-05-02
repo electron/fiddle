@@ -129,7 +129,7 @@ jobs:
           command: |
             echo 'export PATH=/snap/bin:"$PATH"' >> "$BASH_ENV"
             source "$BASH_ENV"
-      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
+      - run: DEBUG=electron-installer-snap:* npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple
       # jobs, so only persist the .webpack path from the x64 linux-build job
       - when:

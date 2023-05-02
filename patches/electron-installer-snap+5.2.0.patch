@@ -1,0 +1,12 @@
+diff --git a/node_modules/electron-installer-snap/src/snapcraft.js b/node_modules/electron-installer-snap/src/snapcraft.js
+index be64a19..2090daa 100644
+--- a/node_modules/electron-installer-snap/src/snapcraft.js
++++ b/node_modules/electron-installer-snap/src/snapcraft.js
+@@ -65,7 +65,6 @@ class Snapcraft {
+     }
+     /* istanbul ignore if */
+     if (debug.enabled) {
+-      args.push('--destructive-mode')
+       args.push('--debug')
+     }
+ 
