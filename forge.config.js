@@ -134,6 +134,18 @@ const config = {
       platforms: ['linux'],
       config: commonLinuxConfig,
     },
+    {
+      name: '@electron-forge/maker-snap',
+      platforms: ['linux'],
+      config: {
+        ...commonLinuxConfig,
+        features: {
+          audio: true,
+          video: true,
+          webgl: true,
+        },
+      },
+    },
   ],
   publishers: [
     {

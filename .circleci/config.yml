@@ -121,6 +121,8 @@ jobs:
       - image: cimg/base:stable
     steps:
       - run: sudo apt-get update && sudo apt install rpm
+      - run: sudo snap install snapd
+      - run: sudo snap install snapcraft --classic
       - install
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple
@@ -209,12 +211,12 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
+          # filters:
+          #   tags:
+          #     only: 
+          #       - /^v.*/
+          #   branches:
+          #     ignore: /.*/
       - publish-to-github:
           context: fiddle-release
           requires:
