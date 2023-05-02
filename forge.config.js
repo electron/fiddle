@@ -138,9 +138,7 @@ const config = {
       name: '@electron-forge/maker-snap',
       platforms: ['linux'],
       config: {
-        appConfig: {
-          icon: path.resolve(iconDir, 'fiddle.svg'),
-        },
+        icon: path.resolve(iconDir, 'fiddle.svg'),
         features: {
           audio: true,
         },
