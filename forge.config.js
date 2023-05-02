@@ -144,7 +144,6 @@ const config = {
         features: {
           audio: true,
         },
-        snapcraft: '/snap/bin/snapcraft',
       },
     },
   ],
