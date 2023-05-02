@@ -120,7 +120,8 @@ jobs:
     docker:
       - image: ubuntudesktop/gnome-3-38-2004
     steps:
-      - run: sudo apt-get -y update && sudo apt-get install -y git && sudo apt install -y rpm
+      - run: sudo apt-get -y update
+      - run: sudo apt-get install -y git curl dpkg fakeroot rpm
       # - run: sudo snap install snapd
       # - run: sudo snap install snapcraft --classic
       - install
