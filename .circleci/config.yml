@@ -179,18 +179,18 @@ workflows:
   build-and-test:
     jobs:
       - lint
-      # - mac-test:
-      #     matrix:
-      #       parameters:
-      #         arch: [ x64, arm64 ]
-      # - win-test:
-      #     matrix:
-      #       parameters:
-      #         arch: [ x64 ]
-      # - linux-test:
-      #     matrix:
-      #       parameters:
-      #         arch: [ x64 ]
+      - mac-test:
+          matrix:
+            parameters:
+              arch: [ x64, arm64 ]
+      - win-test:
+          matrix:
+            parameters:
+              arch: [ x64 ]
+      - linux-test:
+          matrix:
+            parameters:
+              arch: [ x64 ]
       - mac-build:
           matrix:
             parameters:
@@ -215,27 +215,27 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-          # filters:
-          #   tags:
-          #     only: 
-          #       - /^v.*/
-          #   branches:
-          #     ignore: /.*/
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - publish-to-github:
           context: fiddle-release
           requires:
             - lint
-            # - mac-test-x64
-            # - mac-test-arm64
-            # - win-test-x64
-            # - linux-test-x64
-            # - mac-build-x64
-            # - mac-build-arm64
-            # - win-build-ia32
-            # - win-build-x64
+            - mac-test-x64
+            - mac-test-arm64
+            - win-test-x64
+            - linux-test-x64
+            - mac-build-x64
+            - mac-build-arm64
+            - win-build-ia32
+            - win-build-x64
             - linux-build-x64
-            # - linux-build-arm64
-            # - linux-build-armv7l
+            - linux-build-arm64
+            - linux-build-armv7l
           filters:
             tags:
               only: 
