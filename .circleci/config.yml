@@ -120,8 +120,8 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - run: sudo apt-get update && sudo apt install rpm
-      - run: sudo snap install snapd
+      - run: sudo apt-get update && sudo apt install rpm && sudo apt install -y snapd
+      # - run: sudo snap install snapd
       - run: sudo snap install snapcraft --classic
       - install
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
