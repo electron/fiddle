@@ -214,8 +214,7 @@ workflows:
       - linux-build:
           matrix:
             parameters:
-              arch: [ x64 ]
-              # arch: [ x64, arm64, armv7l ]
+              arch: [ x64, arm64, armv7l ]
           # filters:
           #   tags:
           #     only: 
