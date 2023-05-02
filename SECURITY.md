@@ -9,4 +9,5 @@ The Electron team will send a response indicating the next steps in handling you
 Report security bugs in third-party modules to the person or team maintaining the module.
 
 ## Learning More About Security
+
 To learn more about securing an Electron application, please see the [security tutorial](https://github.com/electron/electron/blob/main/docs/tutorial/security.md).

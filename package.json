@@ -10,8 +10,9 @@
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
+    "lint:markdown": "electron-markdownlint \"*.md\"",
     "lint:templates": "standard \"static/**/*.js\"",
-    "lint:links": "node ./tools/check-links.js",
+    "lint:links": "electron-lint-markdown-links --root . --fetch-external-links \"*.md\"",
     "lint:fix": "npm-run-all \"lint:!(fix) -- --fix\"",
     "lint": "npm-run-all \"lint:*\"",
     "make": "electron-forge make",
@@ -70,6 +71,7 @@
   },
   "devDependencies": {
     "@babel/core": "^7.13.8",
+    "@electron/lint-roller": "^1.0.1",
     "@electron-forge/cli": "^6.1.1",
     "@electron-forge/maker-deb": "^6.1.1",
     "@electron-forge/maker-rpm": "^6.1.1",
