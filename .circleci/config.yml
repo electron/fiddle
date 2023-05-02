@@ -121,11 +121,13 @@ jobs:
       - image: ubuntudesktop/gnome-3-38-2004
     steps:
       - run: sudo apt-get -y update
-      - run: sudo apt-get install -y git curl dpkg fakeroot rpm
-      # - run: sudo snap install snapd
-      # - run: sudo snap install snapcraft --classic
+      - run: sudo apt-get install -y git curl dpkg fakeroot rpm lsb-release
       - install
-      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
+      - run: echo $PATH
+      - run: |
+          export PATH="/snap/bin:$PATH"
+          export SNAP="/snap/snapcraft/current"
+      - run: DEBUG=electron-installer-snap:* npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple
       # jobs, so only persist the .webpack path from the x64 linux-build job
       - when:
