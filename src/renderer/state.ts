@@ -602,10 +602,11 @@ export class AppState {
     const isRemote = source === VersionSource.remote;
     const isDownloaded = state === InstallState.downloaded;
     const isDownloading = state === InstallState.downloading;
+    const isInstalling = state === InstallState.installing;
     const isReady = state === InstallState.installed;
 
-    if (isDownloading) {
-      console.log(`State: Already downloading ${version}.`);
+    if (isDownloading || isInstalling) {
+      console.log(`State: Already ${state} ${version}.`);
       return;
     }
 
