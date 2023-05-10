@@ -11,10 +11,20 @@ async function populateReleases() {
     elves.getReleaseInfo(version),
   );
 
-  console.log(`Updating local releases.json with ${releases.length} versions.`);
+  if (releases.length) {
+    console.log(
+      `Updating local releases.json with ${releases.length} versions.`,
+    );
 
-  await fs.remove(file);
-  await fs.outputJSON(file, releases);
+    await fs.remove(file);
+    await fs.outputJSON(file, releases);
+  } else if (process.env.CI) {
+    throw new Error('Failed to fetch latest releases.json');
+  } else {
+    console.warn(
+      'Failed to fetch latest releases.json, falling back to whatever exists on disk',
+    );
+  }
 }
 
 module.exports = {
