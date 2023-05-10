@@ -16,7 +16,6 @@ async function populateReleases() {
       `Updating local releases.json with ${releases.length} versions.`,
     );
 
-    await fs.remove(file);
     await fs.outputJSON(file, releases);
   } else if (process.env.CI) {
     throw new Error('Failed to fetch latest releases.json');
