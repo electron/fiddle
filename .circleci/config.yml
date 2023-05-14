@@ -165,7 +165,7 @@ jobs:
             export SENTRY_RELEASE=Electron-Fiddle@${CIRCLE_TAG:1}
             sentry-cli releases new -p $SENTRY_PROJECT $SENTRY_RELEASE
             sentry-cli releases set-commits $SENTRY_RELEASE --auto
-            sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps ./.webpack
+            sentry-cli releases files $SENTRY_RELEASE upload-sourcemaps --url-prefix=~/.webpack ./.webpack/
             sentry-cli releases finalize $SENTRY_RELEASE
             sentry-cli releases deploys $SENTRY_RELEASE new -e $SENTRY_ENVIRONMENT
 
