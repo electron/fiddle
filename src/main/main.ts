@@ -24,6 +24,7 @@ import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
 import { setupThemes } from './themes';
 import { setupUpdates } from './update';
+import { setupVersions } from './versions';
 import { getOrCreateMainWindow } from './windows';
 
 let argv: string[] = [];
@@ -57,6 +58,7 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
+  await setupVersions();
 
   processCommandLine(argv);
 }

@@ -1,8 +1,3 @@
-import * as fs from 'fs';
-import * as path from 'path';
-
-import * as semver from 'semver';
-
 import {
   ElectronReleaseChannel,
   RunnableVersion,
@@ -13,14 +8,10 @@ import {
   addLocalVersion,
   fetchVersions,
   getDefaultVersion,
-  getElectronVersions,
   getLocalVersions,
-  getOldestSupportedMajor,
   getReleaseChannel,
-  isReleasedMajor,
   saveLocalVersions,
 } from '../../src/renderer/versions';
-import { FetchMock } from '../utils';
 
 const mockVersions: Array<Partial<RunnableVersion>> = [
   { version: 'test-0', localPath: '/test/path/0' },
@@ -38,6 +29,9 @@ describe('versions', () => {
 
     it('uses the newest stable as a fallback', () => {
       (localStorage.getItem as jest.Mock).mockReturnValue(null);
+      (window.ElectronFiddle.getLatestStable as jest.Mock).mockReturnValue({
+        version: '13.0.0',
+      });
       const output = getDefaultVersion([
         { version: '11.0.0' },
         { version: '15.0.0-nightly.20210715' },
@@ -155,95 +149,10 @@ describe('versions', () => {
   });
 
   describe('fetchVersions()', () => {
-    it('fetches versions >= 0.24.0', async () => {
-      const fetchMock = new FetchMock();
-      const url = 'https://releases.electronjs.org/releases.json';
-      const filename = path.join(__dirname, '../mocks/versions-mock.json');
-      const contents = fs.readFileSync(filename).toString();
-      fetchMock.add(url, contents);
-
-      const result = await fetchVersions();
-      const expected = [
-        { version: '10.0.0-nightly.20200303' },
-        { version: '9.0.0-beta.5' },
-        { version: '4.2.0' },
-      ];
-
-      expect(result).toEqual(expected);
-      expect(window.localStorage.setItem).toHaveBeenCalled();
-    });
-
-    it('fetches versions < 0.24.0', async () => {
-      const fetchMock = new FetchMock();
-      const url = 'https://releases.electronjs.org/releases.json';
-      fetchMock.add(
-        url,
-        JSON.stringify([
-          {
-            version: '0.23.0',
-          },
-        ]),
-      );
-
-      const result = await fetchVersions();
-
-      expect(result).toHaveLength(0);
-    });
-  });
-
-  describe('getOldestSupportedMajor()', () => {
-    it('uses localStorage versions if available', () => {
-      // inject versions into localstorage
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
-        `[
-          { "version": "10.0.0" },
-          { "version": "9.0.0" },
-          { "version": "8.0.0" },
-          { "version": "7.0.0" },
-          { "version": "6.0.0" }
-        ]`,
-      );
-      expect(getOldestSupportedMajor()).toEqual(7);
-    });
-
-    function getExpectedOldestSupportedVersion() {
-      const versions = getElectronVersions();
-      const major = semver.parse(getDefaultVersion(versions))!.major;
-      const NUM_BRANCHES = parseInt(process.env.NUM_STABLE_BRANCHES || '') || 4;
-      return major + 1 - NUM_BRANCHES;
-    }
-
-    it('falls back to a local require', () => {
-      for (const garbage of ['garbage', '[{ "garbage": "true" }]']) {
-        (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(garbage);
-
-        const expected = getExpectedOldestSupportedVersion();
-        expect(getOldestSupportedMajor()).toBe(expected);
-      }
-    });
-
-    it('honors process.env.NUM_STABLE_BRANCHES', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce('garbage');
-
-      process.env.NUM_STABLE_BRANCHES = '2';
-      const expected = getExpectedOldestSupportedVersion();
-      expect(getOldestSupportedMajor()).toBe(expected);
-    });
-  });
-
-  describe('isReleasedMajor()', () => {
-    it('returns true for recognized releases', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
-        `[{ "version": "3.0.5" }]`,
-      );
-      expect(isReleasedMajor(3)).toBe(true);
-    });
-
-    it('returns false for unrecognized releases', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
-        `[{ "version": "3.0.5" }]`,
-      );
-      expect(isReleasedMajor(1000)).toBe(false);
+    it('removes knownVersions from localStorage', async () => {
+      (window.ElectronFiddle.fetchVersions as jest.Mock).mockResolvedValue([]);
+      await fetchVersions();
+      expect(localStorage.removeItem).toHaveBeenCalledWith(VersionKeys.known);
     });
   });
 });

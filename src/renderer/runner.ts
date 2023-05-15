@@ -14,7 +14,6 @@ import { PackageJsonOptions } from '../utils/get-package';
 import { maybePlural } from '../utils/plural-maybe';
 import { Bisector } from './bisect';
 import { AppState } from './state';
-import { getVersionState } from './versions';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
@@ -157,7 +156,8 @@ export class Runner {
     const currentRunnable = appState.currentElectronVersion;
     const { version, state, localPath } = currentRunnable;
     const isValidBuild =
-      getVersionState(currentRunnable) === InstallState.installed;
+      window.ElectronFiddle.getLocalVersionState(currentRunnable) ===
+      InstallState.installed;
 
     // If the current active version is unavailable when we try to run
     // the fiddle, show an error and fall back.

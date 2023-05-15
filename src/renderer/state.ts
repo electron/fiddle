@@ -43,7 +43,6 @@ import {
   fetchVersions,
   getDefaultVersion,
   getElectronVersions,
-  getOldestSupportedMajor,
   getReleaseChannel,
   makeRunnable,
   saveLocalVersions,
@@ -412,7 +411,7 @@ export class AppState {
       showUndownloadedVersions,
       versions,
     } = this;
-    const oldest = getOldestSupportedMajor();
+    const oldest = window.ElectronFiddle.getOldestSupportedMajor();
 
     const filter = (ver: RunnableVersion) =>
       ver &&

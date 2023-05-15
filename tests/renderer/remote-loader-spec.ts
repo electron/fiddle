@@ -141,6 +141,9 @@ describe('RemoteLoader', () => {
       });
 
       (getOctokit as jest.Mock).mockReturnValue({ gists: mockGetGists });
+      (window.ElectronFiddle.isReleasedMajor as jest.Mock).mockResolvedValue(
+        true,
+      );
 
       const result = await instance.fetchGistAndLoad(gistId);
 

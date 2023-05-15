@@ -34,7 +34,6 @@ jest.mock('../../src/renderer/versions', () => {
     fetchVersions: jest.fn(mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
     getElectronVersions: jest.fn(),
-    getOldestSupportedMajor: jest.fn(),
     getReleaseChannel,
     makeRunnable: jest.fn((v) => v),
     saveLocalVersions: jest.fn(),

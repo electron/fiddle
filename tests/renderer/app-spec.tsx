@@ -32,6 +32,12 @@ describe('App component', () => {
     (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
       defaultDark,
     );
+    (window.ElectronFiddle.getReleasedVersions as jest.Mock).mockReturnValue(
+      [],
+    );
+    (window.ElectronFiddle.getLatestStable as jest.Mock).mockReturnValue({
+      version: '24.0.0',
+    });
 
     ({ ElectronFiddle } = window);
     const { app: appMock } = ElectronFiddle;

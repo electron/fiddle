@@ -9,6 +9,7 @@ let fakeUserData: tmp.DirResult | null;
 
 import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { getTemplate, getTestTemplate } from '../../src/main/content';
+import { isReleasedMajor } from '../../src/main/versions';
 
 jest.mock('cross-fetch');
 jest.unmock('fs-extra');
@@ -16,7 +17,7 @@ jest.mock('../../src/main/constants', () => ({
   STATIC_DIR: path.join(__dirname, '../../static'),
 }));
 jest.mock('../../src/main/versions', () => ({
-  isReleasedMajor: jest.fn().mockResolvedValue(true),
+  isReleasedMajor: jest.fn(),
 }));
 
 let lastResponse = new Response(null, {
@@ -141,12 +142,13 @@ describe('content', () => {
       }
     });
 
-    // TODO(dsanders11): re-enable test once Electron versions in main process
-    it.skip('returns the same promise if the work is already pending', () => {
+    it('returns the same promise if the work is already pending', async () => {
+      (isReleasedMajor as jest.Mock).mockReturnValue(true);
       const version = VERSION_IN_FIXTURES;
       const a = getTemplate(version);
       const b = getTemplate(version);
       expect(a).toBe(b);
+      await Promise.all([a, b]);
     });
   });
 });

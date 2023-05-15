@@ -24,7 +24,7 @@ import {
 } from '../../interfaces';
 import { disableDownload } from '../../utils/disable-download';
 import { AppState } from '../state';
-import { getOldestSupportedMajor, getReleaseChannel } from '../versions';
+import { getReleaseChannel } from '../versions';
 
 interface ElectronSettingsProps {
   appState: AppState;
@@ -264,7 +264,7 @@ export const ElectronSettings = observer(
             </Tooltip>
           ))}
           <Tooltip
-            content={`Include versions that have reached end-of-life (older than ${getOldestSupportedMajor()}.0.0)`}
+            content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
             position="bottom"
             intent="primary"
           >

@@ -12,11 +12,17 @@ export class ElectronFiddleMock {
   public blockAccelerators = jest.fn();
   public confirmQuit = jest.fn();
   public createThemeFile = jest.fn();
+  public fetchVersions = jest.fn();
   public getAvailableThemes = jest.fn();
   public getIsPackageManagerInstalled = jest.fn();
+  public getLatestStable = jest.fn();
+  public getLocalVersionState = jest.fn();
+  public getOldestSupportedMajor = jest.fn();
+  public getReleasedVersions = jest.fn();
   public getTemplate = jest.fn();
   public getTemplateValues = jest.fn();
   public getTestTemplate = jest.fn();
+  public isReleasedMajor = jest.fn();
   public macTitlebarClicked = jest.fn();
   public monaco = new MonacoMock();
   public openThemeFolder = jest.fn();
