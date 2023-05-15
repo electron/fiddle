@@ -94,6 +94,9 @@ export async function setupFiddleGlobal() {
     getReleasedVersions() {
       return ipcRenderer.sendSync(IpcEvents.GET_RELEASED_VERSIONS);
     },
+    getReleaseInfo(version: string) {
+      return ipcRenderer.invoke(IpcEvents.GET_RELEASE_INFO, version);
+    },
     getAvailableThemes() {
       return ipcRenderer.invoke(IpcEvents.GET_AVAILABLE_THEMES);
     },
