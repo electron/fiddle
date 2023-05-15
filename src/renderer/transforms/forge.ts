@@ -1,11 +1,5 @@
-import { execSync } from 'child_process';
-import * as path from 'path';
-
-import { Installer } from '@electron/fiddle-core';
-
 import { Files, PACKAGE_NAME } from '../../interfaces';
 import { getForgeVersion } from '../../utils/get-package';
-import { ELECTRON_DOWNLOAD_PATH } from '../constants';
 
 /**
  * This transform turns the files into an electron-forge
@@ -47,15 +41,12 @@ export async function forgeTransform(files: Files): Promise<Files> {
       const nightlyVersion = devDependencies['electron-nightly'];
       if (nightlyVersion) {
         // Fetch forced ABI for nightly.
-        const binaryPath = Installer.getExecPath(
-          path.join(ELECTRON_DOWNLOAD_PATH, nightlyVersion),
-        );
-        const abi = execSync(
-          `ELECTRON_RUN_AS_NODE=1 "${binaryPath}" -p process.versions.modules`,
-        );
+        const { modules } = (await window.ElectronFiddle.getReleaseInfo(
+          nightlyVersion,
+        ))!;
 
         config.forge.electronRebuildConfig = {
-          forceABI: abi.toString().trim(),
+          forceABI: parseInt(modules.toString().trim()),
         };
       }
 
