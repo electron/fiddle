@@ -6,9 +6,9 @@ import * as namor from 'namor';
  * Returns a name for this project
  *
  * @param {string} [localPath]
- * @returns {Promise<string>}
+ * @returns {string}
  */
-export async function getProjectName(localPath?: string): Promise<string> {
+export function getProjectName(localPath?: string): string {
   if (localPath) {
     return path.basename(localPath);
   }
