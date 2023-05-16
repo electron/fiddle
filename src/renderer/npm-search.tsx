@@ -36,6 +36,7 @@ class NPMSearch {
     } else {
       const result = await this.index.search<AlgoliaHit>(query, {
         hitsPerPage: 5,
+        optionalFilters: [`objectID:${query}`],
       });
       this.searchCache.set(query, result);
       return result;
