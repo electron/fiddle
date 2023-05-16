@@ -81,16 +81,17 @@ export class ElectronTypes {
 
   private async setTypesFromDir(dir: string, version: string) {
     try {
-      const files = await readdir(dir);
+      const files = (await readdir(dir)).filter((f) => f.endsWith('.d.ts'));
+      console.log(
+        `Updating Monaco with files for Node.js ${version}:`,
+        files.map((f) => path.parse(f).base),
+      );
+
       for (const file of files) {
-        if (file.endsWith('.d.ts')) {
-          const { base: filename } = path.parse(file);
-          console.log(`Updating Monaco with "${filename}@${version}"`);
-          const lib = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-            fs.readFileSync(file, 'utf8'),
-          );
-          this.disposables.push(lib);
-        }
+        const lib = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          fs.readFileSync(file, 'utf8'),
+        );
+        this.disposables.push(lib);
       }
     } catch (err) {
       console.debug(`Unable to read types from "${dir}": ${err.message}`);
