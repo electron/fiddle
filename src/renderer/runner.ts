@@ -10,10 +10,10 @@ import {
   RunResult,
   RunnableVersion,
 } from '../interfaces';
-import { PackageJsonOptions } from '../utils/get-package';
-import { maybePlural } from '../utils/plural-maybe';
 import { Bisector } from './bisect';
 import { AppState } from './state';
+import { PackageJsonOptions } from './utils/get-package';
+import { maybePlural } from './utils/plural-maybe';
 
 export enum ForgeCommands {
   PACKAGE = 'package',

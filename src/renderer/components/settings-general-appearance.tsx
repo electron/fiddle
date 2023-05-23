@@ -12,9 +12,9 @@ import { reaction, when } from 'mobx';
 import { observer } from 'mobx-react';
 
 import { LoadedFiddleTheme } from '../../themes-defaults';
-import { highlightText } from '../../utils/highlight-text';
 import { AppState } from '../state';
 import { getTheme } from '../themes';
+import { highlightText } from '../utils/highlight-text';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 

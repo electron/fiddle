@@ -3,8 +3,8 @@ import * as React from 'react';
 import { Button, Callout, Dialog, InputGroup, Intent } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { getOctokit } from '../../utils/octokit';
 import { AppState } from '../state';
+import { getOctokit } from '../utils/octokit';
 
 interface TokenDialogProps {
   appState: AppState;

@@ -24,6 +24,8 @@ export class ElectronFiddleMock {
   public getTemplateValues = jest.fn();
   public getTestTemplate = jest.fn();
   public isReleasedMajor = jest.fn();
+  public getProjectName = jest.fn();
+  public getUsername = jest.fn();
   public macTitlebarClicked = jest.fn();
   public monaco = new MonacoMock();
   public openThemeFolder = jest.fn();

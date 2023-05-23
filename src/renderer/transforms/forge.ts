@@ -1,5 +1,5 @@
 import { Files, PACKAGE_NAME } from '../../interfaces';
-import { getForgeVersion } from '../../utils/get-package';
+import { getForgeVersion } from '../utils/get-package';
 
 /**
  * This transform turns the files into an electron-forge

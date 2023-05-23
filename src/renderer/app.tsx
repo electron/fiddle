@@ -4,7 +4,6 @@ import { autorun, reaction, when } from 'mobx';
 
 import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
 import { defaultDark, defaultLight } from '../themes-defaults';
-import { PackageJsonOptions, getPackageJson } from '../utils/get-package';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
@@ -13,6 +12,7 @@ import { Runner } from './runner';
 import { AppState } from './state';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getTheme } from './themes';
+import { PackageJsonOptions, getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
 
 // Importing styles files

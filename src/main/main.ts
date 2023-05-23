@@ -10,7 +10,6 @@ import {
 } from 'electron';
 
 import { IpcEvents } from '../ipc-events';
-import { isDevMode } from '../utils/devmode';
 import { setupAboutPanel } from './about-panel';
 import { processCommandLine } from './command-line';
 import { setupContent } from './content';
@@ -24,6 +23,9 @@ import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
 import { setupThemes } from './themes';
 import { setupUpdates } from './update';
+import { isDevMode } from './utils/devmode';
+import { getProjectName } from './utils/get-project-name';
+import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
 import { getOrCreateMainWindow } from './windows';
 
@@ -59,6 +61,8 @@ export async function onReady() {
   setupIsDevMode();
   setupNpm();
   await setupVersions();
+  setupGetProjectName();
+  setupGetUsername();
 
   processCommandLine(argv);
 }
@@ -155,6 +159,18 @@ export function setupNativeTheme() {
 export function setupIsDevMode() {
   ipcMainManager.on(IpcEvents.IS_DEV_MODE, (event) => {
     event.returnValue = isDevMode();
+  });
+}
+
+export function setupGetProjectName() {
+  ipcMainManager.handle(IpcEvents.GET_PROJECT_NAME, (_, localPath?: string) =>
+    getProjectName(localPath),
+  );
+}
+
+export function setupGetUsername() {
+  ipcMainManager.on(IpcEvents.GET_USERNAME, (event) => {
+    event.returnValue = getUsername();
   });
 }
 

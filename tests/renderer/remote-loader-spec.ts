@@ -8,12 +8,15 @@ import {
 } from '../../src/interfaces';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
 import { AppState } from '../../src/renderer/state';
-import { isKnownFile, isSupportedFile } from '../../src/utils/editor-utils';
-import { getOctokit } from '../../src/utils/octokit';
+import {
+  isKnownFile,
+  isSupportedFile,
+} from '../../src/renderer/utils/editor-utils';
+import { getOctokit } from '../../src/renderer/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 
-jest.mock('../../src/utils/octokit');
+jest.mock('../../src/renderer/utils/octokit');
 
 type GistFile = { content: string };
 type GistFiles = { [id: string]: GistFile };

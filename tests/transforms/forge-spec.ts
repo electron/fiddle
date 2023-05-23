@@ -1,6 +1,6 @@
 import { PACKAGE_NAME } from '../../src/interfaces';
 import { forgeTransform } from '../../src/renderer/transforms/forge';
-import { getForgeVersion } from '../../src/utils/get-package';
+import { getForgeVersion } from '../../src/renderer/utils/get-package';
 
 describe('forgeTransform()', () => {
   it('adds forge dependencies', async () => {

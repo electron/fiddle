@@ -1,4 +1,4 @@
-import { isDevMode } from '../utils/devmode';
+import { isDevMode } from './utils/devmode';
 
 /**
  * Installs developer tools if we're in dev mode.

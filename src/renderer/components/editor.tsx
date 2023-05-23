@@ -6,8 +6,8 @@ import * as React from 'react';
 import * as MonacoType from 'monaco-editor';
 
 import { EditorId } from '../../interfaces';
-import { monacoLanguage } from '../../utils/editor-utils';
 import { AppState } from '../state';
+import { monacoLanguage } from '../utils/editor-utils';
 
 interface EditorProps {
   readonly appState: AppState;

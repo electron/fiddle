@@ -3,9 +3,9 @@ import {
   getIsPackageManagerInstalled,
   packageRun,
 } from '../../src/main/npm';
-import { exec } from '../../src/utils/exec';
+import { exec } from '../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../utils';
-jest.mock('../../src/utils/exec');
+jest.mock('../../src/main/utils/exec');
 
 describe('npm', () => {
   describe('getIsPackageManagerInstalled()', () => {

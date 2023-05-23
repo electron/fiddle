@@ -107,6 +107,9 @@ export async function setupFiddleGlobal() {
         ignoreCache,
       );
     },
+    getProjectName(localPath?: string) {
+      return ipcRenderer.invoke(IpcEvents.GET_PROJECT_NAME, localPath);
+    },
     getTemplate: (version: string) =>
       ipcRenderer.invoke(IpcEvents.GET_TEMPLATE, version),
     getTemplateValues: (name: string) => {
@@ -116,6 +119,7 @@ export async function setupFiddleGlobal() {
       return ipcRenderer.invoke(IpcEvents.IS_RELEASED_MAJOR, major);
     },
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
+    getUsername: () => ipcRenderer.sendSync(IpcEvents.GET_USERNAME),
     isDevMode: ipcRenderer.sendSync(IpcEvents.IS_DEV_MODE),
     macTitlebarClicked() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);

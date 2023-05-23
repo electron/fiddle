@@ -1,6 +1,6 @@
 import * as semver from 'semver';
 
-import { RunnableVersion } from '../interfaces';
+import { RunnableVersion } from '../../interfaces';
 
 const preTags = ['nightly', 'alpha', 'beta'];
 

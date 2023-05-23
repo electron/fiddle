@@ -1,4 +1,4 @@
-import { getUsername } from '../../src/utils/get-username';
+import { getUsername } from '../../../src/main/utils/get-username';
 
 jest.mock('os', () => ({
   userInfo: () => ({

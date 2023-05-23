@@ -16,13 +16,13 @@ import {
   renderItem,
 } from '../../../src/renderer/components/version-select';
 import { AppState } from '../../../src/renderer/state';
-import { disableDownload } from '../../../src/utils/disable-download';
+import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { StateMock, VersionsMock } from '../../mocks/mocks';
 
 const { downloading, installed, missing, installing } = InstallState;
 const { remote, local } = VersionSource;
 
-jest.mock('../../../src/utils/disable-download.ts');
+jest.mock('../../../src/renderer/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
   let store: AppState;

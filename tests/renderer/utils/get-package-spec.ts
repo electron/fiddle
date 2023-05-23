@@ -1,12 +1,11 @@
 import * as semver from 'semver';
 
-import { MAIN_JS } from '../../src/interfaces';
-import { getForgeVersion, getPackageJson } from '../../src/utils/get-package';
-import { StateMock } from '../mocks/mocks';
-
-jest.mock('../../src/utils/get-username', () => ({
-  getUsername: () => 'test-user',
-}));
+import { MAIN_JS } from '../../../src/interfaces';
+import {
+  getForgeVersion,
+  getPackageJson,
+} from '../../../src/renderer/utils/get-package';
+import { StateMock } from '../../mocks/mocks';
 
 describe('get-package', () => {
   describe('getForgeVersion()', () => {
@@ -19,6 +18,12 @@ describe('get-package', () => {
   });
 
   describe('getPackageJson()', () => {
+    beforeAll(() => {
+      (window.ElectronFiddle.getUsername as jest.Mock).mockReturnValue(
+        'test-user',
+      );
+    });
+
     const appState = new StateMock();
     const defaultName = 'test-app' as const;
     const defaultAuthor = 'test-user' as const;

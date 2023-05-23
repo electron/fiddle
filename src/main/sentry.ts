@@ -1,7 +1,7 @@
 import * as Sentry from '@sentry/electron/main';
 
 import { SENTRY_DSN } from '../constants';
-import { isDevMode } from '../utils/devmode';
+import { isDevMode } from './utils/devmode';
 
 export function initSentry() {
   if (!isDevMode()) {

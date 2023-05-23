@@ -1,10 +1,10 @@
-import { disableDownload } from '../../src/utils/disable-download';
+import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import {
   overrideRendererArch,
   overrideRendererPlatform,
   resetRendererArch,
   resetRendererPlatform,
-} from '../utils';
+} from '../../utils';
 
 describe('disableDownload', () => {
   afterEach(() => {
