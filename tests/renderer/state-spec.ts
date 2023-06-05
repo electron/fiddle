@@ -43,8 +43,9 @@ describe('AppState', () => {
   let appState: AppState;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
-  let removeSpy: any;
-  let installSpy: any;
+  let removeSpy: jest.SpyInstance;
+  let installSpy: jest.SpyInstance;
+  let ensureDownloadedSpy: jest.SpyInstance;
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
@@ -61,6 +62,9 @@ describe('AppState', () => {
     installSpy = jest
       .spyOn(appState.installer, 'install')
       .mockResolvedValue('');
+    ensureDownloadedSpy = jest
+      .spyOn(appState.installer, 'ensureDownloaded')
+      .mockResolvedValue({ path: '', alreadyExtracted: false });
   });
 
   it('exists', () => {
@@ -337,7 +341,8 @@ describe('AppState', () => {
 
       await appState.downloadVersion(ver);
 
-      expect(installSpy).toHaveBeenCalled();
+      expect(ensureDownloadedSpy).toHaveBeenCalled();
+      expect(installSpy).not.toHaveBeenCalled();
     });
 
     it('does not download a version if already ready', async () => {
@@ -346,6 +351,7 @@ describe('AppState', () => {
 
       await appState.downloadVersion(ver);
 
+      expect(ensureDownloadedSpy).not.toHaveBeenCalled();
       expect(installSpy).not.toHaveBeenCalled();
     });
   });

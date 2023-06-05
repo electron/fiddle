@@ -20,7 +20,13 @@ interface RunnerProps {
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
     public render() {
-      const { downloading, missing, installing, installed } = InstallState;
+      const {
+        downloaded,
+        downloading,
+        missing,
+        installing,
+        installed,
+      } = InstallState;
       const {
         isRunning,
         isInstallingModules,
@@ -53,6 +59,7 @@ export const Runner = observer(
           props.icon = <Spinner size={16} />;
           break;
         }
+        case downloaded:
         case installed: {
           props.disabled = false;
           if (isRunning) {
