@@ -39,7 +39,6 @@ export async function onReady() {
   await onFirstRunMaybe();
   if (!isDevMode()) process.env.NODE_ENV = 'production';
 
-  getOrCreateMainWindow();
   setupAboutPanel();
 
   const { setupMenu } = await import('./menu');
@@ -63,6 +62,10 @@ export async function onReady() {
   await setupVersions();
   setupGetProjectName();
   setupGetUsername();
+
+  // Do this after setting everything up to ensure that
+  // any IPC listeners are set up before they're used
+  getOrCreateMainWindow();
 
   processCommandLine(argv);
 }
