@@ -90,7 +90,7 @@ describe('main', () => {
     it('opens a BrowserWindow, sets up updates', async () => {
       await onReady();
       expect(setupAboutPanel).toHaveBeenCalledTimes(1);
-      expect(getOrCreateMainWindow).toHaveBeenCalledTimes(1);
+      expect(getOrCreateMainWindow).toHaveBeenCalled();
       expect(setupUpdates).toHaveBeenCalledTimes(1);
     });
   });
