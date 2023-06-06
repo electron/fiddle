@@ -83,6 +83,10 @@ export async function setupVersions() {
     },
   );
 
+  ipcMainManager.handle(
+    IpcEvents.IS_RELEASED_MAJOR,
+    (_: IpcMainEvent, version: number) => isReleasedMajor(version),
+  );
   ipcMainManager.handle(IpcEvents.FETCH_VERSIONS, (_: IpcMainEvent) =>
     fetchVersions(),
   );
