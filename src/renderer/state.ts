@@ -27,6 +27,8 @@ import {
   OutputOptions,
   RunnableVersion,
   SetFiddleOptions,
+  Setting,
+  SettingKey,
   Version,
   VersionSource,
 } from '../interfaces';
@@ -64,62 +66,68 @@ export class AppState {
   });
 
   // -- Persisted settings ------------------
-  public theme: string | null = localStorage.getItem('theme');
+  public theme: string | null = localStorage.getItem(Setting.theme);
   public gitHubAvatarUrl: string | null = localStorage.getItem(
-    'gitHubAvatarUrl',
+    Setting.gitHubAvatarUrl,
   );
-  public gitHubName: string | null = localStorage.getItem('gitHubName');
-  public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
+  public gitHubName: string | null = localStorage.getItem(Setting.gitHubName);
+  public gitHubLogin: string | null = localStorage.getItem(Setting.gitHubLogin);
   public gitHubToken: string | null =
-    localStorage.getItem('gitHubToken') || null;
-  public gitHubPublishAsPublic = !!this.retrieve('gitHubPublishAsPublic');
+    localStorage.getItem(Setting.gitHubToken) || null;
+  public gitHubPublishAsPublic = !!this.retrieve(Setting.gitHubPublishAsPublic);
   public channelsToShow: Array<ElectronReleaseChannel> = (this.retrieve(
-    'channelsToShow',
+    Setting.channelsToShow,
   ) as Array<ElectronReleaseChannel>) || [
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
   public showObsoleteVersions = !!(
-    this.retrieve('showObsoleteVersions') ?? false
+    this.retrieve(Setting.showObsoleteVersions) ?? false
   );
   public showUndownloadedVersions = !!(
-    this.retrieve('showUndownloadedVersions') ?? true
+    this.retrieve(Setting.showUndownloadedVersions) ?? true
   );
-  public isKeepingUserDataDirs = !!this.retrieve('isKeepingUserDataDirs');
+  public isKeepingUserDataDirs = !!this.retrieve(Setting.isKeepingUserDataDirs);
   public isEnablingElectronLogging = !!this.retrieve(
-    'isEnablingElectronLogging',
+    Setting.isEnablingElectronLogging,
   );
-  public isClearingConsoleOnRun = !!this.retrieve('isClearingConsoleOnRun');
-  public isUsingSystemTheme = !!(this.retrieve('isUsingSystemTheme') ?? true);
+  public isClearingConsoleOnRun = !!this.retrieve(
+    Setting.isClearingConsoleOnRun,
+  );
+  public isUsingSystemTheme = !!(
+    this.retrieve(Setting.isUsingSystemTheme) ?? true
+  );
   public isPublishingGistAsRevision = !!(
-    this.retrieve('isPublishingGistAsRevision') ?? true
+    this.retrieve(Setting.isPublishingGistAsRevision) ?? true
   );
   public executionFlags: Array<string> =
-    (this.retrieve('executionFlags') as Array<string>) === null
+    (this.retrieve(Setting.executionFlags) as Array<string>) === null
       ? []
-      : (this.retrieve('executionFlags') as Array<string>);
+      : (this.retrieve(Setting.executionFlags) as Array<string>);
   public environmentVariables: Array<string> =
-    (this.retrieve('environmentVariables') as Array<string>) === null
+    (this.retrieve(Setting.environmentVariables) as Array<string>) === null
       ? []
-      : (this.retrieve('environmentVariables') as Array<string>);
+      : (this.retrieve(Setting.environmentVariables) as Array<string>);
   public packageManager: IPackageManager =
-    (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
+    (localStorage.getItem(Setting.packageManager) as IPackageManager) || 'npm';
   public acceleratorsToBlock: Array<BlockableAccelerator> =
-    (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
+    (this.retrieve(
+      Setting.acceleratorsToBlock,
+    ) as Array<BlockableAccelerator>) || [];
   public packageAuthor =
-    (localStorage.getItem('packageAuthor') as string) ??
+    (localStorage.getItem(Setting.packageAuthor) as string) ??
     window.ElectronFiddle.getUsername();
   public electronMirror: typeof ELECTRON_MIRROR =
-    (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR) === null
+    (this.retrieve(Setting.electronMirror) as typeof ELECTRON_MIRROR) === null
       ? {
           ...ELECTRON_MIRROR,
           sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
         }
-      : (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR);
+      : (this.retrieve(Setting.electronMirror) as typeof ELECTRON_MIRROR);
   public fontFamily: string | undefined =
-    (localStorage.getItem('fontFamily') as string) || undefined;
+    (localStorage.getItem(Setting.fontFamily) as string) || undefined;
   public fontSize: number | undefined =
-    ((localStorage.getItem('fontSize') as any) as number) || undefined;
+    ((localStorage.getItem(Setting.fontSize) as any) as number) || undefined;
 
   // -- Various session-only state ------------------
   public gistId: string | undefined = undefined;
@@ -158,7 +166,7 @@ export class AppState {
   public isSettingsShowing = false;
   public isThemeDialogShowing = false;
   public isTokenDialogShowing = false;
-  public isTourShowing = !localStorage.getItem('hasShownTour');
+  public isTourShowing = !localStorage.getItem(Setting.hasShownTour);
   public isUpdatingElectronVersions = false;
 
   // -- Editor Values stored when we close the editor ------------------
@@ -330,40 +338,59 @@ export class AppState {
     window.ElectronFiddle.addEventListener('before-quit', this.setIsQuitting);
 
     // Setup auto-runs
-    autorun(() => this.save('theme', this.theme));
+    autorun(() => this.save(Setting.theme, this.theme));
     autorun(() =>
-      this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun),
-    );
-    autorun(() => this.save('isUsingSystemTheme', this.isUsingSystemTheme));
-    autorun(() =>
-      this.save('isPublishingGistAsRevision', this.isPublishingGistAsRevision),
-    );
-    autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
-    autorun(() => this.save('gitHubLogin', this.gitHubLogin));
-    autorun(() => this.save('gitHubName', this.gitHubName));
-    autorun(() => this.save('gitHubToken', this.gitHubToken));
-    autorun(() =>
-      this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic),
+      this.save(Setting.isClearingConsoleOnRun, this.isClearingConsoleOnRun),
     );
     autorun(() =>
-      this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs),
+      this.save(Setting.isUsingSystemTheme, this.isUsingSystemTheme),
     );
     autorun(() =>
-      this.save('isEnablingElectronLogging', this.isEnablingElectronLogging),
+      this.save(
+        Setting.isPublishingGistAsRevision,
+        this.isPublishingGistAsRevision,
+      ),
     );
-    autorun(() => this.save('executionFlags', this.executionFlags));
-    autorun(() => this.save('version', this.version));
-    autorun(() => this.save('channelsToShow', this.channelsToShow));
+    autorun(() => this.save(Setting.gitHubAvatarUrl, this.gitHubAvatarUrl));
+    autorun(() => this.save(Setting.gitHubLogin, this.gitHubLogin));
+    autorun(() => this.save(Setting.gitHubName, this.gitHubName));
+    autorun(() => this.save(Setting.gitHubToken, this.gitHubToken));
     autorun(() =>
-      this.save('showUndownloadedVersions', this.showUndownloadedVersions),
+      this.save(Setting.gitHubPublishAsPublic, this.gitHubPublishAsPublic),
     );
-    autorun(() => this.save('showObsoleteVersions', this.showObsoleteVersions));
-    autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
-    autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
-    autorun(() => this.save('packageAuthor', this.packageAuthor));
-    autorun(() => this.save('electronMirror', this.electronMirror as any));
-    autorun(() => this.save('fontFamily', this.fontFamily as any));
-    autorun(() => this.save('fontSize', this.fontSize as any));
+    autorun(() =>
+      this.save(Setting.isKeepingUserDataDirs, this.isKeepingUserDataDirs),
+    );
+    autorun(() =>
+      this.save(
+        Setting.isEnablingElectronLogging,
+        this.isEnablingElectronLogging,
+      ),
+    );
+    autorun(() => this.save(Setting.executionFlags, this.executionFlags));
+    autorun(() => this.save(Setting.version, this.version));
+    autorun(() => this.save(Setting.channelsToShow, this.channelsToShow));
+    autorun(() =>
+      this.save(
+        Setting.showUndownloadedVersions,
+        this.showUndownloadedVersions,
+      ),
+    );
+    autorun(() =>
+      this.save(Setting.showObsoleteVersions, this.showObsoleteVersions),
+    );
+    autorun(() =>
+      this.save(Setting.packageManager, this.packageManager ?? 'npm'),
+    );
+    autorun(() =>
+      this.save(Setting.acceleratorsToBlock, this.acceleratorsToBlock),
+    );
+    autorun(() => this.save(Setting.packageAuthor, this.packageAuthor));
+    autorun(() =>
+      this.save(Setting.electronMirror, this.electronMirror as any),
+    );
+    autorun(() => this.save(Setting.fontFamily, this.fontFamily as any));
+    autorun(() => this.save(Setting.fontSize, this.fontSize as any));
 
     // Update our known versions
     this.updateElectronVersions();
@@ -514,7 +541,7 @@ export class AppState {
 
   public disableTour() {
     this.resetView();
-    localStorage.setItem('hasShownTour', 'true');
+    localStorage.setItem(Setting.hasShownTour, 'true');
   }
 
   public showTour() {
@@ -935,7 +962,7 @@ export class AppState {
    * @param {(string | number | Array<any> | Record<string, unknown> | null | boolean)} [value]
    */
   private save(
-    key: string,
+    key: SettingKey,
     value?:
       | string
       | number
@@ -961,7 +988,7 @@ export class AppState {
    * @param {string} key
    * @returns {(T | string | null)}
    */
-  private retrieve<T>(key: string): T | string | null {
+  private retrieve<T>(key: SettingKey): T | string | null {
     const value = localStorage.getItem(key);
 
     return JSON.parse(value || 'null') as T;

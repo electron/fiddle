@@ -184,3 +184,34 @@ export interface PMOperationOptions {
   dir: string;
   packageManager: IPackageManager;
 }
+
+export enum Setting {
+  acceleratorsToBlock = 'acceleratorsToBlock',
+  channelsToShow = 'channelsToShow',
+  electronMirror = 'electronMirror',
+  environmentVariables = 'environmentVariables',
+  executionFlags = 'executionFlags',
+  fontFamily = 'fontFamily',
+  fontSize = 'fontSize',
+  gitHubAvatarUrl = 'gitHubAvatarUrl',
+  gitHubLogin = 'gitHubLogin',
+  gitHubName = 'gitHubName',
+  gitHubPublishAsPublic = 'gitHubPublishAsPublic',
+  gitHubToken = 'gitHubToken',
+  hasShownTour = 'hasShownTour',
+  isClearingConsoleOnRun = 'isClearingConsoleOnRun',
+  isEnablingElectronLogging = 'isEnablingElectronLogging',
+  isKeepingUserDataDirs = 'isKeepingUserDataDirs',
+  isPublishingGistAsRevision = 'isPublishingGistAsRevision',
+  isUsingSystemTheme = 'isUsingSystemTheme',
+  knownVersion = 'known-electron-versions',
+  localVersion = 'local-electron-versions',
+  packageAuthor = 'packageAuthor',
+  packageManager = 'packageManager',
+  showObsoleteVersions = 'showObsoleteVersions',
+  showUndownloadedVersions = 'showUndownloadedVersions',
+  theme = 'theme',
+  version = 'version',
+}
+
+export type SettingKey = keyof typeof Setting;
