@@ -185,7 +185,7 @@ export interface PMOperationOptions {
   packageManager: IPackageManager;
 }
 
-export enum Setting {
+export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',
   electronMirror = 'electronMirror',
@@ -196,7 +196,6 @@ export enum Setting {
   gitHubAvatarUrl = 'gitHubAvatarUrl',
   gitHubLogin = 'gitHubLogin',
   gitHubName = 'gitHubName',
-  gitHubPublishAsPublic = 'gitHubPublishAsPublic',
   gitHubToken = 'gitHubToken',
   hasShownTour = 'hasShownTour',
   isClearingConsoleOnRun = 'isClearingConsoleOnRun',
@@ -211,7 +210,13 @@ export enum Setting {
   showObsoleteVersions = 'showObsoleteVersions',
   showUndownloadedVersions = 'showUndownloadedVersions',
   theme = 'theme',
+}
+
+export type GlobalSettingKey = keyof typeof GlobalSetting;
+
+export enum WindowSpecificSetting {
+  gitHubPublishAsPublic = 'gitHubPublishAsPublic',
   version = 'version',
 }
 
-export type SettingKey = keyof typeof Setting;
+export type WindowSpecificSettingKey = keyof typeof WindowSpecificSetting;
