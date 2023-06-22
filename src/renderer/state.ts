@@ -369,7 +369,7 @@ export class AppState {
       }
 
       if (key in GlobalSetting && key in this) {
-        // Any settings listed here need morethan just updating the state directly.
+        // Any settings listed here need more than just updating the state directly.
         const actions: Partial<Record<GlobalSettingKey, () => void>> = {
           theme: () => {
             this.setTheme(parsedValue as string);
