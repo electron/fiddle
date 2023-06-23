@@ -67,6 +67,12 @@ export class AppState {
     timeStyle: 'medium',
   });
 
+  private settingKeyTypeGuard(key: never): never {
+    throw new Error(
+      `Unhandled setting ${key}, please handle it in the \`AppState\`.`,
+    );
+  }
+
   // -- Persisted settings ------------------
   public theme: string | null = localStorage.getItem(GlobalSetting.theme);
   public gitHubAvatarUrl: string | null = localStorage.getItem(
@@ -369,20 +375,43 @@ export class AppState {
       }
 
       if (key in GlobalSetting && key in this) {
-        // Any settings listed here need more than just updating the state directly.
-        const actions: Partial<Record<GlobalSettingKey, () => void>> = {
-          theme: () => {
+        switch (key) {
+          case 'theme': {
             this.setTheme(parsedValue as string);
-          },
-        };
+            break;
+          }
 
-        const action = actions[key];
+          case 'acceleratorsToBlock':
+          case 'channelsToShow':
+          case 'electronMirror':
+          case 'environmentVariables':
+          case 'executionFlags':
+          case 'fontFamily':
+          case 'fontSize':
+          case 'gitHubAvatarUrl':
+          case 'gitHubLogin':
+          case 'gitHubName':
+          case 'gitHubToken':
+          case 'hasShownTour':
+          case 'isClearingConsoleOnRun':
+          case 'isEnablingElectronLogging':
+          case 'isKeepingUserDataDirs':
+          case 'isPublishingGistAsRevision':
+          case 'isUsingSystemTheme':
+          case 'knownVersion':
+          case 'localVersion':
+          case 'packageAuthor':
+          case 'packageManager':
+          case 'showObsoleteVersions':
+          case 'showUndownloadedVersions': {
+            // Fall back to updating the state.
+            this[key] = parsedValue;
+            break;
+          }
 
-        if (typeof action === 'function') {
-          action();
-        } else {
-          // Fall back to updating the state.
-          this[key] = parsedValue;
+          default: {
+            this.settingKeyTypeGuard(key);
+          }
         }
       }
     });
