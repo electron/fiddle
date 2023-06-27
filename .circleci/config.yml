@@ -120,7 +120,7 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - run: sudo apt-get update && sudo apt install rpm
+      - run: sudo apt-get update && sudo apt install rpm squashfs-tools
       - install
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple
