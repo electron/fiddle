@@ -118,10 +118,16 @@ jobs:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
     docker:
-      - image: cimg/base:stable
+      - image: ubuntudesktop/gnome-3-38-2004
     steps:
-      - run: sudo apt-get update && sudo apt install rpm
+      - run: sudo apt-get -y update
+      - run: sudo apt-get install -y git curl dpkg fakeroot rpm lsb-release
       - install
+      - run: cp ./.circleci/snapcraft-wrapper /snap/bin/snapcraft
+      - run:
+          command: |
+            echo 'export PATH=/snap/bin:"$PATH"' >> "$BASH_ENV"
+            source "$BASH_ENV"
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple
       # jobs, so only persist the .webpack path from the x64 linux-build job

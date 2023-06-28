@@ -134,6 +134,16 @@ const config = {
       platforms: ['linux'],
       config: commonLinuxConfig,
     },
+    {
+      name: '@electron-forge/maker-snap',
+      platforms: ['linux'],
+      config: {
+        icon: path.resolve(iconDir, 'fiddle.svg'),
+        features: {
+          audio: true,
+        },
+      },
+    },
   ],
   publishers: [
     {
