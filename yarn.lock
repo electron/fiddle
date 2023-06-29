@@ -696,7 +696,7 @@
     vscode-languageserver-types "^3.17.1"
     vscode-uri "^3.0.3"
 
-"@electron-forge/cli@^6.1.1":
+"@electron-forge/cli@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/cli/-/cli-6.1.1.tgz#671b81f365570a385b40d9726b3d9a027c503782"
   integrity sha512-ufD9wKh35Mynj5MEKcWQKLpuIgxPvehwvykHRULi2ev8MWLCqxN4wda1Wy/cj57Uaeokf2rTbcGHGqbBX60bFQ==
@@ -775,7 +775,7 @@
     fs-extra "^10.0.0"
     which "^2.0.2"
 
-"@electron-forge/maker-deb@^6.1.1":
+"@electron-forge/maker-deb@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-deb/-/maker-deb-6.1.1.tgz#6482e239b09438f57cbdfd60b9f6474fbf09c334"
   integrity sha512-Qk/QMBwWP/D6Fx7+VU54xHec47R9CYg0TCaRtQ1KeBNFdJ3DpwCARr966/IJqEUxX7y8vv8Awc8HvKDPxbpIUA==
@@ -785,7 +785,7 @@
   optionalDependencies:
     electron-installer-debian "^3.0.0"
 
-"@electron-forge/maker-rpm@^6.1.1":
+"@electron-forge/maker-rpm@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-rpm/-/maker-rpm-6.1.1.tgz#ab532e3f5d975708f0e7d5cbe8764563b8869e75"
   integrity sha512-ya+XtNqHuYENQh4+0XLVM5MYQYR/Y3gKxfUO/V7top6R+TWQwgcUywGEcofxjKVB7fIbDVu4yYgqMujvF6m4QQ==
@@ -795,7 +795,7 @@
   optionalDependencies:
     electron-installer-redhat "^3.2.0"
 
-"@electron-forge/maker-squirrel@^6.1.1":
+"@electron-forge/maker-squirrel@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-squirrel/-/maker-squirrel-6.1.1.tgz#34bcaf25f3872d8394826ab9237ad2716111eb06"
   integrity sha512-YA7EY7He5FGGiwNlcOLSHwtrDFmq1XZ+0sKHy/xLu0Q8JZzo15WQ0vwJJEIAxL8KAtjwfhyV5VAWI6w0elr/jg==
@@ -806,7 +806,7 @@
   optionalDependencies:
     electron-winstaller "^5.0.0"
 
-"@electron-forge/maker-zip@^6.1.1":
+"@electron-forge/maker-zip@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-zip/-/maker-zip-6.1.1.tgz#fba5cd18b6f33497f3aadbdade5c0a2142ca9e9a"
   integrity sha512-3T2bIbYhKl3Z/VyeN+X7+7U+HhgaCtBCfDi0k/Ga7CoUpge2uJS/+yjfGJdwFk4TbWhS3sNkZV2mFMKhx/rlmQ==
@@ -824,7 +824,7 @@
   dependencies:
     "@electron-forge/shared-types" "6.1.1"
 
-"@electron-forge/plugin-webpack@^6.1.1":
+"@electron-forge/plugin-webpack@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/plugin-webpack/-/plugin-webpack-6.1.1.tgz#70065698a7b7848dcea6b33b10ac83d5d9cf5192"
   integrity sha512-PJE0taqZzEI+jDvAV8c5QWTY3ues4f0UCsD6XtBRNfQJS28x7Uuo9QQnom3X7oG6MbcpdDOXRUFITE6Tu/5yew==
@@ -848,7 +848,7 @@
   dependencies:
     "@electron-forge/shared-types" "6.1.1"
 
-"@electron-forge/publisher-github@^6.1.1":
+"@electron-forge/publisher-github@6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/publisher-github/-/publisher-github-6.1.1.tgz#5531e591399ed7549009d410c55e42087a827c4f"
   integrity sha512-CAsSGDwSe9Rp3llgFe4T5MFrZ0WM3TCTLD9ylqmo9EddN6wqLnF+OQ2HmMhwmxbxFg0/ysnAyJRyTc5T/seV4Q==
