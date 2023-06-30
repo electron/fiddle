@@ -1,10 +1,10 @@
 import {
   ElectronReleaseChannel,
+  GlobalSetting,
   RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
 import {
-  VersionKeys,
   addLocalVersion,
   fetchVersions,
   getDefaultVersion,
@@ -109,7 +109,7 @@ describe('versions', () => {
       saveLocalVersions(mockLocalVersions as Array<RunnableVersion>);
 
       expect(window.localStorage.setItem).toBeCalledWith(
-        VersionKeys.local,
+        GlobalSetting.localVersion,
         JSON.stringify(mockLocalVersions),
       );
     });
@@ -152,7 +152,9 @@ describe('versions', () => {
     it('removes knownVersions from localStorage', async () => {
       (window.ElectronFiddle.fetchVersions as jest.Mock).mockResolvedValue([]);
       await fetchVersions();
-      expect(localStorage.removeItem).toHaveBeenCalledWith(VersionKeys.known);
+      expect(localStorage.removeItem).toHaveBeenCalledWith(
+        GlobalSetting.knownVersion,
+      );
     });
   });
 });

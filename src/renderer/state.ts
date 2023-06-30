@@ -21,6 +21,8 @@ import {
   GenericDialogOptions,
   GenericDialogType,
   GistActionState,
+  GlobalSetting,
+  GlobalSettingKey,
   IPackageManager,
   InstallState,
   OutputEntry,
@@ -29,6 +31,8 @@ import {
   SetFiddleOptions,
   Version,
   VersionSource,
+  WindowSpecificSetting,
+  WindowSpecificSettingKey,
 } from '../interfaces';
 import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
@@ -63,63 +67,87 @@ export class AppState {
     timeStyle: 'medium',
   });
 
+  private settingKeyTypeGuard(key: never): never {
+    throw new Error(
+      `Unhandled setting ${key}, please handle it in the \`AppState\`.`,
+    );
+  }
+
   // -- Persisted settings ------------------
-  public theme: string | null = localStorage.getItem('theme');
+  public theme: string | null = localStorage.getItem(GlobalSetting.theme);
   public gitHubAvatarUrl: string | null = localStorage.getItem(
-    'gitHubAvatarUrl',
+    GlobalSetting.gitHubAvatarUrl,
   );
-  public gitHubName: string | null = localStorage.getItem('gitHubName');
-  public gitHubLogin: string | null = localStorage.getItem('gitHubLogin');
+  public gitHubName: string | null = localStorage.getItem(
+    GlobalSetting.gitHubName,
+  );
+  public gitHubLogin: string | null = localStorage.getItem(
+    GlobalSetting.gitHubLogin,
+  );
   public gitHubToken: string | null =
-    localStorage.getItem('gitHubToken') || null;
-  public gitHubPublishAsPublic = !!this.retrieve('gitHubPublishAsPublic');
+    localStorage.getItem(GlobalSetting.gitHubToken) || null;
+  public gitHubPublishAsPublic = !!this.retrieve(
+    WindowSpecificSetting.gitHubPublishAsPublic,
+  );
   public channelsToShow: Array<ElectronReleaseChannel> = (this.retrieve(
-    'channelsToShow',
+    GlobalSetting.channelsToShow,
   ) as Array<ElectronReleaseChannel>) || [
     ElectronReleaseChannel.stable,
     ElectronReleaseChannel.beta,
   ];
   public showObsoleteVersions = !!(
-    this.retrieve('showObsoleteVersions') ?? false
+    this.retrieve(GlobalSetting.showObsoleteVersions) ?? false
   );
   public showUndownloadedVersions = !!(
-    this.retrieve('showUndownloadedVersions') ?? true
+    this.retrieve(GlobalSetting.showUndownloadedVersions) ?? true
   );
-  public isKeepingUserDataDirs = !!this.retrieve('isKeepingUserDataDirs');
+  public isKeepingUserDataDirs = !!this.retrieve(
+    GlobalSetting.isKeepingUserDataDirs,
+  );
   public isEnablingElectronLogging = !!this.retrieve(
-    'isEnablingElectronLogging',
+    GlobalSetting.isEnablingElectronLogging,
   );
-  public isClearingConsoleOnRun = !!this.retrieve('isClearingConsoleOnRun');
-  public isUsingSystemTheme = !!(this.retrieve('isUsingSystemTheme') ?? true);
+  public isClearingConsoleOnRun = !!this.retrieve(
+    GlobalSetting.isClearingConsoleOnRun,
+  );
+  public isUsingSystemTheme = !!(
+    this.retrieve(GlobalSetting.isUsingSystemTheme) ?? true
+  );
   public isPublishingGistAsRevision = !!(
-    this.retrieve('isPublishingGistAsRevision') ?? true
+    this.retrieve(GlobalSetting.isPublishingGistAsRevision) ?? true
   );
   public executionFlags: Array<string> =
-    (this.retrieve('executionFlags') as Array<string>) === null
+    (this.retrieve(GlobalSetting.executionFlags) as Array<string>) === null
       ? []
-      : (this.retrieve('executionFlags') as Array<string>);
+      : (this.retrieve(GlobalSetting.executionFlags) as Array<string>);
   public environmentVariables: Array<string> =
-    (this.retrieve('environmentVariables') as Array<string>) === null
+    (this.retrieve(GlobalSetting.environmentVariables) as Array<string>) ===
+    null
       ? []
-      : (this.retrieve('environmentVariables') as Array<string>);
+      : (this.retrieve(GlobalSetting.environmentVariables) as Array<string>);
   public packageManager: IPackageManager =
-    (localStorage.getItem('packageManager') as IPackageManager) || 'npm';
+    (localStorage.getItem(GlobalSetting.packageManager) as IPackageManager) ||
+    'npm';
   public acceleratorsToBlock: Array<BlockableAccelerator> =
-    (this.retrieve('acceleratorsToBlock') as Array<BlockableAccelerator>) || [];
+    (this.retrieve(
+      GlobalSetting.acceleratorsToBlock,
+    ) as Array<BlockableAccelerator>) || [];
   public packageAuthor =
-    (localStorage.getItem('packageAuthor') as string) ??
+    (localStorage.getItem(GlobalSetting.packageAuthor) as string) ??
     window.ElectronFiddle.getUsername();
   public electronMirror: typeof ELECTRON_MIRROR =
-    (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR) === null
+    (this.retrieve(GlobalSetting.electronMirror) as typeof ELECTRON_MIRROR) ===
+    null
       ? {
           ...ELECTRON_MIRROR,
           sourceType: navigator.language === 'zh-CN' ? 'CHINA' : 'DEFAULT',
         }
-      : (this.retrieve('electronMirror') as typeof ELECTRON_MIRROR);
+      : (this.retrieve(GlobalSetting.electronMirror) as typeof ELECTRON_MIRROR);
   public fontFamily: string | undefined =
-    (localStorage.getItem('fontFamily') as string) || undefined;
+    (localStorage.getItem(GlobalSetting.fontFamily) as string) || undefined;
   public fontSize: number | undefined =
-    ((localStorage.getItem('fontSize') as any) as number) || undefined;
+    ((localStorage.getItem(GlobalSetting.fontSize) as any) as number) ||
+    undefined;
 
   // -- Various session-only state ------------------
   public gistId: string | undefined = undefined;
@@ -158,7 +186,7 @@ export class AppState {
   public isSettingsShowing = false;
   public isThemeDialogShowing = false;
   public isTokenDialogShowing = false;
-  public isTourShowing = !localStorage.getItem('hasShownTour');
+  public isTourShowing = !localStorage.getItem(GlobalSetting.hasShownTour);
   public isUpdatingElectronVersions = false;
 
   // -- Editor Values stored when we close the editor ------------------
@@ -329,41 +357,137 @@ export class AppState {
     );
     window.ElectronFiddle.addEventListener('before-quit', this.setIsQuitting);
 
+    /**
+     * Listens for changes in the app settings made in other windows
+     * and refreshes the current window settings accordingly.
+     */
+    window.addEventListener('storage', (event) => {
+      const key = event.key as GlobalSettingKey;
+      const { newValue } = event;
+
+      let parsedValue: unknown;
+
+      try {
+        parsedValue = JSON.parse(newValue as string) as unknown;
+      } catch {
+        // The new value is a plain string, not a well-formed stringified object.
+        parsedValue = newValue;
+      }
+
+      if (key in GlobalSetting && key in this) {
+        switch (key) {
+          case 'theme': {
+            this.setTheme(parsedValue as string);
+            break;
+          }
+
+          case 'acceleratorsToBlock':
+          case 'channelsToShow':
+          case 'electronMirror':
+          case 'environmentVariables':
+          case 'executionFlags':
+          case 'fontFamily':
+          case 'fontSize':
+          case 'gitHubAvatarUrl':
+          case 'gitHubLogin':
+          case 'gitHubName':
+          case 'gitHubToken':
+          case 'hasShownTour':
+          case 'isClearingConsoleOnRun':
+          case 'isEnablingElectronLogging':
+          case 'isKeepingUserDataDirs':
+          case 'isPublishingGistAsRevision':
+          case 'isUsingSystemTheme':
+          case 'knownVersion':
+          case 'localVersion':
+          case 'packageAuthor':
+          case 'packageManager':
+          case 'showObsoleteVersions':
+          case 'showUndownloadedVersions': {
+            // Fall back to updating the state.
+            this[key] = parsedValue;
+            break;
+          }
+
+          default: {
+            this.settingKeyTypeGuard(key);
+          }
+        }
+      } else {
+        console.warn(
+          `"${key}" is not a recognized localStorage key. If you're using this key to persist a setting, please add it to the relevant enum.`,
+        );
+      }
+    });
+
     // Setup auto-runs
-    autorun(() => this.save('theme', this.theme));
+    autorun(() => this.save(GlobalSetting.theme, this.theme));
     autorun(() =>
-      this.save('isClearingConsoleOnRun', this.isClearingConsoleOnRun),
-    );
-    autorun(() => this.save('isUsingSystemTheme', this.isUsingSystemTheme));
-    autorun(() =>
-      this.save('isPublishingGistAsRevision', this.isPublishingGistAsRevision),
-    );
-    autorun(() => this.save('gitHubAvatarUrl', this.gitHubAvatarUrl));
-    autorun(() => this.save('gitHubLogin', this.gitHubLogin));
-    autorun(() => this.save('gitHubName', this.gitHubName));
-    autorun(() => this.save('gitHubToken', this.gitHubToken));
-    autorun(() =>
-      this.save('gitHubPublishAsPublic', this.gitHubPublishAsPublic),
+      this.save(
+        GlobalSetting.isClearingConsoleOnRun,
+        this.isClearingConsoleOnRun,
+      ),
     );
     autorun(() =>
-      this.save('isKeepingUserDataDirs', this.isKeepingUserDataDirs),
+      this.save(GlobalSetting.isUsingSystemTheme, this.isUsingSystemTheme),
     );
     autorun(() =>
-      this.save('isEnablingElectronLogging', this.isEnablingElectronLogging),
+      this.save(
+        GlobalSetting.isPublishingGistAsRevision,
+        this.isPublishingGistAsRevision,
+      ),
     );
-    autorun(() => this.save('executionFlags', this.executionFlags));
-    autorun(() => this.save('version', this.version));
-    autorun(() => this.save('channelsToShow', this.channelsToShow));
     autorun(() =>
-      this.save('showUndownloadedVersions', this.showUndownloadedVersions),
+      this.save(GlobalSetting.gitHubAvatarUrl, this.gitHubAvatarUrl),
     );
-    autorun(() => this.save('showObsoleteVersions', this.showObsoleteVersions));
-    autorun(() => this.save('packageManager', this.packageManager ?? 'npm'));
-    autorun(() => this.save('acceleratorsToBlock', this.acceleratorsToBlock));
-    autorun(() => this.save('packageAuthor', this.packageAuthor));
-    autorun(() => this.save('electronMirror', this.electronMirror as any));
-    autorun(() => this.save('fontFamily', this.fontFamily as any));
-    autorun(() => this.save('fontSize', this.fontSize as any));
+    autorun(() => this.save(GlobalSetting.gitHubLogin, this.gitHubLogin));
+    autorun(() => this.save(GlobalSetting.gitHubName, this.gitHubName));
+    autorun(() => this.save(GlobalSetting.gitHubToken, this.gitHubToken));
+    autorun(() =>
+      this.save(
+        WindowSpecificSetting.gitHubPublishAsPublic,
+        this.gitHubPublishAsPublic,
+      ),
+    );
+    autorun(() =>
+      this.save(
+        GlobalSetting.isKeepingUserDataDirs,
+        this.isKeepingUserDataDirs,
+      ),
+    );
+    autorun(() =>
+      this.save(
+        GlobalSetting.isEnablingElectronLogging,
+        this.isEnablingElectronLogging,
+      ),
+    );
+    autorun(() => this.save(GlobalSetting.executionFlags, this.executionFlags));
+    autorun(() =>
+      this.save(GlobalSetting.environmentVariables, this.environmentVariables),
+    );
+    autorun(() => this.save(WindowSpecificSetting.version, this.version));
+    autorun(() => this.save(GlobalSetting.channelsToShow, this.channelsToShow));
+    autorun(() =>
+      this.save(
+        GlobalSetting.showUndownloadedVersions,
+        this.showUndownloadedVersions,
+      ),
+    );
+    autorun(() =>
+      this.save(GlobalSetting.showObsoleteVersions, this.showObsoleteVersions),
+    );
+    autorun(() =>
+      this.save(GlobalSetting.packageManager, this.packageManager ?? 'npm'),
+    );
+    autorun(() =>
+      this.save(GlobalSetting.acceleratorsToBlock, this.acceleratorsToBlock),
+    );
+    autorun(() => this.save(GlobalSetting.packageAuthor, this.packageAuthor));
+    autorun(() =>
+      this.save(GlobalSetting.electronMirror, this.electronMirror as any),
+    );
+    autorun(() => this.save(GlobalSetting.fontFamily, this.fontFamily as any));
+    autorun(() => this.save(GlobalSetting.fontSize, this.fontSize as any));
 
     // Update our known versions
     this.updateElectronVersions();
@@ -514,7 +638,7 @@ export class AppState {
 
   public disableTour() {
     this.resetView();
-    localStorage.setItem('hasShownTour', 'true');
+    localStorage.setItem(GlobalSetting.hasShownTour, 'true');
   }
 
   public showTour() {
@@ -935,7 +1059,7 @@ export class AppState {
    * @param {(string | number | Array<any> | Record<string, unknown> | null | boolean)} [value]
    */
   private save(
-    key: string,
+    key: GlobalSettingKey | WindowSpecificSettingKey,
     value?:
       | string
       | number
@@ -961,7 +1085,9 @@ export class AppState {
    * @param {string} key
    * @returns {(T | string | null)}
    */
-  private retrieve<T>(key: string): T | string | null {
+  private retrieve<T>(
+    key: GlobalSettingKey | WindowSpecificSettingKey,
+  ): T | string | null {
     const value = localStorage.getItem(key);
 
     return JSON.parse(value || 'null') as T;

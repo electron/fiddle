@@ -12,13 +12,20 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { IPackageManager } from '../../interfaces';
+import {
+  GlobalSetting,
+  GlobalSettingKey,
+  IPackageManager,
+} from '../../interfaces';
 import { AppState } from '../state';
 
-export enum SettingItemType {
-  EnvVars = 'environmentVariables',
-  Flags = 'executionFlags',
-}
+/**
+ * @TODO make this a proper enum again once we update Typescript
+ */
+export const SettingItemType = {
+  EnvVars: GlobalSetting.environmentVariables,
+  Flags: GlobalSetting.executionFlags,
+} as const;
 
 interface ExecutionSettingsProps {
   appState: AppState;
@@ -119,7 +126,7 @@ export const ExecutionSettings = observer(
      */
     public handleSettingsItemChange(
       event: React.ChangeEvent<HTMLInputElement>,
-      type: SettingItemType,
+      type: GlobalSettingKey,
     ) {
       const { name, value } = event.currentTarget;
 
@@ -136,7 +143,7 @@ export const ExecutionSettings = observer(
      *
      * @param {SettingItemType} type
      */
-    private addNewSettingsItem(type: SettingItemType) {
+    private addNewSettingsItem(type: GlobalSettingKey) {
       const array = Object.entries(this.state[type]);
 
       this.setState((prevState) => ({
@@ -160,7 +167,7 @@ export const ExecutionSettings = observer(
       appState.packageManager = value as IPackageManager;
     };
 
-    public renderDeleteItem(idx: string, type: SettingItemType): JSX.Element {
+    public renderDeleteItem(idx: string, type: GlobalSettingKey): JSX.Element {
       const updated = this.state[type];
 
       const removeFn = () => {

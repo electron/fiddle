@@ -1,9 +1,11 @@
 import {
   ElectronReleaseChannel,
+  GlobalSetting,
   InstallState,
   RunnableVersion,
   Version,
   VersionSource,
+  WindowSpecificSetting,
 } from '../interfaces';
 import { normalizeVersion } from './utils/normalize-version';
 
@@ -14,8 +16,10 @@ import { normalizeVersion } from './utils/normalize-version';
  * @returns {string}
  */
 export function getDefaultVersion(versions: RunnableVersion[]): string {
-  const key = localStorage.getItem('version');
-  if (key && versions.some(({ version }) => version === key)) return key;
+  const key = localStorage.getItem(WindowSpecificSetting.version);
+  if (key && versions.some(({ version }) => version === key)) {
+    return key;
+  }
 
   const latestStable = window.ElectronFiddle.getLatestStable();
   if (latestStable) return latestStable.version;
@@ -46,11 +50,6 @@ export function getReleaseChannel(
 
   // Must be a stable version, right?
   return ElectronReleaseChannel.stable;
-}
-
-export const enum VersionKeys {
-  local = 'local-electron-versions',
-  known = 'known-electron-versions',
 }
 
 export function makeRunnable(ver: Version): RunnableVersion {
@@ -112,7 +111,7 @@ export function getLocalVersionForPath(
  * @returns {Array<Version>}
  */
 export function getLocalVersions(): Array<Version> {
-  const fromLs = window.localStorage.getItem(VersionKeys.local);
+  const fromLs = window.localStorage.getItem(GlobalSetting.localVersion);
 
   if (fromLs) {
     try {
@@ -148,12 +147,12 @@ export function saveLocalVersions(
   });
 
   const stringified = JSON.stringify(filteredVersions);
-  window.localStorage.setItem(VersionKeys.local, stringified);
+  window.localStorage.setItem(GlobalSetting.localVersion, stringified);
 }
 
 function getReleasedVersions(): Array<Version> {
   const versions = window.ElectronFiddle.getReleasedVersions();
-  const fromLs = window.localStorage.getItem(VersionKeys.known);
+  const fromLs = window.localStorage.getItem(GlobalSetting.knownVersion);
 
   if (fromLs) {
     try {
@@ -181,7 +180,7 @@ export async function fetchVersions(): Promise<Version[]> {
 
   // Migrate away from known versions being stored in localStorage
   // Now that we've fetched new versions, it's safe to delete
-  window.localStorage.removeItem(VersionKeys.known);
+  window.localStorage.removeItem(GlobalSetting.knownVersion);
 
   console.log(`Fetched ${versions.length} new Electron versions`);
   return versions;
