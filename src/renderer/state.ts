@@ -413,6 +413,10 @@ export class AppState {
             this.settingKeyTypeGuard(key);
           }
         }
+      } else {
+        console.warn(
+          `"${key}" is not a recognized localStorage key. If you're using this key to persist a setting, please add it to the relevant enum.`,
+        );
       }
     });
 
