@@ -407,7 +407,6 @@ export class AppState {
           case GlobalSetting.gitHubLogin:
           case GlobalSetting.gitHubName:
           case GlobalSetting.gitHubToken:
-          case GlobalSetting.hasShownTour:
           case GlobalSetting.isClearingConsoleOnRun:
           case GlobalSetting.isEnablingElectronLogging:
           case GlobalSetting.isKeepingUserDataDirs:
