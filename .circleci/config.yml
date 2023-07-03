@@ -9,8 +9,15 @@ commands:
     steps:
       - run: git config --global core.autocrlf input
       - node/install:
-          node-version: '18.4.0'
-      - run: nvm use 18.4.0
+          # NOTE: nvm-windows only supports proper semver strings
+          # we could omit the patch release whenever we have 1.1.0:
+          # https://github.com/coreybutler/nvm-windows/releases/tag/1.1.10
+          # This is the file to check:
+          # https://github.com/CircleCI-Public/ansible/blob/main/roles/windows-executor/defaults/main/install_dev_tools_defaults.yml#L13
+          #
+          # TODO: bump to 18.16 (LTS) when https://github.com/nodejs/node/issues/47563 lands
+          node-version: '18.15.0'
+      - run: nvm use 18.15.0
       - checkout
       - restore_cache:
           keys:
@@ -120,7 +127,7 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - run: sudo apt-get update && sudo apt install rpm
+      - run: sudo apt-get update && sudo apt install rpm squashfs-tools
       - install
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       # CircleCI doesn't let you persist files with the same name from multiple

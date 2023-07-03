@@ -134,6 +134,11 @@ const config = {
       platforms: ['linux'],
       config: commonLinuxConfig,
     },
+    {
+      name: '@reforged/maker-appimage',
+      platforms: ['linux'],
+      config: commonLinuxConfig,
+    },
   ],
   publishers: [
     {

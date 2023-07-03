@@ -80,6 +80,7 @@
     "@electron-forge/publisher-github": "6.1.1",
     "@electron/lint-roller": "^1.0.1",
     "@octokit/action": "^2.0.0",
+    "@reforged/maker-appimage": "^3.3.0",
     "@testing-library/jest-dom": "^5.16.4",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^14.2.0",
