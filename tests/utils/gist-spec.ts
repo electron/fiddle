@@ -1,6 +1,6 @@
 import { getGistId, idFromUrl, urlFromId } from '../../src/utils/gist';
 
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   userInfo: () => ({
     username: 'test-user',
   }),

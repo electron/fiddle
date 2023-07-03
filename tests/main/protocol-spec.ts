@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 import { app } from 'electron';
 
@@ -15,7 +15,7 @@ import {
 import { getOrCreateMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('fs');
+jest.mock('node:fs');
 
 describe('protocol', () => {
   const oldArgv = [...process.argv];

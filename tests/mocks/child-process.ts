@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 export class ChildProcessMock extends EventEmitter {
   public stdout = new EventEmitter();

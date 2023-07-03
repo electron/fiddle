@@ -7,7 +7,7 @@ import { Runner } from '../../../src/renderer/components/commands-runner';
 import { AppState } from '../../../src/renderer/state';
 
 jest.mock('../../../src/renderer/file-manager');
-jest.mock('child_process');
+jest.mock('node:child_process');
 jest.mock('fs-extra');
 
 describe('Runner component', () => {

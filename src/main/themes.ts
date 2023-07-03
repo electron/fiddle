@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { IpcMainEvent, app, shell } from 'electron';
 import * as fs from 'fs-extra';

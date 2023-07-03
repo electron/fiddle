@@ -1,6 +1,6 @@
 import { overridePlatform, resetPlatform } from '../../utils';
 
-jest.mock('child_process');
+jest.mock('node:child_process');
 
 const mockShellEnv = jest.fn();
 jest.mock('shell-env', () => mockShellEnv);
@@ -21,7 +21,7 @@ describe('exec', () => {
 
   describe('exec()', () => {
     it('executes a given string', async () => {
-      const cpExec = require('child_process').exec;
+      const cpExec = require('node:child_process').exec;
       cpExec.mockImplementation((_a: any, _b: any, c: any) =>
         c(null, {
           stdout: 'hi',
@@ -43,7 +43,7 @@ describe('exec', () => {
     });
 
     it('handles a returned string', async () => {
-      const cpExec = require('child_process').exec;
+      const cpExec = require('node:child_process').exec;
       cpExec.mockImplementation((_a: any, _b: any, c: any) =>
         c(null, {
           stdout: 'hi',
@@ -57,7 +57,7 @@ describe('exec', () => {
 
     it('handles errors', async () => {
       let errored = false;
-      const cpExec = require('child_process').exec;
+      const cpExec = require('node:child_process').exec;
       (cpExec as jest.Mock<any>).mockImplementation(
         (_a: any, _b: any, c: any) => c(new Error('Poop!')),
       );

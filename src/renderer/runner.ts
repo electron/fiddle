@@ -1,5 +1,5 @@
-import { ChildProcess } from 'child_process';
-import * as path from 'path';
+import { ChildProcess } from 'node:child_process';
+import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
 

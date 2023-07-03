@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { Response, fetch } from 'cross-fetch';
 import { app } from 'electron';
