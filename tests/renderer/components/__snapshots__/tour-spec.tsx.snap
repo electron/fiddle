@@ -6,8 +6,8 @@ exports[`VersionChooser component renders 1`] = `
 >
   <Blueprint3.Dialog
     backdropProps={
-      Object {
-        "style": Object {
+      {
+        "style": {
           "visibility": "hidden",
         },
       }
@@ -17,7 +17,7 @@ exports[`VersionChooser component renders 1`] = `
     key="mock-step-1"
     portalClassName="tour-portal"
     style={
-      Object {
+      {
         "left": 165,
         "margin": "10px",
         "position": "absolute",

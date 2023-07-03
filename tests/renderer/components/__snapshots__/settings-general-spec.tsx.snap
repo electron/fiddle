@@ -6,32 +6,32 @@ exports[`GeneralSettings component renders 1`] = `
     General Settings
   </h1>
   <settings-appearance
-    appState={Object {}}
+    appState={{}}
     toggleHasPopoverOpen={[Function]}
   />
   <Blueprint3.Divider />
   <FontSettings
-    appState={Object {}}
+    appState={{}}
   />
   <Blueprint3.Divider />
   <settings-console
-    appState={Object {}}
+    appState={{}}
   />
   <Blueprint3.Divider />
   <settings-github
-    appState={Object {}}
+    appState={{}}
   />
   <Blueprint3.Divider />
   <settings-block-accelerators
-    appState={Object {}}
+    appState={{}}
   />
   <Blueprint3.Divider />
   <settings-package-author
-    appState={Object {}}
+    appState={{}}
   />
   <Blueprint3.Divider />
   <settings-general-mirror
-    appState={Object {}}
+    appState={{}}
   />
 </div>
 `;

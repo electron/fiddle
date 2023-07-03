@@ -4,14 +4,14 @@ exports[`VersionSelect component renders 1`] = `
 <Blueprint3.ButtonGroup>
   <VersionSelect
     appState={
-      Object {
-        "channelsToShow": Array [
+      {
+        "channelsToShow": [
           "Stable",
           "Beta",
         ],
         "currentElectronVersion": "2.0.2 remote installed",
         "version": "2.0.2",
-        "versions": Array [
+        "versions": [
           "2.0.3 remote installed",
           "2.0.2 remote installed",
           "2.0.1 remote installed",
@@ -20,7 +20,7 @@ exports[`VersionSelect component renders 1`] = `
           "1.0.0 remote missing",
           "3.0.0-unsupported remote missing",
         ],
-        "versionsToShow": Array [
+        "versionsToShow": [
           "2.0.3 remote installed",
           "2.0.2 remote installed",
           "2.0.1 remote installed",
@@ -32,7 +32,7 @@ exports[`VersionSelect component renders 1`] = `
       }
     }
     currentVersion={
-      Object {
+      {
         "source": "remote",
         "state": "installed",
         "version": "2.0.2",

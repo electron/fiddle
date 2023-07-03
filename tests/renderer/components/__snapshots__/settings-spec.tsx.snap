@@ -16,7 +16,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -28,7 +28,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -40,7 +40,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -52,7 +52,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -89,7 +89,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -101,7 +101,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -113,7 +113,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -125,7 +125,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -144,7 +144,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
     </button>
     <settings-credits
       appState={
-        Object {
+        {
           "isSettingsShowing": true,
         }
       }
@@ -169,7 +169,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -181,7 +181,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -193,7 +193,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -205,7 +205,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -224,7 +224,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
     </button>
     <settings-electron
       appState={
-        Object {
+        {
           "isSettingsShowing": true,
         }
       }
@@ -249,7 +249,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -261,7 +261,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -273,7 +273,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -285,7 +285,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -304,7 +304,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
     </button>
     <settings-general
       appState={
-        Object {
+        {
           "isSettingsShowing": true,
         }
       }
@@ -330,7 +330,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -342,7 +342,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -354,7 +354,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -366,7 +366,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -385,7 +385,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
     </button>
     <ExecutionSettings
       appState={
-        Object {
+        {
           "isSettingsShowing": true,
         }
       }
@@ -410,7 +410,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         key="General"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="General"
       />
@@ -422,7 +422,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         key="Electron"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Electron"
       />
@@ -434,7 +434,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         key="Execution"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Execution"
       />
@@ -446,7 +446,7 @@ exports[`Settings component renders the General page after a click 1`] = `
         key="Credits"
         multiline={false}
         onClick={[Function]}
-        popoverProps={Object {}}
+        popoverProps={{}}
         shouldDismissPopover={true}
         text="Credits"
       />
@@ -465,7 +465,7 @@ exports[`Settings component renders the General page after a click 1`] = `
     </button>
     <settings-general
       appState={
-        Object {
+        {
           "isSettingsShowing": true,
         }
       }

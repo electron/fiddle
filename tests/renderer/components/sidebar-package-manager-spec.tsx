@@ -48,7 +48,7 @@ describe('SidebarPackageManager component', () => {
 
     expect(
       Array.from((store.modules as Map<string, string>).entries()),
-    ).toMatchSnapshot([
+    ).toEqual([
       ['cow', '1.0.0'],
       ['say', '2.0.0'],
     ]);

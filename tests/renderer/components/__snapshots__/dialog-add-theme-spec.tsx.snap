@@ -14,7 +14,7 @@ exports[`AddThemeDialog component renders 1`] = `
     <Blueprint3.FileInput
       hasSelection={false}
       inputProps={
-        Object {
+        {
           "accept": ".json",
         }
       }

@@ -209,8 +209,10 @@ describe('processCommandLine()', () => {
           const fakeEvent = {};
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
+        const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
         await processCommandLine(argv);
-        expect(process.exit).toHaveBeenCalledWith(exitCode);
+        expect(exitSpy).toHaveBeenCalledWith(exitCode);
+        exitSpy.mockReset();
       }
 
       it(`exits with 0 on ${RunResult.SUCCESS}`, async () => {

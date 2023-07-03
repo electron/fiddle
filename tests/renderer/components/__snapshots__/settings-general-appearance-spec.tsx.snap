@@ -7,10 +7,10 @@ exports[`AppearanceSettings component renderItem() returns a MenuItem for matchi
   icon="media"
   multiline={false}
   onClick={[Function]}
-  popoverProps={Object {}}
+  popoverProps={{}}
   shouldDismissPopover={true}
   text={
-    Array [
+    [
       "foo",
     ]
   }
@@ -40,19 +40,19 @@ exports[`AppearanceSettings component renders 1`] = `
       filterable={true}
       itemPredicate={[Function]}
       itemRenderer={[Function]}
-      items={Array []}
+      items={[]}
       noResults={
         <Blueprint3.MenuItem
           disabled={true}
           multiline={false}
-          popoverProps={Object {}}
+          popoverProps={{}}
           shouldDismissPopover={true}
           text="No results."
         />
       }
       onItemSelect={[Function]}
       popoverProps={
-        Object {
+        {
           "onClosed": [Function],
         }
       }

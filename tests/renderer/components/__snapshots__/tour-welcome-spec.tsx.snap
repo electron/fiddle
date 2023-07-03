@@ -53,7 +53,7 @@ exports[`Header component renders the tour once started 1`] = `
   onStop={[Function]}
   tour={
     Set {
-      Object {
+      {
         "content": <React.Fragment>
           <p>
             Electron Fiddle allows you to build little experiments and mini-apps with Electron. Each Fiddle has at least three of these files: A main script, a renderer script, a preload script, and an HTML file.
@@ -74,7 +74,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": "div.mosaic-root",
         "title": "📝 Fiddle Editors",
       },
-      Object {
+      {
         "content": <React.Fragment>
           <p>
             Electron Fiddle knows about all released Electron versions, downloading your versions automatically in the background.
@@ -87,7 +87,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": "button.version-chooser",
         "title": "📇 Choose an Electron Version",
       },
-      Object {
+      {
         "content": <p>
           Hit this button to give your Fiddle a try and start it.
         </p>,
@@ -95,7 +95,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": ".button-run",
         "title": "🚀 Run Your Fiddle",
       },
-      Object {
+      {
         "content": <React.Fragment>
           <p>
             Like what you've built? You can save your Fiddle as a public GitHub Gist, allowing other users to load it by pasting the URL into the address bar. If they don't have Electron Fiddle, they can see and download your code directly from GitHub.
@@ -108,7 +108,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": ".button-publish",
         "title": "🗺 Share Your Fiddle",
       },
-      Object {
+      {
         "content": <p>
           We've finished our tour of Electron Fiddle, but if this is your first time using Electron, we could introduce you to its basics. Interested?
         </p>,
@@ -117,7 +117,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": "div.mosaic-root",
         "title": "👋 Getting Started With Electron?",
       },
-      Object {
+      {
         "content": <React.Fragment>
           <p>
             Every Electron app starts with a main script, very similar to how a Node.js application is started. The main script runs in the "main process". To display a user interface, the main process creates renderer processes – usually in the form of windows, which Electron calls  
@@ -145,7 +145,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": "div.mosaic-window.main",
         "title": "📝 Main Script",
       },
-      Object {
+      {
         "content": <p>
           In the default fiddle, this HTML file is loaded in the  
           <code>
@@ -166,7 +166,7 @@ exports[`Header component renders the tour once started 1`] = `
         "selector": "div.mosaic-window.html",
         "title": "📝 HTML",
       },
-      Object {
+      {
         "content": <React.Fragment>
           <p>
             This is the script we just required from the HTML file. In here, you can do anything that works in Node.js 

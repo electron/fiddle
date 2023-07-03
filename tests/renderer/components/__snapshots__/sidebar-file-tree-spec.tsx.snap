@@ -6,10 +6,10 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
 >
   <Blueprint3.Tree
     contents={
-      Array [
-        Object {
-          "childNodes": Array [
-            Object {
+      [
+        {
+          "childNodes": [
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 0,
@@ -24,7 +24,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -34,7 +34,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -63,7 +63,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 1,
@@ -78,7 +78,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -88,7 +88,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -117,7 +117,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 2,
@@ -132,7 +132,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -142,7 +142,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -171,7 +171,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 3,
@@ -186,7 +186,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -196,7 +196,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -225,7 +225,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 4,
@@ -240,7 +240,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -250,7 +250,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -279,7 +279,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "className": "add-file-input",
               "icon": "document",
               "id": "add",
@@ -290,7 +290,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
                 onBlur={[Function]}
                 onKeyDown={[Function]}
                 style={
-                  Object {
+                  {
                     "padding": 0,
                     "width": "100%",
                   }
@@ -346,10 +346,10 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
 >
   <Blueprint3.Tree
     contents={
-      Array [
-        Object {
-          "childNodes": Array [
-            Object {
+      [
+        {
+          "childNodes": [
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 0,
@@ -364,7 +364,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -374,7 +374,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -403,7 +403,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 1,
@@ -418,7 +418,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -428,7 +428,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -457,7 +457,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 2,
@@ -472,7 +472,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -482,7 +482,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -511,7 +511,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 3,
@@ -526,7 +526,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -536,7 +536,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -565,7 +565,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 4,
@@ -580,7 +580,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -590,7 +590,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -668,10 +668,10 @@ exports[`SidebarFileTree component renders 1`] = `
 >
   <Blueprint3.Tree
     contents={
-      Array [
-        Object {
-          "childNodes": Array [
-            Object {
+      [
+        {
+          "childNodes": [
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 0,
@@ -686,7 +686,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -696,7 +696,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -725,7 +725,7 @@ exports[`SidebarFileTree component renders 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 1,
@@ -740,7 +740,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -750,7 +750,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -779,7 +779,7 @@ exports[`SidebarFileTree component renders 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 2,
@@ -794,7 +794,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -804,7 +804,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -833,7 +833,7 @@ exports[`SidebarFileTree component renders 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 3,
@@ -848,7 +848,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -858,7 +858,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />
@@ -887,7 +887,7 @@ exports[`SidebarFileTree component renders 1`] = `
                 </Blueprint3.Tooltip2>
               </Blueprint3.ButtonGroup>,
             },
-            Object {
+            {
               "hasCaret": false,
               "icon": "document",
               "id": 4,
@@ -902,7 +902,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="primary"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Rename"
                     />
@@ -912,7 +912,7 @@ exports[`SidebarFileTree component renders 1`] = `
                       intent="danger"
                       multiline={false}
                       onClick={[Function]}
-                      popoverProps={Object {}}
+                      popoverProps={{}}
                       shouldDismissPopover={true}
                       text="Delete"
                     />

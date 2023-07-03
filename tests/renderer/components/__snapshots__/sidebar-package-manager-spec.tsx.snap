@@ -1,18 +1,5 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`SidebarPackageManager component can add a package 1`] = `
-Array [
-  Array [
-    "cow",
-    "1.0.0",
-  ],
-  Array [
-    "say",
-    "2.0.0",
-  ],
-]
-`;
-
 exports[`SidebarPackageManager component renders 1`] = `
 <div
   className="package-tree"
@@ -25,7 +12,7 @@ exports[`SidebarPackageManager component renders 1`] = `
     fill={true}
     inputValueRenderer={[Function]}
     itemRenderer={[Function]}
-    items={Array []}
+    items={[]}
     noResults={
       <em>
         Search for modules here...
@@ -35,7 +22,7 @@ exports[`SidebarPackageManager component renders 1`] = `
     onQueryChange={[Function]}
     openOnKeyDown={false}
     popoverProps={
-      Object {
+      {
         "fill": true,
         "minimal": true,
         "usePortal": false,
@@ -46,8 +33,8 @@ exports[`SidebarPackageManager component renders 1`] = `
   />
   <Blueprint3.Tree
     contents={
-      Array [
-        Object {
+      [
+        {
           "id": "cow",
           "label": "cow",
           "secondaryLabel": <div>

@@ -11,7 +11,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-tile"
       key="main.js"
       style={
-        Object {
+        {
           "bottom": "50%",
           "left": "0%",
           "right": "50%",
@@ -170,7 +170,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-split -column"
       onMouseDown={[Function]}
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "0%",
           "right": "50%",
@@ -186,7 +186,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-tile"
       key="renderer.js"
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "0%",
           "right": "50%",
@@ -345,7 +345,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-split -row"
       onMouseDown={[Function]}
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "50%",
           "right": "0%",
@@ -361,7 +361,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-tile"
       key="index.html"
       style={
-        Object {
+        {
           "bottom": "50%",
           "left": "50%",
           "right": "0%",
@@ -520,7 +520,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-split -column"
       onMouseDown={[Function]}
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "50%",
           "right": "0%",
@@ -536,7 +536,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-tile"
       key="preload.js"
       style={
-        Object {
+        {
           "bottom": "25%",
           "left": "50%",
           "right": "0%",
@@ -695,7 +695,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-split -column"
       onMouseDown={[Function]}
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "50%",
           "right": "0%",
@@ -711,7 +711,7 @@ exports[`Editors component renders 1`] = `
       className="mosaic-tile"
       key="styles.css"
       style={
-        Object {
+        {
           "bottom": "0%",
           "left": "50%",
           "right": "0%",
@@ -899,20 +899,20 @@ exports[`Editors component renders a toolbar 1`] = `
   >
     <MaximizeButton
       appState={
-        Object {
-          "editorMosaic": Object {
+        {
+          "editorMosaic": {
             "layoutDebounce": 26,
-            "mosaic": Object {
+            "mosaic": {
               "direction": "row",
-              "first": Object {
+              "first": {
                 "direction": "column",
                 "first": "main.js",
                 "second": "renderer.js",
               },
-              "second": Object {
+              "second": {
                 "direction": "column",
                 "first": "index.html",
-                "second": Object {
+                "second": {
                   "direction": "column",
                   "first": "preload.js",
                   "second": "styles.css",
@@ -926,20 +926,20 @@ exports[`Editors component renders a toolbar 1`] = `
     />
     <RemoveButton
       appState={
-        Object {
-          "editorMosaic": Object {
+        {
+          "editorMosaic": {
             "layoutDebounce": 26,
-            "mosaic": Object {
+            "mosaic": {
               "direction": "row",
-              "first": Object {
+              "first": {
                 "direction": "column",
                 "first": "main.js",
                 "second": "renderer.js",
               },
-              "second": Object {
+              "second": {
                 "direction": "column",
                 "first": "index.html",
-                "second": Object {
+                "second": {
                   "direction": "column",
                   "first": "preload.js",
                   "second": "styles.css",
