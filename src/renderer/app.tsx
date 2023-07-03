@@ -105,13 +105,19 @@ export class App {
   public async setup(): Promise<void | Element | React.Component> {
     await this.loadTheme(this.state.theme || '');
 
-    const React = await import('react');
-    const { render } = await import('react-dom');
-    const { Dialogs } = await import('./components/dialogs');
-    const { OutputEditorsWrapper } = await import(
-      './components/output-editors-wrapper'
-    );
-    const { Header } = await import('./components/header');
+    const [
+      { default: React },
+      { render },
+      { Dialogs },
+      { OutputEditorsWrapper },
+      { Header },
+    ] = await Promise.all([
+      import('react'),
+      import('react-dom'),
+      import('./components/dialogs'),
+      import('./components/output-editors-wrapper'),
+      import('./components/header'),
+    ]);
 
     // The AppState constructor started loading a fiddle.
     // Wait for it here so the UI doesn't start life in `nonIdealState`.
