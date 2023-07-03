@@ -139,7 +139,7 @@ export const AddThemeDialog = observer(
           <div className="bp3-dialog-body">
             <FileInput
               onInputChange={this.onChangeFile}
-              inputProps={inputProps as any}
+              inputProps={inputProps}
               text={text}
             />
             <br />

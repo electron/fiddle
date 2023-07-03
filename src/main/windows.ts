@@ -109,9 +109,9 @@ export function createMainWindow(): Electron.BrowserWindow {
       'temp',
       'downloads',
       'desktop',
-    ];
+    ] as const;
     for (const path of pathsToQuery) {
-      paths[path] = app.getPath(path as any);
+      paths[path] = app.getPath(path);
     }
     return paths;
   });
