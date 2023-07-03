@@ -22,7 +22,6 @@ import {
   GenericDialogType,
   GistActionState,
   GlobalSetting,
-  GlobalSettingKey,
   IPackageManager,
   InstallState,
   OutputEntry,
@@ -32,7 +31,6 @@ import {
   Version,
   VersionSource,
   WindowSpecificSetting,
-  WindowSpecificSettingKey,
 } from '../interfaces';
 import { Bisector } from './bisect';
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
@@ -45,6 +43,7 @@ import {
   fetchVersions,
   getDefaultVersion,
   getElectronVersions,
+  getLocalVersions,
   getReleaseChannel,
   makeRunnable,
   saveLocalVersions,
@@ -362,7 +361,7 @@ export class AppState {
      * and refreshes the current window settings accordingly.
      */
     window.addEventListener('storage', (event) => {
-      const key = event.key as GlobalSettingKey;
+      const key = event.key as GlobalSetting;
       const { newValue } = event;
 
       let parsedValue: unknown;
@@ -374,36 +373,50 @@ export class AppState {
         parsedValue = newValue;
       }
 
-      if (key in GlobalSetting && key in this) {
+      if (Object.values(GlobalSetting).includes(key)) {
         switch (key) {
-          case 'theme': {
+          case GlobalSetting.theme: {
             this.setTheme(parsedValue as string);
             break;
           }
 
-          case 'acceleratorsToBlock':
-          case 'channelsToShow':
-          case 'electronMirror':
-          case 'environmentVariables':
-          case 'executionFlags':
-          case 'fontFamily':
-          case 'fontSize':
-          case 'gitHubAvatarUrl':
-          case 'gitHubLogin':
-          case 'gitHubName':
-          case 'gitHubToken':
-          case 'hasShownTour':
-          case 'isClearingConsoleOnRun':
-          case 'isEnablingElectronLogging':
-          case 'isKeepingUserDataDirs':
-          case 'isPublishingGistAsRevision':
-          case 'isUsingSystemTheme':
-          case 'knownVersion':
-          case 'localVersion':
-          case 'packageAuthor':
-          case 'packageManager':
-          case 'showObsoleteVersions':
-          case 'showUndownloadedVersions': {
+          case GlobalSetting.hasShownTour: {
+            this['isTourShowing'] = !(parsedValue as boolean);
+            break;
+          }
+
+          // This key is deprecated, so do nothing
+          case GlobalSetting.knownVersion: {
+            break;
+          }
+
+          // Refresh local versions
+          case GlobalSetting.localVersion: {
+            this.refreshLocalVersions(getLocalVersions());
+            break;
+          }
+
+          case GlobalSetting.acceleratorsToBlock:
+          case GlobalSetting.channelsToShow:
+          case GlobalSetting.electronMirror:
+          case GlobalSetting.environmentVariables:
+          case GlobalSetting.executionFlags:
+          case GlobalSetting.fontFamily:
+          case GlobalSetting.fontSize:
+          case GlobalSetting.gitHubAvatarUrl:
+          case GlobalSetting.gitHubLogin:
+          case GlobalSetting.gitHubName:
+          case GlobalSetting.gitHubToken:
+          case GlobalSetting.hasShownTour:
+          case GlobalSetting.isClearingConsoleOnRun:
+          case GlobalSetting.isEnablingElectronLogging:
+          case GlobalSetting.isKeepingUserDataDirs:
+          case GlobalSetting.isPublishingGistAsRevision:
+          case GlobalSetting.isUsingSystemTheme:
+          case GlobalSetting.packageAuthor:
+          case GlobalSetting.packageManager:
+          case GlobalSetting.showObsoleteVersions:
+          case GlobalSetting.showUndownloadedVersions: {
             // Fall back to updating the state.
             this[key] = parsedValue;
             break;
@@ -413,7 +426,11 @@ export class AppState {
             this.settingKeyTypeGuard(key);
           }
         }
-      } else {
+      } else if (
+        !Object.values(WindowSpecificSetting).includes(
+          (key as unknown) as WindowSpecificSetting,
+        )
+      ) {
         console.warn(
           `"${key}" is not a recognized localStorage key. If you're using this key to persist a setting, please add it to the relevant enum.`,
         );
@@ -653,6 +670,23 @@ export class AppState {
   public addLocalVersion(input: Version) {
     addLocalVersion(input);
     this.addNewVersions(getElectronVersions());
+  }
+
+  public refreshLocalVersions(versions: Version[]) {
+    const localVersions = versions.map((ver) => ver.version);
+
+    // Remove any local versions not in the provided list
+    for (const ver of Object.keys(this.versions)) {
+      if (
+        this.versions[ver].source === VersionSource.local &&
+        !localVersions.includes(ver)
+      ) {
+        delete this.versions[ver];
+      }
+    }
+
+    // Add any new local versions
+    this.addNewVersions(versions.map((ver) => makeRunnable(ver)));
   }
 
   public addNewVersions(versions: RunnableVersion[]) {
@@ -1055,11 +1089,11 @@ export class AppState {
   /**
    * Save a key/value to localStorage.
    *
-   * @param {string} key
+   * @param {GlobalSetting | WindowSpecificSetting} key
    * @param {(string | number | Array<any> | Record<string, unknown> | null | boolean)} [value]
    */
   private save(
-    key: GlobalSettingKey | WindowSpecificSettingKey,
+    key: GlobalSetting | WindowSpecificSetting,
     value?:
       | string
       | number
@@ -1082,11 +1116,11 @@ export class AppState {
    * Fetch data from localStorage.
    *
    * @template T
-   * @param {string} key
+   * @param {GlobalSetting | WindowSpecificSetting} key
    * @returns {(T | string | null)}
    */
   private retrieve<T>(
-    key: GlobalSettingKey | WindowSpecificSettingKey,
+    key: GlobalSetting | WindowSpecificSetting,
   ): T | string | null {
     const value = localStorage.getItem(key);
 
