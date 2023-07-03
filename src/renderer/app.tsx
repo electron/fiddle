@@ -103,7 +103,7 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void | Element | React.Component> {
-    this.loadTheme(this.state.theme || '');
+    await this.loadTheme(this.state.theme || '');
 
     const React = await import('react');
     const { render } = await import('react-dom');
