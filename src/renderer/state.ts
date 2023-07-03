@@ -417,7 +417,7 @@ export class AppState {
           case GlobalSetting.showObsoleteVersions:
           case GlobalSetting.showUndownloadedVersions: {
             // Fall back to updating the state.
-            this[key] = parsedValue;
+            (this[key] as any) = parsedValue;
             break;
           }
 
