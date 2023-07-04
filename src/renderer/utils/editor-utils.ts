@@ -44,8 +44,8 @@ export function getEditorTitle(id: EditorId): string {
 // the KNOWN_FILES, in the order of that array, go first.
 // then everything else, sorted lexigraphically
 export function compareEditors(a: EditorId, b: EditorId) {
-  const ia = KNOWN_FILES.indexOf(a as any);
-  const ib = KNOWN_FILES.indexOf(b as any);
+  const ia = KNOWN_FILES.indexOf(a);
+  const ib = KNOWN_FILES.indexOf(b);
   if (ia === -1 && ib === -1) return a.localeCompare(b);
   if (ia === -1) return 1;
   if (ib === -1) return -1;

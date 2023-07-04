@@ -177,7 +177,7 @@ export const AddVersionDialog = observer(
           <div className="bp3-dialog-body">
             <FileInput
               id="custom-electron-version"
-              inputProps={inputProps as any}
+              inputProps={inputProps}
               text={text}
             />
             <br />

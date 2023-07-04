@@ -27,8 +27,8 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
 export async function readThemeFile(
   name?: string,
 ): Promise<LoadedFiddleTheme | null> {
-  if (!name || name === DefaultThemes.DARK) return defaultDark as any;
-  if (name === DefaultThemes.LIGHT) return defaultLight as any;
+  if (!name || name === DefaultThemes.DARK) return defaultDark;
+  if (name === DefaultThemes.LIGHT) return defaultLight;
 
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
@@ -91,10 +91,7 @@ export async function createThemeFile(
  * @returns {Promise<Array<LoadedFiddleTheme>>}
  */
 export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
-  const themes: Array<LoadedFiddleTheme> = [
-    defaultDark as any,
-    defaultLight as any,
-  ];
+  const themes: Array<LoadedFiddleTheme> = [defaultDark, defaultLight];
 
   if (!fs.existsSync(THEMES_PATH)) {
     return themes;

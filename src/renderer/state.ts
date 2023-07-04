@@ -146,8 +146,7 @@ export class AppState {
   public fontFamily: string | undefined =
     (localStorage.getItem(GlobalSetting.fontFamily) as string) || undefined;
   public fontSize: number | undefined =
-    ((localStorage.getItem(GlobalSetting.fontSize) as any) as number) ||
-    undefined;
+    parseInt(localStorage.getItem(GlobalSetting.fontSize)!) || undefined;
 
   // -- Various session-only state ------------------
   public gistId: string | undefined = undefined;
@@ -483,11 +482,9 @@ export class AppState {
       this.save(GlobalSetting.acceleratorsToBlock, this.acceleratorsToBlock),
     );
     autorun(() => this.save(GlobalSetting.packageAuthor, this.packageAuthor));
-    autorun(() =>
-      this.save(GlobalSetting.electronMirror, this.electronMirror as any),
-    );
-    autorun(() => this.save(GlobalSetting.fontFamily, this.fontFamily as any));
-    autorun(() => this.save(GlobalSetting.fontSize, this.fontSize as any));
+    autorun(() => this.save(GlobalSetting.electronMirror, this.electronMirror));
+    autorun(() => this.save(GlobalSetting.fontFamily, this.fontFamily));
+    autorun(() => this.save(GlobalSetting.fontSize, this.fontSize));
 
     // Update our known versions
     this.updateElectronVersions();
