@@ -15,7 +15,7 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -65,7 +65,7 @@ exports[`AddVersionDialog component renders 1`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -128,7 +128,7 @@ exports[`AddVersionDialog component renders 2`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -192,7 +192,7 @@ exports[`AddVersionDialog component renders 3`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }

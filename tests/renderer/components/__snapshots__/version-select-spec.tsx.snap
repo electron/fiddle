@@ -8,10 +8,10 @@ exports[`VersionSelect component renderItem() renders an item 1`] = `
   label="Not downloaded"
   multiline={false}
   onClick={[Function]}
-  popoverProps={Object {}}
+  popoverProps={{}}
   shouldDismissPopover={true}
   text={
-    Array [
+    [
       "1.0.0",
     ]
   }
@@ -26,38 +26,38 @@ exports[`VersionSelect component renders 1`] = `
   itemListRenderer={[Function]}
   itemRenderer={[Function]}
   items={
-    Array [
-      Object {
+    [
+      {
         "source": "remote",
         "state": "installed",
         "version": "2.0.3",
       },
-      Object {
+      {
         "source": "remote",
         "state": "installed",
         "version": "2.0.2",
       },
-      Object {
+      {
         "source": "remote",
         "state": "installed",
         "version": "2.0.1",
       },
-      Object {
+      {
         "source": "remote",
         "state": "installed",
         "version": "2.0.0",
       },
-      Object {
+      {
         "source": "remote",
         "state": "installed",
         "version": "1.8.7",
       },
-      Object {
+      {
         "source": "remote",
         "state": "missing",
         "version": "1.0.0",
       },
-      Object {
+      {
         "source": "remote",
         "state": "missing",
         "version": "3.0.0-unsupported",
@@ -68,7 +68,7 @@ exports[`VersionSelect component renders 1`] = `
     <Blueprint3.MenuItem
       disabled={true}
       multiline={false}
-      popoverProps={Object {}}
+      popoverProps={{}}
       shouldDismissPopover={true}
       text="No results."
     />

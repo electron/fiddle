@@ -22,7 +22,7 @@ exports[`CreditsSettings component renders 1`] = `
       <div
         className="avatar"
         style={
-          Object {
+          {
             "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
           }
         }
@@ -74,7 +74,7 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
       <div
         className="avatar"
         style={
-          Object {
+          {
             "backgroundImage": "url(https://avatars3.githubusercontent.com/u/1426799?v=4)",
           }
         }

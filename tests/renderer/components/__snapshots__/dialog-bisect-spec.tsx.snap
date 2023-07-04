@@ -13,7 +13,7 @@ exports[`BisectDialog component renders 1`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -48,11 +48,11 @@ exports[`BisectDialog component renders 1`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -62,7 +62,7 @@ exports[`BisectDialog component renders 1`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -75,7 +75,7 @@ exports[`BisectDialog component renders 1`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -93,11 +93,11 @@ exports[`BisectDialog component renders 1`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -107,7 +107,7 @@ exports[`BisectDialog component renders 1`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -120,7 +120,7 @@ exports[`BisectDialog component renders 1`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "1.0.0",
@@ -176,7 +176,7 @@ exports[`BisectDialog component renders 2`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -211,11 +211,11 @@ exports[`BisectDialog component renders 2`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -225,7 +225,7 @@ exports[`BisectDialog component renders 2`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -249,11 +249,11 @@ exports[`BisectDialog component renders 2`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -263,7 +263,7 @@ exports[`BisectDialog component renders 2`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -325,7 +325,7 @@ exports[`BisectDialog component renders 3`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -360,11 +360,11 @@ exports[`BisectDialog component renders 3`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -374,7 +374,7 @@ exports[`BisectDialog component renders 3`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -387,7 +387,7 @@ exports[`BisectDialog component renders 3`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -405,11 +405,11 @@ exports[`BisectDialog component renders 3`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -419,7 +419,7 @@ exports[`BisectDialog component renders 3`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -481,7 +481,7 @@ exports[`BisectDialog component renders 4`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -516,11 +516,11 @@ exports[`BisectDialog component renders 4`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -530,7 +530,7 @@ exports[`BisectDialog component renders 4`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -543,7 +543,7 @@ exports[`BisectDialog component renders 4`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -561,11 +561,11 @@ exports[`BisectDialog component renders 4`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -575,7 +575,7 @@ exports[`BisectDialog component renders 4`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -588,7 +588,7 @@ exports[`BisectDialog component renders 4`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "5.0.0",
@@ -644,7 +644,7 @@ exports[`BisectDialog component renders 5`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -680,11 +680,11 @@ exports[`BisectDialog component renders 5`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -694,7 +694,7 @@ exports[`BisectDialog component renders 5`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -707,7 +707,7 @@ exports[`BisectDialog component renders 5`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -725,11 +725,11 @@ exports[`BisectDialog component renders 5`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -739,7 +739,7 @@ exports[`BisectDialog component renders 5`] = `
                 "7.0.0 local installed",
                 "8.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -752,7 +752,7 @@ exports[`BisectDialog component renders 5`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "5.0.0",
@@ -808,7 +808,7 @@ exports[`BisectDialog component renders 6`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -843,11 +843,11 @@ exports[`BisectDialog component renders 6`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -864,7 +864,7 @@ exports[`BisectDialog component renders 6`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -884,7 +884,7 @@ exports[`BisectDialog component renders 6`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -902,11 +902,11 @@ exports[`BisectDialog component renders 6`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -923,7 +923,7 @@ exports[`BisectDialog component renders 6`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -943,7 +943,7 @@ exports[`BisectDialog component renders 6`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "1.0.0",
@@ -999,7 +999,7 @@ exports[`BisectDialog component renders 7`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -1034,11 +1034,11 @@ exports[`BisectDialog component renders 7`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1055,7 +1055,7 @@ exports[`BisectDialog component renders 7`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1086,11 +1086,11 @@ exports[`BisectDialog component renders 7`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1107,7 +1107,7 @@ exports[`BisectDialog component renders 7`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1176,7 +1176,7 @@ exports[`BisectDialog component renders 8`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -1211,11 +1211,11 @@ exports[`BisectDialog component renders 8`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1232,7 +1232,7 @@ exports[`BisectDialog component renders 8`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1252,7 +1252,7 @@ exports[`BisectDialog component renders 8`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -1270,11 +1270,11 @@ exports[`BisectDialog component renders 8`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1291,7 +1291,7 @@ exports[`BisectDialog component renders 8`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1360,7 +1360,7 @@ exports[`BisectDialog component renders 9`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -1395,11 +1395,11 @@ exports[`BisectDialog component renders 9`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1416,7 +1416,7 @@ exports[`BisectDialog component renders 9`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1436,7 +1436,7 @@ exports[`BisectDialog component renders 9`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -1454,11 +1454,11 @@ exports[`BisectDialog component renders 9`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1475,7 +1475,7 @@ exports[`BisectDialog component renders 9`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1495,7 +1495,7 @@ exports[`BisectDialog component renders 9`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "5.0.0",
@@ -1551,7 +1551,7 @@ exports[`BisectDialog component renders 10`] = `
   >
     <Blueprint3.Callout
       style={
-        Object {
+        {
           "marginBottom": "1rem",
           "marginTop": 0,
         }
@@ -1587,11 +1587,11 @@ exports[`BisectDialog component renders 10`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1608,7 +1608,7 @@ exports[`BisectDialog component renders 10`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1628,7 +1628,7 @@ exports[`BisectDialog component renders 10`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "4.0.0",
@@ -1646,11 +1646,11 @@ exports[`BisectDialog component renders 10`] = `
       >
         <VersionSelect
           appState={
-            Object {
-              "channelsToShow": Array [
+            {
+              "channelsToShow": [
                 "Stable",
               ],
-              "versions": Array [
+              "versions": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1667,7 +1667,7 @@ exports[`BisectDialog component renders 10`] = `
                 "14.0.0 local installed",
                 "15.0.0 local installed",
               ],
-              "versionsToShow": Array [
+              "versionsToShow": [
                 "1.0.0 local installed",
                 "2.0.0 local installed",
                 "3.0.0 local installed",
@@ -1687,7 +1687,7 @@ exports[`BisectDialog component renders 10`] = `
             }
           }
           currentVersion={
-            Object {
+            {
               "source": "local",
               "state": "installed",
               "version": "5.0.0",

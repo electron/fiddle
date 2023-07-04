@@ -6,12 +6,12 @@ exports[`Header component renders 1`] = `
     id="header"
   >
     <commands
-      appState={Object {}}
+      appState={{}}
       key="commands"
     />
   </header>
   <welcome-tour
-    appState={Object {}}
+    appState={{}}
   />
 </Fragment>
 `;

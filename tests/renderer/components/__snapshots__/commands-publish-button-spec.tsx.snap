@@ -19,7 +19,7 @@ exports[`Action button component renders 1`] = `
               icon="lock"
               multiline={false}
               onClick={[Function]}
-              popoverProps={Object {}}
+              popoverProps={{}}
               shouldDismissPopover={true}
               text="Private"
             />
@@ -29,7 +29,7 @@ exports[`Action button component renders 1`] = `
               icon="unlock"
               multiline={false}
               onClick={[Function]}
-              popoverProps={Object {}}
+              popoverProps={{}}
               shouldDismissPopover={true}
               text="Public"
             />
@@ -44,7 +44,7 @@ exports[`Action button component renders 1`] = `
         inheritDarkTheme={true}
         interactionKind="click"
         minimal={false}
-        modifiers={Object {}}
+        modifiers={{}}
         openOnTargetFocus={true}
         position="bottom"
         targetTagName="span"
