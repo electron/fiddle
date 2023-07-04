@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import * as semver from 'semver';
 
@@ -20,7 +20,7 @@ import { emitEvent, waitFor } from '../utils';
 
 jest.mock('../../src/renderer/file-manager');
 jest.mock('fs-extra');
-jest.mock('path');
+jest.mock('node:path');
 
 describe('Runner component', () => {
   let store: StateMock;

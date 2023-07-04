@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import * as electron from 'electron';
 
@@ -16,7 +16,7 @@ import {
 import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/context-menu');
-jest.mock('path');
+jest.mock('node:path');
 
 describe('windows', () => {
   beforeAll(() => {

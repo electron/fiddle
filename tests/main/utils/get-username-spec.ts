@@ -1,6 +1,6 @@
 import { getUsername } from '../../../src/main/utils/get-username';
 
-jest.mock('os', () => ({
+jest.mock('node:os', () => ({
   userInfo: () => ({
     username: 'test-user',
   }),

@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 export const USER_DATA_PATH = window.ElectronFiddle.appPaths.userData;
 export const ELECTRON_DOWNLOAD_PATH = path.join(USER_DATA_PATH, 'electron-bin');

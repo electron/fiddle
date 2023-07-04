@@ -1,4 +1,4 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { MAIN_JS } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/main/templates';

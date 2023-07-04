@@ -1,4 +1,4 @@
-import { EventEmitter } from 'events';
+import { EventEmitter } from 'node:events';
 
 import { BrowserWindowMock } from './browser-window';
 import { WebContentsMock } from './web-contents';

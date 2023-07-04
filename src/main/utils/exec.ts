@@ -1,5 +1,5 @@
-import { exec as cp_exec } from 'child_process';
-import { promisify } from 'util';
+import { exec as cp_exec } from 'node:child_process';
+import { promisify } from 'node:util';
 
 import shellEnv from 'shell-env';
 
