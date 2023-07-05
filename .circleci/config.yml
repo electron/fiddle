@@ -226,17 +226,12 @@ workflows:
           context: fiddle-release
           requires:
             - lint
-            - mac-test-x64
-            - mac-test-arm64
-            - win-test-x64
-            - linux-test-x64
-            - mac-build-x64
-            - mac-build-arm64
-            - win-build-ia32
-            - win-build-x64
-            - linux-build-x64
-            - linux-build-arm64
-            - linux-build-armv7l
+            - mac-test
+            - win-test
+            - linux-test
+            - mac-build
+            - win-build
+            - linux-build
           filters:
             tags:
               only: 
