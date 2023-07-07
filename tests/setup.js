@@ -32,19 +32,10 @@ jest.mock('@sentry/electron/renderer', () => ({
   init: jest.fn(),
 }));
 
-function broadcastChannelMock() {
-  //
-}
-
-broadcastChannelMock.prototype.addEventListener = function () {
-  //
+global.BroadcastChannel = class {
+  addEventListener = jest.fn();
+  postMessage = jest.fn();
 };
-
-broadcastChannelMock.prototype.postMessage = function () {
-  //
-};
-
-global.BroadcastChannel = broadcastChannelMock;
 
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
