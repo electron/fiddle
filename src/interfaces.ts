@@ -217,10 +217,14 @@ export enum WindowSpecificSetting {
   version = 'version',
 }
 
-export interface AppStateBroadcastMessage<T = unknown> {
-  type: AppStateBroadcastMessageType;
-  payload: T;
+export interface AppStateBroadcastChannel extends BroadcastChannel {
+  postMessage(params: AppStateBroadcastMessage): void;
 }
+
+export type AppStateBroadcastMessage = {
+  type: AppStateBroadcastMessageType.syncVersion;
+  payload: RunnableVersion;
+};
 
 export enum AppStateBroadcastMessageType {
   syncVersion = 'syncVersion',

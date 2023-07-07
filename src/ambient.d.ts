@@ -2,7 +2,6 @@ import { ReleaseInfo } from '@electron/fiddle-core';
 import * as MonacoType from 'monaco-editor';
 
 import {
-  AppStateBroadcastMessage,
   BisectRequest,
   BlockableAccelerator,
   EditorValues,
@@ -125,9 +124,5 @@ declare global {
       taskDone(result: RunResult): void;
       themePath: string;
     };
-  }
-
-  interface AppStateBroadcastChannel extends BroadcastChannel {
-    postMessage<T = unknown>(params: AppStateBroadcastMessage<T>): void;
   }
 }

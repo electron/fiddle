@@ -16,6 +16,7 @@ import {
 } from 'mobx';
 
 import {
+  AppStateBroadcastChannel,
   AppStateBroadcastMessage,
   AppStateBroadcastMessageType,
   BlockableAccelerator,
@@ -214,7 +215,7 @@ export class AppState {
 
   // Notifies other windows that this version has changed so they can update their state to reflect that.
   private updateVersionDownloadStatus(version: RunnableVersion) {
-    this.broadcastChannel.postMessage<RunnableVersion>({
+    this.broadcastChannel.postMessage({
       type: AppStateBroadcastMessageType.syncVersion,
       payload: { ...version },
     });
@@ -461,7 +462,7 @@ export class AppState {
 
         switch (type) {
           case AppStateBroadcastMessageType.syncVersion: {
-            this.addNewVersions([payload as RunnableVersion]);
+            this.addNewVersions([payload]);
 
             break;
           }
