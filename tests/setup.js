@@ -43,13 +43,13 @@ global.__JEST__ = global.__JEST__ || {};
 global.window = global.window || {};
 global.document = global.document || { body: {} };
 global.fetch = window.fetch = jest.fn();
-global.BroadcastChannel = BroadcastChannel;
 
 delete window.localStorage;
 window.localStorage = {};
 
 window.navigator = window.navigator ?? {};
 window.navigator.clipboard = {};
+window.BroadcastChannel = BroadcastChannel;
 
 /**
  * Mock these properties twice so that they're available
