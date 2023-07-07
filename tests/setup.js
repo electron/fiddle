@@ -1,3 +1,5 @@
+const { BroadcastChannel } = require('worker_threads');
+
 const { configure: enzymeConfigure } = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
 const { createSerializer } = require('enzyme-to-json');
@@ -41,6 +43,7 @@ global.__JEST__ = global.__JEST__ || {};
 global.window = global.window || {};
 global.document = global.document || { body: {} };
 global.fetch = window.fetch = jest.fn();
+global.BroadcastChannel = BroadcastChannel;
 
 delete window.localStorage;
 window.localStorage = {};

@@ -216,3 +216,12 @@ export enum WindowSpecificSetting {
   gitHubPublishAsPublic = 'gitHubPublishAsPublic',
   version = 'version',
 }
+
+export interface AppStateBroadcastMessage<T = unknown> {
+  type: AppStateBroadcastMessageType;
+  payload: T;
+}
+
+export enum AppStateBroadcastMessageType {
+  syncVersion = 'syncVersion',
+}
