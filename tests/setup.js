@@ -1,5 +1,3 @@
-const { BroadcastChannel } = require('worker_threads');
-
 const { configure: enzymeConfigure } = require('enzyme');
 const Adapter = require('enzyme-adapter-react-16');
 const { createSerializer } = require('enzyme-to-json');
@@ -34,6 +32,20 @@ jest.mock('@sentry/electron/renderer', () => ({
   init: jest.fn(),
 }));
 
+function broadcastChannelMock() {
+  //
+}
+
+broadcastChannelMock.prototype.addEventListener = function () {
+  //
+};
+
+broadcastChannelMock.prototype.postMessage = function () {
+  //
+};
+
+global.BroadcastChannel = broadcastChannelMock;
+
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
 // We want to detect jest sometimes
@@ -49,7 +61,6 @@ window.localStorage = {};
 
 window.navigator = window.navigator ?? {};
 window.navigator.clipboard = {};
-window.BroadcastChannel = BroadcastChannel;
 
 /**
  * Mock these properties twice so that they're available
