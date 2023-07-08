@@ -222,10 +222,10 @@ export interface AppStateBroadcastChannel extends BroadcastChannel {
 }
 
 export type AppStateBroadcastMessage = {
-  type: AppStateBroadcastMessageType.syncVersion;
-  payload: RunnableVersion;
+  type: AppStateBroadcastMessageType.syncVersions;
+  payload: RunnableVersion[];
 };
 
 export enum AppStateBroadcastMessageType {
-  syncVersion = 'syncVersion',
+  syncVersions = 'syncVersions',
 }

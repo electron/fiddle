@@ -214,10 +214,13 @@ export class AppState {
   );
 
   // Notifies other windows that this version has changed so they can update their state to reflect that.
-  private updateVersionState(version: RunnableVersion) {
+  private broadcastVersionStates(versions: RunnableVersion[]) {
     this.broadcastChannel.postMessage({
-      type: AppStateBroadcastMessageType.syncVersion,
-      payload: { ...version },
+      type: AppStateBroadcastMessageType.syncVersions,
+
+      // the RunnableVersion proxies can't be cloned by structuredClone,
+      // so we have to create plain objects out of them
+      payload: versions.map((version) => ({ ...version })),
     });
   }
 
@@ -461,8 +464,8 @@ export class AppState {
         const { type, payload } = event.data;
 
         switch (type) {
-          case AppStateBroadcastMessageType.syncVersion: {
-            this.addNewVersions([payload]);
+          case AppStateBroadcastMessageType.syncVersions: {
+            this.setVersionStates(payload);
 
             break;
           }
@@ -729,6 +732,15 @@ export class AppState {
 
   public addNewVersions(versions: RunnableVersion[]) {
     for (const ver of versions) {
+      this.versions[ver.version] ||= ver;
+    }
+
+    this.broadcastVersionStates(versions);
+  }
+
+  // Updates the version states in the current window to reflect updates made by other windows.
+  private setVersionStates(versions: RunnableVersion[]) {
+    for (const ver of versions) {
       this.versions[ver.version] = ver;
     }
   }
@@ -768,7 +780,7 @@ export class AppState {
 
           await typeDefsCleaner();
 
-          this.updateVersionState(ver);
+          this.broadcastVersionStates([ver]);
         }
       } else {
         console.log(`State: Version ${version} already removed, doing nothing`);
@@ -807,10 +819,12 @@ export class AppState {
 
     console.log(`State: Downloading Electron ${version}`);
 
-    this.updateVersionState({
-      ...ver,
-      state: InstallState.downloading,
-    });
+    this.broadcastVersionStates([
+      {
+        ...ver,
+        state: InstallState.downloading,
+      },
+    ]);
 
     // Download the version without setting it as the current version.
     await this.installer.ensureDownloaded(version, {
@@ -825,13 +839,13 @@ export class AppState {
           if (ver.downloadProgress !== percent) {
             ver.downloadProgress = percent;
 
-            this.updateVersionState(ver);
+            this.broadcastVersionStates([ver]);
           }
         });
       },
     });
 
-    this.updateVersionState(ver);
+    this.broadcastVersionStates([ver]);
   }
 
   /**
