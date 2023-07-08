@@ -214,7 +214,7 @@ export class AppState {
   );
 
   // Notifies other windows that this version has changed so they can update their state to reflect that.
-  private updateVersionDownloadStatus(version: RunnableVersion) {
+  private updateVersionState(version: RunnableVersion) {
     this.broadcastChannel.postMessage({
       type: AppStateBroadcastMessageType.syncVersion,
       payload: { ...version },
@@ -768,7 +768,7 @@ export class AppState {
 
           await typeDefsCleaner();
 
-          this.updateVersionDownloadStatus(ver);
+          this.updateVersionState(ver);
         }
       } else {
         console.log(`State: Version ${version} already removed, doing nothing`);
@@ -807,7 +807,7 @@ export class AppState {
 
     console.log(`State: Downloading Electron ${version}`);
 
-    this.updateVersionDownloadStatus({
+    this.updateVersionState({
       ...ver,
       state: InstallState.downloading,
     });
@@ -825,13 +825,13 @@ export class AppState {
           if (ver.downloadProgress !== percent) {
             ver.downloadProgress = percent;
 
-            this.updateVersionDownloadStatus(ver);
+            this.updateVersionState(ver);
           }
         });
       },
     });
 
-    this.updateVersionDownloadStatus(ver);
+    this.updateVersionState(ver);
   }
 
   /**
