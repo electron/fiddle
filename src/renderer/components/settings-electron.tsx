@@ -52,6 +52,39 @@ export const ElectronSettings = observer(
       this.handleStateChange = this.handleStateChange.bind(this);
     }
 
+    /**
+     * Queries the currently active versions and update the local state.
+     *
+     * This currently gives a warning/error in development mode when the ElectronSettings component is unmounted
+     * ("Can't perform a React state update on an unmounted component. This is a no-op, but it indicates a memory leak
+     * in your application"). This is a false positive, the warning has been removed in React 18+ (see
+     * https://github.com/facebook/react/pull/22114).
+     *
+     * @TODO upgrade to React 18
+     */
+    updateActiveVersions = () => {
+      this.props.appState
+        .getActiveVersions()
+        .then((activeVersions) =>
+          this.setState({ ...this.state, activeVersions }),
+        )
+        .catch((err) => {
+          console.error(
+            'Error updating the currently active Electron versions:',
+          );
+          console.error(err);
+        });
+    };
+
+    public componentDidMount() {
+      this.updateActiveVersions();
+    }
+
+    // Fired when other windows change their active Electron version
+    public componentDidUpdate() {
+      this.updateActiveVersions();
+    }
+
     public handleUpdateElectronVersions() {
       this.props.appState.updateElectronVersions();
     }
@@ -215,6 +248,7 @@ export const ElectronSettings = observer(
         </ButtonGroup>
       );
     }
+
     private filterSection(): JSX.Element {
       const { appState } = this.props;
       return (
@@ -401,7 +435,7 @@ export const ElectronSettings = observer(
           break;
       }
 
-      if (version === appState.currentElectronVersion.version) {
+      if (this.state.activeVersions.has(appState.getVersionLockName(version))) {
         return (
           <Tooltip
             position="auto"

@@ -225,6 +225,34 @@ export class AppState {
     });
   }
 
+  // Lock on the active Electron version that prevents other windows from removing it
+  private versionLock: Lock | null = null;
+
+  // Used to release the lock when the current window switches Electron versions
+  private versionLockController = new AbortController();
+
+  private static versionLockNamePrefix = 'version:';
+
+  public getVersionLockName(ver: string) {
+    return [AppState.versionLockNamePrefix, ver].join('');
+  }
+
+  /**
+   * Retrieves all Electron versions that are currently active in some window.
+   */
+  public async getActiveVersions(): Promise<Set<string>> {
+    return ((await navigator.locks.query()).held || []).reduce<Set<string>>(
+      (acc, item) => {
+        if (item.name?.startsWith(AppState.versionLockNamePrefix)) {
+          acc.add(item.name);
+        }
+
+        return acc;
+      },
+      new Set(),
+    );
+  }
+
   constructor(versions: RunnableVersion[]) {
     makeObservable<AppState, 'setPageHash' | 'setVersionStates'>(this, {
       Bisector: observable,
@@ -795,7 +823,9 @@ export class AppState {
   public async removeVersion(ver: RunnableVersion): Promise<void> {
     const { version, state, source } = ver;
 
-    if (ver === this.currentElectronVersion) {
+    const activeVersions = await this.getActiveVersions();
+
+    if (activeVersions.has(this.getVersionLockName(ver.version))) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
@@ -954,9 +984,35 @@ export class AppState {
       return;
     }
 
+    if (this.versionLock) {
+      console.log(`Releasing lock on version ${this.version}`);
+
+      // release the lock on the previous version
+      this.versionLockController.abort();
+
+      // replace the spent AbortController
+      this.versionLockController = new AbortController();
+    }
+
     const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
     this.version = version;
+
+    navigator.locks.request(
+      this.getVersionLockName(version),
+      { mode: 'shared' },
+      (lock) => {
+        this.versionLock = lock;
+
+        /**
+         * The lock is released when this promise resolves, so we keep it in the
+         * pending state until our AbortController is aborted.
+         */
+        return new Promise<void>((resolve) => {
+          this.versionLockController.signal.onabort = () => resolve();
+        });
+      },
+    );
 
     // If there's no current fiddle,
     // or if the current fiddle is the previous version's template,
