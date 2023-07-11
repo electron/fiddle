@@ -212,11 +212,7 @@ export enum GlobalSetting {
   theme = 'theme',
 }
 
-export type GlobalSettingKey = keyof typeof GlobalSetting;
-
 export enum WindowSpecificSetting {
   gitHubPublishAsPublic = 'gitHubPublishAsPublic',
   version = 'version',
 }
-
-export type WindowSpecificSettingKey = keyof typeof WindowSpecificSetting;

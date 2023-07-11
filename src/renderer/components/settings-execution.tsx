@@ -12,11 +12,7 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import {
-  GlobalSetting,
-  GlobalSettingKey,
-  IPackageManager,
-} from '../../interfaces';
+import { GlobalSetting, IPackageManager } from '../../interfaces';
 import { AppState } from '../state';
 
 /**
@@ -122,11 +118,11 @@ export const ExecutionSettings = observer(
      * run with the Electron executable.
      *
      * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @param {SettingItemType} type
+     * @param {GlobalSetting} type
      */
     public handleSettingsItemChange(
       event: React.ChangeEvent<HTMLInputElement>,
-      type: GlobalSettingKey,
+      type: GlobalSetting,
     ) {
       const { name, value } = event.currentTarget;
 
@@ -141,9 +137,9 @@ export const ExecutionSettings = observer(
     /**
      * Adds a new settings item input field.
      *
-     * @param {SettingItemType} type
+     * @param {GlobalSetting} type
      */
-    private addNewSettingsItem(type: GlobalSettingKey) {
+    private addNewSettingsItem(type: GlobalSetting) {
       const array = Object.entries(this.state[type]);
 
       this.setState((prevState) => ({
@@ -167,7 +163,7 @@ export const ExecutionSettings = observer(
       appState.packageManager = value as IPackageManager;
     };
 
-    public renderDeleteItem(idx: string, type: GlobalSettingKey): JSX.Element {
+    public renderDeleteItem(idx: string, type: GlobalSetting): JSX.Element {
       const updated = this.state[type];
 
       const removeFn = () => {
