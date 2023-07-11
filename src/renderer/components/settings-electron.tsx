@@ -435,7 +435,7 @@ export const ElectronSettings = observer(
           break;
       }
 
-      if (this.state.activeVersions.has(appState.getVersionLockName(version))) {
+      if (this.state.activeVersions.has(version)) {
         return (
           <Tooltip
             position="auto"

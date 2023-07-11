@@ -233,7 +233,7 @@ export class AppState {
 
   private static versionLockNamePrefix = 'version:';
 
-  public getVersionLockName(ver: string) {
+  private getVersionLockName(ver: string) {
     return `${AppState.versionLockNamePrefix}${ver}`;
   }
 
@@ -244,7 +244,7 @@ export class AppState {
     return ((await navigator.locks.query()).held || []).reduce<Set<string>>(
       (acc, item) => {
         if (item.name?.startsWith(AppState.versionLockNamePrefix)) {
-          acc.add(item.name);
+          acc.add(item.name.split(AppState.versionLockNamePrefix)[1]);
         }
 
         return acc;
@@ -825,7 +825,7 @@ export class AppState {
 
     const activeVersions = await this.getActiveVersions();
 
-    if (activeVersions.has(this.getVersionLockName(ver.version))) {
+    if (activeVersions.has(ver.version)) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
