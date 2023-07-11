@@ -234,7 +234,7 @@ export class AppState {
   private static versionLockNamePrefix = 'version:';
 
   public getVersionLockName(ver: string) {
-    return [AppState.versionLockNamePrefix, ver].join('');
+    return `${AppState.versionLockNamePrefix}${ver}`;
   }
 
   /**
