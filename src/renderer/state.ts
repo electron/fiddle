@@ -225,8 +225,8 @@ export class AppState {
     });
   }
 
-  // Lock on the active Electron version that prevents other windows from removing it
-  private versionLock: Lock | null = null;
+  // Do we have a lock on the active Electron version that prevents other windows from removing it?
+  private hasActiveLock = false;
 
   // Used to release the lock when the current window switches Electron versions
   private versionLockController = new AbortController();
@@ -984,7 +984,7 @@ export class AppState {
       return;
     }
 
-    if (this.versionLock) {
+    if (this.hasActiveLock) {
       console.log(`Releasing lock on version ${this.version}`);
 
       // release the lock on the previous version
@@ -1002,7 +1002,7 @@ export class AppState {
       this.getVersionLockName(version),
       { mode: 'shared' },
       (lock) => {
-        this.versionLock = lock;
+        this.hasActiveLock = Boolean(lock);
 
         /**
          * The lock is released when this promise resolves, so we keep it in the
