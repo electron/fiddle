@@ -32,9 +32,26 @@ jest.mock('@sentry/electron/renderer', () => ({
   init: jest.fn(),
 }));
 
-global.BroadcastChannel = class {
-  addEventListener = jest.fn();
-  postMessage = jest.fn();
+class FakeBroadcastChannel {
+  listeners = [];
+
+  addEventListener = (_, callback) => {
+    this.listeners.push(callback);
+  };
+
+  postMessage = (message) => {
+    for (const listener of this.listeners) {
+      listener(new MessageEvent('message', { data: message }));
+    }
+  };
+}
+
+global.BroadcastChannel = class Singleton {
+  static instance = new FakeBroadcastChannel();
+
+  constructor(_) {
+    return Singleton.instance;
+  }
 };
 
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));

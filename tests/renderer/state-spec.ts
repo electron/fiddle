@@ -1,6 +1,8 @@
 import { reaction } from 'mobx';
 
 import {
+  AppStateBroadcastChannel,
+  AppStateBroadcastMessageType,
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -741,6 +743,30 @@ describe('AppState', () => {
       appState.editorMosaic.isEdited = true;
       const actual = appState.title;
       expect(actual).toBe(expected);
+    });
+  });
+
+  describe('broadcastChannel', () => {
+    it('updates the version state in response to changes in other windows', async () => {
+      const broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
+        'AppState',
+      );
+
+      const fakeVersion = {
+        version: '13.9.9',
+        state: InstallState.downloading,
+      } as RunnableVersion;
+
+      expect(appState.versions[fakeVersion.version]).toBeFalsy();
+
+      broadcastChannel.postMessage({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [fakeVersion],
+      });
+
+      expect(appState.versions[fakeVersion.version].state).toEqual(
+        InstallState.downloading,
+      );
     });
   });
 });
