@@ -3,6 +3,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { Settings } from '../../../src/renderer/components/settings';
+import { AppState } from '../../../src/renderer/state';
 
 jest.mock('../../../src/renderer/components/settings-general', () => ({
   GeneralSettings: 'settings-general',
@@ -17,12 +18,12 @@ jest.mock('../../../src/renderer/components/settings-credits', () => ({
 }));
 
 describe('Settings component', () => {
-  let store: any;
+  let store: AppState;
 
   beforeEach(() => {
     store = {
       isSettingsShowing: true,
-    };
+    } as AppState;
   });
 
   it('renders null if settings not showing', () => {
@@ -138,8 +139,8 @@ describe('Settings component', () => {
     });
 
     // Set the theme selector showing to true
-    const wrapper = shallow(<Settings appState={store} />);
-    const instance: any = wrapper.instance();
+    const wrapper = shallow<Settings>(<Settings appState={store} />);
+    const instance = wrapper.instance();
 
     // Toggle the state of the variable
     instance.toggleHasPopoverOpen();

@@ -2,20 +2,15 @@ import { SearchResponse } from '@algolia/client-search';
 import algoliasearch, { SearchIndex } from 'algoliasearch/lite';
 
 // See full schema: https://github.com/algolia/npm-search#schema
-interface AlgoliaHit {
+export interface NPMSearchResult {
   name: string;
   version: string;
   versions: Record<string, string>;
-  _highlightResult: {
-    name: {
-      value: string;
-    };
-  };
 }
 
 class NPMSearch {
   private index: SearchIndex;
-  private searchCache: Map<string, SearchResponse<AlgoliaHit>>;
+  private searchCache: Map<string, SearchResponse<NPMSearchResult>>;
   constructor() {
     const client = algoliasearch(
       'OFCNCOG2CU',
@@ -34,7 +29,7 @@ class NPMSearch {
     if (this.searchCache.has(query)) {
       return this.searchCache.get(query)!;
     } else {
-      const result = await this.index.search<AlgoliaHit>(query, {
+      const result = await this.index.search<NPMSearchResult>(query, {
         hitsPerPage: 5,
         optionalFilters: [`objectID:${query}`],
       });

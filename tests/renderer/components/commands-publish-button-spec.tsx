@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { ShallowWrapper, shallow } from 'enzyme';
 
 import {
   EditorValues,
@@ -76,8 +76,10 @@ describe('Action button component', () => {
   });
 
   function createActionButton() {
-    const wrapper = shallow(<GistActionButton appState={state} />);
-    const instance = wrapper.instance() as any;
+    const wrapper = shallow<GistActionButton>(
+      <GistActionButton appState={state} />,
+    );
+    const instance = wrapper.instance();
     return { wrapper, instance };
   }
 
@@ -143,7 +145,7 @@ describe('Action button component', () => {
   });
 
   describe('publish mode', () => {
-    let instance: any;
+    let instance: GistActionButton;
 
     beforeEach(() => {
       // create a button that's primed to publish a new gist
@@ -265,8 +267,8 @@ describe('Action button component', () => {
 
   describe('update mode', () => {
     const gistId = '123';
-    let wrapper: any;
-    let instance: any;
+    let wrapper: ShallowWrapper;
+    let instance: GistActionButton;
 
     beforeEach(() => {
       // create a button that's primed to update gistId
@@ -311,8 +313,8 @@ describe('Action button component', () => {
 
   describe('delete mode', () => {
     const gistId = '123';
-    let wrapper: any;
-    let instance: any;
+    let wrapper: ShallowWrapper;
+    let instance: GistActionButton;
 
     beforeEach(() => {
       state.gistId = gistId;

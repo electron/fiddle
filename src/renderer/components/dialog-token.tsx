@@ -29,174 +29,171 @@ const TOKEN_PATTERN = /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0
  * @class TokenDialog
  * @extends {React.Component<TokenDialogProps, TokenDialogState>}
  */
-export const TokenDialog = observer(
-  class TokenDialog extends React.Component<
-    TokenDialogProps,
-    TokenDialogState
-  > {
-    constructor(props: TokenDialogProps) {
-      super(props);
+@observer
+export class TokenDialog extends React.Component<
+  TokenDialogProps,
+  TokenDialogState
+> {
+  constructor(props: TokenDialogProps) {
+    super(props);
 
-      this.state = {
-        verifying: false,
-        error: false,
-        tokenInput: '',
-      };
+    this.state = {
+      verifying: false,
+      error: false,
+      tokenInput: '',
+    };
 
-      this.onSubmitToken = this.onSubmitToken.bind(this);
-      this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(
-        this,
-      );
-      this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
-      this.handleChange = this.handleChange.bind(this);
-      this.onClose = this.onClose.bind(this);
+    this.onSubmitToken = this.onSubmitToken.bind(this);
+    this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(this);
+    this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.onClose = this.onClose.bind(this);
+  }
+
+  /**
+   * Handles the submission of a token
+   *
+   * @returns {Promise<void>}
+   * @memberof TokenDialog
+   */
+  public async onSubmitToken(): Promise<void> {
+    if (!this.state.tokenInput) return;
+    this.setState({ verifying: true });
+    this.props.appState.gitHubToken = this.state.tokenInput;
+
+    const octo = await getOctokit(this.props.appState);
+
+    try {
+      const { data } = await octo.users.getAuthenticated();
+      this.props.appState.gitHubAvatarUrl = data.avatar_url;
+      this.props.appState.gitHubLogin = data.login;
+      this.props.appState.gitHubName = data.name;
+      this.setState({ verifying: false, error: false });
+    } catch (error) {
+      console.warn(`Authenticating against GitHub failed`, error);
+      this.setState({ verifying: false, error: true });
+      this.props.appState.gitHubToken = null;
+      return;
     }
 
-    /**
-     * Handles the submission of a token
-     *
-     * @returns {Promise<void>}
-     * @memberof TokenDialog
-     */
-    public async onSubmitToken(): Promise<void> {
-      if (!this.state.tokenInput) return;
-      this.setState({ verifying: true });
-      this.props.appState.gitHubToken = this.state.tokenInput;
+    this.props.appState.isTokenDialogShowing = false;
+  }
 
-      const octo = await getOctokit(this.props.appState);
+  /**
+   * Closes the dialog
+   */
+  public onClose() {
+    this.props.appState.isTokenDialogShowing = false;
+    this.reset();
+  }
 
-      try {
-        const { data } = await octo.users.getAuthenticated();
-        this.props.appState.gitHubAvatarUrl = data.avatar_url;
-        this.props.appState.gitHubLogin = data.login;
-        this.props.appState.gitHubName = data.name;
-        this.setState({ verifying: false, error: false });
-      } catch (error) {
-        console.warn(`Authenticating against GitHub failed`, error);
-        this.setState({ verifying: false, error: true });
-        this.props.appState.gitHubToken = null;
-        return;
-      }
+  /**
+   * Reset this component's state
+   */
+  public reset(): void {
+    this.setState({
+      verifying: false,
+      error: false,
+      tokenInput: '',
+    });
+  }
 
-      this.props.appState.isTokenDialogShowing = false;
+  /**
+   * Opens GitHub's page for token generation
+   *
+   * @memberof TokenDialog
+   */
+  public openGenerateTokenExternal() {
+    window.open(GENERATE_TOKEN_URL);
+  }
+
+  /**
+   * When the input field receives focus, we check the clipboard.
+   * Maybe there's already something token-like there!
+   *
+   * @returns
+   * @memberof TokenDialog
+   */
+  public async onTokenInputFocused() {
+    const text = ((await navigator.clipboard.readText()) || '').trim();
+
+    if (TOKEN_PATTERN.test(text)) {
+      this.setState({ tokenInput: text });
     }
+  }
 
-    /**
-     * Closes the dialog
-     */
-    public onClose() {
-      this.props.appState.isTokenDialogShowing = false;
-      this.reset();
-    }
+  /**
+   * Handle the change event, which usually just updates the address bar's value
+   *
+   * @param {React.ChangeEvent<HTMLInputElement>} event
+   * @memberof AddressBar
+   */
+  public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    this.setState({ tokenInput: event.target.value });
+  }
 
-    /**
-     * Reset this component's state
-     */
-    public reset(): void {
-      this.setState({
-        verifying: false,
-        error: false,
-        tokenInput: '',
-      });
-    }
+  get buttons() {
+    const canSubmit = !!this.state.tokenInput;
 
-    /**
-     * Opens GitHub's page for token generation
-     *
-     * @memberof TokenDialog
-     */
-    public openGenerateTokenExternal() {
-      window.open(GENERATE_TOKEN_URL);
-    }
+    return [
+      <Button
+        key="done"
+        disabled={!canSubmit}
+        onClick={this.onSubmitToken}
+        loading={this.state.verifying}
+        text="Done"
+        icon="log-in"
+      />,
+      <Button
+        key="cancel"
+        text="Cancel"
+        icon="log-out"
+        onClick={this.onClose}
+      />,
+    ];
+  }
 
-    /**
-     * When the input field receives focus, we check the clipboard.
-     * Maybe there's already something token-like there!
-     *
-     * @returns
-     * @memberof TokenDialog
-     */
-    public async onTokenInputFocused() {
-      const text = ((await navigator.clipboard.readText()) || '').trim();
+  get invalidWarning() {
+    return (
+      <>
+        <Callout intent={Intent.DANGER}>
+          Please provide a valid GitHub Personal Access Token
+        </Callout>
+        <br />
+      </>
+    );
+  }
 
-      if (TOKEN_PATTERN.test(text)) {
-        this.setState({ tokenInput: text });
-      }
-    }
+  public render() {
+    const { isTokenDialogShowing } = this.props.appState;
 
-    /**
-     * Handle the change event, which usually just updates the address bar's value
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @memberof AddressBar
-     */
-    public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-      this.setState({ tokenInput: event.target.value });
-    }
+    return (
+      <Dialog
+        isOpen={isTokenDialogShowing}
+        onClose={this.onClose}
+        title="GitHub Token"
+      >
+        <div className="bp3-dialog-body">
+          <p>
+            Generate a{' '}
+            <a onClick={this.openGenerateTokenExternal}>
+              GitHub Personal Access Token
+            </a>{' '}
+            and paste it here:
+          </p>
 
-    get buttons() {
-      const canSubmit = !!this.state.tokenInput;
+          {this.state.error ? this.invalidWarning : null}
 
-      return [
-        <Button
-          key="done"
-          disabled={!canSubmit}
-          onClick={this.onSubmitToken}
-          loading={this.state.verifying}
-          text="Done"
-          icon="log-in"
-        />,
-        <Button
-          key="cancel"
-          text="Cancel"
-          icon="log-out"
-          onClick={this.onClose}
-        />,
-      ];
-    }
-
-    get invalidWarning() {
-      return (
-        <>
-          <Callout intent={Intent.DANGER}>
-            Please provide a valid GitHub Personal Access Token
-          </Callout>
-          <br />
-        </>
-      );
-    }
-
-    public render() {
-      const { isTokenDialogShowing } = this.props.appState;
-
-      return (
-        <Dialog
-          isOpen={isTokenDialogShowing}
-          onClose={this.onClose}
-          title="GitHub Token"
-        >
-          <div className="bp3-dialog-body">
-            <p>
-              Generate a{' '}
-              <a onClick={this.openGenerateTokenExternal}>
-                GitHub Personal Access Token
-              </a>{' '}
-              and paste it here:
-            </p>
-
-            {this.state.error ? this.invalidWarning : null}
-
-            <InputGroup
-              value={this.state.tokenInput || ''}
-              onFocus={this.onTokenInputFocused}
-              onChange={this.handleChange}
-            />
-          </div>
-          <div className="bp3-dialog-footer">
-            <div className="bp3-dialog-footer-actions">{this.buttons}</div>
-          </div>
-        </Dialog>
-      );
-    }
-  },
-);
+          <InputGroup
+            value={this.state.tokenInput || ''}
+            onFocus={this.onTokenInputFocused}
+            onChange={this.handleChange}
+          />
+        </div>
+        <div className="bp3-dialog-footer">
+          <div className="bp3-dialog-footer-actions">{this.buttons}</div>
+        </div>
+      </Dialog>
+    );
+  }
+}

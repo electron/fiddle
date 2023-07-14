@@ -56,11 +56,11 @@ describe('Commands component', () => {
   });
 
   it('handleDoubleClick()', () => {
-    const wrapper = shallow(<Commands appState={store} />);
-    const instance = wrapper.instance() as any;
+    const wrapper = shallow<Commands>(<Commands appState={store} />);
+    const instance = wrapper.instance();
 
     const tag = { tagName: 'DIV' };
-    instance.handleDoubleClick({ target: tag, currentTarget: tag });
+    (instance as any).handleDoubleClick({ target: tag, currentTarget: tag });
 
     expect(
       window.ElectronFiddle.macTitlebarClicked as jest.Mock,
@@ -68,10 +68,10 @@ describe('Commands component', () => {
   });
 
   it('handleDoubleClick() should not handle input tag', () => {
-    const wrapper = shallow(<Commands appState={store} />);
-    const instance = wrapper.instance() as any;
+    const wrapper = shallow<Commands>(<Commands appState={store} />);
+    const instance = wrapper.instance();
 
-    instance.handleDoubleClick({
+    (instance as any).handleDoubleClick({
       target: { tagName: 'INPUT' },
       currentTarget: { tagName: 'DIV' },
     });

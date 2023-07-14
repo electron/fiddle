@@ -17,7 +17,7 @@ interface ToolbarButtonProps {
 
 abstract class ToolbarButton extends React.PureComponent<ToolbarButtonProps> {
   public static contextType = MosaicWindowContext;
-  public context: MosaicWindowContext;
+  declare context: MosaicWindowContext;
 
   constructor(props: ToolbarButtonProps) {
     super(props);

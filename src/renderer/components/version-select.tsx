@@ -244,38 +244,37 @@ interface VersionSelectProps {
  * @class VersionSelect
  * @extends {React.Component<VersionSelectProps, VersionSelectState>}
  */
-export const VersionSelect = observer(
-  class VersionSelect extends React.Component<
-    VersionSelectProps,
-    VersionSelectState
-  > {
-    public render() {
-      const { currentVersion, itemDisabled } = this.props;
-      const { version } = currentVersion;
+@observer
+export class VersionSelect extends React.Component<
+  VersionSelectProps,
+  VersionSelectState
+> {
+  public render() {
+    const { currentVersion, itemDisabled } = this.props;
+    const { version } = currentVersion;
 
-      return (
-        <ElectronVersionSelect
-          filterable={true}
-          items={this.props.appState.versionsToShow}
-          itemRenderer={renderItem}
-          itemListPredicate={filterItems}
-          itemListRenderer={itemListRenderer}
-          itemDisabled={itemDisabled}
-          onItemSelect={this.props.onVersionSelect}
-          noResults={<MenuItem disabled={true} text="No results." />}
+    return (
+      <ElectronVersionSelect
+        filterable={true}
+        items={this.props.appState.versionsToShow}
+        itemRenderer={renderItem}
+        itemListPredicate={filterItems}
+        itemListRenderer={itemListRenderer}
+        itemDisabled={itemDisabled}
+        onItemSelect={this.props.onVersionSelect}
+        noResults={<MenuItem disabled={true} text="No results." />}
+        disabled={!!this.props.disabled}
+      >
+        <Button
+          className="version-chooser"
+          text={`Electron v${version}`}
+          icon={getItemIcon(currentVersion)}
+          onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
+            renderVersionContextMenu(e, version);
+          }}
           disabled={!!this.props.disabled}
-        >
-          <Button
-            className="version-chooser"
-            text={`Electron v${version}`}
-            icon={getItemIcon(currentVersion)}
-            onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
-              renderVersionContextMenu(e, version);
-            }}
-            disabled={!!this.props.disabled}
-          />
-        </ElectronVersionSelect>
-      );
-    }
-  },
-);
+        />
+      </ElectronVersionSelect>
+    );
+  }
+}

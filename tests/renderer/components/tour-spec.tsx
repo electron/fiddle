@@ -84,8 +84,8 @@ describe('VersionChooser component', () => {
 
   it('stops on stop()', () => {
     const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
+    const wrapper = shallow<Tour>(<Tour tour={mockTour} onStop={mockStop} />);
+    const instance = wrapper.instance();
 
     instance.stop();
 
@@ -94,11 +94,11 @@ describe('VersionChooser component', () => {
 
   it('advances on advance()', () => {
     const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
+    const wrapper = shallow<Tour>(<Tour tour={mockTour} onStop={mockStop} />);
+    const instance = wrapper.instance();
 
     instance.advance();
-    expect((wrapper.state('step') as any).name).toBe('mock-step-2');
+    expect(wrapper.state('step')?.name).toBe('mock-step-2');
 
     instance.advance();
     expect(wrapper.state('step')).toBe(null);
@@ -108,13 +108,13 @@ describe('VersionChooser component', () => {
     jest.useFakeTimers();
 
     const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
+    const wrapper = shallow<Tour>(<Tour tour={mockTour} onStop={mockStop} />);
+    const instance = wrapper.instance();
 
     instance.forceUpdate = jest.fn();
     instance.onResize();
 
-    expect(instance.resizeHandle).toBeTruthy();
+    expect((instance as any).resizeHandle).toBeTruthy();
     jest.runAllTimers();
 
     expect(instance.forceUpdate).toHaveBeenCalled();
@@ -125,8 +125,8 @@ describe('VersionChooser component', () => {
     window.removeEventListener = jest.fn();
 
     const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance() as any;
+    const wrapper = shallow<Tour>(<Tour tour={mockTour} onStop={mockStop} />);
+    const instance = wrapper.instance();
 
     instance.componentWillUnmount();
     expect(window.removeEventListener).toHaveBeenCalled();

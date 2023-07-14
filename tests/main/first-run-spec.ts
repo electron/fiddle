@@ -22,9 +22,7 @@ describe('first-run', () => {
   beforeEach(() => {
     overridePlatform('darwin');
 
-    (dialog.showMessageBox as jest.Mock<any>).mockResolvedValue(
-      mockDialogResponse,
-    );
+    (dialog.showMessageBox as jest.Mock).mockResolvedValue(mockDialogResponse);
   });
 
   afterEach(() => {

@@ -4,6 +4,7 @@ import {
   InstallState,
   MAIN_JS,
   PACKAGE_NAME,
+  RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
 import { RemoteLoader } from '../../src/renderer/remote-loader';
@@ -36,9 +37,9 @@ describe('RemoteLoader', () => {
     ({ state: store } = app);
     store.channelsToShow = [ElectronReleaseChannel.stable];
     store.initVersions('4.0.0', {
-      '4.0.0': { version: '4.0.0' },
-      '4.0.0-beta': { version: '4.0.0-beta' },
-    } as any);
+      '4.0.0': { version: '4.0.0' } as RunnableVersion,
+      '4.0.0-beta': { version: '4.0.0-beta' } as RunnableVersion,
+    });
     instance = new RemoteLoader((store as unknown) as AppState);
 
     editorValues = createEditorValues();

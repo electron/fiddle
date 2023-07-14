@@ -18,7 +18,7 @@ describe('Editor component', () => {
   });
 
   function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
-    const wrapper = shallow(
+    const wrapper = shallow<Editor>(
       <Editor
         appState={store}
         editorDidMount={didMount}
@@ -28,7 +28,7 @@ describe('Editor component', () => {
         setFocused={() => undefined}
       />,
     );
-    const instance: any = wrapper.instance();
+    const instance = wrapper.instance();
     return { wrapper, instance };
   }
 
@@ -50,7 +50,7 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const { instance } = createEditor(MAIN_JS);
-    expect(instance.shouldComponentUpdate(null, null, null)).toBe(false);
+    expect(instance.shouldComponentUpdate()).toBe(false);
   });
 
   describe('initMonaco()', () => {
@@ -63,7 +63,7 @@ describe('Editor component', () => {
       const didMount = jest.fn();
       const { instance } = createEditor(id, didMount);
 
-      instance.containerRef.current = 'ref';
+      (instance as any).containerRef.current = 'ref';
       await instance.initMonaco();
 
       expect(didMount).toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe('Editor component', () => {
       store.editorMosaic.set({ [id]: '// content' });
       const { instance } = createEditor(id);
 
-      instance.containerRef.current = 'ref';
+      (instance as any).containerRef.current = 'ref';
       await instance.initMonaco();
       expect(monaco.latestEditor.onDidFocusEditorText).toHaveBeenCalled();
     });
@@ -87,7 +87,7 @@ describe('Editor component', () => {
     const didMount = jest.fn();
     const { instance } = createEditor(id, didMount);
 
-    instance.containerRef.current = 'ref';
+    (instance as any).containerRef.current = 'ref';
     await instance.initMonaco();
     instance.componentWillUnmount();
 
@@ -100,7 +100,7 @@ describe('Editor component', () => {
     const didMount = jest.fn();
     const { instance } = createEditor(id, didMount);
 
-    instance.containerRef.current = 'ref';
+    (instance as any).containerRef.current = 'ref';
     await instance.initMonaco();
     instance.componentWillUnmount();
     expect(instance.props.id).toBe(id);

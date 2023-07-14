@@ -66,13 +66,15 @@ describe('AddVersionDialog component', () => {
 
   describe('selectLocalVersion()', () => {
     it('updates state', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
+      const wrapper = shallow<AddVersionDialog>(
+        <AddVersionDialog appState={store} />,
+      );
       (window.ElectronFiddle.selectLocalVersion as jest.Mock).mockReturnValue({
         folderPath: '/test/',
         isValidElectron: true,
         localName: 'Test',
       });
-      await (wrapper.instance() as any).selectLocalVersion();
+      await wrapper.instance().selectLocalVersion();
 
       expect(wrapper.state('isValidElectron')).toBe(true);
       expect(wrapper.state('folderPath')).toBe('/test/');
@@ -82,23 +84,31 @@ describe('AddVersionDialog component', () => {
 
   describe('onChangeVersion()', () => {
     it('handles valid input', () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
+      const wrapper = shallow<AddVersionDialog>(
+        <AddVersionDialog appState={store} />,
+      );
 
-      (wrapper.instance() as any).onChangeVersion({
+      wrapper.instance().onChangeVersion({
         target: { value: '3.3.3' },
-      });
+      } as React.ChangeEvent<HTMLInputElement>);
       expect(wrapper.state('isValidVersion')).toBe(true);
       expect(wrapper.state('version')).toBe('3.3.3');
     });
 
     it('handles invalid input', () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
+      const wrapper = shallow<AddVersionDialog>(
+        <AddVersionDialog appState={store} />,
+      );
 
-      (wrapper.instance() as any).onChangeVersion({ target: { value: 'foo' } });
+      wrapper.instance().onChangeVersion({
+        target: { value: 'foo' },
+      } as React.ChangeEvent<HTMLInputElement>);
       expect(wrapper.state('isValidVersion')).toBe(false);
       expect(wrapper.state('version')).toBe('foo');
 
-      (wrapper.instance() as any).onChangeVersion({ target: {} });
+      wrapper
+        .instance()
+        .onChangeVersion({ target: {} } as React.ChangeEvent<HTMLInputElement>);
       expect(wrapper.state('isValidVersion')).toBe(false);
       expect(wrapper.state('version')).toBe('');
     });
@@ -106,22 +116,26 @@ describe('AddVersionDialog component', () => {
 
   describe('onSubmit', () => {
     it('does not do anything without a file', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
+      const wrapper = shallow<AddVersionDialog>(
+        <AddVersionDialog appState={store} />,
+      );
 
-      await (wrapper.instance() as any).onSubmit();
+      await wrapper.instance().onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(0);
     });
 
     it('adds a local version using the given data', async () => {
-      const wrapper = shallow(<AddVersionDialog appState={store} />);
+      const wrapper = shallow<AddVersionDialog>(
+        <AddVersionDialog appState={store} />,
+      );
 
       wrapper.setState({
         version: '3.3.3',
         folderPath: '/test/path',
       });
 
-      await (wrapper.instance() as any).onSubmit();
+      await wrapper.instance().onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
       expect(store.addLocalVersion).toHaveBeenCalledWith(

@@ -42,7 +42,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<BisectDialog appState={store} />);
+    const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
     // start and end selected
     wrapper.setState({
       startIndex: 3,
@@ -53,8 +53,8 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
     // no selection
     wrapper.setState({
-      startIndex: undefined,
-      endIndex: undefined,
+      startIndex: (undefined as unknown) as number,
+      endIndex: (undefined as unknown) as number,
       allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
@@ -62,7 +62,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     // only start selected
     wrapper.setState({
       startIndex: 3,
-      endIndex: undefined,
+      endIndex: (undefined as unknown) as number,
       allVersions: generateVersionRange(numVersions),
     });
     expect(wrapper).toMatchSnapshot();
@@ -76,14 +76,14 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     expect(wrapper).toMatchSnapshot();
 
     // Help displayed
-    (wrapper.instance() as any).showHelp();
+    wrapper.instance().showHelp();
     expect(wrapper).toMatchSnapshot();
   });
 
   describe('onBeginSelect()', () => {
     it('sets the begin version', () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
+      const instance = wrapper.instance();
 
       expect(instance.state.startIndex).toBe(
         numVersions > 10 ? 10 : numVersions - 1,
@@ -95,8 +95,8 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
   describe('onEndSelect()', () => {
     it('sets the end version', () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
+      const instance = wrapper.instance();
 
       expect(instance.state.endIndex).toBe(0);
       instance.onEndSelect(store.versionsToShow[2]);
@@ -113,14 +113,14 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
       const versions = generateVersionRange(numVersions);
 
-      const wrapper = shallow(<BisectDialog appState={store} />);
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
       wrapper.setState({
         allVersions: versions,
         endIndex: 0,
         startIndex: versions.length - 1,
       });
 
-      const instance: any = wrapper.instance() as any;
+      const instance = wrapper.instance();
       await instance.onSubmit();
       expect(Bisector).toHaveBeenCalledWith(versions.reverse());
       expect(store.Bisector).toBeDefined();
@@ -128,22 +128,22 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     });
 
     it('does nothing if endIndex or startIndex are falsy', async () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
 
       wrapper.setState({
-        startIndex: undefined,
+        startIndex: (undefined as unknown) as number,
         endIndex: 0,
       });
-      const instance1: any = wrapper.instance() as any;
+      const instance1 = wrapper.instance();
       await instance1.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
       wrapper.setState({
         startIndex: 4,
-        endIndex: undefined,
+        endIndex: (undefined as unknown) as number,
       });
 
-      const instance2: any = wrapper.instance() as any;
+      const instance2 = wrapper.instance();
       await instance2.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
     });
@@ -152,7 +152,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onAuto()', () => {
     it('initiates autobisect', async () => {
       // setup: dialog state
-      const wrapper = shallow(<BisectDialog appState={store} />);
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
       wrapper.setState({
         allVersions: generateVersionRange(numVersions),
         endIndex: 0,
@@ -162,7 +162,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       (runner.autobisect as jest.Mock).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
-      const instance1: any = wrapper.instance() as any;
+      const instance1 = wrapper.instance();
       await instance1.onAuto();
 
       // check the results
@@ -170,33 +170,33 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     });
 
     it('does nothing if endIndex or startIndex are falsy', async () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
 
       wrapper.setState({
-        startIndex: undefined,
+        startIndex: (undefined as unknown) as number,
         endIndex: 0,
       });
-      const instance1: any = wrapper.instance() as any;
+      const instance1 = wrapper.instance();
       await instance1.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
       wrapper.setState({
         startIndex: 4,
-        endIndex: undefined,
+        endIndex: (undefined as unknown) as number,
       });
 
-      const instance2: any = wrapper.instance() as any;
+      const instance2 = wrapper.instance();
       await instance2.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
     });
   });
 
   describe('items disabled', () => {
-    let instance: any;
+    let instance: BisectDialog;
 
     beforeEach(() => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      instance = wrapper.instance() as any;
+      const wrapper = shallow<BisectDialog>(<BisectDialog appState={store} />);
+      instance = wrapper.instance();
     });
 
     describe('isEarliestItemDisabled', () => {

@@ -3,6 +3,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { GeneralSettings } from '../../../src/renderer/components/settings-general';
+import { AppState } from '../../../src/renderer/state';
 
 const doNothingFunc = () => {
   // Do Nothing
@@ -42,7 +43,7 @@ jest.mock('../../../src/renderer/components/settings-general-mirror', () => ({
 }));
 
 describe('GeneralSettings component', () => {
-  const store: any = {};
+  const store = {} as AppState;
 
   it('renders', () => {
     const wrapper = shallow(

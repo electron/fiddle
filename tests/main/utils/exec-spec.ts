@@ -58,8 +58,8 @@ describe('exec', () => {
     it('handles errors', async () => {
       let errored = false;
       const cpExec = require('node:child_process').exec;
-      (cpExec as jest.Mock<any>).mockImplementation(
-        (_a: any, _b: any, c: any) => c(new Error('Poop!')),
+      (cpExec as jest.Mock).mockImplementation((_a: any, _b: any, c: any) =>
+        c(new Error('Poop!')),
       );
 
       try {

@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { Hit } from '@algolia/client-search';
 import { Button, MenuItem, Tree, TreeNodeInfo } from '@blueprintjs/core';
 import { Suggest } from '@blueprintjs/select';
 import { autorun } from 'mobx';
@@ -7,27 +8,16 @@ import { observer } from 'mobx-react';
 import pDebounce from 'p-debounce';
 import semver from 'semver';
 
-import { npmSearch } from '../npm-search';
+import { NPMSearchResult, npmSearch } from '../npm-search';
 import { AppState } from '../state';
+
 interface IState {
-  suggestions: Array<AlgoliaHit>;
+  suggestions: Array<Hit<NPMSearchResult>>;
   versionsCache: Map<string, string[]>;
 }
 
 interface IProps {
   appState: AppState;
-}
-
-// See full schema: https://github.com/algolia/npm-search#schema
-interface AlgoliaHit {
-  name: string;
-  version: string;
-  versions: Record<string, string>;
-  _highlightResult: {
-    name: {
-      value: string;
-    };
-  };
 }
 
 @observer
@@ -47,7 +37,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
     });
   }
 
-  public addModuleToFiddle = (item: AlgoliaHit) => {
+  public addModuleToFiddle = (item: Hit<NPMSearchResult>) => {
     const { appState } = this.props;
     appState.modules.set(item.name, item.version);
     // copy state so react can re-render
@@ -72,7 +62,7 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
                 <span
                   className="package-manager-result"
                   dangerouslySetInnerHTML={{
-                    __html: item._highlightResult.name.value,
+                    __html: item._highlightResult?.name?.value ?? '',
                   }}
                 />
               }

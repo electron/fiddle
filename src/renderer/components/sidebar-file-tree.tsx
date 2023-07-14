@@ -30,197 +30,196 @@ interface FileTreeState {
 // crazy idea: maybe save state should be tied to the editors
 // and not to the filesystem
 
-export const SidebarFileTree = observer(
-  class SidebarFileTree extends React.Component<FileTreeProps, FileTreeState> {
-    constructor(props: FileTreeProps) {
-      super(props);
+@observer
+export class SidebarFileTree extends React.Component<
+  FileTreeProps,
+  FileTreeState
+> {
+  constructor(props: FileTreeProps) {
+    super(props);
 
-      this.state = {
-        action: 'default',
-      };
-    }
+    this.state = {
+      action: 'default',
+    };
+  }
 
-    public render() {
-      const { editorMosaic } = this.props.appState;
-      const { files, focusedFile } = editorMosaic;
+  public render() {
+    const { editorMosaic } = this.props.appState;
+    const { files, focusedFile } = editorMosaic;
 
-      const fileList: TreeNodeInfo[] = Array.from(files)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([editorId, presence], index) => {
-          const visibilityIcon =
-            presence !== EditorPresence.Hidden ? 'eye-open' : 'eye-off';
+    const fileList: TreeNodeInfo[] = Array.from(files)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([editorId, presence], index) => {
+        const visibilityIcon =
+          presence !== EditorPresence.Hidden ? 'eye-open' : 'eye-off';
 
-          return {
-            isSelected: focusedFile === editorId,
-            id: index,
-            hasCaret: false,
-            icon: 'document',
-            label: (
-              <ContextMenu2
-                className="pointer"
-                onClick={() => this.setFocusedFile(editorId)}
-                content={
-                  <Menu>
-                    <MenuItem
-                      icon="redo"
-                      text="Rename"
-                      intent="primary"
-                      onClick={() => this.renameEditor(editorId)}
-                    />
-                    <MenuItem
-                      disabled={isRequiredFile(editorId)}
-                      icon="remove"
-                      text="Delete"
-                      intent="danger"
-                      onClick={() => this.removeEditor(editorId)}
-                    />
-                  </Menu>
-                }
-              >
-                {String(editorId)}
-              </ContextMenu2>
-            ),
-            secondaryLabel: (
-              <ButtonGroup>
-                <Tooltip2
-                  content="Toggle Visibility"
-                  minimal={true}
-                  hoverOpenDelay={1000}
-                >
-                  <Button
-                    minimal
-                    onClick={() => this.toggleVisibility(editorId)}
-                  >
-                    <Icon icon={visibilityIcon} />
-                  </Button>
-                </Tooltip2>
-              </ButtonGroup>
-            ),
-          };
-        });
-
-      if (this.state.action === 'add') {
-        fileList.push({
-          id: 'add',
-          className: 'add-file-input',
+        return {
+          isSelected: focusedFile === editorId,
+          id: index,
+          hasCaret: false,
           icon: 'document',
           label: (
-            <input
-              className={classNames(Classes.INPUT, Classes.FILL, Classes.SMALL)}
-              style={{ width: `100%`, padding: 0 }}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  e.currentTarget.blur();
-                } else if (e.key === 'Enter') {
-                  this.createEditor(e.currentTarget.value as EditorId);
-                  e.currentTarget.blur();
-                }
-              }}
-              id="new-file-input"
-              autoFocus
-              onBlur={() => {
-                this.setState({ action: 'default' });
-              }}
-            />
+            <ContextMenu2
+              className="pointer"
+              onClick={() => this.setFocusedFile(editorId)}
+              content={
+                <Menu>
+                  <MenuItem
+                    icon="redo"
+                    text="Rename"
+                    intent="primary"
+                    onClick={() => this.renameEditor(editorId)}
+                  />
+                  <MenuItem
+                    disabled={isRequiredFile(editorId)}
+                    icon="remove"
+                    text="Delete"
+                    intent="danger"
+                    onClick={() => this.removeEditor(editorId)}
+                  />
+                </Menu>
+              }
+            >
+              {String(editorId)}
+            </ContextMenu2>
           ),
-        });
-      }
-
-      const editorsTree: TreeNodeInfo[] = [
-        {
-          childNodes: fileList,
-          id: 'files',
-          hasCaret: false,
-          icon: 'folder-open',
-          isExpanded: true,
-          label: 'Editors',
           secondaryLabel: (
-            <ButtonGroup minimal>
+            <ButtonGroup>
               <Tooltip2
-                content="Add New File"
+                content="Toggle Visibility"
                 minimal={true}
                 hoverOpenDelay={1000}
               >
-                <Button
-                  small
-                  icon="add"
-                  onClick={() => this.setState({ action: 'add' })}
-                />
-              </Tooltip2>
-              <Tooltip2
-                content="Reset Layout"
-                minimal={true}
-                hoverOpenDelay={1000}
-              >
-                <Button small icon="grid-view" onClick={this.resetLayout} />
+                <Button minimal onClick={() => this.toggleVisibility(editorId)}>
+                  <Icon icon={visibilityIcon} />
+                </Button>
               </Tooltip2>
             </ButtonGroup>
           ),
-        },
-      ];
+        };
+      });
 
-      return (
-        <div className="fiddle-scrollbar">
-          <Tree contents={editorsTree} />
-        </div>
-      );
+    if (this.state.action === 'add') {
+      fileList.push({
+        id: 'add',
+        className: 'add-file-input',
+        icon: 'document',
+        label: (
+          <input
+            className={classNames(Classes.INPUT, Classes.FILL, Classes.SMALL)}
+            style={{ width: `100%`, padding: 0 }}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                e.currentTarget.blur();
+              } else if (e.key === 'Enter') {
+                this.createEditor(e.currentTarget.value as EditorId);
+                e.currentTarget.blur();
+              }
+            }}
+            id="new-file-input"
+            autoFocus
+            onBlur={() => {
+              this.setState({ action: 'default' });
+            }}
+          />
+        ),
+      });
     }
 
-    public toggleVisibility = (editorId: EditorId) => {
-      const { editorMosaic } = this.props.appState;
-      editorMosaic.toggle(editorId);
-    };
+    const editorsTree: TreeNodeInfo[] = [
+      {
+        childNodes: fileList,
+        id: 'files',
+        hasCaret: false,
+        icon: 'folder-open',
+        isExpanded: true,
+        label: 'Editors',
+        secondaryLabel: (
+          <ButtonGroup minimal>
+            <Tooltip2
+              content="Add New File"
+              minimal={true}
+              hoverOpenDelay={1000}
+            >
+              <Button
+                small
+                icon="add"
+                onClick={() => this.setState({ action: 'add' })}
+              />
+            </Tooltip2>
+            <Tooltip2
+              content="Reset Layout"
+              minimal={true}
+              hoverOpenDelay={1000}
+            >
+              <Button small icon="grid-view" onClick={this.resetLayout} />
+            </Tooltip2>
+          </ButtonGroup>
+        ),
+      },
+    ];
 
-    public setFocusedFile = (editorId: EditorId) => {
-      const { editorMosaic } = this.props.appState;
-      editorMosaic.setFocusedFile(editorId);
-    };
+    return (
+      <div className="fiddle-scrollbar">
+        <Tree contents={editorsTree} />
+      </div>
+    );
+  }
 
-    public renameEditor = async (editorId: EditorId) => {
-      const { appState } = this.props;
+  public toggleVisibility = (editorId: EditorId) => {
+    const { editorMosaic } = this.props.appState;
+    editorMosaic.toggle(editorId);
+  };
 
-      const visible =
-        appState.editorMosaic.files.get(editorId) === EditorPresence.Visible;
-      const id = (await appState.showInputDialog({
-        label: 'Enter New Filename',
-        ok: 'Rename',
-        placeholder: 'New Name',
-      })) as EditorId;
+  public setFocusedFile = (editorId: EditorId) => {
+    const { editorMosaic } = this.props.appState;
+    editorMosaic.setFocusedFile(editorId);
+  };
 
-      if (!id) return;
+  public renameEditor = async (editorId: EditorId) => {
+    const { appState } = this.props;
 
-      if (!isSupportedFile(id)) {
-        await appState.showErrorDialog(
-          `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
-        );
-        return;
-      }
+    const visible =
+      appState.editorMosaic.files.get(editorId) === EditorPresence.Visible;
+    const id = (await appState.showInputDialog({
+      label: 'Enter New Filename',
+      ok: 'Rename',
+      placeholder: 'New Name',
+    })) as EditorId;
 
-      const contents = appState.editorMosaic.value(editorId).trim();
-      appState.editorMosaic.remove(editorId);
-      appState.editorMosaic.addNewFile(id, contents);
+    if (!id) return;
 
-      if (visible) appState.editorMosaic.show(id);
-    };
+    if (!isSupportedFile(id)) {
+      await appState.showErrorDialog(
+        `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
+      );
+      return;
+    }
 
-    public removeEditor = (editorId: EditorId) => {
-      const { editorMosaic } = this.props.appState;
-      editorMosaic.remove(editorId);
-    };
+    const contents = appState.editorMosaic.value(editorId).trim();
+    appState.editorMosaic.remove(editorId);
+    appState.editorMosaic.addNewFile(id, contents);
 
-    public createEditor = (editorId: EditorId) => {
-      const { appState } = this.props;
-      try {
-        appState.editorMosaic.addNewFile(editorId);
-        appState.editorMosaic.show(editorId);
-      } catch (err) {
-        appState.showErrorDialog(err.message);
-      }
-    };
+    if (visible) appState.editorMosaic.show(id);
+  };
 
-    public resetLayout = () => {
-      const { editorMosaic } = this.props.appState;
-      editorMosaic.resetLayout();
-    };
-  },
-);
+  public removeEditor = (editorId: EditorId) => {
+    const { editorMosaic } = this.props.appState;
+    editorMosaic.remove(editorId);
+  };
+
+  public createEditor = (editorId: EditorId) => {
+    const { appState } = this.props;
+    try {
+      appState.editorMosaic.addNewFile(editorId);
+      appState.editorMosaic.show(editorId);
+    } catch (err) {
+      appState.showErrorDialog(err.message);
+    }
+  };
+
+  public resetLayout = () => {
+    const { editorMosaic } = this.props.appState;
+    editorMosaic.resetLayout();
+  };
+}

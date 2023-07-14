@@ -34,18 +34,20 @@ describe('GitHubSettings component', () => {
 
   describe('Gist publish as revision component', () => {
     it('state changes', async () => {
-      const wrapper = shallow(<GitHubSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const wrapper = shallow<GitHubSettings>(
+        <GitHubSettings appState={store} />,
+      );
+      const instance = wrapper.instance();
 
-      await instance.handlePublishGistAsRevisionChange({
+      instance.handlePublishGistAsRevisionChange({
         currentTarget: { checked: false },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isPublishingGistAsRevision).toBe(false);
 
-      await instance.handlePublishGistAsRevisionChange({
+      instance.handlePublishGistAsRevisionChange({
         currentTarget: { checked: true },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isPublishingGistAsRevision).toBe(true);
     });

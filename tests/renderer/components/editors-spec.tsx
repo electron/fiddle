@@ -1,11 +1,12 @@
 import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
+import { MosaicWindowProps } from 'react-mosaic-component';
 
-import { EditorValues, MAIN_JS } from '../../../src/interfaces';
+import { EditorId, EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { App } from '../../../src/renderer/app';
 import { Editors } from '../../../src/renderer/components/editors';
-import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
+import { Editor, EditorMosaic } from '../../../src/renderer/editor-mosaic';
 import { AppState } from '../../../src/renderer/state';
 import {
   MonacoEditorMock,
@@ -44,8 +45,8 @@ describe('Editors component', () => {
   });
 
   it('does not execute command if not supported', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance() as any;
+    const wrapper = shallow<Editors>(<Editors appState={store} />);
+    const instance = wrapper.instance();
 
     const editor = new MonacoEditorMock();
     const action = editor.getAction();
@@ -64,23 +65,23 @@ describe('Editors component', () => {
 
     it('handles an error', () => {
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, editor as any);
+      editorMosaic.addEditor(filename, (editor as unknown) as Editor);
       editor.updateOptions.mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
 
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<Editors>(<Editors appState={store} />);
+      const instance = wrapper.instance();
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
     });
 
     it('updates a setting', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<Editors>(<Editors appState={store} />);
+      const instance = wrapper.instance();
 
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, editor as any);
+      editorMosaic.addEditor(filename, (editor as unknown) as Editor);
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
       expect(editor.updateOptions).toHaveBeenCalledWith({
         minimap: { enabled: false },
@@ -90,16 +91,19 @@ describe('Editors component', () => {
   });
 
   it('renders a toolbar', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance() as any;
-    const toolbar = instance.renderToolbar({ title: MAIN_JS } as any, MAIN_JS);
+    const wrapper = shallow<Editors>(<Editors appState={store} />);
+    const instance = wrapper.instance();
+    const toolbar = instance.renderToolbar(
+      { title: MAIN_JS } as MosaicWindowProps<EditorId>,
+      MAIN_JS,
+    );
 
     expect(toolbar).toMatchSnapshot();
   });
 
   it('onChange() updates the mosaic arrangement in the appState', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance() as any;
+    const wrapper = shallow<Editors>(<Editors appState={store} />);
+    const instance = wrapper.instance();
 
     const arrangement = { testArrangement: true };
     instance.onChange(arrangement as any);
@@ -127,7 +131,7 @@ describe('Editors component', () => {
     it('handles a "new-fiddle" event', async () => {
       shallow(<Editors appState={store} />);
 
-      let resolve: any;
+      let resolve: (value?: unknown) => void;
       const replacePromise = new Promise((r) => {
         resolve = r;
       });
@@ -138,7 +142,10 @@ describe('Editors component', () => {
         .mockResolvedValue(fakeValues);
       const replaceFiddleSpy = jest
         .spyOn(app, 'replaceFiddle')
-        .mockImplementation(() => resolve());
+        .mockImplementation(async () => {
+          resolve();
+          return true;
+        });
 
       // invoke the call
       emitEvent('new-fiddle');
@@ -197,13 +204,16 @@ describe('Editors component', () => {
       const getTestTemplateSpy = jest
         .spyOn(window.ElectronFiddle, 'getTestTemplate')
         .mockResolvedValue(fakeValues);
-      let replaceResolve: any;
+      let replaceResolve: (value?: unknown) => void;
       const replacePromise = new Promise((r) => {
         replaceResolve = r;
       });
       const replaceFiddleSpy = jest
         .spyOn(app, 'replaceFiddle')
-        .mockImplementation(() => replaceResolve());
+        .mockImplementation(async () => {
+          replaceResolve();
+          return true;
+        });
 
       // invoke the call
       emitEvent('new-test');
@@ -235,7 +245,7 @@ describe('Editors component', () => {
     it('handles the monaco editor option event', () => {
       const id = MAIN_JS;
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(id, editor as any);
+      editorMosaic.addEditor(id, (editor as unknown) as Editor);
 
       shallow(<Editors appState={store} />);
       emitEvent('toggle-monaco-option', 'wordWrap');
@@ -245,8 +255,8 @@ describe('Editors component', () => {
 
   describe('setFocused()', () => {
     it('sets the "focused" property', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<Editors>(<Editors appState={store} />);
+      const instance = wrapper.instance();
       const spy = jest.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
@@ -255,8 +265,8 @@ describe('Editors component', () => {
     });
 
     it('focus sidebar file', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const wrapper = shallow<Editors>(<Editors appState={store} />);
+      const instance = wrapper.instance();
       const spy = jest.spyOn(instance, 'setState');
 
       const id = MAIN_JS;

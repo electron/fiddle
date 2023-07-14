@@ -20,21 +20,23 @@ describe('PackageAuthorSettings component', () => {
 
   describe('handlePackageAuthorChange()', () => {
     it('handles package author', async () => {
-      const wrapper = shallow(<PackageAuthorSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const wrapper = shallow<PackageAuthorSettings>(
+        <PackageAuthorSettings appState={store} />,
+      );
+      const instance = wrapper.instance();
 
       const author = 'electron<electron@electron.org>';
 
-      await instance.handlePackageAuthorChange({
+      instance.handlePackageAuthorChange({
         currentTarget: { value: author },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.packageAuthor).toEqual(author);
       expect(instance.state.value).toEqual(author);
 
-      await instance.handlePackageAuthorChange({
+      instance.handlePackageAuthorChange({
         currentTarget: { value: 'test' },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.packageAuthor).toEqual('test');
       expect(instance.state.value).toEqual('test');

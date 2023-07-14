@@ -5,6 +5,7 @@
     "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
+    "useDefineForClassFields": true,
     "removeComments": false,
     "resolveJsonModule": true,
     "preserveConstEnums": true,
