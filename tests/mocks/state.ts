@@ -181,11 +181,13 @@ export class StateMock {
       [ver.version, ver.source, ver.state].join(' ');
     for (const [key, val] of Object.entries(o)) {
       if (key == 'currentElectronVersion') {
-        o[key] = terserRunnable(val) as any;
+        o[key] = terserRunnable(val as RunnableVersion);
       } else if (key === 'versions') {
-        o[key] = Object.values(val).map(terserRunnable) as any;
+        o[key] = Object.values(val as Record<string, RunnableVersion>).map(
+          terserRunnable,
+        );
       } else if (key === 'versionsToShow') {
-        o[key] = val.map(terserRunnable);
+        o[key] = (val as Array<RunnableVersion>).map(terserRunnable);
       }
     }
 

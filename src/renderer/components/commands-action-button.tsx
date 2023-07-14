@@ -14,9 +14,11 @@ import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
 import {
+  EditorId,
   EditorValues,
   GistActionState,
   GistActionType,
+  PACKAGE_NAME,
 } from '../../interfaces';
 import { AppState } from '../state';
 import { ensureRequiredFiles } from '../utils/editor-utils';
@@ -125,7 +127,8 @@ export const GistActionButton = observer(
         options,
       );
 
-      defaultGistValues['package.json'] = currentEditorValues['package.json'];
+      defaultGistValues[PACKAGE_NAME as EditorId] =
+        currentEditorValues[PACKAGE_NAME as EditorId];
 
       try {
         const gistFilesList = appState.isPublishingGistAsRevision

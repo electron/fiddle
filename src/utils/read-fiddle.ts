@@ -2,7 +2,7 @@ import * as path from 'node:path';
 
 import * as fs from 'fs-extra';
 
-import { EditorValues, PACKAGE_NAME } from '../interfaces';
+import { EditorId, EditorValues, PACKAGE_NAME } from '../interfaces';
 import { ensureRequiredFiles, isSupportedFile } from './editor-utils';
 
 /**
@@ -31,7 +31,7 @@ export async function readFiddle(
     );
 
     for (let i = 0; i < names.length; ++i) {
-      const name = names[i];
+      const name = names[i] as EditorId;
       const value = values[i];
 
       if (value.status === 'fulfilled') {

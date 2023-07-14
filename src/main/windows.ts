@@ -101,7 +101,6 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
-    const paths = {};
     const pathsToQuery = [
       'home',
       'appData',
@@ -110,6 +109,7 @@ export function createMainWindow(): Electron.BrowserWindow {
       'downloads',
       'desktop',
     ] as const;
+    const paths = {} as Record<typeof pathsToQuery[number], string>;
     for (const path of pathsToQuery) {
       paths[path] = app.getPath(path);
     }

@@ -276,7 +276,7 @@ describe('RemoteLoader', () => {
 
       await instance.fetchExampleAndLoad('v4.0.0', 'test/path');
 
-      const expectedValues = {};
+      const expectedValues: Record<string, string> = {};
       for (const filename of Object.keys(mockGistFiles)) {
         expectedValues[filename] = filename;
       }

@@ -13,7 +13,7 @@ export const Sidebar = ({ appState }: { appState: AppState }) => {
   };
   return (
     <Mosaic<string>
-      renderTile={(id) => ELEMENT_MAP[id]}
+      renderTile={(id) => ELEMENT_MAP[id as keyof typeof ELEMENT_MAP]}
       initialValue={{
         first: 'fileTree',
         second: 'packageManager',

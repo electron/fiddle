@@ -227,7 +227,7 @@ describe('EditorMosaic', () => {
 
       // now modify values _after_ calling editorMosaic.set()
       for (const [file, value] of Object.entries(values)) {
-        values[file] = `${value} plus more text`;
+        values[file as EditorId] = `${value} plus more text`;
       }
 
       // and then add Monaco editors

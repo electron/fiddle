@@ -15,13 +15,10 @@ import { observer } from 'mobx-react';
 import { GlobalSetting, IPackageManager } from '../../interfaces';
 import { AppState } from '../state';
 
-/**
- * @TODO make this a proper enum again once we update Typescript
- */
-export const SettingItemType = {
-  EnvVars: GlobalSetting.environmentVariables,
-  Flags: GlobalSetting.executionFlags,
-} as const;
+export enum SettingItemType {
+  EnvVars = GlobalSetting.environmentVariables,
+  Flags = GlobalSetting.executionFlags,
+}
 
 interface ExecutionSettingsProps {
   appState: AppState;
@@ -118,11 +115,11 @@ export const ExecutionSettings = observer(
      * run with the Electron executable.
      *
      * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @param {GlobalSetting} type
+     * @param {SettingItemType} type
      */
     public handleSettingsItemChange(
       event: React.ChangeEvent<HTMLInputElement>,
-      type: GlobalSetting,
+      type: SettingItemType,
     ) {
       const { name, value } = event.currentTarget;
 
@@ -137,9 +134,9 @@ export const ExecutionSettings = observer(
     /**
      * Adds a new settings item input field.
      *
-     * @param {GlobalSetting} type
+     * @param {SettingItemType} type
      */
-    private addNewSettingsItem(type: GlobalSetting) {
+    private addNewSettingsItem(type: SettingItemType) {
       const array = Object.entries(this.state[type]);
 
       this.setState((prevState) => ({
@@ -163,7 +160,7 @@ export const ExecutionSettings = observer(
       appState.packageManager = value as IPackageManager;
     };
 
-    public renderDeleteItem(idx: string, type: GlobalSetting): JSX.Element {
+    public renderDeleteItem(idx: string, type: SettingItemType): JSX.Element {
       const updated = this.state[type];
 
       const removeFn = () => {
