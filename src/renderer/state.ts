@@ -225,7 +225,7 @@ export class AppState {
   }
 
   constructor(versions: RunnableVersion[]) {
-    makeObservable<AppState, 'setPageHash'>(this, {
+    makeObservable<AppState, 'setPageHash' | 'setVersionStates'>(this, {
       Bisector: observable,
       acceleratorsToBlock: observable,
       activeGistAction: observable,
@@ -288,6 +288,7 @@ export class AppState {
       setPageHash: action,
       setTheme: action,
       setVersion: action,
+      setVersionStates: action,
       showChannels: action,
       showConfirmDialog: action,
       showErrorDialog: action,
