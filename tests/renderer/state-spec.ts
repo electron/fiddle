@@ -1,7 +1,6 @@
 import { reaction } from 'mobx';
 
 import {
-  AppStateBroadcastChannel,
   AppStateBroadcastMessageType,
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -48,6 +47,7 @@ describe('AppState', () => {
   let removeSpy: jest.SpyInstance;
   let installSpy: jest.SpyInstance;
   let ensureDownloadedSpy: jest.SpyInstance;
+  let broadcastMessageSpy: jest.SpyInstance;
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
@@ -67,6 +67,10 @@ describe('AppState', () => {
     ensureDownloadedSpy = jest
       .spyOn(appState.installer, 'ensureDownloaded')
       .mockResolvedValue({ path: '', alreadyExtracted: false });
+    broadcastMessageSpy = jest.spyOn(
+      (appState as any).broadcastChannel,
+      'postMessage',
+    );
   });
 
   it('exists', () => {
@@ -98,6 +102,10 @@ describe('AppState', () => {
       const newCount = Object.keys(appState.versions).length;
       expect(newCount).toBe(oldCount + 1);
       expect(appState.versions[version]).toStrictEqual(ver);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
   });
 
@@ -302,8 +310,10 @@ describe('AppState', () => {
 
     it('does not remove the active version', async () => {
       const ver = appState.versions[active];
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
       expect(removeSpy).not.toHaveBeenCalled();
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
 
     it('removes a version', async () => {
@@ -311,13 +321,19 @@ describe('AppState', () => {
       ver.state = InstallState.installed;
       await appState.removeVersion(ver);
       expect(removeSpy).toHaveBeenCalledWith<any>(ver.version);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
 
     it('does not remove it if not necessary', async () => {
       const ver = appState.versions[version];
       ver.state = InstallState.missing;
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
       expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
 
     it('removes (but does not delete) a local version', async () => {
@@ -328,11 +344,13 @@ describe('AppState', () => {
       ver.source = VersionSource.local;
       ver.state = InstallState.installed;
 
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
       expect(appState.versions[version]).toBeUndefined();
       expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -345,16 +363,22 @@ describe('AppState', () => {
 
       expect(ensureDownloadedSpy).toHaveBeenCalled();
       expect(installSpy).not.toHaveBeenCalled();
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
 
     it('does not download a version if already ready', async () => {
       const ver = appState.versions['2.0.2'];
       ver.state = InstallState.installed;
 
+      broadcastMessageSpy.mockClear();
       await appState.downloadVersion(ver);
 
       expect(ensureDownloadedSpy).not.toHaveBeenCalled();
       expect(installSpy).not.toHaveBeenCalled();
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -748,10 +772,6 @@ describe('AppState', () => {
 
   describe('broadcastChannel', () => {
     it('updates the version state in response to changes in other windows', async () => {
-      const broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
-        'AppState',
-      );
-
       const fakeVersion = {
         version: '13.9.9',
         state: InstallState.downloading,
@@ -759,7 +779,7 @@ describe('AppState', () => {
 
       expect(appState.versions[fakeVersion.version]).toBeFalsy();
 
-      broadcastChannel.postMessage({
+      (appState as any).broadcastChannel.postMessage({
         type: AppStateBroadcastMessageType.syncVersions,
         payload: [fakeVersion],
       });

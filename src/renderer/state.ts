@@ -209,7 +209,7 @@ export class AppState {
   });
 
   // Used for communications between windows
-  public broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
+  private broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
     'AppState',
   );
 
