@@ -32,25 +32,28 @@ jest.mock('@sentry/electron/renderer', () => ({
   init: jest.fn(),
 }));
 
-class FakeBroadcastChannel {
-  listeners = [];
+class FakeBroadcastChannel extends EventTarget {
+  constructor(channelName) {
+    super();
+    this.name = channelName;
+  }
 
-  addEventListener = (_, callback) => {
-    this.listeners.push(callback);
-  };
-
-  postMessage = (message) => {
-    for (const listener of this.listeners) {
-      listener(new MessageEvent('message', { data: message }));
-    }
-  };
+  postMessage(message) {
+    this.dispatchEvent(new MessageEvent('message', { data: message }));
+  }
 }
 
 global.BroadcastChannel = class Singleton {
-  static instance = new FakeBroadcastChannel();
+  static channels = new Map();
 
-  constructor(_) {
-    return Singleton.instance;
+  constructor(channelName) {
+    if (!Singleton.channels.has(channelName)) {
+      Singleton.channels.set(
+        channelName,
+        new FakeBroadcastChannel(channelName),
+      );
+    }
+    return Singleton.channels.get(channelName);
   }
 };
 
