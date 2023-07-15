@@ -1,6 +1,7 @@
 import * as semver from 'semver';
 
 import { MAIN_JS } from '../../../src/interfaces';
+import { AppState } from '../../../src/renderer/state';
 import {
   getForgeVersion,
   getPackageJson,
@@ -56,7 +57,7 @@ describe('get-package', () => {
         modules: new Map<string, string>([['say', '*']]),
         packageAuthor: defaultAuthor,
       };
-      const result = await getPackageJson(appState as any);
+      const result = await getPackageJson((appState as unknown) as AppState);
       expect(result).toEqual(buildExpectedPackage());
     });
 
@@ -70,7 +71,7 @@ describe('get-package', () => {
       appState.version = version;
       appState.packageAuthor = defaultAuthor;
 
-      const result = await getPackageJson(appState as any);
+      const result = await getPackageJson((appState as unknown) as AppState);
       const devDependencies = { [electronPkg]: version };
       expect(result).toEqual(buildExpectedPackage({ name, devDependencies }));
     });

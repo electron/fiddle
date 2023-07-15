@@ -22,10 +22,10 @@ jest.mock('fs-extra', () => ({
 }));
 
 const mockTarget = {
-  webContents: {
+  webContents: ({
     send: jest.fn(),
     isDestroyed: () => false,
-  },
+  } as unknown) as Electron.WebContents,
 };
 
 describe('files', () => {
@@ -35,7 +35,7 @@ describe('files', () => {
     });
     (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
 
-    ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
+    ipcMainManager.readyWebContents.add(mockTarget.webContents);
   });
 
   describe('setupFileListeners()', () => {
@@ -108,7 +108,7 @@ describe('files', () => {
       (dialog.showMessageBox as jest.Mock).mockResolvedValue(consent);
       (fs.pathExists as jest.Mock).mockReturnValue(true);
       (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
-      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents);
 
       await showSaveDialog();
 

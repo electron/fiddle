@@ -1,5 +1,4 @@
 import * as React from 'react';
-import { FormEvent } from 'react';
 
 import { InputGroup, Radio } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
@@ -22,7 +21,7 @@ describe('MirrorSettings component', () => {
   describe('modifyMirror()', () => {
     it('modify mirror', async () => {
       const wrapper = shallow(<MirrorSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       const [mirror, nightlyMirror] = ['mirror_test1', 'nightly_test2'];
 
@@ -42,12 +41,12 @@ describe('MirrorSettings component', () => {
   describe('changeSourceType()', () => {
     it('change source type', () => {
       const wrapper = shallow(<MirrorSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       store.electronMirror.sourceType = 'DEFAULT';
       const event = { target: { value: 'CUSTOM' } };
       instance.changeSourceType(
-        (event as unknown) as FormEvent<HTMLInputElement>,
+        (event as unknown) as React.FormEvent<HTMLInputElement>,
       );
 
       expect(store.electronMirror.sourceType).toEqual('CUSTOM');

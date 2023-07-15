@@ -69,7 +69,6 @@ export class MonacoEditorMock {
   public restoreViewState = jest.fn();
   public revealLine = jest.fn();
   public saveViewState = jest.fn();
-  public setContent = jest.fn();
   public setModel = jest.fn((model) => (this.model = model));
   public setMonarchTokensProvider = jest.fn();
   public setSelection = jest.fn();

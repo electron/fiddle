@@ -3,6 +3,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
+import { AppState } from '../../../src/renderer/state';
 
 describe('CreditsSettings component', () => {
   const mockContributors = [
@@ -29,10 +30,10 @@ describe('CreditsSettings component', () => {
     },
   ];
 
-  let store: any;
+  let store: AppState;
 
   beforeEach(() => {
-    store = {};
+    store = {} as AppState;
   });
 
   it('renders', async () => {

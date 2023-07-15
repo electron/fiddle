@@ -50,7 +50,7 @@ describe('Editor component', () => {
 
   it('denies updates', () => {
     const { instance } = createEditor(MAIN_JS);
-    expect(instance.shouldComponentUpdate(null, null, null)).toBe(false);
+    expect(instance.shouldComponentUpdate()).toBe(false);
   });
 
   describe('initMonaco()', () => {

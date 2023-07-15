@@ -76,10 +76,8 @@ describe('main', () => {
   describe('onBeforeQuit()', () => {
     it('sets up IPC so app can quit if dialog confirmed', () => {
       onBeforeQuit();
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-        IpcEvents.BEFORE_QUIT,
-      );
-      expect(ipcMainManager.on).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.BEFORE_QUIT);
+      expect(ipcMainManager.on).toHaveBeenCalledWith(
         IpcEvents.CONFIRM_QUIT,
         app.quit,
       );
@@ -115,7 +113,7 @@ describe('main', () => {
     it('check if listening on BLOCK_ACCELERATORS', () => {
       setupMenuHandler();
 
-      expect(ipcMainManager.on).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.on).toHaveBeenCalledWith(
         IpcEvents.BLOCK_ACCELERATORS,
         expect.anything(),
       );

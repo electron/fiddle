@@ -24,7 +24,7 @@ jest.mock('node:path');
 
 describe('Runner component', () => {
   let store: StateMock;
-  let instance: any;
+  let instance: Runner;
   let fileManager: FileManagerMock;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
@@ -389,7 +389,7 @@ describe('Runner component', () => {
     });
 
     it('handles an error in saveToTemp()', async () => {
-      (instance as any).saveToTemp = jest.fn();
+      instance.saveToTemp = jest.fn();
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,

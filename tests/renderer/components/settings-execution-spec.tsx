@@ -6,15 +6,16 @@ import {
   ExecutionSettings,
   SettingItemType,
 } from '../../../src/renderer/components/settings-execution';
+import { AppState } from '../../../src/renderer/state';
 
 describe('ExecutionSettings component', () => {
-  let store: any;
+  let store: AppState;
 
   beforeEach(() => {
     store = {
-      executionFlags: [],
-      environmentVariables: [],
-    };
+      executionFlags: [] as string[],
+      environmentVariables: [] as string[],
+    } as AppState;
   });
 
   it('renders', () => {
@@ -25,16 +26,16 @@ describe('ExecutionSettings component', () => {
   describe('handleDeleteDataChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleDeleteDataChange({
+      const instance: any = wrapper.instance();
+      instance.handleDeleteDataChange({
         currentTarget: { checked: false },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isKeepingUserDataDirs).toBe(false);
 
-      await instance.handleDeleteDataChange({
+      instance.handleDeleteDataChange({
         currentTarget: { checked: true },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isKeepingUserDataDirs).toBe(true);
     });
@@ -43,16 +44,16 @@ describe('ExecutionSettings component', () => {
   describe('handleElectronLoggingChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<ExecutionSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleElectronLoggingChange({
+      const instance: any = wrapper.instance();
+      instance.handleElectronLoggingChange({
         currentTarget: { checked: false },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isEnablingElectronLogging).toBe(false);
 
-      await instance.handleElectronLoggingChange({
+      instance.handleElectronLoggingChange({
         currentTarget: { checked: true },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isEnablingElectronLogging).toBe(true);
     });
@@ -62,25 +63,25 @@ describe('ExecutionSettings component', () => {
     describe('with executionFlags', () => {
       it('updates when new flags are added', async () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance = wrapper.instance() as any;
+        const instance: any = wrapper.instance();
 
         const lang = '--lang=es';
         const flags = '--js-flags=--expose-gc';
 
-        await instance.handleSettingsItemChange(
+        instance.handleSettingsItemChange(
           {
             currentTarget: { name: '0', value: lang },
-          },
+          } as React.ChangeEvent<HTMLInputElement>,
           SettingItemType.Flags,
         );
 
         expect(instance.state.executionFlags).toEqual({ '0': lang });
         expect(store.executionFlags).toEqual([lang]);
 
-        await instance.handleSettingsItemChange(
+        instance.handleSettingsItemChange(
           {
             currentTarget: { name: '1', value: flags },
-          },
+          } as React.ChangeEvent<HTMLInputElement>,
           SettingItemType.Flags,
         );
 
@@ -95,28 +96,28 @@ describe('ExecutionSettings component', () => {
     describe('with environmentVariables', () => {
       it('updates when new flags are added', async () => {
         const wrapper = shallow(<ExecutionSettings appState={store} />);
-        const instance = wrapper.instance() as any;
+        const instance: any = wrapper.instance();
 
         const debug = 'ELECTRON_DEBUG_DRAG_REGIONS=1';
         const trash = 'ELECTRON_TRASH=trash-cli';
 
-        await instance.handleSettingsItemChange(
+        instance.handleSettingsItemChange(
           {
             currentTarget: {
               name: '0',
               value: debug,
             },
-          },
+          } as React.ChangeEvent<HTMLInputElement>,
           SettingItemType.EnvVars,
         );
 
         expect(instance.state.environmentVariables).toEqual({ '0': debug });
         expect(store.environmentVariables).toEqual([debug]);
 
-        await instance.handleSettingsItemChange(
+        instance.handleSettingsItemChange(
           {
             currentTarget: { name: '1', value: trash },
-          },
+          } as React.ChangeEvent<HTMLInputElement>,
           SettingItemType.EnvVars,
         );
 

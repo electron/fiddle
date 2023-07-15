@@ -53,7 +53,7 @@ describe('AppearanceSettings component', () => {
     );
 
     await process.nextTick;
-    expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
+    expect((wrapper.state() as any).selectedTheme?.name).toBe('defaultDark');
   });
 
   it('handles a theme change', () => {
@@ -63,8 +63,8 @@ describe('AppearanceSettings component', () => {
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
-    const instance: any = wrapper.instance() as any;
-    instance.handleChange({ file: 'defaultLight' } as any);
+    const instance: any = wrapper.instance();
+    instance.handleChange({ file: 'defaultLight' } as LoadedFiddleTheme);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
@@ -95,7 +95,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.openThemeFolder();
 
       expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
@@ -108,7 +108,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       (window.ElectronFiddle.openThemeFolder as jest.Mock).mockRejectedValue(
         new Error('Bwap'),
       );
@@ -125,7 +125,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.createNewThemeFromCurrent();
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
@@ -152,7 +152,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       expect(wrapper.state('themes')).toHaveLength(0);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.createNewThemeFromCurrent();
       expect(wrapper.state('themes')).toHaveLength(1);
     });
@@ -164,7 +164,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       (window.ElectronFiddle.createThemeFile as jest.Mock).mockRejectedValue(
         new Error('Bwap'),
       );
@@ -187,7 +187,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       const promise = instance.handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
@@ -197,10 +197,10 @@ describe('AppearanceSettings component', () => {
 
   describe('filterItem()', () => {
     it('filters', () => {
-      const foo = filterItem('foo', { name: 'foo' } as any);
+      const foo = filterItem('foo', { name: 'foo' } as LoadedFiddleTheme);
       expect(foo).toBe(true);
 
-      const bar = filterItem('foo', { name: 'bar' } as any);
+      const bar = filterItem('foo', { name: 'bar' } as LoadedFiddleTheme);
       expect(bar).toBe(false);
     });
   });
@@ -218,7 +218,7 @@ describe('AppearanceSettings component', () => {
     };
 
     it('returns null for non-matching', () => {
-      const result = renderItem({ name: 'foo' } as any, {
+      const result = renderItem({ name: 'foo' } as LoadedFiddleTheme, {
         ...mockItemProps,
         modifiers: {
           ...mockItemProps.modifiers,
@@ -230,7 +230,7 @@ describe('AppearanceSettings component', () => {
     });
 
     it('returns a MenuItem for matching', () => {
-      const result = renderItem({ name: 'foo' } as any, {
+      const result = renderItem({ name: 'foo' } as LoadedFiddleTheme, {
         ...mockItemProps,
       });
 

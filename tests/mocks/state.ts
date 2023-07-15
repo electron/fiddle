@@ -23,7 +23,7 @@ export class StateMock {
   public executionFlags: string[] = [];
   public genericDialogLastInput: string | null = null;
   public genericDialogLastResult: boolean | null = null;
-  public genericDialogOptions: GenericDialogOptions = {} as any;
+  public genericDialogOptions = {} as GenericDialogOptions;
   public gistId = '';
   public gitHubAvatarUrl: string | null = null;
   public gitHubLogin: string | null = null;
