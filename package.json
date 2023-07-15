@@ -4,6 +4,7 @@
   "version": "0.33.0",
   "description": "The easiest way to get started with Electron",
   "repository": "https://github.com/electron/fiddle",
+  "homepage": "https://electronjs.org/fiddle",
   "main": "./.webpack/main",
   "scripts": {
     "contributors": "node ./tools/contributors.js",
