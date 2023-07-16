@@ -30,11 +30,6 @@ interface ElectronSettingsProps {
   appState: AppState;
 }
 
-interface ElectronSettingsState {
-  isDownloadingAll: boolean;
-  isDeletingAll: boolean;
-}
-
 /**
  * Settings content to manage Electron-related preferences.
  *
@@ -42,10 +37,7 @@ interface ElectronSettingsState {
  * @extends {React.Component<ElectronSettingsProps, ElectronSettingsState>}
  */
 export const ElectronSettings = observer(
-  class ElectronSettings extends React.Component<
-    ElectronSettingsProps,
-    ElectronSettingsState
-  > {
+  class ElectronSettings extends React.Component<ElectronSettingsProps> {
     constructor(props: ElectronSettingsProps) {
       super(props);
 
@@ -53,16 +45,12 @@ export const ElectronSettings = observer(
       this.handleChannelChange = this.handleChannelChange.bind(this);
       this.handleDeleteAll = this.handleDeleteAll.bind(this);
       this.handleDownloadAll = this.handleDownloadAll.bind(this);
+      this.handleStopDownloads = this.handleStopDownloads.bind(this);
       this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(
         this,
       );
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
-
-      this.state = {
-        isDownloadingAll: false,
-        isDeletingAll: false,
-      };
     }
 
     public handleUpdateElectronVersions() {
@@ -113,15 +101,22 @@ export const ElectronSettings = observer(
      * @returns {Promise<void>}
      */
     public async handleDownloadAll(): Promise<void> {
-      this.setState({ isDownloadingAll: true });
+      const {
+        downloadVersion,
+        versionsToShow,
+        startDownloadingAll,
+        stopDeletingAll,
+      } = this.props.appState;
 
-      const { downloadVersion, versionsToShow } = this.props.appState;
+      startDownloadingAll();
 
       for (const ver of versionsToShow) {
+        if (!this.props.appState.isDownloadingAll) break;
+
         await downloadVersion(ver);
       }
 
-      this.setState({ isDownloadingAll: false });
+      stopDeletingAll();
     }
 
     /**
@@ -130,16 +125,28 @@ export const ElectronSettings = observer(
      * @returns {Promise<void>}
      */
     public async handleDeleteAll(): Promise<void> {
-      this.setState({ isDeletingAll: true });
+      const {
+        versions,
+        removeVersion,
+        startDeletingAll,
+        stopDeletingAll,
+      } = this.props.appState;
 
-      const { versions, removeVersion } = this.props.appState;
+      startDeletingAll();
 
       for (const ver of Object.values(versions)) {
         await removeVersion(ver);
       }
 
-      this.setState({ isDeletingAll: false });
+      stopDeletingAll();
     }
+
+    /**
+     * Stops the downloads
+     */
+    public handleStopDownloads = (): void => {
+      this.props.appState.stopDownloadingAll();
+    };
 
     /**
      * Opens the "add local version" dialog
@@ -171,8 +178,12 @@ export const ElectronSettings = observer(
      * @returns {JSX.Element}
      */
     private renderAdvancedButtons(): JSX.Element {
-      const { isDownloadingAll, isDeletingAll } = this.state;
-      const { isUpdatingElectronVersions } = this.props.appState;
+      const {
+        isUpdatingElectronVersions,
+        isDownloadingAll,
+        isDeletingAll,
+      } = this.props.appState;
+
       const isWorking = isDownloadingAll || isDeletingAll;
 
       return (
@@ -184,12 +195,20 @@ export const ElectronSettings = observer(
             icon="numbered-list"
             text="Update Electron Release List"
           />
-          <Button
-            disabled={isWorking}
-            icon="download"
-            onClick={this.handleDownloadAll}
-            text="Download All Versions"
-          />
+          {isDownloadingAll ? (
+            <Button
+              icon="stop"
+              onClick={this.handleStopDownloads}
+              text="Stop Downloads"
+            />
+          ) : (
+            <Button
+              disabled={isWorking}
+              icon="download"
+              onClick={this.handleDownloadAll}
+              text="Download All Versions"
+            />
+          )}
           <Button
             disabled={isWorking}
             icon="trash"
