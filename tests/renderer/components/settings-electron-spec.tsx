@@ -156,6 +156,9 @@ describe('ElectronSettings component', () => {
     await instance.handleDownloadAll();
 
     expect(store.downloadVersion).toHaveBeenCalled();
+    expect(store.downloadVersion).toHaveBeenCalledTimes(
+      store.versionsToShow.length,
+    );
   });
 
   it('handles the downloadAll() during stopDownloadingAll()', async () => {
