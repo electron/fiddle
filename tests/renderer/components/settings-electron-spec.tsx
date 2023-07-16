@@ -158,7 +158,7 @@ describe('ElectronSettings component', () => {
     expect(store.downloadVersion).toHaveBeenCalled();
   });
 
-  it('handles the downloadAll() during stop downloads', async () => {
+  it('handles the downloadAll() during stopDownloadingAll()', async () => {
     const versionsToShowCount = store.versionsToShow.length;
     const downloadCount = 2;
 
@@ -174,24 +174,24 @@ describe('ElectronSettings component', () => {
     // Initiate download for all versions
     instance.handleDownloadAll();
 
-    // Count starts from 1 because stopDownload condition is checked after each download not before
-    let completedDownloads = 1;
+    // Count starts from 1 because the stopDownload condition is checked after each download, not before
+    let completedDownloadCount = 1;
 
     // Wait for downloads to complete
-    while (completedDownloads < versionsToShowCount - downloadCount) {
+    while (completedDownloadCount < versionsToShowCount - downloadCount) {
       await downloadPromise;
-      completedDownloads++;
+      completedDownloadCount++;
     }
 
     // Stop downloads
     await instance.handleStopDownloads();
 
-    // Assertions
+    // Stops downloading more versions
     expect(store.stopDownloadingAll).toHaveBeenCalled();
     expect(store.downloadVersion).not.toHaveBeenCalledTimes(
       versionsToShowCount,
     );
-    expect(store.downloadVersion).not.toHaveBeenCalledTimes(downloadCount);
+    expect(store.downloadVersion).toHaveBeenCalledTimes(completedDownloadCount);
   });
 
   describe('handleUpdateElectronVersions()', () => {
