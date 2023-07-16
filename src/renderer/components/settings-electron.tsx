@@ -111,9 +111,9 @@ export const ElectronSettings = observer(
       startDownloadingAll();
 
       for (const ver of versionsToShow) {
-        if (!this.props.appState.isDownloadingAll) break;
-
         await downloadVersion(ver);
+
+        if (!this.props.appState.isDownloadingAll) break;
       }
 
       stopDeletingAll();

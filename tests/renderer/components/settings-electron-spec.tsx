@@ -149,9 +149,6 @@ describe('ElectronSettings component', () => {
   });
 
   it('handles the downloadAll()', async () => {
-    store.startDownloadingAll.mockImplementation(
-      () => (store.isDownloadingAll = true),
-    );
     const wrapper = shallow(
       <ElectronSettings appState={(store as unknown) as AppState} />,
     );
