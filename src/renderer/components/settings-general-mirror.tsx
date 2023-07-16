@@ -37,8 +37,9 @@ export const MirrorSettings = observer(
     }
 
     private changeSourceType(e: FormEvent<HTMLInputElement>) {
-      this.props.appState.electronMirror.sourceType = (e.target as HTMLInputElement)
-        .value as Sources;
+      this.props.appState.electronMirror.sourceType = (
+        e.target as HTMLInputElement
+      ).value as Sources;
     }
 
     private get notCustomSource() {

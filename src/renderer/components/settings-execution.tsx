@@ -58,9 +58,8 @@ export const ExecutionSettings = observer(
       };
 
       this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
-      this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
-        this,
-      );
+      this.handleElectronLoggingChange =
+        this.handleElectronLoggingChange.bind(this);
 
       this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
       this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
@@ -258,10 +257,8 @@ export const ExecutionSettings = observer(
     }
 
     public render() {
-      const {
-        isKeepingUserDataDirs,
-        isEnablingElectronLogging,
-      } = this.props.appState;
+      const { isKeepingUserDataDirs, isEnablingElectronLogging } =
+        this.props.appState;
 
       return (
         <div>

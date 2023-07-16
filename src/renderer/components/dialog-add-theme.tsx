@@ -70,7 +70,8 @@ export const AddThemeDialog = observer(
         if (!editor.base && !editor.rules)
           throw Error('File does not match specifications'); // has to have these attributes
         const newTheme: FiddleTheme = { ...defaultTheme };
-        newTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+        newTheme.editor =
+          editor as Partial<MonacoType.editor.IStandaloneThemeData>;
         // Use file.name if no editor.name, and strip file extension (should be .json)
         const name: string = editor.name
           ? editor.name

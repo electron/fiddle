@@ -265,9 +265,10 @@ describe('menu', () => {
 
       it('attempts to open a template on click', () => {
         showMe.submenu[0].submenu[0].click();
-        expect(
-          ipcMainManager.send,
-        ).toHaveBeenCalledWith(IpcEvents.FS_OPEN_TEMPLATE, ['App']);
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
+          IpcEvents.FS_OPEN_TEMPLATE,
+          ['App'],
+        );
       });
     });
 

@@ -2,12 +2,12 @@ import { EventEmitter } from 'node:events';
 
 import { MessagePortMain, ipcMain } from 'electron';
 
+import { getOrCreateMainWindow } from './windows';
 import {
   IpcEvents,
   WEBCONTENTS_READY_FOR_IPC_SIGNAL,
   ipcMainEvents,
 } from '../ipc-events';
-import { getOrCreateMainWindow } from './windows';
 
 /**
  * The main purpose of this class is to be the central

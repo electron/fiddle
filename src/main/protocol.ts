@@ -3,10 +3,10 @@ import * as path from 'node:path';
 
 import { app } from 'electron';
 
-import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
 import { getOrCreateMainWindow } from './windows';
+import { IpcEvents } from '../ipc-events';
 
 const PROTOCOL = 'electron-fiddle';
 const squirrelPath = path.resolve(

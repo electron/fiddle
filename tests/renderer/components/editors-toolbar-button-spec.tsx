@@ -12,11 +12,8 @@ import { AppState } from '../../../src/renderer/state';
 let mockContext: any = {};
 
 jest.mock('react-mosaic-component', () => {
-  const {
-    MosaicContext,
-    MosaicRootActions,
-    MosaicWindowContext,
-  } = jest.requireActual('react-mosaic-component');
+  const { MosaicContext, MosaicRootActions, MosaicWindowContext } =
+    jest.requireActual('react-mosaic-component');
 
   MosaicContext.Consumer = (props: any) => props.children(mockContext);
 

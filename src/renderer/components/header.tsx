@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { reaction } from 'mobx';
 
-import { AppState } from '../state';
 import { Commands } from './commands';
 import { WelcomeTour } from './tour-welcome';
+import { AppState } from '../state';
 
 interface HeaderProps {
   appState: AppState;

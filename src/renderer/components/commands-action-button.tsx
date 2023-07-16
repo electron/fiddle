@@ -123,9 +123,8 @@ export const GistActionButton = observer(
       const defaultGistValues = await window.ElectronFiddle.getTemplate(
         appState.version,
       );
-      const currentEditorValues = await window.ElectronFiddle.app.getEditorValues(
-        options,
-      );
+      const currentEditorValues =
+        await window.ElectronFiddle.app.getEditorValues(options);
 
       defaultGistValues[PACKAGE_NAME as EditorId] =
         currentEditorValues[PACKAGE_NAME as EditorId];

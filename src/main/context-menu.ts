@@ -5,9 +5,9 @@ import {
   MenuItemConstructorOptions,
 } from 'electron';
 
-import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
+import { IpcEvents } from '../ipc-events';
 
 /**
  * Returns items related to running the current fiddle.

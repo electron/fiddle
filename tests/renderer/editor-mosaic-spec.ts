@@ -24,16 +24,13 @@ describe('EditorMosaic', () => {
   let app: AppMock;
 
   beforeEach(() => {
-    ({
-      app,
-      monaco,
-    } = (window.ElectronFiddle as unknown) as ElectronFiddleMock);
+    ({ app, monaco } = window.ElectronFiddle as unknown as ElectronFiddleMock);
 
     // inject a real EditorMosaic into our mock scaffolding
     editorMosaic = new EditorMosaic();
     app.state.editorMosaic = editorMosaic;
 
-    editor = (new MonacoEditorMock() as unknown) as Editor;
+    editor = new MonacoEditorMock() as unknown as Editor;
     valuesIn = createEditorValues();
   });
 
@@ -92,7 +89,7 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
 
       // now try to re-show the file
-      const editor2: Editor = (new MonacoEditorMock() as unknown) as Editor;
+      const editor2: Editor = new MonacoEditorMock() as unknown as Editor;
       editorMosaic.show(id);
       editorMosaic.addEditor(id, editor2);
 
@@ -232,7 +229,7 @@ describe('EditorMosaic', () => {
 
       // and then add Monaco editors
       for (const [file, value] of Object.entries(values)) {
-        const editor = (new MonacoEditorMock() as unknown) as Editor;
+        const editor = new MonacoEditorMock() as unknown as Editor;
         editorMosaic.addEditor(file as EditorId, editor);
         editor.setValue(value as string);
       }
@@ -314,7 +311,7 @@ describe('EditorMosaic', () => {
           if (presence === EditorPresence.Pending) {
             editorMosaic.addEditor(
               id,
-              (new MonacoEditorMock() as unknown) as Editor,
+              new MonacoEditorMock() as unknown as Editor,
             );
           }
         }
@@ -448,7 +445,7 @@ describe('EditorMosaic', () => {
     it('layout() calls editor.layout() only once', async () => {
       const id = MAIN_JS;
       const content = '// content';
-      const editor = (new MonacoEditorMock() as unknown) as Editor;
+      const editor = new MonacoEditorMock() as unknown as Editor;
       editorMosaic.set({ [id]: content });
       await editorMosaic.addEditor(id, editor);
 
@@ -476,7 +473,7 @@ describe('EditorMosaic', () => {
     let editor: Editor;
 
     beforeEach(() => {
-      editor = (new MonacoEditorMock() as unknown) as Editor;
+      editor = new MonacoEditorMock() as unknown as Editor;
       editorMosaic.set(valuesIn);
       editorMosaic.addEditor(id, editor);
       expect(editorMosaic.isEdited).toBe(false);

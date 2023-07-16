@@ -4,10 +4,10 @@ import { Installer } from '@electron/fiddle-core';
 import { dialog } from 'electron';
 import * as fs from 'fs-extra';
 
-import { SelectedLocalVersion } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
 import { getOrCreateMainWindow } from './windows';
+import { SelectedLocalVersion } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 
 /**
  * Build a default name for a local Electron version

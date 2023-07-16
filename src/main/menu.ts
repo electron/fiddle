@@ -6,6 +6,9 @@ import {
   shell,
 } from 'electron';
 
+import { showOpenDialog, showSaveDialog } from './files';
+import { ipcMainManager } from './ipc';
+import { createMainWindow } from './windows';
 import {
   BlockableAccelerator,
   SetUpMenuOptions,
@@ -13,9 +16,6 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { SHOW_ME_TEMPLATES } from '../templates';
-import { showOpenDialog, showSaveDialog } from './files';
-import { ipcMainManager } from './ipc';
-import { createMainWindow } from './windows';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
@@ -312,10 +312,9 @@ export function setupMenu(options?: SetUpMenuOptions) {
 
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
-  const menu = (defaultMenu(
-    app,
-    shell,
-  ) as Array<MenuItemConstructorOptions>).map((item) => {
+  const menu = (
+    defaultMenu(app, shell) as Array<MenuItemConstructorOptions>
+  ).map((item) => {
     const { label } = item;
 
     // Append the "Settings" item

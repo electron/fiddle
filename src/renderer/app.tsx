@@ -2,13 +2,6 @@ import * as path from 'node:path';
 
 import { autorun, reaction, when } from 'mobx';
 
-import {
-  EditorId,
-  EditorValues,
-  PACKAGE_NAME,
-  SetFiddleOptions,
-} from '../interfaces';
-import { defaultDark, defaultLight } from '../themes-defaults';
 import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
@@ -19,6 +12,13 @@ import { TaskRunner } from './task-runner';
 import { activateTheme, getTheme } from './themes';
 import { PackageJsonOptions, getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
+import {
+  EditorId,
+  EditorValues,
+  PACKAGE_NAME,
+  SetFiddleOptions,
+} from '../interfaces';
+import { defaultDark, defaultLight } from '../themes-defaults';
 
 // Importing styles files
 import '../less/root.less';
@@ -226,9 +226,8 @@ export class App {
    * @returns {Promise<void>}
    */
   public async loadTheme(name: string): Promise<void> {
-    const tag: HTMLStyleElement | null = document.querySelector(
-      'style#fiddle-theme',
-    );
+    const tag: HTMLStyleElement | null =
+      document.querySelector('style#fiddle-theme');
     const theme = await getTheme(name);
     activateTheme(theme);
 

@@ -31,16 +31,17 @@ describe('Runner component', () => {
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ fileManager, state: store } = (window.ElectronFiddle
-      .app as unknown) as AppMock);
+    ({ fileManager, state: store } = window.ElectronFiddle
+      .app as unknown as AppMock);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
 
-    (window.ElectronFiddle
-      .getIsPackageManagerInstalled as jest.Mock).mockReturnValue(true);
+    (
+      window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
+    ).mockReturnValue(true);
 
-    instance = new Runner((store as unknown) as AppState);
+    instance = new Runner(store as unknown as AppState);
   });
 
   describe('run()', () => {
@@ -417,8 +418,9 @@ describe('Runner component', () => {
     });
 
     it('does attempt a forge operation if npm is not installed', async () => {
-      (window.ElectronFiddle
-        .getIsPackageManagerInstalled as jest.Mock).mockReturnValueOnce(false);
+      (
+        window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
+      ).mockReturnValueOnce(false);
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -431,8 +433,9 @@ describe('Runner component', () => {
       ['does not attempt installation if npm is not installed', false, 0],
       ['does attempt installation if npm is installed', true, 1],
     ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      (window.ElectronFiddle
-        .getIsPackageManagerInstalled as jest.Mock).mockReturnValue(haveNpm);
+      (
+        window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
+      ).mockReturnValue(haveNpm);
       await instance.installModules({
         dir: '/fake/path',
         packageManager: 'npm',

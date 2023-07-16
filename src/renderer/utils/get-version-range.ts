@@ -1,5 +1,5 @@
-import { RunnableVersion } from '../../interfaces';
 import { semverCompare } from './sort-versions';
+import { RunnableVersion } from '../../interfaces';
 
 /**
  * An subset of `versions` sorted from oldest to newest and bounded in the range of [oldVersion..newVersion]

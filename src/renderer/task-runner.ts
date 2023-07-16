@@ -1,3 +1,7 @@
+import { App } from './app';
+import { AppState } from './state';
+import { getVersionRange } from './utils/get-version-range';
+import { normalizeVersion } from './utils/normalize-version';
 import {
   BisectRequest,
   ElectronReleaseChannel,
@@ -7,10 +11,6 @@ import {
   SetupRequest,
   TestRequest,
 } from '../interfaces';
-import { App } from './app';
-import { AppState } from './state';
-import { getVersionRange } from './utils/get-version-range';
-import { normalizeVersion } from './utils/normalize-version';
 
 export class TaskRunner {
   private readonly appState: AppState;

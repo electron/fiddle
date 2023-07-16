@@ -3,8 +3,8 @@ import * as React from 'react';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 
-import { AppState } from '../state';
 import { Output } from './output';
+import { AppState } from '../state';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {

@@ -32,9 +32,9 @@ describe('FileManager', () => {
     );
 
     // create a real FileManager and insert it into our mocks
-    app = (window.ElectronFiddle.app as unknown) as AppMock;
-    fm = new FileManager(((app as unknown) as App).state);
-    ((app as unknown) as App).fileManager = fm;
+    app = window.ElectronFiddle.app as unknown as AppMock;
+    fm = new FileManager((app as unknown as App).state);
+    (app as unknown as App).fileManager = fm;
   });
 
   describe('openFiddle()', () => {

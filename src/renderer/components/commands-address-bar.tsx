@@ -39,9 +39,8 @@ export const AddressBar = observer(
         value,
         loaders: {
           gist: remoteLoader.loadFiddleFromGist.bind(remoteLoader),
-          example: remoteLoader.loadFiddleFromElectronExample.bind(
-            remoteLoader,
-          ),
+          example:
+            remoteLoader.loadFiddleFromElectronExample.bind(remoteLoader),
         },
       };
     }

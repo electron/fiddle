@@ -9,9 +9,9 @@ import {
   MosaicParent,
 } from 'react-mosaic-component';
 
+import { WrapperEditorId } from './output-editors-wrapper';
 import { OutputEntry } from '../../interfaces';
 import { AppState } from '../state';
-import { WrapperEditorId } from './output-editors-wrapper';
 
 interface CommandsProps {
   readonly appState: AppState;

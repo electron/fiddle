@@ -3,11 +3,11 @@ import * as React from 'react';
 import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
 import { ExecutionSettings } from './settings-execution';
 import { GeneralSettings } from './settings-general';
+import { AppState } from '../state';
 
 enum SettingsSections {
   General = 'General',

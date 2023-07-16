@@ -2,9 +2,9 @@ import * as path from 'node:path';
 
 import { BrowserWindow, app, shell } from 'electron';
 
-import { IpcEvents } from '../ipc-events';
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
+import { IpcEvents } from '../ipc-events';
 
 // Keep a global reference of the window objects, if we don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -109,7 +109,7 @@ export function createMainWindow(): Electron.BrowserWindow {
       'downloads',
       'desktop',
     ] as const;
-    const paths = {} as Record<typeof pathsToQuery[number], string>;
+    const paths = {} as Record<(typeof pathsToQuery)[number], string>;
     for (const path of pathsToQuery) {
       paths[path] = app.getPath(path);
     }

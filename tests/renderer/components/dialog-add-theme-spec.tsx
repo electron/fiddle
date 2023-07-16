@@ -162,7 +162,7 @@ describe('AddThemeDialog component', () => {
 
       const files = ['one', 'two'];
       await (wrapper.instance() as any).onChangeFile({
-        target: ({ files } as unknown) as EventTarget,
+        target: { files } as unknown as EventTarget,
       } as React.FormEvent<HTMLInputElement>);
       expect(wrapper.state('file')).toBe(files[0]);
     });
@@ -171,7 +171,7 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
 
       (wrapper.instance() as any).onChangeFile({
-        target: ({ files: null } as unknown) as EventTarget,
+        target: { files: null } as unknown as EventTarget,
       } as React.FormEvent<HTMLInputElement>);
       expect(wrapper.state('file')).toBeUndefined();
     });

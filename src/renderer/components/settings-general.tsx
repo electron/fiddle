@@ -3,7 +3,6 @@ import * as React from 'react';
 import { Divider } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { AppearanceSettings } from './settings-general-appearance';
 import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
@@ -11,6 +10,7 @@ import { FontSettings } from './settings-general-font';
 import { GitHubSettings } from './settings-general-github';
 import { MirrorSettings } from './settings-general-mirror';
 import { PackageAuthorSettings } from './settings-general-package-author';
+import { AppState } from '../state';
 
 interface GeneralSettingsProps {
   appState: AppState;

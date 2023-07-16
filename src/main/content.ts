@@ -4,12 +4,12 @@ import fetch from 'cross-fetch';
 import { IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 
-import { EditorValues } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
-import { readFiddle } from '../utils/read-fiddle';
 import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
 import { isReleasedMajor } from './versions';
+import { EditorValues } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
+import { readFiddle } from '../utils/read-fiddle';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');

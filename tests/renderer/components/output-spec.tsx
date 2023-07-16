@@ -71,7 +71,7 @@ describe('Output component', () => {
     instance.componentWillUnmount();
 
     expect(
-      ((monaco as unknown) as MonacoMock).latestEditor.dispose,
+      (monaco as unknown as MonacoMock).latestEditor.dispose,
     ).toHaveBeenCalled();
   });
 

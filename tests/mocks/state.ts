@@ -1,5 +1,8 @@
 import { makeObservable, observable } from 'mobx';
 
+import { BisectorMock } from './bisector';
+import { VersionsMock } from './electron-versions';
+import { FiddleRunnerMock, InstallerMock } from './fiddle-core';
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -10,9 +13,6 @@ import {
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 import { objectDifference } from '../utils';
-import { BisectorMock } from './bisector';
-import { VersionsMock } from './electron-versions';
-import { FiddleRunnerMock, InstallerMock } from './fiddle-core';
 
 export class StateMock {
   public acceleratorsToBlock: BlockableAccelerator[] = [];

@@ -2,7 +2,10 @@ import { objectDifference } from '../utils';
 
 export class MonacoModelMock {
   private options: any;
-  constructor(private value: string, private language: string) {}
+  constructor(
+    private value: string,
+    private language: string,
+  ) {}
 
   public getFullModelRange = jest.fn();
   public getValue = jest.fn(() => this.value);

@@ -111,9 +111,8 @@ export const AppearanceSettings = observer(
         );
       });
 
-      this.createNewThemeFromCurrent = this.createNewThemeFromCurrent.bind(
-        this,
-      );
+      this.createNewThemeFromCurrent =
+        this.createNewThemeFromCurrent.bind(this);
       this.openThemeFolder = this.openThemeFolder.bind(this);
     }
 

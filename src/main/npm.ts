@@ -1,9 +1,9 @@
 import { IpcMainEvent } from 'electron';
 
-import { IPackageManager, PMOperationOptions } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
 import { ipcMainManager } from './ipc';
 import { exec } from './utils/exec';
+import { IPackageManager, PMOperationOptions } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
