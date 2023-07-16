@@ -186,6 +186,8 @@ export class AppState {
   public isTokenDialogShowing = false;
   public isTourShowing = !localStorage.getItem(GlobalSetting.hasShownTour);
   public isUpdatingElectronVersions = false;
+  public isDownloadingAll = false;
+  public isDeletingAll = false;
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';
@@ -256,6 +258,8 @@ export class AppState {
       isTokenDialogShowing: observable,
       isTourShowing: observable,
       isUpdatingElectronVersions: observable,
+      isDeletingAll: observable,
+      isDownloadingAll: observable,
       isUsingSystemTheme: observable,
       localPath: observable,
       modules: observable,
@@ -296,6 +300,10 @@ export class AppState {
       versions: observable,
       versionsToShow: computed,
       changeRunnableState: action,
+      startDownloadingAll: action,
+      stopDownloadingAll: action,
+      startDeletingAll: action,
+      stopDeletingAll: action,
     });
 
     // Bind all actions
@@ -322,6 +330,10 @@ export class AppState {
     this.hideChannels = this.hideChannels.bind(this);
     this.showChannels = this.showChannels.bind(this);
     this.changeRunnableState = this.changeRunnableState.bind(this);
+    this.startDownloadingAll = this.startDownloadingAll.bind(this);
+    this.stopDownloadingAll = this.stopDownloadingAll.bind(this);
+    this.startDeletingAll = this.startDeletingAll.bind(this);
+    this.stopDeletingAll = this.stopDeletingAll.bind(this);
 
     // Populating the current state of every version present
     versions.forEach((ver: RunnableVersion) => {
@@ -585,6 +597,21 @@ export class AppState {
     }
 
     this.isUpdatingElectronVersions = false;
+  }
+  public startDownloadingAll() {
+    this.isDownloadingAll = true;
+  }
+
+  public stopDownloadingAll() {
+    this.isDownloadingAll = false;
+  }
+
+  public startDeletingAll() {
+    this.isDeletingAll = true;
+  }
+
+  public stopDeletingAll() {
+    this.isDeletingAll = false;
   }
 
   public async getName() {
