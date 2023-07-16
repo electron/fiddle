@@ -93,6 +93,12 @@ export class StateMock {
     const { mockVersionsArray } = new VersionsMock();
     return { ver: this.versions[mockVersionsArray[0].version] };
   });
+  public startDownloadingAll = jest.fn().mockImplementation(() => {
+    this.isDownloadingAll = true;
+  });
+  public stopDownloadingAll = jest.fn().mockImplementation(() => {
+    this.isDownloadingAll = false;
+  });
   public showChannels = jest.fn();
   public showConfirmDialog = jest.fn();
   public showErrorDialog = jest.fn();
@@ -105,8 +111,6 @@ export class StateMock {
   public toggleAuthDialog = jest.fn();
   public toggleSettings = jest.fn();
   public updateElectronVersions = jest.fn();
-  public startDownloadingAll = jest.fn();
-  public stopDownloadingAll = jest.fn();
   public startDeletingAll = jest.fn();
   public stopDeletingAll = jest.fn();
   public installer = new InstallerMock();

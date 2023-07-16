@@ -158,6 +158,42 @@ describe('ElectronSettings component', () => {
     expect(store.downloadVersion).toHaveBeenCalled();
   });
 
+  it('handles the downloadAll() during stop downloads', async () => {
+    const versionsToShowCount = store.versionsToShow.length;
+    const downloadCount = 2;
+
+    // Set up download promise
+    const downloadPromise = new Promise((resolve) => setTimeout(resolve, 50));
+    store.downloadVersion.mockResolvedValue(downloadPromise);
+
+    const wrapper = shallow(
+      <ElectronSettings appState={(store as unknown) as AppState} />,
+    );
+    const instance = wrapper.instance() as any;
+
+    // Initiate download for all versions
+    instance.handleDownloadAll();
+
+    // Count starts from 1 because stopDownload condition is checked after each download not before
+    let completedDownloads = 1;
+
+    // Wait for downloads to complete
+    while (completedDownloads < versionsToShowCount - downloadCount) {
+      await downloadPromise;
+      completedDownloads++;
+    }
+
+    // Stop downloads
+    await instance.handleStopDownloads();
+
+    // Assertions
+    expect(store.stopDownloadingAll).toHaveBeenCalled();
+    expect(store.downloadVersion).not.toHaveBeenCalledTimes(
+      versionsToShowCount,
+    );
+    expect(store.downloadVersion).not.toHaveBeenCalledTimes(downloadCount);
+  });
+
   describe('handleUpdateElectronVersions()', () => {
     it('kicks off an update of Electron versions', async () => {
       const wrapper = shallow(
