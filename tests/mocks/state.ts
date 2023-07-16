@@ -59,6 +59,8 @@ export class StateMock {
   public packageAuthor = 'electron<electron@electron.org>';
   public electronMirror = ELECTRON_MIRROR;
   public isBisectCommandShowing = false;
+  public isDownloadingAll = false;
+  public isDeletingAll = false;
 
   public Bisector: BisectorMock | undefined = new BisectorMock();
   public addAcceleratorToBlock = jest.fn();
@@ -103,6 +105,10 @@ export class StateMock {
   public toggleAuthDialog = jest.fn();
   public toggleSettings = jest.fn();
   public updateElectronVersions = jest.fn();
+  public startDownloadingAll = jest.fn();
+  public stopDownloadingAll = jest.fn();
+  public startDeletingAll = jest.fn();
+  public stopDeletingAll = jest.fn();
   public installer = new InstallerMock();
   public versionRunner = new FiddleRunnerMock();
 
@@ -152,6 +158,8 @@ export class StateMock {
       packageAuthor: observable,
       electronMirror: observable,
       isBisectCommandShowing: observable,
+      isDeletingAll: observable,
+      isDownloadingAll: observable,
     });
 
     const { mockVersions: obj, mockVersionsArray: arr } = new VersionsMock();

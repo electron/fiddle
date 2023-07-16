@@ -743,4 +743,60 @@ describe('AppState', () => {
       expect(actual).toBe(expected);
     });
   });
+
+  describe('startDownloadingAll()', () => {
+    it('change isDownloadingAll to true when false', () => {
+      appState.isDownloadingAll = false;
+      appState.startDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(true);
+    });
+
+    it('takes no action when isDownloadingAll is true', () => {
+      appState.isDownloadingAll = true;
+      appState.startDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(true);
+    });
+  });
+
+  describe('stopDownloadingAll()', () => {
+    it('change isDownloadingAll to false when true', () => {
+      appState.isDownloadingAll = true;
+      appState.stopDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(false);
+    });
+
+    it('takes no action when isDownloadingAll is false', () => {
+      appState.isDownloadingAll = false;
+      appState.stopDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(false);
+    });
+  });
+
+  describe('startDeletingAll()', () => {
+    it('change isDeletingAll to true when false', () => {
+      appState.isDeletingAll = false;
+      appState.startDeletingAll();
+      expect(appState.isDeletingAll).toBe(true);
+    });
+
+    it('takes no action when isDeletingAll is true', () => {
+      appState.isDeletingAll = true;
+      appState.startDeletingAll();
+      expect(appState.isDeletingAll).toBe(true);
+    });
+  });
+
+  describe('stopDeletingAll()', () => {
+    it('change isDeletingAll to false when true', () => {
+      appState.isDeletingAll = true;
+      appState.stopDeletingAll();
+      expect(appState.isDeletingAll).toBe(false);
+    });
+
+    it('takes no action when isDeletingAll is false', () => {
+      appState.isDeletingAll = false;
+      appState.stopDeletingAll();
+      expect(appState.isDeletingAll).toBe(false);
+    });
+  });
 });
