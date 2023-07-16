@@ -105,7 +105,7 @@ export const ElectronSettings = observer(
         downloadVersion,
         versionsToShow,
         startDownloadingAll,
-        stopDeletingAll,
+        stopDownloadingAll,
       } = this.props.appState;
 
       startDownloadingAll();
@@ -116,7 +116,7 @@ export const ElectronSettings = observer(
         if (!this.props.appState.isDownloadingAll) break;
       }
 
-      stopDeletingAll();
+      stopDownloadingAll();
     }
 
     /**
