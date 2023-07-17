@@ -5,6 +5,8 @@
     "./src/less/*-vendor.less"
   ],
   "rules": {
+    "alpha-value-notation": null,
+    "color-function-notation": null,
     "import-notation": "string"
   }
 }
