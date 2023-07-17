@@ -32,6 +32,31 @@ jest.mock('@sentry/electron/renderer', () => ({
   init: jest.fn(),
 }));
 
+class FakeBroadcastChannel extends EventTarget {
+  constructor(channelName) {
+    super();
+    this.name = channelName;
+  }
+
+  postMessage(message) {
+    this.dispatchEvent(new MessageEvent('message', { data: message }));
+  }
+}
+
+global.BroadcastChannel = class Singleton {
+  static channels = new Map();
+
+  constructor(channelName) {
+    if (!Singleton.channels.has(channelName)) {
+      Singleton.channels.set(
+        channelName,
+        new FakeBroadcastChannel(channelName),
+      );
+    }
+    return Singleton.channels.get(channelName);
+  }
+};
+
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
 
 // We want to detect jest sometimes

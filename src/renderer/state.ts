@@ -16,6 +16,9 @@ import {
 } from 'mobx';
 
 import {
+  AppStateBroadcastChannel,
+  AppStateBroadcastMessage,
+  AppStateBroadcastMessageType,
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogOptions,
@@ -66,10 +69,8 @@ export class AppState {
     timeStyle: 'medium',
   });
 
-  private settingKeyTypeGuard(key: never): never {
-    throw new Error(
-      `Unhandled setting ${key}, please handle it in the \`AppState\`.`,
-    );
+  private genericTypeGuard(_: never, errorMessage: string): never {
+    throw new Error(errorMessage);
   }
 
   // -- Persisted settings ------------------
@@ -209,8 +210,24 @@ export class AppState {
     versions: this.baseVersions,
   });
 
+  // Used for communications between windows
+  private broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
+    'AppState',
+  );
+
+  // Notifies other windows that this version has changed so they can update their state to reflect that.
+  private broadcastVersionStates(versions: RunnableVersion[]) {
+    this.broadcastChannel.postMessage({
+      type: AppStateBroadcastMessageType.syncVersions,
+
+      // the RunnableVersion proxies can't be cloned by structuredClone,
+      // so we have to create plain objects out of them
+      payload: versions.map((version) => ({ ...version })),
+    });
+  }
+
   constructor(versions: RunnableVersion[]) {
-    makeObservable<AppState, 'setPageHash'>(this, {
+    makeObservable<AppState, 'setPageHash' | 'setVersionStates'>(this, {
       Bisector: observable,
       acceleratorsToBlock: observable,
       activeGistAction: observable,
@@ -275,6 +292,7 @@ export class AppState {
       setPageHash: action,
       setTheme: action,
       setVersion: action,
+      setVersionStates: action,
       showChannels: action,
       showConfirmDialog: action,
       showErrorDialog: action,
@@ -433,7 +451,10 @@ export class AppState {
           }
 
           default: {
-            this.settingKeyTypeGuard(key);
+            this.genericTypeGuard(
+              key,
+              `Unhandled setting "${key}", please handle it in the \`AppState\`.`,
+            );
           }
         }
       } else if (
@@ -446,6 +467,36 @@ export class AppState {
         );
       }
     });
+
+    /**
+     * Handles communications between windows.
+     */
+    this.broadcastChannel.addEventListener(
+      'message',
+      (event: MessageEvent<AppStateBroadcastMessage>) => {
+        const { type, payload } = event.data;
+
+        switch (type) {
+          case AppStateBroadcastMessageType.isDownloadingAll: {
+            this.isDownloadingAll = payload;
+            break;
+          }
+
+          case AppStateBroadcastMessageType.syncVersions: {
+            this.setVersionStates(payload);
+
+            break;
+          }
+
+          default: {
+            this.genericTypeGuard(
+              type,
+              `Unhandled BroadcastChannel message "${type}", please handle it in the \`AppState\`.`,
+            );
+          }
+        }
+      },
+    );
 
     // Setup auto-runs
     autorun(() => this.save(GlobalSetting.theme, this.theme));
@@ -601,10 +652,18 @@ export class AppState {
 
   public startDownloadingAll() {
     this.isDownloadingAll = true;
+    this.broadcastChannel.postMessage({
+      type: AppStateBroadcastMessageType.isDownloadingAll,
+      payload: true,
+    });
   }
 
   public stopDownloadingAll() {
     this.isDownloadingAll = false;
+    this.broadcastChannel.postMessage({
+      type: AppStateBroadcastMessageType.isDownloadingAll,
+      payload: false,
+    });
   }
 
   public startDeletingAll() {
@@ -717,6 +776,15 @@ export class AppState {
     for (const ver of versions) {
       this.versions[ver.version] ||= ver;
     }
+
+    this.broadcastVersionStates(versions);
+  }
+
+  // Updates the version states in the current window to reflect updates made by other windows.
+  private setVersionStates(versions: RunnableVersion[]) {
+    for (const ver of versions) {
+      this.versions[ver.version] = ver;
+    }
   }
 
   /**
@@ -753,6 +821,8 @@ export class AppState {
           };
 
           await typeDefsCleaner();
+
+          this.broadcastVersionStates([ver]);
         }
       } else {
         console.log(`State: Version ${version} already removed, doing nothing`);
@@ -791,22 +861,33 @@ export class AppState {
 
     console.log(`State: Downloading Electron ${version}`);
 
+    this.broadcastVersionStates([
+      {
+        ...ver,
+        state: InstallState.downloading,
+      },
+    ]);
+
     // Download the version without setting it as the current version.
     await this.installer.ensureDownloaded(version, {
       mirror: {
         electronMirror,
         electronNightlyMirror,
       },
-      progressCallback(progress: ProgressObject) {
+      progressCallback: (progress: ProgressObject) => {
         // https://mobx.js.org/actions.html#runinaction
         runInAction(() => {
           const percent = Math.round(progress.percent * 100) / 100;
           if (ver.downloadProgress !== percent) {
             ver.downloadProgress = percent;
+
+            this.broadcastVersionStates([ver]);
           }
         });
       },
     });
+
+    this.broadcastVersionStates([ver]);
   }
 
   /**
