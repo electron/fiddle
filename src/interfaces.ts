@@ -221,11 +221,17 @@ export interface AppStateBroadcastChannel extends BroadcastChannel {
   postMessage(params: AppStateBroadcastMessage): void;
 }
 
-export type AppStateBroadcastMessage = {
-  type: AppStateBroadcastMessageType.syncVersions;
-  payload: RunnableVersion[];
-};
+export type AppStateBroadcastMessage =
+  | {
+      type: AppStateBroadcastMessageType.isDownloadingAll;
+      payload: boolean;
+    }
+  | {
+      type: AppStateBroadcastMessageType.syncVersions;
+      payload: RunnableVersion[];
+    };
 
 export enum AppStateBroadcastMessageType {
+  isDownloadingAll = 'isDownloadingAll',
   syncVersions = 'syncVersions',
 }

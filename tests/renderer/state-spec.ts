@@ -775,6 +775,10 @@ describe('AppState', () => {
       appState.isDownloadingAll = false;
       appState.startDownloadingAll();
       expect(appState.isDownloadingAll).toBe(true);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.isDownloadingAll,
+        payload: true,
+      });
     });
 
     it('takes no action when isDownloadingAll is true', () => {
@@ -789,6 +793,10 @@ describe('AppState', () => {
       appState.isDownloadingAll = true;
       appState.stopDownloadingAll();
       expect(appState.isDownloadingAll).toBe(false);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.isDownloadingAll,
+        payload: false,
+      });
     });
 
     it('takes no action when isDownloadingAll is false', () => {

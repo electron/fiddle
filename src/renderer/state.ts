@@ -477,6 +477,11 @@ export class AppState {
         const { type, payload } = event.data;
 
         switch (type) {
+          case AppStateBroadcastMessageType.isDownloadingAll: {
+            this.isDownloadingAll = payload;
+            break;
+          }
+
           case AppStateBroadcastMessageType.syncVersions: {
             this.setVersionStates(payload);
 
@@ -647,10 +652,18 @@ export class AppState {
 
   public startDownloadingAll() {
     this.isDownloadingAll = true;
+    this.broadcastChannel.postMessage({
+      type: AppStateBroadcastMessageType.isDownloadingAll,
+      payload: true,
+    });
   }
 
   public stopDownloadingAll() {
     this.isDownloadingAll = false;
+    this.broadcastChannel.postMessage({
+      type: AppStateBroadcastMessageType.isDownloadingAll,
+      payload: false,
+    });
   }
 
   public startDeletingAll() {
