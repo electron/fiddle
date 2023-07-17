@@ -3,6 +3,11 @@ import * as path from 'node:path';
 import * as fs from 'fs-extra';
 import semver from 'semver';
 
+import { AppState } from './state';
+import { dotfilesTransform } from './transforms/dotfiles';
+import { forgeTransform } from './transforms/forge';
+import { isKnownFile } from './utils/editor-utils';
+import { DEFAULT_OPTIONS, PackageJsonOptions } from './utils/get-package';
 import {
   EditorId,
   EditorValues,
@@ -12,11 +17,6 @@ import {
   PACKAGE_NAME,
 } from '../interfaces';
 import { readFiddle } from '../utils/read-fiddle';
-import { AppState } from './state';
-import { dotfilesTransform } from './transforms/dotfiles';
-import { forgeTransform } from './transforms/forge';
-import { isKnownFile } from './utils/editor-utils';
-import { DEFAULT_OPTIONS, PackageJsonOptions } from './utils/get-package';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {

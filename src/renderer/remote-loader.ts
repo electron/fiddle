@@ -1,5 +1,11 @@
 import semver from 'semver';
 
+import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
+import { AppState } from './state';
+import { disableDownload } from './utils/disable-download';
+import { isKnownFile, isSupportedFile } from './utils/editor-utils';
+import { getOctokit } from './utils/octokit';
+import { getReleaseChannel } from './versions';
 import {
   EditorId,
   EditorValues,
@@ -9,12 +15,6 @@ import {
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';
-import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
-import { AppState } from './state';
-import { disableDownload } from './utils/disable-download';
-import { isKnownFile, isSupportedFile } from './utils/editor-utils';
-import { getOctokit } from './utils/octokit';
-import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -216,9 +216,8 @@ export class RemoteLoader {
     }
 
     // check if version is part of release channel
-    const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(
-      version,
-    );
+    const versionReleaseChannel: ElectronReleaseChannel =
+      getReleaseChannel(version);
 
     if (!this.appState.channelsToShow.includes(versionReleaseChannel)) {
       const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);

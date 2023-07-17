@@ -21,9 +21,8 @@ export const GitHubSettings = observer(
       super(props);
 
       this.signIn = this.signIn.bind(this);
-      this.handlePublishGistAsRevisionChange = this.handlePublishGistAsRevisionChange.bind(
-        this,
-      );
+      this.handlePublishGistAsRevisionChange =
+        this.handlePublishGistAsRevisionChange.bind(this);
     }
 
     private static publishGistAsRevisionInstructions = `

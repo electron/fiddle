@@ -4,10 +4,10 @@ import { ElectronVersions, Installer, SemVer } from '@electron/fiddle-core';
 import { IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 
+import { ipcMainManager } from './ipc';
 import releases from '../../static/releases.json';
 import { InstallState, Version } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { ipcMainManager } from './ipc';
 
 let knownVersions: ElectronVersions;
 

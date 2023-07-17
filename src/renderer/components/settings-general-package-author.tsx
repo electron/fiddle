@@ -31,9 +31,8 @@ export const PackageAuthorSettings = observer(
         value: this.props.appState.packageAuthor,
       };
 
-      this.handlePackageAuthorChange = this.handlePackageAuthorChange.bind(
-        this,
-      );
+      this.handlePackageAuthorChange =
+        this.handlePackageAuthorChange.bind(this);
     }
 
     /**

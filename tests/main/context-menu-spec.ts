@@ -32,7 +32,7 @@ describe('context-menu', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    mockWindow = (new BrowserWindowMock() as unknown) as BrowserWindow;
+    mockWindow = new BrowserWindowMock() as unknown as BrowserWindow;
     createContextMenu(mockWindow);
   });
 
@@ -157,9 +157,11 @@ describe('context-menu', () => {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      (mockWindow.webContents
-        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
-      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
+      (
+        mockWindow.webContents.isDevToolsOpened as jest.Mock
+      ).mockReturnValueOnce(true);
+      (mockWindow.webContents as any).devToolsWebContents =
+        new WebContentsMock();
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
@@ -174,11 +176,14 @@ describe('context-menu', () => {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      (mockWindow.webContents
-        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
-      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
-      (mockWindow.webContents.devToolsWebContents!
-        .focus as jest.Mock).mockImplementationOnce(() => {
+      (
+        mockWindow.webContents.isDevToolsOpened as jest.Mock
+      ).mockReturnValueOnce(true);
+      (mockWindow.webContents as any).devToolsWebContents =
+        new WebContentsMock();
+      (
+        mockWindow.webContents.devToolsWebContents!.focus as jest.Mock
+      ).mockImplementationOnce(() => {
         throw new Error('💩');
       });
 

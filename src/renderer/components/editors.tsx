@@ -10,14 +10,14 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
+import { Editor } from './editor';
+import { renderNonIdealState } from './editors-non-ideal-state';
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { AppState } from '../state';
 import { getEditorTitle } from '../utils/editor-utils';
 import { getAtPath, setAtPath } from '../utils/js-path';
 import { toggleMonaco } from '../utils/toggle-monaco';
-import { Editor } from './editor';
-import { renderNonIdealState } from './editors-non-ideal-state';
-import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {

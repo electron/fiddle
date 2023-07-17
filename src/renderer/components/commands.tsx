@@ -3,12 +3,12 @@ import * as React from 'react';
 import { Button, ControlGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { GistActionButton } from './commands-action-button';
 import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
+import { AppState } from '../state';
 
 interface CommandsProps {
   appState: AppState;

@@ -3,8 +3,8 @@ import * as React from 'react';
 import { ButtonGroup } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { VersionSelect } from './version-select';
+import { AppState } from '../state';
 
 interface VersionChooserProps {
   appState: AppState;

@@ -21,9 +21,8 @@ export const BlockAcceleratorsSettings = observer(
     constructor(props: BlockAcceleratorsSettingsProps) {
       super(props);
 
-      this.handleBlockAcceleratorChange = this.handleBlockAcceleratorChange.bind(
-        this,
-      );
+      this.handleBlockAcceleratorChange =
+        this.handleBlockAcceleratorChange.bind(this);
     }
 
     /**

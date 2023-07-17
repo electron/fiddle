@@ -20,13 +20,8 @@ interface RunnerProps {
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
     public render() {
-      const {
-        downloaded,
-        downloading,
-        missing,
-        installing,
-        installed,
-      } = InstallState;
+      const { downloaded, downloading, missing, installing, installed } =
+        InstallState;
       const {
         isRunning,
         isInstallingModules,

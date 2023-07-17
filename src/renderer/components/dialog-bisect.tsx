@@ -3,10 +3,10 @@ import * as React from 'react';
 import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { VersionSelect } from './version-select';
 import { RunnableVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
 import { AppState } from '../state';
-import { VersionSelect } from './version-select';
 
 interface BisectDialogProps {
   appState: AppState;
@@ -76,8 +76,8 @@ export const BisectDialog = observer(
       if (range.length > 1) {
         const { appState } = this.props;
         appState.Bisector = new Bisector(range);
-        const initialBisectPivot = appState.Bisector.getCurrentVersion()
-          .version;
+        const initialBisectPivot =
+          appState.Bisector.getCurrentVersion().version;
         appState.setVersion(initialBisectPivot);
         this.onClose();
       }

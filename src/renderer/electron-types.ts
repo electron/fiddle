@@ -84,9 +84,10 @@ export class ElectronTypes {
       );
 
       for (const file of files) {
-        const lib = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-          fs.readFileSync(file, 'utf8'),
-        );
+        const lib =
+          this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+            fs.readFileSync(file, 'utf8'),
+          );
         this.disposables.push(lib);
       }
     } catch (err) {
@@ -97,9 +98,10 @@ export class ElectronTypes {
   private setTypesFromFile(file: string, version: string) {
     try {
       console.log(`Updating Monaco with "${ELECTRON_DTS}@${version}"`);
-      const lib = this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-        fs.readFileSync(file, 'utf8'),
-      );
+      const lib =
+        this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+          fs.readFileSync(file, 'utf8'),
+        );
       this.disposables.push(lib);
     } catch (err) {
       console.debug(`Unable to read types from "${file}": ${err.message}`);

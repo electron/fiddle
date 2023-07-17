@@ -42,18 +42,10 @@ export const GenericDialog = observer(
     }
 
     public render() {
-      const {
-        isGenericDialogShowing,
-        genericDialogOptions,
-      } = this.props.appState;
-      const {
-        type,
-        ok,
-        cancel,
-        label,
-        wantsInput,
-        placeholder,
-      } = genericDialogOptions;
+      const { isGenericDialogShowing, genericDialogOptions } =
+        this.props.appState;
+      const { type, ok, cancel, label, wantsInput, placeholder } =
+        genericDialogOptions;
 
       let intent: Intent;
       let icon: IconName;

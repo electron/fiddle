@@ -2,11 +2,11 @@ import * as path from 'node:path';
 
 import { IpcMainEvent } from 'electron';
 
+import { STATIC_DIR } from './constants';
+import { ipcMainManager } from './ipc';
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { readFiddle } from '../utils/read-fiddle';
-import { STATIC_DIR } from './constants';
-import { ipcMainManager } from './ipc';
 
 /**
  * Returns expected content for a given name.

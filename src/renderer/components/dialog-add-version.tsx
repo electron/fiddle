@@ -128,11 +128,8 @@ export const AddVersionDialog = observer(
     }
 
     get buttons() {
-      const {
-        isValidElectron,
-        isValidVersion,
-        existingLocalVersion,
-      } = this.state;
+      const { isValidElectron, isValidVersion, existingLocalVersion } =
+        this.state;
       const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
       const canSwitch = isValidElectron && existingLocalVersion;
 

@@ -3,6 +3,10 @@ import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
 
+import { Bisector } from './bisect';
+import { AppState } from './state';
+import { PackageJsonOptions } from './utils/get-package';
+import { maybePlural } from './utils/plural-maybe';
 import {
   FileTransform,
   InstallState,
@@ -10,10 +14,6 @@ import {
   RunResult,
   RunnableVersion,
 } from '../interfaces';
-import { Bisector } from './bisect';
-import { AppState } from './state';
-import { PackageJsonOptions } from './utils/get-package';
-import { maybePlural } from './utils/plural-maybe';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
@@ -262,9 +262,8 @@ export class Runner {
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     const packageManager = this.appState.packageManager;
-    const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
-      packageManager,
-    );
+    const pmInstalled =
+      await window.ElectronFiddle.getIsPackageManagerInstalled(packageManager);
     if (!pmInstalled) {
       let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
@@ -322,9 +321,10 @@ export class Runner {
     if (modules && modules.length > 0) {
       this.appState.isInstallingModules = true;
       const packageManager = pmOptions.packageManager;
-      const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
-        packageManager,
-      );
+      const pmInstalled =
+        await window.ElectronFiddle.getIsPackageManagerInstalled(
+          packageManager,
+        );
       if (!pmInstalled) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(
           ', ',
@@ -385,12 +385,8 @@ export class Runner {
    */
   private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
     const { localPath, isValidBuild, version, dir } = params;
-    const {
-      versionRunner,
-      pushOutput,
-      flushOutput,
-      executionFlags,
-    } = this.appState;
+    const { versionRunner, pushOutput, flushOutput, executionFlags } =
+      this.appState;
     const fiddleRunner = await versionRunner;
     const env = this.buildChildEnvVars();
 

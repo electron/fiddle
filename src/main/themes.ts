@@ -4,6 +4,7 @@ import { IpcMainEvent, app, shell } from 'electron';
 import * as fs from 'fs-extra';
 import * as namor from 'namor';
 
+import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import {
   DefaultThemes,
@@ -12,7 +13,6 @@ import {
   defaultDark,
   defaultLight,
 } from '../themes-defaults';
-import { ipcMainManager } from './ipc';
 
 export const CONFIG_PATH = path.join(app.getPath('home'), '.electron-fiddle');
 export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');

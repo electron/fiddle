@@ -4,6 +4,8 @@ import * as commander from 'commander';
 import * as fs from 'fs-extra';
 import getos from 'getos';
 
+import { ipcMainManager } from './ipc';
+import { findProtocolArg } from './protocol';
 import {
   ElectronReleaseChannel,
   OutputEntry,
@@ -12,8 +14,6 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getGistId } from '../utils/gist';
-import { ipcMainManager } from './ipc';
-import { findProtocolArg } from './protocol';
 
 function getSetup(opts: commander.OptionValues): SetupRequest {
   const config: SetupRequest = {

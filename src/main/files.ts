@@ -1,9 +1,9 @@
 import { app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
+import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
-import { ipcMainManager } from './ipc';
 
 /**
  * Ensures that we're listening to file events

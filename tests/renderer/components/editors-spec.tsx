@@ -29,13 +29,13 @@ describe('Editors component', () => {
 
   beforeEach(() => {
     ({ app } = window.ElectronFiddle);
-    monaco = (window.ElectronFiddle.monaco as unknown) as MonacoMock;
+    monaco = window.ElectronFiddle.monaco as unknown as MonacoMock;
     ({ state: store } = window.ElectronFiddle.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);
 
-    ((store as unknown) as StateMock).editorMosaic = editorMosaic;
+    (store as unknown as StateMock).editorMosaic = editorMosaic;
   });
 
   it('renders', () => {
@@ -65,7 +65,7 @@ describe('Editors component', () => {
 
     it('handles an error', () => {
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, (editor as unknown) as Editor);
+      editorMosaic.addEditor(filename, editor as unknown as Editor);
       editor.updateOptions.mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
@@ -81,7 +81,7 @@ describe('Editors component', () => {
       const instance: any = wrapper.instance();
 
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, (editor as unknown) as Editor);
+      editorMosaic.addEditor(filename, editor as unknown as Editor);
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
       expect(editor.updateOptions).toHaveBeenCalledWith({
         minimap: { enabled: false },
@@ -245,7 +245,7 @@ describe('Editors component', () => {
     it('handles the monaco editor option event', () => {
       const id = MAIN_JS;
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(id, (editor as unknown) as Editor);
+      editorMosaic.addEditor(id, editor as unknown as Editor);
 
       shallow(<Editors appState={store} />);
       emitEvent('toggle-monaco-option', 'wordWrap');

@@ -19,7 +19,8 @@ interface TokenDialogState {
 const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
-const TOKEN_PATTERN = /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+const TOKEN_PATTERN =
+  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
@@ -44,9 +45,8 @@ export const TokenDialog = observer(
       };
 
       this.onSubmitToken = this.onSubmitToken.bind(this);
-      this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(
-        this,
-      );
+      this.openGenerateTokenExternal =
+        this.openGenerateTokenExternal.bind(this);
       this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
       this.handleChange = this.handleChange.bind(this);
       this.onClose = this.onClose.bind(this);

@@ -28,10 +28,10 @@ describe('IpcMainManager', () => {
   describe('send()', () => {
     it('sends an event and finds the main window', () => {
       const mockTarget = {
-        webContents: ({
+        webContents: {
           send: jest.fn(),
           isDestroyed: () => false,
-        } as unknown) as Electron.WebContents,
+        } as unknown as Electron.WebContents,
       };
 
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
@@ -45,10 +45,10 @@ describe('IpcMainManager', () => {
     });
 
     it('sends an event to a target window', () => {
-      const mockTarget = ({
+      const mockTarget = {
         send: jest.fn(),
         isDestroyed: () => false,
-      } as unknown) as Electron.WebContents;
+      } as unknown as Electron.WebContents;
 
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
       ipcMainManager.readyWebContents.add(mockTarget);
@@ -59,9 +59,9 @@ describe('IpcMainManager', () => {
     });
 
     it('does not send an event to a target window if it is not ready', () => {
-      const mockTarget = ({
+      const mockTarget = {
         send: jest.fn(),
-      } as unknown) as Electron.WebContents;
+      } as unknown as Electron.WebContents;
 
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
 

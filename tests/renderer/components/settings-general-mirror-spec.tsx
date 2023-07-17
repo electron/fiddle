@@ -46,7 +46,7 @@ describe('MirrorSettings component', () => {
       store.electronMirror.sourceType = 'DEFAULT';
       const event = { target: { value: 'CUSTOM' } };
       instance.changeSourceType(
-        (event as unknown) as React.FormEvent<HTMLInputElement>,
+        event as unknown as React.FormEvent<HTMLInputElement>,
       );
 
       expect(store.electronMirror.sourceType).toEqual('CUSTOM');

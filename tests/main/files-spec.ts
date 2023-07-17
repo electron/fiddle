@@ -22,10 +22,10 @@ jest.mock('fs-extra', () => ({
 }));
 
 const mockTarget = {
-  webContents: ({
+  webContents: {
     send: jest.fn(),
     isDestroyed: () => false,
-  } as unknown) as Electron.WebContents,
+  } as unknown as Electron.WebContents,
 };
 
 describe('files', () => {

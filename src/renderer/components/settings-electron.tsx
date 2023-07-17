@@ -46,9 +46,8 @@ export const ElectronSettings = observer(
       this.handleDeleteAll = this.handleDeleteAll.bind(this);
       this.handleDownloadAll = this.handleDownloadAll.bind(this);
       this.handleStopDownloads = this.handleStopDownloads.bind(this);
-      this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(
-        this,
-      );
+      this.handleUpdateElectronVersions =
+        this.handleUpdateElectronVersions.bind(this);
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
     }
@@ -125,12 +124,8 @@ export const ElectronSettings = observer(
      * @returns {Promise<void>}
      */
     public async handleDeleteAll(): Promise<void> {
-      const {
-        versions,
-        removeVersion,
-        startDeletingAll,
-        stopDeletingAll,
-      } = this.props.appState;
+      const { versions, removeVersion, startDeletingAll, stopDeletingAll } =
+        this.props.appState;
 
       startDeletingAll();
 
@@ -178,11 +173,8 @@ export const ElectronSettings = observer(
      * @returns {JSX.Element}
      */
     private renderAdvancedButtons(): JSX.Element {
-      const {
-        isUpdatingElectronVersions,
-        isDownloadingAll,
-        isDeletingAll,
-      } = this.props.appState;
+      const { isUpdatingElectronVersions, isDownloadingAll, isDeletingAll } =
+        this.props.appState;
 
       const isWorking = isDownloadingAll || isDeletingAll;
 

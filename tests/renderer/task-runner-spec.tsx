@@ -29,11 +29,11 @@ describe('Task Runner component', () => {
   }
 
   beforeEach(() => {
-    app = (window.ElectronFiddle.app as unknown) as AppMock;
+    app = window.ElectronFiddle.app as unknown as AppMock;
     appState = app.state;
     runner = app.runner;
     (runner.autobisect as any).foo = 'a';
-    app.taskRunner = new TaskRunner((app as unknown) as App);
+    app.taskRunner = new TaskRunner(app as unknown as App);
   });
 
   async function requestAndWait(event: FiddleEvent, req: any) {

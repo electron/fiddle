@@ -3,10 +3,10 @@ import * as React from 'react';
 import { reaction } from 'mobx';
 import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
-import { AppState } from '../state';
 import { Editors } from './editors';
 import { Outputs } from './outputs';
 import { Sidebar } from './sidebar';
+import { AppState } from '../state';
 
 interface WrapperProps {
   appState: AppState;

@@ -15,6 +15,22 @@ import {
   when,
 } from 'mobx';
 
+import { Bisector } from './bisect';
+import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
+import { EditorMosaic } from './editor-mosaic';
+import { ELECTRON_MIRROR } from './mirror-constants';
+import { normalizeVersion } from './utils/normalize-version';
+import { sortVersions } from './utils/sort-versions';
+import {
+  addLocalVersion,
+  fetchVersions,
+  getDefaultVersion,
+  getElectronVersions,
+  getLocalVersions,
+  getReleaseChannel,
+  makeRunnable,
+  saveLocalVersions,
+} from './versions';
 import {
   AppStateBroadcastChannel,
   AppStateBroadcastMessage,
@@ -35,22 +51,6 @@ import {
   VersionSource,
   WindowSpecificSetting,
 } from '../interfaces';
-import { Bisector } from './bisect';
-import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
-import { EditorMosaic } from './editor-mosaic';
-import { ELECTRON_MIRROR } from './mirror-constants';
-import { normalizeVersion } from './utils/normalize-version';
-import { sortVersions } from './utils/sort-versions';
-import {
-  addLocalVersion,
-  fetchVersions,
-  getDefaultVersion,
-  getElectronVersions,
-  getLocalVersions,
-  getReleaseChannel,
-  makeRunnable,
-  saveLocalVersions,
-} from './versions';
 
 class UpdateableBaseVersions extends BaseVersions {
   public updateVersions(val: unknown): void {
@@ -459,7 +459,7 @@ export class AppState {
         }
       } else if (
         !Object.values(WindowSpecificSetting).includes(
-          (key as unknown) as WindowSpecificSetting,
+          key as unknown as WindowSpecificSetting,
         )
       ) {
         console.warn(
@@ -838,10 +838,8 @@ export class AppState {
    */
   public async downloadVersion(ver: RunnableVersion): Promise<void> {
     const { source, state, version } = ver;
-    const {
-      electronMirror,
-      electronNightlyMirror,
-    } = this.electronMirror.sources[this.electronMirror.sourceType];
+    const { electronMirror, electronNightlyMirror } =
+      this.electronMirror.sources[this.electronMirror.sourceType];
 
     const isRemote = source === VersionSource.remote;
     const isDownloaded = state === InstallState.downloaded;
@@ -916,9 +914,10 @@ export class AppState {
    *
    * Returns a RunnableVersion if it would work, or an error string otherwise.
    */
-  public isVersionUsable(
-    input: string,
-  ): { ver?: RunnableVersion; err?: string } {
+  public isVersionUsable(input: string): {
+    ver?: RunnableVersion;
+    err?: string;
+  } {
     const ver = this.getVersion(input);
     if (!ver) {
       return { err: `Unknown version ${input}` };

@@ -1,7 +1,7 @@
 import { Installer } from '@electron/fiddle-core';
 
-import { InstallState } from '../../src/interfaces';
 import { ChildProcessMock } from './child-process';
+import { InstallState } from '../../src/interfaces';
 
 export class InstallerMock extends Installer {
   public state = () => InstallState.installed;

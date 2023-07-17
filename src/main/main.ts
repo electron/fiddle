@@ -9,7 +9,6 @@ import {
   systemPreferences,
 } from 'electron';
 
-import { IpcEvents } from '../ipc-events';
 import { setupAboutPanel } from './about-panel';
 import { processCommandLine } from './command-line';
 import { setupContent } from './content';
@@ -28,6 +27,7 @@ import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
 import { getOrCreateMainWindow } from './windows';
+import { IpcEvents } from '../ipc-events';
 
 let argv: string[] = [];
 

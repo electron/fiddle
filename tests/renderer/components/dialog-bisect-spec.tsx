@@ -30,13 +30,12 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   beforeEach(() => {
     ({ runner, state: store } = window.ElectronFiddle.app);
 
-    ((store as unknown) as StateMock).versionsToShow = generateVersionRange(
-      numVersions,
-    );
-    ((store as unknown) as StateMock).versions = Object.fromEntries(
+    (store as unknown as StateMock).versionsToShow =
+      generateVersionRange(numVersions);
+    (store as unknown as StateMock).versions = Object.fromEntries(
       store.versionsToShow.map((ver) => [ver.version, ver]),
     );
-    ((store as unknown) as StateMock).channelsToShow = [
+    (store as unknown as StateMock).channelsToShow = [
       ElectronReleaseChannel.stable,
     ];
   });
