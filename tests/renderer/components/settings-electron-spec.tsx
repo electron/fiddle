@@ -156,6 +156,36 @@ describe('ElectronSettings component', () => {
     await instance.handleDownloadAll();
 
     expect(store.downloadVersion).toHaveBeenCalled();
+    expect(store.downloadVersion).toHaveBeenCalledTimes(
+      store.versionsToShow.length,
+    );
+  });
+
+  it('handles stopDownloadingAll() during downloadAll()', async () => {
+    const versionsToShowCount = store.versionsToShow.length;
+
+    let completedDownloadCount = 0;
+
+    // Set up download mock
+    store.downloadVersion.mockImplementation(async () => {
+      completedDownloadCount++;
+      if (completedDownloadCount >= versionsToShowCount - 2) {
+        // Stop downloads before all versions downloaded
+        await instance.handleStopDownloads();
+      }
+    });
+
+    const wrapper = shallow(
+      <ElectronSettings appState={(store as unknown) as AppState} />,
+    );
+    const instance = wrapper.instance() as any;
+
+    // Initiate download for all versions
+    await instance.handleDownloadAll();
+
+    // Stops downloading more versions
+    expect(completedDownloadCount).toBeGreaterThan(1);
+    expect(completedDownloadCount).toBeLessThan(versionsToShowCount);
   });
 
   describe('handleUpdateElectronVersions()', () => {
