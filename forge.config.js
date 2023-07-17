@@ -19,7 +19,9 @@ if (process.env['WINDOWS_CODESIGN_FILE']) {
 }
 
 const commonLinuxConfig = {
+  categories: ['Development', 'Utility'],
   icon: {
+    '1024x1024': path.resolve(iconDir, 'fiddle.png'),
     scalable: path.resolve(iconDir, 'fiddle.svg'),
   },
   mimeType: ['x-scheme-handler/electron-fiddle'],
@@ -137,7 +139,11 @@ const config = {
     {
       name: '@reforged/maker-appimage',
       platforms: ['linux'],
-      config: commonLinuxConfig,
+      config: {
+        options: {
+          categories: commonLinuxConfig.categories,
+        },
+      },
     },
   ],
   publishers: [
