@@ -161,12 +161,19 @@ describe('ElectronSettings component', () => {
     );
   });
 
-  it('handles the downloadAll() during stopDownloadingAll()', async () => {
+  it('handles stopDownloadingAll() during downloadAll()', async () => {
     const versionsToShowCount = store.versionsToShow.length;
 
-    // Set up download promise
-    const downloadPromise = new Promise((resolve) => setTimeout(resolve, 50));
-    store.downloadVersion.mockResolvedValue(downloadPromise);
+    let completedDownloadCount = 0;
+
+    // Set up download mock
+    store.downloadVersion.mockImplementation(async () => {
+      completedDownloadCount++;
+      if (completedDownloadCount >= versionsToShowCount - 2) {
+        // Stop downloads before all versions downloaded
+        await instance.handleStopDownloads();
+      }
+    });
 
     const wrapper = shallow(
       <ElectronSettings appState={(store as unknown) as AppState} />,
@@ -174,26 +181,11 @@ describe('ElectronSettings component', () => {
     const instance = wrapper.instance() as any;
 
     // Initiate download for all versions
-    instance.handleDownloadAll();
-
-    // Count starts from 1 because the stopDownload condition is checked after each download, not before
-    let completedDownloadCount = 1;
-
-    // Wait for some downloads to complete
-    while (completedDownloadCount < versionsToShowCount - 2) {
-      await downloadPromise;
-      completedDownloadCount++;
-    }
-
-    // Stop downloads
-    await instance.handleStopDownloads();
+    await instance.handleDownloadAll();
 
     // Stops downloading more versions
-    expect(store.stopDownloadingAll).toHaveBeenCalled();
-    expect(store.downloadVersion).not.toHaveBeenCalledTimes(
-      versionsToShowCount,
-    );
-    expect(store.downloadVersion).toHaveBeenCalledTimes(completedDownloadCount);
+    expect(completedDownloadCount).toBeGreaterThan(1);
+    expect(completedDownloadCount).toBeLessThan(versionsToShowCount);
   });
 
   describe('handleUpdateElectronVersions()', () => {

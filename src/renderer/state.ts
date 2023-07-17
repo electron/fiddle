@@ -598,6 +598,7 @@ export class AppState {
 
     this.isUpdatingElectronVersions = false;
   }
+
   public startDownloadingAll() {
     this.isDownloadingAll = true;
   }
