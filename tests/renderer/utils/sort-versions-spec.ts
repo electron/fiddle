@@ -23,7 +23,7 @@ describe('sort-versions', () => {
 
     const sorted = sortVersions([...unsorted]);
 
-    expect(sorted).toStrictEqual<any>([
+    expect(sorted).toStrictEqual([
       makeVersion('v3.0.0'),
       makeVersion('v2.0.0'),
       makeVersion('v1.0.0'),
@@ -47,7 +47,7 @@ describe('sort-versions', () => {
 
     const sorted = sortVersions([...unsorted]);
 
-    expect(sorted).toStrictEqual<any>([
+    expect(sorted).toStrictEqual([
       makeVersion('v3.0.0'),
       makeVersion('v3.0.0-beta.1'),
       makeVersion('v3.0.0-alpha.1'),

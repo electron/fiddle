@@ -3,12 +3,13 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { ConsoleSettings } from '../../../src/renderer/components/settings-general-console';
+import { AppState } from '../../../src/renderer/state';
 
 describe('ConsoleSettings component', () => {
-  let store: any;
+  let store: AppState;
 
   beforeEach(() => {
-    store = {};
+    store = {} as AppState;
   });
 
   it('renders', () => {
@@ -19,16 +20,16 @@ describe('ConsoleSettings component', () => {
   describe('handleClearOnRunChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<ConsoleSettings appState={store} />);
-      const instance = wrapper.instance() as any;
-      await instance.handleClearOnRunChange({
+      const instance: any = wrapper.instance();
+      instance.handleClearOnRunChange({
         currentTarget: { checked: false },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isClearingConsoleOnRun).toBe(false);
 
-      await instance.handleClearOnRunChange({
+      instance.handleClearOnRunChange({
         currentTarget: { checked: true },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isClearingConsoleOnRun).toBe(true);
     });

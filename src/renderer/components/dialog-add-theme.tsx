@@ -44,7 +44,7 @@ export const AddThemeDialog = observer(
      * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
-      const { files } = event.target as any;
+      const { files } = event.target as HTMLInputElement;
       const file = files?.[0];
 
       this.setState({ file });

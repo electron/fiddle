@@ -142,7 +142,7 @@ describe('ElectronSettings component', () => {
     const wrapper = shallow(
       <ElectronSettings appState={(store as unknown) as AppState} />,
     );
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
     await instance.handleDeleteAll();
 
     expect(store.removeVersion).toHaveBeenCalledTimes(mockVersionsArray.length);
@@ -152,10 +152,40 @@ describe('ElectronSettings component', () => {
     const wrapper = shallow(
       <ElectronSettings appState={(store as unknown) as AppState} />,
     );
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
     await instance.handleDownloadAll();
 
     expect(store.downloadVersion).toHaveBeenCalled();
+    expect(store.downloadVersion).toHaveBeenCalledTimes(
+      store.versionsToShow.length,
+    );
+  });
+
+  it('handles stopDownloadingAll() during downloadAll()', async () => {
+    const versionsToShowCount = store.versionsToShow.length;
+
+    let completedDownloadCount = 0;
+
+    // Set up download mock
+    store.downloadVersion.mockImplementation(async () => {
+      completedDownloadCount++;
+      if (completedDownloadCount >= versionsToShowCount - 2) {
+        // Stop downloads before all versions downloaded
+        await instance.handleStopDownloads();
+      }
+    });
+
+    const wrapper = shallow(
+      <ElectronSettings appState={(store as unknown) as AppState} />,
+    );
+    const instance = wrapper.instance() as any;
+
+    // Initiate download for all versions
+    await instance.handleDownloadAll();
+
+    // Stops downloading more versions
+    expect(completedDownloadCount).toBeGreaterThan(1);
+    expect(completedDownloadCount).toBeLessThan(versionsToShowCount);
   });
 
   describe('handleUpdateElectronVersions()', () => {
@@ -163,8 +193,8 @@ describe('ElectronSettings component', () => {
       const wrapper = shallow(
         <ElectronSettings appState={(store as unknown) as AppState} />,
       );
-      const instance = wrapper.instance() as any;
-      await instance.handleUpdateElectronVersions();
+      const instance: any = wrapper.instance();
+      instance.handleUpdateElectronVersions();
 
       expect(store.updateElectronVersions).toHaveBeenCalled();
     });
@@ -175,7 +205,7 @@ describe('ElectronSettings component', () => {
       const wrapper = shallow(
         <ElectronSettings appState={(store as unknown) as AppState} />,
       );
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       instance.handleAddVersion();
 
       expect(store.toggleAddVersionDialog).toHaveBeenCalled();
@@ -189,10 +219,10 @@ describe('ElectronSettings component', () => {
         const wrapper = shallow(
           <ElectronSettings appState={(store as unknown) as AppState} />,
         );
-        const instance = wrapper.instance() as any;
-        await instance.handleStateChange({
+        const instance: any = wrapper.instance();
+        instance.handleStateChange({
           currentTarget: { checked, id },
-        });
+        } as React.FormEvent<HTMLInputElement>);
         expect(store[id]).toBe(checked);
       }
     });
@@ -205,10 +235,10 @@ describe('ElectronSettings component', () => {
         const wrapper = shallow(
           <ElectronSettings appState={(store as unknown) as AppState} />,
         );
-        const instance = wrapper.instance() as any;
-        await instance.handleShowObsoleteChange({
+        const instance: any = wrapper.instance();
+        instance.handleShowObsoleteChange({
           currentTarget: { checked, id },
-        });
+        } as React.FormEvent<HTMLInputElement>);
         expect(store[id]).toBe(checked);
       }
     });
@@ -216,7 +246,7 @@ describe('ElectronSettings component', () => {
 
   describe('handleChannelChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(
+      const wrapper: any = shallow(
         <ElectronSettings appState={(store as unknown) as AppState} />,
       );
       store.showChannels.mockImplementation((ids: ElectronReleaseChannel[]) =>
@@ -228,20 +258,20 @@ describe('ElectronSettings component', () => {
             (id: ElectronReleaseChannel) => !ids.includes(id),
           )),
       );
-      const instance = wrapper.instance() as any;
-      await instance.handleChannelChange({
+      const instance = wrapper.instance();
+      instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.stable,
           checked: false,
         },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
-      await instance.handleChannelChange({
+      instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.nightly,
           checked: true,
         },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.channelsToShow).toEqual([
         ElectronReleaseChannel.beta,

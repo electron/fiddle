@@ -2,6 +2,7 @@ import {
   ElectronReleaseChannel,
   GlobalSetting,
   RunnableVersion,
+  Version,
   VersionSource,
 } from '../../src/interfaces';
 import {
@@ -23,7 +24,9 @@ describe('versions', () => {
   describe('getDefaultVersion()', () => {
     it('handles a stored version', () => {
       (localStorage.getItem as jest.Mock).mockReturnValue('2.0.2');
-      const output = getDefaultVersion([{ version: '2.0.2' }] as any);
+      const output = getDefaultVersion([
+        { version: '2.0.2' } as RunnableVersion,
+      ]);
       expect(output).toBe('2.0.2');
     });
 
@@ -39,7 +42,7 @@ describe('versions', () => {
         { version: '15.0.0-alpha.1' },
         { version: '12.0.0' },
         { version: '14.0.0-beta.1' },
-      ] as any);
+      ] as RunnableVersion[]);
       expect(output).toBe('13.0.0');
     });
 
@@ -53,7 +56,7 @@ describe('versions', () => {
       expect(
         getReleaseChannel({
           version: 'v4.0.0-nightly.20180817',
-        } as any),
+        } as Version),
       ).toBe(ElectronReleaseChannel.nightly);
     });
 
@@ -61,7 +64,7 @@ describe('versions', () => {
       expect(
         getReleaseChannel({
           version: 'v3.0.0-beta.4',
-        } as any),
+        } as Version),
       ).toBe(ElectronReleaseChannel.beta);
     });
 
@@ -69,12 +72,14 @@ describe('versions', () => {
       expect(
         getReleaseChannel({
           version: 'v3.0.0',
-        } as any),
+        } as Version),
       ).toBe(ElectronReleaseChannel.stable);
     });
 
     it('identifies an unknown release as stable', () => {
-      expect(getReleaseChannel({} as any)).toBe(ElectronReleaseChannel.stable);
+      expect(getReleaseChannel({} as Version)).toBe(
+        ElectronReleaseChannel.stable,
+      );
     });
   });
 
@@ -86,14 +91,14 @@ describe('versions', () => {
     });
 
     it('adds a local version', () => {
-      expect(addLocalVersion(mockVersions[1] as any)).toEqual([
+      expect(addLocalVersion(mockVersions[1] as Version)).toEqual([
         mockVersions[0],
         mockVersions[1],
       ]);
     });
 
     it('does not add duplicates', () => {
-      expect(addLocalVersion(mockVersions[0] as any)).toEqual([
+      expect(addLocalVersion(mockVersions[0] as Version)).toEqual([
         mockVersions[0],
       ]);
     });

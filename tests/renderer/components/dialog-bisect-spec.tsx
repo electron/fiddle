@@ -83,7 +83,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onBeginSelect()', () => {
     it('sets the begin version', () => {
       const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       expect(instance.state.startIndex).toBe(
         numVersions > 10 ? 10 : numVersions - 1,
@@ -96,7 +96,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onEndSelect()', () => {
     it('sets the end version', () => {
       const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       expect(instance.state.endIndex).toBe(0);
       instance.onEndSelect(store.versionsToShow[2]);
@@ -120,7 +120,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: versions.length - 1,
       });
 
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.onSubmit();
       expect(Bisector).toHaveBeenCalledWith(versions.reverse());
       expect(store.Bisector).toBeDefined();
@@ -134,7 +134,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: undefined,
         endIndex: 0,
       });
-      const instance1: any = wrapper.instance() as any;
+      const instance1: any = wrapper.instance();
       await instance1.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
@@ -143,7 +143,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         endIndex: undefined,
       });
 
-      const instance2: any = wrapper.instance() as any;
+      const instance2: any = wrapper.instance();
       await instance2.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
     });
@@ -162,7 +162,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       (runner.autobisect as jest.Mock).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
-      const instance1: any = wrapper.instance() as any;
+      const instance1: any = wrapper.instance();
       await instance1.onAuto();
 
       // check the results
@@ -176,7 +176,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: undefined,
         endIndex: 0,
       });
-      const instance1: any = wrapper.instance() as any;
+      const instance1: any = wrapper.instance();
       await instance1.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
@@ -185,7 +185,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         endIndex: undefined,
       });
 
-      const instance2: any = wrapper.instance() as any;
+      const instance2: any = wrapper.instance();
       await instance2.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
     });
@@ -196,7 +196,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
     beforeEach(() => {
       const wrapper = shallow(<BisectDialog appState={store} />);
-      instance = wrapper.instance() as any;
+      instance = wrapper.instance();
     });
 
     describe('isEarliestItemDisabled', () => {

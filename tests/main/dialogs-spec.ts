@@ -31,7 +31,7 @@ describe('dialogs', () => {
   describe('warning dialog', () => {
     it('shows dialog when triggering IPC event', () => {
       ipcMainManager.emit(IpcEvents.SHOW_WARNING_DIALOG, {}, { hi: 'hello' });
-      expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
+      expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
         type: 'warning',
         hi: 'hello',
       });
@@ -55,7 +55,7 @@ describe('dialogs', () => {
       });
 
       await ipcHandler();
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith<any>(
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(
         expect.objectContaining({
           properties: ['openDirectory'],
         }),

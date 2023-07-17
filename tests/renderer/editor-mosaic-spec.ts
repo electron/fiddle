@@ -31,7 +31,7 @@ describe('EditorMosaic', () => {
 
     // inject a real EditorMosaic into our mock scaffolding
     editorMosaic = new EditorMosaic();
-    app.state.editorMosaic = editorMosaic as any;
+    app.state.editorMosaic = editorMosaic;
 
     editor = (new MonacoEditorMock() as unknown) as Editor;
     valuesIn = createEditorValues();
@@ -233,7 +233,7 @@ describe('EditorMosaic', () => {
       // and then add Monaco editors
       for (const [file, value] of Object.entries(values)) {
         const editor = (new MonacoEditorMock() as unknown) as Editor;
-        editorMosaic.addEditor(file as any, editor);
+        editorMosaic.addEditor(file as EditorId, editor);
         editor.setValue(value as string);
       }
 
