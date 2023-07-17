@@ -82,7 +82,7 @@ describe('ElectronTypes', () => {
     return jest.spyOn(global, 'fetch').mockResolvedValue({
       text: async () => text,
       json: async () => ({ files: nodeTypesData }),
-    } as any);
+    } as Response);
   }
 
   describe('setVersion({ source: local })', () => {

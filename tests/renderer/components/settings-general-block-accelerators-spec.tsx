@@ -21,19 +21,19 @@ describe('BlockAcceleratorsSettings component', () => {
   describe('handleBlockAcceleratorChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
-      await instance.handleBlockAcceleratorChange({
+      instance.handleBlockAcceleratorChange({
         currentTarget: { checked: false, value: BlockableAccelerator.save },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
 
-      await instance.handleBlockAcceleratorChange({
+      instance.handleBlockAcceleratorChange({
         currentTarget: { checked: true, value: BlockableAccelerator.save },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,

@@ -1,4 +1,4 @@
-import { reaction } from 'mobx';
+import { IReactionDisposer, reaction } from 'mobx';
 
 import {
   BlockableAccelerator,
@@ -239,7 +239,7 @@ describe('AppState', () => {
     it('excludes channels', () => {
       appState.channelsToShow = ['Unsupported' as any];
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.channelsToShow = ['Stable' as any];
+      appState.channelsToShow = [ElectronReleaseChannel.stable];
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
@@ -308,7 +308,7 @@ describe('AppState', () => {
       const ver = appState.versions[version];
       ver.state = InstallState.installed;
       await appState.removeVersion(ver);
-      expect(removeSpy).toHaveBeenCalledWith<any>(ver.version);
+      expect(removeSpy).toHaveBeenCalledWith(ver.version);
     });
 
     it('does not remove it if not necessary', async () => {
@@ -469,7 +469,7 @@ describe('AppState', () => {
   });
 
   describe('dialog helpers', () => {
-    let dispose: any;
+    let dispose: IReactionDisposer;
 
     afterEach(() => {
       if (dispose) dispose();

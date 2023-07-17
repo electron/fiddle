@@ -28,44 +28,44 @@ describe('IpcMainManager', () => {
   describe('send()', () => {
     it('sends an event and finds the main window', () => {
       const mockTarget = {
-        webContents: {
+        webContents: ({
           send: jest.fn(),
           isDestroyed: () => false,
-        },
+        } as unknown) as Electron.WebContents,
       };
 
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(mockTarget);
-      ipcMainManager.readyWebContents.add(mockTarget.webContents as any);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+      ipcMainManager.readyWebContents.add(mockTarget.webContents);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
 
-      expect(mockTarget.webContents.send).toHaveBeenCalledWith<any>(
+      expect(mockTarget.webContents.send).toHaveBeenCalledWith(
         IpcEvents.FIDDLE_RUN,
       );
     });
 
     it('sends an event to a target window', () => {
-      const mockTarget = {
+      const mockTarget = ({
         send: jest.fn(),
         isDestroyed: () => false,
-      };
+      } as unknown) as Electron.WebContents;
 
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
-      ipcMainManager.readyWebContents.add(mockTarget as any);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
+      ipcMainManager.readyWebContents.add(mockTarget);
 
-      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget as any);
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
 
-      expect(mockTarget.send).toHaveBeenCalledWith<any>(IpcEvents.FIDDLE_RUN);
+      expect(mockTarget.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
     });
 
     it('does not send an event to a target window if it is not ready', () => {
-      const mockTarget = {
+      const mockTarget = ({
         send: jest.fn(),
-      };
+      } as unknown) as Electron.WebContents;
 
-      (getOrCreateMainWindow as jest.Mock<any>).mockReturnValue(null);
+      (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
 
-      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget as any);
+      ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
 
       expect(mockTarget.send).toHaveBeenCalledTimes(0);
     });

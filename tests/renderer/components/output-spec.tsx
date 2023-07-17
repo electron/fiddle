@@ -132,7 +132,7 @@ describe('Output component', () => {
     instance.updateModel();
 
     expect(monaco.editor.createModel).toHaveBeenCalled();
-    expect(instance.editor.revealLine).toHaveBeenCalled();
+    expect(instance.editor?.revealLine).toHaveBeenCalled();
   });
 
   it('updateModel correctly observes and gets called when output is updated', async () => {
@@ -181,8 +181,7 @@ describe('Output component', () => {
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
 
-    // setContent will trigger componentDidUpdate()
-    instance.editor.setContent(store.output);
+    await instance.updateModel();
     expect(spy).toHaveBeenCalled();
   });
 });

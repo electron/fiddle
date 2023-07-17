@@ -57,7 +57,7 @@ describe('Commands component', () => {
 
   it('handleDoubleClick()', () => {
     const wrapper = shallow(<Commands appState={store} />);
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
 
     const tag = { tagName: 'DIV' };
     instance.handleDoubleClick({ target: tag, currentTarget: tag });
@@ -69,7 +69,7 @@ describe('Commands component', () => {
 
   it('handleDoubleClick() should not handle input tag', () => {
     const wrapper = shallow(<Commands appState={store} />);
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
 
     instance.handleDoubleClick({
       target: { tagName: 'INPUT' },

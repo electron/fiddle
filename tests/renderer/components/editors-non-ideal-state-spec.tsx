@@ -11,12 +11,12 @@ describe('renderNonIdealState()', () => {
   });
 
   it('renders a non-ideal state', () => {
-    expect(renderNonIdealState({} as any)).toMatchSnapshot();
+    expect(renderNonIdealState({} as EditorMosaic)).toMatchSnapshot();
   });
 
   it('handles a click', () => {
     const resetLayoutSpy = jest.spyOn(editorMosaic, 'resetLayout');
-    const wrapper = mount(renderNonIdealState(editorMosaic as any));
+    const wrapper = mount(renderNonIdealState(editorMosaic));
     wrapper.find('button').simulate('click');
     expect(resetLayoutSpy).toHaveBeenCalledTimes(1);
   });

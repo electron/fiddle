@@ -3,6 +3,7 @@ import * as React from 'react';
 import { shallow } from 'enzyme';
 
 import { Settings } from '../../../src/renderer/components/settings';
+import { AppState } from '../../../src/renderer/state';
 
 jest.mock('../../../src/renderer/components/settings-general', () => ({
   GeneralSettings: 'settings-general',
@@ -17,12 +18,12 @@ jest.mock('../../../src/renderer/components/settings-credits', () => ({
 }));
 
 describe('Settings component', () => {
-  let store: any;
+  let store: AppState;
 
   beforeEach(() => {
     store = {
       isSettingsShowing: true,
-    };
+    } as AppState;
   });
 
   it('renders null if settings not showing', () => {

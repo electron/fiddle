@@ -7,12 +7,20 @@ import { AppState } from '../../../src/renderer/state';
 import { LoadedFiddleTheme, defaultLight } from '../../../src/themes-defaults';
 import { overrideRendererPlatform } from '../../utils';
 
-class FileMock {
+class FileMock extends Blob {
+  public lastModified: number;
+  public webkitRelativePath: string;
+
   constructor(
     private bits: string[],
     public name: string,
     public path: string,
-  ) {}
+    type: string,
+  ) {
+    super(bits, { type });
+    this.lastModified = Date.now();
+    this.webkitRelativePath = '';
+  }
 
   async text() {
     return this.bits.join('');
@@ -44,7 +52,7 @@ describe('AddThemeDialog component', () => {
   describe('createNewThemeFromMonaco()', () => {
     it('handles invalid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       try {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
@@ -57,12 +65,13 @@ describe('AddThemeDialog component', () => {
 
     it('handles valid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       wrapper.setState({
         file: new FileMock(
           [JSON.stringify(defaultLight.editor)],
           'file.json',
           '/test/file.json',
+          'application/json',
         ),
       });
 
@@ -88,7 +97,7 @@ describe('AddThemeDialog component', () => {
   describe('onSubmit()', () => {
     it('does nothing if there is no file currently set', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       instance.createNewThemeFromMonaco = jest.fn();
       instance.onClose = jest.fn();
@@ -101,12 +110,13 @@ describe('AddThemeDialog component', () => {
 
     it('loads a theme if a file is currently set', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       const file = new FileMock(
         [JSON.stringify(defaultLight.editor)],
         'file.json',
         '/test/file.json',
+        'application/json',
       );
       const spy = jest.spyOn(file, 'text');
       wrapper.setState({ file });
@@ -124,12 +134,13 @@ describe('AddThemeDialog component', () => {
     it('shows an error dialog for a malformed theme', async () => {
       store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
       const wrapper = shallow(<AddThemeDialog appState={store} />);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       const file = new FileMock(
         [JSON.stringify(defaultLight.editor)],
         'file.json',
         '/test/file.json',
+        'application/json',
       );
       const spy = jest.spyOn(file, 'text').mockResolvedValue('{}');
       wrapper.setState({ file });
@@ -146,13 +157,13 @@ describe('AddThemeDialog component', () => {
   });
 
   describe('onChangeFile()', () => {
-    it('handles valid input', () => {
+    it('handles valid input', async () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
 
       const files = ['one', 'two'];
-      (wrapper.instance() as any).onChangeFile({
-        target: { files },
-      });
+      await (wrapper.instance() as any).onChangeFile({
+        target: ({ files } as unknown) as EventTarget,
+      } as React.FormEvent<HTMLInputElement>);
       expect(wrapper.state('file')).toBe(files[0]);
     });
 
@@ -160,8 +171,8 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
 
       (wrapper.instance() as any).onChangeFile({
-        target: { files: null },
-      });
+        target: ({ files: null } as unknown) as EventTarget,
+      } as React.FormEvent<HTMLInputElement>);
       expect(wrapper.state('file')).toBeUndefined();
     });
   });

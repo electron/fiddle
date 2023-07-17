@@ -382,7 +382,7 @@ describe('App component', () => {
     let editorMosaic: EditorMosaic;
 
     beforeEach(() => {
-      ({ editorMosaic } = app.state as any);
+      ({ editorMosaic } = app.state);
     });
 
     async function testDialog(confirm: boolean) {

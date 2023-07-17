@@ -11,13 +11,14 @@ import {
 import { App } from '../../src/renderer/app';
 import { TaskRunner } from '../../src/renderer/task-runner';
 import { AppMock } from '../mocks/app';
+import { RunnerMock } from '../mocks/runner';
 import { StateMock } from '../mocks/state';
 import { emitEvent, waitFor } from '../utils';
 
 describe('Task Runner component', () => {
   let app: AppMock;
   let appState: StateMock;
-  let runner: any;
+  let runner: RunnerMock;
 
   function makeRunnables(versions: string[]): RunnableVersion[] {
     return versions.map((version) => ({
@@ -31,7 +32,7 @@ describe('Task Runner component', () => {
     app = (window.ElectronFiddle.app as unknown) as AppMock;
     appState = app.state;
     runner = app.runner;
-    runner.autobisect.foo = 'a';
+    (runner.autobisect as any).foo = 'a';
     app.taskRunner = new TaskRunner((app as unknown) as App);
   });
 
@@ -84,7 +85,7 @@ describe('Task Runner component', () => {
       (appState.hideChannels as jest.Mock).mockResolvedValue(0);
       (appState.setVersion as jest.Mock).mockResolvedValue(0);
       (appState.showChannels as jest.Mock).mockResolvedValue(0);
-      (appState.versionsToShow as any) = makeRunnables(VERSIONS);
+      appState.versionsToShow = makeRunnables(VERSIONS);
       (runner.autobisect as jest.Mock).mockResolvedValueOnce(RESULT);
 
       await requestAndWait('bisect-task', req);
@@ -132,7 +133,7 @@ describe('Task Runner component', () => {
       (appState.hideChannels as jest.Mock).mockResolvedValue(0);
       (appState.setVersion as jest.Mock).mockResolvedValue(0);
       (appState.showChannels as jest.Mock).mockResolvedValue(0);
-      (appState.versionsToShow as any) = makeRunnables([VERSION]);
+      appState.versionsToShow = makeRunnables([VERSION]);
       (runner.run as jest.Mock).mockResolvedValueOnce(RESULT);
 
       await requestAndWait('test-task', req);

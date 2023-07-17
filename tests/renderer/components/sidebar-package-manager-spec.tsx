@@ -4,6 +4,7 @@ import { Button } from '@blueprintjs/core';
 import { mount, shallow } from 'enzyme';
 
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
+import { AppState } from '../../../src/renderer/state';
 
 jest.mock('../../../src/renderer/npm-search', () => ({
   npmSearch: {
@@ -20,11 +21,11 @@ jest.mock('../../../src/renderer/npm-search', () => ({
 }));
 
 describe('SidebarPackageManager component', () => {
-  let store: any;
+  let store: AppState;
   beforeEach(() => {
     store = {
       modules: new Map<string, string>([['cow', '1.0.0']]),
-    };
+    } as AppState;
   });
 
   it('renders', () => {
@@ -34,16 +35,20 @@ describe('SidebarPackageManager component', () => {
 
   it('can add a package', () => {
     const wrapper = shallow(<SidebarPackageManager appState={store} />);
-    const instance = wrapper.instance();
+    const instance: any = wrapper.instance();
     instance.state = {
       suggestions: [],
       versionsCache: new Map(),
     };
 
-    (instance as any).addModuleToFiddle({
+    instance.addModuleToFiddle({
+      objectID: 'say',
       name: 'say',
       version: '2.0.0',
-      versions: ['1.0.0', '2.0.0'],
+      versions: {
+        '1.0.0': '',
+        '2.0.0': '',
+      },
     });
 
     expect(
