@@ -77,15 +77,6 @@ export const ExecutionSettings = observer(
       }
     }
 
-    public componentDidUpdate() {
-      const { appState } = this.props;
-
-      for (const type of Object.values(SettingItemType)) {
-        const values = Object.values(this.state[type]);
-        appState[type] = values.filter((v) => v !== '');
-      }
-    }
-
     /**
      * Handles a change on whether or not the user data dir should be deleted
      * after a run.
@@ -122,12 +113,18 @@ export const ExecutionSettings = observer(
     ) {
       const { name, value } = event.currentTarget;
 
-      this.setState((prevState) => ({
-        [type]: {
-          ...prevState[type],
-          [name]: value,
+      this.setState(
+        (prevState) => ({
+          [type]: {
+            ...prevState[type],
+            [name]: value,
+          },
+        }),
+        () => {
+          const values = Object.values(this.state[type]);
+          this.props.appState[type] = values.filter((v) => v !== '');
         },
-      }));
+      );
     }
 
     /**
@@ -169,7 +166,10 @@ export const ExecutionSettings = observer(
           delete updated[idx];
         }
 
-        this.setState({ [type]: updated });
+        this.setState({ [type]: updated }, () => {
+          const values = Object.values(this.state[type]);
+          this.props.appState[type] = values.filter((v) => v !== '');
+        });
       };
 
       return (
