@@ -1,9 +1,9 @@
-const { configure: enzymeConfigure } = require('enzyme');
-const Adapter = require('enzyme-adapter-react-16');
-const { createSerializer } = require('enzyme-to-json');
-const { configure: mobxConfigure } = require('mobx');
+import { configure as enzymeConfigure } from 'enzyme';
+import Adapter from 'enzyme-adapter-react-16';
+import { createSerializer } from 'enzyme-to-json';
+import { configure as mobxConfigure } from 'mobx';
 
-const { ElectronFiddleMock } = require('./mocks/mocks');
+import { ElectronFiddleMock } from './mocks/mocks';
 
 enzymeConfigure({ adapter: new Adapter() });
 
@@ -33,20 +33,22 @@ jest.mock('@sentry/electron/renderer', () => ({
 }));
 
 class FakeBroadcastChannel extends EventTarget {
-  constructor(channelName) {
+  public name: string;
+
+  constructor(channelName: string) {
     super();
     this.name = channelName;
   }
 
-  postMessage(message) {
+  postMessage(message: unknown) {
     this.dispatchEvent(new MessageEvent('message', { data: message }));
   }
 }
 
-global.BroadcastChannel = class Singleton {
+(global.BroadcastChannel as any) = class Singleton {
   static channels = new Map();
 
-  constructor(channelName) {
+  constructor(channelName: string) {
     if (!Singleton.channels.has(channelName)) {
       Singleton.channels.set(
         channelName,
@@ -57,28 +59,28 @@ global.BroadcastChannel = class Singleton {
   }
 };
 
-expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }));
+expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }) as any);
 
 // We want to detect jest sometimes
-global.__JEST__ = global.__JEST__ || {};
+(global as any).__JEST__ = (global as any).__JEST__ || {};
 
 // Setup for main tests
 global.window = global.window || {};
 global.document = global.document || { body: {} };
 global.fetch = window.fetch = jest.fn();
 
-delete window.localStorage;
-window.localStorage = {};
+delete (window as any).localStorage;
+(window.localStorage as any) = {};
 
 window.navigator = window.navigator ?? {};
-window.navigator.clipboard = {};
+(window.navigator.clipboard as any) = {};
 
 /**
  * Mock these properties twice so that they're available
  * both at the top-level of files and also within the
  * code called in individual tests.
  */
-window.ElectronFiddle = new ElectronFiddleMock();
+(window.ElectronFiddle as any) = new ElectronFiddleMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
@@ -87,13 +89,13 @@ window.navigator.clipboard.readText = jest.fn();
 window.navigator.clipboard.writeText = jest.fn();
 
 beforeEach(() => {
-  process.env.JEST = true;
-  process.env.TEST = true;
+  (process.env.JEST as any) = true;
+  (process.env.TEST as any) = true;
   document.body.innerHTML = '<div id="app" />';
 
-  window.ElectronFiddle = new ElectronFiddleMock();
-  window.localStorage.setItem.mockReset();
-  window.localStorage.getItem.mockReset();
-  window.localStorage.removeItem.mockReset();
-  window.open.mockReset();
+  (window.ElectronFiddle as any) = new ElectronFiddleMock();
+  (window.localStorage.setItem as jest.Mock).mockReset();
+  (window.localStorage.getItem as jest.Mock).mockReset();
+  (window.localStorage.removeItem as jest.Mock).mockReset();
+  (window.open as jest.Mock).mockReset();
 });

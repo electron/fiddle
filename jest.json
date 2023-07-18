@@ -1,6 +1,6 @@
 {
   "transform": {
-    "\\.(js|jsx|ts|tsx)$": "ts-jest"
+    "\\.(ts|tsx)$": "ts-jest"
   },
   "testEnvironment": "jsdom",
   "testEnvironmentOptions": {
@@ -13,9 +13,9 @@
   "snapshotSerializers": [
     "enzyme-to-json/serializer"
   ],
-  "globalSetup": "<rootDir>/tests/globalSetup.js",
+  "globalSetup": "<rootDir>/tests/globalSetup.ts",
   "setupFilesAfterEnv": [
-    "<rootDir>/tests/setup.js"
+    "<rootDir>/tests/setup.ts"
   ],
   "moduleFileExtensions": [
     "js",
