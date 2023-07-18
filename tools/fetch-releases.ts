@@ -1,11 +1,11 @@
-const path = require('path');
+import * as path from 'node:path';
 
-const { ElectronVersions } = require('@electron/fiddle-core');
-const fs = require('fs-extra');
+import { ElectronVersions } from '@electron/fiddle-core';
+import fs from 'fs-extra';
 
 const file = path.join(__dirname, '..', 'static', 'releases.json');
 
-async function populateReleases() {
+export async function populateReleases() {
   const elves = await ElectronVersions.create(undefined, { ignoreCache: true });
   const releases = elves.versions.map(({ version }) =>
     elves.getReleaseInfo(version),
@@ -25,10 +25,6 @@ async function populateReleases() {
     );
   }
 }
-
-module.exports = {
-  populateReleases,
-};
 
 if (require.main === module) {
   (async () => {

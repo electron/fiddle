@@ -111,7 +111,7 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - run: export WINDOWS_CODESIGN_FILE=$(node ./tools/add-windows-cert.js)
+      - run: export WINDOWS_CODESIGN_FILE=$(ts-node ./tools/add-windows-cert.ts)
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
