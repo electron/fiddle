@@ -47,6 +47,7 @@
     "algoliasearch": "^4.12.0",
     "classnames": "^2.2.6",
     "commander": "^7.1.0",
+    "cross-fetch": "^3.1.0",
     "electron-default-menu": "^1.0.2",
     "electron-devtools-installer": "^3.1.1",
     "electron-squirrel-startup": "^1.0.0",
@@ -71,7 +72,6 @@
     "update-electron-app": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/core": "^7.13.8",
     "@electron-forge/cli": "6.1.1",
     "@electron-forge/maker-deb": "6.1.1",
     "@electron-forge/maker-rpm": "6.1.1",
@@ -106,7 +106,6 @@
     "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
     "copy-webpack-plugin": "^11.0.0",
-    "cross-fetch": "^3.1.0",
     "css-loader": "^6.7.1",
     "electron": "25.2.0",
     "enzyme": "^3.11.0",
