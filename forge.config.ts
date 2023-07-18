@@ -1,9 +1,13 @@
-const fs = require('fs');
-const path = require('path');
+import * as fs from 'node:fs';
+import * as path from 'node:path';
 
-const packageJson = require('./package.json');
-const { maybeFetchContributors } = require('./tools/contributors');
-const { populateReleases } = require('./tools/fetch-releases');
+import type { ForgeConfig } from '@electron-forge/shared-types';
+
+import packageJson from './package.json';
+import { maybeFetchContributors } from './tools/contributors';
+import { populateReleases } from './tools/fetch-releases';
+import { mainConfig } from './tools/webpack/webpack.main.config';
+import { rendererConfig } from './tools/webpack/webpack.renderer.config';
 
 const { version } = packageJson;
 const iconDir = path.resolve(__dirname, 'assets', 'icons');
@@ -27,7 +31,7 @@ const commonLinuxConfig = {
   mimeType: ['x-scheme-handler/electron-fiddle'],
 };
 
-const config = {
+const config: ForgeConfig = {
   hooks: {
     generateAssets: async () => {
       await Promise.all([populateReleases(), maybeFetchContributors(true)]);
@@ -45,10 +49,10 @@ const config = {
           liveReload: false,
           hot: 'only',
         },
-        mainConfig: path.join(root, 'tools/webpack/webpack.main.config.js'),
+        mainConfig: mainConfig,
         renderer: {
           nodeIntegration: true,
-          config: path.join(root, 'tools/webpack/webpack.renderer.config.js'),
+          config: rendererConfig,
           entryPoints: [
             {
               html: path.join(root, './static/index.html'),
@@ -108,7 +112,7 @@ const config = {
     {
       name: '@electron-forge/maker-squirrel',
       platforms: ['win32'],
-      config: (arch) => ({
+      config: (arch: string) => ({
         name: 'electron-fiddle',
         authors: 'Electron Community',
         exe: 'electron-fiddle.exe',
@@ -125,6 +129,7 @@ const config = {
     {
       name: '@electron-forge/maker-zip',
       platforms: ['darwin'],
+      config: {},
     },
     {
       name: '@electron-forge/maker-deb',
@@ -178,7 +183,8 @@ function notarizeMaybe() {
     return;
   }
 
-  config.packagerConfig.osxNotarize = {
+  // TODO: appBundleId is not being accepted for typing
+  (config.packagerConfig!.osxNotarize as any) = {
     appBundleId: 'com.electron.fiddle',
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_ID_PASSWORD,
@@ -189,4 +195,4 @@ function notarizeMaybe() {
 notarizeMaybe();
 
 // Finally, export it
-module.exports = config;
+export default config;

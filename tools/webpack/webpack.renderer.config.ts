@@ -1,10 +1,11 @@
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin');
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
+import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
+import type { Configuration } from 'webpack';
 
-const plugins = require('./common/webpack.plugins');
-const rules = require('./common/webpack.rules');
+import { plugins } from './common/webpack.plugins';
+import { rules } from './common/webpack.rules';
 
-module.exports = {
+export const rendererConfig: Configuration = {
   module: {
     rules: [
       ...rules,

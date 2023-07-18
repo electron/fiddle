@@ -7,7 +7,7 @@
   "homepage": "https://electronjs.org/fiddle",
   "main": "./.webpack/main",
   "scripts": {
-    "contributors": "node ./tools/contributors.js",
+    "contributors": "ts-node ./tools/contributors.ts",
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
@@ -24,7 +24,7 @@
     "test:ci": "jest --ci --config=jest.json --coverage --runInBand --reporters=jest-junit",
     "test:report": "jest --config=jest.json --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
-    "electron-releases": "node --unhandled-rejections=strict ./tools/fetch-releases.js",
+    "electron-releases": "NODE_OPTIONS=--unhandled-rejections=strict ts-node ./tools/fetch-releases.ts",
     "postinstall": "husky install && npm run electron-releases"
   },
   "keywords": [
@@ -35,7 +35,7 @@
   "author": "Felix Rieseberg <felix@felixrieseberg.com>",
   "license": "MIT",
   "config": {
-    "forge": "./forge.config.js"
+    "forge": "./forge.config.ts"
   },
   "dependencies": {
     "@blueprintjs/core": "^3.36.0",
@@ -144,6 +144,7 @@
     "terser-webpack-plugin": "^5.3.3",
     "ts-jest": "^29.1.1",
     "ts-loader": "^9.4.4",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6",
     "webpack": "^5.69.1"
   },

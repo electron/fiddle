@@ -1,10 +1,11 @@
-const CopyPlugin = require('copy-webpack-plugin');
-const TerserPlugin = require('terser-webpack-plugin');
+import CopyPlugin from 'copy-webpack-plugin';
+import TerserPlugin from 'terser-webpack-plugin';
+import type { Configuration } from 'webpack';
 
-const plugins = require('./common/webpack.plugins');
-const rules = require('./common/webpack.rules');
+import { plugins } from './common/webpack.plugins';
+import { rules } from './common/webpack.rules';
 
-module.exports = {
+export const mainConfig: Configuration = {
   /**
    * This is the main entry point for your application, it's the first file
    * that runs in the main process.

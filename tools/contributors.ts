@@ -1,9 +1,9 @@
-const path = require('path');
-const util = require('util');
+import * as path from 'node:path';
+import * as util from 'node:util';
 
-const fetch = require('cross-fetch');
-const fs = require('fs-extra');
-const logSymbols = require('log-symbols');
+import fetch from 'cross-fetch';
+import fs from 'fs-extra';
+import logSymbols from 'log-symbols';
 
 const { GITHUB_TOKEN, GH_TOKEN } = process.env;
 const CONTRIBUTORS_FILE_PATH = path.join(
@@ -12,14 +12,33 @@ const CONTRIBUTORS_FILE_PATH = path.join(
 );
 const CONTRIBUTORS_URL =
   'https://api.github.com/repos/electron/fiddle/contributors?per_page=100';
-const HEADERS =
+const HEADERS: Record<string, string> =
   GITHUB_TOKEN || GH_TOKEN
     ? {
         Authorization: `Bearer ${GITHUB_TOKEN || GH_TOKEN}`,
       }
     : {};
 
-async function maybeFetchContributors(silent) {
+interface GitHubContributorInfo {
+  html_url: string;
+  url: string;
+  login: string;
+  avatar_url: string;
+  type: string;
+  contributions: number;
+}
+
+interface ContributorInfo {
+  url: string;
+  api: string;
+  login: string;
+  avatar: string;
+  name: string;
+  bio: string;
+  location: string;
+}
+
+export async function maybeFetchContributors(silent?: boolean): Promise<void> {
   try {
     const stats = fs.statSync(CONTRIBUTORS_FILE_PATH);
     const mtime = new Date(util.inspect(stats.mtime));
@@ -66,9 +85,10 @@ async function maybeFetchContributors(silent) {
  * Fetch the name for a contributor
  *
  * @param contributor - Contributor object
- * @returns {Promise}
  */
-function fetchDetailsContributor(contributor) {
+function fetchDetailsContributor(contributor: {
+  api: string;
+}): Promise<ContributorInfo> {
   return fetch(contributor.api, { headers: HEADERS }).then((response) =>
     response.json(),
   );
@@ -78,41 +98,38 @@ function fetchDetailsContributor(contributor) {
  * Fetch the names for an array of contributors
  *
  * @param contributors - Array of contributor
- * @returns {Promise}
  */
-function fetchDetailsContributors(contributors) {
-  return new Promise((resolve) => {
-    const withDetails = contributors;
-    const promises = [];
+async function fetchDetailsContributors(
+  contributors: Pick<ContributorInfo, 'api'>[],
+) {
+  const withDetails = contributors as ContributorInfo[];
+  const promises: Promise<void>[] = [];
 
-    contributors.forEach((contributor, i) => {
-      const detailFetcher = fetchDetailsContributor(contributor).then(
-        ({ name, bio, location }) => {
-          withDetails[i].name = name;
-          withDetails[i].bio = bio;
-          withDetails[i].location = location;
-        },
-      );
+  contributors.forEach((contributor, i) => {
+    const detailFetcher = fetchDetailsContributor(contributor).then(
+      ({ name, bio, location }) => {
+        withDetails[i].name = name;
+        withDetails[i].bio = bio;
+        withDetails[i].location = location;
+      },
+    );
 
-      promises.push(detailFetcher);
-    });
-
-    Promise.all(promises).then(() => resolve(withDetails));
+    promises.push(detailFetcher);
   });
+
+  await Promise.all(promises);
+  return withDetails;
 }
 
-/**
- * (description)
- *
- * @export
- * @returns {Promise}
- */
 function fetchContributors() {
-  const contributors = [];
+  const contributors: Pick<
+    ContributorInfo,
+    'url' | 'api' | 'login' | 'avatar'
+  >[] = [];
 
   return fetch(CONTRIBUTORS_URL, { headers: HEADERS })
     .then((response) => response.json())
-    .then(async (data) => {
+    .then(async (data: GitHubContributorInfo[]) => {
       if (data && data.forEach) {
         data.forEach(
           ({ html_url, url, login, avatar_url, type, contributions }) => {
@@ -140,7 +157,7 @@ function fetchContributors() {
  * Fetch the contributors and write the result to disk
  */
 async function fetchAndWriteContributorsFile() {
-  await new Promise((resolve) => {
+  await new Promise<void>((resolve) => {
     fs.access(
       CONTRIBUTORS_FILE_PATH,
       fs.constants.F_OK | fs.constants.R_OK | fs.constants.W_OK,
@@ -151,7 +168,7 @@ async function fetchAndWriteContributorsFile() {
         }
 
         console.log(logSymbols.info, 'Fetching contributors');
-        let data;
+        let data: ContributorInfo[];
 
         try {
           data = await fetchContributors();
@@ -177,10 +194,6 @@ async function fetchAndWriteContributorsFile() {
     );
   });
 }
-
-module.exports = {
-  maybeFetchContributors,
-};
 
 if (require.main === module) {
   (async () => {
