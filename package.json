@@ -24,7 +24,7 @@
     "test:ci": "jest --ci --config=jest.json --coverage --runInBand --reporters=jest-junit",
     "test:report": "jest --config=jest.json --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
-    "electron-releases": "NODE_OPTIONS=--unhandled-rejections=strict ts-node ./tools/fetch-releases.ts",
+    "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
     "postinstall": "husky install && npm run electron-releases"
   },
   "keywords": [
