@@ -236,9 +236,14 @@ export type AppStateBroadcastMessage =
   | {
       type: AppStateBroadcastMessageType.syncVersions;
       payload: RunnableVersion[];
+    }
+  | {
+      type: AppStateBroadcastMessageType.activeVersionsChanged;
+      payload?: never;
     };
 
 export enum AppStateBroadcastMessageType {
+  activeVersionsChanged = 'activeVersionsChanged',
   isDownloadingAll = 'isDownloadingAll',
   syncVersions = 'syncVersions',
 }

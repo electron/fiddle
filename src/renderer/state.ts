@@ -233,24 +233,25 @@ export class AppState {
 
   private static versionLockNamePrefix = 'version:';
 
+  public activeVersions: Set<string> = new Set();
+
   private getVersionLockName(ver: string) {
     return `${AppState.versionLockNamePrefix}${ver}`;
   }
 
   /**
-   * Retrieves all Electron versions that are currently active in some window.
+   * Updates the Electron versions that are currently active in some window.
    */
-  public async getActiveVersions(): Promise<Set<string>> {
-    return ((await navigator.locks.query()).held || []).reduce<Set<string>>(
-      (acc, item) => {
-        if (item.name?.startsWith(AppState.versionLockNamePrefix)) {
-          acc.add(item.name.split(AppState.versionLockNamePrefix)[1]);
-        }
+  private async updateActiveVersions(): Promise<void> {
+    this.activeVersions = ((await navigator.locks.query()).held || []).reduce<
+      Set<string>
+    >((acc, item) => {
+      if (item.name?.startsWith(AppState.versionLockNamePrefix)) {
+        acc.add(item.name.split(AppState.versionLockNamePrefix)[1]);
+      }
 
-        return acc;
-      },
-      new Set(),
-    );
+      return acc;
+    }, new Set());
   }
 
   constructor(versions: RunnableVersion[]) {
@@ -261,6 +262,7 @@ export class AppState {
       addAcceleratorToBlock: action,
       addLocalVersion: action,
       addNewVersions: action,
+      activeVersions: observable,
       channelsToShow: observable,
       clearConsole: action,
       currentElectronVersion: computed,
@@ -504,6 +506,12 @@ export class AppState {
         const { type, payload } = event.data;
 
         switch (type) {
+          case AppStateBroadcastMessageType.activeVersionsChanged: {
+            this.updateActiveVersions();
+
+            break;
+          }
+
           case AppStateBroadcastMessageType.isDownloadingAll: {
             this.isDownloadingAll = payload;
             break;
@@ -823,9 +831,7 @@ export class AppState {
   public async removeVersion(ver: RunnableVersion): Promise<void> {
     const { version, state, source } = ver;
 
-    const activeVersions = await this.getActiveVersions();
-
-    if (activeVersions.has(ver.version)) {
+    if (this.activeVersions.has(ver.version)) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
@@ -1002,6 +1008,15 @@ export class AppState {
       this.getVersionLockName(version),
       { mode: 'shared' },
       (lock) => {
+        // let other windows know we're using this version
+        this.broadcastChannel.postMessage({
+          type: AppStateBroadcastMessageType.activeVersionsChanged,
+        });
+
+        // the current window's state also needs an update - that's how
+        // the current window knows it can't remove this version
+        this.updateActiveVersions();
+
         this.hasActiveLock = Boolean(lock);
 
         /**
