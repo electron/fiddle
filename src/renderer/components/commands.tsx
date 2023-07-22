@@ -42,8 +42,8 @@ export const Commands = observer(
         <div
           className={
             window.ElectronFiddle.platform === 'darwin'
-              ? 'commands is-mac'
-              : 'commands'
+              ? 'commands is-mac fiddle-scrollbar'
+              : 'commands fiddle-scrollbar'
           }
           onDoubleClick={this.handleDoubleClick}
         >
