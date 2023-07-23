@@ -76,6 +76,52 @@ delete (window as any).localStorage;
 window.navigator = window.navigator ?? {};
 (window.navigator.clipboard as any) = {};
 
+class FakeNavigatorLocks implements LockManager {
+  locks = {
+    held: new Set<Lock>(),
+    pending: new Set<Lock>(),
+  };
+
+  query = async () => {
+    const result = {
+      held: [...this.locks.held],
+      pending: [...this.locks.pending],
+    };
+
+    return result as LockManagerSnapshot;
+  };
+
+  /**
+   * WIP. Right now, this is a **very** naive mock that will just happily grant a shared lock when one is requested,
+   * but I'll add some bookkeeping and expand it to cover the exclusive lock case as well.
+   *
+   * @TODO remove this comment
+   */
+  request = (async (...args: Parameters<LockManager['request']>) => {
+    const [
+      name,
+      options = {
+        mode: 'exclusive',
+      },
+      cb,
+    ] = args;
+
+    const { mode } = options;
+
+    const lock = { name, mode, cb } as Lock;
+
+    if (mode === 'shared') {
+      this.locks.held.add(lock);
+
+      await cb(lock);
+
+      return;
+    }
+  }) as LockManager['request'];
+}
+
+(window.navigator.locks as any) = new FakeNavigatorLocks();
+
 /**
  * Mock these properties twice so that they're available
  * both at the top-level of files and also within the

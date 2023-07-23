@@ -17,6 +17,7 @@ import { objectDifference } from '../utils';
 export class StateMock {
   public acceleratorsToBlock: BlockableAccelerator[] = [];
   public activeGistAction = GistActionState.none;
+  public activeVersions = new Set<string>();
   public channelsToShow: ElectronReleaseChannel[] = [];
   public editorMosaic = new EditorMosaic();
   public environmentVariables: string[] = [];
@@ -85,6 +86,7 @@ export class StateMock {
   public setVersion = jest.fn().mockImplementation((version: string) => {
     this.currentElectronVersion = this.versions[version];
     this.version = version;
+    this.activeVersions.add(version);
   });
   public isVersionUsable = jest.fn().mockImplementation(() => {
     return { ver: this.currentElectronVersion };
@@ -120,6 +122,7 @@ export class StateMock {
     makeObservable(this, {
       acceleratorsToBlock: observable,
       activeGistAction: observable,
+      activeVersions: observable,
       channelsToShow: observable,
       editorMosaic: observable,
       environmentVariables: observable,

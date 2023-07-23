@@ -21,7 +21,11 @@ import {
   saveLocalVersions,
 } from '../../src/renderer/versions';
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
-import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
+import {
+  overrideRendererPlatform,
+  resetRendererPlatform,
+  waitFor,
+} from '../utils';
 
 jest.mock('../../src/renderer/versions', () => {
   const { getReleaseChannel } = jest.requireActual(
@@ -311,6 +315,10 @@ describe('AppState', () => {
 
     it('does not remove the active version', async () => {
       const ver = appState.versions[active];
+
+      await appState.setVersion(ver.version);
+      await waitFor(() => appState.activeVersions.size > 0);
+
       broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
       expect(removeSpy).not.toHaveBeenCalled();
