@@ -85,7 +85,7 @@ async function confirmFileOverwrite(filePath: string): Promise<boolean> {
       detail: `The file ${filePath} already exists. Do you want to overwrite it?`,
     });
 
-    return !!result;
+    return result.response === 1;
   } catch (error) {
     // Let's not overwrite files. We'd rather crash.
     throw error;
