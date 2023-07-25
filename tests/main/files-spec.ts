@@ -4,6 +4,7 @@
 
 import { app, dialog } from 'electron';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import { MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
@@ -105,7 +106,10 @@ describe('files', () => {
     it('ensures that the target is empty on save', async () => {
       const consent = true;
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
-      (dialog.showMessageBox as jest.Mock).mockResolvedValue(consent);
+      mocked(dialog.showMessageBox).mockResolvedValue({
+        response: consent ? 1 : 0,
+        checkboxChecked: false,
+      });
       (fs.pathExists as jest.Mock).mockReturnValue(true);
       (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
       ipcMainManager.readyWebContents.add(mockTarget.webContents);
@@ -119,7 +123,10 @@ describe('files', () => {
     it('does not overwrite files without consent', async () => {
       const consent = false;
       (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
-      (dialog.showMessageBox as jest.Mock).mockResolvedValue(consent);
+      mocked(dialog.showMessageBox).mockResolvedValue({
+        response: consent ? 1 : 0,
+        checkboxChecked: false,
+      });
       (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
       (fs.pathExists as jest.Mock).mockReturnValue(true);
       (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
