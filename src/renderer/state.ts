@@ -836,29 +836,48 @@ export class AppState {
       return;
     }
 
-    console.log(`State: Removing Electron ${version}`);
-    if (source === VersionSource.local) {
-      if (version in this.versions) {
-        delete this.versions[version];
-        saveLocalVersions(Object.values(this.versions));
-      } else {
-        console.log(`State: Version ${version} already removed, doing nothing`);
-      }
-    } else {
-      if (
-        state === InstallState.installed ||
-        state == InstallState.downloaded
-      ) {
-        await this.installer.remove(version);
-        if (this.installer.state(version) === InstallState.missing) {
-          await window.ElectronFiddle.app.electronTypes.uncache(ver);
-
-          this.broadcastVersionStates([ver]);
+    await navigator.locks.request(
+      this.getVersionLockName(version),
+      {
+        mode: 'exclusive',
+        ifAvailable: true,
+      },
+      async (lock) => {
+        // another window is already removing this version
+        if (!lock) {
+          return;
         }
-      } else {
-        console.log(`State: Version ${version} already removed, doing nothing`);
-      }
-    }
+
+        console.log(`State: Removing Electron ${version}`);
+
+        if (source === VersionSource.local) {
+          if (version in this.versions) {
+            delete this.versions[version];
+            saveLocalVersions(Object.values(this.versions));
+          } else {
+            console.log(
+              `State: Version ${version} already removed, doing nothing`,
+            );
+          }
+        } else {
+          if (
+            state === InstallState.installed ||
+            state == InstallState.downloaded
+          ) {
+            await this.installer.remove(version);
+            if (this.installer.state(version) === InstallState.missing) {
+              await window.ElectronFiddle.app.electronTypes.uncache(ver);
+
+              this.broadcastVersionStates([ver]);
+            }
+          } else {
+            console.log(
+              `State: Version ${version} already removed, doing nothing`,
+            );
+          }
+        }
+      },
+    );
   }
 
   /**
@@ -1044,8 +1063,17 @@ export class AppState {
       }
     }
 
-    // Fetch new binaries, maybe?
-    await this.downloadVersion(ver);
+    await navigator.locks.request(
+      `downloading:${version}`,
+      { mode: 'exclusive' },
+      async (lock) => {
+        console.log(`exclusive download lock granted:`);
+        console.log(lock);
+
+        // Fetch new binaries, maybe?
+        await this.downloadVersion(ver);
+      },
+    );
   }
 
   /**
