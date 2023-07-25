@@ -1,4 +1,5 @@
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
@@ -26,8 +27,8 @@ describe('FileManager', () => {
   let fm: FileManager;
 
   beforeEach(() => {
-    (readFiddle as jest.Mock).mockResolvedValue(editorValues);
-    (window.ElectronFiddle.getTemplateValues as jest.Mock).mockResolvedValue(
+    mocked(readFiddle).mockResolvedValue(editorValues);
+    mocked(window.ElectronFiddle.getTemplateValues).mockResolvedValue(
       editorValues,
     );
 
@@ -51,7 +52,7 @@ describe('FileManager', () => {
       expect(isSupportedFile(file));
       const content = '// content';
       const values = { ...editorValues, [file]: content };
-      (readFiddle as jest.Mock).mockResolvedValue(values);
+      mocked(readFiddle).mockResolvedValue(values);
       app.remoteLoader.confirmAddFile.mockResolvedValue(true);
 
       await fm.openFiddle(filePath);
@@ -71,7 +72,7 @@ describe('FileManager', () => {
         ...editorValues,
         [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
       };
-      (readFiddle as jest.Mock).mockResolvedValue(values);
+      mocked(readFiddle).mockResolvedValue(values);
 
       await fm.openFiddle(filePath);
       expect(app.remoteLoader.setElectronVersion).toBeCalledWith('17.0.0');
@@ -93,7 +94,7 @@ describe('FileManager', () => {
         ...editorValues,
         [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
       };
-      (readFiddle as jest.Mock).mockResolvedValue(values);
+      mocked(readFiddle).mockResolvedValue(values);
 
       await fm.openFiddle(filePath);
       expect(readFiddle).toHaveBeenCalledWith(filePath, true);
@@ -146,7 +147,7 @@ describe('FileManager', () => {
     });
 
     it('handles an error (output)', async () => {
-      (fs.outputFile as jest.Mock).mockImplementation(() => {
+      mocked(fs.outputFile).mockImplementation(() => {
         throw new Error('bwap');
       });
 
@@ -158,7 +159,7 @@ describe('FileManager', () => {
     });
 
     it('handles an error (remove)', async () => {
-      (fs.remove as jest.Mock).mockImplementation(() => {
+      mocked(fs.remove).mockImplementation(() => {
         throw new Error('bwap');
       });
       await fm.saveFiddle('/fake/path');
@@ -239,7 +240,7 @@ describe('FileManager', () => {
 
   describe('cleanup()', () => {
     it('attempts to remove a directory if it exists', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      mocked(fs.existsSync).mockReturnValueOnce(true);
 
       const result = await fm.cleanup('/fake/dir');
 
@@ -248,7 +249,7 @@ describe('FileManager', () => {
     });
 
     it('does not attempt to remove a directory if it does not exists', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+      mocked(fs.existsSync).mockReturnValueOnce(false);
 
       const result = await fm.cleanup('/fake/dir');
 
@@ -257,7 +258,7 @@ describe('FileManager', () => {
     });
 
     it('handles an error', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      mocked(fs.existsSync).mockReturnValueOnce(true);
       (fs.remove as jest.Mock).mockRejectedValueOnce('bwapbwap');
 
       const result = await fm.cleanup('/fake/dir');

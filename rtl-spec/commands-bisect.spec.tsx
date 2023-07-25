@@ -2,8 +2,9 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { mocked } from 'jest-mock';
 
-import { InstallState } from '../src/interfaces';
+import { InstallState, VersionSource } from '../src/interfaces';
 import { BisectHandler } from '../src/renderer/components/commands-bisect';
 import { AppState } from '../src/renderer/state';
 
@@ -59,8 +60,10 @@ describe('Bisect commands component', () => {
       });
       // the bisector returns the next version to inspect
       // when continuing the bisect process
-      (store.Bisector!.continue as jest.Mock).mockReturnValueOnce({
+      mocked(store.Bisector!.continue).mockReturnValueOnce({
         version: 'v10.0.0',
+        source: VersionSource.remote,
+        state: InstallState.downloaded,
       });
       await user.click(goodButton);
       expect(store.Bisector).toBeTruthy();
@@ -76,11 +79,17 @@ describe('Bisect commands component', () => {
     });
     // the bisector returns a tuple of two values when
     // the bisect is terminated
-    (store.Bisector!.continue as jest.Mock).mockReturnValueOnce([
+    mocked(store.Bisector!.continue).mockReturnValueOnce([
       {
         version: 'v10.0.0',
+        source: VersionSource.remote,
+        state: InstallState.downloaded,
       },
-      { version: 'v10.0.2' },
+      {
+        version: 'v10.0.2',
+        source: VersionSource.remote,
+        state: InstallState.downloaded,
+      },
     ]);
     await user.click(goodButton);
     expect(store.Bisector).toBeUndefined();

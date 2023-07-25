@@ -31,10 +31,13 @@ const mockTarget = {
 
 describe('files', () => {
   beforeEach(() => {
-    (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+    mocked(dialog.showOpenDialog).mockResolvedValue({
       filePaths: ['my/fake/path'],
+      canceled: false,
     });
-    (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+    mocked(getOrCreateMainWindow).mockReturnValue(
+      mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
+    );
 
     ipcMainManager.readyWebContents.add(mockTarget.webContents);
   });
@@ -63,7 +66,9 @@ describe('files', () => {
     });
 
     it('notifies the main window of the event', async () => {
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+      mocked(getOrCreateMainWindow).mockReturnValue(
+        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
+      );
 
       await showOpenDialog();
 
@@ -98,20 +103,20 @@ describe('files', () => {
     });
 
     it('handles not getting a path returned', async () => {
-      (dialog.showOpenDialogSync as jest.Mock).mockReturnValueOnce([]);
+      mocked(dialog.showOpenDialogSync).mockReturnValueOnce([]);
       await showSaveDialog();
       expect(fs.pathExists).toHaveBeenCalledTimes(0);
     });
 
     it('ensures that the target is empty on save', async () => {
       const consent = true;
-      (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
+      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
       mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      (fs.pathExists as jest.Mock).mockReturnValue(true);
-      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
+      (fs.pathExists as jest.Mock).mockResolvedValue(true);
+      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
       ipcMainManager.readyWebContents.add(mockTarget.webContents);
 
       await showSaveDialog();
@@ -122,14 +127,16 @@ describe('files', () => {
 
     it('does not overwrite files without consent', async () => {
       const consent = false;
-      (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
+      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
       mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
-      (fs.pathExists as jest.Mock).mockReturnValue(true);
-      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
+      mocked(getOrCreateMainWindow).mockReturnValue(
+        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
+      );
+      (fs.pathExists as jest.Mock).mockResolvedValue(true);
+      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 
       await showSaveDialog();
 
@@ -139,11 +146,13 @@ describe('files', () => {
 
     it('does not overwrite files if an error happens', async () => {
       const err = new Error('💩');
-      (dialog.showOpenDialogSync as jest.Mock).mockReturnValue(['path']);
-      (dialog.showMessageBox as jest.Mock).mockRejectedValue(err);
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
-      (fs.pathExists as jest.Mock).mockReturnValue(true);
-      (fs.readdir as jest.Mock).mockReturnValue([MAIN_JS]);
+      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
+      mocked(dialog.showMessageBox).mockRejectedValue(err);
+      mocked(getOrCreateMainWindow).mockReturnValue(
+        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
+      );
+      (fs.pathExists as jest.Mock).mockResolvedValue(true);
+      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 
       let caughtError: unknown;
       try {

@@ -3,6 +3,7 @@
  */
 
 import { app, dialog } from 'electron';
+import { mocked } from 'jest-mock';
 
 import { onFirstRunMaybe } from '../../src/main/first-run';
 import { isFirstRun } from '../../src/main/utils/check-first-run';
@@ -14,6 +15,7 @@ jest.mock('../../src/main/utils/check-first-run', () => ({
 
 const mockDialogResponse = {
   response: 1,
+  checkboxChecked: false,
 };
 
 describe('first-run', () => {
@@ -22,7 +24,7 @@ describe('first-run', () => {
   beforeEach(() => {
     overridePlatform('darwin');
 
-    (dialog.showMessageBox as jest.Mock).mockResolvedValue(mockDialogResponse);
+    mocked(dialog.showMessageBox).mockResolvedValue(mockDialogResponse);
   });
 
   afterEach(() => {
@@ -40,8 +42,8 @@ describe('first-run', () => {
     });
 
     it(`doesn't run unless required (is already in app folder)`, () => {
-      (isFirstRun as jest.Mock).mockReturnValueOnce(true);
-      (app.isInApplicationsFolder as jest.Mock).mockReturnValue(true);
+      mocked(isFirstRun).mockReturnValueOnce(true);
+      mocked(app.isInApplicationsFolder).mockReturnValue(true);
 
       onFirstRunMaybe();
 
@@ -49,9 +51,9 @@ describe('first-run', () => {
     });
 
     it(`doesn't run unless required (dev mode)`, () => {
-      (isFirstRun as jest.Mock).mockReturnValueOnce(true);
+      mocked(isFirstRun).mockReturnValueOnce(true);
       (process as any).defaultApp = true;
-      (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
+      mocked(app.isInApplicationsFolder).mockReturnValue(false);
 
       onFirstRunMaybe();
 
@@ -61,8 +63,8 @@ describe('first-run', () => {
     it(`doesn't run unless required (Windows, Linux)`, () => {
       overridePlatform('win32');
 
-      (isFirstRun as jest.Mock).mockReturnValueOnce(true);
-      (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
+      mocked(isFirstRun).mockReturnValueOnce(true);
+      mocked(app.isInApplicationsFolder).mockReturnValue(false);
 
       onFirstRunMaybe();
 
@@ -70,8 +72,8 @@ describe('first-run', () => {
     });
 
     it(`moves the app when requested to do so`, async () => {
-      (isFirstRun as jest.Mock).mockReturnValue(true);
-      (app.isInApplicationsFolder as jest.Mock).mockReturnValue(false);
+      mocked(isFirstRun).mockReturnValue(true);
+      mocked(app.isInApplicationsFolder).mockReturnValue(false);
 
       mockDialogResponse.response = 1;
       await onFirstRunMaybe();

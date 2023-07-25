@@ -3,6 +3,7 @@
  */
 
 import * as electron from 'electron';
+import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -32,9 +33,9 @@ describe('IpcMainManager', () => {
           send: jest.fn(),
           isDestroyed: () => false,
         } as unknown as Electron.WebContents,
-      };
+      } as electron.BrowserWindow;
 
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(mockTarget);
+      mocked(getOrCreateMainWindow).mockReturnValue(mockTarget);
       ipcMainManager.readyWebContents.add(mockTarget.webContents);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
@@ -50,7 +51,7 @@ describe('IpcMainManager', () => {
         isDestroyed: () => false,
       } as unknown as Electron.WebContents;
 
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
+      mocked(getOrCreateMainWindow).mockReturnValue(null as any);
       ipcMainManager.readyWebContents.add(mockTarget);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
@@ -63,7 +64,7 @@ describe('IpcMainManager', () => {
         send: jest.fn(),
       } as unknown as Electron.WebContents;
 
-      (getOrCreateMainWindow as jest.Mock).mockReturnValue(null);
+      mocked(getOrCreateMainWindow).mockReturnValue(null as any);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
 

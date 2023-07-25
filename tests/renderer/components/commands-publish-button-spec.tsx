@@ -1,6 +1,8 @@
 import * as React from 'react';
 
+import { Octokit } from '@octokit/rest';
 import { shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import {
   EditorValues,
@@ -63,14 +65,16 @@ describe('Action button component', () => {
 
     // have the octokit getter use our mock
     mocktokit = new OctokitMock();
-    (getOctokit as jest.Mock).mockImplementation(() => mocktokit);
+    mocked(getOctokit).mockImplementation(
+      async () => mocktokit as unknown as Octokit,
+    );
 
     // build ExpectedGistCreateOpts
     const editorValues = createEditorValues();
     const files = getGistFiles(editorValues);
     expectedGistOpts = { description, files, public: true } as const;
 
-    (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
+    mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
   });
@@ -124,7 +128,7 @@ describe('Action button component', () => {
     expect(instance.performGistAction).not.toHaveBeenCalled();
 
     // If authed, continue to performGistAction
-    (state.toggleAuthDialog as jest.Mock).mockImplementationOnce(
+    mocked(state.toggleAuthDialog).mockImplementationOnce(
       () => (state.gitHubToken = 'github-token'),
     );
     await instance.handleClick();
@@ -185,7 +189,7 @@ describe('Action button component', () => {
       it('are replaced with default content for required files', async () => {
         const values = { [MAIN_JS]: '' } as const;
 
-        (app.getEditorValues as jest.Mock).mockReturnValueOnce(values);
+        mocked(app.getEditorValues).mockResolvedValueOnce(values);
         const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();
@@ -199,7 +203,7 @@ describe('Action button component', () => {
         const required = { [MAIN_JS]: '// fnord' };
         const optional = { 'foo.js': '' };
 
-        (app.getEditorValues as jest.Mock).mockReturnValueOnce({
+        mocked(app.getEditorValues).mockResolvedValueOnce({
           ...required,
           ...optional,
         });
@@ -298,9 +302,7 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(
-        window.ElectronFiddle.showWarningDialog as jest.Mock,
-      ).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Updating Fiddle Gist failed.'),
@@ -335,9 +337,7 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(
-        window.ElectronFiddle.showWarningDialog as jest.Mock,
-      ).toHaveBeenCalledWith(
+      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Deleting Fiddle Gist failed.'),

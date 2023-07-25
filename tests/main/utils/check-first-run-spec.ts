@@ -1,5 +1,6 @@
 import * as electron from 'electron';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import { isFirstRun } from '../../../src/main/utils/check-first-run';
 
@@ -10,22 +11,22 @@ jest.mock('fs-extra', () => ({
 
 describe('isFirstRun', () => {
   beforeEach(() => {
-    (electron.app.getPath as jest.Mock).mockReturnValue('path');
+    mocked(electron.app.getPath).mockReturnValue('path');
   });
 
   it('reports a non-first run', () => {
-    (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+    mocked(fs.existsSync).mockReturnValueOnce(true);
     expect(isFirstRun()).toBe(false);
   });
 
   it('reports a first run', () => {
-    (fs.existsSync as jest.Mock).mockReturnValueOnce(false);
+    mocked(fs.existsSync).mockReturnValueOnce(false);
     expect(isFirstRun()).toBe(true);
     expect(fs.outputFileSync).toHaveBeenCalledTimes(1);
   });
 
   it('handles an error', () => {
-    (fs.existsSync as jest.Mock).mockImplementationOnce(() => {
+    mocked(fs.existsSync).mockImplementationOnce(() => {
       throw new Error('bwap bwap');
     });
 

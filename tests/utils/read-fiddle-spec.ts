@@ -1,6 +1,7 @@
 import * as path from 'node:path';
 
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
 import {
@@ -20,7 +21,7 @@ describe('read-fiddle', () => {
   });
 
   afterEach(() => {
-    (console.warn as jest.Mock).mockClear();
+    mocked(console.warn).mockClear();
   });
 
   function setupFSMocks(editorValues: EditorValues) {

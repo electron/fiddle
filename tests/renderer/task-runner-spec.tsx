@@ -1,3 +1,5 @@
+import { mocked } from 'jest-mock';
+
 import {
   BisectRequest,
   ElectronReleaseChannel,
@@ -39,7 +41,7 @@ describe('Task Runner component', () => {
   async function requestAndWait(event: FiddleEvent, req: any) {
     emitEvent(event, req);
     await waitFor(
-      () => (window.ElectronFiddle.taskDone as jest.Mock).mock.calls.length > 0,
+      () => mocked(window.ElectronFiddle.taskDone).mock.calls.length > 0,
     );
   }
 
@@ -80,13 +82,13 @@ describe('Task Runner component', () => {
     it('invokes the runner and returns the result', async () => {
       const RESULT = RunResult.SUCCESS;
 
-      (app.openFiddle as jest.Mock).mockResolvedValue(0);
-      (appState.hasVersion as jest.Mock).mockReturnValueOnce(true);
-      (appState.hideChannels as jest.Mock).mockResolvedValue(0);
-      (appState.setVersion as jest.Mock).mockResolvedValue(0);
-      (appState.showChannels as jest.Mock).mockResolvedValue(0);
+      app.openFiddle.mockResolvedValue(0);
+      appState.hasVersion.mockReturnValueOnce(true);
+      appState.hideChannels.mockResolvedValue(0);
+      appState.setVersion.mockResolvedValue(0);
+      appState.showChannels.mockResolvedValue(0);
       appState.versionsToShow = makeRunnables(VERSIONS);
-      (runner.autobisect as jest.Mock).mockResolvedValueOnce(RESULT);
+      runner.autobisect.mockResolvedValueOnce(RESULT);
 
       await requestAndWait('bisect-task', req);
 
@@ -103,7 +105,7 @@ describe('Task Runner component', () => {
 
     it('returns invalid if an exception is thrown', async () => {
       const RESULT = RunResult.INVALID;
-      (app.openFiddle as jest.Mock).mockRejectedValue('💩');
+      app.openFiddle.mockRejectedValue('💩');
 
       await requestAndWait('bisect-task', req);
 
@@ -128,13 +130,13 @@ describe('Task Runner component', () => {
     it('invokes the runner and returns the result', async () => {
       const RESULT = RunResult.FAILURE;
 
-      (app.openFiddle as jest.Mock).mockResolvedValue(0);
-      (appState.hasVersion as jest.Mock).mockReturnValueOnce(true);
-      (appState.hideChannels as jest.Mock).mockResolvedValue(0);
-      (appState.setVersion as jest.Mock).mockResolvedValue(0);
-      (appState.showChannels as jest.Mock).mockResolvedValue(0);
+      app.openFiddle.mockResolvedValue(0);
+      appState.hasVersion.mockReturnValueOnce(true);
+      appState.hideChannels.mockResolvedValue(0);
+      appState.setVersion.mockResolvedValue(0);
+      appState.showChannels.mockResolvedValue(0);
       appState.versionsToShow = makeRunnables([VERSION]);
-      (runner.run as jest.Mock).mockResolvedValueOnce(RESULT);
+      runner.run.mockResolvedValueOnce(RESULT);
 
       await requestAndWait('test-task', req);
 
@@ -151,12 +153,12 @@ describe('Task Runner component', () => {
     it('returns invalid if an exception is thrown', async () => {
       const RESULT = RunResult.INVALID;
 
-      (app.openFiddle as jest.Mock).mockResolvedValue(0);
-      (appState.hasVersion as jest.Mock).mockReturnValueOnce(false);
-      (appState.hideChannels as jest.Mock).mockResolvedValue(0);
-      (appState.setVersion as jest.Mock).mockResolvedValue(0);
-      (appState.showChannels as jest.Mock).mockResolvedValue(0);
-      (runner.run as jest.Mock).mockResolvedValueOnce(RESULT);
+      app.openFiddle.mockResolvedValue(0);
+      appState.hasVersion.mockReturnValueOnce(false);
+      appState.hideChannels.mockResolvedValue(0);
+      appState.setVersion.mockResolvedValue(0);
+      appState.showChannels.mockResolvedValue(0);
+      runner.run.mockResolvedValueOnce(RESULT);
 
       await requestAndWait('test-task', req);
 

@@ -1,6 +1,8 @@
 import * as path from 'node:path';
 
+import { ReleaseInfo } from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 import * as tmp from 'tmp';
 
 import {
@@ -160,9 +162,9 @@ describe('ElectronTypes', () => {
     });
 
     it('fetches types', async () => {
-      (window.ElectronFiddle.getReleaseInfo as jest.Mock).mockResolvedValue({
+      mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue({
         node: '16.2.0',
-      });
+      } as ReleaseInfo);
 
       const types = 'here are the types';
       const fetchSpy = makeFetchSpy(types);
@@ -222,9 +224,7 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if no release info', async () => {
-      (window.ElectronFiddle.getReleaseInfo as jest.Mock).mockResolvedValue(
-        undefined,
-      );
+      mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue(undefined);
 
       await electronTypes.setVersion(remoteVersion);
       expect(addExtraLib).not.toHaveBeenCalled();

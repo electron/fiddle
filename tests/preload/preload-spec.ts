@@ -2,6 +2,7 @@
  * @jest-environment node
  */
 import * as electron from 'electron';
+import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupFiddleGlobal } from '../../src/preload/preload';
@@ -25,7 +26,7 @@ describe('preload', () => {
       const obj = {
         appPath: '/fake/path',
       };
-      (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(obj);
+      mocked(electron.ipcRenderer.invoke).mockResolvedValue(obj);
 
       await setupFiddleGlobal();
 

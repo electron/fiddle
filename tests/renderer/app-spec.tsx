@@ -1,3 +1,5 @@
+import { mocked } from 'jest-mock';
+
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
@@ -26,16 +28,12 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
-    (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue({
+    mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
-    (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
-      defaultDark,
-    );
-    (window.ElectronFiddle.getReleasedVersions as jest.Mock).mockReturnValue(
-      [],
-    );
-    (window.ElectronFiddle.getLatestStable as jest.Mock).mockReturnValue({
+    mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(defaultDark);
+    mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
+    mocked(window.ElectronFiddle.getLatestStable).mockReturnValue({
       version: '24.0.0',
     });
 
@@ -92,7 +90,7 @@ describe('App component', () => {
   describe('openFiddle()', () => {
     it('understands gists', async () => {
       const { fetchGistAndLoad } = app.remoteLoader;
-      (fetchGistAndLoad as jest.Mock).mockResolvedValue(true);
+      mocked(fetchGistAndLoad).mockResolvedValue(true);
 
       const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
       await app.openFiddle({ gistId });
@@ -101,7 +99,7 @@ describe('App component', () => {
 
     it('understands files', async () => {
       const { openFiddle } = app.fileManager;
-      (openFiddle as jest.Mock).mockResolvedValueOnce(undefined);
+      mocked(openFiddle).mockResolvedValueOnce(undefined);
 
       const filePath = '/fake/path';
       await app.openFiddle({ filePath });
@@ -231,7 +229,7 @@ describe('App component', () => {
     });
 
     it('removes the dark theme option if required', async () => {
-      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultLight,
       );
       document.body.classList.add('bp3-dark');
@@ -250,21 +248,19 @@ describe('App component', () => {
     it('sets native theme', async () => {
       app.state.isUsingSystemTheme = false;
 
-      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultLight,
       );
       await app.loadTheme('defaultLight');
-      expect(
-        window.ElectronFiddle.setNativeTheme as jest.Mock,
-      ).toHaveBeenCalledWith('light');
+      expect(window.ElectronFiddle.setNativeTheme).toHaveBeenCalledWith(
+        'light',
+      );
 
-      (window.ElectronFiddle.readThemeFile as jest.Mock).mockResolvedValue(
+      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultDark,
       );
       await app.loadTheme('custom-dark');
-      expect(
-        window.ElectronFiddle.setNativeTheme as jest.Mock,
-      ).toHaveBeenCalledWith('dark');
+      expect(window.ElectronFiddle.setNativeTheme).toHaveBeenCalledWith('dark');
     });
   });
 
@@ -304,17 +300,17 @@ describe('App component', () => {
 
         // isUsingSystemTheme and prefersDark
         app.state.isUsingSystemTheme = false;
-        (window.matchMedia as jest.Mock).mockReturnValue({
+        mocked(window.matchMedia).mockReturnValue({
           matches: true,
-        });
+        } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
 
         // isUsingSystemTheme and not prefersDark
         app.state.isUsingSystemTheme = false;
-        (window.matchMedia as jest.Mock).mockReturnValue({
+        mocked(window.matchMedia).mockReturnValue({
           matches: false,
-        });
+        } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
       });
@@ -324,9 +320,9 @@ describe('App component', () => {
         app.setupThemeListeners();
         app.state.isUsingSystemTheme = true;
 
-        expect(
-          window.ElectronFiddle.setNativeTheme as jest.Mock,
-        ).toHaveBeenCalledWith('system');
+        expect(window.ElectronFiddle.setNativeTheme).toHaveBeenCalledWith(
+          'system',
+        );
       });
     });
 
@@ -442,8 +438,7 @@ describe('App component', () => {
       expect(e.returnValue).toBe(false);
 
       await waitFor(
-        () =>
-          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
+        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.close).toHaveBeenCalled();
     });
@@ -463,8 +458,7 @@ describe('App component', () => {
       expect(e.returnValue).toBe(false);
 
       await waitFor(
-        () =>
-          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
+        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.ElectronFiddle.confirmQuit).toHaveBeenCalled();
       expect(window.close).toHaveBeenCalledTimes(1);
@@ -485,8 +479,7 @@ describe('App component', () => {
       expect(e.returnValue).toBe(false);
 
       await waitFor(
-        () =>
-          (window.ElectronFiddle.showWindow as jest.Mock).mock.calls.length > 0,
+        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.close).not.toHaveBeenCalled();
       expect(!app.state.isQuitting);

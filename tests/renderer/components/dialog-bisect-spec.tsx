@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import {
   ElectronReleaseChannel,
@@ -106,9 +107,9 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onSubmit()', () => {
     it('initiates a bisect instance and sets a version', async () => {
       const version = '1.0.0';
-      (Bisector as jest.Mock).mockReturnValue({
+      mocked(Bisector).mockReturnValue({
         getCurrentVersion: () => ({ version }),
-      });
+      } as any);
 
       const versions = generateVersionRange(numVersions);
 
@@ -158,7 +159,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: 4,
       });
 
-      (runner.autobisect as jest.Mock).mockResolvedValue(RunResult.SUCCESS);
+      mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
       const instance1: any = wrapper.instance();
