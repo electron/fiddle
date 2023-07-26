@@ -160,8 +160,8 @@ export async function setupFiddleGlobal() {
     setNativeTheme(theme) {
       ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, theme);
     },
-    setShowMeTemplate() {
-      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE);
+    setShowMeTemplate(template?: string) {
+      ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, template);
     },
     showSaveDialog() {
       ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
