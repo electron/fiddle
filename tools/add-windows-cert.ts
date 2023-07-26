@@ -25,3 +25,9 @@ export async function generateWindowsSigningCert() {
     throw new Error(`Could not generate code signing cert: ${err}`);
   }
 }
+
+if (require.main === module) {
+  (async () => {
+    await generateWindowsSigningCert();
+  })();
+}
