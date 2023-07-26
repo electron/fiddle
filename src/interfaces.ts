@@ -2,6 +2,8 @@ export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
 
+export type FileTransformOperation = 'dotfiles' | 'forge';
+
 export enum VersionSource {
   remote = 'remote',
   local = 'local',

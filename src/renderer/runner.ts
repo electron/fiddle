@@ -8,7 +8,7 @@ import { AppState } from './state';
 import { PackageJsonOptions } from './utils/get-package';
 import { maybePlural } from './utils/plural-maybe';
 import {
-  FileTransform,
+  FileTransformOperation,
   InstallState,
   PMOperationOptions,
   RunResult,
@@ -249,8 +249,6 @@ export class Runner {
     operation: ForgeCommands,
   ): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
-    const { dotfilesTransform } = await import('./transforms/dotfiles');
-    const { forgeTransform } = await import('./transforms/forge');
     const { pushError, pushOutput } = this.appState;
 
     const strings =
@@ -275,11 +273,7 @@ export class Runner {
     }
 
     // Save files to temp
-    const dir = await this.saveToTemp(
-      options,
-      dotfilesTransform,
-      forgeTransform,
-    );
+    const dir = await this.saveToTemp(options, ['dotfiles', 'forge']);
     if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
@@ -447,20 +441,20 @@ export class Runner {
    * Save files to temp, logging to the Fiddle terminal while doing so
    *
    * @param {PackageJsonOptions} options
-   * @param {...Array<FileTransform>} transforms
+   * @param {Array<FileTransformOperation>} [transforms]
    * @returns {(Promise<string | null>)}
    * @memberof Runner
    */
   public async saveToTemp(
     options: PackageJsonOptions,
-    ...transforms: Array<FileTransform>
+    transforms?: Array<FileTransformOperation>,
   ): Promise<string | null> {
     const { fileManager } = window.ElectronFiddle.app;
     const { pushOutput, pushError } = this.appState;
 
     try {
       pushOutput(`Saving files to temp directory...`);
-      const dir = await fileManager.saveToTemp(options, ...transforms);
+      const dir = await fileManager.saveToTemp(options, transforms);
       pushOutput(`Saved files to ${dir}`);
       return dir;
     } catch (error) {

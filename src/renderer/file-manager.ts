@@ -12,6 +12,7 @@ import {
   EditorId,
   EditorValues,
   FileTransform,
+  FileTransformOperation,
   Files,
   GenericDialogType,
   PACKAGE_NAME,
@@ -41,11 +42,11 @@ export class FileManager {
     );
 
     window.ElectronFiddle.addEventListener('save-fiddle', (filePath) => {
-      this.saveFiddle(filePath, dotfilesTransform);
+      this.saveFiddle(filePath, ['dotfiles']);
     });
 
     window.ElectronFiddle.addEventListener('save-fiddle-forge', (filePath) => {
-      this.saveFiddle(filePath, dotfilesTransform, forgeTransform);
+      this.saveFiddle(filePath, ['dotfiles', 'forge']);
     });
   }
 
@@ -116,12 +117,12 @@ export class FileManager {
    * we'll first open the "Save" dialog.
    *
    * @param {string} [filePath]
-   * @param {...Array<FileTransform>} transforms
+   * @param {Array<FileTransformOperation>} [transforms]
    * @memberof FileManager
    */
   public async saveFiddle(
     filePath?: string,
-    ...transforms: Array<FileTransform>
+    transforms?: Array<FileTransformOperation>,
   ) {
     const { localPath } = this.appState;
     const pathToSave = filePath || localPath;
@@ -131,7 +132,7 @@ export class FileManager {
     if (!pathToSave) {
       window.ElectronFiddle.showSaveDialog();
     } else {
-      const files = await this.getFiles(undefined, ...transforms);
+      const files = await this.getFiles(undefined, transforms);
 
       for (const [fileName, content] of files) {
         const savePath = path.join(pathToSave, fileName);
@@ -159,13 +160,13 @@ export class FileManager {
    * Get files to save, but with a transform applied
    *
    * @param {PackageJsonOptions} [options]
-   * @param {...Array<FileTransform>} transforms
+   * @param {Array<FileTransformOperation>} [transforms]
    * @returns {Promise<Files>}
    * @memberof FileManager
    */
   public async getFiles(
     options?: PackageJsonOptions,
-    ...transforms: Array<FileTransform>
+    transforms: Array<FileTransformOperation> = [],
   ): Promise<Files> {
     const { app } = window.ElectronFiddle;
 
@@ -176,7 +177,14 @@ export class FileManager {
 
     output.set(PACKAGE_NAME, values[PACKAGE_NAME as EditorId]!);
 
-    for (const transform of transforms) {
+    const transformers: Record<FileTransformOperation, FileTransform> = {
+      dotfiles: dotfilesTransform,
+      forge: forgeTransform,
+    } as const;
+
+    for (const transform of transforms.map(
+      (operation: FileTransformOperation) => transformers[operation],
+    )) {
       try {
         console.log(`getFiles: Applying ${transform.name}`);
         output = await transform(output);
@@ -217,15 +225,15 @@ export class FileManager {
    * path to the temp directory.
    *
    * @param {PackageJsonOptions} options
-   * @param {...Array<FileTransform>} transforms
+   * @param {Array<FileTransformOperation>} [transforms]
    * @returns {Promise<string>}
    */
   public async saveToTemp(
     options: PackageJsonOptions,
-    ...transforms: Array<FileTransform>
+    transforms?: Array<FileTransformOperation>,
   ): Promise<string> {
     const tmp = await import('tmp');
-    const files = await this.getFiles(options, ...transforms);
+    const files = await this.getFiles(options, transforms);
     const dir = tmp.dirSync({
       prefix: 'electron-fiddle',
     });

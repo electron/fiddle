@@ -4,10 +4,12 @@ import { mocked } from 'jest-mock';
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
+import { dotfilesTransform } from '../../src/renderer/transforms/dotfiles';
 import { isSupportedFile } from '../../src/utils/editor-utils';
 import { AppMock, createEditorValues } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
+jest.mock('../../src/renderer/transforms/dotfiles');
 jest.mock('fs-extra');
 jest.mock('tmp', () => ({
   setGracefulCleanup: jest.fn(),
@@ -276,15 +278,13 @@ describe('FileManager', () => {
 
     it('applies transforms', async () => {
       const transformed: Files = new Map([['👉', '👈']]);
-      const transform = async () => transformed;
-      expect(await fm.getFiles(undefined, transform)).toBe(transformed);
+      mocked(dotfilesTransform).mockResolvedValue(transformed);
+      expect(await fm.getFiles(undefined, ['dotfiles'])).toBe(transformed);
     });
 
     it('handles transform error', async () => {
-      const transform = async () => {
-        throw new Error('💩');
-      };
-      const result = await fm.getFiles(undefined, transform);
+      mocked(dotfilesTransform).mockRejectedValue(new Error('💩'));
+      const result = await fm.getFiles(undefined, ['dotfiles']);
       expect(result).toStrictEqual(expected);
     });
   });
