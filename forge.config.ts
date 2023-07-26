@@ -24,12 +24,18 @@ if (process.env['WINDOWS_CODESIGN_FILE']) {
   } else if (process.env['SIGN_OR_DIE']) {
     throw new Error('Did not find Windows codesign file');
   }
+}
 
-  if (!process.env['WINDOWS_CODESIGN_PASSWORD'] && process.env['SIGN_OR_DIE']) {
-    throw new Error('Did not find "WINDOWS_CODESIGN_PASSWORD" env variable');
-  }
-} else if (process.env['SIGN_OR_DIE']) {
-  throw new Error('Did not find "WINDOWS_CODESIGN_FILE" env variable');
+if (
+  process.env['SIGN_OR_DIE'] &&
+  !(
+    process.env['WINDOWS_CODESIGN_FILE'] &&
+    process.env['WINDOWS_CODESIGN_PASSWORD']
+  )
+) {
+  throw new Error(
+    'Did not find "WINDOWS_CODESIGN_{FILE|PASSWORD}" env variable(s)',
+  );
 }
 
 const commonLinuxConfig = {
