@@ -1,6 +1,3 @@
-import * as path from 'node:path';
-
-import * as fs from 'fs-extra';
 import semver from 'semver';
 
 import { AppState } from './state';
@@ -23,12 +20,10 @@ export class FileManager {
   constructor(private readonly appState: AppState) {
     this.getFiles = this.getFiles.bind(this);
     this.openFiddle = this.openFiddle.bind(this);
-    this.saveFiddle = this.saveFiddle.bind(this);
 
     window.ElectronFiddle.removeAllListeners('open-fiddle');
     window.ElectronFiddle.removeAllListeners('open-template');
-    window.ElectronFiddle.removeAllListeners('save-fiddle');
-    window.ElectronFiddle.removeAllListeners('save-fiddle-forge');
+    window.ElectronFiddle.removeAllListeners('saved-local-fiddle');
 
     window.ElectronFiddle.addEventListener('open-fiddle', (filePath, files) => {
       this.openFiddle(filePath, files);
@@ -43,12 +38,16 @@ export class FileManager {
       },
     );
 
-    window.ElectronFiddle.addEventListener('save-fiddle', (filePath) => {
-      this.saveFiddle(filePath, ['dotfiles']);
-    });
+    window.ElectronFiddle.addEventListener('saved-local-fiddle', (filePath) => {
+      const { localPath } = this.appState;
 
-    window.ElectronFiddle.addEventListener('save-fiddle-forge', (filePath) => {
-      this.saveFiddle(filePath, ['dotfiles', 'forge']);
+      if (filePath !== localPath) {
+        this.appState.localPath = filePath;
+        this.appState.gistId = undefined;
+      }
+      window.ElectronFiddle.setShowMeTemplate();
+      this.appState.templateName = undefined;
+      this.appState.editorMosaic.isEdited = false;
     });
 
     window.ElectronFiddle.onGetFiles(this.getFiles);
@@ -117,50 +116,6 @@ export class FileManager {
   }
 
   /**
-   * Saves the current Fiddle to disk. If we never saved before,
-   * we'll first open the "Save" dialog.
-   *
-   * @param {string} [filePath]
-   * @param {Array<FileTransformOperation>} [transforms]
-   * @memberof FileManager
-   */
-  public async saveFiddle(
-    filePath?: string,
-    transforms?: Array<FileTransformOperation>,
-  ) {
-    const { localPath } = this.appState;
-    const pathToSave = filePath || localPath;
-
-    console.log(`FileManager: Asked to save to ${pathToSave}`);
-
-    if (!pathToSave) {
-      window.ElectronFiddle.showSaveDialog();
-    } else {
-      const { files } = await this.getFiles(undefined, transforms);
-
-      for (const [fileName, content] of files) {
-        const savePath = path.join(pathToSave, fileName);
-
-        // If the file has content, save it to disk. If there's no
-        // content in the file, remove a file that possibly exists.
-        if (content) {
-          await this.saveFile(savePath, content);
-          this.appState.templateName = undefined;
-        } else {
-          await this.removeFile(savePath);
-        }
-      }
-
-      if (pathToSave !== localPath) {
-        this.appState.localPath = pathToSave;
-        this.appState.gistId = undefined;
-      }
-      window.ElectronFiddle.setShowMeTemplate();
-      this.appState.editorMosaic.isEdited = false;
-    }
-  }
-
-  /**
    * Get files to save, but with a transform applied
    *
    * @param {PackageJsonOptions} [options]
@@ -215,55 +170,7 @@ export class FileManager {
     options: PackageJsonOptions,
     transforms?: Array<FileTransformOperation>,
   ): Promise<string> {
-    const tmp = await import('tmp');
     const { files } = await this.getFiles(options, transforms);
-    const dir = tmp.dirSync({
-      prefix: 'electron-fiddle',
-    });
-
-    tmp.setGracefulCleanup();
-
-    for (const [name, content] of files) {
-      try {
-        await fs.outputFile(path.join(dir.name, name), content);
-      } catch (error) {
-        throw error;
-      }
-    }
-
-    return dir.name;
-  }
-
-  /**
-   * Safely attempts to save a file, doesn't crash the app if
-   * it fails.
-   *
-   * @param {string} filePath
-   * @param {string} content
-   * @returns {Promise<void>}
-   * @memberof FileManager
-   */
-  private async saveFile(filePath: string, content: string): Promise<void> {
-    try {
-      return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
-    } catch (error) {
-      console.log(`FileManager: Could not save ${filePath}`, error);
-    }
-  }
-
-  /**
-   * Safely attempts to remove a file, doesn't crash the app if
-   * it fails.
-   *
-   * @param {string} filePath
-   * @returns {Promise<void>}
-   * @memberof FileManager
-   */
-  private async removeFile(filePath: string): Promise<void> {
-    try {
-      return await fs.remove(filePath);
-    } catch (error) {
-      console.log(`FileManager: Could not remove ${filePath}`, error);
-    }
+    return window.ElectronFiddle.saveFilesToTemp(files);
   }
 }

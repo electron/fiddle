@@ -60,11 +60,7 @@ declare global {
         listener: (name: string, editorValues: EditorValues) => void,
       ): void;
       addEventListener(
-        type: 'save-fiddle',
-        listener: (filePath: string) => void,
-      ): void;
-      addEventListener(
-        type: 'save-fiddle-forge',
+        type: 'saved-local-fiddle',
         listener: (filePath: string) => void,
       ): void;
       addEventListener(
@@ -136,11 +132,11 @@ declare global {
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
+      saveFilesToTemp(files: Files): Promise<string>;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
       sendReady(): void;
       setNativeTheme(theme: 'dark' | 'light' | 'system'): void;
       setShowMeTemplate(template?: string): void;
-      showSaveDialog(): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
       taskDone(result: RunResult): void;

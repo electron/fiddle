@@ -39,11 +39,11 @@ export class ElectronFiddleMock {
   public pushOutputEntry = jest.fn();
   public reloadWindows = jest.fn();
   public removeAllListeners = jest.fn();
+  public saveFilesToTemp = jest.fn();
   public selectLocalVersion = jest.fn();
   public sendReady = jest.fn();
   public setNativeTheme = jest.fn();
   public setShowMeTemplate = jest.fn();
-  public showSaveDialog = jest.fn();
   public showWarningDialog = jest.fn();
   public showWindow = jest.fn();
   public taskDone = jest.fn();

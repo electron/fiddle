@@ -27,8 +27,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'package-fiddle': IpcEvents.FIDDLE_PACKAGE,
   'redo-in-editor': IpcEvents.REDO_IN_EDITOR,
   'run-fiddle': IpcEvents.FIDDLE_RUN,
-  'save-fiddle': IpcEvents.FS_SAVE_FIDDLE,
-  'save-fiddle-forge': IpcEvents.FS_SAVE_FIDDLE_FORGE,
+  'saved-local-fiddle': IpcEvents.SAVED_LOCAL_FIDDLE,
   'save-fiddle-gist': IpcEvents.FS_SAVE_FIDDLE_GIST,
   'select-all-in-editor': IpcEvents.SELECT_ALL_IN_EDITOR,
   'set-show-me-template': IpcEvents.SET_SHOW_ME_TEMPLATE,
@@ -187,6 +186,11 @@ export async function setupFiddleGlobal() {
         ipcRenderer.removeAllListeners(channel);
       }
     },
+    saveFilesToTemp(files: Files) {
+      return ipcRenderer.invoke(IpcEvents.SAVE_FILES_TO_TEMP, [
+        ...files.entries(),
+      ]);
+    },
     selectLocalVersion: () => {
       return ipcRenderer.invoke(IpcEvents.LOAD_LOCAL_VERSION_FOLDER);
     },
@@ -198,9 +202,6 @@ export async function setupFiddleGlobal() {
     },
     setShowMeTemplate(template?: string) {
       ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, template);
-    },
-    showSaveDialog() {
-      ipcRenderer.send(IpcEvents.FS_SAVE_FIDDLE_DIALOG);
     },
     showWarningDialog(messageOptions) {
       ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageOptions);
