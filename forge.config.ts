@@ -21,7 +21,15 @@ if (process.env['WINDOWS_CODESIGN_FILE']) {
 
   if (certExists) {
     process.env['WINDOWS_CODESIGN_FILE'] = certPath;
+  } else if (process.env['SIGN_OR_DIE']) {
+    throw new Error('Did not find Windows codesign file');
   }
+
+  if (!process.env['WINDOWS_CODESIGN_PASSWORD'] && process.env['SIGN_OR_DIE']) {
+    throw new Error('Did not find "WINDOWS_CODESIGN_PASSWORD" env variable');
+  }
+} else if (process.env['SIGN_OR_DIE']) {
+  throw new Error('Did not find "WINDOWS_CODESIGN_FILE" env variable');
 }
 
 const commonLinuxConfig = {
