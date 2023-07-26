@@ -16,12 +16,9 @@ const iconDir = path.resolve(__dirname, 'assets', 'icons');
 const root = process.cwd();
 
 if (process.env['WINDOWS_CODESIGN_FILE']) {
-  const certPath = path.join(__dirname, 'win-certificate.pfx');
-  const certExists = fs.existsSync(certPath);
+  const certPath = process.env['WINDOWS_CODESIGN_FILE'];
 
-  if (certExists) {
-    process.env['WINDOWS_CODESIGN_FILE'] = certPath;
-  } else if (process.env['SIGN_OR_DIE']) {
+  if (!fs.existsSync(certPath) && process.env['SIGN_OR_DIE']) {
     throw new Error('Did not find Windows codesign file');
   }
 }
