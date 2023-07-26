@@ -122,7 +122,10 @@ describe('Task Runner component', () => {
         hideChannels: [],
         version: VERSION,
         fiddle: {
-          filePath: PATH,
+          localFiddle: {
+            filePath: PATH,
+            files: {},
+          },
         },
       },
     };

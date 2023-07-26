@@ -3,6 +3,7 @@ import * as path from 'node:path';
 
 import { app } from 'electron';
 
+import { openFiddle } from './file-manager';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
 import { getOrCreateMainWindow } from './windows';
@@ -107,11 +108,12 @@ export const listenForProtocolHandler = () => {
     scanArgv(commandLine);
   });
 
-  app.on('open-file', (_, path) => {
+  app.on('open-file', async (_, path) => {
     if (!path || path.length < 1) {
       return;
     }
-    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [path]);
+    const files = await openFiddle(path);
+    ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [path, files]);
   });
 
   // pass protocol URL via npm start args in dev mode

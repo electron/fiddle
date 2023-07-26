@@ -3,14 +3,14 @@ import * as path from 'node:path';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
 
-import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
+import { EditorId, EditorValues, MAIN_JS } from '../../../src/interfaces';
+import { readFiddle } from '../../../src/main/utils/read-fiddle';
 import {
   ensureRequiredFiles,
   getEmptyContent,
   isSupportedFile,
-} from '../../src/utils/editor-utils';
-import { readFiddle } from '../../src/utils/read-fiddle';
-import { createEditorValues } from '../mocks/editor-values';
+} from '../../../src/utils/editor-utils';
+import { createEditorValues } from '../../mocks/editor-values';
 
 describe('read-fiddle', () => {
   const folder = '/some/place';

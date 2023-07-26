@@ -102,8 +102,9 @@ describe('App component', () => {
       mocked(openFiddle).mockResolvedValueOnce(undefined);
 
       const filePath = '/fake/path';
-      await app.openFiddle({ filePath });
-      expect(openFiddle).toHaveBeenCalledWith(filePath);
+      const files = { MAIN_JS: 'foo' };
+      await app.openFiddle({ localFiddle: { filePath, files } });
+      expect(openFiddle).toHaveBeenCalledWith(filePath, files);
     });
   });
 
@@ -127,7 +128,11 @@ describe('App component', () => {
       const filePath = '/dev/urandom';
       const gistId = '129fe1ed16f97c5b65e86795c7aa9762';
       const templateName = 'clipboard';
-      await app.replaceFiddle(editorValues, { filePath, templateName, gistId });
+      await app.replaceFiddle(editorValues, {
+        localFiddle: { filePath, files: {} },
+        templateName,
+        gistId,
+      });
 
       expect(app.state.gistId).toBe(gistId);
       expect(app.state.templateName).toBe(templateName);
@@ -137,7 +142,7 @@ describe('App component', () => {
 
     it.each([
       { gistId: 'ed44613269be4b1eff79' },
-      { localPath: '/etc/passwd' },
+      { localFiddle: { filePath: '/etc/passwd', files: {} } },
       { templateName: 'clipboard' },
     ])(
       'updates appState when called with %o',
@@ -146,7 +151,9 @@ describe('App component', () => {
         const { state } = app;
         expect(Boolean(state.gistId)).toBe(Boolean(opts.gistId));
         expect(Boolean(state.templateName)).toBe(Boolean(opts.templateName));
-        expect(Boolean(state.localPath)).toBe(Boolean(opts.filePath));
+        expect(Boolean(state.localPath)).toBe(
+          Boolean(opts.localFiddle?.filePath),
+        );
       },
     );
 
@@ -161,7 +168,9 @@ describe('App component', () => {
         // load up a fiddle...
         const localPath = '/etc/passwd';
         const gistId = '2c24ecd147c9c28c9b2d0cf738d4993a';
-        await app.replaceFiddle(editorValues, { filePath: localPath });
+        await app.replaceFiddle(editorValues, {
+          localFiddle: { filePath: localPath, files: {} },
+        });
         expect(app.state.gistId).toBeFalsy();
         expect(app.state.localPath).toBe(localPath);
 
@@ -386,7 +395,9 @@ describe('App component', () => {
       const gistId = '2c24ecd147c9c28c9b2d0cf738d4993a';
 
       // load up a fiddle...
-      await app.replaceFiddle(editorValues, { filePath: localPath });
+      await app.replaceFiddle(editorValues, {
+        localFiddle: { filePath: localPath, files: {} },
+      });
       expect(app.state.gistId).toBeFalsy();
       expect(app.state.localPath).toBe(localPath);
 

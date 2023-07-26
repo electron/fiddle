@@ -8,6 +8,7 @@ import {
 
 import { showOpenDialog, showSaveDialog } from './files';
 import { ipcMainManager } from './ipc';
+import { getTemplateValues } from './templates';
 import { createMainWindow } from './windows';
 import {
   BlockableAccelerator,
@@ -181,7 +182,10 @@ function getShowMeMenuItem(
       label: key,
       type: 'radio',
       checked: key === activeKey,
-      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key]),
+      click: async () => {
+        const editorValues = await getTemplateValues(key);
+        ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key, editorValues]);
+      },
     };
   }
 

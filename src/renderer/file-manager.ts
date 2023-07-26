@@ -16,7 +16,6 @@ import {
   GenericDialogType,
   PACKAGE_NAME,
 } from '../interfaces';
-import { readFiddle } from '../utils/read-fiddle';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {
@@ -28,13 +27,18 @@ export class FileManager {
     window.ElectronFiddle.removeAllListeners('save-fiddle');
     window.ElectronFiddle.removeAllListeners('save-fiddle-forge');
 
-    window.ElectronFiddle.addEventListener('open-fiddle', (filePath) => {
-      this.openFiddle(filePath);
+    window.ElectronFiddle.addEventListener('open-fiddle', (filePath, files) => {
+      this.openFiddle(filePath, files);
     });
 
-    window.ElectronFiddle.addEventListener('open-template', (name) => {
-      this.openTemplate(name);
-    });
+    window.ElectronFiddle.addEventListener(
+      'open-template',
+      (templateName, editorValues) => {
+        window.ElectronFiddle.app.replaceFiddle(editorValues, {
+          templateName,
+        });
+      },
+    );
 
     window.ElectronFiddle.addEventListener('save-fiddle', (filePath) => {
       this.saveFiddle(filePath, dotfilesTransform);
@@ -46,37 +50,20 @@ export class FileManager {
   }
 
   /**
-   * Opens a template.
-   *
-   * @param {string} templateName
-   * @memberof FileManager
-   */
-  public async openTemplate(templateName: string) {
-    const editorValues = await window.ElectronFiddle.getTemplateValues(
-      templateName,
-    );
-    await window.ElectronFiddle.app.replaceFiddle(editorValues, {
-      templateName,
-    });
-  }
-
-  /**
    * Tries to open a fiddle.
    *
    * @param {string} filePath
+   * @param {Record<string, string>} files
    * @memberof FileManager
    */
-  public async openFiddle(filePath: string) {
+  public async openFiddle(filePath: string, files: Record<string, string>) {
     const { app } = window.ElectronFiddle;
 
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
 
     const editorValues: EditorValues = {};
-    const files: [string, string][] = Object.entries(
-      await readFiddle(filePath, true),
-    );
-    for (const [name, value] of files) {
+    for (const [name, value] of Object.entries(files)) {
       if (name === PACKAGE_NAME) {
         const { remoteLoader } = window.ElectronFiddle.app;
         const { dependencies, devDependencies } = JSON.parse(value);
@@ -121,7 +108,7 @@ export class FileManager {
       }
     }
 
-    app.replaceFiddle(editorValues, { filePath });
+    app.replaceFiddle(editorValues, { localFiddle: { filePath, files } });
   }
 
   /**

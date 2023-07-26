@@ -13,7 +13,12 @@ jest.unmock('fs-extra');
 
 describe('processCommandLine()', () => {
   // when no fiddle specified, cwd is the default
-  const DEFAULT_FIDDLE = { filePath: process.cwd() };
+  const DEFAULT_FIDDLE = {
+    localFiddle: {
+      filePath: process.cwd(),
+      files: expect.anything(),
+    },
+  };
   const ARGV_PREFIX = process.defaultApp
     ? ['/path/to/electron', 'main.ts']
     : ['main.ts'];
