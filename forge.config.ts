@@ -1,6 +1,8 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 
+import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import type { ForgeConfig } from '@electron-forge/shared-types';
 
 import packageJson from './package.json';
@@ -66,6 +68,13 @@ const config: ForgeConfig = {
         },
       },
     },
+    new FusesPlugin({
+      version: FuseVersion.V1,
+      [FuseV1Options.RunAsNode]: false,
+      [FuseV1Options.EnableNodeOptionsEnvironmentVariable]: false,
+      [FuseV1Options.EnableNodeCliInspectArguments]: false,
+      [FuseV1Options.OnlyLoadAppFromAsar]: true,
+    }),
   ],
   packagerConfig: {
     name: 'Electron Fiddle',
