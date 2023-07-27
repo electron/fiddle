@@ -1,3 +1,5 @@
+import { mocked } from 'jest-mock';
+
 import {
   ElectronReleaseChannel,
   GlobalSetting,
@@ -23,7 +25,7 @@ const mockVersions: Array<Partial<RunnableVersion>> = [
 describe('versions', () => {
   describe('getDefaultVersion()', () => {
     it('handles a stored version', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue('2.0.2');
+      mocked(localStorage.getItem).mockReturnValue('2.0.2');
       const output = getDefaultVersion([
         { version: '2.0.2' } as RunnableVersion,
       ]);
@@ -31,8 +33,8 @@ describe('versions', () => {
     });
 
     it('uses the newest stable as a fallback', () => {
-      (localStorage.getItem as jest.Mock).mockReturnValue(null);
-      (window.ElectronFiddle.getLatestStable as jest.Mock).mockReturnValue({
+      mocked(localStorage.getItem).mockReturnValue(null);
+      mocked(window.ElectronFiddle.getLatestStable).mockReturnValue({
         version: '13.0.0',
       });
       const output = getDefaultVersion([
@@ -85,7 +87,7 @@ describe('versions', () => {
 
   describe('addLocalVersion()', () => {
     beforeEach(() => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValue(
+      mocked(window.localStorage.getItem).mockReturnValue(
         JSON.stringify([mockVersions[0]]),
       );
     });
@@ -126,7 +128,7 @@ describe('versions', () => {
     });
 
     it('migrates an old format if necessary', () => {
-      (window.localStorage.getItem as jest.Mock).mockReturnValueOnce(
+      mocked(window.localStorage.getItem).mockReturnValueOnce(
         `
         [{
           "url": "/Users/felixr/Code/electron/src/out/Debug",
@@ -155,7 +157,7 @@ describe('versions', () => {
 
   describe('fetchVersions()', () => {
     it('removes knownVersions from localStorage', async () => {
-      (window.ElectronFiddle.fetchVersions as jest.Mock).mockResolvedValue([]);
+      mocked(window.ElectronFiddle.fetchVersions).mockResolvedValue([]);
       await fetchVersions();
       expect(localStorage.removeItem).toHaveBeenCalledWith(
         GlobalSetting.knownVersion,

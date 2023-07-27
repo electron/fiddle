@@ -1,3 +1,4 @@
+import { mocked } from 'jest-mock';
 import * as semver from 'semver';
 
 import { MAIN_JS } from '../../../src/interfaces';
@@ -20,9 +21,7 @@ describe('get-package', () => {
 
   describe('getPackageJson()', () => {
     beforeAll(() => {
-      (window.ElectronFiddle.getUsername as jest.Mock).mockReturnValue(
-        'test-user',
-      );
+      mocked(window.ElectronFiddle.getUsername).mockReturnValue('test-user');
     });
 
     const appState = new StateMock();

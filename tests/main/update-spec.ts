@@ -1,6 +1,7 @@
 /**
  * @jest-environment node
  */
+import { mocked } from 'jest-mock';
 
 jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
@@ -16,7 +17,7 @@ describe('update', () => {
     setupUpdates();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    (setTimeout as unknown as jest.Mock).mock.calls[0][0]();
+    mocked(setTimeout).mock.calls[0][0]();
     expect(updateElectronApp).toHaveBeenCalled();
   });
 });

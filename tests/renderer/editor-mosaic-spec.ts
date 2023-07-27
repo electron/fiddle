@@ -1,3 +1,4 @@
+import { mocked } from 'jest-mock';
 import { reaction } from 'mobx';
 
 import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
@@ -83,7 +84,7 @@ describe('EditorMosaic', () => {
       // setup: put visible file into the mosaic and then hide it.
       // this should cause EditorMosaic to cache the viewstate offscreen.
       const viewState = Symbol('some unique viewstate');
-      (editor.saveViewState as jest.Mock).mockReturnValueOnce(viewState);
+      mocked(editor.saveViewState).mockReturnValueOnce(viewState as any);
       editorMosaic.addEditor(id, editor);
       editorMosaic.hide(id);
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
@@ -430,7 +431,7 @@ describe('EditorMosaic', () => {
       const id = MAIN_JS;
       editorMosaic.set(valuesIn);
       editorMosaic.addEditor(id, editor);
-      (editor.hasTextFocus as jest.Mock).mockReturnValue(true);
+      mocked(editor.hasTextFocus).mockReturnValue(true);
 
       expect(editorMosaic.focusedEditor()).toBe(editor);
     });
@@ -447,13 +448,13 @@ describe('EditorMosaic', () => {
       const content = '// content';
       const editor = new MonacoEditorMock() as unknown as Editor;
       editorMosaic.set({ [id]: content });
-      await editorMosaic.addEditor(id, editor);
+      editorMosaic.addEditor(id, editor);
 
       editorMosaic.layout();
       editorMosaic.layout();
       editorMosaic.layout();
       editorMosaic.layout();
-      await waitFor(() => (editor.layout as jest.Mock).mock.calls.length > 0);
+      await waitFor(() => mocked(editor.layout).mock.calls.length > 0);
 
       expect(editor.layout).toHaveBeenCalledTimes(1);
     });

@@ -3,6 +3,7 @@
  */
 
 import { BrowserWindow, app, systemPreferences } from 'electron';
+import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupAboutPanel } from '../../src/main/about-panel';
@@ -56,12 +57,12 @@ describe('main', () => {
   });
 
   beforeEach(() => {
-    (app.getPath as jest.Mock).mockImplementation((name) => name);
+    mocked(app.getPath).mockImplementation((name) => name);
   });
 
   describe('main()', () => {
     it('quits during Squirrel events', () => {
-      (shouldQuit as jest.Mock).mockReturnValueOnce(true);
+      mocked(shouldQuit).mockReturnValueOnce(true);
 
       main([]);
       expect(app.quit).toHaveBeenCalledTimes(1);
@@ -125,18 +126,19 @@ describe('main', () => {
       // Since ipcMainManager is mocked, we can't just .emit to trigger
       // the event. Instead, call the callback as soon as the listener
       // is instantiated.
-      (ipcMainManager.on as jest.Mock).mockImplementationOnce(
-        (channel, callback) => {
-          if (channel === IpcEvents.SHOW_WINDOW) {
-            callback({});
-          }
-        },
-      );
+      mocked(ipcMainManager.on).mockImplementationOnce((channel, callback) => {
+        if (channel === IpcEvents.SHOW_WINDOW) {
+          callback({});
+        }
+        return ipcMainManager;
+      });
     });
 
     it('shows the window', () => {
       const mockWindow = new BrowserWindowMock();
-      (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(mockWindow);
+      mocked(BrowserWindow.fromWebContents).mockReturnValue(
+        mockWindow as unknown as BrowserWindow,
+      );
       setupShowWindow();
       expect(mockWindow.show).toHaveBeenCalled();
     });
@@ -156,23 +158,20 @@ describe('main', () => {
         // Since ipcMainManager is mocked, we can't just .emit to trigger
         // the event. Instead, call the callback as soon as the listener
         // is instantiated.
-        (ipcMainManager.on as jest.Mock).mockImplementationOnce(
+        mocked(ipcMainManager.on).mockImplementationOnce(
           (channel, callback) => {
             if (channel === IpcEvents.CLICK_TITLEBAR_MAC) {
               callback({});
             }
+            return ipcMainManager;
           },
         );
       });
 
       it('should minimize the window if AppleActionOnDoubleClick is minimize', () => {
-        const mockWindow = new BrowserWindowMock();
-        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
-          mockWindow,
-        );
-        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
-          'Minimize',
-        );
+        const mockWindow = new BrowserWindowMock() as unknown as BrowserWindow;
+        mocked(BrowserWindow.fromWebContents).mockReturnValue(mockWindow);
+        mocked(systemPreferences.getUserDefault).mockReturnValue('Minimize');
 
         setupTitleBarClickMac();
 
@@ -183,13 +182,11 @@ describe('main', () => {
 
       it('should maximize the window if AppleActionOnDoubleClick is maximize and the window is not maximized', () => {
         const mockWindow = new BrowserWindowMock();
-        mockWindow.isMaximized.mockReturnValue(false);
-        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
-          mockWindow,
+        mocked(mockWindow.isMaximized).mockReturnValue(false);
+        mocked(BrowserWindow.fromWebContents).mockReturnValue(
+          mockWindow as unknown as BrowserWindow,
         );
-        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
-          'Maximize',
-        );
+        mocked(systemPreferences.getUserDefault).mockReturnValue('Maximize');
 
         setupTitleBarClickMac();
 
@@ -201,12 +198,10 @@ describe('main', () => {
       it('should unmaximize the window if AppleActionOnDoubleClick is maximize and the window is maximized', () => {
         const mockWindow = new BrowserWindowMock();
         mockWindow.isMaximized.mockReturnValue(true);
-        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
-          mockWindow,
+        mocked(BrowserWindow.fromWebContents).mockReturnValue(
+          mockWindow as unknown as BrowserWindow,
         );
-        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
-          'Maximize',
-        );
+        mocked(systemPreferences.getUserDefault).mockReturnValue('Maximize');
 
         setupTitleBarClickMac();
 
@@ -217,11 +212,11 @@ describe('main', () => {
 
       it('should do nothing if AppleActionOnDoubleClick is an unknown value', () => {
         const mockWindow = new BrowserWindowMock();
-        (BrowserWindow.fromWebContents as jest.Mock).mockReturnValue(
-          mockWindow,
+        mocked(BrowserWindow.fromWebContents).mockReturnValue(
+          mockWindow as unknown as BrowserWindow,
         );
-        (systemPreferences.getUserDefault as jest.Mock).mockReturnValue(
-          undefined,
+        mocked(systemPreferences.getUserDefault).mockReturnValue(
+          undefined as any,
         );
         setupTitleBarClickMac();
         expect(mockWindow.minimize).not.toHaveBeenCalled();

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import { Tour } from '../../../src/renderer/components/tour';
 import { overrideRendererPlatform } from '../../utils';
@@ -74,7 +75,7 @@ describe('VersionChooser component', () => {
   });
 
   it('handles a missing target', () => {
-    (document.querySelector as jest.Mock).mockReturnValueOnce(null);
+    mocked(document.querySelector).mockReturnValueOnce(null);
 
     const mockStop = jest.fn();
     const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import {
   ElectronReleaseChannel,
@@ -93,7 +94,7 @@ describe('VersionSelect component', () => {
 
   describe('disableDownload', () => {
     it('disables download buttons when return value is true', () => {
-      (disableDownload as jest.Mock).mockReturnValueOnce(true);
+      mocked(disableDownload).mockReturnValueOnce(true);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
@@ -108,7 +109,7 @@ describe('VersionSelect component', () => {
     });
 
     it('does not disable enabled download buttons when return value is false', () => {
-      (disableDownload as jest.Mock).mockReturnValueOnce(false);
+      mocked(disableDownload).mockReturnValueOnce(false);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),

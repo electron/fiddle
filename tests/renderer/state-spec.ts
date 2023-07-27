@@ -1,3 +1,4 @@
+import { mocked } from 'jest-mock';
 import { IReactionDisposer, reaction } from 'mobx';
 
 import {
@@ -52,7 +53,7 @@ describe('AppState', () => {
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
+    mocked(fetchVersions).mockResolvedValue(mockVersionsArray);
     jest
       .spyOn(AppState.prototype, 'getVersionState')
       .mockImplementation(() => InstallState.installed);
@@ -85,7 +86,7 @@ describe('AppState', () => {
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
+      mocked(fetchVersions).mockRejectedValue(new Error('Bwap-bwap'));
       await appState.updateElectronVersions();
     });
 
@@ -93,8 +94,10 @@ describe('AppState', () => {
       const version = '100.0.0';
       const ver: Version = { version };
 
-      (fetchVersions as jest.Mock).mockResolvedValue([ver]);
-      (makeRunnable as jest.Mock).mockImplementation((v: unknown) => v);
+      mocked(fetchVersions).mockResolvedValue([ver]);
+      mocked(makeRunnable).mockImplementation(
+        (v: Version): RunnableVersion => v as RunnableVersion,
+      );
 
       const oldCount = Object.keys(appState.versions).length;
 
@@ -116,9 +119,7 @@ describe('AppState', () => {
     });
 
     it('returns the name, even if none exists', async () => {
-      (window.ElectronFiddle.getProjectName as jest.Mock).mockReturnValue(
-        'test',
-      );
+      mocked(window.ElectronFiddle.getProjectName).mockResolvedValue('test');
       (appState as any).name = undefined;
       expect(await appState.getName()).toBe('test');
     });
@@ -427,9 +428,7 @@ describe('AppState', () => {
         replaceSpy = jest.spyOn(window.ElectronFiddle.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
-        (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue(
-          nextValues,
-        );
+        mocked(window.ElectronFiddle.getTemplate).mockResolvedValue(nextValues);
       });
 
       it('if there is no current fiddle', async () => {
@@ -657,15 +656,17 @@ describe('AppState', () => {
   describe('addLocalVersion()', () => {
     it('refreshes version state', async () => {
       const version = '4.0.0';
-      const ver: Version = {
+      const ver: RunnableVersion = {
         localPath: '/fake/path',
         name: 'local-foo',
         version,
+        source: VersionSource.local,
+        state: InstallState.installed,
       };
 
-      (getElectronVersions as jest.Mock).mockReturnValue([ver]);
+      mocked(getElectronVersions).mockReturnValue([ver]);
 
-      await appState.addLocalVersion(ver);
+      appState.addLocalVersion(ver);
 
       // `getElectronVersions` is called when the AppState is initialized
       // as well

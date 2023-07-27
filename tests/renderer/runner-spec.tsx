@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 
+import { mocked } from 'jest-mock';
 import * as semver from 'semver';
 
 import {
@@ -37,9 +38,9 @@ describe('Runner component', () => {
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);
 
-    (
-      window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
-    ).mockReturnValue(true);
+    mocked(
+      window.ElectronFiddle.getIsPackageManagerInstalled,
+    ).mockResolvedValue(true);
 
     instance = new Runner(store as unknown as AppState);
   });
@@ -213,7 +214,7 @@ describe('Runner component', () => {
     });
 
     it('does not run if writing files fails', async () => {
-      (fileManager.saveToTemp as jest.Mock).mockRejectedValueOnce('bwap bwap');
+      mocked(fileManager.saveToTemp).mockRejectedValueOnce('bwap bwap');
 
       expect(await instance.run()).toBe(RunResult.INVALID);
     });
@@ -356,7 +357,7 @@ describe('Runner component', () => {
     });
 
     it('handles an error', async () => {
-      (window.ElectronFiddle.addModules as jest.Mock).mockRejectedValueOnce(
+      mocked(window.ElectronFiddle.addModules).mockRejectedValueOnce(
         'bwap bwap',
       );
 
@@ -398,7 +399,7 @@ describe('Runner component', () => {
     });
 
     it('handles an error in packageInstall()', async () => {
-      (window.ElectronFiddle.addModules as jest.Mock).mockRejectedValueOnce(
+      mocked(window.ElectronFiddle.addModules).mockRejectedValueOnce(
         'bwap bwap',
       );
 
@@ -408,7 +409,7 @@ describe('Runner component', () => {
     });
 
     it('handles an error in packageRun()', async () => {
-      (window.ElectronFiddle.packageRun as jest.Mock).mockRejectedValueOnce(
+      mocked(window.ElectronFiddle.packageRun).mockRejectedValueOnce(
         'bwap bwap',
       );
 
@@ -418,9 +419,9 @@ describe('Runner component', () => {
     });
 
     it('does attempt a forge operation if npm is not installed', async () => {
-      (
-        window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
-      ).mockReturnValueOnce(false);
+      mocked(
+        window.ElectronFiddle.getIsPackageManagerInstalled,
+      ).mockResolvedValueOnce(false);
 
       expect(await instance.performForgeOperation(ForgeCommands.MAKE)).toBe(
         false,
@@ -433,9 +434,9 @@ describe('Runner component', () => {
       ['does not attempt installation if npm is not installed', false, 0],
       ['does attempt installation if npm is installed', true, 1],
     ])('%s', async (_: unknown, haveNpm: boolean, numCalls: number) => {
-      (
-        window.ElectronFiddle.getIsPackageManagerInstalled as jest.Mock
-      ).mockReturnValue(haveNpm);
+      mocked(
+        window.ElectronFiddle.getIsPackageManagerInstalled,
+      ).mockResolvedValue(haveNpm);
       await instance.installModules({
         dir: '/fake/path',
         packageManager: 'npm',

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
@@ -76,9 +77,9 @@ describe('AddThemeDialog component', () => {
       });
 
       const themePath = '~/.electron-fiddle/themes/testingLight';
-      (window.ElectronFiddle.createThemeFile as jest.Mock).mockResolvedValue({
+      mocked(window.ElectronFiddle.createThemeFile).mockResolvedValue({
         file: themePath,
-      });
+      } as LoadedFiddleTheme);
 
       await instance.createNewThemeFromMonaco('testingLight', defaultLight);
 
