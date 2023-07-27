@@ -206,12 +206,11 @@ function notarizeMaybe() {
     return;
   }
 
-  // TODO: appBundleId is not being accepted for typing
-  (config.packagerConfig!.osxNotarize as any) = {
-    appBundleId: 'com.electron.fiddle',
+  config.packagerConfig!.osxNotarize = {
+    tool: 'notarytool',
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_ID_PASSWORD,
-    ascProvider: 'LT94ZKYDCJ',
+    teamId: 'LT94ZKYDCJ',
   };
 }
 
