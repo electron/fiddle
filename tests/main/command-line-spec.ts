@@ -53,7 +53,7 @@ describe('processCommandLine()', () => {
     const [ev, params] = call;
     expect(ev).toBe(event);
     expect(params?.length).toBe(1);
-    const [request] = params;
+    const [request] = params!;
     expect(request).toEqual(payload);
   }
 
