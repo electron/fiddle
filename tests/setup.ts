@@ -1,6 +1,7 @@
 import { configure as enzymeConfigure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { createSerializer } from 'enzyme-to-json';
+import { mocked } from 'jest-mock';
 import { configure as mobxConfigure } from 'mobx';
 
 import { ElectronFiddleMock } from './mocks/mocks';
@@ -94,8 +95,8 @@ beforeEach(() => {
   document.body.innerHTML = '<div id="app" />';
 
   (window.ElectronFiddle as any) = new ElectronFiddleMock();
-  (window.localStorage.setItem as jest.Mock).mockReset();
-  (window.localStorage.getItem as jest.Mock).mockReset();
-  (window.localStorage.removeItem as jest.Mock).mockReset();
-  (window.open as jest.Mock).mockReset();
+  mocked(window.localStorage.setItem).mockReset();
+  mocked(window.localStorage.getItem).mockReset();
+  mocked(window.localStorage.removeItem).mockReset();
+  mocked(window.open).mockReset();
 });

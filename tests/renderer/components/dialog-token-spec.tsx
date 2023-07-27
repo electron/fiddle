@@ -1,6 +1,8 @@
 import * as React from 'react';
 
+import { Octokit } from '@octokit/rest';
 import { shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
@@ -37,7 +39,7 @@ describe('TokenDialog component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance();
 
-    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
+    mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockValidToken,
     );
     await instance.onTokenInputFocused();
@@ -50,7 +52,7 @@ describe('TokenDialog component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance();
 
-    (window.navigator.clipboard.readText as jest.Mock).mockResolvedValueOnce(
+    mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockInvalidToken,
     );
     await instance.onTokenInputFocused();
@@ -108,7 +110,7 @@ describe('TokenDialog component', () => {
   });
 
   describe('onSubmitToken()', () => {
-    let mockOctokit: any;
+    let mockOctokit: Octokit;
     const mockUser = {
       avatar_url: 'https://avatars.fake/hi',
       login: 'test-login',
@@ -121,9 +123,9 @@ describe('TokenDialog component', () => {
         users: {
           getAuthenticated: jest.fn().mockResolvedValue({ data: mockUser }),
         },
-      };
+      } as unknown as Octokit;
 
-      (getOctokit as jest.Mock).mockResolvedValue(mockOctokit);
+      mocked(getOctokit).mockResolvedValue(mockOctokit);
     });
 
     it('handles missing input', async () => {
@@ -150,7 +152,9 @@ describe('TokenDialog component', () => {
     });
 
     it('handles an error', async () => {
-      mockOctokit.users.getAuthenticated.mockReturnValue({ data: null });
+      mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
+        data: null,
+      } as any);
 
       const wrapper = shallow(<TokenDialog appState={store} />);
       wrapper.setState({ tokenInput: mockValidToken });

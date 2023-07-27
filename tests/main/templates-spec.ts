@@ -1,5 +1,7 @@
 import * as path from 'node:path';
 
+import { mocked } from 'jest-mock';
+
 import { MAIN_JS } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/main/templates';
 import { getEmptyContent } from '../../src/utils/editor-utils';
@@ -34,7 +36,7 @@ describe('templates', () => {
         [MAIN_JS],
       );
 
-      (console.log as jest.Mock).mockClear();
+      mocked(console.log).mockClear();
     });
   });
 });

@@ -1,3 +1,5 @@
+import { mocked } from 'jest-mock';
+
 import { overridePlatform, resetPlatform } from '../../utils';
 
 jest.mock('node:child_process');
@@ -58,7 +60,7 @@ describe('exec', () => {
     it('handles errors', async () => {
       let errored = false;
       const cpExec = require('node:child_process').exec;
-      (cpExec as jest.Mock).mockImplementation((_a: any, _b: any, c: any) =>
+      mocked(cpExec).mockImplementation((_a: any, _b: any, c: any) =>
         c(new Error('Poop!')),
       );
 

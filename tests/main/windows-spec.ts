@@ -5,6 +5,7 @@
 import * as path from 'node:path';
 
 import * as electron from 'electron';
+import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
@@ -52,7 +53,7 @@ describe('windows', () => {
     };
 
     beforeEach(() => {
-      (path.join as jest.Mock).mockReturnValue('/fake/path');
+      mocked(path.join).mockReturnValue('/fake/path');
     });
 
     afterEach(() => {
@@ -129,15 +130,13 @@ describe('windows', () => {
 
       // can't .emit() to trigger .handleOnce() so instead we mock
       // to instantly call the listener.
-      let result: any;
-      (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
-      (electron.ipcMain.handle as jest.Mock).mockImplementation(
-        (event, listener) => {
-          if (event === IpcEvents.GET_APP_PATHS) {
-            result = listener();
-          }
-        },
-      );
+      let result: Record<string, string> = {};
+      mocked(electron.app.getPath).mockImplementation((name) => name);
+      mocked(electron.ipcMain.handle).mockImplementation((event, listener) => {
+        if (event === IpcEvents.GET_APP_PATHS) {
+          result = listener(null as any);
+        }
+      });
       getOrCreateMainWindow();
       expect(Object.values(result).length).toBeGreaterThan(0);
       for (const prop in result) {

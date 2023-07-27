@@ -3,6 +3,7 @@ import * as path from 'node:path';
 import { Response, fetch } from 'cross-fetch';
 import { app } from 'electron';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 import * as tmp from 'tmp';
 
 let fakeUserData: tmp.DirResult | null;
@@ -55,7 +56,7 @@ describe('content', () => {
   const VERSION_NOT_IN_FIXTURES = '10.0.0';
 
   beforeAll(() => {
-    (app.getPath as jest.Mock).mockImplementation((name: string) => {
+    mocked(app.getPath).mockImplementation((name: string) => {
       if (name === 'userData') {
         // set it to be a newly-allocated tmpdir
         if (!fakeUserData) {
@@ -66,6 +67,8 @@ describe('content', () => {
           });
         }
       }
+
+      return '';
     });
   });
 
@@ -78,11 +81,11 @@ describe('content', () => {
 
   describe('getTestTemplate()', () => {
     beforeEach(() => {
-      (fetch as jest.Mock).mockImplementation(fetchFromFilesystem);
+      mocked(fetch).mockImplementation(fetchFromFilesystem);
     });
 
     afterEach(() => {
-      (fetch as jest.Mock).mockClear();
+      mocked(fetch).mockClear();
     });
 
     it('loads a test template', async () => {
@@ -96,10 +99,10 @@ describe('content', () => {
 
   describe('getTemplate()', () => {
     beforeEach(() => {
-      (fetch as jest.Mock).mockImplementation(fetchFromFilesystem);
+      mocked(fetch).mockImplementation(fetchFromFilesystem);
     });
     afterEach(() => {
-      (fetch as jest.Mock).mockClear();
+      mocked(fetch).mockClear();
     });
 
     it('returns the same promise if the work is already pending', async () => {
@@ -143,7 +146,7 @@ describe('content', () => {
     });
 
     it('returns the same promise if the work is already pending', async () => {
-      (isReleasedMajor as jest.Mock).mockReturnValue(true);
+      mocked(isReleasedMajor).mockReturnValue(true);
       const version = VERSION_IN_FIXTURES;
       const a = getTemplate(version);
       const b = getTemplate(version);

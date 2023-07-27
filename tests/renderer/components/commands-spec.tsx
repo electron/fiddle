@@ -62,9 +62,7 @@ describe('Commands component', () => {
     const tag = { tagName: 'DIV' };
     instance.handleDoubleClick({ target: tag, currentTarget: tag });
 
-    expect(
-      window.ElectronFiddle.macTitlebarClicked as jest.Mock,
-    ).toHaveBeenCalled();
+    expect(window.ElectronFiddle.macTitlebarClicked).toHaveBeenCalled();
   });
 
   it('handleDoubleClick() should not handle input tag', () => {
@@ -76,9 +74,7 @@ describe('Commands component', () => {
       currentTarget: { tagName: 'DIV' },
     });
 
-    expect(
-      window.ElectronFiddle.macTitlebarClicked as jest.Mock,
-    ).toHaveBeenCalledTimes(0);
+    expect(window.ElectronFiddle.macTitlebarClicked).toHaveBeenCalledTimes(0);
   });
 
   it('show setting', () => {

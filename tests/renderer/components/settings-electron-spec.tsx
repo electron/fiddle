@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
+import { mocked } from 'jest-mock';
 
 import {
   ElectronReleaseChannel,
@@ -282,7 +283,7 @@ describe('ElectronSettings component', () => {
 
   describe('disableDownload()', () => {
     it('disables download buttons where return values are true', () => {
-      (disableDownload as jest.Mock).mockReturnValue(true);
+      mocked(disableDownload).mockReturnValue(true);
 
       const version = '3.0.0';
       const ver = {

@@ -1,3 +1,5 @@
+import { mocked } from 'jest-mock';
+
 import {
   ElectronReleaseChannel,
   OutputEntry,
@@ -44,13 +46,13 @@ describe('processCommandLine()', () => {
     event: IpcEvents,
     payload: Record<string, any>,
   ) {
-    const send = ipcMainManager.send as jest.Mock;
+    const send = mocked(ipcMainManager.send);
     expect(send).toHaveBeenCalledTimes(1);
     const [call] = send.mock.calls;
     expect(call.length).toEqual(2);
     const [ev, params] = call;
     expect(ev).toBe(event);
-    expect(params.length).toBe(1);
+    expect(params?.length).toBe(1);
     const [request] = params;
     expect(request).toEqual(payload);
   }
@@ -287,7 +289,7 @@ describe('processCommandLine()', () => {
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
       async function expectDoneCausesExit(result: RunResult, exitCode: number) {
         const argv = [...ARGV, GOOD, BAD];
-        (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
+        mocked(ipcMainManager.send).mockImplementationOnce(() => {
           const fakeEvent = {};
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
@@ -317,7 +319,7 @@ describe('processCommandLine()', () => {
 
         const fakeEvent = {};
         const entry: OutputEntry = { text, timeString };
-        (ipcMainManager.send as jest.Mock).mockImplementationOnce(() => {
+        mocked(ipcMainManager.send).mockImplementationOnce(() => {
           ipcMainManager.emit(IpcEvents.OUTPUT_ENTRY, fakeEvent, entry);
         });
 

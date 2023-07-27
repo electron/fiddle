@@ -100,6 +100,8 @@ jobs:
           paths:
             - out
   win-build:
+    environment:
+      SIGN_OR_DIE: true
     parameters:
       arch:
         type: enum
@@ -109,7 +111,9 @@ jobs:
       shell: bash.exe
     steps:
       - install
-      - run: export WINDOWS_CODESIGN_FILE=$(ts-node ./tools/add-windows-cert.ts)
+      - run: |
+          WINDOWS_CODESIGN_FILE=$(npx ts-node ./tools/add-windows-cert.ts)
+          echo 'export WINDOWS_CODESIGN_FILE="$WINDOWS_CODESIGN_FILE"' >> "$BASH_ENV"
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out

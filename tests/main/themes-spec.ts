@@ -2,6 +2,7 @@ import * as path from 'node:path';
 
 import { shell } from 'electron';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import {
   THEMES_PATH,
@@ -22,7 +23,7 @@ describe('themes', () => {
     });
 
     it('reads the themes folder for themes', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      mocked(fs.existsSync).mockReturnValue(true);
       (fs.readdir as jest.Mock).mockReturnValueOnce([
         'test-theme1.json',
         'test-theme2.json',
@@ -45,12 +46,12 @@ describe('themes', () => {
     });
 
     it('only reads files ending in .json', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      mocked(fs.existsSync).mockReturnValue(true);
       (fs.readdir as jest.Mock).mockReturnValueOnce([
         'test-theme1.json',
         '.DS_Store',
       ]);
-      (fs.readJSON as jest.Mock).mockReturnValue({ test: true });
+      (fs.readJSON as jest.Mock).mockResolvedValue({ test: true });
 
       const themes = await getAvailableThemes();
 
@@ -63,7 +64,7 @@ describe('themes', () => {
     });
 
     it('handles a readdir error', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      mocked(fs.existsSync).mockReturnValueOnce(true);
       (fs.readdir as jest.Mock).mockRejectedValueOnce('Bwap');
 
       const themes = await getAvailableThemes();
@@ -71,7 +72,7 @@ describe('themes', () => {
     });
 
     it('handles a readJSON error', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
+      mocked(fs.existsSync).mockReturnValueOnce(true);
       (fs.readdir as jest.Mock).mockImplementationOnce(() => ['hi']);
       (fs.readJSON as jest.Mock).mockRejectedValueOnce('Bwap');
 
@@ -97,7 +98,7 @@ describe('themes', () => {
     });
 
     it('reads the right file if ends with .json', async () => {
-      (fs.readJSON as jest.Mock).mockReturnValueOnce({});
+      (fs.readJSON as jest.Mock).mockResolvedValueOnce({});
 
       const theme = await readThemeFile('myfile.json');
       const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);
@@ -107,7 +108,7 @@ describe('themes', () => {
     });
 
     it('reads the right file if does not end with .json', async () => {
-      (fs.readJSON as jest.Mock).mockReturnValueOnce({});
+      (fs.readJSON as jest.Mock).mockResolvedValueOnce({});
 
       const theme = await readThemeFile('myfile');
       const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);

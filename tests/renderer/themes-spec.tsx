@@ -1,4 +1,7 @@
+import { mocked } from 'jest-mock';
+
 import { activateTheme, getTheme } from '../../src/renderer/themes';
+import { LoadedFiddleTheme } from '../../src/themes-defaults';
 
 describe('themes', () => {
   describe('activateTheme()', () => {
@@ -27,17 +30,17 @@ describe('themes', () => {
     });
 
     it('returns a named theme', async () => {
-      (window.ElectronFiddle.readThemeFile as jest.Mock).mockReturnValue({
+      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue({
         name: 'Test',
         common: { test: true },
-      });
+      } as unknown as LoadedFiddleTheme);
 
       const theme = await getTheme('test');
       expect(theme.name).toBe('Test');
     });
 
     it('handles a read error', async () => {
-      (window.ElectronFiddle.readThemeFile as jest.Mock).mockReturnValue(null);
+      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(null);
 
       const theme = await getTheme('test');
       expect(theme.name).toBe('Fiddle (Dark)');

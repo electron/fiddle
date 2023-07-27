@@ -4,6 +4,7 @@
 
 import { dialog } from 'electron';
 import * as fs from 'fs-extra';
+import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
@@ -43,15 +44,22 @@ describe('dialogs', () => {
 
     beforeAll(() => {
       // Manually invoke handler to simulate IPC event
-      const call = (ipcMainManager.handle as jest.Mock).mock.calls.find(
+      const call = mocked(ipcMainManager.handle).mock.calls.find(
         ([channelName]) => channelName === IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
       );
-      ipcHandler = call[1];
+      if (call?.length && call.length > 1) {
+        const rawIpcHandler = call[1];
+        ipcHandler = async () =>
+          rawIpcHandler({} as Electron.IpcMainInvokeEvent);
+      } else {
+        throw new Error('Could not find IPC listener');
+      }
     });
 
     it('shows dialog when triggering IPC event', async () => {
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: [],
+        canceled: true,
       });
 
       await ipcHandler();
@@ -65,9 +73,10 @@ describe('dialogs', () => {
     it('returns a SelectedLocalVersion for the path', () => {
       const paths = ['/test/path/'];
 
-      (fs.existsSync as jest.Mock).mockReturnValue(false);
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      mocked(fs.existsSync).mockReturnValue(false);
+      mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: paths,
+        canceled: false,
       });
 
       expect(ipcHandler()).resolves.toStrictEqual({
@@ -79,13 +88,14 @@ describe('dialogs', () => {
 
     it('returns nothing if not given a path', async () => {
       // empty array
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: [],
+        canceled: true,
       });
       expect(ipcHandler()).resolves.toBe(undefined);
 
       // nothing in response
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
+      mocked(dialog.showOpenDialog).mockResolvedValue({} as any);
       expect(ipcHandler()).resolves.toBe(undefined);
     });
   });
