@@ -26,7 +26,7 @@ import { isDevMode } from './utils/devmode';
 import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
-import { getOrCreateMainWindow } from './windows';
+import { getOrCreateMainWindow, mainIsReady } from './windows';
 import { IpcEvents } from '../ipc-events';
 
 let argv: string[] = [];
@@ -65,7 +65,8 @@ export async function onReady() {
 
   // Do this after setting everything up to ensure that
   // any IPC listeners are set up before they're used
-  getOrCreateMainWindow();
+  mainIsReady();
+  await getOrCreateMainWindow();
 
   processCommandLine(argv);
 }

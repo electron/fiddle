@@ -13,6 +13,7 @@ import {
   browserWindows,
   getMainWindowOptions,
   getOrCreateMainWindow,
+  mainIsReady,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -21,6 +22,7 @@ jest.mock('node:path');
 
 describe('windows', () => {
   beforeAll(() => {
+    mainIsReady();
     overridePlatform('win32');
   });
 
@@ -81,50 +83,50 @@ describe('windows', () => {
   });
 
   describe('getOrCreateMainWindow()', () => {
-    it('creates a window on first call', () => {
+    it('creates a window on first call', async () => {
       expect(browserWindows.length).toBe(0);
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
     });
 
-    it('updates "browserWindows" on "close"', () => {
-      getOrCreateMainWindow();
+    it('updates "browserWindows" on "close"', async () => {
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().emit('closed');
+      (await getOrCreateMainWindow()).emit('closed');
       expect(browserWindows.length).toBe(0);
     });
 
-    it('creates the context menu on "dom-ready"', () => {
-      getOrCreateMainWindow();
+    it('creates the context menu on "dom-ready"', async () => {
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('dom-ready');
+      (await getOrCreateMainWindow()).webContents.emit('dom-ready');
       expect(createContextMenu).toHaveBeenCalled();
     });
 
     // FIXME: new test for setWindowOpenHandler
-    it.skip('prevents new-window"', () => {
+    it.skip('prevents new-window"', async () => {
       const e = {
         preventDefault: jest.fn(),
       };
 
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('new-window', e);
+      (await getOrCreateMainWindow()).webContents.emit('new-window', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
 
-    it('prevents will-navigate"', () => {
+    it('prevents will-navigate"', async () => {
       const e = {
         preventDefault: jest.fn(),
       };
 
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      getOrCreateMainWindow().webContents.emit('will-navigate', e);
+      (await getOrCreateMainWindow()).webContents.emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
 
-    it('returns app.getPath() values on IPC event', () => {
+    it('returns app.getPath() values on IPC event', async () => {
       // we want to remove the effects of previous calls
       browserWindows.length = 0;
 
@@ -137,7 +139,7 @@ describe('windows', () => {
           result = listener(null as any);
         }
       });
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(Object.values(result).length).toBeGreaterThan(0);
       for (const prop in result) {
         expect(prop).toBe(result[prop]);
