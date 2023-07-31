@@ -4,7 +4,6 @@ import {
   ProgressObject,
   Runner,
 } from '@electron/fiddle-core';
-import * as fs from 'fs-extra';
 import {
   action,
   autorun,
@@ -924,7 +923,7 @@ export class AppState {
     }
 
     const { localPath, version } = ver;
-    if (localPath && !fs.existsSync(localPath)) {
+    if (localPath && !window.ElectronFiddle.pathExists(localPath)) {
       const err = `Local Electron build missing for version ${version} - please verify it is in the correct location or remove and re-add it.`;
       return { err };
     }

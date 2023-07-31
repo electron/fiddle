@@ -135,6 +135,8 @@ export async function setupFiddleGlobal() {
         command,
       );
     },
+    pathExists: (path: string) =>
+      ipcRenderer.sendSync(IpcEvents.PATH_EXISTS, path),
     platform: process.platform,
     pushOutputEntry(entry) {
       ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);

@@ -47,6 +47,7 @@ describe('files', () => {
       setupFileListeners();
 
       expect(ipcMainManager.eventNames()).toEqual([
+        IpcEvents.PATH_EXISTS,
         IpcEvents.FS_SAVE_FIDDLE_DIALOG,
       ]);
 

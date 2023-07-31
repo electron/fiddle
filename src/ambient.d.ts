@@ -109,6 +109,7 @@ declare global {
         { dir, packageManager }: PMOperationOptions,
         command: string,
       ): Promise<string>;
+      pathExists(path: string): boolean;
       platform: string;
       pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;

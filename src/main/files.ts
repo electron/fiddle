@@ -9,6 +9,9 @@ import { isSupportedFile } from '../utils/editor-utils';
  * Ensures that we're listening to file events
  */
 export function setupFileListeners() {
+  ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, path: string) => {
+    event.returnValue = fs.existsSync(path);
+  });
   ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => {
     showSaveDialog();
   });
