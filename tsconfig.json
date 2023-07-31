@@ -33,6 +33,7 @@
     "baseUrl": "."
   },
   "include": [
+    "rtl-spec/**/*",
     "src/**/*",
     "tests/**/*"
   ],
