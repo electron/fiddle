@@ -60,7 +60,14 @@ class IpcMainManager extends EventEmitter {
     args?: Array<any>,
     target?: Electron.WebContents,
   ) {
-    const _target = target || getOrCreateMainWindow().webContents;
+    const _target = target;
+    if (!_target) {
+      getOrCreateMainWindow().then((window) => {
+        this.send(channel, args, window.webContents);
+      });
+      return;
+    }
+
     const _args = args || [];
     if (!this.readyWebContents.has(_target)) {
       const existing = this.messageQueue.get(_target) || [];
@@ -93,7 +100,13 @@ class IpcMainManager extends EventEmitter {
     transfer?: MessagePortMain[],
     target?: Electron.WebContents,
   ) {
-    const _target = target || getOrCreateMainWindow().webContents;
+    const _target = target;
+    if (!_target) {
+      getOrCreateMainWindow().then((window) => {
+        window.webContents.postMessage(channel, message, transfer);
+      });
+      return;
+    }
     _target.postMessage(channel, message, transfer);
   }
 }

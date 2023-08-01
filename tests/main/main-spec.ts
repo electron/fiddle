@@ -25,6 +25,7 @@ import { overridePlatform, resetPlatform } from '../utils';
 
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
+  mainIsReady: jest.fn(),
 }));
 
 jest.mock('../../src/main/about-panel', () => ({

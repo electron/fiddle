@@ -1,11 +1,10 @@
 import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
-import { dialog } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
-import { getOrCreateMainWindow } from './windows';
 import { SelectedLocalVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
@@ -51,8 +50,8 @@ function isValidElectronPath(folderPath: string): boolean {
  * @export
  */
 export function setupDialogs() {
-  ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, (_event, args) => {
-    showWarningDialog(args);
+  ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, (event, args) => {
+    showWarningDialog(BrowserWindow.fromWebContents(event.sender)!, args);
   });
 
   ipcMainManager.handle(
@@ -79,8 +78,11 @@ export function setupDialogs() {
  *
  * @param {Electron.MessageBoxOptions} args
  */
-function showWarningDialog(args: Electron.MessageBoxOptions) {
-  dialog.showMessageBox(getOrCreateMainWindow(), {
+function showWarningDialog(
+  window: BrowserWindow,
+  args: Electron.MessageBoxOptions,
+) {
+  dialog.showMessageBox(window, {
     type: 'warning',
     ...args,
   });

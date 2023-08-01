@@ -15,6 +15,15 @@ export let browserWindows: Array<BrowserWindow | null> = [];
 declare const MAIN_WINDOW_WEBPACK_ENTRY: string;
 declare const MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY: string;
 
+let mainIsReadyResolver: () => void;
+const mainIsReadyPromise = new Promise<void>(
+  (resolve) => (mainIsReadyResolver = resolve),
+);
+
+export function mainIsReady() {
+  mainIsReadyResolver();
+}
+
 /**
  * Gets default options for the main window
  *
@@ -124,9 +133,10 @@ export function createMainWindow(): Electron.BrowserWindow {
 /**
  * Gets or creates the main window, returning it in both cases.
  *
- * @returns {Electron.BrowserWindow}
+ * @returns {Promise<Electron.BrowserWindow>}
  */
-export function getOrCreateMainWindow(): Electron.BrowserWindow {
+export async function getOrCreateMainWindow(): Promise<Electron.BrowserWindow> {
+  await mainIsReadyPromise;
   return (
     BrowserWindow.getFocusedWindow() || browserWindows[0] || createMainWindow()
   );

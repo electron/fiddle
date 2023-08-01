@@ -27,7 +27,7 @@ describe('IpcMainManager', () => {
   });
 
   describe('send()', () => {
-    it('sends an event and finds the main window', () => {
+    it('sends an event and finds the main window', async () => {
       const mockTarget = {
         webContents: {
           send: jest.fn(),
@@ -35,10 +35,11 @@ describe('IpcMainManager', () => {
         } as unknown as Electron.WebContents,
       } as electron.BrowserWindow;
 
-      mocked(getOrCreateMainWindow).mockReturnValue(mockTarget);
+      mocked(getOrCreateMainWindow).mockResolvedValue(mockTarget);
       ipcMainManager.readyWebContents.add(mockTarget.webContents);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN);
+      await new Promise(process.nextTick);
 
       expect(mockTarget.webContents.send).toHaveBeenCalledWith(
         IpcEvents.FIDDLE_RUN,
@@ -51,7 +52,7 @@ describe('IpcMainManager', () => {
         isDestroyed: () => false,
       } as unknown as Electron.WebContents;
 
-      mocked(getOrCreateMainWindow).mockReturnValue(null as any);
+      mocked(getOrCreateMainWindow).mockResolvedValue(null as any);
       ipcMainManager.readyWebContents.add(mockTarget);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
@@ -64,7 +65,7 @@ describe('IpcMainManager', () => {
         send: jest.fn(),
       } as unknown as Electron.WebContents;
 
-      mocked(getOrCreateMainWindow).mockReturnValue(null as any);
+      mocked(getOrCreateMainWindow).mockResolvedValue(null as any);
 
       ipcMainManager.send(IpcEvents.FIDDLE_RUN, undefined, mockTarget);
 

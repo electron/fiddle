@@ -35,7 +35,7 @@ describe('files', () => {
       filePaths: ['my/fake/path'],
       canceled: false,
     });
-    mocked(getOrCreateMainWindow).mockReturnValue(
+    mocked(getOrCreateMainWindow).mockResolvedValue(
       mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
     );
 
@@ -67,7 +67,7 @@ describe('files', () => {
     });
 
     it('notifies the main window of the event', async () => {
-      mocked(getOrCreateMainWindow).mockReturnValue(
+      mocked(getOrCreateMainWindow).mockResolvedValue(
         mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
       );
 
@@ -133,7 +133,7 @@ describe('files', () => {
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      mocked(getOrCreateMainWindow).mockReturnValue(
+      mocked(getOrCreateMainWindow).mockResolvedValue(
         mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
       );
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
@@ -149,7 +149,7 @@ describe('files', () => {
       const err = new Error('💩');
       mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
       mocked(dialog.showMessageBox).mockRejectedValue(err);
-      mocked(getOrCreateMainWindow).mockReturnValue(
+      mocked(getOrCreateMainWindow).mockResolvedValue(
         mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
       );
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
