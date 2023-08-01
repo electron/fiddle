@@ -7,7 +7,7 @@ export async function generateWindowsSigningCert() {
   try {
     const dir = await fs.mkdtemp(path.resolve(os.tmpdir(), 'builder-folder-'));
 
-    const certAsBase64 = process.env.WINDOWS_SIGNING_CERT;
+    const certAsBase64 = process.env.WINDOWS_CODESIGN_P12;
     if (!certAsBase64) {
       throw new Error(`Could not find code sign cert base value`);
     }
@@ -28,6 +28,6 @@ export async function generateWindowsSigningCert() {
 
 if (require.main === module) {
   (async () => {
-    await generateWindowsSigningCert();
+    console.log(await generateWindowsSigningCert());
   })();
 }
