@@ -20,6 +20,7 @@ const ELECTRON_DTS = 'electron.d.ts';
  */
 export class ElectronTypes {
   private disposables: MonacoType.IDisposable[] = [];
+  private electronTypesDisposable: MonacoType.IDisposable | undefined;
   private watcher: fs.FSWatcher | undefined;
 
   constructor(
@@ -96,13 +97,16 @@ export class ElectronTypes {
   }
 
   private setTypesFromFile(file: string, version: string) {
+    // Dispose of any previous Electron types so there's only ever one
+    this.electronTypesDisposable?.dispose();
+    this.electronTypesDisposable = undefined;
+
     try {
       console.log(`Updating Monaco with "${ELECTRON_DTS}@${version}"`);
-      const lib =
+      this.electronTypesDisposable =
         this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
           fs.readFileSync(file, 'utf8'),
         );
-      this.disposables.push(lib);
     } catch (err) {
       console.debug(`Unable to read types from "${file}": ${err.message}`);
     }
@@ -122,6 +126,9 @@ export class ElectronTypes {
   }
 
   private dispose() {
+    this.electronTypesDisposable?.dispose();
+    this.electronTypesDisposable = undefined;
+
     if (this.disposables.length > 0) {
       for (const disposable of this.disposables) {
         disposable.dispose();
