@@ -107,6 +107,9 @@ export async function setupFiddleGlobal() {
         ignoreCache,
       );
     },
+    getNodeTypes(version) {
+      return ipcRenderer.invoke(IpcEvents.GET_NODE_TYPES, version);
+    },
     getProjectName(localPath?: string) {
       return ipcRenderer.invoke(IpcEvents.GET_PROJECT_NAME, localPath);
     },

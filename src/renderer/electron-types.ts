@@ -3,11 +3,8 @@ import * as path from 'node:path';
 import * as fs from 'fs-extra';
 import * as MonacoType from 'monaco-editor';
 import watch from 'node-watch';
-import packageJson from 'package-json';
-import readdir from 'recursive-readdir';
-import semver from 'semver';
 
-import { RunnableVersion, VersionSource } from '../interfaces';
+import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';
 
 const ELECTRON_DTS = 'electron.d.ts';
 
@@ -25,7 +22,6 @@ export class ElectronTypes {
   constructor(
     private readonly monaco: typeof MonacoType,
     private readonly electronCacheDir: string,
-    private readonly nodeCacheDir: string,
   ) {}
 
   public async setVersion(ver?: RunnableVersion): Promise<void> {
@@ -59,40 +55,29 @@ export class ElectronTypes {
     }
   }
 
-  private async setNodeTypes(version: string): Promise<void> {
-    // Get the Node.js version corresponding to the current Electron version.
-    const v = (await window.ElectronFiddle.getReleaseInfo(version))?.node;
+  private async setNodeTypes(ver: string): Promise<void> {
+    const nodeTypes = await window.ElectronFiddle.getNodeTypes(ver);
+    if (nodeTypes) {
+      console.log(
+        `Updating Monaco with files for Node.js ${nodeTypes.version}:`,
+        Object.keys(nodeTypes.types),
+      );
 
-    if (!v) return;
-
-    const dir = this.getCacheDir(v);
-    const ver = await this.cacheAndReturnNodeTypesVersion(v, dir);
-    await this.setTypesFromDir(dir, ver);
+      for (const file of Object.keys(nodeTypes.types)) {
+        const lib =
+          this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
+            nodeTypes.types[file as keyof NodeTypes],
+          );
+        this.disposables.push(lib);
+      }
+    } else {
+      console.log(`No types found for Node.js in Electron ${ver}`);
+    }
   }
 
   public uncache(ver: RunnableVersion) {
     if (ver.source === VersionSource.remote)
       fs.removeSync(this.getCacheFile(ver.version));
-  }
-
-  private async setTypesFromDir(dir: string, version: string) {
-    try {
-      const files = (await readdir(dir)).filter((f) => f.endsWith('.d.ts'));
-      console.log(
-        `Updating Monaco with files for Node.js ${version}:`,
-        files.map((f) => path.parse(f).base),
-      );
-
-      for (const file of files) {
-        const lib =
-          this.monaco.languages.typescript.javascriptDefaults.addExtraLib(
-            fs.readFileSync(file, 'utf8'),
-          );
-        this.disposables.push(lib);
-      }
-    } catch (err) {
-      console.debug(`Unable to read types from "${dir}": ${err.message}`);
-    }
   }
 
   private setTypesFromFile(file: string, version: string) {
@@ -110,10 +95,6 @@ export class ElectronTypes {
 
   private getCacheFile(version: string) {
     return path.join(this.electronCacheDir, version, ELECTRON_DTS);
-  }
-
-  private getCacheDir(version: string) {
-    return path.join(this.nodeCacheDir, version);
   }
 
   private clear() {
@@ -135,66 +116,6 @@ export class ElectronTypes {
       this.watcher.close();
       delete this.watcher;
     }
-  }
-
-  /**
-   * This function ensures that the Node.js version for a given version of
-   * Electron is downloaded and cached. It can be the case that DefinitelyTyped
-   * doesn't have specific Node.js versions, and if it's missing a certain version,
-   * we instead download the most recent version of Node.js in that release line older
-   * than the target version and return that. This also allows Electron versions to share
-   * versions of Node.js types.
-   *
-   * @param version - version of Node.js to fetch types for.
-   * @param dir - directory where the Node.js types version may be stored.
-   * @returns the version of Node.js types for this version of Electron.
-   */
-  private async cacheAndReturnNodeTypesVersion(version: string, dir: string) {
-    if (fs.existsSync(dir)) return version;
-
-    let downloadVersion = version;
-    let response = await fetch(
-      `https://unpkg.com/@types/node@${version}/?meta`,
-    );
-
-    if (response.status === 404) {
-      const types = await packageJson('@types/node', {
-        version: semver.major(version).toString(),
-        fullMetadata: false,
-      });
-
-      downloadVersion = types.version as string;
-      console.log(
-        `falling back to the latest applicable Node.js version type: ${downloadVersion}`,
-      );
-
-      const maybeCachedDir = path.join(this.nodeCacheDir, downloadVersion);
-      if (fs.existsSync(maybeCachedDir)) return downloadVersion;
-
-      response = await fetch(
-        `https://unpkg.com/@types/node@${downloadVersion}/?meta`,
-      );
-    }
-
-    const { files: fileJson } = (await response.json()) as {
-      files: { path: string }[];
-    };
-    await Promise.all(
-      fileJson
-        .flatMap((item: { files?: { path: string }[]; path: string }) => {
-          return item.files ? item.files.map((f: any) => f.path) : item.path;
-        })
-        .filter((path: string) => path.endsWith('.d.ts'))
-        .map(async (path: string) => {
-          const res = await fetch(
-            `https://unpkg.com/@types/node@${downloadVersion}${path}`,
-          );
-          const text = await res.text();
-          fs.outputFileSync(`${dir}${path}`, text);
-        }),
-    );
-
-    return downloadVersion;
   }
 
   private async ensureElectronVersionIsCachedAt(version: string, file: string) {

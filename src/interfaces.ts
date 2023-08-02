@@ -235,3 +235,7 @@ export enum AppStateBroadcastMessageType {
   isDownloadingAll = 'isDownloadingAll',
   syncVersions = 'syncVersions',
 }
+
+export type NodeTypeDTS = `${string}.d.ts`;
+
+export type NodeTypes = Record<NodeTypeDTS, string>;
