@@ -123,10 +123,12 @@ describe('ElectronTypes', () => {
       await electronTypes.setVersion(localVersion);
       expect(addExtraLib).toHaveBeenCalledWith(oldTypes);
 
+      expect(disposable.dispose).not.toHaveBeenCalled();
       const newTypes = saveTypesFile('some changed types');
       expect(newTypes).not.toEqual(oldTypes);
       await waitFor(() => addExtraLib.mock.calls.length > 1);
       expect(addExtraLib).toHaveBeenCalledWith(newTypes);
+      expect(disposable.dispose).toHaveBeenCalledTimes(1);
     });
 
     it('stops watching old types files when the version changes', async () => {
