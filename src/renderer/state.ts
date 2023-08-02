@@ -815,11 +815,7 @@ export class AppState {
       ) {
         await this.installer.remove(version);
         if (this.installer.state(version) === InstallState.missing) {
-          const typeDefsCleaner = async () => {
-            window.ElectronFiddle.app.electronTypes.uncache(ver);
-          };
-
-          await typeDefsCleaner();
+          await window.ElectronFiddle.app.electronTypes.uncache(ver);
 
           this.broadcastVersionStates([ver]);
         }

@@ -2,23 +2,84 @@ import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
 import fetch from 'cross-fetch';
-import { IpcMainEvent, app } from 'electron';
+import { BrowserWindow, IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
+import watch from 'node-watch';
 import packageJson from 'package-json';
 import readdir from 'recursive-readdir';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
-import { NodeTypes } from '../interfaces';
+import { ELECTRON_DTS } from '../constants';
+import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
 let electronTypes: ElectronTypes;
 
 export class ElectronTypes {
+  private localPaths: Map<BrowserWindow, string>;
+  private watchers: Map<string, fs.FSWatcher>;
+
   constructor(
     private readonly knownVersions: ElectronVersions,
+    private readonly electronCacheDir: string,
     private readonly nodeCacheDir: string,
-  ) {}
+  ) {
+    this.localPaths = new Map();
+    this.watchers = new Map();
+  }
+
+  private getWindowsForLocalPath(localPath: string): BrowserWindow[] {
+    return Array.from(this.localPaths.entries())
+      .filter(([, path]) => path === localPath)
+      .map(([window]) => window);
+  }
+
+  public async getElectronTypes(
+    window: BrowserWindow,
+    ver: RunnableVersion,
+  ): Promise<string | undefined> {
+    const { localPath: dir, source, version } = ver;
+    let content: string | undefined;
+
+    // If it's a local development version, pull Electron types from out directory.
+    if (dir) {
+      const file = path.join(dir, 'gen/electron/tsc/typings', ELECTRON_DTS);
+      content = this.getTypesFromFile(file);
+      try {
+        this.unwatch(window);
+        this.localPaths.set(window, dir);
+
+        // If no watcher for that path yet, create it
+        if (!this.watchers.has(dir)) {
+          const watcher = watch(file, () => {
+            // Watcher should notify all windows watching that path
+            const windows = this.getWindowsForLocalPath(dir);
+            for (const window of windows) {
+              ipcMainManager.send(
+                IpcEvents.ELECTRON_TYPES_CHANGED,
+                [fs.readFileSync(file, 'utf8'), version],
+                window.webContents,
+              );
+            }
+          });
+          this.watchers.set(dir, watcher);
+        }
+        window.once('close', () => this.unwatch(window));
+      } catch (err) {
+        console.debug(`Unable to watch "${file}" for changes: ${err}`);
+      }
+    }
+
+    // If it's a published version, pull from cached file.
+    else if (source === VersionSource.remote) {
+      const file = this.getCacheFile(version);
+      await this.ensureElectronVersionIsCachedAt(version, file);
+      content = this.getTypesFromFile(file);
+    }
+
+    return content;
+  }
 
   public async getNodeTypes(
     version: string,
@@ -41,6 +102,11 @@ export class ElectronTypes {
     }
   }
 
+  public uncache(ver: RunnableVersion) {
+    if (ver.source === VersionSource.remote)
+      fs.removeSync(this.getCacheFile(ver.version));
+  }
+
   private async getTypesFromDir(dir: string): Promise<NodeTypes> {
     const types: NodeTypes = {};
 
@@ -60,8 +126,40 @@ export class ElectronTypes {
     return types;
   }
 
+  private getTypesFromFile(file: string): string | undefined {
+    try {
+      return fs.readFileSync(file, 'utf8');
+    } catch (err) {
+      console.debug(`Unable to read types from "${file}": ${err.message}`);
+      return undefined;
+    }
+  }
+
+  private getCacheFile(version: string) {
+    return path.join(this.electronCacheDir, version, ELECTRON_DTS);
+  }
+
   private getCacheDir(version: string) {
     return path.join(this.nodeCacheDir, version);
+  }
+
+  public unwatch(window: BrowserWindow) {
+    const localPath = this.localPaths.get(window);
+
+    if (localPath) {
+      this.localPaths.delete(window);
+
+      const windows = this.getWindowsForLocalPath(localPath);
+
+      // If it's the last window watching that path, close the watcher
+      if (!windows.length) {
+        const watcher = this.watchers.get(localPath);
+        if (watcher) {
+          watcher.close();
+        }
+        this.watchers.delete(localPath);
+      }
+    }
   }
 
   /**
@@ -123,6 +221,21 @@ export class ElectronTypes {
 
     return downloadVersion;
   }
+
+  private async ensureElectronVersionIsCachedAt(version: string, file: string) {
+    if (fs.existsSync(file)) return;
+
+    const name = version.includes('nightly') ? 'electron-nightly' : 'electron';
+    const url = `https://unpkg.com/${name}@${version}/${ELECTRON_DTS}`;
+    try {
+      const response = await fetch(url);
+      const text = await response.text();
+      if (text.includes('Cannot find package')) throw new Error(text);
+      fs.outputFileSync(file, text);
+    } catch (err) {
+      console.warn(`Error saving "${url}" to "${file}": ${err}`);
+    }
+  }
 }
 
 export async function setupTypes(knownVersions: ElectronVersions) {
@@ -130,13 +243,35 @@ export async function setupTypes(knownVersions: ElectronVersions) {
 
   electronTypes = new ElectronTypes(
     knownVersions,
+    path.join(userDataPath, 'electron-typedef'),
     path.join(userDataPath, 'nodejs-typedef'),
   );
 
   ipcMainManager.handle(
+    IpcEvents.GET_ELECTRON_TYPES,
+    (event: IpcMainEvent, ver: RunnableVersion) => {
+      return electronTypes.getElectronTypes(
+        BrowserWindow.fromWebContents(event.sender)!,
+        ver,
+      );
+    },
+  );
+  ipcMainManager.handle(
     IpcEvents.GET_NODE_TYPES,
     (_: IpcMainEvent, version: string) => {
       return electronTypes.getNodeTypes(version);
+    },
+  );
+  ipcMainManager.handle(
+    IpcEvents.UNCACHE_TYPES,
+    (_: IpcMainEvent, ver: RunnableVersion) => {
+      electronTypes.uncache(ver);
+    },
+  );
+  ipcMainManager.handle(
+    IpcEvents.UNWATCH_ELECTRON_TYPES,
+    (event: IpcMainEvent) => {
+      electronTypes.unwatch(BrowserWindow.fromWebContents(event.sender)!);
     },
   );
 }

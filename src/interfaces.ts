@@ -154,6 +154,7 @@ export type FiddleEvent =
   | 'before-quit'
   | 'bisect-task'
   | 'clear-console'
+  | 'electron-types-changed'
   | 'execute-monaco-command'
   | 'load-example'
   | 'load-gist'

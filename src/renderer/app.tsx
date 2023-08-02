@@ -1,8 +1,5 @@
-import * as path from 'node:path';
-
 import { autorun, reaction, when } from 'mobx';
 
-import { USER_DATA_PATH } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
@@ -42,10 +39,7 @@ export class App {
 
     this.taskRunner = new TaskRunner(this);
 
-    this.electronTypes = new ElectronTypes(
-      window.ElectronFiddle.monaco,
-      path.join(USER_DATA_PATH, 'electron-typedef'),
-    );
+    this.electronTypes = new ElectronTypes(window.ElectronFiddle.monaco);
   }
 
   private confirmReplaceUnsaved(): Promise<boolean> {

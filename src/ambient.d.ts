@@ -13,6 +13,7 @@ import {
   OutputEntry,
   PMOperationOptions,
   RunResult,
+  RunnableVersion,
   SelectedLocalVersion,
   TestRequest,
   Version,
@@ -72,6 +73,10 @@ declare global {
         type: 'toggle-monaco-option',
         listener: (path: string) => void,
       ): void;
+      addEventListener(
+        type: 'electron-types-changed',
+        listener: (types: string, version: string) => void,
+      ): void;
       addModules(
         { dir, packageManager }: PMOperationOptions,
         ...names: Array<string>
@@ -87,6 +92,7 @@ declare global {
       ): Promise<LoadedFiddleTheme>;
       fetchVersions(): Promise<Version[]>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
+      getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
       getIsPackageManagerInstalled(
         packageManager: IPackageManager,
         ignoreCache?: boolean,
@@ -128,6 +134,8 @@ declare global {
       showWindow(): void;
       taskDone(result: RunResult): void;
       themePath: string;
+      uncacheTypes(ver: RunnableVersion): Promise<void>;
+      unwatchElectronTypes(): Promise<void>;
     };
   }
 }
