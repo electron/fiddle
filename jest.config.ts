@@ -1,4 +1,6 @@
-module.exports = {
+import type { Config } from 'jest';
+
+const config: Config = {
   transform: {
     '\\.(ts|tsx)$': 'ts-jest',
   },
@@ -23,3 +25,5 @@ module.exports = {
     '\\.(css|less|scss)$': '<rootDir>/tests/mocks/styles.ts',
   },
 };
+
+export default config;
