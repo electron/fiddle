@@ -1,85 +1,43 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mocked } from 'jest-mock';
 
 import {
-  ElectronReleaseChannel,
   InstallState,
   RunnableVersion,
   VersionSource,
-} from '../../../src/interfaces';
+} from '../../src/interfaces';
 import {
   VersionSelect,
   filterItems,
   getItemIcon,
   getItemLabel,
   renderItem,
-} from '../../../src/renderer/components/version-select';
-import { AppState } from '../../../src/renderer/state';
-import { disableDownload } from '../../../src/renderer/utils/disable-download';
-import { StateMock, VersionsMock } from '../../mocks/mocks';
+} from '../../src/renderer/components/version-select';
+import { disableDownload } from '../../src/renderer/utils/disable-download';
+import { mockVersion1, prepareAppState } from '../test-utils/versions';
 
 const { downloading, installed, missing, installing } = InstallState;
-const { remote, local } = VersionSource;
+const { local } = VersionSource;
 
-jest.mock('../../../src/renderer/utils/disable-download.ts');
+jest.mock('../../src/renderer/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
-  let store: AppState;
+  function renderVersionSelect() {
+    const appState = prepareAppState();
 
-  const mockVersion1 = {
-    source: remote,
-    state: missing,
-    version: '1.0.0',
-  };
-
-  const mockVersion2 = {
-    source: remote,
-    state: missing,
-    version: '3.0.0-unsupported',
-  };
-
-  beforeEach(() => {
-    ({ state: store } = window.app);
-
-    const { mockVersions } = new VersionsMock();
-    (store as unknown as StateMock).initVersions('2.0.2', {
-      ...mockVersions,
-      '1.0.0': { ...mockVersion1 },
-      '3.0.0-unsupported': { ...mockVersion2 },
-    });
-    store.channelsToShow = [
-      ElectronReleaseChannel.stable,
-      ElectronReleaseChannel.beta,
-    ];
-  });
-
-  const onVersionSelect = () => ({});
-
-  it('renders', () => {
-    const wrapper = shallow(
+    return render(
       <VersionSelect
-        appState={store}
+        appState={appState}
         currentVersion={mockVersion1}
-        onVersionSelect={onVersionSelect}
+        onVersionSelect={jest.fn()}
       />,
     );
-    expect(wrapper).toMatchSnapshot();
-  });
+  }
 
   describe('renderItem()', () => {
-    it('renders an item', () => {
-      const item = renderItem(mockVersion1, {
-        handleClick: () => ({}),
-        index: 0,
-        modifiers: { active: true, disabled: false, matchesPredicate: true },
-        query: '',
-      });
-
-      expect(item).toMatchSnapshot();
-    });
-
     it('returns null if it does not match predicate', () => {
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
@@ -103,9 +61,9 @@ describe('VersionSelect component', () => {
         query: '',
       })!;
 
-      const ItemWrapper = shallow(item);
+      const { getAllByTestId } = render(item);
 
-      expect(ItemWrapper.find('.disabled-menu-tooltip')).toHaveLength(1);
+      expect(getAllByTestId('disabled-menu-item')).toHaveLength(1);
     });
 
     it('does not disable enabled download buttons when return value is false', () => {
@@ -118,9 +76,9 @@ describe('VersionSelect component', () => {
         query: '',
       })!;
 
-      const ItemWrapper = shallow(item);
+      const { queryAllByTestId } = render(item);
 
-      expect(ItemWrapper.exists('.disabled-menu-tooltip')).toBe(false);
+      expect(queryAllByTestId('disabled-menu-item')).toHaveLength(0);
     });
   });
 
@@ -231,6 +189,25 @@ describe('VersionSelect component', () => {
       ] as RunnableVersion[];
 
       expect(filterItems('nightly', versions)).toEqual(expected);
+    });
+  });
+
+  describe('renderVersionContextMenu()', () => {
+    it('copies the current version number to the clipboard', async () => {
+      const spy = jest
+        .spyOn(navigator.clipboard, 'writeText')
+        .mockImplementationOnce(jest.fn());
+
+      const { getByRole, getByText } = renderVersionSelect();
+
+      await userEvent.pointer({
+        keys: '[MouseRight]',
+        target: getByRole('button'),
+      });
+
+      await userEvent.click(getByText(/copy version number/i));
+
+      expect(spy).toHaveBeenCalledWith(mockVersion1.version);
     });
   });
 });
