@@ -8,7 +8,7 @@ const config: Config = {
   testEnvironmentOptions: {
     url: 'http://localhost',
   },
-  testMatch: ['**/rtl-spec/*.spec.*', '**/tests/**/*-spec.{ts,tsx}'],
+  testMatch: ['**/rtl-spec/**/*.spec.*', '**/tests/**/*-spec.{ts,tsx}'],
   resetMocks: true,
   bail: true,
   resetModules: true,
