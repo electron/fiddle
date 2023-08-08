@@ -10,4 +10,5 @@ export interface NodeTypesMock {
   integrity: string;
   lastModified: string;
   size: number;
+  files?: NodeTypesMock[];
 }

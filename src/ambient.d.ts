@@ -9,6 +9,7 @@ import {
   IPackageManager,
   InstallState,
   MessageOptions,
+  NodeTypes,
   OutputEntry,
   PMOperationOptions,
   RunResult,
@@ -96,6 +97,9 @@ declare global {
       getTestTemplate(): Promise<EditorValues>;
       getLatestStable(): SemVer | undefined;
       getLocalVersionState(ver: Version): InstallState;
+      getNodeTypes(
+        version: string,
+      ): Promise<{ version: string; types: NodeTypes } | undefined>;
       getOldestSupportedMajor(): number | undefined;
       getReleaseInfo(version: string): Promise<ReleaseInfo | undefined>;
       getReleasedVersions(): Array<Version>;

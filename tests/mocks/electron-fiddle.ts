@@ -17,6 +17,7 @@ export class ElectronFiddleMock {
   public getIsPackageManagerInstalled = jest.fn();
   public getLatestStable = jest.fn();
   public getLocalVersionState = jest.fn();
+  public getNodeTypes = jest.fn();
   public getOldestSupportedMajor = jest.fn();
   public getReleaseInfo = jest.fn();
   public getReleasedVersions = jest.fn();

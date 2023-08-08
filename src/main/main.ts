@@ -14,6 +14,7 @@ import { processCommandLine } from './command-line';
 import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
+import { setupTypes } from './electron-types';
 import { onFirstRunMaybe } from './first-run';
 import { ipcMainManager } from './ipc';
 import { setupNpm } from './npm';
@@ -59,9 +60,10 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
-  await setupVersions();
+  const knownVersions = await setupVersions();
   setupGetProjectName();
   setupGetUsername();
+  setupTypes(knownVersions);
 
   // Do this after setting everything up to ensure that
   // any IPC listeners are set up before they're used

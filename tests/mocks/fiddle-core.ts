@@ -13,3 +13,7 @@ export class FiddleRunnerMock {
     return this.child;
   };
 }
+
+export class ElectronVersionsMock {
+  public getReleaseInfo = jest.fn();
+}

@@ -59,6 +59,7 @@ export enum IpcEvents {
   GET_PROJECT_NAME = 'GET_PROJECT_NAME',
   GET_USERNAME = 'GET_USERNAME',
   PATH_EXISTS = 'PATH_EXISTS',
+  GET_NODE_TYPES = 'GET_NODE_TYPES',
 }
 
 export const ipcMainEvents = [
@@ -96,6 +97,7 @@ export const ipcMainEvents = [
   IpcEvents.GET_PROJECT_NAME,
   IpcEvents.GET_USERNAME,
   IpcEvents.PATH_EXISTS,
+  IpcEvents.GET_NODE_TYPES,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

@@ -1,12 +1,12 @@
 import * as path from 'node:path';
 
-import { ReleaseInfo } from '@electron/fiddle-core';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
 import * as tmp from 'tmp';
 
 import {
   InstallState,
+  NodeTypes,
   RunnableVersion,
   VersionSource,
 } from '../../src/interfaces';
@@ -36,11 +36,9 @@ describe('ElectronTypes', () => {
     });
 
     const electronCacheDir = path.join(tmpdir.name, 'electron-cache');
-    const nodeCacheDir = path.join(tmpdir.name, 'node-cache');
     const localDir = path.join(tmpdir.name, 'local');
 
     fs.ensureDirSync(electronCacheDir);
-    fs.ensureDirSync(nodeCacheDir);
     fs.ensureDirSync(localDir);
 
     monaco = new MonacoMock();
@@ -67,11 +65,7 @@ describe('ElectronTypes', () => {
     } as const;
     localFile = path.join(localDir, 'gen/electron/tsc/typings/electron.d.ts');
 
-    electronTypes = new ElectronTypes(
-      monaco as any,
-      electronCacheDir,
-      nodeCacheDir,
-    );
+    electronTypes = new ElectronTypes(monaco as any, electronCacheDir);
     nodeTypesData = require('../fixtures/node-types.json');
   });
 
@@ -83,7 +77,7 @@ describe('ElectronTypes', () => {
   function makeFetchSpy(text: string) {
     return jest.spyOn(global, 'fetch').mockResolvedValue({
       text: async () => text,
-      json: async () => ({ files: nodeTypesData }),
+      json: async () => ({}),
     } as Response);
   }
 
@@ -164,26 +158,25 @@ describe('ElectronTypes', () => {
     });
 
     it('fetches types', async () => {
-      mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue({
-        node: '16.2.0',
-      } as ReleaseInfo);
-
+      const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       const types = 'here are the types';
       const fetchSpy = makeFetchSpy(types);
+      mocked(window.ElectronFiddle.getNodeTypes).mockResolvedValue({
+        version: version.version,
+        types: nodeTypesData
+          .flatMap((entry) => (entry.files ? entry.files : entry))
+          .filter(({ path }) => path.endsWith('.d.ts')) as unknown as NodeTypes,
+      });
 
-      const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       await electronTypes.setVersion(version);
 
-      expect(fetchSpy).toHaveBeenCalledTimes(nodeTypesData.length + 1);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
       expect(fetchSpy).toHaveBeenCalledWith(
         expect.stringMatching('electron-nightly'),
       );
-
-      for (const file of nodeTypesData.filter(({ path }) =>
-        path.endsWith('.d.ts'),
-      )) {
-        expect(fetchSpy).toHaveBeenCalledWith(expect.stringMatching(file.path));
-      }
+      expect(window.ElectronFiddle.getNodeTypes).toHaveBeenCalledWith(
+        version.version,
+      );
 
       expect(addExtraLib).toHaveBeenCalledTimes(52);
       expect(addExtraLib).toHaveBeenCalledWith(types);
@@ -225,10 +218,10 @@ describe('ElectronTypes', () => {
       expect(addExtraLib).not.toHaveBeenCalled();
     });
 
-    it('does not crash if no release info', async () => {
-      mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue(undefined);
-
+    it('does not crash if types are not found', async () => {
+      mocked(window.ElectronFiddle.getNodeTypes).mockResolvedValue(undefined);
       await electronTypes.setVersion(remoteVersion);
+      expect(window.ElectronFiddle.getNodeTypes).toHaveBeenCalledTimes(1);
       expect(addExtraLib).not.toHaveBeenCalled();
     });
   });
