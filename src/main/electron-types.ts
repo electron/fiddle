@@ -48,7 +48,7 @@ export class ElectronTypes {
       const files = (await readdir(dir)).filter((f) => f.endsWith('.d.ts'));
 
       for (const file of files) {
-        types[path.relative(dir, file) as keyof NodeTypes] = fs.readFileSync(
+        types[path.relative(dir, file) as keyof NodeTypes] = await fs.readFile(
           file,
           'utf8',
         );
