@@ -64,7 +64,7 @@ export class App {
 
   public async replaceFiddle(
     editorValues: EditorValues,
-    { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
+    { localFiddle, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
     const { state } = this;
     const { editorMosaic } = state;
@@ -76,7 +76,7 @@ export class App {
     this.state.editorMosaic.set(editorValues);
 
     this.state.gistId = gistId || '';
-    this.state.localPath = filePath;
+    this.state.localPath = localFiddle?.filePath;
     this.state.templateName = templateName;
 
     // update menu when a new Fiddle is loaded
@@ -210,9 +210,12 @@ export class App {
    * @param {SetFiddleOptions} fiddle The fiddle to open
    */
   public async openFiddle(fiddle: SetFiddleOptions) {
-    const { filePath, gistId } = fiddle;
-    if (filePath) {
-      await this.fileManager.openFiddle(filePath);
+    const { localFiddle, gistId } = fiddle;
+    if (localFiddle) {
+      await this.fileManager.openFiddle(
+        localFiddle.filePath,
+        localFiddle.files,
+      );
     } else if (gistId) {
       await this.remoteLoader.fetchGistAndLoad(gistId);
     }

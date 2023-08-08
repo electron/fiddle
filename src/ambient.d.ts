@@ -49,11 +49,11 @@ declare global {
       ): void;
       addEventListener(
         type: 'open-fiddle',
-        listener: (filePath: string) => void,
+        listener: (filePath: string, files: Record<string, string>) => void,
       ): void;
       addEventListener(
         type: 'open-template',
-        listener: (name: string) => void,
+        listener: (name: string, editorValues: EditorValues) => void,
       ): void;
       addEventListener(
         type: 'save-fiddle',

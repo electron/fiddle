@@ -2,8 +2,8 @@ import * as path from 'node:path';
 
 import * as fs from 'fs-extra';
 
-import { ensureRequiredFiles, isSupportedFile } from './editor-utils';
-import { EditorId, EditorValues, PACKAGE_NAME } from '../interfaces';
+import { EditorId, EditorValues, PACKAGE_NAME } from '../../interfaces';
+import { ensureRequiredFiles, isSupportedFile } from '../../utils/editor-utils';
 
 /**
  * Reads a Fiddle from a directory.

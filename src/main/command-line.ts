@@ -4,6 +4,7 @@ import * as commander from 'commander';
 import * as fs from 'fs-extra';
 import getos from 'getos';
 
+import { openFiddle } from './file-manager';
 import { ipcMainManager } from './ipc';
 import { findProtocolArg } from './protocol';
 import {
@@ -15,7 +16,7 @@ import {
 import { IpcEvents } from '../ipc-events';
 import { getGistId } from '../utils/gist';
 
-function getSetup(opts: commander.OptionValues): SetupRequest {
+async function getSetup(opts: commander.OptionValues): Promise<SetupRequest> {
   const config: SetupRequest = {
     showChannels: [],
     hideChannels: [],
@@ -24,7 +25,8 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
   const { betas, fiddle, full, nightlies, obsolete, version } = opts;
 
   if (fs.existsSync(fiddle)) {
-    config.fiddle = { filePath: fiddle };
+    const files = await openFiddle(fiddle);
+    config.fiddle = { localFiddle: { filePath: fiddle, files } };
   } else {
     const gistId = getGistId(fiddle);
     if (gistId) {
@@ -110,7 +112,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
     if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
-      setup: getSetup(opts),
+      setup: await getSetup(opts),
       goodVersion: good,
       badVersion: bad,
     });
@@ -124,7 +126,7 @@ async function test(opts: commander.OptionValues) {
   try {
     if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
-      setup: getSetup(opts),
+      setup: await getSetup(opts),
     });
   } catch (err) {
     console.error(err);

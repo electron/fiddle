@@ -6,10 +6,10 @@ import * as fs from 'fs-extra';
 
 import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
+import { readFiddle } from './utils/read-fiddle';
 import { isReleasedMajor } from './versions';
 import { EditorValues } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { readFiddle } from '../utils/read-fiddle';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');

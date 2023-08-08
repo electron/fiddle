@@ -9,9 +9,11 @@ import { BlockableAccelerator } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
 import { setupMenu } from '../../src/main/menu';
+import { getTemplateValues } from '../../src/main/templates';
 import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
+jest.mock('../../src/main/templates');
 jest.mock('../../src/main/windows');
 jest.mock('../../src/main/ipc');
 
@@ -261,11 +263,13 @@ describe('menu', () => {
         showMe = menu[menu.length - 2];
       });
 
-      it('attempts to open a template on click', () => {
-        showMe.submenu[0].submenu[0].click();
+      it('attempts to open a template on click', async () => {
+        const editorValues = { 'main.js': 'foobar' };
+        mocked(getTemplateValues).mockResolvedValue(editorValues);
+        await showMe.submenu[0].submenu[0].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.FS_OPEN_TEMPLATE,
-          ['App'],
+          ['App', editorValues],
         );
       });
     });

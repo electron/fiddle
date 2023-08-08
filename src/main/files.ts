@@ -1,6 +1,7 @@
 import { app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
+import { openFiddle } from './file-manager';
 import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
@@ -31,7 +32,8 @@ export async function showOpenDialog() {
     return;
   }
   app.addRecentDocument(filePaths[0]);
-  ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [filePaths[0]]);
+  const files = await openFiddle(filePaths[0]);
+  ipcMainManager.send(IpcEvents.FS_OPEN_FIDDLE, [filePaths[0], files]);
 }
 
 /**

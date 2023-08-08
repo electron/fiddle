@@ -5,7 +5,6 @@ import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
 import { isSupportedFile } from '../../src/utils/editor-utils';
-import { readFiddle } from '../../src/utils/read-fiddle';
 import { AppMock, createEditorValues } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
@@ -17,17 +16,12 @@ jest.mock('tmp', () => ({
   })),
 }));
 
-jest.mock('../../src/utils/read-fiddle', () => ({
-  readFiddle: jest.fn(),
-}));
-
 describe('FileManager', () => {
   const editorValues = createEditorValues();
   let app: AppMock;
   let fm: FileManager;
 
   beforeEach(() => {
-    mocked(readFiddle).mockResolvedValue(editorValues);
     mocked(window.ElectronFiddle.getTemplateValues).mockResolvedValue(
       editorValues,
     );
@@ -38,12 +32,22 @@ describe('FileManager', () => {
     (app as unknown as App).fileManager = fm;
   });
 
+  it('replaces fiddle on an open-template event', () => {
+    const templateName = 'test';
+    emitEvent('open-template', templateName, editorValues);
+    expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
+      templateName,
+    });
+  });
+
   describe('openFiddle()', () => {
     const filePath = '/fake/path';
 
     it('opens a local fiddle', async () => {
-      const opts: SetFiddleOptions = { filePath };
-      await fm.openFiddle(filePath);
+      const opts: SetFiddleOptions = {
+        localFiddle: { filePath, files: editorValues },
+      };
+      await fm.openFiddle(filePath, editorValues);
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, opts);
     });
 
@@ -52,12 +56,12 @@ describe('FileManager', () => {
       expect(isSupportedFile(file));
       const content = '// content';
       const values = { ...editorValues, [file]: content };
-      mocked(readFiddle).mockResolvedValue(values);
       app.remoteLoader.confirmAddFile.mockResolvedValue(true);
 
-      await fm.openFiddle(filePath);
-      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
-      expect(app.replaceFiddle).toHaveBeenCalledWith(values, { filePath });
+      await fm.openFiddle(filePath, values);
+      expect(app.replaceFiddle).toHaveBeenCalledWith(values, {
+        localFiddle: { filePath, files: values },
+      });
     });
 
     it('respects the Electron version specified in package.json', async () => {
@@ -72,13 +76,11 @@ describe('FileManager', () => {
         ...editorValues,
         [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
       };
-      mocked(readFiddle).mockResolvedValue(values);
 
-      await fm.openFiddle(filePath);
+      await fm.openFiddle(filePath, values);
       expect(app.remoteLoader.setElectronVersion).toBeCalledWith('17.0.0');
-      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
-        filePath,
+        localFiddle: { filePath, files: values },
       });
     });
 
@@ -94,30 +96,28 @@ describe('FileManager', () => {
         ...editorValues,
         [PACKAGE_NAME]: JSON.stringify(pj, null, 2),
       };
-      mocked(readFiddle).mockResolvedValue(values);
 
-      await fm.openFiddle(filePath);
-      expect(readFiddle).toHaveBeenCalledWith(filePath, true);
+      await fm.openFiddle(filePath, values);
       expect(app.state.modules.get('meaning-of-life')).toBe('*');
       expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
-        filePath,
+        localFiddle: { filePath, files: values },
       });
     });
 
     it('runs it on an event', () => {
       fm.openFiddle = jest.fn();
-      emitEvent('open-fiddle');
+      emitEvent('open-fiddle', filePath, editorValues);
       expect(fm.openFiddle).toHaveBeenCalled();
     });
 
     it('does not do anything with incorrect inputs', async () => {
-      await fm.openFiddle({} as any);
+      await fm.openFiddle({} as any, [] as any);
       expect(app.replaceFiddle).not.toHaveBeenCalled();
     });
 
     it('does not do anything if cancelled', async () => {
       app.replaceFiddle.mockResolvedValueOnce(false);
-      await fm.openFiddle('/fake/path');
+      await fm.openFiddle('/fake/path', editorValues);
     });
   });
 
@@ -219,22 +219,6 @@ describe('FileManager', () => {
       }
 
       expect(errored).toBe(true);
-    });
-  });
-
-  describe('openTemplate()', () => {
-    it('attempts to open a template', async () => {
-      const templateName = 'test';
-      await fm.openTemplate(templateName);
-      expect(app.replaceFiddle).toHaveBeenCalledWith(editorValues, {
-        templateName,
-      });
-    });
-
-    it('runs openTemplate on an event', () => {
-      fm.openTemplate = jest.fn();
-      emitEvent('open-template');
-      expect(fm.openTemplate).toHaveBeenCalled();
     });
   });
 

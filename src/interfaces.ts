@@ -52,8 +52,13 @@ export const enum ElectronReleaseChannel {
   nightly = 'Nightly',
 }
 
+export interface SetLocalFiddleOptions {
+  filePath: string;
+  files: Record<string, string>;
+}
+
 export interface SetFiddleOptions {
-  filePath?: string;
+  localFiddle?: SetLocalFiddleOptions;
   templateName?: string;
   gistId?: string;
 }
