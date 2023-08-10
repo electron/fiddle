@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 import {
   WelcomeTour,
@@ -9,47 +10,58 @@ import {
 import { AppState } from '../../src/renderer/state';
 
 describe('Header component', () => {
-  let store: AppState;
+  let appState: AppState;
+
+  function renderWelcomeTour(appState: AppState) {
+    return render(<WelcomeTour appState={appState} />);
+  }
 
   beforeEach(() => {
-    ({ state: store } = window.app);
-    store.isTourShowing = true;
+    ({ state: appState } = window.app);
+    appState.isTourShowing = true;
   });
 
   it('renders', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { getByTestId } = renderWelcomeTour(appState);
+    expect(getByTestId('welcome-tour-dialog')).toBeInTheDocument();
   });
 
-  it('renders null if the tour is not showing', () => {
-    store.isTourShowing = false;
+  it('does not render if the tour is not showing', () => {
+    appState.isTourShowing = false;
 
-    const wrapper = shallow(<WelcomeTour appState={store} />);
-    expect(wrapper.html()).toBe(null);
+    const { queryByTestId } = renderWelcomeTour(appState);
+    expect(queryByTestId('welcome-tour-dialog')).not.toBeInTheDocument();
   });
 
-  it('renders the tour once started', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
-    const instance: any = wrapper.instance();
+  it('renders the tour once started', async () => {
+    const { getByText, getByTestId } = renderWelcomeTour(appState);
 
-    instance.startTour();
+    await userEvent.click(getByText(/show me around/i));
 
-    expect(wrapper.state('isTourStarted')).toBe(true);
-    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('tour')).toBeInTheDocument();
   });
 
-  it('stops the tour on stopTour()', () => {
-    const wrapper = shallow(<WelcomeTour appState={store} />);
-    const instance: any = wrapper.instance();
+  it('stops the tour on stopTour()', async () => {
+    (appState.disableTour as jest.Mock).mockImplementation(
+      () => (appState.isTourShowing = false),
+    );
 
-    instance.stopTour();
+    const { getByText, queryByTestId } = renderWelcomeTour(appState);
 
-    expect(wrapper.state('isTourStarted')).toBe(false);
-    expect(store.disableTour).toHaveBeenCalled();
+    await userEvent.click(getByText(/show me around/i));
+    await userEvent.click(getByText(/stop tour/i));
+
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    expect(appState.isTourShowing).toBe(false);
+
+    expect(queryByTestId('tour')).not.toBeInTheDocument();
+
+    expect(appState.disableTour).toHaveBeenCalled();
   });
 
   describe('getWelcomeTour()', () => {
-    it('offers custom buttons for the Electron step', () => {
+    it('offers custom buttons for the Electron step', async () => {
       const tourSteps = [...getWelcomeTour()];
       const electronStep = tourSteps.find(
         ({ name }) => name === 'first-time-electron',
@@ -57,10 +69,16 @@ describe('Header component', () => {
       const mockParam = { stop: jest.fn(), advance: jest.fn() };
       const buttons = electronStep!.getButtons!(mockParam);
 
-      shallow(buttons[0]).simulate('click');
+      const renderResultFirstButton = render(buttons[0]);
+      await userEvent.click(renderResultFirstButton.getByText(/i'm good!/i));
+
       expect(mockParam.stop).toHaveBeenCalled();
 
-      shallow(buttons[1]).simulate('click');
+      const renderResultSecondButton = render(buttons[1]);
+      await userEvent.click(
+        renderResultSecondButton.getByText(/electron basics/i),
+      );
+
       expect(mockParam.advance).toHaveBeenCalled();
     });
   });
