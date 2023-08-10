@@ -5,8 +5,8 @@ import { shallow } from 'enzyme';
 import {
   WelcomeTour,
   getWelcomeTour,
-} from '../../../src/renderer/components/tour-welcome';
-import { AppState } from '../../../src/renderer/state';
+} from '../../src/renderer/components/tour-welcome';
+import { AppState } from '../../src/renderer/state';
 
 describe('Header component', () => {
   let store: AppState;

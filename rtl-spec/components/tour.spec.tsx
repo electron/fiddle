@@ -3,8 +3,8 @@ import * as React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mocked } from 'jest-mock';
 
-import { Tour } from '../../../src/renderer/components/tour';
-import { overrideRendererPlatform } from '../../utils';
+import { Tour } from '../../src/renderer/components/tour';
+import { overrideRendererPlatform } from '../../tests/utils';
 
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
