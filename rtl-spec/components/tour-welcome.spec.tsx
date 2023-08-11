@@ -51,8 +51,6 @@ describe('Header component', () => {
     await userEvent.click(getByText(/show me around/i));
     await userEvent.click(getByText(/stop tour/i));
 
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
     expect(appState.isTourShowing).toBe(false);
 
     expect(queryByTestId('tour')).not.toBeInTheDocument();
