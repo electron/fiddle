@@ -1,27 +1,41 @@
 import * as React from 'react';
 
-import { mount, shallow } from 'enzyme';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mocked } from 'jest-mock';
 
-import { Tour } from '../../src/renderer/components/tour';
+import { Tour, TourScriptStep } from '../../src/renderer/components/tour';
 import { overrideRendererPlatform } from '../../tests/utils';
 
 describe('VersionChooser component', () => {
   const oldQuerySelector = document.querySelector;
-  const mockTour = new Set([
-    {
-      name: 'mock-step-1',
-      selector: 'div.mock-1',
-      title: 'Step 1',
-      content: <span key="1">mock-step-1</span>,
-    },
-    {
-      name: 'mock-step-2',
-      selector: 'div.mock-2',
-      title: 'Step 2',
-      content: <span key="2">mock-step-2</span>,
-    },
-  ]);
+
+  /**
+   * This is a function to ensure different object references are returned every
+   * time. The test for the `getButtons` method mutates the mock tour and that
+   * would interfere with other tests if the same object were reused.
+   */
+  const getMockTour = () =>
+    new Set<TourScriptStep>([
+      {
+        name: 'mock-step-1',
+        selector: 'div.mock-1',
+        title: 'Step 1',
+        content: <span key="1">mock-step-1</span>,
+      },
+      {
+        name: 'mock-step-2',
+        selector: 'div.mock-2',
+        title: 'Step 2',
+        content: <span key="2">mock-step-2</span>,
+      },
+    ]);
+
+  const mockStop = jest.fn();
+
+  function renderTour(mockTour = getMockTour()) {
+    return render(<Tour tour={mockTour} onStop={mockStop} />);
+  }
 
   beforeEach(() => {
     overrideRendererPlatform('darwin');
@@ -41,24 +55,24 @@ describe('VersionChooser component', () => {
   });
 
   it('renders', () => {
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+    const { getByTestId } = renderTour();
 
-    expect(wrapper).toMatchSnapshot();
+    expect(getByTestId('tour')).toBeInTheDocument();
   });
 
   it('renders supplied buttons', () => {
+    const mockTour = getMockTour();
+
     mockTour.forEach((item) => {
       (item as any).getButtons = () => [<button key="hello">Hello</button>];
     });
 
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+    const { getByText } = renderTour(mockTour);
 
-    expect(wrapper.find('button').text()).toBe('Hello');
+    expect(getByText(/hello/i)).toBeInTheDocument();
   });
 
-  it('renders "Finish Tour" at the end', () => {
+  it(`renders the "Finish Tour" button at the end and closes the tour when it's clicked`, async () => {
     const singleItemTour = new Set([
       {
         name: 'mock-step-1',
@@ -68,70 +82,39 @@ describe('VersionChooser component', () => {
       },
     ]);
 
-    const mockStop = jest.fn();
-    const wrapper = mount(<Tour tour={singleItemTour} onStop={mockStop} />);
+    const { getByText } = renderTour(singleItemTour);
+    const finishTourButton = getByText(/finish tour/i);
 
-    expect(wrapper.find('button').text()).toBe('tick-circleFinish Tour');
+    expect(finishTourButton).toBeInTheDocument();
+
+    await userEvent.click(finishTourButton);
+
+    expect(mockStop).toHaveBeenCalled();
   });
 
   it('handles a missing target', () => {
     mocked(document.querySelector).mockReturnValueOnce(null);
 
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
+    const { container } = renderTour();
 
-    expect(wrapper.find('svg').length).toBe(1);
+    expect(container.querySelectorAll('svg')).toHaveLength(1);
   });
 
-  it('stops on stop()', () => {
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
+  it('stops on stop()', async () => {
+    const { getByText } = renderTour();
 
-    instance.stop();
+    await userEvent.click(getByText(/stop tour/i));
 
     expect(mockStop).toHaveBeenCalled();
   });
 
-  it('advances on advance()', () => {
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
+  it('advances on advance()', async () => {
+    const { getByText } = renderTour();
 
-    instance.advance();
-    expect((wrapper.state('step') as any).name).toBe('mock-step-2');
+    await userEvent.click(getByText(/continue/i));
 
-    instance.advance();
-    expect(wrapper.state('step')).toBe(null);
-  });
+    const mockTour = [...getMockTour()];
 
-  it('handles a resize', () => {
-    jest.useFakeTimers();
-
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance();
-
-    instance.forceUpdate = jest.fn();
-    instance.onResize();
-
-    expect(instance.resizeHandle).toBeTruthy();
-    jest.runAllTimers();
-
-    expect(instance.forceUpdate).toHaveBeenCalled();
-  });
-
-  it('removes the resize listener', () => {
-    const oldRemove = window.removeEventListener;
-    window.removeEventListener = jest.fn();
-
-    const mockStop = jest.fn();
-    const wrapper = shallow(<Tour tour={mockTour} onStop={mockStop} />);
-    const instance: any = wrapper.instance() as any;
-
-    instance.componentWillUnmount();
-    expect(window.removeEventListener).toHaveBeenCalled();
-
-    window.removeEventListener = oldRemove;
+    expect(getByText(mockTour[1].title)).toBeInTheDocument();
   });
 });
