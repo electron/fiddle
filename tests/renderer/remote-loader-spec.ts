@@ -22,7 +22,7 @@ import { FetchMock } from '../utils';
 
 jest.mock('../../src/renderer/utils/octokit');
 
-type GistFile = { content: string };
+type GistFile = { content: string; truncated?: boolean; raw_url?: string };
 type GistFiles = { [id: string]: GistFile };
 
 describe('RemoteLoader', () => {
@@ -163,6 +163,29 @@ describe('RemoteLoader', () => {
       expect(result).toBe(true);
       expect(store.modules.size).toEqual(0);
       expect(store.setVersion).toBeCalledWith('17.0.0');
+    });
+
+    it('handles gists with files over 1mb', async () => {
+      const gistId = 'toobig';
+
+      mockGistFiles['index.js'] = {
+        truncated: true,
+        content: JSON.stringify('hello im huge', null, 2),
+        raw_url: 'https://gist.githubusercontent.com/IMTOOBIG',
+      };
+
+      jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
+        Promise.resolve({
+          text: () => Promise.resolve('hello im huge'),
+        } as Response),
+      );
+
+      mocked(getOctokit).mockResolvedValue({
+        gists: mockGetGists,
+      } as unknown as Octokit);
+
+      const result = await instance.fetchGistAndLoad(gistId);
+      expect(result).toBe(true);
     });
 
     it('does not set an invalid Electron version from package.json', async () => {
