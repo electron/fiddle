@@ -35,6 +35,27 @@ export class ElectronTypes {
       .map(([window]) => window);
   }
 
+  private notifyElectronTypesChanged(
+    dir: string,
+    file: string,
+    version: string,
+  ) {
+    try {
+      const content = fs.readFileSync(file, 'utf8');
+
+      // Notify all windows watching that path
+      for (const window of this.getWindowsForLocalPath(dir)) {
+        ipcMainManager.send(
+          IpcEvents.ELECTRON_TYPES_CHANGED,
+          [content, version],
+          window.webContents,
+        );
+      }
+    } catch (err) {
+      console.debug(`Unable to read types from "${file}": ${err.message}`);
+    }
+  }
+
   public async getElectronTypes(
     window: BrowserWindow,
     ver: RunnableVersion,
@@ -52,17 +73,9 @@ export class ElectronTypes {
 
         // If no watcher for that path yet, create it
         if (!this.watchers.has(dir)) {
-          const watcher = watch(file, () => {
-            // Watcher should notify all windows watching that path
-            const windows = this.getWindowsForLocalPath(dir);
-            for (const window of windows) {
-              ipcMainManager.send(
-                IpcEvents.ELECTRON_TYPES_CHANGED,
-                [fs.readFileSync(file, 'utf8'), version],
-                window.webContents,
-              );
-            }
-          });
+          const watcher = watch(file, () =>
+            this.notifyElectronTypesChanged(dir, file, version),
+          );
           this.watchers.set(dir, watcher);
         }
         window.once('close', () => this.unwatch(window));
