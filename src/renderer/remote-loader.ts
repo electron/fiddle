@@ -125,8 +125,11 @@ export class RemoteLoader {
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
+        const content = data.truncated
+          ? await fetch(data.raw_url).then((r) => r.text())
+          : data.content;
         if (id === PACKAGE_NAME) {
-          const { dependencies, devDependencies } = JSON.parse(data.content);
+          const { dependencies, devDependencies } = JSON.parse(content);
           const deps: Record<string, string> = {
             ...dependencies,
             ...devDependencies,
@@ -177,7 +180,7 @@ export class RemoteLoader {
         if (!isSupportedFile(id)) continue;
 
         if (isKnownFile(id) || (await this.confirmAddFile(id))) {
-          values[id] = data.content;
+          values[id] = content;
         }
       }
 
