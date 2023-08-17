@@ -167,25 +167,28 @@ describe('RemoteLoader', () => {
 
     it('handles gists with files over 1mb', async () => {
       const gistId = 'toobig';
+      const filename = 'index.js';
+      const content = 'hello im huge';
 
-      mockGistFiles['index.js'] = {
+      editorValues[filename] = content;
+      mockGistFiles[filename] = {
         truncated: true,
-        content: JSON.stringify('hello im huge', null, 2),
+        content: 'truncated',
         raw_url: 'https://gist.githubusercontent.com/IMTOOBIG',
       };
 
-      jest.spyOn(global, 'fetch').mockImplementationOnce(() =>
-        Promise.resolve({
-          text: () => Promise.resolve('hello im huge'),
-        } as Response),
-      );
+      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+        text: () => Promise.resolve(content),
+      } as Response);
 
       mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
+      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
       expect(result).toBe(true);
+      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
     it('does not set an invalid Electron version from package.json', async () => {
