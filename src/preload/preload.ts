@@ -9,6 +9,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'before-quit': IpcEvents.BEFORE_QUIT,
   'bisect-task': IpcEvents.TASK_BISECT,
   'clear-console': IpcEvents.CLEAR_CONSOLE,
+  'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,
@@ -78,6 +79,10 @@ export async function setupFiddleGlobal() {
     },
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
+    },
+    getElectronTypes(ver) {
+      // Destructure ver into a copy, as the object sometimes can't be cloned
+      return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, { ...ver });
     },
     getLatestStable() {
       return ipcRenderer.sendSync(IpcEvents.GET_LATEST_STABLE);
@@ -181,6 +186,13 @@ export async function setupFiddleGlobal() {
       ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
     themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
+    async uncacheTypes(ver) {
+      // Destructure ver into a copy, as the object sometimes can't be cloned
+      await ipcRenderer.invoke(IpcEvents.UNCACHE_TYPES, { ...ver });
+    },
+    async unwatchElectronTypes() {
+      await ipcRenderer.invoke(IpcEvents.UNWATCH_ELECTRON_TYPES);
+    },
   };
 }
 

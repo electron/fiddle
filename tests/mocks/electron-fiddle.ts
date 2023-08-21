@@ -14,6 +14,7 @@ export class ElectronFiddleMock {
   public createThemeFile = jest.fn();
   public fetchVersions = jest.fn();
   public getAvailableThemes = jest.fn();
+  public getElectronTypes = jest.fn();
   public getIsPackageManagerInstalled = jest.fn();
   public getLatestStable = jest.fn();
   public getLocalVersionState = jest.fn();
@@ -45,4 +46,6 @@ export class ElectronFiddleMock {
   public taskDone = jest.fn();
   public readThemeFile = jest.fn();
   public themePath = '~/.electron-fiddle/themes';
+  public uncacheTypes = jest.fn();
+  public unwatchElectronTypes = jest.fn();
 }

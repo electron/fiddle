@@ -1,8 +1,4 @@
-import * as path from 'node:path';
-
-import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
-import * as tmp from 'tmp';
 
 import {
   InstallState,
@@ -12,35 +8,19 @@ import {
 } from '../../src/interfaces';
 import { ElectronTypes } from '../../src/renderer/electron-types';
 import { MonacoMock, NodeTypesMock } from '../mocks/mocks';
-import { waitFor } from '../utils';
-
-jest.unmock('fs-extra');
+import { emitEvent, waitFor } from '../utils';
 
 describe('ElectronTypes', () => {
   const version = '10.11.12';
   let addExtraLib: ReturnType<typeof jest.fn>;
-  let cacheFile: string;
-  let localFile: string;
   let localVersion: RunnableVersion;
   let monaco: MonacoMock;
   let remoteVersion: RunnableVersion;
-  let tmpdir: tmp.DirResult;
   let electronTypes: ElectronTypes;
   let nodeTypesData: NodeTypesMock[];
   let disposable: { dispose: typeof jest.fn };
 
   beforeEach(() => {
-    tmpdir = tmp.dirSync({
-      template: 'electron-fiddle-typedefs-XXXXXX',
-      unsafeCleanup: true,
-    });
-
-    const electronCacheDir = path.join(tmpdir.name, 'electron-cache');
-    const localDir = path.join(tmpdir.name, 'local');
-
-    fs.ensureDirSync(electronCacheDir);
-    fs.ensureDirSync(localDir);
-
     monaco = new MonacoMock();
     ({ addExtraLib } = monaco.languages.typescript.javascriptDefaults);
     disposable = { dispose: jest.fn() };
@@ -51,35 +31,21 @@ describe('ElectronTypes', () => {
       state: InstallState.installed,
       source: VersionSource.remote,
     } as const;
-    cacheFile = path.join(
-      electronCacheDir,
-      remoteVersion.version,
-      'electron.d.ts',
-    );
 
     localVersion = {
       version,
-      localPath: localDir,
+      localPath: '/foo/bar/',
       state: InstallState.installed,
       source: VersionSource.local,
     } as const;
-    localFile = path.join(localDir, 'gen/electron/tsc/typings/electron.d.ts');
 
-    electronTypes = new ElectronTypes(monaco as any, electronCacheDir);
+    electronTypes = new ElectronTypes(monaco as any);
     nodeTypesData = require('../fixtures/node-types.json');
   });
 
   afterEach(async () => {
     await electronTypes.setVersion();
-    tmpdir.removeCallback();
   });
-
-  function makeFetchSpy(text: string) {
-    return jest.spyOn(global, 'fetch').mockResolvedValue({
-      text: async () => text,
-      json: async () => ({}),
-    } as Response);
-  }
 
   describe('setVersion({ source: local })', () => {
     const missingLocalVersion = {
@@ -89,20 +55,17 @@ describe('ElectronTypes', () => {
       source: VersionSource.local,
     } as const;
 
-    function saveTypesFile(content: string) {
-      fs.outputFileSync(localFile, content);
-      return content;
-    }
-
     it('gives types to monaco', async () => {
-      const types = saveTypesFile('some types');
+      const types = 'some types';
+      mocked(window.ElectronFiddle.getElectronTypes).mockResolvedValue(types);
       await electronTypes.setVersion(localVersion);
       expect(addExtraLib).toHaveBeenCalledWith(types);
     });
 
     it('disposes the previous monaco content', async () => {
       // setup: call setVersion once to get some content into monaco
-      const types = saveTypesFile('some types');
+      const types = 'some types';
+      mocked(window.ElectronFiddle.getElectronTypes).mockResolvedValue(types);
       await electronTypes.setVersion(localVersion);
       expect(addExtraLib).toHaveBeenCalledWith(types);
       expect(disposable.dispose).not.toHaveBeenCalled();
@@ -113,12 +76,16 @@ describe('ElectronTypes', () => {
     });
 
     it('watches for the types file to be updated', async () => {
-      const oldTypes = saveTypesFile('some types');
+      const oldTypes = 'some types';
+      mocked(window.ElectronFiddle.getElectronTypes).mockResolvedValue(
+        oldTypes,
+      );
       await electronTypes.setVersion(localVersion);
       expect(addExtraLib).toHaveBeenCalledWith(oldTypes);
 
       expect(disposable.dispose).not.toHaveBeenCalled();
-      const newTypes = saveTypesFile('some changed types');
+      const newTypes = 'some changed types';
+      emitEvent('electron-types-changed', newTypes);
       expect(newTypes).not.toEqual(oldTypes);
       await waitFor(() => addExtraLib.mock.calls.length > 1);
       expect(addExtraLib).toHaveBeenCalledWith(newTypes);
@@ -127,7 +94,8 @@ describe('ElectronTypes', () => {
 
     it('stops watching old types files when the version changes', async () => {
       // set to version A
-      let types = saveTypesFile('some types');
+      const types = 'some types';
+      mocked(window.ElectronFiddle.getElectronTypes).mockResolvedValue(types);
       await electronTypes.setVersion(localVersion);
       expect(addExtraLib).toHaveBeenCalledWith(types);
 
@@ -137,7 +105,6 @@ describe('ElectronTypes', () => {
 
       // test that updating the now-unobserved version A triggers no actions
       addExtraLib.mockReset();
-      types = saveTypesFile('some changed types');
       try {
         await waitFor(() => addExtraLib.mock.calls.length > 0);
       } catch (err) {
@@ -157,10 +124,10 @@ describe('ElectronTypes', () => {
       addExtraLib.mockReturnValue({ dispose: jest.fn() });
     });
 
-    it('fetches types', async () => {
+    it('gets types', async () => {
       const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       const types = 'here are the types';
-      const fetchSpy = makeFetchSpy(types);
+      mocked(window.ElectronFiddle.getElectronTypes).mockResolvedValue(types);
       mocked(window.ElectronFiddle.getNodeTypes).mockResolvedValue({
         version: version.version,
         types: nodeTypesData
@@ -170,9 +137,8 @@ describe('ElectronTypes', () => {
 
       await electronTypes.setVersion(version);
 
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        expect.stringMatching('electron-nightly'),
+      expect(window.ElectronFiddle.getElectronTypes).toHaveBeenCalledWith(
+        version,
       );
       expect(window.ElectronFiddle.getNodeTypes).toHaveBeenCalledWith(
         version.version,
@@ -180,42 +146,6 @@ describe('ElectronTypes', () => {
 
       expect(addExtraLib).toHaveBeenCalledTimes(52);
       expect(addExtraLib).toHaveBeenCalledWith(types);
-    });
-
-    it('caches fetched types', async () => {
-      expect(fs.existsSync(cacheFile)).toBe(false);
-
-      // setup: fetch and cache a .d.ts that we did not have
-      const types = 'here are the types';
-      const fetchSpy = makeFetchSpy(types);
-      await electronTypes.setVersion(remoteVersion);
-      expect(addExtraLib).toHaveBeenCalledTimes(1);
-      expect(addExtraLib).toHaveBeenLastCalledWith(types);
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-      expect(fs.existsSync(cacheFile)).toBe(true);
-
-      // test re-using the same version does not trigger another fetch
-      // (i.e. the types are cached locally)
-      await electronTypes.setVersion(remoteVersion);
-      expect(addExtraLib).toHaveBeenCalledTimes(2);
-      expect(addExtraLib).toHaveBeenLastCalledWith(types);
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-    });
-
-    it('does not crash if fetch() rejects', async () => {
-      const spy = jest
-        .spyOn(global, 'fetch')
-        .mockRejectedValue(new Error('💩'));
-      await electronTypes.setVersion(remoteVersion);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(addExtraLib).not.toHaveBeenCalled();
-    });
-
-    it('does not crash if fetch() does not find the package', async () => {
-      const spy = makeFetchSpy('Cannot find package');
-      await electronTypes.setVersion(remoteVersion);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(addExtraLib).not.toHaveBeenCalled();
     });
 
     it('does not crash if types are not found', async () => {
@@ -227,25 +157,15 @@ describe('ElectronTypes', () => {
   });
 
   describe('uncache()', () => {
-    beforeEach(async () => {
-      // setup: fetch and cache some types
-      expect(fs.existsSync(cacheFile)).toBe(false);
-      const types = 'here are the types';
-      makeFetchSpy(types);
-      await electronTypes.setVersion(remoteVersion);
+    it('uncaches remote versions', async () => {
+      await electronTypes.uncache(remoteVersion);
+      expect(window.ElectronFiddle.uncacheTypes).toHaveBeenCalled();
     });
 
-    it('uncaches fetched types', () => {
-      expect(fs.existsSync(cacheFile)).toBe(true);
-      electronTypes.uncache(remoteVersion);
-      expect(fs.existsSync(cacheFile)).toBe(false);
-    });
-
-    it('does not touch local builds', () => {
-      expect(fs.existsSync(cacheFile)).toBe(true);
+    it('does not uncache local versions', async () => {
       const version = { ...remoteVersion, source: VersionSource.local };
-      electronTypes.uncache(version);
-      expect(fs.existsSync(cacheFile)).toBe(true);
+      await electronTypes.uncache(version);
+      expect(window.ElectronFiddle.uncacheTypes).not.toHaveBeenCalled();
     });
   });
 });
