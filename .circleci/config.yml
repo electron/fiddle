@@ -9,7 +9,7 @@ commands:
     steps:
       - run: git config --global core.autocrlf input
       - node/install:
-          node-version: 18.17
+          node-version: '18.17'
       - checkout
       - restore_cache:
           keys:
