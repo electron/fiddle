@@ -2,7 +2,6 @@ version: 2.1
 
 orbs:
   node: electronjs/node@1.2.0
-  win: circleci/windows@5.0.0
 
 commands:
   install:
@@ -47,9 +46,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64' ]
-    macos:
-      xcode: '13.4.0'
-    resource_class: macos.x86.medium.gen2
+    executor: node/macos
     steps:
       - install
       - test
@@ -58,9 +55,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64', 'ia32' ]
-    executor:
-      name: win/default
-      shell: bash.exe
+    executor: node/windows
     steps:
       - install
       - test
@@ -69,8 +64,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
-    docker:
-      - image: cimg/base:stable
+    executor: node/linux
     steps:
       - install
       - test
@@ -79,9 +73,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64' ]
-    macos:
-      xcode: '13.4.0'
-    resource_class: macos.x86.medium.gen2
+    executor: node/macos
     steps:
       - install
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
@@ -99,9 +91,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64', 'ia32' ]
-    executor:
-      name: win/default
-      shell: bash.exe
+    executor: node/windows
     steps:
       - install
       - run:
@@ -122,8 +112,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
-    docker:
-      - image: cimg/base:stable
+    executor: node/linux
     steps:
       - run: sudo apt-get update && sudo apt install rpm squashfs-tools
       - install
