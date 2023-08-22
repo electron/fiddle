@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 import { app } from 'electron';
 
-import { openFiddle } from './file-manager';
+import { openFiddle } from './files';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
 import { getOrCreateMainWindow } from './windows';

@@ -1,8 +1,8 @@
 import { IpcMainEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
-import { openFiddle } from './file-manager';
 import { ipcMainManager } from './ipc';
+import { readFiddle } from './utils/read-fiddle';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -99,6 +99,16 @@ async function confirmFileOverwrite(filePath: string): Promise<boolean> {
     // Let's not overwrite files. We'd rather crash.
     throw error;
   }
+}
+
+/**
+ * Tries to open a fiddle.
+ */
+export async function openFiddle(
+  filePath: string,
+): Promise<Record<string, string>> {
+  console.log(`openFiddle: Asked to open`, filePath);
+  return readFiddle(filePath, true);
 }
 
 /**
