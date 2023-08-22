@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.1.0
+  node: electronjs/node@1.2.0
   win: circleci/windows@5.0.0
 
 commands:
@@ -9,19 +9,12 @@ commands:
     steps:
       - run: git config --global core.autocrlf input
       - node/install:
-          # NOTE: nvm-windows only supports proper semver strings
-          # we could omit the patch release whenever we have 1.1.0:
-          # https://github.com/coreybutler/nvm-windows/releases/tag/1.1.10
-          # This is the file to check:
-          # https://github.com/CircleCI-Public/ansible/blob/main/roles/windows-executor/defaults/main/install_dev_tools_defaults.yml#L13
-          node-version: '18.17.0'
-      - run: nvm use 18.17.0
+          node-version: 18.17
       - checkout
       - restore_cache:
           keys:
             - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
             - v1-dependencies-{{ arch }}
-      - run: npm install --global yarn
       - run: yarn install --frozen-lockfile
       - run: yarn run contributors
       - run: yarn run electron-releases
