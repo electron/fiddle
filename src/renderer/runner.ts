@@ -149,7 +149,6 @@ export class Runner {
    * @memberof Runner
    */
   public async run(): Promise<RunResult> {
-    const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
     const { appState } = this;
@@ -188,7 +187,7 @@ export class Runner {
       appState.pushError('Could not install modules', error.message);
       appState.isInstallingModules = false;
 
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -206,7 +205,7 @@ export class Runner {
       message += `before running the fiddle.`;
 
       appState.pushOutput(message, { isNotPre: true });
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -394,7 +393,7 @@ export class Runner {
       this.child = null;
 
       // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       await this.deleteUserData();
     };
 
@@ -500,6 +499,6 @@ export class Runner {
     const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.app.fileManager.cleanup(appData);
+    await window.ElectronFiddle.cleanupDirectory(appData);
   }
 }

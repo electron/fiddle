@@ -1,4 +1,4 @@
-import { app, dialog } from 'electron';
+import { IpcMainEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
 import { openFiddle } from './file-manager';
@@ -16,6 +16,10 @@ export function setupFileListeners() {
   ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => {
     showSaveDialog();
   });
+  ipcMainManager.handle(
+    IpcEvents.CLEANUP_DIRECTORY,
+    (_: IpcMainEvent, dir: string) => cleanupDirectory(dir),
+  );
 }
 
 /**
@@ -95,4 +99,23 @@ async function confirmFileOverwrite(filePath: string): Promise<boolean> {
     // Let's not overwrite files. We'd rather crash.
     throw error;
   }
+}
+
+/**
+ * Attempts to clean a given directory. Used to manually
+ * clean temp directories.
+ */
+export async function cleanupDirectory(dir?: string): Promise<boolean> {
+  if (dir) {
+    if (fs.existsSync(dir)) {
+      try {
+        await fs.remove(dir);
+        return true;
+      } catch (error) {
+        console.warn(`cleanupDirectory: Failed to clean directory`, error);
+      }
+    }
+  }
+
+  return false;
 }

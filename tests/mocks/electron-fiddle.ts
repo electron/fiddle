@@ -10,6 +10,7 @@ export class ElectronFiddleMock {
   };
   public arch = process.arch;
   public blockAccelerators = jest.fn();
+  public cleanupDirectory = jest.fn();
   public confirmQuit = jest.fn();
   public createThemeFile = jest.fn();
   public fetchVersions = jest.fn();

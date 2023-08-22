@@ -64,6 +64,7 @@ export enum IpcEvents {
   GET_ELECTRON_TYPES = 'GET_ELECTRON_TYPES',
   UNWATCH_ELECTRON_TYPES = 'UNWATCH_ELECTRON_TYPES',
   GET_NODE_TYPES = 'GET_NODE_TYPES',
+  CLEANUP_DIRECTORY = 'CLEANUP_DIRECTORY',
 }
 
 export const ipcMainEvents = [
@@ -104,6 +105,7 @@ export const ipcMainEvents = [
   IpcEvents.GET_ELECTRON_TYPES,
   IpcEvents.UNWATCH_ELECTRON_TYPES,
   IpcEvents.GET_NODE_TYPES,
+  IpcEvents.CLEANUP_DIRECTORY,
 ];
 
 export const WEBCONTENTS_READY_FOR_IPC_SIGNAL =

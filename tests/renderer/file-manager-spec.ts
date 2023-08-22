@@ -224,35 +224,6 @@ describe('FileManager', () => {
     });
   });
 
-  describe('cleanup()', () => {
-    it('attempts to remove a directory if it exists', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(true);
-
-      const result = await fm.cleanup('/fake/dir');
-
-      expect(fs.remove).toHaveBeenCalled();
-      expect(result).toBe(true);
-    });
-
-    it('does not attempt to remove a directory if it does not exists', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(false);
-
-      const result = await fm.cleanup('/fake/dir');
-
-      expect(fs.remove).toHaveBeenCalledTimes(0);
-      expect(result).toBe(false);
-    });
-
-    it('handles an error', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(true);
-      (fs.remove as jest.Mock).mockRejectedValueOnce('bwapbwap');
-
-      const result = await fm.cleanup('/fake/dir');
-
-      expect(result).toBe(false);
-    });
-  });
-
   describe('getFiles()', () => {
     let expected: Files;
 
