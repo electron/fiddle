@@ -293,8 +293,6 @@ export class Runner {
       return false;
     }
 
-    const { shell } = await import('electron');
-    shell.showItemInFolder(path.join(dir, 'out'));
     return true;
   }
 

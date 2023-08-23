@@ -1,4 +1,6 @@
-import { IpcMainEvent } from 'electron';
+import * as path from 'node:path';
+
+import { IpcMainEvent, shell } from 'electron';
 
 import { ipcMainManager } from './ipc';
 import { exec } from './utils/exec';
@@ -77,11 +79,15 @@ export async function addModules(
  * @param {string} command
  * @returns {Promise<string>}
  */
-export function packageRun(
+export async function packageRun(
   { dir, packageManager }: PMOperationOptions,
   command: string,
 ): Promise<string> {
-  return exec(dir, `${packageManager} run ${command}`);
+  const result = await exec(dir, `${packageManager} run ${command}`);
+
+  shell.showItemInFolder(path.join(dir, 'out'));
+
+  return result;
 }
 
 export async function setupNpm() {
