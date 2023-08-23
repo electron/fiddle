@@ -21,6 +21,7 @@ import {
 
 export class FileManager {
   constructor(private readonly appState: AppState) {
+    this.getFiles = this.getFiles.bind(this);
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
@@ -49,6 +50,8 @@ export class FileManager {
     window.ElectronFiddle.addEventListener('save-fiddle-forge', (filePath) => {
       this.saveFiddle(filePath, ['dotfiles', 'forge']);
     });
+
+    window.ElectronFiddle.onGetFiles(this.getFiles);
   }
 
   /**

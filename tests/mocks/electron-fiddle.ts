@@ -31,6 +31,7 @@ export class ElectronFiddleMock {
   public getUsername = jest.fn();
   public macTitlebarClicked = jest.fn();
   public monaco = new MonacoMock();
+  public onGetFiles = jest.fn();
   public openThemeFolder = jest.fn();
   public packageRun = jest.fn();
   public platform = process.platform;
