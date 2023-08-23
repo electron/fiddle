@@ -94,6 +94,7 @@ declare global {
         newTheme: FiddleTheme,
         name?: string,
       ): Promise<LoadedFiddleTheme>;
+      deleteUserData(name: string): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;

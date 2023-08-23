@@ -13,6 +13,7 @@ export class ElectronFiddleMock {
   public cleanupDirectory = jest.fn();
   public confirmQuit = jest.fn();
   public createThemeFile = jest.fn();
+  public deleteUserData = jest.fn();
   public fetchVersions = jest.fn();
   public getAvailableThemes = jest.fn();
   public getElectronTypes = jest.fn();
