@@ -1,5 +1,3 @@
-import * as path from 'node:path';
-
 import { mocked } from 'jest-mock';
 import * as semver from 'semver';
 
@@ -21,7 +19,6 @@ import { emitEvent, waitFor } from '../utils';
 
 jest.mock('../../src/renderer/file-manager');
 jest.mock('fs-extra');
-jest.mock('node:path');
 
 describe('Runner component', () => {
   let store: StateMock;
@@ -41,6 +38,7 @@ describe('Runner component', () => {
     mocked(
       window.ElectronFiddle.getIsPackageManagerInstalled,
     ).mockResolvedValue(true);
+    mocked(window.ElectronFiddle.deleteUserData).mockResolvedValue();
 
     instance = new Runner(store as unknown as AppState);
   });
@@ -179,9 +177,10 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       await process.nextTick;
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(2);
-      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenLastCalledWith(
-        path.join(`/test-path/test-app-name`),
+      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledWith(
+        'test-app-name',
       );
     });
 

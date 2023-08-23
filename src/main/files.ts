@@ -1,3 +1,5 @@
+import * as path from 'node:path';
+
 import { IpcMainEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 
@@ -19,6 +21,10 @@ export function setupFileListeners() {
   ipcMainManager.handle(
     IpcEvents.CLEANUP_DIRECTORY,
     (_: IpcMainEvent, dir: string) => cleanupDirectory(dir),
+  );
+  ipcMainManager.handle(
+    IpcEvents.DELETE_USER_DATA,
+    (_: IpcMainEvent, name: string) => deleteUserData(name),
   );
 }
 
@@ -128,4 +134,10 @@ export async function cleanupDirectory(dir?: string): Promise<boolean> {
   }
 
   return false;
+}
+
+export async function deleteUserData(name: string) {
+  const appData = path.join(app.getPath('appData'), name);
+  console.log(`Cleanup: Deleting data dir ${appData}`);
+  await cleanupDirectory(appData);
 }

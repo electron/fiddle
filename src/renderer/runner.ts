@@ -1,5 +1,4 @@
 import { ChildProcess } from 'node:child_process';
-import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
 
@@ -494,9 +493,8 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
 
-    console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.cleanupDirectory(appData);
+    console.log(`Cleanup: Deleting data dir for ${name}`);
+    await window.ElectronFiddle.deleteUserData(name);
   }
 }

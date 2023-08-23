@@ -80,6 +80,9 @@ export async function setupFiddleGlobal() {
     createThemeFile(newTheme: FiddleTheme, name?: string) {
       return ipcRenderer.invoke(IpcEvents.CREATE_THEME_FILE, newTheme, name);
     },
+    async deleteUserData(name: string) {
+      await ipcRenderer.invoke(IpcEvents.DELETE_USER_DATA, name);
+    },
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
     },
