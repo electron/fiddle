@@ -85,6 +85,7 @@ declare global {
       appPaths: Record<string, string>;
       arch: string;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
+      cleanupDirectory(dir: string): Promise<boolean>;
       confirmQuit(): void;
       createThemeFile(
         newTheme: FiddleTheme,

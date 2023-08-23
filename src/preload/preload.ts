@@ -71,6 +71,9 @@ export async function setupFiddleGlobal() {
     blockAccelerators(acceleratorsToBlock) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
     },
+    cleanupDirectory(dir: string) {
+      return ipcRenderer.invoke(IpcEvents.CLEANUP_DIRECTORY, dir);
+    },
     confirmQuit() {
       ipcRenderer.send(IpcEvents.CONFIRM_QUIT);
     },

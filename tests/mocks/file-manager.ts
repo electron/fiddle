@@ -1,5 +1,4 @@
 export class FileManagerMock {
-  public cleanup = jest.fn();
   public getFiles = jest.fn();
   public openFiddle = jest.fn();
   public saveFiddle = jest.fn();

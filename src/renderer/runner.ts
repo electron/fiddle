@@ -8,7 +8,7 @@ import { AppState } from './state';
 import { PackageJsonOptions } from './utils/get-package';
 import { maybePlural } from './utils/plural-maybe';
 import {
-  FileTransform,
+  FileTransformOperation,
   InstallState,
   PMOperationOptions,
   RunResult,
@@ -149,7 +149,6 @@ export class Runner {
    * @memberof Runner
    */
   public async run(): Promise<RunResult> {
-    const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
     const { appState } = this;
@@ -188,7 +187,7 @@ export class Runner {
       appState.pushError('Could not install modules', error.message);
       appState.isInstallingModules = false;
 
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -206,7 +205,7 @@ export class Runner {
       message += `before running the fiddle.`;
 
       appState.pushOutput(message, { isNotPre: true });
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -249,8 +248,6 @@ export class Runner {
     operation: ForgeCommands,
   ): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
-    const { dotfilesTransform } = await import('./transforms/dotfiles');
-    const { forgeTransform } = await import('./transforms/forge');
     const { pushError, pushOutput } = this.appState;
 
     const strings =
@@ -275,11 +272,7 @@ export class Runner {
     }
 
     // Save files to temp
-    const dir = await this.saveToTemp(
-      options,
-      dotfilesTransform,
-      forgeTransform,
-    );
+    const dir = await this.saveToTemp(options, ['dotfiles', 'forge']);
     if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
@@ -400,7 +393,7 @@ export class Runner {
       this.child = null;
 
       // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       await this.deleteUserData();
     };
 
@@ -447,20 +440,20 @@ export class Runner {
    * Save files to temp, logging to the Fiddle terminal while doing so
    *
    * @param {PackageJsonOptions} options
-   * @param {...Array<FileTransform>} transforms
+   * @param {Array<FileTransformOperation>} [transforms]
    * @returns {(Promise<string | null>)}
    * @memberof Runner
    */
   public async saveToTemp(
     options: PackageJsonOptions,
-    ...transforms: Array<FileTransform>
+    transforms?: Array<FileTransformOperation>,
   ): Promise<string | null> {
     const { fileManager } = window.ElectronFiddle.app;
     const { pushOutput, pushError } = this.appState;
 
     try {
       pushOutput(`Saving files to temp directory...`);
-      const dir = await fileManager.saveToTemp(options, ...transforms);
+      const dir = await fileManager.saveToTemp(options, transforms);
       pushOutput(`Saved files to ${dir}`);
       return dir;
     } catch (error) {
@@ -506,6 +499,6 @@ export class Runner {
     const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
 
     console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.app.fileManager.cleanup(appData);
+    await window.ElectronFiddle.cleanupDirectory(appData);
   }
 }

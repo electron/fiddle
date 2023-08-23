@@ -4,7 +4,7 @@ import * as commander from 'commander';
 import * as fs from 'fs-extra';
 import getos from 'getos';
 
-import { openFiddle } from './file-manager';
+import { openFiddle } from './files';
 import { ipcMainManager } from './ipc';
 import { findProtocolArg } from './protocol';
 import {

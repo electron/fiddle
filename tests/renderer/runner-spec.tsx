@@ -179,9 +179,8 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(2);
-      expect(cleanup).toHaveBeenLastCalledWith(
+      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(2);
+      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenLastCalledWith(
         path.join(`/test-path/test-app-name`),
       );
     });
@@ -194,8 +193,7 @@ describe('Runner component', () => {
 
       expect(result).toBe(RunResult.SUCCESS);
       await process.nextTick;
-      const { cleanup } = fileManager;
-      expect(cleanup).toHaveBeenCalledTimes(1);
+      expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
     });
 
     it('automatically cleans the console when enabled', async () => {

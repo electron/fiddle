@@ -9,6 +9,7 @@ import { mocked } from 'jest-mock';
 import { MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import {
+  cleanupDirectory,
   setupFileListeners,
   showOpenDialog,
   showSaveDialog,
@@ -17,10 +18,7 @@ import { ipcMainManager } from '../../src/main/ipc';
 import { getOrCreateMainWindow } from '../../src/main/windows';
 
 jest.mock('../../src/main/windows');
-jest.mock('fs-extra', () => ({
-  pathExists: jest.fn(),
-  readdir: jest.fn(),
-}));
+jest.mock('fs-extra');
 
 const mockTarget = {
   webContents: {
@@ -163,6 +161,35 @@ describe('files', () => {
       }
 
       expect(caughtError).toBe(err);
+    });
+  });
+
+  describe('cleanupDirectory()', () => {
+    it('attempts to remove a directory if it exists', async () => {
+      mocked(fs.existsSync).mockReturnValueOnce(true);
+
+      const result = await cleanupDirectory('/fake/dir');
+
+      expect(fs.remove).toHaveBeenCalled();
+      expect(result).toBe(true);
+    });
+
+    it('does not attempt to remove a directory if it does not exists', async () => {
+      mocked(fs.existsSync).mockReturnValueOnce(false);
+
+      const result = await cleanupDirectory('/fake/dir');
+
+      expect(fs.remove).toHaveBeenCalledTimes(0);
+      expect(result).toBe(false);
+    });
+
+    it('handles an error', async () => {
+      mocked(fs.existsSync).mockReturnValueOnce(true);
+      (fs.remove as jest.Mock).mockRejectedValueOnce('bwapbwap');
+
+      const result = await cleanupDirectory('/fake/dir');
+
+      expect(result).toBe(false);
     });
   });
 });
