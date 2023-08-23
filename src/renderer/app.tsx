@@ -7,12 +7,13 @@ import { Runner } from './runner';
 import { AppState } from './state';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getTheme } from './themes';
-import { PackageJsonOptions, getPackageJson } from './utils/get-package';
+import { getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
 import {
   EditorId,
   EditorValues,
   PACKAGE_NAME,
+  PackageJsonOptions,
   SetFiddleOptions,
 } from '../interfaces';
 import { defaultDark, defaultLight } from '../themes-defaults';

@@ -7,7 +7,7 @@ import { AppState } from './state';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 import { isKnownFile } from './utils/editor-utils';
-import { DEFAULT_OPTIONS, PackageJsonOptions } from './utils/get-package';
+import { DEFAULT_OPTIONS } from './utils/get-package';
 import {
   EditorId,
   EditorValues,
@@ -16,6 +16,7 @@ import {
   Files,
   GenericDialogType,
   PACKAGE_NAME,
+  PackageJsonOptions,
 } from '../interfaces';
 
 export class FileManager {

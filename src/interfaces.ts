@@ -247,3 +247,8 @@ export enum AppStateBroadcastMessageType {
 export type NodeTypeDTS = `${string}.d.ts`;
 
 export type NodeTypes = Record<NodeTypeDTS, string>;
+
+export interface PackageJsonOptions {
+  includeElectron?: boolean;
+  includeDependencies?: boolean;
+}
