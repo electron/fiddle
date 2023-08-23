@@ -132,7 +132,7 @@ export class FileManager {
     if (!pathToSave) {
       window.ElectronFiddle.showSaveDialog();
     } else {
-      const files = await this.getFiles(undefined, transforms);
+      const { files } = await this.getFiles(undefined, transforms);
 
       for (const [fileName, content] of files) {
         const savePath = path.join(pathToSave, fileName);
@@ -161,13 +161,13 @@ export class FileManager {
    *
    * @param {PackageJsonOptions} [options]
    * @param {Array<FileTransformOperation>} [transforms]
-   * @returns {Promise<Files>}
+   * @returns {Promise<{ localPath: string; files: Files }>}
    * @memberof FileManager
    */
   public async getFiles(
     options?: PackageJsonOptions,
     transforms: Array<FileTransformOperation> = [],
-  ): Promise<Files> {
+  ): Promise<{ localPath?: string; files: Files }> {
     const { app } = window.ElectronFiddle;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
@@ -196,7 +196,7 @@ export class FileManager {
       }
     }
 
-    return output;
+    return { localPath: app.state.localPath, files: output };
   }
 
   /**
@@ -212,7 +212,7 @@ export class FileManager {
     transforms?: Array<FileTransformOperation>,
   ): Promise<string> {
     const tmp = await import('tmp');
-    const files = await this.getFiles(options, transforms);
+    const { files } = await this.getFiles(options, transforms);
     const dir = tmp.dirSync({
       prefix: 'electron-fiddle',
     });
