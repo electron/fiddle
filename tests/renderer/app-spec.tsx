@@ -1,4 +1,5 @@
 import { mocked } from 'jest-mock';
+import * as semver from 'semver';
 
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
@@ -33,9 +34,9 @@ describe('App component', () => {
     });
     mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(defaultDark);
     mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
-    mocked(window.ElectronFiddle.getLatestStable).mockReturnValue({
-      version: '24.0.0',
-    });
+    mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
+      semver.parse('24.0.0')!,
+    );
 
     ({ ElectronFiddle } = window);
     const { app: appMock } = ElectronFiddle;

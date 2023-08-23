@@ -1,4 +1,4 @@
-import { ReleaseInfo } from '@electron/fiddle-core';
+import { ReleaseInfo, SemVer } from '@electron/fiddle-core';
 import * as MonacoType from 'monaco-editor';
 
 import {
