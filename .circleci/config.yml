@@ -10,17 +10,9 @@ commands:
       - node/install:
           node-version: '18.17'
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
-            - v1-dependencies-{{ arch }}
-      - run: yarn install --frozen-lockfile
+      - node/install-packages
       - run: yarn run contributors
       - run: yarn run electron-releases
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
   load-gh-token:
     steps:
       - run: |
