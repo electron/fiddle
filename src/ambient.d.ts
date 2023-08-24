@@ -1,4 +1,4 @@
-import { ReleaseInfo } from '@electron/fiddle-core';
+import { ReleaseInfo, SemVer } from '@electron/fiddle-core';
 import * as MonacoType from 'monaco-editor';
 
 import {
@@ -6,12 +6,15 @@ import {
   BlockableAccelerator,
   EditorValues,
   FiddleEvent,
+  FileTransformOperation,
+  Files,
   IPackageManager,
   InstallState,
   MessageOptions,
   NodeTypes,
   OutputEntry,
   PMOperationOptions,
+  PackageJsonOptions,
   RunResult,
   RunnableVersion,
   SelectedLocalVersion,
@@ -116,6 +119,12 @@ declare global {
       isReleasedMajor(major: number): Promise<boolean>;
       macTitlebarClicked(): void;
       monaco: typeof MonacoType;
+      onGetFiles(
+        callback: (
+          options: PackageJsonOptions | undefined,
+          transforms: Array<FileTransformOperation>,
+        ) => Promise<{ localPath?: string; files: Files }>,
+      );
       openThemeFolder(): Promise<void>;
       packageRun(
         { dir, packageManager }: PMOperationOptions,

@@ -66,6 +66,7 @@ export enum IpcEvents {
   GET_NODE_TYPES = 'GET_NODE_TYPES',
   CLEANUP_DIRECTORY = 'CLEANUP_DIRECTORY',
   DELETE_USER_DATA = 'DELETE_USER_DATA',
+  GET_FILES = 'GET_FILES',
 }
 
 export const ipcMainEvents = [

@@ -1,7 +1,12 @@
 // Remember to update ambient.d.ts for extending window object
 import { IpcRendererEvent, ipcRenderer } from 'electron';
 
-import { FiddleEvent } from '../interfaces';
+import {
+  FiddleEvent,
+  FileTransformOperation,
+  Files,
+  PackageJsonOptions,
+} from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { FiddleTheme } from '../themes-defaults';
 
@@ -139,6 +144,21 @@ export async function setupFiddleGlobal() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
     },
     monaco: null as any, // will be set in main.tsx
+    onGetFiles(
+      callback: (
+        options: PackageJsonOptions | undefined,
+        transforms: Array<FileTransformOperation>,
+      ) => Promise<{ localPath?: string; files: Files }>,
+    ) {
+      ipcRenderer.removeAllListeners(IpcEvents.GET_FILES);
+      ipcRenderer.on(
+        IpcEvents.GET_FILES,
+        async (e, { options, transforms }) => {
+          const { localPath, files } = await callback(options, transforms);
+          e.ports[0].postMessage({ localPath, files: [...files.entries()] });
+        },
+      );
+    },
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
     },

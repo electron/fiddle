@@ -4,12 +4,12 @@ import { Installer } from '@electron/fiddle-core';
 
 import { Bisector } from './bisect';
 import { AppState } from './state';
-import { PackageJsonOptions } from './utils/get-package';
 import { maybePlural } from './utils/plural-maybe';
 import {
   FileTransformOperation,
   InstallState,
   PMOperationOptions,
+  PackageJsonOptions,
   RunResult,
   RunnableVersion,
 } from '../interfaces';

@@ -1,4 +1,5 @@
 import { mocked } from 'jest-mock';
+import * as semver from 'semver';
 
 import {
   ElectronReleaseChannel,
@@ -34,9 +35,9 @@ describe('versions', () => {
 
     it('uses the newest stable as a fallback', () => {
       mocked(localStorage.getItem).mockReturnValue(null);
-      mocked(window.ElectronFiddle.getLatestStable).mockReturnValue({
-        version: '13.0.0',
-      });
+      mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
+        semver.parse('13.0.0')!,
+      );
       const output = getDefaultVersion([
         { version: '11.0.0' },
         { version: '15.0.0-nightly.20210715' },

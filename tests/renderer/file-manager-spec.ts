@@ -234,7 +234,8 @@ describe('FileManager', () => {
     });
 
     it(`always inserts ${PACKAGE_NAME}`, async () => {
-      expect(await fm.getFiles()).toStrictEqual(expected);
+      const { files } = await fm.getFiles();
+      expect(files).toStrictEqual(expected);
     });
 
     it('includes supported files', async () => {
@@ -244,19 +245,21 @@ describe('FileManager', () => {
       const values = { ...editorValues, [file]: content };
 
       app.getEditorValues.mockReturnValue(values);
-      expect((await fm.getFiles()).get(file)).toStrictEqual(content);
+      const { files } = await fm.getFiles();
+      expect(files.get(file)).toStrictEqual(content);
     });
 
     it('applies transforms', async () => {
       const transformed: Files = new Map([['👉', '👈']]);
       mocked(dotfilesTransform).mockResolvedValue(transformed);
-      expect(await fm.getFiles(undefined, ['dotfiles'])).toBe(transformed);
+      const { files } = await fm.getFiles(undefined, ['dotfiles']);
+      expect(files).toBe(transformed);
     });
 
     it('handles transform error', async () => {
       mocked(dotfilesTransform).mockRejectedValue(new Error('💩'));
-      const result = await fm.getFiles(undefined, ['dotfiles']);
-      expect(result).toStrictEqual(expected);
+      const { files } = await fm.getFiles(undefined, ['dotfiles']);
+      expect(files).toStrictEqual(expected);
     });
   });
 });

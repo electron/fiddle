@@ -7,7 +7,7 @@ import { AppState } from './state';
 import { dotfilesTransform } from './transforms/dotfiles';
 import { forgeTransform } from './transforms/forge';
 import { isKnownFile } from './utils/editor-utils';
-import { DEFAULT_OPTIONS, PackageJsonOptions } from './utils/get-package';
+import { DEFAULT_OPTIONS } from './utils/get-package';
 import {
   EditorId,
   EditorValues,
@@ -16,10 +16,12 @@ import {
   Files,
   GenericDialogType,
   PACKAGE_NAME,
+  PackageJsonOptions,
 } from '../interfaces';
 
 export class FileManager {
   constructor(private readonly appState: AppState) {
+    this.getFiles = this.getFiles.bind(this);
     this.openFiddle = this.openFiddle.bind(this);
     this.saveFiddle = this.saveFiddle.bind(this);
 
@@ -48,6 +50,8 @@ export class FileManager {
     window.ElectronFiddle.addEventListener('save-fiddle-forge', (filePath) => {
       this.saveFiddle(filePath, ['dotfiles', 'forge']);
     });
+
+    window.ElectronFiddle.onGetFiles(this.getFiles);
   }
 
   /**
@@ -132,7 +136,7 @@ export class FileManager {
     if (!pathToSave) {
       window.ElectronFiddle.showSaveDialog();
     } else {
-      const files = await this.getFiles(undefined, transforms);
+      const { files } = await this.getFiles(undefined, transforms);
 
       for (const [fileName, content] of files) {
         const savePath = path.join(pathToSave, fileName);
@@ -161,13 +165,13 @@ export class FileManager {
    *
    * @param {PackageJsonOptions} [options]
    * @param {Array<FileTransformOperation>} [transforms]
-   * @returns {Promise<Files>}
+   * @returns {Promise<{ localPath: string; files: Files }>}
    * @memberof FileManager
    */
   public async getFiles(
     options?: PackageJsonOptions,
     transforms: Array<FileTransformOperation> = [],
-  ): Promise<Files> {
+  ): Promise<{ localPath?: string; files: Files }> {
     const { app } = window.ElectronFiddle;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
@@ -196,7 +200,7 @@ export class FileManager {
       }
     }
 
-    return output;
+    return { localPath: app.state.localPath, files: output };
   }
 
   /**
@@ -212,7 +216,7 @@ export class FileManager {
     transforms?: Array<FileTransformOperation>,
   ): Promise<string> {
     const tmp = await import('tmp');
-    const files = await this.getFiles(options, transforms);
+    const { files } = await this.getFiles(options, transforms);
     const dir = tmp.dirSync({
       prefix: 'electron-fiddle',
     });

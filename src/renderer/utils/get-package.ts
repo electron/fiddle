@@ -1,11 +1,6 @@
 import * as fiddlePackageJSON from '../../../package.json';
-import { MAIN_JS } from '../../interfaces';
+import { MAIN_JS, PackageJsonOptions } from '../../interfaces';
 import { AppState } from '../../renderer/state';
-
-export interface PackageJsonOptions {
-  includeElectron?: boolean;
-  includeDependencies?: boolean;
-}
 
 export const DEFAULT_OPTIONS = {
   includeElectron: true,
