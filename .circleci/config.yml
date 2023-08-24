@@ -1,34 +1,18 @@
 version: 2.1
 
 orbs:
-  node: circleci/node@5.1.0
-  win: circleci/windows@5.0.0
+  node: electronjs/node@1.4.1
 
 commands:
   install:
     steps:
       - run: git config --global core.autocrlf input
       - node/install:
-          # NOTE: nvm-windows only supports proper semver strings
-          # we could omit the patch release whenever we have 1.1.0:
-          # https://github.com/coreybutler/nvm-windows/releases/tag/1.1.10
-          # This is the file to check:
-          # https://github.com/CircleCI-Public/ansible/blob/main/roles/windows-executor/defaults/main/install_dev_tools_defaults.yml#L13
-          node-version: '18.17.0'
-      - run: nvm use 18.17.0
+          node-version: '18.17'
       - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
-            - v1-dependencies-{{ arch }}
-      - run: npm install --global yarn
-      - run: yarn install --frozen-lockfile
+      - node/install-packages
       - run: yarn run contributors
       - run: yarn run electron-releases
-      - save_cache:
-          paths:
-            - node_modules
-          key: v1-dependencies-{{ arch }}-{{ checksum "yarn.lock" }}
   load-gh-token:
     steps:
       - run: |
@@ -54,9 +38,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64' ]
-    macos:
-      xcode: '13.4.0'
-    resource_class: macos.x86.medium.gen2
+    executor: node/macos
     steps:
       - install
       - test
@@ -65,9 +47,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64', 'ia32' ]
-    executor:
-      name: win/default
-      shell: bash.exe
+    executor: node/windows
     steps:
       - install
       - test
@@ -76,8 +56,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
-    docker:
-      - image: cimg/base:stable
+    executor: node/linux
     steps:
       - install
       - test
@@ -86,9 +65,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64' ]
-    macos:
-      xcode: '13.4.0'
-    resource_class: macos.x86.medium.gen2
+    executor: node/macos
     steps:
       - install
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
@@ -106,9 +83,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64', 'ia32' ]
-    executor:
-      name: win/default
-      shell: bash.exe
+    executor: node/windows
     steps:
       - install
       - run:
@@ -129,8 +104,7 @@ jobs:
       arch:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
-    docker:
-      - image: cimg/base:stable
+    executor: node/linux
     steps:
       - run: sudo apt-get update && sudo apt install rpm squashfs-tools
       - install
