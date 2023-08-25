@@ -15,6 +15,7 @@ import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
 import { setupTypes } from './electron-types';
+import { setupFiddleCore } from './fiddle-core';
 import { onFirstRunMaybe } from './first-run';
 import { ipcMainManager } from './ipc';
 import { setupNpm } from './npm';
@@ -64,6 +65,7 @@ export async function onReady() {
   setupGetProjectName();
   setupGetUsername();
   setupTypes(knownVersions);
+  await setupFiddleCore(knownVersions);
 
   // Do this after setting everything up to ensure that
   // any IPC listeners are set up before they're used

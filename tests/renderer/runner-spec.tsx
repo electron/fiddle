@@ -18,7 +18,6 @@ import {
 import { emitEvent, waitFor } from '../utils';
 
 jest.mock('../../src/renderer/file-manager');
-jest.mock('fs-extra');
 
 describe('Runner component', () => {
   let store: StateMock;
@@ -50,8 +49,8 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
-      // child process exits with success
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
+      // fiddle exits with success
+      setTimeout(() => emitEvent('fiddle-stopped', 0));
       const result = await runPromise;
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -62,11 +61,10 @@ describe('Runner component', () => {
 
     it('runs with logging when enabled', async () => {
       store.isEnablingElectronLogging = true;
-      const spyChildProcess = jest.spyOn(store.versionRunner, 'spawn');
-      (spyChildProcess as jest.Mock).mockImplementationOnce((_, __, opts) => {
-        expect(opts.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
-        expect(opts.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
-        return store.versionRunner.child;
+      const spy = jest.spyOn(window.ElectronFiddle, 'startFiddle');
+      spy.mockImplementationOnce(async (params) => {
+        expect(params.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
+        expect(params.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
       });
 
       // wait for run() to get running
@@ -74,8 +72,8 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
-      // child process exits with success
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
+      // fiddle exits with success
+      setTimeout(() => emitEvent('fiddle-stopped', 0));
       const result = await runPromise;
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -90,11 +88,11 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
-      // mock child process gives output,
+      // mock fiddle gives output,
       // then exits with exitCode 0
-      store.versionRunner.child.stdout.emit('data', 'hi');
-      store.versionRunner.child.stderr.emit('data', 'hi');
-      store.versionRunner.child.emit('close', 0);
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-stopped', 0);
 
       const result = await runPromise;
 
@@ -115,8 +113,8 @@ describe('Runner component', () => {
       await waitFor(() => store.isRunning);
       expect(store.isRunning).toBe(true);
 
-      // mock child process exits with ARBITRARY_FAIL_CODE
-      store.versionRunner.child.emit('close', ARBITRARY_FAIL_CODE);
+      // mock fiddle exits with ARBITRARY_FAIL_CODE
+      emitEvent('fiddle-stopped', ARBITRARY_FAIL_CODE);
       const result = await runPromise;
 
       expect(result).toBe(RunResult.FAILURE);
@@ -155,11 +153,11 @@ describe('Runner component', () => {
 
       const signal = 'SIGTERM';
 
-      // mock child process gives output,
+      // mock fiddle gives output,
       // then exits without an explicit exitCode
-      store.versionRunner.child.stdout.emit('data', 'hi');
-      store.versionRunner.child.stderr.emit('data', 'hi');
-      store.versionRunner.child.emit('close', null, signal);
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-runner-output', 'hi');
+      emitEvent('fiddle-stopped', null, signal);
       const result = await runPromise;
 
       expect(result).toBe(RunResult.FAILURE);
@@ -172,7 +170,7 @@ describe('Runner component', () => {
     });
 
     it('cleans the app data dir after a run', async () => {
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
+      setTimeout(() => emitEvent('fiddle-stopped', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -187,7 +185,7 @@ describe('Runner component', () => {
     it('does not clean the app data dir after a run if configured', async () => {
       (instance as any).appState.isKeepingUserDataDirs = true;
 
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
+      setTimeout(() => emitEvent('fiddle-stopped', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -198,7 +196,7 @@ describe('Runner component', () => {
     it('automatically cleans the console when enabled', async () => {
       store.isClearingConsoleOnRun = true;
 
-      setTimeout(() => store.versionRunner.child.emit('close', 0));
+      setTimeout(() => emitEvent('fiddle-stopped', 0));
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
@@ -232,9 +230,8 @@ describe('Runner component', () => {
 
   describe('stop()', () => {
     it('stops a running session', async () => {
-      store.versionRunner.child.kill.mockImplementationOnce(() => {
-        store.versionRunner.child.emit('close');
-        return true;
+      mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(() => {
+        emitEvent('fiddle-stopped', RunResult.FAILURE);
       });
 
       // wait for run() to get running
@@ -250,8 +247,8 @@ describe('Runner component', () => {
       expect(store.isRunning).toBe(false);
     });
 
-    it('fails if killing child process fails', async () => {
-      store.versionRunner.child.kill.mockReturnValueOnce(false);
+    it('fails if stopping fiddle fails', async () => {
+      mocked(window.ElectronFiddle.stopFiddle).mockImplementationOnce(() => {});
 
       // wait for run() to get running
       instance.run();

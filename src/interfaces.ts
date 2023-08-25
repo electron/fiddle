@@ -1,3 +1,11 @@
+import type { Mirrors } from '@electron/fiddle-core';
+export type {
+  InstallStateEvent,
+  ProgressObject,
+  ReleaseInfo,
+  SemVer,
+} from '@electron/fiddle-core';
+
 export type Files = Map<string, string>;
 
 export type FileTransform = (files: Files) => Promise<Files>;
@@ -158,6 +166,8 @@ export type FiddleEvent =
   | 'clear-console'
   | 'electron-types-changed'
   | 'execute-monaco-command'
+  | 'fiddle-runner-output'
+  | 'fiddle-stopped'
   | 'load-example'
   | 'load-gist'
   | 'make-fiddle'
@@ -177,7 +187,9 @@ export type FiddleEvent =
   | 'test-task'
   | 'toggle-bisect'
   | 'toggle-monaco-option'
-  | 'undo-in-editor';
+  | 'undo-in-editor'
+  | 'version-download-progress'
+  | 'version-state-changed';
 
 export interface MessageOptions {
   message: string;
@@ -250,4 +262,17 @@ export type NodeTypes = Record<NodeTypeDTS, string>;
 export interface PackageJsonOptions {
   includeElectron?: boolean;
   includeDependencies?: boolean;
+}
+
+export interface StartFiddleParams {
+  localPath: string | undefined;
+  isValidBuild: boolean; // If the localPath is a valid Electron build
+  version: string; // The user selected version
+  dir: string;
+  options: string[];
+  env: { [x: string]: string | undefined };
+}
+
+export interface DownloadVersionParams {
+  mirror: Mirrors;
 }

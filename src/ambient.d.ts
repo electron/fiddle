@@ -1,23 +1,28 @@
-import { ReleaseInfo, SemVer } from '@electron/fiddle-core';
 import * as MonacoType from 'monaco-editor';
 
 import {
   BisectRequest,
   BlockableAccelerator,
+  DownloadVersionParams,
   EditorValues,
   FiddleEvent,
   FileTransformOperation,
   Files,
   IPackageManager,
   InstallState,
+  InstallStateEvent,
   MessageOptions,
   NodeTypes,
   OutputEntry,
   PMOperationOptions,
   PackageJsonOptions,
+  ProgressObject,
+  ReleaseInfo,
   RunResult,
   RunnableVersion,
   SelectedLocalVersion,
+  SemVer,
+  StartFiddleParams,
   TestRequest,
   Version,
 } from './interfaces';
@@ -41,6 +46,14 @@ declare global {
         type: 'execute-monaco-command',
         listener: (commandId: string) => void,
         options?: { signal: AbortSignal },
+      ): void;
+      addEventListener(
+        type: 'fiddle-runner-output',
+        listener: (output: string) => void,
+      ): void;
+      addEventListener(
+        type: 'fiddle-stopped',
+        listener: (code: number | null, signal: string | null) => void,
       ): void;
       addEventListener(
         type: 'load-example',
@@ -73,6 +86,14 @@ declare global {
         listener: (path: string) => void,
       ): void;
       addEventListener(
+        type: 'version-download-progress',
+        listener: (version: string, progress: ProgressObject) => void,
+      ): void;
+      addEventListener(
+        type: 'version-state-changed',
+        listener: (event: InstallStateEvent) => void,
+      ): void;
+      addEventListener(
         type: 'electron-types-changed',
         listener: (types: string, version: string) => void,
       ): void;
@@ -91,6 +112,10 @@ declare global {
         name?: string,
       ): Promise<LoadedFiddleTheme>;
       deleteUserData(name: string): Promise<void>;
+      downloadVersion(
+        version: string,
+        opts?: Partial<DownloadVersionParams>,
+      ): Promise<void>;
       fetchVersions(): Promise<Version[]>;
       getAvailableThemes(): Promise<Array<LoadedFiddleTheme>>;
       getElectronTypes(ver: RunnableVersion): Promise<string | undefined>;
@@ -111,6 +136,7 @@ declare global {
       getReleaseInfo(version: string): Promise<ReleaseInfo | undefined>;
       getReleasedVersions(): Array<Version>;
       getUsername(): string;
+      getVersionState(version: string): InstallState;
       isDevMode: boolean;
       isReleasedMajor(major: number): Promise<boolean>;
       macTitlebarClicked(): void;
@@ -132,6 +158,7 @@ declare global {
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
+      removeVersion(version: string): Promise<void>;
       saveFilesToTemp(files: Files): Promise<string>;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
       sendReady(): void;
@@ -139,6 +166,8 @@ declare global {
       setShowMeTemplate(template?: string): void;
       showWarningDialog(messageOptions: MessageOptions): void;
       showWindow(): void;
+      startFiddle(params: StartFiddleParams): Promise<void>;
+      stopFiddle(): void;
       taskDone(result: RunResult): void;
       themePath: string;
       uncacheTypes(ver: RunnableVersion): Promise<void>;

@@ -46,7 +46,6 @@ describe('AppState', () => {
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
   let removeSpy: jest.SpyInstance;
-  let installSpy: jest.SpyInstance;
   let ensureDownloadedSpy: jest.SpyInstance;
   let broadcastMessageSpy: jest.SpyInstance;
 
@@ -54,20 +53,17 @@ describe('AppState', () => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
     mocked(fetchVersions).mockResolvedValue(mockVersionsArray);
-    jest
-      .spyOn(AppState.prototype, 'getVersionState')
-      .mockImplementation(() => InstallState.installed);
+    mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+      InstallState.installed,
+    );
 
     appState = new AppState(mockVersionsArray);
     removeSpy = jest
-      .spyOn(appState.installer, 'remove')
+      .spyOn(window.ElectronFiddle, 'removeVersion')
       .mockResolvedValue(undefined);
-    installSpy = jest
-      .spyOn(appState.installer, 'install')
-      .mockResolvedValue('');
     ensureDownloadedSpy = jest
-      .spyOn(appState.installer, 'ensureDownloaded')
-      .mockResolvedValue({ path: '', alreadyExtracted: false });
+      .spyOn(window.ElectronFiddle, 'downloadVersion')
+      .mockResolvedValue(undefined);
     broadcastMessageSpy = jest.spyOn(
       (appState as any).broadcastChannel,
       'postMessage',
@@ -320,6 +316,9 @@ describe('AppState', () => {
     it('removes a version', async () => {
       const ver = appState.versions[version];
       ver.state = InstallState.installed;
+      mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+        InstallState.missing,
+      );
       await appState.removeVersion(ver);
       expect(removeSpy).toHaveBeenCalledWith(ver.version);
       expect(broadcastMessageSpy).toHaveBeenCalledWith({
@@ -363,7 +362,6 @@ describe('AppState', () => {
       await appState.downloadVersion(ver);
 
       expect(ensureDownloadedSpy).toHaveBeenCalled();
-      expect(installSpy).not.toHaveBeenCalled();
       expect(broadcastMessageSpy).toHaveBeenCalledWith({
         type: AppStateBroadcastMessageType.syncVersions,
         payload: [ver],
@@ -378,7 +376,6 @@ describe('AppState', () => {
       await appState.downloadVersion(ver);
 
       expect(ensureDownloadedSpy).not.toHaveBeenCalled();
-      expect(installSpy).not.toHaveBeenCalled();
       expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
   });
@@ -668,9 +665,7 @@ describe('AppState', () => {
 
       appState.addLocalVersion(ver);
 
-      // `getElectronVersions` is called when the AppState is initialized
-      // as well
-      expect(getElectronVersions).toHaveBeenCalledTimes(2);
+      expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);
     });
   });

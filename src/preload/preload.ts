@@ -2,10 +2,12 @@
 import { IpcRendererEvent, ipcRenderer } from 'electron';
 
 import {
+  DownloadVersionParams,
   FiddleEvent,
   FileTransformOperation,
   Files,
   PackageJsonOptions,
+  StartFiddleParams,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
 import { FiddleTheme } from '../themes-defaults';
@@ -16,6 +18,8 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'clear-console': IpcEvents.CLEAR_CONSOLE,
   'electron-types-changed': IpcEvents.ELECTRON_TYPES_CHANGED,
   'execute-monaco-command': IpcEvents.MONACO_EXECUTE_COMMAND,
+  'fiddle-runner-output': IpcEvents.FIDDLE_RUNNER_OUTPUT,
+  'fiddle-stopped': IpcEvents.FIDDLE_STOPPED,
   'load-example': IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
   'load-gist': IpcEvents.LOAD_GIST_REQUEST,
   'make-fiddle': IpcEvents.FIDDLE_MAKE,
@@ -36,6 +40,8 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'toggle-bisect': IpcEvents.BISECT_COMMANDS_TOGGLE,
   'toggle-monaco-option': IpcEvents.MONACO_TOGGLE_OPTION,
   'undo-in-editor': IpcEvents.UNDO_IN_EDITOR,
+  'version-download-progress': IpcEvents.VERSION_DOWNLOAD_PROGRESS,
+  'version-state-changed': IpcEvents.VERSION_STATE_CHANGED,
 } as const;
 
 async function preload() {
@@ -86,6 +92,12 @@ export async function setupFiddleGlobal() {
     },
     async deleteUserData(name: string) {
       await ipcRenderer.invoke(IpcEvents.DELETE_USER_DATA, name);
+    },
+    async downloadVersion(
+      version: string,
+      opts?: Partial<DownloadVersionParams>,
+    ) {
+      await ipcRenderer.invoke(IpcEvents.DOWNLOAD_VERSION, version, opts);
     },
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
@@ -138,6 +150,8 @@ export async function setupFiddleGlobal() {
     },
     getTestTemplate: () => ipcRenderer.invoke(IpcEvents.GET_TEST_TEMPLATE),
     getUsername: () => ipcRenderer.sendSync(IpcEvents.GET_USERNAME),
+    getVersionState: (version: string) =>
+      ipcRenderer.sendSync(IpcEvents.GET_VERSION_STATE, version),
     isDevMode: ipcRenderer.sendSync(IpcEvents.IS_DEV_MODE),
     macTitlebarClicked() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
@@ -186,6 +200,9 @@ export async function setupFiddleGlobal() {
         ipcRenderer.removeAllListeners(channel);
       }
     },
+    async removeVersion(version: string) {
+      await ipcRenderer.invoke(IpcEvents.REMOVE_VERSION, version);
+    },
     saveFilesToTemp(files: Files) {
       return ipcRenderer.invoke(IpcEvents.SAVE_FILES_TO_TEMP, [
         ...files.entries(),
@@ -208,6 +225,12 @@ export async function setupFiddleGlobal() {
     },
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
+    },
+    async startFiddle(params: StartFiddleParams) {
+      await ipcRenderer.invoke(IpcEvents.START_FIDDLE, params);
+    },
+    stopFiddle() {
+      ipcRenderer.send(IpcEvents.STOP_FIDDLE);
     },
     taskDone(result) {
       ipcRenderer.send(IpcEvents.TASK_DONE, result);

@@ -2,7 +2,6 @@ import { makeObservable, observable } from 'mobx';
 
 import { BisectorMock } from './bisector';
 import { VersionsMock } from './electron-versions';
-import { FiddleRunnerMock, InstallerMock } from './fiddle-core';
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -113,8 +112,6 @@ export class StateMock {
   public updateElectronVersions = jest.fn();
   public startDeletingAll = jest.fn();
   public stopDeletingAll = jest.fn();
-  public installer = new InstallerMock();
-  public versionRunner = new FiddleRunnerMock();
 
   constructor() {
     makeObservable(this, {
