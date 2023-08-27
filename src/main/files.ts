@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent, app, dialog } from 'electron';
+import { BrowserWindow, IpcMainEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 
@@ -194,7 +194,11 @@ async function removeFile(filePath: string): Promise<void> {
   }
 }
 
-export async function saveFiles(filePath: string, files: Files) {
+export async function saveFiles(
+  window: BrowserWindow,
+  filePath: string,
+  files: Files,
+) {
   console.log(`saveFiddleWithTransforms: Asked to save to ${filePath}`);
 
   for (const [fileName, content] of files) {
@@ -209,7 +213,11 @@ export async function saveFiles(filePath: string, files: Files) {
     }
   }
 
-  ipcMainManager.send(IpcEvents.SAVED_LOCAL_FIDDLE, [filePath]);
+  ipcMainManager.send(
+    IpcEvents.SAVED_LOCAL_FIDDLE,
+    [filePath],
+    window.webContents,
+  );
 }
 
 /**
@@ -217,10 +225,13 @@ export async function saveFiles(filePath: string, files: Files) {
  * we'll first open the "Save" dialog.
  */
 export async function saveFiddle() {
-  const { localPath, files } = await getFiles(['dotfiles']);
-  const pathToSave = localPath ?? (await showSaveDialog());
-  if (pathToSave) {
-    await saveFiles(pathToSave, files);
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { localPath, files } = await getFiles(window, ['dotfiles']);
+    const pathToSave = localPath ?? (await showSaveDialog());
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
   }
 }
 
@@ -228,10 +239,13 @@ export async function saveFiddle() {
  * Saves the current Fiddle to disk.
  */
 export async function saveFiddleAs() {
-  const { files } = await getFiles(['dotfiles']);
-  const pathToSave = await showSaveDialog();
-  if (pathToSave) {
-    await saveFiles(pathToSave, files);
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { files } = await getFiles(window, ['dotfiles']);
+    const pathToSave = await showSaveDialog();
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
   }
 }
 
@@ -239,9 +253,12 @@ export async function saveFiddleAs() {
  * Saves the current Fiddle to disk as a Forge project.
  */
 export async function saveFiddleAsForgeProject() {
-  const { files } = await getFiles(['dotfiles', 'forge']);
-  const pathToSave = await showSaveDialog('Forge Project');
-  if (pathToSave) {
-    await saveFiles(pathToSave, files);
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { files } = await getFiles(window, ['dotfiles', 'forge']);
+    const pathToSave = await showSaveDialog('Forge Project');
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
   }
 }

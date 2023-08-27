@@ -2,7 +2,7 @@
  * @jest-environment node
  */
 
-import { app, dialog } from 'electron';
+import { BrowserWindow, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
 import * as tmp from 'tmp';
@@ -37,6 +37,7 @@ describe('files', () => {
   const editorValues = createEditorValues();
 
   beforeEach(() => {
+    mocked(BrowserWindow.getFocusedWindow).mockReturnValue(mockWindow);
     mocked(getFiles).mockResolvedValue({
       localPath: 'my/fake/path',
       files: new Map(Object.entries(editorValues)),
@@ -205,7 +206,11 @@ describe('files', () => {
   describe('saveFiles()', () => {
     it('saves all non-empty files in Fiddle', async () => {
       const values = { ...editorValues };
-      await saveFiles('/fake/path', new Map(Object.entries(values)));
+      await saveFiles(
+        mockWindow,
+        '/fake/path',
+        new Map(Object.entries(values)),
+      );
 
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
@@ -215,13 +220,21 @@ describe('files', () => {
       const content = '// hi';
       const values = { ...editorValues, [file]: content };
 
-      await saveFiles('/fake/path', new Map(Object.entries(values)));
+      await saveFiles(
+        mockWindow,
+        '/fake/path',
+        new Map(Object.entries(values)),
+      );
       expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
     });
 
     it('removes a file that is newly empty', async () => {
       const values = { ...editorValues, 'index.html': '' };
-      await saveFiles('/fake/path', new Map(Object.entries(values)));
+      await saveFiles(
+        mockWindow,
+        '/fake/path',
+        new Map(Object.entries(values)),
+      );
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
     });
@@ -232,13 +245,19 @@ describe('files', () => {
         throw new Error('bwap');
       });
 
-      await saveFiles('my/fake/path', new Map(Object.entries(editorValues)));
+      await saveFiles(
+        mockWindow,
+        'my/fake/path',
+        new Map(Object.entries(editorValues)),
+      );
 
       const n = Object.keys(editorValues).length;
       expect(fs.outputFile).toHaveBeenCalledTimes(n);
-      expect(spy).toHaveBeenCalledWith(IpcEvents.SAVED_LOCAL_FIDDLE, [
-        'my/fake/path',
-      ]);
+      expect(spy).toHaveBeenCalledWith(
+        IpcEvents.SAVED_LOCAL_FIDDLE,
+        ['my/fake/path'],
+        mockWindow.webContents,
+      );
       spy.mockClear();
     });
 
@@ -247,7 +266,11 @@ describe('files', () => {
       mocked(fs.remove).mockImplementation(() => {
         throw new Error('bwap');
       });
-      await saveFiles('/fake/path', new Map(Object.entries(values)));
+      await saveFiles(
+        mockWindow,
+        '/fake/path',
+        new Map(Object.entries(values)),
+      );
 
       expect(fs.remove).toHaveBeenCalledTimes(1);
     });
@@ -291,7 +314,10 @@ describe('files', () => {
         files: new Map(),
       });
       await saveFiddleAsForgeProject();
-      expect(getFiles).toHaveBeenCalledWith(expect.arrayContaining(['forge']));
+      expect(getFiles).toHaveBeenCalledWith(
+        mockWindow,
+        expect.arrayContaining(['forge']),
+      );
     });
   });
 
