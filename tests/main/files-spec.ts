@@ -23,6 +23,7 @@ import {
 import { ipcMainManager } from '../../src/main/ipc';
 import { getFiles } from '../../src/main/utils/get-files';
 import { getOrCreateMainWindow } from '../../src/main/windows';
+import { BrowserWindowMock } from '../mocks/browser-window';
 import { createEditorValues } from '../mocks/editor-values';
 
 jest.mock('../../src/main/windows');
@@ -30,12 +31,7 @@ jest.mock('../../src/main/utils/get-files');
 jest.mock('fs-extra');
 jest.mock('tmp');
 
-const mockTarget = {
-  webContents: {
-    send: jest.fn(),
-    isDestroyed: () => false,
-  } as unknown as Electron.WebContents,
-};
+const mockWindow = new BrowserWindowMock() as unknown as Electron.BrowserWindow;
 
 describe('files', () => {
   const editorValues = createEditorValues();
@@ -49,11 +45,9 @@ describe('files', () => {
       filePaths: ['my/fake/path'],
       canceled: false,
     });
-    mocked(getOrCreateMainWindow).mockResolvedValue(
-      mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
-    );
+    mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
 
-    ipcMainManager.readyWebContents.add(mockTarget.webContents);
+    ipcMainManager.readyWebContents.add(mockWindow.webContents);
   });
 
   describe('setupFileListeners()', () => {
@@ -89,13 +83,11 @@ describe('files', () => {
     });
 
     it('notifies the main window of the event', async () => {
-      mocked(getOrCreateMainWindow).mockResolvedValue(
-        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
-      );
+      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
 
       await showOpenDialog();
 
-      expect(mockTarget.webContents.send).toHaveBeenCalledTimes(1);
+      expect(mockWindow.webContents.send).toHaveBeenCalledTimes(1);
     });
 
     it('adds the opened file path to recent files', async () => {
@@ -153,9 +145,7 @@ describe('files', () => {
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      mocked(getOrCreateMainWindow).mockResolvedValue(
-        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
-      );
+      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
       (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 
@@ -168,9 +158,7 @@ describe('files', () => {
       const err = new Error('💩');
       mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
       mocked(dialog.showMessageBox).mockRejectedValue(err);
-      mocked(getOrCreateMainWindow).mockResolvedValue(
-        mockTarget as Partial<Electron.BrowserWindow> as Electron.BrowserWindow,
-      );
+      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
       (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 

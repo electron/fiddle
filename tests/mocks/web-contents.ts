@@ -43,6 +43,7 @@ export class WebContentsMock extends EventEmitter {
   public inspectServiceWorker = jest.fn();
   public invalidate = jest.fn();
   public isCrashed = jest.fn();
+  public isDestroyed = jest.fn();
   public isDevToolsFocused = jest.fn();
   public isDevToolsOpened = jest.fn();
   public isLoading = jest.fn();
