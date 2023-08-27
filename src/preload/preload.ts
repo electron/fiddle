@@ -76,7 +76,6 @@ export async function setupFiddleGlobal() {
       );
     },
     app: null as any, // will be set in main.tsx
-    appPaths: await ipcRenderer.invoke(IpcEvents.GET_APP_PATHS),
     arch: process.arch,
     blockAccelerators(acceleratorsToBlock) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);

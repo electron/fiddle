@@ -4,10 +4,6 @@ export class ElectronFiddleMock {
   public addEventListener = jest.fn();
   public addModules = jest.fn();
   public app = new AppMock();
-  public appPaths = {
-    userData: '/fake/path',
-    home: `~`,
-  };
   public arch = process.arch;
   public blockAccelerators = jest.fn();
   public cleanupDirectory = jest.fn();

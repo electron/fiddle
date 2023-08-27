@@ -102,7 +102,6 @@ declare global {
         ...names: Array<string>
       ): Promise<string>;
       app: App;
-      appPaths: Record<string, string>;
       arch: string;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
       cleanupDirectory(dir: string): Promise<boolean>;
