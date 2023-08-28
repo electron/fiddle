@@ -36,7 +36,7 @@ describe('RemoteLoader', () => {
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    app = window.ElectronFiddle.app as unknown as AppMock;
+    app = window.app as unknown as AppMock;
     ({ state: store } = app);
     store.channelsToShow = [ElectronReleaseChannel.stable];
     store.initVersions('4.0.0', {

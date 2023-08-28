@@ -41,7 +41,7 @@ describe('VersionSelect component', () => {
   };
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
 
     const { mockVersions } = new VersionsMock();
     (store as unknown as StateMock).initVersions('2.0.2', {

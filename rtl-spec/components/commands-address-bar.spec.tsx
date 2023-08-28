@@ -12,7 +12,7 @@ describe('AddressBar component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    store = window.ElectronFiddle.app.state;
+    store = window.app.state;
   });
 
   it('loads a remote gist from a gist URL', async () => {
@@ -33,7 +33,7 @@ describe('AddressBar component', () => {
 
     await userEvent.click(btn);
 
-    const { fetchGistAndLoad } = window.ElectronFiddle.app.remoteLoader;
+    const { fetchGistAndLoad } = window.app.remoteLoader;
     expect(fetchGistAndLoad).toBeCalledWith(gistId);
   });
 

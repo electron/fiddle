@@ -148,7 +148,8 @@ export class Runner {
     const currentRunnable = appState.currentElectronVersion;
     const { version, state, localPath } = currentRunnable;
     const isValidBuild =
-      window.ElectronFiddle.getLocalVersionState(currentRunnable) ===
+      // Destructure currentRunnable so it's not a Proxy object, which can't be used
+      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
       InstallState.installed;
 
     // If the current active version is unavailable when we try to run
@@ -430,7 +431,7 @@ export class Runner {
     options: PackageJsonOptions,
     transforms?: Array<FileTransformOperation>,
   ): Promise<string | null> {
-    const { fileManager } = window.ElectronFiddle.app;
+    const { fileManager } = window.app;
     const { pushOutput, pushError } = this.appState;
 
     try {

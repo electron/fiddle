@@ -29,7 +29,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     }));
 
   beforeEach(() => {
-    ({ runner, state: store } = window.ElectronFiddle.app);
+    ({ runner, state: store } = window.app);
 
     (store as unknown as StateMock).versionsToShow =
       generateVersionRange(numVersions);

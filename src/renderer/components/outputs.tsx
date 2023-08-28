@@ -28,7 +28,7 @@ export const Outputs = observer(
       super(props);
 
       this.state = {
-        monaco: window.ElectronFiddle.monaco,
+        monaco: window.monaco,
         monacoOptions: defaultMonacoOptions,
       };
     }

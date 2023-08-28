@@ -12,7 +12,7 @@ describe('Header component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
     store.isTourShowing = true;
   });
 

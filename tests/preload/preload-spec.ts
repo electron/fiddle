@@ -2,6 +2,9 @@
  * @jest-environment node
  */
 
+import { contextBridge } from 'electron';
+import { mocked } from 'jest-mock';
+
 import { setupFiddleGlobal } from '../../src/preload/preload';
 
 describe('preload', () => {
@@ -13,10 +16,14 @@ describe('preload', () => {
   });
 
   describe('setupGlobalWindow()', () => {
-    it('sets up a window.ElectronFiddle object', async () => {
+    it('exposes an ElectronFiddle object via the contextBridge', async () => {
+      mocked(contextBridge.exposeInMainWorld).mockReturnValue(undefined);
       await setupFiddleGlobal();
 
-      expect(window.ElectronFiddle).toMatchObject({ app: null });
+      expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
+        'ElectronFiddle',
+        expect.objectContaining({ startFiddle: expect.anything() }),
+      );
     });
   });
 });

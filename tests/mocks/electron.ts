@@ -97,6 +97,10 @@ export class IPCRendererMock extends EventEmitter {
   public invoke = jest.fn();
 }
 
+export class ContextBridgeMock {
+  public exposeInMainWorld = jest.fn();
+}
+
 function CreateWindowStub() {
   return {
     id: 0,
@@ -177,6 +181,7 @@ const electronMock = {
     writeText: jest.fn(),
     writeImage: jest.fn(),
   },
+  contextBridge: new ContextBridgeMock(),
   crashReporter: {
     start: jest.fn(),
   },

@@ -12,7 +12,7 @@ describe('Bisect commands component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    store = window.ElectronFiddle.app.state;
+    store = window.app.state;
   });
 
   it('is disabled if an electron version is currently downloading', () => {

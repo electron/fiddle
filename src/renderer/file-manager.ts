@@ -32,7 +32,7 @@ export class FileManager {
     window.ElectronFiddle.addEventListener(
       'open-template',
       (templateName, editorValues) => {
-        window.ElectronFiddle.app.replaceFiddle(editorValues, {
+        window.app.replaceFiddle(editorValues, {
           templateName,
         });
       },
@@ -61,7 +61,7 @@ export class FileManager {
    * @memberof FileManager
    */
   public async openFiddle(filePath: string, files: Record<string, string>) {
-    const { app } = window.ElectronFiddle;
+    const { app } = window;
 
     console.log(`FileManager: Asked to open`, filePath);
     if (!filePath || typeof filePath !== 'string') return;
@@ -69,7 +69,7 @@ export class FileManager {
     const editorValues: EditorValues = {};
     for (const [name, value] of Object.entries(files)) {
       if (name === PACKAGE_NAME) {
-        const { remoteLoader } = window.ElectronFiddle.app;
+        const { remoteLoader } = window.app;
         const { dependencies, devDependencies } = JSON.parse(value);
         const deps: Record<string, string> = {
           ...dependencies,
@@ -127,7 +127,7 @@ export class FileManager {
     options?: PackageJsonOptions,
     transforms: Array<FileTransformOperation> = [],
   ): Promise<{ localPath?: string; files: Files }> {
-    const { app } = window.ElectronFiddle;
+    const { app } = window;
 
     const pOptions = typeof options === 'object' ? options : DEFAULT_OPTIONS;
     const values = await app.getEditorValues(pOptions);

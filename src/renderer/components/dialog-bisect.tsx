@@ -86,7 +86,7 @@ export const BisectDialog = observer(
     public async onAuto(): Promise<void> {
       const range = this.getBisectRange();
       if (range.length > 1) {
-        window.ElectronFiddle.app.runner.autobisect(range);
+        window.app.runner.autobisect(range);
         this.onClose();
       }
     }

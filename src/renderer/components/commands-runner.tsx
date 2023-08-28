@@ -60,14 +60,14 @@ export const Runner = observer(
           if (isRunning) {
             props.active = true;
             props.text = 'Stop';
-            props.onClick = window.ElectronFiddle.app.runner.stop;
+            props.onClick = window.app.runner.stop;
             props.icon = 'stop';
           } else if (isInstallingModules) {
             props.text = 'Installing modules';
             props.icon = <Spinner size={16} />;
           } else {
             props.text = 'Run';
-            props.onClick = window.ElectronFiddle.app.runner.run;
+            props.onClick = window.app.runner.run;
             props.icon = 'play';
           }
           break;

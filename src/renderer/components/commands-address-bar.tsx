@@ -33,7 +33,7 @@ export const AddressBar = observer(
       const { gistId } = this.props.appState;
       const value = urlFromId(gistId);
 
-      const { remoteLoader } = window.ElectronFiddle.app;
+      const { remoteLoader } = window.app;
 
       this.state = {
         value,
@@ -62,7 +62,7 @@ export const AddressBar = observer(
      * @memberof AddressBar
      */
     private submit() {
-      const { remoteLoader } = window.ElectronFiddle.app;
+      const { remoteLoader } = window.app;
       if (this.state.value) {
         remoteLoader.fetchGistAndLoad(
           idFromUrl(this.state.value) || this.state.value,

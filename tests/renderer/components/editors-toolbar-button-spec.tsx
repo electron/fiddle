@@ -47,7 +47,7 @@ describe('Editor toolbar button component', () => {
       mosaicId: 'test',
     };
 
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   describe('MaximizeButton', () => {

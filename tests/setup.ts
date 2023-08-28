@@ -4,7 +4,7 @@ import { createSerializer } from 'enzyme-to-json';
 import { mocked } from 'jest-mock';
 import { configure as mobxConfigure } from 'mobx';
 
-import { ElectronFiddleMock } from './mocks/mocks';
+import { AppMock, ElectronFiddleMock, MonacoMock } from './mocks/mocks';
 
 enzymeConfigure({ adapter: new Adapter() });
 
@@ -82,6 +82,8 @@ window.navigator = window.navigator ?? {};
  * code called in individual tests.
  */
 (window.ElectronFiddle as any) = new ElectronFiddleMock();
+(window.app as any) = new AppMock();
+(window.monaco as any) = new MonacoMock();
 window.localStorage.setItem = jest.fn();
 window.localStorage.getItem = jest.fn();
 window.localStorage.removeItem = jest.fn();
@@ -95,6 +97,8 @@ beforeEach(() => {
   document.body.innerHTML = '<div id="app" />';
 
   (window.ElectronFiddle as any) = new ElectronFiddleMock();
+  (window.app as any) = new AppMock();
+  (window.monaco as any) = new MonacoMock();
   mocked(window.localStorage.setItem).mockReset();
   mocked(window.localStorage.getItem).mockReset();
   mocked(window.localStorage.removeItem).mockReset();

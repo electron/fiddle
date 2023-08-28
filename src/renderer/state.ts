@@ -742,7 +742,7 @@ export class AppState {
 
   public setTheme(fileName?: string) {
     this.theme = fileName || '';
-    window.ElectronFiddle.app.loadTheme(this.theme);
+    window.app.loadTheme(this.theme);
   }
 
   public addLocalVersion(input: Version) {
@@ -813,7 +813,7 @@ export class AppState {
           (await window.ElectronFiddle.removeVersion(version)) ===
           InstallState.missing
         ) {
-          await window.ElectronFiddle.app.electronTypes.uncache(ver);
+          await window.app.electronTypes.uncache(ver);
 
           this.broadcastVersionStates([ver]);
         }
@@ -956,7 +956,7 @@ export class AppState {
       const values = await window.ElectronFiddle.getTemplate(version);
       // test again just in case something happened while we awaited
       if (shouldReplace()) {
-        await window.ElectronFiddle.app.replaceFiddle(values, options);
+        await window.app.replaceFiddle(values, options);
       }
     }
 

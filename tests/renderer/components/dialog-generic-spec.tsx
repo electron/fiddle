@@ -15,7 +15,7 @@ describe('GenericDialog component', () => {
     // platform, so let' have a uniform platform for unit tests
     overrideRendererPlatform('darwin');
 
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   describe('renders', () => {

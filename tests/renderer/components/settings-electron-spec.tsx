@@ -23,7 +23,7 @@ describe('ElectronSettings component', () => {
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ state: store } = window.ElectronFiddle.app as unknown as AppMock);
+    ({ state: store } = window.app as unknown as AppMock);
 
     store.initVersions('2.0.1', { ...mockVersions });
     store.channelsToShow = [

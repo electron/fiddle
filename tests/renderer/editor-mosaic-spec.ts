@@ -10,7 +10,6 @@ import {
 import { getEmptyContent } from '../../src/utils/editor-utils';
 import {
   AppMock,
-  ElectronFiddleMock,
   MonacoEditorMock,
   MonacoMock,
   createEditorValues,
@@ -25,7 +24,7 @@ describe('EditorMosaic', () => {
   let app: AppMock;
 
   beforeEach(() => {
-    ({ app, monaco } = window.ElectronFiddle as unknown as ElectronFiddleMock);
+    ({ app, monaco } = window as any);
 
     // inject a real EditorMosaic into our mock scaffolding
     editorMosaic = new EditorMosaic();

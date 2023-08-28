@@ -21,7 +21,7 @@ describe('FileManager', () => {
     );
 
     // create a real FileManager and insert it into our mocks
-    app = window.ElectronFiddle.app as unknown as AppMock;
+    app = window.app as unknown as AppMock;
     fm = new FileManager((app as unknown as App).state);
     (app as unknown as App).fileManager = fm;
   });

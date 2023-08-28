@@ -47,7 +47,7 @@ export const Editors = observer(
       this.setFocused = this.setFocused.bind(this);
 
       this.state = {
-        monaco: window.ElectronFiddle.monaco,
+        monaco: window.monaco,
         monacoOptions: defaultMonacoOptions,
       };
     }
@@ -75,14 +75,14 @@ export const Editors = observer(
         // Clear previously installed modules.
         modules.clear();
 
-        await window.ElectronFiddle.app.replaceFiddle(values, options);
+        await window.app.replaceFiddle(values, options);
       });
 
       window.ElectronFiddle.addEventListener('new-test', async () => {
         const values = await window.ElectronFiddle.getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
-        await window.ElectronFiddle.app.replaceFiddle(values, options);
+        await window.app.replaceFiddle(values, options);
       });
 
       window.ElectronFiddle.addEventListener(

@@ -10,7 +10,7 @@ import {
  * @param {LoadedFiddleTheme} theme
  */
 export function activateTheme(theme: LoadedFiddleTheme) {
-  const { monaco } = window.ElectronFiddle;
+  const { monaco } = window;
   monaco.editor.defineTheme('main', theme.editor as any);
   monaco.editor.setTheme('main');
 }

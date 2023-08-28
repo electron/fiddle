@@ -22,7 +22,6 @@ jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
 
 describe('App component', () => {
   let app: App;
-  let ElectronFiddle: Window['ElectronFiddle'];
 
   beforeAll(() => {
     document.body.innerHTML = '<div id="app" />';
@@ -38,8 +37,7 @@ describe('App component', () => {
       semver.parse('24.0.0')!,
     );
 
-    ({ ElectronFiddle } = window);
-    const { app: appMock } = ElectronFiddle;
+    const { app: appMock } = window;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
     jest.spyOn(app.state, 'downloadVersion').mockResolvedValue(undefined);
@@ -50,7 +48,7 @@ describe('App component', () => {
       runner,
       state,
     });
-    ElectronFiddle.app = app;
+    window.app = app;
 
     state.editorMosaic.set({ [MAIN_JS]: '// content' });
     state.editorMosaic.files.set(MAIN_JS, EditorPresence.Pending);
