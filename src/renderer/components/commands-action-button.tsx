@@ -213,8 +213,8 @@ export const GistActionButton = observer(
 
         const files = this.gistFilesList(values);
         for (const id of Object.keys(oldFiles)) {
-          // Gist files are deleted by setting content to an empty string.
-          if (!(id in files)) files[id] = { content: '' };
+          // Delete files that have been removed or renamed.
+          if (!(id in files)) files[id] = null as any;
         }
 
         const gist = await octo.gists.update({
