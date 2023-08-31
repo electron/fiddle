@@ -6,7 +6,12 @@ import {
   shell,
 } from 'electron';
 
-import { showOpenDialog, showSaveDialog } from './files';
+import {
+  saveFiddle,
+  saveFiddleAs,
+  saveFiddleAsForgeProject,
+  showOpenDialog,
+} from './files';
 import { ipcMainManager } from './ipc';
 import { getTemplateValues } from './templates';
 import { createMainWindow } from './windows';
@@ -265,14 +270,14 @@ function getFileMenu(
     },
     {
       label: 'Save',
-      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE),
+      click: () => saveFiddle(),
       accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.save)
         ? 'CmdOrCtrl+S'
         : undefined,
     },
     {
       label: 'Save as',
-      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE),
+      click: () => saveFiddleAs(),
       accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.saveAs)
         ? 'CmdOrCtrl+Shift+S'
         : undefined,
@@ -286,8 +291,7 @@ function getFileMenu(
     },
     {
       label: 'Save as Forge Project',
-      click: () =>
-        showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Forge Project'),
+      click: () => saveFiddleAsForgeProject(),
     },
   ];
 

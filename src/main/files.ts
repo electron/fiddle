@@ -1,10 +1,13 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent, app, dialog } from 'electron';
+import { BrowserWindow, IpcMainEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
+import * as tmp from 'tmp';
 
 import { ipcMainManager } from './ipc';
+import { getFiles } from './utils/get-files';
 import { readFiddle } from './utils/read-fiddle';
+import { Files } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { isSupportedFile } from '../utils/editor-utils';
 
@@ -15,9 +18,6 @@ export function setupFileListeners() {
   ipcMainManager.on(IpcEvents.PATH_EXISTS, (event, path: string) => {
     event.returnValue = fs.existsSync(path);
   });
-  ipcMainManager.on(IpcEvents.FS_SAVE_FIDDLE_DIALOG, () => {
-    showSaveDialog();
-  });
   ipcMainManager.handle(
     IpcEvents.CLEANUP_DIRECTORY,
     (_: IpcMainEvent, dir: string) => cleanupDirectory(dir),
@@ -25,6 +25,11 @@ export function setupFileListeners() {
   ipcMainManager.handle(
     IpcEvents.DELETE_USER_DATA,
     (_: IpcMainEvent, name: string) => deleteUserData(name),
+  );
+  ipcMainManager.handle(
+    IpcEvents.SAVE_FILES_TO_TEMP,
+    (_: IpcMainEvent, files: [string, string][]) =>
+      saveFilesToTemp(new Map(files)),
   );
 }
 
@@ -47,10 +52,9 @@ export async function showOpenDialog() {
 }
 
 /**
- * Shows the "Save Fiddle" dialog and forwards
- * the path to the renderer
+ * Shows the "Save Fiddle" dialog and returns the path
  */
-export async function showSaveDialog(event?: IpcEvents, as?: string) {
+export async function showSaveDialog(as?: string): Promise<undefined | string> {
   // We want to save to a folder, so we'll use an open dialog here
   const filePaths = dialog.showOpenDialogSync({
     buttonLabel: 'Save here',
@@ -66,8 +70,10 @@ export async function showSaveDialog(event?: IpcEvents, as?: string) {
 
   // Let's confirm real quick if we want this
   if (await isOkToSaveAt(filePaths[0])) {
-    ipcMainManager.send(event || IpcEvents.FS_SAVE_FIDDLE, [filePaths[0]]);
+    return filePaths[0];
   }
+
+  return;
 }
 
 /**
@@ -140,4 +146,119 @@ export async function deleteUserData(name: string) {
   const appData = path.join(app.getPath('appData'), name);
   console.log(`Cleanup: Deleting data dir ${appData}`);
   await cleanupDirectory(appData);
+}
+
+/**
+ * Save the files to a temporary directory. Returns the
+ * path to the temp directory.
+ */
+export async function saveFilesToTemp(files: Files): Promise<string> {
+  const dir = tmp.dirSync({
+    prefix: 'electron-fiddle',
+  });
+
+  tmp.setGracefulCleanup();
+
+  for (const [name, content] of files) {
+    try {
+      await fs.outputFile(path.join(dir.name, name), content);
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  return dir.name;
+}
+
+/**
+ * Safely attempts to save a file, doesn't crash the app if
+ * it fails.
+ */
+async function saveFile(filePath: string, content: string): Promise<void> {
+  try {
+    return await fs.outputFile(filePath, content, { encoding: 'utf-8' });
+  } catch (error) {
+    console.log(`saveFile: Could not save ${filePath}`, error);
+  }
+}
+
+/**
+ * Safely attempts to remove a file, doesn't crash the app if
+ * it fails.
+ */
+async function removeFile(filePath: string): Promise<void> {
+  try {
+    return await fs.remove(filePath);
+  } catch (error) {
+    console.log(`removeFile: Could not remove ${filePath}`, error);
+  }
+}
+
+export async function saveFiles(
+  window: BrowserWindow,
+  filePath: string,
+  files: Files,
+) {
+  console.log(`saveFiddleWithTransforms: Asked to save to ${filePath}`);
+
+  for (const [fileName, content] of files) {
+    const savePath = path.join(filePath, fileName);
+
+    // If the file has content, save it to disk. If there's no
+    // content in the file, remove a file that possibly exists.
+    if (content) {
+      await saveFile(savePath, content);
+    } else {
+      await removeFile(savePath);
+    }
+  }
+
+  ipcMainManager.send(
+    IpcEvents.SAVED_LOCAL_FIDDLE,
+    [filePath],
+    window.webContents,
+  );
+}
+
+/**
+ * Saves the current Fiddle to disk. If we never saved before,
+ * we'll first open the "Save" dialog.
+ */
+export async function saveFiddle() {
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { localPath, files } = await getFiles(window, ['dotfiles']);
+    const pathToSave = localPath ?? (await showSaveDialog());
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
+  }
+}
+
+/**
+ * Saves the current Fiddle to disk.
+ */
+export async function saveFiddleAs() {
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { files } = await getFiles(window, ['dotfiles']);
+    const pathToSave = await showSaveDialog();
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
+  }
+}
+
+/**
+ * Saves the current Fiddle to disk as a Forge project.
+ */
+export async function saveFiddleAsForgeProject() {
+  const window = BrowserWindow.getFocusedWindow();
+  if (window) {
+    const { files } = await getFiles(window, ['dotfiles', 'forge']);
+    const pathToSave = await showSaveDialog('Forge Project');
+    if (pathToSave) {
+      await saveFiles(window, pathToSave, files);
+    }
+  }
 }

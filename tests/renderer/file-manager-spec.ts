@@ -1,4 +1,3 @@
-import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
 
 import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
@@ -10,13 +9,6 @@ import { AppMock, createEditorValues } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
 jest.mock('../../src/renderer/transforms/dotfiles');
-jest.mock('fs-extra');
-jest.mock('tmp', () => ({
-  setGracefulCleanup: jest.fn(),
-  dirSync: jest.fn(() => ({
-    name: '/fake/temp',
-  })),
-}));
 
 describe('FileManager', () => {
   const editorValues = createEditorValues();
@@ -123,88 +115,23 @@ describe('FileManager', () => {
     });
   });
 
-  describe('saveFiddle()', () => {
-    it('saves all non-empty files in Fiddle', async () => {
-      const values = { ...editorValues };
-      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
-
-      await fm.saveFiddle('/fake/path');
-      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
-    });
-
-    it('saves a fiddle with supported files', async () => {
-      const file = 'file.js';
-      const content = '// hi';
-      const values = { ...editorValues, [file]: content };
-      jest.spyOn(app, 'getEditorValues').mockReturnValue(values);
-
-      await fm.saveFiddle('/fake/path');
-      expect(fs.outputFile).toHaveBeenCalledTimes(Object.keys(values).length);
-    });
-
-    it('removes a file that is newly empty', async () => {
-      await fm.saveFiddle('/fake/path');
-
-      expect(fs.remove).toHaveBeenCalledTimes(1);
-    });
-
-    it('handles an error (output)', async () => {
-      mocked(fs.outputFile).mockImplementation(() => {
-        throw new Error('bwap');
-      });
-
-      await fm.saveFiddle('/fake/path');
-
-      const n = Object.keys(editorValues).length;
-      expect(fs.outputFile).toHaveBeenCalledTimes(n);
-      expect(window.ElectronFiddle.setShowMeTemplate).toHaveBeenCalled();
-    });
-
-    it('handles an error (remove)', async () => {
-      mocked(fs.remove).mockImplementation(() => {
-        throw new Error('bwap');
-      });
-      await fm.saveFiddle('/fake/path');
-
-      expect(fs.remove).toHaveBeenCalledTimes(1);
-    });
-
-    it('runs saveFiddle (normal) on event', () => {
-      fm.saveFiddle = jest.fn();
-      emitEvent('save-fiddle');
-      expect(fm.saveFiddle).toHaveBeenCalled();
-    });
-
-    it('runs saveFiddle (forge) on event', () => {
-      fm.saveFiddle = jest.fn();
-      emitEvent('save-fiddle-forge');
-      expect(fm.saveFiddle).toHaveBeenCalled();
-    });
-
-    it('asks for a path if none can  be found', async () => {
-      await fm.saveFiddle();
-
-      expect(window.ElectronFiddle.showSaveDialog).toHaveBeenCalled();
-    });
-  });
-
   describe('saveToTemp()', () => {
     it('saves as a local fiddle', async () => {
-      const tmp = require('tmp');
-
-      await fm.saveToTemp({
-        includeDependencies: false,
-        includeElectron: false,
-      });
-
-      expect(fs.outputFile).toHaveBeenCalledTimes(6);
-      expect(tmp.setGracefulCleanup).toHaveBeenCalled();
+      const tmpPath = '/tmp/save-to-temp/';
+      mocked(window.ElectronFiddle.saveFilesToTemp).mockResolvedValue(tmpPath);
+      await expect(
+        fm.saveToTemp({
+          includeDependencies: false,
+          includeElectron: false,
+        }),
+      ).resolves.toEqual(tmpPath);
+      expect(window.ElectronFiddle.saveFilesToTemp).toHaveBeenCalled();
     });
 
     it('throws an error', async () => {
-      (fs.outputFile as jest.Mock).mockImplementation(() => {
-        throw new Error('bwap');
-      });
+      mocked(window.ElectronFiddle.saveFilesToTemp).mockRejectedValue(
+        new Error('bwap'),
+      );
 
       const testFn = async () => {
         await fm.saveToTemp({

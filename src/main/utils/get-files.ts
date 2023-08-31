@@ -8,6 +8,7 @@ import { ipcMainManager } from '../ipc';
  * Gets file content from the renderer
  */
 export function getFiles(
+  window: Electron.BrowserWindow,
   transforms: Array<FileTransformOperation>,
 ): Promise<{ localPath?: string; files: Files }> {
   return new Promise((resolve) => {
@@ -16,6 +17,7 @@ export function getFiles(
       IpcEvents.GET_FILES,
       { options: undefined, transforms },
       [port1],
+      window.webContents,
     );
     port2.once('message', (event) => {
       resolve(event.data);

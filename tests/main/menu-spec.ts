@@ -7,12 +7,19 @@ import { mocked } from 'jest-mock';
 
 import { BlockableAccelerator } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
+import {
+  saveFiddle,
+  saveFiddleAs,
+  saveFiddleAsForgeProject,
+  showOpenDialog,
+} from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 import { setupMenu } from '../../src/main/menu';
 import { getTemplateValues } from '../../src/main/templates';
 import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
+jest.mock('../../src/main/files');
 jest.mock('../../src/main/templates');
 jest.mock('../../src/main/windows');
 jest.mock('../../src/main/ipc');
@@ -341,19 +348,17 @@ describe('menu', () => {
 
       it('opens a Fiddle', () => {
         file.submenu[Idx.OPEN].click();
-        expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
+        expect(showOpenDialog).toHaveBeenCalled();
       });
 
       it('saves a Fiddle', () => {
         file.submenu[Idx.SAVE].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
-          IpcEvents.FS_SAVE_FIDDLE,
-        );
+        expect(saveFiddle).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as', () => {
         file.submenu[Idx.SAVE_AS].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAs).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as a gist', () => {
@@ -365,21 +370,19 @@ describe('menu', () => {
 
       it('saves a Fiddle as a forge project', () => {
         file.submenu[Idx.FORGE].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAsForgeProject).toHaveBeenCalled();
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
         setupMenu({ acceleratorsToBlock: [BlockableAccelerator.save] });
         file.submenu[Idx.SAVE].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith(
-          IpcEvents.FS_SAVE_FIDDLE,
-        );
+        expect(saveFiddle).toHaveBeenCalled();
       });
 
       it('saves as a Fiddle with blocked accelerator', () => {
         setupMenu({ acceleratorsToBlock: [BlockableAccelerator.saveAs] });
         file.submenu[Idx.SAVE_AS].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAs).toHaveBeenCalled();
       });
     });
   });
