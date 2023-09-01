@@ -809,8 +809,10 @@ export class AppState {
         state === InstallState.installed ||
         state == InstallState.downloaded
       ) {
-        await window.ElectronFiddle.removeVersion(version);
-        if (this.getVersionState(version) === InstallState.missing) {
+        if (
+          (await window.ElectronFiddle.removeVersion(version)) ===
+          InstallState.missing
+        ) {
           await window.ElectronFiddle.app.electronTypes.uncache(ver);
 
           this.broadcastVersionStates([ver]);

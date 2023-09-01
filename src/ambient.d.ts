@@ -157,7 +157,7 @@ declare global {
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
-      removeVersion(version: string): Promise<void>;
+      removeVersion(version: string): Promise<InstallState>;
       saveFilesToTemp(files: Files): Promise<string>;
       selectLocalVersion: () => Promise<SelectedLocalVersion | undefined>;
       sendReady(): void;

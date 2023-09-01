@@ -60,7 +60,7 @@ describe('AppState', () => {
     appState = new AppState(mockVersionsArray);
     removeSpy = jest
       .spyOn(window.ElectronFiddle, 'removeVersion')
-      .mockResolvedValue(undefined);
+      .mockResolvedValue(InstallState.missing);
     ensureDownloadedSpy = jest
       .spyOn(window.ElectronFiddle, 'downloadVersion')
       .mockResolvedValue(undefined);

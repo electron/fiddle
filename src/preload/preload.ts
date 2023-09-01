@@ -200,7 +200,7 @@ export async function setupFiddleGlobal() {
       }
     },
     async removeVersion(version: string) {
-      await ipcRenderer.invoke(IpcEvents.REMOVE_VERSION, version);
+      return ipcRenderer.invoke(IpcEvents.REMOVE_VERSION, version);
     },
     saveFilesToTemp(files: Files) {
       return ipcRenderer.invoke(IpcEvents.SAVE_FILES_TO_TEMP, [

@@ -146,6 +146,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
 
       try {
         await removingVersions.get(version);
+        return installer.state(version);
       } finally {
         removingVersions.delete(version);
       }
