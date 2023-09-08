@@ -147,3 +147,25 @@ export function emitEvent(type: FiddleEvent, ...args: any[]) {
     },
   );
 }
+
+export function getOrCreateMapValue<T extends Map<unknown, unknown>>(
+  map: T,
+  key: MapKey<T>,
+  fallbackValue: MapValue<T>,
+): MapValue<T> {
+  if (!map.has(key)) {
+    map.set(key, fallbackValue);
+
+    return fallbackValue;
+  }
+
+  return map.get(key) as MapValue<T>;
+}
+
+type MapKey<T extends Map<unknown, unknown>> = T extends Map<infer I, unknown>
+  ? I
+  : never;
+
+type MapValue<T extends Map<unknown, unknown>> = T extends Map<unknown, infer I>
+  ? I
+  : never;

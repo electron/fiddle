@@ -13,6 +13,7 @@ import { ElectronSettings } from '../../../src/renderer/components/settings-elec
 import { AppState } from '../../../src/renderer/state';
 import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
+import { waitFor } from '../../utils';
 
 jest.mock('../../../src/renderer/utils/disable-download.ts');
 
@@ -20,12 +21,13 @@ describe('ElectronSettings component', () => {
   let store: StateMock;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
+  const version = '2.0.1';
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
     ({ state: store } = window.ElectronFiddle.app as unknown as AppMock);
 
-    store.initVersions('2.0.1', { ...mockVersions });
+    store.initVersions(version, { ...mockVersions });
     store.channelsToShow = [
       ElectronReleaseChannel.stable,
       ElectronReleaseChannel.beta,
@@ -39,7 +41,7 @@ describe('ElectronSettings component', () => {
     store.versionsToShow[i++].state = InstallState.installing;
   });
 
-  it('renders', () => {
+  it('renders', async () => {
     const spy = jest
       .spyOn(window.ElectronFiddle, 'getOldestSupportedMajor')
       .mockReturnValue(9);
@@ -65,6 +67,10 @@ describe('ElectronSettings component', () => {
     const wrapper = shallow(
       <ElectronSettings appState={store as unknown as AppState} />,
     );
+
+    await store.setVersion(version);
+    await waitFor(() => store.activeVersions.size > 0);
+
     expect(wrapper).toMatchSnapshot();
 
     spy.mockRestore();

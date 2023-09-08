@@ -215,6 +215,7 @@ export const ElectronSettings = observer(
         </ButtonGroup>
       );
     }
+
     private filterSection(): JSX.Element {
       const { appState } = this.props;
       return (
@@ -401,7 +402,7 @@ export const ElectronSettings = observer(
           break;
       }
 
-      if (version === appState.currentElectronVersion.version) {
+      if (appState.activeVersions.has(version)) {
         return (
           <Tooltip
             position="auto"

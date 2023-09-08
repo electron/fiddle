@@ -225,6 +225,35 @@ export class AppState {
     });
   }
 
+  // Do we have a lock on the active Electron version that prevents other windows from removing it?
+  private hasActiveLock = false;
+
+  // Used to release the lock when the current window switches Electron versions
+  private versionLockController = new AbortController();
+
+  private static versionLockNamePrefix = 'version:';
+
+  public activeVersions: Set<string> = new Set();
+
+  private getVersionLockName(ver: string) {
+    return `${AppState.versionLockNamePrefix}${ver}`;
+  }
+
+  /**
+   * Updates the Electron versions that are currently active in some window.
+   */
+  private async updateActiveVersions(): Promise<void> {
+    this.activeVersions = ((await navigator.locks.query()).held || []).reduce<
+      Set<string>
+    >((acc, item) => {
+      if (item.name?.startsWith(AppState.versionLockNamePrefix)) {
+        acc.add(item.name.split(AppState.versionLockNamePrefix)[1]);
+      }
+
+      return acc;
+    }, new Set());
+  }
+
   constructor(versions: RunnableVersion[]) {
     makeObservable<AppState, 'setPageHash' | 'setVersionStates'>(this, {
       Bisector: observable,
@@ -233,6 +262,7 @@ export class AppState {
       addAcceleratorToBlock: action,
       addLocalVersion: action,
       addNewVersions: action,
+      activeVersions: observable,
       channelsToShow: observable,
       clearConsole: action,
       currentElectronVersion: computed,
@@ -476,6 +506,12 @@ export class AppState {
         const { type, payload } = event.data;
 
         switch (type) {
+          case AppStateBroadcastMessageType.activeVersionsChanged: {
+            this.updateActiveVersions();
+
+            break;
+          }
+
           case AppStateBroadcastMessageType.isDownloadingAll: {
             this.isDownloadingAll = payload;
             break;
@@ -795,34 +831,53 @@ export class AppState {
   public async removeVersion(ver: RunnableVersion): Promise<void> {
     const { version, state, source } = ver;
 
-    if (ver === this.currentElectronVersion) {
+    if (this.activeVersions.has(ver.version)) {
       console.log(`State: Not removing active version ${version}`);
       return;
     }
 
-    console.log(`State: Removing Electron ${version}`);
-    if (source === VersionSource.local) {
-      if (version in this.versions) {
-        delete this.versions[version];
-        saveLocalVersions(Object.values(this.versions));
-      } else {
-        console.log(`State: Version ${version} already removed, doing nothing`);
-      }
-    } else {
-      if (
-        state === InstallState.installed ||
-        state == InstallState.downloaded
-      ) {
-        await this.installer.remove(version);
-        if (this.installer.state(version) === InstallState.missing) {
-          await window.ElectronFiddle.app.electronTypes.uncache(ver);
-
-          this.broadcastVersionStates([ver]);
+    await navigator.locks.request(
+      this.getVersionLockName(version),
+      {
+        mode: 'exclusive',
+        ifAvailable: true,
+      },
+      async (lock) => {
+        // another window is already removing this version
+        if (!lock) {
+          return;
         }
-      } else {
-        console.log(`State: Version ${version} already removed, doing nothing`);
-      }
-    }
+
+        console.log(`State: Removing Electron ${version}`);
+
+        if (source === VersionSource.local) {
+          if (version in this.versions) {
+            delete this.versions[version];
+            saveLocalVersions(Object.values(this.versions));
+          } else {
+            console.log(
+              `State: Version ${version} already removed, doing nothing`,
+            );
+          }
+        } else {
+          if (
+            state === InstallState.installed ||
+            state == InstallState.downloaded
+          ) {
+            await this.installer.remove(version);
+            if (this.installer.state(version) === InstallState.missing) {
+              await window.ElectronFiddle.app.electronTypes.uncache(ver);
+
+              this.broadcastVersionStates([ver]);
+            }
+          } else {
+            console.log(
+              `State: Version ${version} already removed, doing nothing`,
+            );
+          }
+        }
+      },
+    );
   }
 
   /**
@@ -954,9 +1009,44 @@ export class AppState {
       return;
     }
 
+    if (this.hasActiveLock) {
+      console.log(`Releasing lock on version ${this.version}`);
+
+      // release the lock on the previous version
+      this.versionLockController.abort();
+
+      // replace the spent AbortController
+      this.versionLockController = new AbortController();
+    }
+
     const { version } = ver;
     console.log(`State: Switching to Electron ${version}`);
     this.version = version;
+
+    navigator.locks.request(
+      this.getVersionLockName(version),
+      { mode: 'shared' },
+      (lock) => {
+        // let other windows know we're using this version
+        this.broadcastChannel.postMessage({
+          type: AppStateBroadcastMessageType.activeVersionsChanged,
+        });
+
+        // the current window's state also needs an update - that's how
+        // the current window knows it can't remove this version
+        this.updateActiveVersions();
+
+        this.hasActiveLock = Boolean(lock);
+
+        /**
+         * The lock is released when this promise resolves, so we keep it in the
+         * pending state until our AbortController is aborted.
+         */
+        return new Promise<void>((resolve) => {
+          this.versionLockController.signal.onabort = () => resolve();
+        });
+      },
+    );
 
     // If there's no current fiddle,
     // or if the current fiddle is the previous version's template,
@@ -973,8 +1063,17 @@ export class AppState {
       }
     }
 
-    // Fetch new binaries, maybe?
-    await this.downloadVersion(ver);
+    await navigator.locks.request(
+      `downloading:${version}`,
+      { mode: 'exclusive' },
+      async (lock) => {
+        console.log(`exclusive download lock granted:`);
+        console.log(lock);
+
+        // Fetch new binaries, maybe?
+        await this.downloadVersion(ver);
+      },
+    );
   }
 
   /**

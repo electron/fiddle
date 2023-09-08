@@ -5,6 +5,7 @@ import { mocked } from 'jest-mock';
 import { configure as mobxConfigure } from 'mobx';
 
 import { ElectronFiddleMock } from './mocks/mocks';
+import { getOrCreateMapValue } from './utils';
 
 enzymeConfigure({ adapter: new Adapter() });
 
@@ -75,6 +76,164 @@ delete (window as any).localStorage;
 
 window.navigator = window.navigator ?? {};
 (window.navigator.clipboard as any) = {};
+
+type MockLock = Lock & {
+  abortController: AbortController;
+};
+
+class FakeNavigatorLocks implements LockManager {
+  locks = {
+    held: new Map<string, Map<LockMode, Set<MockLock>>>(),
+  };
+
+  query = async () => {
+    const result = {
+      held: [...this.locks.held.values()].reduce((acc, item) => {
+        acc.push(...[...item.get('exclusive')!.values()]);
+        acc.push(...[...item.get('shared')!.values()]);
+
+        return acc;
+      }, [] as MockLock[]),
+    };
+
+    return result as LockManagerSnapshot;
+  };
+
+  request = (async (...args: Parameters<LockManager['request']>) => {
+    const [
+      name,
+      options = {
+        ifAvailable: false,
+        mode: 'exclusive',
+        steal: false,
+      },
+      cb,
+    ] = args;
+
+    const { ifAvailable, mode, steal } = options;
+
+    const lock = {
+      name,
+      mode,
+      abortController: new AbortController(),
+    } as MockLock;
+
+    const heldLocksWithSameName = getOrCreateMapValue(
+      this.locks.held,
+      name,
+      new Map<LockMode, Set<MockLock>>(),
+    );
+
+    const exclusiveLocksWithSameName = getOrCreateMapValue(
+      heldLocksWithSameName,
+      'exclusive',
+      new Set<MockLock>(),
+    );
+
+    const sharedLocksWithSameName = getOrCreateMapValue(
+      heldLocksWithSameName,
+      'shared',
+      new Set<MockLock>(),
+    );
+
+    if (mode === 'shared') {
+      sharedLocksWithSameName.add(lock);
+
+      try {
+        await cb(lock);
+      } finally {
+        sharedLocksWithSameName.delete(lock);
+      }
+
+      return;
+    }
+
+    // exclusive lock
+
+    // no locks with this name -> grant an exclusive lock
+    if (
+      exclusiveLocksWithSameName.size === 0 &&
+      sharedLocksWithSameName.size === 0
+    ) {
+      exclusiveLocksWithSameName.add(lock);
+
+      try {
+        await cb(lock);
+      } finally {
+        exclusiveLocksWithSameName.delete(lock);
+      }
+
+      return;
+    }
+
+    // steal any currently held locks
+    if (steal) {
+      for (const lock of sharedLocksWithSameName) {
+        lock.abortController.abort();
+      }
+
+      for (const lock of exclusiveLocksWithSameName) {
+        lock.abortController.abort();
+      }
+
+      sharedLocksWithSameName.clear();
+      exclusiveLocksWithSameName.clear();
+
+      exclusiveLocksWithSameName.add(lock);
+
+      try {
+        await cb(lock);
+      } finally {
+        exclusiveLocksWithSameName.delete(lock);
+      }
+
+      return;
+    }
+
+    // run the callback without waiting for the lock to be released
+    if (ifAvailable) {
+      // just run the callback without waiting for it
+      cb(null);
+
+      return;
+    }
+
+    // @TODO add the lock to the list of pending locks?
+
+    // it's an exclusive lock, so there's only one value
+    const currentLock = exclusiveLocksWithSameName.values().next()
+      .value as MockLock;
+
+    const { abortController: currentLockAbortController } = currentLock;
+
+    // wait for the current lock to be released
+    await new Promise<void>((resolve, reject) => {
+      currentLockAbortController.signal.onabort = () => resolve();
+
+      const { abortController: pendingLockAbortController } = lock;
+
+      // this allows the locking mechanism to release this lock
+      pendingLockAbortController.signal.onabort = () => reject();
+    });
+
+    // clear the exclusive locks
+    exclusiveLocksWithSameName.clear();
+
+    // grant our lock
+    exclusiveLocksWithSameName.add(lock);
+
+    try {
+      // run the callback
+      await cb(lock);
+    } finally {
+      exclusiveLocksWithSameName.delete(lock);
+    }
+
+    return;
+  }) as LockManager['request'];
+}
+
+(window.navigator.locks as any) = new FakeNavigatorLocks();
 
 /**
  * Mock these properties twice so that they're available
