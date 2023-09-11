@@ -4,10 +4,8 @@
 
 import * as path from 'node:path';
 
-import * as electron from 'electron';
 import { mocked } from 'jest-mock';
 
-import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
 import {
   browserWindows,
@@ -124,26 +122,6 @@ describe('windows', () => {
       expect(browserWindows[0]).toBeTruthy();
       (await getOrCreateMainWindow()).webContents.emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
-    });
-
-    it('returns app.getPath() values on IPC event', async () => {
-      // we want to remove the effects of previous calls
-      browserWindows.length = 0;
-
-      // can't .emit() to trigger .handleOnce() so instead we mock
-      // to instantly call the listener.
-      let result: Record<string, string> = {};
-      mocked(electron.app.getPath).mockImplementation((name) => name);
-      mocked(electron.ipcMain.handle).mockImplementation((event, listener) => {
-        if (event === IpcEvents.GET_APP_PATHS) {
-          result = listener(null as any);
-        }
-      });
-      await getOrCreateMainWindow();
-      expect(Object.values(result).length).toBeGreaterThan(0);
-      for (const prop in result) {
-        expect(prop).toBe(result[prop]);
-      }
     });
   });
 });

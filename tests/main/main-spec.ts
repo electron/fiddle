@@ -23,6 +23,12 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { overridePlatform, resetPlatform } from '../utils';
 
+// Need to mock this out or CI will hit an error due to
+// code being run async continuing after the test ends:
+// > ReferenceError: You are trying to `import` a file
+// > after the Jest environment has been torn down.
+jest.mock('getos');
+
 jest.mock('../../src/main/windows', () => ({
   getOrCreateMainWindow: jest.fn(),
   mainIsReady: jest.fn(),

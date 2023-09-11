@@ -4,16 +4,13 @@ export class ElectronFiddleMock {
   public addEventListener = jest.fn();
   public addModules = jest.fn();
   public app = new AppMock();
-  public appPaths = {
-    userData: '/fake/path',
-    home: `~`,
-  };
   public arch = process.arch;
   public blockAccelerators = jest.fn();
   public cleanupDirectory = jest.fn();
   public confirmQuit = jest.fn();
   public createThemeFile = jest.fn();
   public deleteUserData = jest.fn();
+  public downloadVersion = jest.fn();
   public fetchVersions = jest.fn();
   public getAvailableThemes = jest.fn();
   public getElectronTypes = jest.fn();
@@ -30,6 +27,7 @@ export class ElectronFiddleMock {
   public isReleasedMajor = jest.fn();
   public getProjectName = jest.fn();
   public getUsername = jest.fn();
+  public getVersionState = jest.fn();
   public macTitlebarClicked = jest.fn();
   public monaco = new MonacoMock();
   public onGetFiles = jest.fn();
@@ -39,6 +37,7 @@ export class ElectronFiddleMock {
   public pushOutputEntry = jest.fn();
   public reloadWindows = jest.fn();
   public removeAllListeners = jest.fn();
+  public removeVersion = jest.fn();
   public saveFilesToTemp = jest.fn();
   public selectLocalVersion = jest.fn();
   public sendReady = jest.fn();
@@ -46,6 +45,8 @@ export class ElectronFiddleMock {
   public setShowMeTemplate = jest.fn();
   public showWarningDialog = jest.fn();
   public showWindow = jest.fn();
+  public startFiddle = jest.fn();
+  public stopFiddle = jest.fn();
   public taskDone = jest.fn();
   public readThemeFile = jest.fn();
   public themePath = '~/.electron-fiddle/themes';

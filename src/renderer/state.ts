@@ -1,21 +1,13 @@
 import {
-  BaseVersions,
-  Installer,
-  ProgressObject,
-  Runner,
-} from '@electron/fiddle-core';
-import {
   action,
   autorun,
   computed,
   makeObservable,
   observable,
-  runInAction,
   when,
 } from 'mobx';
 
 import { Bisector } from './bisect';
-import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { EditorMosaic } from './editor-mosaic';
 import { ELECTRON_MIRROR } from './mirror-constants';
 import { normalizeVersion } from './utils/normalize-version';
@@ -44,18 +36,13 @@ import {
   InstallState,
   OutputEntry,
   OutputOptions,
+  ProgressObject,
   RunnableVersion,
   SetFiddleOptions,
   Version,
   VersionSource,
   WindowSpecificSetting,
 } from '../interfaces';
-
-class UpdateableBaseVersions extends BaseVersions {
-  public updateVersions(val: unknown): void {
-    this.setVersions(val);
-  }
-}
 
 /**
  * The application's state. Exported as a singleton below.
@@ -195,20 +182,6 @@ export class AppState {
   private readonly defaultVersion: string;
   public appData: string;
 
-  // Populating versions in fiddle-core
-  public baseVersions = new UpdateableBaseVersions(getElectronVersions());
-
-  // For managing downloads and versions for electron
-  public installer: Installer = new Installer({
-    electronDownloads: ELECTRON_DOWNLOAD_PATH,
-    electronInstall: ELECTRON_INSTALL_PATH,
-  });
-
-  public versionRunner: Promise<Runner> = Runner.create({
-    installer: this.installer,
-    versions: this.baseVersions,
-  });
-
   // Used for communications between windows
   private broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
     'AppState',
@@ -312,6 +285,7 @@ export class AppState {
       toggleBisectDialog: action,
       toggleConsole: action,
       toggleSettings: action,
+      updateDownloadProgress: action,
       updateElectronVersions: action,
       version: observable,
       versions: observable,
@@ -340,6 +314,7 @@ export class AppState {
     this.clearConsole = this.clearConsole.bind(this);
     this.toggleSettings = this.toggleSettings.bind(this);
     this.toggleBisectDialog = this.toggleBisectDialog.bind(this);
+    this.updateDownloadProgress = this.updateDownloadProgress.bind(this);
     this.updateElectronVersions = this.updateElectronVersions.bind(this);
     this.setIsQuitting = this.setIsQuitting.bind(this);
     this.addAcceleratorToBlock = this.addAcceleratorToBlock.bind(this);
@@ -371,6 +346,7 @@ export class AppState {
     window.ElectronFiddle.removeAllListeners('clear-console');
     window.ElectronFiddle.removeAllListeners('open-settings');
     window.ElectronFiddle.removeAllListeners('show-welcome-tour');
+    window.ElectronFiddle.removeAllListeners('version-download-progress');
 
     window.ElectronFiddle.addEventListener(
       'open-settings',
@@ -383,6 +359,10 @@ export class AppState {
       this.toggleBisectCommands,
     );
     window.ElectronFiddle.addEventListener('before-quit', this.setIsQuitting);
+    window.ElectronFiddle.addEventListener(
+      'version-download-progress',
+      this.updateDownloadProgress,
+    );
 
     /**
      * Listens for changes in the app settings made in other windows
@@ -576,9 +556,13 @@ export class AppState {
     this.setVersion(this.version);
 
     // Trigger the change state event
-    this.installer.on('state-changed', ({ version, state }) => {
-      this.changeRunnableState(version, state);
-    });
+    window.ElectronFiddle.removeAllListeners('version-state-changed');
+    window.ElectronFiddle.addEventListener(
+      'version-state-changed',
+      ({ version, state }) => {
+        this.changeRunnableState(version, state);
+      },
+    );
   }
 
   /**
@@ -641,7 +625,6 @@ export class AppState {
           .filter((ver) => !(ver.version in this.versions))
           .map((ver) => makeRunnable(ver)),
       );
-      this.baseVersions.updateVersions(fullVersions);
     } catch (error) {
       console.warn(`State: Could not update Electron versions`, error);
     }
@@ -731,6 +714,19 @@ export class AppState {
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
   }
 
+  public updateDownloadProgress(version: string, progress: ProgressObject) {
+    const percent = Math.round(progress.percent * 100) / 100;
+    const ver = this.versions[version];
+    // Stop if its undefined or has same downloadProgress percent
+    if (ver === undefined || ver.downloadProgress === percent) {
+      return;
+    }
+
+    ver.downloadProgress = percent;
+    this.versions[version] = ver;
+    this.broadcastVersionStates([ver]);
+  }
+
   public setIsQuitting() {
     this.isQuitting = true;
   }
@@ -813,8 +809,10 @@ export class AppState {
         state === InstallState.installed ||
         state == InstallState.downloaded
       ) {
-        await this.installer.remove(version);
-        if (this.installer.state(version) === InstallState.missing) {
+        if (
+          (await window.ElectronFiddle.removeVersion(version)) ===
+          InstallState.missing
+        ) {
           await window.ElectronFiddle.app.electronTypes.uncache(ver);
 
           this.broadcastVersionStates([ver]);
@@ -862,21 +860,10 @@ export class AppState {
     ]);
 
     // Download the version without setting it as the current version.
-    await this.installer.ensureDownloaded(version, {
+    await window.ElectronFiddle.downloadVersion(version, {
       mirror: {
         electronMirror,
         electronNightlyMirror,
-      },
-      progressCallback: (progress: ProgressObject) => {
-        // https://mobx.js.org/actions.html#runinaction
-        runInAction(() => {
-          const percent = Math.round(progress.percent * 100) / 100;
-          if (ver.downloadProgress !== percent) {
-            ver.downloadProgress = percent;
-
-            this.broadcastVersionStates([ver]);
-          }
-        });
       },
     });
 
@@ -1182,7 +1169,7 @@ export class AppState {
    * @returns {InstallState}
    */
   public getVersionState(version: string): InstallState {
-    return this.installer.state(version);
+    return window.ElectronFiddle.getVersionState(version);
   }
 
   /**

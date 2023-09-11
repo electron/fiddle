@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { BrowserWindow, app, shell } from 'electron';
+import { BrowserWindow, shell } from 'electron';
 
 import { createContextMenu } from './context-menu';
 import { ipcMainManager } from './ipc';
@@ -107,22 +107,6 @@ export function createMainWindow(): Electron.BrowserWindow {
 
   ipcMainManager.on(IpcEvents.RELOAD_WINDOW, () => {
     browserWindow?.reload();
-  });
-
-  ipcMainManager.handle(IpcEvents.GET_APP_PATHS, () => {
-    const pathsToQuery = [
-      'home',
-      'appData',
-      'userData',
-      'temp',
-      'downloads',
-      'desktop',
-    ] as const;
-    const paths = {} as Record<(typeof pathsToQuery)[number], string>;
-    for (const path of pathsToQuery) {
-      paths[path] = app.getPath(path);
-    }
-    return paths;
   });
 
   browserWindows.push(browserWindow);

@@ -1,10 +1,7 @@
 /**
  * @jest-environment node
  */
-import * as electron from 'electron';
-import { mocked } from 'jest-mock';
 
-import { IpcEvents } from '../../src/ipc-events';
 import { setupFiddleGlobal } from '../../src/preload/preload';
 
 describe('preload', () => {
@@ -20,20 +17,6 @@ describe('preload', () => {
       await setupFiddleGlobal();
 
       expect(window.ElectronFiddle).toMatchObject({ app: null });
-    });
-
-    it('sets app paths', async () => {
-      const obj = {
-        appPath: '/fake/path',
-      };
-      mocked(electron.ipcRenderer.invoke).mockResolvedValue(obj);
-
-      await setupFiddleGlobal();
-
-      expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
-        IpcEvents.GET_APP_PATHS,
-      );
-      expect(window.ElectronFiddle.appPaths).toBe(obj);
     });
   });
 });

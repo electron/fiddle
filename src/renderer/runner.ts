@@ -1,7 +1,3 @@
-import { ChildProcess } from 'node:child_process';
-
-import { Installer } from '@electron/fiddle-core';
-
 import { Bisector } from './bisect';
 import { AppState } from './state';
 import { maybePlural } from './utils/plural-maybe';
@@ -33,8 +29,6 @@ const resultString: Record<RunResult, string> = Object.freeze({
 });
 
 export class Runner {
-  public child: ChildProcess | null = null;
-
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
@@ -222,18 +216,7 @@ export class Runner {
    * @memberof Runner
    */
   public stop(): void {
-    const child = this.child;
-    this.appState.isRunning = !!child && !child.kill();
-
-    if (child) {
-      // If the child process is still alive 1 second after we've
-      // attempted to kill it by normal means, kill it forcefully.
-      setTimeout(() => {
-        if (child.exitCode === null) {
-          child.kill('SIGKILL');
-        }
-      }, 1000);
-    }
+    window.ElectronFiddle.stopFiddle();
   }
 
   /**
@@ -374,10 +357,8 @@ export class Runner {
    * or the user selected electron version
    */
   private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { localPath, isValidBuild, version, dir } = params;
-    const { versionRunner, pushOutput, flushOutput, executionFlags } =
-      this.appState;
-    const fiddleRunner = await versionRunner;
+    const { version, dir } = params;
+    const { pushOutput, flushOutput, executionFlags } = this.appState;
     const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
@@ -387,7 +368,6 @@ export class Runner {
       flushOutput();
 
       this.appState.isRunning = false;
-      this.child = null;
 
       // Clean older folders
       await window.ElectronFiddle.cleanupDirectory(dir);
@@ -396,13 +376,11 @@ export class Runner {
 
     return new Promise(async (resolve, _reject) => {
       try {
-        this.child = await fiddleRunner.spawn(
-          isValidBuild && localPath
-            ? Installer.getExecPath(localPath)
-            : version,
-          dir,
-          { args: options, cwd: dir, env },
-        );
+        await window.ElectronFiddle.startFiddle({
+          ...params,
+          options,
+          env,
+        });
       } catch (e) {
         pushOutput(`Failed to spawn Fiddle: ${e.message}`);
         await cleanup();
@@ -413,23 +391,30 @@ export class Runner {
 
       pushOutput(`Electron v${version} started.`);
 
-      this.child?.stdout?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.stderr?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.on('close', async (code, signal) => {
-        await cleanup();
+      window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
+      window.ElectronFiddle.removeAllListeners('fiddle-stopped');
 
-        if (typeof code !== 'number') {
-          pushOutput(`Electron exited with signal ${signal}.`);
-          resolve(RunResult.FAILURE);
-        } else {
-          pushOutput(`Electron exited with code ${code}.`);
-          resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
-        }
-      });
+      window.ElectronFiddle.addEventListener(
+        'fiddle-runner-output',
+        (output: string) => {
+          pushOutput(output, { bypassBuffer: false });
+        },
+      );
+
+      window.ElectronFiddle.addEventListener(
+        'fiddle-stopped',
+        async (code, signal) => {
+          await cleanup();
+
+          if (typeof code !== 'number') {
+            pushOutput(`Electron exited with signal ${signal}.`);
+            resolve(RunResult.FAILURE);
+          } else {
+            pushOutput(`Electron exited with code ${code}.`);
+            resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
+          }
+        },
+      );
     });
   }
 
