@@ -6,7 +6,7 @@ import { LoadedFiddleTheme } from '../../src/themes-defaults';
 describe('themes', () => {
   describe('activateTheme()', () => {
     it('attempts to activate a theme', async () => {
-      const { editor } = window.ElectronFiddle.monaco;
+      const { editor } = window.monaco;
 
       activateTheme(await getTheme());
 

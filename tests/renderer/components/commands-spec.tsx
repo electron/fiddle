@@ -29,7 +29,7 @@ describe('Commands component', () => {
 
   beforeEach(() => {
     overrideRendererPlatform('linux');
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   afterEach(() => {

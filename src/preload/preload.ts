@@ -1,12 +1,19 @@
 // Remember to update ambient.d.ts for extending window object
-import { IpcRendererEvent, ipcRenderer } from 'electron';
+import { IpcRendererEvent, contextBridge, ipcRenderer } from 'electron';
 
 import {
+  BlockableAccelerator,
   DownloadVersionParams,
   FiddleEvent,
   FileTransformOperation,
   Files,
+  IPackageManager,
+  MessageOptions,
+  OutputEntry,
+  PMOperationOptions,
   PackageJsonOptions,
+  RunResult,
+  RunnableVersion,
   StartFiddleParams,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
@@ -49,7 +56,7 @@ async function preload() {
 }
 
 export async function setupFiddleGlobal() {
-  window.ElectronFiddle = {
+  contextBridge.exposeInMainWorld('ElectronFiddle', {
     addEventListener(
       type: FiddleEvent,
       listener: (...args: any[]) => void,
@@ -68,16 +75,18 @@ export async function setupFiddleGlobal() {
         }
       }
     },
-    addModules({ dir, packageManager }, ...names) {
+    addModules(
+      { dir, packageManager }: PMOperationOptions,
+      ...names: Array<string>
+    ) {
       return ipcRenderer.invoke(
         IpcEvents.NPM_ADD_MODULES,
         { dir, packageManager },
         ...names,
       );
     },
-    app: null as any, // will be set in main.tsx
     arch: process.arch,
-    blockAccelerators(acceleratorsToBlock) {
+    blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]) {
       ipcRenderer.send(IpcEvents.BLOCK_ACCELERATORS, acceleratorsToBlock);
     },
     cleanupDirectory(dir: string) {
@@ -101,18 +110,14 @@ export async function setupFiddleGlobal() {
     fetchVersions() {
       return ipcRenderer.invoke(IpcEvents.FETCH_VERSIONS);
     },
-    getElectronTypes(ver) {
-      // Destructure ver into a copy, as the object sometimes can't be cloned
-      return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, { ...ver });
+    getElectronTypes(ver: RunnableVersion) {
+      return ipcRenderer.invoke(IpcEvents.GET_ELECTRON_TYPES, ver);
     },
     getLatestStable() {
       return ipcRenderer.sendSync(IpcEvents.GET_LATEST_STABLE);
     },
-    getLocalVersionState(ver) {
-      // Destructure ver into a copy, as the object sometimes can't be cloned
-      return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSION_STATE, {
-        ...ver,
-      });
+    getLocalVersionState(ver: RunnableVersion) {
+      return ipcRenderer.sendSync(IpcEvents.GET_LOCAL_VERSION_STATE, ver);
     },
     getOldestSupportedMajor() {
       return ipcRenderer.sendSync(IpcEvents.GET_OLDEST_SUPPORTED_MAJOR);
@@ -126,14 +131,17 @@ export async function setupFiddleGlobal() {
     getAvailableThemes() {
       return ipcRenderer.invoke(IpcEvents.GET_AVAILABLE_THEMES);
     },
-    getIsPackageManagerInstalled(packageManager, ignoreCache) {
+    getIsPackageManagerInstalled(
+      packageManager: IPackageManager,
+      ignoreCache?: boolean,
+    ) {
       return ipcRenderer.invoke(
         IpcEvents.NPM_IS_PM_INSTALLED,
         packageManager,
         ignoreCache,
       );
     },
-    getNodeTypes(version) {
+    getNodeTypes(version: string) {
       return ipcRenderer.invoke(IpcEvents.GET_NODE_TYPES, version);
     },
     getProjectName(localPath?: string) {
@@ -155,7 +163,6 @@ export async function setupFiddleGlobal() {
     macTitlebarClicked() {
       ipcRenderer.send(IpcEvents.CLICK_TITLEBAR_MAC);
     },
-    monaco: null as any, // will be set in main.tsx
     onGetFiles(
       callback: (
         options: PackageJsonOptions | undefined,
@@ -174,7 +181,7 @@ export async function setupFiddleGlobal() {
     async openThemeFolder() {
       await ipcRenderer.invoke(IpcEvents.OPEN_THEME_FOLDER);
     },
-    packageRun({ dir, packageManager }, command) {
+    packageRun({ dir, packageManager }: PMOperationOptions, command: string) {
       return ipcRenderer.invoke(
         IpcEvents.NPM_PACKAGE_RUN,
         { dir, packageManager },
@@ -184,7 +191,7 @@ export async function setupFiddleGlobal() {
     pathExists: (path: string) =>
       ipcRenderer.sendSync(IpcEvents.PATH_EXISTS, path),
     platform: process.platform,
-    pushOutputEntry(entry) {
+    pushOutputEntry(entry: OutputEntry) {
       ipcRenderer.send(IpcEvents.OUTPUT_ENTRY, entry);
     },
     reloadWindows() {
@@ -213,13 +220,13 @@ export async function setupFiddleGlobal() {
     sendReady() {
       ipcRenderer.send(WEBCONTENTS_READY_FOR_IPC_SIGNAL);
     },
-    setNativeTheme(theme) {
+    setNativeTheme(theme: 'dark' | 'light' | 'system') {
       ipcRenderer.send(IpcEvents.SET_NATIVE_THEME, theme);
     },
     setShowMeTemplate(template?: string) {
       ipcRenderer.send(IpcEvents.SET_SHOW_ME_TEMPLATE, template);
     },
-    showWarningDialog(messageOptions) {
+    showWarningDialog(messageOptions: MessageOptions) {
       ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageOptions);
     },
     showWindow() {
@@ -231,18 +238,17 @@ export async function setupFiddleGlobal() {
     stopFiddle() {
       ipcRenderer.send(IpcEvents.STOP_FIDDLE);
     },
-    taskDone(result) {
+    taskDone(result: RunResult) {
       ipcRenderer.send(IpcEvents.TASK_DONE, result);
     },
     themePath: await ipcRenderer.sendSync(IpcEvents.GET_THEME_PATH),
-    async uncacheTypes(ver) {
-      // Destructure ver into a copy, as the object sometimes can't be cloned
-      await ipcRenderer.invoke(IpcEvents.UNCACHE_TYPES, { ...ver });
+    async uncacheTypes(ver: RunnableVersion) {
+      await ipcRenderer.invoke(IpcEvents.UNCACHE_TYPES, ver);
     },
     async unwatchElectronTypes() {
       await ipcRenderer.invoke(IpcEvents.UNWATCH_ELECTRON_TYPES);
     },
-  };
+  });
 }
 
 preload();

@@ -10,7 +10,7 @@ describe('MirrorSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   it('renders', () => {

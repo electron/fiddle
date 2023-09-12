@@ -40,7 +40,7 @@ export class App {
 
     this.taskRunner = new TaskRunner(this);
 
-    this.electronTypes = new ElectronTypes(window.ElectronFiddle.monaco);
+    this.electronTypes = new ElectronTypes(window.monaco);
   }
 
   private confirmReplaceUnsaved(): Promise<boolean> {

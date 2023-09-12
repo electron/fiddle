@@ -20,7 +20,7 @@ describe('SidebarFileTree component', () => {
   let stateMock: StateMock;
 
   beforeEach(() => {
-    ({ state: stateMock } = window.ElectronFiddle.app as unknown as AppMock);
+    ({ state: stateMock } = window.app as unknown as AppMock);
     store = {} as unknown as AppState;
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();

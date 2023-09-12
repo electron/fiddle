@@ -1,6 +1,7 @@
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 import MonacoWebpackPlugin from 'monaco-editor-webpack-plugin';
 import type { Configuration } from 'webpack';
+import { DefinePlugin } from 'webpack';
 
 import { plugins } from './common/webpack.plugins';
 import { rules } from './common/webpack.rules';
@@ -67,6 +68,11 @@ export const rendererConfig: Configuration = {
       filename: './css/[name].css',
       // https://github.com/webpack-contrib/mini-css-extract-plugin#experimentalUseImportModule
       experimentalUseImportModule: false,
+    }),
+    // Workaround for Blueprint issue
+    // See https://github.com/palantir/blueprint/issues/3739
+    new DefinePlugin({
+      'process.env': `(${JSON.stringify(process.env)})`,
     }),
   ],
   resolve: {

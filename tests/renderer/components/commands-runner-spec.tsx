@@ -12,7 +12,7 @@ describe('Runner component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   describe('renders', () => {

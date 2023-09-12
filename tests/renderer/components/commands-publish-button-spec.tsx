@@ -60,7 +60,7 @@ describe('Action button component', () => {
   }
 
   beforeEach(() => {
-    ({ app } = window.ElectronFiddle);
+    ({ app } = window);
     ({ state } = app);
 
     // have the octokit getter use our mock

@@ -53,12 +53,13 @@ export function getReleaseChannel(
 }
 
 export function makeRunnable(ver: Version): RunnableVersion {
+  // Destructure ver so it's not a Proxy object, which can't be used
   const ret: RunnableVersion = {
     ...ver,
     version: normalizeVersion(ver.version),
     source: Boolean(ver.localPath) ? VersionSource.local : VersionSource.remote,
     state: Boolean(ver.localPath)
-      ? window.ElectronFiddle.getLocalVersionState(ver)
+      ? window.ElectronFiddle.getLocalVersionState({ ...ver })
       : InstallState.missing,
   };
 

@@ -5,6 +5,6 @@ import { initSentry } from './sentry';
 
 initSentry();
 
-window.ElectronFiddle.monaco = monaco;
-window.ElectronFiddle.app = new App();
-window.ElectronFiddle.app.setup();
+window.monaco = monaco;
+window.app = new App();
+window.app.setup();

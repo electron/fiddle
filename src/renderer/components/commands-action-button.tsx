@@ -123,8 +123,7 @@ export const GistActionButton = observer(
       const defaultGistValues = await window.ElectronFiddle.getTemplate(
         appState.version,
       );
-      const currentEditorValues =
-        await window.ElectronFiddle.app.getEditorValues(options);
+      const currentEditorValues = await window.app.getEditorValues(options);
 
       defaultGistValues[PACKAGE_NAME as EditorId] =
         currentEditorValues[PACKAGE_NAME as EditorId];
@@ -202,7 +201,7 @@ export const GistActionButton = observer(
       const { appState } = this.props;
       const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
-      const values = await window.ElectronFiddle.app.getEditorValues(options);
+      const values = await window.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
 

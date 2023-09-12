@@ -273,7 +273,7 @@ export class RemoteLoader {
     values: EditorValues,
     gistId: string,
   ): Promise<boolean> {
-    await window.ElectronFiddle.app.replaceFiddle(values, { gistId });
+    await window.app.replaceFiddle(values, { gistId });
     return true;
   }
 

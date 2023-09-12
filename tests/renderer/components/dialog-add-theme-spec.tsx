@@ -36,7 +36,7 @@ describe('AddThemeDialog component', () => {
     // platform, so let' have a uniform platform for unit tests
     overrideRendererPlatform('darwin');
 
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   // TODO(dsanders11): Update this test to be accurate

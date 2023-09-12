@@ -28,9 +28,9 @@ describe('Editors component', () => {
   let editorValues: EditorValues;
 
   beforeEach(() => {
-    ({ app } = window.ElectronFiddle);
-    monaco = window.ElectronFiddle.monaco as unknown as MonacoMock;
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ app } = window);
+    monaco = window.monaco as unknown as MonacoMock;
+    ({ state: store } = window.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
     editorMosaic.set(editorValues);

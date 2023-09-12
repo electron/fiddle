@@ -24,8 +24,8 @@ describe('Output component', () => {
   let monaco: typeof MonacoType;
 
   beforeEach(() => {
-    monaco = window.ElectronFiddle.monaco;
-    ({ state: store } = window.ElectronFiddle.app);
+    monaco = window.monaco;
+    ({ state: store } = window.app);
   });
 
   it('renders the output container', () => {

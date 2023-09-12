@@ -44,10 +44,6 @@ describe('windows', () => {
         y: 17,
       },
       webPreferences: {
-        webviewTag: false,
-        nodeIntegration: true,
-        nodeIntegrationInWorker: true,
-        contextIsolation: false,
         preload: '/fake/path',
       },
     };

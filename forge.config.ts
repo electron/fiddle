@@ -64,7 +64,6 @@ const config: ForgeConfig = {
         },
         mainConfig: mainConfig,
         renderer: {
-          nodeIntegration: true,
           config: rendererConfig,
           entryPoints: [
             {

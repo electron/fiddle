@@ -422,7 +422,7 @@ describe('AppState', () => {
         expect(newVersion).toBeTruthy();
 
         // spy on app.replaceFiddle
-        replaceSpy = jest.spyOn(window.ElectronFiddle.app, 'replaceFiddle');
+        replaceSpy = jest.spyOn(window.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
         mocked(window.ElectronFiddle.getTemplate).mockResolvedValue(nextValues);
@@ -479,14 +479,14 @@ describe('AppState', () => {
       appState.setTheme('custom');
 
       expect(appState.theme).toBe('custom');
-      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
+      expect(window.app.loadTheme).toHaveBeenCalledTimes(1);
     });
 
     it('handles a missing theme name', () => {
       appState.setTheme();
 
       expect(appState.theme).toBe('');
-      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
+      expect(window.app.loadTheme).toHaveBeenCalledTimes(1);
     });
   });
 

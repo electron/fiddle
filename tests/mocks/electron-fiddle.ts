@@ -1,9 +1,6 @@
-import { AppMock, MonacoMock } from './mocks';
-
 export class ElectronFiddleMock {
   public addEventListener = jest.fn();
   public addModules = jest.fn();
-  public app = new AppMock();
   public arch = process.arch;
   public blockAccelerators = jest.fn();
   public cleanupDirectory = jest.fn();
@@ -29,7 +26,6 @@ export class ElectronFiddleMock {
   public getUsername = jest.fn();
   public getVersionState = jest.fn();
   public macTitlebarClicked = jest.fn();
-  public monaco = new MonacoMock();
   public onGetFiles = jest.fn();
   public openThemeFolder = jest.fn();
   public packageRun = jest.fn();

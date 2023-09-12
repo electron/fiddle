@@ -28,8 +28,7 @@ describe('Runner component', () => {
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ fileManager, state: store } = window.ElectronFiddle
-      .app as unknown as AppMock);
+    ({ fileManager, state: store } = window.app as unknown as AppMock);
     store.initVersions('2.0.2', { ...mockVersions });
     store.getName.mockResolvedValue('test-app-name');
     store.modules = new Map<string, string>([['cow', '*']]);

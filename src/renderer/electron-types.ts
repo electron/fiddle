@@ -33,7 +33,8 @@ export class ElectronTypes {
     if (!ver) return;
 
     this.setElectronTypes(
-      await window.ElectronFiddle.getElectronTypes(ver),
+      // Destructure ver so it's not a Proxy object, which can't be used
+      await window.ElectronFiddle.getElectronTypes({ ...ver }),
       ver.version,
     );
     await this.setNodeTypes(ver.version);
@@ -71,7 +72,8 @@ export class ElectronTypes {
 
   public async uncache(ver: RunnableVersion) {
     if (ver.source === VersionSource.remote) {
-      await window.ElectronFiddle.uncacheTypes(ver);
+      // Destructure ver so it's not a Proxy object, which can't be used
+      await window.ElectronFiddle.uncacheTypes({ ...ver });
     }
   }
 

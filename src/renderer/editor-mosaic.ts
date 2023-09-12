@@ -144,7 +144,7 @@ export class EditorMosaic {
       throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
 
     // create a monaco model with the file's contents
-    const { monaco } = window.ElectronFiddle;
+    const { monaco } = window;
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);
     model.updateOptions({ tabSize: 2 });

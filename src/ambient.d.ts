@@ -31,6 +31,8 @@ import { FiddleTheme, LoadedFiddleTheme } from './themes-defaults';
 
 declare global {
   interface Window {
+    app: App;
+    monaco: typeof MonacoType;
     ElectronFiddle: {
       addEventListener(
         type: FiddleEvent,
@@ -101,7 +103,6 @@ declare global {
         { dir, packageManager }: PMOperationOptions,
         ...names: Array<string>
       ): Promise<string>;
-      app: App;
       arch: string;
       blockAccelerators(acceleratorsToBlock: BlockableAccelerator[]): void;
       cleanupDirectory(dir: string): Promise<boolean>;
@@ -139,7 +140,6 @@ declare global {
       isDevMode: boolean;
       isReleasedMajor(major: number): Promise<boolean>;
       macTitlebarClicked(): void;
-      monaco: typeof MonacoType;
       onGetFiles(
         callback: (
           options: PackageJsonOptions | undefined,

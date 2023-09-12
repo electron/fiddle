@@ -13,8 +13,8 @@ describe('Editor component', () => {
   let monaco: any;
 
   beforeEach(() => {
-    ({ monaco } = window.ElectronFiddle);
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ monaco } = window);
+    ({ state: store } = window.app);
   });
 
   function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
