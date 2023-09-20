@@ -2,7 +2,6 @@
 
 exports[`Runner component renders InstallState.downloading 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={true}
   icon={
     <Blueprint3.Spinner
@@ -10,51 +9,52 @@ exports[`Runner component renders InstallState.downloading 1`] = `
       value={50}
     />
   }
+  id="button-run"
   text="Downloading"
 />
 `;
 
 exports[`Runner component renders InstallState.installed 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={false}
   icon="play"
+  id="button-run"
   onClick={[MockFunction]}
   text="Run"
 />
 `;
 
-exports[`Runner component renders InstallState.missing 1`] = `
+exports[`Runner component renders InstallState.installing 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={true}
   icon={
     <Blueprint3.Spinner
       size={16}
     />
   }
-  text="Checking status"
+  id="button-run"
+  text="Unzipping"
 />
 `;
 
-exports[`Runner component renders InstallState.installing 1`] = `
+exports[`Runner component renders InstallState.missing 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={true}
   icon={
     <Blueprint3.Spinner
       size={16}
     />
   }
-  text="Unzipping"
+  id="button-run"
+  text="Checking status"
 />
 `;
 
 exports[`Runner component renders idle 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={false}
   icon="play"
+  id="button-run"
   onClick={[MockFunction]}
   text="Run"
 />
@@ -62,13 +62,13 @@ exports[`Runner component renders idle 1`] = `
 
 exports[`Runner component renders installing modules 1`] = `
 <Blueprint3.Button
-  className="button-run"
   disabled={false}
   icon={
     <Blueprint3.Spinner
       size={16}
     />
   }
+  id="button-run"
   text="Installing modules"
 />
 `;
@@ -76,9 +76,9 @@ exports[`Runner component renders installing modules 1`] = `
 exports[`Runner component renders running 1`] = `
 <Blueprint3.Button
   active={true}
-  className="button-run"
   disabled={false}
   icon="stop"
+  id="button-run"
   onClick={[MockFunction]}
   text="Stop"
 />

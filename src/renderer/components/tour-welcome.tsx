@@ -43,7 +43,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'select-versions',
-      selector: 'button.version-chooser',
+      selector: '#version-chooser',
       title: '📇 Choose an Electron Version',
       content: (
         <>
@@ -60,13 +60,13 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'button-run',
-      selector: '.button-run',
+      selector: '#button-run',
       title: '🚀 Run Your Fiddle',
       content: <p>Hit this button to give your Fiddle a try and start it.</p>,
     },
     {
-      name: 'button-publish',
-      selector: '.button-publish',
+      name: 'button-action',
+      selector: '#button-action',
       title: '🗺 Share Your Fiddle',
       content: (
         <>
@@ -111,7 +111,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'main-editor',
-      selector: 'div.mosaic-window.main',
+      selector: 'div.mosaic-window.main\\.js',
       title: '📝 Main Script',
       content: (
         <>
@@ -137,7 +137,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'html-editor',
-      selector: 'div.mosaic-window.html',
+      selector: 'div.mosaic-window.index\\.html',
       title: '📝 HTML',
       content: (
         <p>
@@ -152,7 +152,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'renderer-editor',
-      selector: 'div.mosaic-window.renderer',
+      selector: 'div.mosaic-window.renderer\\.js',
       title: '📝  Renderer Script',
       content: (
         <>

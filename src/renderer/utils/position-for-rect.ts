@@ -52,6 +52,14 @@ export function positionForRect(
     return { ...result, type: 'bottom' };
   }
 
+  // Okay, let's try bottom left
+  result.left = target.left - margin - size.width;
+  result.top = target.top + target.height + margin;
+
+  if (isResultOkay(result, size)) {
+    return { ...result, type: 'left' };
+  }
+
   // Top middle would require us to measure the
   // text height, which is a bit gross. I'll leave
   // this commented out for now, but if you need it

@@ -84,7 +84,7 @@ exports[`Header component renders the tour once started 1`] = `
           </p>
         </React.Fragment>,
         "name": "select-versions",
-        "selector": "button.version-chooser",
+        "selector": "#version-chooser",
         "title": "📇 Choose an Electron Version",
       },
       {
@@ -92,7 +92,7 @@ exports[`Header component renders the tour once started 1`] = `
           Hit this button to give your Fiddle a try and start it.
         </p>,
         "name": "button-run",
-        "selector": ".button-run",
+        "selector": "#button-run",
         "title": "🚀 Run Your Fiddle",
       },
       {
@@ -104,8 +104,8 @@ exports[`Header component renders the tour once started 1`] = `
             You can also package your Fiddle as a standalone binary or as an installer from the "Tasks" menu.
           </p>
         </React.Fragment>,
-        "name": "button-publish",
-        "selector": ".button-publish",
+        "name": "button-action",
+        "selector": "#button-action",
         "title": "🗺 Share Your Fiddle",
       },
       {
@@ -142,7 +142,7 @@ exports[`Header component renders the tour once started 1`] = `
           </p>
         </React.Fragment>,
         "name": "main-editor",
-        "selector": "div.mosaic-window.main",
+        "selector": "div.mosaic-window.main\\.js",
         "title": "📝 Main Script",
       },
       {
@@ -163,7 +163,7 @@ exports[`Header component renders the tour once started 1`] = `
            like we would in Node.js.
         </p>,
         "name": "html-editor",
-        "selector": "div.mosaic-window.html",
+        "selector": "div.mosaic-window.index\\.html",
         "title": "📝 HTML",
       },
       {
@@ -188,7 +188,7 @@ exports[`Header component renders the tour once started 1`] = `
           </p>
         </React.Fragment>,
         "name": "renderer-editor",
-        "selector": "div.mosaic-window.renderer",
+        "selector": "div.mosaic-window.renderer\\.js",
         "title": "📝  Renderer Script",
       },
     }
