@@ -266,7 +266,7 @@ export const VersionSelect = observer(
           disabled={!!this.props.disabled}
         >
           <Button
-            className="version-chooser"
+            id="version-chooser"
             text={`Electron v${version}`}
             icon={getItemIcon(currentVersion)}
             onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {

@@ -30,12 +30,12 @@ export const Runner = observer(
       } = this.props.appState;
 
       const state = currentElectronVersion?.state;
-      const props: ButtonProps = { className: 'button-run', disabled: true };
+      const props: ButtonProps = { disabled: true };
 
       if ([downloading, missing].includes(state) && !isOnline) {
         props.text = 'Offline';
         props.icon = 'satellite';
-        return <Button {...props} type={undefined} />;
+        return <Button id="button-run" {...props} type={undefined} />;
       }
 
       switch (state) {
@@ -78,7 +78,7 @@ export const Runner = observer(
         }
       }
 
-      return <Button {...props} type={undefined} />;
+      return <Button id="button-run" {...props} type={undefined} />;
     }
   },
 );

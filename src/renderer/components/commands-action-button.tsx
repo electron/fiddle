@@ -360,6 +360,7 @@ export const GistActionButton = observer(
             <ButtonGroup className="button-gist-action">
               {this.renderPrivacyMenu()}
               <Button
+                id="button-action"
                 onClick={this.handleClick}
                 loading={isPerformingAction}
                 icon={getActionIcon()}

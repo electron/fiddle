@@ -58,6 +58,7 @@ exports[`Action button component renders 1`] = `
       </Blueprint3.Popover>
       <Blueprint3.Button
         icon="upload"
+        id="button-action"
         loading={false}
         onClick={[Function]}
         text="Publish"

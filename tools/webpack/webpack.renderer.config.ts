@@ -72,7 +72,7 @@ export const rendererConfig: Configuration = {
     // Workaround for Blueprint issue
     // See https://github.com/palantir/blueprint/issues/3739
     new DefinePlugin({
-      'process.env': `(${JSON.stringify(process.env)})`,
+      'process.env': '{}',
     }),
   ],
   resolve: {
