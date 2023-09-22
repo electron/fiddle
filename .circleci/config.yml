@@ -14,7 +14,7 @@ commands:
       - node/install-packages
       - run: yarn run contributors
       - run: yarn run electron-releases
-  load-gh-token:
+  load-release-secrets:
     steps:
       - run: |
           curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
@@ -70,6 +70,7 @@ jobs:
     executor: node/macos
     steps:
       - install
+      - load-release-secrets
       - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
@@ -134,7 +135,7 @@ jobs:
       - install
       - attach_workspace:
           at: .
-      - load-gh-token
+      - load-release-secrets
       - run: yarn run publish --from-dry-run
   notify-sentry-deploy:
     docker:
@@ -175,6 +176,7 @@ workflows:
             parameters:
               arch: [ x64 ]
       - mac-build:
+          context: fiddle-release
           matrix:
             parameters:
               arch: [ x64, arm64 ]
