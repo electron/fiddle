@@ -1,9 +1,9 @@
-import { EditorId, MAIN_JS } from '../../interfaces';
+import { EditorId, MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../interfaces';
 import {
   ensureRequiredFiles,
   getEmptyContent,
   getSuffix,
-  isRequiredFile,
+  isMainEntryPoint,
   isSupportedFile,
 } from '../../utils/editor-utils';
 
@@ -11,17 +11,23 @@ export {
   ensureRequiredFiles,
   getEmptyContent,
   getSuffix,
-  isRequiredFile,
+  isMainEntryPoint,
   isSupportedFile,
 };
 
 // The order of these fields is the order that
 // they'll be sorted in the mosaic
 const KNOWN_FILES: string[] = [
+  MAIN_CJS,
   MAIN_JS,
+  MAIN_MJS,
+  'renderer.cjs',
   'renderer.js',
+  'renderer.mjs',
   'index.html',
+  'preload.cjs',
   'preload.js',
+  'preload.mjs',
   'styles.css',
 ];
 
@@ -29,16 +35,31 @@ export function isKnownFile(filename: string): boolean {
   return KNOWN_FILES.includes(filename);
 }
 
-const TITLE_MAP = new Map<EditorId, string>([
-  [MAIN_JS, `Main Process (${MAIN_JS})`],
-  ['renderer.js', 'Renderer Process (renderer.js)'],
-  ['index.html', 'HTML (index.html)'],
-  ['preload.js', 'Preload (preload.js)'],
-  ['styles.css', 'Stylesheet (styles.css)'],
-]);
-
 export function getEditorTitle(id: EditorId): string {
-  return TITLE_MAP.get(id) || id;
+  switch (id) {
+    case 'index.html':
+      return 'HTML (index.html)';
+
+    case MAIN_CJS:
+    case MAIN_JS:
+    case MAIN_MJS:
+      return `Main Process (${id})`;
+
+    case 'preload.cjs':
+    case 'preload.js':
+    case 'preload.mjs':
+      return `Preload (${id})`;
+
+    case 'renderer.cjs':
+    case 'renderer.js':
+    case 'renderer.mjs':
+      return `Renderer Process (${id})`;
+
+    case 'styles.css':
+      return 'Stylesheet (styles.css)';
+  }
+
+  return id;
 }
 
 // the KNOWN_FILES, in the order of that array, go first.

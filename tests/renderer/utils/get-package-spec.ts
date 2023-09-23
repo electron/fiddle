@@ -1,7 +1,7 @@
 import { mocked } from 'jest-mock';
 import * as semver from 'semver';
 
-import { MAIN_JS } from '../../../src/interfaces';
+import { EditorId, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import { AppState } from '../../../src/renderer/state';
 import {
   getForgeVersion,
@@ -49,15 +49,36 @@ describe('get-package', () => {
       return JSON.stringify({ ...defaultPackage, ...opts }, null, 2);
     }
 
-    it('getPackageJson() returns a default package.json', async () => {
+    it('returns a default package.json', async () => {
       const name = defaultName;
       const appState = {
+        editorMosaic: {
+          files: new Map<EditorId, unknown>(),
+          mainEntryPointFile: () => MAIN_JS,
+        },
         getName: () => name,
         modules: new Map<string, string>([['say', '*']]),
         packageAuthor: defaultAuthor,
       };
       const result = await getPackageJson(appState as unknown as AppState);
       expect(result).toEqual(buildExpectedPackage());
+    });
+
+    it('can use an ESM entry point', async () => {
+      const name = defaultName;
+      const appState = {
+        editorMosaic: {
+          files: new Map<EditorId, unknown>([[MAIN_MJS, '']]),
+          mainEntryPointFile: () => MAIN_MJS,
+        },
+        getName: () => name,
+        modules: new Map<string, string>([['say', '*']]),
+        packageAuthor: defaultAuthor,
+      };
+      const result = await getPackageJson(appState as unknown as AppState);
+      expect(JSON.parse(result)).toMatchObject({
+        main: `./${MAIN_MJS}`,
+      });
     });
 
     it.each([

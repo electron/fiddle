@@ -86,7 +86,7 @@ describe('RemoteLoader', () => {
     it('handles gist fiddle devDependencies', async () => {
       const gistId = 'pjsontestid';
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         devDependencies: {
           electron: '17.0.0',
         },
@@ -132,7 +132,7 @@ describe('RemoteLoader', () => {
       expect(result).toBe(false);
       expect(store.showErrorDialog).toHaveBeenCalledWith(
         expect.stringMatching(
-          /This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html/i,
+          /This Gist did not contain any supported files. Supported files must have one of the following extensions: .cjs, .js, .mjs, .css, or .html/i,
         ),
       );
     });
@@ -140,7 +140,7 @@ describe('RemoteLoader', () => {
     it('sets the Electron version from package.json', async () => {
       const gistId = 'pjsontestid';
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         devDependencies: {
           electron: '17.0.0',
         },
@@ -194,7 +194,7 @@ describe('RemoteLoader', () => {
     it('does not set an invalid Electron version from package.json', async () => {
       const gistId = 'pjsontestid';
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         devDependencies: {
           electron: '99999.0.0',
         },
@@ -226,7 +226,7 @@ describe('RemoteLoader', () => {
     it('handles extra gist fiddle dependencies', async () => {
       const gistId = 'pjsontestid';
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         dependencies: {
           'meaning-of-life': '*',
         },

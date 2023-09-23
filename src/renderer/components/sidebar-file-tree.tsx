@@ -17,7 +17,7 @@ import { observer } from 'mobx-react';
 import { EditorId } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
-import { isRequiredFile, isSupportedFile } from '../utils/editor-utils';
+import { isMainEntryPoint, isSupportedFile } from '../utils/editor-utils';
 
 interface FileTreeProps {
   appState: AppState;
@@ -68,7 +68,7 @@ export const SidebarFileTree = observer(
                       onClick={() => this.renameEditor(editorId)}
                     />
                     <MenuItem
-                      disabled={isRequiredFile(editorId)}
+                      disabled={isMainEntryPoint(editorId)}
                       icon="remove"
                       text="Delete"
                       intent="danger"
@@ -191,7 +191,7 @@ export const SidebarFileTree = observer(
 
       if (!isSupportedFile(id)) {
         await appState.showErrorDialog(
-          `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
+          `Invalid filename "${id}": Must be a file ending in .cjs, .js, .mjs, .html, or .css`,
         );
         return;
       }

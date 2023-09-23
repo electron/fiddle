@@ -1,4 +1,4 @@
-import { MAIN_JS } from '../../../src/interfaces';
+import { MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import {
   compareEditors,
   getEditorTitle,
@@ -11,19 +11,21 @@ describe('editor-utils', () => {
   describe('getEditorTitle', () => {
     it('recognizes known files', () => {
       // setup: id is a known file
-      const id = MAIN_JS;
-      expect(isKnownFile(id));
-      expect(isSupportedFile(id));
+      for (const id of [MAIN_CJS, MAIN_JS, MAIN_MJS] as const) {
+        expect(isKnownFile(id));
+        expect(isSupportedFile(id));
 
-      expect(getEditorTitle(id)).toBe('Main Process (main.js)');
+        expect(getEditorTitle(id)).toBe(`Main Process (${id})`);
+      }
     });
     it('recognizes supported files', () => {
       // set up: id is supported but not known
-      const id = 'foo.js';
-      expect(!isKnownFile(id));
-      expect(isSupportedFile(id));
+      for (const id of ['foo.cjs', 'foo.js', 'foo.mjs'] as const) {
+        expect(!isKnownFile(id));
+        expect(isSupportedFile(id));
 
-      expect(getEditorTitle(id)).toBe(id);
+        expect(getEditorTitle(id)).toBe(id);
+      }
     });
   });
 

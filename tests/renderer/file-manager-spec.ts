@@ -1,6 +1,11 @@
 import { mocked } from 'jest-mock';
 
-import { Files, PACKAGE_NAME, SetFiddleOptions } from '../../src/interfaces';
+import {
+  Files,
+  MAIN_JS,
+  PACKAGE_NAME,
+  SetFiddleOptions,
+} from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { FileManager } from '../../src/renderer/file-manager';
 import { dotfilesTransform } from '../../src/renderer/transforms/dotfiles';
@@ -60,7 +65,7 @@ describe('FileManager', () => {
 
     it('respects the Electron version specified in package.json', async () => {
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         devDependencies: {
           electron: '17.0.0',
         },
@@ -80,7 +85,7 @@ describe('FileManager', () => {
 
     it('correctly adds modules specified in package.json', async () => {
       const pj = {
-        main: 'main.js',
+        main: MAIN_JS,
         dependencies: {
           'meaning-of-life': '*',
         },

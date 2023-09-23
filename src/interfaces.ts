@@ -137,13 +137,15 @@ export const enum GenericDialogType {
   'success' = 'success',
 }
 
-export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
+export type EditorId = `${string}.${'cjs' | 'js' | 'mjs' | 'html' | 'css'}`;
 
 export type EditorValues = Record<EditorId, string>;
 
-// main.js gets special treatment: it is required as the entry point
+// main.{cjs,js,mjs} gets special treatment: it is required as the entry point
 // when we run fiddles or create a package.json to package fiddles.
+export const MAIN_CJS = 'main.cjs';
 export const MAIN_JS = 'main.js';
+export const MAIN_MJS = 'main.mjs';
 
 export const PACKAGE_NAME = 'package.json';
 
