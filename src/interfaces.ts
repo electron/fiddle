@@ -266,6 +266,7 @@ export interface PackageJsonOptions {
 
 export interface StartFiddleParams {
   localPath: string | undefined;
+  enableElectronLogging: boolean;
   isValidBuild: boolean; // If the localPath is a valid Electron build
   version: string; // The user selected version
   dir: string;
