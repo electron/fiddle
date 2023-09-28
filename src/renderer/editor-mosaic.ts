@@ -165,6 +165,8 @@ export class EditorMosaic {
     } else {
       this.hide(id);
     }
+
+    this.isEdited = true;
   }
 
   /// show or hide files in the view
@@ -237,6 +239,8 @@ export class EditorMosaic {
     this.editors.delete(id);
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
+
+    this.isEdited = true;
   }
 
   /** Wire up a newly-mounted Monaco editor */
