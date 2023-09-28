@@ -11,7 +11,7 @@ app.whenReady().then(() => {
   // app is ready
   const { screen } = require('electron')
 
-  // Create a window that fills the sceen's available
+  // Create a window that fills the screen's available
   // work area.
   const primaryDisplay = screen.getPrimaryDisplay()
   const { width, height } = primaryDisplay.workAreaSize
