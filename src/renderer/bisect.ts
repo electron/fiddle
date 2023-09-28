@@ -1,5 +1,7 @@
 import { RunnableVersion } from '../interfaces';
+import { autobind } from 'bind-decorator';
 
+@autobind
 export class Bisector {
   public revList: Array<RunnableVersion>;
   public minRev: number;
@@ -7,10 +9,6 @@ export class Bisector {
   private pivot: number;
 
   constructor(revList: Array<RunnableVersion>) {
-    this.getCurrentVersion = this.getCurrentVersion.bind(this);
-    this.continue = this.continue.bind(this);
-    this.calculatePivot = this.calculatePivot.bind(this);
-
     this.revList = revList;
     this.minRev = 0;
     this.maxRev = revList.length - 1;
