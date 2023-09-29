@@ -22,21 +22,21 @@ jest.mock('@electron/fiddle-core', () => {
 
 describe('fiddle-core', () => {
   let runner: FiddleRunnerMock;
-  let env: NodeJS.ProcessEnv;
+  let originalEnv: NodeJS.ProcessEnv;
   const mockEnv = Object.seal({
     PATH: '/path/to/bin/',
   });
 
   beforeEach(() => {
     runner = new FiddleRunnerMock();
-    env = { ...process.env };
+    originalEnv = { ...process.env };
     process.env = mockEnv;
     mocked(Runner.create).mockResolvedValue(runner as unknown as Runner);
     setupFiddleCore(new ElectronVersionsMock() as unknown as ElectronVersions);
   });
 
   afterEach(() => {
-    process.env = env;
+    process.env = originalEnv;
   });
 
   describe('startFiddle', () => {
