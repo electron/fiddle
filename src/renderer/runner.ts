@@ -331,19 +331,9 @@ export class Runner {
   }
 
   private buildChildEnvVars(): { [x: string]: string | undefined } {
-    const { isEnablingElectronLogging, environmentVariables } = this.appState;
+    const { environmentVariables } = this.appState;
 
-    const env = { ...process.env };
-
-    if (isEnablingElectronLogging) {
-      env.ELECTRON_ENABLE_LOGGING = 'true';
-      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
-      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
-    } else {
-      delete env.ELECTRON_ENABLE_LOGGING;
-      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
-      delete env.ELECTRON_ENABLE_STACK_DUMPING;
-    }
+    const env: Record<string, string> = {};
 
     for (const v of environmentVariables) {
       const [key, value] = v.split('=');
@@ -379,6 +369,7 @@ export class Runner {
       try {
         await window.ElectronFiddle.startFiddle({
           ...params,
+          enableElectronLogging: this.appState.isEnablingElectronLogging,
           options,
           env,
         });

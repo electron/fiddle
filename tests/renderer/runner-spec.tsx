@@ -60,11 +60,6 @@ describe('Runner component', () => {
 
     it('runs with logging when enabled', async () => {
       store.isEnablingElectronLogging = true;
-      const spy = jest.spyOn(window.ElectronFiddle, 'startFiddle');
-      spy.mockImplementationOnce(async (params) => {
-        expect(params.env).toHaveProperty('ELECTRON_ENABLE_LOGGING');
-        expect(params.env).toHaveProperty('ELECTRON_ENABLE_STACK_DUMPING');
-      });
 
       // wait for run() to get running
       const runPromise = instance.run();
@@ -79,6 +74,11 @@ describe('Runner component', () => {
       expect(store.isRunning).toBe(false);
       expect(fileManager.saveToTemp).toHaveBeenCalled();
       expect(window.ElectronFiddle.addModules).toHaveBeenCalled();
+      expect(window.ElectronFiddle.startFiddle).toBeCalledWith(
+        expect.objectContaining({
+          enableElectronLogging: true,
+        }),
+      );
     });
 
     it('emits output with exitCode', async () => {

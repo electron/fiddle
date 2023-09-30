@@ -28,7 +28,28 @@ export async function startFiddle(
   webContents: WebContents,
   params: StartFiddleParams,
 ): Promise<void> {
-  const { dir, env, isValidBuild, localPath, options, version } = params;
+  const {
+    dir,
+    enableElectronLogging,
+    isValidBuild,
+    localPath,
+    options,
+    version,
+  } = params;
+  const env = { ...process.env };
+
+  if (enableElectronLogging) {
+    env.ELECTRON_ENABLE_LOGGING = 'true';
+    env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
+    env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
+  } else {
+    delete env.ELECTRON_ENABLE_LOGGING;
+    delete env.ELECTRON_DEBUG_NOTIFICATIONS;
+    delete env.ELECTRON_ENABLE_STACK_DUMPING;
+  }
+
+  Object.assign(env, params.env);
+
   const child = await runner.spawn(
     isValidBuild && localPath ? Installer.getExecPath(localPath) : version,
     dir,
