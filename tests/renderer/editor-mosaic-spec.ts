@@ -239,6 +239,24 @@ describe('EditorMosaic', () => {
     });
   });
 
+  describe('addNewFile()', () => {
+    it('sets isEdited to true', () => {
+      editorMosaic.set(createEditorValues());
+      editorMosaic.isEdited = false;
+      editorMosaic.addNewFile('foo.js');
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+  });
+
+  describe('remove()', () => {
+    it('sets isEdited to true', () => {
+      editorMosaic.set(createEditorValues());
+      editorMosaic.isEdited = false;
+      editorMosaic.remove('renderer.js');
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+  });
+
   describe('set()', () => {
     it('resets isEdited to false', () => {
       editorMosaic.isEdited = true;
