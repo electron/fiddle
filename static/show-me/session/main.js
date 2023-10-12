@@ -16,7 +16,7 @@ app.whenReady().then(() => {
   console.log(defaultSession.getUserAgent())
 
   // Cache Size
-  defaultSession.getCacheSize((result) => {
+  defaultSession.getCacheSize().then((result) => {
     console.log(result)
   })
 })
