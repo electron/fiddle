@@ -93,7 +93,11 @@ export class Tour extends React.Component<TourProps, TourState> {
 
     if (!step) return null;
 
-    return <div className="tour">{this.getStep(step)}</div>;
+    return (
+      <div className="tour" data-testid="tour">
+        {this.getStep(step)}
+      </div>
+    );
   }
 
   /**
