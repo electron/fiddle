@@ -7,7 +7,7 @@ import { mocked } from 'jest-mock';
 import { Tour, TourScriptStep } from '../../src/renderer/components/tour';
 import { overrideRendererPlatform } from '../../tests/utils';
 
-describe('VersionChooser component', () => {
+describe('Tour component', () => {
   const oldQuerySelector = document.querySelector;
 
   /**
