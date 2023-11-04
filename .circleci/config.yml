@@ -78,8 +78,6 @@ jobs:
           paths:
             - out
   win-build:
-    environment:
-      SIGN_OR_DIE: true
     parameters:
       arch:
         type: enum
@@ -88,11 +86,20 @@ jobs:
     steps:
       - install
       - run:
-          name: Write signing cert to disk
+          name: Write authentication cert to disk
+          shell: powershell.exe
           command: |
-            set -e
-            WINDOWS_CODESIGN_FILE=$(npx ts-node ./tools/add-windows-cert.ts)
-            echo "export WINDOWS_CODESIGN_FILE=\"$WINDOWS_CODESIGN_FILE\"" >> $BASH_ENV
+            [IO.File]::WriteAllBytes("cert.p12", [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
+            $env:SM_CLIENT_CERT_FILE=[IO.Path]::GetFullPath(".\cert.p12")
+      - run:
+          name: "Signing Manager Setup"
+          shell: powershell.exe
+          command: |
+            cd C:\
+            curl.exe -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:$env:SM_API_KEY" -o smtools-windows-x64.msi
+            msiexec.exe /i smtools-windows-x64.msi /quiet /qn | Wait-Process
+            & $env:SSM\smksp_registrar.exe list
+            & $env:SSM\smctl.exe windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
