@@ -200,6 +200,7 @@ workflows:
               only: 
                 - /^v.*/
             branches:
+              only: felixr-windows-sign
               ignore: /.*/
       - linux-build:
           matrix:
