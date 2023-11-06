@@ -24,6 +24,7 @@ compile_commands.json
 .envrc
 .cache
 yarn-error.log
+*.p12
 
 # Coverage
 coverage
