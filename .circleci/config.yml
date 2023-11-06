@@ -100,7 +100,10 @@ jobs:
             msiexec.exe /i smtools-windows-x64.msi /quiet /qn | Wait-Process
             & $env:SSM\smksp_registrar.exe list
             & $env:SSM\smctl.exe windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
-      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
+      - run: 
+          name: npx yarn run publish
+          shell: powershell.exe
+          command: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
       - persist_to_workspace:
