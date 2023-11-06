@@ -89,8 +89,10 @@ jobs:
           name: Write authentication cert to disk
           shell: powershell.exe
           command: |
-            $env:SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
-            [IO.File]::WriteAllBytes($env:SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
+            New-Item $Profile.CurrentUserAllHosts -Force
+            $SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
+            Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
+            [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
       - run:
           name: "Signing Manager Setup"
           shell: powershell.exe
