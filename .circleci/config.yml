@@ -68,7 +68,6 @@ jobs:
     executor: node/macos
     steps:
       - install
-      - load-release-secrets
       - run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
@@ -145,7 +144,6 @@ jobs:
       - install
       - attach_workspace:
           at: .
-      - load-release-secrets
       - run: yarn run publish --from-dry-run
   notify-sentry-deploy:
     docker:
