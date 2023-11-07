@@ -69,7 +69,7 @@ jobs:
     steps:
       - install
       - load-release-secrets
-      - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
+      - run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
