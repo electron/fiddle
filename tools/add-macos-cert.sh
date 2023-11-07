@@ -1,10 +1,20 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 KEY_CHAIN=build.keychain
 MACOS_CERT_P12_FILE=certificate.p12
 
+# Check if the variable is set
+if [ -n "$MACOS_CERT_P12" ]; then
+  # If the variable is set, print its length
+  variable_length=${#MACOS_CERT_P12}
+  echo "MACOS_CERT_P12 is set. Length: $variable_length"
+else
+  # If the variable is not set, print a message
+  echo "MACOS_CERT_P12 is not set."
+fi
+
 # Recreate the certificate from the secure environment variable
-echo "$MACOS_CERT_P12" | base64 -d > "$MACOS_CERT_P12_FILE"
+echo -n "$MACOS_CERT_P12" | base64 -d > "$MACOS_CERT_P12_FILE"
 file_size=$(stat -f%z "$MACOS_CERT_P12_FILE")
 echo "Certificate size is $file_size bytes"
 
