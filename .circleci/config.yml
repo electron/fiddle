@@ -144,6 +144,7 @@ jobs:
       - install
       - attach_workspace:
           at: .
+      - load-release-secrets
       - run: yarn run publish --from-dry-run
   notify-sentry-deploy:
     docker:
