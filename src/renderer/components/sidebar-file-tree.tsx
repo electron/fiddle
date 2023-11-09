@@ -14,7 +14,7 @@ import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
-import { EditorId } from '../../interfaces';
+import { EditorId, PACKAGE_NAME } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
 import { isRequiredFile, isSupportedFile } from '../utils/editor-utils';
@@ -189,9 +189,19 @@ export const SidebarFileTree = observer(
 
       if (!id) return;
 
+      if (
+        id.endsWith('.json') &&
+        [PACKAGE_NAME, 'package-lock.json'].includes(id)
+      ) {
+        await appState.showErrorDialog(
+          'Cannot add package.json or package-lock.json as custom files',
+        );
+        return;
+      }
+
       if (!isSupportedFile(id)) {
         await appState.showErrorDialog(
-          `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
+          `Invalid filename "${id}": Must be a file ending in .js, .html, .css, or .json`,
         );
         return;
       }

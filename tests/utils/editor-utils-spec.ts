@@ -9,7 +9,11 @@ describe('editor-utils', () => {
   describe('getEmptyContent', () => {
     it('returns comments for known types', () => {
       expect(getEmptyContent('main.js')).toBe('// Empty');
+      expect(getEmptyContent('styles.css')).toBe('/* Empty */');
+      expect(getEmptyContent('index.html')).toBe('<!-- Empty -->');
+      expect(getEmptyContent('data.json')).toBe('{}');
     });
+
     it('returns an empty string for unknown types', () => {
       expect(getEmptyContent('main.foo')).toBe('');
     });

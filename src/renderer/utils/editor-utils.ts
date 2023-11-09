@@ -56,5 +56,6 @@ export function monacoLanguage(filename: string) {
   const suffix = getSuffix(filename);
   if (suffix === 'css') return 'css';
   if (suffix === 'html') return 'html';
+  if (suffix === 'json') return 'json';
   return 'javascript';
 }
