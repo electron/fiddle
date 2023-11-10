@@ -68,8 +68,7 @@ jobs:
     executor: node/macos
     steps:
       - install
-      - load-release-secrets
-      - run: chmod +x tools/add-macos-cert.sh && ./tools/add-macos-cert.sh
+      - run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
@@ -78,8 +77,6 @@ jobs:
           paths:
             - out
   win-build:
-    environment:
-      SIGN_OR_DIE: true
     parameters:
       arch:
         type: enum
@@ -88,12 +85,26 @@ jobs:
     steps:
       - install
       - run:
-          name: Write signing cert to disk
+          name: Write authentication cert to disk
+          shell: powershell.exe
           command: |
-            set -e
-            WINDOWS_CODESIGN_FILE=$(npx ts-node ./tools/add-windows-cert.ts)
-            echo "export WINDOWS_CODESIGN_FILE=\"$WINDOWS_CODESIGN_FILE\"" >> $BASH_ENV
-      - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
+            New-Item $Profile.CurrentUserAllHosts -Force
+            $SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
+            Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
+            [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
+      - run:
+          name: "Signing Manager Setup"
+          shell: powershell.exe
+          command: |
+            cd C:\
+            curl.exe -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:$env:SM_API_KEY" -o smtools-windows-x64.msi
+            msiexec.exe /i smtools-windows-x64.msi /quiet /qn | Wait-Process
+            & $env:SSM\smksp_registrar.exe list
+            & $env:SSM\smctl.exe windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
+      - run: 
+          name: npx yarn run publish
+          shell: powershell.exe
+          command: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
           path: out
       - persist_to_workspace:

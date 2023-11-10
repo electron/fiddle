@@ -12,7 +12,11 @@ describe('editor-utils', () => {
       for (const id of [MAIN_CJS, MAIN_JS, MAIN_MJS]) {
         expect(getEmptyContent(id)).toBe('// Empty');
       }
+      expect(getEmptyContent('styles.css')).toBe('/* Empty */');
+      expect(getEmptyContent('index.html')).toBe('<!-- Empty -->');
+      expect(getEmptyContent('data.json')).toBe('{}');
     });
+
     it('returns an empty string for unknown types', () => {
       expect(getEmptyContent('main.foo')).toBe('');
     });

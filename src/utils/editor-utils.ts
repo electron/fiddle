@@ -14,6 +14,7 @@ const EMPTY_EDITOR_CONTENT: Record<EditorId, string> = {
   '.cjs': '// Empty',
   '.js': '// Empty',
   '.mjs': '// Empty',
+  '.json': '{}',
 } as const;
 
 export function getEmptyContent(filename: string): string {
@@ -44,5 +45,5 @@ export function getSuffix(filename: string) {
 }
 
 export function isSupportedFile(filename: string): filename is EditorId {
-  return /\.(css|html|cjs|js|mjs)$/i.test(filename);
+  return /\.(css|html|cjs|js|mjs|json)$/i.test(filename);
 }

@@ -128,6 +128,7 @@ export class RemoteLoader {
         const content = data.truncated
           ? await fetch(data.raw_url).then((r) => r.text())
           : data.content;
+
         if (id === PACKAGE_NAME) {
           const { dependencies, devDependencies } = JSON.parse(content);
           const deps: Record<string, string> = {
@@ -176,6 +177,10 @@ export class RemoteLoader {
 
           this.appState.modules = new Map(Object.entries(deps));
         }
+
+        // JSON files are supported, but we don't want to add package.json
+        // or the lockfile to the visible editor array.
+        if ([PACKAGE_NAME, 'package-lock.json'].includes(id)) continue;
 
         if (!isSupportedFile(id)) continue;
 

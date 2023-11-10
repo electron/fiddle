@@ -1,12 +1,31 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <title>Shell Example</title>
-  </head>
-  <body>
-    <h1>Shell Example</h1>
-    <button id="open-github">Open GitHub.com</button>
-    <button id="open-folder">Show me in my folder</button>
-    <button id="beep">Play a system beep</button>
-  </body>
+
+<head>
+  <title>Shell Example</title>
+</head>
+
+<body>
+  <h1>Shell Example</h1>
+  <button id="open-github">Open GitHub.com</button>
+  <button id="open-folder">Show me in my folder</button>
+  <button id="beep">Play a system beep</button>
+</body>
+
+<script>
+  window.addEventListener('DOMContentLoaded', () => {
+    document.querySelector('#open-github').onclick = () => {
+      window.electron.openGitHub()
+    }
+
+    document.querySelector('#open-folder').onclick = () => {
+      window.electron.openFolder()
+    }
+
+    document.querySelector('#beep').onclick = () => {
+      window.electron.beep()
+    }
+  })
+</script>
+
 </html>

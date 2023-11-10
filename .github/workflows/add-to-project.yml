@@ -21,7 +21,7 @@ jobs:
           creds: ${{ secrets.ECOSYSTEM_ISSUE_TRIAGE_GH_APP_CREDS }}
           org: electron
       - name: Add to Project
-        uses: dsanders11/project-actions/add-item@a24415515fa60a22f71f9d9d00e36ca82660cde9 # v1.0.1
+        uses: dsanders11/project-actions/add-item@3a81985616963f32fae17d1d1b406c631f3201a1 # v1.1.0
         with:
           field: Opened
           field-value: ${{ github.event.pull_request.created_at || github.event.issue.created_at }}
