@@ -256,10 +256,37 @@ describe('RemoteLoader', () => {
       expect(store.modules.has('electron')).toEqual(false);
     });
 
-    it('loads a fiddle with a new file', async () => {
+    it('loads a fiddle with a new JS file', async () => {
       // setup: adding a new supported file
       const filename = 'file.js';
       const content = '// hello!';
+      const gistId = 'customtestid';
+      expect(isKnownFile(filename)).toBe(false);
+      expect(isSupportedFile(filename)).toBe(true);
+
+      store.gistId = gistId;
+
+      editorValues[filename] = content;
+      mockGistFiles[filename] = { content };
+      mockRepos.push({
+        name: filename,
+        download_url: `https://${filename}`,
+      });
+
+      mocked(getOctokit).mockResolvedValue({
+        gists: mockGetGists,
+      } as unknown as Octokit);
+      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
+
+      const result = await instance.fetchGistAndLoad(gistId);
+
+      expect(result).toBe(true);
+      expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
+    });
+
+    it('loads a fiddle with a new JSON file', async () => {
+      const filename = 'data.json';
+      const content = '{"test": "hello!"}';
       const gistId = 'customtestid';
       expect(isKnownFile(filename)).toBe(false);
       expect(isSupportedFile(filename)).toBe(true);

@@ -8,7 +8,7 @@ import {
   isSupportedFile,
   monacoLanguage,
 } from './utils/editor-utils';
-import { EditorId, EditorValues } from '../interfaces';
+import { EditorId, EditorValues, PACKAGE_NAME } from '../interfaces';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
@@ -140,8 +140,20 @@ export class EditorMosaic {
 
   /** Add a file. If we already have a file with that name, replace it. */
   private addFile(id: EditorId, value: string) {
-    if (!isSupportedFile(id))
-      throw new Error(`Cannot add file "${id}": Must be .js, .html, or .css`);
+    if (
+      id.endsWith('.json') &&
+      [PACKAGE_NAME, 'package-lock.json'].includes(id)
+    ) {
+      throw new Error(
+        `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
+      );
+    }
+
+    if (!isSupportedFile(id)) {
+      throw new Error(
+        `Cannot add file "${id}": Must be .js, .html, .css, or .json`,
+      );
+    }
 
     // create a monaco model with the file's contents
     const { monaco } = window;

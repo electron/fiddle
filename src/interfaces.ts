@@ -137,7 +137,7 @@ export const enum GenericDialogType {
   'success' = 'success',
 }
 
-export type EditorId = `${string}.${'js' | 'html' | 'css'}`;
+export type EditorId = `${string}.${'js' | 'html' | 'css' | 'json'}`;
 
 export type EditorValues = Record<EditorId, string>;
 

@@ -6,6 +6,7 @@ const EMPTY_EDITOR_CONTENT = {
   css: '/* Empty */',
   html: '<!-- Empty -->',
   js: '// Empty',
+  json: '{}',
 } as const;
 
 export function getEmptyContent(filename: string): string {
@@ -32,5 +33,5 @@ export function getSuffix(filename: string) {
 }
 
 export function isSupportedFile(filename: string): filename is EditorId {
-  return /\.(css|html|js)$/i.test(filename);
+  return /\.(css|html|js|json)$/i.test(filename);
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EditorValues } from '../../../src/interfaces';
+import { EditorValues, PACKAGE_NAME } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { SidebarFileTree } from '../../../src/renderer/components/sidebar-file-tree';
 import {
@@ -95,6 +95,26 @@ describe('SidebarFileTree component', () => {
     expect(editorMosaic.files.get(EDITOR_NAME)).toBe(undefined);
     expect(editorMosaic.files.get(EDITOR_NEW_NAME)).toBe(
       EditorPresence.Pending,
+    );
+  });
+
+  it('fails if trying to rename an editor to an invalid value', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const EDITOR_NAME = 'data.json';
+    const EDITOR_NEW_NAME = PACKAGE_NAME;
+
+    editorValues[EDITOR_NAME] = '{}';
+    editorMosaic.set(editorValues);
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    await instance.renameEditor(EDITOR_NAME);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
     );
   });
 
