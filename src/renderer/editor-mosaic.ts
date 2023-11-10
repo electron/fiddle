@@ -145,7 +145,7 @@ export class EditorMosaic {
       [PACKAGE_NAME, 'package-lock.json'].includes(id)
     ) {
       throw new Error(
-        'Cannot add package.json or package-lock.json as custom files',
+        `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
       );
     }
 

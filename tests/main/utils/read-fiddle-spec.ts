@@ -55,7 +55,7 @@ describe('read-fiddle', () => {
     expect(fiddle).toStrictEqual(mockValues);
   });
 
-  it('reads JSON files only if they are not package.json', async () => {
+  it(`reads JSON files only if they are not ${PACKAGE_NAME}`, async () => {
     const content = 'hello im main';
     const mockValues = {
       [MAIN_JS]: content,

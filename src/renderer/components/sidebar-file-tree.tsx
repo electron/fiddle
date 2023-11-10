@@ -194,7 +194,7 @@ export const SidebarFileTree = observer(
         [PACKAGE_NAME, 'package-lock.json'].includes(id)
       ) {
         await appState.showErrorDialog(
-          'Cannot add package.json or package-lock.json as custom files',
+          `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
         );
         return;
       }
