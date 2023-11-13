@@ -10,6 +10,8 @@ import {
   RunnableVersion,
 } from '../interfaces';
 
+const parseEnvString = require('parse-env-string');
+
 export enum ForgeCommands {
   PACKAGE = 'package',
   MAKE = 'make',
@@ -330,14 +332,26 @@ export class Runner {
     }
   }
 
-  private buildChildEnvVars(): { [x: string]: string | undefined } {
+  public buildChildEnvVars(): { [x: string]: string | undefined } {
     const { environmentVariables } = this.appState;
 
     const env: Record<string, string> = {};
 
-    for (const v of environmentVariables) {
-      const [key, value] = v.split('=');
-      env[key] = value;
+    for (const envVar of environmentVariables) {
+      const errMsg = `Could not parse environment variable: ${envVar}`;
+
+      try {
+        const parsed: Record<string, string> | null = parseEnvString(envVar);
+        if (!parsed || !Object.keys(parsed).length) {
+          this.appState.showErrorDialog(errMsg);
+          continue;
+        }
+
+        const [key, value] = Object.entries(parsed)[0];
+        env[key] = value;
+      } catch (e) {
+        this.appState.showErrorDialog(errMsg);
+      }
     }
 
     return env;

@@ -41,6 +41,48 @@ describe('Runner component', () => {
     instance = new Runner(store as unknown as AppState);
   });
 
+  describe('buildChildEnvVars', () => {
+    it('fails when the environment variable is invalid', () => {
+      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+      store.environmentVariables = ['bwap bwap'];
+      const env = instance.buildChildEnvVars();
+      expect(env).toEqual({});
+
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(
+          `Could not parse environment variable: bwap bwap`,
+        ),
+      );
+    });
+
+    it('returns an empty object when there are no environment variables', () => {
+      store.environmentVariables = [];
+      const env = instance.buildChildEnvVars();
+      expect(env).toEqual({});
+    });
+
+    it('returns an object with the environment variables', () => {
+      store.environmentVariables = ['foo=bar', 'bar=baz'];
+      const env = instance.buildChildEnvVars();
+      expect(env).toEqual({ foo: 'bar', bar: 'baz' });
+    });
+
+    it('returns an object with complex environment variables', () => {
+      store.environmentVariables = [
+        'NODE_OPTIONS="--no-warnings --max-old-space-size=2048"',
+        'ELECTRON_TRASH=gvfs-trash',
+        'ELECTRON_OVERRIDE_DIST_PATH=/Users/user=nam=!e/projects/electron/out/Testing',
+      ];
+      const env = instance.buildChildEnvVars();
+      expect(env).toEqual({
+        NODE_OPTIONS: '--no-warnings --max-old-space-size=2048',
+        ELECTRON_TRASH: 'gvfs-trash',
+        ELECTRON_OVERRIDE_DIST_PATH:
+          '/Users/user=nam=!e/projects/electron/out/Testing',
+      });
+    });
+  });
+
   describe('run()', () => {
     it('runs', async () => {
       // wait for run() to get running

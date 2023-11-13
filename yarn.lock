@@ -9570,6 +9570,11 @@ parse-author@^2.0.0:
   dependencies:
     author-regex "^1.0.0"
 
+parse-env-string@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/parse-env-string/-/parse-env-string-1.0.1.tgz#9e1d06a5e561237d3ca7d06f6178f86b54d5c610"
+  integrity sha512-nozPS2x3SzOI6K2TUeeK/KwxMcg22SpAYVY75JeOXHu0M33L+Zo38NkNBlvUqajGwBGKYEbVTI4WemZJFo/OAA==
+
 parse-json@^2.2.0:
   version "2.2.0"
   resolved "https://registry.npmjs.org/parse-json/-/parse-json-2.2.0.tgz"
