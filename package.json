@@ -61,6 +61,7 @@
     "node-watch": "^0.7.3",
     "p-debounce": "^2.0.0",
     "package-json": "^7.0.0",
+    "parse-env-string": "^1.0.1",
     "react": "^16.14.0",
     "react-dom": "^16.14.0",
     "react-mosaic-component": "^4.1.1",
