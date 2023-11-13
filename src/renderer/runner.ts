@@ -1,3 +1,5 @@
+import { ipcRenderer } from 'electron';
+
 import { Bisector } from './bisect';
 import { AppState } from './state';
 import { maybePlural } from './utils/plural-maybe';
@@ -9,6 +11,7 @@ import {
   RunResult,
   RunnableVersion,
 } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
@@ -353,7 +356,11 @@ export class Runner {
     const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
-    const options = [dir, '--inspect'].concat(executionFlags);
+    const options = await ipcRenderer.invoke(
+      IpcEvents.PARSE_CLI_FLAGS,
+      dir,
+      executionFlags,
+    );
 
     const cleanup = async () => {
       flushOutput();

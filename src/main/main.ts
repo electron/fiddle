@@ -27,6 +27,7 @@ import { setupUpdates } from './update';
 import { isDevMode } from './utils/devmode';
 import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
+import { setupCliFlags } from './utils/parse-cli-flags';
 import { setupVersions } from './versions';
 import { getOrCreateMainWindow, mainIsReady } from './windows';
 import { IpcEvents } from '../ipc-events';
@@ -61,6 +62,7 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
+  setupCliFlags();
   const knownVersions = await setupVersions();
   setupGetProjectName();
   setupGetUsername();
