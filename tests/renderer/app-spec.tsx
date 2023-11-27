@@ -101,7 +101,7 @@ describe('App component', () => {
       mocked(openFiddle).mockResolvedValueOnce(undefined);
 
       const filePath = '/fake/path';
-      const files = { MAIN_JS: 'foo' };
+      const files = { [MAIN_JS]: 'foo' };
       await app.openFiddle({ localFiddle: { filePath, files } });
       expect(openFiddle).toHaveBeenCalledWith(filePath, files);
     });

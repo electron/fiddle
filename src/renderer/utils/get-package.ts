@@ -42,13 +42,15 @@ export async function getPackageJson(
     }
   }
 
+  const entryPoint = appState.editorMosaic.mainEntryPointFile() ?? MAIN_JS;
+
   return JSON.stringify(
     {
       name,
       productName: name,
       description: 'My Electron application description',
       keywords: [],
-      main: `./${MAIN_JS}`,
+      main: `./${entryPoint}`,
       version: '1.0.0',
       author: appState.packageAuthor,
       scripts: {

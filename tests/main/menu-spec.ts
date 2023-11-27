@@ -5,7 +5,7 @@
 import * as electron from 'electron';
 import { mocked } from 'jest-mock';
 
-import { BlockableAccelerator } from '../../src/interfaces';
+import { BlockableAccelerator, MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
 import {
   saveFiddle,
@@ -271,7 +271,7 @@ describe('menu', () => {
       });
 
       it('attempts to open a template on click', async () => {
-        const editorValues = { 'main.js': 'foobar' };
+        const editorValues = { [MAIN_JS]: 'foobar' };
         mocked(getTemplateValues).mockResolvedValue(editorValues);
         await showMe.submenu[0].submenu[0].click();
         expect(ipcMainManager.send).toHaveBeenCalledWith(

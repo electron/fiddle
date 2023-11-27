@@ -1,3 +1,4 @@
+import { MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../src/interfaces';
 import {
   getEmptyContent,
   getSuffix,
@@ -8,7 +9,9 @@ import { createEditorValues } from '../mocks/editor-values';
 describe('editor-utils', () => {
   describe('getEmptyContent', () => {
     it('returns comments for known types', () => {
-      expect(getEmptyContent('main.js')).toBe('// Empty');
+      for (const id of [MAIN_CJS, MAIN_JS, MAIN_MJS]) {
+        expect(getEmptyContent(id)).toBe('// Empty');
+      }
       expect(getEmptyContent('styles.css')).toBe('/* Empty */');
       expect(getEmptyContent('index.html')).toBe('<!-- Empty -->');
       expect(getEmptyContent('data.json')).toBe('{}');

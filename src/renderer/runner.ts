@@ -1,9 +1,12 @@
+import semver from 'semver';
+
 import { Bisector } from './bisect';
 import { AppState } from './state';
 import { maybePlural } from './utils/plural-maybe';
 import {
   FileTransformOperation,
   InstallState,
+  MAIN_MJS,
   PMOperationOptions,
   PackageJsonOptions,
   RunResult,
@@ -163,6 +166,20 @@ export class Runner {
       const fallback = appState.findUsableVersion();
       if (fallback) await appState.setVersion(fallback.version);
       return RunResult.INVALID;
+    }
+
+    if (
+      semver.lt(ver.version, '28.0.0') &&
+      !ver.version.startsWith('28.0.0-nightly')
+    ) {
+      const entryPoint = appState.editorMosaic.mainEntryPointFile();
+
+      if (entryPoint === MAIN_MJS) {
+        appState.showErrorDialog(
+          'ESM main entry points are only supported starting in Electron 28',
+        );
+        return RunResult.INVALID;
+      }
     }
 
     if (appState.isClearingConsoleOnRun) {

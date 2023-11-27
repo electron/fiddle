@@ -5,6 +5,7 @@ import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 import {
   compareEditors,
   getEmptyContent,
+  isMainEntryPoint,
   isSupportedFile,
   monacoLanguage,
 } from './utils/editor-utils';
@@ -151,7 +152,7 @@ export class EditorMosaic {
 
     if (!isSupportedFile(id)) {
       throw new Error(
-        `Cannot add file "${id}": Must be .js, .html, .css, or .json`,
+        `Cannot add file "${id}": Must be .cjs, .js, .mjs, .html, .css, or .json`,
       );
     }
 
@@ -275,8 +276,17 @@ export class EditorMosaic {
 
   /** Add a new file to the mosaic */
   public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
-    if (this.files.has(id))
+    if (this.files.has(id)) {
       throw new Error(`Cannot add file "${id}": File already exists`);
+    }
+
+    const entryPoint = this.mainEntryPointFile();
+
+    if (isMainEntryPoint(id) && entryPoint) {
+      throw new Error(
+        `Cannot add file "${id}": Main entry point ${entryPoint} exists`,
+      );
+    }
 
     this.addFile(id, value);
   }
@@ -316,6 +326,10 @@ export class EditorMosaic {
 
   public updateOptions(options: MonacoType.editor.IEditorOptions) {
     for (const editor of this.editors.values()) editor.updateOptions(options);
+  }
+
+  public mainEntryPointFile(): EditorId | undefined {
+    return Array.from(this.files.keys()).find((id) => isMainEntryPoint(id));
   }
 
   //=== Listen for user edits

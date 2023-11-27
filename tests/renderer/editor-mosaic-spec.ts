@@ -392,7 +392,7 @@ describe('EditorMosaic', () => {
         direction: 'row',
         first: {
           direction: 'column',
-          first: 'main.js',
+          first: MAIN_JS,
           second: 'renderer.js',
         },
         second: {
