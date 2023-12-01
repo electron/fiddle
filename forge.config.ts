@@ -23,6 +23,8 @@ const commonLinuxConfig = {
   mimeType: ['x-scheme-handler/electron-fiddle'],
 };
 
+const requirements = path.resolve(__dirname, 'tools/certs/requirements.txt');
+
 const config: ForgeConfig = {
   hooks: {
     generateAssets: async () => {
@@ -95,15 +97,15 @@ const config: ForgeConfig = {
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
-      identity:
-        'Developer ID Application: OpenJS Foundation, Inc. (UY52UFTVTM)',
+      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
       optionsForFile: (filePath) =>
         ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
           filePath.includes(helper),
         )
-          ? {}
+          ? { requirements }
           : {
               entitlements: 'static/entitlements.plist',
+              requirements,
             },
     },
   },
