@@ -1,4 +1,4 @@
-// The ipcMain and ipcRenderer modules allow communication between the mai
+// The ipcMain and ipcRenderer modules allow communication between the main
 // process and the renderer processes.
 //
 // For more info, see:
