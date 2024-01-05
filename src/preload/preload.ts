@@ -197,6 +197,9 @@ export async function setupFiddleGlobal() {
     reloadWindows() {
       ipcRenderer.send(IpcEvents.RELOAD_WINDOW);
     },
+    openExternal(url: string) {
+      ipcRenderer.send(IpcEvents.OPEN_EXTERNAL, url);
+    },
     readThemeFile(name?: string) {
       return ipcRenderer.invoke(IpcEvents.READ_THEME_FILE, name);
     },

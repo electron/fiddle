@@ -78,16 +78,22 @@ export const Output = observer(
       const ref = this.outputRef.current;
       if (ref) {
         this.setupCustomOutputEditorLanguage(monaco);
-        this.editor = monaco.editor.create(ref, {
-          language: this.language,
-          theme: 'main',
-          readOnly: true,
-          contextmenu: false,
-          automaticLayout: true,
-          model: this.model,
-          ...monacoOptions,
-          wordWrap: 'on',
-        });
+        this.editor = monaco.editor.create(
+          ref,
+          {
+            language: this.language,
+            theme: 'main',
+            readOnly: true,
+            contextmenu: false,
+            automaticLayout: true,
+            model: this.model,
+            ...monacoOptions,
+            wordWrap: 'on',
+          },
+          {
+            openerService: this.openerService(),
+          },
+        );
       }
     }
 
@@ -191,6 +197,30 @@ export const Output = observer(
       }
 
       return lines;
+    }
+
+    /**
+     * Implements external url handling for Monaco.
+     *
+     * @returns {MonacoType.editor.IOpenerService}
+     */
+    private openerService() {
+      const { appState } = this.props;
+
+      return {
+        open: (url: string) => {
+          appState
+            .showConfirmDialog({
+              label: `Open ${url} in external browser?`,
+              ok: 'Open',
+            })
+            .then((open) => {
+              if (open) {
+                window.ElectronFiddle.openExternal(url);
+              }
+            });
+        },
+      };
     }
 
     public render(): JSX.Element | null {

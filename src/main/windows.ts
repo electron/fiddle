@@ -105,6 +105,10 @@ export function createMainWindow(): Electron.BrowserWindow {
     browserWindow?.reload();
   });
 
+  ipcMainManager.on(IpcEvents.OPEN_EXTERNAL, (_, url: string) => {
+    shell.openExternal(url);
+  });
+
   browserWindows.push(browserWindow);
 
   return browserWindow;
