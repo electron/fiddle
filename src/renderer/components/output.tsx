@@ -215,9 +215,7 @@ export const Output = observer(
               ok: 'Open',
             })
             .then((open) => {
-              if (open) {
-                window.ElectronFiddle.openExternal(url);
-              }
+              if (open) window.open(url);
             });
         },
       };

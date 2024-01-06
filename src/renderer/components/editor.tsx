@@ -135,9 +135,7 @@ export class Editor extends React.Component<EditorProps> {
             ok: 'Open',
           })
           .then((open) => {
-            if (open) {
-              window.ElectronFiddle.openExternal(url);
-            }
+            if (open) window.open(url);
           });
       },
     };

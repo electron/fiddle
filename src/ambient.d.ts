@@ -156,7 +156,6 @@ declare global {
       pushOutputEntry(entry: OutputEntry): void;
       readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
-      openExternal(url: string): Promise<void>;
       removeAllListeners(type: FiddleEvent): void;
       removeVersion(version: string): Promise<InstallState>;
       saveFilesToTemp(files: Files): Promise<string>;

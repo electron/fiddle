@@ -87,7 +87,6 @@ export const ipcMainEvents = [
   IpcEvents.OUTPUT_ENTRY,
   IpcEvents.TASK_DONE,
   IpcEvents.RELOAD_WINDOW,
-  IpcEvents.OPEN_EXTERNAL,
   IpcEvents.SET_NATIVE_THEME,
   IpcEvents.SHOW_WINDOW,
   IpcEvents.GET_TEMPLATE_VALUES,
