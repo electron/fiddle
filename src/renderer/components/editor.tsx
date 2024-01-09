@@ -82,16 +82,22 @@ export class Editor extends React.Component<EditorProps> {
     const { fontFamily, fontSize } = appState;
 
     if (ref) {
-      this.editor = monaco.editor.create(ref, {
-        automaticLayout: true,
-        language: this.language,
-        theme: 'main',
-        fontFamily,
-        fontSize,
-        contextmenu: false,
-        model: null,
-        ...monacoOptions,
-      });
+      this.editor = monaco.editor.create(
+        ref,
+        {
+          automaticLayout: true,
+          language: this.language,
+          theme: 'main',
+          fontFamily,
+          fontSize,
+          contextmenu: false,
+          model: null,
+          ...monacoOptions,
+        },
+        {
+          openerService: this.openerService(),
+        },
+      );
 
       // mark this editor as focused whenever it is
       this.editor.onDidFocusEditorText(() => {
@@ -111,6 +117,28 @@ export class Editor extends React.Component<EditorProps> {
       console.log('Editor: Disposing');
       this.editor.dispose();
     }
+  }
+
+  /**
+   * Implements external url handling for Monaco.
+   *
+   * @returns {MonacoType.editor.IOpenerService}
+   */
+  private openerService() {
+    const { appState } = this.props;
+
+    return {
+      open: (url: string) => {
+        appState
+          .showConfirmDialog({
+            label: `Open ${url} in external browser?`,
+            ok: 'Open',
+          })
+          .then((open) => {
+            if (open) window.open(url);
+          });
+      },
+    };
   }
 
   public render() {
