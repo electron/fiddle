@@ -4,7 +4,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/browser-window
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow } = require('electron/main')
 
 const windows = []
 

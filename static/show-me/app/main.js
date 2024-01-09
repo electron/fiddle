@@ -5,7 +5,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/app
 
-const { app } = require('electron')
+const { app } = require('electron/main')
 
 app.whenReady().then(() => console.log('The app is now ready for action'))
 

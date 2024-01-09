@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron')
+const { ipcRenderer } = require('electron/renderer')
 
 // prints "pong"
 console.log(ipcRenderer.sendSync('synchronous-message', 'ping'))

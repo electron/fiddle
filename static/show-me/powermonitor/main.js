@@ -3,13 +3,9 @@
 // For more info, see:
 // https://electronjs.org/docs/api/power-monitor
 
-const { app } = require('electron')
+const { app, powerMonitor } = require('electron/main')
 
 app.whenReady().then(() => {
-  // We cannot require the "ready" module until
-  // the app is ready
-  const { powerMonitor } = require('electron')
-
   powerMonitor.on('suspend', () => {
     console.log('The system is going to sleep')
   })

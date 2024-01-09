@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/touch-bar
 
-const { app, BrowserWindow, TouchBar } = require('electron')
+const { app, BrowserWindow, TouchBar } = require('electron/main')
 const { TouchBarLabel, TouchBarButton, TouchBarSpacer } = TouchBar
 
 app.whenReady().then(() => {

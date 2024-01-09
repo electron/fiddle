@@ -5,16 +5,14 @@
 // https://electronjs.org/docs/api/ipc-main
 // https://electronjs.org/docs/api/ipc-renderer
 
-const { app, BrowserWindow, ipcMain } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, ipcMain } = require('electron/main')
+const path = require('node:path')
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
     height: 600,
     width: 600,
     webPreferences: {
-      nodeIntegration: false, // default in Electron >= 5
-      contextIsolation: true, // default in Electron >= 12
       preload: path.join(__dirname, 'preload.js')
     }
   })

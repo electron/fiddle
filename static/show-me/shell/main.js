@@ -3,8 +3,8 @@
 // For more info, see:
 // https://electronjs.org/docs/api/shell
 
-const { app, BrowserWindow, ipcMain, shell } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, ipcMain, shell } = require('electron/main')
+const path = require('node:path')
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({

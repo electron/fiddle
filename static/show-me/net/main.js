@@ -8,7 +8,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/net
 
-const { app, net } = require('electron')
+const { app, net } = require('electron/main')
 
 app.whenReady().then(() => {
   const request = net.request('https://github.com')
