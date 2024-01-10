@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/session
 
-const { app, session } = require('electron')
+const { app, session } = require('electron/main')
 
 app.whenReady().then(() => {
   const { defaultSession } = session
@@ -16,7 +16,7 @@ app.whenReady().then(() => {
   console.log(defaultSession.getUserAgent())
 
   // Cache Size
-  defaultSession.getCacheSize((result) => {
+  defaultSession.getCacheSize().then((result) => {
     console.log(result)
   })
 })

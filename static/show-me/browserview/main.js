@@ -6,7 +6,7 @@
 // https://electronjs.org/docs/api/browser-view
 
 // In the main process.
-const { BrowserView, BrowserWindow, app } = require('electron')
+const { BrowserView, BrowserWindow, app } = require('electron/main')
 
 app.whenReady().then(() => {
   let win = new BrowserWindow({ width: 800, height: 600 })
@@ -14,11 +14,7 @@ app.whenReady().then(() => {
     win = null
   })
 
-  const view = new BrowserView({
-    webPreferences: {
-      nodeIntegration: false
-    }
-  })
+  const view = new BrowserView()
 
   win.setBrowserView(view)
   view.setBounds({ x: 0, y: 0, width: 300, height: 300 })

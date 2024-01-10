@@ -13,7 +13,7 @@
 // https://electronjs.org/docs/api/accelerator
 // https://electronjs.org/docs/api/global-shortcut
 
-const { app, globalShortcut } = require('electron')
+const { app, globalShortcut } = require('electron/main')
 
 app.whenReady().then(() => {
   // Register a 'CommandOrControl+Y' shortcut listener.

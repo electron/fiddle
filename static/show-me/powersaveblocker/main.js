@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/power-save-blocker
 
-const { app, powerSaveBlocker } = require('electron')
+const { app, powerSaveBlocker } = require('electron/main')
 
 app.whenReady().then(() => {
   const id = powerSaveBlocker.start('prevent-display-sleep')

@@ -8,7 +8,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/content-tracing
 
-const { app, contentTracing } = require('electron')
+const { app, contentTracing } = require('electron/main')
 
 app.whenReady().then(() => {
   const options = {
@@ -16,13 +16,13 @@ app.whenReady().then(() => {
     traceOptions: 'record-until-full,enable-sampling'
   }
 
-  contentTracing.startRecording(options, () => {
+  contentTracing.startRecording(options).then(() => {
     console.log('Tracing started')
-
-    setTimeout(() => {
-      contentTracing.stopRecording('', (path) => {
-        console.log('Tracing data recorded to ' + path)
-      })
-    }, 5000)
   })
+
+  setTimeout(() => {
+    contentTracing.stopRecording().then((path) => {
+      console.log('Tracing data recorded to ' + path)
+    })
+  }, 5000)
 })
