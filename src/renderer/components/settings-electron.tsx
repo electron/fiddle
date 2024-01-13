@@ -222,7 +222,7 @@ export const ElectronSettings = observer(
           <Checkbox
             checked={appState.showUndownloadedVersions}
             id="showUndownloadedVersions"
-            label="Not downloaded"
+            label="Not Downloaded"
             onChange={this.handleStateChange}
           />
         </FormGroup>
@@ -338,7 +338,7 @@ export const ElectronSettings = observer(
       const { state, source } = item;
       const isLocal = source === VersionSource.local;
       let icon: IconName = 'box';
-      let humanState = 'Downloaded';
+      let humanState = isLocal ? 'Available' : 'Downloaded';
 
       if (state === InstallState.downloading) {
         icon = 'cloud-download';
@@ -347,7 +347,7 @@ export const ElectronSettings = observer(
         // The only way for a local version to be missing
         // is for it to have been deleted. Mark as unavailable.
         icon = isLocal ? 'issue' : 'cloud';
-        humanState = isLocal ? 'Not available' : 'Not downloaded';
+        humanState = isLocal ? 'Not Available' : 'Not Downloaded';
       }
 
       return (
