@@ -68,7 +68,7 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
   // If a version is local, either it's there or it's not.
   if (source === VersionSource.local) {
-    return state === 'missing' ? 'Unavailable' : name || 'Local';
+    return state === InstallState.missing ? 'Unavailable' : name || 'Local';
   }
 
   const installStateLabels: Record<InstallState, string> = {
