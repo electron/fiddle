@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { InstallState } from '../../interfaces';
+import { InstallState, VersionSource } from '../../interfaces';
 import { AppState } from '../state';
 
 interface RunnerProps {
@@ -29,7 +29,7 @@ export const Runner = observer(
         isOnline,
       } = this.props.appState;
 
-      const state = currentElectronVersion?.state;
+      const { downloadProgress, source, state } = currentElectronVersion;
       const props: ButtonProps = { disabled: true };
 
       if ([downloading, missing].includes(state) && !isOnline) {
@@ -41,12 +41,7 @@ export const Runner = observer(
       switch (state) {
         case downloading: {
           props.text = 'Downloading';
-          props.icon = (
-            <Spinner
-              size={16}
-              value={currentElectronVersion?.downloadProgress}
-            />
-          );
+          props.icon = <Spinner size={16} value={downloadProgress} />;
           break;
         }
         case installing: {
@@ -71,6 +66,13 @@ export const Runner = observer(
             props.icon = 'play';
           }
           break;
+        }
+        case missing: {
+          if (source === VersionSource.local) {
+            props.text = 'Unavailable';
+            props.icon = 'issue';
+            break;
+          }
         }
         default: {
           props.text = 'Checking status';

@@ -125,14 +125,25 @@ describe('VersionSelect component', () => {
   });
 
   describe('getItemLabel()', () => {
-    it('returns the correct label for a local version', () => {
+    it('returns the correct label for an available local version', () => {
       const input: RunnableVersion = {
         ...mockVersion1,
+        state: installed,
         source: local,
       };
 
       expect(getItemLabel(input)).toBe('Local');
       expect(getItemLabel({ ...input, name: 'Hi' })).toBe('Hi');
+    });
+
+    it('returns the correct label for an unavailable local version', () => {
+      const input: RunnableVersion = {
+        ...mockVersion1,
+        state: missing,
+        source: local,
+      };
+
+      expect(getItemLabel(input)).toBe('Unavailable');
     });
 
     it('returns the correct label for a version not downloaded', () => {

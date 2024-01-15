@@ -66,8 +66,9 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
  * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
+  // If a version is local, either it's there or it's not.
   if (source === VersionSource.local) {
-    return name || 'Local';
+    return state === InstallState.missing ? 'Unavailable' : name || 'Local';
   }
 
   const installStateLabels: Record<InstallState, string> = {
@@ -87,7 +88,12 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
  * @param {RunnableVersion} { state }
  * @returns {IconName}
  */
-export function getItemIcon({ state }: RunnableVersion): IconName {
+export function getItemIcon({ source, state }: RunnableVersion): IconName {
+  // If a version is local, either it's there or it's not.
+  if (source === VersionSource.local) {
+    return state === InstallState.missing ? 'issue' : 'saved';
+  }
+
   const installStateIcons: Record<InstallState, IconName> = {
     missing: 'cloud',
     downloading: 'cloud-download',
