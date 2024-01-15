@@ -71,7 +71,7 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
   }
 
   const installStateLabels: Record<InstallState, string> = {
-    missing: 'Not downloaded',
+    missing: 'Not Downloaded',
     downloading: 'Downloading',
     downloaded: 'Downloaded',
     installing: 'Downloaded',

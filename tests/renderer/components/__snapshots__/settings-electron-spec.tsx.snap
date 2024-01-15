@@ -98,7 +98,7 @@ exports[`ElectronSettings component renders 1`] = `
       <Blueprint3.Checkbox
         checked={false}
         id="showUndownloadedVersions"
-        label="Not downloaded"
+        label="Not Downloaded"
         onChange={[Function]}
       />
     </Blueprint3.FormGroup>
@@ -190,7 +190,7 @@ exports[`ElectronSettings component renders 1`] = `
                 icon="box"
               />
                
-              Downloaded
+              Available
             </span>
           </td>
           <td
@@ -275,7 +275,7 @@ exports[`ElectronSettings component renders 1`] = `
                 icon="cloud"
               />
                
-              Not downloaded
+              Not Downloaded
             </span>
           </td>
           <td

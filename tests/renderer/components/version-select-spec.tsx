@@ -141,7 +141,7 @@ describe('VersionSelect component', () => {
         state: missing,
       };
 
-      expect(getItemLabel(input)).toBe('Not downloaded');
+      expect(getItemLabel(input)).toBe('Not Downloaded');
     });
 
     it('returns the correct label for a version downloaded', () => {
