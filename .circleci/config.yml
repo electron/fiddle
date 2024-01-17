@@ -5,9 +5,15 @@ orbs:
 
 commands:
   install:
+    parameters:
+      arch:
+        type: enum
+        enum: ['', 'arm64', 'x86_64']
+        default: ''
     steps:
       - run: git config --global core.autocrlf input
       - node/install:
+          arch: << parameters.arch >>
           node-version: '18.17'
       - checkout
       - node/install-packages
@@ -40,7 +46,19 @@ jobs:
         enum: [ 'x64', 'arm64' ]
     executor: node/macos
     steps:
-      - install
+      - when:
+          condition:
+            equal: ['x64', << parameters.arch >>]
+          steps:
+            - node/install-rosetta
+            - install:
+                arch: 'x86_64'
+      - when:
+          condition:
+            not:
+              equal: ['x64', << parameters.arch >>]
+          steps:
+            - install
       - test
   win-test:
     parameters:
@@ -67,7 +85,19 @@ jobs:
         enum: [ 'x64', 'arm64' ]
     executor: node/macos
     steps:
-      - install
+      - when:
+          condition:
+            equal: ['x64', << parameters.arch >>]
+          steps:
+            - node/install-rosetta
+            - install:
+                arch: 'x86_64'
+      - when:
+          condition:
+            not:
+              equal: ['x64', << parameters.arch >>]
+          steps:
+            - install
       - run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - run: npx yarn run publish --arch=<< parameters.arch >> --dry-run
       - store_artifacts:
