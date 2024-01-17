@@ -97,7 +97,8 @@ const config: ForgeConfig = {
       OriginalFilename: 'Electron Fiddle',
     },
     osxSign: {
-      identity: 'Developer ID Application: Felix Rieseberg (LT94ZKYDCJ)',
+      identity:
+        'Developer ID Application: OpenJS Foundation, Inc. (UY52UFTVTM)',
       optionsForFile: (filePath) =>
         ['(Plugin).app', '(GPU).app', '(Renderer).app'].some((helper) =>
           filePath.includes(helper),
@@ -187,7 +188,7 @@ function notarizeMaybe() {
   config.packagerConfig!.osxNotarize = {
     appleId: process.env.APPLE_ID,
     appleIdPassword: process.env.APPLE_ID_PASSWORD,
-    teamId: 'LT94ZKYDCJ',
+    teamId: 'UY52UFTVTM',
   };
 }
 
