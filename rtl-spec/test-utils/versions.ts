@@ -12,13 +12,13 @@ const { remote } = VersionSource;
 export const mockVersion1 = {
   source: remote,
   state: missing,
-  version: '1.0.0',
+  version: '26.0.0',
 };
 
 export const mockVersion2 = {
   source: remote,
   state: missing,
-  version: '3.0.0-unsupported',
+  version: '28.0.0-unsupported',
 };
 
 /**
@@ -31,8 +31,8 @@ export function prepareAppState() {
 
   (appState as unknown as StateMock).initVersions('2.0.2', {
     ...mockVersions,
-    '1.0.0': { ...mockVersion1 },
-    '3.0.0-unsupported': { ...mockVersion2 },
+    [mockVersion1.version]: { ...mockVersion1 },
+    [mockVersion2.version]: { ...mockVersion2 },
   });
 
   appState.channelsToShow = [
