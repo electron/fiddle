@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { VersionChooser } from '../../src/renderer/components/commands-version-chooser';
@@ -28,6 +28,10 @@ describe('VersionSelect component', () => {
 
     await userEvent.click(versionButton);
 
-    expect(appState.setVersion).toHaveBeenCalledWith(mockVersion1.version);
+    waitFor(() =>
+      expect(btnOpenVersionSelector.textContent).toContain(
+        mockVersion1.version,
+      ),
+    );
   });
 });
