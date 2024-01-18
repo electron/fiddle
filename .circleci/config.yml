@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  node: electronjs/node@2.1.0
+  node: electronjs/node@2.2.0
 
 commands:
   install:
