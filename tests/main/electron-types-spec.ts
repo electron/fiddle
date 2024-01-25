@@ -112,7 +112,11 @@ describe('ElectronTypes', () => {
 
       const newTypes = saveTypesFile('some changed types');
       expect(newTypes).not.toEqual(oldTypes);
-      await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0);
+      // TODO(dsanders11) - Find a better fix for this flakiness under macOS Rosetta
+      await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0, {
+        interval: 100,
+        timeout: 8000,
+      });
       expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.ELECTRON_TYPES_CHANGED,
         [newTypes, localVersion.version],
