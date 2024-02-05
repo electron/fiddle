@@ -1249,10 +1249,10 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@electron/lint-roller@^1.0.1":
-  version "1.10.3"
-  resolved "https://registry.yarnpkg.com/@electron/lint-roller/-/lint-roller-1.10.3.tgz#772ea0daf6e1f89a414276881b89f81a68454537"
-  integrity sha512-8vvDYQf7LCgH1wDQsT0KSjb/LKVE0lu60RBFQuJe3Dli4Q3O9g63JBZMxKJCpFknF1lSSSog6nK2eXmRnfitig==
+"@electron/lint-roller@^1.11.0":
+  version "1.11.0"
+  resolved "https://registry.yarnpkg.com/@electron/lint-roller/-/lint-roller-1.11.0.tgz#85492052ace3f9bcba478627f0f3ff4e407d7377"
+  integrity sha512-ogkoSsEnvp7bfoZ7DR3iWK64Z9CDXZugC8/70/dnu7uFi0ZbJVsCVlDPpGPLoUUAUr6HW+vzRFKPzyuF0G9hcw==
   dependencies:
     "@dsanders11/vscode-markdown-languageservice" "^0.3.0"
     balanced-match "^2.0.0"
