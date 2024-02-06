@@ -1,0 +1,44 @@
+name: Check Download Links
+'on':
+  workflow_dispatch: null
+  schedule:
+    - cron: 0 1 * * *
+permissions: {}
+jobs:
+  check-download-links:
+    name: Check Download Links
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: npm install hast-util-from-html@^2.0.1 hast-util-select@^6.0.2
+      - name: Check website download links
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        with:
+          script: |
+            const { fromHtml } = await import('${{ github.workspace }}/node_modules/hast-util-from-html/index.js');
+            const { selectAll } = await import('${{ github.workspace }}/node_modules/hast-util-select/index.js');
+            const tree = fromHtml(await fetch('https://www.electronjs.org/fiddle').then(resp => resp.text()));
+            const links = selectAll('#downloads a[href^="https://github.com/electron/fiddle/releases/download/"]', tree);
+            const statusCodes = new Map();
+            for (const { properties: { href } } of links) {
+              const resp = await fetch(href, { method: 'HEAD' });
+              statusCodes.set(href, resp.status);
+            }
+            if (Array.from(statusCodes.values()).some(code => code === 404)) {
+              process.exitCode = 1;
+              core.summary.addHeading('🚨 Broken Download Links');
+              core.summary.addTable([
+                [
+                  { data: 'Artifact', header: true },
+                  { data: 'Status', header: true },
+                ],
+                ...Array.from(statusCodes.entries())
+                  .map(([href, code]) => [
+                    `<a href="${href}">${href.split('/').pop()}</a>`,
+                    `<p align="center">${code === 404 ? '❌' : '✅'}</p>`,
+                  ]),
+              ]);
+            } else {
+              core.summary.addRaw('🎉 No broken links');
+            }
+            await core.summary.write();
