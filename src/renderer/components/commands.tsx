@@ -36,15 +36,15 @@ export const Commands = observer(
 
     public render() {
       const { appState } = this.props;
-      const { isBisectCommandShowing, title } = appState;
+      const { isBisectCommandShowing, title, isSettingsShowing } = appState;
 
       return (
         <div
-          className={
+          className={`${
             window.ElectronFiddle.platform === 'darwin'
               ? 'commands is-mac'
               : 'commands'
-          }
+          }${isSettingsShowing ? ' tabbing-hidden' : ''}`}
           onDoubleClick={this.handleDoubleClick}
         >
           <div>

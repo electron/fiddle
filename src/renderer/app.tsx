@@ -127,9 +127,9 @@ export class App {
 
     const app = (
       <div className="container">
-        <Dialogs appState={this.state} />
         <Header appState={this.state} />
         <OutputEditorsWrapper appState={this.state} />
+        <Dialogs appState={this.state} />
       </div>
     );
 
