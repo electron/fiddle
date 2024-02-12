@@ -1,7 +1,5 @@
 import * as React from 'react';
 
-import { reaction } from 'mobx';
-
 import { Commands } from './commands';
 import { WelcomeTour } from './tour-welcome';
 import { AppState } from '../state';
@@ -23,21 +21,12 @@ interface HeaderState {
 export class Header extends React.Component<HeaderProps, HeaderState> {
   constructor(props: HeaderProps) {
     super(props);
-    this.state = {
-      focusable: true,
-    };
-    reaction(
-      () => this.props.appState.isSettingsShowing,
-      (isSettingsShowing) => this.setState({ focusable: !isSettingsShowing }),
-    );
   }
+
   public render() {
     return (
       <>
-        <header
-          id="header"
-          className={!this.state.focusable ? 'tabbing-hidden' : undefined}
-        >
+        <header id="header">
           <Commands key="commands" appState={this.props.appState} />
         </header>
         <WelcomeTour appState={this.props.appState} />

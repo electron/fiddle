@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { Button, ControlGroup } from '@blueprintjs/core';
+import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
 import { GistActionButton } from './commands-action-button';
@@ -36,15 +37,15 @@ export const Commands = observer(
 
     public render() {
       const { appState } = this.props;
-      const { isBisectCommandShowing, title } = appState;
+      const { isBisectCommandShowing, title, isSettingsShowing } = appState;
 
       return (
         <div
-          className={
-            window.ElectronFiddle.platform === 'darwin'
-              ? 'commands is-mac'
-              : 'commands'
-          }
+          className={classNames(
+            'commands',
+            { 'is-mac': window.ElectronFiddle.platform === 'darwin' },
+            { 'tabbing-hidden': isSettingsShowing },
+          )}
           onDoubleClick={this.handleDoubleClick}
         >
           <div>

@@ -61,7 +61,7 @@ describe('App component', () => {
       const result = (await app.setup()) as HTMLDivElement;
       jest.runAllTimers();
 
-      expect(result.innerHTML).toBe('Dialogs;Header;OutputEditorsWrapper;');
+      expect(result.innerHTML).toBe('Header;OutputEditorsWrapper;Dialogs;');
 
       jest.useRealTimers();
     });
