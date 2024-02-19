@@ -83,6 +83,29 @@ describe('RemoteLoader', () => {
       expect(app.replaceFiddle).toBeCalledWith(editorValues, { gistId });
     });
 
+    it('handles bad JSON in package.json', async () => {
+      const gistId = 'badjsontestid';
+      const badPj =
+        '{"main":"main.js","devDependencies":{"electron":"17.0.0",}}';
+
+      store.gistId = gistId;
+      mockGistFiles[PACKAGE_NAME] = { content: badPj };
+      mockRepos.push({
+        name: PACKAGE_NAME,
+        download_url: `https://${PACKAGE_NAME}`,
+      });
+
+      mocked(getOctokit).mockResolvedValue({
+        gists: mockGetGists,
+      } as unknown as Octokit);
+
+      const result = await instance.fetchGistAndLoad(gistId);
+      expect(result).toBe(false);
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(/Invalid JSON found in package.json/i),
+      );
+    });
+
     it('handles gist fiddle devDependencies', async () => {
       const gistId = 'pjsontestid';
       const pj = {

@@ -63,6 +63,19 @@ describe('FileManager', () => {
       });
     });
 
+    it('handles bad JSON in package.json', async () => {
+      const badPj =
+        '{"main":"main.js","devDependencies":{"electron":"17.0.0",}}';
+      const values = { ...editorValues, [PACKAGE_NAME]: badPj };
+
+      await fm.openFiddle(filePath, values);
+      expect(app.state.showErrorDialog).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Could not open Fiddle - invalid JSON found in package.json/i,
+        ),
+      );
+    });
+
     it('respects the Electron version specified in package.json', async () => {
       const pj = {
         main: MAIN_JS,
