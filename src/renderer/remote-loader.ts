@@ -130,7 +130,7 @@ export class RemoteLoader {
           : data.content;
 
         if (id === PACKAGE_NAME) {
-          const deps: Record<string, string>;
+          const deps: Record<string, string> = {};
           try {
             const { dependencies, devDependencies } = JSON.parse(content);
             Object.assign(deps, dependencies, devDependencies);
