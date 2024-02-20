@@ -130,10 +130,10 @@ export class RemoteLoader {
           : data.content;
 
         if (id === PACKAGE_NAME) {
-          let deps: Record<string, string>;
+          const deps: Record<string, string>;
           try {
             const { dependencies, devDependencies } = JSON.parse(content);
-            deps = { ...dependencies, ...devDependencies };
+            Object.assign(deps, dependencies, devDependencies);
           } catch (e) {
             throw new Error('Invalid JSON found in package.json');
           }
