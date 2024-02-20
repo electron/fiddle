@@ -71,10 +71,10 @@ export class FileManager {
       if (name === PACKAGE_NAME) {
         const { remoteLoader } = window.app;
 
-        let deps: Record<string, string> = {};
+        const deps: Record<string, string> = {};
         try {
           const { dependencies, devDependencies } = JSON.parse(value);
-          deps = { ...dependencies, ...devDependencies };
+          Object.assign(deps, dependencies, devDependencies);
         } catch {
           await this.appState.showErrorDialog(
             'Could not open Fiddle - invalid JSON found in package.json',
