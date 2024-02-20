@@ -130,11 +130,13 @@ export class RemoteLoader {
           : data.content;
 
         if (id === PACKAGE_NAME) {
-          const { dependencies, devDependencies } = JSON.parse(content);
-          const deps: Record<string, string> = {
-            ...dependencies,
-            ...devDependencies,
-          };
+          const deps: Record<string, string> = {};
+          try {
+            const { dependencies, devDependencies } = JSON.parse(content);
+            Object.assign(deps, dependencies, devDependencies);
+          } catch (e) {
+            throw new Error('Invalid JSON found in package.json');
+          }
 
           // If the gist specifies an Electron version, we want to tell Fiddle to run
           // it with that version by default.
