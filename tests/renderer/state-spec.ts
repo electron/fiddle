@@ -406,6 +406,23 @@ describe('AppState', () => {
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
 
+    it('falls back if downloading the new version fails', async () => {
+      appState.downloadVersion = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('FAILURE'));
+      appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        confirm: true,
+      });
+
+      await appState.setVersion('v2.0.2');
+      expect(appState.showGenericDialog).toHaveBeenCalledWith({
+        label: 'Failed to download Electron version 2.0.2',
+        ok: 'Close',
+        type: GenericDialogType.warning,
+        wantsInput: false,
+      });
+    });
+
     describe('loads the template for the new version', () => {
       let newVersion: string;
       let oldVersion: string;

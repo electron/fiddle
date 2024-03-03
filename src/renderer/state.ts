@@ -931,17 +931,30 @@ export class AppState {
    * @returns {Promise<void>}
    */
   public async setVersion(input: string): Promise<void> {
-    // make sure we can  use this version
+    const fallback = this.findUsableVersion();
+
     const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
-      console.warn(`setVersion('${input}') failed: ${err}`);
+      console.error(`setVersion('${input}') failed: ${err}`);
       this.showErrorDialog(err!);
-      const fallback = this.findUsableVersion();
       if (fallback) await this.setVersion(fallback.version);
       return;
     }
 
     const { version } = ver;
+
+    try {
+      await this.downloadVersion(ver);
+    } catch {
+      await this.removeVersion(ver);
+      console.error(
+        `setVersion('${input}') failed: Couldn't download ${version}`,
+      );
+      this.showErrorDialog(`Failed to download Electron version ${version}`);
+      if (fallback) await this.setVersion(fallback.version);
+      return;
+    }
+
     console.log(`State: Switching to Electron ${version}`);
     this.version = version;
 
@@ -959,9 +972,6 @@ export class AppState {
         await window.app.replaceFiddle(values, options);
       }
     }
-
-    // Fetch new binaries, maybe?
-    await this.downloadVersion(ver);
   }
 
   /**
