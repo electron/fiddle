@@ -94,6 +94,14 @@ export const Output = observer(
             openerService: this.openerService(),
           },
         );
+        /**
+         * TODO: Clear Console on CTRL + K.
+         */
+        if(this.editor){
+          this.editor.addCommand(MonacoType.KeyMod.CtrlCmd | MonacoType.KeyCode.KEY_K, () => {
+            if(this.model) this.model.setValue("Console Cleared !");
+          });
+        }
       }
     }
 
