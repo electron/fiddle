@@ -88,7 +88,7 @@ export class FontSettings extends React.Component<
               }
             />
             <Button
-              onClick={window.ElectronFiddle.reloadWindows}
+              onClick={() => window.ElectronFiddle.reloadWindows()}
               icon="repeat"
               text="Reload Window"
             />
