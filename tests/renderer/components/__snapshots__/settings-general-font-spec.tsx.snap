@@ -29,7 +29,7 @@ exports[`FontSettings component renders 1`] = `
       />
       <Blueprint3.Button
         icon="repeat"
-        onClick={[MockFunction]}
+        onClick={[Function]}
         text="Reload Window"
       />
     </Blueprint3.FormGroup>
