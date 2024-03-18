@@ -207,10 +207,14 @@ export const SidebarFileTree = observer(
       }
 
       const contents = appState.editorMosaic.value(editorId).trim();
-      appState.editorMosaic.remove(editorId);
-      appState.editorMosaic.addNewFile(id, contents);
+      try {
+        appState.editorMosaic.addNewFile(id, contents);
+        appState.editorMosaic.remove(editorId);
 
-      if (visible) appState.editorMosaic.show(id);
+        if (visible) appState.editorMosaic.show(id);
+      } catch (err) {
+        appState.showErrorDialog(err.message);
+      }
     };
 
     public removeEditor = (editorId: EditorId) => {
