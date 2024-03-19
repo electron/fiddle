@@ -2,7 +2,12 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EditorValues, PACKAGE_NAME } from '../../../src/interfaces';
+import {
+  EditorValues,
+  MAIN_CJS,
+  MAIN_JS,
+  PACKAGE_NAME,
+} from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
 import { SidebarFileTree } from '../../../src/renderer/components/sidebar-file-tree';
 import {
@@ -98,15 +103,12 @@ describe('SidebarFileTree component', () => {
     );
   });
 
-  it('fails if trying to rename an editor to an invalid value', async () => {
+  it('fails if trying to rename an editor to package(-lock).json', async () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
     const instance: any = wrapper.instance();
 
-    const EDITOR_NAME = 'data.json';
+    const EDITOR_NAME = 'index.html';
     const EDITOR_NEW_NAME = PACKAGE_NAME;
-
-    editorValues[EDITOR_NAME] = '{}';
-    editorMosaic.set(editorValues);
 
     store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
     store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
@@ -116,6 +118,62 @@ describe('SidebarFileTree component', () => {
     expect(store.showErrorDialog).toHaveBeenCalledWith(
       `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
     );
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
+  });
+
+  it('fails if trying to rename an editor to an unsupported name', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const EDITOR_NAME = 'index.html';
+    const EDITOR_NEW_NAME = 'data.txt';
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    await instance.renameEditor(EDITOR_NAME);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Invalid filename "${EDITOR_NEW_NAME}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+    );
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
+  });
+
+  it('fails if trying to rename an editor to an existing name', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const EXISTED_NAME = 'styles.css';
+    const TO_BE_NAMED = 'index.html';
+    const EDITOR_NEW_NAME = EXISTED_NAME;
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    await instance.renameEditor(TO_BE_NAMED);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Cannot add file "${EDITOR_NEW_NAME}": File already exists`,
+    );
+    expect(editorMosaic.files.get(TO_BE_NAMED)).toBe(EditorPresence.Pending);
+  });
+
+  it('fails if trying to rename an editor to another main entry point file', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const TO_BE_NAMED = 'index.html';
+    const EDITOR_NEW_NAME = MAIN_CJS;
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    await instance.renameEditor(TO_BE_NAMED);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Cannot add file "${EDITOR_NEW_NAME}": Main entry point ${MAIN_JS} exists`,
+    );
+    expect(editorMosaic.files.get(TO_BE_NAMED)).toBe(EditorPresence.Pending);
   });
 
   it('can reset the editor layout', () => {
