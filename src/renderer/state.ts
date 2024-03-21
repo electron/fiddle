@@ -943,6 +943,9 @@ export class AppState {
 
     const { version } = ver;
 
+    console.log(`State: Switching to Electron ${version}`);
+    this.version = version;
+
     try {
       await this.downloadVersion(ver);
     } catch {
@@ -954,9 +957,6 @@ export class AppState {
       if (fallback) await this.setVersion(fallback.version);
       return;
     }
-
-    console.log(`State: Switching to Electron ${version}`);
-    this.version = version;
 
     // If there's no current fiddle,
     // or if the current fiddle is the previous version's template,
