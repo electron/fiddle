@@ -98,7 +98,7 @@ export const Output = observer(
           this.editor.addCommand(
             MonacoType.KeyMod.CtrlCmd | MonacoType.KeyCode.KEY_K,
             () => {
-              if (this.model) this.model.setValue('Console Cleared !');
+              if (this.model) this.model.setValue('');
             },
           );
         }
