@@ -462,7 +462,7 @@ export const GistActionButton = observer(
       return Object.fromEntries(
         Object.entries(values)
           .filter(([, content]) => Boolean(content))
-          .map(([id, content]) => [id, { content }]),
+          .map(([id, content]) => [id, { filename: id, content }]),
       );
     };
   },

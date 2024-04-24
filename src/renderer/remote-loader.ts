@@ -126,8 +126,8 @@ export class RemoteLoader {
 
       for (const [id, data] of Object.entries(gist.data.files)) {
         const content = data.truncated
-          ? await fetch(data.raw_url).then((r) => r.text())
-          : data.content;
+          ? await fetch(data.raw_url!).then((r) => r.text())
+          : data.content!;
 
         if (id === PACKAGE_NAME) {
           const deps: Record<string, string> = {};
