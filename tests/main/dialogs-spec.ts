@@ -2,13 +2,14 @@
  * @jest-environment node
  */
 
-import { dialog } from 'electron';
+import { BrowserWindow, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
+import { BrowserWindowMock } from '../mocks/browser-window';
 
 jest.mock('fs-extra');
 jest.mock('../../src/main/windows');
@@ -57,6 +58,9 @@ describe('dialogs', () => {
     });
 
     it('shows dialog when triggering IPC event', async () => {
+      const mockWindow =
+        new BrowserWindowMock() as unknown as Electron.BrowserWindow;
+      mocked(BrowserWindow.fromWebContents).mockReturnValue(mockWindow);
       mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: [],
         canceled: true,
@@ -64,6 +68,7 @@ describe('dialogs', () => {
 
       await ipcHandler();
       expect(dialog.showOpenDialog).toHaveBeenCalledWith(
+        mockWindow,
         expect.objectContaining({
           properties: ['openDirectory'],
         }),

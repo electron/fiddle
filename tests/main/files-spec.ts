@@ -75,9 +75,9 @@ describe('files', () => {
 
   describe('showOpenDialog', () => {
     it('tries to open an "open" dialog', async () => {
-      await showOpenDialog();
+      await showOpenDialog(mockWindow);
 
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(mockWindow, {
         title: 'Open Fiddle',
         properties: ['openDirectory'],
       });
@@ -86,22 +86,22 @@ describe('files', () => {
     it('notifies the main window of the event', async () => {
       mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
 
-      await showOpenDialog();
+      await showOpenDialog(mockWindow);
 
       expect(mockWindow.webContents.send).toHaveBeenCalledTimes(1);
     });
 
     it('adds the opened file path to recent files', async () => {
-      await showOpenDialog();
+      await showOpenDialog(mockWindow);
       expect(app.addRecentDocument).toHaveBeenCalled();
     });
   });
 
   describe('showSaveDialog', () => {
     it('tries to open an "open" dialog to be used as a save dialog', async () => {
-      await showSaveDialog();
+      await showSaveDialog(mockWindow);
 
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(mockWindow, {
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle',
@@ -109,9 +109,9 @@ describe('files', () => {
     });
 
     it('tries to open an "open" dialog to be used as a save as dialog', async () => {
-      await showSaveDialog('hello');
+      await showSaveDialog(mockWindow, 'hello');
 
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(mockWindow, {
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle as hello',
@@ -123,7 +123,7 @@ describe('files', () => {
         canceled: true,
         filePaths: [],
       });
-      await showSaveDialog();
+      await showSaveDialog(mockWindow);
       expect(fs.pathExists).toHaveBeenCalledTimes(0);
     });
 
@@ -140,7 +140,7 @@ describe('files', () => {
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
       (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 
-      await showSaveDialog();
+      await showSaveDialog(mockWindow);
 
       expect(dialog.showMessageBox).toHaveBeenCalled();
     });
@@ -148,7 +148,7 @@ describe('files', () => {
     it('does not overwrite files without consent', async () => {
       const consent = false;
       mocked(dialog.showOpenDialog).mockResolvedValueOnce({
-        canceled: false,
+        canceled: true,
         filePaths: ['path'],
       });
       mocked(dialog.showMessageBox).mockResolvedValue({
@@ -159,7 +159,7 @@ describe('files', () => {
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
       (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
 
-      await showSaveDialog();
+      await showSaveDialog(mockWindow);
 
       expect(dialog.showMessageBox).toHaveBeenCalled();
     });
@@ -167,7 +167,7 @@ describe('files', () => {
     it('does not overwrite files if an error happens', async () => {
       const err = new Error('💩');
       mocked(dialog.showOpenDialog).mockResolvedValueOnce({
-        canceled: false,
+        canceled: true,
         filePaths: ['path'],
       });
       mocked(dialog.showMessageBox).mockRejectedValue(err);
@@ -177,7 +177,7 @@ describe('files', () => {
 
       let caughtError: unknown;
       try {
-        await showSaveDialog();
+        await showSaveDialog(mockWindow);
       } catch (error: unknown) {
         caughtError = error;
       }

@@ -56,8 +56,10 @@ export function setupDialogs() {
 
   ipcMainManager.handle(
     IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-    async (): Promise<SelectedLocalVersion | undefined> => {
-      const folderPath = await showOpenDialog();
+    async (event): Promise<SelectedLocalVersion | undefined> => {
+      const folderPath = await showOpenDialog(
+        BrowserWindow.fromWebContents(event.sender)!,
+      );
 
       if (folderPath) {
         const isValidElectron = isValidElectronPath(folderPath);
@@ -88,8 +90,8 @@ function showWarningDialog(
   });
 }
 
-async function showOpenDialog() {
-  const { filePaths } = await dialog.showOpenDialog({
+async function showOpenDialog(window: BrowserWindow) {
+  const { filePaths } = await dialog.showOpenDialog(window, {
     title: 'Open Folder',
     properties: ['openDirectory'],
   });
