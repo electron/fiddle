@@ -56,7 +56,7 @@ export async function showOpenDialog() {
  */
 export async function showSaveDialog(as?: string): Promise<undefined | string> {
   // We want to save to a folder, so we'll use an open dialog here
-  const filePaths = dialog.showOpenDialogSync({
+  const { filePaths } = await dialog.showOpenDialog({
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory'],
     title: `Save Fiddle${as ? ` as ${as}` : ''}`,
