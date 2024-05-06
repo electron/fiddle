@@ -107,7 +107,7 @@ export const GitHubSettings = observer(
     }
 
     /**
-     * Simply shows the GitHub Token dialog.``
+     * Simply shows the GitHub Token dialog.
      */
     private signIn() {
       this.props.appState.isTokenDialogShowing = true;
