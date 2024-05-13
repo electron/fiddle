@@ -53,7 +53,7 @@ describe('AppearanceSettings component', () => {
       />,
     );
 
-    await process.nextTick;
+    await new Promise(process.nextTick);
     expect((wrapper.state() as any).selectedTheme?.name).toBe('defaultDark');
   });
 
