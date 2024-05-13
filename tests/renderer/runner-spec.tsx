@@ -215,7 +215,7 @@ describe('Runner component', () => {
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
+      await new Promise(process.nextTick);
       expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
       expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledTimes(1);
       expect(window.ElectronFiddle.deleteUserData).toHaveBeenCalledWith(
@@ -230,7 +230,7 @@ describe('Runner component', () => {
       const result = await instance.run();
 
       expect(result).toBe(RunResult.SUCCESS);
-      await process.nextTick;
+      await new Promise(process.nextTick);
       expect(window.ElectronFiddle.cleanupDirectory).toHaveBeenCalledTimes(1);
     });
 
