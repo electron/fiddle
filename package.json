@@ -70,7 +70,7 @@
     "shell-env": "^3.0.1",
     "tmp": "0.2.1",
     "tslib": "^2.6.0",
-    "update-electron-app": "^2.0.1"
+    "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
     "@electron-forge/cli": "7.3.1",

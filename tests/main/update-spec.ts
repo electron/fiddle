@@ -7,11 +7,11 @@ jest.useFakeTimers();
 jest.spyOn(global, 'setTimeout');
 
 const mockUpdateApp = jest.fn();
-jest.mock('update-electron-app', () => mockUpdateApp);
+jest.mock('update-electron-app', () => ({ updateElectronApp: mockUpdateApp }));
 
 describe('update', () => {
   const { setupUpdates } = require('../../src/main/update');
-  const updateElectronApp = require('update-electron-app');
+  const { updateElectronApp } = require('update-electron-app');
 
   it('schedules an update check', () => {
     setupUpdates();

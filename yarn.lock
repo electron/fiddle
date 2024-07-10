@@ -4857,11 +4857,6 @@ electron-installer-redhat@^3.2.0:
     word-wrap "^1.2.3"
     yargs "^16.0.2"
 
-electron-is-dev@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.npmjs.org/electron-is-dev/-/electron-is-dev-0.3.0.tgz"
-  integrity sha1-FOb9pcaOnk7L7/nM8DfL18BcWv4=
-
 electron-squirrel-startup@^1.0.0:
   version "1.0.0"
   resolved "https://registry.npmjs.org/electron-squirrel-startup/-/electron-squirrel-startup-1.0.0.tgz"
@@ -12069,12 +12064,11 @@ update-browserslist-db@^1.0.11:
     escalade "^3.1.1"
     picocolors "^1.0.0"
 
-update-electron-app@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.npmjs.org/update-electron-app/-/update-electron-app-2.0.1.tgz"
-  integrity sha512-e4xEner89UZZaBGYJbYlMdL1uUrC0VjOsTAL2N4opPjzFtn+j7mdsJJsnyXZzUVeLY+8tuCX4XEsUM98oBHmZg==
+update-electron-app@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/update-electron-app/-/update-electron-app-3.0.0.tgz#d705889e5bd86939f22e144c0c8b5f919a90f954"
+  integrity sha512-Ccs46fgUEcMpSRPMNw82DFMux2MGi5tkKkEpV723JmtPNI3qAtxvTeiYkKczN2/LehA3U7JGrGr4MhraxGdRTw==
   dependencies:
-    electron-is-dev "^0.3.0"
     github-url-to-object "^4.0.4"
     is-url "^1.2.4"
     ms "^2.1.1"
