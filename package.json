@@ -25,7 +25,7 @@
     "test:report": "jest --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
-    "postinstall": "husky install && npm run electron-releases"
+    "postinstall": "husky && npm run electron-releases"
   },
   "keywords": [
     "Electron",
@@ -120,13 +120,13 @@
     "eslint-plugin-react": "^7.32.2",
     "fetch-mock-jest": "^1.5.1",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
-    "husky": "^8.0.3",
+    "husky": "^9.0.11",
     "jest": "^29.6.2",
     "jest-environment-jsdom": "^29.6.2",
     "jest-junit": "^16.0.0",
     "less": "^4.1.1",
     "less-loader": "^11.0.0",
-    "lint-staged": "^13.2.3",
+    "lint-staged": "^15.2.7",
     "log-symbols": "^4.0.0",
     "mini-css-extract-plugin": "^2.6.1",
     "monaco-editor-webpack-plugin": "2.1.0",
