@@ -1,5 +1,6 @@
 {
   "name": "electron-fiddle",
+  "private": true,
   "productName": "Electron Fiddle",
   "version": "0.36.3",
   "description": "The easiest way to get started with Electron",
