@@ -34,7 +34,7 @@ class OctokitMock {
   };
 }
 
-type GistFile = { content: string };
+type GistFile = { filename: string; content: string };
 type GistFiles = { [id: string]: GistFile };
 type GistCreateOpts = {
   description: string;
@@ -54,7 +54,7 @@ describe('Action button component', () => {
     return Object.fromEntries(
       Object.entries(values).map(([id, content]) => [
         id,
-        { content } as GistFile,
+        { filename: id, content } as GistFile,
       ]),
     );
   }
@@ -291,7 +291,7 @@ describe('Action button component', () => {
 
       expect(mocktokit.gists.update).toHaveBeenCalledWith({
         gist_id: gistId,
-        files: expectedGistOpts.files as unknown,
+        files: expectedGistOpts.files,
       });
     });
 

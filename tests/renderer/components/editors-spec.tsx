@@ -172,7 +172,7 @@ describe('Editors component', () => {
 
         emitEvent('select-all-in-editor');
 
-        await process.nextTick;
+        await new Promise(process.nextTick);
         expect(editor.setSelection).toHaveBeenCalledWith('range');
       });
 
@@ -185,7 +185,7 @@ describe('Editors component', () => {
 
         emitEvent('select-all-in-editor');
 
-        await process.nextTick;
+        await new Promise(process.nextTick);
         expect(editor.getModel).toHaveBeenCalledTimes(1);
         expect(editor.setSelection).not.toHaveBeenCalled();
       });
@@ -237,7 +237,7 @@ describe('Editors component', () => {
       editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
 
       emitEvent('select-all-in-editor');
-      await process.nextTick;
+      await new Promise(process.nextTick);
 
       expect(editor.setSelection).toHaveBeenCalledWith(range);
     });

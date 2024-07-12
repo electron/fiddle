@@ -1,4 +1,4 @@
-# <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
+# <img src="https://img.like.video/asia_live/4hd/10lwMv.jpg" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
 [![CircleCI](https://dl.circleci.com/status-badge/img/gh/electron/fiddle/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/electron/fiddle/tree/main)
 [![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=main)](https://coveralls.io/github/electron/fiddle?branch=main)

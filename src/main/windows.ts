@@ -24,6 +24,15 @@ export function mainIsReady() {
   mainIsReadyResolver();
 }
 
+export function safelyOpenWebURL(url: string) {
+  try {
+    const { protocol } = new URL(url);
+    if (['http:', 'https:'].includes(protocol)) {
+      shell.openExternal(url);
+    }
+  } catch {}
+}
+
 /**
  * Gets default options for the main window
  *
@@ -92,13 +101,13 @@ export function createMainWindow(): Electron.BrowserWindow {
   });
 
   browserWindow.webContents.setWindowOpenHandler((details) => {
-    shell.openExternal(details.url);
+    safelyOpenWebURL(details.url);
     return { action: 'deny' };
   });
 
   browserWindow.webContents.on('will-navigate', (event, url) => {
     event.preventDefault();
-    shell.openExternal(url);
+    safelyOpenWebURL(url);
   });
 
   ipcMainManager.on(IpcEvents.RELOAD_WINDOW, () => {

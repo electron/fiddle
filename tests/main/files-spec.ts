@@ -101,7 +101,7 @@ describe('files', () => {
     it('tries to open an "open" dialog to be used as a save dialog', async () => {
       await showSaveDialog();
 
-      expect(dialog.showOpenDialogSync).toHaveBeenCalledWith({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle',
@@ -111,7 +111,7 @@ describe('files', () => {
     it('tries to open an "open" dialog to be used as a save as dialog', async () => {
       await showSaveDialog('hello');
 
-      expect(dialog.showOpenDialogSync).toHaveBeenCalledWith({
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith({
         buttonLabel: 'Save here',
         properties: ['openDirectory', 'createDirectory'],
         title: 'Save Fiddle as hello',
@@ -119,14 +119,20 @@ describe('files', () => {
     });
 
     it('handles not getting a path returned', async () => {
-      mocked(dialog.showOpenDialogSync).mockReturnValueOnce([]);
+      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: true,
+        filePaths: [],
+      });
       await showSaveDialog();
       expect(fs.pathExists).toHaveBeenCalledTimes(0);
     });
 
     it('ensures that the target is empty on save', async () => {
       const consent = true;
-      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
+      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: ['path'],
+      });
       mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
@@ -141,7 +147,10 @@ describe('files', () => {
 
     it('does not overwrite files without consent', async () => {
       const consent = false;
-      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
+      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: ['path'],
+      });
       mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
@@ -157,7 +166,10 @@ describe('files', () => {
 
     it('does not overwrite files if an error happens', async () => {
       const err = new Error('💩');
-      mocked(dialog.showOpenDialogSync).mockReturnValue(['path']);
+      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+        canceled: false,
+        filePaths: ['path'],
+      });
       mocked(dialog.showMessageBox).mockRejectedValue(err);
       mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
       (fs.pathExists as jest.Mock).mockResolvedValue(true);
@@ -281,7 +293,7 @@ describe('files', () => {
       mocked(getFiles).mockResolvedValue({ files: new Map() });
       await saveFiddle();
 
-      expect(dialog.showOpenDialogSync).toHaveBeenCalled();
+      expect(dialog.showOpenDialog).toHaveBeenCalled();
     });
   });
 
@@ -293,7 +305,7 @@ describe('files', () => {
       });
       await saveFiddleAs();
 
-      expect(dialog.showOpenDialogSync).toHaveBeenCalled();
+      expect(dialog.showOpenDialog).toHaveBeenCalled();
     });
   });
 
@@ -305,7 +317,7 @@ describe('files', () => {
       });
       await saveFiddleAsForgeProject();
 
-      expect(dialog.showOpenDialogSync).toHaveBeenCalled();
+      expect(dialog.showOpenDialog).toHaveBeenCalled();
     });
 
     it('uses the forge transform', async () => {

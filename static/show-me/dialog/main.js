@@ -18,7 +18,7 @@ app.whenReady().then(async () => {
       console.log('Dialog was canceled')
     } else {
       const file = filePaths[0]
-      mainWindow.loadURL(`file://${file}`)
+      mainWindow.loadFile(file)
     }
   } catch (err) {
     console.log(err)

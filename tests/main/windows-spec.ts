@@ -4,6 +4,7 @@
 
 import * as path from 'node:path';
 
+import * as electron from 'electron';
 import { mocked } from 'jest-mock';
 
 import { createContextMenu } from '../../src/main/context-menu';
@@ -12,6 +13,7 @@ import {
   getMainWindowOptions,
   getOrCreateMainWindow,
   mainIsReady,
+  safelyOpenWebURL,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -118,6 +120,19 @@ describe('windows', () => {
       expect(browserWindows[0]).toBeTruthy();
       (await getOrCreateMainWindow()).webContents.emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
+    });
+  });
+
+  describe('safelyOpenWebURL()', () => {
+    it('opens web URLs', () => {
+      const url = 'https://github.com/electron/fiddle';
+      safelyOpenWebURL(url);
+      expect(electron.shell.openExternal).toHaveBeenCalledWith(url);
+    });
+
+    it('does not open file URLs', () => {
+      safelyOpenWebURL('file:///fake/path');
+      expect(electron.shell.openExternal).not.toHaveBeenCalled();
     });
   });
 });
