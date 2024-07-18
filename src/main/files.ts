@@ -37,8 +37,8 @@ export function setupFileListeners() {
  * Shows the "Open Fiddle" dialog and forwards
  * the path to the renderer
  */
-export async function showOpenDialog() {
-  const { filePaths } = await dialog.showOpenDialog({
+export async function showOpenDialog(window: BrowserWindow) {
+  const { filePaths } = await dialog.showOpenDialog(window, {
     title: 'Open Fiddle',
     properties: ['openDirectory'],
   });
@@ -54,9 +54,12 @@ export async function showOpenDialog() {
 /**
  * Shows the "Save Fiddle" dialog and returns the path
  */
-export async function showSaveDialog(as?: string): Promise<undefined | string> {
+export async function showSaveDialog(
+  window: BrowserWindow,
+  as?: string,
+): Promise<undefined | string> {
   // We want to save to a folder, so we'll use an open dialog here
-  const { filePaths } = await dialog.showOpenDialog({
+  const { filePaths } = await dialog.showOpenDialog(window, {
     buttonLabel: 'Save here',
     properties: ['openDirectory', 'createDirectory'],
     title: `Save Fiddle${as ? ` as ${as}` : ''}`,
@@ -228,7 +231,7 @@ export async function saveFiddle() {
   const window = BrowserWindow.getFocusedWindow();
   if (window) {
     const { localPath, files } = await getFiles(window, ['dotfiles']);
-    const pathToSave = localPath ?? (await showSaveDialog());
+    const pathToSave = localPath ?? (await showSaveDialog(window));
     if (pathToSave) {
       await saveFiles(window, pathToSave, files);
     }
@@ -242,7 +245,7 @@ export async function saveFiddleAs() {
   const window = BrowserWindow.getFocusedWindow();
   if (window) {
     const { files } = await getFiles(window, ['dotfiles']);
-    const pathToSave = await showSaveDialog();
+    const pathToSave = await showSaveDialog(window);
     if (pathToSave) {
       await saveFiles(window, pathToSave, files);
     }
@@ -256,7 +259,7 @@ export async function saveFiddleAsForgeProject() {
   const window = BrowserWindow.getFocusedWindow();
   if (window) {
     const { files } = await getFiles(window, ['dotfiles', 'forge']);
-    const pathToSave = await showSaveDialog('Forge Project');
+    const pathToSave = await showSaveDialog(window, 'Forge Project');
     if (pathToSave) {
       await saveFiles(window, pathToSave, files);
     }

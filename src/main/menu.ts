@@ -252,7 +252,13 @@ function getFileMenu(
     },
     {
       label: 'Open',
-      click: showOpenDialog,
+      click() {
+        const browserWindow = BrowserWindow.getFocusedWindow();
+
+        if (browserWindow) {
+          showOpenDialog(browserWindow);
+        }
+      },
       accelerator: 'CmdOrCtrl+O',
     },
     {

@@ -347,6 +347,10 @@ describe('menu', () => {
       });
 
       it('opens a Fiddle', () => {
+        mocked(electron.BrowserWindow.getFocusedWindow).mockReturnValue(
+          {} as Partial<electron.BrowserWindow> as electron.BrowserWindow,
+        );
+
         file.submenu[Idx.OPEN].click();
         expect(showOpenDialog).toHaveBeenCalled();
       });
