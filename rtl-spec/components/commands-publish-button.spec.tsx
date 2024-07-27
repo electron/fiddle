@@ -1,7 +1,4 @@
-import * as React from 'react';
-
 import { Octokit } from '@octokit/rest';
-import { shallow } from 'enzyme';
 import { mocked } from 'jest-mock';
 
 import {
@@ -15,6 +12,7 @@ import { GistActionButton } from '../../src/renderer/components/commands-action-
 import { AppState } from '../../src/renderer/state';
 import { getOctokit } from '../../src/renderer/utils/octokit';
 import { createEditorValues } from '../../tests/mocks/mocks';
+import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
 
 jest.mock('../../src/renderer/utils/octokit');
 
@@ -80,20 +78,24 @@ describe('Action button component', () => {
   });
 
   function createActionButton() {
-    const wrapper = shallow(<GistActionButton appState={state} />);
-    const instance = wrapper.instance() as any;
-    return { wrapper, instance };
+    return renderClassComponentWithInstanceRef(GistActionButton, {
+      appState: state,
+    });
   }
 
   it('renders', () => {
-    const { wrapper } = createActionButton();
-    expect(wrapper).toMatchSnapshot();
+    const { renderResult } = createActionButton();
+    const button = renderResult.getByTestId('button-action');
+    expect(button).toBeInTheDocument();
   });
 
   it('registers for "save-fiddle-gist" events', () => {
     // confirm that it starts listening when mounted
     const listenSpy = jest.spyOn(window.ElectronFiddle, 'addEventListener');
-    const { instance, wrapper } = createActionButton();
+    const {
+      instance,
+      renderResult: { unmount },
+    } = createActionButton();
     expect(listenSpy).toHaveBeenCalledWith(
       'save-fiddle-gist',
       instance.handleClick,
@@ -105,7 +107,7 @@ describe('Action button component', () => {
       window.ElectronFiddle,
       'removeAllListeners',
     );
-    wrapper.unmount();
+    unmount();
     expect(removeListenerSpy).toHaveBeenCalledWith('save-fiddle-gist');
     removeListenerSpy.mockRestore();
   });
@@ -147,7 +149,7 @@ describe('Action button component', () => {
   });
 
   describe('publish mode', () => {
-    let instance: any;
+    let instance: InstanceType<typeof GistActionButton>;
 
     beforeEach(() => {
       // create a button that's primed to publish a new gist
@@ -190,7 +192,6 @@ describe('Action button component', () => {
         const values = { [MAIN_JS]: '' } as const;
 
         mocked(app.getEditorValues).mockResolvedValueOnce(values);
-        const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();
 
@@ -207,7 +208,6 @@ describe('Action button component', () => {
           ...required,
           ...optional,
         });
-        const { instance } = createActionButton();
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
         await instance.performGistAction();
 
@@ -220,7 +220,6 @@ describe('Action button component', () => {
         state.isPublishingGistAsRevision = true;
         state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 
-        const { instance } = createActionButton();
         const spy = jest.spyOn(instance, 'handleUpdate');
 
         await instance.performGistAction();
@@ -236,7 +235,6 @@ describe('Action button component', () => {
       state.editorMosaic.isEdited = true;
       state.showInputDialog = jest.fn().mockResolvedValueOnce(description);
 
-      const { instance } = createActionButton();
       await instance.performGistAction();
       expect(state.activeGistAction).toBe(GistActionState.none);
 
@@ -269,14 +267,12 @@ describe('Action button component', () => {
 
   describe('update mode', () => {
     const gistId = '123';
-    let wrapper: any;
     let instance: any;
 
     beforeEach(() => {
       // create a button that's primed to update gistId
       state.gistId = gistId;
-      ({ instance, wrapper } = createActionButton());
-      wrapper.setProps({ appState: state });
+      ({ instance } = createActionButton());
       instance.setState({ actionType: GistActionType.update });
 
       mocktokit.gists.get.mockImplementation(() => {
@@ -313,15 +309,13 @@ describe('Action button component', () => {
 
   describe('delete mode', () => {
     const gistId = '123';
-    let wrapper: any;
     let instance: any;
 
     beforeEach(() => {
       state.gistId = gistId;
 
       // create a button primed to delete gistId
-      ({ instance, wrapper } = createActionButton());
-      wrapper.setProps({ appState: state });
+      ({ instance } = createActionButton());
       instance.setState({ actionType: GistActionType.delete });
     });
 
@@ -350,14 +344,16 @@ describe('Action button component', () => {
     async function testDisabledWhen(gistActionState: GistActionState) {
       // create a button with no initial state
       state.activeGistAction = GistActionState.none;
-      const { wrapper } = createActionButton();
-      expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+      const {
+        renderResult: { container },
+      } = createActionButton();
+      expect(container.querySelector('fieldset')).not.toBeDisabled();
 
       state.activeGistAction = gistActionState;
-      expect(wrapper.find('fieldset').prop('disabled')).toBe(true);
+      expect(container.querySelector('fieldset')).toBeDisabled();
 
       state.activeGistAction = GistActionState.none;
-      expect(wrapper.find('fieldset').prop('disabled')).toBe(false);
+      expect(container.querySelector('fieldset')).not.toBeDisabled();
     }
 
     it('while publishing', async () => {
