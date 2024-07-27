@@ -9,14 +9,14 @@ import {
   GistActionState,
   GistActionType,
   MAIN_JS,
-} from '../../../src/interfaces';
-import { App } from '../../../src/renderer/app';
-import { GistActionButton } from '../../../src/renderer/components/commands-action-button';
-import { AppState } from '../../../src/renderer/state';
-import { getOctokit } from '../../../src/renderer/utils/octokit';
-import { createEditorValues } from '../../mocks/mocks';
+} from '../../src/interfaces';
+import { App } from '../../src/renderer/app';
+import { GistActionButton } from '../../src/renderer/components/commands-action-button';
+import { AppState } from '../../src/renderer/state';
+import { getOctokit } from '../../src/renderer/utils/octokit';
+import { createEditorValues } from '../../tests/mocks/mocks';
 
-jest.mock('../../../src/renderer/utils/octokit');
+jest.mock('../../src/renderer/utils/octokit');
 
 class OctokitMock {
   private static nextId = 1;
