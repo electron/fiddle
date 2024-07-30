@@ -361,6 +361,7 @@ export const GistActionButton = observer(
               {this.renderPrivacyMenu()}
               <Button
                 id="button-action"
+                data-testid="button-action"
                 onClick={this.handleClick}
                 loading={isPerformingAction}
                 icon={getActionIcon()}
