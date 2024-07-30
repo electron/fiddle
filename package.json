@@ -22,7 +22,7 @@
     "publish": "electron-forge publish",
     "start": "rimraf ./.webpack && electron-forge start --",
     "test": "jest",
-    "test:ci": "jest --ci --coverage --runInBand --reporters=jest-junit",
+    "test:ci": "jest --ci --coverage --runInBand --reporters=default --reporters=jest-junit",
     "test:report": "jest --json --bail=false --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
