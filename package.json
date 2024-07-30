@@ -28,6 +28,9 @@
     "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
     "postinstall": "husky && npm run electron-releases"
   },
+  "engines": {
+    "node": ">= 20.10.0"
+  },
   "keywords": [
     "Electron",
     "Fiddle",
@@ -97,7 +100,7 @@
     "@types/getos": "^3.0.1",
     "@types/jest": "^29.5.3",
     "@types/log-symbols": "^3.0.0",
-    "@types/node": "^18.11.18",
+    "@types/node": "^20.10.0",
     "@types/react": "^16.14.0",
     "@types/react-dom": "^16.9.11",
     "@types/react-window": "^1.8.5",

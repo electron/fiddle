@@ -14,7 +14,7 @@ commands:
       - run: git config --global core.autocrlf input
       - node/install:
           arch: << parameters.arch >>
-          node-version: '18.17'
+          node-version: '20.16'
       - checkout
       - node/install-packages
       - run: yarn run contributors

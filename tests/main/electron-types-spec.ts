@@ -69,6 +69,7 @@ describe('ElectronTypes', () => {
       source: VersionSource.local,
     } as const;
     localFile = path.join(localDir, 'gen/electron/tsc/typings/electron.d.ts');
+    fs.ensureDirSync(path.dirname(localFile));
 
     electronVersions = new ElectronVersionsMock();
     electronTypes = new ElectronTypes(
@@ -100,7 +101,7 @@ describe('ElectronTypes', () => {
     } as const;
 
     function saveTypesFile(content: string) {
-      fs.outputFileSync(localFile, content);
+      fs.writeFileSync(localFile, content, { flush: true });
       return content;
     }
 
@@ -112,11 +113,7 @@ describe('ElectronTypes', () => {
 
       const newTypes = saveTypesFile('some changed types');
       expect(newTypes).not.toEqual(oldTypes);
-      // TODO(dsanders11) - Find a better fix for this flakiness under macOS Rosetta
-      await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0, {
-        interval: 100,
-        timeout: 8000,
-      });
+      await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0);
       expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.ELECTRON_TYPES_CHANGED,
         [newTypes, localVersion.version],
