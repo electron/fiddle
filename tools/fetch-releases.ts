@@ -1,7 +1,7 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
-import fs from 'fs-extra';
 
 const file = path.join(__dirname, '..', 'static', 'releases.json');
 
@@ -16,7 +16,7 @@ export async function populateReleases() {
       `Updating local releases.json with ${releases.length} versions.`,
     );
 
-    await fs.outputJSON(file, releases);
+    await fs.promises.writeFile(file, JSON.stringify(releases));
   } else if (process.env.CI) {
     throw new Error('Failed to fetch latest releases.json');
   } else {

@@ -1,9 +1,6 @@
+import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as util from 'node:util';
-
-import fetch from 'cross-fetch';
-import fs from 'fs-extra';
-import logSymbols from 'log-symbols';
 
 const { GITHUB_TOKEN, GH_TOKEN } = process.env;
 const CONTRIBUTORS_FILE_PATH = path.join(
@@ -38,7 +35,12 @@ interface ContributorInfo {
   location: string;
 }
 
+// Helper function to work around import issues with ESM module
+const dynamicImport = new Function('specifier', 'return import(specifier)');
+
 export async function maybeFetchContributors(silent?: boolean): Promise<void> {
+  const { default: logSymbols } = await dynamicImport('log-symbols');
+
   try {
     const stats = fs.statSync(CONTRIBUTORS_FILE_PATH);
     const mtime = new Date(util.inspect(stats.mtime));
@@ -54,7 +56,9 @@ export async function maybeFetchContributors(silent?: boolean): Promise<void> {
       }
       await fetchAndWriteContributorsFile();
     } else {
-      const contributors = await fs.readJson(CONTRIBUTORS_FILE_PATH);
+      const contributors = JSON.parse(
+        await fs.promises.readFile(CONTRIBUTORS_FILE_PATH, 'utf-8'),
+      );
       if (contributors.length === 0) {
         // File exists, but is empty
         await fetchAndWriteContributorsFile();
@@ -157,6 +161,8 @@ function fetchContributors() {
  * Fetch the contributors and write the result to disk
  */
 async function fetchAndWriteContributorsFile() {
+  const { default: logSymbols } = await dynamicImport('log-symbols');
+
   await new Promise<void>((resolve) => {
     fs.access(
       CONTRIBUTORS_FILE_PATH,
@@ -186,7 +192,10 @@ async function fetchAndWriteContributorsFile() {
           data = [];
         }
 
-        await fs.outputFile(CONTRIBUTORS_FILE_PATH, JSON.stringify(data));
+        await fs.promises.writeFile(
+          CONTRIBUTORS_FILE_PATH,
+          JSON.stringify(data),
+        );
 
         console.log(logSymbols.success, `${data.length} Contributors fetched`);
         resolve();
