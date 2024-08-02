@@ -1,7 +1,6 @@
 import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
-import fetch from 'cross-fetch';
 import { BrowserWindow, IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 import watch from 'node-watch';

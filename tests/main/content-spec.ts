@@ -1,6 +1,5 @@
 import * as path from 'node:path';
 
-import { Response, fetch } from 'cross-fetch';
 import { app } from 'electron';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
@@ -12,7 +11,6 @@ import { EditorValues, MAIN_JS } from '../../src/interfaces';
 import { getTemplate, getTestTemplate } from '../../src/main/content';
 import { isReleasedMajor } from '../../src/main/versions';
 
-jest.mock('cross-fetch');
 jest.unmock('fs-extra');
 jest.mock('../../src/main/constants', () => ({
   STATIC_DIR: path.join(__dirname, '../../static'),
@@ -20,11 +18,6 @@ jest.mock('../../src/main/constants', () => ({
 jest.mock('../../src/main/versions', () => ({
   isReleasedMajor: jest.fn(),
 }));
-
-let lastResponse = new Response(null, {
-  status: 503,
-  statusText: 'Service Unavailable',
-});
 
 // instead of downloading fixtures,
 // pull the files from tests/fixtures/templates/
@@ -47,8 +40,12 @@ const fetchFromFilesystem = async (url: string) => {
   } catch (err) {
     console.log(err);
   }
-  lastResponse = new Response(arrayBuffer, { status, statusText });
-  return lastResponse;
+  return {
+    arrayBuffer: jest.fn().mockResolvedValue(arrayBuffer),
+    ok: true,
+    status,
+    statusText,
+  } as unknown as Response;
 };
 
 describe('content', () => {
