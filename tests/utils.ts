@@ -1,4 +1,3 @@
-import { mocked } from 'jest-mock';
 import { toJS } from 'mobx';
 
 import { FiddleEvent } from '../src/interfaces';
@@ -58,13 +57,6 @@ export function resetRendererArch() {
     value: rendererOverrides.arch,
     writable: true,
   });
-}
-
-export function mockFetchOnce(text: string) {
-  mocked(window.fetch).mockResolvedValueOnce({
-    text: jest.fn().mockResolvedValue(text),
-    json: jest.fn().mockImplementation(async () => JSON.parse(text)),
-  } as unknown as Response);
 }
 
 export class FetchMock {

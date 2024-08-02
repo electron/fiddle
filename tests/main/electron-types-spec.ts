@@ -1,7 +1,6 @@
 import * as path from 'node:path';
 
 import { ElectronVersions, ReleaseInfo } from '@electron/fiddle-core';
-import { fetch } from 'cross-fetch';
 import type { BrowserWindow } from 'electron';
 import * as fs from 'fs-extra';
 import { mocked } from 'jest-mock';
@@ -20,10 +19,7 @@ import { BrowserWindowMock, NodeTypesMock } from '../mocks/mocks';
 import { waitFor } from '../utils';
 
 jest.mock('../../src/main/ipc');
-jest.mock('cross-fetch');
 jest.unmock('fs-extra');
-
-const { Response } = jest.requireActual('cross-fetch');
 
 describe('ElectronTypes', () => {
   const version = '10.11.12';
@@ -152,13 +148,13 @@ describe('ElectronTypes', () => {
     it('fetches types', async () => {
       const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       const types = 'here are the types';
-      mocked(fetch).mockImplementation(
-        () =>
-          new Response(types, {
-            status: 200,
-            statusText: 'OK',
-          }),
-      );
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue(types),
+        json: jest.fn().mockImplementation(async () => JSON.parse(types)),
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+      } as unknown as Response);
 
       await expect(
         electronTypes.getElectronTypes(browserWindow, version),
@@ -175,13 +171,13 @@ describe('ElectronTypes', () => {
 
       // setup: fetch and cache a .d.ts that we did not have
       const types = 'here are the types';
-      mocked(fetch).mockImplementation(
-        () =>
-          new Response(types, {
-            status: 200,
-            statusText: 'OK',
-          }),
-      );
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue(types),
+        json: jest.fn().mockImplementation(async () => JSON.parse(types)),
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+      } as unknown as Response);
       await expect(
         electronTypes.getElectronTypes(browserWindow, remoteVersion),
       ).resolves.toEqual(types);
@@ -203,12 +199,12 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() does not find the package', async () => {
-      mocked(fetch).mockResolvedValue(
-        new Response('Cannot find package', {
-          status: 404,
-          statusText: 'Not Found',
-        }),
-      );
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue('Cannot find package'),
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      } as unknown as Response);
       await expect(
         electronTypes.getElectronTypes(browserWindow, remoteVersion),
       ).resolves.toBe(undefined);
@@ -218,13 +214,14 @@ describe('ElectronTypes', () => {
 
   describe('getNodeTypes', () => {
     it('fetches types', async () => {
-      mocked(fetch).mockImplementation(
-        () =>
-          new Response(JSON.stringify({ files: nodeTypesData }), {
-            status: 200,
-            statusText: 'OK',
-          }),
-      );
+      const content = JSON.stringify({ files: nodeTypesData });
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue(content),
+        json: jest.fn().mockImplementation(async () => JSON.parse(content)),
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+      } as unknown as Response);
 
       const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       await expect(
@@ -249,12 +246,12 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() does not find the package', async () => {
-      mocked(fetch).mockResolvedValue(
-        new Response('Cannot find package', {
-          status: 404,
-          statusText: 'Not Found',
-        }),
-      );
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue('Cannot find package'),
+        ok: false,
+        status: 404,
+        statusText: 'Not Found',
+      } as unknown as Response);
       await expect(
         electronTypes.getNodeTypes(remoteVersion.version),
       ).resolves.toBe(undefined);
@@ -276,13 +273,14 @@ describe('ElectronTypes', () => {
       // setup: fetch and cache some types
       expect(fs.existsSync(cacheFile)).toBe(false);
       const types = 'here are the types';
-      mocked(fetch).mockImplementation(
-        () =>
-          new Response(JSON.stringify({ files: types }), {
-            status: 200,
-            statusText: 'OK',
-          }),
-      );
+      const content = JSON.stringify({ files: types });
+      mocked(fetch).mockResolvedValue({
+        text: jest.fn().mockResolvedValue(content),
+        json: jest.fn().mockImplementation(async () => JSON.parse(content)),
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+      } as unknown as Response);
       await electronTypes.getElectronTypes(browserWindow, remoteVersion);
     });
 
