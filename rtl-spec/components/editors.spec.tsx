@@ -4,20 +4,20 @@ import { mount, shallow } from 'enzyme';
 import { MosaicWindowProps } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { EditorId, EditorValues, MAIN_JS } from '../../../src/interfaces';
-import { App } from '../../../src/renderer/app';
-import { Editors } from '../../../src/renderer/components/editors';
-import { Editor, EditorMosaic } from '../../../src/renderer/editor-mosaic';
-import { AppState } from '../../../src/renderer/state';
+import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
+import { App } from '../../src/renderer/app';
+import { Editors } from '../../src/renderer/components/editors';
+import { Editor, EditorMosaic } from '../../src/renderer/editor-mosaic';
+import { AppState } from '../../src/renderer/state';
 import {
   MonacoEditorMock,
   MonacoMock,
   StateMock,
   createEditorValues,
-} from '../../mocks/mocks';
-import { emitEvent } from '../../utils';
+} from '../../tests/mocks/mocks';
+import { emitEvent } from '../../tests/utils';
 
-vi.mock('../../../src/renderer/components/editor', () => ({
+vi.mock('../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
 }));
 
