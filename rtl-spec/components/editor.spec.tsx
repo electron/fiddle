@@ -1,10 +1,7 @@
-import * as React from 'react';
-
-import { shallow } from 'enzyme';
-
 import { EditorId, MAIN_JS } from '../../src/interfaces';
 import { Editor } from '../../src/renderer/components/editor';
 import { AppState } from '../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
 
 type DidMount = () => void;
 
@@ -18,23 +15,27 @@ describe('Editor component', () => {
   });
 
   function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
-    const wrapper = shallow(
-      <Editor
-        appState={store}
-        editorDidMount={didMount}
-        id={id}
-        monaco={monaco}
-        monacoOptions={{}}
-        setFocused={() => undefined}
-      />,
-    );
-    const instance: any = wrapper.instance();
-    return { wrapper, instance };
+    return renderClassComponentWithInstanceRef(Editor, {
+      appState: store,
+      editorDidMount: didMount,
+      id,
+      monaco,
+      monacoOptions: {},
+      setFocused: () => undefined,
+    });
+  }
+
+  function initializeEditorMosaic(id: EditorId) {
+    store.editorMosaic.set({ [id]: '// content' });
   }
 
   it('renders the editor container', () => {
-    const { wrapper } = createEditor(MAIN_JS);
-    expect(wrapper.html()).toBe('<div class="editorContainer"></div>');
+    const id = MAIN_JS;
+    initializeEditorMosaic(id);
+
+    const { renderResult } = createEditor(id);
+
+    expect(renderResult.getByTestId('editorContainer')).toBeInTheDocument();
   });
 
   describe('correctly sets the language', () => {
@@ -43,13 +44,20 @@ describe('Editor component', () => {
       ['for html', 'file.html', 'html'],
       ['for css', 'file.css', 'css'],
     ])('%s', (_: unknown, filename: EditorId, language: string) => {
+      initializeEditorMosaic(filename);
+
       const { instance } = createEditor(filename);
+
       expect(instance.language).toBe(language);
     });
   });
 
   it('denies updates', () => {
-    const { instance } = createEditor(MAIN_JS);
+    const id = MAIN_JS;
+    initializeEditorMosaic(id);
+
+    const { instance } = createEditor(id);
+
     expect(instance.shouldComponentUpdate()).toBe(false);
   });
 
@@ -61,10 +69,7 @@ describe('Editor component', () => {
       const addEditorSpy = jest.spyOn(editorMosaic, 'addEditor');
 
       const didMount = jest.fn();
-      const { instance } = createEditor(id, didMount);
-
-      instance.containerRef.current = 'ref';
-      await instance.initMonaco();
+      createEditor(id, didMount);
 
       expect(didMount).toHaveBeenCalled();
       expect(addEditorSpy).toHaveBeenCalledWith(id, expect.anything());
@@ -72,37 +77,37 @@ describe('Editor component', () => {
 
     it('sets up a listener on focused text editor', async () => {
       const id = MAIN_JS;
-      store.editorMosaic.set({ [id]: '// content' });
-      const { instance } = createEditor(id);
+      initializeEditorMosaic(id);
+      createEditor(id);
 
-      instance.containerRef.current = 'ref';
-      await instance.initMonaco();
       expect(monaco.latestEditor.onDidFocusEditorText).toHaveBeenCalled();
     });
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
     const id = MAIN_JS;
-    store.editorMosaic.set({ [id]: '// content' });
-    const didMount = jest.fn();
-    const { instance } = createEditor(id, didMount);
+    initializeEditorMosaic(id);
 
-    instance.containerRef.current = 'ref';
-    await instance.initMonaco();
-    instance.componentWillUnmount();
+    const {
+      renderResult: { unmount },
+    } = createEditor(id);
+
+    unmount();
 
     expect(monaco.latestEditor.dispose).toHaveBeenCalled();
   });
 
   it('focus editor file', async () => {
     const id = MAIN_JS;
-    store.editorMosaic.set({ [id]: '// content' });
-    const didMount = jest.fn();
-    const { instance } = createEditor(id, didMount);
+    initializeEditorMosaic(id);
 
-    instance.containerRef.current = 'ref';
-    await instance.initMonaco();
-    instance.componentWillUnmount();
+    const {
+      instance,
+      renderResult: { unmount },
+    } = createEditor(id);
+
+    unmount();
+
     expect(instance.props.id).toBe(id);
   });
 });
