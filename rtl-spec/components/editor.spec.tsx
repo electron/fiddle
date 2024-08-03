@@ -2,9 +2,9 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EditorId, MAIN_JS } from '../../../src/interfaces';
-import { Editor } from '../../../src/renderer/components/editor';
-import { AppState } from '../../../src/renderer/state';
+import { EditorId, MAIN_JS } from '../../src/interfaces';
+import { Editor } from '../../src/renderer/components/editor';
+import { AppState } from '../../src/renderer/state';
 
 type DidMount = () => void;
 
