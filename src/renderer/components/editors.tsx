@@ -13,6 +13,7 @@ import {
 import { Editor } from './editor';
 import { RenderNonIdealState } from './editors-non-ideal-state';
 import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
+import { TestIdContainer } from './TestIdContainer';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { AppState } from '../state';
 import { getEditorTitle } from '../utils/editor-utils';
@@ -182,7 +183,7 @@ export const Editors = observer(
       const { appState } = this.props;
 
       return (
-        <div>
+        <div data-testid="editors-toolbar">
           {/* Left */}
           <div>
             <h5>{title}</h5>
@@ -241,13 +242,15 @@ export const Editors = observer(
       const { editorMosaic } = this.props.appState;
 
       return (
-        <Mosaic<EditorId>
-          className={`focused__${this.state.focused}`}
-          onChange={this.onChange}
-          value={editorMosaic.mosaic}
-          zeroStateView={<RenderNonIdealState editorMosaic={editorMosaic} />}
-          renderTile={this.renderTile}
-        />
+        <TestIdContainer testId="editors">
+          <Mosaic<EditorId>
+            className={`focused__${this.state.focused}`}
+            onChange={this.onChange}
+            value={editorMosaic.mosaic}
+            zeroStateView={<RenderNonIdealState editorMosaic={editorMosaic} />}
+            renderTile={this.renderTile}
+          />
+        </TestIdContainer>
       );
     }
 

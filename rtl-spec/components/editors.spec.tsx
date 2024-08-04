@@ -1,7 +1,4 @@
-import * as React from 'react';
-
-import { mount, shallow } from 'enzyme';
-import { MosaicWindowProps } from 'react-mosaic-component';
+import { MosaicNode } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorId, EditorValues, MAIN_JS } from '../../src/interfaces';
@@ -11,11 +8,11 @@ import { Editor, EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { AppState } from '../../src/renderer/state';
 import {
   MonacoEditorMock,
-  MonacoMock,
   StateMock,
   createEditorValues,
 } from '../../tests/mocks/mocks';
 import { emitEvent } from '../../tests/utils';
+import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
@@ -23,14 +20,12 @@ vi.mock('../../src/renderer/components/editor', () => ({
 
 describe('Editors component', () => {
   let app: App;
-  let monaco: MonacoMock;
   let store: AppState;
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
 
   beforeEach(() => {
     ({ app } = window);
-    monaco = window.monaco as unknown as MonacoMock;
     ({ state: store } = window.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
@@ -39,15 +34,20 @@ describe('Editors component', () => {
     (store as unknown as StateMock).editorMosaic = editorMosaic;
   });
 
+  function renderEditors() {
+    return renderClassComponentWithInstanceRef(Editors, {
+      appState: store,
+    });
+  }
+
   it('renders', () => {
-    const wrapper = mount(<Editors appState={store} />);
-    wrapper.setState({ monaco });
-    expect(wrapper).toMatchSnapshot();
+    const { renderResult } = renderEditors();
+
+    expect(renderResult.getByTestId('editors')).toBeInTheDocument();
   });
 
   it('does not execute command if not supported', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance();
+    const { instance } = renderEditors();
 
     const editor = new MonacoEditorMock();
     const action = editor.getAction();
@@ -71,15 +71,13 @@ describe('Editors component', () => {
         throw new Error('Bwap bwap');
       });
 
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance();
+      const { instance } = renderEditors();
 
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
     });
 
     it('updates a setting', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance();
+      const { instance } = renderEditors();
 
       const editor = new MonacoEditorMock();
       editorMosaic.addEditor(filename, editor as unknown as Editor);
@@ -91,29 +89,35 @@ describe('Editors component', () => {
     });
   });
 
-  it('renders a toolbar', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance();
-    const toolbar = instance.renderToolbar(
-      { title: MAIN_JS } as MosaicWindowProps<EditorId>,
-      MAIN_JS,
-    );
+  it('renders toolbars', () => {
+    const { renderResult } = renderEditors();
 
-    expect(toolbar).toMatchSnapshot();
+    const [
+      mainToolbar,
+      rendererToolbar,
+      htmlToolbar,
+      preloadToolbar,
+      stylesheetToolbar,
+    ] = renderResult.getAllByTestId('editors-toolbar');
+
+    expect(mainToolbar).toHaveTextContent('Main Process (main.js)');
+    expect(rendererToolbar).toHaveTextContent('Renderer Process (renderer.js)');
+    expect(htmlToolbar).toHaveTextContent('HTML (index.html)');
+    expect(preloadToolbar).toHaveTextContent('Preload (preload.js)');
+    expect(stylesheetToolbar).toHaveTextContent('Stylesheet (styles.css)');
   });
 
   it('onChange() updates the mosaic arrangement in the appState', () => {
-    const wrapper = shallow(<Editors appState={store} />);
-    const instance: any = wrapper.instance();
+    const { instance } = renderEditors();
 
-    const arrangement = { testArrangement: true };
-    instance.onChange(arrangement as any);
+    const arrangement: MosaicNode<EditorId> = 'testArrangement.js';
+    instance.onChange(arrangement);
     expect(editorMosaic.mosaic).toStrictEqual(arrangement);
   });
 
   describe('events', () => {
     it('handles a "execute-monaco-command" event', () => {
-      shallow(<Editors appState={store} />);
+      renderEditors();
 
       const editor = new MonacoEditorMock();
       const action = editor.getAction();
@@ -130,7 +134,7 @@ describe('Editors component', () => {
     const fakeValues = { [MAIN_JS]: 'hi' } as const;
 
     it('handles a "new-fiddle" event', async () => {
-      shallow(<Editors appState={store} />);
+      renderEditors();
 
       let resolve: (value?: unknown) => void;
       const replacePromise = new Promise((r) => {
@@ -163,7 +167,7 @@ describe('Editors component', () => {
 
     describe('"select-all-in-editor" handler', () => {
       it('selects all in the focused editor', async () => {
-        shallow(<Editors appState={store} />);
+        renderEditors();
 
         const range = 'range';
         const editor = new MonacoEditorMock();
@@ -178,7 +182,7 @@ describe('Editors component', () => {
       });
 
       it('does not change selection if the selected editor has no model', async () => {
-        shallow(<Editors appState={store} />);
+        renderEditors();
 
         const editor = new MonacoEditorMock();
         delete (editor as any).model;
@@ -192,14 +196,14 @@ describe('Editors component', () => {
       });
 
       it('does not crash if there is no selected editor', () => {
-        shallow(<Editors appState={store} />);
+        renderEditors();
         editorMosaic.focusedEditor = vi.fn().mockReturnValue(null);
         emitEvent('select-all-in-editor');
       });
     });
 
     it('handles a "new-test" event', async () => {
-      shallow(<Editors appState={store} />);
+      renderEditors();
 
       // setup
       const getTestTemplateSpy = vi
@@ -230,7 +234,7 @@ describe('Editors component', () => {
     });
 
     it('handles a "select-all-in-editor" event', async () => {
-      shallow(<Editors appState={store} />);
+      renderEditors();
 
       const range = 'range';
       const editor = new MonacoEditorMock();
@@ -248,7 +252,7 @@ describe('Editors component', () => {
       const editor = new MonacoEditorMock();
       editorMosaic.addEditor(id, editor as unknown as Editor);
 
-      shallow(<Editors appState={store} />);
+      renderEditors();
       emitEvent('toggle-monaco-option', 'wordWrap');
       expect(editor.updateOptions).toHaveBeenCalled();
     });
@@ -256,8 +260,8 @@ describe('Editors component', () => {
 
   describe('setFocused()', () => {
     it('sets the "focused" property', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance();
+      const { instance } = renderEditors();
+
       const spy = vi.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
@@ -266,8 +270,8 @@ describe('Editors component', () => {
     });
 
     it('focus sidebar file', () => {
-      const wrapper = shallow(<Editors appState={store} />);
-      const instance: any = wrapper.instance();
+      const { instance } = renderEditors();
+
       const spy = vi.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
