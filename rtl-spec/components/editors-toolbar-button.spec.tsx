@@ -2,12 +2,12 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EditorId, MAIN_JS } from '../../../src/interfaces';
+import { EditorId, MAIN_JS } from '../../src/interfaces';
 import {
   MaximizeButton,
   RemoveButton,
-} from '../../../src/renderer/components/editors-toolbar-button';
-import { AppState } from '../../../src/renderer/state';
+} from '../../src/renderer/components/editors-toolbar-button';
+import { AppState } from '../../src/renderer/state';
 
 let mockContext: any = {};
 
