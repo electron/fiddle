@@ -1,9 +1,12 @@
-import { mount } from 'enzyme';
+import React from 'react';
 
-import { renderNonIdealState } from '../../src/renderer/components/editors-non-ideal-state';
+import { render } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+
+import { RenderNonIdealState } from '../../src/renderer/components/editors-non-ideal-state';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 
-describe('renderNonIdealState()', () => {
+describe('RenderNonIdealState component', () => {
   let editorMosaic: EditorMosaic;
 
   beforeEach(() => {
@@ -11,13 +14,20 @@ describe('renderNonIdealState()', () => {
   });
 
   it('renders a non-ideal state', () => {
-    expect(renderNonIdealState({} as EditorMosaic)).toMatchSnapshot();
+    const { getByText } = render(
+      <RenderNonIdealState editorMosaic={{} as EditorMosaic} />,
+    );
+
+    expect(getByText('Reset editors')).toBeInTheDocument();
   });
 
-  it('handles a click', () => {
+  it('handles a click', async () => {
     const resetLayoutSpy = jest.spyOn(editorMosaic, 'resetLayout');
-    const wrapper = mount(renderNonIdealState(editorMosaic));
-    wrapper.find('button').simulate('click');
+    const { getByRole } = render(
+      <RenderNonIdealState editorMosaic={editorMosaic} />,
+    );
+    await userEvent.click(getByRole('button'));
+
     expect(resetLayoutSpy).toHaveBeenCalledTimes(1);
   });
 });
