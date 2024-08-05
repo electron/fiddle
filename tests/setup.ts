@@ -1,3 +1,5 @@
+import '@testing-library/jest-dom';
+
 import { configure as enzymeConfigure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { createSerializer } from 'enzyme-to-json';
@@ -11,7 +13,6 @@ enzymeConfigure({ adapter: new Adapter() });
 // allow jest fns to overwrite readonly mobx stuff
 // https://mobx.js.org/configuration.html#safedescriptors-boolean
 mobxConfigure({ safeDescriptors: false });
-require('@testing-library/jest-dom/extend-expect');
 
 global.confirm = jest.fn();
 
