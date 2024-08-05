@@ -1,6 +1,5 @@
-import * as React from 'react';
-
-import { shallow } from 'enzyme';
+import userEvent from '@testing-library/user-event';
+import { MosaicContext, MosaicWindowContext } from 'react-mosaic-component';
 
 import { EditorId, MAIN_JS } from '../../src/interfaces';
 import {
@@ -8,8 +7,9 @@ import {
   RemoveButton,
 } from '../../src/renderer/components/editors-toolbar-button';
 import { AppState } from '../../src/renderer/state';
+import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
 
-let mockContext: any = {};
+let mockContext = {} as MosaicWindowContext & MosaicContext<string>;
 
 jest.mock('react-mosaic-component', () => {
   const { MosaicContext, MosaicRootActions, MosaicWindowContext } =
@@ -52,44 +52,43 @@ describe('Editor toolbar button component', () => {
 
   describe('MaximizeButton', () => {
     function createMaximizeButton(id: EditorId) {
-      const wrapper = shallow(<MaximizeButton id={id} appState={store} />, {
-        context: mockContext,
+      return renderClassComponentWithInstanceRef(MaximizeButton, {
+        id,
+        appState: store,
       });
-      const instance = wrapper.instance();
-      return { instance, wrapper };
     }
 
     it('renders', () => {
-      const { wrapper } = createMaximizeButton(MAIN_JS);
-      expect(wrapper).toMatchSnapshot();
+      const { renderResult } = createMaximizeButton(MAIN_JS);
+      expect(renderResult.getByRole('button')).toBeInTheDocument();
     });
 
-    it('handles a click', () => {
-      const { instance, wrapper } = createMaximizeButton(MAIN_JS);
-      instance.context = mockContext as unknown;
-      wrapper.dive().dive().find('button').simulate('click');
+    it('handles a click', async () => {
+      const { instance, renderResult } = createMaximizeButton(MAIN_JS);
+      instance.context = mockContext;
+      await userEvent.click(renderResult.getByRole('button'));
       expect(mockContext.mosaicActions.expand).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('RemoveButton', () => {
     function createRemoveButton(id: EditorId) {
-      const wrapper = shallow(<RemoveButton id={id} appState={store} />, {
-        context: mockContext,
+      return renderClassComponentWithInstanceRef(RemoveButton, {
+        id,
+        appState: store,
       });
-      return { wrapper };
     }
 
     it('renders', () => {
-      const { wrapper } = createRemoveButton(MAIN_JS);
-      expect(wrapper).toMatchSnapshot();
+      const { renderResult } = createRemoveButton(MAIN_JS);
+      expect(renderResult.getByRole('button')).toBeInTheDocument();
     });
 
-    it('handles a click', () => {
+    it('handles a click', async () => {
       const { editorMosaic } = store;
       const hideSpy = jest.spyOn(editorMosaic, 'hide');
-      const { wrapper } = createRemoveButton(MAIN_JS);
-      wrapper.dive().dive().find('button').simulate('click');
+      const { renderResult } = createRemoveButton(MAIN_JS);
+      await userEvent.click(renderResult.getByRole('button'));
       expect(hideSpy).toHaveBeenCalledTimes(1);
     });
   });
