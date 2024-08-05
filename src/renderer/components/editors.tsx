@@ -11,7 +11,7 @@ import {
 } from 'react-mosaic-component';
 
 import { Editor } from './editor';
-import { renderNonIdealState } from './editors-non-ideal-state';
+import { RenderNonIdealState } from './editors-non-ideal-state';
 import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { AppState } from '../state';
@@ -262,7 +262,7 @@ export const Editors = observer(
           className={`focused__${this.state.focused}`}
           onChange={this.onChange}
           value={editorMosaic.mosaic}
-          zeroStateView={renderNonIdealState(editorMosaic)}
+          zeroStateView={<RenderNonIdealState editorMosaic={editorMosaic} />}
           renderTile={this.renderTile}
         />
       );
