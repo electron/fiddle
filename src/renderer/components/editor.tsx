@@ -142,6 +142,12 @@ export class Editor extends React.Component<EditorProps> {
   }
 
   public render() {
-    return <div className="editorContainer" ref={this.containerRef} />;
+    return (
+      <div
+        className="editorContainer"
+        data-testid="editorContainer"
+        ref={this.containerRef}
+      />
+    );
   }
 }
