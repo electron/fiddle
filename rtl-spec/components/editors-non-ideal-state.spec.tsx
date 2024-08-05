@@ -1,7 +1,7 @@
 import { mount } from 'enzyme';
 
-import { renderNonIdealState } from '../../../src/renderer/components/editors-non-ideal-state';
-import { EditorMosaic } from '../../../src/renderer/editor-mosaic';
+import { renderNonIdealState } from '../../src/renderer/components/editors-non-ideal-state';
+import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 
 describe('renderNonIdealState()', () => {
   let editorMosaic: EditorMosaic;
