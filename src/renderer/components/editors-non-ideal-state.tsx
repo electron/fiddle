@@ -4,7 +4,13 @@ import { Button, NonIdealState } from '@blueprintjs/core';
 
 import { EditorMosaic } from '../editor-mosaic';
 
-export function renderNonIdealState(editorMosaic: EditorMosaic) {
+type RenderNonIdealStateProps = {
+  editorMosaic: EditorMosaic;
+};
+
+export function RenderNonIdealState({
+  editorMosaic,
+}: RenderNonIdealStateProps) {
   const resolveButton = (
     <Button text="Reset editors" onClick={() => editorMosaic.resetLayout()} />
   );
