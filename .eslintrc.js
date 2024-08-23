@@ -25,7 +25,7 @@ const config = {
     'plugin:import/recommended', // Used along with eslint-plugin-import to sort imports with recommended standards
     'plugin:import/typescript', // To handle import order cases for typescript files
   ],
-  plugins: ['import'],
+  plugins: ['import', 'eslint-plugin-tsdoc'],
   rules: {
     // Place to specify ESLint rules. Can be used to overwrite rules specified from the extended configs
     // e.g. "@typescript-eslint/explicit-function-return-type": "off",
@@ -76,7 +76,16 @@ const config = {
         pathGroupsExcludedImportTypes: ['react'],
       },
     ],
+    'tsdoc/syntax': 'error',
   },
+  overrides: [
+    {
+      files: ['rtl-spec/**', 'tests/**'],
+      rules: {
+        'tsdoc/syntax': 'off',
+      },
+    },
+  ],
   // the static folder is linted by standard
   ignorePatterns: ['/out', '/.webpack', '/coverage', '/static'],
 };

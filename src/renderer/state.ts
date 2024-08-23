@@ -46,9 +46,6 @@ import {
 
 /**
  * The application's state. Exported as a singleton below.
- *
- * @export
- * @class AppState
  */
 export class AppState {
   private readonly timeFmt = new Intl.DateTimeFormat([], {
@@ -566,7 +563,7 @@ export class AppState {
   }
 
   /**
-   * @returns {string} the title, e.g. appname, fiddle name, state
+   * @returns the title, e.g. appname, fiddle name, state
    */
   get title(): string {
     const { isEdited } = this.editorMosaic;
@@ -784,9 +781,6 @@ export class AppState {
 
   /**
    * Remove a version of Electron
-   *
-   * @param {RunnableVersion} ver
-   * @returns {Promise<void>}
    */
   public async removeVersion(ver: RunnableVersion): Promise<void> {
     const { version, state, source } = ver;
@@ -825,9 +819,6 @@ export class AppState {
 
   /**
    * Download a version of Electron.
-   *
-   * @param {RunnableVersion} ver
-   * @returns {Promise<void>}
    */
   public async downloadVersion(ver: RunnableVersion): Promise<void> {
     const { source, state, version } = ver;
@@ -926,9 +917,6 @@ export class AppState {
 
   /**
    * Select a version of Electron (and download it if necessary).
-   *
-   * @param {string} input
-   * @returns {Promise<void>}
    */
   public async setVersion(input: string): Promise<void> {
     const fallback = this.findUsableVersion();
@@ -976,8 +964,6 @@ export class AppState {
 
   /**
    * The equivalent of signing out.
-   *
-   * @returns {void}
    */
   public signOutGitHub(): void {
     this.gitHubAvatarUrl = null;
@@ -1050,8 +1036,6 @@ export class AppState {
   /**
    * Ensure that any buffered console output is
    * printed before a running Fiddle is stopped.
-   *
-   * @returns {void}
    */
   public flushOutput(): void {
     this.pushOutput('\n', { bypassBuffer: false });
@@ -1060,9 +1044,6 @@ export class AppState {
   /**
    * Push output to the application's state. Accepts a buffer or a string as input,
    * attaches a timestamp, and pushes into the store.
-   *
-   * @param {(string | Buffer)} data
-   * @param {OutputOptions} options
    */
   public pushOutput(
     data: string | Buffer,
@@ -1103,9 +1084,6 @@ export class AppState {
 
   /**
    * Little convenience method that pushes message and error.
-   *
-   * @param {string} message
-   * @param {Error} error
    */
   public pushError(message: string, error: Error) {
     this.pushOutput(`⚠️ ${message}. Error encountered:`);
@@ -1158,9 +1136,6 @@ export class AppState {
   /**
    * Updates the pages url with a hash element that allows the main
    * process to quickly determine if there's a view open.
-   *
-   * @private
-   * @memberof AppState
    */
   private setPageHash() {
     let hash = '';
@@ -1174,9 +1149,6 @@ export class AppState {
 
   /**
    * Returns the current state of version passed
-   *
-   * @param {string} version
-   * @returns {InstallState}
    */
   public getVersionState(version: string): InstallState {
     return window.ElectronFiddle.getVersionState(version);
@@ -1184,9 +1156,6 @@ export class AppState {
 
   /**
    * Save a key/value to localStorage.
-   *
-   * @param {GlobalSetting | WindowSpecificSetting} key
-   * @param {(string | number | Array<any> | Record<string, unknown> | null | boolean)} [value]
    */
   private save(
     key: GlobalSetting | WindowSpecificSetting,
@@ -1210,10 +1179,6 @@ export class AppState {
 
   /**
    * Fetch data from localStorage.
-   *
-   * @template T
-   * @param {GlobalSetting | WindowSpecificSetting} key
-   * @returns {(T | string | null)}
    */
   private retrieve<T>(
     key: GlobalSetting | WindowSpecificSetting,

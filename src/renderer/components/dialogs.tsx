@@ -16,9 +16,6 @@ interface DialogsProps {
 
 /**
  * Dialogs (like the GitHub PAT input).
- *
- * @class Dialogs
- * @extends {React.Component<DialogsProps, {}>}
  */
 export const Dialogs = observer(
   class Dialogs extends React.Component<DialogsProps> {

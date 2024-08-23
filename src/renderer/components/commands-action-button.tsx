@@ -36,10 +36,6 @@ interface IGistActionButtonState {
 
 /**
  * The "publish" button takes care of logging you in.
- *
- * @export
- * @class GistActionButton
- * @extends {React.Component<GistActionButtonProps, GistActionButtonState>}
  */
 export const GistActionButton = observer(
   class GistActionButton extends React.Component<
@@ -85,9 +81,6 @@ export const GistActionButton = observer(
      * If we're showing the authentication dialog, we wait for it
      * to be closed again (or a GitHub token to show up) before
      * we publish
-     *
-     * @returns {Promise<void>}
-     * @memberof GistActionButton
      */
     public async handleClick(): Promise<void> {
       const { appState } = this.props;
@@ -306,8 +299,6 @@ export const GistActionButton = observer(
 
     /**
      * Publish fiddles as private.
-     *
-     * @memberof GistActionButton
      */
     public setPrivate() {
       this.setPrivacy(false);
@@ -315,8 +306,6 @@ export const GistActionButton = observer(
 
     /**
      * Publish fiddles as public.
-     *
-     * @memberof GistActionButton
      */
     public setPublic() {
       this.setPrivacy(true);

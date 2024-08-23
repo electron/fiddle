@@ -21,10 +21,6 @@ const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
 /**
  * Helper method: Returns the <Select /> predicate for an Electron
  * version.
- *
- * @param {string} query
- * @param {RunnableVersion} { name }
- * @returns
  */
 export const filterItem: ItemPredicate<LoadedFiddleTheme> = (
   query,
@@ -36,10 +32,6 @@ export const filterItem: ItemPredicate<LoadedFiddleTheme> = (
 /**
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
- *
- * @param {RunnableVersion} item
- * @param {IItemRendererProps} { handleClick, modifiers, query }
- * @returns
  */
 export const renderItem: ItemRenderer<LoadedFiddleTheme> = (
   item,
@@ -73,9 +65,6 @@ interface AppearanceSettingsState {
 
 /**
  * Settings content to manage appearance-related preferences.
- *
- * @class AppearanceSettings
- * @extends {React.Component<AppearanceSettingsProps, AppearanceSettingsState>}
  */
 export const AppearanceSettings = observer(
   class AppearanceSettings extends React.Component<
@@ -119,8 +108,6 @@ export const AppearanceSettings = observer(
     /**
      * Handle change, which usually means that we'd like update
      * the current theme.
-     *
-     * @param {LoadedFiddleTheme} theme
      */
     public handleChange(theme: LoadedFiddleTheme) {
       this.setState({ selectedTheme: theme });
@@ -129,9 +116,6 @@ export const AppearanceSettings = observer(
 
     /**
      * Creates a new theme from the current template.
-     *
-     * @returns {Promise<boolean>}
-     * @memberof AppearanceSettings
      */
     public async createNewThemeFromCurrent(): Promise<boolean> {
       const { appState } = this.props;
@@ -154,8 +138,6 @@ export const AppearanceSettings = observer(
     /**
      * Creates the themes folder in .electron-fiddle if one does not
      * exist yet, then shows that folder in the Finder/Explorer.
-     *
-     * @returns {Promise<boolean>}
      */
     public async openThemeFolder(): Promise<boolean> {
       try {

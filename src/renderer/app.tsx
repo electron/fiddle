@@ -24,8 +24,6 @@ import '../less/root.less';
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
  * but it does eventually render all components.
- *
- * @class App
  */
 export class App {
   public state = new AppState(getElectronVersions());
@@ -82,8 +80,6 @@ export class App {
 
   /**
    * Retrieves the contents of all editor panes.
-   *
-   * @returns {EditorValues}
    */
   public async getEditorValues(
     options?: PackageJsonOptions,
@@ -202,7 +198,7 @@ export class App {
   /**
    * Opens a fiddle from the specified location.
    *
-   * @param {SetFiddleOptions} fiddle The fiddle to open
+   * @param fiddle - The fiddle to open
    */
   public async openFiddle(fiddle: SetFiddleOptions) {
     const { localFiddle, gistId } = fiddle;
@@ -218,9 +214,6 @@ export class App {
 
   /**
    * Loads theme CSS into the HTML document.
-   *
-   * @param {string} name
-   * @returns {Promise<void>}
    */
   public async loadTheme(name: string): Promise<void> {
     const tag: HTMLStyleElement | null =

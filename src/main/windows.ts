@@ -35,8 +35,6 @@ export function safelyOpenWebURL(url: string) {
 
 /**
  * Gets default options for the main window
- *
- * @returns {Electron.BrowserWindowConstructorOptions}
  */
 export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions {
   const HEADER_COMMANDS_HEIGHT = 50;
@@ -66,9 +64,6 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
 
 /**
  * Creates a new main window.
- *
- * @export
- * @returns {Electron.BrowserWindow}
  */
 export function createMainWindow(): Electron.BrowserWindow {
   console.log(`Creating main window`);
@@ -121,8 +116,6 @@ export function createMainWindow(): Electron.BrowserWindow {
 
 /**
  * Gets or creates the main window, returning it in both cases.
- *
- * @returns {Promise<Electron.BrowserWindow>}
  */
 export async function getOrCreateMainWindow(): Promise<Electron.BrowserWindow> {
   await mainIsReadyPromise;

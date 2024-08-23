@@ -54,9 +54,7 @@ export class Runner {
   /**
    * Bisect the current fiddle across the specified versions.
    *
-   * @param {Array<RunnableVersion>} versions - versions to bisect
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
+   * @param versions - versions to bisect
    */
   public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
     const { appState } = this;
@@ -68,9 +66,7 @@ export class Runner {
   /**
    * Bisect the current fiddle across the specified versions.
    *
-   * @param {Array<RunnableVersion>} versions - versions to bisect
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
+   * @param versions - versions to bisect
    */
   public async autobisectImpl(
     versions: Array<RunnableVersion>,
@@ -142,9 +138,6 @@ export class Runner {
 
   /**
    * Actually run the fiddle.
-   *
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
    */
   public async run(): Promise<RunResult> {
     const options = { includeDependencies: false, includeElectron: false };
@@ -232,8 +225,6 @@ export class Runner {
 
   /**
    * Stop a currently running Electron fiddle.
-   *
-   * @memberof Runner
    */
   public stop(): void {
     window.ElectronFiddle.stopFiddle();
@@ -241,10 +232,6 @@ export class Runner {
 
   /**
    * Uses electron-forge to either package or make the current fiddle
-   *
-   * @param {ForgeCommands} operation
-   * @returns {Promise<boolean>}
-   * @memberof Runner
    */
   public async performForgeOperation(
     operation: ForgeCommands,
@@ -300,10 +287,6 @@ export class Runner {
 
   /**
    * Installs the specified modules
-   *
-   * @param {PMOperationOptions} pmOptions
-   * @returns {Promise<void>}
-   * @memberof Runner
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
     const modules = Array.from(this.appState.modules.entries()).map(
@@ -443,11 +426,6 @@ export class Runner {
 
   /**
    * Save files to temp, logging to the Fiddle terminal while doing so
-   *
-   * @param {PackageJsonOptions} options
-   * @param {Array<FileTransformOperation>} [transforms]
-   * @returns {(Promise<string | null>)}
-   * @memberof Runner
    */
   public async saveToTemp(
     options: PackageJsonOptions,
@@ -470,11 +448,7 @@ export class Runner {
 
   /**
    * Installs modules in a given directory (we're basically
-   * just running "{packageManager} install")
-   *
-   * @param {PMOperationOptions} options
-   * @returns {Promise<boolean>}
-   * @memberof Runner
+   * just running "\{packageManager\} install")
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     const pm = options.packageManager;

@@ -6,8 +6,6 @@ import shellEnv from 'shell-env';
 /**
  * On macOS & Linux, we need to fix the $PATH environment variable
  * so that we can call `npm`.
- *
- * @returns {Promise<void>}
  */
 export const maybeFixPath = (() => {
   // Singleton: We don't want to do this more than once.
@@ -31,10 +29,6 @@ export const maybeFixPath = (() => {
 
 /**
  * Execute a command in a directory.
- *
- * @param {string} dir
- * @param {string} cliArgs
- * @returns {Promise<string>}
  */
 export async function exec(dir: string, cliArgs: string): Promise<string> {
   await maybeFixPath();

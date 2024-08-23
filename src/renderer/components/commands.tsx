@@ -18,9 +18,6 @@ interface CommandsProps {
 /**
  * The command bar, containing all the buttons doing
  * all the things
- *
- * @class Commands
- * @extends {React.Component<CommandsProps>}
  */
 export const Commands = observer(
   class Commands extends React.Component<CommandsProps> {

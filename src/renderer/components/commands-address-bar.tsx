@@ -48,8 +48,6 @@ export const AddressBar = observer(
     /**
      * Handle the form's submit event, trying to load whatever
      * URL was entered.
-     *
-     * @param {React.SyntheticEvent<HTMLFormElement>} event
      */
     private handleSubmit(event: React.SyntheticEvent<HTMLFormElement>) {
       event.preventDefault();
@@ -58,8 +56,6 @@ export const AddressBar = observer(
 
     /**
      * Commit the address bar's value to app state and load the fiddle.
-     *
-     * @memberof AddressBar
      */
     private submit() {
       const { remoteLoader } = window.app;
@@ -91,8 +87,6 @@ export const AddressBar = observer(
 
     /**
      * Handle the change event, which usually just updates the address bar's value
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     private handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState({ value: event.target.value });

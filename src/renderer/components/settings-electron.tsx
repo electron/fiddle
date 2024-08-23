@@ -32,9 +32,6 @@ interface ElectronSettingsProps {
 
 /**
  * Settings content to manage Electron-related preferences.
- *
- * @class ElectronSettings
- * @extends {React.Component<ElectronSettingsProps, ElectronSettingsState>}
  */
 export const ElectronSettings = observer(
   class ElectronSettings extends React.Component<ElectronSettingsProps> {
@@ -58,8 +55,6 @@ export const ElectronSettings = observer(
 
     /**
      * Toggles visibility of non-downloaded versions
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
       const { appState } = this.props;
@@ -69,8 +64,6 @@ export const ElectronSettings = observer(
 
     /**
      * Toggles visibility of obsolete versions
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleShowObsoleteChange(event: React.FormEvent<HTMLInputElement>) {
       const { appState } = this.props;
@@ -80,8 +73,6 @@ export const ElectronSettings = observer(
 
     /**
      * Handles a change in which channels should be displayed.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
       const { id, checked } = event.currentTarget;
@@ -96,8 +87,6 @@ export const ElectronSettings = observer(
 
     /**
      * Download all visible versions of Electron.
-     *
-     * @returns {Promise<void>}
      */
     public async handleDownloadAll(): Promise<void> {
       const {
@@ -120,8 +109,6 @@ export const ElectronSettings = observer(
 
     /**
      * Delete all downloaded versions of Electron.
-     *
-     * @returns {Promise<void>}
      */
     public async handleDeleteAll(): Promise<void> {
       const { versions, removeVersion, startDeletingAll, stopDeletingAll } =
@@ -168,9 +155,6 @@ export const ElectronSettings = observer(
 
     /**
      * Renders the various buttons for advanced operations
-     *
-     * @private
-     * @returns {JSX.Element}
      */
     private renderAdvancedButtons(): JSX.Element {
       const { isUpdatingElectronVersions, isDownloadingAll, isDeletingAll } =
@@ -231,9 +215,6 @@ export const ElectronSettings = observer(
 
     /**
      * Renders the various options for which versions should be displayed
-     *
-     * @private
-     * @returns {JSX.Element}
      */
     private renderVersionShowOptions(): JSX.Element {
       const { appState } = this.props;
@@ -293,9 +274,6 @@ export const ElectronSettings = observer(
 
     /**
      * Renders the table with Electron versions.
-     *
-     * @private
-     * @returns {JSX.Element}
      */
     private renderTable(): JSX.Element {
       return (
@@ -314,9 +292,6 @@ export const ElectronSettings = observer(
 
     /**
      * Renders the rows with Electron version, returning an Array.
-     *
-     * @private
-     * @returns {Array<JSX.Element>}
      */
     private renderTableRows(): Array<JSX.Element | null> {
       return this.props.appState.versionsToShow.map((item) => (
@@ -330,9 +305,6 @@ export const ElectronSettings = observer(
 
     /**
      * Returns a human-readable state indicator for an Electron version.
-     *
-     * @param {RunnableVersion} item
-     * @returns {JSX.Element}
      */
     private renderHumanState(item: RunnableVersion): JSX.Element {
       const { state, source } = item;
@@ -359,10 +331,6 @@ export const ElectronSettings = observer(
 
     /**
      * Renders the action for a single Electron version.
-     *
-     * @private
-     * @param {RunnableVersion} ver
-     * @returns {JSX.Element}
      */
     private renderAction(ver: RunnableVersion): JSX.Element {
       const { state, source, version } = ver;

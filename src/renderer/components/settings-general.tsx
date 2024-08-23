@@ -19,9 +19,6 @@ interface GeneralSettingsProps {
 
 /**
  * Settings content to manage GitHub-related preferences.
- *
- * @class GitHubSettings
- * @extends {React.Component<GeneralSettingsProps>}
  */
 export const GeneralSettings = observer(
   class GeneralSettings extends React.Component<GeneralSettingsProps> {

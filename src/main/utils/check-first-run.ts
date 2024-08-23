@@ -11,8 +11,6 @@ const getConfigPath = () => {
 /**
  * Whether or not the app is being run for
  * the first time
- *
- * @returns {boolean}
  */
 export function isFirstRun(): boolean {
   const configPath = getConfigPath();

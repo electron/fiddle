@@ -12,10 +12,6 @@ interface GenericDialogProps {
 
 /**
  * The token dialog prompts the user to either continue or cancel the operation.
- *
- * @export
- * @class GenericDialog
- * @extends {React.Component<GenericDialogProps, GenericDialogState>}
  */
 export const GenericDialog = observer(
   class GenericDialog extends React.Component<GenericDialogProps> {

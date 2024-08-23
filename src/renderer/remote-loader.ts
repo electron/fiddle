@@ -251,7 +251,7 @@ export class RemoteLoader {
   /**
    * Verifies from the user that we should be loading this fiddle.
    *
-   * @param {string} what What are we loading from (gist, example, etc.)
+   * @param what - What are we loading from (gist, example, etc.)
    */
   public verifyRemoteLoad(what: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
@@ -271,10 +271,6 @@ export class RemoteLoader {
 
   /**
    * Loading a fiddle from GitHub succeeded, let's move on.
-   *
-   * @param {EditorValues} values
-   * @param {string} gistId
-   * @returns {Promise<boolean>}
    */
   private async handleLoadingSuccess(
     values: EditorValues,
@@ -287,9 +283,6 @@ export class RemoteLoader {
   /**
    * Loading a fiddle from GitHub failed - this method handles this case
    * gracefully.
-   *
-   * @param {Error} error
-   * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;

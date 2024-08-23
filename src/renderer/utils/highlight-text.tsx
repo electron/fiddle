@@ -6,11 +6,6 @@ import * as React from 'react';
  * Inspired by https://github.com/palantir/blueprint/blob/develop/packages/docs-app/src/examples/select-examples/films.tsx
  * License: https://github.com/palantir/blueprint/blob/develop/LICENSE
  * Copyright 2017 Palantir Technologies, Inc. All rights reserved.
- *
- * @export
- * @param {string} text
- * @param {string} query
- * @returns {(Array<React.ReactNode | string> | null)}
  */
 export function highlightText(
   text: string,

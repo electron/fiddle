@@ -23,8 +23,8 @@ const TEST_TEMPLATE_BRANCH = 'test-template';
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
- * @returns {Promise<string>} Path to the folder where the fiddle is kept
+ * @param branch - Electron branchname, e.g. `12-x-y` or `main`
+ * @returns Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
   let folder = path.join(TEMPLATES_DIR, `electron-quick-start-${branch}`);
@@ -69,8 +69,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
 /**
  * Get a cached copy of the Electron branch's fiddle.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
- * @returns {Promise<EditorValues>}
+ * @param branch - Electron branchname, e.g. `12-x-y` or `main`
  */
 function getQuickStart(branch: string): Promise<EditorValues> {
   // Load the template for that branch.
@@ -86,8 +85,6 @@ function getQuickStart(branch: string): Promise<EditorValues> {
 
 /**
  * Get a cached copy of the Electron Test fiddle.
- *
- * @returns {Promise<EditorValues>}
  */
 export function getTestTemplate(): Promise<EditorValues> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
@@ -96,8 +93,7 @@ export function getTestTemplate(): Promise<EditorValues> {
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
  *
- * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<EditorValues>}
+ * @param version - Electron version, e.g. 12.0.0
  */
 export function getTemplate(version: string): Promise<EditorValues> {
   const major = Number.parseInt(version);

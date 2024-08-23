@@ -7,9 +7,6 @@ let _octo: Octokit;
 /**
  * Returns a loaded Octokit. If state is passed and authentication
  * is available, we'll token-authenticate.
- *
- * @export
- * @returns {Promise<typeof Octokit>}
  */
 export async function getOctokit(appState?: AppState): Promise<Octokit> {
   // It's possible to load Gists without being authenticated,

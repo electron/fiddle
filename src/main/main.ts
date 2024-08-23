@@ -77,8 +77,6 @@ export async function onReady() {
 
 /**
  * Handle the "before-quit" event
- *
- * @export
  */
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);

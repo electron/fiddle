@@ -11,9 +11,6 @@ interface ConsoleSettingsProps {
 
 /**
  * Settings content to manage console-related preferences.
- *
- * @class ConsoleSettings
- * @extends {React.Component<ConsoleSettingsProps>}
  */
 export const ConsoleSettings = observer(
   class ConsoleSettings extends React.Component<ConsoleSettingsProps> {
@@ -26,8 +23,6 @@ export const ConsoleSettings = observer(
     /**
      * Handles a change on whether or not the console should be cleared
      * before fiddle is executed.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleClearOnRunChange(event: React.FormEvent<HTMLInputElement>) {
       const { checked } = event.currentTarget;

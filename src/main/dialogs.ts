@@ -11,9 +11,7 @@ import { IpcEvents } from '../ipc-events';
 /**
  * Build a default name for a local Electron version
  * from its dirname.
- *
- * @param {string} folderPath
- * @return {string} human-readable local build name
+ * @returns human-readable local build name
  */
 function makeLocalName(folderPath: string): string {
   // take a dirname like '/home/username/electron/gn/main/src/out/testing'
@@ -35,9 +33,6 @@ function makeLocalName(folderPath: string): string {
 
 /**
  * Verifies if the local electron path is valid
- *
- * @param {string} folderPath
- * @return {boolean}
  */
 function isValidElectronPath(folderPath: string): boolean {
   const execPath = Installer.getExecPath(folderPath);
@@ -46,8 +41,6 @@ function isValidElectronPath(folderPath: string): boolean {
 
 /**
  * Listens to IPC events related to dialogs and message boxes
- *
- * @export
  */
 export function setupDialogs() {
   ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, (event, args) => {
@@ -77,8 +70,6 @@ export function setupDialogs() {
 
 /**
  * Shows a warning dialog
- *
- * @param {Electron.MessageBoxOptions} args
  */
 function showWarningDialog(
   window: BrowserWindow,

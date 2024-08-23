@@ -30,9 +30,6 @@ interface ExecutionSettingsState {
 
 /**
  * Settings content to manage execution-related preferences.
- *
- * @class ExecutionSettings
- * @extends {React.Component<ExecutionSettingsProps, ExecutionSettingsState>}
  */
 export const ExecutionSettings = observer(
   class ExecutionSettings extends React.Component<
@@ -80,8 +77,6 @@ export const ExecutionSettings = observer(
     /**
      * Handles a change on whether or not the user data dir should be deleted
      * after a run.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleDeleteDataChange(event: React.FormEvent<HTMLInputElement>) {
       const { checked } = event.currentTarget;
@@ -90,8 +85,6 @@ export const ExecutionSettings = observer(
 
     /**
      * Handles a change on whether or not electron should log more things
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleElectronLoggingChange(
       event: React.FormEvent<HTMLInputElement>,
@@ -103,9 +96,6 @@ export const ExecutionSettings = observer(
     /**
      * Handles a change in the execution flags or environment variables
      * run with the Electron executable.
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @param {SettingItemType} type
      */
     public handleSettingsItemChange(
       event: React.ChangeEvent<HTMLInputElement>,
@@ -129,8 +119,6 @@ export const ExecutionSettings = observer(
 
     /**
      * Adds a new settings item input field.
-     *
-     * @param {SettingItemType} type
      */
     private addNewSettingsItem(type: SettingItemType) {
       const array = Object.entries(this.state[type]);
@@ -146,8 +134,6 @@ export const ExecutionSettings = observer(
     /**
      * Handle a change to the package manager used to install modules when running
      * Fiddles;
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     private handlePMChange = (event: React.FormEvent<HTMLInputElement>) => {
       const { appState } = this.props;

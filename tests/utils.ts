@@ -97,18 +97,28 @@ export function objectDifference(a: any, b: any): Record<string, unknown> {
   return o;
 }
 
+interface WaitForOptions {
+  /**
+   * polling frequency, in msec
+   * @defaultValue 100
+   */
+  interval: number;
+  /**
+   * timeout interval, in msec
+   * @defaultValue 2000
+   */
+  timeout: number;
+}
+
 /**
  * Waits up to `timeout` msec for a test to pass.
  *
- * @return a promise that returns the test result on success, or rejects on timeout
- * @param {() => any} test - function to test
- * @param {Object} options
- * @param {Number} [options.interval=100] - polling frequency, in msec
- * @param {Number} [options.timeout=2000] - timeout interval, in msec
+ * @param test - function to test
+ * @returns a promise that returns the test result on success, or rejects on timeout
  */
 export async function waitFor(
   test: () => any,
-  options = {
+  options: WaitForOptions = {
     interval: 100,
     timeout: 2000,
   },

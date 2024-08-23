@@ -19,10 +19,6 @@ export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
 
 /**
  * Read in a theme file.
- *
- * @export
- * @param {string} [name]
- * @returns {Promise<FiddleTheme | null>}
  */
 export async function readThemeFile(
   name?: string,
@@ -48,10 +44,6 @@ export async function readThemeFile(
 
 /**
  * Create theme file and show in folder.
- *
- * @param {FiddleTheme} theme
- * @param {string} [name]
- * @returns {Promise<LoadedFiddleTheme>}
  */
 export async function createThemeFile(
   theme: FiddleTheme | LoadedFiddleTheme,
@@ -87,8 +79,6 @@ export async function createThemeFile(
 
 /**
  * Reads and then returns all available themes.
- *
- * @returns {Promise<Array<LoadedFiddleTheme>>}
  */
 export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
   const themes: Array<LoadedFiddleTheme> = [defaultDark, defaultLight];

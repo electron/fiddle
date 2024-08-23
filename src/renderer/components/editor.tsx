@@ -50,8 +50,6 @@ export class Editor extends React.Component<EditorProps> {
   /**
    * Handle the editor having been mounted. This refers to Monaco's
    * mount, not React's.
-   *
-   * @param {MonacoType.editor.IStandaloneCodeEditor} editor
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { appState, editorDidMount, id } = this.props;
@@ -121,8 +119,6 @@ export class Editor extends React.Component<EditorProps> {
 
   /**
    * Implements external url handling for Monaco.
-   *
-   * @returns {MonacoType.editor.IOpenerService}
    */
   private openerService() {
     const { appState } = this.props;

@@ -21,9 +21,6 @@ interface BisectDialogState {
 
 /**
  * The "add version" dialog allows users to add custom builds of Electron.
- *
- * @class BisectDialog
- * @extends {React.Component<BisectDialogProps, BisectDialogState>}
  */
 export const BisectDialog = observer(
   class BisectDialog extends React.Component<
@@ -68,8 +65,6 @@ export const BisectDialog = observer(
 
     /**
      * Handles the submission of the dialog
-     *
-     * @returns {Promise<void>}
      */
     public async onSubmit(): Promise<void> {
       const range = this.getBisectRange();
@@ -239,9 +234,6 @@ export const BisectDialog = observer(
 
     /**
      * Should an item in the "earliest version" dropdown be disabled?
-     *
-     * @param {RunnableVersion} version
-     * @returns {boolean}
      */
     public isEarliestItemDisabled(version: RunnableVersion): boolean {
       const { allVersions, endIndex } = this.state;
@@ -256,9 +248,6 @@ export const BisectDialog = observer(
 
     /**
      * Should an item in the "latest version" dropdown be disabled?
-     *
-     * @param {RunnableVersion} version
-     * @returns {boolean}
      */
     public isLatestItemDisabled(version: RunnableVersion): boolean {
       const { allVersions, startIndex } = this.state;

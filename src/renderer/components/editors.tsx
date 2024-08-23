@@ -54,8 +54,6 @@ export const Editors = observer(
 
     /**
      * Executed right after the component mounts. We'll setup the IPC listeners here.
-     *
-     * @memberof Editors
      */
     public async componentDidMount() {
       this.stopListening();
@@ -135,9 +133,6 @@ export const Editors = observer(
 
     /**
      * Attempt to execute a given commandId on the currently focused editor
-     *
-     * @param {string} commandId
-     * @memberof Editors
      */
     public executeCommand(commandId: string) {
       const editor = this.props.appState.editorMosaic.focusedEditor();
@@ -179,10 +174,6 @@ export const Editors = observer(
 
     /**
      * Renders the little tool bar on top of each panel
-     *
-     * @param {MosaicWindowProps<EditorId>} { title }
-     * @param {EditorId} id
-     * @returns {JSX.Element}
      */
     public renderToolbar(
       { title }: MosaicWindowProps<EditorId>,
@@ -209,10 +200,6 @@ export const Editors = observer(
 
     /**
      * Renders a Mosaic tile
-     *
-     * @param {EditorId} id
-     * @param {Array<MosaicBranch>} path
-     * @returns {JSX.Element}
      */
     public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
       const content = this.renderEditor(id);
@@ -234,10 +221,6 @@ export const Editors = observer(
 
     /**
      * Render an editor
-     *
-     * @param {EditorId} id
-     * @returns {(JSX.Element | null)}
-     * @memberof Editors
      */
     public renderEditor(id: EditorId): JSX.Element | null {
       const { appState } = this.props;
@@ -270,8 +253,6 @@ export const Editors = observer(
 
     /**
      * Handles a change in the visible nodes
-     *
-     * @param {(MosaicNode<EditorId> | null)} currentNode
      */
     public onChange(currentNode: MosaicNode<EditorId> | null) {
       this.props.appState.editorMosaic.mosaic = currentNode;
@@ -281,7 +262,6 @@ export const Editors = observer(
      * Sets the currently-focused editor. This will impact the editor's
      * z-index, ensuring that its intellisense menus don't get clipped
      * by the other editor windows.
-     * @param {EditorId} id
      */
     public setFocused(id: EditorId): void {
       this.props.appState.editorMosaic.setFocusedFile(id);
