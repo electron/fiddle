@@ -25,9 +25,6 @@ import { SHOW_ME_TEMPLATES } from '../templates';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
- *
- * @param {(Array<Electron.MenuItemConstructorOptions> | Electron.Menu)} [submenu]
- * @returns {submenu is Array<Electron.MenuItemConstructorOptions>}
  */
 function isSubmenu(
   submenu?: Array<MenuItemConstructorOptions> | Menu,
@@ -37,8 +34,6 @@ function isSubmenu(
 
 /**
  * Returns additional items for the help menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getHelpItems(): Array<MenuItemConstructorOptions> {
   const items: MenuItemConstructorOptions[] = [];
@@ -112,8 +107,6 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
 /**
  * Depending on the OS, the `Preferences` either go into the `Fiddle`
  * menu (macOS) or under `File` (Linux, Windows)
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getPreferencesItems(): Array<MenuItemConstructorOptions> {
   return [
@@ -135,8 +128,6 @@ function getPreferencesItems(): Array<MenuItemConstructorOptions> {
 
 /**
  * Returns the Exit items
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getQuitItems(): Array<MenuItemConstructorOptions> {
   return [
@@ -151,8 +142,6 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
 
 /**
  * Returns the top-level "File" menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
@@ -219,8 +208,6 @@ function getShowMeMenu(
 
 /**
  * Returns the top-level "File" menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getFileMenu(
   acceleratorsToBlock: BlockableAccelerator[] = [],

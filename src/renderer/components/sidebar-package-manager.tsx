@@ -94,7 +94,6 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
   /**
    * Takes the module map and returns an object
    * conforming to the BlueprintJS tree schema.
-   * @returns TreeNodeInfo[]
    */
   private getModuleNodes = (): TreeNodeInfo[] => {
     const values: TreeNodeInfo[] = [];

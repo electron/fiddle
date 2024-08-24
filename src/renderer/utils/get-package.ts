@@ -13,10 +13,6 @@ export function getForgeVersion(): string {
 
 /**
  * Returns the package.json for the current Fiddle
- *
- * @param {AppState} appState
- * @param {PackageJsonOptions} [options]
- * @returns {string}
  */
 export async function getPackageJson(
   appState: AppState,

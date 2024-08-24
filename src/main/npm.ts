@@ -49,10 +49,6 @@ export async function getIsPackageManagerInstalled(
 
 /**
  * Installs given modules to a given folder.
- *
- * @param {PMOperationOptions} { dir, packageManager }
- * @param {...Array<string>} names
- * @returns {Promise<string>}
  */
 export async function addModules(
   { dir, packageManager }: PMOperationOptions,
@@ -73,11 +69,7 @@ export async function addModules(
 }
 
 /**
- * Execute an "{packageManager} run" command
- *
- * @param {PMOperationOptions} { dir, packageManager }
- * @param {string} command
- * @returns {Promise<string>}
+ * Execute an "\{packageManager\} run" command
  */
 export async function packageRun(
   { dir, packageManager }: PMOperationOptions,

@@ -14,9 +14,6 @@ interface HeaderState {
 
 /**
  * Everything above the editors, so buttons and the address bar.
- *
- * @class Header
- * @extends {React.Component<HeaderProps>}
  */
 export class Header extends React.Component<HeaderProps, HeaderState> {
   constructor(props: HeaderProps) {

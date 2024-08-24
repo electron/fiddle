@@ -4,9 +4,6 @@ import { getForgeVersion } from '../utils/get-package';
 /**
  * This transform turns the files into an electron-forge
  * project.
- *
- * @param {Files} files
- * @returns {Promise<Files>}
  */
 export async function forgeTransform(files: Files): Promise<Files> {
   if (files.get(PACKAGE_NAME)) {

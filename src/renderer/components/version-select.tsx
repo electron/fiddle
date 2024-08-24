@@ -61,9 +61,6 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
 /**
  * Helper method: Returns the <Select /> label for an Electron
  * version.
- *
- * @param {RunnableVersion} { source, state, name }
- * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
   // If a version is local, either it's there or it's not.
@@ -84,9 +81,6 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
 /**
  * Helper method: Returns the <Select /> icon for an Electron
  * version.
- *
- * @param {RunnableVersion} { state }
- * @returns {IconName}
  */
 export function getItemIcon({ source, state }: RunnableVersion): IconName {
   // If a version is local, either it's there or it's not.
@@ -114,10 +108,6 @@ export function getItemIcon({ source, state }: RunnableVersion): IconName {
  * [3.0.0, 14.3.0, 13.2.0, 12.0.0-nightly.20210301, 12.0.0-beta.3]
  * and a search query of '3', this method would sort them into:
  * [3.0.0, 13.2.0, 14.3.0, 12.0.0-beta.3, 12.0.0-nightly.20210301]
- *
- * @param {string} query
- * @param {RunnableVersion[]} versions
- * @returns
  */
 export const filterItems: ItemListPredicate<RunnableVersion> = (
   query,
@@ -153,8 +143,7 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
 /**
  * Renders a context menu to copy the current Electron version.
  *
- * @param {React.MouseEvent<HTMLButtonElement>} e
- * @param {string} version the Electron version number to copy.
+ * @param version - the Electron version number to copy.
  */
 export const renderVersionContextMenu = (
   e: React.MouseEvent<HTMLButtonElement>,
@@ -178,10 +167,6 @@ export const renderVersionContextMenu = (
 /**
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
- *
- * @param {RunnableVersion} item
- * @param {IItemRendererProps} { handleClick, modifiers, query }
- * @returns
  */
 export const renderItem: ItemRenderer<RunnableVersion> = (
   item,
@@ -247,9 +232,6 @@ interface VersionSelectProps {
 /**
  * A dropdown allowing the selection of Electron versions. The actual
  * download is managed in the state.
- *
- * @class VersionSelect
- * @extends {React.Component<VersionSelectProps, VersionSelectState>}
  */
 export const VersionSelect = observer(
   class VersionSelect extends React.Component<

@@ -1,7 +1,5 @@
 /**
  * Returns the correct name of ELectron for the current platform
- *
- * @returns {string}
  */
 export function getElectronNameForPlatform(): string {
   switch (window.ElectronFiddle.platform) {

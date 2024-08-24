@@ -81,9 +81,6 @@ export async function showSaveDialog(
 
 /**
  * Confirm it's OK to save files in `folder`
- *
- * @param {string} filePath
- * @returns {Promise<boolean>}
  */
 async function isOkToSaveAt(filePath: string): Promise<boolean> {
   return (
@@ -96,9 +93,6 @@ async function isOkToSaveAt(filePath: string): Promise<boolean> {
 /**
  * Pops open a confirmation dialog, asking the user if they really
  * want to overwrite an existing file
- *
- * @param {string} filePath
- * @returns {Promise<boolean>}
  */
 async function confirmFileOverwrite(filePath: string): Promise<boolean> {
   try {

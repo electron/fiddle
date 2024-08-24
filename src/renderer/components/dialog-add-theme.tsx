@@ -18,9 +18,6 @@ interface AddThemeDialogState {
 
 /**
  * The "add monaco theme" dialog allows users to add custom editor themes.
- *
- * @class AddThemeDialog
- * @extends {React.Component<AddThemeDialogProps, AddThemeDialogState>}
  */
 export const AddThemeDialog = observer(
   class AddThemeDialog extends React.Component<
@@ -40,8 +37,6 @@ export const AddThemeDialog = observer(
 
     /**
      * Handles a change of the file input.
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
       const { files } = event.target as HTMLInputElement;
@@ -52,8 +47,6 @@ export const AddThemeDialog = observer(
 
     /**
      * Handles the submission of the dialog.
-     *
-     * @returns {Promise<void>}
      */
     public async onSubmit(): Promise<void> {
       const { file } = this.state;

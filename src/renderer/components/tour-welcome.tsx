@@ -17,8 +17,6 @@ interface WelcomeTourState {
 /**
  * This is our "Welcome to Electron Fiddle" Tour. It includes both an intro to
  * the app and a short intro to Electron.
- *
- * @returns {Set<TourScriptStep>}
  */
 export function getWelcomeTour(): Set<TourScriptStep> {
   return new Set([
@@ -175,10 +173,6 @@ export function getWelcomeTour(): Set<TourScriptStep> {
 
 /**
  * The "Welcome to Electron Fiddle" Tour.
- *
- * @export
- * @class WelcomeTour
- * @extends {React.Component<WelcomeTourProps, WelcomeTourState>}
  */
 export const WelcomeTour = observer(
   class WelcomeTour extends React.Component<

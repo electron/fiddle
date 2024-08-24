@@ -8,9 +8,7 @@ import { ensureRequiredFiles, isSupportedFile } from '../../utils/editor-utils';
 /**
  * Reads a Fiddle from a directory.
  *
- * @param {string} folder
- * @param {boolean} includePackageJson
- * @returns {Promise<EditorValues>} the loaded Fiddle
+ * @returns the loaded Fiddle
  */
 export async function readFiddle(
   folder: string,

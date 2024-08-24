@@ -17,8 +17,8 @@ let knownVersions: ElectronVersions;
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {number} major - Electron major version number
- * @returns {boolean} true if there are releases with that major version
+ * @param major - Electron major version number
+ * @returns true if there are releases with that major version
  */
 export function isReleasedMajor(major: number): boolean {
   return knownVersions.inMajor(major).length > 0;
@@ -52,9 +52,6 @@ export function getReleasedVersions(): Array<Version> {
 /**
  * Gets the current state of a specific version
  * Valid local electron builds are marked as `installed`
- *
- * @param {Version} ver
- * @returns {InstallState}
  */
 export function getLocalVersionState(ver: Version): InstallState {
   const { localPath } = ver;

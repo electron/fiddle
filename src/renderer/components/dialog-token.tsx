@@ -25,10 +25,6 @@ const TOKEN_PATTERN =
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
  * It's also responsible for checking if the token is correct.
- *
- * @export
- * @class TokenDialog
- * @extends {React.Component<TokenDialogProps, TokenDialogState>}
  */
 export const TokenDialog = observer(
   class TokenDialog extends React.Component<
@@ -54,9 +50,6 @@ export const TokenDialog = observer(
 
     /**
      * Handles the submission of a token
-     *
-     * @returns {Promise<void>}
-     * @memberof TokenDialog
      */
     public async onSubmitToken(): Promise<void> {
       if (!this.state.tokenInput) return;
@@ -102,8 +95,6 @@ export const TokenDialog = observer(
 
     /**
      * Opens GitHub's page for token generation
-     *
-     * @memberof TokenDialog
      */
     public openGenerateTokenExternal() {
       window.open(GENERATE_TOKEN_URL);
@@ -112,9 +103,6 @@ export const TokenDialog = observer(
     /**
      * When the input field receives focus, we check the clipboard.
      * Maybe there's already something token-like there!
-     *
-     * @returns
-     * @memberof TokenDialog
      */
     public async onTokenInputFocused() {
       const text = ((await navigator.clipboard.readText()) || '').trim();
@@ -126,9 +114,6 @@ export const TokenDialog = observer(
 
     /**
      * Handle the change event, which usually just updates the address bar's value
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @memberof AddressBar
      */
     public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState({ tokenInput: event.target.value });

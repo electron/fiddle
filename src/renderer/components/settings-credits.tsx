@@ -17,9 +17,6 @@ interface CreditsSettingsState {
 
 /**
  * Settings content to manage Credits-related preferences.
- *
- * @class CreditsSettings
- * @extends {React.Component<CreditsSettingsProps, CreditsSettingsState>}
  */
 export class CreditsSettings extends React.Component<
   CreditsSettingsProps,
@@ -35,8 +32,6 @@ export class CreditsSettings extends React.Component<
 
   /**
    * Renders a list of contributors of Electron Fiddle.
-   *
-   * @returns {Array<JSX.Element>}
    */
   public renderContributors(): Array<JSX.Element> {
     const { contributors } = this.state;

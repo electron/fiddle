@@ -15,9 +15,6 @@ type IMirrorSettingsState = Mirrors;
 
 /**
  * Settings electron mirror
- *
- * @class MirrorSettings
- * @extends {React.Component<MirrorSettingsProps, IMirrorSettingsState>}
  */
 export const MirrorSettings = observer(
   class MirrorSettings extends React.Component<

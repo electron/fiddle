@@ -28,7 +28,6 @@ class NPMSearch {
   /**
    * Finds a list of packages Algolia's npm search index.
    * Naively caches all queries client-side.
-   * @param query Search query
    */
   async search(query: string) {
     if (this.searchCache.has(query)) {

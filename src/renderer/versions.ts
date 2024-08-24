@@ -11,9 +11,6 @@ import {
 
 /**
  * Returns a sensible default version string.
- *
- * @param {Array<RunnableVersion>} versions
- * @returns {string}
  */
 export function getDefaultVersion(versions: RunnableVersion[]): string {
   const key = localStorage.getItem(WindowSpecificSetting.version);
@@ -31,9 +28,6 @@ export function getDefaultVersion(versions: RunnableVersion[]): string {
 /**
  * Return the release channel for a given input
  * version.
- *
- * @param {Version | string} input
- * @returns {ElectronReleaseChannel}
  */
 export function getReleaseChannel(
   input: Version | string,
@@ -68,8 +62,6 @@ export function makeRunnable(ver: Version): RunnableVersion {
 
 /**
  * Return both known as well as local versions.
- *
- * @returns {Array<RunnableVersion>}
  */
 export function getElectronVersions(): Array<RunnableVersion> {
   const versions = [...getReleasedVersions(), ...getLocalVersions()];
@@ -78,9 +70,6 @@ export function getElectronVersions(): Array<RunnableVersion> {
 
 /**
  * Add a version to the local versions
- *
- * @param {Version} input
- * @returns {Array<Version>}
  */
 export function addLocalVersion(input: Version): Array<Version> {
   const versions = getLocalVersions();
@@ -96,9 +85,6 @@ export function addLocalVersion(input: Version): Array<Version> {
 
 /**
  * Get the Version (if any) that is located at localPath.
- *
- * @param {string} folderPath
- * @returns {Version | undefined}
  */
 export function getLocalVersionForPath(
   folderPath: string,
@@ -108,8 +94,6 @@ export function getLocalVersionForPath(
 
 /**
  * Retrieves local Electron versions, configured by the user.
- *
- * @returns {Array<Version>}
  */
 export function getLocalVersions(): Array<Version> {
   const fromLs = window.localStorage.getItem(GlobalSetting.localVersion);
@@ -133,8 +117,6 @@ export function getLocalVersions(): Array<Version> {
 
 /**
  * Saves local versions to localStorage.
- *
- * @param {Array<Version | RunnableVersion>} versions
  */
 export function saveLocalVersions(
   versions: Array<Version | RunnableVersion>,
@@ -173,8 +155,6 @@ function getReleasedVersions(): Array<Version> {
 
 /**
  * Fetch a list of released versions from electronjs.org.
- *
- * @returns {Promise<Version[]>}
  */
 export async function fetchVersions(): Promise<Version[]> {
   const versions = await window.ElectronFiddle.fetchVersions();
@@ -189,9 +169,6 @@ export async function fetchVersions(): Promise<Version[]> {
 
 /**
  * Is the given array an array of versions?
- *
- * @param {Array<any>} input
- * @returns {boolean}
  */
 function isExpectedFormat(input: Array<any>): boolean {
   return input.every((entry) => !!entry.version);
@@ -199,9 +176,6 @@ function isExpectedFormat(input: Array<any>): boolean {
 
 /**
  * Migrates old versions, if necessary
- *
- * @param {Array<any>} input
- * @returns {Array<Version>}
  */
 function migrateVersions(input: Array<any>): Array<Version> {
   return input

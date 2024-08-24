@@ -13,9 +13,6 @@ interface RunnerProps {
 /**
  * The runner component is responsible for actually launching the fiddle
  * with Electron. It also renders the button that does so.
- *
- * @class Runner
- * @extends {React.Component<RunnerProps>}
  */
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {

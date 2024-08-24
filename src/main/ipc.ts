@@ -13,9 +13,6 @@ import {
  * The main purpose of this class is to be the central
  * gathering place for IPC calls the main process sends
  * or listens to.
- *
- * @class IpcManager
- * @extends {EventEmitter}
  */
 class IpcMainManager extends EventEmitter {
   public readyWebContents = new WeakSet<Electron.WebContents>();
@@ -50,10 +47,6 @@ class IpcMainManager extends EventEmitter {
   /**
    * Send an IPC message to an instance of Electron.WebContents.
    * If none is specified, we'll automatically go with the main window.
-   *
-   * @param {IpcEvents} channel
-   * @param {Array<any>} [args]
-   * @param {Electron.WebContents} [target]
    */
   public send(
     channel: IpcEvents,

@@ -55,10 +55,6 @@ export class FileManager {
 
   /**
    * Tries to open a fiddle.
-   *
-   * @param {string} filePath
-   * @param {Record<string, string>} files
-   * @memberof FileManager
    */
   public async openFiddle(filePath: string, files: Record<string, string>) {
     const { app } = window;
@@ -122,11 +118,6 @@ export class FileManager {
 
   /**
    * Get files to save, but with a transform applied
-   *
-   * @param {PackageJsonOptions} [options]
-   * @param {Array<FileTransformOperation>} [transforms]
-   * @returns {Promise<{ localPath: string; files: Files }>}
-   * @memberof FileManager
    */
   public async getFiles(
     options?: PackageJsonOptions,
@@ -166,10 +157,6 @@ export class FileManager {
   /**
    * Save the current project to a temporary directory. Returns the
    * path to the temp directory.
-   *
-   * @param {PackageJsonOptions} options
-   * @param {Array<FileTransformOperation>} [transforms]
-   * @returns {Promise<string>}
    */
   public async saveToTemp(
     options: PackageJsonOptions,
