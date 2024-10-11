@@ -26,6 +26,6 @@ jobs:
       - name: test
         run: yarn test:ci
       - name: Coveralls
-        uses: coverallsapp/github-action@643bc377ffa44ace6394b2b5d0d3950076de9f63 # v2.3.0
+        uses: coverallsapp/github-action@1134c89e4bf10443bf8f0ec69640b667cfd91041 # v2.3.1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
