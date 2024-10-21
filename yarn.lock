@@ -2577,13 +2577,6 @@
     "@types/scheduler" "*"
     csstype "^3.0.2"
 
-"@types/recursive-readdir@^2.2.0":
-  version "2.2.1"
-  resolved "https://registry.npmjs.org/@types/recursive-readdir/-/recursive-readdir-2.2.1.tgz"
-  integrity sha512-Xd+Ptc4/F2ueInqy5yK2FI5FxtwwbX2+VZpcg+9oYsFJVen8qQKGapCr+Bi5wQtHU1cTXT8s+07lo/nKPgu8Gg==
-  dependencies:
-    "@types/node" "*"
-
 "@types/responselike@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@types/responselike/-/responselike-1.0.0.tgz#251f4fe7d154d2bad125abe1b429b23afd262e29"
@@ -10218,13 +10211,6 @@ rechoir@^0.8.0:
   integrity sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ==
   dependencies:
     resolve "^1.20.0"
-
-recursive-readdir@^2.2.2:
-  version "2.2.3"
-  resolved "https://registry.npmjs.org/recursive-readdir/-/recursive-readdir-2.2.3.tgz"
-  integrity sha512-8HrF5ZsXk5FAH9dgsx3BlUer73nIhuj+9OrQwEbLTPOBzGkL1lsFCR01am+v+0m2Cmbs1nP12hLDl5FA7EszKA==
-  dependencies:
-    minimatch "^3.0.5"
 
 redent@^3.0.0:
   version "3.0.0"

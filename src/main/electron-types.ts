@@ -1,3 +1,4 @@
+import { readdir } from 'fs/promises';
 import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
@@ -5,7 +6,6 @@ import { BrowserWindow, IpcMainEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 import watch from 'node-watch';
 import packageJson from 'package-json';
-import readdir from 'recursive-readdir';
 import semver from 'semver';
 
 import { ipcMainManager } from './ipc';
@@ -123,11 +123,13 @@ export class ElectronTypes {
     const types: NodeTypes = {};
 
     try {
-      const files = (await readdir(dir)).filter((f) => f.endsWith('.d.ts'));
+      const files = (await readdir(dir, { recursive: true })).filter((f) =>
+        f.endsWith('.d.ts'),
+      );
 
       for (const file of files) {
         types[path.relative(dir, file) as keyof NodeTypes] = await fs.readFile(
-          file,
+          path.join(dir, file),
           'utf8',
         );
       }
