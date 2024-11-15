@@ -15,6 +15,7 @@ import {
   PACKAGE_NAME,
   PackageJsonOptions,
   SetFiddleOptions,
+  Version,
 } from '../interfaces';
 import { defaultDark, defaultLight } from '../themes-defaults';
 
@@ -137,6 +138,7 @@ export class App {
     this.setupTitleListeners();
     this.setupUnloadListeners();
     this.setupTypeListeners();
+    this.setupProtocolListeners();
 
     window.ElectronFiddle.sendReady();
 
@@ -309,5 +311,21 @@ export class App {
         e.returnValue = false;
       };
     });
+  }
+
+  public setupProtocolListeners() {
+    window.ElectronFiddle.addEventListener(
+      'register-local-version',
+      ({ name, path, version }) => {
+        const toAdd: Version = {
+          localPath: path,
+          version,
+          name,
+        };
+
+        this.state.addLocalVersion(toAdd);
+        this.state.setVersion(version);
+      },
+    );
   }
 }

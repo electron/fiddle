@@ -1,10 +1,9 @@
 import * as path from 'node:path';
 
-import { Installer } from '@electron/fiddle-core';
 import { BrowserWindow, dialog } from 'electron';
-import * as fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
+import { isValidElectronPath } from './utils/local-version';
 import { SelectedLocalVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
@@ -29,14 +28,6 @@ function makeLocalName(folderPath: string): string {
     .slice(1)
     .join(path.sep);
   return `${leader} - ${buildType}`;
-}
-
-/**
- * Verifies if the local electron path is valid
- */
-function isValidElectronPath(folderPath: string): boolean {
-  const execPath = Installer.getExecPath(folderPath);
-  return fs.existsSync(execPath);
 }
 
 /**
