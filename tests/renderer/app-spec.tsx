@@ -379,6 +379,36 @@ describe('App component', () => {
     });
   });
 
+  describe('setupProtocolListeners()', () => {
+    it('handles registering new versions', () => {
+      const addEventListenerMock = window.ElectronFiddle
+        .addEventListener as any;
+      addEventListenerMock.mockClear();
+
+      app.setupProtocolListeners();
+
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'register-local-version',
+        expect.anything(),
+      );
+
+      const callback = addEventListenerMock.mock.calls[0][1];
+      const addVersion = {
+        name: 'new-version',
+        path: '/version/build/path',
+        version: '123.0.0-local',
+      };
+      callback(addVersion);
+
+      expect(app.state.addLocalVersion).toHaveBeenCalledWith({
+        name: addVersion.name,
+        localPath: addVersion.path,
+        version: addVersion.version,
+      });
+      expect(app.state.setVersion).toHaveBeenCalledWith(addVersion.version);
+    });
+  });
+
   describe('prompting to confirm replacing an unsaved fiddle', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
