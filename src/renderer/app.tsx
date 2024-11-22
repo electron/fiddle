@@ -316,7 +316,13 @@ export class App {
   public setupProtocolListeners() {
     window.ElectronFiddle.addEventListener(
       'register-local-version',
-      ({ name, path, version }) => {
+      async ({ name, path, version }) => {
+        const confirm = await this.state.showConfirmDialog({
+          label: `Are you sure you want to register "${path}" with version "${version}"? Only register and run it if you trust the source.`,
+          ok: 'Register',
+        });
+        if (!confirm) return;
+
         const toAdd: Version = {
           localPath: path,
           version,
