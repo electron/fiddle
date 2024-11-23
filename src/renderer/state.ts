@@ -4,6 +4,7 @@ import {
   computed,
   makeObservable,
   observable,
+  runInAction,
   when,
 } from 'mobx';
 
@@ -975,12 +976,34 @@ export class AppState {
   public async showGenericDialog(
     opts: GenericDialogOptions,
   ): Promise<{ confirm: boolean; input: string }> {
-    this.genericDialogLastResult = null;
-    this.genericDialogOptions = opts;
-    this.isGenericDialogShowing = true;
+    // Wait for any existing dialog to be closed and cleaned up.
+    await when(() => {
+      if (
+        !this.isGenericDialogShowing &&
+        this.genericDialogLastResult === null
+      ) {
+        // Set dialog immediately to prevent any other queued dialogs from
+        // showing.
+        runInAction(() => {
+          this.genericDialogOptions = opts;
+          this.isGenericDialogShowing = true;
+        });
+        return true;
+      }
+      return false;
+    });
+
+    // Wait for dialog to be closed.
     await when(() => !this.isGenericDialogShowing);
+
+    // Cleanup to allow queued dialog to show.
+    const result = this.genericDialogLastResult;
+    runInAction(() => {
+      this.genericDialogLastResult = null;
+    });
+
     return {
-      confirm: Boolean(this.genericDialogLastResult),
+      confirm: Boolean(result),
       input: this.genericDialogLastInput || opts.defaultInput || '',
     };
   }
