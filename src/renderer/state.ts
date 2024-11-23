@@ -996,16 +996,16 @@ export class AppState {
     // Wait for dialog to be closed.
     await when(() => !this.isGenericDialogShowing);
 
+    const confirm = Boolean(this.genericDialogLastResult);
+    const input = this.genericDialogLastInput || opts.defaultInput || '';
+
     // Cleanup to allow queued dialog to show.
-    const result = this.genericDialogLastResult;
     runInAction(() => {
       this.genericDialogLastResult = null;
+      this.genericDialogLastInput = null;
     });
 
-    return {
-      confirm: Boolean(result),
-      input: this.genericDialogLastInput || opts.defaultInput || '',
-    };
+    return { confirm, input };
   }
 
   public async showInputDialog(opts: {
