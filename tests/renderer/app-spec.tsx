@@ -273,24 +273,6 @@ describe('App component', () => {
   });
 
   describe('setupThemeListeners()', () => {
-    const addEventListenerMock = jest.fn();
-    beforeEach(() => {
-      // matchMedia mock
-      Object.defineProperty(window, 'matchMedia', {
-        writable: true,
-        value: jest.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addListener: jest.fn(), // Deprecated
-          removeListener: jest.fn(), // Deprecated
-          addEventListener: addEventListenerMock,
-          removeEventListener: jest.fn(),
-          dispatchEvent: jest.fn(),
-        })),
-      });
-    });
-
     describe('isUsingSystemTheme reaction', () => {
       beforeEach(() => {
         window.ElectronFiddle.setNativeTheme = jest.fn();
@@ -336,32 +318,40 @@ describe('App component', () => {
 
     describe('prefers-color-scheme event listener', () => {
       it('adds an event listener to the "change" event', () => {
+        const spy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        expect(addEventListenerMock).toHaveBeenCalledWith(
+        const { addEventListener } = spy.mock.results[0].value;
+        expect(addEventListener).toHaveBeenCalledWith(
           'change',
           expect.anything(),
         );
       });
 
       it('does nothing if not isUsingSystemTheme', () => {
+        const spy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const callback = addEventListenerMock.mock.calls[0][1];
+        const { addEventListener } = spy.mock.results[0].value;
+        const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = false;
         callback({ matches: true });
         expect(app.state.setTheme).not.toHaveBeenCalled();
       });
 
       it('sets dark theme if isUsingSystemTheme and prefers dark', () => {
+        const spy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const callback = addEventListenerMock.mock.calls[0][1];
+        const { addEventListener } = spy.mock.results[0].value;
+        const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
         callback({ matches: true });
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
       });
 
       it('sets light theme if isUsingSystemTheme and not prefers dark', () => {
+        const spy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const callback = addEventListenerMock.mock.calls[0][1];
+        const { addEventListener } = spy.mock.results[0].value;
+        const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
         callback({ matches: false });
         expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);

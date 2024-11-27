@@ -173,26 +173,20 @@ export class App {
         if (this.state.isUsingSystemTheme) {
           window.ElectronFiddle.setNativeTheme('system');
 
-          if (!!window.matchMedia) {
-            const { matches } = window.matchMedia(
-              '(prefers-color-scheme: dark)',
-            );
-            setSystemTheme(matches);
-          }
+          const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
+          setSystemTheme(matches);
         }
       },
     );
 
     // change theme when system theme changes
-    if (!!window.matchMedia) {
-      window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', ({ matches }) => {
-          if (this.state.isUsingSystemTheme) {
-            setSystemTheme(matches);
-          }
-        });
-    }
+    window
+      .matchMedia('(prefers-color-scheme: dark)')
+      .addEventListener('change', ({ matches }) => {
+        if (this.state.isUsingSystemTheme) {
+          setSystemTheme(matches);
+        }
+      });
   }
 
   /**
