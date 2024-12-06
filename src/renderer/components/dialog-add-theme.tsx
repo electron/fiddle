@@ -4,7 +4,7 @@ import { Button, Dialog, FileInput } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 
-import { FiddleTheme, defaultDark } from '../../themes-defaults';
+import { FiddleTheme } from '../../themes-defaults';
 import { AppState } from '../state';
 import { getTheme } from '../themes';
 
@@ -52,9 +52,7 @@ export const AddThemeDialog = observer(
       const { file } = this.state;
       const { appState } = this.props;
 
-      const defaultTheme = !!appState.theme
-        ? await getTheme(appState.theme)
-        : defaultDark;
+      const defaultTheme = await getTheme(appState, appState.theme);
 
       if (!file) return;
 

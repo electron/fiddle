@@ -737,8 +737,8 @@ export class AppState {
     this.resetView({ isTourShowing: true });
   }
 
-  public setTheme(fileName?: string) {
-    this.theme = fileName || '';
+  public setTheme(fileName: string | null) {
+    this.theme = fileName;
     window.app.loadTheme(this.theme);
   }
 

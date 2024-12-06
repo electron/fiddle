@@ -11,7 +11,7 @@ import {
   openThemeFolder,
   readThemeFile,
 } from '../../src/main/themes';
-import { DefaultThemes, LoadedFiddleTheme } from '../../src/themes-defaults';
+import { LoadedFiddleTheme, defaultDark } from '../../src/themes-defaults';
 
 jest.mock('fs-extra');
 
@@ -82,21 +82,6 @@ describe('themes', () => {
   });
 
   describe('readThemeFile()', () => {
-    it('returns the default (light) theme', async () => {
-      const theme = await readThemeFile(DefaultThemes.LIGHT);
-      expect(theme!.name).toBe('Fiddle (Light)');
-    });
-
-    it('returns the default (Dark) theme', async () => {
-      const theme = await readThemeFile(DefaultThemes.DARK);
-      expect(theme!.name).toBe('Fiddle (Dark)');
-    });
-
-    it('returns the default (Dark) theme if no name provided', async () => {
-      const theme = await readThemeFile();
-      expect(theme!.name).toBe('Fiddle (Dark)');
-    });
-
     it('reads the right file if ends with .json', async () => {
       (fs.readJSON as jest.Mock).mockResolvedValueOnce({});
 
@@ -122,12 +107,7 @@ describe('themes', () => {
     let defaultTheme: LoadedFiddleTheme;
 
     beforeEach(async () => {
-      const theme = await readThemeFile();
-      if (theme) {
-        defaultTheme = theme;
-      } else {
-        fail('Error loading default theme');
-      }
+      defaultTheme = defaultDark;
     });
 
     it('filters out file and css keys', async () => {
