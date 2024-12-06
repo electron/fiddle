@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 
 import { VersionChooser } from '../../src/renderer/components/commands-version-chooser';
 import { AppState } from '../../src/renderer/state';
