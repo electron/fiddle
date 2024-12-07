@@ -154,7 +154,7 @@ declare global {
       pathExists(path: string): boolean;
       platform: string;
       pushOutputEntry(entry: OutputEntry): void;
-      readThemeFile(name?: string): Promise<LoadedFiddleTheme | null>;
+      readThemeFile(name: string): Promise<LoadedFiddleTheme | null>;
       reloadWindows(): void;
       removeAllListeners(type: FiddleEvent): void;
       removeVersion(version: string): Promise<InstallState>;

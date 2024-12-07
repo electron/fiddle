@@ -208,6 +208,12 @@ describe('App component', () => {
 
   describe('loadTheme()', () => {
     it(`adds the current theme's css to the document`, async () => {
+      window.app.state.isUsingSystemTheme = true;
+
+      mocked(window.matchMedia).mockReturnValueOnce({
+        matches: true,
+      } as MediaQueryList);
+
       document.head!.innerHTML = "<style id='fiddle-theme'></style>";
 
       await app.loadTheme('');
@@ -278,14 +284,17 @@ describe('App component', () => {
         window.ElectronFiddle.setNativeTheme = jest.fn();
       });
 
-      it('ignores system theme changes when not isUsingSystemTheme', () => {
+      it('loads the set theme when not isUsingSystemTheme', () => {
+        const spy = jest.spyOn(app, 'loadTheme');
+        app.state.theme = 'defaultDark';
         app.state.isUsingSystemTheme = true;
         app.setupThemeListeners();
         app.state.isUsingSystemTheme = false;
-        expect(app.state.setTheme).not.toHaveBeenCalled();
+        expect(spy).toHaveBeenCalledWith(defaultDark.file);
       });
 
-      it('sets theme according to system when isUsingSystemTheme', () => {
+      it('loads theme according to system when isUsingSystemTheme', () => {
+        const spy = jest.spyOn(app, 'loadTheme');
         app.setupThemeListeners();
 
         // isUsingSystemTheme and prefersDark
@@ -294,7 +303,7 @@ describe('App component', () => {
           matches: true,
         } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
-        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+        expect(spy).toHaveBeenLastCalledWith(defaultDark.file);
 
         // isUsingSystemTheme and not prefersDark
         app.state.isUsingSystemTheme = false;
@@ -302,7 +311,7 @@ describe('App component', () => {
           matches: false,
         } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
-        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+        expect(spy).toHaveBeenLastCalledWith(defaultLight.file);
       });
 
       it('sets native theme to system', () => {
@@ -328,33 +337,36 @@ describe('App component', () => {
       });
 
       it('does nothing if not isUsingSystemTheme', () => {
-        const spy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const { addEventListener } = spy.mock.results[0].value;
+        const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = false;
+        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
         callback({ matches: true });
-        expect(app.state.setTheme).not.toHaveBeenCalled();
+        expect(loadThemeSpy).not.toHaveBeenCalled();
       });
 
       it('sets dark theme if isUsingSystemTheme and prefers dark', () => {
-        const spy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const { addEventListener } = spy.mock.results[0].value;
+        const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
+        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
         callback({ matches: true });
-        expect(app.state.setTheme).toHaveBeenCalledWith(defaultDark.file);
+        expect(loadThemeSpy).toHaveBeenCalledWith(defaultDark.file);
       });
 
       it('sets light theme if isUsingSystemTheme and not prefers dark', () => {
-        const spy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
-        const { addEventListener } = spy.mock.results[0].value;
+        const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
+        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
         callback({ matches: false });
-        expect(app.state.setTheme).toHaveBeenCalledWith(defaultLight.file);
+        expect(loadThemeSpy).toHaveBeenCalledWith(defaultLight.file);
       });
     });
   });
