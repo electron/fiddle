@@ -1,4 +1,4 @@
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { MosaicContext, MosaicWindowContext } from 'react-mosaic-component';
 
 import { EditorId, MAIN_JS } from '../../src/interfaces';
