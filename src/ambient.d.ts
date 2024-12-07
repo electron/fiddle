@@ -75,6 +75,14 @@ declare global {
         listener: (name: string, editorValues: EditorValues) => void,
       ): void;
       addEventListener(
+        type: 'register-local-version',
+        listener: (info: {
+          name: string;
+          path: string;
+          version: string;
+        }) => void,
+      ): void;
+      addEventListener(
         type: 'saved-local-fiddle',
         listener: (filePath: string) => void,
       ): void;

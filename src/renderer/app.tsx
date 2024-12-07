@@ -15,6 +15,7 @@ import {
   PACKAGE_NAME,
   PackageJsonOptions,
   SetFiddleOptions,
+  Version,
 } from '../interfaces';
 import { defaultDark, defaultLight } from '../themes-defaults';
 
@@ -137,6 +138,7 @@ export class App {
     this.setupTitleListeners();
     this.setupUnloadListeners();
     this.setupTypeListeners();
+    this.setupProtocolListeners();
 
     window.ElectronFiddle.sendReady();
 
@@ -303,5 +305,27 @@ export class App {
         e.returnValue = false;
       };
     });
+  }
+
+  public setupProtocolListeners() {
+    window.ElectronFiddle.addEventListener(
+      'register-local-version',
+      async ({ name, path, version }) => {
+        const confirm = await this.state.showConfirmDialog({
+          label: `Are you sure you want to register "${path}" with version "${version}"? Only register and run it if you trust the source.`,
+          ok: 'Register',
+        });
+        if (!confirm) return;
+
+        const toAdd: Version = {
+          localPath: path,
+          version,
+          name,
+        };
+
+        this.state.addLocalVersion(toAdd);
+        this.state.setVersion(version);
+      },
+    );
   }
 }
