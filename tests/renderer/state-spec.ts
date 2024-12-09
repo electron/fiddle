@@ -500,9 +500,9 @@ describe('AppState', () => {
     });
 
     it('handles a missing theme name', () => {
-      appState.setTheme();
+      appState.setTheme(null);
 
-      expect(appState.theme).toBe('');
+      expect(appState.theme).toBe(null);
       expect(window.app.loadTheme).toHaveBeenCalledTimes(1);
     });
   });

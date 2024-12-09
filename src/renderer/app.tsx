@@ -1,12 +1,13 @@
 import { autorun, reaction, when } from 'mobx';
 
+import { PREFERS_DARK_MEDIA_QUERY } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
 import { TaskRunner } from './task-runner';
-import { activateTheme, getTheme } from './themes';
+import { activateTheme, getCurrentTheme, getTheme } from './themes';
 import { getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
 import {
@@ -101,7 +102,11 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void | Element | React.Component> {
-    await this.loadTheme(this.state.theme || '');
+    if (this.state.isUsingSystemTheme) {
+      await this.loadTheme(getCurrentTheme().file);
+    } else {
+      await this.loadTheme(this.state.theme);
+    }
 
     const [
       { default: React },
@@ -158,33 +163,25 @@ export class App {
   }
 
   public async setupThemeListeners() {
-    const setSystemTheme = (prefersDark: boolean) => {
-      if (prefersDark) {
-        this.state.setTheme(defaultDark.file);
-      } else {
-        this.state.setTheme(defaultLight.file);
-      }
-    };
-
     // match theme to system when box is ticked
     reaction(
       () => this.state.isUsingSystemTheme,
       () => {
         if (this.state.isUsingSystemTheme) {
           window.ElectronFiddle.setNativeTheme('system');
-
-          const { matches } = window.matchMedia('(prefers-color-scheme: dark)');
-          setSystemTheme(matches);
+          this.loadTheme(getCurrentTheme().file);
+        } else {
+          this.loadTheme(this.state.theme);
         }
       },
     );
 
     // change theme when system theme changes
     window
-      .matchMedia('(prefers-color-scheme: dark)')
-      .addEventListener('change', ({ matches }) => {
+      .matchMedia(PREFERS_DARK_MEDIA_QUERY)
+      .addEventListener('change', ({ matches: prefersDark }) => {
         if (this.state.isUsingSystemTheme) {
-          setSystemTheme(matches);
+          this.loadTheme((prefersDark ? defaultDark : defaultLight).file);
         }
       });
   }
@@ -209,10 +206,10 @@ export class App {
   /**
    * Loads theme CSS into the HTML document.
    */
-  public async loadTheme(name: string): Promise<void> {
+  public async loadTheme(name: string | null): Promise<void> {
     const tag: HTMLStyleElement | null =
       document.querySelector('style#fiddle-theme');
-    const theme = await getTheme(name);
+    const theme = await getTheme(this.state, name);
     activateTheme(theme);
 
     if (tag && theme.css) {

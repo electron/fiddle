@@ -13,7 +13,7 @@ import { observer } from 'mobx-react';
 
 import { LoadedFiddleTheme } from '../../themes-defaults';
 import { AppState } from '../state';
-import { getTheme } from '../themes';
+import { getCurrentTheme, getTheme } from '../themes';
 import { highlightText } from '../utils/highlight-text';
 
 const ThemeSelect = Select.ofType<LoadedFiddleTheme>();
@@ -86,7 +86,8 @@ export const AppearanceSettings = observer(
       window.ElectronFiddle.getAvailableThemes().then((themes) => {
         const { theme } = this.props.appState;
         const selectedTheme =
-          (theme && themes.find(({ file }) => file === theme)) || themes[0];
+          (theme && themes.find(({ file }) => file === theme)) ||
+          getCurrentTheme();
 
         this.setState({ themes, selectedTheme });
 
@@ -94,7 +95,10 @@ export const AppearanceSettings = observer(
         reaction(
           () => this.props.appState.theme,
           async () => {
-            const selectedTheme = await getTheme(this.props.appState.theme);
+            const selectedTheme = await getTheme(
+              this.props.appState,
+              this.props.appState.theme,
+            );
             this.setState({ selectedTheme });
           },
         );
@@ -119,7 +123,7 @@ export const AppearanceSettings = observer(
      */
     public async createNewThemeFromCurrent(): Promise<boolean> {
       const { appState } = this.props;
-      const theme = await getTheme(appState.theme);
+      const theme = await getTheme(appState, appState.theme);
 
       try {
         await window.ElectronFiddle.createThemeFile(theme);
@@ -172,8 +176,7 @@ export const AppearanceSettings = observer(
     public render() {
       const { selectedTheme } = this.state;
       const { isUsingSystemTheme } = this.props.appState;
-      const selectedName =
-        (selectedTheme && selectedTheme.name) || 'Select a theme';
+      const selectedName = selectedTheme?.name || 'Select a theme';
 
       return (
         <div className="settings-appearance">
