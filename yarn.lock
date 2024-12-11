@@ -1164,9 +1164,9 @@
     vscode-languageserver-textdocument "^1.0.8"
     vscode-uri "^3.0.7"
 
-"@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2":
+"@electron/node-gyp@https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2":
   version "10.2.0-electron.1"
-  resolved "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
+  resolved "https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2"
   dependencies:
     env-paths "^2.2.0"
     exponential-backoff "^3.1.1"
@@ -5142,10 +5142,10 @@ electron-winstaller@^5.3.0:
   optionalDependencies:
     "@electron/windows-sign" "^1.1.2"
 
-electron@31.1.0:
-  version "31.1.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-31.1.0.tgz#2836dbeb8f80c9b278aa4563c8fc3a6e6afbe723"
-  integrity sha512-TBOwqLxSxnx6+pH6GMri7R3JPH2AkuGJHfWZS0p1HsmN+Qr1T9b0IRJnnehSd/3NZAmAre4ft9Ljec7zjyKFJA==
+electron@33.3.0:
+  version "33.3.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-33.3.0.tgz#5ae603818820c2a29736ed924d32bf18d31a9f63"
+  integrity sha512-316ZlFUHJmzGrhRj87tVStxyYvknDqVR9eYSsGKAHY7auhVWFLIcPPGxcnbD/H1mez8CpDjXvEjcz76zpWxsXw==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"
