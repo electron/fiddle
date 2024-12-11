@@ -16,6 +16,9 @@ import {
 import { getOrCreateMainWindow, mainIsReady } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
+type OpenUrlCallback = (event: object, url: string) => void;
+type SecondInstanceCallback = (event: object, argv: string[]) => void;
+
 jest.mock('node:fs');
 
 describe('protocol', () => {
@@ -49,7 +52,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[1][1];
+      const handler: SecondInstanceCallback = mocked(app.on).mock.calls[1][1];
 
       handler({}, ['electron-fiddle://gist/hi']);
       expect(ipcMainManager.send).toHaveBeenCalledWith(
@@ -63,7 +66,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/hi');
       expect(ipcMainManager.send).toHaveBeenCalledWith(
@@ -77,7 +80,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/username/gistID');
       expect(ipcMainManager.send).toHaveBeenCalledWith(
@@ -91,7 +94,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://noop');
       handler({}, 'electron-fiddle://gist/noop/noop/null');
@@ -117,7 +120,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://gist/hi-ready');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -138,7 +141,7 @@ describe('protocol', () => {
       // electron-fiddle://electron/{tag}/{path}
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
@@ -156,7 +159,7 @@ describe('protocol', () => {
     it('handles a flawed electron path url', () => {
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://electron/v4.0.0');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -165,7 +168,7 @@ describe('protocol', () => {
     it('handles a flawed url (unclear instruction)', () => {
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://noop/123');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -174,7 +177,7 @@ describe('protocol', () => {
     it('handles a flawed url (no instruction)', () => {
       listenForProtocolHandler();
 
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -185,7 +188,7 @@ describe('protocol', () => {
       listenForProtocolHandler();
 
       const mainWindow = await getOrCreateMainWindow();
-      const handler = mocked(app.on).mock.calls[0][1];
+      const handler: OpenUrlCallback = mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
