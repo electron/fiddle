@@ -147,7 +147,7 @@ jobs:
         type: enum
         enum: [ 'x64', 'arm64','armv7l' ]
     executor: node/linux
-    resource_class: medium+
+    resource_class: large
     steps:
       - run: sudo apt-get update && sudo apt install rpm squashfs-tools
       - install
