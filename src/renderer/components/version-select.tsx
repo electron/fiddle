@@ -8,8 +8,8 @@ import {
   Intent,
   Menu,
   MenuItem,
-  Tooltip,
 } from '@blueprintjs/core';
+import { Tooltip2 } from '@blueprintjs/popover2';
 import {
   ItemListPredicate,
   ItemListRenderer,
@@ -178,7 +178,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
 
   if (disableDownload(item.version)) {
     return (
-      <Tooltip
+      <Tooltip2
         className="disabled-menu-tooltip"
         modifiers={{
           flip: { enabled: false },
@@ -197,7 +197,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           label={getItemLabel(item)}
           icon={getItemIcon(item)}
         />
-      </Tooltip>
+      </Tooltip2>
     );
   }
 
