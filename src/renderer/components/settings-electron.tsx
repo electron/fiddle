@@ -12,8 +12,8 @@ import {
   Icon,
   IconName,
   Spinner,
-  Tooltip,
 } from '@blueprintjs/core';
+import { Tooltip2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
 
 import {
@@ -238,7 +238,7 @@ export const ElectronSettings = observer(
       return (
         <FormGroup label="Channels:">
           {Object.values(channels).map((channel) => (
-            <Tooltip
+            <Tooltip2
               content={`Can't disable channel of selected version (${appState.version})`}
               disabled={!getIsCurrentVersionReleaseChannel(channel)}
               position="bottom"
@@ -253,9 +253,9 @@ export const ElectronSettings = observer(
                 disabled={getIsCurrentVersionReleaseChannel(channel)}
                 inline={true}
               />
-            </Tooltip>
+            </Tooltip2>
           ))}
-          <Tooltip
+          <Tooltip2
             content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
             position="bottom"
             intent="primary"
@@ -267,7 +267,7 @@ export const ElectronSettings = observer(
               label="Obsolete"
               onChange={this.handleShowObsoleteChange}
             />
-          </Tooltip>
+          </Tooltip2>
         </FormGroup>
       );
     }
@@ -371,7 +371,7 @@ export const ElectronSettings = observer(
 
       if (version === appState.currentElectronVersion.version) {
         return (
-          <Tooltip
+          <Tooltip2
             position="auto"
             intent="primary"
             content={`Can't remove currently active Electron version (${version})`}
@@ -382,11 +382,11 @@ export const ElectronSettings = observer(
               text={buttonProps.text}
               icon={buttonProps.icon}
             />
-          </Tooltip>
+          </Tooltip2>
         );
       } else if (disableDownload(version)) {
         return (
-          <Tooltip
+          <Tooltip2
             position="auto"
             intent="primary"
             content={`Version is not available on your current OS`}
@@ -397,7 +397,7 @@ export const ElectronSettings = observer(
               text={buttonProps.text}
               icon={buttonProps.icon}
             />
-          </Tooltip>
+          </Tooltip2>
         );
       }
 

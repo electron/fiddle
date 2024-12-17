@@ -11,7 +11,7 @@ exports[`ElectronSettings component renders 1`] = `
     <Blueprint3.FormGroup
       label="Channels:"
     >
-      <Blueprint3.Tooltip
+      <Blueprint3.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={false}
         hoverCloseDelay={0}
@@ -30,8 +30,8 @@ exports[`ElectronSettings component renders 1`] = `
           label="Stable"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Tooltip
+      </Blueprint3.Tooltip2>
+      <Blueprint3.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={true}
         hoverCloseDelay={0}
@@ -50,8 +50,8 @@ exports[`ElectronSettings component renders 1`] = `
           label="Beta"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Tooltip
+      </Blueprint3.Tooltip2>
+      <Blueprint3.Tooltip2
         content="Can't disable channel of selected version (2.0.1)"
         disabled={true}
         hoverCloseDelay={0}
@@ -70,8 +70,8 @@ exports[`ElectronSettings component renders 1`] = `
           label="Nightly"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
-      <Blueprint3.Tooltip
+      </Blueprint3.Tooltip2>
+      <Blueprint3.Tooltip2
         content="Include versions that have reached end-of-life (older than 9.0.0)"
         hoverCloseDelay={0}
         hoverOpenDelay={100}
@@ -87,7 +87,7 @@ exports[`ElectronSettings component renders 1`] = `
           label="Obsolete"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip>
+      </Blueprint3.Tooltip2>
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
   <br />
@@ -281,7 +281,7 @@ exports[`ElectronSettings component renders 1`] = `
           <td
             className="action"
           >
-            <Blueprint3.Tooltip
+            <Blueprint3.Tooltip2
               content="Can't remove currently active Electron version (2.0.1)"
               hoverCloseDelay={0}
               hoverOpenDelay={100}
@@ -296,7 +296,7 @@ exports[`ElectronSettings component renders 1`] = `
                 icon="cloud-download"
                 text="Download"
               />
-            </Blueprint3.Tooltip>
+            </Blueprint3.Tooltip2>
           </td>
         </tr>
         <tr

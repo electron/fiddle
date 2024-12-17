@@ -6,10 +6,10 @@ import {
   IToastProps,
   Menu,
   MenuItem,
-  Popover,
   Position,
   Toaster,
 } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
@@ -396,9 +396,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={menu} position={Position.BOTTOM}>
+        <Popover2 content={menu} position={Position.BOTTOM}>
           <Button icon="wrench" />
-        </Popover>
+        </Popover2>
       );
     };
 
@@ -429,9 +429,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={privacyMenu} position={Position.BOTTOM}>
+        <Popover2 content={privacyMenu} position={Position.BOTTOM}>
           <Button icon={privacyIcon} />
-        </Popover>
+        </Popover2>
       );
     };
 
