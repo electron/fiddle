@@ -60,7 +60,17 @@ export function getWelcomeTour(): Set<TourScriptStep> {
       name: 'button-run',
       selector: '#button-run',
       title: '🚀 Run Your Fiddle',
-      content: <p>Hit this button to give your Fiddle a try and start it.</p>,
+      content: (
+        <>
+          <p>Hit this button to give your Fiddle a try and start it.</p>
+          <p>
+            When your Fiddle starts, it will create a user data directory for
+            cookies, the cache, and a few other things. We delete this directory
+            by default when you exit the Fiddle, but you can change this in
+            Settings.
+          </p>
+        </>
+      ),
     },
     {
       name: 'button-action',
