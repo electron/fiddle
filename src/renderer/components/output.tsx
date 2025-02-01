@@ -91,6 +91,23 @@ export const Output = observer(
             openerService: this.openerService(),
           },
         );
+        if (this.editor) {
+          // Register Command (⌘) + K to clear the console on MacOs,
+          // Ctrl + K on other systems, such as Windows and Linux
+          this.editor.addCommand(
+            MonacoType.KeyMod.CtrlCmd | MonacoType.KeyCode.KEY_K,
+            () => {
+              if (this.model || this.props.appState.output.length > 0) {
+                this.props.appState.clearConsole();
+                this.outputRef.current?.scrollTo(0, 0);
+                this.props.appState.output.push({
+                  timeString: new Date().toLocaleTimeString(),
+                  text: '',
+                });
+              }
+            },
+          );
+        }
       }
     }
 
