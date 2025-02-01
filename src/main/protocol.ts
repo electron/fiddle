@@ -119,7 +119,7 @@ export const listenForProtocolHandler = () => {
   // pass protocol URL via npm start args in dev mode
   if (isDevMode() && process.env.npm_config_argv) {
     scanNpmArgv(process.env.npm_config_argv);
-  } else if (process.platform === 'win32') {
+  } else {
     scanArgv(process.argv);
   }
 };
