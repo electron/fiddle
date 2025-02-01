@@ -29,6 +29,7 @@ export const SHOW_ME_TEMPLATES: Templates = {
     Tray: 'Tray',
     utilityProcess: 'utilityProcess',
     WebContents: 'WebContents',
+    WebContentsView: 'WebContentsView',
     WebFrame: 'WebFrame',
   },
 };
