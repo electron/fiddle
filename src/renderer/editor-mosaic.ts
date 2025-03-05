@@ -83,6 +83,7 @@ export class EditorMosaic {
       addEditor: action,
       setEditorFromBackup: action,
       addNewFile: action,
+      renameFile: action,
     });
 
     // whenever the mosaics are changed,
@@ -289,6 +290,28 @@ export class EditorMosaic {
     }
 
     this.addFile(id, value);
+  }
+
+  /** Rename a file in the mosaic */
+  public renameFile(oldId: EditorId, newId: EditorId) {
+    if (!this.files.has(oldId)) {
+      throw new Error(`Cannot rename file "${oldId}": File doesn't exist`);
+    }
+
+    if (this.files.has(newId)) {
+      throw new Error(`Cannot rename file to "${newId}": File already exists`);
+    }
+
+    const entryPoint = this.mainEntryPointFile();
+
+    if (isMainEntryPoint(newId) && entryPoint !== oldId) {
+      throw new Error(
+        `Cannot rename file to "${newId}": Main entry point ${entryPoint} exists`,
+      );
+    }
+
+    this.addFile(newId, this.value(oldId).trim());
+    this.remove(oldId);
   }
 
   /** Get the contents of a single file. */

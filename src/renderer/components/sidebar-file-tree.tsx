@@ -206,10 +206,8 @@ export const SidebarFileTree = observer(
         return;
       }
 
-      const contents = appState.editorMosaic.value(editorId).trim();
       try {
-        appState.editorMosaic.addNewFile(id, contents);
-        appState.editorMosaic.remove(editorId);
+        appState.editorMosaic.renameFile(editorId, id);
 
         if (visible) appState.editorMosaic.show(id);
       } catch (err) {
