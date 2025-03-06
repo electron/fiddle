@@ -6,6 +6,10 @@
 
 // Override some of the colors
 .fiddle.bp3-dark {
+  .bp3-control input:focus ~ .bp3-control-indicator {
+    outline: @blue3 solid 2px;
+  }
+
   .bp3-menu,
   .bp3-popover .bp3-popover-content {
     background-color: @background-1;
@@ -26,6 +30,10 @@
   .bp3-button:hover,
   .bp3-button.bp3-minimal:hover {
     background-color: rgba(138, 155, 168, 0.15);
+  }
+
+  .bp3-button:focus{
+    outline: @blue3 solid 2px;
   }
 
   .bp3-menu-item.bp3-active.bp3-intent-primary {
