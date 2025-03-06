@@ -96,6 +96,10 @@ export const Output = observer(
           monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_K,
           () => {
             this.props.appState.clearConsole();
+            this.props.appState.output.push({
+              timeString: new Date().toLocaleTimeString(),
+              text: '',
+            });
           },
         );
       }
