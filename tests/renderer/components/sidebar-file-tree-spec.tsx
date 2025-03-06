@@ -103,6 +103,23 @@ describe('SidebarFileTree component', () => {
     );
   });
 
+  it('can rename one main entry point file to another main entry point file', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const EDITOR_NAME = MAIN_JS;
+    const EDITOR_NEW_NAME = MAIN_CJS;
+
+    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+
+    await instance.renameEditor(EDITOR_NAME);
+
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(undefined);
+    expect(editorMosaic.files.get(EDITOR_NEW_NAME)).toBe(
+      EditorPresence.Pending,
+    );
+  });
+
   it('fails if trying to rename an editor to package(-lock).json', async () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
     const instance: any = wrapper.instance();
@@ -153,7 +170,7 @@ describe('SidebarFileTree component', () => {
     await instance.renameEditor(TO_BE_NAMED);
 
     expect(store.showErrorDialog).toHaveBeenCalledWith(
-      `Cannot add file "${EDITOR_NEW_NAME}": File already exists`,
+      `Cannot rename file to "${EDITOR_NEW_NAME}": File already exists`,
     );
     expect(editorMosaic.files.get(TO_BE_NAMED)).toBe(EditorPresence.Pending);
   });
@@ -171,7 +188,7 @@ describe('SidebarFileTree component', () => {
     await instance.renameEditor(TO_BE_NAMED);
 
     expect(store.showErrorDialog).toHaveBeenCalledWith(
-      `Cannot add file "${EDITOR_NEW_NAME}": Main entry point ${MAIN_JS} exists`,
+      `Cannot rename file to "${EDITOR_NEW_NAME}": Main entry point ${MAIN_JS} exists`,
     );
     expect(editorMosaic.files.get(TO_BE_NAMED)).toBe(EditorPresence.Pending);
   });
