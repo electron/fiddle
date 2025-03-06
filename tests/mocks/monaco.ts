@@ -44,6 +44,12 @@ export class MonacoMock {
       },
     },
   };
+  public KeyMod = {
+    CtrlCmd: jest.fn(),
+  };
+  public KeyCode = {
+    KEY_K: jest.fn(),
+  };
 }
 
 export class MonacoEditorMock {
@@ -55,6 +61,7 @@ export class MonacoEditorMock {
   private model = new MonacoModelMock('', 'javascript');
   private scrollHeight = 0;
 
+  public addCommand = jest.fn();
   public dispose = jest.fn();
   public getAction = jest.fn(() => this.action);
   public getModel = jest.fn(() => this.model);
