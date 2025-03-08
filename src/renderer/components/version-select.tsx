@@ -256,7 +256,7 @@ export const VersionSelect = observer(
         >
           <Button
             id="version-chooser"
-            text={`Electron v${version}`}
+            text={version}
             icon={getItemIcon(currentVersion)}
             onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
               renderVersionContextMenu(e, version);
