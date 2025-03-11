@@ -13,7 +13,7 @@ exports[`Commands component renders when system is darwin 1`] = `
       <Blueprint3.Button
         icon="cog"
         onClick={[MockFunction]}
-        title="Setting"
+        title="Settings"
       />
     </Blueprint3.ControlGroup>
     <Blueprint3.ControlGroup
@@ -35,6 +35,7 @@ exports[`Commands component renders when system is darwin 1`] = `
         active={true}
         icon="console"
         text="Console"
+        title="Console"
       />
     </Blueprint3.ControlGroup>
   </div>
@@ -67,7 +68,7 @@ exports[`Commands component renders when system not is darwin 1`] = `
       <Blueprint3.Button
         icon="cog"
         onClick={[MockFunction]}
-        title="Setting"
+        title="Settings"
       />
     </Blueprint3.ControlGroup>
     <Blueprint3.ControlGroup
@@ -89,6 +90,7 @@ exports[`Commands component renders when system not is darwin 1`] = `
         active={true}
         icon="console"
         text="Console"
+        title="Console"
       />
     </Blueprint3.ControlGroup>
   </div>

@@ -100,3 +100,109 @@ header {
     margin: 0 10px;
   }
 }
+
+/* Responsive styles - medium screens */
+@media (max-width: 900px) {
+  .commands {
+    .address-bar {
+      width: 300px;
+      &.empty {
+        width: 250px;
+      }
+    }
+  }
+}
+
+/* Responsive styles - small screens */
+@media (max-width: 768px) {
+  .commands {
+    height: auto;
+    padding: 8px 5px;
+    overflow-x: auto;
+    
+    /* Hide text in buttons, only show icons */
+    .bp3-button .bp3-button-text {
+      display: none !important;
+    }
+    
+    /* Adjust buttons to be smaller and icon-only */
+    .bp3-button {
+      min-width: 32px !important;
+      padding: 5px !important;
+    }
+    
+    /* Make selects smaller */
+    select {
+      width: 70px;
+    }
+    
+    /* Adjust address bar width */
+    .address-bar {
+      width: 200px;
+      &.empty {
+        width: 150px;
+      }
+    }
+  }
+}
+
+/* Responsive styles - very small screens */
+@media (max-width: 480px) {
+  .commands {
+    padding: 5px 2px;
+    
+    & > div {
+      &:last-of-type {
+        margin-right: 2px;
+      }
+    }
+    
+    .bp3-control-group {
+      margin-right: 2px;
+    }
+    
+    /* Further reduce address bar width */
+    .address-bar {
+      width: 120px;
+      &.empty {
+        width: 100px;
+      }
+    }
+    
+    /* Hide the title on very small screens */
+    & > .title {
+      display: none;
+    }
+    
+    /* Make selects even smaller */
+    select {
+      width: 50px;
+      margin-left: 2px;
+      padding: 0 15px 0 5px;
+    }
+    
+    /* Make buttons more compact */
+    .bp3-button {
+      min-width: 28px !important;
+      padding: 3px !important;
+    }
+  }
+}
+
+/* Extremely small screens - stack components vertically if needed */
+@media (max-width: 380px) {
+  .commands {
+    flex-wrap: wrap;
+    justify-content: center;
+    
+    & > div {
+      margin: 2px 0;
+    }
+    
+    /* Let address bar take full width */
+    .address-bar {
+      width: 100%;
+      max-width: 200px;
+    }
+  }
+}

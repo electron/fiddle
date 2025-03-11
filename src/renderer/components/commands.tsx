@@ -49,7 +49,7 @@ export const Commands = observer(
             <ControlGroup fill={true} vertical={false}>
               <Button
                 icon="cog"
-                title="Setting"
+                title="Settings"
                 onClick={appState.toggleSettings}
               />
             </ControlGroup>
@@ -67,6 +67,7 @@ export const Commands = observer(
                 active={appState.isConsoleShowing}
                 icon="console"
                 text="Console"
+                title="Console"
                 onClick={appState.toggleConsole}
               />
             </ControlGroup>
