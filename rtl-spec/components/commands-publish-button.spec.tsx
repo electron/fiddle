@@ -75,6 +75,9 @@ describe('Action button component', () => {
     mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
+    window.ElectronFiddle.showWarningDialogToSetting = jest
+      .fn()
+      .mockResolvedValue(0);
   });
 
   function createActionButton() {
@@ -298,7 +301,9 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
+      expect(
+        window.ElectronFiddle.showWarningDialogToSetting,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Updating Fiddle Gist failed.'),
@@ -331,7 +336,9 @@ describe('Action button component', () => {
 
       await instance.performGistAction();
 
-      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
+      expect(
+        window.ElectronFiddle.showWarningDialogToSetting,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           detail: expect.stringContaining(errorMessage),
           message: expect.stringContaining('Deleting Fiddle Gist failed.'),

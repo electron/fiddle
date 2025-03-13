@@ -47,6 +47,18 @@ export function setupDialogs() {
     showWarningDialog(BrowserWindow.fromWebContents(event.sender)!, args);
   });
 
+  ipcMainManager.handle(IpcEvents.SHOW_WARNING_DIALOG, async (event, args) => {
+    const result = await dialog.showMessageBox(
+      BrowserWindow.fromWebContents(event.sender)!,
+      {
+        type: 'warning',
+        ...args,
+      },
+    );
+
+    return result.response; // Returns button index
+  });
+
   ipcMainManager.handle(
     IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
     async (event): Promise<SelectedLocalVersion | undefined> => {

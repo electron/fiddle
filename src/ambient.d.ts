@@ -34,6 +34,11 @@ declare global {
     app: App;
     monaco: typeof MonacoType;
     ElectronFiddle: {
+      showWarningDialogToSetting(arg0: {
+        message: string;
+        detail: string;
+        buttons: string[];
+      }): unknown;
       addEventListener(
         type: FiddleEvent,
         listener: () => void,

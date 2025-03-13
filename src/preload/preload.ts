@@ -229,6 +229,11 @@ export async function setupFiddleGlobal() {
     showWarningDialog(messageOptions: MessageOptions) {
       ipcRenderer.send(IpcEvents.SHOW_WARNING_DIALOG, messageOptions);
     },
+    showWarningDialogToSetting(
+      messageOptions: MessageOptions,
+    ): Promise<number> {
+      return ipcRenderer.invoke(IpcEvents.SHOW_WARNING_DIALOG, messageOptions);
+    },
     showWindow() {
       ipcRenderer.send(IpcEvents.SHOW_WINDOW);
     },

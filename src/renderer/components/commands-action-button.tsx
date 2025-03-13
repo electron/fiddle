@@ -156,14 +156,20 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not publish gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        // Used the new method that returns a Promise with the button index
+        const buttonIndex =
+          await window.ElectronFiddle.showWarningDialogToSetting({
+            message: `Publishing Fiddle to GitHub failed. Are you connected to the Internet? Your GitHub Tokens might have expired`,
+            detail: `GitHub encountered the following error: ${error.message}`,
+            buttons: ['Ok', 'Settings'],
+          });
 
-        return false;
+        // If Settings button was clicked (index 1)
+        if (buttonIndex === 1) {
+          this.props.appState.toggleSettings();
+        }
       }
+      return false;
     }
 
     /**
@@ -230,14 +236,17 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not update gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-          buttons: ['Ok'],
-        });
-      }
+        const buttonIndex =
+          await window.ElectronFiddle.showWarningDialogToSetting({
+            message: `Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist? Your GitHub Tokens might have expired`,
+            detail: `GitHub encountered the following error: ${error.message}`,
+            buttons: ['Ok', 'Settings'],
+          });
 
+        if (buttonIndex === 1) {
+          this.props.appState.toggleSettings();
+        }
+      }
       appState.activeGistAction = GistActionState.none;
       this.setActionType(GistActionType.update);
     }
@@ -262,11 +271,16 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not delete gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        const buttonIndex =
+          await window.ElectronFiddle.showWarningDialogToSetting({
+            message: `Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it? Your GitHub Tokens might have expired`,
+            detail: `GitHub encountered the following error: ${error.message}`,
+            buttons: ['Ok', 'Settings'],
+          });
+
+        if (buttonIndex === 1) {
+          this.props.appState.toggleSettings();
+        }
       }
 
       appState.gistId = undefined;
