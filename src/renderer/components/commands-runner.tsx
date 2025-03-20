@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
+import { Button, ButtonGroup, ButtonProps, Spinner } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
 
 import { InstallState, VersionSource } from '../../interfaces';
@@ -16,6 +17,30 @@ interface RunnerProps {
  */
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
+    private renderAsarButton = (disabled: boolean) => {
+      const asarButton = (
+        <Button
+          text="Run from ASAR"
+          icon="play"
+          disabled={disabled}
+          small
+          onClick={() => {
+            window.app.runner.run({ runFromAsar: true });
+          }}
+        />
+      );
+
+      return (
+        <Popover2 fill={true} content={asarButton} placement="bottom">
+          <Button
+            icon="caret-down"
+            style={{ minWidth: 20 }}
+            disabled={disabled}
+          />
+        </Popover2>
+      );
+    };
+
     public render() {
       const { downloaded, downloading, missing, installing, installed } =
         InstallState;
@@ -59,7 +84,9 @@ export const Runner = observer(
             props.icon = <Spinner size={16} />;
           } else {
             props.text = 'Run';
-            props.onClick = window.app.runner.run;
+            props.onClick = () => {
+              window.app.runner.run({ runFromAsar: false });
+            };
             props.icon = 'play';
           }
           break;
@@ -76,8 +103,15 @@ export const Runner = observer(
           props.icon = <Spinner size={16} />;
         }
       }
+      const isAsarDisabled: boolean =
+        props.disabled || isRunning || isInstallingModules;
 
-      return <Button id="button-run" {...props} type={undefined} />;
+      return (
+        <ButtonGroup>
+          <Button id="button-run" {...props} type={undefined} />
+          {this.renderAsarButton(isAsarDisabled)}
+        </ButtonGroup>
+      );
     }
   },
 );
