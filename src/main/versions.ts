@@ -38,6 +38,11 @@ export function getLatestStable(): SemVer | undefined {
   return knownVersions.latestStable;
 }
 
+function isOldVersion(version: string): boolean {
+  const [major, minor] = version.split('.').map(Number);
+  return major === 0 && minor < 30;
+}
+
 export function getReleasedVersions(): Array<Version> {
   // Don't support anything older than 0.30 (Aug 2015).
   // The oldest version known to releases.json.org is 0.20,
@@ -45,7 +50,7 @@ export function getReleasedVersions(): Array<Version> {
   // be downloaded with @electron/get.
   // TODO(dsanders11): upstream this logic to @electron/fiddle-core
   return knownVersions.versions
-    .filter((ver) => !ver.version.startsWith('0.2'))
+    .filter((ver) => !isOldVersion(ver.version))
     .map(({ version }) => ({ version }));
 }
 
