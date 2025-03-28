@@ -16,6 +16,7 @@ import { observer } from 'mobx-react';
 import {
   EditorId,
   EditorValues,
+  GenericDialogType,
   GistActionState,
   GistActionType,
   PACKAGE_NAME,
@@ -156,11 +157,30 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not publish gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        // Handle expired or invalid GitHub tokens by:
+        // 1. Clearing the invalid token
+        // 2. Showing a dialog with a direct action to sign in again
+        // 3. Opening the token dialog if the user clicks "Sign In"
+        if (error.status === 401) {
+          appState.signOutGitHub();
+          const { confirm } = await appState.showGenericDialog({
+            type: GenericDialogType.warning,
+            label:
+              'Your GitHub token has expired or is invalid. Please sign in again with a new token.',
+            ok: 'Sign In',
+            cancel: 'Cancel',
+            wantsInput: false,
+          });
+          if (confirm) {
+            appState.toggleAuthDialog();
+          }
+        } else {
+          window.ElectronFiddle.showWarningDialog({
+            message:
+              'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
+            detail: `GitHub encountered the following error: ${error.message}`,
+          });
+        }
 
         return false;
       }
@@ -230,12 +250,31 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not update gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-          buttons: ['Ok'],
-        });
+        // Handle expired or invalid GitHub tokens by:
+        // 1. Clearing the invalid token
+        // 2. Showing a dialog with a direct action to sign in again
+        // 3. Opening the token dialog if the user clicks "Sign In"
+        if (error.status === 401) {
+          appState.signOutGitHub();
+          const { confirm } = await appState.showGenericDialog({
+            type: GenericDialogType.warning,
+            label:
+              'Your GitHub token has expired or is invalid. Please sign in again with a new token.',
+            ok: 'Sign In',
+            cancel: 'Cancel',
+            wantsInput: false,
+          });
+          if (confirm) {
+            appState.toggleAuthDialog();
+          }
+        } else {
+          window.ElectronFiddle.showWarningDialog({
+            message:
+              'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
+            detail: `GitHub encountered the following error: ${error.message}`,
+            buttons: ['Ok'],
+          });
+        }
       }
 
       appState.activeGistAction = GistActionState.none;
@@ -262,11 +301,30 @@ export const GistActionButton = observer(
       } catch (error) {
         console.warn(`Could not delete gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        // Handle expired or invalid GitHub tokens by:
+        // 1. Clearing the invalid token
+        // 2. Showing a dialog with a direct action to sign in again
+        // 3. Opening the token dialog if the user clicks "Sign In"
+        if (error.status === 401) {
+          appState.signOutGitHub();
+          const { confirm } = await appState.showGenericDialog({
+            type: GenericDialogType.warning,
+            label:
+              'Your GitHub token has expired or is invalid. Please sign in again with a new token.',
+            ok: 'Sign In',
+            cancel: 'Cancel',
+            wantsInput: false,
+          });
+          if (confirm) {
+            appState.toggleAuthDialog();
+          }
+        } else {
+          window.ElectronFiddle.showWarningDialog({
+            message:
+              'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
+            detail: `GitHub encountered the following error: ${error.message}`,
+          });
+        }
       }
 
       appState.gistId = undefined;
