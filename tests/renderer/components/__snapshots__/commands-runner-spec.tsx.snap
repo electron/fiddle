@@ -13,45 +13,9 @@ exports[`Runner component renders InstallState.downloading 1`] = `
     id="button-run"
     text="Downloading"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={true}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
-    disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={true}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  <AsarButton
+    disabled={true}
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -64,45 +28,9 @@ exports[`Runner component renders InstallState.installed 1`] = `
     onClick={[Function]}
     text="Run"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={false}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
+  <AsarButton
     disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={false}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -118,45 +46,9 @@ exports[`Runner component renders InstallState.installing 1`] = `
     id="button-run"
     text="Unzipping"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={true}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
-    disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={true}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  <AsarButton
+    disabled={true}
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -172,45 +64,9 @@ exports[`Runner component renders InstallState.missing 1`] = `
     id="button-run"
     text="Checking status"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={true}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
-    disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={true}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  <AsarButton
+    disabled={true}
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -223,45 +79,9 @@ exports[`Runner component renders idle 1`] = `
     onClick={[Function]}
     text="Run"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={false}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
+  <AsarButton
     disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={false}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -277,45 +97,9 @@ exports[`Runner component renders installing modules 1`] = `
     id="button-run"
     text="Installing modules"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={true}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
-    disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={true}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  <AsarButton
+    disabled={true}
+  />
 </Blueprint3.ButtonGroup>
 `;
 
@@ -329,44 +113,8 @@ exports[`Runner component renders running 1`] = `
     onClick={[MockFunction]}
     text="Stop"
   />
-  <Blueprint3.Popover2
-    boundary="clippingParents"
-    captureDismiss={false}
-    content={
-      <Blueprint3.Button
-        disabled={true}
-        icon="play"
-        onClick={[Function]}
-        small={true}
-        text="Run from ASAR"
-      />
-    }
-    defaultIsOpen={false}
-    disabled={false}
-    fill={true}
-    hasBackdrop={false}
-    hoverCloseDelay={300}
-    hoverOpenDelay={150}
-    inheritDarkTheme={true}
-    interactionKind="click"
-    minimal={false}
-    openOnTargetFocus={true}
-    placement="bottom"
-    positioningStrategy="absolute"
-    shouldReturnFocusOnClose={false}
-    targetTagName="span"
-    transitionDuration={300}
-    usePortal={true}
-  >
-    <Blueprint3.Button
-      disabled={true}
-      icon="caret-down"
-      style={
-        {
-          "minWidth": 20,
-        }
-      }
-    />
-  </Blueprint3.Popover2>
+  <AsarButton
+    disabled={true}
+  />
 </Blueprint3.ButtonGroup>
 `;

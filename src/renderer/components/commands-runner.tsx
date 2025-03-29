@@ -17,30 +17,6 @@ interface RunnerProps {
  */
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
-    private renderAsarButton = (disabled: boolean) => {
-      const asarButton = (
-        <Button
-          text="Run from ASAR"
-          icon="play"
-          disabled={disabled}
-          small
-          onClick={() => {
-            window.app.runner.run({ runFromAsar: true });
-          }}
-        />
-      );
-
-      return (
-        <Popover2 fill={true} content={asarButton} placement="bottom">
-          <Button
-            icon="caret-down"
-            style={{ minWidth: 20 }}
-            disabled={disabled}
-          />
-        </Popover2>
-      );
-    };
-
     public render() {
       const { downloaded, downloading, missing, installing, installed } =
         InstallState;
@@ -109,9 +85,29 @@ export const Runner = observer(
       return (
         <ButtonGroup>
           <Button id="button-run" {...props} type={undefined} />
-          {this.renderAsarButton(isAsarDisabled)}
+          <AsarButton disabled={isAsarDisabled} />
         </ButtonGroup>
       );
     }
   },
 );
+
+const AsarButton = ({ disabled }: { disabled: boolean }): JSX.Element => {
+  const asarButton = (
+    <Button
+      text="Run from ASAR"
+      icon="play"
+      disabled={disabled}
+      small={true}
+      onClick={() => {
+        window.app.runner.run({ runFromAsar: true });
+      }}
+    />
+  );
+
+  return (
+    <Popover2 fill={true} content={asarButton} placement="bottom">
+      <Button icon="caret-down" style={{ minWidth: 20 }} disabled={disabled} />
+    </Popover2>
+  );
+};
