@@ -23,6 +23,11 @@ exports[`Commands component renders when system is darwin 1`] = `
       <version-chooser
         appState={"default StateMock"}
       />
+    </Blueprint3.ControlGroup>
+    <Blueprint3.ControlGroup
+      fill={true}
+      vertical={false}
+    >
       <runner
         appState={"default StateMock"}
       />
@@ -77,6 +82,11 @@ exports[`Commands component renders when system not is darwin 1`] = `
       <version-chooser
         appState={"default StateMock"}
       />
+    </Blueprint3.ControlGroup>
+    <Blueprint3.ControlGroup
+      fill={true}
+      vertical={false}
+    >
       <runner
         appState={"default StateMock"}
       />
