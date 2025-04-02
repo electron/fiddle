@@ -185,6 +185,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           preventOverflow: { enabled: false },
           hide: { enabled: false },
         }}
+        position="bottom"
         intent={Intent.PRIMARY}
         content={`Version is not available on current OS`}
       >
