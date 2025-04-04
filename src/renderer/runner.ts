@@ -20,8 +20,8 @@ export enum ForgeCommands {
   MAKE = 'make',
 }
 
-interface runOptions {
-  runFromAsar: boolean;
+export interface RunOptions {
+  runFromAsar?: boolean;
 }
 
 interface RunFiddleParams {
@@ -29,7 +29,7 @@ interface RunFiddleParams {
   isValidBuild: boolean; // If the localPath is a valid Electron build
   version: string; // The user selected version
   dir: string;
-  runFromAsar: boolean;
+  runFromAsar?: boolean;
 }
 
 const resultString: Record<RunResult, string> = Object.freeze({
@@ -144,7 +144,7 @@ export class Runner {
   /**
    * Actually run the fiddle.
    */
-  public async run(runOptions?: runOptions): Promise<RunResult> {
+  public async run(runOptions?: RunOptions): Promise<RunResult> {
     const options = { includeDependencies: false, includeElectron: false };
     const runFromAsar = runOptions?.runFromAsar ?? false;
 
@@ -369,15 +369,12 @@ export class Runner {
    * or the user selected electron version
    */
   private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { version, dir, runFromAsar } = params;
+    const { version, dir } = params;
     const { pushOutput, flushOutput, executionFlags } = this.appState;
     const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
     const options = [dir, '--inspect'].concat(executionFlags);
-    if (runFromAsar) {
-      options.push('runFromAsar');
-    }
 
     const cleanup = async () => {
       flushOutput();
