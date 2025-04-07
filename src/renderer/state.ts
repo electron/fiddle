@@ -177,7 +177,6 @@ export class AppState {
   private outputBuffer = '';
   private name: string;
   private readonly defaultVersion: string;
-  public appData: string;
 
   // Used for communications between windows
   private broadcastChannel: AppStateBroadcastChannel = new BroadcastChannel(
