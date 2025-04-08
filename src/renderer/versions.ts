@@ -74,9 +74,15 @@ export function getElectronVersions(): Array<RunnableVersion> {
 export function addLocalVersion(input: Version): Array<Version> {
   const versions = getLocalVersions();
 
-  if (!versions.find((v) => v.localPath === input.localPath)) {
-    versions.push(input);
+  // Replace existing local version if it exists
+  const existingVersionIndex = versions.findIndex(
+    (v) => v.localPath === input.localPath,
+  );
+  if (existingVersionIndex > -1) {
+    versions.splice(existingVersionIndex, 1);
   }
+
+  versions.push(input);
 
   saveLocalVersions(versions);
 
