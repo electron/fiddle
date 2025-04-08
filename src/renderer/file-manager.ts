@@ -142,7 +142,7 @@ export class FileManager {
     )) {
       try {
         console.log(`getFiles: Applying ${transform.name}`);
-        output = await transform(output);
+        output = await transform(output, app.state.currentElectronVersion);
       } catch (error) {
         console.warn(`getFiles: Failed to apply transform`, {
           transform,

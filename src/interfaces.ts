@@ -8,7 +8,10 @@ export type {
 
 export type Files = Map<string, string>;
 
-export type FileTransform = (files: Files) => Promise<Files>;
+export type FileTransform = (
+  files: Files,
+  version: RunnableVersion,
+) => Promise<Files>;
 
 export type FileTransformOperation = 'dotfiles' | 'forge';
 
