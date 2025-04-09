@@ -1089,11 +1089,21 @@
     glob "^7.1.6"
     minimatch "^3.0.4"
 
-"@electron/fiddle-core@^1.3.3":
-  version "1.3.3"
-  resolved "https://registry.yarnpkg.com/@electron/fiddle-core/-/fiddle-core-1.3.3.tgz#adb54cd4cb3c63726c945c028808e39baa562747"
-  integrity sha512-aBUN+jsNsLo+Ywfl0wQy2TRRGC8TvLF42Lt9zOdrzGgT7vzDNiFvr7+UiRVvC5inGR0XgeTmZpwaS6CnT6ZPWA==
+"@electron/asar@^3.3.1":
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/@electron/asar/-/asar-3.4.1.tgz#4e9196a4b54fba18c56cd8d5cac67c5bdc588065"
+  integrity sha512-i4/rNPRS84t0vSRa2HorerGRXWyF4vThfHesw0dmcWHp+cspK743UanA0suA5Q5y8kzY2y6YKrvbIUn69BCAiA==
   dependencies:
+    commander "^5.0.0"
+    glob "^7.1.6"
+    minimatch "^3.0.4"
+
+"@electron/fiddle-core@^1.4.0":
+  version "1.4.0"
+  resolved "https://registry.yarnpkg.com/@electron/fiddle-core/-/fiddle-core-1.4.0.tgz#b19840053a1a8e2e6cba45db3bd80b296b90fb88"
+  integrity sha512-dPoLYJJ5HtvnWG8p29JorKn6mlX4JOsQb6eGKT41Q48SqAm96WXkarHCGDA4PQWj5qJq1R75aBHtH78pLjX46A==
+  dependencies:
+    "@electron/asar" "^3.3.1"
     "@electron/get" "^2.0.0"
     debug "^4.3.3"
     env-paths "^2.2.1"
