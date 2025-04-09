@@ -1,6 +1,13 @@
 import * as React from 'react';
 
-import { Button, ButtonGroup, ButtonProps, Spinner } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroup,
+  ButtonProps,
+  Menu,
+  MenuItem,
+  Spinner,
+} from '@blueprintjs/core';
 import { Popover2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
 
@@ -94,15 +101,16 @@ export const Runner = observer(
 
 const AsarButton = ({ disabled }: { disabled: boolean }): JSX.Element => {
   const asarButton = (
-    <Button
-      text="Run from ASAR"
-      icon="play"
-      disabled={disabled}
-      small={true}
-      onClick={() => {
-        window.app.runner.run({ runFromAsar: true });
-      }}
-    />
+    <Menu>
+      <MenuItem
+        text="Run from ASAR"
+        icon="play"
+        active={!disabled}
+        onClick={() => {
+          window.app.runner.run({ runFromAsar: true });
+        }}
+      />
+    </Menu>
   );
 
   return (
