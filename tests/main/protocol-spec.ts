@@ -3,6 +3,7 @@
  */
 
 import * as fs from 'node:fs';
+import * as path from 'node:path';
 
 import { app } from 'electron';
 import { mocked } from 'jest-mock';
@@ -13,6 +14,7 @@ import {
   listenForProtocolHandler,
   setupProtocolHandler,
 } from '../../src/main/protocol';
+import { isValidElectronPath } from '../../src/main/utils/local-version';
 import { getOrCreateMainWindow, mainIsReady } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
@@ -20,6 +22,10 @@ type OpenUrlCallback = (event: object, url: string) => void;
 type SecondInstanceCallback = (event: object, argv: string[]) => void;
 
 jest.mock('node:fs');
+
+jest.mock('../../src/main/utils/local-version', () => ({
+  isValidElectronPath: jest.fn(),
+}));
 
 describe('protocol', () => {
   const oldArgv = [...process.argv];
@@ -194,6 +200,64 @@ describe('protocol', () => {
 
       await new Promise(process.nextTick);
       expect(mainWindow.focus).toHaveBeenCalled();
+    });
+
+    it('handles registering local version url', () => {
+      mocked(isValidElectronPath).mockReturnValueOnce(true);
+
+      overridePlatform('darwin');
+      listenForProtocolHandler();
+
+      const handler = mocked(app.on).mock.calls[0][1];
+      const url = new URL('electron-fiddle://register-local-version/');
+      const params = {
+        name: 'test',
+        path: path.resolve(__dirname),
+        version: '35.0.0-local',
+      };
+      const keys = Object.keys(params) as Array<keyof typeof params>;
+      keys.forEach((k) => {
+        url.searchParams.append(k, params[k]);
+      });
+      handler({}, url.href);
+
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
+        IpcEvents.REGISTER_LOCAL_VERSION_FOLDER,
+        [params],
+      );
+    });
+
+    it('handles registering local version without valid path', () => {
+      mocked(isValidElectronPath).mockReturnValueOnce(false);
+
+      overridePlatform('darwin');
+      listenForProtocolHandler();
+
+      const handler = mocked(app.on).mock.calls[0][1];
+      const url = new URL('electron-fiddle://register-local-version/');
+      const params = {
+        name: 'test',
+        path: path.resolve(__dirname),
+        version: '35.0.0-local',
+      };
+      const keys = Object.keys(params) as Array<keyof typeof params>;
+      keys.forEach((k) => {
+        url.searchParams.append(k, params[k]);
+      });
+      handler({}, url.href);
+
+      expect(ipcMainManager.send).not.toHaveBeenCalled();
+    });
+
+    it('handles registering local version with missing params', () => {
+      overridePlatform('darwin');
+      listenForProtocolHandler();
+
+      const handler = mocked(app.on).mock.calls[0][1];
+      const url = new URL('electron-fiddle://register-local-version/');
+      handler({}, url.href);
+
+      expect(ipcMainManager.send).not.toHaveBeenCalled();
     });
   });
 });
