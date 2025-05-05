@@ -31,12 +31,9 @@ jest.mock(
   }),
 );
 
-jest.mock(
-  '../../../src/renderer/components/settings-general-package-author',
-  () => ({
-    PackageAuthorSettings: 'settings-package-author',
-  }),
-);
+jest.mock('../../../src/renderer/components/settings-general-gist', () => ({
+  GistSettings: 'settings-gist',
+}));
 
 jest.mock('../../../src/renderer/components/settings-general-mirror', () => ({
   MirrorSettings: 'settings-general-mirror',
