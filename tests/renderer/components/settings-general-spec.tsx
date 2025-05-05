@@ -29,12 +29,9 @@ vi.mock(
   }),
 );
 
-vi.mock(
-  '../../../src/renderer/components/settings-general-package-author',
-  () => ({
-    PackageAuthorSettings: 'settings-package-author',
-  }),
-);
+vi.mock('../../../src/renderer/components/settings-general-gist', () => ({
+  GistSettings: 'settings-gist',
+}));
 
 vi.mock('../../../src/renderer/components/settings-general-mirror', () => ({
   MirrorSettings: 'settings-general-mirror',
