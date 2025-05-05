@@ -236,6 +236,7 @@ export enum GlobalSetting {
   knownVersion = 'known-electron-versions',
   localVersion = 'local-electron-versions',
   packageAuthor = 'packageAuthor',
+  isShowingGistHistory = 'isShowingGistHistory',
   packageManager = 'packageManager',
   showObsoleteVersions = 'showObsoleteVersions',
   showUndownloadedVersions = 'showUndownloadedVersions',

@@ -16,6 +16,17 @@ import {
   VersionSource,
 } from '../interfaces';
 
+// Define the GistRevision interface
+interface GistRevision {
+  sha: string;
+  date: string;
+  changes: {
+    deletions: number;
+    additions: number;
+    total: number;
+  };
+}
+
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
     for (const name of [
@@ -115,13 +126,40 @@ export class RemoteLoader {
     }
   }
 
+  public async getGistRevisions(gistId: string): Promise<GistRevision[]> {
+    try {
+      const octo = await getOctokit(this.appState);
+      const revisions = await octo.gists.listCommits({
+        gist_id: gistId,
+      });
+
+      return revisions.data
+        .slice()
+        .reverse()
+        .map((r) => ({
+          sha: r.version,
+          date: r.committed_at,
+          changes: r.change_status,
+        }));
+    } catch (error: any) {
+      this.handleLoadingFailed(error);
+      return [];
+    }
+  }
+
   /**
    * Load a fiddle
    */
-  public async fetchGistAndLoad(gistId: string): Promise<boolean> {
+  public async fetchGistAndLoad(
+    gistId: string,
+    revision?: string,
+  ): Promise<boolean> {
     try {
       const octo = await getOctokit(this.appState);
-      const gist = await octo.gists.get({ gist_id: gistId });
+      const gist = revision
+        ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
+        : await octo.gists.get({ gist_id: gistId });
+
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {

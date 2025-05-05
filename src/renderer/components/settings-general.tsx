@@ -7,9 +7,9 @@ import { AppearanceSettings } from './settings-general-appearance';
 import { BlockAcceleratorsSettings } from './settings-general-block-accelerators';
 import { ConsoleSettings } from './settings-general-console';
 import { FontSettings } from './settings-general-font';
+import { GistSettings } from './settings-general-gist';
 import { GitHubSettings } from './settings-general-github';
 import { MirrorSettings } from './settings-general-mirror';
-import { PackageAuthorSettings } from './settings-general-package-author';
 import { AppState } from '../state';
 
 interface GeneralSettingsProps {
@@ -39,7 +39,7 @@ export const GeneralSettings = observer(
           <Divider />
           <BlockAcceleratorsSettings appState={this.props.appState} />
           <Divider />
-          <PackageAuthorSettings appState={this.props.appState} />
+          <GistSettings appState={this.props.appState} />
           <Divider />
           <MirrorSettings appState={this.props.appState} />
         </div>
