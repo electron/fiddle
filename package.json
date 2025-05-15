@@ -12,7 +12,7 @@
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
-    "lint:markdown": "electron-markdownlint \"*.md\"",
+    "lint:markdown": "markdownlint-cli2 \"*.md\"",
     "lint:templates": "standard \"static/**/*.js\"",
     "lint:links": "lint-roller-markdown-links --fetch-external-links \"*.md\"",
     "lint:fix": "npm-run-all \"lint:!(fix|links) -- --fix\"",
@@ -29,7 +29,7 @@
     "postinstall": "husky && npm run electron-releases"
   },
   "engines": {
-    "node": ">= 20.10.0"
+    "node": ">= 20.16.0"
   },
   "keywords": [
     "Electron",
@@ -85,7 +85,7 @@
     "@electron-forge/plugin-webpack": "7.7.0",
     "@electron-forge/publisher-github": "7.7.0",
     "@electron/fuses": "^1.6.1",
-    "@electron/lint-roller": "^2.1.0",
+    "@electron/lint-roller": "^3.0.0",
     "@octokit/core": "^3.5.1",
     "@reforged/maker-appimage": "^3.3.0",
     "@testing-library/dom": "^10.4.0",
@@ -129,6 +129,7 @@
     "less-loader": "^11.0.0",
     "lint-staged": "^15.2.7",
     "log-symbols": "^6.0.0",
+    "markdownlint-cli2": "^0.18.0",
     "mini-css-extract-plugin": "^2.6.1",
     "monaco-editor-webpack-plugin": "2.1.0",
     "npm-run-all2": "^7.0.1",
