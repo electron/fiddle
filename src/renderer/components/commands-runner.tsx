@@ -1,6 +1,14 @@
 import * as React from 'react';
 
-import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
+import {
+  Button,
+  ButtonGroup,
+  ButtonProps,
+  Menu,
+  MenuItem,
+  Spinner,
+} from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
 
 import { InstallState, VersionSource } from '../../interfaces';
@@ -59,7 +67,9 @@ export const Runner = observer(
             props.icon = <Spinner size={16} />;
           } else {
             props.text = 'Run';
-            props.onClick = window.app.runner.run;
+            props.onClick = () => {
+              window.app.runner.run({ runFromAsar: false });
+            };
             props.icon = 'play';
           }
           break;
@@ -76,8 +86,36 @@ export const Runner = observer(
           props.icon = <Spinner size={16} />;
         }
       }
+      const isAsarDisabled: boolean =
+        props.disabled || isRunning || isInstallingModules;
 
-      return <Button id="button-run" {...props} type={undefined} />;
+      return (
+        <ButtonGroup>
+          <Button id="button-run" {...props} type={undefined} />
+          <AsarButton disabled={isAsarDisabled} />
+        </ButtonGroup>
+      );
     }
   },
 );
+
+const AsarButton = ({ disabled }: { disabled: boolean }): JSX.Element => {
+  const asarButton = (
+    <Menu>
+      <MenuItem
+        text="Run from ASAR"
+        icon="play"
+        active={!disabled}
+        onClick={() => {
+          window.app.runner.run({ runFromAsar: true });
+        }}
+      />
+    </Menu>
+  );
+
+  return (
+    <Popover2 fill={true} content={asarButton} placement="bottom">
+      <Button icon="caret-down" style={{ minWidth: 20 }} disabled={disabled} />
+    </Popover2>
+  );
+};
