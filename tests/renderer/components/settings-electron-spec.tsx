@@ -16,6 +16,17 @@ import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
 vi.mock('../../../src/renderer/utils/disable-download.ts');
 
+// Mock react-window to render all items
+jest.mock('react-window', () => ({
+  FixedSizeList: ({ children, itemCount, itemData }: any) => (
+    <div>
+      {Array.from({ length: itemCount }, (_, index) =>
+        children({ index, style: {}, data: itemData }),
+      )}
+    </div>
+  ),
+}));
+
 describe('ElectronSettings component', () => {
   let store: StateMock;
   let mockVersions: Record<string, RunnableVersion>;
@@ -293,14 +304,15 @@ describe('ElectronSettings component', () => {
       };
 
       store.versions = { version: ver };
+      store.versionsToShow = [ver];
 
-      store.versionsToShow = [ver, { ...ver }, { ...ver }];
-
-      const wrapper = shallow(
+      const wrapper = mount(
         <ElectronSettings appState={store as unknown as AppState} />,
       );
 
-      expect(wrapper.find('.disabled-version')).toHaveLength(3);
+      const disabledVersions = wrapper.find('.disabled-version');
+      expect(disabledVersions).toHaveLength(2);
+      expect(disabledVersions.first().prop('disabled')).toBe(true);
     });
   });
 });

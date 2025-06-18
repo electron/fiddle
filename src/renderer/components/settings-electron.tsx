@@ -8,13 +8,14 @@ import {
   Callout,
   Checkbox,
   FormGroup,
-  HTMLTable,
   Icon,
   IconName,
+  InputGroup,
   Spinner,
 } from '@blueprintjs/core';
 import { Tooltip2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
+import { FixedSizeList as List } from 'react-window';
 
 import {
   ElectronReleaseChannel,
@@ -30,13 +31,35 @@ interface ElectronSettingsProps {
   appState: AppState;
 }
 
+interface ElectronSettingsState {
+  filterQuery: string;
+}
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    versions: RunnableVersion[];
+    appState: AppState;
+    renderHumanState: (item: RunnableVersion) => JSX.Element;
+    renderAction: (ver: RunnableVersion) => JSX.Element;
+  };
+}
+
 /**
  * Settings content to manage Electron-related preferences.
  */
 export const ElectronSettings = observer(
-  class ElectronSettings extends React.Component<ElectronSettingsProps> {
+  class ElectronSettings extends React.Component<
+    ElectronSettingsProps,
+    ElectronSettingsState
+  > {
     constructor(props: ElectronSettingsProps) {
       super(props);
+
+      this.state = {
+        filterQuery: '',
+      };
 
       this.handleAddVersion = this.handleAddVersion.bind(this);
       this.handleChannelChange = this.handleChannelChange.bind(this);
@@ -47,6 +70,7 @@ export const ElectronSettings = observer(
         this.handleUpdateElectronVersions.bind(this);
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
+      this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
     public handleUpdateElectronVersions() {
@@ -137,24 +161,39 @@ export const ElectronSettings = observer(
       this.props.appState.toggleAddVersionDialog();
     }
 
+    private handleFilterChange(event: React.ChangeEvent<HTMLInputElement>) {
+      this.setState({ filterQuery: event.target.value });
+    }
+
+    private get filteredVersions(): RunnableVersion[] {
+      const { filterQuery } = this.state;
+      const { versionsToShow } = this.props.appState;
+
+      if (!filterQuery) return versionsToShow;
+
+      const query = filterQuery.toLowerCase();
+      return versionsToShow.filter((ver) =>
+        ver.version.toLowerCase().includes(query),
+      );
+    }
+
     public render() {
       return (
         <div className="settings-electron">
           <h1>Electron Settings</h1>
-          <Callout>{this.renderVersionShowOptions()}</Callout>
-          <br />
-          <Callout>{this.filterSection()}</Callout>
+          <Callout>{this.renderFilters()}</Callout>
           <br />
           <Callout>
             {this.renderAdvancedButtons()}
-            {this.renderTable()}
+            {this.renderVersionFilter()}
+            {this.renderVersionsTable()}
           </Callout>
         </div>
       );
     }
 
     /**
-     * Renders the various buttons for advanced operations
+     * Renders the various buttons for advanced operations.
      */
     private renderAdvancedButtons(): JSX.Element {
       const { isUpdatingElectronVersions, isDownloadingAll, isDeletingAll } =
@@ -199,24 +238,11 @@ export const ElectronSettings = observer(
         </ButtonGroup>
       );
     }
-    private filterSection(): JSX.Element {
-      const { appState } = this.props;
-      return (
-        <FormGroup label="Filters:">
-          <Checkbox
-            checked={appState.showUndownloadedVersions}
-            id="showUndownloadedVersions"
-            label="Not Downloaded"
-            onChange={this.handleStateChange}
-          />
-        </FormGroup>
-      );
-    }
 
     /**
-     * Renders the various options for which versions should be displayed
+     * Renders the filters section with channels and visibility options.
      */
-    private renderVersionShowOptions(): JSX.Element {
+    private renderFilters(): JSX.Element {
       const { appState } = this.props;
 
       const getIsChecked = (channel: ElectronReleaseChannel) => {
@@ -236,72 +262,142 @@ export const ElectronSettings = observer(
       };
 
       return (
-        <FormGroup label="Channels:">
-          {Object.values(channels).map((channel) => (
+        <FormGroup>
+          <div style={{ marginBottom: '8px' }}>
+            <label
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '4px',
+                display: 'block',
+              }}
+            >
+              Channels
+            </label>
+            {Object.values(channels).map((channel) => (
+              <Tooltip2
+                content={`Can't disable channel of selected version (${appState.version})`}
+                disabled={!getIsCurrentVersionReleaseChannel(channel)}
+                position="bottom"
+                intent="primary"
+                key={channel}
+              >
+                <Checkbox
+                  checked={getIsChecked(channel)}
+                  label={channel}
+                  id={channel}
+                  onChange={this.handleChannelChange}
+                  disabled={getIsCurrentVersionReleaseChannel(channel)}
+                  inline={true}
+                />
+              </Tooltip2>
+            ))}
+          </div>
+
+          <div>
+            <label
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '4px',
+                display: 'block',
+              }}
+            >
+              Visibility
+            </label>
+            <Checkbox
+              checked={appState.showUndownloadedVersions}
+              id="showUndownloadedVersions"
+              label="Show not downloaded versions"
+              onChange={this.handleStateChange}
+              inline={true}
+            />
             <Tooltip2
-              content={`Can't disable channel of selected version (${appState.version})`}
-              disabled={!getIsCurrentVersionReleaseChannel(channel)}
+              content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
               position="bottom"
               intent="primary"
-              key={channel}
             >
               <Checkbox
-                checked={getIsChecked(channel)}
-                label={channel}
-                id={channel}
-                onChange={this.handleChannelChange}
-                disabled={getIsCurrentVersionReleaseChannel(channel)}
+                checked={appState.showObsoleteVersions}
+                id="showObsoleteVersions"
                 inline={true}
+                label="Show obsolete versions"
+                onChange={this.handleShowObsoleteChange}
               />
             </Tooltip2>
-          ))}
-          <Tooltip2
-            content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
-            position="bottom"
-            intent="primary"
-          >
-            <Checkbox
-              checked={appState.showObsoleteVersions}
-              id="showObsoleteVersions"
-              inline={true}
-              label="Obsolete"
-              onChange={this.handleShowObsoleteChange}
-            />
-          </Tooltip2>
+          </div>
         </FormGroup>
+      );
+    }
+
+    /**
+     * Renders the version filter input.
+     */
+    private renderVersionFilter(): JSX.Element {
+      return (
+        <InputGroup
+          className="version-filter"
+          leftIcon="filter"
+          placeholder="Filter versions..."
+          value={this.state.filterQuery}
+          onChange={this.handleFilterChange}
+        />
       );
     }
 
     /**
      * Renders the table with Electron versions.
      */
-    private renderTable(): JSX.Element {
+    private renderVersionsTable(): JSX.Element {
+      const versions = this.filteredVersions;
+      const itemData = {
+        versions,
+        appState: this.props.appState,
+        renderHumanState: this.renderHumanState.bind(this),
+        renderAction: this.renderAction.bind(this),
+      };
+
       return (
-        <HTMLTable className="electron-versions-table" striped={true}>
-          <thead>
-            <tr>
-              <th>Version</th>
-              <th>Status</th>
-              <th className="action">Action</th>
-            </tr>
-          </thead>
-          <tbody>{this.renderTableRows()}</tbody>
-        </HTMLTable>
+        <div className="electron-versions-table">
+          <div className="electron-versions-header">
+            <div className="version-col">Version</div>
+            <div className="status-col">Status</div>
+            <div className="action-col">Action</div>
+          </div>
+          {versions.length === 0 ? (
+            <div className="no-versions">No versions match your filter</div>
+          ) : (
+            <List
+              height={400}
+              itemCount={versions.length}
+              itemSize={40}
+              width="100%"
+              itemData={itemData}
+              className="electron-versions-list"
+            >
+              {this.Row}
+            </List>
+          )}
+        </div>
       );
     }
 
     /**
-     * Renders the rows with Electron version, returning an Array.
+     * Renders a single row in the list.
      */
-    private renderTableRows(): Array<JSX.Element | null> {
-      return this.props.appState.versionsToShow.map((item) => (
-        <tr key={item.version}>
-          <td>{item.version}</td>
-          <td>{this.renderHumanState(item)}</td>
-          <td className="action">{this.renderAction(item)}</td>
-        </tr>
-      ));
-    }
+    private Row = ({ index, style, data }: RowProps) => {
+      const { versions, renderHumanState, renderAction } = data;
+      const item = versions[index];
+
+      return (
+        <div
+          className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'}`}
+          style={style}
+        >
+          <div className="version-col">{item.version}</div>
+          <div className="status-col">{renderHumanState(item)}</div>
+          <div className="action-col">{renderAction(item)}</div>
+        </div>
+      );
+    };
 
     /**
      * Returns a human-readable state indicator for an Electron version.

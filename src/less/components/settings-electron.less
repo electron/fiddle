@@ -1,0 +1,120 @@
+@import "../variables.less";
+
+.settings-electron {
+  .version-filter {
+    margin: 10px 0;
+  }
+
+  .electron-versions-table {
+    border: 1px solid @border-color-1;
+    border-radius: 3px;
+    overflow: hidden;
+    background-color: @background-1;
+
+    .electron-versions-header {
+      display: flex;
+      font-weight: 600;
+      padding: 10px 0;
+      border-bottom: 2px solid @border-color-1;
+      background-color: @background-2;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+
+      .version-col {
+        flex: 1;
+        padding: 0 15px;
+      }
+
+      .status-col {
+        width: 180px;
+        padding: 0 15px;
+      }
+
+      .action-col {
+        width: 160px;
+        padding: 0 15px;
+        text-align: center;
+      }
+    }
+
+    .no-versions {
+      padding: 40px 20px;
+      text-align: center;
+      color: @text-color-2;
+    }
+
+    .electron-versions-list {
+      .electron-version-row {
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid @border-color-2;
+
+        &.even {
+          background-color: @background-1;
+        }
+
+        &.odd {
+          background-color: rgba(92, 112, 128, 0.05);
+        }
+
+        &:hover {
+          background-color: rgba(92, 112, 128, 0.15);
+        }
+
+        .version-col {
+          flex: 1;
+          padding: 0 15px;
+        }
+
+        .status-col {
+          width: 180px;
+          padding: 0 15px;
+
+          .bp3-icon {
+            margin-right: 5px;
+          }
+        }
+
+        .action-col {
+          width: 160px;
+          padding: 0 15px;
+          display: flex;
+          justify-content: center;
+
+          .bp3-button {
+            width: 90px;
+          }
+
+          .disabled-version {
+            width: 90px;
+          }
+        }
+      }
+    }
+  }
+
+  // Dark theme overrides
+  .bp3-dark & {
+    .electron-versions-table {
+      .electron-versions-header {
+        background-color: @dark-gray5;
+        border-bottom-color: @dark-gray4;
+      }
+
+      .electron-versions-list {
+        .electron-version-row {
+          border-bottom-color: @dark-gray4;
+
+          &.odd {
+            background-color: rgba(255, 255, 255, 0.02);
+          }
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+          }
+        }
+      }
+    }
+  }
+}
