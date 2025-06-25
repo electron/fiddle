@@ -19,7 +19,7 @@ exports[`AddThemeDialog component renders 1`] = `
         }
       }
       onInputChange={[Function]}
-      text="Select the Monaco file..."
+      text="Choose file..."
     />
     <br />
   </div>

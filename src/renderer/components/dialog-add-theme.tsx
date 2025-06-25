@@ -40,9 +40,10 @@ export const AddThemeDialog = observer(
      */
     public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
       const { files } = event.target as HTMLInputElement;
-      const file = files?.[0];
 
-      this.setState({ file });
+      this.setState({
+        file: files?.[0],
+      });
     }
 
     /**
@@ -120,7 +121,7 @@ export const AddThemeDialog = observer(
       const inputProps = { accept: '.json' };
       const { file } = this.state;
 
-      const text = file && file.path ? file.path : `Select the Monaco file...`;
+      const text = file ? file.name : `Select the Monaco file...`;
       return (
         <Dialog
           isOpen={isThemeDialogShowing}
