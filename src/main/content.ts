@@ -13,7 +13,7 @@ import { IpcEvents } from '../ipc-events';
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');
 
-// location of the fallback template fiddle used iff downloading failed
+// location of the fallback template fiddle used if downloading failed
 const STATIC_TEMPLATE_DIR = path.join(STATIC_DIR, 'electron-quick-start');
 
 // electron-quick-start branch that holds the test template
