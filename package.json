@@ -85,7 +85,7 @@
     "@electron-forge/plugin-webpack": "7.7.0",
     "@electron-forge/publisher-github": "7.7.0",
     "@electron/fuses": "^1.6.1",
-    "@electron/lint-roller": "^3.1.1",
+    "@electron/lint-roller": "^3.1.2",
     "@octokit/core": "^3.5.1",
     "@reforged/maker-appimage": "^3.3.0",
     "@testing-library/dom": "^10.4.0",
