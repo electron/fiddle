@@ -1137,10 +1137,10 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@electron/lint-roller@^3.1.1":
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/@electron/lint-roller/-/lint-roller-3.1.1.tgz#a301f1f84ef836e7800c655fa3b5efcda82f95b0"
-  integrity sha512-s30rM5ksvVuks7bsTKxQALmqY/8/KxJieGWs3QKru2nL4UJlN5PTTbxXh42qCqQ1LRTfE/cZ5CDjF9nomc3mYw==
+"@electron/lint-roller@^3.1.2":
+  version "3.1.2"
+  resolved "https://registry.yarnpkg.com/@electron/lint-roller/-/lint-roller-3.1.2.tgz#120d7ce21d3a25997d39a6f7f04027c60d85421b"
+  integrity sha512-yWQ6YgjK6Yoa6qXxEeTJW/3Qgp6S87KR1Hy2Bg0bWj++iYLI7ODgpAI3pq8q0NIjQEcA+u/nTF8gewgzL7r/JA==
   dependencies:
     "@dsanders11/vscode-markdown-languageservice" "^0.3.0"
     ajv "^8.16.0"
