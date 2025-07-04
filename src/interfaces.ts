@@ -283,6 +283,7 @@ export interface StartFiddleParams {
   dir: string;
   options: string[];
   env: { [x: string]: string | undefined };
+  runFromAsar?: boolean;
 }
 
 export interface DownloadVersionParams {
