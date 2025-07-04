@@ -41,10 +41,115 @@ interface RowProps {
   data: {
     versions: RunnableVersion[];
     appState: AppState;
-    renderHumanState: (item: RunnableVersion) => JSX.Element;
-    renderAction: (ver: RunnableVersion) => JSX.Element;
   };
 }
+
+// Observer component for individual rows to ensure they re-render when version state changes
+const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
+  const { versions, appState } = data;
+  const item = versions[index];
+
+  const renderHumanState = (item: RunnableVersion): JSX.Element => {
+    const { state, source } = item;
+    const isLocal = source === VersionSource.local;
+    let icon: IconName = 'box';
+    let humanState = isLocal ? 'Available' : 'Downloaded';
+
+    if (state === InstallState.downloading) {
+      icon = 'cloud-download';
+      humanState = 'Downloading';
+    } else if (state === InstallState.missing) {
+      icon = isLocal ? 'issue' : 'cloud';
+      humanState = isLocal ? 'Not Available' : 'Not Downloaded';
+    }
+
+    return (
+      <span>
+        <Icon icon={icon} /> {humanState}
+      </span>
+    );
+  };
+
+  const renderAction = (ver: RunnableVersion): JSX.Element => {
+    const { state, source, version } = ver;
+    const isLocal = source === VersionSource.local;
+    const buttonProps: ButtonProps = {
+      small: true,
+    };
+
+    switch (state) {
+      case InstallState.installed:
+      case InstallState.downloaded:
+        buttonProps.icon = 'trash';
+        buttonProps.onClick = () => appState.removeVersion(ver);
+        buttonProps.text = isLocal ? 'Remove' : 'Delete';
+        break;
+
+      case InstallState.installing:
+      case InstallState.downloading:
+        buttonProps.disabled = true;
+        buttonProps.icon = <Spinner size={16} value={ver.downloadProgress} />;
+        buttonProps.text = 'Downloading';
+        buttonProps.className = 'disabled-version';
+        break;
+
+      case InstallState.missing:
+        buttonProps.disabled = false;
+        buttonProps.loading = false;
+        buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
+        buttonProps.text = isLocal ? 'Remove' : 'Download';
+        buttonProps.onClick = () => {
+          isLocal ? appState.removeVersion(ver) : appState.downloadVersion(ver);
+        };
+        break;
+    }
+
+    if (version === appState.currentElectronVersion.version) {
+      return (
+        <Tooltip2
+          position="auto"
+          intent="primary"
+          content={`Can't remove currently active Electron version (${version})`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip2>
+      );
+    } else if (disableDownload(version)) {
+      return (
+        <Tooltip2
+          position="auto"
+          intent="primary"
+          content={`Version is not available on your current OS`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip2>
+      );
+    }
+
+    return <Button {...buttonProps} type={undefined} />;
+  };
+
+  return (
+    <div
+      className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'}`}
+      style={style}
+    >
+      <div className="version-col">{item.version}</div>
+      <div className="status-col">{renderHumanState(item)}</div>
+      <div className="action-col">{renderAction(item)}</div>
+    </div>
+  );
+});
 
 /**
  * Settings content to manage Electron-related preferences.
@@ -351,8 +456,6 @@ export const ElectronSettings = observer(
       const itemData = {
         versions,
         appState: this.props.appState,
-        renderHumanState: this.renderHumanState.bind(this),
-        renderAction: this.renderAction.bind(this),
       };
 
       return (
@@ -373,131 +476,11 @@ export const ElectronSettings = observer(
               itemData={itemData}
               className="electron-versions-list"
             >
-              {this.Row}
+              {ElectronVersionRow}
             </List>
           )}
         </div>
       );
-    }
-
-    /**
-     * Renders a single row in the list.
-     */
-    private Row = ({ index, style, data }: RowProps) => {
-      const { versions, renderHumanState, renderAction } = data;
-      const item = versions[index];
-
-      return (
-        <div
-          className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'}`}
-          style={style}
-        >
-          <div className="version-col">{item.version}</div>
-          <div className="status-col">{renderHumanState(item)}</div>
-          <div className="action-col">{renderAction(item)}</div>
-        </div>
-      );
-    };
-
-    /**
-     * Returns a human-readable state indicator for an Electron version.
-     */
-    private renderHumanState(item: RunnableVersion): JSX.Element {
-      const { state, source } = item;
-      const isLocal = source === VersionSource.local;
-      let icon: IconName = 'box';
-      let humanState = isLocal ? 'Available' : 'Downloaded';
-
-      if (state === InstallState.downloading) {
-        icon = 'cloud-download';
-        humanState = 'Downloading';
-      } else if (state === InstallState.missing) {
-        // The only way for a local version to be missing
-        // is for it to have been deleted. Mark as unavailable.
-        icon = isLocal ? 'issue' : 'cloud';
-        humanState = isLocal ? 'Not Available' : 'Not Downloaded';
-      }
-
-      return (
-        <span>
-          <Icon icon={icon} /> {humanState}
-        </span>
-      );
-    }
-
-    /**
-     * Renders the action for a single Electron version.
-     */
-    private renderAction(ver: RunnableVersion): JSX.Element {
-      const { state, source, version } = ver;
-      const { appState } = this.props;
-      const isLocal = source === VersionSource.local;
-      const buttonProps: ButtonProps = {
-        fill: true,
-        small: true,
-      };
-
-      switch (state) {
-        case InstallState.installed:
-        case InstallState.downloaded:
-          buttonProps.icon = 'trash';
-          buttonProps.onClick = () => appState.removeVersion(ver);
-          buttonProps.text = isLocal ? 'Remove' : 'Delete';
-          break;
-
-        case InstallState.installing:
-        case InstallState.downloading:
-          buttonProps.disabled = true;
-          buttonProps.icon = <Spinner size={16} value={ver.downloadProgress} />;
-          buttonProps.text = 'Downloading';
-          break;
-
-        case InstallState.missing:
-          buttonProps.disabled = false;
-          buttonProps.loading = false;
-          buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
-          buttonProps.text = isLocal ? 'Remove' : 'Download';
-          buttonProps.onClick = () => {
-            isLocal
-              ? appState.removeVersion(ver)
-              : appState.downloadVersion(ver);
-          };
-          break;
-      }
-
-      if (version === appState.currentElectronVersion.version) {
-        return (
-          <Tooltip2
-            position="auto"
-            intent="primary"
-            content={`Can't remove currently active Electron version (${version})`}
-          >
-            <AnchorButton
-              className={'disabled-version'}
-              disabled={true}
-              text={buttonProps.text}
-              icon={buttonProps.icon}
-            />
-          </Tooltip2>
-        );
-      } else if (disableDownload(version)) {
-        return (
-          <Tooltip2
-            position="auto"
-            intent="primary"
-            content={`Version is not available on your current OS`}
-          >
-            <AnchorButton
-              className={'disabled-version'}
-              disabled={true}
-              text={buttonProps.text}
-              icon={buttonProps.icon}
-            />
-          </Tooltip2>
-        );
-      }
-
-      return <Button {...buttonProps} type={undefined} />;
     }
   },
 );
