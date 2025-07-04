@@ -18,6 +18,7 @@ export type FileTransformOperation = 'dotfiles' | 'forge';
 export enum VersionSource {
   remote = 'remote',
   local = 'local',
+  pullRequest = 'pull-request',
 }
 
 export enum GistActionType {
@@ -189,6 +190,7 @@ export type FiddleEvent =
   | 'open-template'
   | 'package-fiddle'
   | 'redo-in-editor'
+  | 'register-local-version'
   | 'run-fiddle'
   | 'save-fiddle-gist'
   | 'saved-local-fiddle'

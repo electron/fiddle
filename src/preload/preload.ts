@@ -36,6 +36,7 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
   'open-settings': IpcEvents.OPEN_SETTINGS,
   'open-template': IpcEvents.FS_OPEN_TEMPLATE,
   'package-fiddle': IpcEvents.FIDDLE_PACKAGE,
+  'register-local-version': IpcEvents.REGISTER_LOCAL_VERSION_FOLDER,
   'redo-in-editor': IpcEvents.REDO_IN_EDITOR,
   'run-fiddle': IpcEvents.FIDDLE_RUN,
   'saved-local-fiddle': IpcEvents.SAVED_LOCAL_FIDDLE,
