@@ -355,6 +355,12 @@ export const ElectronSettings = observer(
         renderAction: this.renderAction.bind(this),
       };
 
+      // Create a key that changes when any version's state changes
+      // This forces the List to re-render when download/install states change
+      const listKey = versions
+        .map((v) => `${v.version}:${v.state}:${v.downloadProgress || 0}`)
+        .join('|');
+
       return (
         <div className="electron-versions-table">
           <div className="electron-versions-header">
@@ -366,6 +372,7 @@ export const ElectronSettings = observer(
             <div className="no-versions">No versions match your filter</div>
           ) : (
             <List
+              key={listKey}
               height={400}
               itemCount={versions.length}
               itemSize={40}
