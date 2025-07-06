@@ -15,6 +15,19 @@ address bar.
 
 <img src="https://user-images.githubusercontent.com/8198408/183111969-f25e202f-b7d8-45d2-ae89-89df965c6c8f.png" width="880px" alt="Electron Fiddle screenshot">
 
+## Quickstart
+
+1. **Download and open Electron Fiddle** — it loads with a runnable starter template.  
+2. **Choose the Electron version** you want to test against using the dropdown.  
+3. **Edit the code** in the built-in Monaco editor (includes autocomplete & types).  
+4. Click **Run** to launch your Fiddle instantly.  
+5. **Save your Fiddle**:
+   - Locally on your computer  
+   - Or publish as a GitHub Gist  
+6. Optionally, **package your Fiddle** into a desktop app using Electron Forge.
+
+Electron Fiddle is a fast‑feedback playground to prototype, test Electron APIs, and share/demo your work easily.
+
 ## Features
 
 ### Explore Electron
@@ -27,6 +40,8 @@ available in Electron, so if you want to quickly see what a
 [BrowserView][BrowserView] is or how the [desktopCapturer][desktopCapturer]
 works, Fiddle has got you covered.
 
+---
+
 ### Code with Types
 
 ![Screenshot: Fiddle's Types](https://user-images.githubusercontent.com/1426799/43874324-10e46eae-9b40-11e8-962b-8c793d73c259.png)
@@ -36,6 +51,8 @@ Visual Studio Code. It also installs the type definitions for the currently
 selected version of Electron automatically, ensuring that you always have
 all Electron APIs only a few keystrokes away.
 
+---
+
 ### Compile and Package
 
 <img width="895" alt="Screenshot: Fiddle's Tasks Menu" src="https://user-images.githubusercontent.com/8198408/183113871-5774174a-da63-4d9b-87fa-239512c843e6.png">
@@ -44,6 +61,8 @@ Fiddle can automatically turn your experiment into binaries you can share with
 your friends, coworkers, or grandparents. It does so thanks to
 [electron-forge][electron-forge], allowing you to package your fiddle as an
 app for Windows, macOS, or Linux.
+
+---
 
 ### Start with Fiddle, Continue Wherever
 
