@@ -17,13 +17,13 @@ address bar.
 
 ## Quickstart
 
-1. **Download and open Electron Fiddle** — it loads with a runnable starter template.  
-2. **Choose the Electron version** you want to test against using the dropdown.  
-3. **Edit the code** in the built-in Monaco editor (includes autocomplete & types).  
-4. Click **Run** to launch your Fiddle instantly.  
+1. **Download and open Electron Fiddle** — it loads with a runnable starter template.
+2. **Choose the Electron version** you want to test against using the dropdown.
+3. **Edit the code** in the built-in Monaco editor (includes autocomplete & types).
+4. Click **Run** to launch your Fiddle instantly.
 5. **Save your Fiddle**:
-   - Locally on your computer  
-   - Or publish as a GitHub Gist  
+   - Locally on your computer
+   - Or publish as a GitHub Gist
 6. Optionally, **package your Fiddle** into a desktop app using Electron Forge.
 
 Electron Fiddle is a fast‑feedback playground to prototype, test Electron APIs, and share/demo your work easily.
