@@ -65,8 +65,10 @@ export class OutputEditorsWrapper extends React.Component<
     );
   }
 
-  private onChange = (rootNode: MosaicParent<WrapperEditorId>) => {
-    const isConsoleShowing = rootNode.splitPercentage !== 0;
+  private onChange = (rootNode: MosaicNode<WrapperEditorId> | null) => {
+    if (rootNode === null) return;
+    const isConsoleShowing =
+      (rootNode as MosaicParent<WrapperEditorId>).splitPercentage !== 0;
 
     if (isConsoleShowing !== this.props.appState.isConsoleShowing) {
       this.props.appState.isConsoleShowing = isConsoleShowing;

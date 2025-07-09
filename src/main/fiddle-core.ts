@@ -1,7 +1,12 @@
 import { ChildProcess } from 'node:child_process';
 
 import { ElectronVersions, Installer, Runner } from '@electron/fiddle-core';
-import { BrowserWindow, IpcMainEvent, WebContents } from 'electron';
+import {
+  BrowserWindow,
+  IpcMainEvent,
+  IpcMainInvokeEvent,
+  WebContents,
+} from 'electron';
 
 import { ELECTRON_DOWNLOAD_PATH, ELECTRON_INSTALL_PATH } from './constants';
 import { ipcMainManager } from './ipc';
@@ -122,7 +127,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   ipcMainManager.handle(
     IpcEvents.DOWNLOAD_VERSION,
     async (
-      event: IpcMainEvent,
+      event: IpcMainInvokeEvent,
       version: string,
       opts?: Partial<DownloadVersionParams>,
     ) => {
@@ -156,7 +161,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   );
   ipcMainManager.handle(
     IpcEvents.REMOVE_VERSION,
-    async (_: IpcMainEvent, version: string) => {
+    async (_: IpcMainInvokeEvent, version: string) => {
       if (downloadingVersions.has(version)) {
         throw new Error('Version is being downloaded');
       }
@@ -175,7 +180,7 @@ export async function setupFiddleCore(versions: ElectronVersions) {
   );
   ipcMainManager.handle(
     IpcEvents.START_FIDDLE,
-    async (event: IpcMainEvent, params: StartFiddleParams) => {
+    async (event: IpcMainInvokeEvent, params: StartFiddleParams) => {
       await startFiddle(event.sender, params);
     },
   );

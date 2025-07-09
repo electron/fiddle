@@ -21,6 +21,7 @@ const config: Config = {
   collectCoverageFrom: ['src/**/*.{ts,tsx}', '!**/*.d.ts', '!**/*constants.ts'],
   coveragePathIgnorePatterns: ['/node_modules/', '/tests/.*\\.(ts|js)$'],
   moduleNameMapper: {
+    '^(\\.{1,2}/.*)\\.js$': '$1',
     '.*releases.json$': '<rootDir>/static/releases.json',
     '\\.(css|less|scss)$': '<rootDir>/tests/mocks/styles.ts',
   },

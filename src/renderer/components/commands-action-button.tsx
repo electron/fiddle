@@ -58,7 +58,7 @@ export const GistActionButton = observer(
       window.ElectronFiddle.removeAllListeners('save-fiddle-gist');
     }
 
-    private toaster: Toaster;
+    private toaster?: Toaster;
     private refHandlers = {
       toaster: (ref: Toaster) => (this.toaster = ref),
     };
@@ -153,7 +153,7 @@ export const GistActionButton = observer(
         this.setActionType(GistActionType.update);
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not publish gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({
@@ -227,7 +227,7 @@ export const GistActionButton = observer(
             },
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not update gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({
@@ -259,7 +259,7 @@ export const GistActionButton = observer(
         appState.editorMosaic.isEdited = true;
         console.log('Deleting: Deleting done', { gist });
         this.renderToast({ message: 'Successfully deleted gist!' });
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not delete gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({

@@ -210,7 +210,7 @@ export const SidebarFileTree = observer(
         appState.editorMosaic.renameFile(editorId, id);
 
         if (visible) appState.editorMosaic.show(id);
-      } catch (err) {
+      } catch (err: any) {
         appState.showErrorDialog(err.message);
       }
     };
@@ -225,7 +225,7 @@ export const SidebarFileTree = observer(
       try {
         appState.editorMosaic.addNewFile(editorId);
         appState.editorMosaic.show(editorId);
-      } catch (err) {
+      } catch (err: any) {
         appState.showErrorDialog(err.message);
       }
     };

@@ -29,7 +29,7 @@ export class RemoteLoader {
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
     ] as const) {
-      this[name] = this[name].bind(this);
+      this[name] = this[name].bind(this) as any;
     }
   }
 
@@ -110,7 +110,7 @@ export class RemoteLoader {
       await Promise.all(loaders);
 
       return this.handleLoadingSuccess(values, '');
-    } catch (error) {
+    } catch (error: any) {
       return this.handleLoadingFailed(error);
     }
   }
@@ -200,7 +200,7 @@ export class RemoteLoader {
       }
 
       return this.handleLoadingSuccess(values, gistId);
-    } catch (error) {
+    } catch (error: any) {
       return this.handleLoadingFailed(error);
     }
   }

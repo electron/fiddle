@@ -43,8 +43,8 @@ export async function onReady() {
 
   setupAboutPanel();
 
-  const { setupMenu } = await import('./menu');
-  const { setupFileListeners } = await import('./files');
+  const { setupMenu } = await import('./menu.js');
+  const { setupFileListeners } = await import('./files.js');
 
   setupShowWindow();
   setupMenu();
@@ -96,7 +96,7 @@ export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.BLOCK_ACCELERATORS,
     async (_, acceleratorsToBlock) => {
-      (await import('./menu')).setupMenu({
+      (await import('./menu.js')).setupMenu({
         acceleratorsToBlock,
         activeTemplate: null,
       });
@@ -106,7 +106,7 @@ export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.SET_SHOW_ME_TEMPLATE,
     async (_, activeTemplate) => {
-      (await import('./menu')).setupMenu({
+      (await import('./menu.js')).setupMenu({
         acceleratorsToBlock: [],
         activeTemplate,
       });

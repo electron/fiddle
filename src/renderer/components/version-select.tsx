@@ -39,7 +39,7 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
   renderItem,
   itemsParentRef,
 }) => {
-  const InnerElement = React.forwardRef((props, ref: React.RefObject<Menu>) => {
+  const InnerElement = React.forwardRef((props, ref: React.Ref<Menu>) => {
     return <Menu ref={ref} ulRef={itemsParentRef} {...props} />;
   });
   InnerElement.displayName = 'Menu';

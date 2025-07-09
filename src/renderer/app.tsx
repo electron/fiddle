@@ -117,9 +117,9 @@ export class App {
     ] = await Promise.all([
       import('react'),
       import('react-dom'),
-      import('./components/dialogs'),
-      import('./components/output-editors-wrapper'),
-      import('./components/header'),
+      import('./components/dialogs.js'),
+      import('./components/output-editors-wrapper.js'),
+      import('./components/header.js'),
     ]);
 
     // The AppState constructor started loading a fiddle.

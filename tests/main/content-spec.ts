@@ -78,7 +78,7 @@ describe('content', () => {
 
   describe('getTestTemplate()', () => {
     beforeEach(() => {
-      mocked(fetch).mockImplementation(fetchFromFilesystem);
+      mocked(fetch).mockImplementation(fetchFromFilesystem as typeof fetch);
     });
 
     afterEach(() => {
@@ -96,7 +96,7 @@ describe('content', () => {
 
   describe('getTemplate()', () => {
     beforeEach(() => {
-      mocked(fetch).mockImplementation(fetchFromFilesystem);
+      mocked(fetch).mockImplementation(fetchFromFilesystem as typeof fetch);
     });
     afterEach(() => {
       mocked(fetch).mockClear();

@@ -4,7 +4,7 @@ export class Bisector {
   public revList: Array<RunnableVersion>;
   public minRev: number;
   public maxRev: number;
-  private pivot: number;
+  private pivot!: number;
 
   constructor(revList: Array<RunnableVersion>) {
     this.getCurrentVersion = this.getCurrentVersion.bind(this);

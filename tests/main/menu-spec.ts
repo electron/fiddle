@@ -43,12 +43,14 @@ describe('menu', () => {
       const result = mocked(electron.Menu.buildFromTemplate).mock.calls[0][0];
       expect(result.length).toBe(8);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('creates a menu (Windows)', () => {
@@ -59,12 +61,14 @@ describe('menu', () => {
       const result = mocked(electron.Menu.buildFromTemplate).mock.calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('creates a menu (Linux)', () => {
@@ -75,12 +79,14 @@ describe('menu', () => {
       const result = mocked(electron.Menu.buildFromTemplate).mock.calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('adds Monaco toggle options', () => {

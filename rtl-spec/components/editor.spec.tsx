@@ -40,9 +40,9 @@ describe('Editor component', () => {
 
   describe('correctly sets the language', () => {
     it.each([
-      ['for javascript', 'file.js', 'javascript'],
-      ['for html', 'file.html', 'html'],
-      ['for css', 'file.css', 'css'],
+      ['for javascript', 'file.js' as EditorId, 'javascript'],
+      ['for html', 'file.html' as EditorId, 'html'],
+      ['for css', 'file.css' as EditorId, 'css'],
     ])('%s', (_: unknown, filename: EditorId, language: string) => {
       initializeEditorMosaic(filename);
 

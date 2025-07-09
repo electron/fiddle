@@ -175,7 +175,7 @@ export class AppState {
 
   // -- Editor Values stored when we close the editor ------------------
   private outputBuffer = '';
-  private name: string;
+  private name?: string;
   private readonly defaultVersion: string;
 
   // Used for communications between windows

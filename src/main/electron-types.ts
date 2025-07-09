@@ -2,7 +2,7 @@ import { readdir } from 'fs/promises';
 import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
-import { BrowserWindow, IpcMainEvent, app } from 'electron';
+import { BrowserWindow, IpcMainInvokeEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 import watch from 'node-watch';
 import packageJson from 'package-json';
@@ -50,7 +50,7 @@ export class ElectronTypes {
           window.webContents,
         );
       }
-    } catch (err) {
+    } catch (err: any) {
       console.debug(`Unable to read types from "${file}": ${err.message}`);
     }
   }
@@ -106,7 +106,7 @@ export class ElectronTypes {
       const ver = await this.cacheAndReturnNodeTypesVersion(v, dir);
 
       return { version: ver, types: await this.getTypesFromDir(dir) };
-    } catch (err) {
+    } catch (err: any) {
       console.debug(
         `Unable to get Node.js types for Electron "${version}": ${err.message}`,
       );
@@ -133,7 +133,7 @@ export class ElectronTypes {
           'utf8',
         );
       }
-    } catch (err) {
+    } catch (err: any) {
       console.debug(`Unable to read types from "${dir}": ${err.message}`);
     }
 
@@ -143,7 +143,7 @@ export class ElectronTypes {
   private getTypesFromFile(file: string): string | undefined {
     try {
       return fs.readFileSync(file, 'utf8');
-    } catch (err) {
+    } catch (err: any) {
       console.debug(`Unable to read types from "${file}": ${err.message}`);
       return undefined;
     }
@@ -263,7 +263,7 @@ export async function setupTypes(knownVersions: ElectronVersions) {
 
   ipcMainManager.handle(
     IpcEvents.GET_ELECTRON_TYPES,
-    (event: IpcMainEvent, ver: RunnableVersion) => {
+    (event: IpcMainInvokeEvent, ver: RunnableVersion) => {
       return electronTypes.getElectronTypes(
         BrowserWindow.fromWebContents(event.sender)!,
         ver,
@@ -272,19 +272,19 @@ export async function setupTypes(knownVersions: ElectronVersions) {
   );
   ipcMainManager.handle(
     IpcEvents.GET_NODE_TYPES,
-    (_: IpcMainEvent, version: string) => {
+    (_: IpcMainInvokeEvent, version: string) => {
       return electronTypes.getNodeTypes(version);
     },
   );
   ipcMainManager.handle(
     IpcEvents.UNCACHE_TYPES,
-    (_: IpcMainEvent, ver: RunnableVersion) => {
+    (_: IpcMainInvokeEvent, ver: RunnableVersion) => {
       electronTypes.uncache(ver);
     },
   );
   ipcMainManager.handle(
     IpcEvents.UNWATCH_ELECTRON_TYPES,
-    (event: IpcMainEvent) => {
+    (event: IpcMainInvokeEvent) => {
       electronTypes.unwatch(BrowserWindow.fromWebContents(event.sender)!);
     },
   );
