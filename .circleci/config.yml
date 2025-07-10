@@ -14,7 +14,7 @@ commands:
       - run: git config --global core.autocrlf input
       - node/install:
           arch: << parameters.arch >>
-          node-version: '20.16'
+          node-version: '22.17'
       - checkout
       - node/install-packages
       - run: yarn run contributors
@@ -27,8 +27,6 @@ commands:
     steps:
       - run:
           command: yarn test:ci
-          environment:
-            JEST_JUNIT_OUTPUT_DIR: ./reports/
       - store_test_results:
           path: ./reports/
 

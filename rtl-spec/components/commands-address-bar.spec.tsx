@@ -3,6 +3,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { runInAction } from 'mobx';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GistActionState } from '../../src/interfaces';
 import { AddressBar } from '../../src/renderer/components/commands-address-bar';

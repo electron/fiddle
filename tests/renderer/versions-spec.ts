@@ -1,5 +1,5 @@
-import { mocked } from 'jest-mock';
 import * as semver from 'semver';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
@@ -26,7 +26,7 @@ const mockVersions: Array<Partial<RunnableVersion>> = [
 describe('versions', () => {
   describe('getDefaultVersion()', () => {
     it('handles a stored version', () => {
-      mocked(localStorage.getItem).mockReturnValue('2.0.2');
+      vi.mocked(localStorage.getItem).mockReturnValue('2.0.2');
       const output = getDefaultVersion([
         { version: '2.0.2' } as RunnableVersion,
       ]);
@@ -34,8 +34,8 @@ describe('versions', () => {
     });
 
     it('uses the newest stable as a fallback', () => {
-      mocked(localStorage.getItem).mockReturnValue(null);
-      mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
+      vi.mocked(localStorage.getItem).mockReturnValue(null);
+      vi.mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
         semver.parse('13.0.0')!,
       );
       const output = getDefaultVersion([
@@ -88,7 +88,7 @@ describe('versions', () => {
 
   describe('addLocalVersion()', () => {
     beforeEach(() => {
-      mocked(window.localStorage.getItem).mockReturnValue(
+      vi.mocked(window.localStorage.getItem).mockReturnValue(
         JSON.stringify([mockVersions[0]]),
       );
     });
@@ -129,7 +129,7 @@ describe('versions', () => {
     });
 
     it('migrates an old format if necessary', () => {
-      mocked(window.localStorage.getItem).mockReturnValueOnce(
+      vi.mocked(window.localStorage.getItem).mockReturnValueOnce(
         `
         [{
           "url": "/Users/felixr/Code/electron/src/out/Debug",
@@ -158,7 +158,7 @@ describe('versions', () => {
 
   describe('fetchVersions()', () => {
     it('removes knownVersions from localStorage', async () => {
-      mocked(window.ElectronFiddle.fetchVersions).mockResolvedValue([]);
+      vi.mocked(window.ElectronFiddle.fetchVersions).mockResolvedValue([]);
       await fetchVersions();
       expect(localStorage.removeItem).toHaveBeenCalledWith(
         GlobalSetting.knownVersion,

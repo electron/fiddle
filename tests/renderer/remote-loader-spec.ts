@@ -1,5 +1,5 @@
 import { Octokit } from '@octokit/rest';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   EditorValues,
@@ -20,7 +20,7 @@ import { getOctokit } from '../../src/renderer/utils/octokit';
 import { AppMock, StateMock, createEditorValues } from '../mocks/mocks';
 import { FetchMock } from '../utils';
 
-jest.mock('../../src/renderer/utils/octokit');
+vi.mock('../../src/renderer/utils/octokit');
 
 type GistFile = { content: string; truncated?: boolean; raw_url?: string };
 type GistFiles = { [id: string]: GistFile };
@@ -54,7 +54,7 @@ describe('RemoteLoader', () => {
       ]),
     );
     mockGetGists = {
-      get: jest.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
+      get: vi.fn().mockResolvedValue({ data: { files: mockGistFiles } }),
     };
 
     mockRepos = [
@@ -65,14 +65,14 @@ describe('RemoteLoader', () => {
       { name: 'stuff', download_url: 'https://google.com/' },
     ];
     mockGetRepos = {
-      getContents: jest.fn().mockResolvedValue({ data: mockRepos }),
+      getContents: vi.fn().mockResolvedValue({ data: mockRepos }),
     };
   });
 
   describe('fetchGistAndLoad()', () => {
     it('loads a fiddle', async () => {
       const gistId = 'abcdtestid';
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
       store.gistId = gistId;
@@ -95,7 +95,7 @@ describe('RemoteLoader', () => {
         download_url: `https://${PACKAGE_NAME}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
 
@@ -122,7 +122,7 @@ describe('RemoteLoader', () => {
         download_url: `https://${PACKAGE_NAME}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
 
@@ -135,9 +135,9 @@ describe('RemoteLoader', () => {
     it('throws an error when a user loads a gist with no supported files', async () => {
       const gistId = 'abcdtestid';
 
-      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+      store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
       const errorGetGists = {
-        get: jest.fn().mockResolvedValue({
+        get: vi.fn().mockResolvedValue({
           data: {
             files: {
               'blah.blah': { content: '' },
@@ -146,7 +146,7 @@ describe('RemoteLoader', () => {
           },
         }),
       };
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: errorGetGists,
       } as unknown as Octokit);
       store.gistId = gistId;
@@ -176,10 +176,10 @@ describe('RemoteLoader', () => {
         download_url: `https://${PACKAGE_NAME}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
-      mocked(window.ElectronFiddle.isReleasedMajor).mockResolvedValue(true);
+      vi.mocked(window.ElectronFiddle.isReleasedMajor).mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -200,14 +200,14 @@ describe('RemoteLoader', () => {
         raw_url: 'https://gist.githubusercontent.com/IMTOOBIG',
       };
 
-      jest.spyOn(global, 'fetch').mockResolvedValueOnce({
+      vi.spyOn(global, 'fetch').mockResolvedValueOnce({
         text: () => Promise.resolve(content),
       } as Response);
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
-      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
+      instance.confirmAddFile = vi.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
       expect(result).toBe(true);
@@ -230,7 +230,7 @@ describe('RemoteLoader', () => {
         download_url: `https://${PACKAGE_NAME}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
 
@@ -266,7 +266,7 @@ describe('RemoteLoader', () => {
         download_url: `https://${PACKAGE_NAME}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
 
@@ -296,10 +296,10 @@ describe('RemoteLoader', () => {
         download_url: `https://${filename}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
-      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
+      instance.confirmAddFile = vi.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -323,10 +323,10 @@ describe('RemoteLoader', () => {
         download_url: `https://${filename}`,
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: mockGetGists,
       } as unknown as Octokit);
-      instance.confirmAddFile = jest.fn().mockResolvedValue(true);
+      instance.confirmAddFile = vi.fn().mockResolvedValue(true);
 
       const result = await instance.fetchGistAndLoad(gistId);
 
@@ -335,7 +335,7 @@ describe('RemoteLoader', () => {
     });
 
     it('handles an error', async () => {
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         gists: {
           get: async () => {
             throw new Error('Bwap bwap');
@@ -352,7 +352,7 @@ describe('RemoteLoader', () => {
     let fetchMock: FetchMock;
 
     beforeEach(() => {
-      instance.setElectronVersion = jest.fn().mockReturnValueOnce(true);
+      instance.setElectronVersion = vi.fn().mockReturnValueOnce(true);
       fetchMock = new FetchMock();
       for (const { name, download_url } of mockRepos) {
         fetchMock.add(download_url, name);
@@ -360,11 +360,11 @@ describe('RemoteLoader', () => {
     });
 
     it('loads an Electron example', async () => {
-      mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
+      vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
         [MAIN_JS]: '// content',
       });
 
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         repos: mockGetRepos,
       } as unknown as Octokit);
 
@@ -383,7 +383,7 @@ describe('RemoteLoader', () => {
     });
 
     it('handles an error', async () => {
-      mocked(getOctokit).mockResolvedValue({
+      vi.mocked(getOctokit).mockResolvedValue({
         repos: {
           getContents: async () => {
             throw new Error('Bwap bwap');
@@ -396,8 +396,8 @@ describe('RemoteLoader', () => {
     });
 
     it('handles incorrect results', async () => {
-      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
-      mocked(getOctokit).mockResolvedValue({
+      store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
+      vi.mocked(getOctokit).mockResolvedValue({
         repos: {
           getContents: async () => ({
             not_an_array: true,
@@ -415,7 +415,7 @@ describe('RemoteLoader', () => {
 
   describe('setElectronVersion()', () => {
     it('sets version from ref if release channel enabled', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
 
       const result = await instance.setElectronVersion('4.0.0');
       expect(result).toBe(true);
@@ -423,7 +423,7 @@ describe('RemoteLoader', () => {
     });
 
     it('enables release channel when authorized', async () => {
-      instance.verifyReleaseChannelEnabled = jest.fn().mockResolvedValue(true);
+      instance.verifyReleaseChannelEnabled = vi.fn().mockResolvedValue(true);
 
       const result = await instance.setElectronVersion('4.0.0-beta');
       expect(result).toBe(true);
@@ -448,7 +448,7 @@ describe('RemoteLoader', () => {
 
   describe('verifyReleaseChannelEnabled', () => {
     it('asks the user if they want to enable a release channel', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
       await instance.verifyReleaseChannelEnabled(ElectronReleaseChannel.beta);
       expect(store.showConfirmDialog).toHaveBeenCalledWith({
         label: expect.stringMatching(/enable the release channel/i),
@@ -459,9 +459,9 @@ describe('RemoteLoader', () => {
 
   describe('loadFiddleFromElectronExample()', () => {
     it('loads the example with confirmation', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      instance.verifyReleaseChannelEnabled = jest.fn().mockResolvedValue(true);
-      instance.fetchExampleAndLoad = jest.fn();
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
+      instance.verifyReleaseChannelEnabled = vi.fn().mockResolvedValue(true);
+      instance.fetchExampleAndLoad = vi.fn();
       await instance.loadFiddleFromElectronExample({
         path: 'test/path',
         tag: 'v4.0.0',
@@ -478,9 +478,9 @@ describe('RemoteLoader', () => {
     });
 
     it('does not load the example without confirmation', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
-      instance.verifyReleaseChannelEnabled = jest.fn();
-      instance.fetchExampleAndLoad = jest.fn();
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(false);
+      instance.verifyReleaseChannelEnabled = vi.fn();
+      instance.fetchExampleAndLoad = vi.fn();
       await instance.loadFiddleFromElectronExample({
         path: 'test/path',
         tag: 'v4.0.0',
@@ -493,8 +493,8 @@ describe('RemoteLoader', () => {
 
   describe('loadFiddleFromGist()', () => {
     it('loads the example with confirmation', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
-      instance.fetchGistAndLoad = jest.fn();
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
+      instance.fetchGistAndLoad = vi.fn();
       await instance.loadFiddleFromGist({ id: 'gist' });
 
       expect(instance.fetchGistAndLoad).toHaveBeenCalledWith('gist');
@@ -505,8 +505,8 @@ describe('RemoteLoader', () => {
     });
 
     it('does not load the example without confirmation', async () => {
-      store.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
-      instance.fetchGistAndLoad = jest.fn();
+      store.showConfirmDialog = vi.fn().mockResolvedValueOnce(false);
+      instance.fetchGistAndLoad = vi.fn();
       await instance.loadFiddleFromGist({ id: 'gist' });
 
       expect(instance.fetchGistAndLoad).not.toHaveBeenCalled();

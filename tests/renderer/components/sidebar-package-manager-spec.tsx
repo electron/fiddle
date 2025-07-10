@@ -2,11 +2,12 @@ import * as React from 'react';
 
 import { Button } from '@blueprintjs/core';
 import { mount, shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
 import { AppState } from '../../../src/renderer/state';
 
-jest.mock('../../../src/renderer/npm-search', () => ({
+vi.mock('../../../src/renderer/npm-search', () => ({
   npmSearch: {
     // this is just enough mocking to hit the right code paths
     // by stubbing out the npmSearch utility.

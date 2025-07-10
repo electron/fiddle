@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
 import { app } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 const getConfigPath = () => {
   const userDataPath = app.getPath('userData');

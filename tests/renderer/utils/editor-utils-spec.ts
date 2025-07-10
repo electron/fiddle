@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { EditorId, MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import {
   compareEditors,

@@ -1,47 +1,59 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
-
-import { mocked } from 'jest-mock';
+import { type Mock, beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { setupDevTools } from '../../src/main/devtools';
 import { isDevMode } from '../../src/main/utils/devmode';
 
-jest.mock('../../src/main/utils/devmode');
+vi.mock('../../src/main/utils/devmode');
 
-jest.mock('electron-devtools-installer', () => ({
-  default: jest.fn(),
-  REACT_DEVELOPER_TOOLS: 'REACT_DEVELOPER_TOOLS',
-  REACT_PERF: 'REACT_PERF',
-}));
+const installExtensionPromise = vi.hoisted(async () => {
+  const { mockRequire } = await import('../utils.js');
+  const installExtension = vi.fn();
 
-describe('devtools', () => {
-  it('does not set up developer tools if not in dev mode', () => {
-    const devtools = require('electron-devtools-installer');
-    mocked(isDevMode).mockReturnValue(false);
-    setupDevTools();
-
-    expect(devtools.default).toHaveBeenCalledTimes(0);
+  mockRequire('electron-devtools-installer', {
+    default: installExtension,
+    REACT_DEVELOPER_TOOLS: 'REACT_DEVELOPER_TOOLS',
+    REACT_PERF: 'REACT_PERF',
   });
 
-  it('sets up developer tools if in dev mode', () => {
-    const devtools = require('electron-devtools-installer');
-    mocked(isDevMode).mockReturnValue(true);
-    setupDevTools();
+  return installExtension;
+});
 
-    expect(devtools.default).toHaveBeenCalledTimes(1);
+describe('devtools', () => {
+  let installExtension: Mock;
+
+  beforeAll(async () => {
+    installExtension = await installExtensionPromise;
+  });
+
+  it('does not set up developer tools if not in dev mode', async () => {
+    vi.mocked(isDevMode).mockReturnValue(false);
+    await setupDevTools();
+
+    expect(installExtension).toHaveBeenCalledTimes(0);
+  });
+
+  it('sets up developer tools if in dev mode', async () => {
+    vi.mocked(isDevMode).mockReturnValue(true);
+    await setupDevTools();
+
+    expect(installExtension).toHaveBeenCalledTimes(1);
   });
 
   it('catch error in setting up developer tools', async () => {
-    const devtools = require('electron-devtools-installer');
-    // throw devtool error
-    devtools.default.mockRejectedValue(new Error('devtool error'));
-    mocked(isDevMode).mockReturnValue(true);
+    console.warn = vi.fn();
+    const error = new Error('devtool error');
 
-    try {
-      await setupDevTools();
-    } catch (e) {
-      expect(e).toMatch('error');
-    }
+    // throw devtool error
+    vi.mocked(installExtension).mockRejectedValue(error);
+    vi.mocked(isDevMode).mockReturnValue(true);
+
+    await setupDevTools();
+    expect(console.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/installDevTools/),
+      error,
+    );
   });
 });

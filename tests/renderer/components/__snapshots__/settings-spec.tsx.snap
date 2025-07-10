@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Settings component renders only the menu if page unknown 1`] = `
+exports[`Settings component > renders only the menu if page unknown 1`] = `
 <div
   className="settings"
 >
@@ -73,7 +73,7 @@ exports[`Settings component renders only the menu if page unknown 1`] = `
 </div>
 `;
 
-exports[`Settings component renders the Credits page after a click 1`] = `
+exports[`Settings component > renders the Credits page after a click 1`] = `
 <div
   className="settings"
 >
@@ -153,7 +153,7 @@ exports[`Settings component renders the Credits page after a click 1`] = `
 </div>
 `;
 
-exports[`Settings component renders the Electron page after a click 1`] = `
+exports[`Settings component > renders the Electron page after a click 1`] = `
 <div
   className="settings"
 >
@@ -233,7 +233,7 @@ exports[`Settings component renders the Electron page after a click 1`] = `
 </div>
 `;
 
-exports[`Settings component renders the Electron page by default 1`] = `
+exports[`Settings component > renders the Electron page by default 1`] = `
 <div
   className="settings"
 >
@@ -314,7 +314,7 @@ exports[`Settings component renders the Electron page by default 1`] = `
 </div>
 `;
 
-exports[`Settings component renders the Execution page after a click 1`] = `
+exports[`Settings component > renders the Execution page after a click 1`] = `
 <div
   className="settings"
 >
@@ -383,7 +383,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
         iconSize={25}
       />
     </button>
-    <ExecutionSettings
+    <ExecutionSettings2
       appState={
         {
           "isSettingsShowing": true,
@@ -394,7 +394,7 @@ exports[`Settings component renders the Execution page after a click 1`] = `
 </div>
 `;
 
-exports[`Settings component renders the General page after a click 1`] = `
+exports[`Settings component > renders the General page after a click 1`] = `
 <div
   className="settings"
 >

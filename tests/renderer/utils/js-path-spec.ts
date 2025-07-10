@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { getAtPath, setAtPath } from '../../../src/renderer/utils/js-path';
 
 describe('js-path', () => {

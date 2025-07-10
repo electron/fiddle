@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AddThemeDialog } from '../../../src/renderer/components/dialog-add-theme';
 import { AppState } from '../../../src/renderer/state';
@@ -77,7 +77,7 @@ describe('AddThemeDialog component', () => {
       });
 
       const themePath = '~/.electron-fiddle/themes/testingLight';
-      mocked(window.ElectronFiddle.createThemeFile).mockResolvedValue({
+      vi.mocked(window.ElectronFiddle.createThemeFile).mockResolvedValue({
         file: themePath,
       } as LoadedFiddleTheme);
 
@@ -100,8 +100,8 @@ describe('AddThemeDialog component', () => {
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance();
 
-      instance.createNewThemeFromMonaco = jest.fn();
-      instance.onClose = jest.fn();
+      instance.createNewThemeFromMonaco = vi.fn();
+      instance.onClose = vi.fn();
 
       await instance.onSubmit();
 
@@ -119,11 +119,11 @@ describe('AddThemeDialog component', () => {
         '/test/file.json',
         'application/json',
       );
-      const spy = jest.spyOn(file, 'text');
+      const spy = vi.spyOn(file, 'text');
       wrapper.setState({ file });
 
-      instance.createNewThemeFromMonaco = jest.fn();
-      instance.onClose = jest.fn();
+      instance.createNewThemeFromMonaco = vi.fn();
+      instance.onClose = vi.fn();
 
       await instance.onSubmit();
 
@@ -133,7 +133,7 @@ describe('AddThemeDialog component', () => {
     });
 
     it('shows an error dialog for a malformed theme', async () => {
-      store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+      store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
       const wrapper = shallow(<AddThemeDialog appState={store} />);
       const instance: any = wrapper.instance();
 
@@ -143,10 +143,10 @@ describe('AddThemeDialog component', () => {
         '/test/file.json',
         'application/json',
       );
-      const spy = jest.spyOn(file, 'text').mockResolvedValue('{}');
+      const spy = vi.spyOn(file, 'text').mockResolvedValue('{}');
       wrapper.setState({ file });
 
-      instance.onClose = jest.fn();
+      instance.onClose = vi.fn();
 
       await instance.onSubmit();
 

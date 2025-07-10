@@ -1,9 +1,9 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import { contextBridge } from 'electron';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { setupFiddleGlobal } from '../../src/preload/preload';
 
@@ -17,7 +17,7 @@ describe('preload', () => {
 
   describe('setupGlobalWindow()', () => {
     it('exposes an ElectronFiddle object via the contextBridge', async () => {
-      mocked(contextBridge.exposeInMainWorld).mockReturnValue(undefined);
+      vi.mocked(contextBridge.exposeInMainWorld).mockReturnValue(undefined);
       await setupFiddleGlobal();
 
       expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith(

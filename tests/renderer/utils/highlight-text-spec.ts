@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { highlightText } from '../../../src/renderer/utils/highlight-text';
 
 describe('highlightText', () => {

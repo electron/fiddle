@@ -1,5 +1,5 @@
 import { ReleaseInfo } from '@electron/fiddle-core';
-import { mocked } from 'jest-mock';
+import { describe, expect, it, vi } from 'vitest';
 
 import { PACKAGE_NAME } from '../../src/interfaces';
 import { forgeTransform } from '../../src/renderer/transforms/forge';
@@ -62,7 +62,7 @@ describe('forgeTransform()', () => {
   });
 
   it('forces ABI for nightly builds', async () => {
-    mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue({
+    vi.mocked(window.ElectronFiddle.getReleaseInfo).mockResolvedValue({
       version: '26.0.0-nightly.20230411',
       modules: '116',
     } as ReleaseInfo);

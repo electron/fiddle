@@ -1,13 +1,13 @@
 import * as path from 'node:path';
 
-import { mocked } from 'jest-mock';
+import { describe, expect, it, vi } from 'vitest';
 
 import { MAIN_JS } from '../../src/interfaces';
 import { getTemplateValues } from '../../src/main/templates';
 import { getEmptyContent } from '../../src/utils/editor-utils';
 
-jest.unmock('fs-extra');
-jest.mock('../../src/main/constants', () => ({
+vi.unmock('fs-extra');
+vi.mock('../../src/main/constants', () => ({
   STATIC_DIR: path.join(__dirname, '../../static'),
 }));
 
@@ -27,7 +27,7 @@ describe('templates', () => {
     });
 
     it('reports missing files', async () => {
-      console.log = jest.fn();
+      console.log = vi.fn();
 
       await getTemplateValues(KNOWN_BAD_TEMPLATE);
 
@@ -36,7 +36,7 @@ describe('templates', () => {
         [MAIN_JS],
       );
 
-      mocked(console.log).mockClear();
+      vi.mocked(console.log).mockClear();
     });
   });
 });

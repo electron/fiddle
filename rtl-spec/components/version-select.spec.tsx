@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { mocked } from 'jest-mock';
+import { describe, expect, it, vi } from 'vitest';
 
 import {
   InstallState,
@@ -22,7 +22,7 @@ import { mockVersion1, prepareAppState } from '../test-utils/versions';
 const { downloading, installed, missing, installing } = InstallState;
 const { local } = VersionSource;
 
-jest.mock('../../src/renderer/utils/disable-download.ts');
+vi.mock('../../src/renderer/utils/disable-download.ts');
 
 describe('VersionSelect component', () => {
   function renderVersionSelect() {
@@ -32,7 +32,7 @@ describe('VersionSelect component', () => {
       <VersionSelect
         appState={appState}
         currentVersion={mockVersion1}
-        onVersionSelect={jest.fn()}
+        onVersionSelect={vi.fn()}
       />,
     );
   }
@@ -52,7 +52,7 @@ describe('VersionSelect component', () => {
 
   describe('disableDownload', () => {
     it('disables download buttons when return value is true', () => {
-      mocked(disableDownload).mockReturnValueOnce(true);
+      vi.mocked(disableDownload).mockReturnValueOnce(true);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
@@ -67,7 +67,7 @@ describe('VersionSelect component', () => {
     });
 
     it('does not disable enabled download buttons when return value is false', () => {
-      mocked(disableDownload).mockReturnValueOnce(false);
+      vi.mocked(disableDownload).mockReturnValueOnce(false);
 
       const item = renderItem(mockVersion1, {
         handleClick: () => ({}),
@@ -194,9 +194,9 @@ describe('VersionSelect component', () => {
 
   describe('renderVersionContextMenu()', () => {
     it('copies the current version number to the clipboard', async () => {
-      const spy = jest
+      const spy = vi
         .spyOn(navigator.clipboard, 'writeText')
-        .mockImplementationOnce(jest.fn());
+        .mockImplementationOnce(vi.fn());
 
       const { getByRole, getByText } = renderVersionSelect();
 

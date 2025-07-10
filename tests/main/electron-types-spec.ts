@@ -2,9 +2,9 @@ import * as path from 'node:path';
 
 import { ElectronVersions, ReleaseInfo } from '@electron/fiddle-core';
 import type { BrowserWindow } from 'electron';
-import * as fs from 'fs-extra';
-import { mocked } from 'jest-mock';
+import fs from 'fs-extra';
 import * as tmp from 'tmp';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   InstallState,
@@ -16,10 +16,9 @@ import { ElectronTypes } from '../../src/main/electron-types';
 import { ipcMainManager } from '../../src/main/ipc';
 import { ElectronVersionsMock } from '../mocks/fiddle-core';
 import { BrowserWindowMock, NodeTypesMock } from '../mocks/mocks';
-import { waitFor } from '../utils';
 
-jest.mock('../../src/main/ipc');
-jest.unmock('fs-extra');
+vi.mock('../../src/main/ipc');
+vi.unmock('fs-extra');
 
 describe('ElectronTypes', () => {
   const version = '10.11.12';
@@ -34,7 +33,7 @@ describe('ElectronTypes', () => {
   let electronVersions: ElectronVersionsMock;
   let browserWindow: BrowserWindow;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpdir = tmp.dirSync({
       template: 'electron-fiddle-typedefs-XXXXXX',
       unsafeCleanup: true,
@@ -73,9 +72,11 @@ describe('ElectronTypes', () => {
       electronCacheDir,
       nodeCacheDir,
     );
-    nodeTypesData = require('../fixtures/node-types.json');
+    ({ default: nodeTypesData } = await import('../fixtures/node-types.json', {
+      with: { type: 'json' },
+    }));
 
-    mocked(electronVersions.getReleaseInfo).mockReturnValue({
+    vi.mocked(electronVersions.getReleaseInfo).mockReturnValue({
       node: nodeVersion,
     } as ReleaseInfo);
 
@@ -85,7 +86,7 @@ describe('ElectronTypes', () => {
   afterEach(async () => {
     electronTypes.unwatch(browserWindow);
     tmpdir.removeCallback();
-    mocked(fetch).mockReset();
+    vi.mocked(fetch).mockReset();
   });
 
   describe('getElectronTypes({ source: local })', () => {
@@ -109,7 +110,9 @@ describe('ElectronTypes', () => {
 
       const newTypes = saveTypesFile('some changed types');
       expect(newTypes).not.toEqual(oldTypes);
-      await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0);
+      await vi.waitUntil(
+        () => vi.mocked(ipcMainManager).send.mock.calls.length > 0,
+      );
       expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.ELECTRON_TYPES_CHANGED,
         [newTypes, localVersion.version],
@@ -130,9 +133,11 @@ describe('ElectronTypes', () => {
       // test that updating the now-unobserved version A triggers no actions
       types = saveTypesFile('some changed types');
       try {
-        await waitFor(() => mocked(ipcMainManager).send.mock.calls.length > 0);
-      } catch (err) {
-        expect(err).toMatch(/timed out/i);
+        await vi.waitUntil(
+          () => vi.mocked(ipcMainManager).send.mock.calls.length > 0,
+        );
+      } catch (err: any) {
+        expect(err.toString()).toMatch(/timed out/i);
       }
       expect(ipcMainManager.send).not.toHaveBeenCalled();
     });
@@ -148,9 +153,9 @@ describe('ElectronTypes', () => {
     it('fetches types', async () => {
       const version = { ...remoteVersion, version: '15.0.0-nightly.20210628' };
       const types = 'here are the types';
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue(types),
-        json: jest.fn().mockImplementation(async () => JSON.parse(types)),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue(types),
+        json: vi.fn().mockImplementation(async () => JSON.parse(types)),
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -171,9 +176,9 @@ describe('ElectronTypes', () => {
 
       // setup: fetch and cache a .d.ts that we did not have
       const types = 'here are the types';
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue(types),
-        json: jest.fn().mockImplementation(async () => JSON.parse(types)),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue(types),
+        json: vi.fn().mockImplementation(async () => JSON.parse(types)),
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -191,7 +196,7 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() rejects', async () => {
-      mocked(fetch).mockRejectedValue(new Error('💩'));
+      vi.mocked(fetch).mockRejectedValue(new Error('💩'));
       await expect(
         electronTypes.getElectronTypes(browserWindow, remoteVersion),
       ).resolves.toBe(undefined);
@@ -199,8 +204,8 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() does not find the package', async () => {
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue('Cannot find package'),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue('Cannot find package'),
         ok: false,
         status: 404,
         statusText: 'Not Found',
@@ -215,9 +220,9 @@ describe('ElectronTypes', () => {
   describe('getNodeTypes', () => {
     it('fetches types', async () => {
       const content = JSON.stringify({ files: nodeTypesData });
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue(content),
-        json: jest.fn().mockImplementation(async () => JSON.parse(content)),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue(content),
+        json: vi.fn().mockImplementation(async () => JSON.parse(content)),
         ok: true,
         status: 200,
         statusText: 'OK',
@@ -238,7 +243,7 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() rejects', async () => {
-      mocked(fetch).mockRejectedValue(new Error('💩'));
+      vi.mocked(fetch).mockRejectedValue(new Error('💩'));
       await expect(
         electronTypes.getNodeTypes(remoteVersion.version),
       ).resolves.toBe(undefined);
@@ -246,8 +251,8 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if fetch() does not find the package', async () => {
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue('Cannot find package'),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue('Cannot find package'),
         ok: false,
         status: 404,
         statusText: 'Not Found',
@@ -259,7 +264,7 @@ describe('ElectronTypes', () => {
     });
 
     it('does not crash if no release info', async () => {
-      mocked(electronVersions.getReleaseInfo).mockReturnValue(undefined);
+      vi.mocked(electronVersions.getReleaseInfo).mockReturnValue(undefined);
 
       await expect(
         electronTypes.getNodeTypes(remoteVersion.version),
@@ -274,9 +279,9 @@ describe('ElectronTypes', () => {
       expect(fs.existsSync(cacheFile)).toBe(false);
       const types = 'here are the types';
       const content = JSON.stringify({ files: types });
-      mocked(fetch).mockResolvedValue({
-        text: jest.fn().mockResolvedValue(content),
-        json: jest.fn().mockImplementation(async () => JSON.parse(content)),
+      vi.mocked(fetch).mockResolvedValue({
+        text: vi.fn().mockResolvedValue(content),
+        json: vi.fn().mockImplementation(async () => JSON.parse(content)),
         ok: true,
         status: 200,
         statusText: 'OK',

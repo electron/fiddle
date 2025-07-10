@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { InputGroup, Radio } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MirrorSettings } from '../../../src/renderer/components/settings-general-mirror';
 import { AppState } from '../../../src/renderer/state';

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InstallState, VersionSource } from '../../src/interfaces';
 import { BisectHandler } from '../../src/renderer/components/commands-bisect';
@@ -60,7 +60,7 @@ describe('Bisect commands component', () => {
       });
       // the bisector returns the next version to inspect
       // when continuing the bisect process
-      mocked(store.Bisector!.continue).mockReturnValueOnce({
+      vi.mocked(store.Bisector!.continue).mockReturnValueOnce({
         version: 'v10.0.0',
         source: VersionSource.remote,
         state: InstallState.downloaded,
@@ -79,7 +79,7 @@ describe('Bisect commands component', () => {
     });
     // the bisector returns a tuple of two values when
     // the bisect is terminated
-    mocked(store.Bisector!.continue).mockReturnValueOnce([
+    vi.mocked(store.Bisector!.continue).mockReturnValueOnce([
       {
         version: 'v10.0.0',
         source: VersionSource.remote,

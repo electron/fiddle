@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
 import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import * as tmp from 'tmp';
 
 import { ipcMainManager } from './ipc';

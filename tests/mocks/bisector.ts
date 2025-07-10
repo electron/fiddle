@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 import { RunnableVersion } from '../../src/interfaces';
 
 export class BisectorMock {
@@ -6,7 +8,7 @@ export class BisectorMock {
   public maxRev: number = 0;
   public pivot: number = 0;
 
-  public getCurrentVersion = jest.fn();
-  public continue = jest.fn();
-  public calculatePivot = jest.fn();
+  public getCurrentVersion = vi.fn();
+  public continue = vi.fn();
+  public calculatePivot = vi.fn();
 }

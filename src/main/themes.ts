@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
 import { IpcMainInvokeEvent, app, shell } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import * as namor from 'namor';
 
 import { ipcMainManager } from './ipc';

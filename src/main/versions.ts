@@ -2,7 +2,7 @@ import * as path from 'node:path';
 
 import { ElectronVersions, Installer, SemVer } from '@electron/fiddle-core';
 import { IpcMainInvokeEvent, app } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
 import releases from '../../static/releases.json';

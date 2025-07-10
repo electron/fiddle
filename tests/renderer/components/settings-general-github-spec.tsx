@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
 import { AppState } from '../../../src/renderer/state';

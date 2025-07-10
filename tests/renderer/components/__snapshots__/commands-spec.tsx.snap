@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Commands component renders when system is darwin 1`] = `
+exports[`Commands component > renders when system is darwin 1`] = `
 <div
   className="commands is-mac"
   onDoubleClick={[Function]}
@@ -12,7 +12,7 @@ exports[`Commands component renders when system is darwin 1`] = `
     >
       <Blueprint3.Button
         icon="cog"
-        onClick={[MockFunction]}
+        onClick={[MockFunction spy]}
         title="Setting"
       />
     </Blueprint3.ControlGroup>
@@ -54,7 +54,7 @@ exports[`Commands component renders when system is darwin 1`] = `
 </div>
 `;
 
-exports[`Commands component renders when system not is darwin 1`] = `
+exports[`Commands component > renders when system not is darwin 1`] = `
 <div
   className="commands"
   onDoubleClick={[Function]}
@@ -66,7 +66,7 @@ exports[`Commands component renders when system not is darwin 1`] = `
     >
       <Blueprint3.Button
         icon="cog"
-        onClick={[MockFunction]}
+        onClick={[MockFunction spy]}
         title="Setting"
       />
     </Blueprint3.ControlGroup>

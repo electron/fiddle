@@ -1,4 +1,4 @@
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { activateTheme, getTheme } from '../../src/renderer/themes';
 import { LoadedFiddleTheme } from '../../src/themes-defaults';
@@ -37,13 +37,13 @@ describe('themes', () => {
       let theme: LoadedFiddleTheme;
       window.app.state.isUsingSystemTheme = true;
 
-      mocked(window.matchMedia).mockReturnValueOnce({
+      vi.mocked(window.matchMedia).mockReturnValueOnce({
         matches: true,
       } as MediaQueryList);
       theme = await getTheme(window.app.state, null);
       expect(theme.name).toBe('Fiddle (Dark)');
 
-      mocked(window.matchMedia).mockReturnValueOnce({
+      vi.mocked(window.matchMedia).mockReturnValueOnce({
         matches: false,
       } as MediaQueryList);
       theme = await getTheme(window.app.state, null);
@@ -51,7 +51,7 @@ describe('themes', () => {
     });
 
     it('returns a named theme', async () => {
-      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue({
+      vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue({
         name: 'Test',
         common: { test: true },
       } as unknown as LoadedFiddleTheme);
@@ -61,7 +61,7 @@ describe('themes', () => {
     });
 
     it('handles a read error', async () => {
-      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(null);
+      vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(null);
 
       const theme = await getTheme(window.app.state, 'test');
       expect(theme.name).toBe('Fiddle (Dark)');

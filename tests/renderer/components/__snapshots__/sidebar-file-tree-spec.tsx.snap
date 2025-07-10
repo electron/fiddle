@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SidebarFileTree component can bring up the Add File input 1`] = `
+exports[`SidebarFileTree component > can bring up the Add File input 1`] = `
 <div
   className="fiddle-scrollbar"
 >
@@ -340,7 +340,7 @@ exports[`SidebarFileTree component can bring up the Add File input 1`] = `
 </div>
 `;
 
-exports[`SidebarFileTree component reflects the visibility state of all icons 1`] = `
+exports[`SidebarFileTree component > reflects the visibility state of all icons 1`] = `
 <div
   className="fiddle-scrollbar"
 >
@@ -662,7 +662,7 @@ exports[`SidebarFileTree component reflects the visibility state of all icons 1`
 </div>
 `;
 
-exports[`SidebarFileTree component renders 1`] = `
+exports[`SidebarFileTree component > renders 1`] = `
 <div
   className="fiddle-scrollbar"
 >
