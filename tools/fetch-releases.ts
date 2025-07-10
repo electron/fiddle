@@ -6,7 +6,7 @@ import { ElectronVersions } from '@electron/fiddle-core';
 const file = path.join(__dirname, '..', 'static', 'releases.json');
 
 export async function populateReleases() {
-  const elves = await ElectronVersions.create(undefined, { ignoreCache: true });
+  const elves = await ElectronVersions.create({ ignoreCache: true });
   const releases = elves.versions.map(({ version }) =>
     elves.getReleaseInfo(version),
   );
