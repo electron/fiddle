@@ -3,7 +3,7 @@ import * as path from 'node:path';
 
 import { ElectronVersions } from '@electron/fiddle-core';
 import { BrowserWindow, IpcMainInvokeEvent, app } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import watch from 'node-watch';
 import packageJson from 'package-json';
 import semver from 'semver';

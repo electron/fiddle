@@ -1,22 +1,21 @@
-import { mocked } from 'jest-mock';
 import * as semver from 'semver';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
 import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
 import { defaultDark, defaultLight } from '../../src/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
-import { waitFor } from '../utils';
 
-global.fetch = window.fetch = jest.fn();
+global.fetch = window.fetch = vi.fn();
 
-jest.mock('../../src/renderer/components/header', () => ({
+vi.mock('../../src/renderer/components/header', () => ({
   Header: () => 'Header;',
 }));
-jest.mock('../../src/renderer/components/dialogs', () => ({
+vi.mock('../../src/renderer/components/dialogs', () => ({
   Dialogs: () => 'Dialogs;',
 }));
-jest.mock('../../src/renderer/components/output-editors-wrapper', () => ({
+vi.mock('../../src/renderer/components/output-editors-wrapper', () => ({
   OutputEditorsWrapper: () => 'OutputEditorsWrapper;',
 }));
 
@@ -28,19 +27,21 @@ describe('App component', () => {
   });
 
   beforeEach(() => {
-    mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
+    vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
-    mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(defaultDark);
-    mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
-    mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
+    vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
+      defaultDark,
+    );
+    vi.mocked(window.ElectronFiddle.getReleasedVersions).mockReturnValue([]);
+    vi.mocked(window.ElectronFiddle.getLatestStable).mockReturnValue(
       semver.parse('24.0.0')!,
     );
 
     const { app: appMock } = window;
     const { electronTypes, fileManager, remoteLoader, runner, state } = appMock;
     app = new App();
-    jest.spyOn(app.state, 'downloadVersion').mockResolvedValue(undefined);
+    vi.spyOn(app.state, 'downloadVersion').mockResolvedValue(undefined);
     Object.assign(app, {
       electronTypes,
       fileManager,
@@ -56,21 +57,21 @@ describe('App component', () => {
 
   describe('setup()', () => {
     it('renders the app', async () => {
-      jest.useFakeTimers();
+      vi.useFakeTimers();
 
       const result = (await app.setup()) as HTMLDivElement;
-      jest.runAllTimers();
+      vi.runAllTimers();
 
       expect(result.innerHTML).toBe('Header;OutputEditorsWrapper;Dialogs;');
 
-      jest.useRealTimers();
+      vi.useRealTimers();
     });
 
     it('updates electronTypes when state.version changes', async () => {
       const { state } = app;
 
       // test that electronTypes is set during app.setup
-      const spy = jest.spyOn(app.electronTypes, 'setVersion');
+      const spy = vi.spyOn(app.electronTypes, 'setVersion');
       await app.setup();
       expect(spy).toHaveBeenLastCalledWith(state.currentElectronVersion);
       expect(spy).toHaveBeenCalledTimes(1);
@@ -89,7 +90,7 @@ describe('App component', () => {
   describe('openFiddle()', () => {
     it('understands gists', async () => {
       const { fetchGistAndLoad } = app.remoteLoader;
-      mocked(fetchGistAndLoad).mockResolvedValue(true);
+      vi.mocked(fetchGistAndLoad).mockResolvedValue(true);
 
       const gistId = '8c5fc0c6a5153d49b5a4a56d3ed9da8f';
       await app.openFiddle({ gistId });
@@ -98,7 +99,7 @@ describe('App component', () => {
 
     it('understands files', async () => {
       const { openFiddle } = app.fileManager;
-      mocked(openFiddle).mockResolvedValueOnce(undefined);
+      vi.mocked(openFiddle).mockResolvedValueOnce(undefined);
 
       const filePath = '/fake/path';
       const files = { [MAIN_JS]: 'foo' };
@@ -110,7 +111,7 @@ describe('App component', () => {
   describe('getEditorValues()', () => {
     it('gets values', async () => {
       const values = createEditorValues();
-      jest.spyOn(app.state.editorMosaic, 'values').mockReturnValue(values);
+      vi.spyOn(app.state.editorMosaic, 'values').mockReturnValue(values);
       const b = await app.getEditorValues({});
       expect(b).toStrictEqual(values);
     });
@@ -175,7 +176,7 @@ describe('App component', () => {
 
         // ...mark it as edited so a confirm dialog will appear before replacing
         app.state.editorMosaic.isEdited = true;
-        app.state.showConfirmDialog = jest.fn().mockResolvedValue(confirm);
+        app.state.showConfirmDialog = vi.fn().mockResolvedValue(confirm);
 
         // now try to replace
         await app.replaceFiddle(editorValues2, { gistId });
@@ -195,7 +196,7 @@ describe('App component', () => {
 
   describe('setupResizeListener()', () => {
     it('attaches to the handler', () => {
-      window.addEventListener = jest.fn();
+      window.addEventListener = vi.fn();
 
       app.setupResizeListener();
 
@@ -210,7 +211,7 @@ describe('App component', () => {
     it(`adds the current theme's css to the document`, async () => {
       window.app.state.isUsingSystemTheme = true;
 
-      mocked(window.matchMedia).mockReturnValueOnce({
+      vi.mocked(window.matchMedia).mockReturnValueOnce({
         matches: true,
       } as MediaQueryList);
 
@@ -243,7 +244,7 @@ describe('App component', () => {
     });
 
     it('removes the dark theme option if required', async () => {
-      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
+      vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultLight,
       );
       document.body.classList.add('bp3-dark');
@@ -262,7 +263,7 @@ describe('App component', () => {
     it('sets native theme', async () => {
       app.state.isUsingSystemTheme = false;
 
-      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
+      vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultLight,
       );
       await app.loadTheme('defaultLight');
@@ -270,7 +271,7 @@ describe('App component', () => {
         'light',
       );
 
-      mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
+      vi.mocked(window.ElectronFiddle.readThemeFile).mockResolvedValue(
         defaultDark,
       );
       await app.loadTheme('custom-dark');
@@ -281,11 +282,11 @@ describe('App component', () => {
   describe('setupThemeListeners()', () => {
     describe('isUsingSystemTheme reaction', () => {
       beforeEach(() => {
-        window.ElectronFiddle.setNativeTheme = jest.fn();
+        window.ElectronFiddle.setNativeTheme = vi.fn();
       });
 
       it('loads the set theme when not isUsingSystemTheme', () => {
-        const spy = jest.spyOn(app, 'loadTheme');
+        const spy = vi.spyOn(app, 'loadTheme');
         app.state.theme = 'defaultDark';
         app.state.isUsingSystemTheme = true;
         app.setupThemeListeners();
@@ -294,12 +295,12 @@ describe('App component', () => {
       });
 
       it('loads theme according to system when isUsingSystemTheme', () => {
-        const spy = jest.spyOn(app, 'loadTheme');
+        const spy = vi.spyOn(app, 'loadTheme');
         app.setupThemeListeners();
 
         // isUsingSystemTheme and prefersDark
         app.state.isUsingSystemTheme = false;
-        mocked(window.matchMedia).mockReturnValue({
+        vi.mocked(window.matchMedia).mockReturnValue({
           matches: true,
         } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
@@ -307,7 +308,7 @@ describe('App component', () => {
 
         // isUsingSystemTheme and not prefersDark
         app.state.isUsingSystemTheme = false;
-        mocked(window.matchMedia).mockReturnValue({
+        vi.mocked(window.matchMedia).mockReturnValue({
           matches: false,
         } as MediaQueryList);
         app.state.isUsingSystemTheme = true;
@@ -327,7 +328,7 @@ describe('App component', () => {
 
     describe('prefers-color-scheme event listener', () => {
       it('adds an event listener to the "change" event', () => {
-        const spy = jest.spyOn(window, 'matchMedia');
+        const spy = vi.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
         const { addEventListener } = spy.mock.results[0].value;
         expect(addEventListener).toHaveBeenCalledWith(
@@ -337,34 +338,34 @@ describe('App component', () => {
       });
 
       it('does nothing if not isUsingSystemTheme', () => {
-        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = vi.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
         const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = false;
-        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
+        const loadThemeSpy = vi.spyOn(app, 'loadTheme');
         callback({ matches: true });
         expect(loadThemeSpy).not.toHaveBeenCalled();
       });
 
       it('sets dark theme if isUsingSystemTheme and prefers dark', () => {
-        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = vi.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
         const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
-        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
+        const loadThemeSpy = vi.spyOn(app, 'loadTheme');
         callback({ matches: true });
         expect(loadThemeSpy).toHaveBeenCalledWith(defaultDark.file);
       });
 
       it('sets light theme if isUsingSystemTheme and not prefers dark', () => {
-        const matchMediaSpy = jest.spyOn(window, 'matchMedia');
+        const matchMediaSpy = vi.spyOn(window, 'matchMedia');
         app.setupThemeListeners();
         const { addEventListener } = matchMediaSpy.mock.results[0].value;
         const callback = addEventListener.mock.calls[0][1];
         app.state.isUsingSystemTheme = true;
-        const loadThemeSpy = jest.spyOn(app, 'loadTheme');
+        const loadThemeSpy = vi.spyOn(app, 'loadTheme');
         callback({ matches: false });
         expect(loadThemeSpy).toHaveBeenCalledWith(defaultLight.file);
       });
@@ -376,7 +377,7 @@ describe('App component', () => {
       const title = 'Hello, World!';
       app.setupTitleListeners();
       (app.state.title as any) = title;
-      await waitFor(() => document.title?.length > 0);
+      await vi.waitUntil(() => document.title?.length > 0);
       expect(document.title).toMatch(title);
     });
   });
@@ -408,7 +409,7 @@ describe('App component', () => {
 
       // set up a reaction to confirm the replacement
       // when it happens
-      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(confirm);
+      app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(confirm);
 
       // now try to replace
       await app.replaceFiddle(editorValues2, { gistId });
@@ -416,13 +417,13 @@ describe('App component', () => {
     }
 
     it('does not replace the fiddle if not confirmed', async () => {
-      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
+      const setSpy = vi.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(false);
       expect(setSpy).toHaveBeenCalledTimes(1);
     });
 
     it('replaces the fiddle if confirmed', async () => {
-      const setSpy = jest.spyOn(app.state.editorMosaic, 'set').mockReset();
+      const setSpy = vi.spyOn(app.state.editorMosaic, 'set').mockReset();
       await testDialog(true);
       expect(setSpy).toHaveBeenCalledTimes(2);
     });
@@ -431,13 +432,13 @@ describe('App component', () => {
   describe('prompting to confirm exiting an unsaved fiddle', () => {
     beforeEach(() => {
       // setup: mock close & setNativeTheme
-      window.close = jest.fn();
-      window.ElectronFiddle.setNativeTheme = jest.fn();
+      window.close = vi.fn();
+      window.ElectronFiddle.setNativeTheme = vi.fn();
       app.setupUnloadListeners();
     });
 
     it('can close the window if user accepts the dialog', async () => {
-      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
+      app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
@@ -449,15 +450,15 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(
-        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
+      await vi.waitUntil(
+        () => vi.mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.close).toHaveBeenCalled();
     });
 
     it('can close the app after user accepts dialog', async () => {
       app.state.isQuitting = true;
-      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(true);
+      app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
@@ -469,8 +470,8 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(
-        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
+      await vi.waitUntil(
+        () => vi.mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.ElectronFiddle.confirmQuit).toHaveBeenCalled();
       expect(window.close).toHaveBeenCalledTimes(1);
@@ -478,7 +479,7 @@ describe('App component', () => {
 
     it('does nothing if user cancels the dialog', async () => {
       app.state.isQuitting = true;
-      app.state.showConfirmDialog = jest.fn().mockResolvedValueOnce(false);
+      app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(false);
 
       // expect the app to be watching for exit if the fiddle is edited
       app.state.editorMosaic.isEdited = true;
@@ -490,8 +491,8 @@ describe('App component', () => {
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
-      await waitFor(
-        () => mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
+      await vi.waitUntil(
+        () => vi.mocked(window.ElectronFiddle.showWindow).mock.calls.length > 0,
       );
       expect(window.close).not.toHaveBeenCalled();
       expect(!app.state.isQuitting);

@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { positionForRect } from '../../../src/renderer/utils/position-for-rect';
 import { overrideRendererPlatform } from '../../utils';
 

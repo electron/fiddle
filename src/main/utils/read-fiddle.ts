@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 import { EditorId, EditorValues, PACKAGE_NAME } from '../../interfaces';
 import { ensureRequiredFiles, isSupportedFile } from '../../utils/editor-utils';

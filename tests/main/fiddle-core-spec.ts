@@ -1,18 +1,20 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import { ElectronVersions, Runner } from '@electron/fiddle-core';
 import { WebContents } from 'electron';
-import { mocked } from 'jest-mock';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { setupFiddleCore, startFiddle } from '../../src/main/fiddle-core';
 import { ChildProcessMock } from '../mocks/child-process';
 import { ElectronVersionsMock, FiddleRunnerMock } from '../mocks/fiddle-core';
 import { WebContentsMock } from '../mocks/web-contents';
 
-jest.mock('@electron/fiddle-core', () => {
-  const { FiddleRunnerMock, InstallerMock } = require('../mocks/fiddle-core');
+vi.mock('@electron/fiddle-core', async () => {
+  const { FiddleRunnerMock, InstallerMock } = await import(
+    '../mocks/fiddle-core.js'
+  );
 
   return {
     Installer: InstallerMock,
@@ -31,7 +33,7 @@ describe('fiddle-core', () => {
     runner = new FiddleRunnerMock();
     originalEnv = { ...process.env };
     process.env = mockEnv;
-    mocked(Runner.create).mockResolvedValue(runner as unknown as Runner);
+    vi.mocked(Runner.create).mockResolvedValue(runner as unknown as Runner);
     setupFiddleCore(new ElectronVersionsMock() as unknown as ElectronVersions);
   });
 
@@ -45,7 +47,7 @@ describe('fiddle-core', () => {
 
     it('uses provided env', async () => {
       const child = new ChildProcessMock();
-      mocked(runner.spawn).mockResolvedValue(child);
+      vi.mocked(runner.spawn).mockResolvedValue(child);
 
       await startFiddle(new WebContentsMock() as unknown as WebContents, {
         dir,
@@ -73,7 +75,7 @@ describe('fiddle-core', () => {
 
     it('runs with logging when enabled', async () => {
       const child = new ChildProcessMock();
-      mocked(runner.spawn).mockResolvedValue(child);
+      vi.mocked(runner.spawn).mockResolvedValue(child);
 
       await startFiddle(new WebContentsMock() as unknown as WebContents, {
         dir,
@@ -101,7 +103,7 @@ describe('fiddle-core', () => {
 
     it('can set ELECTRON_ENABLE_LOGGING in env', async () => {
       const child = new ChildProcessMock();
-      mocked(runner.spawn).mockResolvedValue(child);
+      vi.mocked(runner.spawn).mockResolvedValue(child);
 
       await startFiddle(new WebContentsMock() as unknown as WebContents, {
         dir,

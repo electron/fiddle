@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AppearanceSettings component renderItem() returns a MenuItem for matching 1`] = `
+exports[`AppearanceSettings component > renderItem() > returns a MenuItem for matching 1`] = `
 <Blueprint3.MenuItem
   active={false}
   disabled={false}
@@ -17,7 +17,7 @@ exports[`AppearanceSettings component renderItem() returns a MenuItem for matchi
 />
 `;
 
-exports[`AppearanceSettings component renders 1`] = `
+exports[`AppearanceSettings component > renders 1`] = `
 <div
   className="settings-appearance"
 >

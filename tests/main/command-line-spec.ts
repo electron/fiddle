@@ -1,4 +1,4 @@
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
@@ -9,7 +9,7 @@ import { IpcEvents } from '../../src/ipc-events';
 import { processCommandLine } from '../../src/main/command-line';
 import { ipcMainManager } from '../../src/main/ipc';
 
-jest.unmock('fs-extra');
+vi.unmock('fs-extra');
 
 describe('processCommandLine()', () => {
   // when no fiddle specified, cwd is the default
@@ -25,7 +25,7 @@ describe('processCommandLine()', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    ipcMainManager.send = jest.fn();
+    ipcMainManager.send = vi.fn();
   });
 
   it('does nothing when passed no arguments', async () => {
@@ -41,7 +41,9 @@ describe('processCommandLine()', () => {
   it('exits with 2 if called with invalid parameters', async () => {
     const argv = [...ARGV_PREFIX, 'test', '--this-option-is-unknown=true'];
     const exitCode = 2;
-    const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+    const exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((() => {}) as () => never);
     await processCommandLine(argv);
     expect(exitSpy).toHaveBeenCalledWith(exitCode);
     exitSpy.mockReset();
@@ -51,7 +53,7 @@ describe('processCommandLine()', () => {
     event: IpcEvents,
     payload: Record<string, any>,
   ) {
-    const send = mocked(ipcMainManager.send);
+    const send = vi.mocked(ipcMainManager.send);
     expect(send).toHaveBeenCalledTimes(1);
     const [call] = send.mock.calls;
     expect(call.length).toEqual(2);
@@ -64,7 +66,7 @@ describe('processCommandLine()', () => {
 
   async function expectLogConfigOptionWorks(argv: string[]) {
     argv = [...argv, '--log-config'];
-    const consoleSpy = jest.spyOn(console, 'log').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'log').mockReset();
     await processCommandLine(argv);
     expect(consoleSpy).toHaveBeenCalledWith(
       expect.stringMatching('electron-fiddle started'),
@@ -109,9 +111,13 @@ describe('processCommandLine()', () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const exitExpected = 2;
-      const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+      const exitSpy = vi
+        .spyOn(process, 'exit')
+        .mockImplementation((() => {}) as () => never);
       await processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
@@ -276,9 +282,13 @@ describe('processCommandLine()', () => {
       const FIDDLE = '✨🤪💎';
       const argv = [...ARGV, GOOD, BAD, '--fiddle', FIDDLE];
       const consoleExpected = `Unrecognized Fiddle "${FIDDLE}"`;
-      const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       const exitExpected = 2;
-      const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+      const exitSpy = vi
+        .spyOn(process, 'exit')
+        .mockImplementation((() => {}) as () => never);
       await processCommandLine(argv);
       expect(ipcMainManager.send).not.toHaveBeenCalled();
       expect(consoleSpy).toHaveBeenCalledWith(consoleExpected);
@@ -294,11 +304,13 @@ describe('processCommandLine()', () => {
     describe(`watches for ${IpcEvents.TASK_DONE} events`, () => {
       async function expectDoneCausesExit(result: RunResult, exitCode: number) {
         const argv = [...ARGV, GOOD, BAD];
-        mocked(ipcMainManager.send).mockImplementationOnce(() => {
+        vi.mocked(ipcMainManager.send).mockImplementationOnce(() => {
           const fakeEvent = {};
           ipcMainManager.emit(IpcEvents.TASK_DONE, fakeEvent, result);
         });
-        const exitSpy = jest.spyOn(process, 'exit').mockImplementation();
+        const exitSpy = vi
+          .spyOn(process, 'exit')
+          .mockImplementation((() => {}) as () => never);
         await processCommandLine(argv);
         expect(exitSpy).toHaveBeenCalledWith(exitCode);
         exitSpy.mockReset();
@@ -320,11 +332,11 @@ describe('processCommandLine()', () => {
         const timeString = new Date().toLocaleTimeString();
         const text = 'asieoniezi';
         const expected = `[${timeString}] ${text}`;
-        const spy = jest.spyOn(console, 'log').mockReturnValue();
+        const spy = vi.spyOn(console, 'log').mockReturnValue();
 
         const fakeEvent = {};
         const entry: OutputEntry = { text, timeString };
-        mocked(ipcMainManager.send).mockImplementationOnce(() => {
+        vi.mocked(ipcMainManager.send).mockImplementationOnce(() => {
           ipcMainManager.emit(IpcEvents.OUTPUT_ENTRY, fakeEvent, entry);
         });
 

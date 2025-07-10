@@ -1,4 +1,5 @@
 import * as semver from 'semver';
+import { describe, expect, it } from 'vitest';
 
 import { getVersionRange } from '../../../src/renderer/utils/get-version-range';
 import { VersionsMock } from '../../mocks/electron-versions';

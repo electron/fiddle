@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GenericDialog component renders confirmation 1`] = `
+exports[`GenericDialog component > renders > confirmation 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
@@ -15,7 +15,7 @@ exports[`GenericDialog component renders confirmation 1`] = `
 </Blueprint3.Alert>
 `;
 
-exports[`GenericDialog component renders success 1`] = `
+exports[`GenericDialog component > renders > success 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
@@ -30,7 +30,7 @@ exports[`GenericDialog component renders success 1`] = `
 </Blueprint3.Alert>
 `;
 
-exports[`GenericDialog component renders warning 1`] = `
+exports[`GenericDialog component > renders > warning 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
@@ -45,7 +45,7 @@ exports[`GenericDialog component renders warning 1`] = `
 </Blueprint3.Alert>
 `;
 
-exports[`GenericDialog component renders with an input prompt 1`] = `
+exports[`GenericDialog component > renders > with an input prompt 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}
@@ -64,7 +64,7 @@ exports[`GenericDialog component renders with an input prompt 1`] = `
 </Blueprint3.Alert>
 `;
 
-exports[`GenericDialog component renders with an input prompt and placeholder 1`] = `
+exports[`GenericDialog component > renders > with an input prompt and placeholder 1`] = `
 <Blueprint3.Alert
   canEscapeKeyCancel={false}
   canOutsideClickCancel={false}

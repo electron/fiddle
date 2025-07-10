@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Runner component renders InstallState.downloading 1`] = `
+exports[`Runner component > renders > InstallState.downloading 1`] = `
 <Blueprint3.Button
   disabled={true}
   icon={
@@ -14,17 +14,17 @@ exports[`Runner component renders InstallState.downloading 1`] = `
 />
 `;
 
-exports[`Runner component renders InstallState.installed 1`] = `
+exports[`Runner component > renders > InstallState.installed 1`] = `
 <Blueprint3.Button
   disabled={false}
   icon="play"
   id="button-run"
-  onClick={[MockFunction]}
+  onClick={[MockFunction spy]}
   text="Run"
 />
 `;
 
-exports[`Runner component renders InstallState.installing 1`] = `
+exports[`Runner component > renders > InstallState.installing 1`] = `
 <Blueprint3.Button
   disabled={true}
   icon={
@@ -37,7 +37,7 @@ exports[`Runner component renders InstallState.installing 1`] = `
 />
 `;
 
-exports[`Runner component renders InstallState.missing 1`] = `
+exports[`Runner component > renders > InstallState.missing 1`] = `
 <Blueprint3.Button
   disabled={true}
   icon={
@@ -50,17 +50,17 @@ exports[`Runner component renders InstallState.missing 1`] = `
 />
 `;
 
-exports[`Runner component renders idle 1`] = `
+exports[`Runner component > renders > idle 1`] = `
 <Blueprint3.Button
   disabled={false}
   icon="play"
   id="button-run"
-  onClick={[MockFunction]}
+  onClick={[MockFunction spy]}
   text="Run"
 />
 `;
 
-exports[`Runner component renders installing modules 1`] = `
+exports[`Runner component > renders > installing modules 1`] = `
 <Blueprint3.Button
   disabled={false}
   icon={
@@ -73,13 +73,13 @@ exports[`Runner component renders installing modules 1`] = `
 />
 `;
 
-exports[`Runner component renders running 1`] = `
+exports[`Runner component > renders > running 1`] = `
 <Blueprint3.Button
   active={true}
   disabled={false}
   icon="stop"
   id="button-run"
-  onClick={[MockFunction]}
+  onClick={[MockFunction spy]}
   text="Stop"
 />
 `;

@@ -1,4 +1,5 @@
 import { InstallState as FiddleCoreInstallState } from '@electron/fiddle-core';
+import { describe, expect, it } from 'vitest';
 
 import { InstallState } from '../src/interfaces';
 

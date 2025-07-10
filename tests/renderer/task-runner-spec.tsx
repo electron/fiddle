@@ -1,4 +1,4 @@
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   BisectRequest,
@@ -15,7 +15,7 @@ import { TaskRunner } from '../../src/renderer/task-runner';
 import { AppMock } from '../mocks/app';
 import { RunnerMock } from '../mocks/runner';
 import { StateMock } from '../mocks/state';
-import { emitEvent, waitFor } from '../utils';
+import { emitEvent } from '../utils';
 
 describe('Task Runner component', () => {
   let app: AppMock;
@@ -40,8 +40,8 @@ describe('Task Runner component', () => {
 
   async function requestAndWait(event: FiddleEvent, req: any) {
     emitEvent(event, req);
-    await waitFor(
-      () => mocked(window.ElectronFiddle.taskDone).mock.calls.length > 0,
+    await vi.waitUntil(
+      () => vi.mocked(window.ElectronFiddle.taskDone).mock.calls.length > 0,
     );
   }
 

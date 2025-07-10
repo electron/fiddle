@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 import { AppState } from '../../../src/renderer/state';

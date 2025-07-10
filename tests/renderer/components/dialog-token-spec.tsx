@@ -2,14 +2,14 @@ import * as React from 'react';
 
 import { Octokit } from '@octokit/rest';
 import { shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/renderer/utils/octokit';
 import { overrideRendererPlatform } from '../../utils';
 
-jest.mock('../../../src/renderer/utils/octokit');
+vi.mock('../../../src/renderer/utils/octokit');
 
 describe('TokenDialog component', () => {
   const mockValidToken = 'ghp_muuHkYenGrOHrTBQKDALW8WtSD929EXMz63n';
@@ -39,7 +39,7 @@ describe('TokenDialog component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance();
 
-    mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
+    vi.mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockValidToken,
     );
     await instance.onTokenInputFocused();
@@ -52,7 +52,7 @@ describe('TokenDialog component', () => {
     const wrapper = shallow(<TokenDialog appState={store} />);
     const instance: any = wrapper.instance();
 
-    mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
+    vi.mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockInvalidToken,
     );
     await instance.onTokenInputFocused();
@@ -119,13 +119,13 @@ describe('TokenDialog component', () => {
 
     beforeEach(() => {
       mockOctokit = {
-        authenticate: jest.fn(),
+        authenticate: vi.fn(),
         users: {
-          getAuthenticated: jest.fn().mockResolvedValue({ data: mockUser }),
+          getAuthenticated: vi.fn().mockResolvedValue({ data: mockUser }),
         },
       } as unknown as Octokit;
 
-      mocked(getOctokit).mockResolvedValue(mockOctokit);
+      vi.mocked(getOctokit).mockResolvedValue(mockOctokit);
     });
 
     it('handles missing input', async () => {
@@ -152,7 +152,7 @@ describe('TokenDialog component', () => {
     });
 
     it('handles an error', async () => {
-      mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
+      vi.mocked(mockOctokit.users.getAuthenticated).mockResolvedValue({
         data: null,
       } as any);
 

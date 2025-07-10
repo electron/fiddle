@@ -1,19 +1,20 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { describe, expect, it, vi } from 'vitest';
 
 import { Header } from '../../../src/renderer/components/header';
 import { AppState } from '../../../src/renderer/state';
 
-jest.mock('../../../src/renderer/components/commands', () => ({
+vi.mock('../..//src/renderer/components/commands', () => ({
   Commands: 'commands',
 }));
 
-jest.mock('../../../src/renderer/components/output', () => ({
+vi.mock('../../../src/renderer/components/output', () => ({
   Output: 'output',
 }));
 
-jest.mock('../../../src/renderer/components/tour-welcome', () => ({
+vi.mock('../../../src/renderer/components/tour-welcome', () => ({
   WelcomeTour: 'welcome-tour',
 }));
 

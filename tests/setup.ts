@@ -1,37 +1,37 @@
-import '@testing-library/jest-dom';
+import '@testing-library/jest-dom/vitest';
 
 import { configure as enzymeConfigure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { createSerializer } from 'enzyme-to-json';
-import { mocked } from 'jest-mock';
 import { configure as mobxConfigure } from 'mobx';
+import { beforeEach, expect, vi } from 'vitest';
 
 import { AppMock, ElectronFiddleMock, MonacoMock } from './mocks/mocks';
 
 enzymeConfigure({ adapter: new Adapter() });
 
-// allow jest fns to overwrite readonly mobx stuff
+// allow vitest fns to overwrite readonly mobx stuff
 // https://mobx.js.org/configuration.html#safedescriptors-boolean
 mobxConfigure({ safeDescriptors: false });
 
-global.confirm = jest.fn();
+global.confirm = vi.fn();
 
 if (!process.env.FIDDLE_VERBOSE_TESTS) {
-  jest.spyOn(global.console, 'error').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'info').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'log').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'warn').mockImplementation(() => jest.fn());
-  jest.spyOn(global.console, 'debug').mockImplementation(() => jest.fn());
+  vi.spyOn(global.console, 'error').mockImplementation(() => vi.fn());
+  vi.spyOn(global.console, 'info').mockImplementation(() => vi.fn());
+  vi.spyOn(global.console, 'log').mockImplementation(() => vi.fn());
+  vi.spyOn(global.console, 'warn').mockImplementation(() => vi.fn());
+  vi.spyOn(global.console, 'debug').mockImplementation(() => vi.fn());
 }
-jest.mock('electron', () => require('./mocks/electron'));
-jest.mock('fs-extra');
+vi.mock('electron', () => import('./mocks/electron.js'));
+vi.mock('fs-extra');
 
 // Disable Sentry in tests
-jest.mock('@sentry/electron/main', () => ({
-  init: jest.fn(),
+vi.mock('@sentry/electron/main', () => ({
+  init: vi.fn(),
 }));
-jest.mock('@sentry/electron/renderer', () => ({
-  init: jest.fn(),
+vi.mock('@sentry/electron/renderer', () => ({
+  init: vi.fn(),
 }));
 
 class FakeBroadcastChannel extends EventTarget {
@@ -63,13 +63,24 @@ class FakeBroadcastChannel extends EventTarget {
 
 expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }) as any);
 
-// We want to detect jest sometimes
-(global as any).__JEST__ = (global as any).__JEST__ || {};
+// Don't serialize Timeout objects in depth
+// TODO(dsanders11): This feels like we shouldn't need to do this?
+expect.addSnapshotSerializer({
+  serialize(val) {
+    return val.toString();
+  },
+  test(val) {
+    return val?.constructor.name === 'Timeout';
+  },
+});
+
+// We want to detect vi sometimes
+(global as any).__vi__ = (global as any).__vi__ || {};
 
 // Setup for main tests
 global.window = global.window || {};
 global.document = global.document || { body: {} };
-global.fetch = window.fetch = jest.fn();
+global.fetch = window.fetch = vi.fn();
 
 delete (window as any).localStorage;
 (window.localStorage as any) = {};
@@ -85,33 +96,34 @@ window.navigator = window.navigator ?? {};
 (window.ElectronFiddle as any) = new ElectronFiddleMock();
 (window.app as any) = new AppMock();
 (window.monaco as any) = new MonacoMock();
-window.localStorage.setItem = jest.fn();
-window.localStorage.getItem = jest.fn();
-window.localStorage.removeItem = jest.fn();
-window.open = jest.fn();
-window.navigator.clipboard.readText = jest.fn();
-window.navigator.clipboard.writeText = jest.fn();
+window.localStorage.setItem = vi.fn();
+window.localStorage.getItem = vi.fn();
+window.localStorage.removeItem = vi.fn();
+window.open = vi.fn();
+window.navigator.clipboard.readText = vi.fn();
+window.navigator.clipboard.writeText = vi.fn();
 
 beforeEach(() => {
-  (process.env.JEST as any) = true;
+  vi.resetAllMocks();
+
   (process.env.TEST as any) = true;
   document.body.innerHTML = '<div id="app" />';
 
   (window.ElectronFiddle as any) = new ElectronFiddleMock();
   (window.app as any) = new AppMock();
   (window.monaco as any) = new MonacoMock();
-  mocked(window.localStorage.setItem).mockReset();
-  mocked(window.localStorage.getItem).mockReset();
-  mocked(window.localStorage.removeItem).mockReset();
-  mocked(window.open).mockReset();
-  window.matchMedia = jest.fn((query) => ({
+  vi.mocked(window.localStorage.setItem).mockReset();
+  vi.mocked(window.localStorage.getItem).mockReset();
+  vi.mocked(window.localStorage.removeItem).mockReset();
+  vi.mocked(window.open).mockReset();
+  window.matchMedia = vi.fn((query) => ({
     matches: false,
     media: query,
     onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    dispatchEvent: vi.fn(),
   }));
 });

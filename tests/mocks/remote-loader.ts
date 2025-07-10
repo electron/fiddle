@@ -1,7 +1,9 @@
+import { vi } from 'vitest';
+
 export class RemoteLoaderMock {
-  public confirmAddFile = jest.fn();
-  public fetchGistAndLoad = jest.fn();
-  public loadFiddleFromElectronExample = jest.fn();
-  public loadFiddleFromGist = jest.fn();
-  public setElectronVersion = jest.fn();
+  public confirmAddFile = vi.fn();
+  public fetchGistAndLoad = vi.fn();
+  public loadFiddleFromElectronExample = vi.fn();
+  public loadFiddleFromGist = vi.fn();
+  public setElectronVersion = vi.fn();
 }

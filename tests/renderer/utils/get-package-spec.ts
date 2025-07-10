@@ -1,5 +1,5 @@
-import { mocked } from 'jest-mock';
 import * as semver from 'semver';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { EditorId, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import { AppState } from '../../../src/renderer/state';
@@ -21,7 +21,7 @@ describe('get-package', () => {
 
   describe('getPackageJson()', () => {
     beforeAll(() => {
-      mocked(window.ElectronFiddle.getUsername).mockReturnValue('test-user');
+      vi.mocked(window.ElectronFiddle.getUsername).mockReturnValue('test-user');
     });
 
     const appState = new StateMock();

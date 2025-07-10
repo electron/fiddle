@@ -1,5 +1,14 @@
-import { mocked } from 'jest-mock';
 import { IReactionDisposer, reaction } from 'mobx';
+import {
+  type MockInstance,
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import {
   AppStateBroadcastMessageType,
@@ -23,21 +32,21 @@ import {
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
-jest.mock('../../src/renderer/versions', () => {
-  const { getReleaseChannel } = jest.requireActual(
-    '../../src/renderer/versions',
-  );
-  const { VersionsMock } = require('../mocks/electron-versions');
+vi.mock('../../src/renderer/versions', async () => {
+  const { getReleaseChannel } = await vi.importActual<
+    typeof import('../../src/renderer/versions')
+  >('../../src/renderer/versions');
+  const { VersionsMock } = await import('../mocks/electron-versions.js');
   const { mockVersionsArray } = new VersionsMock();
 
   return {
-    addLocalVersion: jest.fn(),
-    fetchVersions: jest.fn(mockVersionsArray),
+    addLocalVersion: vi.fn(),
+    fetchVersions: vi.fn(() => mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
-    getElectronVersions: jest.fn(),
+    getElectronVersions: vi.fn(),
     getReleaseChannel,
-    makeRunnable: jest.fn((v) => v),
-    saveLocalVersions: jest.fn(),
+    makeRunnable: vi.fn((v) => v),
+    saveLocalVersions: vi.fn(),
   };
 });
 
@@ -45,26 +54,26 @@ describe('AppState', () => {
   let appState: AppState;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
-  let removeSpy: jest.SpyInstance;
-  let ensureDownloadedSpy: jest.SpyInstance;
-  let broadcastMessageSpy: jest.SpyInstance;
+  let removeSpy: MockInstance;
+  let ensureDownloadedSpy: MockInstance;
+  let broadcastMessageSpy: MockInstance;
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    mocked(fetchVersions).mockResolvedValue(mockVersionsArray);
-    mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+    vi.mocked(fetchVersions).mockResolvedValue(mockVersionsArray);
+    vi.mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
       InstallState.installed,
     );
 
     appState = new AppState(mockVersionsArray);
-    removeSpy = jest
+    removeSpy = vi
       .spyOn(window.ElectronFiddle, 'removeVersion')
       .mockResolvedValue(InstallState.missing);
-    ensureDownloadedSpy = jest
+    ensureDownloadedSpy = vi
       .spyOn(window.ElectronFiddle, 'downloadVersion')
       .mockResolvedValue(undefined);
-    broadcastMessageSpy = jest.spyOn(
+    broadcastMessageSpy = vi.spyOn(
       (appState as any).broadcastChannel,
       'postMessage',
     );
@@ -75,14 +84,14 @@ describe('AppState', () => {
   });
 
   afterAll(async () => {
-    // Wait for all the async task to resolve before the jest
+    // Wait for all the async task to resolve before the
     // environment tears down
     await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      mocked(fetchVersions).mockRejectedValue(new Error('Bwap-bwap'));
+      vi.mocked(fetchVersions).mockRejectedValue(new Error('Bwap-bwap'));
       await appState.updateElectronVersions();
     });
 
@@ -90,8 +99,8 @@ describe('AppState', () => {
       const version = '100.0.0';
       const ver: Version = { version };
 
-      mocked(fetchVersions).mockResolvedValue([ver]);
-      mocked(makeRunnable).mockImplementation(
+      vi.mocked(fetchVersions).mockResolvedValue([ver]);
+      vi.mocked(makeRunnable).mockImplementation(
         (v: Version): RunnableVersion => v as RunnableVersion,
       );
 
@@ -115,7 +124,7 @@ describe('AppState', () => {
     });
 
     it('returns the name, even if none exists', async () => {
-      mocked(window.ElectronFiddle.getProjectName).mockResolvedValue('test');
+      vi.mocked(window.ElectronFiddle.getProjectName).mockResolvedValue('test');
       (appState as any).name = undefined;
       expect(await appState.getName()).toBe('test');
     });
@@ -316,7 +325,7 @@ describe('AppState', () => {
     it('removes a version', async () => {
       const ver = appState.versions[version];
       ver.state = InstallState.installed;
-      mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+      vi.mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
         InstallState.missing,
       );
       await appState.removeVersion(ver);
@@ -400,17 +409,17 @@ describe('AppState', () => {
     });
 
     it('downloads a version if necessary', async () => {
-      appState.downloadVersion = jest.fn();
+      appState.downloadVersion = vi.fn();
       await appState.setVersion('v2.0.2');
 
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
 
     it('falls back if downloading the new version fails', async () => {
-      appState.downloadVersion = jest
+      appState.downloadVersion = vi
         .fn()
         .mockRejectedValueOnce(new Error('FAILURE'));
-      appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+      appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
         confirm: true,
       });
 
@@ -426,7 +435,8 @@ describe('AppState', () => {
     describe('loads the template for the new version', () => {
       let newVersion: string;
       let oldVersion: string;
-      let replaceSpy: ReturnType<typeof jest.spyOn>;
+      // TODO(dsanders11): improve this type
+      let replaceSpy: any;
       const nextValues = createEditorValues();
 
       beforeEach(() => {
@@ -439,10 +449,12 @@ describe('AppState', () => {
         expect(newVersion).toBeTruthy();
 
         // spy on app.replaceFiddle
-        replaceSpy = jest.spyOn(window.app, 'replaceFiddle');
+        replaceSpy = vi.spyOn(window.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
-        mocked(window.ElectronFiddle.getTemplate).mockResolvedValue(nextValues);
+        vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue(
+          nextValues,
+        );
       });
 
       it('if there is no current fiddle', async () => {
@@ -596,7 +608,7 @@ describe('AppState', () => {
       } as const;
 
       it('returns text when confirmed', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
           input,
         });
@@ -605,7 +617,7 @@ describe('AppState', () => {
       });
 
       it('returns undefined when canceled', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: false,
           input,
         });
@@ -617,7 +629,7 @@ describe('AppState', () => {
     describe('showConfirmDialog', () => {
       const label = 'Do you want to confirm this dialog?';
       async function testConfirmDialog(confirm: boolean) {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm,
           input: undefined,
         });
@@ -636,7 +648,7 @@ describe('AppState', () => {
       const label = 'This is an error message.';
 
       it('shows an error dialog', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
         });
         await appState.showErrorDialog(label);
@@ -653,7 +665,7 @@ describe('AppState', () => {
       const label = 'This is an informational message.';
 
       it('shows an error dialog', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
         });
         await appState.showInfoDialog(label);
@@ -678,7 +690,7 @@ describe('AppState', () => {
         state: InstallState.installed,
       };
 
-      mocked(getElectronVersions).mockReturnValue([ver]);
+      vi.mocked(getElectronVersions).mockReturnValue([ver]);
 
       appState.addLocalVersion(ver);
 

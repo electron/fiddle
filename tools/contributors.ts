@@ -2,6 +2,8 @@ import * as fs from 'node:fs';
 import * as path from 'node:path';
 import * as util from 'node:util';
 
+import logSymbols from 'log-symbols';
+
 const { GITHUB_TOKEN, GH_TOKEN } = process.env;
 const CONTRIBUTORS_FILE_PATH = path.join(
   __dirname,
@@ -35,12 +37,7 @@ interface ContributorInfo {
   location: string;
 }
 
-// Helper function to work around import issues with ESM module
-const dynamicImport = new Function('specifier', 'return import(specifier)');
-
 export async function maybeFetchContributors(silent?: boolean): Promise<void> {
-  const { default: logSymbols } = await dynamicImport('log-symbols');
-
   try {
     const stats = fs.statSync(CONTRIBUTORS_FILE_PATH);
     const mtime = new Date(util.inspect(stats.mtime));
@@ -161,8 +158,6 @@ function fetchContributors() {
  * Fetch the contributors and write the result to disk
  */
 async function fetchAndWriteContributorsFile() {
-  const { default: logSymbols } = await dynamicImport('log-symbols');
-
   await new Promise<void>((resolve) => {
     fs.access(
       CONTRIBUTORS_FILE_PATH,

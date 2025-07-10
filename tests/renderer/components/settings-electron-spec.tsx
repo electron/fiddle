@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
@@ -14,7 +14,7 @@ import { AppState } from '../../../src/renderer/state';
 import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
-jest.mock('../../../src/renderer/utils/disable-download.ts');
+vi.mock('../../../src/renderer/utils/disable-download.ts');
 
 describe('ElectronSettings component', () => {
   let store: StateMock;
@@ -40,7 +40,7 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(window.ElectronFiddle, 'getOldestSupportedMajor')
       .mockReturnValue(9);
 
@@ -283,7 +283,7 @@ describe('ElectronSettings component', () => {
 
   describe('disableDownload()', () => {
     it('disables download buttons where return values are true', () => {
-      mocked(disableDownload).mockReturnValue(true);
+      vi.mocked(disableDownload).mockReturnValue(true);
 
       const version = '3.0.0';
       const ver = {
