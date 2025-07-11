@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`CreditsSettings component renders 1`] = `
+exports[`CreditsSettings component > renders 1`] = `
 <div>
   <h1>
     Credits
@@ -52,7 +52,7 @@ exports[`CreditsSettings component renders 1`] = `
 </div>
 `;
 
-exports[`CreditsSettings component renders for contributors with less data 1`] = `
+exports[`CreditsSettings component > renders for contributors with less data 1`] = `
 <div>
   <h1>
     Credits
@@ -93,7 +93,7 @@ exports[`CreditsSettings component renders for contributors with less data 1`] =
 </div>
 `;
 
-exports[`CreditsSettings component renders nothing if we do not have contributors 1`] = `
+exports[`CreditsSettings component > renders nothing if we do not have contributors 1`] = `
 <div>
   <h1>
     Credits

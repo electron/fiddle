@@ -1,5 +1,6 @@
 import { ElectronVersions } from '@electron/fiddle-core';
 import * as semver from 'semver';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import {
   getLatestStable,
@@ -51,7 +52,7 @@ describe('versions', () => {
         { version: '9.0.0-beta.5' },
         { version: '4.2.0' },
       ];
-      const spy = jest
+      const spy = vi
         .spyOn(knownVersions, 'versions', 'get')
         .mockReturnValue(expected.map(({ version }) => semver.parse(version)!));
 
@@ -62,7 +63,7 @@ describe('versions', () => {
     });
 
     it('does not fetch versions < 0.24.0', () => {
-      const spy = jest
+      const spy = vi
         .spyOn(knownVersions, 'versions', 'get')
         .mockReturnValue([semver.parse('0.23.0')!]);
 

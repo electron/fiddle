@@ -2,25 +2,26 @@ import * as React from 'react';
 
 import { Button, ControlGroup } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Commands } from '../../../src/renderer/components/commands';
 import { BisectHandler } from '../../../src/renderer/components/commands-bisect';
 import { AppState } from '../../../src/renderer/state';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 
-jest.mock('../../../src/renderer/components/commands-runner', () => ({
+vi.mock('../../../src/renderer/components/commands-runner', () => ({
   Runner: 'runner',
 }));
 
-jest.mock('../../../src/renderer/components/commands-version-chooser', () => ({
+vi.mock('../../../src/renderer/components/commands-version-chooser', () => ({
   VersionChooser: 'version-chooser',
 }));
 
-jest.mock('../../../src/renderer/components/commands-address-bar', () => ({
+vi.mock('../../../src/renderer/components/commands-address-bar', () => ({
   AddressBar: 'address-bar',
 }));
 
-jest.mock('../../../src/renderer/components/commands-action-button', () => ({
+vi.mock('../../../src/renderer/components/commands-action-button', () => ({
   GistActionButton: 'action-button',
 }));
 

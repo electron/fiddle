@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
-import { mocked } from 'jest-mock';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Tour, TourScriptStep } from '../../src/renderer/components/tour';
 import { overrideRendererPlatform } from '../../tests/utils';
@@ -31,7 +31,7 @@ describe('Tour component', () => {
       },
     ]);
 
-  const mockStop = jest.fn();
+  const mockStop = vi.fn();
 
   function renderTour(mockTour = getMockTour()) {
     return render(<Tour tour={mockTour} onStop={mockStop} />);
@@ -40,8 +40,8 @@ describe('Tour component', () => {
   beforeEach(() => {
     overrideRendererPlatform('darwin');
 
-    document.querySelector = jest.fn(() => ({
-      getBoundingClientRect: jest.fn(() => ({
+    document.querySelector = vi.fn(() => ({
+      getBoundingClientRect: vi.fn(() => ({
         top: 20,
         left: 25,
         height: 120,
@@ -93,7 +93,7 @@ describe('Tour component', () => {
   });
 
   it('handles a missing target', () => {
-    mocked(document.querySelector).mockReturnValueOnce(null);
+    vi.mocked(document.querySelector).mockReturnValueOnce(null);
 
     const { container } = renderTour();
 

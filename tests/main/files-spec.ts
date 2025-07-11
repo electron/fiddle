@@ -1,11 +1,11 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import { BrowserWindow, app, dialog } from 'electron';
-import * as fs from 'fs-extra';
-import { mocked } from 'jest-mock';
+import fs from 'fs-extra';
 import * as tmp from 'tmp';
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
@@ -26,10 +26,10 @@ import { getOrCreateMainWindow } from '../../src/main/windows';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { createEditorValues } from '../mocks/editor-values';
 
-jest.mock('../../src/main/windows');
-jest.mock('../../src/main/utils/get-files');
-jest.mock('fs-extra');
-jest.mock('tmp');
+vi.mock('../../src/main/windows');
+vi.mock('../../src/main/utils/get-files');
+vi.mock('fs-extra');
+vi.mock('tmp');
 
 const mockWindow = new BrowserWindowMock() as unknown as Electron.BrowserWindow;
 
@@ -37,23 +37,23 @@ describe('files', () => {
   const editorValues = createEditorValues();
 
   beforeEach(() => {
-    mocked(BrowserWindow.getFocusedWindow).mockReturnValue(mockWindow);
-    mocked(getFiles).mockResolvedValue({
+    vi.mocked(BrowserWindow.getFocusedWindow).mockReturnValue(mockWindow);
+    vi.mocked(getFiles).mockResolvedValue({
       localPath: 'my/fake/path',
       files: new Map(Object.entries(editorValues)),
     });
-    mocked(dialog.showOpenDialog).mockResolvedValue({
+    vi.mocked(dialog.showOpenDialog).mockResolvedValue({
       filePaths: ['my/fake/path'],
       canceled: false,
     });
-    mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
+    vi.mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
 
     ipcMainManager.readyWebContents.add(mockWindow.webContents);
   });
 
   describe('setupFileListeners()', () => {
     it('sets up the listener', () => {
-      const spy = jest.spyOn(ipcMainManager, 'handle');
+      const spy = vi.spyOn(ipcMainManager, 'handle');
       setupFileListeners();
 
       expect(ipcMainManager.eventNames()).toEqual([IpcEvents.PATH_EXISTS]);
@@ -84,7 +84,7 @@ describe('files', () => {
     });
 
     it('notifies the main window of the event', async () => {
-      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
+      vi.mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
 
       await showOpenDialog(mockWindow);
 
@@ -119,7 +119,7 @@ describe('files', () => {
     });
 
     it('handles not getting a path returned', async () => {
-      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
         canceled: true,
         filePaths: [],
       });
@@ -129,16 +129,16 @@ describe('files', () => {
 
     it('ensures that the target is empty on save', async () => {
       const consent = true;
-      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
         canceled: false,
         filePaths: ['path'],
       });
-      mocked(dialog.showMessageBox).mockResolvedValue({
+      vi.mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      (fs.pathExists as jest.Mock).mockResolvedValue(true);
-      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
+      (fs.pathExists as Mock).mockResolvedValue(true);
+      (fs.readdir as Mock).mockResolvedValue([MAIN_JS]);
 
       await showSaveDialog(mockWindow);
 
@@ -147,17 +147,17 @@ describe('files', () => {
 
     it('does not overwrite files without consent', async () => {
       const consent = false;
-      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
         canceled: true,
         filePaths: ['path'],
       });
-      mocked(dialog.showMessageBox).mockResolvedValue({
+      vi.mocked(dialog.showMessageBox).mockResolvedValue({
         response: consent ? 1 : 0,
         checkboxChecked: false,
       });
-      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
-      (fs.pathExists as jest.Mock).mockResolvedValue(true);
-      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
+      vi.mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
+      (fs.pathExists as Mock).mockResolvedValue(true);
+      (fs.readdir as Mock).mockResolvedValue([MAIN_JS]);
 
       await showSaveDialog(mockWindow);
 
@@ -166,14 +166,14 @@ describe('files', () => {
 
     it('does not overwrite files if an error happens', async () => {
       const err = new Error('💩');
-      mocked(dialog.showOpenDialog).mockResolvedValueOnce({
+      vi.mocked(dialog.showOpenDialog).mockResolvedValueOnce({
         canceled: true,
         filePaths: ['path'],
       });
-      mocked(dialog.showMessageBox).mockRejectedValue(err);
-      mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
-      (fs.pathExists as jest.Mock).mockResolvedValue(true);
-      (fs.readdir as jest.Mock).mockResolvedValue([MAIN_JS]);
+      vi.mocked(dialog.showMessageBox).mockRejectedValue(err);
+      vi.mocked(getOrCreateMainWindow).mockResolvedValue(mockWindow);
+      (fs.pathExists as Mock).mockResolvedValue(true);
+      (fs.readdir as Mock).mockResolvedValue([MAIN_JS]);
 
       let caughtError: unknown;
       try {
@@ -188,7 +188,7 @@ describe('files', () => {
 
   describe('cleanupDirectory()', () => {
     it('attempts to remove a directory if it exists', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(true);
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
 
       const result = await cleanupDirectory('/fake/dir');
 
@@ -197,7 +197,7 @@ describe('files', () => {
     });
 
     it('does not attempt to remove a directory if it does not exists', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(false);
+      vi.mocked(fs.existsSync).mockReturnValueOnce(false);
 
       const result = await cleanupDirectory('/fake/dir');
 
@@ -206,8 +206,8 @@ describe('files', () => {
     });
 
     it('handles an error', async () => {
-      mocked(fs.existsSync).mockReturnValueOnce(true);
-      (fs.remove as jest.Mock).mockRejectedValueOnce('bwapbwap');
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+      (fs.remove as Mock).mockRejectedValueOnce('bwapbwap');
 
       const result = await cleanupDirectory('/fake/dir');
 
@@ -252,8 +252,8 @@ describe('files', () => {
     });
 
     it('handles an error (output)', async () => {
-      const spy = jest.spyOn(ipcMainManager, 'send');
-      mocked(fs.outputFile).mockImplementation(() => {
+      const spy = vi.spyOn(ipcMainManager, 'send');
+      vi.mocked(fs.outputFile).mockImplementation(() => {
         throw new Error('bwap');
       });
 
@@ -275,7 +275,7 @@ describe('files', () => {
 
     it('handles an error (remove)', async () => {
       const values = { ...editorValues, 'index.html': '' };
-      mocked(fs.remove).mockImplementation(() => {
+      vi.mocked(fs.remove).mockImplementation(() => {
         throw new Error('bwap');
       });
       await saveFiles(
@@ -290,7 +290,7 @@ describe('files', () => {
 
   describe('saveFiddle()', () => {
     it('asks for a path if none can be found', async () => {
-      mocked(getFiles).mockResolvedValue({ files: new Map() });
+      vi.mocked(getFiles).mockResolvedValue({ files: new Map() });
       await saveFiddle();
 
       expect(dialog.showOpenDialog).toHaveBeenCalled();
@@ -299,7 +299,7 @@ describe('files', () => {
 
   describe('saveFiddleAs()', () => {
     it('always asks for a file path', async () => {
-      mocked(getFiles).mockResolvedValue({
+      vi.mocked(getFiles).mockResolvedValue({
         localPath: '/fake/path',
         files: new Map(),
       });
@@ -311,7 +311,7 @@ describe('files', () => {
 
   describe('saveFiddleAsForgeProject()', () => {
     it('always asks for a file path', async () => {
-      mocked(getFiles).mockResolvedValue({
+      vi.mocked(getFiles).mockResolvedValue({
         localPath: '/fake/path',
         files: new Map(),
       });
@@ -321,7 +321,7 @@ describe('files', () => {
     });
 
     it('uses the forge transform', async () => {
-      mocked(getFiles).mockResolvedValue({
+      vi.mocked(getFiles).mockResolvedValue({
         localPath: '/fake/path',
         files: new Map(),
       });
@@ -335,7 +335,7 @@ describe('files', () => {
 
   it('saveFilesToTemp()', async () => {
     const tmpPath = '/tmp/save-to-temp/';
-    jest.spyOn(tmp, 'dirSync').mockReturnValue({
+    vi.spyOn(tmp, 'dirSync').mockReturnValue({
       name: tmpPath,
     } as tmp.DirResult);
 

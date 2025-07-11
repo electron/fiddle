@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`GitHubSettings component renders when not signed in 1`] = `
+exports[`GitHubSettings component > renders when not signed in 1`] = `
 <div>
   <h4>
     GitHub
@@ -31,7 +31,7 @@ exports[`GitHubSettings component renders when not signed in 1`] = `
 </div>
 `;
 
-exports[`GitHubSettings component renders when signed in 1`] = `
+exports[`GitHubSettings component > renders when signed in 1`] = `
 <div>
   <h4>
     GitHub
@@ -47,7 +47,7 @@ exports[`GitHubSettings component renders when signed in 1`] = `
     </p>
     <Blueprint3.Button
       icon="log-out"
-      onClick={[MockFunction]}
+      onClick={[MockFunction spy]}
       text="Sign out"
     />
   </Blueprint3.Callout>

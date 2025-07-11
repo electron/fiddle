@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { FontSettings } from '../../../src/renderer/components/settings-general-font';
 import { AppState } from '../../../src/renderer/state';

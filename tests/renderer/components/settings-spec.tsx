@@ -1,19 +1,20 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Settings } from '../../../src/renderer/components/settings';
 import { AppState } from '../../../src/renderer/state';
 
-jest.mock('../../../src/renderer/components/settings-general', () => ({
+vi.mock('../../../src/renderer/components/settings-general', () => ({
   GeneralSettings: 'settings-general',
 }));
 
-jest.mock('../../../src/renderer/components/settings-electron', () => ({
+vi.mock('../../../src/renderer/components/settings-electron', () => ({
   ElectronSettings: 'settings-electron',
 }));
 
-jest.mock('../../../src/renderer/components/settings-credits', () => ({
+vi.mock('../../../src/renderer/components/settings-credits', () => ({
   CreditsSettings: 'settings-credits',
 }));
 
@@ -79,11 +80,11 @@ describe('Settings component', () => {
     expect(store.isSettingsShowing).toBe(true);
     // mock event listener API
     const map: any = {};
-    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+    window.addEventListener = vi.fn().mockImplementation((event, cb) => {
       map[event] = cb;
     });
 
-    window.removeEventListener = jest.fn().mockImplementation((event) => {
+    window.removeEventListener = vi.fn().mockImplementation((event) => {
       delete map[event];
     });
 
@@ -104,18 +105,18 @@ describe('Settings component', () => {
     expect(store.isSettingsShowing).toBe(true);
     // mock event listener API
     const map: any = {};
-    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+    window.addEventListener = vi.fn().mockImplementation((event, cb) => {
       map[event] = cb;
     });
 
-    window.removeEventListener = jest.fn().mockImplementation((event) => {
+    window.removeEventListener = vi.fn().mockImplementation((event) => {
       delete map[event];
     });
 
     const wrapper = shallow(<Settings appState={store} />);
 
     // trigger mock 'contextmenu' event
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
     map.contextmenu({ preventDefault });
     expect(Object.keys(map)).toContain('contextmenu');
     expect(Object.keys(map)).toHaveLength(2); // ['keyup','contextmenu']
@@ -130,11 +131,11 @@ describe('Settings component', () => {
     expect(store.isSettingsShowing).toBe(true);
     // mock event listener API
     const map: any = {};
-    window.addEventListener = jest.fn().mockImplementation((event, cb) => {
+    window.addEventListener = vi.fn().mockImplementation((event, cb) => {
       map[event] = cb;
     });
 
-    window.removeEventListener = jest.fn().mockImplementation((event) => {
+    window.removeEventListener = vi.fn().mockImplementation((event) => {
       delete map[event];
     });
 

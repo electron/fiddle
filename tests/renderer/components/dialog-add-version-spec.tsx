@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { AppState } from '../../../src/renderer/state';
@@ -53,7 +53,7 @@ describe('AddVersionDialog component', () => {
   });
 
   it('overrides default input with Electron dialog', () => {
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
 
     const wrapper = shallow(<AddVersionDialog appState={store} />);
     const inp = wrapper.find('#custom-electron-version');
@@ -66,7 +66,7 @@ describe('AddVersionDialog component', () => {
   describe('selectLocalVersion()', () => {
     it('updates state', async () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
-      mocked(window.ElectronFiddle.selectLocalVersion).mockResolvedValue({
+      vi.mocked(window.ElectronFiddle.selectLocalVersion).mockResolvedValue({
         folderPath: '/test/',
         isValidElectron: true,
         localName: 'Test',

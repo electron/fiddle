@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { IItemRendererProps } from '@blueprintjs/select';
 import { shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   AppearanceSettings,
@@ -28,7 +28,7 @@ describe('AppearanceSettings component', () => {
   beforeEach(() => {
     ({ state: store } = window.app);
 
-    mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
+    vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
       mockThemes,
     );
   });
@@ -71,7 +71,7 @@ describe('AppearanceSettings component', () => {
   });
 
   it('toggles popover toggle event', () => {
-    const toggleFunc = jest.fn();
+    const toggleFunc = vi.fn();
     const wrapper = shallow(
       <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
@@ -110,7 +110,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       const instance: any = wrapper.instance();
-      mocked(window.ElectronFiddle.openThemeFolder).mockRejectedValue(
+      vi.mocked(window.ElectronFiddle.openThemeFolder).mockRejectedValue(
         new Error('Bwap'),
       );
 
@@ -138,8 +138,10 @@ describe('AppearanceSettings component', () => {
 
     it('adds the newly created theme to the Themes dropdown', async () => {
       const arr: Array<LoadedFiddleTheme> = [];
-      mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(arr);
-      mocked(window.ElectronFiddle.createThemeFile).mockImplementation(
+      vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
+        arr,
+      );
+      vi.mocked(window.ElectronFiddle.createThemeFile).mockImplementation(
         async (theme: FiddleTheme) => {
           const loadedTheme = {
             ...theme,
@@ -170,7 +172,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       const instance: any = wrapper.instance();
-      mocked(window.ElectronFiddle.createThemeFile).mockRejectedValue(
+      vi.mocked(window.ElectronFiddle.createThemeFile).mockRejectedValue(
         new Error('Bwap'),
       );
 
@@ -182,7 +184,9 @@ describe('AppearanceSettings component', () => {
   describe('handleAddTheme()', () => {
     it('refreshes the Themes dropdown', async () => {
       const arr: Array<LoadedFiddleTheme> = [];
-      mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(arr);
+      vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
+        arr,
+      );
       const wrapper = shallow(
         <AppearanceSettings
           appState={store}

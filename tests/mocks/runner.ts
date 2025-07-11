@@ -1,5 +1,7 @@
+import { vi } from 'vitest';
+
 export class RunnerMock {
-  public autobisect = jest.fn();
-  public run = jest.fn();
-  public stop = jest.fn();
+  public autobisect = vi.fn();
+  public run = vi.fn();
+  public stop = vi.fn();
 }

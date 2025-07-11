@@ -1,6 +1,8 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import { getUsername } from '../../../src/main/utils/get-username';
 
-jest.mock('node:os', () => ({
+vi.mock('node:os', () => ({
   userInfo: () => ({
     username: 'test-user',
   }),

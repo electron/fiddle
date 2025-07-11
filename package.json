@@ -21,15 +21,15 @@
     "package": "electron-forge package",
     "publish": "electron-forge publish",
     "start": "ts-node ./tools/clean-webpack.ts && electron-forge start --",
-    "test": "jest",
-    "test:ci": "jest --ci --coverage --runInBand --reporters=default --reporters=jest-junit",
-    "test:report": "jest --json --bail=false --outputFile=report.json | true",
+    "test": "vitest run",
+    "test:ci": "vitest run --coverage --reporter=junit --outputFile=./reports/report.xml",
+    "test:report": "vitest run --reporter=json --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
     "postinstall": "husky && npm run electron-releases"
   },
   "engines": {
-    "node": ">= 20.16.0"
+    "node": ">= 22.12.0"
   },
   "keywords": [
     "Electron",
@@ -89,7 +89,7 @@
     "@octokit/core": "^3.5.1",
     "@reforged/maker-appimage": "^3.3.0",
     "@testing-library/dom": "^10.4.0",
-    "@testing-library/jest-dom": "^6.4.8",
+    "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^12.1.5",
     "@testing-library/user-event": "^14.5.2",
     "@tsconfig/node22": "^22.0.2",
@@ -98,8 +98,8 @@
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/fs-extra": "^9.0.7",
     "@types/getos": "^3.0.1",
-    "@types/jest": "^29.5.3",
     "@types/node": "~22.10.7",
+    "@types/parse-env-string": "^1.0.2",
     "@types/react": "^16.14.0",
     "@types/react-dom": "^16.9.11",
     "@types/react-window": "^1.8.5",
@@ -108,6 +108,7 @@
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "@vercel/webpack-asset-relocator-loader": "^1.7.2",
+    "@vitest/coverage-v8": "3.2.4",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
     "electron": "36.5.0",
@@ -123,9 +124,7 @@
     "eslint-plugin-tsdoc": "^0.3.0",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
     "husky": "^9.0.11",
-    "jest": "^29.6.2",
     "jest-environment-jsdom": "^29.6.2",
-    "jest-junit": "^16.0.0",
     "less": "^4.1.1",
     "less-loader": "^11.0.0",
     "lint-staged": "^15.2.7",
@@ -142,10 +141,10 @@
     "stylelint": "^15.10.1",
     "stylelint-config-standard": "^34.0.0",
     "terser-webpack-plugin": "^5.3.3",
-    "ts-jest": "^29.1.1",
     "ts-loader": "^9.4.4",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
+    "vitest": "^3.2.4",
     "webpack": "^5.94.0"
   },
   "lint-staged": {

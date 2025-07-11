@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { dotfilesTransform } from '../../src/renderer/transforms/dotfiles';
 
 describe('dotfilesTransform()', () => {
