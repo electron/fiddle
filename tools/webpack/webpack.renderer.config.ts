@@ -80,6 +80,9 @@ export const rendererConfig: Configuration = {
     alias: {
       'monaco-editor': 'monaco-editor/esm/vs/editor/editor.api.js',
     },
+    extensionAlias: {
+      '.js': ['.js', '.ts', '.tsx'],
+    },
   },
   devtool: 'source-map',
 };

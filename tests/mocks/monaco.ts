@@ -20,7 +20,7 @@ export class MonacoModelMock {
 }
 
 export class MonacoMock {
-  public latestEditor: MonacoEditorMock;
+  public latestEditor!: MonacoEditorMock;
   public latestModel: any;
   public editor = {
     create: jest.fn(() => (this.latestEditor = new MonacoEditorMock())),

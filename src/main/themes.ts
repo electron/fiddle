@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent, app, shell } from 'electron';
+import { IpcMainInvokeEvent, app, shell } from 'electron';
 import * as fs from 'fs-extra';
 import * as namor from 'namor';
 
@@ -113,17 +113,18 @@ export async function openThemeFolder() {
 export function setupThemes() {
   ipcMainManager.handle(
     IpcEvents.READ_THEME_FILE,
-    (_: IpcMainEvent, name: string) => readThemeFile(name),
+    (_: IpcMainInvokeEvent, name: string) => readThemeFile(name),
   );
-  ipcMainManager.handle(IpcEvents.GET_AVAILABLE_THEMES, (_: IpcMainEvent) =>
-    getAvailableThemes(),
+  ipcMainManager.handle(
+    IpcEvents.GET_AVAILABLE_THEMES,
+    (_: IpcMainInvokeEvent) => getAvailableThemes(),
   );
   ipcMainManager.handle(
     IpcEvents.CREATE_THEME_FILE,
-    (_: IpcMainEvent, newTheme: FiddleTheme, name?: string) =>
+    (_: IpcMainInvokeEvent, newTheme: FiddleTheme, name?: string) =>
       createThemeFile(newTheme, name),
   );
-  ipcMainManager.handle(IpcEvents.OPEN_THEME_FOLDER, (_: IpcMainEvent) =>
+  ipcMainManager.handle(IpcEvents.OPEN_THEME_FOLDER, (_: IpcMainInvokeEvent) =>
     openThemeFolder(),
   );
   ipcMainManager.on(IpcEvents.GET_THEME_PATH, (event) => {

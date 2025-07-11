@@ -28,7 +28,7 @@ interface CommandsProps {
 export const Output = observer(
   class Output extends React.Component<CommandsProps> {
     public static contextType = MosaicContext;
-    public context: MosaicContext<WrapperEditorId>;
+    public declare context: MosaicContext<WrapperEditorId>;
     public editor?: MonacoType.editor.IStandaloneCodeEditor;
     public language = 'consoleOutputLanguage';
 

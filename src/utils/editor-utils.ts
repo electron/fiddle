@@ -26,8 +26,8 @@ export function isMainEntryPoint(id: EditorId) {
 }
 
 export function ensureRequiredFiles(values: EditorValues): EditorValues {
-  const mainEntryPoint = Object.keys(values).find((id: EditorId) =>
-    mainEntryPointFiles.has(id),
+  const mainEntryPoint = Object.keys(values).find((id: string) =>
+    mainEntryPointFiles.has(id as EditorId),
   ) as EditorId | undefined;
 
   // If no entry point is found, default to main.js

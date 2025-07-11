@@ -23,7 +23,7 @@ interface EditorProps {
 }
 
 export class Editor extends React.Component<EditorProps> {
-  public editor: MonacoType.editor.IStandaloneCodeEditor;
+  public editor?: MonacoType.editor.IStandaloneCodeEditor;
   public language = 'javascript';
   public value = '';
 

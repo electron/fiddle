@@ -74,7 +74,7 @@ export const AddressBar = observer(
       const { loaders } = this.state;
       reaction(
         () => appState.gistId,
-        (gistId: string) => this.setState({ value: urlFromId(gistId) }),
+        (gistId?: string) => this.setState({ value: urlFromId(gistId) }),
       );
       window.ElectronFiddle.addEventListener('load-gist', loaders.gist);
       window.ElectronFiddle.addEventListener('load-example', loaders.example);

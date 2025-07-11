@@ -125,9 +125,9 @@ export interface Contributor {
   api: string;
   login: string;
   avatar: string;
-  name: string;
-  bio: string;
-  location: string;
+  name: string | null;
+  bio: string | null;
+  location: string | null;
 }
 
 export interface Templates {

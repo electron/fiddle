@@ -1,4 +1,4 @@
-import { MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
+import { EditorId, MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import {
   compareEditors,
   getEditorTitle,
@@ -39,7 +39,7 @@ describe('editor-utils', () => {
 
   describe('compareEditors', () => {
     it('sorts known files in a consistent order', () => {
-      const ids = Object.keys(createEditorValues());
+      const ids = Object.keys(createEditorValues()) as EditorId[];
       const sorted1 = [...ids].sort(compareEditors);
       ids.push(ids.shift()!);
       ids.push(ids.shift()!);
@@ -50,7 +50,7 @@ describe('editor-utils', () => {
     it('sorts known editors before supported ones', () => {
       const filename = 'hello.js';
 
-      let ids = [MAIN_JS, filename];
+      let ids: EditorId[] = [MAIN_JS, filename];
       ids.sort(compareEditors);
       expect(ids).toStrictEqual([MAIN_JS, filename]);
 
@@ -60,7 +60,7 @@ describe('editor-utils', () => {
     });
 
     it('sorts supported files lexicographically', () => {
-      const expected = ['a.js', 'b.js'];
+      const expected: EditorId[] = ['a.js', 'b.js'];
 
       const ids = [...expected];
       ids.sort(compareEditors);

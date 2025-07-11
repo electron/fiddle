@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent, shell } from 'electron';
+import { IpcMainInvokeEvent, shell } from 'electron';
 
 import { ipcMainManager } from './ipc';
 import { exec } from './utils/exec';
@@ -86,20 +86,23 @@ export async function setupNpm() {
   ipcMainManager.handle(
     IpcEvents.NPM_ADD_MODULES,
     (
-      _: IpcMainEvent,
+      _: IpcMainInvokeEvent,
       { dir, packageManager }: PMOperationOptions,
       ...names: Array<string>
     ) => addModules({ dir, packageManager }, ...names),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_IS_PM_INSTALLED,
-    (_: IpcMainEvent, packageManager: IPackageManager, ignoreCache?: boolean) =>
-      getIsPackageManagerInstalled(packageManager, ignoreCache),
+    (
+      _: IpcMainInvokeEvent,
+      packageManager: IPackageManager,
+      ignoreCache?: boolean,
+    ) => getIsPackageManagerInstalled(packageManager, ignoreCache),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_PACKAGE_RUN,
     (
-      _: IpcMainEvent,
+      _: IpcMainInvokeEvent,
       { dir, packageManager }: PMOperationOptions,
       command: string,
     ) => packageRun({ dir, packageManager }, command),

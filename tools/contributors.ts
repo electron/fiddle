@@ -72,7 +72,7 @@ export async function maybeFetchContributors(silent?: boolean): Promise<void> {
       }
     }
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
       // File does not exist, move to fetch right away
       await fetchAndWriteContributorsFile();
     } else if (error) {

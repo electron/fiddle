@@ -187,7 +187,7 @@ export class Runner {
 
     try {
       await this.installModules({ dir, packageManager });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runner: Could not install modules', error);
 
       appState.pushError('Could not install modules', error.message);
@@ -277,7 +277,7 @@ export class Runner {
         ),
       );
       pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
-    } catch (error) {
+    } catch (error: any) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
       return false;
     }
@@ -387,7 +387,7 @@ export class Runner {
           options,
           env,
         });
-      } catch (e) {
+      } catch (e: any) {
         pushOutput(`Failed to spawn Fiddle: ${e.message}`);
         await cleanup();
         return resolve(RunResult.FAILURE);
@@ -439,7 +439,7 @@ export class Runner {
       const dir = await fileManager.saveToTemp(options, transforms);
       pushOutput(`Saved files to ${dir}`);
       return dir;
-    } catch (error) {
+    } catch (error: any) {
       pushError('Failed to save files.', error.message);
     }
 
@@ -456,7 +456,7 @@ export class Runner {
       this.appState.pushOutput(`Now running "${pm} install..."`);
       this.appState.pushOutput(await window.ElectronFiddle.addModules(options));
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.appState.pushError(`Failed to run "${pm} install".`, error);
     }
 

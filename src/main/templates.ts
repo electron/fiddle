@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent } from 'electron';
+import { IpcMainInvokeEvent } from 'electron';
 
 import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
@@ -20,6 +20,6 @@ export function getTemplateValues(name: string): Promise<EditorValues> {
 export function setupTemplates() {
   ipcMainManager.handle(
     IpcEvents.GET_TEMPLATE_VALUES,
-    (_: IpcMainEvent, name: string) => getTemplateValues(name),
+    (_: IpcMainInvokeEvent, name: string) => getTemplateValues(name),
   );
 }

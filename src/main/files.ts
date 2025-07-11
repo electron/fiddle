@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { BrowserWindow, IpcMainEvent, app, dialog } from 'electron';
+import { BrowserWindow, IpcMainInvokeEvent, app, dialog } from 'electron';
 import * as fs from 'fs-extra';
 import * as tmp from 'tmp';
 
@@ -20,15 +20,15 @@ export function setupFileListeners() {
   });
   ipcMainManager.handle(
     IpcEvents.CLEANUP_DIRECTORY,
-    (_: IpcMainEvent, dir: string) => cleanupDirectory(dir),
+    (_: IpcMainInvokeEvent, dir: string) => cleanupDirectory(dir),
   );
   ipcMainManager.handle(
     IpcEvents.DELETE_USER_DATA,
-    (_: IpcMainEvent, name: string) => deleteUserData(name),
+    (_: IpcMainInvokeEvent, name: string) => deleteUserData(name),
   );
   ipcMainManager.handle(
     IpcEvents.SAVE_FILES_TO_TEMP,
-    (_: IpcMainEvent, files: [string, string][]) =>
+    (_: IpcMainInvokeEvent, files: [string, string][]) =>
       saveFilesToTemp(new Map(files)),
   );
 }

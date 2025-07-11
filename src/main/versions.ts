@@ -1,7 +1,7 @@
 import * as path from 'node:path';
 
 import { ElectronVersions, Installer, SemVer } from '@electron/fiddle-core';
-import { IpcMainEvent, app } from 'electron';
+import { IpcMainInvokeEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
@@ -82,9 +82,9 @@ export async function setupVersions() {
 
   ipcMainManager.handle(
     IpcEvents.IS_RELEASED_MAJOR,
-    (_: IpcMainEvent, version: number) => isReleasedMajor(version),
+    (_: IpcMainInvokeEvent, version: number) => isReleasedMajor(version),
   );
-  ipcMainManager.handle(IpcEvents.FETCH_VERSIONS, (_: IpcMainEvent) =>
+  ipcMainManager.handle(IpcEvents.FETCH_VERSIONS, (_: IpcMainInvokeEvent) =>
     fetchVersions(),
   );
   ipcMainManager.on(IpcEvents.GET_LATEST_STABLE, (event) => {
@@ -101,7 +101,7 @@ export async function setupVersions() {
   });
   ipcMainManager.handle(
     IpcEvents.GET_RELEASE_INFO,
-    (_: IpcMainEvent, version) => knownVersions.getReleaseInfo(version),
+    (_: IpcMainInvokeEvent, version) => knownVersions.getReleaseInfo(version),
   );
 
   return knownVersions;

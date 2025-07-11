@@ -57,7 +57,7 @@ describe('AddThemeDialog component', () => {
 
       try {
         await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
-      } catch (err) {
+      } catch (err: any) {
         expect(err.message).toEqual(`Filename  not found`);
         expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledTimes(0);
         expect(store.setTheme).toHaveBeenCalledTimes(0);

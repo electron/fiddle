@@ -17,6 +17,9 @@ export const mainConfig: Configuration = {
   devtool: 'source-map',
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.jsx', '.json'],
+    extensionAlias: {
+      '.js': ['.js', '.ts'],
+    },
   },
   // https://webpack.js.org/configuration/optimization/#optimizationnodeenv
   plugins: [

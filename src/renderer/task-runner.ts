@@ -16,12 +16,12 @@ export class TaskRunner {
   private readonly appState: AppState;
   private readonly autobisect: (v: RunnableVersion[]) => Promise<RunResult>;
   private readonly done: (r: RunResult) => void;
-  private readonly hide: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly hide: (channels: ElectronReleaseChannel[]) => void;
   private readonly log: (message: string) => void;
   private readonly open: (o: SetFiddleOptions) => Promise<void>;
   private readonly run: () => Promise<RunResult>;
   private readonly setVersion: (ver: string) => Promise<void>;
-  private readonly show: (channels: ElectronReleaseChannel[]) => Promise<void>;
+  private readonly show: (channels: ElectronReleaseChannel[]) => void;
   private readonly showObsoleteVersions: (show: boolean) => void;
 
   constructor(app: App) {
@@ -79,7 +79,7 @@ export class TaskRunner {
 
       result = await this.autobisect(range);
       log(`${prefix} ${result}`);
-    } catch (err) {
+    } catch (err: any) {
       log(err);
     }
 
@@ -93,7 +93,7 @@ export class TaskRunner {
     try {
       await this.setup(req.setup);
       result = await this.run();
-    } catch (err) {
+    } catch (err: any) {
       log(err);
     }
 

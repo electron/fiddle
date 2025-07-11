@@ -47,7 +47,7 @@ export async function readFiddle(
         got[name] = '';
       }
     }
-  } catch (err) {
+  } catch (err: any) {
     console.warn(`Unable to read "${folder}": ${err.toString()}`);
   }
 

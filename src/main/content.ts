@@ -1,6 +1,6 @@
 import * as path from 'node:path';
 
-import { IpcMainEvent, app } from 'electron';
+import { IpcMainInvokeEvent, app } from 'electron';
 import * as fs from 'fs-extra';
 
 import { STATIC_DIR } from './constants';
@@ -105,9 +105,9 @@ export function getTemplate(version: string): Promise<EditorValues> {
 export async function setupContent() {
   ipcMainManager.handle(
     IpcEvents.GET_TEMPLATE,
-    (_: IpcMainEvent, version: string) => getTemplate(version),
+    (_: IpcMainInvokeEvent, version: string) => getTemplate(version),
   );
-  ipcMainManager.handle(IpcEvents.GET_TEST_TEMPLATE, (_: IpcMainEvent) =>
+  ipcMainManager.handle(IpcEvents.GET_TEST_TEMPLATE, (_: IpcMainInvokeEvent) =>
     getTestTemplate(),
   );
 }

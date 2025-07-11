@@ -2,9 +2,7 @@ import { Component, ComponentClass, createElement, createRef } from 'react';
 
 import { render } from '@testing-library/react';
 
-type ComponentConstructor<P = object, S = object> = new (
-  props: P,
-) => Component<P, S>;
+type ComponentConstructor<P = any, S = any> = new (props: P) => Component<P, S>;
 
 /**
  * Renders a class component and returns the render result alongside the
