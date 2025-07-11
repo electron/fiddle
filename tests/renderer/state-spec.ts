@@ -1,5 +1,5 @@
 import { mocked } from 'jest-mock';
-import { IReactionDisposer, reaction } from 'mobx';
+import { IReactionDisposer, reaction, runInAction, when } from 'mobx';
 
 import {
   AppStateBroadcastMessageType,
@@ -584,6 +584,53 @@ describe('AppState', () => {
         registerDialogHandler(null, true);
         const result = await appState.showGenericDialog(Opts);
         expect(result).toHaveProperty('input', '');
+      });
+
+      it('queues dialogs', async () => {
+        const optsA = {
+          label: 'A',
+          ok: 'Close',
+          type: GenericDialogType.warning,
+          wantsInput: false,
+        } as const;
+
+        const optsB = {
+          label: 'B',
+          ok: 'Close',
+          type: GenericDialogType.warning,
+          wantsInput: false,
+        } as const;
+
+        // Show Dialog A
+        const dialogPromiseA = appState.showGenericDialog(optsA);
+        await when(() => appState.genericDialogOptions?.label === optsA.label);
+
+        // Queue Dialog B
+        const dialogPromiseB = appState.showGenericDialog(optsB);
+        expect(appState).toHaveProperty('isGenericDialogShowing', true);
+        expect(appState.genericDialogOptions?.label).toEqual(optsA.label);
+
+        // Close Dialog A
+        runInAction(() => {
+          appState.genericDialogLastResult = true;
+          appState.isGenericDialogShowing = false;
+        });
+        expect(appState.genericDialogOptions?.label).toEqual(optsA.label);
+        await dialogPromiseA;
+
+        // Expect dialog set to Dialog B
+        expect(appState).toHaveProperty('isGenericDialogShowing', true);
+        expect(appState.genericDialogOptions?.label).toEqual(optsB.label);
+
+        // Close Dialog B
+        runInAction(() => {
+          appState.genericDialogLastResult = true;
+          appState.isGenericDialogShowing = false;
+        });
+        await dialogPromiseB;
+
+        // No remaining dialogs queued
+        expect(appState).toHaveProperty('isGenericDialogShowing', false);
       });
     });
 

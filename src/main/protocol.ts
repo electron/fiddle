@@ -6,6 +6,7 @@ import { app } from 'electron';
 import { openFiddle } from './files';
 import { ipcMainManager } from './ipc';
 import { isDevMode } from './utils/devmode';
+import { isValidElectronPath } from './utils/local-version';
 import { getOrCreateMainWindow } from './windows';
 import { IpcEvents } from '../ipc-events';
 
@@ -65,6 +66,38 @@ const handlePotentialProtocolLaunch = (url: string) => {
         return;
       }
       break;
+    // electron-fiddle://register-local-version/?name={name}&path={path}&version={version}
+    case 'register-local-version': {
+      if (pathParts.length === 1) {
+        const name = parsed.searchParams.get('name');
+        const localPath = parsed.searchParams.get('path');
+        const version = parsed.searchParams.get('version');
+
+        if (!(name && localPath && version)) {
+          console.debug('register-local-version: Missing params');
+          return;
+        }
+
+        if (!isValidElectronPath(localPath)) {
+          console.debug(`register-local-version: Invalid path ${localPath}`);
+          return;
+        }
+
+        const toAdd = {
+          name,
+          path: localPath,
+          version,
+        };
+
+        console.debug('register-local-version: Registering version', toAdd);
+
+        ipcMainManager.send(IpcEvents.REGISTER_LOCAL_VERSION_FOLDER, [toAdd]);
+      } else {
+        // Invalid
+        return;
+      }
+      break;
+    }
     default:
       return;
   }

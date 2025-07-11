@@ -381,6 +381,61 @@ describe('App component', () => {
     });
   });
 
+  describe('setupProtocolListeners()', () => {
+    let addEventListenerMock: jest.Mock;
+
+    beforeEach(() => {
+      addEventListenerMock = window.ElectronFiddle.addEventListener as any;
+      addEventListenerMock.mockClear();
+    });
+
+    it('registers protocol listeners', () => {
+      app.setupProtocolListeners();
+
+      expect(addEventListenerMock).toHaveBeenCalledWith(
+        'register-local-version',
+        expect.anything(),
+      );
+    });
+
+    it('handles registering new versions', async () => {
+      app.setupProtocolListeners();
+      const callback = addEventListenerMock.mock.calls[0][1];
+
+      app.state.showConfirmDialog = jest.fn().mockResolvedValue(true);
+
+      const addVersion = {
+        name: 'new-version',
+        path: '/version/build/path',
+        version: '123.0.0-local',
+      };
+      await callback(addVersion);
+
+      expect(app.state.addLocalVersion).toHaveBeenCalledWith({
+        name: addVersion.name,
+        localPath: addVersion.path,
+        version: addVersion.version,
+      });
+      expect(app.state.setVersion).toHaveBeenCalledWith(addVersion.version);
+    });
+
+    it('skips registering new versions when not confirmed', async () => {
+      app.setupProtocolListeners();
+      const callback = addEventListenerMock.mock.calls[0][1];
+
+      app.state.showConfirmDialog = jest.fn().mockResolvedValue(false);
+
+      const addVersion = {
+        name: 'new-version',
+        path: '/version/build/path',
+        version: '123.0.0-local',
+      };
+      await callback(addVersion);
+
+      expect(app.state.addLocalVersion).not.toHaveBeenCalled();
+    });
+  });
+
   describe('prompting to confirm replacing an unsaved fiddle', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
