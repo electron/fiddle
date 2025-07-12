@@ -40,6 +40,7 @@ export async function startFiddle(
     localPath,
     options,
     version,
+    runFromAsar,
   } = params;
   const env = { ...process.env };
 
@@ -58,7 +59,7 @@ export async function startFiddle(
   const child = await runner.spawn(
     isValidBuild && localPath ? Installer.getExecPath(localPath) : version,
     dir,
-    { args: options, cwd: dir, env },
+    { args: options, cwd: dir, env, runFromAsar },
   );
   fiddleProcesses.set(webContents, child);
 
