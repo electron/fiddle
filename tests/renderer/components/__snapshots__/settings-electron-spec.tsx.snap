@@ -216,8 +216,6 @@ exports[`ElectronSettings component > renders 1`] = `
                 "1.8.7 remote installed",
               ],
             },
-            "renderAction": [Function],
-            "renderHumanState": [Function],
             "versions": [
               {
                 "source": "remote",
@@ -258,7 +256,6 @@ exports[`ElectronSettings component > renders 1`] = `
           }
         }
         itemSize={40}
-        key="3.0.0-nightly.1:installed:0|3.0.0:installed:0|2.0.3:installed:0|2.0.2:downloading:0|2.0.1:missing:0|2.0.0:installing:0|1.8.7:installed:0"
         width="100%"
       >
         <Component />
