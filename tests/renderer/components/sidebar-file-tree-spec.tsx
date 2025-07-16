@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   EditorValues,
@@ -33,6 +33,10 @@ describe('SidebarFileTree component', () => {
     editorMosaic.set(editorValues);
     (store as unknown as StateMock).editorMosaic = editorMosaic;
     stateMock.editorMosaic = editorMosaic;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders', () => {
@@ -206,6 +210,8 @@ describe('SidebarFileTree component', () => {
   });
 
   it('file is visible, click files tree, focus file content', async () => {
+    vi.useFakeTimers();
+
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(
       <Editors appState={stateMock as unknown as AppState} />,
@@ -218,10 +224,12 @@ describe('SidebarFileTree component', () => {
     setTimeout(() => {
       expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Visible);
       expect(editorsInstance.state.focused).toBe('index.html');
-    }, 1000);
+    });
   });
 
   it('file is hidden, click files tree, make file visible and focus file content', async () => {
+    vi.useFakeTimers();
+
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(
       <Editors appState={stateMock as unknown as AppState} />,
@@ -238,6 +246,6 @@ describe('SidebarFileTree component', () => {
     setTimeout(() => {
       expect(editorMosaic.files.get('index.html')).toBe(EditorPresence.Visible);
       expect(editorsInstance.state.focused).toBe('index.html');
-    }, 1000);
+    });
   });
 });
