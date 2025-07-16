@@ -84,7 +84,7 @@ describe('AppState', () => {
   });
 
   afterAll(async () => {
-    // Wait for all the async task to resolve before the
+    // Wait for all the async task to resolve before the vitest
     // environment tears down
     await new Promise((resolve) => setTimeout(resolve, 2000));
   });
