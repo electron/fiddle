@@ -17,6 +17,7 @@ import {
   StartFiddleParams,
 } from '../interfaces';
 import { IpcEvents, WEBCONTENTS_READY_FOR_IPC_SIGNAL } from '../ipc-events';
+import { isDevMode } from '../main/utils/devmode';
 import { FiddleTheme } from '../themes-defaults';
 
 const channelMapping: Record<FiddleEvent, IpcEvents> = {
@@ -52,6 +53,13 @@ const channelMapping: Record<FiddleEvent, IpcEvents> = {
 } as const;
 
 async function preload() {
+  if (isDevMode()) {
+    const { monitorRenderer } = await import(
+      '@hitarth-gg/devtron/monitorRenderer'
+    );
+    monitorRenderer();
+  }
+
   await setupFiddleGlobal();
 }
 
