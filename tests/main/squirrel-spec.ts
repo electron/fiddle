@@ -1,10 +1,13 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
-import { shouldQuit } from '../../src/main/squirrel';
+import { describe, expect, it } from 'vitest';
 
-jest.mock('electron-squirrel-startup', () => ({ mock: true }));
+import { shouldQuit } from '../../src/main/squirrel';
+import { mockRequire } from '../utils';
+
+mockRequire('electron-squirrel-startup', { mock: true });
 
 describe('shouldQuit', () => {
   it('returns simply electron-squirrel-startup', () => {

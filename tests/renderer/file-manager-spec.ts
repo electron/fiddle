@@ -1,4 +1,4 @@
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   Files,
@@ -13,7 +13,7 @@ import { isSupportedFile } from '../../src/utils/editor-utils';
 import { AppMock, createEditorValues } from '../mocks/mocks';
 import { emitEvent } from '../utils';
 
-jest.mock('../../src/renderer/transforms/dotfiles');
+vi.mock('../../src/renderer/transforms/dotfiles');
 
 describe('FileManager', () => {
   const editorValues = createEditorValues();
@@ -21,7 +21,7 @@ describe('FileManager', () => {
   let fm: FileManager;
 
   beforeEach(() => {
-    mocked(window.ElectronFiddle.getTemplateValues).mockResolvedValue(
+    vi.mocked(window.ElectronFiddle.getTemplateValues).mockResolvedValue(
       editorValues,
     );
 
@@ -117,7 +117,7 @@ describe('FileManager', () => {
     });
 
     it('runs it on an event', () => {
-      fm.openFiddle = jest.fn();
+      fm.openFiddle = vi.fn();
       emitEvent('open-fiddle', filePath, editorValues);
       expect(fm.openFiddle).toHaveBeenCalled();
     });
@@ -136,7 +136,9 @@ describe('FileManager', () => {
   describe('saveToTemp()', () => {
     it('saves as a local fiddle', async () => {
       const tmpPath = '/tmp/save-to-temp/';
-      mocked(window.ElectronFiddle.saveFilesToTemp).mockResolvedValue(tmpPath);
+      vi.mocked(window.ElectronFiddle.saveFilesToTemp).mockResolvedValue(
+        tmpPath,
+      );
       await expect(
         fm.saveToTemp({
           includeDependencies: false,
@@ -147,7 +149,7 @@ describe('FileManager', () => {
     });
 
     it('throws an error', async () => {
-      mocked(window.ElectronFiddle.saveFilesToTemp).mockRejectedValue(
+      vi.mocked(window.ElectronFiddle.saveFilesToTemp).mockRejectedValue(
         new Error('bwap'),
       );
 
@@ -196,13 +198,13 @@ describe('FileManager', () => {
 
     it('applies transforms', async () => {
       const transformed: Files = new Map([['👉', '👈']]);
-      mocked(dotfilesTransform).mockResolvedValue(transformed);
+      vi.mocked(dotfilesTransform).mockResolvedValue(transformed);
       const { files } = await fm.getFiles(undefined, ['dotfiles']);
       expect(files).toBe(transformed);
     });
 
     it('handles transform error', async () => {
-      mocked(dotfilesTransform).mockRejectedValue(new Error('💩'));
+      vi.mocked(dotfilesTransform).mockRejectedValue(new Error('💩'));
       const { files } = await fm.getFiles(undefined, ['dotfiles']);
       expect(files).toStrictEqual(expected);
     });

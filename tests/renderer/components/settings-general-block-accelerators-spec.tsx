@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BlockableAccelerator } from '../../../src/interfaces';
 import { BlockAcceleratorsSettings } from '../../../src/renderer/components/settings-general-block-accelerators';

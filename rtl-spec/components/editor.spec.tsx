@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { EditorId, MAIN_JS } from '../../src/interfaces';
 import { Editor } from '../../src/renderer/components/editor';
 import { AppState } from '../../src/renderer/state';
@@ -14,7 +16,7 @@ describe('Editor component', () => {
     ({ state: store } = window.app);
   });
 
-  function createEditor(id: EditorId, didMount: DidMount = jest.fn()) {
+  function createEditor(id: EditorId, didMount: DidMount = vi.fn()) {
     return renderClassComponentWithInstanceRef(Editor, {
       appState: store,
       editorDidMount: didMount,
@@ -66,9 +68,9 @@ describe('Editor component', () => {
       const id = MAIN_JS;
       const { editorMosaic } = store;
       editorMosaic.set({ [id]: '// content' });
-      const addEditorSpy = jest.spyOn(editorMosaic, 'addEditor');
+      const addEditorSpy = vi.spyOn(editorMosaic, 'addEditor');
 
-      const didMount = jest.fn();
+      const didMount = vi.fn();
       createEditor(id, didMount);
 
       expect(didMount).toHaveBeenCalled();

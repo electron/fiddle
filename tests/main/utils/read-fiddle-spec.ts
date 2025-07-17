@@ -1,7 +1,15 @@
 import * as path from 'node:path';
 
-import * as fs from 'fs-extra';
-import { mocked } from 'jest-mock';
+import fs from 'fs-extra';
+import {
+  type Mock,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import {
   EditorId,
@@ -23,17 +31,17 @@ describe('read-fiddle', () => {
   const folder = '/some/place';
 
   beforeEach(() => {
-    (fs.readFile as jest.Mock).mockImplementation(async (filename) => filename);
-    console.warn = jest.fn();
+    (fs.readFile as Mock).mockImplementation(async (filename) => filename);
+    console.warn = vi.fn();
   });
 
   afterEach(() => {
-    mocked(console.warn).mockClear();
+    vi.mocked(console.warn).mockClear();
   });
 
   function setupFSMocks(editorValues: EditorValues) {
-    (fs.readdir as jest.Mock).mockResolvedValue(Object.keys(editorValues));
-    (fs.readFile as jest.Mock).mockImplementation(
+    (fs.readdir as Mock).mockResolvedValue(Object.keys(editorValues));
+    (fs.readFile as Mock).mockImplementation(
       async (filename) => editorValues[path.basename(filename) as EditorId],
     );
   }
@@ -118,7 +126,7 @@ describe('read-fiddle', () => {
   it('handles read errors gracefully', async () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
-    (fs.readFile as jest.Mock).mockRejectedValue(new Error('bwap'));
+    (fs.readFile as Mock).mockRejectedValue(new Error('bwap'));
 
     const files = await readFiddle(folder);
     expect(files).toStrictEqual(expectedOnReadError(mockValues));
@@ -127,7 +135,7 @@ describe('read-fiddle', () => {
   it('ensures truthy even when read returns null', async () => {
     const mockValues = createEditorValues();
     setupFSMocks(mockValues);
-    (fs.readFile as jest.Mock).mockResolvedValue(null);
+    (fs.readFile as Mock).mockResolvedValue(null);
 
     const files = await readFiddle(folder);
     expect(files).toStrictEqual(expectedOnReadError(mockValues));

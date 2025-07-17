@@ -55,7 +55,7 @@ export function getMainWindowOptions(): Electron.BrowserWindowConstructorOptions
     backgroundColor: '#1d2427',
     show: false,
     webPreferences: {
-      preload: !!process.env.JEST
+      preload: !!process.env.VITEST
         ? path.join(process.cwd(), './.webpack/renderer/main_window/preload.js')
         : MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
@@ -70,7 +70,7 @@ export function createMainWindow(): Electron.BrowserWindow {
   let browserWindow: BrowserWindow | null;
   browserWindow = new BrowserWindow(getMainWindowOptions());
   browserWindow.loadURL(
-    !!process.env.JEST
+    !!process.env.VITEST
       ? path.join(process.cwd(), './.webpack/renderer/main_window/index.html')
       : MAIN_WINDOW_WEBPACK_ENTRY,
   );

@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
 import { MosaicWindowProps } from 'react-mosaic-component';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorId, EditorValues, MAIN_JS } from '../../../src/interfaces';
 import { App } from '../../../src/renderer/app';
@@ -16,7 +17,7 @@ import {
 } from '../../mocks/mocks';
 import { emitEvent } from '../../utils';
 
-jest.mock('../../../src/renderer/components/editor', () => ({
+vi.mock('../../../src/renderer/components/editor', () => ({
   Editor: () => 'Editor',
 }));
 
@@ -52,7 +53,7 @@ describe('Editors component', () => {
     const action = editor.getAction();
     action.isSupported.mockReturnValue(false);
 
-    editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
+    editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
 
     instance.executeCommand('hello');
     expect(editor.getAction).toHaveBeenCalled();
@@ -118,7 +119,7 @@ describe('Editors component', () => {
       const action = editor.getAction();
       action.isSupported.mockReturnValue(true);
 
-      editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
+      editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
 
       emitEvent('execute-monaco-command', 'hello');
       expect(editor.getAction).toHaveBeenCalled();
@@ -137,10 +138,10 @@ describe('Editors component', () => {
       });
 
       // setup
-      const getTemplateSpy = jest
+      const getTemplateSpy = vi
         .spyOn(window.ElectronFiddle, 'getTemplate')
         .mockResolvedValue(fakeValues);
-      const replaceFiddleSpy = jest
+      const replaceFiddleSpy = vi
         .spyOn(app, 'replaceFiddle')
         .mockImplementation(async () => {
           resolve();
@@ -168,7 +169,7 @@ describe('Editors component', () => {
         const editor = new MonacoEditorMock();
         const model = editor.getModel();
         model.getFullModelRange.mockReturnValue(range);
-        editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
+        editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
 
         emitEvent('select-all-in-editor');
 
@@ -181,7 +182,7 @@ describe('Editors component', () => {
 
         const editor = new MonacoEditorMock();
         delete (editor as any).model;
-        editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
+        editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
 
         emitEvent('select-all-in-editor');
 
@@ -192,7 +193,7 @@ describe('Editors component', () => {
 
       it('does not crash if there is no selected editor', () => {
         shallow(<Editors appState={store} />);
-        editorMosaic.focusedEditor = jest.fn().mockReturnValue(null);
+        editorMosaic.focusedEditor = vi.fn().mockReturnValue(null);
         emitEvent('select-all-in-editor');
       });
     });
@@ -201,14 +202,14 @@ describe('Editors component', () => {
       shallow(<Editors appState={store} />);
 
       // setup
-      const getTestTemplateSpy = jest
+      const getTestTemplateSpy = vi
         .spyOn(window.ElectronFiddle, 'getTestTemplate')
         .mockResolvedValue(fakeValues);
       let replaceResolve: (value?: unknown) => void;
       const replacePromise = new Promise((r) => {
         replaceResolve = r;
       });
-      const replaceFiddleSpy = jest
+      const replaceFiddleSpy = vi
         .spyOn(app, 'replaceFiddle')
         .mockImplementation(async () => {
           replaceResolve();
@@ -234,7 +235,7 @@ describe('Editors component', () => {
       const range = 'range';
       const editor = new MonacoEditorMock();
       editor.getModel().getFullModelRange.mockReturnValue(range);
-      editorMosaic.focusedEditor = jest.fn().mockReturnValue(editor);
+      editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
 
       emitEvent('select-all-in-editor');
       await new Promise(process.nextTick);
@@ -257,7 +258,7 @@ describe('Editors component', () => {
     it('sets the "focused" property', () => {
       const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance();
-      const spy = jest.spyOn(instance, 'setState');
+      const spy = vi.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
       instance.setFocused(id);
@@ -267,7 +268,7 @@ describe('Editors component', () => {
     it('focus sidebar file', () => {
       const wrapper = shallow(<Editors appState={store} />);
       const instance: any = wrapper.instance();
-      const spy = jest.spyOn(instance, 'setState');
+      const spy = vi.spyOn(instance, 'setState');
 
       const id = MAIN_JS;
       instance.setFocused(id);

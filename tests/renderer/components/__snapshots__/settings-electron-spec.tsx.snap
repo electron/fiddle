@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`ElectronSettings component renders 1`] = `
+exports[`ElectronSettings component > renders 1`] = `
 <div
   className="settings-electron"
 >

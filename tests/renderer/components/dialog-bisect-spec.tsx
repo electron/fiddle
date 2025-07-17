@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
@@ -15,7 +15,7 @@ import { Runner } from '../../../src/renderer/runner';
 import { AppState } from '../../../src/renderer/state';
 import { StateMock } from '../../mocks/mocks';
 
-jest.mock('../../../src/renderer/bisect');
+vi.mock('../../../src/renderer/bisect');
 
 describe.each([8, 15])('BisectDialog component', (numVersions) => {
   let runner: Runner;
@@ -107,7 +107,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   describe('onSubmit()', () => {
     it('initiates a bisect instance and sets a version', async () => {
       const version = '1.0.0';
-      mocked(Bisector).mockReturnValue({
+      vi.mocked(Bisector).mockReturnValue({
         getCurrentVersion: () => ({ version }),
       } as any);
 
@@ -159,7 +159,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: 4,
       });
 
-      mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
+      vi.mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
       const instance1: any = wrapper.instance();

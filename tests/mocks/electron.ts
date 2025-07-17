@@ -1,12 +1,14 @@
 import { EventEmitter } from 'node:events';
 
+import { vi } from 'vitest';
+
 import { BrowserWindowMock } from './browser-window';
 import { WebContentsMock } from './web-contents';
 
 const createdNotifications: Array<NotificationMock> = [];
 
 class NotificationMock extends EventEmitter {
-  public readonly show = jest.fn();
+  public readonly show = vi.fn();
 
   constructor(public readonly options: any) {
     super();
@@ -15,23 +17,23 @@ class NotificationMock extends EventEmitter {
 }
 
 class Screen extends EventEmitter {
-  public readonly getDisplayMatching = jest.fn();
-  public readonly getDisplayNearestPoint = jest.fn();
-  public readonly getPrimaryDisplay = jest.fn();
-  public readonly getCursorScreenPoint = jest.fn();
+  public readonly getDisplayMatching = vi.fn();
+  public readonly getDisplayNearestPoint = vi.fn();
+  public readonly getPrimaryDisplay = vi.fn();
+  public readonly getCursorScreenPoint = vi.fn();
 }
 
 class AutoUpdaterMock extends EventEmitter {
-  public readonly quitAndInstall = jest.fn();
+  public readonly quitAndInstall = vi.fn();
 }
 
 export class MenuMock {
-  public static readonly setApplicationMenu = jest.fn();
-  public static readonly sendActionToFirstResponder = jest.fn();
-  public static readonly getApplicationMenu = jest.fn();
-  public static readonly buildFromTemplate = jest.fn();
-  public readonly popup = jest.fn();
-  public readonly closePopup = jest.fn();
+  public static readonly setApplicationMenu = vi.fn();
+  public static readonly sendActionToFirstResponder = vi.fn();
+  public static readonly getApplicationMenu = vi.fn();
+  public static readonly buildFromTemplate = vi.fn();
+  public readonly popup = vi.fn();
+  public readonly closePopup = vi.fn();
   public items: Array<MenuItemMock> = [];
   public append(mi: MenuItemMock) {
     this.items.push(mi);
@@ -52,9 +54,9 @@ export class MessageChannelMainMock {
 }
 
 export class MessagePortMainMock {
-  public once = jest.fn();
-  public postMessage = jest.fn();
-  public start = jest.fn();
+  public once = vi.fn();
+  public postMessage = vi.fn();
+  public start = vi.fn();
 }
 
 export class NativeImageMock {
@@ -85,66 +87,66 @@ export class MenuItemMock {
 }
 
 export class IPCMainMock extends EventEmitter {
-  public handle = jest.fn();
-  public handleOnce = jest.fn();
-  public removeHandler = jest.fn();
-  public send = jest.fn();
+  public handle = vi.fn();
+  public handleOnce = vi.fn();
+  public removeHandler = vi.fn();
+  public send = vi.fn();
 }
 
 export class IPCRendererMock extends EventEmitter {
-  public send = jest.fn();
-  public sendSync = jest.fn();
-  public invoke = jest.fn();
+  public send = vi.fn();
+  public sendSync = vi.fn();
+  public invoke = vi.fn();
 }
 
 export class ContextBridgeMock {
-  public exposeInMainWorld = jest.fn();
+  public exposeInMainWorld = vi.fn();
 }
 
 function CreateWindowStub() {
   return {
     id: 0,
-    setMenuBarVisibility: jest.fn(),
-    setAutoHideMenuBar: jest.fn(),
-    setIgnoreMouseEvents: jest.fn(),
-    setTitle: jest.fn(),
-    reload: jest.fn(),
-    isDestroyed: jest.fn(() => false),
+    setMenuBarVisibility: vi.fn(),
+    setAutoHideMenuBar: vi.fn(),
+    setIgnoreMouseEvents: vi.fn(),
+    setTitle: vi.fn(),
+    reload: vi.fn(),
+    isDestroyed: vi.fn(() => false),
   };
 }
 
 const app = {
-  addRecentDocument: jest.fn(),
-  getName: jest.fn().mockReturnValue('Electron Fiddle'),
-  exit: jest.fn(),
-  hide: jest.fn(),
-  show: jest.fn(),
-  isDefaultProtocolClient: jest.fn().mockReturnValue(true),
-  setAsDefaultProtocolClient: jest.fn(),
-  isReady: jest.fn().mockReturnValue(true),
-  isInApplicationsFolder: jest.fn().mockReturnValue(true),
-  moveToApplicationsFolder: jest.fn(),
-  getAppMetrics: jest.fn().mockReturnValue({ metrics: 123 }),
-  getGPUFeatureStatus: jest.fn(),
-  getJumpListSettings: jest.fn(() => ({
+  addRecentDocument: vi.fn(),
+  getName: vi.fn().mockReturnValue('Electron Fiddle'),
+  exit: vi.fn(),
+  hide: vi.fn(),
+  show: vi.fn(),
+  isDefaultProtocolClient: vi.fn().mockReturnValue(true),
+  setAsDefaultProtocolClient: vi.fn(),
+  isReady: vi.fn().mockReturnValue(true),
+  isInApplicationsFolder: vi.fn().mockReturnValue(true),
+  moveToApplicationsFolder: vi.fn(),
+  getAppMetrics: vi.fn().mockReturnValue({ metrics: 123 }),
+  getGPUFeatureStatus: vi.fn(),
+  getJumpListSettings: vi.fn(() => ({
     removedItems: [],
   })),
-  getLoginItemSettings: jest.fn(),
-  getPath: jest.fn((name: string) => {
+  getLoginItemSettings: vi.fn(),
+  getPath: vi.fn((name: string) => {
     if (name === 'userData') return '/Users/fake-user';
     if (name === 'home') return `~`;
     return '/test-path';
   }),
-  focus: jest.fn(),
-  quit: jest.fn(),
-  relaunch: jest.fn(),
-  setJumpList: jest.fn(),
-  requestSingleInstanceLock: jest.fn(),
-  on: jest.fn(),
-  off: jest.fn(),
-  once: jest.fn(),
+  focus: vi.fn(),
+  quit: vi.fn(),
+  relaunch: vi.fn(),
+  setJumpList: vi.fn(),
+  requestSingleInstanceLock: vi.fn(),
+  on: vi.fn(),
+  off: vi.fn(),
+  once: vi.fn(),
   whenReady: () => Promise.resolve(),
-  removeAllListeners: jest.fn(),
+  removeAllListeners: vi.fn(),
 };
 
 const mainWindowStub = CreateWindowStub();
@@ -153,22 +155,22 @@ const autoUpdater = new AutoUpdaterMock();
 
 const session = {
   defaultSession: {
-    clearCache: jest.fn((cb) => cb()),
-    clearStorageData: jest.fn((_opts, cb) => cb()),
+    clearCache: vi.fn((cb) => cb()),
+    clearStorageData: vi.fn((_opts, cb) => cb()),
     cookies: {
-      get: jest.fn(),
+      get: vi.fn(),
     },
   },
 };
 
 const shell = {
-  openExternal: jest.fn(),
-  openPath: jest.fn(),
-  showItemInFolder: jest.fn(),
+  openExternal: vi.fn(),
+  openPath: vi.fn(),
+  showItemInFolder: vi.fn(),
 };
 
 const systemPreferences = {
-  getUserDefault: jest.fn(),
+  getUserDefault: vi.fn(),
 };
 
 const electronMock = {
@@ -176,52 +178,52 @@ const electronMock = {
   autoUpdater,
   BrowserWindow: BrowserWindowMock,
   clipboard: {
-    readText: jest.fn(),
-    readImage: jest.fn(),
-    writeText: jest.fn(),
-    writeImage: jest.fn(),
+    readText: vi.fn(),
+    readImage: vi.fn(),
+    writeText: vi.fn(),
+    writeImage: vi.fn(),
   },
   contextBridge: new ContextBridgeMock(),
   crashReporter: {
-    start: jest.fn(),
+    start: vi.fn(),
   },
   dialog: {
-    showOpenDialog: jest.fn().mockResolvedValue({}),
-    showMessageBox: jest.fn().mockResolvedValue({}),
+    showOpenDialog: vi.fn().mockResolvedValue({}),
+    showMessageBox: vi.fn().mockResolvedValue({}),
   },
   ipcMain: new IPCMainMock(),
   ipcRenderer: new IPCRendererMock(),
   nativeImage: {
     createFromPath: (...args: Array<any>) => new NativeImageMock(...args),
-    createFromBuffer: jest.fn(),
-    createFromDataURL: jest.fn(function () {
-      return { toPNG: jest.fn(() => 'content') };
+    createFromBuffer: vi.fn(),
+    createFromDataURL: vi.fn(function () {
+      return { toPNG: vi.fn(() => 'content') };
     }),
-    createEmpty: jest.fn(),
+    createEmpty: vi.fn(),
   },
-  match: jest.fn(),
+  match: vi.fn(),
   Menu: MenuMock,
   MenuItem: MenuItemMock,
   MessageChannelMain: MessageChannelMainMock,
   Notification: NotificationMock,
   _notifications: createdNotifications,
   protocol: {
-    registerStandardSchemes: jest.fn(),
-    registerServiceWorkerSchemes: jest.fn(),
-    registerFileProtocol: jest.fn(),
-    registerBufferProtocol: jest.fn(),
-    registerStringProtocol: jest.fn(),
-    registerHttpProtocol: jest.fn(),
-    registerStreamProtocol: jest.fn(),
-    unregisterProtocol: jest.fn(),
-    isProtocolHandled: jest.fn(),
-    interceptFileProtocol: jest.fn(),
-    interceptStringProtocol: jest.fn(),
-    interceptBufferProtocol: jest.fn(),
-    interceptHttpProtocol: jest.fn(),
-    uninterceptProtocol: jest.fn(),
+    registerStandardSchemes: vi.fn(),
+    registerServiceWorkerSchemes: vi.fn(),
+    registerFileProtocol: vi.fn(),
+    registerBufferProtocol: vi.fn(),
+    registerStringProtocol: vi.fn(),
+    registerHttpProtocol: vi.fn(),
+    registerStreamProtocol: vi.fn(),
+    unregisterProtocol: vi.fn(),
+    isProtocolHandled: vi.fn(),
+    interceptFileProtocol: vi.fn(),
+    interceptStringProtocol: vi.fn(),
+    interceptBufferProtocol: vi.fn(),
+    interceptHttpProtocol: vi.fn(),
+    uninterceptProtocol: vi.fn(),
   },
-  require: jest.fn(),
+  require: vi.fn(),
   screen: new Screen(),
   session,
   shell,

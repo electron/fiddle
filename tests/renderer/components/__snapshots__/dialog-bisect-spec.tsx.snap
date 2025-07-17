@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`BisectDialog component renders 1`] = `
+exports[`BisectDialog component > renders 1`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -46,7 +46,7 @@ exports[`BisectDialog component renders 1`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -91,7 +91,7 @@ exports[`BisectDialog component renders 1`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -163,7 +163,7 @@ exports[`BisectDialog component renders 1`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 2`] = `
+exports[`BisectDialog component > renders 2`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -209,7 +209,7 @@ exports[`BisectDialog component renders 2`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -247,7 +247,7 @@ exports[`BisectDialog component renders 2`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -312,7 +312,7 @@ exports[`BisectDialog component renders 2`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 3`] = `
+exports[`BisectDialog component > renders 3`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -358,7 +358,7 @@ exports[`BisectDialog component renders 3`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -403,7 +403,7 @@ exports[`BisectDialog component renders 3`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -468,7 +468,7 @@ exports[`BisectDialog component renders 3`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 4`] = `
+exports[`BisectDialog component > renders 4`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -514,7 +514,7 @@ exports[`BisectDialog component renders 4`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -559,7 +559,7 @@ exports[`BisectDialog component renders 4`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -631,7 +631,7 @@ exports[`BisectDialog component renders 4`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 5`] = `
+exports[`BisectDialog component > renders 5`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -678,7 +678,7 @@ exports[`BisectDialog component renders 5`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -723,7 +723,7 @@ exports[`BisectDialog component renders 5`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -795,7 +795,7 @@ exports[`BisectDialog component renders 5`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 6`] = `
+exports[`BisectDialog component > renders 6`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -841,7 +841,7 @@ exports[`BisectDialog component renders 6`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -900,7 +900,7 @@ exports[`BisectDialog component renders 6`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -986,7 +986,7 @@ exports[`BisectDialog component renders 6`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 7`] = `
+exports[`BisectDialog component > renders 7`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -1032,7 +1032,7 @@ exports[`BisectDialog component renders 7`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1084,7 +1084,7 @@ exports[`BisectDialog component renders 7`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1163,7 +1163,7 @@ exports[`BisectDialog component renders 7`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 8`] = `
+exports[`BisectDialog component > renders 8`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -1209,7 +1209,7 @@ exports[`BisectDialog component renders 8`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1268,7 +1268,7 @@ exports[`BisectDialog component renders 8`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1347,7 +1347,7 @@ exports[`BisectDialog component renders 8`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 9`] = `
+exports[`BisectDialog component > renders 9`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -1393,7 +1393,7 @@ exports[`BisectDialog component renders 9`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1452,7 +1452,7 @@ exports[`BisectDialog component renders 9`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1538,7 +1538,7 @@ exports[`BisectDialog component renders 9`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`BisectDialog component renders 10`] = `
+exports[`BisectDialog component > renders 10`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -1585,7 +1585,7 @@ exports[`BisectDialog component renders 10`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [
@@ -1644,7 +1644,7 @@ exports[`BisectDialog component renders 10`] = `
       <Blueprint3.ButtonGroup
         fill={true}
       >
-        <VersionSelect
+        <VersionSelect2
           appState={
             {
               "channelsToShow": [

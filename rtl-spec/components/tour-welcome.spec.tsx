@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   WelcomeTour,
@@ -42,7 +43,7 @@ describe('Header component', () => {
   });
 
   it('stops the tour on stopTour()', async () => {
-    (appState.disableTour as jest.Mock).mockImplementation(
+    (appState.disableTour as Mock).mockImplementation(
       () => (appState.isTourShowing = false),
     );
 
@@ -64,7 +65,7 @@ describe('Header component', () => {
       const electronStep = tourSteps.find(
         ({ name }) => name === 'first-time-electron',
       );
-      const mockParam = { stop: jest.fn(), advance: jest.fn() };
+      const mockParam = { stop: vi.fn(), advance: vi.fn() };
       const buttons = electronStep!.getButtons!(mockParam);
 
       const renderResultFirstButton = render(buttons[0]);

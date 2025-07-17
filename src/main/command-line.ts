@@ -1,7 +1,7 @@
 import * as os from 'node:os';
 
 import * as commander from 'commander';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import getos from 'getos';
 
 import { openFiddle } from './files';
@@ -87,7 +87,9 @@ async function sendTask(type: IpcEvents, task: any) {
 }
 
 async function logConfig() {
-  const packageJson = require('../../package.json');
+  const { default: packageJson } = await import('../../package.json', {
+    with: { type: 'json' },
+  });
   const osinfo = await new Promise((resolve) =>
     getos((err, result) => resolve(err || result)),
   );

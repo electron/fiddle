@@ -2,7 +2,7 @@ import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
 import { BrowserWindow, dialog } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 import { ipcMainManager } from './ipc';
 import { SelectedLocalVersion } from '../interfaces';

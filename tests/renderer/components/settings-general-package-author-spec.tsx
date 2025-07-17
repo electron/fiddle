@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { InputGroup } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { PackageAuthorSettings } from '../../../src/renderer/components/settings-general-package-author';
 import { AppState } from '../../../src/renderer/state';

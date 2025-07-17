@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   EditorValues,
@@ -32,6 +33,10 @@ describe('SidebarFileTree component', () => {
     editorMosaic.set(editorValues);
     (store as unknown as StateMock).editorMosaic = editorMosaic;
     stateMock.editorMosaic = editorMosaic;
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders', () => {
@@ -91,7 +96,7 @@ describe('SidebarFileTree component', () => {
     const EDITOR_NAME = 'index.html';
     const EDITOR_NEW_NAME = 'new_index.html';
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
 
     expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
 
@@ -110,7 +115,7 @@ describe('SidebarFileTree component', () => {
     const EDITOR_NAME = MAIN_JS;
     const EDITOR_NEW_NAME = MAIN_CJS;
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
 
     await instance.renameEditor(EDITOR_NAME);
 
@@ -127,8 +132,8 @@ describe('SidebarFileTree component', () => {
     const EDITOR_NAME = 'index.html';
     const EDITOR_NEW_NAME = PACKAGE_NAME;
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
 
     await instance.renameEditor(EDITOR_NAME);
 
@@ -145,8 +150,8 @@ describe('SidebarFileTree component', () => {
     const EDITOR_NAME = 'index.html';
     const EDITOR_NEW_NAME = 'data.txt';
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
 
     await instance.renameEditor(EDITOR_NAME);
 
@@ -164,8 +169,8 @@ describe('SidebarFileTree component', () => {
     const TO_BE_NAMED = 'index.html';
     const EDITOR_NEW_NAME = EXISTED_NAME;
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
 
     await instance.renameEditor(TO_BE_NAMED);
 
@@ -182,8 +187,8 @@ describe('SidebarFileTree component', () => {
     const TO_BE_NAMED = 'index.html';
     const EDITOR_NEW_NAME = MAIN_CJS;
 
-    store.showInputDialog = jest.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
-    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
 
     await instance.renameEditor(TO_BE_NAMED);
 
@@ -197,7 +202,7 @@ describe('SidebarFileTree component', () => {
     const wrapper = shallow(<SidebarFileTree appState={store} />);
     const instance: any = wrapper.instance();
 
-    editorMosaic.resetLayout = jest.fn();
+    editorMosaic.resetLayout = vi.fn();
 
     instance.resetLayout();
 
@@ -205,6 +210,8 @@ describe('SidebarFileTree component', () => {
   });
 
   it('file is visible, click files tree, focus file content', async () => {
+    vi.useFakeTimers();
+
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(
       <Editors appState={stateMock as unknown as AppState} />,
@@ -220,7 +227,9 @@ describe('SidebarFileTree component', () => {
     });
   });
 
-  it('file is hidden, click files tree, make file visible and focus file content', function () {
+  it('file is hidden, click files tree, make file visible and focus file content', async () => {
+    vi.useFakeTimers();
+
     const sidebarFileTree = shallow(<SidebarFileTree appState={store} />);
     const editors = shallow(
       <Editors appState={stateMock as unknown as AppState} />,

@@ -1,5 +1,6 @@
 import { userEvent } from '@testing-library/user-event';
 import { MosaicContext, MosaicWindowContext } from 'react-mosaic-component';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
 import { EditorId, MAIN_JS } from '../../src/interfaces';
 import {
@@ -11,15 +12,15 @@ import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassCo
 
 let mockContext = {} as MosaicWindowContext & MosaicContext<string>;
 
-jest.mock('react-mosaic-component', () => {
-  const { MosaicContext, MosaicRootActions, MosaicWindowContext } =
-    jest.requireActual('react-mosaic-component');
+vi.mock('react-mosaic-component', async () => {
+  const { MosaicContext, MosaicWindowContext } = await vi.importActual<
+    typeof import('react-mosaic-component')
+  >('react-mosaic-component');
 
-  MosaicContext.Consumer = (props: any) => props.children(mockContext);
+  (MosaicContext.Consumer as any) = (props: any) => props.children(mockContext);
 
   return {
     MosaicContext,
-    MosaicRootActions,
     MosaicWindowContext,
   };
 });
@@ -30,19 +31,19 @@ describe('Editor toolbar button component', () => {
   beforeAll(() => {
     mockContext = {
       mosaicWindowActions: {
-        getPath: jest.fn(),
-        split: jest.fn(),
-        replaceWithNew: jest.fn(),
-        setAdditionalControlsOpen: jest.fn(),
-        connectDragSource: jest.fn(),
+        getPath: vi.fn(),
+        split: vi.fn(),
+        replaceWithNew: vi.fn(),
+        setAdditionalControlsOpen: vi.fn(),
+        connectDragSource: vi.fn(),
       },
       mosaicActions: {
-        expand: jest.fn(),
-        remove: jest.fn(),
-        hide: jest.fn(),
-        replaceWith: jest.fn(),
-        updateTree: jest.fn(),
-        getRoot: jest.fn(),
+        expand: vi.fn(),
+        remove: vi.fn(),
+        hide: vi.fn(),
+        replaceWith: vi.fn(),
+        updateTree: vi.fn(),
+        getRoot: vi.fn(),
       },
       mosaicId: 'test',
     };
@@ -86,7 +87,7 @@ describe('Editor toolbar button component', () => {
 
     it('handles a click', async () => {
       const { editorMosaic } = store;
-      const hideSpy = jest.spyOn(editorMosaic, 'hide');
+      const hideSpy = vi.spyOn(editorMosaic, 'hide');
       const { renderResult } = createRemoveButton(MAIN_JS);
       await userEvent.click(renderResult.getByRole('button'));
       expect(hideSpy).toHaveBeenCalledTimes(1);

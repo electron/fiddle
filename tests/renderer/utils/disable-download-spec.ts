@@ -1,3 +1,5 @@
+import { afterEach, describe, expect, it } from 'vitest';
+
 import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import {
   overrideRendererArch,

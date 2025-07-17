@@ -2,6 +2,7 @@ import React from 'react';
 
 import { render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { RenderNonIdealState } from '../../src/renderer/components/editors-non-ideal-state';
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
@@ -22,7 +23,7 @@ describe('RenderNonIdealState component', () => {
   });
 
   it('handles a click', async () => {
-    const resetLayoutSpy = jest.spyOn(editorMosaic, 'resetLayout');
+    const resetLayoutSpy = vi.spyOn(editorMosaic, 'resetLayout');
     const { getByRole } = render(
       <RenderNonIdealState editorMosaic={editorMosaic} />,
     );

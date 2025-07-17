@@ -11,7 +11,11 @@ import {
   NativeImageMock,
 } from './electron';
 import { ElectronFiddleMock } from './electron-fiddle';
-import { ElectronTypesMock, NodeTypesMock } from './electron-types';
+import {
+  ElectronTypesMock,
+  NodeTypesDirectory,
+  NodeTypesMock,
+} from './electron-types';
 import { VersionsMock } from './electron-versions';
 import { FileManagerMock } from './file-manager';
 import { MonacoEditorMock, MonacoMock, MonacoModelMock } from './monaco';
@@ -36,6 +40,7 @@ export {
   MonacoMock,
   MonacoModelMock,
   NativeImageMock,
+  NodeTypesDirectory,
   NodeTypesMock,
   RemoteLoaderMock,
   RunnerMock,

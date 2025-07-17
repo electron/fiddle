@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { defaultDark, defaultLight } from '../src/themes-defaults';
 
 describe('themes defaults', () => {

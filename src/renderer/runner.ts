@@ -1,3 +1,4 @@
+import parseEnvString from 'parse-env-string';
 import semver from 'semver';
 
 import { Bisector } from './bisect';
@@ -12,8 +13,6 @@ import {
   RunResult,
   RunnableVersion,
 } from '../interfaces';
-
-const parseEnvString = require('parse-env-string');
 
 export enum ForgeCommands {
   PACKAGE = 'package',

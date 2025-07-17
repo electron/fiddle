@@ -1,9 +1,9 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import { BrowserWindow, ContextMenuParams, Menu } from 'electron';
-import { mocked } from 'jest-mock';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createContextMenu,
@@ -16,8 +16,8 @@ import { isDevMode } from '../../src/main/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { WebContentsMock } from '../mocks/web-contents';
 
-jest.mock('../../src/main/utils/devmode');
-jest.mock('../../src/main/ipc');
+vi.mock('../../src/main/utils/devmode');
+vi.mock('../../src/main/ipc');
 
 describe('context-menu', () => {
   let mockWindow: BrowserWindow;
@@ -44,10 +44,10 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu with inspect for dev mode', () => {
-      mocked(Menu.buildFromTemplate).mockReturnValue({
-        popup: jest.fn(),
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
       } as Partial<Menu> as Menu);
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
@@ -65,22 +65,22 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu without inspect in production', () => {
-      mocked(Menu.buildFromTemplate).mockReturnValue({
-        popup: jest.fn(),
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
       } as Partial<Menu> as Menu);
-      mocked(isDevMode).mockReturnValueOnce(false);
+      vi.mocked(isDevMode).mockReturnValueOnce(false);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
-      const template = mocked(Menu.buildFromTemplate).mock.calls[0][0];
+      const template = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0];
 
       expect(template).toHaveLength(7);
     });
 
     it('disables cut/copy/paste if not in editFlags', () => {
-      mocked(Menu.buildFromTemplate).mockReturnValue({
-        popup: jest.fn(),
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
       } as Partial<Menu> as Menu);
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
@@ -99,10 +99,10 @@ describe('context-menu', () => {
     });
 
     it('enables cut/copy/paste if in editFlags', () => {
-      mocked(Menu.buildFromTemplate).mockReturnValue({
-        popup: jest.fn(),
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
       } as Partial<Menu> as Menu);
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, {
         ...mockFlags,
@@ -130,19 +130,19 @@ describe('context-menu', () => {
 
   describe('getInspectItems()', () => {
     it('returns an empty array if not in devMode', () => {
-      mocked(isDevMode).mockReturnValueOnce(false);
+      vi.mocked(isDevMode).mockReturnValueOnce(false);
       const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(0);
     });
 
     it('returns an inspect item if in devMode', () => {
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(1);
     });
 
     it('inspects on click', () => {
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
@@ -153,12 +153,14 @@ describe('context-menu', () => {
     });
 
     it('focuses the dev tools if already open', () => {
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(true);
+      vi.mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(
+        true,
+      );
       (mockWindow.webContents as any).devToolsWebContents =
         new WebContentsMock();
 
@@ -170,15 +172,17 @@ describe('context-menu', () => {
     });
 
     it('catches an error', () => {
-      mocked(isDevMode).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(true);
+      vi.mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(
+        true,
+      );
       (mockWindow.webContents as any).devToolsWebContents =
         new WebContentsMock();
-      mocked(
+      vi.mocked(
         mockWindow.webContents.devToolsWebContents!.focus,
       ).mockImplementationOnce(() => {
         throw new Error('💩');

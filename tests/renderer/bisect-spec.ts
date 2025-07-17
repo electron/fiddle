@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { InstallState, VersionSource } from '../../src/interfaces';
 import { Bisector } from '../../src/renderer/bisect';
 

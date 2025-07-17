@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`SidebarPackageManager component renders 1`] = `
+exports[`SidebarPackageManager component > renders 1`] = `
 <div
   className="package-tree"
 >

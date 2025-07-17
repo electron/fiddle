@@ -1,11 +1,20 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import * as path from 'node:path';
 
 import * as electron from 'electron';
-import { mocked } from 'jest-mock';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import { createContextMenu } from '../../src/main/context-menu';
 import {
@@ -17,8 +26,8 @@ import {
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('../../src/main/context-menu');
-jest.mock('node:path');
+vi.mock('../../src/main/context-menu');
+vi.mock('node:path');
 
 describe('windows', () => {
   beforeAll(() => {
@@ -51,7 +60,7 @@ describe('windows', () => {
     };
 
     beforeEach(() => {
-      mocked(path.join).mockReturnValue('/fake/path');
+      vi.mocked(path.join).mockReturnValue('/fake/path');
     });
 
     afterEach(() => {
@@ -102,7 +111,7 @@ describe('windows', () => {
     // FIXME: new test for setWindowOpenHandler
     it.skip('prevents new-window"', async () => {
       const e = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       };
 
       await getOrCreateMainWindow();
@@ -113,7 +122,7 @@ describe('windows', () => {
 
     it('prevents will-navigate"', async () => {
       const e = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       };
 
       await getOrCreateMainWindow();
