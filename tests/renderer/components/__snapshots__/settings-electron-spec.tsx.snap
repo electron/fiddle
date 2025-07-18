@@ -8,99 +8,123 @@ exports[`ElectronSettings component > renders 1`] = `
     Electron Settings
   </h1>
   <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="Channels:"
-    >
-      <Blueprint3.Tooltip2
-        content="Can't disable channel of selected version (2.0.1)"
-        disabled={false}
-        hoverCloseDelay={0}
-        hoverOpenDelay={100}
-        intent="primary"
-        key="Stable"
-        minimal={false}
-        position="bottom"
-        transitionDuration={100}
+    <Blueprint3.FormGroup>
+      <div
+        style={
+          {
+            "marginBottom": "8px",
+          }
+        }
       >
-        <Blueprint3.Checkbox
-          checked={true}
+        <label
+          style={
+            {
+              "display": "block",
+              "fontWeight": "bold",
+              "marginBottom": "4px",
+            }
+          }
+        >
+          Channels
+        </label>
+        <Blueprint3.Tooltip2
+          content="Can't disable channel of selected version (2.0.1)"
+          disabled={false}
+          hoverCloseDelay={0}
+          hoverOpenDelay={100}
+          intent="primary"
+          key="Stable"
+          minimal={false}
+          position="bottom"
+          transitionDuration={100}
+        >
+          <Blueprint3.Checkbox
+            checked={true}
+            disabled={true}
+            id="Stable"
+            inline={true}
+            label="Stable"
+            onChange={[Function]}
+          />
+        </Blueprint3.Tooltip2>
+        <Blueprint3.Tooltip2
+          content="Can't disable channel of selected version (2.0.1)"
           disabled={true}
-          id="Stable"
-          inline={true}
-          label="Stable"
-          onChange={[Function]}
-        />
-      </Blueprint3.Tooltip2>
-      <Blueprint3.Tooltip2
-        content="Can't disable channel of selected version (2.0.1)"
-        disabled={true}
-        hoverCloseDelay={0}
-        hoverOpenDelay={100}
-        intent="primary"
-        key="Beta"
-        minimal={false}
-        position="bottom"
-        transitionDuration={100}
-      >
-        <Blueprint3.Checkbox
-          checked={true}
-          disabled={false}
-          id="Beta"
-          inline={true}
-          label="Beta"
-          onChange={[Function]}
-        />
-      </Blueprint3.Tooltip2>
-      <Blueprint3.Tooltip2
-        content="Can't disable channel of selected version (2.0.1)"
-        disabled={true}
-        hoverCloseDelay={0}
-        hoverOpenDelay={100}
-        intent="primary"
-        key="Nightly"
-        minimal={false}
-        position="bottom"
-        transitionDuration={100}
-      >
-        <Blueprint3.Checkbox
-          checked={false}
-          disabled={false}
-          id="Nightly"
-          inline={true}
-          label="Nightly"
-          onChange={[Function]}
-        />
-      </Blueprint3.Tooltip2>
-      <Blueprint3.Tooltip2
-        content="Include versions that have reached end-of-life (older than 9.0.0)"
-        hoverCloseDelay={0}
-        hoverOpenDelay={100}
-        intent="primary"
-        minimal={false}
-        position="bottom"
-        transitionDuration={100}
-      >
+          hoverCloseDelay={0}
+          hoverOpenDelay={100}
+          intent="primary"
+          key="Beta"
+          minimal={false}
+          position="bottom"
+          transitionDuration={100}
+        >
+          <Blueprint3.Checkbox
+            checked={true}
+            disabled={false}
+            id="Beta"
+            inline={true}
+            label="Beta"
+            onChange={[Function]}
+          />
+        </Blueprint3.Tooltip2>
+        <Blueprint3.Tooltip2
+          content="Can't disable channel of selected version (2.0.1)"
+          disabled={true}
+          hoverCloseDelay={0}
+          hoverOpenDelay={100}
+          intent="primary"
+          key="Nightly"
+          minimal={false}
+          position="bottom"
+          transitionDuration={100}
+        >
+          <Blueprint3.Checkbox
+            checked={false}
+            disabled={false}
+            id="Nightly"
+            inline={true}
+            label="Nightly"
+            onChange={[Function]}
+          />
+        </Blueprint3.Tooltip2>
+      </div>
+      <div>
+        <label
+          style={
+            {
+              "display": "block",
+              "fontWeight": "bold",
+              "marginBottom": "4px",
+            }
+          }
+        >
+          Visibility
+        </label>
         <Blueprint3.Checkbox
           checked={false}
-          id="showObsoleteVersions"
+          id="showUndownloadedVersions"
           inline={true}
-          label="Obsolete"
+          label="Show not downloaded versions"
           onChange={[Function]}
         />
-      </Blueprint3.Tooltip2>
-    </Blueprint3.FormGroup>
-  </Blueprint3.Callout>
-  <br />
-  <Blueprint3.Callout>
-    <Blueprint3.FormGroup
-      label="Filters:"
-    >
-      <Blueprint3.Checkbox
-        checked={false}
-        id="showUndownloadedVersions"
-        label="Not Downloaded"
-        onChange={[Function]}
-      />
+        <Blueprint3.Tooltip2
+          content="Include versions that have reached end-of-life (older than 9.0.0)"
+          hoverCloseDelay={0}
+          hoverOpenDelay={100}
+          intent="primary"
+          minimal={false}
+          position="bottom"
+          transitionDuration={100}
+        >
+          <Blueprint3.Checkbox
+            checked={false}
+            id="showObsoleteVersions"
+            inline={true}
+            label="Show obsolete versions"
+            onChange={[Function]}
+          />
+        </Blueprint3.Tooltip2>
+      </div>
     </Blueprint3.FormGroup>
   </Blueprint3.Callout>
   <br />
@@ -131,234 +155,112 @@ exports[`ElectronSettings component > renders 1`] = `
         text="Add Local Electron Build"
       />
     </Blueprint3.ButtonGroup>
-    <HTMLTable
+    <Blueprint3.InputGroup
+      className="version-filter"
+      leftIcon="filter"
+      onChange={[Function]}
+      placeholder="Filter versions..."
+      value=""
+    />
+    <div
       className="electron-versions-table"
-      striped={true}
     >
-      <thead>
-        <tr>
-          <th>
-            Version
-          </th>
-          <th>
-            Status
-          </th>
-          <th
-            className="action"
-          >
-            Action
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          key="3.0.0-nightly.1"
+      <div
+        className="electron-versions-header"
+      >
+        <div
+          className="version-col"
         >
-          <td>
-            3.0.0-nightly.1
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
-              Downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              fill={true}
-              icon="trash"
-              onClick={[Function]}
-              small={true}
-              text="Delete"
-            />
-          </td>
-        </tr>
-        <tr
-          key="3.0.0"
+          Version
+        </div>
+        <div
+          className="status-col"
         >
-          <td>
-            3.0.0
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
-              Available
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              fill={true}
-              icon="trash"
-              onClick={[Function]}
-              small={true}
-              text="Remove"
-            />
-          </td>
-        </tr>
-        <tr
-          key="2.0.3"
+          Status
+        </div>
+        <div
+          className="action-col"
         >
-          <td>
-            2.0.3
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
-              Downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              fill={true}
-              icon="trash"
-              onClick={[Function]}
-              small={true}
-              text="Delete"
-            />
-          </td>
-        </tr>
-        <tr
-          key="2.0.2"
-        >
-          <td>
-            2.0.2
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="cloud-download"
-              />
-               
-              Downloading
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              disabled={true}
-              fill={true}
-              icon={
-                <Blueprint3.Spinner
-                  size={16}
-                />
-              }
-              small={true}
-              text="Downloading"
-            />
-          </td>
-        </tr>
-        <tr
-          key="2.0.1"
-        >
-          <td>
-            2.0.1
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="cloud"
-              />
-               
-              Not Downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Tooltip2
-              content="Can't remove currently active Electron version (2.0.1)"
-              hoverCloseDelay={0}
-              hoverOpenDelay={100}
-              intent="primary"
-              minimal={false}
-              position="auto"
-              transitionDuration={100}
-            >
-              <Blueprint3.AnchorButton
-                className="disabled-version"
-                disabled={true}
-                icon="cloud-download"
-                text="Download"
-              />
-            </Blueprint3.Tooltip2>
-          </td>
-        </tr>
-        <tr
-          key="2.0.0"
-        >
-          <td>
-            2.0.0
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
-              Downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              disabled={true}
-              fill={true}
-              icon={
-                <Blueprint3.Spinner
-                  size={16}
-                />
-              }
-              small={true}
-              text="Downloading"
-            />
-          </td>
-        </tr>
-        <tr
-          key="1.8.7"
-        >
-          <td>
-            1.8.7
-          </td>
-          <td>
-            <span>
-              <Blueprint3.Icon
-                icon="box"
-              />
-               
-              Downloaded
-            </span>
-          </td>
-          <td
-            className="action"
-          >
-            <Blueprint3.Button
-              fill={true}
-              icon="trash"
-              onClick={[Function]}
-              small={true}
-              text="Delete"
-            />
-          </td>
-        </tr>
-      </tbody>
-    </HTMLTable>
+          Action
+        </div>
+      </div>
+      <FixedSizeList
+        className="electron-versions-list"
+        height={400}
+        itemCount={7}
+        itemData={
+          {
+            "appState": {
+              "channelsToShow": [
+                "Stable",
+                "Beta",
+              ],
+              "currentElectronVersion": "2.0.1 remote installed",
+              "version": "2.0.1",
+              "versions": [
+                "2.0.3 remote installed",
+                "2.0.2 remote installed",
+                "2.0.1 remote installed",
+                "2.0.0 remote installed",
+                "1.8.7 remote installed",
+                "3.0.0 local installed",
+                "3.0.0-nightly.1 remote installed",
+              ],
+              "versionsToShow": [
+                "3.0.0-nightly.1 remote installed",
+                "3.0.0 local installed",
+                "2.0.3 remote installed",
+                "2.0.2 remote downloading",
+                "2.0.1 remote missing",
+                "2.0.0 remote installing",
+                "1.8.7 remote installed",
+              ],
+            },
+            "versions": [
+              {
+                "source": "remote",
+                "state": "installed",
+                "version": "3.0.0-nightly.1",
+              },
+              {
+                "source": "local",
+                "state": "installed",
+                "version": "3.0.0",
+              },
+              {
+                "source": "remote",
+                "state": "installed",
+                "version": "2.0.3",
+              },
+              {
+                "source": "remote",
+                "state": "downloading",
+                "version": "2.0.2",
+              },
+              {
+                "source": "remote",
+                "state": "missing",
+                "version": "2.0.1",
+              },
+              {
+                "source": "remote",
+                "state": "installing",
+                "version": "2.0.0",
+              },
+              {
+                "source": "remote",
+                "state": "installed",
+                "version": "1.8.7",
+              },
+            ],
+          }
+        }
+        itemSize={40}
+        width="100%"
+      >
+        <Component />
+      </FixedSizeList>
+    </div>
   </Blueprint3.Callout>
 </div>
 `;
