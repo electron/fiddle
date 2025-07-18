@@ -71,14 +71,12 @@ export async function fetchVersions(): Promise<Version[]> {
 }
 
 export async function setupVersions() {
-  knownVersions = await ElectronVersions.create(
-    {
+  knownVersions = await ElectronVersions.create({
+    initialVersions: releases,
+    paths: {
       versionsCache: path.join(app.getPath('userData'), 'releases.json'),
     },
-    {
-      initialVersions: releases,
-    },
-  );
+  });
 
   ipcMainManager.handle(
     IpcEvents.IS_RELEASED_MAJOR,
