@@ -14,6 +14,7 @@ interface TokenDialogState {
   tokenInput: string;
   verifying: boolean;
   error: boolean;
+  errorMessage?: string;
 }
 
 const TOKEN_SCOPES = ['gist'].join();
@@ -37,6 +38,7 @@ export const TokenDialog = observer(
       this.state = {
         verifying: false,
         error: false,
+        errorMessage: undefined,
         tokenInput: '',
       };
 
@@ -49,28 +51,79 @@ export const TokenDialog = observer(
     }
 
     /**
-     * Handles the submission of a token
+     * Validates a GitHub token and checks for required scopes.
+     */
+    private async validateGitHubToken(token: string): Promise<{
+      isValid: boolean;
+      scopes: string[];
+      hasGistScope: boolean;
+      user?: any;
+      error?: string;
+    }> {
+      try {
+        const octokit = await getOctokit({ gitHubToken: token } as AppState);
+        const response = await octokit.users.getAuthenticated();
+
+        const scopes = response.headers['x-oauth-scopes']?.split(', ') || [];
+        const hasGistScope = scopes.includes('gist');
+
+        return {
+          isValid: true,
+          scopes,
+          hasGistScope,
+          user: response.data,
+        };
+      } catch (error) {
+        return {
+          isValid: false,
+          scopes: [],
+          hasGistScope: false,
+          error: error.message,
+        };
+      }
+    }
+
+    /**
+     * Handles the submission of a token and verifies
+     * that it has the correct scopes.
      */
     public async onSubmitToken(): Promise<void> {
       if (!this.state.tokenInput) return;
-      this.setState({ verifying: true });
-      this.props.appState.gitHubToken = this.state.tokenInput;
+      this.setState({ verifying: true, error: false, errorMessage: undefined });
 
-      const octo = await getOctokit(this.props.appState);
+      const validation = await this.validateGitHubToken(this.state.tokenInput);
 
-      try {
-        const { data } = await octo.users.getAuthenticated();
-        this.props.appState.gitHubAvatarUrl = data.avatar_url;
-        this.props.appState.gitHubLogin = data.login;
-        this.props.appState.gitHubName = data.name;
-        this.setState({ verifying: false, error: false });
-      } catch (error) {
-        console.warn(`Authenticating against GitHub failed`, error);
-        this.setState({ verifying: false, error: true });
+      if (!validation.isValid) {
+        console.warn(`Authenticating against GitHub failed`, validation.error);
+        this.setState({
+          verifying: false,
+          error: true,
+          errorMessage:
+            'Invalid GitHub token. Please check your token and try again.',
+        });
         this.props.appState.gitHubToken = null;
         return;
       }
 
+      if (!validation.hasGistScope) {
+        console.warn(`Token missing required gist scope`);
+        this.setState({
+          verifying: false,
+          error: true,
+          errorMessage:
+            'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
+        });
+        this.props.appState.gitHubToken = null;
+        return;
+      }
+
+      // Token is valid and has required scopes.
+      this.props.appState.gitHubToken = this.state.tokenInput;
+      this.props.appState.gitHubAvatarUrl = validation.user.avatar_url;
+      this.props.appState.gitHubLogin = validation.user.login;
+      this.props.appState.gitHubName = validation.user.name;
+
+      this.setState({ verifying: false, error: false });
       this.props.appState.isTokenDialogShowing = false;
     }
 
@@ -89,6 +142,7 @@ export const TokenDialog = observer(
       this.setState({
         verifying: false,
         error: false,
+        errorMessage: undefined,
         tokenInput: '',
       });
     }
@@ -141,11 +195,12 @@ export const TokenDialog = observer(
     }
 
     get invalidWarning() {
+      const message =
+        this.state.errorMessage ||
+        'Please provide a valid GitHub Personal Access Token';
       return (
         <>
-          <Callout intent={Intent.DANGER}>
-            Please provide a valid GitHub Personal Access Token
-          </Callout>
+          <Callout intent={Intent.DANGER}>{message}</Callout>
           <br />
         </>
       );
