@@ -22,7 +22,7 @@
     "publish": "electron-forge publish",
     "start": "ts-node ./tools/clean-webpack.ts && electron-forge start --",
     "test": "vitest run",
-    "test:ci": "vitest run --coverage --reporter=junit --outputFile=./reports/report.xml",
+    "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./reports/report.xml",
     "test:report": "vitest run --reporter=json --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
     "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
