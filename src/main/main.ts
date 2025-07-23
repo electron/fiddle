@@ -43,7 +43,9 @@ export async function onReady() {
     process.env.NODE_ENV = 'production';
   } else {
     const { devtron } = await import('@hitarth-gg/devtron');
-    await devtron.install();
+    await devtron.install().catch(err => {
+      console.warn(`cannot install devtron: ${err.message}`)
+    });
   }
 
   setupAboutPanel();
