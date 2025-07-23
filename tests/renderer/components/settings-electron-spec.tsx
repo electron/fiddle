@@ -16,11 +16,11 @@ import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
 vi.mock('../../../src/renderer/utils/disable-download.ts');
 
-jest.mock('mobx-react', () => ({
+vi.mock('mobx-react', () => ({
   observer: (component: any) => component,
 }));
 
-jest.mock('react-window', () => ({
+vi.mock('react-window', () => ({
   FixedSizeList: ({ children, itemCount, itemData }: any) => (
     <div data-testid="electron-versions-list">
       {Array.from({ length: itemCount }, (_, index) => {
