@@ -39,7 +39,14 @@ let argv: string[] = [];
  */
 export async function onReady() {
   await onFirstRunMaybe();
-  if (!isDevMode()) process.env.NODE_ENV = 'production';
+  if (!isDevMode()) {
+    process.env.NODE_ENV = 'production';
+  } else {
+    const { devtron } = await import('@hitarth-gg/devtron');
+    await devtron.install().catch((err) => {
+      console.warn(`cannot install devtron: ${err.message}`);
+    });
+  }
 
   setupAboutPanel();
 
