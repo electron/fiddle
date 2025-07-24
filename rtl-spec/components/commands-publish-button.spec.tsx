@@ -40,9 +40,21 @@ type GistCreateOpts = {
   public: boolean;
 };
 
+class RequestError extends Error {
+  public message: string;
+  public status: number;
+
+  public constructor(message: string, status: number) {
+    super(message);
+
+    this.message = message;
+    this.status = status;
+  }
+}
+
 describe('Action button component', () => {
   const description = 'Electron Fiddle Gist';
-  const errorMessage = '💀';
+  const error = new RequestError("Don't be blue 💙", 401);
   let app: App;
   let mocktokit: OctokitMock;
   let state: AppState;
@@ -228,8 +240,9 @@ describe('Action button component', () => {
     });
 
     it('handles an error in Gist publishing', async () => {
+      state.showGenericDialog = vi.fn().mockReturnValue({ confirm: true });
       mocktokit.gists.create.mockImplementation(() => {
-        throw new Error(errorMessage);
+        throw new RequestError(error.message, error.status);
       });
 
       state.editorMosaic.isEdited = true;
@@ -240,6 +253,11 @@ describe('Action button component', () => {
 
       // On failure the editor should still be considered edited
       expect(state.editorMosaic.isEdited).toBe(true);
+      expect(state.showGenericDialog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          label: expect.stringContaining('Publishing Fiddle to GitHub failed.'),
+        }),
+      );
     });
 
     it('can publish private gists', async () => {
@@ -292,16 +310,16 @@ describe('Action button component', () => {
     });
 
     it('notifies the user if updating fails', async () => {
+      state.showGenericDialog = vi.fn().mockReturnValue({ confirm: true });
       mocktokit.gists.update.mockImplementation(() => {
-        throw new Error(errorMessage);
+        throw new RequestError(error.message, error.status);
       });
 
       await instance.performGistAction();
 
-      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
+      expect(state.showGenericDialog).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: expect.stringContaining(errorMessage),
-          message: expect.stringContaining('Updating Fiddle Gist failed.'),
+          label: expect.stringContaining('Updating Fiddle Gist failed.'),
         }),
       );
     });
@@ -325,16 +343,16 @@ describe('Action button component', () => {
     });
 
     it('notifies the user if deleting fails', async () => {
+      state.showGenericDialog = vi.fn().mockReturnValue({ confirm: true });
       mocktokit.gists.delete.mockImplementation(() => {
-        throw new Error(errorMessage);
+        throw new RequestError(error.message, error.status);
       });
 
       await instance.performGistAction();
 
-      expect(window.ElectronFiddle.showWarningDialog).toHaveBeenCalledWith(
+      expect(state.showGenericDialog).toHaveBeenCalledWith(
         expect.objectContaining({
-          detail: expect.stringContaining(errorMessage),
-          message: expect.stringContaining('Deleting Fiddle Gist failed.'),
+          label: expect.stringContaining('Deleting Fiddle Gist failed.'),
         }),
       );
     });
