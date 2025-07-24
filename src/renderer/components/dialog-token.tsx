@@ -15,6 +15,7 @@ interface TokenDialogState {
   verifying: boolean;
   error: boolean;
   errorMessage?: string;
+  isTokenUpdateAction?: boolean;
 }
 
 const TOKEN_SCOPES = ['gist'].join();
@@ -40,6 +41,7 @@ export const TokenDialog = observer(
         error: false,
         errorMessage: undefined,
         tokenInput: '',
+        isTokenUpdateAction: props.appState.gitHubToken !== '',
       };
 
       this.onSubmitToken = this.onSubmitToken.bind(this);
@@ -101,7 +103,9 @@ export const TokenDialog = observer(
           errorMessage:
             'Invalid GitHub token. Please check your token and try again.',
         });
-        this.props.appState.gitHubToken = null;
+        if (!this.state.isTokenUpdateAction) {
+          this.props.appState.gitHubToken = null;
+        }
         return;
       }
 
@@ -113,7 +117,9 @@ export const TokenDialog = observer(
           errorMessage:
             'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
         });
-        this.props.appState.gitHubToken = null;
+        if (!this.state.isTokenUpdateAction) {
+          this.props.appState.gitHubToken = null;
+        }
         return;
       }
 
@@ -144,6 +150,7 @@ export const TokenDialog = observer(
         error: false,
         errorMessage: undefined,
         tokenInput: '',
+        isTokenUpdateAction: false,
       });
     }
 
