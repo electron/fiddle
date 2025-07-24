@@ -16,6 +16,7 @@ import { observer } from 'mobx-react';
 import {
   EditorId,
   EditorValues,
+  GenericDialogType,
   GistActionState,
   GistActionType,
   PACKAGE_NAME,
@@ -156,11 +157,24 @@ export const GistActionButton = observer(
       } catch (error: any) {
         console.warn(`Could not publish gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        if (error.message.includes('Bad credentials')) {
+          const { confirm } = await this.props.appState.showGenericDialog({
+            label: `Publishing Fiddle to GitHub failed. Github encountered the following error: ${error.message}`,
+            ok: 'Update token',
+            cancel: 'Close',
+            type: GenericDialogType.warning,
+            wantsInput: false,
+          });
+
+          if (confirm) {
+            this.props.appState.toggleSettings();
+            this.props.appState.isTokenDialogShowing = true;
+          }
+        } else {
+          await this.props.appState.showErrorDialog(
+            `Publishing Fiddle to GitHub failed. Are you connected to the Internet? GitHub encountered the following error: ${error.message}`,
+          );
+        }
 
         return false;
       }
