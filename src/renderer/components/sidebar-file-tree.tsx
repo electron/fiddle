@@ -135,7 +135,7 @@ export const SidebarFileTree = observer(
           isExpanded: true,
           label: 'Editors',
           secondaryLabel: (
-            <ButtonGroup minimal>
+            <ButtonGroup minimal style={{ display: 'flex', gap: 4 }}>
               <Tooltip2
                 content="Add New File"
                 minimal={true}
