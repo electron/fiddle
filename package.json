@@ -164,6 +164,7 @@
   },
   "resolutions": {
     "@electron-forge/maker-base": "7.7.0",
-    "@electron-forge/shared-types": "7.7.0"
+    "@electron-forge/shared-types": "7.7.0",
+    "@electron/windows-sign": "github:electron/windows-sign#node-22"
   }
 }
