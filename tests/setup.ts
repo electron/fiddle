@@ -1,10 +1,11 @@
 import '@testing-library/jest-dom/vitest';
 
+import { cleanup } from '@testing-library/react';
 import { configure as enzymeConfigure } from 'enzyme';
 import Adapter from 'enzyme-adapter-react-16';
 import { createSerializer } from 'enzyme-to-json';
 import { configure as mobxConfigure } from 'mobx';
-import { beforeEach, expect, vi } from 'vitest';
+import { afterEach, beforeEach, expect, vi } from 'vitest';
 
 import { AppMock, ElectronFiddleMock, MonacoMock } from './mocks/mocks';
 
@@ -102,6 +103,10 @@ window.localStorage.removeItem = vi.fn();
 window.open = vi.fn();
 window.navigator.clipboard.readText = vi.fn();
 window.navigator.clipboard.writeText = vi.fn();
+
+afterEach(() => {
+  cleanup();
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
