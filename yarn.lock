@@ -784,24 +784,12 @@
     minimatch "^9.0.3"
     plist "^3.1.0"
 
-"@electron/windows-sign@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@electron/windows-sign/-/windows-sign-1.0.0.tgz#f08a0a5d4b96840ab637ce11228a59ee8b665287"
-  integrity sha512-sdkQYAR/TQCEyYgz2jMbusL/ljdj6qA7vyIm/S9HICMAitXhXROFHUOLLgiORj1uiaf2EOB2U33DatGubUuZaQ==
+"@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2", "@electron/windows-sign@github:electron/windows-sign#node-22":
+  version "0.0.0-development"
+  resolved "https://codeload.github.com/electron/windows-sign/tar.gz/48d6c4198afc5cf9d37e8a51b9797c246b0420a1"
   dependencies:
     debug "^4.3.4"
-    fs-extra "^11.1.1"
-    minimist "^1.2.8"
-
-"@electron/windows-sign@^1.1.2":
-  version "1.1.2"
-  resolved "https://registry.yarnpkg.com/@electron/windows-sign/-/windows-sign-1.1.2.tgz#5489861ca62348d2300407e85d949af95849955e"
-  integrity sha512-eXEiZjDtxW3QORCWfRUarANPRTlH9B6At4jqBZJ0NzokSGutXQUVLPA6WmGpIhDW6w2yCMdHW1EJd1HrXtU5sg==
-  dependencies:
-    cross-dirname "^0.1.0"
-    debug "^4.3.4"
-    fs-extra "^11.1.1"
-    minimist "^1.2.8"
+    graceful-fs "^4.2.11"
     postject "^1.0.0-alpha.6"
 
 "@esbuild/aix-ppc64@0.25.6":
@@ -4344,6 +4332,11 @@ cosmiconfig@^8.2.0:
     js-yaml "^4.1.0"
     parse-json "^5.0.0"
     path-type "^4.0.0"
+
+create-require@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
+  integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
 
 cross-dirname@^0.1.0:
   version "0.1.0"
@@ -8773,7 +8766,7 @@ minimist@^1.2.0:
   resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.7.tgz"
   integrity sha512-bzfL1YUZsP41gmu/qjrEk0Q6i2ix/cVeAhbCbqH9u3zYutS1cLg00qhrD0M2MVdCcx4Sc0UpP2eBWo9rotpq6g==
 
-minimist@^1.2.5, minimist@^1.2.6, minimist@^1.2.8:
+minimist@^1.2.5, minimist@^1.2.6:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.8.tgz#c1a464e7693302e082a075cee0c057741ac4772c"
   integrity sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==
