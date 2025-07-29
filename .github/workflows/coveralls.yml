@@ -22,6 +22,8 @@ jobs:
       - name: Install
         run: yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000 || yarn --frozen-lockfile --network-timeout 100000
       - run: yarn run contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run electron-releases
       - name: test
         run: yarn test:ci

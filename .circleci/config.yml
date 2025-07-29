@@ -25,7 +25,6 @@ commands:
           curl -X POST "$FIDDLE_SECRETS_SERVICE_ENDPOINT?format=shell" -H "Content-Type: application/json" -d '{"token":"'$CIRCLE_OIDC_TOKEN'"}' >> $BASH_ENV
   test:
     steps:
-      - run: yarn contributors
       - run: yarn tsc
       - run:
           command: yarn test:ci
