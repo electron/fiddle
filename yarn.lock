@@ -389,7 +389,7 @@
     sudo-prompt "^9.1.1"
     username "^5.1.0"
 
-"@electron-forge/maker-base@7.8.1", "@electron-forge/maker-base@^6.0.4":
+"@electron-forge/maker-base@7.8.1", "@electron-forge/maker-base@^6.0.0 || ^7.0.0":
   version "7.8.1"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-base/-/maker-base-7.8.1.tgz#92d953b52e1173323c9498b8c8de1568328a5012"
   integrity sha512-GUZqschGuEBzSzE0bMeDip65IDds48DZXzldlRwQ+85SYVA6RMU2AwDDqx3YiYsvP2OuxKruuqIJZtOF5ps4FQ==
@@ -784,9 +784,9 @@
     minimatch "^9.0.3"
     plist "^3.1.0"
 
-"@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2", "@electron/windows-sign@github:electron/windows-sign#node-22":
+"@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2", "@electron/windows-sign@github:electron/windows-sign#node-22-dist":
   version "0.0.0-development"
-  resolved "https://codeload.github.com/electron/windows-sign/tar.gz/48d6c4198afc5cf9d37e8a51b9797c246b0420a1"
+  resolved "https://codeload.github.com/electron/windows-sign/tar.gz/bd0d56cc89846c891354be7386e2e3f0f5c7ffd8"
   dependencies:
     debug "^4.3.4"
     graceful-fs "^4.2.11"
@@ -1961,15 +1961,20 @@
   resolved "https://registry.npmjs.org/@react-dnd/shallowequal/-/shallowequal-2.0.0.tgz"
   integrity sha512-Pc/AFTdwZwEKJxFJvlxrSmGe/di+aAOBn60sremrpLo6VI/6cmiUYNNwlI5KNYttg7uypzA3ILPMPgxB2GYZEg==
 
-"@reforged/maker-appimage@^3.3.0":
-  version "3.3.0"
-  resolved "https://registry.yarnpkg.com/@reforged/maker-appimage/-/maker-appimage-3.3.0.tgz#c1420dd4bc81d3d037206cea834b98003cfa0c5f"
-  integrity sha512-UxQP/RJwxzBp6pflCeifw/sB/RHMWF0ZyIypUI5B4341VC2NSwa5za1L5ZD3vYTmJzUcP+SJDHgIVTCdZ0Qt9g==
+"@reforged/maker-appimage@^5.0.0":
+  version "5.0.0"
+  resolved "https://registry.yarnpkg.com/@reforged/maker-appimage/-/maker-appimage-5.0.0.tgz#cbd04bda32bcbaa216e45fb770e8ad430364a2df"
+  integrity sha512-25nli9nt5MVMRladnoJ3uP5W+2KpND5mzA36rc/Duj/R71oGcOj3t9Uoc/dDmaED8afAEeaSYpVE7VPPe9T54A==
   dependencies:
-    "@electron-forge/maker-base" "^6.0.4"
+    "@electron-forge/maker-base" "^6.0.0 || ^7.0.0"
+    "@reforged/maker-types" "^1.0.0"
     "@spacingbat3/lss" "^1.0.0"
-    node-fetch "^3.2.5"
     semver "^7.3.8"
+
+"@reforged/maker-types@^1.0.0":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@reforged/maker-types/-/maker-types-1.0.1.tgz#5f92c40c793166dbdafa2cb68bb4495f0cf639d9"
+  integrity sha512-gjLr6O7rS8XzjbqCEo/BxT4mrevWuYKdMzc0uO6dNcWDXinfhJVHT3aEZmtMyn1nx+ZbffzpCFPgGNYZtwGXxQ==
 
 "@rollup/rollup-android-arm-eabi@4.44.2":
   version "4.44.2"
@@ -4333,16 +4338,6 @@ cosmiconfig@^8.2.0:
     parse-json "^5.0.0"
     path-type "^4.0.0"
 
-create-require@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/create-require/-/create-require-1.1.1.tgz#c1d7e8f1e5f6cfc9ff65f9cd352d37348756c333"
-  integrity sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==
-
-cross-dirname@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/cross-dirname/-/cross-dirname-0.1.0.tgz#b899599f30a5389f59e78c150e19f957ad16a37c"
-  integrity sha512-+R08/oI0nl3vfPcqftZRpytksBXDzOUveBq/NBVx0sUp1axwzPQrKinNx5yd5sxPu8j1wIy8AfnVQ+5eFdha6Q==
-
 cross-spawn@^6.0.0:
   version "6.0.6"
   resolved "https://registry.yarnpkg.com/cross-spawn/-/cross-spawn-6.0.6.tgz#30d0efa0712ddb7eb5a76e1e8721bffafa6b5d57"
@@ -4468,11 +4463,6 @@ csstype@^3.0.2:
   version "3.0.8"
   resolved "https://registry.npmjs.org/csstype/-/csstype-3.0.8.tgz"
   integrity sha512-jXKhWqXPmlUeoQnF/EhTtTl4C9SnrxSH/jZUih3jmO6lBKr99rP3/+FmrMj4EFpOXzMtXHAZkd3x0E6h6Fgflw==
-
-data-uri-to-buffer@^4.0.0:
-  version "4.0.1"
-  resolved "https://registry.yarnpkg.com/data-uri-to-buffer/-/data-uri-to-buffer-4.0.1.tgz#d8feb2b2881e6a4f58c2e08acfd0e2834e26222e"
-  integrity sha512-0R9ikRb668HB7QDxT1vkpuUBtqc53YyAwMwGeUFKRojY/NWKvdZ+9UYtRfGmhqNbRkTSVpMbmyhXipFFv2cb/A==
 
 data-urls@^3.0.2:
   version "3.0.2"
@@ -5951,14 +5941,6 @@ fdir@^6.4.4, fdir@^6.4.6:
   resolved "https://registry.yarnpkg.com/fdir/-/fdir-6.4.6.tgz#2b268c0232697063111bbf3f64810a2a741ba281"
   integrity sha512-hiFoqpyZcfNm1yc4u8oWCf9A2c4D3QjCrks3zmoVKVxpQRzmPNar1hUJcBG2RQHvEVGDN+Jm81ZheVLAQMK6+w==
 
-fetch-blob@^3.1.2, fetch-blob@^3.1.4:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/fetch-blob/-/fetch-blob-3.2.0.tgz#f09b8d4bbd45adc6f0c20b7e787e793e309dcce9"
-  integrity sha512-7yAQpD2UMJzLi1Dqv7qFYnPbaPx7ZfFK6PiIxQ4PfkGPyNyl2Ugx+a/umUonmKqjhM4DnfbMvdX6otXq83soQQ==
-  dependencies:
-    node-domexception "^1.0.0"
-    web-streams-polyfill "^3.0.3"
-
 file-entry-cache@^6.0.1:
   version "6.0.1"
   resolved "https://registry.npmjs.org/file-entry-cache/-/file-entry-cache-6.0.1.tgz"
@@ -6104,13 +6086,6 @@ form-data@^4.0.0:
     es-set-tostringtag "^2.1.0"
     hasown "^2.0.2"
     mime-types "^2.1.12"
-
-formdata-polyfill@^4.0.10:
-  version "4.0.10"
-  resolved "https://registry.yarnpkg.com/formdata-polyfill/-/formdata-polyfill-4.0.10.tgz#24807c31c9d402e002ab3d8c720144ceb8848423"
-  integrity sha512-buewHzMvYL29jdeQTVILecSaZKnt/RJWjoZCF5OW60Z67/GmSLBkOFM7qh1PI3zFNtJbaZL5eQu1vLfazOwj4g==
-  dependencies:
-    fetch-blob "^3.1.2"
 
 forwarded-parse@2.1.2:
   version "2.1.2"
@@ -9002,26 +8977,12 @@ node-api-version@^0.2.0:
   dependencies:
     semver "^7.3.5"
 
-node-domexception@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/node-domexception/-/node-domexception-1.0.0.tgz#6888db46a1f71c0b76b3f7555016b63fe64766e5"
-  integrity sha512-/jKZoMpw0F8GRwl4/eLROPA3cfcXtLApP0QzLmUT/HuPCZWyB7IY9ZrMeKw2O/nFIqPQB3PVM9aYm0F312AXDQ==
-
 node-fetch@^2.6.7:
   version "2.6.9"
   resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-2.6.9.tgz#7c7f744b5cc6eb5fd404e0c7a9fec630a55657e6"
   integrity sha512-DJm/CJkZkRjKKj4Zi4BsKVZh3ValV5IR5s7LVZnW+6YMh0W1BfNA8XSs6DLMGYlId5F3KnA70uu2qepcR08Qqg==
   dependencies:
     whatwg-url "^5.0.0"
-
-node-fetch@^3.2.5:
-  version "3.3.1"
-  resolved "https://registry.yarnpkg.com/node-fetch/-/node-fetch-3.3.1.tgz#b3eea7b54b3a48020e46f4f88b9c5a7430d20b2e"
-  integrity sha512-cRVc/kyto/7E5shrWca1Wsea4y6tL9iYJE5FBCius3JQfb/4P4I295PfhgbJQBLTx6lATE4z+wK0rPM4VS2uow==
-  dependencies:
-    data-uri-to-buffer "^4.0.0"
-    fetch-blob "^3.1.4"
-    formdata-polyfill "^4.0.10"
 
 node-forge@^1:
   version "1.3.1"
@@ -12316,11 +12277,6 @@ web-namespaces@^2.0.0:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/web-namespaces/-/web-namespaces-2.0.1.tgz#1010ff7c650eccb2592cebeeaf9a1b253fd40692"
   integrity sha512-bKr1DkiNa2krS7qxNtdrtHAmzuYGFQLiQ13TsorsdT6ULTkPLKuu5+GsFpDlg6JFjUTwX2DyhMPG2be8uPrqsQ==
-
-web-streams-polyfill@^3.0.3:
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/web-streams-polyfill/-/web-streams-polyfill-3.2.1.tgz#71c2718c52b45fd49dbeee88634b3a60ceab42a6"
-  integrity sha512-e0MO3wdXWKrLbL0DgGnUV7WHVuw9OUvL4hjgnPkIeEvESk74gAITi5G606JtZPp39cd8HA9VQzCIvA49LpPN5Q==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"
