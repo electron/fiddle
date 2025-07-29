@@ -219,32 +219,14 @@ workflows:
           matrix:
             parameters:
               arch: [ x64, arm64 ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
       - win-build:
           matrix:
             parameters:
               arch: [ x64, ia32 ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
       - linux-build:
           matrix:
             parameters:
               arch: [ x64, arm64, armv7l ]
-          filters:
-            tags:
-              only: 
-                - /^v.*/
-            branches:
-              ignore: /.*/
       - publish-to-github:
           context: fiddle-release
           requires:
