@@ -12,7 +12,7 @@ import contributorsJSON from '../../static/contributors.json';
 export function setupAboutPanel(): void {
   const contributors: Array<string> = [];
   contributorsJSON.forEach((userData: Contributor) => {
-    if (userData.name !== null && userData.name !== undefined) {
+    if (userData.name !== null) {
       contributors.push(userData.name);
     }
   });
