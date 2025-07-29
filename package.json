@@ -8,7 +8,7 @@
   "homepage": "https://electronjs.org/fiddle",
   "main": "./.webpack/main",
   "scripts": {
-    "contributors": "ts-node ./tools/contributors.ts",
+    "contributors": "tsx ./tools/contributors.ts",
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
@@ -20,12 +20,12 @@
     "make": "electron-forge make",
     "package": "electron-forge package",
     "publish": "electron-forge publish",
-    "start": "ts-node ./tools/clean-webpack.ts && electron-forge start --",
+    "start": "tsx ./tools/clean-webpack.ts && electron-forge start --",
     "test": "vitest run",
     "test:ci": "vitest run --coverage --reporter=default --reporter=junit --outputFile=./reports/report.xml",
     "test:report": "vitest run --reporter=json --outputFile=report.json | true",
     "tsc": "tsc --noEmit -p .",
-    "electron-releases": "node --unhandled-rejections=strict -r ts-node/register ./tools/fetch-releases.ts",
+    "electron-releases": "tsx ./tools/fetch-releases.ts",
     "postinstall": "husky && npm run electron-releases"
   },
   "engines": {
@@ -73,17 +73,18 @@
     "shell-env": "^3.0.1",
     "tmp": "0.2.1",
     "tslib": "^2.6.0",
+    "tsx": "^4.20.3",
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "7.7.0",
-    "@electron-forge/maker-deb": "7.7.0",
-    "@electron-forge/maker-rpm": "7.7.0",
-    "@electron-forge/maker-squirrel": "7.7.0",
-    "@electron-forge/maker-zip": "7.7.0",
-    "@electron-forge/plugin-fuses": "7.7.0",
-    "@electron-forge/plugin-webpack": "7.7.0",
-    "@electron-forge/publisher-github": "7.7.0",
+    "@electron-forge/cli": "7.8.1",
+    "@electron-forge/maker-deb": "7.8.1",
+    "@electron-forge/maker-rpm": "7.8.1",
+    "@electron-forge/maker-squirrel": "7.8.1",
+    "@electron-forge/maker-zip": "7.8.1",
+    "@electron-forge/plugin-fuses": "7.8.1",
+    "@electron-forge/plugin-webpack": "7.8.1",
+    "@electron-forge/publisher-github": "7.8.1",
     "@electron/fuses": "^1.6.1",
     "@electron/lint-roller": "^3.1.2",
     "@hitarth-gg/devtron": "^0.0.0-development.8",
@@ -143,7 +144,6 @@
     "stylelint-config-standard": "^34.0.0",
     "terser-webpack-plugin": "^5.3.3",
     "ts-loader": "^9.4.4",
-    "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.4",
     "webpack": "^5.94.0"
@@ -163,7 +163,7 @@
     ]
   },
   "resolutions": {
-    "@electron-forge/maker-base": "7.7.0",
-    "@electron-forge/shared-types": "7.7.0"
+    "@electron-forge/maker-base": "7.8.1",
+    "@electron-forge/shared-types": "7.8.1"
   }
 }
