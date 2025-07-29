@@ -32,9 +32,9 @@ interface ContributorInfo {
   api: string;
   login: string;
   avatar: string;
-  name: string;
-  bio: string;
-  location: string;
+  name: string | null;
+  bio: string | null;
+  location: string | null;
 }
 
 export async function maybeFetchContributors(silent?: boolean): Promise<void> {
@@ -87,71 +87,67 @@ export async function maybeFetchContributors(silent?: boolean): Promise<void> {
  *
  * @param contributor - Contributor object
  */
-function fetchDetailsContributor(contributor: {
+async function fetchDetailsContributor(contributor: {
   api: string;
 }): Promise<ContributorInfo> {
-  return fetch(contributor.api, { headers: HEADERS }).then((response) =>
-    response.json(),
-  );
+  const response = await fetch(contributor.api, { headers: HEADERS });
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch contributor details from ${contributor.api}: ${response.status} ${response.statusText}`,
+    );
+  }
+
+  return await response.json();
 }
 
 /**
  * Fetch the names for an array of contributors
  *
- * @param contributors - Array of contributor
+ * @param contributors - Array of contributors
  */
-async function fetchDetailsContributors(
-  contributors: Pick<ContributorInfo, 'api'>[],
-) {
-  const withDetails = contributors as ContributorInfo[];
-  const promises: Promise<void>[] = [];
+async function fetchDetailsContributors(contributors: ContributorInfo[]) {
+  return Promise.all(
+    contributors.map(async (contributor) => {
+      const details = await fetchDetailsContributor(contributor);
 
-  contributors.forEach((contributor, i) => {
-    const detailFetcher = fetchDetailsContributor(contributor).then(
-      ({ name, bio, location }) => {
-        withDetails[i].name = name;
-        withDetails[i].bio = bio;
-        withDetails[i].location = location;
-      },
-    );
-
-    promises.push(detailFetcher);
-  });
-
-  await Promise.all(promises);
-  return withDetails;
+      return {
+        ...contributor,
+        name: details.name,
+        bio: details.bio,
+        location: details.location,
+      };
+    }),
+  );
 }
 
-function fetchContributors() {
-  const contributors: Pick<
-    ContributorInfo,
-    'url' | 'api' | 'login' | 'avatar'
-  >[] = [];
+async function fetchContributors() {
+  const response = await fetch(CONTRIBUTORS_URL, { headers: HEADERS });
 
-  return fetch(CONTRIBUTORS_URL, { headers: HEADERS })
-    .then((response) => response.json())
-    .then(async (data: GitHubContributorInfo[]) => {
-      if (data && data.forEach) {
-        data.forEach(
-          ({ html_url, url, login, avatar_url, type, contributions }) => {
-            if (
-              type !== 'Bot' &&
-              login !== 'electron-bot' &&
-              contributions >= 2
-            ) {
-              contributors.push({
-                url: html_url,
-                api: url,
-                login: login,
-                avatar: avatar_url,
-              });
-            }
-          },
-        );
-      }
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch contributors: ${response.status} ${response.statusText}`,
+    );
+  }
 
-      return fetchDetailsContributors(contributors);
-    });
+  const data: GitHubContributorInfo[] = await response.json();
+
+  const contributors: ContributorInfo[] = data
+    .filter(
+      ({ type, login, contributions }) =>
+        type !== 'Bot' && login !== 'electron-bot' && contributions >= 2,
+    )
+    .map(({ html_url, url, login, avatar_url }) => ({
+      url: html_url,
+      api: url,
+      login: login,
+      avatar: avatar_url,
+      name: null,
+      bio: null,
+      location: null,
+    }));
+
+  return fetchDetailsContributors(contributors);
 }
 
 /**
