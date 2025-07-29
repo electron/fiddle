@@ -15,7 +15,7 @@ import { emitEvent } from '../../tests/utils';
 import { renderClassComponentWithInstanceRef } from '../test-utils/renderClassComponentWithInstanceRef';
 
 vi.mock('../../src/renderer/components/editor', () => ({
-  Editor: () => 'Editor',
+  Editor: () => 'EditorComponent',
 }));
 
 describe('Editors component', () => {
@@ -43,7 +43,7 @@ describe('Editors component', () => {
   it('renders', () => {
     const { renderResult } = renderEditors();
 
-    expect(renderResult.getByTestId('editors')).toBeInTheDocument();
+    expect(renderResult.getAllByText('EditorComponent')).not.toHaveLength(0);
   });
 
   it('does not execute command if not supported', () => {
@@ -92,19 +92,23 @@ describe('Editors component', () => {
   it('renders toolbars', () => {
     const { renderResult } = renderEditors();
 
-    const [
-      mainToolbar,
-      rendererToolbar,
-      htmlToolbar,
-      preloadToolbar,
-      stylesheetToolbar,
-    ] = renderResult.getAllByTestId('editors-toolbar');
+    const toolbars = renderResult.getAllByRole('toolbar');
+    const editors = Object.keys(editorValues);
+    expect(editors).not.toHaveLength(0);
 
-    expect(mainToolbar).toHaveTextContent('Main Process (main.js)');
-    expect(rendererToolbar).toHaveTextContent('Renderer Process (renderer.js)');
-    expect(htmlToolbar).toHaveTextContent('HTML (index.html)');
-    expect(preloadToolbar).toHaveTextContent('Preload (preload.js)');
-    expect(stylesheetToolbar).toHaveTextContent('Stylesheet (styles.css)');
+    const toolbarTitles = [
+      'Main Process (main.js)',
+      'Renderer Process (renderer.js)',
+      'HTML (index.html)',
+      'Preload (preload.js)',
+      'Stylesheet (styles.css)',
+    ];
+
+    for (const toolbarTitle of toolbarTitles) {
+      expect(
+        toolbars.find((toolbar) => toolbar.textContent?.includes(toolbarTitle)),
+      ).toBeInTheDocument();
+    }
   });
 
   it('onChange() updates the mosaic arrangement in the appState', () => {

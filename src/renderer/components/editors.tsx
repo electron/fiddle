@@ -183,7 +183,7 @@ export const Editors = observer(
       const { appState } = this.props;
 
       return (
-        <div data-testid="editors-toolbar">
+        <div role="toolbar">
           {/* Left */}
           <div>
             <h5>{title}</h5>
