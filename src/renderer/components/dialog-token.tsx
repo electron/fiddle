@@ -73,7 +73,7 @@ export const TokenDialog = observer(
           hasGistScope,
           user: response.data,
         };
-      } catch (error) {
+      } catch (error: any) {
         return {
           isValid: false,
           scopes: [],
