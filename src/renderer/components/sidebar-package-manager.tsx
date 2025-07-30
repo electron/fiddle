@@ -112,9 +112,9 @@ export class SidebarPackageManager extends React.Component<IProps, IState> {
                 appState.modules.set(target.name, target.value)
               }
             >
-              {this.state.versionsCache
-                .get(pkg)
-                ?.map((version) => <option key={version}>{version}</option>)}
+              {this.state.versionsCache.get(pkg)?.map((version) => (
+                <option key={version}>{version}</option>
+              ))}
             </select>
 
             <Button

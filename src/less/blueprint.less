@@ -1,8 +1,8 @@
-@import (inline) "~@blueprintjs/core/lib/css/blueprint.css";
-@import (inline) "~@blueprintjs/select/lib/css/blueprint-select.css";
-@import (inline) "~@blueprintjs/icons/lib/css/blueprint-icons.css";
-@import (inline) "~@blueprintjs/popover2/lib/css/blueprint-popover2.css";
-@import "~@blueprintjs/core/lib/less/variables.less";
+@import (inline) '~@blueprintjs/core/lib/css/blueprint.css';
+@import (inline) '~@blueprintjs/select/lib/css/blueprint-select.css';
+@import (inline) '~@blueprintjs/icons/lib/css/blueprint-icons.css';
+@import (inline) '~@blueprintjs/popover2/lib/css/blueprint-popover2.css';
+@import '~@blueprintjs/core/lib/less/variables.less';
 
 // Override some of the colors
 .fiddle.bp3-dark {
@@ -11,15 +11,17 @@
   }
 
   .bp3-menu,
-  .bp3-popover .bp3-popover-content, .bp3-popover2 .bp3-popover2-content {
+  .bp3-popover .bp3-popover-content,
+  .bp3-popover2 .bp3-popover2-content {
     background-color: @background-1;
   }
 
-  .bp3-popover .bp3-popover-arrow-fill, .bp3-popover2 .bp3-popover2-arrow-fill {
+  .bp3-popover .bp3-popover-arrow-fill,
+  .bp3-popover2 .bp3-popover2-arrow-fill {
     fill: @background-1;
   }
 
-  .bp3-button:not([class*="bp3-intent-"]) {
+  .bp3-button:not([class*='bp3-intent-']) {
     background-color: @background-1;
   }
 
@@ -32,7 +34,7 @@
     background-color: rgba(138, 155, 168, 0.15);
   }
 
-  .bp3-button:focus{
+  .bp3-button:focus {
     outline: @blue3 solid 2px;
   }
 
