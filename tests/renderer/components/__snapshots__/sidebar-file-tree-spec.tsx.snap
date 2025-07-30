@@ -305,6 +305,12 @@ exports[`SidebarFileTree component > can bring up the Add File input 1`] = `
           "label": "Editors",
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
+            style={
+              {
+                "display": "flex",
+                "gap": 4,
+              }
+            }
           >
             <Blueprint3.Tooltip2
               content="Add New File"
@@ -627,6 +633,12 @@ exports[`SidebarFileTree component > reflects the visibility state of all icons 
           "label": "Editors",
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
+            style={
+              {
+                "display": "flex",
+                "gap": 4,
+              }
+            }
           >
             <Blueprint3.Tooltip2
               content="Add New File"
@@ -949,6 +961,12 @@ exports[`SidebarFileTree component > renders 1`] = `
           "label": "Editors",
           "secondaryLabel": <Blueprint3.ButtonGroup
             minimal={true}
+            style={
+              {
+                "display": "flex",
+                "gap": 4,
+              }
+            }
           >
             <Blueprint3.Tooltip2
               content="Add New File"
