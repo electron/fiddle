@@ -38,6 +38,7 @@ jobs:
     steps:
       - install
       - run: yarn run lint
+      - run: yarn run format
   mac-test:
     parameters:
       arch:
