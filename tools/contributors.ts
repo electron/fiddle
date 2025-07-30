@@ -106,19 +106,23 @@ async function fetchDetailsContributor(contributor: {
  *
  * @param contributors - Array of contributors
  */
-async function fetchDetailsContributors(contributors: ContributorInfo[]) {
-  return Promise.all(
-    contributors.map(async (contributor) => {
-      const details = await fetchDetailsContributor(contributor);
+async function fetchDetailsContributors(
+  contributors: ContributorInfo[],
+): Promise<ContributorInfo[]> {
+  const detailedContributors: ContributorInfo[] = [];
 
-      return {
-        ...contributor,
-        name: details.name,
-        bio: details.bio,
-        location: details.location,
-      };
-    }),
-  );
+  for (const contributor of contributors) {
+    const details = await fetchDetailsContributor(contributor);
+
+    detailedContributors.push({
+      ...contributor,
+      name: details.name,
+      bio: details.bio,
+      location: details.location,
+    });
+  }
+
+  return detailedContributors;
 }
 
 async function fetchContributors() {
