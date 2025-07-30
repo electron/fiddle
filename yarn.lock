@@ -784,9 +784,10 @@
     minimatch "^9.0.3"
     plist "^3.1.0"
 
-"@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2", "@electron/windows-sign@github:electron/windows-sign#node-22-dist":
-  version "0.0.0-development"
-  resolved "https://codeload.github.com/electron/windows-sign/tar.gz/bd0d56cc89846c891354be7386e2e3f0f5c7ffd8"
+"@electron/windows-sign@2.0.0", "@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@electron/windows-sign/-/windows-sign-2.0.0.tgz#097670d5529374a44e1e811e908cfc11b2c83c1a"
+  integrity sha512-ydPPtFx1CXc4jQwWzxe973N9N7V/Ev2kvHrj8QjhyjSApep6TGvGaLVNZsSsHzWe6iASV7DHaBT393eBZH9O/g==
   dependencies:
     debug "^4.3.4"
     graceful-fs "^4.2.11"
