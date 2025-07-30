@@ -784,10 +784,10 @@
     minimatch "^9.0.3"
     plist "^3.1.0"
 
-"@electron/windows-sign@2.0.0", "@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@electron/windows-sign/-/windows-sign-2.0.0.tgz#097670d5529374a44e1e811e908cfc11b2c83c1a"
-  integrity sha512-ydPPtFx1CXc4jQwWzxe973N9N7V/Ev2kvHrj8QjhyjSApep6TGvGaLVNZsSsHzWe6iASV7DHaBT393eBZH9O/g==
+"@electron/windows-sign@2.0.1", "@electron/windows-sign@^1.0.0", "@electron/windows-sign@^1.1.2":
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/@electron/windows-sign/-/windows-sign-2.0.1.tgz#6711ad7abd5ec21f69c0ce95eb76c4ccd299bb42"
+  integrity sha512-tNmSvCTsMJeh/4iQBCnyJA24kJKkvdmge5IviVwSUgNJkoj4wRlPhyBIDHGRfVeIh92qqYBcMCdoyBff6RYYFA==
   dependencies:
     debug "^4.3.4"
     graceful-fs "^4.2.11"
