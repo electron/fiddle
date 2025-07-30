@@ -89,7 +89,7 @@
     "@electron/lint-roller": "^3.1.2",
     "@hitarth-gg/devtron": "^0.0.0-development.8",
     "@octokit/core": "^3.5.1",
-    "@reforged/maker-appimage": "^3.3.0",
+    "@reforged/maker-appimage": "^5.0.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^12.1.5",
