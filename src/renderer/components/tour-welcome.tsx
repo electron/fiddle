@@ -3,6 +3,7 @@ import * as React from 'react';
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { TestIdContainer } from './TestIdContainer';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
 import { AppState } from '../state';
 
@@ -242,10 +243,7 @@ export const WelcomeTour = observer(
       if (!isTourStarted) {
         return (
           <Dialog key="welcome-tour-dialog" isOpen={true}>
-            <div
-              data-testid="welcome-tour-dialog"
-              style={{ display: 'contents' }}
-            >
+            <TestIdContainer testId="welcome-tour-dialog">
               <div className={Classes.DIALOG_HEADER}>
                 <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
               </div>
@@ -264,7 +262,7 @@ export const WelcomeTour = observer(
                   {this.buttons}
                 </div>
               </div>
-            </div>
+            </TestIdContainer>
           </Dialog>
         );
       } else {
