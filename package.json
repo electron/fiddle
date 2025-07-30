@@ -9,6 +9,7 @@
   "main": "./.webpack/main",
   "scripts": {
     "contributors": "tsx ./tools/contributors.ts",
+    "format": "prettier src --check --experimental-cli",
     "lint:style": "stylelint \"./src/less/*.less\"",
     "lint:ts": "eslint \"./**/*.{ts,tsx}\"",
     "lint:js": "eslint \"./**/*.js\"",
@@ -121,7 +122,6 @@
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-typescript": "^3.5.5",
     "eslint-plugin-import": "^2.27.5",
-    "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-tsdoc": "^0.3.0",
     "fork-ts-checker-webpack-plugin": "^8.0.0",
@@ -137,7 +137,7 @@
     "npm-run-all2": "^7.0.1",
     "postcss": "^8.4.25",
     "postcss-less": "^6.0.0",
-    "prettier": "^3.0.0",
+    "prettier": "^3.6.2",
     "resolve-url-loader": "^5.0.0",
     "standard": "^17.1.0",
     "stylelint": "^15.10.1",
@@ -150,16 +150,19 @@
   },
   "lint-staged": {
     "./**/*.js": [
-      "npm run lint:js -- --fix"
+      "npm run lint:js -- --fix",
+      "npx prettier --write --experimental-cli"
     ],
     "./**/*.{ts,tsx}": [
-      "npm run lint:ts -- --fix"
+      "npm run lint:ts -- --fix",
+      "npx prettier --write --experimental-cli"
     ],
     "./static/**/*.js": [
       "npm run lint:templates -- --fix"
     ],
     "./src/less/*.less": [
-      "npm run lint:style -- --fix"
+      "npm run lint:style -- --fix",
+      "npx prettier --write --experimental-cli"
     ]
   },
   "resolutions": {

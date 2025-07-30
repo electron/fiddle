@@ -41,9 +41,8 @@ export async function forgeTransform(
       const nightlyVersion = devDependencies['electron-nightly'];
       if (nightlyVersion) {
         // Fetch forced ABI for nightly.
-        const { modules } = (await window.ElectronFiddle.getReleaseInfo(
-          nightlyVersion,
-        ))!;
+        const { modules } =
+          (await window.ElectronFiddle.getReleaseInfo(nightlyVersion))!;
 
         config.forge.electronRebuildConfig = {
           forceABI: parseInt(modules.toString().trim()),
