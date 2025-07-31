@@ -164,7 +164,6 @@
   },
   "resolutions": {
     "@electron-forge/maker-base": "7.8.1",
-    "@electron-forge/shared-types": "7.8.1",
-    "@electron/windows-sign": "1.2.2"
+    "@electron-forge/shared-types": "7.8.1"
   }
 }
