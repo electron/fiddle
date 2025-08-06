@@ -201,19 +201,43 @@ jobs:
 workflows:
   build-and-test:
     jobs:
-      - lint
+      - lint:
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - mac-test:
           matrix:
             parameters:
               arch: [ x64, arm64 ]
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - win-test:
           matrix:
             parameters:
               arch: [ x64 ]
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - linux-test:
           matrix:
             parameters:
               arch: [ x64 ]
+          filters:
+            tags:
+              only: 
+                - /^v.*/
+            branches:
+              ignore: /.*/
       - mac-build:
           context: fiddle-release
           matrix:

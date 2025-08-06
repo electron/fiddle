@@ -1,0 +1,53 @@
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - x64
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        include:
+          - os: macos-latest
+            arch: arm64
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Install Rosetta
+        if: ${{ matrix.os == 'macos-latest' && matrix.arch == 'x64' }}
+        run: /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22.17.x'
+          cache: 'yarn'
+          architecture: ${{ matrix.os == 'macos-latest' && matrix.arch == 'x64' && 'x64' || env.RUNNER_ARCH }}
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+      - run: yarn run contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: yarn run electron-releases
+      - name: Lint and format
+        run: yarn run lint && yarn run format
+      - name: Test
+        run: yarn tsc && yarn test:ci
