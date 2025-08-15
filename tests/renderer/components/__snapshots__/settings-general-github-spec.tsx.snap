@@ -45,11 +45,18 @@ exports[`GitHubSettings component > renders when signed in 1`] = `
       </code>
       .
     </p>
-    <Blueprint3.Button
-      icon="log-out"
-      onClick={[MockFunction spy]}
-      text="Sign out"
-    />
+    <Blueprint3.ButtonGroup>
+      <Blueprint3.Button
+        icon="log-in"
+        onClick={[Function]}
+        text="Update token"
+      />
+      <Blueprint3.Button
+        icon="log-out"
+        onClick={[MockFunction spy]}
+        text="Sign out"
+      />
+    </Blueprint3.ButtonGroup>
   </Blueprint3.Callout>
   <Blueprint3.Callout>
     <Blueprint3.FormGroup>
