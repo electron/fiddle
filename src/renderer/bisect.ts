@@ -4,7 +4,7 @@ export class Bisector {
   public revList: Array<RunnableVersion>;
   public minRev: number;
   public maxRev: number;
-  private pivot: number;
+  private pivot!: number;
 
   constructor(revList: Array<RunnableVersion>) {
     this.getCurrentVersion = this.getCurrentVersion.bind(this);
@@ -51,6 +51,18 @@ export class Bisector {
     } else {
       return this.revList[this.pivot];
     }
+  }
+
+  public skip() {
+    const prevPivot = this.pivot;
+    this.pivot =
+      Math.floor(
+        Math.pow(Math.random(), 1.5) * (this.maxRev - this.minRev + 1),
+      ) + this.minRev;
+
+    if (this.pivot === prevPivot && this.pivot > this.minRev) this.pivot--;
+
+    return this.revList[this.pivot];
   }
 
   private calculatePivot() {

@@ -9,12 +9,13 @@ import {
   systemPreferences,
 } from 'electron';
 
-import { IpcEvents } from '../ipc-events';
 import { setupAboutPanel } from './about-panel';
 import { processCommandLine } from './command-line';
 import { setupContent } from './content';
 import { setupDevTools } from './devtools';
 import { setupDialogs } from './dialogs';
+import { setupTypes } from './electron-types';
+import { setupFiddleCore } from './fiddle-core';
 import { onFirstRunMaybe } from './first-run';
 import { ipcMainManager } from './ipc';
 import { setupNpm } from './npm';
@@ -27,7 +28,8 @@ import { isDevMode } from './utils/devmode';
 import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
-import { getOrCreateMainWindow } from './windows';
+import { getOrCreateMainWindow, mainIsReady } from './windows';
+import { IpcEvents } from '../ipc-events';
 
 let argv: string[] = [];
 
@@ -37,13 +39,19 @@ let argv: string[] = [];
  */
 export async function onReady() {
   await onFirstRunMaybe();
-  if (!isDevMode()) process.env.NODE_ENV = 'production';
+  if (!isDevMode()) {
+    process.env.NODE_ENV = 'production';
+  } else {
+    const { devtron } = await import('@hitarth-gg/devtron');
+    await devtron.install().catch((err) => {
+      console.warn(`cannot install devtron: ${err.message}`);
+    });
+  }
 
-  getOrCreateMainWindow();
   setupAboutPanel();
 
-  const { setupMenu } = await import('./menu');
-  const { setupFileListeners } = await import('./files');
+  const { setupMenu } = await import('./menu.js');
+  const { setupFileListeners } = await import('./files.js');
 
   setupShowWindow();
   setupMenu();
@@ -60,17 +68,22 @@ export async function onReady() {
   setupThemes();
   setupIsDevMode();
   setupNpm();
-  await setupVersions();
+  const knownVersions = await setupVersions();
   setupGetProjectName();
   setupGetUsername();
+  setupTypes(knownVersions);
+  await setupFiddleCore(knownVersions);
+
+  // Do this after setting everything up to ensure that
+  // any IPC listeners are set up before they're used
+  mainIsReady();
+  await getOrCreateMainWindow();
 
   processCommandLine(argv);
 }
 
 /**
  * Handle the "before-quit" event
- *
- * @export
  */
 export function onBeforeQuit() {
   ipcMainManager.send(IpcEvents.BEFORE_QUIT);
@@ -90,7 +103,7 @@ export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.BLOCK_ACCELERATORS,
     async (_, acceleratorsToBlock) => {
-      (await import('./menu')).setupMenu({
+      (await import('./menu.js')).setupMenu({
         acceleratorsToBlock,
         activeTemplate: null,
       });
@@ -100,7 +113,7 @@ export function setupMenuHandler() {
   ipcMainManager.on(
     IpcEvents.SET_SHOW_ME_TEMPLATE,
     async (_, activeTemplate) => {
-      (await import('./menu')).setupMenu({
+      (await import('./menu.js')).setupMenu({
         acceleratorsToBlock: [],
         activeTemplate,
       });

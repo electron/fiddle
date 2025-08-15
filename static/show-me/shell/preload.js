@@ -1,15 +1,10 @@
-const { shell } = require('electron')
+const { contextBridge, ipcRenderer } = require('electron/renderer')
 
-window.addEventListener('DOMContentLoaded', () => {
-  document.querySelector('#open-github').onclick = () => {
-    shell.openExternal('https://github.com')
+contextBridge.exposeInMainWorld(
+  'electron',
+  {
+    openGitHub: () => ipcRenderer.send('open-github'),
+    openFolder: () => ipcRenderer.send('open-folder'),
+    beep: () => ipcRenderer.send('beep')
   }
-
-  document.querySelector('#open-folder').onclick = () => {
-    shell.showItemInFolder(__dirname)
-  }
-
-  document.querySelector('#beep').onclick = () => {
-    shell.beep()
-  }
-})
+)

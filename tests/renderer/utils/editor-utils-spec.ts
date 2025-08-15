@@ -1,4 +1,6 @@
-import { MAIN_JS } from '../../../src/interfaces';
+import { describe, expect, it } from 'vitest';
+
+import { EditorId, MAIN_CJS, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
 import {
   compareEditors,
   getEditorTitle,
@@ -11,19 +13,21 @@ describe('editor-utils', () => {
   describe('getEditorTitle', () => {
     it('recognizes known files', () => {
       // setup: id is a known file
-      const id = MAIN_JS;
-      expect(isKnownFile(id));
-      expect(isSupportedFile(id));
+      for (const id of [MAIN_CJS, MAIN_JS, MAIN_MJS] as const) {
+        expect(isKnownFile(id));
+        expect(isSupportedFile(id));
 
-      expect(getEditorTitle(id)).toBe('Main Process (main.js)');
+        expect(getEditorTitle(id)).toBe(`Main Process (${id})`);
+      }
     });
     it('recognizes supported files', () => {
       // set up: id is supported but not known
-      const id = 'foo.js';
-      expect(!isKnownFile(id));
-      expect(isSupportedFile(id));
+      for (const id of ['foo.cjs', 'foo.js', 'foo.mjs'] as const) {
+        expect(!isKnownFile(id));
+        expect(isSupportedFile(id));
 
-      expect(getEditorTitle(id)).toBe(id);
+        expect(getEditorTitle(id)).toBe(id);
+      }
     });
   });
 
@@ -37,7 +41,7 @@ describe('editor-utils', () => {
 
   describe('compareEditors', () => {
     it('sorts known files in a consistent order', () => {
-      const ids = Object.keys(createEditorValues());
+      const ids = Object.keys(createEditorValues()) as EditorId[];
       const sorted1 = [...ids].sort(compareEditors);
       ids.push(ids.shift()!);
       ids.push(ids.shift()!);
@@ -48,7 +52,7 @@ describe('editor-utils', () => {
     it('sorts known editors before supported ones', () => {
       const filename = 'hello.js';
 
-      let ids = [MAIN_JS, filename];
+      let ids: EditorId[] = [MAIN_JS, filename];
       ids.sort(compareEditors);
       expect(ids).toStrictEqual([MAIN_JS, filename]);
 
@@ -58,7 +62,7 @@ describe('editor-utils', () => {
     });
 
     it('sorts supported files lexicographically', () => {
-      const expected = ['a.js', 'b.js'];
+      const expected: EditorId[] = ['a.js', 'b.js'];
 
       const ids = [...expected];
       ids.sort(compareEditors);

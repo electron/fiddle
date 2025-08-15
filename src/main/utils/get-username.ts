@@ -1,10 +1,7 @@
-import * as os from 'os';
+import * as os from 'node:os';
 
 /**
  * Returns the current username
- *
- * @export
- * @returns {string}
  */
 export const getUsername = (() => {
   let username = '';

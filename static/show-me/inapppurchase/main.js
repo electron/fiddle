@@ -6,7 +6,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/in-app-purchase
 
-const { app, inAppPurchase } = require('electron')
+const { app, inAppPurchase } = require('electron/main')
 
 app.whenReady().then(() => {
   // Can the user can make a payment?

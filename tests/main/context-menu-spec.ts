@@ -1,8 +1,9 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import { BrowserWindow, ContextMenuParams, Menu } from 'electron';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   createContextMenu,
@@ -15,8 +16,8 @@ import { isDevMode } from '../../src/main/utils/devmode';
 import { BrowserWindowMock } from '../mocks/browser-window';
 import { WebContentsMock } from '../mocks/web-contents';
 
-jest.mock('../../src/main/utils/devmode');
-jest.mock('../../src/main/ipc');
+vi.mock('../../src/main/utils/devmode');
+vi.mock('../../src/main/ipc');
 
 describe('context-menu', () => {
   let mockWindow: BrowserWindow;
@@ -32,7 +33,7 @@ describe('context-menu', () => {
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    mockWindow = (new BrowserWindowMock() as unknown) as BrowserWindow;
+    mockWindow = new BrowserWindowMock() as unknown as BrowserWindow;
     createContextMenu(mockWindow);
   });
 
@@ -43,10 +44,10 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu with inspect for dev mode', () => {
-      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
-        popup: jest.fn(),
-      });
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
+      } as Partial<Menu> as Menu);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
@@ -64,22 +65,22 @@ describe('context-menu', () => {
     });
 
     it('creates a default context-menu without inspect in production', () => {
-      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
-        popup: jest.fn(),
-      });
-      (isDevMode as jest.Mock).mockReturnValueOnce(false);
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
+      } as Partial<Menu> as Menu);
+      vi.mocked(isDevMode).mockReturnValueOnce(false);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
-      const template = (Menu.buildFromTemplate as jest.Mock).mock.calls[0][0];
+      const template = vi.mocked(Menu.buildFromTemplate).mock.calls[0][0];
 
       expect(template).toHaveLength(7);
     });
 
     it('disables cut/copy/paste if not in editFlags', () => {
-      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
-        popup: jest.fn(),
-      });
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
+      } as Partial<Menu> as Menu);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, mockFlags);
 
@@ -98,10 +99,10 @@ describe('context-menu', () => {
     });
 
     it('enables cut/copy/paste if in editFlags', () => {
-      (Menu.buildFromTemplate as jest.Mock).mockReturnValue({
-        popup: jest.fn(),
-      });
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(Menu.buildFromTemplate).mockReturnValue({
+        popup: vi.fn(),
+      } as Partial<Menu> as Menu);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
 
       mockWindow.webContents.emit('context-menu', null, {
         ...mockFlags,
@@ -129,19 +130,19 @@ describe('context-menu', () => {
 
   describe('getInspectItems()', () => {
     it('returns an empty array if not in devMode', () => {
-      (isDevMode as jest.Mock).mockReturnValueOnce(false);
+      vi.mocked(isDevMode).mockReturnValueOnce(false);
       const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(0);
     });
 
     it('returns an inspect item if in devMode', () => {
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {} as ContextMenuParams);
       expect(result).toHaveLength(1);
     });
 
     it('inspects on click', () => {
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
@@ -152,33 +153,38 @@ describe('context-menu', () => {
     });
 
     it('focuses the dev tools if already open', () => {
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      (mockWindow.webContents
-        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
-      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
+      vi.mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(
+        true,
+      );
+      (mockWindow.webContents as any).devToolsWebContents =
+        new WebContentsMock();
 
       (result[0] as any).click();
       expect(mockWindow.webContents.inspectElement).toHaveBeenCalled();
       expect(
-        mockWindow.webContents.devToolsWebContents!.focus as jest.Mock,
+        mockWindow.webContents.devToolsWebContents!.focus,
       ).toHaveBeenCalled();
     });
 
     it('catches an error', () => {
-      (isDevMode as jest.Mock).mockReturnValueOnce(true);
+      vi.mocked(isDevMode).mockReturnValueOnce(true);
       const result = getInspectItems(mockWindow, {
         x: 5,
         y: 10,
       } as ContextMenuParams);
-      (mockWindow.webContents
-        .isDevToolsOpened as jest.Mock).mockReturnValueOnce(true);
-      (mockWindow.webContents as any).devToolsWebContents = new WebContentsMock();
-      (mockWindow.webContents.devToolsWebContents!
-        .focus as jest.Mock).mockImplementationOnce(() => {
+      vi.mocked(mockWindow.webContents.isDevToolsOpened).mockReturnValueOnce(
+        true,
+      );
+      (mockWindow.webContents as any).devToolsWebContents =
+        new WebContentsMock();
+      vi.mocked(
+        mockWindow.webContents.devToolsWebContents!.focus,
+      ).mockImplementationOnce(() => {
         throw new Error('💩');
       });
 

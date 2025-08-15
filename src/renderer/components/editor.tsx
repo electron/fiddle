@@ -23,7 +23,7 @@ interface EditorProps {
 }
 
 export class Editor extends React.Component<EditorProps> {
-  public editor: MonacoType.editor.IStandaloneCodeEditor;
+  public editor?: MonacoType.editor.IStandaloneCodeEditor;
   public language = 'javascript';
   public value = '';
 
@@ -50,8 +50,6 @@ export class Editor extends React.Component<EditorProps> {
   /**
    * Handle the editor having been mounted. This refers to Monaco's
    * mount, not React's.
-   *
-   * @param {MonacoType.editor.IStandaloneCodeEditor} editor
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
     const { appState, editorDidMount, id } = this.props;
@@ -82,16 +80,22 @@ export class Editor extends React.Component<EditorProps> {
     const { fontFamily, fontSize } = appState;
 
     if (ref) {
-      this.editor = monaco.editor.create(ref, {
-        automaticLayout: true,
-        language: this.language,
-        theme: 'main',
-        fontFamily,
-        fontSize,
-        contextmenu: false,
-        model: null,
-        ...monacoOptions,
-      });
+      this.editor = monaco.editor.create(
+        ref,
+        {
+          automaticLayout: true,
+          language: this.language,
+          theme: 'main',
+          fontFamily,
+          fontSize,
+          contextmenu: false,
+          model: null,
+          ...monacoOptions,
+        },
+        {
+          openerService: this.openerService(),
+        },
+      );
 
       // mark this editor as focused whenever it is
       this.editor.onDidFocusEditorText(() => {
@@ -113,7 +117,33 @@ export class Editor extends React.Component<EditorProps> {
     }
   }
 
+  /**
+   * Implements external url handling for Monaco.
+   */
+  private openerService() {
+    const { appState } = this.props;
+
+    return {
+      open: (url: string) => {
+        appState
+          .showConfirmDialog({
+            label: `Open ${url} in external browser?`,
+            ok: 'Open',
+          })
+          .then((open) => {
+            if (open) window.open(url);
+          });
+      },
+    };
+  }
+
   public render() {
-    return <div className="editorContainer" ref={this.containerRef} />;
+    return (
+      <div
+        className="editorContainer"
+        data-testid="editorContainer"
+        ref={this.containerRef}
+      />
+    );
   }
 }

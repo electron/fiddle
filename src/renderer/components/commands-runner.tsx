@@ -3,7 +3,7 @@ import * as React from 'react';
 import { Button, ButtonProps, Spinner } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { InstallState } from '../../interfaces';
+import { InstallState, VersionSource } from '../../interfaces';
 import { AppState } from '../state';
 
 interface RunnerProps {
@@ -13,14 +13,12 @@ interface RunnerProps {
 /**
  * The runner component is responsible for actually launching the fiddle
  * with Electron. It also renders the button that does so.
- *
- * @class Runner
- * @extends {React.Component<RunnerProps>}
  */
 export const Runner = observer(
   class Runner extends React.Component<RunnerProps> {
     public render() {
-      const { downloading, missing, installing, installed } = InstallState;
+      const { downloaded, downloading, missing, installing, installed } =
+        InstallState;
       const {
         isRunning,
         isInstallingModules,
@@ -28,24 +26,19 @@ export const Runner = observer(
         isOnline,
       } = this.props.appState;
 
-      const state = currentElectronVersion?.state;
-      const props: ButtonProps = { className: 'button-run', disabled: true };
+      const { downloadProgress, source, state } = currentElectronVersion;
+      const props: ButtonProps = { disabled: true };
 
       if ([downloading, missing].includes(state) && !isOnline) {
         props.text = 'Offline';
         props.icon = 'satellite';
-        return <Button {...props} type={undefined} />;
+        return <Button id="button-run" {...props} type={undefined} />;
       }
 
       switch (state) {
         case downloading: {
           props.text = 'Downloading';
-          props.icon = (
-            <Spinner
-              size={16}
-              value={currentElectronVersion?.downloadProgress}
-            />
-          );
+          props.icon = <Spinner size={16} value={downloadProgress} />;
           break;
         }
         case installing: {
@@ -53,22 +46,30 @@ export const Runner = observer(
           props.icon = <Spinner size={16} />;
           break;
         }
+        case downloaded:
         case installed: {
           props.disabled = false;
           if (isRunning) {
             props.active = true;
             props.text = 'Stop';
-            props.onClick = window.ElectronFiddle.app.runner.stop;
+            props.onClick = window.app.runner.stop;
             props.icon = 'stop';
           } else if (isInstallingModules) {
             props.text = 'Installing modules';
             props.icon = <Spinner size={16} />;
           } else {
             props.text = 'Run';
-            props.onClick = window.ElectronFiddle.app.runner.run;
+            props.onClick = window.app.runner.run;
             props.icon = 'play';
           }
           break;
+        }
+        case missing: {
+          if (source === VersionSource.local) {
+            props.text = 'Unavailable';
+            props.icon = 'issue';
+            break;
+          }
         }
         default: {
           props.text = 'Checking status';
@@ -76,7 +77,7 @@ export const Runner = observer(
         }
       }
 
-      return <Button {...props} type={undefined} />;
+      return <Button id="button-run" {...props} type={undefined} />;
     }
   },
 );

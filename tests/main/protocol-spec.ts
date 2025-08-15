@@ -1,10 +1,11 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
-import * as fs from 'fs';
+import * as fs from 'node:fs';
 
 import { app } from 'electron';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { ipcMainManager } from '../../src/main/ipc';
@@ -12,18 +13,21 @@ import {
   listenForProtocolHandler,
   setupProtocolHandler,
 } from '../../src/main/protocol';
-import { getOrCreateMainWindow } from '../../src/main/windows';
+import { getOrCreateMainWindow, mainIsReady } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('fs');
+type OpenUrlCallback = (event: object, url: string) => void;
+type SecondInstanceCallback = (event: object, argv: string[]) => void;
+
+vi.mock('node:fs');
 
 describe('protocol', () => {
   const oldArgv = [...process.argv];
 
   beforeEach(() => {
     ipcMainManager.removeAllListeners();
-    ipcMainManager.send = jest.fn();
-    (app.isReady as jest.Mock).mockReturnValue(true);
+    ipcMainManager.send = vi.fn();
+    vi.mocked(app.isReady).mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -36,7 +40,7 @@ describe('protocol', () => {
     it('attempts to setup the protocol handler', () => {
       overridePlatform('win32');
 
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
+      vi.mocked(fs.existsSync).mockReturnValue(true);
       setupProtocolHandler();
       expect(app.setAsDefaultProtocolClient).toHaveBeenCalled();
     });
@@ -48,10 +52,11 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[1][1];
+      const handler: SecondInstanceCallback = vi.mocked(app.on).mock
+        .calls[1][1];
 
       handler({}, ['electron-fiddle://gist/hi']);
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_GIST_REQUEST,
         [{ id: 'hi' }],
       );
@@ -62,10 +67,10 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/hi');
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_GIST_REQUEST,
         [{ id: 'hi' }],
       );
@@ -76,10 +81,10 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://gist/username/gistID');
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_GIST_REQUEST,
         [{ id: 'gistID' }],
       );
@@ -90,7 +95,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://noop');
       handler({}, 'electron-fiddle://gist/noop/noop/null');
@@ -104,7 +109,7 @@ describe('protocol', () => {
 
       listenForProtocolHandler();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_GIST_REQUEST,
         [{ id: 'hi-arg' }],
       );
@@ -112,22 +117,22 @@ describe('protocol', () => {
 
     it('waits for the app to be ready', () => {
       overridePlatform('darwin');
-      (app.isReady as jest.Mock).mockReturnValue(false);
+      vi.mocked(app.isReady).mockReturnValue(false);
 
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://gist/hi-ready');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
       expect(app.once).toHaveBeenCalled();
 
-      const cb = (app.once as jest.Mock).mock.calls[0][1];
-      (app.isReady as jest.Mock).mockReturnValue(true);
+      const cb = vi.mocked(app.once).mock.calls[0][1];
+      vi.mocked(app.isReady).mockReturnValue(true);
 
       cb();
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_GIST_REQUEST,
         [{ id: 'hi-ready' }],
       );
@@ -137,11 +142,11 @@ describe('protocol', () => {
       // electron-fiddle://electron/{tag}/{path}
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.LOAD_ELECTRON_EXAMPLE_REQUEST,
         [
           {
@@ -155,7 +160,7 @@ describe('protocol', () => {
     it('handles a flawed electron path url', () => {
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://electron/v4.0.0');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -164,7 +169,7 @@ describe('protocol', () => {
     it('handles a flawed url (unclear instruction)', () => {
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://noop/123');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
@@ -173,20 +178,22 @@ describe('protocol', () => {
     it('handles a flawed url (no instruction)', () => {
       listenForProtocolHandler();
 
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
       handler({}, 'electron-fiddle://');
 
       expect(ipcMainManager.send).toHaveBeenCalledTimes(0);
     });
 
-    it('focuses window when loading a fiddle', () => {
+    it('focuses window when loading a fiddle', async () => {
+      mainIsReady();
       listenForProtocolHandler();
 
-      const mainWindow = getOrCreateMainWindow();
-      const handler = (app.on as jest.Mock).mock.calls[0][1];
+      const mainWindow = await getOrCreateMainWindow();
+      const handler: OpenUrlCallback = vi.mocked(app.on).mock.calls[0][1];
 
       handler({}, 'electron-fiddle://electron/v4.0.0/test/path');
 
+      await new Promise(process.nextTick);
       expect(mainWindow.focus).toHaveBeenCalled();
     });
   });

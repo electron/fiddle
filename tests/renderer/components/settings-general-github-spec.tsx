@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
 import { AppState } from '../../../src/renderer/state';
@@ -9,7 +10,7 @@ describe('GitHubSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   it('renders when not signed in', () => {
@@ -35,17 +36,17 @@ describe('GitHubSettings component', () => {
   describe('Gist publish as revision component', () => {
     it('state changes', async () => {
       const wrapper = shallow(<GitHubSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
-      await instance.handlePublishGistAsRevisionChange({
+      instance.handlePublishGistAsRevisionChange({
         currentTarget: { checked: false },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isPublishingGistAsRevision).toBe(false);
 
-      await instance.handlePublishGistAsRevisionChange({
+      instance.handlePublishGistAsRevisionChange({
         currentTarget: { checked: true },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.isPublishingGistAsRevision).toBe(true);
     });

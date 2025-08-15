@@ -1,3 +1,5 @@
+import { afterAll, describe, expect, it } from 'vitest';
+
 import { getElectronNameForPlatform } from '../../../src/renderer/utils/electron-name';
 import { overrideRendererPlatform, resetRendererPlatform } from '../../utils';
 

@@ -1,6 +1,6 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`AddVersionDialog component onSubmit shows dialog warning when adding duplicate local versions 1`] = `
+exports[`AddVersionDialog component > onSubmit > shows dialog warning when adding duplicate local versions 1`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -15,7 +15,7 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -50,7 +50,7 @@ exports[`AddVersionDialog component onSubmit shows dialog warning when adding du
 </Blueprint3.Dialog>
 `;
 
-exports[`AddVersionDialog component renders 1`] = `
+exports[`AddVersionDialog component > renders 1`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -65,7 +65,7 @@ exports[`AddVersionDialog component renders 1`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -113,7 +113,7 @@ exports[`AddVersionDialog component renders 1`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`AddVersionDialog component renders 2`] = `
+exports[`AddVersionDialog component > renders 2`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -128,7 +128,7 @@ exports[`AddVersionDialog component renders 2`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }
@@ -177,7 +177,7 @@ exports[`AddVersionDialog component renders 2`] = `
 </Blueprint3.Dialog>
 `;
 
-exports[`AddVersionDialog component renders 3`] = `
+exports[`AddVersionDialog component > renders 3`] = `
 <Blueprint3.Dialog
   canOutsideClickClose={true}
   className="dialog-add-version"
@@ -192,7 +192,7 @@ exports[`AddVersionDialog component renders 3`] = `
       hasSelection={false}
       id="custom-electron-version"
       inputProps={
-        Object {
+        {
           "onClick": [Function],
         }
       }

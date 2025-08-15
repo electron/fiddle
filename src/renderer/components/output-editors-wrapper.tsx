@@ -3,10 +3,10 @@ import * as React from 'react';
 import { reaction } from 'mobx';
 import { Mosaic, MosaicNode, MosaicParent } from 'react-mosaic-component';
 
-import { AppState } from '../state';
 import { Editors } from './editors';
 import { Outputs } from './outputs';
 import { Sidebar } from './sidebar';
+import { AppState } from '../state';
 
 interface WrapperProps {
   appState: AppState;
@@ -54,7 +54,9 @@ export class OutputEditorsWrapper extends React.Component<
   public render() {
     return (
       <Mosaic<WrapperEditorId>
-        renderTile={(id: string) => this.MOSAIC_ELEMENTS[id]}
+        renderTile={(id: string) =>
+          this.MOSAIC_ELEMENTS[id as keyof typeof this.MOSAIC_ELEMENTS]
+        }
         resize={{ minimumPaneSizePercentage: 15 }}
         value={this.state.mosaic}
         onChange={this.onChange}
@@ -63,8 +65,10 @@ export class OutputEditorsWrapper extends React.Component<
     );
   }
 
-  private onChange = (rootNode: MosaicParent<WrapperEditorId>) => {
-    const isConsoleShowing = rootNode.splitPercentage !== 0;
+  private onChange = (rootNode: MosaicNode<WrapperEditorId> | null) => {
+    if (rootNode === null) return;
+    const isConsoleShowing =
+      (rootNode as MosaicParent<WrapperEditorId>).splitPercentage !== 0;
 
     if (isConsoleShowing !== this.props.appState.isConsoleShowing) {
       this.props.appState.isConsoleShowing = isConsoleShowing;

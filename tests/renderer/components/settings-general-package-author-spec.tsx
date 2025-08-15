@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { InputGroup } from '@blueprintjs/core';
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { PackageAuthorSettings } from '../../../src/renderer/components/settings-general-package-author';
 import { AppState } from '../../../src/renderer/state';
@@ -10,7 +11,7 @@ describe('PackageAuthorSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   it('renders', () => {
@@ -21,20 +22,20 @@ describe('PackageAuthorSettings component', () => {
   describe('handlePackageAuthorChange()', () => {
     it('handles package author', async () => {
       const wrapper = shallow(<PackageAuthorSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
       const author = 'electron<electron@electron.org>';
 
-      await instance.handlePackageAuthorChange({
+      instance.handlePackageAuthorChange({
         currentTarget: { value: author },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.packageAuthor).toEqual(author);
       expect(instance.state.value).toEqual(author);
 
-      await instance.handlePackageAuthorChange({
+      instance.handlePackageAuthorChange({
         currentTarget: { value: 'test' },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.packageAuthor).toEqual('test');
       expect(instance.state.value).toEqual('test');

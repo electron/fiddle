@@ -1,17 +1,17 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`Header component renders 1`] = `
+exports[`Header component > renders 1`] = `
 <Fragment>
   <header
     id="header"
   >
-    <commands
-      appState={Object {}}
+    <Commands2
+      appState={{}}
       key="commands"
     />
   </header>
   <welcome-tour
-    appState={Object {}}
+    appState={{}}
   />
 </Fragment>
 `;

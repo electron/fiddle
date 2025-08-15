@@ -1,5 +1,4 @@
-const { desktopCapturer } = require('electron')
-const { ipcRenderer } = require('electron')
+const { desktopCapturer, ipcRenderer } = require('electron/renderer')
 
 // The following example shows how to capture video from
 // the screen. It also grabs each window, so you could

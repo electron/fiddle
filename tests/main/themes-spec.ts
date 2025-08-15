@@ -1,7 +1,8 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { shell } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   THEMES_PATH,
@@ -10,9 +11,9 @@ import {
   openThemeFolder,
   readThemeFile,
 } from '../../src/main/themes';
-import { DefaultThemes, LoadedFiddleTheme } from '../../src/themes-defaults';
+import { LoadedFiddleTheme, defaultDark } from '../../src/themes-defaults';
 
-jest.mock('fs-extra');
+vi.mock('fs-extra');
 
 describe('themes', () => {
   describe('getAvailableThemes()', () => {
@@ -22,12 +23,12 @@ describe('themes', () => {
     });
 
     it('reads the themes folder for themes', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdir as jest.Mock).mockReturnValueOnce([
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      (fs.readdir as Mock).mockReturnValueOnce([
         'test-theme1.json',
         'test-theme2.json',
       ]);
-      (fs.readJSON as jest.Mock).mockReturnValue({ test: true });
+      (fs.readJSON as Mock).mockReturnValue({ test: true });
 
       const themes = await getAvailableThemes();
 
@@ -45,12 +46,12 @@ describe('themes', () => {
     });
 
     it('only reads files ending in .json', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValue(true);
-      (fs.readdir as jest.Mock).mockReturnValueOnce([
+      vi.mocked(fs.existsSync).mockReturnValue(true);
+      (fs.readdir as Mock).mockReturnValueOnce([
         'test-theme1.json',
         '.DS_Store',
       ]);
-      (fs.readJSON as jest.Mock).mockReturnValue({ test: true });
+      (fs.readJSON as Mock).mockResolvedValue({ test: true });
 
       const themes = await getAvailableThemes();
 
@@ -63,17 +64,17 @@ describe('themes', () => {
     });
 
     it('handles a readdir error', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
-      (fs.readdir as jest.Mock).mockRejectedValueOnce('Bwap');
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+      (fs.readdir as Mock).mockRejectedValueOnce('Bwap');
 
       const themes = await getAvailableThemes();
       expect(themes).toHaveLength(2);
     });
 
     it('handles a readJSON error', async () => {
-      (fs.existsSync as jest.Mock).mockReturnValueOnce(true);
-      (fs.readdir as jest.Mock).mockImplementationOnce(() => ['hi']);
-      (fs.readJSON as jest.Mock).mockRejectedValueOnce('Bwap');
+      vi.mocked(fs.existsSync).mockReturnValueOnce(true);
+      (fs.readdir as Mock).mockImplementationOnce(() => ['hi']);
+      (fs.readJSON as Mock).mockRejectedValueOnce('Bwap');
 
       const themes = await getAvailableThemes();
       expect(themes).toHaveLength(2);
@@ -81,23 +82,8 @@ describe('themes', () => {
   });
 
   describe('readThemeFile()', () => {
-    it('returns the default (light) theme', async () => {
-      const theme = await readThemeFile(DefaultThemes.LIGHT);
-      expect(theme!.name).toBe('Fiddle (Light)');
-    });
-
-    it('returns the default (Dark) theme', async () => {
-      const theme = await readThemeFile(DefaultThemes.DARK);
-      expect(theme!.name).toBe('Fiddle (Dark)');
-    });
-
-    it('returns the default (Dark) theme if no name provided', async () => {
-      const theme = await readThemeFile();
-      expect(theme!.name).toBe('Fiddle (Dark)');
-    });
-
     it('reads the right file if ends with .json', async () => {
-      (fs.readJSON as jest.Mock).mockReturnValueOnce({});
+      (fs.readJSON as Mock).mockResolvedValueOnce({});
 
       const theme = await readThemeFile('myfile.json');
       const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);
@@ -107,7 +93,7 @@ describe('themes', () => {
     });
 
     it('reads the right file if does not end with .json', async () => {
-      (fs.readJSON as jest.Mock).mockReturnValueOnce({});
+      (fs.readJSON as Mock).mockResolvedValueOnce({});
 
       const theme = await readThemeFile('myfile');
       const expected = path.normalize(`~/.electron-fiddle/themes/myfile.json`);
@@ -121,12 +107,7 @@ describe('themes', () => {
     let defaultTheme: LoadedFiddleTheme;
 
     beforeEach(async () => {
-      const theme = await readThemeFile();
-      if (theme) {
-        defaultTheme = theme;
-      } else {
-        fail('Error loading default theme');
-      }
+      defaultTheme = defaultDark;
     });
 
     it('filters out file and css keys', async () => {
@@ -182,7 +163,7 @@ describe('themes', () => {
 
   describe('openThemeFolder()', () => {
     it('attempts to open the folder', async () => {
-      shell.showItemInFolder = jest.fn();
+      shell.showItemInFolder = vi.fn();
       await openThemeFolder();
 
       expect(shell.showItemInFolder).toHaveBeenCalled();

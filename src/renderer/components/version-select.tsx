@@ -8,8 +8,8 @@ import {
   Intent,
   Menu,
   MenuItem,
-  Tooltip,
 } from '@blueprintjs/core';
+import { Tooltip2 } from '@blueprintjs/popover2';
 import {
   ItemListPredicate,
   ItemListRenderer,
@@ -39,7 +39,7 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
   renderItem,
   itemsParentRef,
 }) => {
-  const InnerElement = React.forwardRef((props, ref: React.RefObject<Menu>) => {
+  const InnerElement = React.forwardRef((props, ref: React.Ref<Menu>) => {
     return <Menu ref={ref} ulRef={itemsParentRef} {...props} />;
   });
   InnerElement.displayName = 'Menu';
@@ -61,17 +61,15 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
 /**
  * Helper method: Returns the <Select /> label for an Electron
  * version.
- *
- * @param {RunnableVersion} { source, state, name }
- * @returns {string}
  */
 export function getItemLabel({ source, state, name }: RunnableVersion): string {
+  // If a version is local, either it's there or it's not.
   if (source === VersionSource.local) {
-    return name || 'Local';
+    return state === InstallState.missing ? 'Unavailable' : name || 'Local';
   }
 
   const installStateLabels: Record<InstallState, string> = {
-    missing: 'Not downloaded',
+    missing: 'Not Downloaded',
     downloading: 'Downloading',
     downloaded: 'Downloaded',
     installing: 'Downloaded',
@@ -83,11 +81,13 @@ export function getItemLabel({ source, state, name }: RunnableVersion): string {
 /**
  * Helper method: Returns the <Select /> icon for an Electron
  * version.
- *
- * @param {RunnableVersion} { state }
- * @returns {IconName}
  */
-export function getItemIcon({ state }: RunnableVersion): IconName {
+export function getItemIcon({ source, state }: RunnableVersion): IconName {
+  // If a version is local, either it's there or it's not.
+  if (source === VersionSource.local) {
+    return state === InstallState.missing ? 'issue' : 'saved';
+  }
+
   const installStateIcons: Record<InstallState, IconName> = {
     missing: 'cloud',
     downloading: 'cloud-download',
@@ -108,10 +108,6 @@ export function getItemIcon({ state }: RunnableVersion): IconName {
  * [3.0.0, 14.3.0, 13.2.0, 12.0.0-nightly.20210301, 12.0.0-beta.3]
  * and a search query of '3', this method would sort them into:
  * [3.0.0, 13.2.0, 14.3.0, 12.0.0-beta.3, 12.0.0-nightly.20210301]
- *
- * @param {string} query
- * @param {RunnableVersion[]} versions
- * @returns
  */
 export const filterItems: ItemListPredicate<RunnableVersion> = (
   query,
@@ -147,8 +143,7 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
 /**
  * Renders a context menu to copy the current Electron version.
  *
- * @param {React.MouseEvent<HTMLButtonElement>} e
- * @param {string} version the Electron version number to copy.
+ * @param version - the Electron version number to copy.
  */
 export const renderVersionContextMenu = (
   e: React.MouseEvent<HTMLButtonElement>,
@@ -172,10 +167,6 @@ export const renderVersionContextMenu = (
 /**
  * Helper method: Returns the <Select /> <MenuItem /> for Electron
  * versions.
- *
- * @param {RunnableVersion} item
- * @param {IItemRendererProps} { handleClick, modifiers, query }
- * @returns
  */
 export const renderItem: ItemRenderer<RunnableVersion> = (
   item,
@@ -187,25 +178,27 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
 
   if (disableDownload(item.version)) {
     return (
-      <Tooltip
+      <Tooltip2
         className="disabled-menu-tooltip"
         modifiers={{
           flip: { enabled: false },
           preventOverflow: { enabled: false },
           hide: { enabled: false },
         }}
+        position="bottom"
         intent={Intent.PRIMARY}
         content={`Version is not available on current OS`}
       >
         <MenuItem
           active={modifiers.active}
+          data-testid="disabled-menu-item"
           disabled={true}
           text={highlightText(item.version, query)}
           key={item.version}
           label={getItemLabel(item)}
           icon={getItemIcon(item)}
         />
-      </Tooltip>
+      </Tooltip2>
     );
   }
 
@@ -240,9 +233,6 @@ interface VersionSelectProps {
 /**
  * A dropdown allowing the selection of Electron versions. The actual
  * download is managed in the state.
- *
- * @class VersionSelect
- * @extends {React.Component<VersionSelectProps, VersionSelectState>}
  */
 export const VersionSelect = observer(
   class VersionSelect extends React.Component<
@@ -266,8 +256,8 @@ export const VersionSelect = observer(
           disabled={!!this.props.disabled}
         >
           <Button
-            className="version-chooser"
-            text={`Electron v${version}`}
+            id="version-chooser"
+            text={version}
             icon={getItemIcon(currentVersion)}
             onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
               renderVersionContextMenu(e, version);

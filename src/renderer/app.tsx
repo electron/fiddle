@@ -1,19 +1,23 @@
-import * as path from 'path';
-
 import { autorun, reaction, when } from 'mobx';
 
-import { EditorValues, PACKAGE_NAME, SetFiddleOptions } from '../interfaces';
-import { defaultDark, defaultLight } from '../themes-defaults';
-import { USER_DATA_PATH } from './constants';
+import { PREFERS_DARK_MEDIA_QUERY } from './constants';
 import { ElectronTypes } from './electron-types';
 import { FileManager } from './file-manager';
 import { RemoteLoader } from './remote-loader';
 import { Runner } from './runner';
 import { AppState } from './state';
 import { TaskRunner } from './task-runner';
-import { activateTheme, getTheme } from './themes';
-import { PackageJsonOptions, getPackageJson } from './utils/get-package';
+import { activateTheme, getCurrentTheme, getTheme } from './themes';
+import { getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
+import {
+  EditorId,
+  EditorValues,
+  PACKAGE_NAME,
+  PackageJsonOptions,
+  SetFiddleOptions,
+} from '../interfaces';
+import { defaultDark, defaultLight } from '../themes-defaults';
 
 // Importing styles files
 import '../less/root.less';
@@ -21,8 +25,6 @@ import '../less/root.less';
 /**
  * The top-level class controlling the whole app. This is *not* a React component,
  * but it does eventually render all components.
- *
- * @class App
  */
 export class App {
   public state = new AppState(getElectronVersions());
@@ -37,11 +39,7 @@ export class App {
 
     this.taskRunner = new TaskRunner(this);
 
-    this.electronTypes = new ElectronTypes(
-      window.ElectronFiddle.monaco,
-      path.join(USER_DATA_PATH, 'electron-typedef'),
-      path.join(USER_DATA_PATH, 'nodejs-typedef'),
-    );
+    this.electronTypes = new ElectronTypes(window.monaco);
   }
 
   private confirmReplaceUnsaved(): Promise<boolean> {
@@ -60,7 +58,7 @@ export class App {
 
   public async replaceFiddle(
     editorValues: EditorValues,
-    { filePath, gistId, templateName }: Partial<SetFiddleOptions>,
+    { localFiddle, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
     const { state } = this;
     const { editorMosaic } = state;
@@ -72,7 +70,7 @@ export class App {
     this.state.editorMosaic.set(editorValues);
 
     this.state.gistId = gistId || '';
-    this.state.localPath = filePath;
+    this.state.localPath = localFiddle?.filePath;
     this.state.templateName = templateName;
 
     // update menu when a new Fiddle is loaded
@@ -83,8 +81,6 @@ export class App {
 
   /**
    * Retrieves the contents of all editor panes.
-   *
-   * @returns {EditorValues}
    */
   public async getEditorValues(
     options?: PackageJsonOptions,
@@ -92,7 +88,10 @@ export class App {
     const values = this.state.editorMosaic.values();
 
     if (options) {
-      values[PACKAGE_NAME] = await getPackageJson(this.state, options);
+      values[PACKAGE_NAME as EditorId] = await getPackageJson(
+        this.state,
+        options,
+      );
     }
 
     return values;
@@ -103,15 +102,25 @@ export class App {
    * render process.
    */
   public async setup(): Promise<void | Element | React.Component> {
-    this.loadTheme(this.state.theme || '');
+    if (this.state.isUsingSystemTheme) {
+      await this.loadTheme(getCurrentTheme().file);
+    } else {
+      await this.loadTheme(this.state.theme);
+    }
 
-    const React = await import('react');
-    const { render } = await import('react-dom');
-    const { Dialogs } = await import('./components/dialogs');
-    const { OutputEditorsWrapper } = await import(
-      './components/output-editors-wrapper'
-    );
-    const { Header } = await import('./components/header');
+    const [
+      { default: React },
+      { render },
+      { Dialogs },
+      { OutputEditorsWrapper },
+      { Header },
+    ] = await Promise.all([
+      import('react'),
+      import('react-dom'),
+      import('./components/dialogs.js'),
+      import('./components/output-editors-wrapper.js'),
+      import('./components/header.js'),
+    ]);
 
     // The AppState constructor started loading a fiddle.
     // Wait for it here so the UI doesn't start life in `nonIdealState`.
@@ -119,9 +128,9 @@ export class App {
 
     const app = (
       <div className="container">
-        <Dialogs appState={this.state} />
         <Header appState={this.state} />
         <OutputEditorsWrapper appState={this.state} />
+        <Dialogs appState={this.state} />
       </div>
     );
 
@@ -154,52 +163,41 @@ export class App {
   }
 
   public async setupThemeListeners() {
-    const setSystemTheme = (prefersDark: boolean) => {
-      if (prefersDark) {
-        this.state.setTheme(defaultDark.file);
-      } else {
-        this.state.setTheme(defaultLight.file);
-      }
-    };
-
     // match theme to system when box is ticked
     reaction(
       () => this.state.isUsingSystemTheme,
       () => {
         if (this.state.isUsingSystemTheme) {
           window.ElectronFiddle.setNativeTheme('system');
-
-          if (!!window.matchMedia) {
-            const { matches } = window.matchMedia(
-              '(prefers-color-scheme: dark)',
-            );
-            setSystemTheme(matches);
-          }
+          this.loadTheme(getCurrentTheme().file);
+        } else {
+          this.loadTheme(this.state.theme);
         }
       },
     );
 
     // change theme when system theme changes
-    if (!!window.matchMedia) {
-      window
-        .matchMedia('(prefers-color-scheme: dark)')
-        .addEventListener('change', ({ matches }) => {
-          if (this.state.isUsingSystemTheme) {
-            setSystemTheme(matches);
-          }
-        });
-    }
+    window
+      .matchMedia(PREFERS_DARK_MEDIA_QUERY)
+      .addEventListener('change', ({ matches: prefersDark }) => {
+        if (this.state.isUsingSystemTheme) {
+          this.loadTheme((prefersDark ? defaultDark : defaultLight).file);
+        }
+      });
   }
 
   /**
    * Opens a fiddle from the specified location.
    *
-   * @param {SetFiddleOptions} fiddle The fiddle to open
+   * @param fiddle - The fiddle to open
    */
   public async openFiddle(fiddle: SetFiddleOptions) {
-    const { filePath, gistId } = fiddle;
-    if (filePath) {
-      await this.fileManager.openFiddle(filePath);
+    const { localFiddle, gistId } = fiddle;
+    if (localFiddle) {
+      await this.fileManager.openFiddle(
+        localFiddle.filePath,
+        localFiddle.files,
+      );
     } else if (gistId) {
       await this.remoteLoader.fetchGistAndLoad(gistId);
     }
@@ -207,15 +205,11 @@ export class App {
 
   /**
    * Loads theme CSS into the HTML document.
-   *
-   * @param {string} name
-   * @returns {Promise<void>}
    */
-  public async loadTheme(name: string): Promise<void> {
-    const tag: HTMLStyleElement | null = document.querySelector(
-      'style#fiddle-theme',
-    );
-    const theme = await getTheme(name);
+  public async loadTheme(name: string | null): Promise<void> {
+    const tag: HTMLStyleElement | null =
+      document.querySelector('style#fiddle-theme');
+    const theme = await getTheme(this.state, name);
     activateTheme(theme);
 
     if (tag && theme.css) {

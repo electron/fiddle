@@ -3,11 +3,11 @@ import * as React from 'react';
 import { Icon, IconName, MenuItem } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { CreditsSettings } from './settings-credits';
 import { ElectronSettings } from './settings-electron';
 import { ExecutionSettings } from './settings-execution';
 import { GeneralSettings } from './settings-general';
+import { AppState } from '../state';
 
 enum SettingsSections {
   General = 'General',
@@ -34,9 +34,6 @@ interface SettingsState {
 
 /**
  * Everything above the editors, so buttons and the address bar.
- *
- * @class Settings
- * @extends {React.Component<SettingsProps, SettingsState>}
  */
 export const Settings = observer(
   class Settings extends React.Component<SettingsProps, SettingsState> {
@@ -65,8 +62,6 @@ export const Settings = observer(
     /**
      * Renders the content of the settings, usually by simply
      * return the appropriate component.
-     *
-     * @returns {(JSX.Element | null)}
      */
     public renderContent(): JSX.Element | null {
       const { section } = this.state;
@@ -98,8 +93,6 @@ export const Settings = observer(
 
     /**
      * Renders the individual menu items
-     *
-     * @returns {Array<JSX.Element>}
      */
     public renderOptions(): Array<JSX.Element> {
       const { section } = this.state;
@@ -147,10 +140,6 @@ export const Settings = observer(
 
     /**
      * Get the settings icons
-     *
-     * @param {SettingsSections} section
-     * @returns {IconName}
-     * @memberof Settings
      */
     private getIconForSection(section: SettingsSections): IconName {
       if (section === SettingsSections.Credits) {
@@ -167,8 +156,6 @@ export const Settings = observer(
     /**
      * Trigger closing of the settings panel upon Esc
      * If hasPopoverOpen is set to true, settings will not close as only the popover should close
-     *
-     * @param {KeyboardEvent} event
      */
     private closeSettingsPanel(event: KeyboardEvent) {
       const { appState } = this.props;

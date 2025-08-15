@@ -16,9 +16,6 @@ interface FontSettingsState {
 
 /**
  * Settings font family and size.
- *
- * @class FontSettings
- * @extends {React.Component<FontSettingsProps, FontSettingsState>}
  */
 @observer
 export class FontSettings extends React.Component<
@@ -39,8 +36,6 @@ export class FontSettings extends React.Component<
 
   /**
    * Handles a change in the editor font family.
-   *
-   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleSetFontFamily(event: React.FormEvent<HTMLInputElement>): void {
     const { value: fontFamily } = event.currentTarget;
@@ -50,8 +45,6 @@ export class FontSettings extends React.Component<
 
   /**
    * Handles a change in the editor font size.
-   *
-   * @param {React.FormEvent<HTMLInputElement>} event
    */
   public handleSetFontSize(event: React.FormEvent<HTMLInputElement>): void {
     const parsedFontSize = parseInt(event.currentTarget.value, 10);
@@ -88,7 +81,7 @@ export class FontSettings extends React.Component<
               }
             />
             <Button
-              onClick={window.ElectronFiddle.reloadWindows}
+              onClick={() => window.ElectronFiddle.reloadWindows()}
               icon="repeat"
               text="Reload Window"
             />

@@ -1,22 +1,24 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
+import { describe, expect, it, vi } from 'vitest';
 
-jest.useFakeTimers();
-jest.spyOn(global, 'setTimeout');
+import { mockRequire } from '../utils.js';
 
-const mockUpdateApp = jest.fn();
-jest.mock('update-electron-app', () => mockUpdateApp);
+vi.useFakeTimers();
+vi.spyOn(global, 'setTimeout');
 
-describe('update', () => {
-  const { setupUpdates } = require('../../src/main/update');
-  const updateElectronApp = require('update-electron-app');
+mockRequire('update-electron-app', { updateElectronApp: vi.fn() });
 
-  it('schedules an update check', () => {
+describe('update', async () => {
+  const { setupUpdates } = await import('../../src/main/update.js');
+  const { updateElectronApp } = require('update-electron-app');
+
+  it('schedules an update check', async () => {
     setupUpdates();
 
     expect(setTimeout).toHaveBeenCalledTimes(1);
-    ((setTimeout as unknown) as jest.Mock).mock.calls[0][0]();
-    expect(updateElectronApp).toHaveBeenCalled();
+    vi.mocked(setTimeout).mock.calls[0][0]();
+    expect(vi.mocked(updateElectronApp)).toHaveBeenCalled();
   });
 });

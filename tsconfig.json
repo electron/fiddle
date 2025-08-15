@@ -1,8 +1,7 @@
 {
+  "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
-    "esModuleInterop": true,
     "allowJs": true,
-    "skipLibCheck": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "removeComments": false,
@@ -10,23 +9,22 @@
     "preserveConstEnums": true,
     "sourceMap": true,
     "lib": [
-      "es2020",
+      "es2024",
+      "ESNext.Array",
+      "ESNext.Collection",
+      "ESNext.Iterator",
       "dom",
       "WebWorker"
     ],
     "noImplicitAny": true,
     "noImplicitReturns": true,
-    "suppressImplicitAnyIndexErrors": true,
     "strictNullChecks": true,
     "noUnusedLocals": true,
     "noImplicitThis": true,
     "noUnusedParameters": true,
     "importHelpers": true,
     "noEmitHelpers": true,
-    "module": "commonjs",
-    "moduleResolution": "node",
     "pretty": true,
-    "target": "es2019",
     "jsx": "react",
     "typeRoots": [
       "./node_modules/@types"
@@ -34,6 +32,7 @@
     "baseUrl": "."
   },
   "include": [
+    "rtl-spec/**/*",
     "src/**/*",
     "tests/**/*"
   ],

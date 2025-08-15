@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { IItemRendererProps } from '@blueprintjs/select';
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   AppearanceSettings,
@@ -15,7 +16,7 @@ const mockThemes = [
   {
     name: 'defaultDark',
     file: 'defaultDark',
-  },
+  } as LoadedFiddleTheme,
 ];
 const doNothingFunc = () => {
   // Do Nothing
@@ -25,9 +26,9 @@ describe('AppearanceSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
 
-    (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+    vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
       mockThemes,
     );
   });
@@ -52,8 +53,8 @@ describe('AppearanceSettings component', () => {
       />,
     );
 
-    await process.nextTick;
-    expect((wrapper.state() as any).selectedTheme.name).toBe('defaultDark');
+    await new Promise(process.nextTick);
+    expect((wrapper.state() as any).selectedTheme?.name).toBe('defaultDark');
   });
 
   it('handles a theme change', () => {
@@ -63,14 +64,14 @@ describe('AppearanceSettings component', () => {
         toggleHasPopoverOpen={doNothingFunc}
       />,
     );
-    const instance: any = wrapper.instance() as any;
-    instance.handleChange({ file: 'defaultLight' } as any);
+    const instance: any = wrapper.instance();
+    instance.handleChange({ file: 'defaultLight' } as LoadedFiddleTheme);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
 
   it('toggles popover toggle event', () => {
-    const toggleFunc = jest.fn();
+    const toggleFunc = vi.fn();
     const wrapper = shallow(
       <AppearanceSettings appState={store} toggleHasPopoverOpen={toggleFunc} />,
     );
@@ -95,7 +96,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.openThemeFolder();
 
       expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
@@ -108,8 +109,8 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
-      (window.ElectronFiddle.openThemeFolder as jest.Mock).mockRejectedValue(
+      const instance: any = wrapper.instance();
+      vi.mocked(window.ElectronFiddle.openThemeFolder).mockRejectedValue(
         new Error('Bwap'),
       );
 
@@ -125,7 +126,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.createNewThemeFromCurrent();
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
@@ -136,13 +137,19 @@ describe('AppearanceSettings component', () => {
     });
 
     it('adds the newly created theme to the Themes dropdown', async () => {
-      const arr: Array<FiddleTheme> = [];
-      (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+      const arr: Array<LoadedFiddleTheme> = [];
+      vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
         arr,
       );
-      (window.ElectronFiddle.createThemeFile as jest.Mock).mockImplementation(
-        (theme: FiddleTheme) => {
-          arr.push(theme);
+      vi.mocked(window.ElectronFiddle.createThemeFile).mockImplementation(
+        async (theme: FiddleTheme) => {
+          const loadedTheme = {
+            ...theme,
+            name: '',
+            file: '',
+          };
+          arr.push(loadedTheme);
+          return loadedTheme;
         },
       );
       const wrapper = shallow(
@@ -152,7 +159,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       expect(wrapper.state('themes')).toHaveLength(0);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       await instance.createNewThemeFromCurrent();
       expect(wrapper.state('themes')).toHaveLength(1);
     });
@@ -164,8 +171,8 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen={doNothingFunc}
         />,
       );
-      const instance: any = wrapper.instance() as any;
-      (window.ElectronFiddle.createThemeFile as jest.Mock).mockRejectedValue(
+      const instance: any = wrapper.instance();
+      vi.mocked(window.ElectronFiddle.createThemeFile).mockRejectedValue(
         new Error('Bwap'),
       );
 
@@ -177,7 +184,7 @@ describe('AppearanceSettings component', () => {
   describe('handleAddTheme()', () => {
     it('refreshes the Themes dropdown', async () => {
       const arr: Array<LoadedFiddleTheme> = [];
-      (window.ElectronFiddle.getAvailableThemes as jest.Mock).mockResolvedValue(
+      vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
         arr,
       );
       const wrapper = shallow(
@@ -187,7 +194,7 @@ describe('AppearanceSettings component', () => {
         />,
       );
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
-      const instance: any = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       const promise = instance.handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
@@ -197,10 +204,10 @@ describe('AppearanceSettings component', () => {
 
   describe('filterItem()', () => {
     it('filters', () => {
-      const foo = filterItem('foo', { name: 'foo' } as any);
+      const foo = filterItem('foo', { name: 'foo' } as LoadedFiddleTheme);
       expect(foo).toBe(true);
 
-      const bar = filterItem('foo', { name: 'bar' } as any);
+      const bar = filterItem('foo', { name: 'bar' } as LoadedFiddleTheme);
       expect(bar).toBe(false);
     });
   });
@@ -218,7 +225,7 @@ describe('AppearanceSettings component', () => {
     };
 
     it('returns null for non-matching', () => {
-      const result = renderItem({ name: 'foo' } as any, {
+      const result = renderItem({ name: 'foo' } as LoadedFiddleTheme, {
         ...mockItemProps,
         modifiers: {
           ...mockItemProps.modifiers,
@@ -230,7 +237,7 @@ describe('AppearanceSettings component', () => {
     });
 
     it('returns a MenuItem for matching', () => {
-      const result = renderItem({ name: 'foo' } as any, {
+      const result = renderItem({ name: 'foo' } as LoadedFiddleTheme, {
         ...mockItemProps,
       });
 

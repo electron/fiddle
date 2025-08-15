@@ -1,23 +1,41 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
 import * as electron from 'electron';
+import {
+  type Mock,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
-import { BlockableAccelerator } from '../../src/interfaces';
+import { BlockableAccelerator, MAIN_JS } from '../../src/interfaces';
 import { IpcEvents } from '../../src/ipc-events';
+import {
+  saveFiddle,
+  saveFiddleAs,
+  saveFiddleAsForgeProject,
+  showOpenDialog,
+} from '../../src/main/files';
 import { ipcMainManager } from '../../src/main/ipc';
 import { setupMenu } from '../../src/main/menu';
+import { getTemplateValues } from '../../src/main/templates';
 import { createMainWindow } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('../../src/main/windows');
-jest.mock('../../src/main/ipc');
+vi.mock('../../src/main/files');
+vi.mock('../../src/main/templates');
+vi.mock('../../src/main/windows');
+vi.mock('../../src/main/ipc');
 
 describe('menu', () => {
   beforeEach(() => {
     electron.app.name = 'Electron Fiddle';
-    (electron.dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
+    vi.mocked(electron.dialog.showOpenDialog).mockResolvedValue({} as any);
   });
 
   afterEach(() => {
@@ -30,16 +48,18 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       expect(result.length).toBe(8);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('creates a menu (Windows)', () => {
@@ -47,16 +67,18 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('creates a menu (Linux)', () => {
@@ -64,16 +86,18 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       expect(result.length).toBe(7);
 
-      result.forEach((submenu: Electron.MenuItemConstructorOptions) => {
-        expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
-          true,
-        );
-        expect(submenu).toBeTruthy();
-      });
+      result.forEach(
+        (submenu: Electron.MenuItemConstructorOptions | Electron.MenuItem) => {
+          expect(!!submenu.role || !!(submenu.label && submenu.submenu)).toBe(
+            true,
+          );
+          expect(submenu).toBeTruthy();
+        },
+      );
     });
 
     it('adds Monaco toggle options', () => {
@@ -81,7 +105,7 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
@@ -104,7 +128,7 @@ describe('menu', () => {
 
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       const submenu = result[2]
         .submenu as Array<Electron.MenuItemConstructorOptions>;
@@ -113,7 +137,7 @@ describe('menu', () => {
         ({ label }) => label === 'Toggle Bisect Helper',
       );
       (toggleSoftWrap as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.BISECT_COMMANDS_TOGGLE,
       );
     });
@@ -121,15 +145,17 @@ describe('menu', () => {
     it('overwrites Select All command', () => {
       setupMenu();
 
-      const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+      const result = vi.mocked(electron.Menu.buildFromTemplate).mock
         .calls[0][0];
       // use find here because the index is platform-specific
-      const submenu = result.find((r: any) => r.label === 'Edit')
-        .submenu as Array<Electron.MenuItemConstructorOptions>;
+      const submenu = result.find((r: any) => r.label === 'Edit')?.submenu as
+        | Array<Electron.MenuItemConstructorOptions>
+        | undefined;
+      expect(submenu).toBeDefined();
 
-      const selectAll = submenu.find(({ label }) => label === 'Select All');
+      const selectAll = submenu!.find(({ label }) => label === 'Select All');
       (selectAll as any).click();
-      expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      expect(ipcMainManager.send).toHaveBeenCalledWith(
         IpcEvents.SELECT_ALL_IN_EDITOR,
       );
     });
@@ -139,7 +165,7 @@ describe('menu', () => {
         overridePlatform('darwin');
         setupMenu();
 
-        const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        const result = (electron.Menu.buildFromTemplate as Mock).mock
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
@@ -152,7 +178,7 @@ describe('menu', () => {
         // simulate the menu rebuild after click that sends correct templateName
         setupMenu({ activeTemplate: 'App' });
 
-        const result = (electron.Menu.buildFromTemplate as jest.Mock).mock
+        const result = (electron.Menu.buildFromTemplate as Mock).mock
           .calls[0][0];
         const showMeMenu = result[result.length - 2];
 
@@ -165,7 +191,7 @@ describe('menu', () => {
   describe('menu groups', () => {
     beforeEach(() => {
       ipcMainManager.removeAllListeners();
-      ipcMainManager.send = jest.fn();
+      ipcMainManager.send = vi.fn();
       overridePlatform('darwin');
       setupMenu();
     });
@@ -174,27 +200,28 @@ describe('menu', () => {
       let help: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         help = menu[menu.length - 1];
       });
 
       it('shows the welcome tour', () => {
         help.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.SHOW_WELCOME_TOUR,
         );
       });
 
       it('toggles developer tools', () => {
         const mocks = {
-          toggleDevTools: jest.fn(),
+          toggleDevTools: vi.fn(),
         };
 
-        (electron.BrowserWindow.getFocusedWindow as jest.Mock).mockReturnValue({
+        vi.mocked(electron.BrowserWindow.getFocusedWindow).mockReturnValue({
           isDestroyed: () => false,
-          webContents: mocks,
-        });
+          webContents:
+            mocks as Partial<electron.WebContents> as electron.WebContents,
+        } as Partial<electron.BrowserWindow> as electron.BrowserWindow);
 
         help.submenu[3].click();
         expect(mocks.toggleDevTools).toHaveBeenCalled();
@@ -202,21 +229,21 @@ describe('menu', () => {
 
       it('opens the Fiddle repo', () => {
         help.submenu[5].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
           'https://github.com/electron/fiddle',
         );
       });
 
       it('opens the Electron repo', () => {
         help.submenu[6].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
           'https://github.com/electron/electron',
         );
       });
 
       it('opens the Electron issues', () => {
         help.submenu[7].click();
-        expect(electron.shell.openExternal).toHaveBeenCalledWith<any>(
+        expect(electron.shell.openExternal).toHaveBeenCalledWith(
           'https://github.com/electron/electron/issues',
         );
       });
@@ -226,14 +253,14 @@ describe('menu', () => {
       let preferences: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         preferences = menu[0];
       });
 
       it('shows the preferences', () => {
         preferences.submenu[3].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.OPEN_SETTINGS,
         );
       });
@@ -243,7 +270,7 @@ describe('menu', () => {
       let quit: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         quit = menu[0];
       });
@@ -258,16 +285,18 @@ describe('menu', () => {
       let showMe: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         showMe = menu[menu.length - 2];
       });
 
-      it('attempts to open a template on click', () => {
-        showMe.submenu[0].submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+      it('attempts to open a template on click', async () => {
+        const editorValues = { [MAIN_JS]: 'foobar' };
+        vi.mocked(getTemplateValues).mockResolvedValue(editorValues);
+        await showMe.submenu[0].submenu[0].click();
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.FS_OPEN_TEMPLATE,
-          ['App'],
+          ['App', editorValues],
         );
       });
     });
@@ -276,30 +305,26 @@ describe('menu', () => {
       let tasks: any;
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         tasks = menu[menu.length - 3];
       });
 
       it('runs the fiddle', () => {
         tasks.submenu[0].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.FIDDLE_RUN,
-        );
+        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_RUN);
       });
 
       it('packages the fiddle', () => {
         tasks.submenu[1].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.FIDDLE_PACKAGE,
         );
       });
 
       it('makes the fiddle', () => {
         tasks.submenu[2].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.FIDDLE_MAKE,
-        );
+        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FIDDLE_MAKE);
       });
     });
 
@@ -318,23 +343,21 @@ describe('menu', () => {
       }
 
       beforeEach(() => {
-        const mock = (electron.Menu.buildFromTemplate as jest.Mock).mock;
+        const mock = vi.mocked(electron.Menu.buildFromTemplate).mock;
         const menu = mock.calls[0][0];
         file = menu[1];
       });
 
       it('creates a new fiddle', () => {
         file.submenu[Idx.NEW_FIDDLE].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.FS_NEW_FIDDLE,
         );
       });
 
       it('creates a new test fiddle', () => {
         file.submenu[Idx.NEW_TEST].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.FS_NEW_TEST,
-        );
+        expect(ipcMainManager.send).toHaveBeenCalledWith(IpcEvents.FS_NEW_TEST);
       });
 
       it('creates a new window', () => {
@@ -344,46 +367,46 @@ describe('menu', () => {
       });
 
       it('opens a Fiddle', () => {
+        vi.mocked(electron.BrowserWindow.getFocusedWindow).mockReturnValue(
+          {} as Partial<electron.BrowserWindow> as electron.BrowserWindow,
+        );
+
         file.submenu[Idx.OPEN].click();
-        expect(electron.dialog.showOpenDialog).toHaveBeenCalled();
+        expect(showOpenDialog).toHaveBeenCalled();
       });
 
       it('saves a Fiddle', () => {
         file.submenu[Idx.SAVE].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.FS_SAVE_FIDDLE,
-        );
+        expect(saveFiddle).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as', () => {
         file.submenu[Idx.SAVE_AS].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAs).toHaveBeenCalled();
       });
 
       it('saves a Fiddle as a gist', () => {
         file.submenu[Idx.PUBLISH].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
+        expect(ipcMainManager.send).toHaveBeenCalledWith(
           IpcEvents.FS_SAVE_FIDDLE_GIST,
         );
       });
 
       it('saves a Fiddle as a forge project', () => {
         file.submenu[Idx.FORGE].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAsForgeProject).toHaveBeenCalled();
       });
 
       it('saves a Fiddle with blocked accelerator', () => {
         setupMenu({ acceleratorsToBlock: [BlockableAccelerator.save] });
         file.submenu[Idx.SAVE].click();
-        expect(ipcMainManager.send).toHaveBeenCalledWith<any>(
-          IpcEvents.FS_SAVE_FIDDLE,
-        );
+        expect(saveFiddle).toHaveBeenCalled();
       });
 
       it('saves as a Fiddle with blocked accelerator', () => {
         setupMenu({ acceleratorsToBlock: [BlockableAccelerator.saveAs] });
         file.submenu[Idx.SAVE_AS].click();
-        expect(electron.dialog.showOpenDialogSync).toHaveBeenCalled();
+        expect(saveFiddleAs).toHaveBeenCalled();
       });
     });
   });

@@ -28,7 +28,9 @@ export const SHOW_ME_TEMPLATES: Templates = {
     SystemPreferences: 'systemPreferences',
     TouchBar: 'TouchBar',
     Tray: 'Tray',
+    utilityProcess: 'utilityProcess',
     WebContents: 'WebContents',
+    WebContentsView: 'WebContentsView',
     WebFrame: 'WebFrame',
   },
 };

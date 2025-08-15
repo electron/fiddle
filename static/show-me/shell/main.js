@@ -3,8 +3,8 @@
 // For more info, see:
 // https://electronjs.org/docs/api/shell
 
-const { app, BrowserWindow } = require('electron')
-const path = require('path')
+const { app, BrowserWindow, ipcMain, shell } = require('electron/main')
+const path = require('node:path')
 
 app.whenReady().then(() => {
   const mainWindow = new BrowserWindow({
@@ -16,4 +16,16 @@ app.whenReady().then(() => {
   })
 
   mainWindow.loadFile('index.html')
+
+  ipcMain.on('open-github', () => {
+    shell.openExternal('https://github.com')
+  })
+
+  ipcMain.on('open-folder', () => {
+    shell.showItemInFolder(__dirname)
+  })
+
+  ipcMain.on('beep', () => {
+    shell.beep()
+  })
 })

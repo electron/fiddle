@@ -14,20 +14,18 @@ interface TokenDialogState {
   tokenInput: string;
   verifying: boolean;
   error: boolean;
+  errorMessage?: string;
 }
 
 const TOKEN_SCOPES = ['gist'].join();
 const TOKEN_DESCRIPTION = encodeURIComponent('Fiddle Gist Token');
 const GENERATE_TOKEN_URL = `https://github.com/settings/tokens/new?scopes=${TOKEN_SCOPES}&description=${TOKEN_DESCRIPTION}`;
-const TOKEN_PATTERN = /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
+const TOKEN_PATTERN =
+  /^(ghp_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9]{22}_[a-zA-Z0-9]{59})$/;
 
 /**
  * The token dialog asks the user for a GitHub Personal Access Token.
  * It's also responsible for checking if the token is correct.
- *
- * @export
- * @class TokenDialog
- * @extends {React.Component<TokenDialogProps, TokenDialogState>}
  */
 export const TokenDialog = observer(
   class TokenDialog extends React.Component<
@@ -40,44 +38,92 @@ export const TokenDialog = observer(
       this.state = {
         verifying: false,
         error: false,
+        errorMessage: undefined,
         tokenInput: '',
       };
 
       this.onSubmitToken = this.onSubmitToken.bind(this);
-      this.openGenerateTokenExternal = this.openGenerateTokenExternal.bind(
-        this,
-      );
+      this.openGenerateTokenExternal =
+        this.openGenerateTokenExternal.bind(this);
       this.onTokenInputFocused = this.onTokenInputFocused.bind(this);
       this.handleChange = this.handleChange.bind(this);
       this.onClose = this.onClose.bind(this);
     }
 
     /**
-     * Handles the submission of a token
-     *
-     * @returns {Promise<void>}
-     * @memberof TokenDialog
+     * Validates a GitHub token and checks for required scopes.
+     */
+    private async validateGitHubToken(token: string): Promise<{
+      isValid: boolean;
+      scopes: string[];
+      hasGistScope: boolean;
+      user?: any;
+      error?: string;
+    }> {
+      try {
+        const octokit = await getOctokit({ gitHubToken: token } as AppState);
+        const response = await octokit.users.getAuthenticated();
+
+        const scopes = response.headers['x-oauth-scopes']?.split(', ') || [];
+        const hasGistScope = scopes.includes('gist');
+
+        return {
+          isValid: true,
+          scopes,
+          hasGistScope,
+          user: response.data,
+        };
+      } catch (error: any) {
+        return {
+          isValid: false,
+          scopes: [],
+          hasGistScope: false,
+          error: error.message,
+        };
+      }
+    }
+
+    /**
+     * Handles the submission of a token and verifies
+     * that it has the correct scopes.
      */
     public async onSubmitToken(): Promise<void> {
       if (!this.state.tokenInput) return;
-      this.setState({ verifying: true });
-      this.props.appState.gitHubToken = this.state.tokenInput;
+      this.setState({ verifying: true, error: false, errorMessage: undefined });
 
-      const octo = await getOctokit(this.props.appState);
+      const validation = await this.validateGitHubToken(this.state.tokenInput);
 
-      try {
-        const { data } = await octo.users.getAuthenticated();
-        this.props.appState.gitHubAvatarUrl = data.avatar_url;
-        this.props.appState.gitHubLogin = data.login;
-        this.props.appState.gitHubName = data.name;
-        this.setState({ verifying: false, error: false });
-      } catch (error) {
-        console.warn(`Authenticating against GitHub failed`, error);
-        this.setState({ verifying: false, error: true });
+      if (!validation.isValid) {
+        console.warn(`Authenticating against GitHub failed`, validation.error);
+        this.setState({
+          verifying: false,
+          error: true,
+          errorMessage:
+            'Invalid GitHub token. Please check your token and try again.',
+        });
         this.props.appState.gitHubToken = null;
         return;
       }
 
+      if (!validation.hasGistScope) {
+        console.warn(`Token missing required gist scope`);
+        this.setState({
+          verifying: false,
+          error: true,
+          errorMessage:
+            'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
+        });
+        this.props.appState.gitHubToken = null;
+        return;
+      }
+
+      // Token is valid and has required scopes.
+      this.props.appState.gitHubToken = this.state.tokenInput;
+      this.props.appState.gitHubAvatarUrl = validation.user.avatar_url;
+      this.props.appState.gitHubLogin = validation.user.login;
+      this.props.appState.gitHubName = validation.user.name;
+
+      this.setState({ verifying: false, error: false });
       this.props.appState.isTokenDialogShowing = false;
     }
 
@@ -96,14 +142,13 @@ export const TokenDialog = observer(
       this.setState({
         verifying: false,
         error: false,
+        errorMessage: undefined,
         tokenInput: '',
       });
     }
 
     /**
      * Opens GitHub's page for token generation
-     *
-     * @memberof TokenDialog
      */
     public openGenerateTokenExternal() {
       window.open(GENERATE_TOKEN_URL);
@@ -112,9 +157,6 @@ export const TokenDialog = observer(
     /**
      * When the input field receives focus, we check the clipboard.
      * Maybe there's already something token-like there!
-     *
-     * @returns
-     * @memberof TokenDialog
      */
     public async onTokenInputFocused() {
       const text = ((await navigator.clipboard.readText()) || '').trim();
@@ -126,9 +168,6 @@ export const TokenDialog = observer(
 
     /**
      * Handle the change event, which usually just updates the address bar's value
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @memberof AddressBar
      */
     public handleChange(event: React.ChangeEvent<HTMLInputElement>) {
       this.setState({ tokenInput: event.target.value });
@@ -156,11 +195,12 @@ export const TokenDialog = observer(
     }
 
     get invalidWarning() {
+      const message =
+        this.state.errorMessage ||
+        'Please provide a valid GitHub Personal Access Token';
       return (
         <>
-          <Callout intent={Intent.DANGER}>
-            Please provide a valid GitHub Personal Access Token
-          </Callout>
+          <Callout intent={Intent.DANGER}>{message}</Callout>
           <br />
         </>
       );

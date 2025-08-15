@@ -1,19 +1,18 @@
-import { ChildProcess } from 'child_process';
-import * as path from 'path';
+import parseEnvString from 'parse-env-string';
+import semver from 'semver';
 
-import { Installer } from '@electron/fiddle-core';
-
+import { Bisector } from './bisect';
+import { AppState } from './state';
+import { maybePlural } from './utils/plural-maybe';
 import {
-  FileTransform,
+  FileTransformOperation,
   InstallState,
+  MAIN_MJS,
   PMOperationOptions,
+  PackageJsonOptions,
   RunResult,
   RunnableVersion,
 } from '../interfaces';
-import { Bisector } from './bisect';
-import { AppState } from './state';
-import { PackageJsonOptions } from './utils/get-package';
-import { maybePlural } from './utils/plural-maybe';
 
 export enum ForgeCommands {
   PACKAGE = 'package',
@@ -34,8 +33,6 @@ const resultString: Record<RunResult, string> = Object.freeze({
 });
 
 export class Runner {
-  public child: ChildProcess | null = null;
-
   constructor(private readonly appState: AppState) {
     this.run = this.run.bind(this);
     this.stop = this.stop.bind(this);
@@ -56,9 +53,7 @@ export class Runner {
   /**
    * Bisect the current fiddle across the specified versions.
    *
-   * @param {Array<RunnableVersion>} versions - versions to bisect
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
+   * @param versions - versions to bisect
    */
   public autobisect(versions: Array<RunnableVersion>): Promise<RunResult> {
     const { appState } = this;
@@ -70,9 +65,7 @@ export class Runner {
   /**
    * Bisect the current fiddle across the specified versions.
    *
-   * @param {Array<RunnableVersion>} versions - versions to bisect
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
+   * @param versions - versions to bisect
    */
   public async autobisectImpl(
     versions: Array<RunnableVersion>,
@@ -144,19 +137,16 @@ export class Runner {
 
   /**
    * Actually run the fiddle.
-   *
-   * @returns {Promise<RunResult>}
-   * @memberof Runner
    */
   public async run(): Promise<RunResult> {
-    const { fileManager } = window.ElectronFiddle.app;
     const options = { includeDependencies: false, includeElectron: false };
 
     const { appState } = this;
     const currentRunnable = appState.currentElectronVersion;
     const { version, state, localPath } = currentRunnable;
     const isValidBuild =
-      window.ElectronFiddle.getLocalVersionState(currentRunnable) ===
+      // Destructure currentRunnable so it's not a Proxy object, which can't be used
+      window.ElectronFiddle.getLocalVersionState({ ...currentRunnable }) ===
       InstallState.installed;
 
     // If the current active version is unavailable when we try to run
@@ -168,6 +158,20 @@ export class Runner {
       const fallback = appState.findUsableVersion();
       if (fallback) await appState.setVersion(fallback.version);
       return RunResult.INVALID;
+    }
+
+    if (
+      semver.lt(ver.version, '28.0.0') &&
+      !ver.version.startsWith('28.0.0-nightly')
+    ) {
+      const entryPoint = appState.editorMosaic.mainEntryPointFile();
+
+      if (entryPoint === MAIN_MJS) {
+        appState.showErrorDialog(
+          'ESM main entry points are only supported starting in Electron 28',
+        );
+        return RunResult.INVALID;
+      }
     }
 
     if (appState.isClearingConsoleOnRun) {
@@ -182,13 +186,13 @@ export class Runner {
 
     try {
       await this.installModules({ dir, packageManager });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Runner: Could not install modules', error);
 
       appState.pushError('Could not install modules', error.message);
       appState.isInstallingModules = false;
 
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -206,7 +210,7 @@ export class Runner {
       message += `before running the fiddle.`;
 
       appState.pushOutput(message, { isNotPre: true });
-      fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       return RunResult.INVALID;
     }
 
@@ -220,37 +224,18 @@ export class Runner {
 
   /**
    * Stop a currently running Electron fiddle.
-   *
-   * @memberof Runner
    */
   public stop(): void {
-    const child = this.child;
-    this.appState.isRunning = !!child && !child.kill();
-
-    if (child) {
-      // If the child process is still alive 1 second after we've
-      // attempted to kill it by normal means, kill it forcefully.
-      setTimeout(() => {
-        if (child.exitCode === null) {
-          child.kill('SIGKILL');
-        }
-      }, 1000);
-    }
+    window.ElectronFiddle.stopFiddle();
   }
 
   /**
    * Uses electron-forge to either package or make the current fiddle
-   *
-   * @param {ForgeCommands} operation
-   * @returns {Promise<boolean>}
-   * @memberof Runner
    */
   public async performForgeOperation(
     operation: ForgeCommands,
   ): Promise<boolean> {
     const options = { includeDependencies: true, includeElectron: true };
-    const { dotfilesTransform } = await import('./transforms/dotfiles');
-    const { forgeTransform } = await import('./transforms/forge');
     const { pushError, pushOutput } = this.appState;
 
     const strings =
@@ -262,9 +247,8 @@ export class Runner {
     pushOutput(`📦 ${strings[0]} current Fiddle...`);
 
     const packageManager = this.appState.packageManager;
-    const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
-      packageManager,
-    );
+    const pmInstalled =
+      await window.ElectronFiddle.getIsPackageManagerInstalled(packageManager);
     if (!pmInstalled) {
       let message = `Error: Could not find ${packageManager}. Fiddle requires Node.js and npm or yarn `;
       message += `to compile packages. Please visit https://nodejs.org to install `;
@@ -276,11 +260,7 @@ export class Runner {
     }
 
     // Save files to temp
-    const dir = await this.saveToTemp(
-      options,
-      dotfilesTransform,
-      forgeTransform,
-    );
+    const dir = await this.saveToTemp(options, ['dotfiles', 'forge']);
     if (!dir) return false;
 
     // Files are now saved to temp, let's install Forge and dependencies
@@ -296,22 +276,16 @@ export class Runner {
         ),
       );
       pushOutput(`✅ ${strings[1]} successfully created.`, { isNotPre: true });
-    } catch (error) {
+    } catch (error: any) {
       pushError(`Creating ${strings[1].toLowerCase()} failed.`, error);
       return false;
     }
 
-    const { shell } = await import('electron');
-    shell.showItemInFolder(path.join(dir, 'out'));
     return true;
   }
 
   /**
    * Installs the specified modules
-   *
-   * @param {PMOperationOptions} pmOptions
-   * @returns {Promise<void>}
-   * @memberof Runner
    */
   public async installModules(pmOptions: PMOperationOptions): Promise<void> {
     const modules = Array.from(this.appState.modules.entries()).map(
@@ -322,9 +296,10 @@ export class Runner {
     if (modules && modules.length > 0) {
       this.appState.isInstallingModules = true;
       const packageManager = pmOptions.packageManager;
-      const pmInstalled = await window.ElectronFiddle.getIsPackageManagerInstalled(
-        packageManager,
-      );
+      const pmInstalled =
+        await window.ElectronFiddle.getIsPackageManagerInstalled(
+          packageManager,
+        );
       if (!pmInstalled) {
         let message = `The ${maybePlural(`module`, modules)} ${modules.join(
           ', ',
@@ -356,24 +331,26 @@ export class Runner {
     }
   }
 
-  private buildChildEnvVars(): { [x: string]: string | undefined } {
-    const { isEnablingElectronLogging, environmentVariables } = this.appState;
+  public buildChildEnvVars(): { [x: string]: string | undefined } {
+    const { environmentVariables } = this.appState;
 
-    const env = { ...process.env };
+    const env: Record<string, string> = {};
 
-    if (isEnablingElectronLogging) {
-      env.ELECTRON_ENABLE_LOGGING = 'true';
-      env.ELECTRON_DEBUG_NOTIFICATIONS = 'true';
-      env.ELECTRON_ENABLE_STACK_DUMPING = 'true';
-    } else {
-      delete env.ELECTRON_ENABLE_LOGGING;
-      delete env.ELECTRON_DEBUG_NOTIFICATIONS;
-      delete env.ELECTRON_ENABLE_STACK_DUMPING;
-    }
+    for (const envVar of environmentVariables) {
+      const errMsg = `Could not parse environment variable: ${envVar}`;
 
-    for (const v of environmentVariables) {
-      const [key, value] = v.split('=');
-      env[key] = value;
+      try {
+        const parsed: Record<string, string> | null = parseEnvString(envVar);
+        if (!parsed || !Object.keys(parsed).length) {
+          this.appState.showErrorDialog(errMsg);
+          continue;
+        }
+
+        const [key, value] = Object.entries(parsed)[0];
+        env[key] = value;
+      } catch (e) {
+        this.appState.showErrorDialog(errMsg);
+      }
     }
 
     return env;
@@ -384,14 +361,8 @@ export class Runner {
    * or the user selected electron version
    */
   private async runFiddle(params: RunFiddleParams): Promise<RunResult> {
-    const { localPath, isValidBuild, version, dir } = params;
-    const {
-      versionRunner,
-      pushOutput,
-      flushOutput,
-      executionFlags,
-    } = this.appState;
-    const fiddleRunner = await versionRunner;
+    const { version, dir } = params;
+    const { pushOutput, flushOutput, executionFlags } = this.appState;
     const env = this.buildChildEnvVars();
 
     // Add user-specified cli flags if any have been set.
@@ -401,23 +372,21 @@ export class Runner {
       flushOutput();
 
       this.appState.isRunning = false;
-      this.child = null;
 
       // Clean older folders
-      await window.ElectronFiddle.app.fileManager.cleanup(dir);
+      await window.ElectronFiddle.cleanupDirectory(dir);
       await this.deleteUserData();
     };
 
     return new Promise(async (resolve, _reject) => {
       try {
-        this.child = await fiddleRunner.spawn(
-          isValidBuild && localPath
-            ? Installer.getExecPath(localPath)
-            : version,
-          dir,
-          { args: options, cwd: dir, env },
-        );
-      } catch (e) {
+        await window.ElectronFiddle.startFiddle({
+          ...params,
+          enableElectronLogging: this.appState.isEnablingElectronLogging,
+          options,
+          env,
+        });
+      } catch (e: any) {
         pushOutput(`Failed to spawn Fiddle: ${e.message}`);
         await cleanup();
         return resolve(RunResult.FAILURE);
@@ -427,47 +396,49 @@ export class Runner {
 
       pushOutput(`Electron v${version} started.`);
 
-      this.child?.stdout?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.stderr?.on('data', (data) =>
-        pushOutput(data, { bypassBuffer: false }),
-      );
-      this.child?.on('close', async (code, signal) => {
-        await cleanup();
+      window.ElectronFiddle.removeAllListeners('fiddle-runner-output');
+      window.ElectronFiddle.removeAllListeners('fiddle-stopped');
 
-        if (typeof code !== 'number') {
-          pushOutput(`Electron exited with signal ${signal}.`);
-          resolve(RunResult.FAILURE);
-        } else {
-          pushOutput(`Electron exited with code ${code}.`);
-          resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
-        }
-      });
+      window.ElectronFiddle.addEventListener(
+        'fiddle-runner-output',
+        (output: string) => {
+          pushOutput(output, { bypassBuffer: false });
+        },
+      );
+
+      window.ElectronFiddle.addEventListener(
+        'fiddle-stopped',
+        async (code, signal) => {
+          await cleanup();
+
+          if (typeof code !== 'number') {
+            pushOutput(`Electron exited with signal ${signal}.`);
+            resolve(RunResult.FAILURE);
+          } else {
+            pushOutput(`Electron exited with code ${code}.`);
+            resolve(code === 0 ? RunResult.SUCCESS : RunResult.FAILURE);
+          }
+        },
+      );
     });
   }
 
   /**
    * Save files to temp, logging to the Fiddle terminal while doing so
-   *
-   * @param {PackageJsonOptions} options
-   * @param {...Array<FileTransform>} transforms
-   * @returns {(Promise<string | null>)}
-   * @memberof Runner
    */
   public async saveToTemp(
     options: PackageJsonOptions,
-    ...transforms: Array<FileTransform>
+    transforms?: Array<FileTransformOperation>,
   ): Promise<string | null> {
-    const { fileManager } = window.ElectronFiddle.app;
+    const { fileManager } = window.app;
     const { pushOutput, pushError } = this.appState;
 
     try {
       pushOutput(`Saving files to temp directory...`);
-      const dir = await fileManager.saveToTemp(options, ...transforms);
+      const dir = await fileManager.saveToTemp(options, transforms);
       pushOutput(`Saved files to ${dir}`);
       return dir;
-    } catch (error) {
+    } catch (error: any) {
       pushError('Failed to save files.', error.message);
     }
 
@@ -476,11 +447,7 @@ export class Runner {
 
   /**
    * Installs modules in a given directory (we're basically
-   * just running "{packageManager} install")
-   *
-   * @param {PMOperationOptions} options
-   * @returns {Promise<boolean>}
-   * @memberof Runner
+   * just running "\{packageManager\} install")
    */
   public async packageInstall(options: PMOperationOptions): Promise<boolean> {
     const pm = options.packageManager;
@@ -488,7 +455,7 @@ export class Runner {
       this.appState.pushOutput(`Now running "${pm} install..."`);
       this.appState.pushOutput(await window.ElectronFiddle.addModules(options));
       return true;
-    } catch (error) {
+    } catch (error: any) {
       this.appState.pushError(`Failed to run "${pm} install".`, error);
     }
 
@@ -507,9 +474,8 @@ export class Runner {
     }
 
     const name = await this.appState.getName();
-    const appData = path.join(window.ElectronFiddle.appPaths.appData, name);
 
-    console.log(`Cleanup: Deleting data dir ${appData}`);
-    await window.ElectronFiddle.app.fileManager.cleanup(appData);
+    console.log(`Cleanup: Deleting data dir for ${name}`);
+    await window.ElectronFiddle.deleteUserData(name);
   }
 }

@@ -1,25 +1,37 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
-import * as path from 'path';
+import * as path from 'node:path';
 
 import * as electron from 'electron';
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
-import { IpcEvents } from '../../src/ipc-events';
 import { createContextMenu } from '../../src/main/context-menu';
 import {
   browserWindows,
   getMainWindowOptions,
   getOrCreateMainWindow,
+  mainIsReady,
+  safelyOpenWebURL,
 } from '../../src/main/windows';
 import { overridePlatform, resetPlatform } from '../utils';
 
-jest.mock('../../src/main/context-menu');
-jest.mock('path');
+vi.mock('../../src/main/context-menu');
+vi.mock('node:path');
 
 describe('windows', () => {
   beforeAll(() => {
+    mainIsReady();
     overridePlatform('win32');
   });
 
@@ -43,16 +55,12 @@ describe('windows', () => {
         y: 17,
       },
       webPreferences: {
-        webviewTag: false,
-        nodeIntegration: true,
-        nodeIntegrationInWorker: true,
-        contextIsolation: false,
         preload: '/fake/path',
       },
     };
 
     beforeEach(() => {
-      (path.join as jest.Mock).mockReturnValue('/fake/path');
+      vi.mocked(path.join).mockReturnValue('/fake/path');
     });
 
     afterEach(() => {
@@ -80,69 +88,60 @@ describe('windows', () => {
   });
 
   describe('getOrCreateMainWindow()', () => {
-    it('creates a window on first call', () => {
+    it('creates a window on first call', async () => {
       expect(browserWindows.length).toBe(0);
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
     });
 
-    it('updates "browserWindows" on "close"', () => {
-      getOrCreateMainWindow();
+    it('updates "browserWindows" on "close"', async () => {
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      (getOrCreateMainWindow() as any).emit('closed');
+      (await getOrCreateMainWindow()).emit('closed');
       expect(browserWindows.length).toBe(0);
     });
 
-    it('creates the context menu on "dom-ready"', () => {
-      getOrCreateMainWindow();
+    it('creates the context menu on "dom-ready"', async () => {
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      (getOrCreateMainWindow().webContents as any).emit('dom-ready');
+      (await getOrCreateMainWindow()).webContents.emit('dom-ready');
       expect(createContextMenu).toHaveBeenCalled();
     });
 
     // FIXME: new test for setWindowOpenHandler
-    it.skip('prevents new-window"', () => {
+    it.skip('prevents new-window"', async () => {
       const e = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       };
 
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      (getOrCreateMainWindow().webContents as any).emit('new-window', e);
+      (await getOrCreateMainWindow()).webContents.emit('new-window', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
 
-    it('prevents will-navigate"', () => {
+    it('prevents will-navigate"', async () => {
       const e = {
-        preventDefault: jest.fn(),
+        preventDefault: vi.fn(),
       };
 
-      getOrCreateMainWindow();
+      await getOrCreateMainWindow();
       expect(browserWindows[0]).toBeTruthy();
-      (getOrCreateMainWindow().webContents as any).emit('will-navigate', e);
+      (await getOrCreateMainWindow()).webContents.emit('will-navigate', e);
       expect(e.preventDefault).toHaveBeenCalled();
     });
+  });
 
-    it('returns app.getPath() values on IPC event', () => {
-      // we want to remove the effects of previous calls
-      browserWindows.length = 0;
+  describe('safelyOpenWebURL()', () => {
+    it('opens web URLs', () => {
+      const url = 'https://github.com/electron/fiddle';
+      safelyOpenWebURL(url);
+      expect(electron.shell.openExternal).toHaveBeenCalledWith(url);
+    });
 
-      // can't .emit() to trigger .handleOnce() so instead we mock
-      // to instantly call the listener.
-      let result: any;
-      (electron.app.getPath as jest.Mock).mockImplementation((name) => name);
-      (electron.ipcMain.handle as jest.Mock).mockImplementation(
-        (event, listener) => {
-          if (event === IpcEvents.GET_APP_PATHS) {
-            result = listener();
-          }
-        },
-      );
-      getOrCreateMainWindow();
-      expect(Object.values(result).length).toBeGreaterThan(0);
-      for (const prop in result) {
-        expect(prop).toBe(result[prop]);
-      }
+    it('does not open file URLs', () => {
+      safelyOpenWebURL('file:///fake/path');
+      expect(electron.shell.openExternal).not.toHaveBeenCalled();
     });
   });
 });

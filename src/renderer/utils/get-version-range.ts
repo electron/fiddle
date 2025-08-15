@@ -1,14 +1,12 @@
-import { RunnableVersion } from '../../interfaces';
 import { semverCompare } from './sort-versions';
+import { RunnableVersion } from '../../interfaces';
 
 /**
  * An subset of `versions` sorted from oldest to newest and bounded in the range of [oldVersion..newVersion]
  *
- * @export
- * @param {string} oldVersion - first version to keep
- * @param {string} newVersion - last version to keep
- * @param {RunnableVersion[]} versions - the versions to make a subset of
- * @returns {RunnableVersion[]}
+ * @param oldVersion - first version to keep
+ * @param newVersion - last version to keep
+ * @param versions - the versions to make a subset of
  */
 export function getVersionRange(
   oldVersion: string,

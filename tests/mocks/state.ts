@@ -1,5 +1,8 @@
 import { makeObservable, observable } from 'mobx';
+import { vi } from 'vitest';
 
+import { BisectorMock } from './bisector';
+import { VersionsMock } from './electron-versions';
 import {
   BlockableAccelerator,
   ElectronReleaseChannel,
@@ -10,9 +13,6 @@ import {
 import { EditorMosaic } from '../../src/renderer/editor-mosaic';
 import { ELECTRON_MIRROR } from '../../src/renderer/mirror-constants';
 import { objectDifference } from '../utils';
-import { BisectorMock } from './bisector';
-import { VersionsMock } from './electron-versions';
-import { FiddleRunnerMock, InstallerMock } from './fiddle-core';
 
 export class StateMock {
   public acceleratorsToBlock: BlockableAccelerator[] = [];
@@ -23,7 +23,7 @@ export class StateMock {
   public executionFlags: string[] = [];
   public genericDialogLastInput: string | null = null;
   public genericDialogLastResult: boolean | null = null;
-  public genericDialogOptions: GenericDialogOptions = {} as any;
+  public genericDialogOptions = {} as GenericDialogOptions;
   public gistId = '';
   public gitHubAvatarUrl: string | null = null;
   public gitHubLogin: string | null = null;
@@ -59,52 +59,60 @@ export class StateMock {
   public packageAuthor = 'electron<electron@electron.org>';
   public electronMirror = ELECTRON_MIRROR;
   public isBisectCommandShowing = false;
+  public isDownloadingAll = false;
+  public isDeletingAll = false;
 
   public Bisector: BisectorMock | undefined = new BisectorMock();
-  public addAcceleratorToBlock = jest.fn();
-  public addLocalVersion = jest.fn();
-  public addNewVersions = jest.fn();
-  public clearConsole = jest.fn();
+  public addAcceleratorToBlock = vi.fn();
+  public addLocalVersion = vi.fn();
+  public addNewVersions = vi.fn();
+  public clearConsole = vi.fn();
   public currentElectronVersion = new VersionsMock().mockVersionsArray.shift()!;
-  public disableTour = jest.fn();
-  public downloadVersion = jest.fn();
-  public getName = jest.fn();
-  public hasVersion = jest
+  public disableTour = vi.fn();
+  public downloadVersion = vi.fn();
+  public getName = vi.fn();
+  public hasVersion = vi
     .fn()
     .mockImplementation((version: string) => !!this.versions[version]);
-  public hideChannels = jest.fn();
-  public pushError = jest.fn();
-  public pushOutput = jest.fn();
-  public flushOutput = jest.fn();
-  public removeAcceleratorToBlock = jest.fn();
-  public removeVersion = jest.fn();
-  public resetView = jest.fn();
-  public setTheme = jest.fn();
-  public setVersion = jest.fn().mockImplementation((version: string) => {
+  public hideChannels = vi.fn();
+  public pushError = vi.fn();
+  public pushOutput = vi.fn();
+  public flushOutput = vi.fn();
+  public removeAcceleratorToBlock = vi.fn();
+  public removeVersion = vi.fn();
+  public resetView = vi.fn();
+  public setTheme = vi.fn();
+  public setVersion = vi.fn().mockImplementation((version: string) => {
     this.currentElectronVersion = this.versions[version];
     this.version = version;
   });
-  public isVersionUsable = jest.fn().mockImplementation(() => {
+  public isVersionUsable = vi.fn().mockImplementation(() => {
     return { ver: this.currentElectronVersion };
   });
-  public findUsableVersion = jest.fn().mockImplementation(() => {
+  public findUsableVersion = vi.fn().mockImplementation(() => {
     const { mockVersionsArray } = new VersionsMock();
     return { ver: this.versions[mockVersionsArray[0].version] };
   });
-  public showChannels = jest.fn();
-  public showConfirmDialog = jest.fn();
-  public showErrorDialog = jest.fn();
-  public showGenericDialog = jest.fn();
-  public showInfoDialog = jest.fn();
-  public showInputDialog = jest.fn();
-  public signOutGitHub = jest.fn();
-  public toggleAddMonacoThemeDialog = jest.fn();
-  public toggleAddVersionDialog = jest.fn();
-  public toggleAuthDialog = jest.fn();
-  public toggleSettings = jest.fn();
-  public updateElectronVersions = jest.fn();
-  public installer = new InstallerMock();
-  public versionRunner = new FiddleRunnerMock();
+  public startDownloadingAll = vi.fn().mockImplementation(() => {
+    this.isDownloadingAll = true;
+  });
+  public stopDownloadingAll = vi.fn().mockImplementation(() => {
+    this.isDownloadingAll = false;
+  });
+  public showChannels = vi.fn();
+  public showConfirmDialog = vi.fn();
+  public showErrorDialog = vi.fn();
+  public showGenericDialog = vi.fn();
+  public showInfoDialog = vi.fn();
+  public showInputDialog = vi.fn();
+  public signOutGitHub = vi.fn();
+  public toggleAddMonacoThemeDialog = vi.fn();
+  public toggleAddVersionDialog = vi.fn();
+  public toggleAuthDialog = vi.fn();
+  public toggleSettings = vi.fn();
+  public updateElectronVersions = vi.fn();
+  public startDeletingAll = vi.fn();
+  public stopDeletingAll = vi.fn();
 
   constructor() {
     makeObservable(this, {
@@ -152,6 +160,8 @@ export class StateMock {
       packageAuthor: observable,
       electronMirror: observable,
       isBisectCommandShowing: observable,
+      isDeletingAll: observable,
+      isDownloadingAll: observable,
     });
 
     const { mockVersions: obj, mockVersionsArray: arr } = new VersionsMock();
@@ -181,11 +191,13 @@ export class StateMock {
       [ver.version, ver.source, ver.state].join(' ');
     for (const [key, val] of Object.entries(o)) {
       if (key == 'currentElectronVersion') {
-        o[key] = terserRunnable(val) as any;
+        o[key] = terserRunnable(val as RunnableVersion);
       } else if (key === 'versions') {
-        o[key] = Object.values(val).map(terserRunnable) as any;
+        o[key] = Object.values(val as Record<string, RunnableVersion>).map(
+          terserRunnable,
+        );
       } else if (key === 'versionsToShow') {
-        o[key] = val.map(terserRunnable);
+        o[key] = (val as Array<RunnableVersion>).map(terserRunnable);
       }
     }
 

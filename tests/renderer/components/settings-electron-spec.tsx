@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { mount, shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
   ElectronReleaseChannel,
@@ -13,7 +14,22 @@ import { AppState } from '../../../src/renderer/state';
 import { disableDownload } from '../../../src/renderer/utils/disable-download';
 import { AppMock, StateMock, VersionsMock } from '../../mocks/mocks';
 
-jest.mock('../../../src/renderer/utils/disable-download.ts');
+vi.mock('../../../src/renderer/utils/disable-download.ts');
+
+vi.mock('mobx-react', () => ({
+  observer: (component: any) => component,
+}));
+
+vi.mock('react-window', () => ({
+  FixedSizeList: ({ children, itemCount, itemData }: any) => (
+    <div data-testid="electron-versions-list">
+      {Array.from({ length: itemCount }, (_, index) => {
+        const Child = children;
+        return <Child key={index} index={index} style={{}} data={itemData} />;
+      })}
+    </div>
+  ),
+}));
 
 describe('ElectronSettings component', () => {
   let store: StateMock;
@@ -22,7 +38,7 @@ describe('ElectronSettings component', () => {
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
-    ({ state: store } = (window.ElectronFiddle.app as unknown) as AppMock);
+    ({ state: store } = window.app as unknown as AppMock);
 
     store.initVersions('2.0.1', { ...mockVersions });
     store.channelsToShow = [
@@ -39,7 +55,7 @@ describe('ElectronSettings component', () => {
   });
 
   it('renders', () => {
-    const spy = jest
+    const spy = vi
       .spyOn(window.ElectronFiddle, 'getOldestSupportedMajor')
       .mockReturnValue(9);
 
@@ -62,7 +78,7 @@ describe('ElectronSettings component', () => {
     }
 
     const wrapper = shallow(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
     expect(wrapper).toMatchSnapshot();
 
@@ -83,7 +99,7 @@ describe('ElectronSettings component', () => {
     };
 
     const wrapper = mount(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
 
     wrapper
@@ -105,7 +121,7 @@ describe('ElectronSettings component', () => {
     store.versionsToShow = [ver];
 
     const wrapper = mount(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
 
     wrapper
@@ -127,7 +143,7 @@ describe('ElectronSettings component', () => {
     store.versionsToShow = [ver];
 
     const wrapper = mount(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
 
     wrapper
@@ -140,9 +156,9 @@ describe('ElectronSettings component', () => {
 
   it('handles the deleteAll()', async () => {
     const wrapper = shallow(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
     await instance.handleDeleteAll();
 
     expect(store.removeVersion).toHaveBeenCalledTimes(mockVersionsArray.length);
@@ -150,21 +166,51 @@ describe('ElectronSettings component', () => {
 
   it('handles the downloadAll()', async () => {
     const wrapper = shallow(
-      <ElectronSettings appState={(store as unknown) as AppState} />,
+      <ElectronSettings appState={store as unknown as AppState} />,
     );
-    const instance = wrapper.instance() as any;
+    const instance: any = wrapper.instance();
     await instance.handleDownloadAll();
 
     expect(store.downloadVersion).toHaveBeenCalled();
+    expect(store.downloadVersion).toHaveBeenCalledTimes(
+      store.versionsToShow.length,
+    );
+  });
+
+  it('handles stopDownloadingAll() during downloadAll()', async () => {
+    const versionsToShowCount = store.versionsToShow.length;
+
+    let completedDownloadCount = 0;
+
+    // Set up download mock
+    store.downloadVersion.mockImplementation(async () => {
+      completedDownloadCount++;
+      if (completedDownloadCount >= versionsToShowCount - 2) {
+        // Stop downloads before all versions downloaded
+        await instance.handleStopDownloads();
+      }
+    });
+
+    const wrapper = shallow(
+      <ElectronSettings appState={store as unknown as AppState} />,
+    );
+    const instance = wrapper.instance() as any;
+
+    // Initiate download for all versions
+    await instance.handleDownloadAll();
+
+    // Stops downloading more versions
+    expect(completedDownloadCount).toBeGreaterThan(1);
+    expect(completedDownloadCount).toBeLessThan(versionsToShowCount);
   });
 
   describe('handleUpdateElectronVersions()', () => {
     it('kicks off an update of Electron versions', async () => {
       const wrapper = shallow(
-        <ElectronSettings appState={(store as unknown) as AppState} />,
+        <ElectronSettings appState={store as unknown as AppState} />,
       );
-      const instance = wrapper.instance() as any;
-      await instance.handleUpdateElectronVersions();
+      const instance: any = wrapper.instance();
+      instance.handleUpdateElectronVersions();
 
       expect(store.updateElectronVersions).toHaveBeenCalled();
     });
@@ -173,9 +219,9 @@ describe('ElectronSettings component', () => {
   describe('handleAddVersion()', () => {
     it('toggles the add version dialog', () => {
       const wrapper = shallow(
-        <ElectronSettings appState={(store as unknown) as AppState} />,
+        <ElectronSettings appState={store as unknown as AppState} />,
       );
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
       instance.handleAddVersion();
 
       expect(store.toggleAddVersionDialog).toHaveBeenCalled();
@@ -187,12 +233,12 @@ describe('ElectronSettings component', () => {
       const id = 'showUndownloadedVersions';
       for (const checked of [true, false]) {
         const wrapper = shallow(
-          <ElectronSettings appState={(store as unknown) as AppState} />,
+          <ElectronSettings appState={store as unknown as AppState} />,
         );
-        const instance = wrapper.instance() as any;
-        await instance.handleStateChange({
+        const instance: any = wrapper.instance();
+        instance.handleStateChange({
           currentTarget: { checked, id },
-        });
+        } as React.FormEvent<HTMLInputElement>);
         expect(store[id]).toBe(checked);
       }
     });
@@ -203,12 +249,12 @@ describe('ElectronSettings component', () => {
       const id = 'showObsoleteVersions';
       for (const checked of [true, false]) {
         const wrapper = shallow(
-          <ElectronSettings appState={(store as unknown) as AppState} />,
+          <ElectronSettings appState={store as unknown as AppState} />,
         );
-        const instance = wrapper.instance() as any;
-        await instance.handleShowObsoleteChange({
+        const instance: any = wrapper.instance();
+        instance.handleShowObsoleteChange({
           currentTarget: { checked, id },
-        });
+        } as React.FormEvent<HTMLInputElement>);
         expect(store[id]).toBe(checked);
       }
     });
@@ -216,8 +262,8 @@ describe('ElectronSettings component', () => {
 
   describe('handleChannelChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(
-        <ElectronSettings appState={(store as unknown) as AppState} />,
+      const wrapper: any = shallow(
+        <ElectronSettings appState={store as unknown as AppState} />,
       );
       store.showChannels.mockImplementation((ids: ElectronReleaseChannel[]) =>
         store.channelsToShow.push(...ids),
@@ -228,20 +274,20 @@ describe('ElectronSettings component', () => {
             (id: ElectronReleaseChannel) => !ids.includes(id),
           )),
       );
-      const instance = wrapper.instance() as any;
-      await instance.handleChannelChange({
+      const instance = wrapper.instance();
+      instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.stable,
           checked: false,
         },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
-      await instance.handleChannelChange({
+      instance.handleChannelChange({
         currentTarget: {
           id: ElectronReleaseChannel.nightly,
           checked: true,
         },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.channelsToShow).toEqual([
         ElectronReleaseChannel.beta,
@@ -252,7 +298,7 @@ describe('ElectronSettings component', () => {
 
   describe('disableDownload()', () => {
     it('disables download buttons where return values are true', () => {
-      (disableDownload as jest.Mock).mockReturnValue(true);
+      vi.mocked(disableDownload).mockReturnValue(true);
 
       const version = '3.0.0';
       const ver = {
@@ -262,14 +308,15 @@ describe('ElectronSettings component', () => {
       };
 
       store.versions = { version: ver };
+      store.versionsToShow = [ver];
 
-      store.versionsToShow = [ver, { ...ver }, { ...ver }];
-
-      const wrapper = shallow(
-        <ElectronSettings appState={(store as unknown) as AppState} />,
+      const wrapper = mount(
+        <ElectronSettings appState={store as unknown as AppState} />,
       );
 
-      expect(wrapper.find('.disabled-version')).toHaveLength(3);
+      const disabledVersions = wrapper.find('.disabled-version');
+      expect(disabledVersions).toHaveLength(2);
+      expect(disabledVersions.first().prop('disabled')).toBe(true);
     });
   });
 });

@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { toggleMonaco } from '../../../src/renderer/utils/toggle-monaco';
 
 describe('toggleMonaco()', () => {

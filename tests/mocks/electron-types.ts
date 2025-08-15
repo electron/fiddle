@@ -1,9 +1,11 @@
+import { vi } from 'vitest';
+
 export class ElectronTypesMock {
-  public setVersion = jest.fn();
-  public uncache = jest.fn();
+  public setVersion = vi.fn();
+  public uncache = vi.fn();
 }
 
-export interface NodeTypesMock {
+export interface NodeTypesFile {
   path: string;
   type: string;
   contentType: string;
@@ -11,3 +13,11 @@ export interface NodeTypesMock {
   lastModified: string;
   size: number;
 }
+
+export interface NodeTypesDirectory {
+  path: string;
+  type: string;
+  files: NodeTypesMock[];
+}
+
+export type NodeTypesMock = NodeTypesFile | NodeTypesDirectory;

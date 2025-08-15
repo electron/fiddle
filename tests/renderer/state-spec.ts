@@ -1,6 +1,17 @@
-import { reaction } from 'mobx';
+import { IReactionDisposer, reaction } from 'mobx';
+import {
+  type MockInstance,
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest';
 
 import {
+  AppStateBroadcastMessageType,
   BlockableAccelerator,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -21,21 +32,21 @@ import {
 import { VersionsMock, createEditorValues } from '../mocks/mocks';
 import { overrideRendererPlatform, resetRendererPlatform } from '../utils';
 
-jest.mock('../../src/renderer/versions', () => {
-  const { getReleaseChannel } = jest.requireActual(
-    '../../src/renderer/versions',
-  );
-  const { VersionsMock } = require('../mocks/electron-versions');
+vi.mock('../../src/renderer/versions', async () => {
+  const { getReleaseChannel } = await vi.importActual<
+    typeof import('../../src/renderer/versions')
+  >('../../src/renderer/versions');
+  const { VersionsMock } = await import('../mocks/electron-versions.js');
   const { mockVersionsArray } = new VersionsMock();
 
   return {
-    addLocalVersion: jest.fn(),
-    fetchVersions: jest.fn(mockVersionsArray),
+    addLocalVersion: vi.fn(),
+    fetchVersions: vi.fn(() => mockVersionsArray),
     getDefaultVersion: () => '2.0.2',
-    getElectronVersions: jest.fn(),
+    getElectronVersions: vi.fn(),
     getReleaseChannel,
-    makeRunnable: jest.fn((v) => v),
-    saveLocalVersions: jest.fn(),
+    makeRunnable: vi.fn((v) => v),
+    saveLocalVersions: vi.fn(),
   };
 });
 
@@ -43,24 +54,29 @@ describe('AppState', () => {
   let appState: AppState;
   let mockVersions: Record<string, RunnableVersion>;
   let mockVersionsArray: RunnableVersion[];
-  let removeSpy: any;
-  let installSpy: any;
+  let removeSpy: MockInstance;
+  let ensureDownloadedSpy: MockInstance;
+  let broadcastMessageSpy: MockInstance;
 
   beforeEach(() => {
     ({ mockVersions, mockVersionsArray } = new VersionsMock());
 
-    (fetchVersions as jest.Mock).mockResolvedValue(mockVersionsArray);
-    jest
-      .spyOn(AppState.prototype, 'getVersionState')
-      .mockImplementation(() => InstallState.installed);
+    vi.mocked(fetchVersions).mockResolvedValue(mockVersionsArray);
+    vi.mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+      InstallState.installed,
+    );
 
     appState = new AppState(mockVersionsArray);
-    removeSpy = jest
-      .spyOn(appState.installer, 'remove')
+    removeSpy = vi
+      .spyOn(window.ElectronFiddle, 'removeVersion')
+      .mockResolvedValue(InstallState.missing);
+    ensureDownloadedSpy = vi
+      .spyOn(window.ElectronFiddle, 'downloadVersion')
       .mockResolvedValue(undefined);
-    installSpy = jest
-      .spyOn(appState.installer, 'install')
-      .mockResolvedValue('');
+    broadcastMessageSpy = vi.spyOn(
+      (appState as any).broadcastChannel,
+      'postMessage',
+    );
   });
 
   it('exists', () => {
@@ -68,14 +84,14 @@ describe('AppState', () => {
   });
 
   afterAll(async () => {
-    // Wait for all the async task to resolve before the jest
+    // Wait for all the async task to resolve before the vitest
     // environment tears down
     await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   describe('updateElectronVersions()', () => {
     it('handles errors gracefully', async () => {
-      (fetchVersions as jest.Mock).mockRejectedValue(new Error('Bwap-bwap'));
+      vi.mocked(fetchVersions).mockRejectedValue(new Error('Bwap-bwap'));
       await appState.updateElectronVersions();
     });
 
@@ -83,8 +99,10 @@ describe('AppState', () => {
       const version = '100.0.0';
       const ver: Version = { version };
 
-      (fetchVersions as jest.Mock).mockResolvedValue([ver]);
-      (makeRunnable as jest.Mock).mockImplementation((v: unknown) => v);
+      vi.mocked(fetchVersions).mockResolvedValue([ver]);
+      vi.mocked(makeRunnable).mockImplementation(
+        (v: Version): RunnableVersion => v as RunnableVersion,
+      );
 
       const oldCount = Object.keys(appState.versions).length;
 
@@ -92,6 +110,10 @@ describe('AppState', () => {
       const newCount = Object.keys(appState.versions).length;
       expect(newCount).toBe(oldCount + 1);
       expect(appState.versions[version]).toStrictEqual(ver);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
   });
 
@@ -102,9 +124,7 @@ describe('AppState', () => {
     });
 
     it('returns the name, even if none exists', async () => {
-      (window.ElectronFiddle.getProjectName as jest.Mock).mockReturnValue(
-        'test',
-      );
+      vi.mocked(window.ElectronFiddle.getProjectName).mockResolvedValue('test');
       (appState as any).name = undefined;
       expect(await appState.getName()).toBe('test');
     });
@@ -235,7 +255,7 @@ describe('AppState', () => {
     it('excludes channels', () => {
       appState.channelsToShow = ['Unsupported' as any];
       expect(appState.versionsToShow.length).toEqual(0);
-      appState.channelsToShow = ['Stable' as any];
+      appState.channelsToShow = [ElectronReleaseChannel.stable];
       expect(appState.versionsToShow.length).toEqual(mockVersionsArray.length);
     });
 
@@ -296,22 +316,33 @@ describe('AppState', () => {
 
     it('does not remove the active version', async () => {
       const ver = appState.versions[active];
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
       expect(removeSpy).not.toHaveBeenCalled();
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
 
     it('removes a version', async () => {
       const ver = appState.versions[version];
       ver.state = InstallState.installed;
+      vi.mocked(window.ElectronFiddle.getVersionState).mockReturnValue(
+        InstallState.missing,
+      );
       await appState.removeVersion(ver);
-      expect(removeSpy).toHaveBeenCalledWith<any>(ver.version);
+      expect(removeSpy).toHaveBeenCalledWith(ver.version);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
 
     it('does not remove it if not necessary', async () => {
       const ver = appState.versions[version];
       ver.state = InstallState.missing;
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
       expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
 
     it('removes (but does not delete) a local version', async () => {
@@ -322,11 +353,13 @@ describe('AppState', () => {
       ver.source = VersionSource.local;
       ver.state = InstallState.installed;
 
+      broadcastMessageSpy.mockClear();
       await appState.removeVersion(ver);
 
       expect(saveLocalVersions).toHaveBeenCalledTimes(1);
       expect(appState.versions[version]).toBeUndefined();
       expect(removeSpy).toHaveBeenCalledTimes(0);
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -337,16 +370,22 @@ describe('AppState', () => {
 
       await appState.downloadVersion(ver);
 
-      expect(installSpy).toHaveBeenCalled();
+      expect(ensureDownloadedSpy).toHaveBeenCalled();
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [ver],
+      });
     });
 
     it('does not download a version if already ready', async () => {
       const ver = appState.versions['2.0.2'];
       ver.state = InstallState.installed;
 
+      broadcastMessageSpy.mockClear();
       await appState.downloadVersion(ver);
 
-      expect(installSpy).not.toHaveBeenCalled();
+      expect(ensureDownloadedSpy).not.toHaveBeenCalled();
+      expect(broadcastMessageSpy).not.toHaveBeenCalled();
     });
   });
 
@@ -370,16 +409,34 @@ describe('AppState', () => {
     });
 
     it('downloads a version if necessary', async () => {
-      appState.downloadVersion = jest.fn();
+      appState.downloadVersion = vi.fn();
       await appState.setVersion('v2.0.2');
 
       expect(appState.downloadVersion).toHaveBeenCalled();
     });
 
+    it('falls back if downloading the new version fails', async () => {
+      appState.downloadVersion = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('FAILURE'));
+      appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
+        confirm: true,
+      });
+
+      await appState.setVersion('v2.0.2');
+      expect(appState.showGenericDialog).toHaveBeenCalledWith({
+        label: 'Failed to download Electron version 2.0.2',
+        ok: 'Close',
+        type: GenericDialogType.warning,
+        wantsInput: false,
+      });
+    });
+
     describe('loads the template for the new version', () => {
       let newVersion: string;
       let oldVersion: string;
-      let replaceSpy: ReturnType<typeof jest.spyOn>;
+      // TODO(dsanders11): improve this type
+      let replaceSpy: any;
       const nextValues = createEditorValues();
 
       beforeEach(() => {
@@ -392,10 +449,10 @@ describe('AppState', () => {
         expect(newVersion).toBeTruthy();
 
         // spy on app.replaceFiddle
-        replaceSpy = jest.spyOn(window.ElectronFiddle.app, 'replaceFiddle');
+        replaceSpy = vi.spyOn(window.app, 'replaceFiddle');
         replaceSpy.mockReset();
 
-        (window.ElectronFiddle.getTemplate as jest.Mock).mockResolvedValue(
+        vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue(
           nextValues,
         );
       });
@@ -451,19 +508,19 @@ describe('AppState', () => {
       appState.setTheme('custom');
 
       expect(appState.theme).toBe('custom');
-      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
+      expect(window.app.loadTheme).toHaveBeenCalledTimes(1);
     });
 
     it('handles a missing theme name', () => {
-      appState.setTheme();
+      appState.setTheme(null);
 
-      expect(appState.theme).toBe('');
-      expect(window.ElectronFiddle.app.loadTheme).toHaveBeenCalledTimes(1);
+      expect(appState.theme).toBe(null);
+      expect(window.app.loadTheme).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('dialog helpers', () => {
-    let dispose: any;
+    let dispose: IReactionDisposer;
 
     afterEach(() => {
       if (dispose) dispose();
@@ -551,7 +608,7 @@ describe('AppState', () => {
       } as const;
 
       it('returns text when confirmed', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
           input,
         });
@@ -560,7 +617,7 @@ describe('AppState', () => {
       });
 
       it('returns undefined when canceled', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: false,
           input,
         });
@@ -572,7 +629,7 @@ describe('AppState', () => {
     describe('showConfirmDialog', () => {
       const label = 'Do you want to confirm this dialog?';
       async function testConfirmDialog(confirm: boolean) {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm,
           input: undefined,
         });
@@ -591,7 +648,7 @@ describe('AppState', () => {
       const label = 'This is an error message.';
 
       it('shows an error dialog', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
         });
         await appState.showErrorDialog(label);
@@ -608,7 +665,7 @@ describe('AppState', () => {
       const label = 'This is an informational message.';
 
       it('shows an error dialog', async () => {
-        appState.showGenericDialog = jest.fn().mockResolvedValueOnce({
+        appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
           confirm: true,
         });
         await appState.showInfoDialog(label);
@@ -625,19 +682,19 @@ describe('AppState', () => {
   describe('addLocalVersion()', () => {
     it('refreshes version state', async () => {
       const version = '4.0.0';
-      const ver: Version = {
+      const ver: RunnableVersion = {
         localPath: '/fake/path',
         name: 'local-foo',
         version,
+        source: VersionSource.local,
+        state: InstallState.installed,
       };
 
-      (getElectronVersions as jest.Mock).mockReturnValue([ver]);
+      vi.mocked(getElectronVersions).mockReturnValue([ver]);
 
-      await appState.addLocalVersion(ver);
+      appState.addLocalVersion(ver);
 
-      // `getElectronVersions` is called when the AppState is initialized
-      // as well
-      expect(getElectronVersions).toHaveBeenCalledTimes(2);
+      expect(getElectronVersions).toHaveBeenCalledTimes(1);
       expect(appState.getVersion(version)).toStrictEqual(ver);
     });
   });
@@ -735,6 +792,90 @@ describe('AppState', () => {
       appState.editorMosaic.isEdited = true;
       const actual = appState.title;
       expect(actual).toBe(expected);
+    });
+  });
+
+  describe('startDownloadingAll()', () => {
+    it('change isDownloadingAll to true when false', () => {
+      appState.isDownloadingAll = false;
+      appState.startDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(true);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.isDownloadingAll,
+        payload: true,
+      });
+    });
+
+    it('takes no action when isDownloadingAll is true', () => {
+      appState.isDownloadingAll = true;
+      appState.startDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(true);
+    });
+  });
+
+  describe('stopDownloadingAll()', () => {
+    it('change isDownloadingAll to false when true', () => {
+      appState.isDownloadingAll = true;
+      appState.stopDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(false);
+      expect(broadcastMessageSpy).toHaveBeenCalledWith({
+        type: AppStateBroadcastMessageType.isDownloadingAll,
+        payload: false,
+      });
+    });
+
+    it('takes no action when isDownloadingAll is false', () => {
+      appState.isDownloadingAll = false;
+      appState.stopDownloadingAll();
+      expect(appState.isDownloadingAll).toBe(false);
+    });
+  });
+
+  describe('startDeletingAll()', () => {
+    it('change isDeletingAll to true when false', () => {
+      appState.isDeletingAll = false;
+      appState.startDeletingAll();
+      expect(appState.isDeletingAll).toBe(true);
+    });
+
+    it('takes no action when isDeletingAll is true', () => {
+      appState.isDeletingAll = true;
+      appState.startDeletingAll();
+      expect(appState.isDeletingAll).toBe(true);
+    });
+  });
+
+  describe('stopDeletingAll()', () => {
+    it('change isDeletingAll to false when true', () => {
+      appState.isDeletingAll = true;
+      appState.stopDeletingAll();
+      expect(appState.isDeletingAll).toBe(false);
+    });
+
+    it('takes no action when isDeletingAll is false', () => {
+      appState.isDeletingAll = false;
+      appState.stopDeletingAll();
+      expect(appState.isDeletingAll).toBe(false);
+    });
+  });
+
+  describe('broadcastChannel', () => {
+    it('updates the version state in response to changes in other windows', async () => {
+      const fakeVersion = {
+        version: '13.9.9',
+        state: InstallState.downloading,
+      } as RunnableVersion;
+
+      expect(appState.versions[fakeVersion.version]).toBeFalsy();
+
+      (appState as any).broadcastChannel.postMessage({
+        type: AppStateBroadcastMessageType.syncVersions,
+        payload: [fakeVersion],
+      });
+
+      expect(appState.versions[fakeVersion.version].state).toEqual(
+        InstallState.downloading,
+      );
     });
   });
 });

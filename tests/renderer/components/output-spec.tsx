@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { shallow } from 'enzyme';
 import * as MonacoType from 'monaco-editor';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Output } from '../../../src/renderer/components/output';
 import { AppState } from '../../../src/renderer/state';
@@ -9,12 +10,12 @@ import { MonacoMock } from '../../mocks/mocks';
 
 const mockContext = {
   mosaicActions: {
-    expand: jest.fn(),
-    remove: jest.fn(),
-    hide: jest.fn(),
-    replaceWith: jest.fn(),
-    updateTree: jest.fn(),
-    getRoot: jest.fn(),
+    expand: vi.fn(),
+    remove: vi.fn(),
+    hide: vi.fn(),
+    replaceWith: vi.fn(),
+    updateTree: vi.fn(),
+    getRoot: vi.fn(),
   },
   mosaicId: 'output',
 };
@@ -24,8 +25,8 @@ describe('Output component', () => {
   let monaco: typeof MonacoType;
 
   beforeEach(() => {
-    monaco = window.ElectronFiddle.monaco;
-    ({ state: store } = window.ElectronFiddle.app);
+    monaco = window.monaco;
+    ({ state: store } = window.app);
   });
 
   it('renders the output container', () => {
@@ -71,7 +72,7 @@ describe('Output component', () => {
     instance.componentWillUnmount();
 
     expect(
-      ((monaco as unknown) as MonacoMock).latestEditor.dispose,
+      (monaco as unknown as MonacoMock).latestEditor.dispose,
     ).toHaveBeenCalled();
   });
 
@@ -132,7 +133,7 @@ describe('Output component', () => {
     instance.updateModel();
 
     expect(monaco.editor.createModel).toHaveBeenCalled();
-    expect(instance.editor.revealLine).toHaveBeenCalled();
+    expect(instance.editor?.revealLine).toHaveBeenCalled();
   });
 
   it('updateModel correctly observes and gets called when output is updated', async () => {
@@ -148,7 +149,7 @@ describe('Output component', () => {
     );
 
     const instance: any = wrapper.instance();
-    const spy = jest.spyOn(instance, 'updateModel');
+    const spy = vi.spyOn(instance, 'updateModel');
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
@@ -176,13 +177,12 @@ describe('Output component', () => {
       <Output appState={store} monaco={monaco} monacoOptions={{}} />,
     );
     const instance: any = wrapper.instance();
-    const spy = jest.spyOn(instance, 'toggleConsole');
+    const spy = vi.spyOn(instance, 'toggleConsole');
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
 
-    // setContent will trigger componentDidUpdate()
-    instance.editor.setContent(store.output);
+    await instance.updateModel();
     expect(spy).toHaveBeenCalled();
   });
 });

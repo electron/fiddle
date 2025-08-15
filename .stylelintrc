@@ -1,7 +1,12 @@
 {
   "extends": "stylelint-config-standard",
+  "customSyntax": "postcss-less",
   "ignoreFiles": [
     "./src/less/*-vendor.less"
   ],
-  "rules": { }
+  "rules": {
+    "alpha-value-notation": null,
+    "color-function-notation": null,
+    "import-notation": "string"
+  }
 }

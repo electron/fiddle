@@ -1,25 +1,42 @@
-import { EditorId, EditorValues, MAIN_JS } from '../interfaces';
+import {
+  EditorId,
+  EditorValues,
+  MAIN_CJS,
+  MAIN_JS,
+  MAIN_MJS,
+} from '../interfaces';
 
-const requiredFiles = new Set<EditorId>([MAIN_JS]);
+const mainEntryPointFiles = new Set<EditorId>([MAIN_CJS, MAIN_JS, MAIN_MJS]);
 
-const EMPTY_EDITOR_CONTENT = {
-  css: '/* Empty */',
-  html: '<!-- Empty -->',
-  js: '// Empty',
+const EMPTY_EDITOR_CONTENT: Record<EditorId, string> = {
+  '.css': '/* Empty */',
+  '.html': '<!-- Empty -->',
+  '.cjs': '// Empty',
+  '.js': '// Empty',
+  '.mjs': '// Empty',
+  '.json': '{}',
 } as const;
 
 export function getEmptyContent(filename: string): string {
-  return EMPTY_EDITOR_CONTENT[getSuffix(filename)] || '';
+  return EMPTY_EDITOR_CONTENT[`.${getSuffix(filename)}` as EditorId] || '';
 }
 
-export function isRequiredFile(id: EditorId) {
-  return requiredFiles.has(id);
+export function isMainEntryPoint(id: EditorId) {
+  return mainEntryPointFiles.has(id);
 }
 
 export function ensureRequiredFiles(values: EditorValues): EditorValues {
-  for (const file of requiredFiles) {
-    values[file] ||= getEmptyContent(file);
+  const mainEntryPoint = Object.keys(values).find((id: string) =>
+    mainEntryPointFiles.has(id as EditorId),
+  ) as EditorId | undefined;
+
+  // If no entry point is found, default to main.js
+  if (!mainEntryPoint) {
+    values[MAIN_JS] = getEmptyContent(MAIN_JS);
+  } else {
+    values[mainEntryPoint] ||= getEmptyContent(mainEntryPoint);
   }
+
   return values;
 }
 
@@ -27,6 +44,6 @@ export function getSuffix(filename: string) {
   return filename.slice(filename.lastIndexOf('.') + 1);
 }
 
-export function isSupportedFile(filename: string): boolean {
-  return /\.(css|html|js)$/i.test(filename);
+export function isSupportedFile(filename: string): filename is EditorId {
+  return /\.(css|html|cjs|js|mjs|json)$/i.test(filename);
 }

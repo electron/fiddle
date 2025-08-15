@@ -11,11 +11,6 @@ interface PositionResult {
  * position for, say, a dialog, tooltip, or popover.
  *
  * TODO: Make this a lot smarter!
- *
- * @param {ClientRect} target
- * @param {number} margin
- * @param {{ width: number, height: number }} size
- * @returns {PositionResult}
  */
 export function positionForRect(
   target: ClientRect,
@@ -52,6 +47,14 @@ export function positionForRect(
     return { ...result, type: 'bottom' };
   }
 
+  // Okay, let's try bottom left
+  result.left = target.left - margin - size.width;
+  result.top = target.top + target.height + margin;
+
+  if (isResultOkay(result, size)) {
+    return { ...result, type: 'left' };
+  }
+
   // Top middle would require us to measure the
   // text height, which is a bit gross. I'll leave
   // this commented out for now, but if you need it
@@ -86,9 +89,6 @@ function isResultOkay(
 
 /**
  * Is the position too far up?
- *
- * @param {PositionResult} input
- * @returns {boolean}
  */
 function isTooFarUp(input: PositionResult): boolean {
   return input.top < 0;
@@ -96,10 +96,6 @@ function isTooFarUp(input: PositionResult): boolean {
 
 /**
  * Is the position too far below?
- *
- * @param {PositionResult} input
- * @param {{ width: number, height: number }} size
- * @returns {boolean}
  */
 function isTooFarBelow(
   input: PositionResult,
@@ -113,10 +109,6 @@ function isTooFarBelow(
 
 /**
  * Is the position too far right?
- *
- * @param {PositionResult} input
- * @param {{ width: number, height: number }} size
- * @returns {boolean}
  */
 function isTooFarRight(
   input: PositionResult,
@@ -130,9 +122,6 @@ function isTooFarRight(
 
 /**
  * Is the position too far left?
- *
- * @param {PositionResult} input
- * @returns {boolean}
  */
 function isTooFarLeft(input: PositionResult): boolean {
   return input.left < 0;

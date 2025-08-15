@@ -10,14 +10,14 @@ import {
   MosaicWindowProps,
 } from 'react-mosaic-component';
 
+import { Editor } from './editor';
+import { RenderNonIdealState } from './editors-non-ideal-state';
+import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 import { EditorId, SetFiddleOptions } from '../../interfaces';
 import { AppState } from '../state';
 import { getEditorTitle } from '../utils/editor-utils';
 import { getAtPath, setAtPath } from '../utils/js-path';
 import { toggleMonaco } from '../utils/toggle-monaco';
-import { Editor } from './editor';
-import { renderNonIdealState } from './editors-non-ideal-state';
-import { MaximizeButton, RemoveButton } from './editors-toolbar-button';
 
 const defaultMonacoOptions: MonacoType.editor.IEditorOptions = {
   minimap: {
@@ -47,15 +47,13 @@ export const Editors = observer(
       this.setFocused = this.setFocused.bind(this);
 
       this.state = {
-        monaco: window.ElectronFiddle.monaco,
+        monaco: window.monaco,
         monacoOptions: defaultMonacoOptions,
       };
     }
 
     /**
      * Executed right after the component mounts. We'll setup the IPC listeners here.
-     *
-     * @memberof Editors
      */
     public async componentDidMount() {
       this.stopListening();
@@ -75,14 +73,14 @@ export const Editors = observer(
         // Clear previously installed modules.
         modules.clear();
 
-        await window.ElectronFiddle.app.replaceFiddle(values, options);
+        await window.app.replaceFiddle(values, options);
       });
 
       window.ElectronFiddle.addEventListener('new-test', async () => {
         const values = await window.ElectronFiddle.getTestTemplate();
         const options: SetFiddleOptions = { templateName: 'Test' };
 
-        await window.ElectronFiddle.app.replaceFiddle(values, options);
+        await window.app.replaceFiddle(values, options);
       });
 
       window.ElectronFiddle.addEventListener(
@@ -135,9 +133,6 @@ export const Editors = observer(
 
     /**
      * Attempt to execute a given commandId on the currently focused editor
-     *
-     * @param {string} commandId
-     * @memberof Editors
      */
     public executeCommand(commandId: string) {
       const editor = this.props.appState.editorMosaic.focusedEditor();
@@ -179,10 +174,6 @@ export const Editors = observer(
 
     /**
      * Renders the little tool bar on top of each panel
-     *
-     * @param {MosaicWindowProps<EditorId>} { title }
-     * @param {EditorId} id
-     * @returns {JSX.Element}
      */
     public renderToolbar(
       { title }: MosaicWindowProps<EditorId>,
@@ -191,7 +182,7 @@ export const Editors = observer(
       const { appState } = this.props;
 
       return (
-        <div>
+        <div role="toolbar">
           {/* Left */}
           <div>
             <h5>{title}</h5>
@@ -209,10 +200,6 @@ export const Editors = observer(
 
     /**
      * Renders a Mosaic tile
-     *
-     * @param {EditorId} id
-     * @param {Array<MosaicBranch>} path
-     * @returns {JSX.Element}
      */
     public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
       const content = this.renderEditor(id);
@@ -234,10 +221,6 @@ export const Editors = observer(
 
     /**
      * Render an editor
-     *
-     * @param {EditorId} id
-     * @returns {(JSX.Element | null)}
-     * @memberof Editors
      */
     public renderEditor(id: EditorId): JSX.Element | null {
       const { appState } = this.props;
@@ -262,7 +245,7 @@ export const Editors = observer(
           className={`focused__${this.state.focused}`}
           onChange={this.onChange}
           value={editorMosaic.mosaic}
-          zeroStateView={renderNonIdealState(editorMosaic)}
+          zeroStateView={<RenderNonIdealState editorMosaic={editorMosaic} />}
           renderTile={this.renderTile}
         />
       );
@@ -270,8 +253,6 @@ export const Editors = observer(
 
     /**
      * Handles a change in the visible nodes
-     *
-     * @param {(MosaicNode<EditorId> | null)} currentNode
      */
     public onChange(currentNode: MosaicNode<EditorId> | null) {
       this.props.appState.editorMosaic.mosaic = currentNode;
@@ -281,7 +262,6 @@ export const Editors = observer(
      * Sets the currently-focused editor. This will impact the editor's
      * z-index, ensuring that its intellisense menus don't get clipped
      * by the other editor windows.
-     * @param {EditorId} id
      */
     public setFocused(id: EditorId): void {
       this.props.appState.editorMosaic.setFocusedFile(id);

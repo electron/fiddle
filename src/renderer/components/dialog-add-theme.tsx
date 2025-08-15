@@ -4,7 +4,7 @@ import { Button, Dialog, FileInput } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 
-import { FiddleTheme, defaultDark } from '../../themes-defaults';
+import { FiddleTheme } from '../../themes-defaults';
 import { AppState } from '../state';
 import { getTheme } from '../themes';
 
@@ -18,9 +18,6 @@ interface AddThemeDialogState {
 
 /**
  * The "add monaco theme" dialog allows users to add custom editor themes.
- *
- * @class AddThemeDialog
- * @extends {React.Component<AddThemeDialogProps, AddThemeDialogState>}
  */
 export const AddThemeDialog = observer(
   class AddThemeDialog extends React.Component<
@@ -40,28 +37,23 @@ export const AddThemeDialog = observer(
 
     /**
      * Handles a change of the file input.
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     public async onChangeFile(event: React.FormEvent<HTMLInputElement>) {
-      const { files } = event.target as any;
-      const file = files?.[0];
+      const { files } = event.target as HTMLInputElement;
 
-      this.setState({ file });
+      this.setState({
+        file: files?.[0],
+      });
     }
 
     /**
      * Handles the submission of the dialog.
-     *
-     * @returns {Promise<void>}
      */
     public async onSubmit(): Promise<void> {
       const { file } = this.state;
       const { appState } = this.props;
 
-      const defaultTheme = !!appState.theme
-        ? await getTheme(appState.theme)
-        : defaultDark;
+      const defaultTheme = await getTheme(appState, appState.theme);
 
       if (!file) return;
 
@@ -70,7 +62,8 @@ export const AddThemeDialog = observer(
         if (!editor.base && !editor.rules)
           throw Error('File does not match specifications'); // has to have these attributes
         const newTheme: FiddleTheme = { ...defaultTheme };
-        newTheme.editor = editor as Partial<MonacoType.editor.IStandaloneThemeData>;
+        newTheme.editor =
+          editor as Partial<MonacoType.editor.IStandaloneThemeData>;
         // Use file.name if no editor.name, and strip file extension (should be .json)
         const name: string = editor.name
           ? editor.name
@@ -128,7 +121,7 @@ export const AddThemeDialog = observer(
       const inputProps = { accept: '.json' };
       const { file } = this.state;
 
-      const text = file && file.path ? file.path : `Select the Monaco file...`;
+      const text = file ? file.name : `Select the Monaco file...`;
       return (
         <Dialog
           isOpen={isThemeDialogShowing}
@@ -139,7 +132,7 @@ export const AddThemeDialog = observer(
           <div className="bp3-dialog-body">
             <FileInput
               onInputChange={this.onChangeFile}
-              inputProps={inputProps as any}
+              inputProps={inputProps}
               text={text}
             />
             <br />

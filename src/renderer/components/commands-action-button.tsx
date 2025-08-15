@@ -6,17 +6,19 @@ import {
   IToastProps,
   Menu,
   MenuItem,
-  Popover,
   Position,
   Toaster,
 } from '@blueprintjs/core';
+import { Popover2 } from '@blueprintjs/popover2';
 import { when } from 'mobx';
 import { observer } from 'mobx-react';
 
 import {
+  EditorId,
   EditorValues,
   GistActionState,
   GistActionType,
+  PACKAGE_NAME,
 } from '../../interfaces';
 import { AppState } from '../state';
 import { ensureRequiredFiles } from '../utils/editor-utils';
@@ -34,10 +36,6 @@ interface IGistActionButtonState {
 
 /**
  * The "publish" button takes care of logging you in.
- *
- * @export
- * @class GistActionButton
- * @extends {React.Component<GistActionButtonProps, GistActionButtonState>}
  */
 export const GistActionButton = observer(
   class GistActionButton extends React.Component<
@@ -60,7 +58,7 @@ export const GistActionButton = observer(
       window.ElectronFiddle.removeAllListeners('save-fiddle-gist');
     }
 
-    private toaster: Toaster;
+    private toaster?: Toaster;
     private refHandlers = {
       toaster: (ref: Toaster) => (this.toaster = ref),
     };
@@ -83,9 +81,6 @@ export const GistActionButton = observer(
      * If we're showing the authentication dialog, we wait for it
      * to be closed again (or a GitHub token to show up) before
      * we publish
-     *
-     * @returns {Promise<void>}
-     * @memberof GistActionButton
      */
     public async handleClick(): Promise<void> {
       const { appState } = this.props;
@@ -121,11 +116,10 @@ export const GistActionButton = observer(
       const defaultGistValues = await window.ElectronFiddle.getTemplate(
         appState.version,
       );
-      const currentEditorValues = await window.ElectronFiddle.app.getEditorValues(
-        options,
-      );
+      const currentEditorValues = await window.app.getEditorValues(options);
 
-      defaultGistValues['package.json'] = currentEditorValues['package.json'];
+      defaultGistValues[PACKAGE_NAME as EditorId] =
+        currentEditorValues[PACKAGE_NAME as EditorId];
 
       try {
         const gistFilesList = appState.isPublishingGistAsRevision
@@ -159,7 +153,7 @@ export const GistActionButton = observer(
         this.setActionType(GistActionType.update);
 
         return true;
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not publish gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({
@@ -200,7 +194,7 @@ export const GistActionButton = observer(
       const { appState } = this.props;
       const octo = await getOctokit(this.props.appState);
       const options = { includeDependencies: true, includeElectron: true };
-      const values = await window.ElectronFiddle.app.getEditorValues(options);
+      const values = await window.app.getEditorValues(options);
 
       appState.activeGistAction = GistActionState.updating;
 
@@ -211,8 +205,8 @@ export const GistActionButton = observer(
 
         const files = this.gistFilesList(values);
         for (const id of Object.keys(oldFiles)) {
-          // Gist files are deleted by setting content to an empty string.
-          if (!(id in files)) files[id] = { content: '' };
+          // Delete files that have been removed or renamed.
+          if (!(id in files)) files[id] = null as any;
         }
 
         const gist = await octo.gists.update({
@@ -233,7 +227,7 @@ export const GistActionButton = observer(
             },
           });
         }
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not update gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({
@@ -265,7 +259,7 @@ export const GistActionButton = observer(
         appState.editorMosaic.isEdited = true;
         console.log('Deleting: Deleting done', { gist });
         this.renderToast({ message: 'Successfully deleted gist!' });
-      } catch (error) {
+      } catch (error: any) {
         console.warn(`Could not delete gist`, { error });
 
         window.ElectronFiddle.showWarningDialog({
@@ -305,8 +299,6 @@ export const GistActionButton = observer(
 
     /**
      * Publish fiddles as private.
-     *
-     * @memberof GistActionButton
      */
     public setPrivate() {
       this.setPrivacy(false);
@@ -314,8 +306,6 @@ export const GistActionButton = observer(
 
     /**
      * Publish fiddles as public.
-     *
-     * @memberof GistActionButton
      */
     public setPublic() {
       this.setPrivacy(true);
@@ -359,6 +349,8 @@ export const GistActionButton = observer(
             <ButtonGroup className="button-gist-action">
               {this.renderPrivacyMenu()}
               <Button
+                id="button-action"
+                data-testid="button-action"
                 onClick={this.handleClick}
                 loading={isPerformingAction}
                 icon={getActionIcon()}
@@ -404,9 +396,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={menu} position={Position.BOTTOM}>
+        <Popover2 content={menu} position={Position.BOTTOM}>
           <Button icon="wrench" />
-        </Popover>
+        </Popover2>
       );
     };
 
@@ -437,9 +429,9 @@ export const GistActionButton = observer(
       );
 
       return (
-        <Popover content={privacyMenu} position={Position.BOTTOM}>
+        <Popover2 content={privacyMenu} position={Position.BOTTOM}>
           <Button icon={privacyIcon} />
-        </Popover>
+        </Popover2>
       );
     };
 
@@ -460,7 +452,7 @@ export const GistActionButton = observer(
       return Object.fromEntries(
         Object.entries(values)
           .filter(([, content]) => Boolean(content))
-          .map(([id, content]) => [id, { content }]),
+          .map(([id, content]) => [id, { filename: id, content }]),
       );
     };
   },

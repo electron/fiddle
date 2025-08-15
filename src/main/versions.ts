@@ -1,13 +1,13 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { ElectronVersions, Installer, SemVer } from '@electron/fiddle-core';
-import { IpcMainEvent, app } from 'electron';
-import * as fs from 'fs-extra';
+import { IpcMainInvokeEvent, app } from 'electron';
+import fs from 'fs-extra';
 
+import { ipcMainManager } from './ipc';
 import releases from '../../static/releases.json';
 import { InstallState, Version } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { ipcMainManager } from './ipc';
 
 let knownVersions: ElectronVersions;
 
@@ -17,8 +17,8 @@ let knownVersions: ElectronVersions;
  * This way when we have a local version of Electron like '999.0.0'
  * we'll know to not try & download 999-x-y.zip from GitHub :D
  *
- * @param {number} major - Electron major version number
- * @returns {boolean} true if there are releases with that major version
+ * @param major - Electron major version number
+ * @returns true if there are releases with that major version
  */
 export function isReleasedMajor(major: number): boolean {
   return knownVersions.inMajor(major).length > 0;
@@ -52,9 +52,6 @@ export function getReleasedVersions(): Array<Version> {
 /**
  * Gets the current state of a specific version
  * Valid local electron builds are marked as `installed`
- *
- * @param {Version} ver
- * @returns {InstallState}
  */
 export function getLocalVersionState(ver: Version): InstallState {
   const { localPath } = ver;
@@ -74,16 +71,18 @@ export async function fetchVersions(): Promise<Version[]> {
 }
 
 export async function setupVersions() {
-  knownVersions = await ElectronVersions.create(
-    {
+  knownVersions = await ElectronVersions.create({
+    initialVersions: releases,
+    paths: {
       versionsCache: path.join(app.getPath('userData'), 'releases.json'),
     },
-    {
-      initialVersions: releases,
-    },
-  );
+  });
 
-  ipcMainManager.handle(IpcEvents.FETCH_VERSIONS, (_: IpcMainEvent) =>
+  ipcMainManager.handle(
+    IpcEvents.IS_RELEASED_MAJOR,
+    (_: IpcMainInvokeEvent, version: number) => isReleasedMajor(version),
+  );
+  ipcMainManager.handle(IpcEvents.FETCH_VERSIONS, (_: IpcMainInvokeEvent) =>
     fetchVersions(),
   );
   ipcMainManager.on(IpcEvents.GET_LATEST_STABLE, (event) => {
@@ -100,7 +99,7 @@ export async function setupVersions() {
   });
   ipcMainManager.handle(
     IpcEvents.GET_RELEASE_INFO,
-    (_: IpcMainEvent, version) => knownVersions.getReleaseInfo(version),
+    (_: IpcMainInvokeEvent, version) => knownVersions.getReleaseInfo(version),
   );
 
   return knownVersions;

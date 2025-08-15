@@ -93,16 +93,17 @@ export class Tour extends React.Component<TourProps, TourState> {
 
     if (!step) return null;
 
-    return <div className="tour">{this.getStep(step)}</div>;
+    return (
+      <div className="tour" data-testid="tour">
+        {this.getStep(step)}
+      </div>
+    );
   }
 
   /**
    * Return buttons for the dialog for the current step
    * of the tour. By default, we just return a continue/stop
    * combo
-   *
-   * @param {TourScriptStep} { getButtons }
-   * @returns {Array<JSX.Element>}
    */
   private getButtons({ getButtons }: TourScriptStep): Array<JSX.Element> {
     // Did the step bring its own buttons?
@@ -141,10 +142,6 @@ export class Tour extends React.Component<TourProps, TourState> {
 
   /**
    * Renders the dialog for the current step of the tour.
-   *
-   * @param {TourScriptStep} step
-   * @param {ClientRect} rect
-   * @returns {JSX.Element}
    */
   private getDialogForStep(
     step: TourScriptStep,
@@ -184,9 +181,6 @@ export class Tour extends React.Component<TourProps, TourState> {
 
   /**
    * Returns the "mask" for a given step.
-   *
-   * @param {TourScriptStep} step
-   * @returns {(JSX.Element | null)}
    */
   private getStep(step: TourScriptStep): JSX.Element | null {
     const { selector } = step;

@@ -14,10 +14,10 @@ import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
-import { EditorId } from '../../interfaces';
+import { EditorId, PACKAGE_NAME } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
-import { isRequiredFile, isSupportedFile } from '../utils/editor-utils';
+import { isMainEntryPoint, isSupportedFile } from '../utils/editor-utils';
 
 interface FileTreeProps {
   appState: AppState;
@@ -68,7 +68,7 @@ export const SidebarFileTree = observer(
                       onClick={() => this.renameEditor(editorId)}
                     />
                     <MenuItem
-                      disabled={isRequiredFile(editorId)}
+                      disabled={isMainEntryPoint(editorId)}
                       icon="remove"
                       text="Delete"
                       intent="danger"
@@ -135,7 +135,7 @@ export const SidebarFileTree = observer(
           isExpanded: true,
           label: 'Editors',
           secondaryLabel: (
-            <ButtonGroup minimal>
+            <ButtonGroup minimal style={{ display: 'flex', gap: 4 }}>
               <Tooltip2
                 content="Add New File"
                 minimal={true}
@@ -189,18 +189,30 @@ export const SidebarFileTree = observer(
 
       if (!id) return;
 
-      if (!isSupportedFile(id)) {
+      if (
+        id.endsWith('.json') &&
+        [PACKAGE_NAME, 'package-lock.json'].includes(id)
+      ) {
         await appState.showErrorDialog(
-          `Invalid filename "${id}": Must be a file ending in .js, .html, or .css`,
+          `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
         );
         return;
       }
 
-      const contents = appState.editorMosaic.value(editorId).trim();
-      appState.editorMosaic.remove(editorId);
-      appState.editorMosaic.addNewFile(id, contents);
+      if (!isSupportedFile(id)) {
+        await appState.showErrorDialog(
+          `Invalid filename "${id}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+        );
+        return;
+      }
 
-      if (visible) appState.editorMosaic.show(id);
+      try {
+        appState.editorMosaic.renameFile(editorId, id);
+
+        if (visible) appState.editorMosaic.show(id);
+      } catch (err: any) {
+        appState.showErrorDialog(err.message);
+      }
     };
 
     public removeEditor = (editorId: EditorId) => {
@@ -213,7 +225,7 @@ export const SidebarFileTree = observer(
       try {
         appState.editorMosaic.addNewFile(editorId);
         appState.editorMosaic.show(editorId);
-      } catch (err) {
+      } catch (err: any) {
         appState.showErrorDialog(err.message);
       }
     };

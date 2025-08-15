@@ -1,20 +1,17 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { Installer } from '@electron/fiddle-core';
-import { dialog } from 'electron';
-import * as fs from 'fs-extra';
+import { BrowserWindow, dialog } from 'electron';
+import fs from 'fs-extra';
 
+import { ipcMainManager } from './ipc';
 import { SelectedLocalVersion } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
-import { ipcMainManager } from './ipc';
-import { getOrCreateMainWindow } from './windows';
 
 /**
  * Build a default name for a local Electron version
  * from its dirname.
- *
- * @param {string} folderPath
- * @return {string} human-readable local build name
+ * @returns human-readable local build name
  */
 function makeLocalName(folderPath: string): string {
   // take a dirname like '/home/username/electron/gn/main/src/out/testing'
@@ -36,9 +33,6 @@ function makeLocalName(folderPath: string): string {
 
 /**
  * Verifies if the local electron path is valid
- *
- * @param {string} folderPath
- * @return {boolean}
  */
 function isValidElectronPath(folderPath: string): boolean {
   const execPath = Installer.getExecPath(folderPath);
@@ -47,18 +41,18 @@ function isValidElectronPath(folderPath: string): boolean {
 
 /**
  * Listens to IPC events related to dialogs and message boxes
- *
- * @export
  */
 export function setupDialogs() {
-  ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, (_event, args) => {
-    showWarningDialog(args);
+  ipcMainManager.on(IpcEvents.SHOW_WARNING_DIALOG, (event, args) => {
+    showWarningDialog(BrowserWindow.fromWebContents(event.sender)!, args);
   });
 
   ipcMainManager.handle(
     IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-    async (): Promise<SelectedLocalVersion | undefined> => {
-      const folderPath = await showOpenDialog();
+    async (event): Promise<SelectedLocalVersion | undefined> => {
+      const folderPath = await showOpenDialog(
+        BrowserWindow.fromWebContents(event.sender)!,
+      );
 
       if (folderPath) {
         const isValidElectron = isValidElectronPath(folderPath);
@@ -76,18 +70,19 @@ export function setupDialogs() {
 
 /**
  * Shows a warning dialog
- *
- * @param {Electron.MessageBoxOptions} args
  */
-function showWarningDialog(args: Electron.MessageBoxOptions) {
-  dialog.showMessageBox(getOrCreateMainWindow(), {
+function showWarningDialog(
+  window: BrowserWindow,
+  args: Electron.MessageBoxOptions,
+) {
+  dialog.showMessageBox(window, {
     type: 'warning',
     ...args,
   });
 }
 
-async function showOpenDialog() {
-  const { filePaths } = await dialog.showOpenDialog({
+async function showOpenDialog(window: BrowserWindow) {
+  const { filePaths } = await dialog.showOpenDialog(window, {
     title: 'Open Folder',
     properties: ['openDirectory'],
   });

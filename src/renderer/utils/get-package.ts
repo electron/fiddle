@@ -1,11 +1,6 @@
 import * as fiddlePackageJSON from '../../../package.json';
-import { MAIN_JS } from '../../interfaces';
+import { MAIN_JS, PackageJsonOptions } from '../../interfaces';
 import { AppState } from '../../renderer/state';
-
-export interface PackageJsonOptions {
-  includeElectron?: boolean;
-  includeDependencies?: boolean;
-}
 
 export const DEFAULT_OPTIONS = {
   includeElectron: true,
@@ -18,10 +13,6 @@ export function getForgeVersion(): string {
 
 /**
  * Returns the package.json for the current Fiddle
- *
- * @param {AppState} appState
- * @param {PackageJsonOptions} [options]
- * @returns {string}
  */
 export async function getPackageJson(
   appState: AppState,
@@ -47,13 +38,15 @@ export async function getPackageJson(
     }
   }
 
+  const entryPoint = appState.editorMosaic.mainEntryPointFile() ?? MAIN_JS;
+
   return JSON.stringify(
     {
       name,
       productName: name,
       description: 'My Electron application description',
       keywords: [],
-      main: `./${MAIN_JS}`,
+      main: `./${entryPoint}`,
       version: '1.0.0',
       author: appState.packageAuthor,
       scripts: {

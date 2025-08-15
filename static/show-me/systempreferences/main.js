@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/system-preferences#systempreferences
 
-const { app, systemPreferences } = require('electron')
+const { app, systemPreferences } = require('electron/main')
 
 app.whenReady().then(() => {
   // This module let's us access various system preferences.

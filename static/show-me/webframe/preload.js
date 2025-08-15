@@ -1,4 +1,4 @@
-const { webFrame } = require('electron')
+const { webFrame } = require('electron/renderer')
 
 setInterval(() => {
   // A random number

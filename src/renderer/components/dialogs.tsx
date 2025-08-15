@@ -2,13 +2,13 @@ import * as React from 'react';
 
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
 import { AddThemeDialog } from './dialog-add-theme';
 import { AddVersionDialog } from './dialog-add-version';
 import { BisectDialog } from './dialog-bisect';
 import { GenericDialog } from './dialog-generic';
 import { TokenDialog } from './dialog-token';
 import { Settings } from './settings';
+import { AppState } from '../state';
 
 interface DialogsProps {
   appState: AppState;
@@ -16,9 +16,6 @@ interface DialogsProps {
 
 /**
  * Dialogs (like the GitHub PAT input).
- *
- * @class Dialogs
- * @extends {React.Component<DialogsProps, {}>}
  */
 export const Dialogs = observer(
   class Dialogs extends React.Component<DialogsProps> {

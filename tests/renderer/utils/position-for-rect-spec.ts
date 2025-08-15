@@ -1,3 +1,5 @@
+import { beforeEach, describe, expect, it } from 'vitest';
+
 import { positionForRect } from '../../../src/renderer/utils/position-for-rect';
 import { overrideRendererPlatform } from '../../utils';
 
@@ -20,7 +22,7 @@ describe('position-for-rect', () => {
       it('returns a position on the top right if doable', () => {
         const target = { left: 50, top: 100, width: 175, height: 50 };
         const size = { width: 200, height: 150 };
-        const result = positionForRect(target as any, size);
+        const result = positionForRect(target as ClientRect, size);
 
         expect(result).toEqual({ left: 235, top: 100, type: 'right' });
       });
@@ -30,7 +32,7 @@ describe('position-for-rect', () => {
 
         const target = { left: 400, top: 100, width: 175, height: 50 };
         const size = { width: 200, height: 150 };
-        const result = positionForRect(target as any, size);
+        const result = positionForRect(target as ClientRect, size);
 
         expect(result).toEqual({ left: 190, top: 100, type: 'left' });
       });
@@ -44,7 +46,7 @@ describe('position-for-rect', () => {
       it('returns a position on the top right if doable', () => {
         const target = { left: 50, top: 100, width: 175, height: 50 };
         const size = { width: 200, height: 150 };
-        const result = positionForRect(target as any, size);
+        const result = positionForRect(target as ClientRect, size);
 
         expect(result).toEqual({ left: 235, top: 85, type: 'right' });
       });
@@ -54,7 +56,7 @@ describe('position-for-rect', () => {
 
         const target = { left: 400, top: 100, width: 175, height: 50 };
         const size = { width: 200, height: 150 };
-        const result = positionForRect(target as any, size);
+        const result = positionForRect(target as ClientRect, size);
 
         expect(result).toEqual({ left: 190, top: 85, type: 'left' });
       });
@@ -65,7 +67,7 @@ describe('position-for-rect', () => {
 
       const target = { left: 50, top: 100, width: 500, height: 50 };
       const size = { width: 200, height: 150 };
-      const result = positionForRect(target as any, size);
+      const result = positionForRect(target as ClientRect, size);
 
       expect(result).toEqual({ left: 200, top: 160, type: 'bottom' });
     });
@@ -76,7 +78,7 @@ describe('position-for-rect', () => {
 
       const target = { left: 50, top: 50, width: 700, height: 500 };
       const size = { width: 200, height: 200 };
-      const result = positionForRect(target as any, size);
+      const result = positionForRect(target as ClientRect, size);
 
       expect(result).toEqual({ left: 300, top: 240, type: 'bottom' });
     });

@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/auto-updater
 
-const { app, autoUpdater } = require('electron')
+const { app, autoUpdater } = require('electron/main')
 
 app.whenReady().then(() => {
   const server = 'https://your-deployment-url.com'

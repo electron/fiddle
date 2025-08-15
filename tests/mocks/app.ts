@@ -1,3 +1,5 @@
+import { vi } from 'vitest';
+
 import {
   ElectronTypesMock,
   FileManagerMock,
@@ -10,13 +12,13 @@ import {
 export class AppMock {
   public electronTypes = new ElectronTypesMock();
   public fileManager = new FileManagerMock();
-  public getEditorValues = jest.fn().mockResolvedValue(createEditorValues());
-  public loadTheme = jest.fn();
-  public openFiddle = jest.fn();
+  public getEditorValues = vi.fn().mockResolvedValue(createEditorValues());
+  public loadTheme = vi.fn();
+  public openFiddle = vi.fn();
   public remoteLoader = new RemoteLoaderMock();
-  public replaceFiddle = jest.fn();
+  public replaceFiddle = vi.fn();
   public runner = new RunnerMock();
-  public setup = jest.fn();
+  public setup = vi.fn();
   public state = new StateMock();
   public taskRunner = {};
 }

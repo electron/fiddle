@@ -1,3 +1,5 @@
+import { describe, expect, it } from 'vitest';
+
 import { normalizeVersion } from '../../../src/renderer/utils/normalize-version';
 
 describe('normalize-version', () => {

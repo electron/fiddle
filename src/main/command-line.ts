@@ -1,9 +1,12 @@
-import * as os from 'os';
+import * as os from 'node:os';
 
 import * as commander from 'commander';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 import getos from 'getos';
 
+import { openFiddle } from './files';
+import { ipcMainManager } from './ipc';
+import { findProtocolArg } from './protocol';
 import {
   ElectronReleaseChannel,
   OutputEntry,
@@ -12,10 +15,8 @@ import {
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { getGistId } from '../utils/gist';
-import { ipcMainManager } from './ipc';
-import { findProtocolArg } from './protocol';
 
-function getSetup(opts: commander.OptionValues): SetupRequest {
+async function getSetup(opts: commander.OptionValues): Promise<SetupRequest> {
   const config: SetupRequest = {
     showChannels: [],
     hideChannels: [],
@@ -24,7 +25,8 @@ function getSetup(opts: commander.OptionValues): SetupRequest {
   const { betas, fiddle, full, nightlies, obsolete, version } = opts;
 
   if (fs.existsSync(fiddle)) {
-    config.fiddle = { filePath: fiddle };
+    const files = await openFiddle(fiddle);
+    config.fiddle = { localFiddle: { filePath: fiddle, files } };
   } else {
     const gistId = getGistId(fiddle);
     if (gistId) {
@@ -85,7 +87,9 @@ async function sendTask(type: IpcEvents, task: any) {
 }
 
 async function logConfig() {
-  const packageJson = require('../../package.json');
+  const { default: packageJson } = await import('../../package.json', {
+    with: { type: 'json' },
+  });
   const osinfo = await new Promise((resolve) =>
     getos((err, result) => resolve(err || result)),
   );
@@ -110,7 +114,7 @@ async function bisect(good: string, bad: string, opts: commander.OptionValues) {
   try {
     if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_BISECT, {
-      setup: getSetup(opts),
+      setup: await getSetup(opts),
       goodVersion: good,
       badVersion: bad,
     });
@@ -124,7 +128,7 @@ async function test(opts: commander.OptionValues) {
   try {
     if (opts.logConfig) await logConfig();
     await sendTask(IpcEvents.TASK_TEST, {
-      setup: getSetup(opts),
+      setup: await getSetup(opts),
     });
   } catch (err) {
     console.error(err);

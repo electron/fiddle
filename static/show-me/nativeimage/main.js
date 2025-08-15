@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/native-image
 
-const { app, Tray, nativeImage } = require('electron')
+const { app, Tray, nativeImage } = require('electron/main')
 
 let trayIcon = null
 

@@ -11,9 +11,6 @@ interface GitHubSettingsProps {
 
 /**
  * Settings content to manage GitHub-related preferences.
- *
- * @class GitHubSettings
- * @extends {React.Component<GitHubSettingsProps, {}>}
  */
 export const GitHubSettings = observer(
   class GitHubSettings extends React.Component<GitHubSettingsProps> {
@@ -21,9 +18,8 @@ export const GitHubSettings = observer(
       super(props);
 
       this.signIn = this.signIn.bind(this);
-      this.handlePublishGistAsRevisionChange = this.handlePublishGistAsRevisionChange.bind(
-        this,
-      );
+      this.handlePublishGistAsRevisionChange =
+        this.handlePublishGistAsRevisionChange.bind(this);
     }
 
     private static publishGistAsRevisionInstructions = `
@@ -32,8 +28,6 @@ export const GitHubSettings = observer(
 
     /**
      * Render the "logged out" settings experience.
-     *
-     * @returns {JSX.Element}
      */
     public renderNotSignedIn(): JSX.Element {
       return (
@@ -49,8 +43,6 @@ export const GitHubSettings = observer(
 
     /**
      * Render the "logged in" settings experience.
-     *
-     * @returns {JSX.Element}
      */
     public renderSignedIn(): JSX.Element {
       const { gitHubLogin } = this.props.appState;
@@ -71,8 +63,6 @@ export const GitHubSettings = observer(
     /**
      * Handles a change on whether or not the gist should be published
      * as a revision on top of the default fiddle gist.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handlePublishGistAsRevisionChange(
       event: React.FormEvent<HTMLInputElement>,
@@ -108,7 +98,7 @@ export const GitHubSettings = observer(
     }
 
     /**
-     * Simply shows the GitHub Token dialog.``
+     * Simply shows the GitHub Token dialog.
      */
     private signIn() {
       this.props.appState.isTokenDialogShowing = true;

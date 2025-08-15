@@ -15,9 +15,6 @@ interface IPackageAuthorSettingsState {
 
 /**
  * Settings package.json author info
- *
- * @class PackageAuthorSettings
- * @extends {React.Component<PackageAuthorSettingsProps, IPackageAuthorSettingsState>}
  */
 export const PackageAuthorSettings = observer(
   class PackageAuthorSettings extends React.Component<
@@ -31,15 +28,12 @@ export const PackageAuthorSettings = observer(
         value: this.props.appState.packageAuthor,
       };
 
-      this.handlePackageAuthorChange = this.handlePackageAuthorChange.bind(
-        this,
-      );
+      this.handlePackageAuthorChange =
+        this.handlePackageAuthorChange.bind(this);
     }
 
     /**
      * Set the author information in package.json when processing uploads to gist
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     public handlePackageAuthorChange(event: React.FormEvent<HTMLInputElement>) {
       const { value } = event.currentTarget;

@@ -15,9 +15,6 @@ type IMirrorSettingsState = Mirrors;
 
 /**
  * Settings electron mirror
- *
- * @class MirrorSettings
- * @extends {React.Component<MirrorSettingsProps, IMirrorSettingsState>}
  */
 export const MirrorSettings = observer(
   class MirrorSettings extends React.Component<
@@ -37,8 +34,9 @@ export const MirrorSettings = observer(
     }
 
     private changeSourceType(e: FormEvent<HTMLInputElement>) {
-      this.props.appState.electronMirror.sourceType = (e.target as HTMLInputElement)
-        .value as Sources;
+      this.props.appState.electronMirror.sourceType = (
+        e.target as HTMLInputElement
+      ).value as Sources;
     }
 
     private get notCustomSource() {

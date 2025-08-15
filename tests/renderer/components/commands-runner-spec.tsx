@@ -1,20 +1,19 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { InstallState } from '../../../src/interfaces';
 import { Runner } from '../../../src/renderer/components/commands-runner';
 import { AppState } from '../../../src/renderer/state';
 
-jest.mock('../../../src/renderer/file-manager');
-jest.mock('child_process');
-jest.mock('fs-extra');
+vi.mock('../../../src/renderer/file-manager');
 
 describe('Runner component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   describe('renders', () => {

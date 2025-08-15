@@ -1,18 +1,20 @@
+import cp from 'node:child_process';
+
+import shellEnv from 'shell-env';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { exec } from '../../../src/main/utils/exec';
 import { overridePlatform, resetPlatform } from '../../utils';
 
-jest.mock('child_process');
+vi.mock('node:child_process', () => ({
+  default: { exec: vi.fn() },
+}));
 
-const mockShellEnv = jest.fn();
-jest.mock('shell-env', () => mockShellEnv);
+vi.mock('shell-env');
 
-describe('exec', () => {
-  // Allow us to reset the module between each run
-  let execModule = require('../../../src/main/utils/exec');
-
-  beforeEach(() => {
-    jest.resetModules();
-    execModule = require('../../../src/main/utils/exec');
-    mockShellEnv.mockResolvedValue({ PATH: '/some/path' });
+describe('exec', async () => {
+  beforeEach(async () => {
+    vi.mocked(shellEnv).mockResolvedValue({ PATH: '/some/path' });
   });
 
   afterEach(() => {
@@ -21,17 +23,16 @@ describe('exec', () => {
 
   describe('exec()', () => {
     it('executes a given string', async () => {
-      const cpExec = require('child_process').exec;
-      cpExec.mockImplementation((_a: any, _b: any, c: any) =>
+      vi.mocked(cp.exec).mockImplementation((_a: any, _b: any, c: any) =>
         c(null, {
           stdout: 'hi',
           stderr: '',
         }),
       );
 
-      const result = await execModule.exec('a/dir', 'echo hi');
+      const result = await exec('a/dir', 'echo hi');
 
-      expect(cpExec).toBeCalledWith(
+      expect(cp.exec).toBeCalledWith(
         'echo hi',
         {
           cwd: 'a/dir',
@@ -43,27 +44,25 @@ describe('exec', () => {
     });
 
     it('handles a returned string', async () => {
-      const cpExec = require('child_process').exec;
-      cpExec.mockImplementation((_a: any, _b: any, c: any) =>
+      vi.mocked(cp.exec).mockImplementation((_a: any, _b: any, c: any) =>
         c(null, {
           stdout: 'hi',
           stderr: '',
         }),
       );
 
-      const result = await execModule.exec('a/dir', 'echo hi');
+      const result = await exec('a/dir', 'echo hi');
       expect(result).toBe('hi');
     });
 
     it('handles errors', async () => {
       let errored = false;
-      const cpExec = require('child_process').exec;
-      (cpExec as jest.Mock<any>).mockImplementation(
-        (_a: any, _b: any, c: any) => c(new Error('Poop!')),
+      vi.mocked(cp.exec).mockImplementation((_a: any, _b: any, c: any) =>
+        c(new Error('Poop!')),
       );
 
       try {
-        await execModule.exec('a/dir', 'echo hi');
+        await exec('a/dir', 'echo hi');
       } catch (error) {
         errored = true;
       }
@@ -73,28 +72,36 @@ describe('exec', () => {
   });
 
   describe('maybeFixPath()', () => {
+    let maybeFixPath: () => Promise<void>;
+
+    beforeEach(async () => {
+      // The module has a singleton, so we need to reset it
+      vi.resetModules();
+      ({ maybeFixPath } = await import('../../../src/main/utils/exec.js'));
+    });
+
     it('does not do anything on Windows', async () => {
       overridePlatform('win32');
 
-      await execModule.maybeFixPath();
+      await maybeFixPath();
 
-      expect(mockShellEnv).toHaveBeenCalledTimes(0);
+      expect(shellEnv).toHaveBeenCalledTimes(0);
     });
 
     it('calls shell-env on macOS', async () => {
       overridePlatform('darwin');
 
-      await execModule.maybeFixPath();
+      await maybeFixPath();
 
-      expect(mockShellEnv).toHaveBeenCalledTimes(1);
+      expect(shellEnv).toHaveBeenCalledTimes(1);
     });
 
     it('calls shell-env on Linux', async () => {
       overridePlatform('linux');
 
-      await execModule.maybeFixPath();
+      await maybeFixPath();
 
-      expect(mockShellEnv).toHaveBeenCalledTimes(1);
+      expect(shellEnv).toHaveBeenCalledTimes(1);
     });
   });
 });

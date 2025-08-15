@@ -3,7 +3,7 @@
 // For more info, see:
 // https://electronjs.org/docs/api/tray
 
-const { app, Tray, Menu, nativeImage } = require('electron')
+const { app, Tray, Menu, nativeImage } = require('electron/main')
 
 let tray
 

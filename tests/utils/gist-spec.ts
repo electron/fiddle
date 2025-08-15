@@ -1,6 +1,8 @@
+import { describe, expect, it, vi } from 'vitest';
+
 import { getGistId, idFromUrl, urlFromId } from '../../src/utils/gist';
 
-jest.mock('os', () => ({
+vi.mock('node:os', () => ({
   userInfo: () => ({
     username: 'test-user',
   }),

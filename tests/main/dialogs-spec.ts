@@ -1,20 +1,22 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
 
-import { dialog } from 'electron';
-import * as fs from 'fs-extra';
+import { BrowserWindow, dialog } from 'electron';
+import fs from 'fs-extra';
+import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { IpcEvents } from '../../src/ipc-events';
 import { setupDialogs } from '../../src/main/dialogs';
 import { ipcMainManager } from '../../src/main/ipc';
+import { BrowserWindowMock } from '../mocks/browser-window';
 
-jest.mock('fs-extra');
-jest.mock('../../src/main/windows');
+vi.mock('fs-extra');
+vi.mock('../../src/main/windows');
 
 describe('dialogs', () => {
   beforeEach(() => {
-    ipcMainManager.handle = jest.fn();
+    ipcMainManager.handle = vi.fn();
     setupDialogs();
   });
 
@@ -31,7 +33,7 @@ describe('dialogs', () => {
   describe('warning dialog', () => {
     it('shows dialog when triggering IPC event', () => {
       ipcMainManager.emit(IpcEvents.SHOW_WARNING_DIALOG, {}, { hi: 'hello' });
-      expect(dialog.showMessageBox).toHaveBeenCalledWith<any>(undefined, {
+      expect(dialog.showMessageBox).toHaveBeenCalledWith(undefined, {
         type: 'warning',
         hi: 'hello',
       });
@@ -43,34 +45,49 @@ describe('dialogs', () => {
 
     beforeAll(() => {
       // Manually invoke handler to simulate IPC event
-      const call = (ipcMainManager.handle as jest.Mock).mock.calls.find(
-        ([channelName]) => channelName === IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
-      );
-      ipcHandler = call[1];
+      const call = vi
+        .mocked(ipcMainManager.handle)
+        .mock.calls.find(
+          ([channelName]) =>
+            channelName === IpcEvents.LOAD_LOCAL_VERSION_FOLDER,
+        );
+      if (call?.length && call.length > 1) {
+        const rawIpcHandler = call[1];
+        ipcHandler = async () =>
+          rawIpcHandler({} as Electron.IpcMainInvokeEvent);
+      } else {
+        throw new Error('Could not find IPC listener');
+      }
     });
 
     it('shows dialog when triggering IPC event', async () => {
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      const mockWindow =
+        new BrowserWindowMock() as unknown as Electron.BrowserWindow;
+      vi.mocked(BrowserWindow.fromWebContents).mockReturnValue(mockWindow);
+      vi.mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: [],
+        canceled: true,
       });
 
       await ipcHandler();
-      expect(dialog.showOpenDialog).toHaveBeenCalledWith<any>(
+      expect(dialog.showOpenDialog).toHaveBeenCalledWith(
+        mockWindow,
         expect.objectContaining({
           properties: ['openDirectory'],
         }),
       );
     });
 
-    it('returns a SelectedLocalVersion for the path', () => {
+    it('returns a SelectedLocalVersion for the path', async () => {
       const paths = ['/test/path/'];
 
-      (fs.existsSync as jest.Mock).mockReturnValue(false);
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      vi.mocked(fs.existsSync).mockReturnValue(false);
+      vi.mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: paths,
+        canceled: false,
       });
 
-      expect(ipcHandler()).resolves.toStrictEqual({
+      await expect(ipcHandler()).resolves.toStrictEqual({
         folderPath: paths[0],
         isValidElectron: false,
         localName: undefined,
@@ -79,14 +96,15 @@ describe('dialogs', () => {
 
     it('returns nothing if not given a path', async () => {
       // empty array
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({
+      vi.mocked(dialog.showOpenDialog).mockResolvedValue({
         filePaths: [],
+        canceled: true,
       });
-      expect(ipcHandler()).resolves.toBe(undefined);
+      await expect(ipcHandler()).resolves.toBe(undefined);
 
       // nothing in response
-      (dialog.showOpenDialog as jest.Mock).mockResolvedValue({});
-      expect(ipcHandler()).resolves.toBe(undefined);
+      vi.mocked(dialog.showOpenDialog).mockResolvedValue({} as any);
+      await expect(ipcHandler()).resolves.toBe(undefined);
     });
   });
 });

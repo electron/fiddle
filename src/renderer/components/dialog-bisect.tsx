@@ -3,10 +3,10 @@ import * as React from 'react';
 import { Button, ButtonGroup, Callout, Dialog, Label } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
+import { VersionSelect } from './version-select';
 import { RunnableVersion } from '../../interfaces';
 import { Bisector } from '../bisect';
 import { AppState } from '../state';
-import { VersionSelect } from './version-select';
 
 interface BisectDialogProps {
   appState: AppState;
@@ -21,9 +21,6 @@ interface BisectDialogState {
 
 /**
  * The "add version" dialog allows users to add custom builds of Electron.
- *
- * @class BisectDialog
- * @extends {React.Component<BisectDialogProps, BisectDialogState>}
  */
 export const BisectDialog = observer(
   class BisectDialog extends React.Component<
@@ -68,16 +65,14 @@ export const BisectDialog = observer(
 
     /**
      * Handles the submission of the dialog
-     *
-     * @returns {Promise<void>}
      */
     public async onSubmit(): Promise<void> {
       const range = this.getBisectRange();
       if (range.length > 1) {
         const { appState } = this.props;
         appState.Bisector = new Bisector(range);
-        const initialBisectPivot = appState.Bisector.getCurrentVersion()
-          .version;
+        const initialBisectPivot =
+          appState.Bisector.getCurrentVersion().version;
         appState.setVersion(initialBisectPivot);
         this.onClose();
       }
@@ -86,7 +81,7 @@ export const BisectDialog = observer(
     public async onAuto(): Promise<void> {
       const range = this.getBisectRange();
       if (range.length > 1) {
-        window.ElectronFiddle.app.runner.autobisect(range);
+        window.app.runner.autobisect(range);
         this.onClose();
       }
     }
@@ -239,9 +234,6 @@ export const BisectDialog = observer(
 
     /**
      * Should an item in the "earliest version" dropdown be disabled?
-     *
-     * @param {RunnableVersion} version
-     * @returns {boolean}
      */
     public isEarliestItemDisabled(version: RunnableVersion): boolean {
       const { allVersions, endIndex } = this.state;
@@ -256,9 +248,6 @@ export const BisectDialog = observer(
 
     /**
      * Should an item in the "latest version" dropdown be disabled?
-     *
-     * @param {RunnableVersion} version
-     * @returns {boolean}
      */
     public isLatestItemDisabled(version: RunnableVersion): boolean {
       const { allVersions, startIndex } = this.state;

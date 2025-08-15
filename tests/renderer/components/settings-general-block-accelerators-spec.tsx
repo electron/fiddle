@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BlockableAccelerator } from '../../../src/interfaces';
 import { BlockAcceleratorsSettings } from '../../../src/renderer/components/settings-general-block-accelerators';
@@ -10,7 +11,7 @@ describe('BlockAcceleratorsSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   it('renders', () => {
@@ -21,19 +22,19 @@ describe('BlockAcceleratorsSettings component', () => {
   describe('handleBlockAcceleratorChange()', () => {
     it('handles a new selection', async () => {
       const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
-      const instance = wrapper.instance() as any;
+      const instance: any = wrapper.instance();
 
-      await instance.handleBlockAcceleratorChange({
+      instance.handleBlockAcceleratorChange({
         currentTarget: { checked: false, value: BlockableAccelerator.save },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
 
-      await instance.handleBlockAcceleratorChange({
+      instance.handleBlockAcceleratorChange({
         currentTarget: { checked: true, value: BlockableAccelerator.save },
-      });
+      } as React.FormEvent<HTMLInputElement>);
 
       expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,

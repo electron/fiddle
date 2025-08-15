@@ -1,7 +1,7 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
 import { app } from 'electron';
-import * as fs from 'fs-extra';
+import fs from 'fs-extra';
 
 const getConfigPath = () => {
   const userDataPath = app.getPath('userData');
@@ -11,8 +11,6 @@ const getConfigPath = () => {
 /**
  * Whether or not the app is being run for
  * the first time
- *
- * @returns {boolean}
  */
 export function isFirstRun(): boolean {
   const configPath = getConfigPath();

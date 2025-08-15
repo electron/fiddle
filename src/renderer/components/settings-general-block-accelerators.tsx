@@ -12,25 +12,19 @@ interface BlockAcceleratorsSettingsProps {
 
 /**
  * Settings content to block keyboard accelerators.
- *
- * @class BlockAcceleratorsSettings
- * @extends {React.Component<BlockAcceleratorsSettingsProps>}
  */
 export const BlockAcceleratorsSettings = observer(
   class BlockAcceleratorsSettings extends React.Component<BlockAcceleratorsSettingsProps> {
     constructor(props: BlockAcceleratorsSettingsProps) {
       super(props);
 
-      this.handleBlockAcceleratorChange = this.handleBlockAcceleratorChange.bind(
-        this,
-      );
+      this.handleBlockAcceleratorChange =
+        this.handleBlockAcceleratorChange.bind(this);
     }
 
     /**
      * Handles a change on whether a keyboard shortcut should be blocked
      * before fiddle is executed.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleBlockAcceleratorChange(
       event: React.FormEvent<HTMLInputElement>,

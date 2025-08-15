@@ -1,8 +1,7 @@
+import { vi } from 'vitest';
+
 export class FileManagerMock {
-  public cleanup = jest.fn();
-  public getFiles = jest.fn();
-  public openFiddle = jest.fn();
-  public openTemplate = jest.fn();
-  public saveFiddle = jest.fn();
-  public saveToTemp = jest.fn().mockResolvedValue('/mock/temp/dir');
+  public getFiles = vi.fn();
+  public openFiddle = vi.fn();
+  public saveToTemp = vi.fn().mockResolvedValue('/mock/temp/dir');
 }

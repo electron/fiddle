@@ -1,35 +1,27 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
-import { IpcMainEvent, app, shell } from 'electron';
-import * as fs from 'fs-extra';
+import { IpcMainInvokeEvent, app, shell } from 'electron';
+import fs from 'fs-extra';
 import * as namor from 'namor';
 
+import { ipcMainManager } from './ipc';
 import { IpcEvents } from '../ipc-events';
 import {
-  DefaultThemes,
   FiddleTheme,
   LoadedFiddleTheme,
   defaultDark,
   defaultLight,
 } from '../themes-defaults';
-import { ipcMainManager } from './ipc';
 
 export const CONFIG_PATH = path.join(app.getPath('home'), '.electron-fiddle');
 export const THEMES_PATH = path.join(CONFIG_PATH, 'themes');
 
 /**
  * Read in a theme file.
- *
- * @export
- * @param {string} [name]
- * @returns {Promise<FiddleTheme | null>}
  */
 export async function readThemeFile(
-  name?: string,
+  name: string,
 ): Promise<LoadedFiddleTheme | null> {
-  if (!name || name === DefaultThemes.DARK) return defaultDark as any;
-  if (name === DefaultThemes.LIGHT) return defaultLight as any;
-
   const file = name.endsWith('.json') ? name : `${name}.json`;
   const themePath = path.join(THEMES_PATH, file);
 
@@ -48,10 +40,6 @@ export async function readThemeFile(
 
 /**
  * Create theme file and show in folder.
- *
- * @param {FiddleTheme} theme
- * @param {string} [name]
- * @returns {Promise<LoadedFiddleTheme>}
  */
 export async function createThemeFile(
   theme: FiddleTheme | LoadedFiddleTheme,
@@ -87,14 +75,9 @@ export async function createThemeFile(
 
 /**
  * Reads and then returns all available themes.
- *
- * @returns {Promise<Array<LoadedFiddleTheme>>}
  */
 export async function getAvailableThemes(): Promise<Array<LoadedFiddleTheme>> {
-  const themes: Array<LoadedFiddleTheme> = [
-    defaultDark as any,
-    defaultLight as any,
-  ];
+  const themes: Array<LoadedFiddleTheme> = [defaultDark, defaultLight];
 
   if (!fs.existsSync(THEMES_PATH)) {
     return themes;
@@ -130,17 +113,18 @@ export async function openThemeFolder() {
 export function setupThemes() {
   ipcMainManager.handle(
     IpcEvents.READ_THEME_FILE,
-    (_: IpcMainEvent, name?: string) => readThemeFile(name),
+    (_: IpcMainInvokeEvent, name: string) => readThemeFile(name),
   );
-  ipcMainManager.handle(IpcEvents.GET_AVAILABLE_THEMES, (_: IpcMainEvent) =>
-    getAvailableThemes(),
+  ipcMainManager.handle(
+    IpcEvents.GET_AVAILABLE_THEMES,
+    (_: IpcMainInvokeEvent) => getAvailableThemes(),
   );
   ipcMainManager.handle(
     IpcEvents.CREATE_THEME_FILE,
-    (_: IpcMainEvent, newTheme: FiddleTheme, name?: string) =>
+    (_: IpcMainInvokeEvent, newTheme: FiddleTheme, name?: string) =>
       createThemeFile(newTheme, name),
   );
-  ipcMainManager.handle(IpcEvents.OPEN_THEME_FOLDER, (_: IpcMainEvent) =>
+  ipcMainManager.handle(IpcEvents.OPEN_THEME_FOLDER, (_: IpcMainInvokeEvent) =>
     openThemeFolder(),
   );
   ipcMainManager.on(IpcEvents.GET_THEME_PATH, (event) => {

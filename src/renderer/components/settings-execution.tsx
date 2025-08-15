@@ -12,12 +12,12 @@ import {
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { IPackageManager } from '../../interfaces';
+import { GlobalSetting, IPackageManager } from '../../interfaces';
 import { AppState } from '../state';
 
 export enum SettingItemType {
-  EnvVars = 'environmentVariables',
-  Flags = 'executionFlags',
+  EnvVars = GlobalSetting.environmentVariables,
+  Flags = GlobalSetting.executionFlags,
 }
 
 interface ExecutionSettingsProps {
@@ -30,9 +30,6 @@ interface ExecutionSettingsState {
 
 /**
  * Settings content to manage execution-related preferences.
- *
- * @class ExecutionSettings
- * @extends {React.Component<ExecutionSettingsProps, ExecutionSettingsState>}
  */
 export const ExecutionSettings = observer(
   class ExecutionSettings extends React.Component<
@@ -58,9 +55,8 @@ export const ExecutionSettings = observer(
       };
 
       this.handleDeleteDataChange = this.handleDeleteDataChange.bind(this);
-      this.handleElectronLoggingChange = this.handleElectronLoggingChange.bind(
-        this,
-      );
+      this.handleElectronLoggingChange =
+        this.handleElectronLoggingChange.bind(this);
 
       this.handleSettingsItemChange = this.handleSettingsItemChange.bind(this);
       this.addNewSettingsItem = this.addNewSettingsItem.bind(this);
@@ -78,20 +74,9 @@ export const ExecutionSettings = observer(
       }
     }
 
-    public componentDidUpdate() {
-      const { appState } = this.props;
-
-      for (const type of Object.values(SettingItemType)) {
-        const values = Object.values(this.state[type]);
-        appState[type] = values.filter((v) => v !== '');
-      }
-    }
-
     /**
      * Handles a change on whether or not the user data dir should be deleted
      * after a run.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleDeleteDataChange(event: React.FormEvent<HTMLInputElement>) {
       const { checked } = event.currentTarget;
@@ -100,8 +85,6 @@ export const ExecutionSettings = observer(
 
     /**
      * Handles a change on whether or not electron should log more things
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleElectronLoggingChange(
       event: React.FormEvent<HTMLInputElement>,
@@ -113,9 +96,6 @@ export const ExecutionSettings = observer(
     /**
      * Handles a change in the execution flags or environment variables
      * run with the Electron executable.
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
-     * @param {SettingItemType} type
      */
     public handleSettingsItemChange(
       event: React.ChangeEvent<HTMLInputElement>,
@@ -123,18 +103,22 @@ export const ExecutionSettings = observer(
     ) {
       const { name, value } = event.currentTarget;
 
-      this.setState((prevState) => ({
-        [type]: {
-          ...prevState[type],
-          [name]: value,
+      this.setState(
+        (prevState) => ({
+          [type]: {
+            ...prevState[type],
+            [name]: value,
+          },
+        }),
+        () => {
+          const values = Object.values(this.state[type]);
+          this.props.appState[type] = values.filter((v) => v !== '');
         },
-      }));
+      );
     }
 
     /**
      * Adds a new settings item input field.
-     *
-     * @param {SettingItemType} type
      */
     private addNewSettingsItem(type: SettingItemType) {
       const array = Object.entries(this.state[type]);
@@ -150,8 +134,6 @@ export const ExecutionSettings = observer(
     /**
      * Handle a change to the package manager used to install modules when running
      * Fiddles;
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     private handlePMChange = (event: React.FormEvent<HTMLInputElement>) => {
       const { appState } = this.props;
@@ -170,7 +152,10 @@ export const ExecutionSettings = observer(
           delete updated[idx];
         }
 
-        this.setState({ [type]: updated });
+        this.setState({ [type]: updated }, () => {
+          const values = Object.values(this.state[type]);
+          this.props.appState[type] = values.filter((v) => v !== '');
+        });
       };
 
       return (
@@ -258,10 +243,8 @@ export const ExecutionSettings = observer(
     }
 
     public render() {
-      const {
-        isKeepingUserDataDirs,
-        isEnablingElectronLogging,
-      } = this.props.appState;
+      const { isKeepingUserDataDirs, isEnablingElectronLogging } =
+        this.props.appState;
 
       return (
         <div>

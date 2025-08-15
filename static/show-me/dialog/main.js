@@ -3,23 +3,24 @@
 // For more info, see:
 // https://electronjs.org/docs/api/dialog
 
-const { app, BrowserWindow, dialog } = require('electron')
+const { app, BrowserWindow, dialog } = require('electron/main')
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   const mainWindow = new BrowserWindow({ height: 600, width: 600 })
 
   // Show an "Open File" dialog and attempt to open
   // the chosen file in our window.
-  dialog.showOpenDialog(mainWindow, {
-    properties: ['openFile']
-  }).then(result => {
-    if (result.canceled) {
+  try {
+    const { filePaths, canceled } = await dialog.showOpenDialog(mainWindow, {
+      properties: ['openFile']
+    })
+    if (canceled) {
       console.log('Dialog was canceled')
     } else {
-      const file = result.filePaths[0]
-      mainWindow.loadURL(`file://${file}`)
+      const file = filePaths[0]
+      mainWindow.loadFile(file)
     }
-  }).catch(err => {
+  } catch (err) {
     console.log(err)
-  })
+  }
 })

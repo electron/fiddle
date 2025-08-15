@@ -1,9 +1,10 @@
 /**
- * @jest-environment node
+ * @vitest-environment node
  */
-import * as electron from 'electron';
 
-import { IpcEvents } from '../../src/ipc-events';
+import { contextBridge } from 'electron';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { setupFiddleGlobal } from '../../src/preload/preload';
 
 describe('preload', () => {
@@ -15,24 +16,14 @@ describe('preload', () => {
   });
 
   describe('setupGlobalWindow()', () => {
-    it('sets up a window.ElectronFiddle object', async () => {
+    it('exposes an ElectronFiddle object via the contextBridge', async () => {
+      vi.mocked(contextBridge.exposeInMainWorld).mockReturnValue(undefined);
       await setupFiddleGlobal();
 
-      expect(window.ElectronFiddle).toMatchObject({ app: null });
-    });
-
-    it('sets app paths', async () => {
-      const obj = {
-        appPath: '/fake/path',
-      };
-      (electron.ipcRenderer.invoke as jest.Mock).mockResolvedValue(obj);
-
-      await setupFiddleGlobal();
-
-      expect(electron.ipcRenderer.invoke).toHaveBeenCalledWith(
-        IpcEvents.GET_APP_PATHS,
+      expect(contextBridge.exposeInMainWorld).toHaveBeenCalledWith(
+        'ElectronFiddle',
+        expect.objectContaining({ startFiddle: expect.anything() }),
       );
-      expect(window.ElectronFiddle.appPaths).toBe(obj);
     });
   });
 });

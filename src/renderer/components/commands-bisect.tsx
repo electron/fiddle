@@ -20,7 +20,7 @@ export const BisectHandler = observer(
     }
 
     private continueBisect(isGood: boolean) {
-      window.ElectronFiddle.app.runner.stop();
+      window.app.runner.stop();
 
       const { appState } = this.props;
       const response = appState.Bisector!.continue(isGood);
@@ -51,6 +51,14 @@ export const BisectHandler = observer(
       }
     }
 
+    private skipBisect() {
+      window.app.runner.stop();
+      const { appState } = this.props;
+      const response = appState.Bisector!.skip();
+
+      appState.setVersion(response.version);
+    }
+
     private terminateBisect() {
       const { appState } = this.props;
       appState.Bisector = undefined;
@@ -75,6 +83,14 @@ export const BisectHandler = observer(
               onClick={() => this.continueBisect(false)}
               disabled={isDownloading}
             />
+            <Button
+              icon={'random'}
+              aria-label={'Skip this commit'}
+              onClick={() => this.skipBisect()}
+              disabled={isDownloading}
+            >
+              Skip
+            </Button>
             <Button
               aria-label={'Cancel bisect'}
               icon={'cross'}

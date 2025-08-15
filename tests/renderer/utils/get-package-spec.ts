@@ -1,6 +1,8 @@
 import * as semver from 'semver';
+import { beforeAll, describe, expect, it, vi } from 'vitest';
 
-import { MAIN_JS } from '../../../src/interfaces';
+import { EditorId, MAIN_JS, MAIN_MJS } from '../../../src/interfaces';
+import { AppState } from '../../../src/renderer/state';
 import {
   getForgeVersion,
   getPackageJson,
@@ -19,9 +21,7 @@ describe('get-package', () => {
 
   describe('getPackageJson()', () => {
     beforeAll(() => {
-      (window.ElectronFiddle.getUsername as jest.Mock).mockReturnValue(
-        'test-user',
-      );
+      vi.mocked(window.ElectronFiddle.getUsername).mockReturnValue('test-user');
     });
 
     const appState = new StateMock();
@@ -49,15 +49,36 @@ describe('get-package', () => {
       return JSON.stringify({ ...defaultPackage, ...opts }, null, 2);
     }
 
-    it('getPackageJson() returns a default package.json', async () => {
+    it('returns a default package.json', async () => {
       const name = defaultName;
       const appState = {
+        editorMosaic: {
+          files: new Map<EditorId, unknown>(),
+          mainEntryPointFile: () => MAIN_JS,
+        },
         getName: () => name,
         modules: new Map<string, string>([['say', '*']]),
         packageAuthor: defaultAuthor,
       };
-      const result = await getPackageJson(appState as any);
+      const result = await getPackageJson(appState as unknown as AppState);
       expect(result).toEqual(buildExpectedPackage());
+    });
+
+    it('can use an ESM entry point', async () => {
+      const name = defaultName;
+      const appState = {
+        editorMosaic: {
+          files: new Map<EditorId, unknown>([[MAIN_MJS, '']]),
+          mainEntryPointFile: () => MAIN_MJS,
+        },
+        getName: () => name,
+        modules: new Map<string, string>([['say', '*']]),
+        packageAuthor: defaultAuthor,
+      };
+      const result = await getPackageJson(appState as unknown as AppState);
+      expect(JSON.parse(result)).toMatchObject({
+        main: `./${MAIN_MJS}`,
+      });
     });
 
     it.each([
@@ -70,7 +91,7 @@ describe('get-package', () => {
       appState.version = version;
       appState.packageAuthor = defaultAuthor;
 
-      const result = await getPackageJson(appState as any);
+      const result = await getPackageJson(appState as unknown as AppState);
       const devDependencies = { [electronPkg]: version };
       expect(result).toEqual(buildExpectedPackage({ name, devDependencies }));
     });

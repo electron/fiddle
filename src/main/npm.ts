@@ -1,9 +1,11 @@
-import { IpcMainEvent } from 'electron';
+import * as path from 'node:path';
 
-import { IPackageManager, PMOperationOptions } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
+import { IpcMainInvokeEvent, shell } from 'electron';
+
 import { ipcMainManager } from './ipc';
 import { exec } from './utils/exec';
+import { IPackageManager, PMOperationOptions } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 
 let isNpmInstalled: boolean | null = null;
 let isYarnInstalled: boolean | null = null;
@@ -47,10 +49,6 @@ export async function getIsPackageManagerInstalled(
 
 /**
  * Installs given modules to a given folder.
- *
- * @param {PMOperationOptions} { dir, packageManager }
- * @param {...Array<string>} names
- * @returns {Promise<string>}
  */
 export async function addModules(
   { dir, packageManager }: PMOperationOptions,
@@ -71,37 +69,40 @@ export async function addModules(
 }
 
 /**
- * Execute an "{packageManager} run" command
- *
- * @param {PMOperationOptions} { dir, packageManager }
- * @param {string} command
- * @returns {Promise<string>}
+ * Execute an "\{packageManager\} run" command
  */
-export function packageRun(
+export async function packageRun(
   { dir, packageManager }: PMOperationOptions,
   command: string,
 ): Promise<string> {
-  return exec(dir, `${packageManager} run ${command}`);
+  const result = await exec(dir, `${packageManager} run ${command}`);
+
+  shell.showItemInFolder(path.join(dir, 'out'));
+
+  return result;
 }
 
 export async function setupNpm() {
   ipcMainManager.handle(
     IpcEvents.NPM_ADD_MODULES,
     (
-      _: IpcMainEvent,
+      _: IpcMainInvokeEvent,
       { dir, packageManager }: PMOperationOptions,
       ...names: Array<string>
     ) => addModules({ dir, packageManager }, ...names),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_IS_PM_INSTALLED,
-    (_: IpcMainEvent, packageManager: IPackageManager, ignoreCache?: boolean) =>
-      getIsPackageManagerInstalled(packageManager, ignoreCache),
+    (
+      _: IpcMainInvokeEvent,
+      packageManager: IPackageManager,
+      ignoreCache?: boolean,
+    ) => getIsPackageManagerInstalled(packageManager, ignoreCache),
   );
   ipcMainManager.handle(
     IpcEvents.NPM_PACKAGE_RUN,
     (
-      _: IpcMainEvent,
+      _: IpcMainInvokeEvent,
       { dir, packageManager }: PMOperationOptions,
       command: string,
     ) => packageRun({ dir, packageManager }, command),

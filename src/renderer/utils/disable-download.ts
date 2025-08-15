@@ -6,8 +6,7 @@ import semver from 'semver';
  * - below 6.0.8 and 7.0.0 on Windows arm64
  * Reference: {@link https://www.electronjs.org/blog/apple-silicon}
  *
- * @param {string} version - electron version
- * @returns {boolean}
+ * @param version - electron version
  */
 export function disableDownload(version: string): boolean {
   return (

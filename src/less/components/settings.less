@@ -1,4 +1,4 @@
-@import "../variables.less";
+@import '../variables.less';
 
 .settings {
   background: @background-3;
@@ -31,11 +31,17 @@
     font-weight: 200;
   }
 
+  button,
+  input,
+  select {
+    -webkit-app-region: no-drag;
+  }
+
   select {
     width: 250px;
   }
 
- .bp3-input-group {
+  .bp3-input-group {
     margin-bottom: 15px;
   }
 
@@ -85,8 +91,9 @@
       }
     }
 
-    .bp3-popover-target {
-      display: inherit;
+    .bp3-popover-target,
+    .bp3-popover2-target {
+      display: inline;
     }
 
     .disabled-version {

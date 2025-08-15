@@ -7,21 +7,24 @@ import {
 } from 'electron';
 
 import {
+  saveFiddle,
+  saveFiddleAs,
+  saveFiddleAsForgeProject,
+  showOpenDialog,
+} from './files';
+import { ipcMainManager } from './ipc';
+import { getTemplateValues } from './templates';
+import { createMainWindow } from './windows';
+import {
   BlockableAccelerator,
   SetUpMenuOptions,
   Templates,
 } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 import { SHOW_ME_TEMPLATES } from '../templates';
-import { showOpenDialog, showSaveDialog } from './files';
-import { ipcMainManager } from './ipc';
-import { createMainWindow } from './windows';
 
 /**
  * Is the passed object a constructor for an Electron Menu?
- *
- * @param {(Array<Electron.MenuItemConstructorOptions> | Electron.Menu)} [submenu]
- * @returns {submenu is Array<Electron.MenuItemConstructorOptions>}
  */
 function isSubmenu(
   submenu?: Array<MenuItemConstructorOptions> | Menu,
@@ -31,8 +34,6 @@ function isSubmenu(
 
 /**
  * Returns additional items for the help menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getHelpItems(): Array<MenuItemConstructorOptions> {
   const items: MenuItemConstructorOptions[] = [];
@@ -106,8 +107,6 @@ function getHelpItems(): Array<MenuItemConstructorOptions> {
 /**
  * Depending on the OS, the `Preferences` either go into the `Fiddle`
  * menu (macOS) or under `File` (Linux, Windows)
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getPreferencesItems(): Array<MenuItemConstructorOptions> {
   return [
@@ -129,8 +128,6 @@ function getPreferencesItems(): Array<MenuItemConstructorOptions> {
 
 /**
  * Returns the Exit items
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getQuitItems(): Array<MenuItemConstructorOptions> {
   return [
@@ -145,8 +142,6 @@ function getQuitItems(): Array<MenuItemConstructorOptions> {
 
 /**
  * Returns the top-level "File" menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getTasksMenu(): MenuItemConstructorOptions {
   const tasksMenu: Array<MenuItemConstructorOptions> = [
@@ -181,7 +176,10 @@ function getShowMeMenuItem(
       label: key,
       type: 'radio',
       checked: key === activeKey,
-      click: () => ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key]),
+      click: async () => {
+        const editorValues = await getTemplateValues(key);
+        ipcMainManager.send(IpcEvents.FS_OPEN_TEMPLATE, [key, editorValues]);
+      },
     };
   }
 
@@ -210,8 +208,6 @@ function getShowMeMenu(
 
 /**
  * Returns the top-level "File" menu
- *
- * @returns {Array<Electron.MenuItemConstructorOptions>}
  */
 function getFileMenu(
   acceleratorsToBlock: BlockableAccelerator[] = [],
@@ -243,7 +239,13 @@ function getFileMenu(
     },
     {
       label: 'Open',
-      click: showOpenDialog,
+      click() {
+        const browserWindow = BrowserWindow.getFocusedWindow();
+
+        if (browserWindow) {
+          showOpenDialog(browserWindow);
+        }
+      },
       accelerator: 'CmdOrCtrl+O',
     },
     {
@@ -261,14 +263,14 @@ function getFileMenu(
     },
     {
       label: 'Save',
-      click: () => ipcMainManager.send(IpcEvents.FS_SAVE_FIDDLE),
+      click: () => saveFiddle(),
       accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.save)
         ? 'CmdOrCtrl+S'
         : undefined,
     },
     {
       label: 'Save as',
-      click: () => showSaveDialog(IpcEvents.FS_SAVE_FIDDLE),
+      click: () => saveFiddleAs(),
       accelerator: !acceleratorsToBlock.includes(BlockableAccelerator.saveAs)
         ? 'CmdOrCtrl+Shift+S'
         : undefined,
@@ -282,8 +284,7 @@ function getFileMenu(
     },
     {
       label: 'Save as Forge Project',
-      click: () =>
-        showSaveDialog(IpcEvents.FS_SAVE_FIDDLE_FORGE, 'Forge Project'),
+      click: () => saveFiddleAsForgeProject(),
     },
   ];
 
@@ -312,10 +313,9 @@ export function setupMenu(options?: SetUpMenuOptions) {
 
   // Get template for default menu
   const defaultMenu = require('electron-default-menu');
-  const menu = (defaultMenu(
-    app,
-    shell,
-  ) as Array<MenuItemConstructorOptions>).map((item) => {
+  const menu = (
+    defaultMenu(app, shell) as Array<MenuItemConstructorOptions>
+  ).map((item) => {
     const { label } = item;
 
     // Append the "Settings" item

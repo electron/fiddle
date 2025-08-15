@@ -1,15 +1,14 @@
-import * as path from 'path';
+import * as path from 'node:path';
 
-import fetch from 'cross-fetch';
-import { IpcMainEvent, app } from 'electron';
-import * as fs from 'fs-extra';
+import { IpcMainInvokeEvent, app } from 'electron';
+import fs from 'fs-extra';
 
-import { EditorValues } from '../interfaces';
-import { IpcEvents } from '../ipc-events';
-import { readFiddle } from '../utils/read-fiddle';
 import { STATIC_DIR } from './constants';
 import { ipcMainManager } from './ipc';
+import { readFiddle } from './utils/read-fiddle';
 import { isReleasedMajor } from './versions';
+import { EditorValues } from '../interfaces';
+import { IpcEvents } from '../ipc-events';
 
 // parent directory of all the downloaded template fiddles
 const TEMPLATES_DIR = path.join(app.getPath('userData'), 'Templates');
@@ -24,8 +23,8 @@ const TEST_TEMPLATE_BRANCH = 'test-template';
  * Ensure we have a fiddle for the specified Electron branch.
  * If we don't have it already, download it from electron-quick-start.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
- * @returns {Promise<string>} Path to the folder where the fiddle is kept
+ * @param branch - Electron branchname, e.g. `12-x-y` or `main`
+ * @returns Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
   let folder = path.join(TEMPLATES_DIR, `electron-quick-start-${branch}`);
@@ -70,8 +69,7 @@ const templateCache: Record<string, Promise<EditorValues>> = {};
 /**
  * Get a cached copy of the Electron branch's fiddle.
  *
- * @param {string} branch - Electron branchname, e.g. `12-x-y` or `main`
- * @returns {Promise<EditorValues>}
+ * @param branch - Electron branchname, e.g. `12-x-y` or `main`
  */
 function getQuickStart(branch: string): Promise<EditorValues> {
   // Load the template for that branch.
@@ -87,8 +85,6 @@ function getQuickStart(branch: string): Promise<EditorValues> {
 
 /**
  * Get a cached copy of the Electron Test fiddle.
- *
- * @returns {Promise<EditorValues>}
  */
 export function getTestTemplate(): Promise<EditorValues> {
   return getQuickStart(TEST_TEMPLATE_BRANCH);
@@ -97,8 +93,7 @@ export function getTestTemplate(): Promise<EditorValues> {
 /**
  * Get a cached copy of the fiddle for the specified Electron version.
  *
- * @param {string} version - Electron version, e.g. 12.0.0
- * @returns {Promise<EditorValues>}
+ * @param version - Electron version, e.g. 12.0.0
  */
 export function getTemplate(version: string): Promise<EditorValues> {
   const major = Number.parseInt(version);
@@ -110,9 +105,9 @@ export function getTemplate(version: string): Promise<EditorValues> {
 export async function setupContent() {
   ipcMainManager.handle(
     IpcEvents.GET_TEMPLATE,
-    (_: IpcMainEvent, version: string) => getTemplate(version),
+    (_: IpcMainInvokeEvent, version: string) => getTemplate(version),
   );
-  ipcMainManager.handle(IpcEvents.GET_TEST_TEMPLATE, (_: IpcMainEvent) =>
+  ipcMainManager.handle(IpcEvents.GET_TEST_TEMPLATE, (_: IpcMainInvokeEvent) =>
     getTestTemplate(),
   );
 }

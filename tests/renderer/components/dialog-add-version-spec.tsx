@@ -1,6 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { AddVersionDialog } from '../../../src/renderer/components/dialog-add-version';
 import { AppState } from '../../../src/renderer/state';
@@ -16,7 +17,7 @@ describe('AddVersionDialog component', () => {
     // platform, so let' have a uniform platform for unit tests
     overrideRendererPlatform('darwin');
 
-    ({ state: store } = window.ElectronFiddle.app);
+    ({ state: store } = window.app);
   });
 
   it('renders', () => {
@@ -52,22 +53,20 @@ describe('AddVersionDialog component', () => {
   });
 
   it('overrides default input with Electron dialog', () => {
-    const preventDefault = jest.fn();
+    const preventDefault = vi.fn();
 
     const wrapper = shallow(<AddVersionDialog appState={store} />);
     const inp = wrapper.find('#custom-electron-version');
     inp.dive().find('input[type="file"]').simulate('click', { preventDefault });
 
-    expect(
-      window.ElectronFiddle.selectLocalVersion as jest.Mock,
-    ).toHaveBeenCalled();
+    expect(window.ElectronFiddle.selectLocalVersion).toHaveBeenCalled();
     expect(preventDefault).toHaveBeenCalled();
   });
 
   describe('selectLocalVersion()', () => {
     it('updates state', async () => {
       const wrapper = shallow(<AddVersionDialog appState={store} />);
-      (window.ElectronFiddle.selectLocalVersion as jest.Mock).mockReturnValue({
+      vi.mocked(window.ElectronFiddle.selectLocalVersion).mockResolvedValue({
         folderPath: '/test/',
         isValidElectron: true,
         localName: 'Test',

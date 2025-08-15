@@ -31,9 +31,6 @@ interface AddVersionDialogState {
 
 /**
  * The "add version" dialog allows users to add custom builds of Electron.
- *
- * @class AddVersionDialog
- * @extends {React.Component<AddVersionDialogProps, AddVersionDialogState>}
  */
 export const AddVersionDialog = observer(
   class AddVersionDialog extends React.Component<
@@ -74,8 +71,6 @@ export const AddVersionDialog = observer(
 
     /**
      * Handles a change of the file input
-     *
-     * @param {React.ChangeEvent<HTMLInputElement>} event
      */
     public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
       const version = event.target.value || '';
@@ -89,8 +84,6 @@ export const AddVersionDialog = observer(
 
     /**
      * Handles the submission of the dialog
-     *
-     * @returns {Promise<void>}
      */
     public async onSubmit(): Promise<void> {
       const {
@@ -128,11 +121,8 @@ export const AddVersionDialog = observer(
     }
 
     get buttons() {
-      const {
-        isValidElectron,
-        isValidVersion,
-        existingLocalVersion,
-      } = this.state;
+      const { isValidElectron, isValidVersion, existingLocalVersion } =
+        this.state;
       const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
       const canSwitch = isValidElectron && existingLocalVersion;
 
@@ -177,7 +167,7 @@ export const AddVersionDialog = observer(
           <div className="bp3-dialog-body">
             <FileInput
               id="custom-electron-version"
-              inputProps={inputProps as any}
+              inputProps={inputProps}
               text={text}
             />
             <br />

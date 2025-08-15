@@ -1,6 +1,13 @@
 import semver from 'semver';
 
+import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
+import { AppState } from './state';
+import { disableDownload } from './utils/disable-download';
+import { isKnownFile, isSupportedFile } from './utils/editor-utils';
+import { getOctokit } from './utils/octokit';
+import { getReleaseChannel } from './versions';
 import {
+  EditorId,
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
@@ -8,12 +15,6 @@ import {
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';
-import { ELECTRON_ORG, ELECTRON_REPO } from './constants';
-import { AppState } from './state';
-import { disableDownload } from './utils/disable-download';
-import { isKnownFile, isSupportedFile } from './utils/editor-utils';
-import { getOctokit } from './utils/octokit';
-import { getReleaseChannel } from './versions';
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -27,8 +28,8 @@ export class RemoteLoader {
       'setElectronVersion',
       'verifyReleaseChannelEnabled',
       'verifyRemoteLoad',
-    ]) {
-      this[name] = this[name].bind(this);
+    ] as const) {
+      this[name] = this[name].bind(this) as any;
     }
   }
 
@@ -100,7 +101,7 @@ export class RemoteLoader {
             fetch(child.download_url)
               .then((r) => r.text())
               .then((t) => {
-                values[child.name] = t;
+                values[child.name as EditorId] = t;
               }),
           );
         }
@@ -109,7 +110,7 @@ export class RemoteLoader {
       await Promise.all(loaders);
 
       return this.handleLoadingSuccess(values, '');
-    } catch (error) {
+    } catch (error: any) {
       return this.handleLoadingFailed(error);
     }
   }
@@ -124,12 +125,18 @@ export class RemoteLoader {
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
+        const content = data.truncated
+          ? await fetch(data.raw_url!).then((r) => r.text())
+          : data.content!;
+
         if (id === PACKAGE_NAME) {
-          const { dependencies, devDependencies } = JSON.parse(data.content);
-          const deps: Record<string, string> = {
-            ...dependencies,
-            ...devDependencies,
-          };
+          const deps: Record<string, string> = {};
+          try {
+            const { dependencies, devDependencies } = JSON.parse(content);
+            Object.assign(deps, dependencies, devDependencies);
+          } catch (e) {
+            throw new Error('Invalid JSON found in package.json');
+          }
 
           // If the gist specifies an Electron version, we want to tell Fiddle to run
           // it with that version by default.
@@ -173,10 +180,14 @@ export class RemoteLoader {
           this.appState.modules = new Map(Object.entries(deps));
         }
 
+        // JSON files are supported, but we don't want to add package.json
+        // or the lockfile to the visible editor array.
+        if ([PACKAGE_NAME, 'package-lock.json'].includes(id)) continue;
+
         if (!isSupportedFile(id)) continue;
 
         if (isKnownFile(id) || (await this.confirmAddFile(id))) {
-          values[id] = data.content;
+          values[id] = content;
         }
       }
 
@@ -184,12 +195,12 @@ export class RemoteLoader {
       // contain any supported files. Throw an error to let the user know.
       if (Object.keys(values).length === 0) {
         throw new Error(
-          'This Gist did not contain any supported files. Supported files must have one of the following extensions: .js, .css, or .html.',
+          'This Gist did not contain any supported files. Supported files must have one of the following extensions: .cjs, .js, .mjs, .css, or .html.',
         );
       }
 
       return this.handleLoadingSuccess(values, gistId);
-    } catch (error) {
+    } catch (error: any) {
       return this.handleLoadingFailed(error);
     }
   }
@@ -215,9 +226,8 @@ export class RemoteLoader {
     }
 
     // check if version is part of release channel
-    const versionReleaseChannel: ElectronReleaseChannel = getReleaseChannel(
-      version,
-    );
+    const versionReleaseChannel: ElectronReleaseChannel =
+      getReleaseChannel(version);
 
     if (!this.appState.channelsToShow.includes(versionReleaseChannel)) {
       const ok = await this.verifyReleaseChannelEnabled(versionReleaseChannel);
@@ -241,7 +251,7 @@ export class RemoteLoader {
   /**
    * Verifies from the user that we should be loading this fiddle.
    *
-   * @param {string} what What are we loading from (gist, example, etc.)
+   * @param what - What are we loading from (gist, example, etc.)
    */
   public verifyRemoteLoad(what: string): Promise<boolean> {
     return this.appState.showConfirmDialog({
@@ -261,25 +271,18 @@ export class RemoteLoader {
 
   /**
    * Loading a fiddle from GitHub succeeded, let's move on.
-   *
-   * @param {EditorValues} values
-   * @param {string} gistId
-   * @returns {Promise<boolean>}
    */
   private async handleLoadingSuccess(
     values: EditorValues,
     gistId: string,
   ): Promise<boolean> {
-    await window.ElectronFiddle.app.replaceFiddle(values, { gistId });
+    await window.app.replaceFiddle(values, { gistId });
     return true;
   }
 
   /**
    * Loading a fiddle from GitHub failed - this method handles this case
    * gracefully.
-   *
-   * @param {Error} error
-   * @returns {boolean}
    */
   private handleLoadingFailed(error: Error): false {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;

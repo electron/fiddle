@@ -3,8 +3,9 @@ import * as React from 'react';
 import { Button, Classes, Dialog } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
+import { TestIdContainer } from './TestIdContainer';
 import { Tour, TourScriptStep, TourStepGetButtonParams } from './tour';
+import { AppState } from '../state';
 
 interface WelcomeTourProps {
   appState: AppState;
@@ -17,8 +18,6 @@ interface WelcomeTourState {
 /**
  * This is our "Welcome to Electron Fiddle" Tour. It includes both an intro to
  * the app and a short intro to Electron.
- *
- * @returns {Set<TourScriptStep>}
  */
 export function getWelcomeTour(): Set<TourScriptStep> {
   return new Set([
@@ -43,7 +42,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'select-versions',
-      selector: 'button.version-chooser',
+      selector: '#version-chooser',
       title: '📇 Choose an Electron Version',
       content: (
         <>
@@ -60,13 +59,23 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'button-run',
-      selector: '.button-run',
+      selector: '#button-run',
       title: '🚀 Run Your Fiddle',
-      content: <p>Hit this button to give your Fiddle a try and start it.</p>,
+      content: (
+        <>
+          <p>Hit this button to give your Fiddle a try and start it.</p>
+          <p>
+            When your Fiddle starts, it will create a user data directory for
+            cookies, the cache, and a few other things. We delete this directory
+            by default when you exit the Fiddle, but you can change this in
+            Settings.
+          </p>
+        </>
+      ),
     },
     {
-      name: 'button-publish',
-      selector: '.button-publish',
+      name: 'button-action',
+      selector: '#button-action',
       title: '🗺 Share Your Fiddle',
       content: (
         <>
@@ -111,7 +120,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'main-editor',
-      selector: 'div.mosaic-window.main',
+      selector: 'div.mosaic-window.main\\.js',
       title: '📝 Main Script',
       content: (
         <>
@@ -137,7 +146,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'html-editor',
-      selector: 'div.mosaic-window.html',
+      selector: 'div.mosaic-window.index\\.html',
       title: '📝 HTML',
       content: (
         <p>
@@ -152,7 +161,7 @@ export function getWelcomeTour(): Set<TourScriptStep> {
     },
     {
       name: 'renderer-editor',
-      selector: 'div.mosaic-window.renderer',
+      selector: 'div.mosaic-window.renderer\\.js',
       title: '📝  Renderer Script',
       content: (
         <>
@@ -175,10 +184,6 @@ export function getWelcomeTour(): Set<TourScriptStep> {
 
 /**
  * The "Welcome to Electron Fiddle" Tour.
- *
- * @export
- * @class WelcomeTour
- * @extends {React.Component<WelcomeTourProps, WelcomeTourState>}
  */
 export const WelcomeTour = observer(
   class WelcomeTour extends React.Component<
@@ -238,24 +243,26 @@ export const WelcomeTour = observer(
       if (!isTourStarted) {
         return (
           <Dialog key="welcome-tour-dialog" isOpen={true}>
-            <div className={Classes.DIALOG_HEADER}>
-              <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
-            </div>
-            <div className={Classes.DIALOG_BODY}>
-              <p>
-                Welcome to Electron Fiddle! If you&apos;re new to the app,
-                we&apos;d like to give you a brief tour of its features.
-              </p>
-              <p>
-                We won&apos;t show this dialog again, but you can always find
-                the tour in the Help menu.
-              </p>
-            </div>
-            <div className={Classes.DIALOG_FOOTER}>
-              <div className={Classes.DIALOG_FOOTER_ACTIONS}>
-                {this.buttons}
+            <TestIdContainer testId="welcome-tour-dialog">
+              <div className={Classes.DIALOG_HEADER}>
+                <h4 className={Classes.HEADING}>🙋‍ Hey There!</h4>
               </div>
-            </div>
+              <div className={Classes.DIALOG_BODY}>
+                <p>
+                  Welcome to Electron Fiddle! If you&apos;re new to the app,
+                  we&apos;d like to give you a brief tour of its features.
+                </p>
+                <p>
+                  We won&apos;t show this dialog again, but you can always find
+                  the tour in the Help menu.
+                </p>
+              </div>
+              <div className={Classes.DIALOG_FOOTER}>
+                <div className={Classes.DIALOG_FOOTER_ACTIONS}>
+                  {this.buttons}
+                </div>
+              </div>
+            </TestIdContainer>
           </Dialog>
         );
       } else {

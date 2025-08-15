@@ -8,13 +8,14 @@ import {
   Callout,
   Checkbox,
   FormGroup,
-  HTMLTable,
   Icon,
   IconName,
+  InputGroup,
   Spinner,
-  Tooltip,
 } from '@blueprintjs/core';
+import { Tooltip2 } from '@blueprintjs/popover2';
 import { observer } from 'mobx-react';
+import { FixedSizeList as List } from 'react-window';
 
 import {
   ElectronReleaseChannel,
@@ -31,15 +32,127 @@ interface ElectronSettingsProps {
 }
 
 interface ElectronSettingsState {
-  isDownloadingAll: boolean;
-  isDeletingAll: boolean;
+  filterQuery: string;
 }
+
+interface RowProps {
+  index: number;
+  style: React.CSSProperties;
+  data: {
+    versions: RunnableVersion[];
+    appState: AppState;
+  };
+}
+
+// Observer component for individual rows to ensure they re-render when version state changes
+const ElectronVersionRow = observer(({ index, style, data }: RowProps) => {
+  const { versions, appState } = data;
+  const item = versions[index];
+
+  const renderHumanState = (item: RunnableVersion): JSX.Element => {
+    const { state, source } = item;
+    const isLocal = source === VersionSource.local;
+    let icon: IconName = 'box';
+    let humanState = isLocal ? 'Available' : 'Downloaded';
+
+    if (state === InstallState.downloading) {
+      icon = 'cloud-download';
+      humanState = 'Downloading';
+    } else if (state === InstallState.missing) {
+      icon = isLocal ? 'issue' : 'cloud';
+      humanState = isLocal ? 'Not Available' : 'Not Downloaded';
+    }
+
+    return (
+      <span>
+        <Icon icon={icon} /> {humanState}
+      </span>
+    );
+  };
+
+  const renderAction = (ver: RunnableVersion): JSX.Element => {
+    const { state, source, version } = ver;
+    const isLocal = source === VersionSource.local;
+    const buttonProps: ButtonProps = {
+      small: true,
+    };
+
+    switch (state) {
+      case InstallState.installed:
+      case InstallState.downloaded:
+        buttonProps.icon = 'trash';
+        buttonProps.onClick = () => appState.removeVersion(ver);
+        buttonProps.text = isLocal ? 'Remove' : 'Delete';
+        break;
+
+      case InstallState.installing:
+      case InstallState.downloading:
+        buttonProps.disabled = true;
+        buttonProps.icon = <Spinner size={16} value={ver.downloadProgress} />;
+        buttonProps.text = 'Downloading';
+        buttonProps.className = 'disabled-version';
+        break;
+
+      case InstallState.missing:
+        buttonProps.disabled = false;
+        buttonProps.loading = false;
+        buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
+        buttonProps.text = isLocal ? 'Remove' : 'Download';
+        buttonProps.onClick = () => {
+          isLocal ? appState.removeVersion(ver) : appState.downloadVersion(ver);
+        };
+        break;
+    }
+
+    if (version === appState.currentElectronVersion.version) {
+      return (
+        <Tooltip2
+          position="auto"
+          intent="primary"
+          content={`Can't remove currently active Electron version (${version})`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip2>
+      );
+    } else if (disableDownload(version)) {
+      return (
+        <Tooltip2
+          position="auto"
+          intent="primary"
+          content={`Version is not available on your current OS`}
+        >
+          <AnchorButton
+            className={'disabled-version'}
+            disabled={true}
+            text={buttonProps.text}
+            icon={buttonProps.icon}
+          />
+        </Tooltip2>
+      );
+    }
+
+    return <Button {...buttonProps} type={undefined} />;
+  };
+
+  return (
+    <div
+      className={`electron-version-row ${index % 2 === 0 ? 'even' : 'odd'}`}
+      style={style}
+    >
+      <div className="version-col">{item.version}</div>
+      <div className="status-col">{renderHumanState(item)}</div>
+      <div className="action-col">{renderAction(item)}</div>
+    </div>
+  );
+});
 
 /**
  * Settings content to manage Electron-related preferences.
- *
- * @class ElectronSettings
- * @extends {React.Component<ElectronSettingsProps, ElectronSettingsState>}
  */
 export const ElectronSettings = observer(
   class ElectronSettings extends React.Component<
@@ -49,20 +162,20 @@ export const ElectronSettings = observer(
     constructor(props: ElectronSettingsProps) {
       super(props);
 
+      this.state = {
+        filterQuery: '',
+      };
+
       this.handleAddVersion = this.handleAddVersion.bind(this);
       this.handleChannelChange = this.handleChannelChange.bind(this);
       this.handleDeleteAll = this.handleDeleteAll.bind(this);
       this.handleDownloadAll = this.handleDownloadAll.bind(this);
-      this.handleUpdateElectronVersions = this.handleUpdateElectronVersions.bind(
-        this,
-      );
+      this.handleStopDownloads = this.handleStopDownloads.bind(this);
+      this.handleUpdateElectronVersions =
+        this.handleUpdateElectronVersions.bind(this);
       this.handleShowObsoleteChange = this.handleShowObsoleteChange.bind(this);
       this.handleStateChange = this.handleStateChange.bind(this);
-
-      this.state = {
-        isDownloadingAll: false,
-        isDeletingAll: false,
-      };
+      this.handleFilterChange = this.handleFilterChange.bind(this);
     }
 
     public handleUpdateElectronVersions() {
@@ -71,8 +184,6 @@ export const ElectronSettings = observer(
 
     /**
      * Toggles visibility of non-downloaded versions
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleStateChange(event: React.FormEvent<HTMLInputElement>) {
       const { appState } = this.props;
@@ -82,8 +193,6 @@ export const ElectronSettings = observer(
 
     /**
      * Toggles visibility of obsolete versions
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleShowObsoleteChange(event: React.FormEvent<HTMLInputElement>) {
       const { appState } = this.props;
@@ -93,8 +202,6 @@ export const ElectronSettings = observer(
 
     /**
      * Handles a change in which channels should be displayed.
-     *
-     * @param {React.FormEvent<HTMLInputElement>} event
      */
     public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
       const { id, checked } = event.currentTarget;
@@ -109,37 +216,48 @@ export const ElectronSettings = observer(
 
     /**
      * Download all visible versions of Electron.
-     *
-     * @returns {Promise<void>}
      */
     public async handleDownloadAll(): Promise<void> {
-      this.setState({ isDownloadingAll: true });
+      const {
+        downloadVersion,
+        versionsToShow,
+        startDownloadingAll,
+        stopDownloadingAll,
+      } = this.props.appState;
 
-      const { downloadVersion, versionsToShow } = this.props.appState;
+      startDownloadingAll();
 
       for (const ver of versionsToShow) {
         await downloadVersion(ver);
+
+        if (!this.props.appState.isDownloadingAll) break;
       }
 
-      this.setState({ isDownloadingAll: false });
+      stopDownloadingAll();
     }
 
     /**
      * Delete all downloaded versions of Electron.
-     *
-     * @returns {Promise<void>}
      */
     public async handleDeleteAll(): Promise<void> {
-      this.setState({ isDeletingAll: true });
+      const { versions, removeVersion, startDeletingAll, stopDeletingAll } =
+        this.props.appState;
 
-      const { versions, removeVersion } = this.props.appState;
+      startDeletingAll();
 
       for (const ver of Object.values(versions)) {
         await removeVersion(ver);
       }
 
-      this.setState({ isDeletingAll: false });
+      stopDeletingAll();
     }
+
+    /**
+     * Stops the downloads
+     */
+    public handleStopDownloads = (): void => {
+      this.props.appState.stopDownloadingAll();
+    };
 
     /**
      * Opens the "add local version" dialog
@@ -148,31 +266,44 @@ export const ElectronSettings = observer(
       this.props.appState.toggleAddVersionDialog();
     }
 
+    private handleFilterChange(event: React.ChangeEvent<HTMLInputElement>) {
+      this.setState({ filterQuery: event.target.value });
+    }
+
+    private get filteredVersions(): RunnableVersion[] {
+      const { filterQuery } = this.state;
+      const { versionsToShow } = this.props.appState;
+
+      if (!filterQuery) return versionsToShow;
+
+      const query = filterQuery.toLowerCase();
+      return versionsToShow.filter((ver) =>
+        ver.version.toLowerCase().includes(query),
+      );
+    }
+
     public render() {
       return (
         <div className="settings-electron">
           <h1>Electron Settings</h1>
-          <Callout>{this.renderVersionShowOptions()}</Callout>
-          <br />
-          <Callout>{this.filterSection()}</Callout>
+          <Callout>{this.renderFilters()}</Callout>
           <br />
           <Callout>
             {this.renderAdvancedButtons()}
-            {this.renderTable()}
+            {this.renderVersionFilter()}
+            {this.renderVersionsTable()}
           </Callout>
         </div>
       );
     }
 
     /**
-     * Renders the various buttons for advanced operations
-     *
-     * @private
-     * @returns {JSX.Element}
+     * Renders the various buttons for advanced operations.
      */
     private renderAdvancedButtons(): JSX.Element {
-      const { isDownloadingAll, isDeletingAll } = this.state;
-      const { isUpdatingElectronVersions } = this.props.appState;
+      const { isUpdatingElectronVersions, isDownloadingAll, isDeletingAll } =
+        this.props.appState;
+
       const isWorking = isDownloadingAll || isDeletingAll;
 
       return (
@@ -184,12 +315,20 @@ export const ElectronSettings = observer(
             icon="numbered-list"
             text="Update Electron Release List"
           />
-          <Button
-            disabled={isWorking}
-            icon="download"
-            onClick={this.handleDownloadAll}
-            text="Download All Versions"
-          />
+          {isDownloadingAll ? (
+            <Button
+              icon="stop"
+              onClick={this.handleStopDownloads}
+              text="Stop Downloads"
+            />
+          ) : (
+            <Button
+              disabled={isWorking}
+              icon="download"
+              onClick={this.handleDownloadAll}
+              text="Download All Versions"
+            />
+          )}
           <Button
             disabled={isWorking}
             icon="trash"
@@ -204,27 +343,11 @@ export const ElectronSettings = observer(
         </ButtonGroup>
       );
     }
-    private filterSection(): JSX.Element {
-      const { appState } = this.props;
-      return (
-        <FormGroup label="Filters:">
-          <Checkbox
-            checked={appState.showUndownloadedVersions}
-            id="showUndownloadedVersions"
-            label="Not downloaded"
-            onChange={this.handleStateChange}
-          />
-        </FormGroup>
-      );
-    }
 
     /**
-     * Renders the various options for which versions should be displayed
-     *
-     * @private
-     * @returns {JSX.Element}
+     * Renders the filters section with channels and visibility options.
      */
-    private renderVersionShowOptions(): JSX.Element {
+    private renderFilters(): JSX.Element {
       const { appState } = this.props;
 
       const getIsChecked = (channel: ElectronReleaseChannel) => {
@@ -244,185 +367,120 @@ export const ElectronSettings = observer(
       };
 
       return (
-        <FormGroup label="Channels:">
-          {Object.values(channels).map((channel) => (
-            <Tooltip
-              content={`Can't disable channel of selected version (${appState.version})`}
-              disabled={!getIsCurrentVersionReleaseChannel(channel)}
+        <FormGroup>
+          <div style={{ marginBottom: '8px' }}>
+            <label
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '4px',
+                display: 'block',
+              }}
+            >
+              Channels
+            </label>
+            {Object.values(channels).map((channel) => (
+              <Tooltip2
+                content={`Can't disable channel of selected version (${appState.version})`}
+                disabled={!getIsCurrentVersionReleaseChannel(channel)}
+                position="bottom"
+                intent="primary"
+                key={channel}
+              >
+                <Checkbox
+                  checked={getIsChecked(channel)}
+                  label={channel}
+                  id={channel}
+                  onChange={this.handleChannelChange}
+                  disabled={getIsCurrentVersionReleaseChannel(channel)}
+                  inline={true}
+                />
+              </Tooltip2>
+            ))}
+          </div>
+
+          <div>
+            <label
+              style={{
+                fontWeight: 'bold',
+                marginBottom: '4px',
+                display: 'block',
+              }}
+            >
+              Visibility
+            </label>
+            <Checkbox
+              checked={appState.showUndownloadedVersions}
+              id="showUndownloadedVersions"
+              label="Show not downloaded versions"
+              onChange={this.handleStateChange}
+              inline={true}
+            />
+            <Tooltip2
+              content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
               position="bottom"
               intent="primary"
-              key={channel}
             >
               <Checkbox
-                checked={getIsChecked(channel)}
-                label={channel}
-                id={channel}
-                onChange={this.handleChannelChange}
-                disabled={getIsCurrentVersionReleaseChannel(channel)}
+                checked={appState.showObsoleteVersions}
+                id="showObsoleteVersions"
                 inline={true}
+                label="Show obsolete versions"
+                onChange={this.handleShowObsoleteChange}
               />
-            </Tooltip>
-          ))}
-          <Tooltip
-            content={`Include versions that have reached end-of-life (older than ${window.ElectronFiddle.getOldestSupportedMajor()}.0.0)`}
-            position="bottom"
-            intent="primary"
-          >
-            <Checkbox
-              checked={appState.showObsoleteVersions}
-              id="showObsoleteVersions"
-              inline={true}
-              label="Obsolete"
-              onChange={this.handleShowObsoleteChange}
-            />
-          </Tooltip>
+            </Tooltip2>
+          </div>
         </FormGroup>
       );
     }
 
     /**
+     * Renders the version filter input.
+     */
+    private renderVersionFilter(): JSX.Element {
+      return (
+        <InputGroup
+          className="version-filter"
+          leftIcon="filter"
+          placeholder="Filter versions..."
+          value={this.state.filterQuery}
+          onChange={this.handleFilterChange}
+        />
+      );
+    }
+
+    /**
      * Renders the table with Electron versions.
-     *
-     * @private
-     * @returns {JSX.Element}
      */
-    private renderTable(): JSX.Element {
-      return (
-        <HTMLTable className="electron-versions-table" striped={true}>
-          <thead>
-            <tr>
-              <th>Version</th>
-              <th>Status</th>
-              <th className="action">Action</th>
-            </tr>
-          </thead>
-          <tbody>{this.renderTableRows()}</tbody>
-        </HTMLTable>
-      );
-    }
-
-    /**
-     * Renders the rows with Electron version, returning an Array.
-     *
-     * @private
-     * @returns {Array<JSX.Element>}
-     */
-    private renderTableRows(): Array<JSX.Element | null> {
-      return this.props.appState.versionsToShow.map((item) => (
-        <tr key={item.version}>
-          <td>{item.version}</td>
-          <td>{this.renderHumanState(item)}</td>
-          <td className="action">{this.renderAction(item)}</td>
-        </tr>
-      ));
-    }
-
-    /**
-     * Returns a human-readable state indicator for an Electron version.
-     *
-     * @param {RunnableVersion} item
-     * @returns {JSX.Element}
-     */
-    private renderHumanState(item: RunnableVersion): JSX.Element {
-      const { state, source } = item;
-      const isLocal = source === VersionSource.local;
-      let icon: IconName = 'box';
-      let humanState = 'Downloaded';
-
-      if (state === InstallState.downloading) {
-        icon = 'cloud-download';
-        humanState = 'Downloading';
-      } else if (state === InstallState.missing) {
-        // The only way for a local version to be missing
-        // is for it to have been deleted. Mark as unavailable.
-        icon = isLocal ? 'issue' : 'cloud';
-        humanState = isLocal ? 'Not available' : 'Not downloaded';
-      }
-
-      return (
-        <span>
-          <Icon icon={icon} /> {humanState}
-        </span>
-      );
-    }
-
-    /**
-     * Renders the action for a single Electron version.
-     *
-     * @private
-     * @param {RunnableVersion} ver
-     * @returns {JSX.Element}
-     */
-    private renderAction(ver: RunnableVersion): JSX.Element {
-      const { state, source, version } = ver;
-      const { appState } = this.props;
-      const isLocal = source === VersionSource.local;
-      const buttonProps: ButtonProps = {
-        fill: true,
-        small: true,
+    private renderVersionsTable(): JSX.Element {
+      const versions = this.filteredVersions;
+      const itemData = {
+        versions,
+        appState: this.props.appState,
       };
 
-      switch (state) {
-        case InstallState.installed:
-        case InstallState.downloaded:
-          buttonProps.icon = 'trash';
-          buttonProps.onClick = () => appState.removeVersion(ver);
-          buttonProps.text = isLocal ? 'Remove' : 'Delete';
-          break;
-
-        case InstallState.installing:
-        case InstallState.downloading:
-          buttonProps.disabled = true;
-          buttonProps.icon = <Spinner size={16} value={ver.downloadProgress} />;
-          buttonProps.text = 'Downloading';
-          break;
-
-        case InstallState.missing:
-          buttonProps.disabled = false;
-          buttonProps.loading = false;
-          buttonProps.icon = isLocal ? 'trash' : 'cloud-download';
-          buttonProps.text = isLocal ? 'Remove' : 'Download';
-          buttonProps.onClick = () => {
-            isLocal
-              ? appState.removeVersion(ver)
-              : appState.downloadVersion(ver, { activate: false });
-          };
-          break;
-      }
-
-      if (version === appState.currentElectronVersion.version) {
-        return (
-          <Tooltip
-            position="auto"
-            intent="primary"
-            content={`Can't remove currently active Electron version (${version})`}
-          >
-            <AnchorButton
-              className={'disabled-version'}
-              disabled={true}
-              text={buttonProps.text}
-              icon={buttonProps.icon}
-            />
-          </Tooltip>
-        );
-      } else if (disableDownload(version)) {
-        return (
-          <Tooltip
-            position="auto"
-            intent="primary"
-            content={`Version is not available on your current OS`}
-          >
-            <AnchorButton
-              className={'disabled-version'}
-              disabled={true}
-              text={buttonProps.text}
-              icon={buttonProps.icon}
-            />
-          </Tooltip>
-        );
-      }
-
-      return <Button {...buttonProps} type={undefined} />;
+      return (
+        <div className="electron-versions-table">
+          <div className="electron-versions-header">
+            <div className="version-col">Version</div>
+            <div className="status-col">Status</div>
+            <div className="action-col">Action</div>
+          </div>
+          {versions.length === 0 ? (
+            <div className="no-versions">No versions match your filter</div>
+          ) : (
+            <List
+              height={400}
+              itemCount={versions.length}
+              itemSize={40}
+              width="100%"
+              itemData={itemData}
+              className="electron-versions-list"
+            >
+              {ElectronVersionRow}
+            </List>
+          )}
+        </div>
+      );
     }
   },
 );
