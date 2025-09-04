@@ -641,6 +641,21 @@
     glob "^11.0.1"
     minimatch "^10.0.1"
 
+"@electron/devtron@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@electron/devtron/-/devtron-2.0.0.tgz#8434e57c29a76bcc6377c408f40bccbd8038667f"
+  integrity sha512-6FK9PyF50Z91EhUrF6pNFY5p9wqfA86jjaGOetQMQVljC6AIf2GQa/5ycTNH5AWKX+Zd00XS9G8p6WgaYc8vPQ==
+  dependencies:
+    "@fontsource-variable/roboto" "^5.2.5"
+    "@fontsource/space-mono" "^5.2.5"
+    "@microlink/react-json-view" "^1.26.2"
+    ag-grid-community "^34.1.2"
+    ag-grid-react "^34.1.2"
+    denque "^2.1.0"
+    lucide-react "^0.513.0"
+    react "^19.1.0"
+    react-dom "^19.1.0"
+
 "@electron/fiddle-core@^2.0.1":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@electron/fiddle-core/-/fiddle-core-2.0.1.tgz#9c83f072e7cb539bf09b6221e9bf0b2ee766474c"
@@ -1140,21 +1155,6 @@
   version "1.1.3"
   resolved "https://registry.npmjs.org/@gar/promisify/-/promisify-1.1.3.tgz"
   integrity sha512-k2Ty1JcVojjJFwrg/ThKi2ujJ7XNLYaFGNB/bWT9wGR+oSMJHMa5w+CUq6p/pVrKeNNgA7pCqEcjSnHVoqJQFw==
-
-"@hitarth-gg/devtron@^0.0.0-development.8":
-  version "0.0.0-development.8"
-  resolved "https://registry.yarnpkg.com/@hitarth-gg/devtron/-/devtron-0.0.0-development.8.tgz#f9fb24bf2e62aaff2fc599aa3c85044d88e60626"
-  integrity sha512-F+pJlIvCYzY8zr20yiMwZq/2ge6RuU4G11aniYdtudg0ASgBgvfQbjtJ8AXht9OKc0FXkGIFlyAbSxEtF6aFXw==
-  dependencies:
-    "@fontsource-variable/roboto" "^5.2.5"
-    "@fontsource/space-mono" "^5.2.5"
-    "@microlink/react-json-view" "^1.26.2"
-    ag-grid-community "^33.3.2"
-    ag-grid-react "^33.3.2"
-    denque "^2.1.0"
-    lucide-react "^0.513.0"
-    react "^19.1.0"
-    react-dom "^19.1.0"
 
 "@humanwhocodes/config-array@^0.11.10":
   version "0.11.10"
@@ -3124,24 +3124,24 @@ adjust-sourcemap-loader@^4.0.0:
     loader-utils "^2.0.0"
     regex-parser "^2.2.11"
 
-ag-charts-types@11.3.2:
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/ag-charts-types/-/ag-charts-types-11.3.2.tgz#b1b4e2d273911cdd6d78ce7b4a6c561fa22796bf"
-  integrity sha512-trPGqgGYiTeLgtf9nLuztDYOPOFOLbqHn1g2D99phf7QowcwdX0TPx0wfWG8Hm90LjB8IH+G2s3AZe2vrdAtMQ==
+ag-charts-types@12.1.2:
+  version "12.1.2"
+  resolved "https://registry.yarnpkg.com/ag-charts-types/-/ag-charts-types-12.1.2.tgz#a94d8c042792d2472998c3e783f674b37327b366"
+  integrity sha512-B5IEMzaDxpJRko9sREIBEZOn44tlMX353tMJ1RGYHZrjDFx4on/p6q3YxBvway3nViAM2POmFOS45+1fF9YC8g==
 
-ag-grid-community@33.3.2, ag-grid-community@^33.3.2:
-  version "33.3.2"
-  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-33.3.2.tgz#bd3e41170958cb81da71a74a3021af66fc6ebdc1"
-  integrity sha512-9bx0e/+ykOyLvUxHqmdy0cRVANH6JAtv0yZdnBZEXYYqBAwN+G5a4NY+2I1KvoOCYzbk8SnStG7y4hCdVAAWOQ==
+ag-grid-community@34.1.2, ag-grid-community@^34.1.2:
+  version "34.1.2"
+  resolved "https://registry.yarnpkg.com/ag-grid-community/-/ag-grid-community-34.1.2.tgz#4ff755f5840b3e110fa4a6184bdb9eb4d826e93c"
+  integrity sha512-PN79zG/tigZaVKkQZXaithLO3j4JWp+9CjqEFth6kFUwMJ0E6OcNzNtn4NFEKM38fEdpGsr+k+gFk5KUE2h5fA==
   dependencies:
-    ag-charts-types "11.3.2"
+    ag-charts-types "12.1.2"
 
-ag-grid-react@^33.3.2:
-  version "33.3.2"
-  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-33.3.2.tgz#c9c5f53f4712929b5b526bba7329ad7496583c32"
-  integrity sha512-5bv4JIJvGov23sduIUIyQTqpa/qhoQrRkQm5pFOQb7RMwusfx6xBPrkLwIIlCJiQ8g0OOinxWzZ2kQ2Zml6tLw==
+ag-grid-react@^34.1.2:
+  version "34.1.2"
+  resolved "https://registry.yarnpkg.com/ag-grid-react/-/ag-grid-react-34.1.2.tgz#54e969512ca9b0eae9a431613479a3ea1dbd8438"
+  integrity sha512-6l5+hp3O4VSZ1nc2IZSQyhNeUOZ4TDg4UVrpxsqV3xXBO1TRqmOhcsYBDJ95JZ8zSiAEvy7XKT3MSI7sJG+MFg==
   dependencies:
-    ag-grid-community "33.3.2"
+    ag-grid-community "34.1.2"
     prop-types "^15.8.1"
 
 agent-base@6, agent-base@^6.0.2:
