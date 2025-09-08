@@ -12,7 +12,7 @@ jobs:
       - name: Install dependencies
         run: npm install hast-util-from-html@^2.0.1 hast-util-select@^6.0.2
       - name: Check website download links
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const { fromHtml } = await import('${{ github.workspace }}/node_modules/hast-util-from-html/index.js');
