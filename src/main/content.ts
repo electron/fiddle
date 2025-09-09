@@ -21,19 +21,20 @@ const TEST_TEMPLATE_BRANCH = 'test-template';
 
 /**
  * Ensure we have a fiddle for the specified Electron branch.
- * If we don't have it already, download it from electron-quick-start.
+ * If we don't have it already, download it from the minimal-repro
+ * repository.
  *
  * @param branch - Electron branchname, e.g. `12-x-y` or `main`
  * @returns Path to the folder where the fiddle is kept
  */
 async function prepareTemplate(branch: string): Promise<string> {
-  let folder = path.join(TEMPLATES_DIR, `electron-quick-start-${branch}`);
+  let folder = path.join(TEMPLATES_DIR, `minimal-repro-${branch}`);
 
   try {
     // if we don't have it, download it
     if (!fs.existsSync(folder)) {
       console.log(`Content: ${branch} downloading template`);
-      const url = `https://github.com/electron/electron-quick-start/archive/${branch}.zip`;
+      const url = `https://github.com/electron/minimal-repro/archive/${branch}.zip`;
       const response = await fetch(url);
       if (!response.ok) {
         throw new Error(`${url} ${response.status} ${response.statusText}`);

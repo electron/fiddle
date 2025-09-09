@@ -97,7 +97,7 @@ describe('content', () => {
       await getTestTemplate();
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(fetch).toHaveBeenLastCalledWith(
-        'https://github.com/electron/electron-quick-start/archive/test-template.zip',
+        'https://github.com/electron/minimal-repro/archive/test-template.zip',
       );
     });
   });
