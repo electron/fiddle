@@ -1963,19 +1963,19 @@
   integrity sha512-Pc/AFTdwZwEKJxFJvlxrSmGe/di+aAOBn60sremrpLo6VI/6cmiUYNNwlI5KNYttg7uypzA3ILPMPgxB2GYZEg==
 
 "@reforged/maker-appimage@^5.0.0":
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/@reforged/maker-appimage/-/maker-appimage-5.0.0.tgz#cbd04bda32bcbaa216e45fb770e8ad430364a2df"
-  integrity sha512-25nli9nt5MVMRladnoJ3uP5W+2KpND5mzA36rc/Duj/R71oGcOj3t9Uoc/dDmaED8afAEeaSYpVE7VPPe9T54A==
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/@reforged/maker-appimage/-/maker-appimage-5.1.0.tgz#dc1a085dddaaf3bc65dd30d11cb09617e3dcf9d8"
+  integrity sha512-N4IkxfaquzgoH/zEC2uiR4smndDhgvBtwfAYnuVM5F2Lpy5IGSDakqvtPfMCy1r645qQRMYdh3gEQu5cvIro4g==
   dependencies:
     "@electron-forge/maker-base" "^6.0.0 || ^7.0.0"
-    "@reforged/maker-types" "^1.0.0"
+    "@reforged/maker-types" "^2.0.0"
     "@spacingbat3/lss" "^1.0.0"
     semver "^7.3.8"
 
-"@reforged/maker-types@^1.0.0":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@reforged/maker-types/-/maker-types-1.0.1.tgz#5f92c40c793166dbdafa2cb68bb4495f0cf639d9"
-  integrity sha512-gjLr6O7rS8XzjbqCEo/BxT4mrevWuYKdMzc0uO6dNcWDXinfhJVHT3aEZmtMyn1nx+ZbffzpCFPgGNYZtwGXxQ==
+"@reforged/maker-types@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@reforged/maker-types/-/maker-types-2.0.0.tgz#08bf3f1926a8ecb967604508aec5dfe51a48a49d"
+  integrity sha512-Vc8xblKLfo+CP7CE/5Yshtyo6NwBkE4ZW00boCI50yePHG2wN04w1qrFlSxAmuau70J3alMhUrByeMrddlxAyw==
 
 "@rollup/rollup-android-arm-eabi@4.50.1":
   version "4.50.1"
