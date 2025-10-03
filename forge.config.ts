@@ -146,9 +146,7 @@ const config: ForgeConfig = {
       name: '@reforged/maker-appimage',
       platforms: ['linux'],
       config: {
-        options: {
-          categories: commonLinuxConfig.categories,
-        },
+        options: commonLinuxConfig,
       },
     },
   ],
