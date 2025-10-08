@@ -20,7 +20,7 @@ jobs:
           node-version: 22.x
           cache: yarn
       - name: Install
-        run: yarn --immutable || yarn --immutable || yarn --immutable
+        run: yarn --immutable
       - run: yarn run contributors
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
