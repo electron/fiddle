@@ -78,14 +78,14 @@
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "7.8.1",
-    "@electron-forge/maker-deb": "7.8.1",
-    "@electron-forge/maker-rpm": "7.8.1",
-    "@electron-forge/maker-squirrel": "7.8.1",
-    "@electron-forge/maker-zip": "7.8.1",
-    "@electron-forge/plugin-fuses": "7.8.1",
-    "@electron-forge/plugin-webpack": "7.8.1",
-    "@electron-forge/publisher-github": "7.8.1",
+    "@electron-forge/cli": "7.9.0",
+    "@electron-forge/maker-deb": "7.9.0",
+    "@electron-forge/maker-rpm": "7.9.0",
+    "@electron-forge/maker-squirrel": "7.9.0",
+    "@electron-forge/maker-zip": "7.9.0",
+    "@electron-forge/plugin-fuses": "7.9.0",
+    "@electron-forge/plugin-webpack": "7.9.0",
+    "@electron-forge/publisher-github": "7.9.0",
     "@electron/devtron": "^2.0.0",
     "@electron/fuses": "^1.6.1",
     "@electron/lint-roller": "^3.1.2",
@@ -166,8 +166,8 @@
     ]
   },
   "resolutions": {
-    "@electron-forge/maker-base": "7.8.1",
-    "@electron-forge/shared-types": "7.8.1"
+    "@electron-forge/maker-base": "7.9.0",
+    "@electron-forge/shared-types": "7.9.0"
   },
   "packageManager": "yarn@4.10.3",
   "dependenciesMeta": {
