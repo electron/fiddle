@@ -2669,22 +2669,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@reforged/maker-appimage@npm:^5.0.0":
-  version: 5.0.0
-  resolution: "@reforged/maker-appimage@npm:5.0.0"
+"@reforged/maker-appimage@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "@reforged/maker-appimage@npm:5.1.0"
   dependencies:
     "@electron-forge/maker-base": "npm:^6.0.0 || ^7.0.0"
-    "@reforged/maker-types": "npm:^1.0.0"
+    "@reforged/maker-types": "npm:^2.0.0"
     "@spacingbat3/lss": "npm:^1.0.0"
     semver: "npm:^7.3.8"
-  checksum: 10c0/9a938d2dc948b41235c7ed988f59c2acf6ca060ee78678a6df9d42f24acac6f0b01a2145d9658b64786f145dd5d760197159c0f5a2060ebc73c732b3d6fd0ae5
+  checksum: 10c0/0b93abfd037fc6016f47e9a2897ba58a3dfe936a8a7429360ec66eda3e327d94c70b87ea3dd321c9f727e891fc8163e607b58b7db4c9dbc28b78f16adbb45bed
   languageName: node
   linkType: hard
 
-"@reforged/maker-types@npm:^1.0.0":
-  version: 1.0.1
-  resolution: "@reforged/maker-types@npm:1.0.1"
-  checksum: 10c0/ba7fff5d635802e4171807044d750fbd28724f1569a5b484e66d4fe2bc2dcb9c29a988c1a4fb64e87e041961cd2b84f915b57afafc5cc4c43f440f40ebdb085a
+"@reforged/maker-types@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@reforged/maker-types@npm:2.0.0"
+  checksum: 10c0/12bb5c7c989fbb73e70e179d45cf045d3cd730cf96c5fbcf0d08d3a4cf252cbd825b7b2e5b5843053a041ee0eec627cdd3850a67c787c9b6c3a1e10e78b4c5f1
   languageName: node
   linkType: hard
 
@@ -6428,7 +6428,7 @@ __metadata:
     "@electron/lint-roller": "npm:^3.1.2"
     "@octokit/core": "npm:^3.5.1"
     "@octokit/rest": "npm:^17.0.0"
-    "@reforged/maker-appimage": "npm:^5.0.0"
+    "@reforged/maker-appimage": "npm:^5.1.0"
     "@sentry/electron": "npm:^5.11.0"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.6.3"
