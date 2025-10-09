@@ -7,6 +7,7 @@ import {
   EditorValues,
   MAIN_CJS,
   MAIN_JS,
+  MAIN_MJS,
   PACKAGE_NAME,
 } from '../../../src/interfaces';
 import { Editors } from '../../../src/renderer/components/editors';
@@ -196,6 +197,101 @@ describe('SidebarFileTree component', () => {
       `Cannot rename file to "${EDITOR_NEW_NAME}": Main entry point ${MAIN_JS} exists`,
     );
     expect(editorMosaic.files.get(TO_BE_NAMED)).toBe(EditorPresence.Pending);
+  });
+
+  it('can set a new main entry point file', () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    // Add MAIN_CJS to the mosaic
+    // NOTE: Using direct map manipulation for test setup only.
+    // In production code, files would be added through proper channels.
+    editorMosaic.files.set(MAIN_CJS, EditorPresence.Visible);
+
+    instance.setMainEntryPoint(MAIN_JS);
+
+    expect(instance.getMainEntryPoint()).toBe(MAIN_JS);
+    expect(editorMosaic.mainEntryPointFile()).toBe(MAIN_JS);
+
+    instance.setMainEntryPoint(MAIN_CJS);
+
+    expect(instance.getMainEntryPoint()).toBe(MAIN_CJS);
+    expect(editorMosaic.mainEntryPointFile()).toBe(MAIN_CJS);
+  });
+
+  it('fails when trying to set an invalid file as main entry point', () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const REGULAR_FILE = 'index.html';
+
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    instance.setMainEntryPoint(REGULAR_FILE);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Cannot set main entry point to "${REGULAR_FILE}": Not a valid main entry point file`,
+    );
+  });
+
+  it('fails when trying to set a non-existent file as main entry point', () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    const NON_EXISTENT_FILE = 'non-existent-file.js';
+
+    store.showErrorDialog = jest.fn().mockResolvedValueOnce(true);
+
+    instance.setMainEntryPoint(NON_EXISTENT_FILE);
+
+    expect(store.showErrorDialog).toHaveBeenCalledWith(
+      `Cannot set main entry point to "${NON_EXISTENT_FILE}": File does not exist`,
+    );
+  });
+
+  it('selects an available alternate main file after renaming active main file', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    // Add MAIN_CJS, MAIN_MJS to the mosaic
+    // NOTE: Using set() for test setup only.
+    // In production code, files would be added through proper channels.
+    editorMosaic.set({
+      ...createEditorValues(),
+      [MAIN_CJS]: '// main.cjs content',
+      [MAIN_MJS]: '// main.mjs content',
+    });
+
+    instance.setMainEntryPoint(MAIN_JS);
+
+    expect(instance.getMainEntryPoint()).toBe(MAIN_JS);
+
+    store.showInputDialog = jest
+      .fn()
+      .mockResolvedValueOnce('not-a-main-file.js');
+
+    await instance.renameEditor(MAIN_JS);
+
+    const newMainFile = instance.getMainEntryPoint();
+    expect(newMainFile).not.toBe(MAIN_JS);
+    expect([MAIN_CJS, MAIN_MJS]).toContain(newMainFile);
+  });
+
+  it('sets main entry point to undefined when no main files exist after renaming', async () => {
+    const wrapper = shallow(<SidebarFileTree appState={store} />);
+    const instance: any = wrapper.instance();
+
+    instance.setMainEntryPoint(MAIN_JS);
+
+    expect(instance.getMainEntryPoint()).toBe(MAIN_JS);
+
+    store.showInputDialog = jest
+      .fn()
+      .mockResolvedValueOnce('not-a-main-file.js');
+
+    await instance.renameEditor(MAIN_JS);
+
+    expect(instance.getMainEntryPoint()).toBeUndefined();
   });
 
   it('can reset the editor layout', () => {
