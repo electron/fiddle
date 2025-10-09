@@ -42,7 +42,7 @@ jobs:
           cache: 'yarn'
           architecture: ${{ matrix.os == 'macos-latest' && matrix.arch == 'x64' && 'x64' || env.RUNNER_ARCH }}
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: yarn --immutable
       - run: yarn run contributors
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

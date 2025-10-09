@@ -90,7 +90,7 @@
     "@electron/fuses": "^1.6.1",
     "@electron/lint-roller": "^3.1.2",
     "@octokit/core": "^3.5.1",
-    "@reforged/maker-appimage": "^5.0.0",
+    "@reforged/maker-appimage": "^5.1.0",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^12.1.5",
@@ -168,5 +168,14 @@
   "resolutions": {
     "@electron-forge/maker-base": "7.9.0",
     "@electron-forge/shared-types": "7.9.0"
+  },
+  "packageManager": "yarn@4.10.3",
+  "dependenciesMeta": {
+    "electron": {
+      "built": true
+    },
+    "electron-winstaller": {
+      "built": true
+    }
   }
 }
