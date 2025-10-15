@@ -81,21 +81,11 @@ environment variable `FIDDLE_VERBOSE_TESTS` when running.
 
 First, create a new branch for your release.
 
-Then, run the [`yarn version`](https://classic.yarnpkg.com/en/docs/cli/version/)
-command, which will guide you through an interactive prompt to update the package
-version number.
-
-```sh
-yarn version
-info Current version: 1.0.1
-question New version: 1.0.2
-info New version: 1.0.2
-✨  Done in 9.42s.
-```
+Then, run the [`yarn version`](https://yarnpkg.com/cli/version)
+command with the corresponding `major`, `minor`, or `patch` positional argument.
 
 After running the command, you should have a commit updating the `version` field in
-the `package.json` file, as well as a git tag corresponding with the new version
-number.
+the `package.json` file. Create a new tag corresponding to this new value with the `git tag` command.
 
 Then, you'll want to commit the version bump change onto the main branch. Push
 your commit upstream and open a new pull request.
