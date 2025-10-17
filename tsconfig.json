@@ -2,9 +2,7 @@
   "extends": "@tsconfig/node22/tsconfig.json",
   "compilerOptions": {
     "allowJs": true,
-    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "removeComments": false,
     "resolveJsonModule": true,
     "preserveConstEnums": true,
     "sourceMap": true,
@@ -16,31 +14,13 @@
       "dom",
       "WebWorker"
     ],
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "strictNullChecks": true,
-    "noUnusedLocals": true,
-    "noImplicitThis": true,
-    "noUnusedParameters": true,
+    "strict": true,
     "importHelpers": true,
     "noEmitHelpers": true,
-    "pretty": true,
     "jsx": "react",
-    "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "baseUrl": "."
   },
-  "include": [
-    "rtl-spec/**/*",
-    "src/**/*",
-    "tests/**/*"
-  ],
-  "exclude": [
-    "node_modules/**/*"
-  ],
-  "formatCodeOptions": {
-    "indentSize": 2,
-    "tabSize": 2
-  }
+  "include": ["rtl-spec/**/*", "src/**/*", "tests/**/*"],
+  "exclude": ["node_modules/**/*"]
 }
