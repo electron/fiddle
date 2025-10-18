@@ -75,6 +75,7 @@ describe('TokenDialog component', () => {
     expect(wrapper.state()).toEqual({
       verifying: false,
       error: false,
+      isTokenUpdateAction: false,
       errorMessage: undefined,
       tokenInput: '',
     });
@@ -94,6 +95,7 @@ describe('TokenDialog component', () => {
     expect(wrapper.state()).toEqual({
       verifying: false,
       error: false,
+      isTokenUpdateAction: false,
       errorMessage: undefined,
       tokenInput: '',
     });
@@ -184,6 +186,22 @@ describe('TokenDialog component', () => {
         'Invalid GitHub token. Please check your token and try again.',
       );
       expect(store.gitHubToken).toEqual(null);
+    });
+
+    it('handles the invalid token update', async () => {
+      vi.mocked(mockOctokit.users.getAuthenticated).mockRejectedValue(
+        new Error('Bad credentials'),
+      );
+
+      store.gitHubToken = mockValidToken;
+      const wrapper = shallow(<TokenDialog appState={store} />);
+      wrapper.setState({ tokenInput: mockInvalidToken });
+      const instance: any = wrapper.instance();
+
+      expect(store.gitHubToken).toEqual(mockValidToken);
+      expect(wrapper.state('isTokenUpdateAction')).toBe(true);
+      await instance.onSubmitToken();
+      expect(store.gitHubToken).toEqual(mockValidToken);
     });
 
     it('handles missing gist scope', async () => {
