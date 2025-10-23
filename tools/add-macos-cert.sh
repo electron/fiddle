@@ -30,7 +30,7 @@ security default-keychain -s $KEY_CHAIN
 security unlock-keychain -p actions $KEY_CHAIN
 
 # The latest Developer ID Intermediate Certificate from Apple is
-# missing on CircleCI, but we need it for the cert to be valid
+# missing on CI, but we need it for the cert to be valid
 curl https://www.apple.com/certificateauthority/DeveloperIDG2CA.cer -o DeveloperIDG2CA.cer
 sudo security add-trusted-cert -d -r unspecified -k $KEY_CHAIN DeveloperIDG2CA.cer
 rm -f DeveloperIDG2CA.cer
