@@ -18,15 +18,17 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        arch:
-          - x64
         os:
           - macos-latest
           - ubuntu-latest
           - windows-latest
+        arch:
+          - x64
         include:
           - os: macos-latest
             arch: arm64
+          - os: ubuntu-24.04-arm
+            arch: armv7l
     runs-on: "${{ matrix.os }}"
     steps:
       - run: git config --global core.autocrlf input
