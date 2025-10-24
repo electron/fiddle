@@ -5,6 +5,8 @@ on:
     tags:
       - 'v*'
 
+permissions: {}
+
 jobs:
   build:
     name: Build
@@ -27,6 +29,9 @@ jobs:
           - os: windows-latest
             arch: ia32
     runs-on: "${{ matrix.os }}"
+    permissions:
+      actions: write
+      contents: read
     environment: release
     steps:
       - run: git config --global core.autocrlf input
@@ -42,6 +47,8 @@ jobs:
           architecture: ${{ startsWith(matrix.os, 'macos-') && matrix.arch == 'x64' && 'x64' || env.RUNNER_ARCH }}
       - run: yarn install --immutable
       - run: yarn run contributors
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run electron-releases
       - name: Install dependencies (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
@@ -54,7 +61,7 @@ jobs:
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - name: Write authentication cert to disk (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        shell: powershell.exe
+        shell: powershell
         env:
           SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
         run: |
@@ -63,7 +70,7 @@ jobs:
           Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
           [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
       - name: Signing Manager Setup (Windows)
-        shell: powershell.exe
+        shell: powershell
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
@@ -106,6 +113,8 @@ jobs:
       - build
       - test
     environment: release
+    permissions:
+      contents: read
     steps:
       - run: git config --global core.autocrlf input
       - name: Checkout
@@ -135,6 +144,8 @@ jobs:
     name: Notify Sentry Deploy
     runs-on: ubuntu-latest
     needs: release
+    permissions:
+      actions: read
     steps:
       - name: Download source maps artifact
         uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
