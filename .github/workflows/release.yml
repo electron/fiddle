@@ -104,6 +104,8 @@ jobs:
           include-hidden-files: true
 
   test:
+    permissions:
+      contents: read
     uses: ./.github/workflows/test.yml
 
   release:
