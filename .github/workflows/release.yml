@@ -89,6 +89,11 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+      - name: Build (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        env:
+          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
       - name: Build
         if: ${{ !startsWith(matrix.os, 'macos-') }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
