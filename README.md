@@ -1,6 +1,6 @@
 # <img src="https://user-images.githubusercontent.com/378023/49785546-4b7f7000-fd64-11e8-8033-a52c73a07fbf.png" width="60px" align="center" alt="Electron Fiddle icon"> Electron Fiddle
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/gh/electron/fiddle/tree/main.svg?style=shield)](https://dl.circleci.com/status-badge/redirect/gh/electron/fiddle/tree/main)
+[![Test](https://github.com/electron/fiddle/actions/workflows/test.yml/badge.svg)](https://github.com/electron/fiddle/actions/workflows/test.yml)
 [![Coverage Status](https://coveralls.io/repos/github/electron/fiddle/badge.svg?branch=main)](https://coveralls.io/github/electron/fiddle?branch=main)
 [![Electron Discord Invite](https://img.shields.io/discord/745037351163527189?color=%237289DA&label=chat&logo=discord&logoColor=white)](https://discord.com/invite/APGC3k5yaH)
 

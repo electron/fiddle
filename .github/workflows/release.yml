@@ -1,0 +1,144 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    name: Build
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-latest
+          - ubuntu-latest
+          - windows-latest
+        arch:
+          - x64
+        include:
+          - os: macos-latest
+            arch: arm64
+          - os: ubuntu-24.04-arm
+            arch: armv7l
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - os: windows-latest
+            arch: ia32
+    runs-on: "${{ matrix.os }}"
+    environment: release
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Install Rosetta
+        if: ${{ startsWith(matrix.os, 'macos-') && matrix.arch == 'x64' }}
+        run: /usr/sbin/softwareupdate --install-rosetta --agree-to-license
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: '22.17.x'
+          architecture: ${{ startsWith(matrix.os, 'macos-') && matrix.arch == 'x64' && 'x64' || env.RUNNER_ARCH }}
+      - run: yarn install --immutable
+      - run: yarn run contributors
+      - run: yarn run electron-releases
+      - name: Install dependencies (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
+        run: sudo apt-get update && sudo apt install rpm squashfs-tools
+      - name: Load certificates (macOS)
+        if: ${{ startsWith(matrix.os, 'macos-') }}
+        env:
+          MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
+          MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
+        run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
+      - name: Write authentication cert to disk (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        shell: powershell.exe
+        env:
+          SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
+        run: |
+          New-Item $Profile.CurrentUserAllHosts -Force
+          $SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
+          Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
+          [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
+      - name: Signing Manager Setup (Windows)
+        shell: powershell.exe
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        env:
+          CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
+          SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SSM: ${{ secrets.SSM }}
+        run: |
+          cd C:\
+          curl.exe -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:$env:SM_API_KEY" -o smtools-windows-x64.msi
+          msiexec.exe /i smtools-windows-x64.msi /quiet /qn | Wait-Process
+          & $env:SSM\smksp_registrar.exe list
+          & $env:SSM\smctl.exe windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
+      - name: Build (macOS)
+        if: ${{ startsWith(matrix.os, 'macos-') }}
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+      - name: Build
+        if: ${{ !startsWith(matrix.os, 'macos-') }}
+        run: yarn run publish --arch=${{ matrix.arch }} --dry-run
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+          path: out
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
+        with:
+          name: webpack-source-maps
+          path: .webpack
+          include-hidden-files: true
+
+  test:
+    uses: ./.github/workflows/test.yml
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs:
+      - build
+      - test
+    environment: release
+    steps:
+      - run: git config --global core.autocrlf input
+      - name: Checkout
+        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      - name: Setup Node.js
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: '22.17.x'
+      - run: yarn install --immutable
+      - name: Download All Artifacts
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          path: out
+          pattern: build-artifacts-*
+          merge-multiple: true
+      - run: yarn run publish --from-dry-run
+
+  notify-sentry-deploy:
+    name: Notify Sentry Deploy
+    runs-on: ubuntu-latest
+    needs: release
+    steps:
+      - name: Download source maps artifact
+        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+        with:
+          name: webpack-source-maps
+          path: .webpack
+      - uses: getsentry/action-release@4f502acc1df792390abe36f2dcb03612ef144818 # v3.3.0
+        env:
+          SENTRY_ORG: electronjs
+          SENTRY_PROJECT: electron-fiddle
+        with:
+          environment: production
+          release: Electron-Fiddle@${{ github.ref_name }}
+          sourcemaps: ./.webpack/
+          url_prefix: '~/.webpack'
