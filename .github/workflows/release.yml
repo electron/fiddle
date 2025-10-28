@@ -137,14 +137,12 @@ jobs:
           path: out
           pattern: build-artifacts-*
           merge-multiple: true
-      - name: Generate GitHub App token
-        uses: electron/github-app-auth-action@384fd19694fe7b6dcc9a684746c6976ad78228ae # v1.1.1
-        id: generate-token
-        with:
-          creds: ${{ secrets.FIDDLE_RELEASE_APP_CREDS }}
+      - name: Get GitHub app token
+        id: secret-service
+        uses: electron/secret-service-action@3476425e8b30555aac15b1b7096938e254b0e155 # v1.0.0
       - name: Publish to GitHub
         env:
-          GITHUB_TOKEN: ${{ steps.generate-token.outputs.token }}
+          GITHUB_TOKEN: ${{ fromJSON(steps.secret-service.outputs.secrets).GITHUB_TOKEN }}
         run: yarn run publish --from-dry-run
 
   notify-sentry-deploy:
