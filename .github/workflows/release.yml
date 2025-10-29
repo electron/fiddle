@@ -59,30 +59,29 @@ jobs:
           MACOS_CERT_P12: ${{ secrets.MACOS_CERT_P12 }}
           MACOS_CERT_PASSWORD: ${{ secrets.MACOS_CERT_PASSWORD }}
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
+      - name: Signing Manager Setup (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
+        uses: digicert/ssm-code-signing@fb61e357690ad6aaa11c372000c37fb74d35c000 # v1.1.1
       - name: Write authentication cert to disk (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        shell: powershell
+        shell: bash
         env:
           SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
-        run: |
-          New-Item $Profile.CurrentUserAllHosts -Force
-          $SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
-          Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
-          [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
-      - name: Signing Manager Setup (Windows)
-        shell: powershell
-        if: ${{ startsWith(matrix.os, 'windows-') }}
+        run: | 
+          echo "$SM_CLIENT_CERT_P12_BASE64" | base64 --decode > /d/cert.p12
+          echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
+      - name: Sync cert (Windows)
+        shell: cmd
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           SM_API_KEY: ${{ secrets.SM_API_KEY }}
-          SSM: ${{ secrets.SSM }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
         run: |
-          cd C:\
-          curl.exe -X GET  https://one.digicert.com/signingmanager/api-ui/v1/releases/smtools-windows-x64.msi/download -H "x-api-key:$env:SM_API_KEY" -o smtools-windows-x64.msi
-          msiexec.exe /i smtools-windows-x64.msi /quiet /qn | Wait-Process
-          & $env:SSM\smksp_registrar.exe list
-          & $env:SSM\smctl.exe windows certsync --keypair-alias=$env:KEYPAIR_ALIAS
+          smksp_registrar list
+          smctl windows certsync --keypair-alias=%KEYPAIR_ALIAS%
       - name: Build (macOS)
         if: ${{ startsWith(matrix.os, 'macos-') }}
         env:
@@ -93,9 +92,14 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
+          SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
-      - name: Build
-        if: ${{ !startsWith(matrix.os, 'macos-') }}
+      - name: Build (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
