@@ -2,8 +2,6 @@ name: Release
 
 on:
   push:
-    tags:
-      - 'v*'
 
 permissions: {}
 
@@ -14,18 +12,18 @@ jobs:
       fail-fast: false
       matrix:
         os:
-          - macos-latest
-          - ubuntu-latest
+          # - macos-latest
+          # - ubuntu-latest
           - windows-latest
         arch:
           - x64
         include:
-          - os: macos-latest
-            arch: arm64
-          - os: ubuntu-24.04-arm
-            arch: armv7l
-          - os: ubuntu-24.04-arm
-            arch: arm64
+          # - os: macos-latest
+          #   arch: arm64
+          # - os: ubuntu-24.04-arm
+          #   arch: armv7l
+          # - os: ubuntu-24.04-arm
+          #   arch: arm64
           - os: windows-latest
             arch: ia32
     runs-on: "${{ matrix.os }}"
@@ -94,75 +92,76 @@ jobs:
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
-      - name: Build
-        if: ${{ !startsWith(matrix.os, 'macos-') }}
+      - name: Build (Linux)
+        if: ${{ startsWith(matrix.os, 'ubuntu-') }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        with:
-          name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
-          path: out
-      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
-        if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
-        with:
-          name: webpack-source-maps
-          path: .webpack
-          include-hidden-files: true
+      # - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      #   with:
+      #     name: build-artifacts-${{ matrix.os }}-${{ matrix.arch }}
+      #     path: out
+      # - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      #   if: ${{ startsWith(matrix.os, 'ubuntu-') && matrix.arch == 'x64' }}
+      #   with:
+      #     name: webpack-source-maps
+      #     path: .webpack
+      #     include-hidden-files: true
 
-  test:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/test.yml
-
-  release:
-    name: Release
-    runs-on: ubuntu-latest
-    needs:
-      - build
-      - test
-    environment: release
-    permissions:
-      contents: read
-    steps:
-      - run: git config --global core.autocrlf input
-      - name: Checkout
-        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
-      - name: Setup Node.js
-        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
-        with:
-          node-version: '22.17.x'
-      - run: yarn install --immutable
-      - name: Download All Artifacts
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          path: out
-          pattern: build-artifacts-*
-          merge-multiple: true
-      - name: Get GitHub app token
-        id: secret-service
-        uses: electron/secret-service-action@3476425e8b30555aac15b1b7096938e254b0e155 # v1.0.0
-      - name: Publish to GitHub
-        env:
-          GITHUB_TOKEN: ${{ fromJSON(steps.secret-service.outputs.secrets).GITHUB_TOKEN }}
-        run: yarn run publish --from-dry-run
-
-  notify-sentry-deploy:
-    name: Notify Sentry Deploy
-    runs-on: ubuntu-latest
-    needs: release
-    permissions:
-      actions: read
-    steps:
-      - name: Download source maps artifact
-        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
-        with:
-          name: webpack-source-maps
-          path: .webpack
-      - uses: getsentry/action-release@4f502acc1df792390abe36f2dcb03612ef144818 # v3.3.0
-        env:
-          SENTRY_ORG: electronjs
-          SENTRY_PROJECT: electron-fiddle
-        with:
-          environment: production
-          release: Electron-Fiddle@${{ github.ref_name }}
-          sourcemaps: ./.webpack/
-          url_prefix: '~/.webpack'
+#  test:
+#    permissions:
+#      contents: read
+#    uses: ./.github/workflows/test.yml
+#
+#  release:
+#    name: Release
+#    runs-on: ubuntu-latest
+#    needs:
+#      - build
+#      - test
+#    environment: release
+#    permissions:
+#      contents: read
+#    steps:
+#      - run: git config --global core.autocrlf input
+#      - name: Checkout
+#        uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+#      - name: Setup Node.js
+#        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+#        with:
+#          node-version: '22.17.x'
+#      - run: yarn install --immutable
+#      - name: Download All Artifacts
+#        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+#        with:
+#          path: out
+#          pattern: build-artifacts-*
+#          merge-multiple: true
+#      - name: Get GitHub app token
+#        id: secret-service
+#        uses: electron/secret-service-action@3476425e8b30555aac15b1b7096938e254b0e155 # v1.0.0
+#      - name: Publish to GitHub
+#        env:
+#          GITHUB_TOKEN: ${{ fromJSON(steps.secret-service.outputs.secrets).GITHUB_TOKEN }}
+#        run: yarn run publish --from-dry-run
+#
+#  notify-sentry-deploy:
+#    name: Notify Sentry Deploy
+#    runs-on: ubuntu-latest
+#    needs: release
+#    permissions:
+#      actions: read
+#    steps:
+#      - name: Download source maps artifact
+#        uses: actions/download-artifact@634f93cb2916e3fdff6788551b99b062d0335ce0 # v5.0.0
+#        with:
+#          name: webpack-source-maps
+#          path: .webpack
+#      - uses: getsentry/action-release@4f502acc1df792390abe36f2dcb03612ef144818 # v3.3.0
+#        env:
+#          SENTRY_ORG: electronjs
+#          SENTRY_PROJECT: electron-fiddle
+#        with:
+#          environment: production
+#          release: Electron-Fiddle@${{ github.ref_name }}
+#          sourcemaps: ./.webpack/
+#          url_prefix: '~/.webpack'
+#
