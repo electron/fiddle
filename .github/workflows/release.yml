@@ -59,7 +59,7 @@ jobs:
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - name: Write authentication cert to disk (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        shell: powershell
+        shell: pwsh
         env:
           SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
         run: |
@@ -67,13 +67,17 @@ jobs:
           $SM_CLIENT_CERT_FILE=(Join-Path -Path (Resolve-Path .\).Path -ChildPath "cert.p12")
           Add-Content -Path $Profile.CurrentUserAllHosts -Value "`$env:SM_CLIENT_CERT_FILE = '$SM_CLIENT_CERT_FILE'"
           [IO.File]::WriteAllBytes($SM_CLIENT_CERT_FILE, [Convert]::FromBase64String($env:SM_CLIENT_CERT_P12_BASE64))
+          "SM_CLIENT_CERT_FILE=$SM_CLIENT_CERT_FILE" >> $env:GITHUB_OUTPUT
       - name: Signing Manager Setup (Windows)
-        shell: powershell
+        shell: pwsh
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
           KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
           SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
           SSM: ${{ secrets.SSM }}
         run: |
           cd C:\
@@ -91,6 +95,11 @@ jobs:
         if: ${{ startsWith(matrix.os, 'windows-') }}
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
+          KEYPAIR_ALIAS: ${{ secrets.KEYPAIR_ALIAS }}
+          SM_API_KEY: ${{ secrets.SM_API_KEY }}
+          SM_CLIENT_CERT_FILE: ${{ env.SM_CLIENT_CERT_FILE }}
+          SM_CLIENT_CERT_PASSWORD: ${{ secrets.SM_CLIENT_CERT_PASSWORD }}
+          SM_HOST: ${{ secrets.SM_HOST }}
         run: yarn run publish --arch=${{ matrix.arch }} --dry-run
       - name: Build (Linux)
         if: ${{ startsWith(matrix.os, 'ubuntu-') }}
