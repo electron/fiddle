@@ -71,6 +71,7 @@ jobs:
           echo "$SM_CLIENT_CERT_P12_BASE64" | base64 --decode > /d/cert.p12
           echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
       - name: Sync cert (Windows)
+        if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: cmd
         env:
           CERT_FINGERPRINT: ${{ secrets.CERT_FINGERPRINT }}
