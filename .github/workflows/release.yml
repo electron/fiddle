@@ -127,6 +127,7 @@ jobs:
     environment: release
     permissions:
       contents: read
+      id-token: write
     steps:
       - run: git config --global core.autocrlf input
       - name: Checkout
