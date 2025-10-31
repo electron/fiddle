@@ -949,9 +949,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/lint-roller@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "@electron/lint-roller@npm:3.1.2"
+"@electron/lint-roller@npm:^3.1.3":
+  version: 3.1.3
+  resolution: "@electron/lint-roller@npm:3.1.3"
   dependencies:
     "@dsanders11/vscode-markdown-languageservice": "npm:^0.3.0"
     ajv: "npm:^8.16.0"
@@ -976,7 +976,7 @@ __metadata:
     lint-roller-markdown-links: dist/bin/lint-markdown-links.js
     lint-roller-markdown-standard: dist/bin/lint-markdown-standard.js
     lint-roller-markdown-ts-check: dist/bin/lint-markdown-ts-check.js
-  checksum: 10c0/e98a65d44b99accf44e33d7dfb1e8d85a75580a7efa7b4a570b0f8e7274aad3eb60fc6d285b5d1d78ecd093e902820222cfdf3e193eec65a8a3536d4c75bb060
+  checksum: 10c0/657b17b4921a8887334287e245dde85022704c673e1bba867e2a79abb643392b4e4e3962b8745074e78811938b28c4653c37b0c07a76a298a2a00ab3276f475e
   languageName: node
   linkType: hard
 
@@ -6753,7 +6753,7 @@ __metadata:
     "@electron/devtron": "npm:^2.0.0"
     "@electron/fiddle-core": "npm:^2.0.1"
     "@electron/fuses": "npm:^1.6.1"
-    "@electron/lint-roller": "npm:^3.1.2"
+    "@electron/lint-roller": "npm:^3.1.3"
     "@octokit/core": "npm:^3.5.1"
     "@octokit/rest": "npm:^17.0.0"
     "@reforged/maker-appimage": "npm:^5.1.0"
