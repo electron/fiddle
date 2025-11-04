@@ -72,7 +72,7 @@
     "react-window": "^1.8.10",
     "semver": "^7.3.4",
     "shell-env": "^3.0.1",
-    "tmp": "0.2.4",
+    "tmp": "0.2.5",
     "tslib": "^2.6.0",
     "tsx": "^4.20.3",
     "update-electron-app": "^3.0.0"
