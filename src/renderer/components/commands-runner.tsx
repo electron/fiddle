@@ -55,6 +55,7 @@ export const Runner = observer(
             props.onClick = window.app.runner.stop;
             props.icon = 'stop';
           } else if (isInstallingModules) {
+            props.disabled = true;
             props.text = 'Installing modules';
             props.icon = <Spinner size={16} />;
           } else {
