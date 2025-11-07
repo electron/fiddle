@@ -6787,7 +6787,7 @@ __metadata:
     commander: "npm:^7.1.0"
     copy-webpack-plugin: "npm:^11.0.0"
     css-loader: "npm:^6.7.1"
-    electron: "npm:36.8.1"
+    electron: "npm:^39.1.1"
     electron-default-menu: "npm:^1.0.2"
     electron-devtools-installer: "npm:^3.1.1"
     electron-squirrel-startup: "npm:^1.0.0"
@@ -6941,16 +6941,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"electron@npm:36.8.1":
-  version: 36.8.1
-  resolution: "electron@npm:36.8.1"
+"electron@npm:^39.1.1":
+  version: 39.1.1
+  resolution: "electron@npm:39.1.1"
   dependencies:
     "@electron/get": "npm:^2.0.0"
     "@types/node": "npm:^22.7.7"
     extract-zip: "npm:^2.0.1"
   bin:
     electron: cli.js
-  checksum: 10c0/a683f2276b460c404b8ea5d819c2282cdb5a963c5569eabac8accffca01432111d847860726f04e87277b7dcbe3099201afbe2f752c99918683c37734cef86da
+  checksum: 10c0/98fb7e57b968f580f1ed3c28b1b78589458b702e79e5f5b9cd1d1c27c336357ec94511db3cfec938f575b2aeaf5000f4ab6f6355e618ab3edeb58c1fd7f7ff36
   languageName: node
   linkType: hard
 
