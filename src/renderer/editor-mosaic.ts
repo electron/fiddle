@@ -58,6 +58,8 @@ export class EditorMosaic {
 
   private readonly backups = new Map<EditorId, EditorBackup>();
   private readonly editors = new Map<EditorId, Editor>();
+  private readonly savedVersions = new Map<EditorId, number>();
+  private readonly modelListeners = new Map<EditorId, MonacoType.IDisposable>();
 
   constructor() {
     makeObservable<
@@ -92,18 +94,6 @@ export class EditorMosaic {
       () => this.mosaic,
       () => this.layout(),
     );
-
-    // whenever isEdited is set, stop or start listening to edits again.
-    reaction(
-      () => this.isEdited,
-      () => {
-        if (this.isEdited) {
-          this.ignoreAllEdits();
-        } else {
-          this.observeAllEdits();
-        }
-      },
-    );
   }
 
   /** File is visible, focus file content */
@@ -129,6 +119,9 @@ export class EditorMosaic {
     // except for this.editors -- we recycle editors below in setFile()
     this.backups.clear();
     this.mosaic = null;
+    for (const disposable of this.modelListeners.values()) disposable.dispose();
+    this.modelListeners.clear();
+    this.savedVersions.clear();
 
     // add the files to the mosaic, recycling existing editors when possible.
     const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
@@ -141,7 +134,13 @@ export class EditorMosaic {
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
-  private addFile(id: EditorId, value: string) {
+  private addFile(
+    id: EditorId,
+    value: string,
+    options: { markSaved?: boolean } = {},
+  ) {
+    const { markSaved = true } = options;
+
     if (
       id.endsWith('.json') &&
       [PACKAGE_NAME, 'package-lock.json'].includes(id)
@@ -162,13 +161,19 @@ export class EditorMosaic {
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);
     model.updateOptions({ tabSize: 2 });
+    this.observeModel(id, model);
+    if (markSaved) {
+      this.savedVersions.set(id, model.getAlternativeVersionId());
+    } else {
+      this.savedVersions.delete(id);
+    }
 
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
     const backup: EditorBackup = { model };
     const editor = this.editors.get(id);
     if (editor) {
-      this.setEditorFromBackup(editor, backup);
+      this.setEditorFromBackup(id, editor, backup);
     } else {
       this.backups.set(id, backup);
     }
@@ -250,6 +255,8 @@ export class EditorMosaic {
 
   /** Remove the specified file and its editor */
   public remove(id: EditorId) {
+    this.disposeModelListener(id);
+    this.savedVersions.delete(id);
     this.editors.delete(id);
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
@@ -264,15 +271,18 @@ export class EditorMosaic {
 
     this.backups.delete(id);
     this.editors.set(id, editor);
-    this.setEditorFromBackup(editor, backup);
+    this.setEditorFromBackup(id, editor, backup);
   }
 
   /** Populate a MonacoEditor with the file's contents */
-  private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
-    this.ignoreEdits(editor); // pause this so that isEdited doesn't get set
+  private setEditorFromBackup(
+    id: EditorId,
+    editor: Editor,
+    backup: EditorBackup,
+  ) {
     if (backup.viewState) editor.restoreViewState(backup.viewState);
     editor.setModel(backup.model);
-    this.observeEdits(editor); // resume
+    this.observeModel(id, backup.model);
   }
 
   /** Add a new file to the mosaic */
@@ -289,7 +299,7 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(id, value);
+    this.addFile(id, value, { markSaved: false });
   }
 
   /** Rename a file in the mosaic */
@@ -310,7 +320,11 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(newId, this.value(oldId).trim());
+    const wasDirty = this.isFileDirty(oldId);
+    const hadBaseline = this.savedVersions.has(oldId);
+    this.addFile(newId, this.value(oldId).trim(), {
+      markSaved: hadBaseline && !wasDirty,
+    });
     this.remove(oldId);
   }
 
@@ -327,6 +341,28 @@ export class EditorMosaic {
     return Object.fromEntries(
       [...this.files].map(([id]) => [id, this.value(id)]),
     );
+  }
+
+  public isFileDirty(id: EditorId): boolean {
+    const model = this.modelFor(id);
+    if (!model) return false;
+    const savedVersion = this.savedVersions.get(id);
+    if (savedVersion === undefined) return true;
+    return savedVersion !== model.getAlternativeVersionId();
+  }
+
+  public markSaved(ids?: EditorId | EditorId[]) {
+    const targets = ids
+      ? Array.isArray(ids)
+        ? ids
+        : [ids]
+      : [...this.files.keys()];
+
+    for (const id of targets) {
+      const model = this.modelFor(id);
+      if (!model) continue;
+      this.savedVersions.set(id, model.getAlternativeVersionId());
+    }
   }
 
   /// misc utilities
@@ -357,24 +393,20 @@ export class EditorMosaic {
 
   //=== Listen for user edits
 
-  private ignoreAllEdits() {
-    for (const editor of this.editors.values()) this.ignoreEdits(editor);
+  private modelFor(id: EditorId) {
+    return this.editors.get(id)?.getModel() ?? this.backups.get(id)?.model;
   }
 
-  private ignoreEdits(editor: Editor) {
-    editor.onDidChangeModelContent(() => {
-      // no-op
+  private observeModel(id: EditorId, model: MonacoType.editor.ITextModel) {
+    this.disposeModelListener(id);
+    const disposable = model.onDidChangeContent(() => {
+      this.isEdited = true;
     });
+    this.modelListeners.set(id, disposable);
   }
 
-  private observeAllEdits() {
-    for (const editor of this.editors.values()) this.observeEdits(editor);
-  }
-
-  private observeEdits(editor: Editor) {
-    const disposable = editor.onDidChangeModelContent(() => {
-      this.isEdited ||= true;
-      disposable.dispose();
-    });
+  private disposeModelListener(id: EditorId) {
+    this.modelListeners.get(id)?.dispose();
+    this.modelListeners.delete(id);
   }
 }

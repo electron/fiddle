@@ -4,6 +4,8 @@ import { objectDifference } from '../utils';
 
 export class MonacoModelMock {
   private options: any;
+  private version = 1;
+  private listeners = new Set<() => void>();
   constructor(
     private value: string,
     private language: string,
@@ -11,14 +13,36 @@ export class MonacoModelMock {
 
   public getFullModelRange = vi.fn();
   public getValue = vi.fn(() => this.value);
-  public setValue = vi.fn((v) => (this.value = v));
+  public setValue = vi.fn((v) => {
+    this.value = v;
+    this.version++;
+    for (const listener of this.listeners) listener();
+  });
   public updateOptions = vi.fn((opts) => (this.options = opts));
   public getModeId = vi.fn(() => this.language);
+  public getAlternativeVersionId = vi.fn(() => this.version);
+  public onDidChangeContent = vi.fn(
+    (listener: () => void): MonacoDisposableMock => {
+      this.listeners.add(listener);
+      return new MonacoDisposableMock(() => this.listeners.delete(listener));
+    },
+  );
 
   public toJSON() {
     const { language, options, value } = this;
     return JSON.stringify({ language, options, value });
   }
+}
+
+class MonacoDisposableMock {
+  private disposed = false;
+  constructor(private readonly onDispose: () => void) {}
+
+  public dispose = vi.fn(() => {
+    if (this.disposed) return;
+    this.disposed = true;
+    this.onDispose();
+  });
 }
 
 export class MonacoMock {

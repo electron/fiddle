@@ -245,6 +245,17 @@ describe('EditorMosaic', () => {
       editorMosaic.addNewFile('foo.js');
       expect(editorMosaic.isEdited).toBe(true);
     });
+
+    it('marks new files as dirty until saved', () => {
+      editorMosaic.set(createEditorValues());
+      const id = 'new-file.js' as EditorId;
+
+      editorMosaic.addNewFile(id);
+
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+      editorMosaic.markSaved(id);
+      expect(editorMosaic.isFileDirty(id)).toBe(false);
+    });
   });
 
   describe('renameFile()', () => {
@@ -262,6 +273,15 @@ describe('EditorMosaic', () => {
       editorMosaic.isEdited = false;
       editorMosaic.remove('renderer.js');
       expect(editorMosaic.isEdited).toBe(true);
+    });
+
+    it('cleans up saved version tracking', () => {
+      const id = 'renderer.js' as EditorId;
+      editorMosaic.set(createEditorValues());
+      editorMosaic.remove(id);
+
+      editorMosaic.addNewFile(id, '// fresh content');
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
     });
   });
 
@@ -546,6 +566,64 @@ describe('EditorMosaic', () => {
       expect(changeCount).toBe(1);
 
       dispose();
+    });
+  });
+
+  describe('dirty tracking', () => {
+    const id = MAIN_JS;
+    let editor: Editor;
+
+    beforeEach(() => {
+      editor = new MonacoEditorMock() as unknown as Editor;
+      editorMosaic.set({ [id]: '// initial content' });
+      editorMosaic.addEditor(id, editor);
+    });
+
+    it('initializes loaded files as clean', () => {
+      expect(editorMosaic.isFileDirty(id)).toBe(false);
+    });
+
+    it('detects edits via model version changes', () => {
+      editor.setValue('// modified');
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+    });
+
+    it('resets baseline when markSaved is called', () => {
+      editor.setValue('// modified');
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+
+      editorMosaic.markSaved(id);
+      expect(editorMosaic.isFileDirty(id)).toBe(false);
+    });
+
+    it('markSaved() defaults to all files', () => {
+      const otherId = 'extra.js' as EditorId;
+      editorMosaic.addNewFile(otherId, '// temp');
+      editorMosaic.markSaved();
+
+      expect(editorMosaic.isFileDirty(id)).toBe(false);
+      expect(editorMosaic.isFileDirty(otherId)).toBe(false);
+    });
+
+    it('keeps dirty state when renaming dirty files', () => {
+      editor.setValue('// modified');
+      const newId = 'renamed.js' as EditorId;
+
+      editorMosaic.renameFile(id, newId);
+
+      expect(editorMosaic.isFileDirty(newId)).toBe(true);
+    });
+
+    it('resets dirty tracking on set()', () => {
+      editor.setValue('// modified');
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+
+      const fresh = createEditorValues();
+      editorMosaic.set(fresh);
+
+      for (const file of Object.keys(fresh)) {
+        expect(editorMosaic.isFileDirty(file as EditorId)).toBe(false);
+      }
     });
   });
 });

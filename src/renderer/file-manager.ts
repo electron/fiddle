@@ -47,6 +47,7 @@ export class FileManager {
       }
       window.ElectronFiddle.setShowMeTemplate();
       this.appState.templateName = undefined;
+      this.appState.editorMosaic.markSaved();
       this.appState.editorMosaic.isEdited = false;
     });
 

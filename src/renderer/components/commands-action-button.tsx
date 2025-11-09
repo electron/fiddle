@@ -178,6 +178,7 @@ export const GistActionButton = observer(
 
         if (description) {
           if (await this.publishGist(description)) {
+            appState.editorMosaic.markSaved();
             appState.editorMosaic.isEdited = false;
           }
         }
@@ -214,6 +215,7 @@ export const GistActionButton = observer(
           files,
         });
 
+        appState.editorMosaic.markSaved();
         appState.editorMosaic.isEdited = false;
         console.log('Updating: Updating done', { gist });
 
