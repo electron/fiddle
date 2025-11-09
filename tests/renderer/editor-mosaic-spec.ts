@@ -571,7 +571,7 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('dirty tracking', () => {
+  describe('dirty file tracking', () => {
     const id = MAIN_JS;
     let editor: Editor;
 
@@ -620,6 +620,15 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.isEdited).toBe(true);
     });
 
+    it('keeps new file clean when renaming clean files but marks project edited', () => {
+      const newId = 'renamed.js' as EditorId;
+
+      editorMosaic.renameFile(id, newId);
+
+      expect(editorMosaic.isFileDirty(newId)).toBe(false);
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+
     it('only clears isEdited when every file is clean', () => {
       const otherId = 'extra.js' as EditorId;
       editorMosaic.addNewFile(otherId, '// temp');
@@ -630,6 +639,40 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.isFileDirty(otherId)).toBe(false);
       expect(editorMosaic.isFileDirty(id)).toBe(true);
       expect(editorMosaic.isEdited).toBe(true);
+    });
+
+    it('retains dirty state when markSaved is called with unknown ids', () => {
+      const otherId = 'extra.js' as EditorId;
+      editorMosaic.addNewFile(otherId, '// temp');
+      editorMosaic.markSaved(otherId);
+
+      editor.setValue('// dirty change');
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
+
+      editorMosaic.markSaved('missing.js' as EditorId);
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+
+    it('detects edits while a file is hidden', () => {
+      editorMosaic.hide(id);
+      expect(editorMosaic.files.get(id)).toBe(EditorPresence.Hidden);
+
+      editorMosaic.markSaved(id);
+      expect(editorMosaic.isFileDirty(id)).toBe(false);
+      expect(editorMosaic.isEdited).toBe(false);
+
+      monaco.latestModel.setValue('// hidden change');
+
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+
+    it('treats unknown files as clean', () => {
+      expect(editorMosaic.isFileDirty('does-not-exist.js' as EditorId)).toBe(
+        false,
+      );
     });
 
     it('resets dirty tracking on set()', () => {
