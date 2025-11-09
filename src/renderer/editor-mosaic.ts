@@ -363,6 +363,8 @@ export class EditorMosaic {
       if (!model) continue;
       this.savedVersions.set(id, model.getAlternativeVersionId());
     }
+
+    this.isEdited = [...this.files.keys()].some((id) => this.isFileDirty(id));
   }
 
   /// misc utilities

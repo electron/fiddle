@@ -253,8 +253,10 @@ describe('EditorMosaic', () => {
       editorMosaic.addNewFile(id);
 
       expect(editorMosaic.isFileDirty(id)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
       editorMosaic.markSaved(id);
       expect(editorMosaic.isFileDirty(id)).toBe(false);
+      expect(editorMosaic.isEdited).toBe(false);
     });
   });
 
@@ -594,15 +596,18 @@ describe('EditorMosaic', () => {
 
       editorMosaic.markSaved(id);
       expect(editorMosaic.isFileDirty(id)).toBe(false);
+      expect(editorMosaic.isEdited).toBe(false);
     });
 
     it('markSaved() defaults to all files', () => {
       const otherId = 'extra.js' as EditorId;
       editorMosaic.addNewFile(otherId, '// temp');
+      expect(editorMosaic.isEdited).toBe(true);
       editorMosaic.markSaved();
 
       expect(editorMosaic.isFileDirty(id)).toBe(false);
       expect(editorMosaic.isFileDirty(otherId)).toBe(false);
+      expect(editorMosaic.isEdited).toBe(false);
     });
 
     it('keeps dirty state when renaming dirty files', () => {
@@ -612,6 +617,19 @@ describe('EditorMosaic', () => {
       editorMosaic.renameFile(id, newId);
 
       expect(editorMosaic.isFileDirty(newId)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
+    });
+
+    it('only clears isEdited when every file is clean', () => {
+      const otherId = 'extra.js' as EditorId;
+      editorMosaic.addNewFile(otherId, '// temp');
+      editor.setValue('// modified');
+
+      editorMosaic.markSaved(otherId);
+
+      expect(editorMosaic.isFileDirty(otherId)).toBe(false);
+      expect(editorMosaic.isFileDirty(id)).toBe(true);
+      expect(editorMosaic.isEdited).toBe(true);
     });
 
     it('resets dirty tracking on set()', () => {
