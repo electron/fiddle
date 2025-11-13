@@ -15,7 +15,7 @@ export async function setupDevTools(): Promise<void> {
     const react = await installExtension(REACT_DEVELOPER_TOOLS, {
       loadExtensionOptions: { allowFileAccess: true },
     });
-    console.log(`installDevTools: Installed ${react}`);
+    console.log(`installDevTools: Installed ${{ react }}`);
   } catch (error) {
     console.warn(`installDevTools: Error occurred:`, error);
   }
