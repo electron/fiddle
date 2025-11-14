@@ -1,6 +1,14 @@
-// eslint-disable-next-line import/order
+// eslint-disable-next-line import/order -- this needs to happen first in execution
 import { initSentry } from './sentry';
 initSentry();
+
+// eslint-disable-next-line import/order -- Devtron needs to be imported and installed before any ipcMain calls are set up.
+import { isDevMode } from './utils/devmode';
+if (isDevMode()) {
+  // `install` returns a Promise, but we don't have access to top-level await in CommonJS
+  void require('@electron/devtron').devtron.install();
+}
+
 import {
   BrowserWindow,
   IpcMainEvent,
@@ -24,7 +32,6 @@ import { shouldQuit } from './squirrel';
 import { setupTemplates } from './templates';
 import { setupThemes } from './themes';
 import { setupUpdates } from './update';
-import { isDevMode } from './utils/devmode';
 import { getProjectName } from './utils/get-project-name';
 import { getUsername } from './utils/get-username';
 import { setupVersions } from './versions';
@@ -39,14 +46,6 @@ let argv: string[] = [];
  */
 export async function onReady() {
   await onFirstRunMaybe();
-  if (!isDevMode()) {
-    process.env.NODE_ENV = 'production';
-  } else {
-    const { devtron } = await import('@electron/devtron');
-    await devtron.install().catch((err) => {
-      console.warn(`cannot install devtron: ${err.message}`);
-    });
-  }
 
   setupAboutPanel();
 
