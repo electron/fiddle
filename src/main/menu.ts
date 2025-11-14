@@ -365,11 +365,9 @@ export function setupMenu(options?: SetUpMenuOptions) {
 
     // Tweak "View" menu
     if (label === 'View' && isSubmenu(item.submenu)) {
-      // remove "Reload" (has weird behaviour) and "Toggle Developer Tools"
+      // remove "Toggle Developer Tools"
       item.submenu = item.submenu.filter(
-        (subItem) =>
-          subItem.label !== 'Toggle Developer Tools' &&
-          subItem.label !== 'Reload',
+        (subItem) => subItem.label !== 'Toggle Developer Tools',
       );
       item.submenu.push(
         { type: 'separator' },
