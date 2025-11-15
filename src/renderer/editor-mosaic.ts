@@ -1,4 +1,4 @@
-import { action, computed, makeObservable, observable, reaction } from 'mobx';
+import { makeAutoObservable, reaction, runInAction } from 'mobx';
 import * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 
@@ -70,39 +70,7 @@ export class EditorMosaic {
   private readonly editors = new Map<EditorId, Editor>();
 
   constructor() {
-    makeObservable<
-      EditorMosaic,
-      | 'backups'
-      | 'editors'
-      | 'addFile'
-      | 'setVisible'
-      | 'setEditorFromBackup'
-      | 'savedHash'
-      | 'currentHash'
-    >(this, {
-      focusedFile: observable,
-      files: computed,
-      isEdited: computed,
-      numVisible: computed,
-      mosaic: observable,
-      backups: observable,
-      editors: observable,
-      setFocusedFile: action,
-      resetLayout: action,
-      set: action,
-      addFile: action,
-      show: action,
-      setVisible: action,
-      toggle: action,
-      hide: action,
-      remove: action,
-      addEditor: action,
-      setEditorFromBackup: action,
-      addNewFile: action,
-      renameFile: action,
-      savedHash: observable,
-      currentHash: observable,
-    });
+    makeAutoObservable(this);
 
     // whenever the mosaics are changed,
     // update the editor layout
@@ -144,6 +112,14 @@ export class EditorMosaic {
     for (const id of this.editors.keys()) {
       if (!values.has(id)) this.editors.delete(id);
     }
+
+    // HACK: editors should be mounted by 1000ms after we load something.
+    // We could try waiting for every single `editorDidMount` callback
+    // to fire, but that gets complicated with recycled editors with changed
+    // values. This is just easier for now.
+    setTimeout(() => {
+      this.markAsSaved();
+    }, 500);
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
@@ -259,7 +235,7 @@ export class EditorMosaic {
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
 
-    this.currentHash = await this.getEditorsHash();
+    this.updateCurrentHash();
   }
 
   /** Wire up a newly-mounted Monaco editor */
@@ -270,8 +246,6 @@ export class EditorMosaic {
     this.backups.delete(id);
     this.editors.set(id, editor);
     this.setEditorFromBackup(editor, backup);
-
-    this.savedHash = await this.getEditorsHash();
   }
 
   /** Populate a MonacoEditor with the file's contents */
@@ -363,9 +337,14 @@ export class EditorMosaic {
 
   private observeEdits(editor: Editor) {
     editor.onDidChangeModelContent(async () => {
-      this.currentHash = await this.getEditorsHash();
-      console.log(this.currentHash, this.savedHash);
-      console.log(this.isEdited);
+      this.updateCurrentHash();
+    });
+  }
+
+  private async updateCurrentHash() {
+    const hash = await this.getEditorsHash();
+    runInAction(() => {
+      this.currentHash = hash;
     });
   }
 
@@ -373,15 +352,26 @@ export class EditorMosaic {
    * Generates a SHA-1 hash of all editor contents.
    */
   private async getEditorsHash() {
-    const txt = Array.from(this.editors.values()).reduce((str, editor) => {
-      str += editor.getModel()?.getValue().trim();
-      return str;
-    }, '');
+    const txt = Array.from(this.editors.entries())
+      .sort(([ka], [kb]) => (kb > ka ? 1 : -1)) // sort by editor name for stability
+      .reduce((str, [_, editor]) => {
+        str += editor.getModel()?.getValue().trim();
+        return str;
+      }, '');
     const encoder = new TextEncoder();
     const data = encoder.encode(txt);
     const digest = await window.crypto.subtle.digest('SHA-1', data);
     const hashArray = Array.from(new Uint8Array(digest));
     const hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
     return hash;
+  }
+
+  public async markAsSaved() {
+    this.savedHash = await this.getEditorsHash();
+    this.currentHash = this.savedHash;
+  }
+
+  public async clearSaved() {
+    this.savedHash = null;
   }
 }

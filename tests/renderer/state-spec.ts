@@ -470,7 +470,8 @@ describe('AppState', () => {
       it('if the current fiddle is an unedited template', async () => {
         appState.templateName = oldVersion;
         appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        appState.editorMosaic.isEdited = false;
+        (appState.editorMosaic as any).savedHash = 'saved';
+        (appState.editorMosaic as any).currentHash = 'current';
 
         await appState.setVersion(newVersion);
         const templateName = newVersion;
@@ -479,7 +480,8 @@ describe('AppState', () => {
 
       it('but not if the current fiddle is edited', async () => {
         appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        appState.editorMosaic.isEdited = true;
+        (appState.editorMosaic as any).savedHash = 'saved';
+        (appState.editorMosaic as any).currentHash = 'current';
         appState.templateName = oldVersion;
 
         await appState.setVersion(newVersion);
@@ -789,7 +791,8 @@ describe('AppState', () => {
 
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
-      appState.editorMosaic.isEdited = true;
+      (appState.editorMosaic as any).savedHash = 'saved';
+      (appState.editorMosaic as any).currentHash = 'current';
       const actual = appState.title;
       expect(actual).toBe(expected);
     });

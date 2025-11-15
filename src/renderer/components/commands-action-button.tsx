@@ -178,7 +178,7 @@ export const GistActionButton = observer(
 
         if (description) {
           if (await this.publishGist(description)) {
-            appState.editorMosaic.isEdited = false;
+            await this.props.appState.editorMosaic.markAsSaved();
           }
         }
       } finally {
@@ -214,7 +214,7 @@ export const GistActionButton = observer(
           files,
         });
 
-        appState.editorMosaic.isEdited = false;
+        appState.editorMosaic.markAsSaved();
         console.log('Updating: Updating done', { gist });
 
         if (!silent) {
@@ -256,7 +256,7 @@ export const GistActionButton = observer(
           gist_id: appState.gistId!,
         });
 
-        appState.editorMosaic.isEdited = true;
+        appState.editorMosaic.clearSaved();
         console.log('Deleting: Deleting done', { gist });
         this.renderToast({ message: 'Successfully deleted gist!' });
       } catch (error: any) {

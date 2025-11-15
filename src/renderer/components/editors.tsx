@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { runInAction } from 'mobx';
 import { observer } from 'mobx-react';
 import * as MonacoType from 'monaco-editor';
 import {
@@ -255,7 +256,9 @@ export const Editors = observer(
      * Handles a change in the visible nodes
      */
     public onChange(currentNode: MosaicNode<EditorId> | null) {
-      this.props.appState.editorMosaic.mosaic = currentNode;
+      runInAction(() => {
+        this.props.appState.editorMosaic.mosaic = currentNode;
+      });
     }
 
     /**
