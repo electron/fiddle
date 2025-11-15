@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { observer } from 'mobx-react';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 import {
   Mosaic,
   MosaicBranch,

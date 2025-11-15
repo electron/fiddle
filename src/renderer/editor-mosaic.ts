@@ -1,5 +1,5 @@
 import { action, computed, makeObservable, observable, reaction } from 'mobx';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 
 import {
