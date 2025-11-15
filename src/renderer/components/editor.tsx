@@ -55,7 +55,7 @@ export class Editor extends React.Component<EditorProps> {
     const { appState, editorDidMount, id } = this.props;
     const { editorMosaic } = appState;
 
-    editorMosaic.addEditor(id, editor);
+    await editorMosaic.addEditor(id, editor);
 
     // And notify others
     if (editorDidMount) {

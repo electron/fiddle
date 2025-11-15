@@ -13,6 +13,10 @@ import { EditorId, EditorValues, PACKAGE_NAME } from '../interfaces';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
+/**
+ * Editors in Electron Fiddle can be hidden from the current view, but
+ * still exist in memory and can be re-opened.
+ */
 export enum EditorPresence {
   /** The file is known to us but we've chosen not to show it, either
       because the content was boring or because hide() was called.
@@ -34,8 +38,14 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
-  public isEdited = false;
   public focusedFile: EditorId | null = null;
+
+  private savedHash: string | null = null;
+  private currentHash: string | null = null;
+
+  public get isEdited() {
+    return this.savedHash !== this.currentHash;
+  }
 
   public get files() {
     const files = new Map<EditorId, EditorPresence>();
@@ -62,11 +72,17 @@ export class EditorMosaic {
   constructor() {
     makeObservable<
       EditorMosaic,
-      'backups' | 'editors' | 'addFile' | 'setVisible' | 'setEditorFromBackup'
+      | 'backups'
+      | 'editors'
+      | 'addFile'
+      | 'setVisible'
+      | 'setEditorFromBackup'
+      | 'savedHash'
+      | 'currentHash'
     >(this, {
-      isEdited: observable,
       focusedFile: observable,
       files: computed,
+      isEdited: computed,
       numVisible: computed,
       mosaic: observable,
       backups: observable,
@@ -84,6 +100,8 @@ export class EditorMosaic {
       setEditorFromBackup: action,
       addNewFile: action,
       renameFile: action,
+      savedHash: observable,
+      currentHash: observable,
     });
 
     // whenever the mosaics are changed,
@@ -91,18 +109,6 @@ export class EditorMosaic {
     reaction(
       () => this.mosaic,
       () => this.layout(),
-    );
-
-    // whenever isEdited is set, stop or start listening to edits again.
-    reaction(
-      () => this.isEdited,
-      () => {
-        if (this.isEdited) {
-          this.ignoreAllEdits();
-        } else {
-          this.observeAllEdits();
-        }
-      },
     );
   }
 
@@ -124,7 +130,7 @@ export class EditorMosaic {
   /// set / add / get the files in the model
 
   /** Set the contents of the mosaic */
-  public set(valuesIn: EditorValues) {
+  public async set(valuesIn: EditorValues) {
     // set() clears out the previous Fiddle, so clear our previous state
     // except for this.editors -- we recycle editors below in setFile()
     this.backups.clear();
@@ -132,16 +138,16 @@ export class EditorMosaic {
 
     // add the files to the mosaic, recycling existing editors when possible.
     const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
-    for (const [id, value] of values) this.addFile(id, value);
+    for (const [id, value] of values) {
+      await this.addFile(id, value);
+    }
     for (const id of this.editors.keys()) {
       if (!values.has(id)) this.editors.delete(id);
     }
-
-    this.isEdited = false;
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
-  private addFile(id: EditorId, value: string) {
+  private async addFile(id: EditorId, value: string) {
     if (
       id.endsWith('.json') &&
       [PACKAGE_NAME, 'package-lock.json'].includes(id)
@@ -169,6 +175,7 @@ export class EditorMosaic {
     const editor = this.editors.get(id);
     if (editor) {
       this.setEditorFromBackup(editor, backup);
+      this.observeEdits(editor);
     } else {
       this.backups.set(id, backup);
     }
@@ -179,8 +186,6 @@ export class EditorMosaic {
     } else {
       this.hide(id);
     }
-
-    this.isEdited = true;
   }
 
   /// show or hide files in the view
@@ -249,34 +254,35 @@ export class EditorMosaic {
   }
 
   /** Remove the specified file and its editor */
-  public remove(id: EditorId) {
+  public async remove(id: EditorId) {
     this.editors.delete(id);
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
 
-    this.isEdited = true;
+    this.currentHash = await this.getEditorsHash();
   }
 
   /** Wire up a newly-mounted Monaco editor */
-  public addEditor(id: EditorId, editor: Editor) {
+  public async addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
     if (!backup) throw new Error(`added Editor for unexpected file "${id}"`);
 
     this.backups.delete(id);
     this.editors.set(id, editor);
     this.setEditorFromBackup(editor, backup);
+
+    this.savedHash = await this.getEditorsHash();
   }
 
   /** Populate a MonacoEditor with the file's contents */
   private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
-    this.ignoreEdits(editor); // pause this so that isEdited doesn't get set
     if (backup.viewState) editor.restoreViewState(backup.viewState);
     editor.setModel(backup.model);
     this.observeEdits(editor); // resume
   }
 
   /** Add a new file to the mosaic */
-  public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
+  public async addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
     if (this.files.has(id)) {
       throw new Error(`Cannot add file "${id}": File already exists`);
     }
@@ -289,7 +295,7 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(id, value);
+    await this.addFile(id, value);
   }
 
   /** Rename a file in the mosaic */
@@ -355,26 +361,27 @@ export class EditorMosaic {
     return Array.from(this.files.keys()).find((id) => isMainEntryPoint(id));
   }
 
-  //=== Listen for user edits
-
-  private ignoreAllEdits() {
-    for (const editor of this.editors.values()) this.ignoreEdits(editor);
-  }
-
-  private ignoreEdits(editor: Editor) {
-    editor.onDidChangeModelContent(() => {
-      // no-op
-    });
-  }
-
-  private observeAllEdits() {
-    for (const editor of this.editors.values()) this.observeEdits(editor);
-  }
-
   private observeEdits(editor: Editor) {
-    const disposable = editor.onDidChangeModelContent(() => {
-      this.isEdited ||= true;
-      disposable.dispose();
+    editor.onDidChangeModelContent(async () => {
+      this.currentHash = await this.getEditorsHash();
+      console.log(this.currentHash, this.savedHash);
+      console.log(this.isEdited);
     });
+  }
+
+  /**
+   * Generates a SHA-1 hash of all editor contents.
+   */
+  private async getEditorsHash() {
+    const txt = Array.from(this.editors.values()).reduce((str, editor) => {
+      str += editor.getModel()?.getValue().trim();
+      return str;
+    }, '');
+    const encoder = new TextEncoder();
+    const data = encoder.encode(txt);
+    const digest = await window.crypto.subtle.digest('SHA-1', data);
+    const hashArray = Array.from(new Uint8Array(digest));
+    const hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
+    return hash;
   }
 }
