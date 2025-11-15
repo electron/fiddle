@@ -3,7 +3,7 @@
 
 import * as React from 'react';
 
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 
 import { EditorId } from '../../interfaces';
 import { AppState } from '../state';
@@ -90,6 +90,8 @@ export class Editor extends React.Component<EditorProps> {
           fontSize,
           contextmenu: false,
           model: null,
+          tabSize: 2,
+          insertSpaces: true,
           ...monacoOptions,
         },
         {

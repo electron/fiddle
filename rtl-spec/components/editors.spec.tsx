@@ -53,7 +53,7 @@ describe('Editors component', () => {
     const action = editor.getAction();
     action.isSupported.mockReturnValue(false);
 
-    editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
+    editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(editor);
 
     instance.executeCommand('hello');
     expect(editor.getAction).toHaveBeenCalled();
@@ -127,12 +127,27 @@ describe('Editors component', () => {
       const action = editor.getAction();
       action.isSupported.mockReturnValue(true);
 
-      editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
+      editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(editor);
 
       emitEvent('execute-monaco-command', 'hello');
       expect(editor.getAction).toHaveBeenCalled();
       expect(action.isSupported).toHaveBeenCalled();
       expect(action.run).toHaveBeenCalled();
+    });
+
+    it('handles a "execute-monaco-command" event for all editors', () => {
+      renderEditors();
+
+      const editor = new MonacoEditorMock();
+      const action = editor.getAction();
+      action.isSupported.mockReturnValue(true);
+
+      editorMosaic.getAllEditors = vi
+        .fn()
+        .mockReturnValue([editor, editor, editor]);
+
+      emitEvent('execute-monaco-command', 'hello', { all: true });
+      expect(action.run).toHaveBeenCalledTimes(3);
     });
 
     const fakeValues = { [MAIN_JS]: 'hi' } as const;
@@ -177,7 +192,7 @@ describe('Editors component', () => {
         const editor = new MonacoEditorMock();
         const model = editor.getModel();
         model.getFullModelRange.mockReturnValue(range);
-        editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
+        editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(editor);
 
         emitEvent('select-all-in-editor');
 
@@ -190,7 +205,7 @@ describe('Editors component', () => {
 
         const editor = new MonacoEditorMock();
         delete (editor as any).model;
-        editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
+        editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(editor);
 
         emitEvent('select-all-in-editor');
 
@@ -201,7 +216,7 @@ describe('Editors component', () => {
 
       it('does not crash if there is no selected editor', () => {
         renderEditors();
-        editorMosaic.focusedEditor = vi.fn().mockReturnValue(null);
+        editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(null);
         emitEvent('select-all-in-editor');
       });
     });
@@ -243,7 +258,7 @@ describe('Editors component', () => {
       const range = 'range';
       const editor = new MonacoEditorMock();
       editor.getModel().getFullModelRange.mockReturnValue(range);
-      editorMosaic.focusedEditor = vi.fn().mockReturnValue(editor);
+      editorMosaic.getFocusedEditor = vi.fn().mockReturnValue(editor);
 
       emitEvent('select-all-in-editor');
       await new Promise(process.nextTick);

@@ -1,4 +1,4 @@
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 
 import { ELECTRON_DTS } from '../constants';
 import { NodeTypes, RunnableVersion, VersionSource } from '../interfaces';

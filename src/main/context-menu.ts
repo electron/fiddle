@@ -94,6 +94,17 @@ export function getMonacoItems({
         ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
       },
     },
+    {
+      id: 'format_all',
+      label: 'Format All Documents',
+      click() {
+        const cmd = ['editor.action.formatSelection'];
+        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, [
+          cmd,
+          { all: true },
+        ]);
+      },
+    },
     { type: 'separator' },
   ];
 }

@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { autorun, reaction } from 'mobx';
 import { observer } from 'mobx-react';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 import {
   MosaicContext,
   MosaicNode,

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { observer } from 'mobx-react';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 import {
   Mosaic,
   MosaicBranch,
@@ -60,8 +60,8 @@ export const Editors = observer(
 
       window.ElectronFiddle.addEventListener(
         'execute-monaco-command',
-        (cmd: string) => {
-          this.executeCommand(cmd);
+        (cmd: string, opts?: Partial<{ all: boolean }>) => {
+          this.executeCommand(cmd, opts);
         },
       );
 
@@ -91,7 +91,7 @@ export const Editors = observer(
       );
 
       window.ElectronFiddle.addEventListener('redo-in-editor', () => {
-        const editor = this.props.appState.editorMosaic.focusedEditor();
+        const editor = this.props.appState.editorMosaic.getFocusedEditor();
         if (editor) {
           const model = editor.getModel();
           if (model) (model as any).redo();
@@ -99,7 +99,7 @@ export const Editors = observer(
       });
 
       window.ElectronFiddle.addEventListener('undo-in-editor', () => {
-        const editor = this.props.appState.editorMosaic.focusedEditor();
+        const editor = this.props.appState.editorMosaic.getFocusedEditor();
         if (editor) {
           const model = editor.getModel();
           if (model) (model as any).undo();
@@ -107,7 +107,7 @@ export const Editors = observer(
       });
 
       window.ElectronFiddle.addEventListener('select-all-in-editor', () => {
-        const editor = this.props.appState.editorMosaic.focusedEditor();
+        const editor = this.props.appState.editorMosaic.getFocusedEditor();
         if (editor) {
           const model = editor.getModel();
           if (model) {
@@ -132,12 +132,24 @@ export const Editors = observer(
     }
 
     /**
-     * Attempt to execute a given commandId on the currently focused editor
+     * Attempt to execute a given commandId on one or more Monaco editors
      */
-    public executeCommand(commandId: string) {
-      const editor = this.props.appState.editorMosaic.focusedEditor();
+    public executeCommand(commandId: string, opts?: Partial<{ all: boolean }>) {
+      const editors = [];
 
-      if (editor) {
+      if (opts?.all) {
+        editors.push(...this.props.appState.editorMosaic.getAllEditors());
+      } else {
+        const focusedEditor =
+          this.props.appState.editorMosaic.getFocusedEditor();
+        if (focusedEditor) {
+          editors.push(focusedEditor);
+        } else {
+          return;
+        }
+      }
+
+      for (const editor of editors) {
         const command = editor.getAction(commandId);
 
         if (!command) return;

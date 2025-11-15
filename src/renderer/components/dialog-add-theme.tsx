@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { Button, Dialog, FileInput } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 
 import { FiddleTheme } from '../../themes-defaults';
 import { AppState } from '../state';
