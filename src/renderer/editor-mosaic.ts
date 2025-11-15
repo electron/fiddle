@@ -40,11 +40,15 @@ interface EditorBackup {
 export class EditorMosaic {
   public focusedFile: EditorId | null = null;
 
-  private savedHash: string | null = null;
-  private currentHash: string | null = null;
+  private savedHash = new Map<EditorId, string>();
+  private currentHash = new Map<EditorId, string>();
 
   public get isEdited() {
-    return this.savedHash !== this.currentHash;
+    if (this.savedHash.size !== this.currentHash.size) return true;
+    for (const [id, hash] of this.currentHash) {
+      if (this.savedHash.get(id) !== hash) return true;
+    }
+    return false;
   }
 
   public get files() {
@@ -342,36 +346,43 @@ export class EditorMosaic {
   }
 
   private async updateCurrentHash() {
-    const hash = await this.getEditorsHash();
+    const hashes = await this.getAllHashes();
     runInAction(() => {
-      this.currentHash = hash;
+      this.currentHash = hashes;
     });
   }
 
   /**
-   * Generates a SHA-1 hash of all editor contents.
+   * Generates a SHA-1 hash for each editor's contents.
    */
-  private async getEditorsHash() {
-    const txt = Array.from(this.editors.entries())
-      .sort(([ka], [kb]) => (kb > ka ? 1 : -1)) // sort by editor name for stability
-      .reduce((str, [_, editor]) => {
-        str += editor.getModel()?.getValue().trim();
-        return str;
-      }, '');
+  private async getAllHashes() {
+    const hashes = new Map<EditorId, string>();
     const encoder = new TextEncoder();
-    const data = encoder.encode(txt);
-    const digest = await window.crypto.subtle.digest('SHA-1', data);
-    const hashArray = Array.from(new Uint8Array(digest));
-    const hash = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('');
-    return hash;
+
+    for (const [id, editor] of this.editors) {
+      const txt = editor.getModel()?.getValue();
+      const data = encoder.encode(txt);
+      const digest = await window.crypto.subtle.digest('SHA-1', data);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hash = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      hashes.set(id, hash);
+    }
+
+    return hashes;
   }
 
   public async markAsSaved() {
-    this.savedHash = await this.getEditorsHash();
-    this.currentHash = this.savedHash;
+    const hashes = await this.getAllHashes();
+    runInAction(() => {
+      this.savedHash = hashes;
+      // new map to clone
+      this.currentHash = new Map(hashes);
+    });
   }
 
   public async clearSaved() {
-    this.savedHash = null;
+    this.savedHash.clear();
   }
 }
