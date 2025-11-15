@@ -46,7 +46,7 @@ declare global {
       ): void;
       addEventListener(
         type: 'execute-monaco-command',
-        listener: (commandId: string) => void,
+        listener: (commandId: string, opts?: Partial<{ all: boolean }>) => void,
         options?: { signal: AbortSignal },
       ): void;
       addEventListener(

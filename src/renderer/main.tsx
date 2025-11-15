@@ -10,6 +10,7 @@ import { initSentry } from './sentry';
 
 initSentry();
 
+// Register Prettier as the formatter for all Monaco.
 monaco.languages.registerDocumentFormattingEditProvider('javascript', {
   provideDocumentFormattingEdits: async (model) => {
     const formatted = await prettier.format(model.getValue(), {

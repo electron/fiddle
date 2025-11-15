@@ -161,7 +161,6 @@ export class EditorMosaic {
     const { monaco } = window;
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);
-    model.updateOptions({ tabSize: 2 });
 
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
@@ -343,7 +342,11 @@ export class EditorMosaic {
     }
   };
 
-  public focusedEditor(): Editor | undefined {
+  public getAllEditors(): Editor[] {
+    return [...this.editors.values()];
+  }
+
+  public getFocusedEditor(): Editor | undefined {
     return [...this.editors.values()].find((editor) => editor.hasTextFocus());
   }
 
