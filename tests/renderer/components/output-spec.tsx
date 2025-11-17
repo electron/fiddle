@@ -1,7 +1,7 @@
 import * as React from 'react';
 
 import { shallow } from 'enzyme';
-import * as MonacoType from 'monaco-editor';
+import type * as MonacoType from 'monaco-editor';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Output } from '../../../src/renderer/components/output';
