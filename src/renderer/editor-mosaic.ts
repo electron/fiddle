@@ -40,13 +40,22 @@ interface EditorBackup {
 export class EditorMosaic {
   public focusedFile: EditorId | null = null;
 
-  private savedHash = new Map<EditorId, string>();
-  private currentHash = new Map<EditorId, string>();
+  /**
+   * A map of editors and the SHA-1 hashes of their contents
+   * when last saved.
+   */
+  private savedHashes = new Map<EditorId, string>();
+  /**
+   * A map of editors and the SHA-1 hashes of their current contents.
+   */
+  private currentHashes = new Map<EditorId, string>();
 
   public get isEdited() {
-    if (this.savedHash.size !== this.currentHash.size) return true;
-    for (const [id, hash] of this.currentHash) {
-      if (this.savedHash.get(id) !== hash) return true;
+    if (this.savedHashes.size !== this.currentHashes.size) {
+      return true;
+    }
+    for (const [id, hash] of this.currentHashes) {
+      if (this.savedHashes.get(id) !== hash) return true;
     }
     return false;
   }
@@ -152,12 +161,12 @@ export class EditorMosaic {
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
     const backup: EditorBackup = { model };
+    this.backups.set(id, backup);
+
     const editor = this.editors.get(id);
     if (editor) {
       this.setEditorFromBackup(editor, backup);
       this.observeEdits(editor);
-    } else {
-      this.backups.set(id, backup);
     }
 
     // only show the file if it has nontrivial content
@@ -348,7 +357,7 @@ export class EditorMosaic {
   private async updateCurrentHash() {
     const hashes = await this.getAllHashes();
     runInAction(() => {
-      this.currentHash = hashes;
+      this.currentHashes = hashes;
     });
   }
 
@@ -373,16 +382,22 @@ export class EditorMosaic {
     return hashes;
   }
 
+  /**
+   * Marks the current state of all editors as saved.
+   */
   public async markAsSaved() {
     const hashes = await this.getAllHashes();
     runInAction(() => {
-      this.savedHash = hashes;
+      this.savedHashes = hashes;
       // new map to clone
-      this.currentHash = new Map(hashes);
+      this.currentHashes = new Map(hashes);
     });
   }
 
+  /**
+   * Forces all editors to be marked as unsaved.
+   */
   public async clearSaved() {
-    this.savedHash.clear();
+    this.savedHashes.clear();
   }
 }

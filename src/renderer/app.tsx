@@ -60,14 +60,14 @@ export class App {
     editorValues: EditorValues,
     { localFiddle, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
-    const { state } = this;
-    const { editorMosaic } = state;
-
-    if (editorMosaic.isEdited && !(await this.confirmReplaceUnsaved())) {
+    if (
+      this.state.editorMosaic.isEdited &&
+      !(await this.confirmReplaceUnsaved())
+    ) {
       return false;
     }
 
-    this.state.editorMosaic.set(editorValues);
+    await this.state.editorMosaic.set(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;
