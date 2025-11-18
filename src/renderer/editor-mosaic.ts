@@ -133,17 +133,6 @@ export class EditorMosaic {
     for (const id of this.editors.keys()) {
       if (!values.has(id)) this.editors.delete(id);
     }
-
-    // HACK: editors should be mounted shortly after we load something.
-    // We could try waiting for every single `editorDidMount` callback
-    // to fire, but that gets complicated with recycled editors with changed
-    // values. This is just easier for now.
-    await new Promise<void>((resolve) =>
-      setTimeout(async () => {
-        await this.markAsSaved();
-        resolve();
-      }, 100),
-    );
   }
 
   /** Add a file. If we already have a file with that name, replace it. */

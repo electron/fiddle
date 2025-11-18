@@ -69,6 +69,17 @@ export class App {
 
     await this.state.editorMosaic.set(editorValues);
 
+    // HACK: editors should be mounted shortly after we load something.
+    // We could try waiting for every single `editorDidMount` callback
+    // to fire, but that gets complicated with recycled editors with changed
+    // values. This is just easier for now.
+    await new Promise<void>((resolve) =>
+      setTimeout(async () => {
+        await this.state.editorMosaic.markAsSaved();
+        resolve();
+      }, 100),
+    );
+
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;
     this.state.templateName = templateName;
