@@ -439,15 +439,16 @@ describe('App component', () => {
 
       // Actually set the editor in a dirty state instead of mocking
       // because this code path uses an autorun on the computed `isEdited` value
+      (app.state.editorMosaic as any).savedHashes = new Map([[MAIN_JS, 'def']]);
       (app.state.editorMosaic as any).currentHashes = new Map([
         [MAIN_JS, 'abc'],
       ]);
 
-      expect(window.onbeforeunload).toBeTruthy();
-
       const e = {
         returnValue: Boolean,
       };
+
+      await vi.waitUntil(() => app.state.editorMosaic.isEdited === true);
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
@@ -463,9 +464,11 @@ describe('App component', () => {
 
       // Actually set the editor in a dirty state instead of mocking
       // because this code path uses an autorun on the computed `isEdited` value
+      (app.state.editorMosaic as any).savedHashes = new Map([[MAIN_JS, 'def']]);
       (app.state.editorMosaic as any).currentHashes = new Map([
         [MAIN_JS, 'abc'],
       ]);
+
       expect(window.onbeforeunload).toBeTruthy();
 
       const e = {
