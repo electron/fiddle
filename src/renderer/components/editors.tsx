@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { toJS } from 'mobx';
 import { observer } from 'mobx-react';
 import type * as MonacoType from 'monaco-editor';
 import {
@@ -185,7 +186,7 @@ export const Editors = observer(
     }
 
     /**
-     * Renders the little tool bar on top of each panel
+     * Renders the little toolbar on top of each panel
      */
     public renderToolbar(
       { title }: MosaicWindowProps<EditorId>,
@@ -197,7 +198,9 @@ export const Editors = observer(
         <div role="toolbar">
           {/* Left */}
           <div>
-            <h5>{title}</h5>
+            <h5>
+              {title} (${appState.editorMosaic.erick.get(id)})
+            </h5>
           </div>
           {/* Middle */}
           <div />
@@ -251,6 +254,8 @@ export const Editors = observer(
 
     public render() {
       const { editorMosaic } = this.props.appState;
+
+      console.log(toJS(editorMosaic.erick));
 
       return (
         <Mosaic<EditorId>
