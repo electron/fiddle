@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
-import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
+import { EditorPresence } from '../../src/renderer/editor-mosaic';
 import { defaultDark, defaultLight } from '../../src/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 
@@ -388,11 +388,6 @@ describe('App component', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
     const editorValues2: EditorValues = { [MAIN_JS]: '// hello world' };
-    let editorMosaic: EditorMosaic;
-
-    beforeEach(() => {
-      ({ editorMosaic } = app.state);
-    });
 
     async function testDialog(confirm: boolean) {
       const localPath = '/etc/passwd';
