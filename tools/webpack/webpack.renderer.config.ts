@@ -63,6 +63,7 @@ export const rendererConfig: Configuration = {
     ...plugins,
     new MonacoWebpackPlugin({
       languages: ['typescript', 'javascript', 'html', 'css'],
+      features: ['!contextmenu', '!iPadShowKeyboard', '!snippets'],
     }),
     new MiniCssExtractPlugin({
       filename: './css/[name].css',
