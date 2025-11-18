@@ -63,7 +63,15 @@ export const rendererConfig: Configuration = {
     ...plugins,
     new MonacoWebpackPlugin({
       languages: ['typescript', 'javascript', 'html', 'css'],
-      features: ['!contextmenu', '!iPadShowKeyboard', '!snippets'],
+      // This array maps to specific entries in the Monaco metadata
+      // To see a full list and where they map to in VSCode, see 'monaco-editor/esm/metadata'
+      features: [
+        '!contextmenu',
+        '!iPadShowKeyboard',
+        '!snippets',
+        '!quickCommand',
+        '!quickOutline',
+      ],
     }),
     new MiniCssExtractPlugin({
       filename: './css/[name].css',
