@@ -97,6 +97,8 @@ export class EditorMosaic {
       () => this.mosaic,
       () => this.layout(),
     );
+
+    this.layout = this.layout.bind(this);
   }
 
   /** File is visible, focus file content */
@@ -330,17 +332,15 @@ export class EditorMosaic {
   }
 
   /// misc utilities
-
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
   public layout() {
-    const DEBOUNCE_MSEC = 50;
-    if (!this.layoutDebounce) {
-      this.layoutDebounce = setTimeout(() => {
-        for (const editor of this.editors.values()) editor.layout();
-        delete this.layoutDebounce;
-      }, DEBOUNCE_MSEC);
-    }
+    clearTimeout(this.layoutDebounce);
+    this.layoutDebounce = setTimeout(() => {
+      for (const editor of this.editors.values()) {
+        editor.layout();
+      }
+    }, 50);
   }
 
   public getAllEditors(): Editor[] {
