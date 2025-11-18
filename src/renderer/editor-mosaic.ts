@@ -166,8 +166,6 @@ export class EditorMosaic {
     const language = monacoLanguage(id);
     const model = monaco.editor.createModel(value, language);
 
-    // if we have an editor available, use the monaco model now.
-    // otherwise, save the file in `this.backups` for future use.
     const backup: EditorBackup = { model };
     this.backups.set(id, backup);
 
