@@ -9,16 +9,13 @@ import {
   MAIN_CJS,
   MAIN_JS,
   PACKAGE_NAME,
-} from '../../../src/interfaces';
-import { Editors } from '../../../src/renderer/components/editors';
-import { SidebarFileTree } from '../../../src/renderer/components/sidebar-file-tree';
-import {
-  EditorMosaic,
-  EditorPresence,
-} from '../../../src/renderer/editor-mosaic';
-import { AppState } from '../../../src/renderer/state';
-import { createEditorValues } from '../../mocks/editor-values';
-import { AppMock, StateMock } from '../../mocks/mocks';
+} from '../../src/interfaces';
+import { Editors } from '../../src/renderer/components/editors';
+import { SidebarFileTree } from '../../src/renderer/components/sidebar-file-tree';
+import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
+import { AppState } from '../../src/renderer/state';
+import { createEditorValues } from '../../tests/mocks/editor-values';
+import { AppMock, StateMock } from '../../tests/mocks/mocks';
 
 describe('SidebarFileTree component', () => {
   let store: AppState;
