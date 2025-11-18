@@ -470,8 +470,6 @@ describe('AppState', () => {
       it('if the current fiddle is an unedited template', async () => {
         appState.templateName = oldVersion;
         await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        (appState.editorMosaic as any).savedHash = 'saved';
-        (appState.editorMosaic as any).currentHash = 'current';
 
         await appState.setVersion(newVersion);
         const templateName = newVersion;
@@ -480,8 +478,12 @@ describe('AppState', () => {
 
       it('but not if the current fiddle is edited', async () => {
         await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        (appState.editorMosaic as any).savedHash = 'saved';
-        (appState.editorMosaic as any).currentHash = 'current';
+        (appState.editorMosaic as any).savedHashes = new Map([
+          [MAIN_JS, 'saved'],
+        ]);
+        (appState.editorMosaic as any).currentHashes = new Map([
+          [MAIN_JS, 'different'],
+        ]);
         appState.templateName = oldVersion;
 
         await appState.setVersion(newVersion);

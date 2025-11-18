@@ -1,0 +1,1121 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`SidebarFileTree component > reflects the visibility state of all icons 1`] = `
+<div>
+  <div
+    class="fiddle-scrollbar"
+  >
+    <div
+      class="bp3-tree"
+    >
+      <ul
+        class="bp3-tree-node-list bp3-tree-root"
+      >
+        <li
+          class="bp3-tree-node bp3-tree-node-expanded"
+        >
+          <div
+            class="bp3-tree-node-content bp3-tree-node-content-0"
+          >
+            <span
+              class="bp3-tree-node-caret-none"
+            />
+            <span
+              aria-hidden="true"
+              class="bp3-icon bp3-icon-folder-open bp3-tree-node-icon"
+              icon="folder-open"
+            >
+              <svg
+                data-icon="folder-open"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <path
+                  d="M2.06 6.69c.14-.4.5-.69.94-.69h11V5c0-.55-.45-1-1-1H6.41l-1.7-1.71A.997.997 0 004 2H1c-.55 0-1 .45-1 1v9.84l2.05-6.15h.01zM16 8c0-.55-.45-1-1-1H4a.99.99 0 00-.94.69l-2 6c-.04.09-.06.2-.06.31 0 .55.45 1 1 1h11c.44 0 .81-.29.94-.69l2-6c.04-.09.06-.2.06-.31z"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </span>
+            <span
+              class="bp3-tree-node-label"
+            >
+              Editors
+            </span>
+            <span
+              class="bp3-tree-node-secondary-label"
+            >
+              <div
+                class="bp3-button-group bp3-minimal"
+                style="display: flex; gap: 4px;"
+              >
+                <span
+                  aria-haspopup="true"
+                  class="bp3-popover2-target"
+                >
+                  <button
+                    class="bp3-button bp3-small"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-add"
+                      icon="add"
+                    >
+                      <svg
+                        data-icon="add"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M10.99 6.99h-2v-2c0-.55-.45-1-1-1s-1 .45-1 1v2h-2c-.55 0-1 .45-1 1s.45 1 1 1h2v2c0 .55.45 1 1 1s1-.45 1-1v-2h2c.55 0 1-.45 1-1s-.45-1-1-1zm-3-7c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.68 6-6 6z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </span>
+                <span
+                  aria-haspopup="true"
+                  class="bp3-popover2-target"
+                >
+                  <button
+                    class="bp3-button bp3-small"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-grid-view"
+                      icon="grid-view"
+                    >
+                      <svg
+                        data-icon="grid-view"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M0 1v6h7V0H1C.45 0 0 .45 0 1zm0 14c0 .55.45 1 1 1h6V9H0v6zM15 0H9v7h7V1c0-.55-.45-1-1-1zM9 16h6c.55 0 1-.45 1-1V9H9v7z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </span>
+              </div>
+            </span>
+          </div>
+          <div
+            class="bp3-collapse"
+            style="height: auto; overflow-y: visible; transition: none;"
+          >
+            <div
+              aria-hidden="false"
+              class="bp3-collapse-body"
+              style="transform: translateY(0); transition: none;"
+            >
+              <ul
+                class="bp3-tree-node-list"
+              >
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        index.html
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-off"
+                                icon="eye-off"
+                              >
+                                <svg
+                                  data-icon="eye-off"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M16 7.97v-.02-.01-.02-.02a.672.672 0 00-.17-.36c-.49-.63-1.07-1.2-1.65-1.72l-3.16 2.26a2.978 2.978 0 01-2.98 2.9c-.31 0-.6-.06-.88-.15L5.09 12.3c.44.19.9.36 1.37.47.97.23 1.94.24 2.92.05.88-.17 1.74-.54 2.53-.98 1.25-.7 2.39-1.67 3.38-2.75.18-.2.37-.41.53-.62.09-.1.15-.22.17-.36v-.02-.02-.01-.02-.03c.01-.02.01-.03.01-.04zm-.43-4.17c.25-.18.43-.46.43-.8 0-.55-.45-1-1-1-.22 0-.41.08-.57.2l-.01-.01-2.67 1.91c-.69-.38-1.41-.69-2.17-.87a6.8 6.8 0 00-2.91-.05c-.88.18-1.74.54-2.53.99-1.25.7-2.39 1.67-3.38 2.75-.18.2-.37.41-.53.62-.23.29-.23.63-.01.92.51.66 1.11 1.25 1.73 1.79.18.16.38.29.56.44l-2.09 1.5.01.01c-.25.18-.43.46-.43.8 0 .55.45 1 1 1 .22 0 .41-.08.57-.2l.01.01 14-10-.01-.01zm-10.41 5a3.03 3.03 0 01-.11-.8 2.99 2.99 0 012.99-2.98c.62 0 1.19.21 1.66.53L5.16 8.8z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        main.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        preload.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        renderer.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        styles.css
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`SidebarFileTree component > renders 1`] = `
+<div>
+  <div
+    class="fiddle-scrollbar"
+  >
+    <div
+      class="bp3-tree"
+    >
+      <ul
+        class="bp3-tree-node-list bp3-tree-root"
+      >
+        <li
+          class="bp3-tree-node bp3-tree-node-expanded"
+        >
+          <div
+            class="bp3-tree-node-content bp3-tree-node-content-0"
+          >
+            <span
+              class="bp3-tree-node-caret-none"
+            />
+            <span
+              aria-hidden="true"
+              class="bp3-icon bp3-icon-folder-open bp3-tree-node-icon"
+              icon="folder-open"
+            >
+              <svg
+                data-icon="folder-open"
+                height="16"
+                viewBox="0 0 16 16"
+                width="16"
+              >
+                <path
+                  d="M2.06 6.69c.14-.4.5-.69.94-.69h11V5c0-.55-.45-1-1-1H6.41l-1.7-1.71A.997.997 0 004 2H1c-.55 0-1 .45-1 1v9.84l2.05-6.15h.01zM16 8c0-.55-.45-1-1-1H4a.99.99 0 00-.94.69l-2 6c-.04.09-.06.2-.06.31 0 .55.45 1 1 1h11c.44 0 .81-.29.94-.69l2-6c.04-.09.06-.2.06-.31z"
+                  fill-rule="evenodd"
+                />
+              </svg>
+            </span>
+            <span
+              class="bp3-tree-node-label"
+            >
+              Editors
+            </span>
+            <span
+              class="bp3-tree-node-secondary-label"
+            >
+              <div
+                class="bp3-button-group bp3-minimal"
+                style="display: flex; gap: 4px;"
+              >
+                <span
+                  aria-haspopup="true"
+                  class="bp3-popover2-target"
+                >
+                  <button
+                    class="bp3-button bp3-small"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-add"
+                      icon="add"
+                    >
+                      <svg
+                        data-icon="add"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M10.99 6.99h-2v-2c0-.55-.45-1-1-1s-1 .45-1 1v2h-2c-.55 0-1 .45-1 1s.45 1 1 1h2v2c0 .55.45 1 1 1s1-.45 1-1v-2h2c.55 0 1-.45 1-1s-.45-1-1-1zm-3-7c-4.42 0-8 3.58-8 8s3.58 8 8 8 8-3.58 8-8-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.68 6-6 6z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </span>
+                <span
+                  aria-haspopup="true"
+                  class="bp3-popover2-target"
+                >
+                  <button
+                    class="bp3-button bp3-small"
+                    tabindex="0"
+                    type="button"
+                  >
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-grid-view"
+                      icon="grid-view"
+                    >
+                      <svg
+                        data-icon="grid-view"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M0 1v6h7V0H1C.45 0 0 .45 0 1zm0 14c0 .55.45 1 1 1h6V9H0v6zM15 0H9v7h7V1c0-.55-.45-1-1-1zM9 16h6c.55 0 1-.45 1-1V9H9v7z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                  </button>
+                </span>
+              </div>
+            </span>
+          </div>
+          <div
+            class="bp3-collapse"
+            style="height: auto; overflow-y: visible; transition: none;"
+          >
+            <div
+              aria-hidden="false"
+              class="bp3-collapse-body"
+              style="transform: translateY(0); transition: none;"
+            >
+              <ul
+                class="bp3-tree-node-list"
+              >
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        index.html
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        main.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        preload.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        renderer.js
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+                <li
+                  class="bp3-tree-node"
+                >
+                  <div
+                    class="bp3-tree-node-content bp3-tree-node-content-1"
+                  >
+                    <span
+                      class="bp3-tree-node-caret-none"
+                    />
+                    <span
+                      aria-hidden="true"
+                      class="bp3-icon bp3-icon-document bp3-tree-node-icon"
+                      icon="document"
+                    >
+                      <svg
+                        data-icon="document"
+                        height="16"
+                        viewBox="0 0 16 16"
+                        width="16"
+                      >
+                        <path
+                          d="M9 0H3c-.55 0-1 .45-1 1v14c0 .55.45 1 1 1h10c.55 0 1-.45 1-1V5L9 0zm3 14H4V2h4v4h4v8z"
+                          fill-rule="evenodd"
+                        />
+                      </svg>
+                    </span>
+                    <span
+                      class="bp3-tree-node-label"
+                    >
+                      <div
+                        class="pointer bp3-context-menu2"
+                      >
+                        styles.css
+                      </div>
+                    </span>
+                    <span
+                      class="bp3-tree-node-secondary-label"
+                    >
+                      <div
+                        class="bp3-button-group"
+                      >
+                        <span
+                          aria-haspopup="true"
+                          class="bp3-popover2-target"
+                        >
+                          <button
+                            class="bp3-button bp3-minimal"
+                            tabindex="0"
+                            type="button"
+                          >
+                            <span
+                              class="bp3-button-text"
+                            >
+                              <span
+                                aria-hidden="true"
+                                class="bp3-icon bp3-icon-eye-open"
+                                icon="eye-open"
+                              >
+                                <svg
+                                  data-icon="eye-open"
+                                  height="16"
+                                  viewBox="0 0 16 16"
+                                  width="16"
+                                >
+                                  <path
+                                    d="M8.002 7.003a1.003 1.003 0 000 2.005 1.003 1.003 0 000-2.005zm7.988.972v-.02-.01-.02-.02a.675.675 0 00-.17-.36c-.509-.673-1.118-1.264-1.737-1.806-1.328-1.173-2.846-2.155-4.523-2.546a6.702 6.702 0 00-2.925-.06c-.889.18-1.738.541-2.546.992C2.84 4.837 1.692 5.81.694 6.902c-.18.211-.36.411-.53.632a.742.742 0 000 .932c.51.672 1.119 1.264 1.738 1.805 1.328 1.173 2.846 2.156 4.523 2.547.968.23 1.947.24 2.925.04.889-.18 1.738-.542 2.546-.993 1.248-.712 2.397-1.684 3.395-2.777.18-.2.37-.411.54-.632.09-.1.149-.23.169-.36v-.02-.02-.01-.02-.03c0-.01-.01-.01-.01-.02zm-7.988 3.038a2.998 2.998 0 01-2.995-3.008 2.998 2.998 0 012.995-3.008 2.998 2.998 0 012.996 3.008 2.998 2.998 0 01-2.996 3.008z"
+                                    fill-rule="evenodd"
+                                  />
+                                </svg>
+                              </span>
+                            </span>
+                          </button>
+                        </span>
+                      </div>
+                    </span>
+                  </div>
+                  <div
+                    class="bp3-collapse"
+                  >
+                    <div
+                      aria-hidden="false"
+                      class="bp3-collapse-body"
+                      style="transform: translateY(-undefinedpx);"
+                    />
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>
+`;

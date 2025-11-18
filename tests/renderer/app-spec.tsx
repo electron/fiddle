@@ -26,7 +26,7 @@ describe('App component', () => {
     document.body.innerHTML = '<div id="app" />';
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
@@ -51,7 +51,7 @@ describe('App component', () => {
     });
     window.app = app;
 
-    state.editorMosaic.set({ [MAIN_JS]: '// content' });
+    await state.editorMosaic.set({ [MAIN_JS]: '// content' });
     state.editorMosaic.files.set(MAIN_JS, EditorPresence.Pending);
   });
 

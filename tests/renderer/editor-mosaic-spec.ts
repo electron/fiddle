@@ -206,7 +206,7 @@ describe('EditorMosaic', () => {
       for (const [file, value] of Object.entries(values)) {
         const editor = new MonacoEditorMock() as unknown as Editor;
         await editorMosaic.addEditor(file as EditorId, editor);
-        editor.setValue(value as string);
+        editor.setValue(value);
       }
 
       // values() should match the modified values
@@ -247,8 +247,8 @@ describe('EditorMosaic', () => {
   describe('set()', () => {
     it('resets isEdited to false', async () => {
       await editorMosaic.set(valuesIn);
-      editorMosaic.clearSaved();
-      expect(editorMosaic.isEdited).toBe(true);
+      editor.setValue('beep boop');
+      vi.waitFor(() => editorMosaic.isEdited === true);
 
       await editorMosaic.set(createEditorValues());
       expect(editorMosaic.isEdited).toBe(false);
