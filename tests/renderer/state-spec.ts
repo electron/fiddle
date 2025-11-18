@@ -459,7 +459,7 @@ describe('AppState', () => {
 
       it('if there is no current fiddle', async () => {
         // setup: current fiddle is empty
-        appState.editorMosaic.set({});
+        await appState.editorMosaic.set({});
 
         await appState.setVersion(newVersion);
         expect(replaceSpy).toHaveBeenCalledTimes(1);
@@ -469,7 +469,7 @@ describe('AppState', () => {
 
       it('if the current fiddle is an unedited template', async () => {
         appState.templateName = oldVersion;
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
         (appState.editorMosaic as any).savedHash = 'saved';
         (appState.editorMosaic as any).currentHash = 'current';
 
@@ -479,7 +479,7 @@ describe('AppState', () => {
       });
 
       it('but not if the current fiddle is edited', async () => {
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
         (appState.editorMosaic as any).savedHash = 'saved';
         (appState.editorMosaic as any).currentHash = 'current';
         appState.templateName = oldVersion;
@@ -489,7 +489,7 @@ describe('AppState', () => {
       });
 
       it('but not if the current fiddle is not a template', async () => {
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
         appState.localPath = '/some/path/to/a/fiddle';
 
         await appState.setVersion(newVersion);

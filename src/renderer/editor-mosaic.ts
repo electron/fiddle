@@ -104,8 +104,8 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  resetLayout = () => {
-    this.set(this.values());
+  resetLayout = async () => {
+    await this.set(this.values());
   };
 
   /// set / add / get the files in the model
@@ -126,13 +126,16 @@ export class EditorMosaic {
       if (!values.has(id)) this.editors.delete(id);
     }
 
-    // HACK: editors should be mounted by 1000ms after we load something.
+    // HACK: editors should be mounted shortly after we load something.
     // We could try waiting for every single `editorDidMount` callback
     // to fire, but that gets complicated with recycled editors with changed
     // values. This is just easier for now.
-    setTimeout(() => {
-      this.markAsSaved();
-    }, 500);
+    await new Promise<void>((resolve) =>
+      setTimeout(async () => {
+        await this.markAsSaved();
+        resolve();
+      }, 100),
+    );
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
@@ -175,6 +178,7 @@ export class EditorMosaic {
     } else {
       this.hide(id);
     }
+    await this.updateCurrentHash();
   }
 
   /// show or hide files in the view
@@ -248,7 +252,7 @@ export class EditorMosaic {
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
 
-    this.updateCurrentHash();
+    await this.updateCurrentHash();
   }
 
   /** Wire up a newly-mounted Monaco editor */
@@ -259,6 +263,7 @@ export class EditorMosaic {
     this.backups.delete(id);
     this.editors.set(id, editor);
     this.setEditorFromBackup(editor, backup);
+    await this.updateCurrentHash();
   }
 
   /** Populate a MonacoEditor with the file's contents */
@@ -286,7 +291,7 @@ export class EditorMosaic {
   }
 
   /** Rename a file in the mosaic */
-  public renameFile(oldId: EditorId, newId: EditorId) {
+  public async renameFile(oldId: EditorId, newId: EditorId) {
     if (!this.files.has(oldId)) {
       throw new Error(`Cannot rename file "${oldId}": File doesn't exist`);
     }
@@ -303,8 +308,8 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(newId, this.value(oldId).trim());
-    this.remove(oldId);
+    await this.addFile(newId, this.value(oldId).trim());
+    await this.remove(oldId);
   }
 
   /** Get the contents of a single file. */
@@ -326,7 +331,7 @@ export class EditorMosaic {
 
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
-  public layout = () => {
+  public layout() {
     const DEBOUNCE_MSEC = 50;
     if (!this.layoutDebounce) {
       this.layoutDebounce = setTimeout(() => {
@@ -334,7 +339,7 @@ export class EditorMosaic {
         delete this.layoutDebounce;
       }, DEBOUNCE_MSEC);
     }
-  };
+  }
 
   public focusedEditor(): Editor | undefined {
     return [...this.editors.values()].find((editor) => editor.hasTextFocus());
@@ -350,7 +355,7 @@ export class EditorMosaic {
 
   private observeEdits(editor: Editor) {
     editor.onDidChangeModelContent(async () => {
-      this.updateCurrentHash();
+      await this.updateCurrentHash();
     });
   }
 
@@ -362,7 +367,8 @@ export class EditorMosaic {
   }
 
   /**
-   * Generates a SHA-1 hash for each editor's contents.
+   * Generates a SHA-1 hash for each editor's contents. Visible editors are
+   * under `this.editors`, and hidden editors are under `this.backups`.
    */
   private async getAllHashes() {
     const hashes = new Map<EditorId, string>();
@@ -370,6 +376,17 @@ export class EditorMosaic {
 
     for (const [id, editor] of this.editors) {
       const txt = editor.getModel()?.getValue();
+      const data = encoder.encode(txt);
+      const digest = await window.crypto.subtle.digest('SHA-1', data);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hash = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      hashes.set(id, hash);
+    }
+
+    for (const [id, backup] of this.backups) {
+      const txt = backup.model.getValue();
       const data = encoder.encode(txt);
       const digest = await window.crypto.subtle.digest('SHA-1', data);
       const hashArray = Array.from(new Uint8Array(digest));
@@ -397,7 +414,7 @@ export class EditorMosaic {
   /**
    * Forces all editors to be marked as unsaved.
    */
-  public async clearSaved() {
+  public clearSaved() {
     this.savedHashes.clear();
   }
 }
