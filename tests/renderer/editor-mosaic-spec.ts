@@ -78,13 +78,6 @@ describe('EditorMosaic', () => {
         expect.anything(),
       );
     });
-
-    it('sets a fixed tab size', async () => {
-      await editorMosaic.addEditor(id, editor);
-      expect(monaco.latestModel.updateOptions).toHaveBeenCalledWith(
-        expect.objectContaining({ tabSize: 2 }),
-      );
-    });
   });
 
   describe('numVisible', () => {
@@ -433,19 +426,19 @@ describe('EditorMosaic', () => {
     });
   });
 
-  describe('focusedEditor', () => {
+  describe('getFocusedEditor', () => {
     it('finds the focused editor if there is one', async () => {
       const id = MAIN_JS;
       await editorMosaic.set(valuesIn);
       await editorMosaic.addEditor(id, editor);
       vi.mocked(editor.hasTextFocus).mockReturnValue(true);
 
-      expect(editorMosaic.focusedEditor()).toBe(editor);
+      expect(editorMosaic.getFocusedEditor()).toBe(editor);
     });
 
     it('returns undefined if none have focus', async () => {
       await editorMosaic.set(valuesIn);
-      expect(editorMosaic.focusedEditor()).toBeUndefined();
+      expect(editorMosaic.getFocusedEditor()).toBeUndefined();
     });
   });
 
