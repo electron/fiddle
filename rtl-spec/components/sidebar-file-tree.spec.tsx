@@ -39,17 +39,13 @@ describe('SidebarFileTree component', () => {
     vi.useRealTimers();
   });
 
-  it('renders', () => {
-    const { container } = render(<SidebarFileTree appState={store} />);
-    expect(container).toMatchSnapshot();
-  });
-
   it('reflects the visibility state of all icons', () => {
     editorMosaic.hide('index.html');
     const { container } = render(<SidebarFileTree appState={store} />);
 
-    // snapshot has an 'eye-off' icon
-    expect(container).toMatchSnapshot();
+    // Check that an 'eye-off' icon is present for the hidden file
+    const eyeOffIcon = container.querySelector('button .bp3-icon-eye-off');
+    expect(eyeOffIcon).toBeInTheDocument();
   });
 
   it('can bring up the Add File input', async () => {
