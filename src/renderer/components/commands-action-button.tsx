@@ -214,7 +214,7 @@ export const GistActionButton = observer(
           files,
         });
 
-        appState.editorMosaic.markAsSaved();
+        await appState.editorMosaic.markAsSaved();
         console.log('Updating: Updating done', { gist });
 
         if (!silent) {
