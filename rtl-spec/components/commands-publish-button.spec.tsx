@@ -242,9 +242,9 @@ describe('Action button component', () => {
       expect(state.editorMosaic.isEdited).toBe(true);
     });
 
-    it('can publish private gists', async () => {
+    it('can publish secret gists', async () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
-      instance.setPrivate();
+      instance.setSecret();
       await instance.performGistAction();
       const { create } = mocktokit.gists;
       expect(create).toHaveBeenCalledWith({
@@ -374,7 +374,7 @@ describe('Action button component', () => {
       instance.setPublic();
       expect(state.gitHubPublishAsPublic).toBe(true);
 
-      instance.setPrivate();
+      instance.setSecret();
       expect(state.gitHubPublishAsPublic).toBe(false);
     });
   });
