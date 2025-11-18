@@ -242,7 +242,7 @@ describe('Action button component', () => {
       expect(state.editorMosaic.isEdited).toBe(true);
     });
 
-    it('can publish private gists', async () => {
+    it('can publish secret gists', async () => {
       state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
       instance.setSecret();
       await instance.performGistAction();
