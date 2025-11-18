@@ -163,7 +163,15 @@ describe('Action button component', () => {
       expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
     });
 
-    it.todo('marks the Fiddle as saved', async () => {});
+    it('marks the Fiddle as saved', async () => {
+      (state.editorMosaic as any).currentHashes = new Map([
+        [MAIN_JS, 'abc123'],
+      ]);
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
+      expect(mocktokit.gists.create).toHaveBeenCalledWith(expectedGistOpts);
+      expect(state.editorMosaic.isEdited).toBe(false);
+    });
 
     it('asks the user for a description', async () => {
       const description = 'some non-default description';
@@ -221,7 +229,7 @@ describe('Action button component', () => {
       });
     });
 
-    it.todo('handles an error in Gist publishing', async () => {
+    it('handles an error in Gist publishing', async () => {
       mocktokit.gists.create.mockImplementation(() => {
         throw new Error(errorMessage);
       });
