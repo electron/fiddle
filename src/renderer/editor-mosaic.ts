@@ -51,6 +51,12 @@ export class EditorMosaic {
   private currentHashes = new Map<EditorId, string>();
 
   public get isEdited() {
+    // If we haven't processed the save state upon initial load yet, don't mark as edited
+    // (All editors need to be mounted into Fiddle first)
+    if (this.savedHashes.size === 0) {
+      return false;
+    }
+
     if (this.savedHashes.size !== this.currentHashes.size) {
       return true;
     }
@@ -263,7 +269,6 @@ export class EditorMosaic {
     this.backups.delete(id);
     this.editors.set(id, editor);
     this.setEditorFromBackup(editor, backup);
-    await this.updateCurrentHash();
   }
 
   /** Populate a MonacoEditor with the file's contents */

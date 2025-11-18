@@ -791,8 +791,12 @@ describe('AppState', () => {
 
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
-      (appState.editorMosaic as any).savedHash = 'saved';
-      (appState.editorMosaic as any).currentHash = 'current';
+      (appState.editorMosaic as any).savedHashes = new Map([
+        ['main.js', 'saved'],
+      ]);
+      (appState.editorMosaic as any).currentHashes = new Map([
+        ['main.js', 'current'],
+      ]);
       const actual = appState.title;
       expect(actual).toBe(expected);
     });

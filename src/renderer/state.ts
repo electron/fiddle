@@ -565,9 +565,9 @@ export class AppState {
    * @returns the title, e.g. appname, fiddle name, state
    */
   get title(): string {
-    const { isEdited } = this.editorMosaic;
-
-    return isEdited ? 'Electron Fiddle - Unsaved' : 'Electron Fiddle';
+    return this.editorMosaic.isEdited
+      ? 'Electron Fiddle - Unsaved'
+      : 'Electron Fiddle';
   }
 
   /**

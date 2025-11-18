@@ -53,18 +53,6 @@ describe('EditorMosaic', () => {
       expect(editorMosaic.files.get(id)).toBe(EditorPresence.Visible);
     });
 
-    it('begins listening for changes to the files', async () => {
-      // test that isEdited is not affected by editors that aren't in the
-      // mosaic (`editor` hasn't been added to the mosaic yet)
-      expect(editorMosaic.isEdited).toBe(false);
-      editor.setValue('💩');
-      expect(editorMosaic.isEdited).toBe(false);
-
-      // test that isEdited is affected by editors that have been added
-      await editorMosaic.addEditor(id, editor);
-      vi.waitUntil(() => editorMosaic.isEdited === true);
-    });
-
     it('restores ViewStates when possible', async () => {
       // setup: put visible file into the mosaic and then hide it.
       // this should cause EditorMosaic to cache the viewstate offscreen.
