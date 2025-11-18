@@ -63,6 +63,7 @@ export class MonacoEditorMock {
   private model = new MonacoModelMock('', 'javascript');
   private scrollHeight = 0;
 
+  public focus = vi.fn();
   public addCommand = vi.fn();
   public dispose = vi.fn();
   public getAction = vi.fn(() => this.action);

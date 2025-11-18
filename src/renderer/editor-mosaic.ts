@@ -110,9 +110,9 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  resetLayout = async () => {
+  public async resetLayout() {
     await this.set(this.values());
-  };
+  }
 
   /// set / add / get the files in the model
 
