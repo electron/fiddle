@@ -68,7 +68,7 @@ export class App {
     }
 
     this.state.editorMosaic.set(editorValues);
-    this.state.editorMosaic.erick.clear();
+    this.state.editorMosaic.editorSeverityMap.clear();
 
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;

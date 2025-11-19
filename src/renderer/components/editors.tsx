@@ -43,7 +43,6 @@ export const Editors = observer(
       super(props);
 
       this.onChange = this.onChange.bind(this);
-      this.renderEditor = this.renderEditor.bind(this);
       this.setFocused = this.setFocused.bind(this);
 
       this.state = {
@@ -184,27 +183,9 @@ export const Editors = observer(
       }
     }
 
-    /**
-     * Render an editor
-     */
-    public renderEditor(id: EditorId): JSX.Element | null {
-      const { appState } = this.props;
-      const { monaco } = this.state;
-
-      return (
-        <Editor
-          id={id}
-          monaco={monaco}
-          appState={appState}
-          monacoOptions={defaultMonacoOptions}
-          setFocused={this.setFocused}
-        />
-      );
-    }
-
     public render() {
       const { editorMosaic } = this.props.appState;
-      const erickMap = toJS(editorMosaic.erick);
+      const severityLevel = toJS(editorMosaic.editorSeverityMap);
       /**
        * Renders the little toolbar on top of each panel
        */
@@ -218,7 +199,7 @@ export const Editors = observer(
             {/* Left */}
             <div>
               <h5
-                className={`mosaic-toolbar-severity-level-${erickMap.get(id)}`}
+                className={`mosaic-toolbar-severity-level-${severityLevel.get(id)}`}
               >
                 {title}
               </h5>
@@ -238,7 +219,7 @@ export const Editors = observer(
        * Renders a Mosaic tile
        */
       const renderTile = (id: EditorId, path: Array<MosaicBranch>) => {
-        const content = this.renderEditor(id);
+        const content = renderEditor(id);
         const title = getEditorTitle(id as EditorId);
 
         return (
@@ -252,6 +233,21 @@ export const Editors = observer(
           >
             {content}
           </MosaicWindow>
+        );
+      };
+
+      const renderEditor = (id: EditorId) => {
+        const { appState } = this.props;
+        const { monaco } = this.state;
+
+        return (
+          <Editor
+            id={id}
+            monaco={monaco}
+            appState={appState}
+            monacoOptions={defaultMonacoOptions}
+            setFocused={this.setFocused}
+          />
         );
       };
 

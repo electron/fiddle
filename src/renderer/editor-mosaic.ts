@@ -91,7 +91,7 @@ export class EditorMosaic {
       setEditorFromBackup: action,
       addNewFile: action,
       renameFile: action,
-      erick: observable,
+      editorSeverityMap: observable,
     });
 
     // whenever the mosaics are changed,
@@ -112,7 +112,6 @@ export class EditorMosaic {
         }
       },
     );
-
     window.monaco.editor.onDidChangeMarkers(() => {
       runInAction(() => {
         for (const id of this.getAllEditorIds()) {
@@ -127,7 +126,7 @@ export class EditorMosaic {
             window.monaco.MarkerSeverity.Hint,
           );
 
-          this.erick.set(id, maxSeverity);
+          this.editorSeverityMap.set(id, maxSeverity);
         }
       });
     });
@@ -294,7 +293,7 @@ export class EditorMosaic {
 
     this.backups.delete(id);
     this.editors.set(id, editor);
-    this.erick.set(id, window.monaco.MarkerSeverity.Hint);
+    this.editorSeverityMap.set(id, window.monaco.MarkerSeverity.Hint);
     this.setEditorFromBackup(editor, backup);
   }
 
@@ -417,5 +416,8 @@ export class EditorMosaic {
     });
   }
 
-  public erick = observable.map<EditorId, MonacoType.MarkerSeverity>();
+  public editorSeverityMap = observable.map<
+    EditorId,
+    MonacoType.MarkerSeverity
+  >();
 }

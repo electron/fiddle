@@ -101,6 +101,7 @@ describe('EditorMosaic', () => {
       expect(monaco.editor.createModel).toHaveBeenCalledWith(
         content,
         expect.anything(),
+        expect.anything(),
       );
     });
   });
