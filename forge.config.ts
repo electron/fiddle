@@ -124,7 +124,9 @@ const config: ForgeConfig = {
         noMsi: true,
         setupExe: `electron-fiddle-${version}-win32-${arch}-setup.exe`,
         setupIcon: path.resolve(iconDir, 'fiddle.ico'),
-        signWithParams: `/sha1 ${process.env.CERT_FINGERPRINT} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`,
+        signWithParams: process.env.CERT_FINGERPRINT
+          ? `/sha1 ${process.env.CERT_FINGERPRINT} /tr http://timestamp.digicert.com /td SHA256 /fd SHA256`
+          : undefined,
       }),
     },
     {
