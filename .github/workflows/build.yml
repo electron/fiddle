@@ -19,6 +19,8 @@ jobs:
         include:
           - os: macos-latest
             arch: arm64
+          - os: macos-latest
+            arch: universal
           - os: ubuntu-24.04-arm
             arch: armv7l
     runs-on: '${{ matrix.os }}'

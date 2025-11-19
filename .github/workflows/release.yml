@@ -22,13 +22,15 @@ jobs:
         include:
           - os: macos-latest
             arch: arm64
+          - os: macos-latest
+            arch: universal
           - os: ubuntu-24.04-arm
             arch: armv7l
           - os: ubuntu-24.04-arm
             arch: arm64
           - os: windows-latest
             arch: ia32
-    runs-on: "${{ matrix.os }}"
+    runs-on: '${{ matrix.os }}'
     permissions:
       actions: write
       contents: read
@@ -63,9 +65,9 @@ jobs:
         shell: bash
         env:
           SM_CLIENT_CERT_P12_BASE64: ${{ secrets.SM_CLIENT_CERT_P12_BASE64 }}
-        run: | 
+        run: |
           echo "$SM_CLIENT_CERT_P12_BASE64" | base64 --decode > /d/cert.p12
-          echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV" 
+          echo "SM_CLIENT_CERT_FILE=D:\\cert.p12" >> "$GITHUB_ENV"
       - name: Sync cert (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: cmd
