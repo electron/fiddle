@@ -542,4 +542,52 @@ describe('EditorMosaic', () => {
       dispose();
     });
   });
+
+  describe('setSeverityLevels', () => {
+    it.each([
+      {
+        markers: [
+          {
+            severity: monaco.MarkerSeverity.Error,
+            message: 'Error message',
+          },
+          {
+            severity: monaco.MarkerSeverity.Warning,
+            message: 'Warning message',
+          },
+        ],
+        expectedSeverity: monaco.MarkerSeverity.Error,
+      },
+      {
+        markers: [
+          {
+            severity: monaco.MarkerSeverity.Warning,
+            message: 'Warning message',
+          },
+        ],
+        expectedSeverity: monaco.MarkerSeverity.Warning,
+      },
+      {
+        markers: [],
+        expectedSeverity: monaco.MarkerSeverity.Info,
+      },
+    ])(
+      'updates severity levels based on Monaco markers',
+      ({ markers, expectedSeverity }) => {
+        const id = MAIN_JS;
+        const editor = new MonacoEditorMock() as unknown as Editor;
+        editorMosaic.set({ [id]: '// content' });
+        editorMosaic.addEditor(id, editor);
+
+        vi.mocked(monaco.editor.getModelMarkers).mockReturnValueOnce(
+          markers as any,
+        );
+
+        editorMosaic.setSeverityLevels();
+
+        const severityLevels = editorMosaic.editorSeverityMap;
+        expect(severityLevels.get(id)).toBe(expectedSeverity);
+      },
+    );
+  });
 });

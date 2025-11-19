@@ -112,24 +112,7 @@ export class EditorMosaic {
         }
       },
     );
-    window.monaco.editor.onDidChangeMarkers(() => {
-      runInAction(() => {
-        for (const id of this.getAllEditorIds()) {
-          const markers = window.monaco.editor.getModelMarkers({
-            resource: window.monaco.Uri.parse(`inmemory://fiddle/${id}`),
-          });
-
-          const maxSeverity: MonacoType.MarkerSeverity = markers.reduce(
-            (max, marker) => {
-              return Math.max(max, marker.severity);
-            },
-            window.monaco.MarkerSeverity.Hint,
-          );
-
-          this.editorSeverityMap.set(id, maxSeverity);
-        }
-      });
-    });
+    window.monaco.editor.onDidChangeMarkers(this.setSeverityLevels.bind(this));
   }
 
   /** File is visible, focus file content */
@@ -420,4 +403,23 @@ export class EditorMosaic {
     EditorId,
     MonacoType.MarkerSeverity
   >();
+
+  public setSeverityLevels() {
+    runInAction(() => {
+      for (const id of this.getAllEditorIds()) {
+        const markers = window.monaco.editor.getModelMarkers({
+          resource: window.monaco.Uri.parse(`inmemory://fiddle/${id}`),
+        });
+
+        const maxSeverity: MonacoType.MarkerSeverity = markers.reduce(
+          (max, marker) => {
+            return Math.max(max, marker.severity);
+          },
+          window.monaco.MarkerSeverity.Hint,
+        );
+
+        this.editorSeverityMap.set(id, maxSeverity);
+      }
+    });
+  }
 }
