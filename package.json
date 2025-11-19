@@ -102,7 +102,7 @@
     "@types/enzyme-adapter-react-16": "^1.0.6",
     "@types/fs-extra": "^9.0.7",
     "@types/getos": "^3.0.1",
-    "@types/node": "~22.10.7",
+    "@types/node": "^22.19.1",
     "@types/parse-env-string": "^1.0.2",
     "@types/react": "^16.14.0",
     "@types/react-dom": "^16.9.11",
