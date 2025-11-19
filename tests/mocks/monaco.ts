@@ -36,7 +36,7 @@ export class MonacoMock {
     onDidFocusEditorText: vi.fn(),
     revealLine: vi.fn(),
     setTheme: vi.fn(),
-    onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
+    onDidChangeMarkers: vi.fn(),
     getModelMarkers: vi.fn(() => []),
   };
   public languages = {
