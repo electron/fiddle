@@ -3,7 +3,7 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EditorValues, MAIN_JS, SetFiddleOptions } from '../../src/interfaces';
 import { App } from '../../src/renderer/app';
-import { EditorMosaic, EditorPresence } from '../../src/renderer/editor-mosaic';
+import { EditorPresence } from '../../src/renderer/editor-mosaic';
 import { defaultDark, defaultLight } from '../../src/themes-defaults';
 import { createEditorValues } from '../mocks/mocks';
 
@@ -26,7 +26,7 @@ describe('App component', () => {
     document.body.innerHTML = '<div id="app" />';
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.mocked(window.ElectronFiddle.getTemplate).mockResolvedValue({
       [MAIN_JS]: '// content',
     });
@@ -51,7 +51,7 @@ describe('App component', () => {
     });
     window.app = app;
 
-    state.editorMosaic.set({ [MAIN_JS]: '// content' });
+    await state.editorMosaic.set({ [MAIN_JS]: '// content' });
     state.editorMosaic.files.set(MAIN_JS, EditorPresence.Pending);
   });
 
@@ -174,8 +174,10 @@ describe('App component', () => {
         expect(app.state.gistId).toBeFalsy();
         expect(app.state.localPath).toBe(localPath);
 
-        // ...mark it as edited so a confirm dialog will appear before replacing
-        app.state.editorMosaic.isEdited = true;
+        vi.spyOn(app.state.editorMosaic, 'isEdited', 'get').mockReturnValue(
+          true,
+        );
+
         app.state.showConfirmDialog = vi.fn().mockResolvedValue(confirm);
 
         // now try to replace
@@ -386,11 +388,6 @@ describe('App component', () => {
     // make a second fiddle that differs from the first
     const editorValues = createEditorValues();
     const editorValues2: EditorValues = { [MAIN_JS]: '// hello world' };
-    let editorMosaic: EditorMosaic;
-
-    beforeEach(() => {
-      ({ editorMosaic } = app.state);
-    });
 
     async function testDialog(confirm: boolean) {
       const localPath = '/etc/passwd';
@@ -405,7 +402,7 @@ describe('App component', () => {
 
       // ...mark it as edited so that trying a confirm dialog
       // will be triggered when we try to replace it
-      editorMosaic.isEdited = true;
+      vi.spyOn(app.state.editorMosaic, 'isEdited', 'get').mockReturnValue(true);
 
       // set up a reaction to confirm the replacement
       // when it happens
@@ -440,13 +437,18 @@ describe('App component', () => {
     it('can close the window if user accepts the dialog', async () => {
       app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
 
-      // expect the app to be watching for exit if the fiddle is edited
-      app.state.editorMosaic.isEdited = true;
-      expect(window.onbeforeunload).toBeTruthy();
+      // Actually set the editor in a dirty state instead of mocking
+      // because this code path uses an autorun on the computed `isEdited` value
+      (app.state.editorMosaic as any).savedHashes = new Map([[MAIN_JS, 'def']]);
+      (app.state.editorMosaic as any).currentHashes = new Map([
+        [MAIN_JS, 'abc'],
+      ]);
 
       const e = {
         returnValue: Boolean,
       };
+
+      await vi.waitUntil(() => app.state.editorMosaic.isEdited === true);
       window.onbeforeunload!(e as any);
       expect(e.returnValue).toBe(false);
 
@@ -460,8 +462,13 @@ describe('App component', () => {
       app.state.isQuitting = true;
       app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(true);
 
-      // expect the app to be watching for exit if the fiddle is edited
-      app.state.editorMosaic.isEdited = true;
+      // Actually set the editor in a dirty state instead of mocking
+      // because this code path uses an autorun on the computed `isEdited` value
+      (app.state.editorMosaic as any).savedHashes = new Map([[MAIN_JS, 'def']]);
+      (app.state.editorMosaic as any).currentHashes = new Map([
+        [MAIN_JS, 'abc'],
+      ]);
+
       expect(window.onbeforeunload).toBeTruthy();
 
       const e = {
@@ -482,7 +489,9 @@ describe('App component', () => {
       app.state.showConfirmDialog = vi.fn().mockResolvedValueOnce(false);
 
       // expect the app to be watching for exit if the fiddle is edited
-      app.state.editorMosaic.isEdited = true;
+      (app.state.editorMosaic as any) = vi.fn(() => ({
+        isEdited: true,
+      }))();
       expect(window.onbeforeunload).toBeTruthy();
 
       const e = {

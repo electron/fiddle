@@ -207,7 +207,7 @@ export const SidebarFileTree = observer(
       }
 
       try {
-        appState.editorMosaic.renameFile(editorId, id);
+        await appState.editorMosaic.renameFile(editorId, id);
 
         if (visible) appState.editorMosaic.show(id);
       } catch (err: any) {

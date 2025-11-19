@@ -38,17 +38,20 @@ export class FileManager {
       },
     );
 
-    window.ElectronFiddle.addEventListener('saved-local-fiddle', (filePath) => {
-      const { localPath } = this.appState;
+    window.ElectronFiddle.addEventListener(
+      'saved-local-fiddle',
+      async (filePath) => {
+        const { localPath } = this.appState;
 
-      if (filePath !== localPath) {
-        this.appState.localPath = filePath;
-        this.appState.gistId = undefined;
-      }
-      window.ElectronFiddle.setShowMeTemplate();
-      this.appState.templateName = undefined;
-      this.appState.editorMosaic.isEdited = false;
-    });
+        if (filePath !== localPath) {
+          this.appState.localPath = filePath;
+          this.appState.gistId = undefined;
+        }
+        window.ElectronFiddle.setShowMeTemplate();
+        this.appState.templateName = undefined;
+        await this.appState.editorMosaic.markAsSaved();
+      },
+    );
 
     window.ElectronFiddle.onGetFiles(this.getFiles);
   }
