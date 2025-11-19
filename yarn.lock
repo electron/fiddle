@@ -755,9 +755,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@electron/devtron@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@electron/devtron@npm:2.0.0"
+"@electron/devtron@npm:^2.1.1":
+  version: 2.1.1
+  resolution: "@electron/devtron@npm:2.1.1"
   dependencies:
     "@fontsource-variable/roboto": "npm:^5.2.5"
     "@fontsource/space-mono": "npm:^5.2.5"
@@ -768,7 +768,10 @@ __metadata:
     lucide-react: "npm:^0.513.0"
     react: "npm:^19.1.0"
     react-dom: "npm:^19.1.0"
-  checksum: 10c0/6534d7f21f81adff6b84accff4a8377bd400490b4315036169cec9f53e858047136ca5ba068107c597ae7148eacc1b4be90d8b1b339e2b52140b7356e7a64903
+  dependenciesMeta:
+    electron:
+      built: true
+  checksum: 10c0/947b21e6603cf68cd388ab0ca2e58cecb5eadf96e0ddb9889c10a0dbc906b4d19915a57b1b8eacc0e8a17689ecafa23ff73d6ef43848f408ba41deaa9f576414
   languageName: node
   linkType: hard
 
@@ -6128,7 +6131,7 @@ __metadata:
     "@electron-forge/plugin-fuses": "npm:7.10.2"
     "@electron-forge/plugin-webpack": "npm:7.10.2"
     "@electron-forge/publisher-github": "npm:7.10.2"
-    "@electron/devtron": "npm:^2.0.0"
+    "@electron/devtron": "npm:^2.1.1"
     "@electron/fiddle-core": "npm:^2.0.1"
     "@electron/fuses": "npm:^1.6.1"
     "@electron/lint-roller": "npm:^3.1.3"
