@@ -44,7 +44,6 @@ export const Editors = observer(
 
       this.onChange = this.onChange.bind(this);
       this.renderEditor = this.renderEditor.bind(this);
-      this.renderTile = this.renderTile.bind(this);
       this.setFocused = this.setFocused.bind(this);
 
       this.state = {
@@ -186,55 +185,6 @@ export const Editors = observer(
     }
 
     /**
-     * Renders the little toolbar on top of each panel
-     */
-    public renderToolbar(
-      { title }: MosaicWindowProps<EditorId>,
-      id: EditorId,
-    ): JSX.Element {
-      const { appState } = this.props;
-
-      return (
-        <div role="toolbar">
-          {/* Left */}
-          <div>
-            <h5>
-              {title} (${appState.editorMosaic.erick.get(id)})
-            </h5>
-          </div>
-          {/* Middle */}
-          <div />
-          {/* Right */}
-          <div className="mosaic-controls">
-            <MaximizeButton id={id} appState={appState} />
-            <RemoveButton id={id} appState={appState} />
-          </div>
-        </div>
-      );
-    }
-
-    /**
-     * Renders a Mosaic tile
-     */
-    public renderTile(id: EditorId, path: Array<MosaicBranch>): JSX.Element {
-      const content = this.renderEditor(id);
-      const title = getEditorTitle(id as EditorId);
-
-      return (
-        <MosaicWindow<EditorId>
-          className={id}
-          path={path}
-          title={title}
-          renderToolbar={(props: MosaicWindowProps<EditorId>) =>
-            this.renderToolbar(props, id)
-          }
-        >
-          {content}
-        </MosaicWindow>
-      );
-    }
-
-    /**
      * Render an editor
      */
     public renderEditor(id: EditorId): JSX.Element | null {
@@ -254,8 +204,56 @@ export const Editors = observer(
 
     public render() {
       const { editorMosaic } = this.props.appState;
+      const erickMap = toJS(editorMosaic.erick);
+      /**
+       * Renders the little toolbar on top of each panel
+       */
+      const renderToolbar = (
+        { title }: MosaicWindowProps<EditorId>,
+        id: EditorId,
+      ) => {
+        const { appState } = this.props;
+        return (
+          <div role="toolbar">
+            {/* Left */}
+            <div>
+              <h5
+                className={`mosaic-toolbar-severity-level-${erickMap.get(id)}`}
+              >
+                {title}
+              </h5>
+            </div>
+            {/* Middle */}
+            <div />
+            {/* Right */}
+            <div className="mosaic-controls">
+              <MaximizeButton id={id} appState={appState} />
+              <RemoveButton id={id} appState={appState} />
+            </div>
+          </div>
+        );
+      };
 
-      console.log(toJS(editorMosaic.erick));
+      /**
+       * Renders a Mosaic tile
+       */
+      const renderTile = (id: EditorId, path: Array<MosaicBranch>) => {
+        const content = this.renderEditor(id);
+        const title = getEditorTitle(id as EditorId);
+
+        return (
+          <MosaicWindow<EditorId>
+            className={id}
+            path={path}
+            title={title}
+            renderToolbar={(props: MosaicWindowProps<EditorId>) =>
+              renderToolbar(props, id)
+            }
+          >
+            {content}
+          </MosaicWindow>
+        );
+      };
 
       return (
         <Mosaic<EditorId>
@@ -263,7 +261,7 @@ export const Editors = observer(
           onChange={this.onChange}
           value={editorMosaic.mosaic}
           zeroStateView={<RenderNonIdealState editorMosaic={editorMosaic} />}
-          renderTile={this.renderTile}
+          renderTile={renderTile}
         />
       );
     }

@@ -91,6 +91,7 @@ export class EditorMosaic {
       setEditorFromBackup: action,
       addNewFile: action,
       renameFile: action,
+      erick: observable,
     });
 
     // whenever the mosaics are changed,
