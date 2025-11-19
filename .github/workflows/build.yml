@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   test:
-    name: Test
+    name: Build
     strategy:
       fail-fast: false
       matrix:
@@ -43,8 +43,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: yarn run electron-releases
-      - name: Run Forge makers
-        run: yarn run make
+      - name: Lint and format
+        run: yarn run lint && yarn run format
+      - name: Test
+        run: yarn tsc && yarn test:ci
 
   gha-done:
     name: GitHub Actions Completed
