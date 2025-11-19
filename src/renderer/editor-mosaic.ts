@@ -189,7 +189,8 @@ export class EditorMosaic {
 
     // set a URI for each editor for stable identification for monaco features
     const uri = monaco.Uri.parse(`inmemory://fiddle/${id}`);
-    const model = monaco.editor.createModel(value, language, uri);
+    const maybeModel = monaco.editor.getModel(uri);
+    const model = maybeModel ?? monaco.editor.createModel(value, language, uri);
 
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
