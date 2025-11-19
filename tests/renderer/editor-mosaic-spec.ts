@@ -548,28 +548,28 @@ describe('EditorMosaic', () => {
       {
         markers: [
           {
-            severity: monaco.MarkerSeverity.Error,
+            severity: window.monaco.MarkerSeverity.Error,
             message: 'Error message',
           },
           {
-            severity: monaco.MarkerSeverity.Warning,
+            severity: window.monaco.MarkerSeverity.Warning,
             message: 'Warning message',
           },
         ],
-        expectedSeverity: monaco.MarkerSeverity.Error,
+        expectedSeverity: window.monaco.MarkerSeverity.Error,
       },
       {
         markers: [
           {
-            severity: monaco.MarkerSeverity.Warning,
+            severity: window.monaco.MarkerSeverity.Warning,
             message: 'Warning message',
           },
         ],
-        expectedSeverity: monaco.MarkerSeverity.Warning,
+        expectedSeverity: window.monaco.MarkerSeverity.Warning,
       },
       {
         markers: [],
-        expectedSeverity: monaco.MarkerSeverity.Info,
+        expectedSeverity: window.monaco.MarkerSeverity.Hint,
       },
     ])(
       'updates severity levels based on Monaco markers',
