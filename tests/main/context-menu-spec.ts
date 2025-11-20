@@ -203,7 +203,7 @@ describe('context-menu', () => {
         editFlags: { canPaste: true },
         pageURL: 'index.html',
       } as any);
-      expect(result).toHaveLength(10);
+      expect(result).toHaveLength(8);
     });
 
     it('executes an IPC send() for each element', () => {

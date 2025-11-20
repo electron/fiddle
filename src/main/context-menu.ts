@@ -70,15 +70,6 @@ export function getMonacoItems({
     },
     { type: 'separator' },
     {
-      id: 'palette',
-      label: 'Command Palette',
-      click() {
-        const cmd = ['editor.action.quickCommand'];
-        ipcMainManager.send(IpcEvents.MONACO_EXECUTE_COMMAND, cmd);
-      },
-    },
-    { type: 'separator' },
-    {
       id: 'format_document',
       label: 'Format Document',
       click() {
