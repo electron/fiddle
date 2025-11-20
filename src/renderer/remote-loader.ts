@@ -11,21 +11,11 @@ import {
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
+  GistRevision,
   InstallState,
   PACKAGE_NAME,
   VersionSource,
 } from '../interfaces';
-
-// Define the GistRevision interface
-interface GistRevision {
-  sha: string;
-  date: string;
-  changes: {
-    deletions: number;
-    additions: number;
-    total: number;
-  };
-}
 
 export class RemoteLoader {
   constructor(private readonly appState: AppState) {
@@ -129,18 +119,18 @@ export class RemoteLoader {
   public async getGistRevisions(gistId: string): Promise<GistRevision[]> {
     try {
       const octo = await getOctokit(this.appState);
-      const revisions = await octo.gists.listCommits({
+      const { data: revisions } = await octo.gists.listCommits({
         gist_id: gistId,
       });
 
-      return revisions.data
-        .slice()
-        .reverse()
-        .map((r) => ({
+      return revisions.reverse().map((r, i) => {
+        return {
           sha: r.version,
           date: r.committed_at,
           changes: r.change_status,
-        }));
+          title: i === 0 ? 'Created' : `Revision ${i}`,
+        };
+      });
     } catch (error: any) {
       this.handleLoadingFailed(error);
       return [];

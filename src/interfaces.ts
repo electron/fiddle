@@ -215,6 +215,17 @@ export interface PMOperationOptions {
   packageManager: IPackageManager;
 }
 
+export interface GistRevision {
+  sha: string;
+  date: string;
+  title: string;
+  changes: {
+    deletions: number;
+    additions: number;
+    total: number;
+  };
+}
+
 export enum GlobalSetting {
   acceleratorsToBlock = 'acceleratorsToBlock',
   channelsToShow = 'channelsToShow',
