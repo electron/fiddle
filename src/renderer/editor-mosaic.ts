@@ -112,6 +112,8 @@ export class EditorMosaic {
         }
       },
     );
+    // TODO: evaluate if we need to dispose of the listener when this class is
+    // destroyed via FinalizationRegistry
     window.monaco.editor.onDidChangeMarkers(this.setSeverityLevels.bind(this));
   }
 
