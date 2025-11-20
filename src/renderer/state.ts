@@ -118,6 +118,9 @@ export class AppState {
   public packageAuthor =
     (localStorage.getItem(GlobalSetting.packageAuthor) as string) ??
     window.ElectronFiddle.getUsername();
+  public isShowingGistHistory = !!(
+    this.retrieve(GlobalSetting.isShowingGistHistory) ?? true
+  );
   public electronMirror: typeof ELECTRON_MIRROR =
     (this.retrieve(GlobalSetting.electronMirror) as typeof ELECTRON_MIRROR) ===
     null
@@ -168,6 +171,7 @@ export class AppState {
   public isSettingsShowing = false;
   public isThemeDialogShowing = false;
   public isTokenDialogShowing = false;
+  public isHistoryShowing = false;
   public isTourShowing = !localStorage.getItem(GlobalSetting.hasShownTour);
   public isUpdatingElectronVersions = false;
   public isDownloadingAll = false;
@@ -232,6 +236,7 @@ export class AppState {
       isConsoleShowing: observable,
       isEnablingElectronLogging: observable,
       isGenericDialogShowing: observable,
+      isHistoryShowing: observable,
       isInstallingModules: observable,
       isKeepingUserDataDirs: observable,
       isOnline: observable,
@@ -245,6 +250,7 @@ export class AppState {
       isUpdatingElectronVersions: observable,
       isDeletingAll: observable,
       isDownloadingAll: observable,
+      isShowingGistHistory: observable,
       isUsingSystemTheme: observable,
       localPath: observable,
       modules: observable,
@@ -415,6 +421,7 @@ export class AppState {
           case GlobalSetting.isEnablingElectronLogging:
           case GlobalSetting.isKeepingUserDataDirs:
           case GlobalSetting.isPublishingGistAsRevision:
+          case GlobalSetting.isShowingGistHistory:
           case GlobalSetting.isUsingSystemTheme:
           case GlobalSetting.packageAuthor:
           case GlobalSetting.packageManager:
@@ -536,6 +543,9 @@ export class AppState {
       this.save(GlobalSetting.acceleratorsToBlock, this.acceleratorsToBlock),
     );
     autorun(() => this.save(GlobalSetting.packageAuthor, this.packageAuthor));
+    autorun(() =>
+      this.save(GlobalSetting.isShowingGistHistory, this.isShowingGistHistory),
+    );
     autorun(() => this.save(GlobalSetting.electronMirror, this.electronMirror));
     autorun(() => this.save(GlobalSetting.fontFamily, this.fontFamily));
     autorun(() => this.save(GlobalSetting.fontSize, this.fontSize));
@@ -708,6 +718,10 @@ export class AppState {
     (document.activeElement as HTMLInputElement).blur();
 
     this.resetView({ isSettingsShowing: !this.isSettingsShowing });
+  }
+
+  public toggleHistory() {
+    this.isHistoryShowing = !this.isHistoryShowing;
   }
 
   public updateDownloadProgress(version: string, progress: ProgressObject) {

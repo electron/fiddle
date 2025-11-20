@@ -9,6 +9,7 @@ import { AddressBar } from './commands-address-bar';
 import { BisectHandler } from './commands-bisect';
 import { Runner } from './commands-runner';
 import { VersionChooser } from './commands-version-chooser';
+import { HistoryWrapper } from './history-wrapper';
 import { AppState } from '../state';
 
 interface CommandsProps {
@@ -75,7 +76,14 @@ export const Commands = observer(
             <div className="title">{title}</div>
           ) : undefined}
           <div>
-            <AddressBar appState={appState} />
+            <ControlGroup vertical={false}>
+              <AddressBar appState={appState} />
+            </ControlGroup>
+            {appState.isShowingGistHistory && (
+              <ControlGroup vertical={false}>
+                <HistoryWrapper appState={appState} />
+              </ControlGroup>
+            )}
             <GistActionButton appState={appState} />
           </div>
         </div>
