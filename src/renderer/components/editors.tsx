@@ -185,6 +185,7 @@ export const Editors = observer(
 
     public render() {
       const { editorMosaic } = this.props.appState;
+      // HACK: we use this to force re-renders of the toolbar when severity changes
       const severityLevel = toJS(editorMosaic.editorSeverityMap);
       /**
        * Renders the little toolbar on top of each panel

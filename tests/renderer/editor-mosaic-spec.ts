@@ -304,6 +304,9 @@ describe('EditorMosaic', () => {
 
         // now call set again, same filename DIFFERENT content
         content = '// second content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         editorMosaic.set({ [id]: content });
         // test that editorMosaic set the editor to the new content
         expect(editor.getValue()).toBe(content);
@@ -311,6 +314,9 @@ describe('EditorMosaic', () => {
 
         // test that the editor still responds to edits
         content = '// third content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         editor.setValue(content);
         expect(editorMosaic.isEdited).toBe(true);
 
@@ -320,6 +326,9 @@ describe('EditorMosaic', () => {
 
         // test that the editor still responds to edits
         content = '// fourth content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         editor.setValue(content);
         expect(editorMosaic.isEdited).toBe(true);
       });
