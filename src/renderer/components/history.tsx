@@ -8,19 +8,12 @@ import {
   Spinner,
   Tag,
 } from '@blueprintjs/core';
+import { IReactionDisposer, reaction } from 'mobx';
 import { observer } from 'mobx-react';
 
-import { AppState } from '../state';
+import { GistRevision } from 'src/interfaces';
 
-interface GistRevision {
-  sha: string;
-  date: string;
-  changes: {
-    deletions: number;
-    additions: number;
-    total: number;
-  };
-}
+import { AppState } from '../state';
 
 interface HistoryProps {
   appState: AppState;
@@ -40,6 +33,8 @@ export class GistHistoryDialog extends React.Component<
   HistoryProps,
   HistoryState
 > {
+  private disposeReaction: IReactionDisposer | null = null;
+
   constructor(props: HistoryProps) {
     super(props);
     this.state = {
@@ -49,13 +44,32 @@ export class GistHistoryDialog extends React.Component<
     };
   }
 
-  public async componentDidMount() {
-    await this.loadRevisions();
+  public componentDidMount() {
+    this.disposeReaction = reaction(
+      () => this.props.appState.gistId,
+      () => this.loadRevisions(),
+    );
+
+    if (this.props.isOpen) {
+      this.loadRevisions();
+    }
+  }
+
+  public componentDidUpdate(prevProps: HistoryProps) {
+    if (this.props.isOpen && !prevProps.isOpen) {
+      this.loadRevisions();
+    }
+  }
+
+  public componentWillUnmount() {
+    this.disposeReaction?.();
   }
 
   private async loadRevisions() {
-    const { appState } = this.props;
+    const { appState, isOpen } = this.props;
     const { remoteLoader } = window.app;
+
+    if (!isOpen) return;
 
     if (!appState.gistId) {
       this.setState({ isLoading: false, error: 'No Gist ID available' });
@@ -82,8 +96,6 @@ export class GistHistoryDialog extends React.Component<
       this.props.onClose();
     } catch (error: any) {
       console.error('Failed to load revision', error);
-      // show an error  to the user and hide popover
-
       this.props.appState.showErrorDialog(
         `Failed to load revision: ${error.message || 'Unknown error'}`,
       );
@@ -108,7 +120,6 @@ export class GistHistoryDialog extends React.Component<
   private renderRevisionItem = (revision: GistRevision, index: number) => {
     const date = new Date(revision.date).toLocaleString();
     const shortSha = revision.sha.substring(0, 7);
-    const titleLabel = index === 0 ? 'Created' : `Revision ${index}`;
 
     return (
       <li
@@ -119,7 +130,7 @@ export class GistHistoryDialog extends React.Component<
         <div className="revision-content">
           <h4>
             <Icon icon="history" className="revision-icon" />
-            {titleLabel}
+            {revision.title}
             <span className="sha-label">{shortSha}</span>
           </h4>
           <div className="revision-details">
@@ -165,7 +176,7 @@ export class GistHistoryDialog extends React.Component<
 
     return (
       <div className="revision-list">
-        <ul>{revisions.map(this.renderRevisionItem)}</ul>
+        <ul>{revisions.reverse().map(this.renderRevisionItem)}</ul>
       </div>
     );
   }
