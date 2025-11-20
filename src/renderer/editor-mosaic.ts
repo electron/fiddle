@@ -1,4 +1,11 @@
-import { action, computed, makeObservable, observable, reaction } from 'mobx';
+import {
+  action,
+  computed,
+  makeObservable,
+  observable,
+  reaction,
+  runInAction,
+} from 'mobx';
 import type * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 
@@ -84,6 +91,7 @@ export class EditorMosaic {
       setEditorFromBackup: action,
       addNewFile: action,
       renameFile: action,
+      editorSeverityMap: observable,
     });
 
     // whenever the mosaics are changed,
@@ -104,6 +112,9 @@ export class EditorMosaic {
         }
       },
     );
+    // TODO: evaluate if we need to dispose of the listener when this class is
+    // destroyed via FinalizationRegistry
+    window.monaco.editor.onDidChangeMarkers(this.setSeverityLevels.bind(this));
   }
 
   /** File is visible, focus file content */
@@ -160,8 +171,17 @@ export class EditorMosaic {
     // create a monaco model with the file's contents
     const { monaco } = window;
     const language = monacoLanguage(id);
-    const model = monaco.editor.createModel(value, language);
 
+    // set a URI for each editor for stable identification for monaco features
+    const uri = monaco.Uri.parse(`inmemory://fiddle/${id}`);
+    let model: MonacoType.editor.ITextModel;
+    const maybeModel = monaco.editor.getModel(uri);
+    if (maybeModel) {
+      model = maybeModel;
+      model.setValue(value);
+    } else {
+      model = monaco.editor.createModel(value, language, uri);
+    }
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
     const backup: EditorBackup = { model };
@@ -263,6 +283,7 @@ export class EditorMosaic {
 
     this.backups.delete(id);
     this.editors.set(id, editor);
+    this.editorSeverityMap.set(id, window.monaco.MarkerSeverity.Hint);
     this.setEditorFromBackup(editor, backup);
   }
 
@@ -342,6 +363,10 @@ export class EditorMosaic {
     }
   };
 
+  public getAllEditorIds(): EditorId[] {
+    return [...this.editors.keys()];
+  }
+
   public getAllEditors(): Editor[] {
     return [...this.editors.values()];
   }
@@ -378,6 +403,30 @@ export class EditorMosaic {
     const disposable = editor.onDidChangeModelContent(() => {
       this.isEdited ||= true;
       disposable.dispose();
+    });
+  }
+
+  public editorSeverityMap = observable.map<
+    EditorId,
+    MonacoType.MarkerSeverity
+  >();
+
+  public setSeverityLevels() {
+    runInAction(() => {
+      for (const id of this.getAllEditorIds()) {
+        const markers = window.monaco.editor.getModelMarkers({
+          resource: window.monaco.Uri.parse(`inmemory://fiddle/${id}`),
+        });
+
+        const maxSeverity: MonacoType.MarkerSeverity = markers.reduce(
+          (max, marker) => {
+            return Math.max(max, marker.severity);
+          },
+          window.monaco.MarkerSeverity.Hint,
+        );
+
+        this.editorSeverityMap.set(id, maxSeverity);
+      }
     });
   }
 }

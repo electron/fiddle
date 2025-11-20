@@ -24,6 +24,20 @@
   }
 }
 
+// Set the toolbar text colour based on the mosaic's
+// current severity level.
+//    Hint=1,
+//    Info=2,
+//    Warning=4,
+//    Error=8
+.mosaic-toolbar-severity-level-8 {
+  color: @red4;
+}
+
+.mosaic-toolbar-severity-level-4 {
+  color: @orange4;
+}
+
 // TODO: support new file
 // update if list of Editor ID changes
 @editor-ids: main\.js, renderer\.js, index\.html, preload\.js, styles\.css;
