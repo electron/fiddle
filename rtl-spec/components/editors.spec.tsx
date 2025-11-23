@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 import { MosaicNode } from 'react-mosaic-component';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -24,12 +25,12 @@ describe('Editors component', () => {
   let editorMosaic: EditorMosaic;
   let editorValues: EditorValues;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     ({ app } = window);
     ({ state: store } = window.app);
     editorValues = createEditorValues();
     editorMosaic = new EditorMosaic();
-    editorMosaic.set(editorValues);
+    await editorMosaic.set(editorValues);
 
     (store as unknown as StateMock).editorMosaic = editorMosaic;
   });
@@ -64,9 +65,9 @@ describe('Editors component', () => {
   describe('toggleEditorOption()', () => {
     const filename = MAIN_JS;
 
-    it('handles an error', () => {
+    it('handles an error', async () => {
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, editor as unknown as Editor);
+      await editorMosaic.addEditor(filename, editor as unknown as Editor);
       editor.updateOptions.mockImplementationOnce(() => {
         throw new Error('Bwap bwap');
       });
@@ -76,11 +77,11 @@ describe('Editors component', () => {
       expect(instance.toggleEditorOption('wordWrap')).toBe(false);
     });
 
-    it('updates a setting', () => {
+    it('updates a setting', async () => {
       const { instance } = renderEditors();
 
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(filename, editor as unknown as Editor);
+      await editorMosaic.addEditor(filename, editor as unknown as Editor);
       expect(instance.toggleEditorOption('wordWrap')).toBe(true);
       expect(editor.updateOptions).toHaveBeenCalledWith({
         minimap: { enabled: false },
@@ -105,9 +106,10 @@ describe('Editors component', () => {
     ];
 
     for (const toolbarTitle of toolbarTitles) {
-      expect(
-        toolbars.find((toolbar) => toolbar.textContent?.includes(toolbarTitle)),
-      ).toBeInTheDocument();
+      const el = toolbars.find((toolbar) =>
+        toolbar.textContent?.includes(toolbarTitle),
+      );
+      expect(el).toBeInTheDocument();
     }
   });
 
@@ -266,10 +268,10 @@ describe('Editors component', () => {
       expect(editor.setSelection).toHaveBeenCalledWith(range);
     });
 
-    it('handles the monaco editor option event', () => {
+    it('handles the monaco editor option event', async () => {
       const id = MAIN_JS;
       const editor = new MonacoEditorMock();
-      editorMosaic.addEditor(id, editor as unknown as Editor);
+      await editorMosaic.addEditor(id, editor as unknown as Editor);
 
       renderEditors();
       emitEvent('toggle-monaco-option', 'wordWrap');
