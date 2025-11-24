@@ -41,6 +41,7 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
+  public mainEntryPoint: EditorId | null = null;
   public isEdited = false;
   public focusedFile: EditorId | null = null;
 
@@ -78,6 +79,7 @@ export class EditorMosaic {
       mosaic: observable,
       backups: observable,
       editors: observable,
+      mainEntryPoint: observable,
       setFocusedFile: action,
       resetLayout: action,
       set: action,
@@ -86,6 +88,7 @@ export class EditorMosaic {
       setVisible: action,
       toggle: action,
       hide: action,
+      setMainEntryPoint: action,
       remove: action,
       addEditor: action,
       setEditorFromBackup: action,
@@ -380,7 +383,29 @@ export class EditorMosaic {
   }
 
   public mainEntryPointFile(): EditorId | undefined {
-    return Array.from(this.files.keys()).find((id) => isMainEntryPoint(id));
+    if (!this.mainEntryPoint || !this.files.get(this.mainEntryPoint)) {
+      const entryPoint = Array.from(this.files.keys()).find((id) =>
+        isMainEntryPoint(id),
+      );
+      if (entryPoint) this.mainEntryPoint = entryPoint;
+      return entryPoint;
+    }
+    return this.mainEntryPoint;
+  }
+
+  public setMainEntryPoint(id: EditorId): void {
+    if (!this.files.has(id)) {
+      throw new Error(
+        `Cannot set main entry point to "${id}": File does not exist`,
+      );
+    }
+    if (!isMainEntryPoint(id)) {
+      throw new Error(
+        `Cannot set main entry point to "${id}": Not a valid main entry point file`,
+      );
+    }
+    this.mainEntryPoint = id;
+    this.isEdited = true;
   }
 
   //=== Listen for user edits
