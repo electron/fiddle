@@ -6192,8 +6192,8 @@ __metadata:
     mini-css-extract-plugin: "npm:^2.6.1"
     mobx: "npm:^6.5.0"
     mobx-react: "npm:^7.3.0"
-    monaco-editor: "npm:^0.21.3"
-    monaco-editor-webpack-plugin: "npm:2.1.0"
+    monaco-editor: "npm:^0.22.0"
+    monaco-editor-webpack-plugin: "npm:^3.0.0"
     namor: "npm:^2.0.2"
     node-watch: "npm:^0.7.3"
     npm-run-all2: "npm:^7.0.1"
@@ -10886,22 +10886,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"monaco-editor-webpack-plugin@npm:2.1.0":
-  version: 2.1.0
-  resolution: "monaco-editor-webpack-plugin@npm:2.1.0"
+"monaco-editor-webpack-plugin@npm:^3.0.0":
+  version: 3.1.0
+  resolution: "monaco-editor-webpack-plugin@npm:3.1.0"
   dependencies:
     loader-utils: "npm:^2.0.0"
   peerDependencies:
-    monaco-editor: 0.21.x
+    monaco-editor: 0.22.x || 0.23.x || 0.24.x
     webpack: ^4.5.0 || 5.x
-  checksum: 10c0/47d891383b46c0fcbcdf6732b0d5e8886bbe28c4ad2054f9a45750efafd8267c3116e6adfb66bf8996c26eeb8b1609cbb6f9dbb3d741a15cbd03a909f8ec20f9
+  checksum: 10c0/c8e094968eeb63a02c764e60bc38e56e1fbad9be9551785bff291da65196bc0061e13ff507c3f786bde92bf270a0cdfc653a99fc88034305a7b6ceeebcb6e20f
   languageName: node
   linkType: hard
 
-"monaco-editor@npm:^0.21.3":
-  version: 0.21.3
-  resolution: "monaco-editor@npm:0.21.3"
-  checksum: 10c0/846a5007fee92eb64bbbe162fc2d06ea908caac9a9072da6903724c3e3959a3c9f8c15eedff2b9f98ce8a11bf7781305b16ad8125bcfe39a13a6aecc1ad9c0d3
+"monaco-editor@npm:^0.22.0":
+  version: 0.22.3
+  resolution: "monaco-editor@npm:0.22.3"
+  checksum: 10c0/a95f82f7788617d1f418e42d478b278ba83adfb3a4659cc813378867ad0d6b7a7dc8e1395afac5ec00b2064cef083b1fe75f77b4edd7aae57de5ed6fa49bc9a4
   languageName: node
   linkType: hard
 
