@@ -8,6 +8,7 @@ import { Runner } from './runner';
 import { AppState } from './state';
 import { TaskRunner } from './task-runner';
 import { activateTheme, getCurrentTheme, getTheme } from './themes';
+import { isMainEntryPoint } from './utils/editor-utils';
 import { getPackageJson } from './utils/get-package';
 import { getElectronVersions } from './versions';
 import {
@@ -33,6 +34,7 @@ export class App {
   public runner = new Runner(this.state);
   public readonly taskRunner: TaskRunner;
   public readonly electronTypes: ElectronTypes;
+  private notifiedMultipleMainFiles = false;
 
   constructor() {
     this.getEditorValues = this.getEditorValues.bind(this);
@@ -56,6 +58,17 @@ export class App {
     });
   }
 
+  private notifyIfMultipleMainFiles(editorValues: EditorValues) {
+    const mainFileCount =
+      Object.keys(editorValues).filter(isMainEntryPoint).length;
+    if (mainFileCount > 1 && !this.notifiedMultipleMainFiles) {
+      this.state.showInfoDialog(
+        'Multiple main entry point files detected. You can right-click on any main file and select "Set as Main Entry Point" to choose which one to use.',
+      );
+      this.notifiedMultipleMainFiles = true;
+    }
+  }
+
   public async replaceFiddle(
     editorValues: EditorValues,
     { localFiddle, gistId, templateName }: Partial<SetFiddleOptions>,
@@ -69,6 +82,8 @@ export class App {
 
     this.state.editorMosaic.set(editorValues);
     this.state.editorMosaic.editorSeverityMap.clear();
+
+    this.notifyIfMultipleMainFiles(editorValues);
 
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;

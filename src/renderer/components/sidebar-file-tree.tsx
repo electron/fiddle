@@ -49,7 +49,8 @@ export const SidebarFileTree = observer(
         .map(([editorId, presence], index) => {
           const visibilityIcon =
             presence !== EditorPresence.Hidden ? 'eye-open' : 'eye-off';
-
+          const isInactive =
+            isMainEntryPoint(editorId) && this.getMainEntryPoint() !== editorId;
           return {
             isSelected: focusedFile === editorId,
             id: index,
@@ -58,6 +59,7 @@ export const SidebarFileTree = observer(
             label: (
               <ContextMenu2
                 className="pointer"
+                style={isInactive ? { opacity: 0.5 } : undefined}
                 onClick={() => this.setFocusedFile(editorId)}
                 content={
                   <Menu>
@@ -67,6 +69,14 @@ export const SidebarFileTree = observer(
                       intent="primary"
                       onClick={() => this.renameEditor(editorId)}
                     />
+                    {isMainEntryPoint(editorId) && (
+                      <MenuItem
+                        icon="star"
+                        text="Set as Main Entry Point"
+                        intent="primary"
+                        onClick={() => this.setMainEntryPoint(editorId)}
+                      />
+                    )}
                     <MenuItem
                       disabled={isMainEntryPoint(editorId)}
                       icon="remove"
@@ -213,6 +223,20 @@ export const SidebarFileTree = observer(
       } catch (err: any) {
         appState.showErrorDialog(err.message);
       }
+    };
+
+    public setMainEntryPoint = (editorId: EditorId) => {
+      const { appState } = this.props;
+      try {
+        appState.editorMosaic.setMainEntryPoint(editorId);
+      } catch (err) {
+        appState.showErrorDialog(err.message);
+      }
+    };
+
+    public getMainEntryPoint = () => {
+      const { editorMosaic } = this.props.appState;
+      return editorMosaic.mainEntryPointFile();
     };
 
     public removeEditor = (editorId: EditorId) => {
