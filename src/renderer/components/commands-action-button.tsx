@@ -16,10 +16,12 @@ import { observer } from 'mobx-react';
 import {
   EditorId,
   EditorValues,
+  GenericDialogType,
   GistActionState,
   GistActionType,
   PACKAGE_NAME,
 } from '../../interfaces';
+import { FIDDLE_GIST_DESCRIPTION_PLACEHOLDER } from '../constants';
 import { AppState } from '../state';
 import { ensureRequiredFiles } from '../utils/editor-utils';
 import { getOctokit } from '../utils/octokit';
@@ -98,7 +100,7 @@ export const GistActionButton = observer(
     }
 
     private getFiddleDescriptionFromUser(): Promise<string | undefined> {
-      const placeholder = 'Electron Fiddle Gist' as const;
+      const placeholder = FIDDLE_GIST_DESCRIPTION_PLACEHOLDER;
       return this.props.appState.showInputDialog({
         defaultInput: placeholder,
         label: 'Please provide a brief description for your Fiddle Gist',
@@ -156,11 +158,23 @@ export const GistActionButton = observer(
       } catch (error: any) {
         console.warn(`Could not publish gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Publishing Fiddle to GitHub failed. Are you connected to the Internet?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        if (error.status === 401 || error.status === 403) {
+          const { confirm } = await this.props.appState.showGenericDialog({
+            label: `Publishing Fiddle to GitHub failed. GitHub encountered the following error: ${error.message}`,
+            ok: 'Update token',
+            cancel: 'Close',
+            type: GenericDialogType.warning,
+            wantsInput: false,
+          });
+
+          if (confirm) {
+            this.showGitHubTokenSettings();
+          }
+        } else {
+          await this.props.appState.showErrorDialog(
+            `Publishing Fiddle to GitHub failed. Are you connected to the Internet? GitHub encountered the following error: ${error.message}`,
+          );
+        }
 
         return false;
       }
@@ -230,12 +244,23 @@ export const GistActionButton = observer(
       } catch (error: any) {
         console.warn(`Could not update gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Updating Fiddle Gist failed. Are you connected to the Internet and is this your Gist?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-          buttons: ['Ok'],
-        });
+        if (error.status === 401 || error.status === 403) {
+          const { confirm } = await this.props.appState.showGenericDialog({
+            label: `Updating Fiddle Gist failed. GitHub encountered the following error: ${error.message}`,
+            ok: 'Update token',
+            cancel: 'Close',
+            type: GenericDialogType.warning,
+            wantsInput: false,
+          });
+
+          if (confirm) {
+            this.showGitHubTokenSettings();
+          }
+        } else {
+          await this.props.appState.showErrorDialog(
+            `Updating Fiddle Gist failed. Are you connected to the Internet? GitHub encountered the following error: ${error.message}`,
+          );
+        }
       }
 
       appState.activeGistAction = GistActionState.none;
@@ -262,11 +287,23 @@ export const GistActionButton = observer(
       } catch (error: any) {
         console.warn(`Could not delete gist`, { error });
 
-        window.ElectronFiddle.showWarningDialog({
-          message:
-            'Deleting Fiddle Gist failed. Are you connected to the Internet, is this your Gist, and have you loaded it?',
-          detail: `GitHub encountered the following error: ${error.message}`,
-        });
+        if (error.status === 401 || error.status === 403) {
+          const { confirm } = await this.props.appState.showGenericDialog({
+            label: `Deleting Fiddle Gist failed. GitHub encountered the following error: ${error.message}`,
+            ok: 'Update token',
+            cancel: 'Close',
+            type: GenericDialogType.warning,
+            wantsInput: false,
+          });
+
+          if (confirm) {
+            this.showGitHubTokenSettings();
+          }
+        } else {
+          await this.props.appState.showErrorDialog(
+            `Deleting Fiddle Gist failed. Are you connected to the Internet? GitHub encountered the following error: ${error.message}`,
+          );
+        }
       }
 
       appState.gistId = undefined;
@@ -455,5 +492,10 @@ export const GistActionButton = observer(
           .map(([id, content]) => [id, { filename: id, content }]),
       );
     };
+
+    private showGitHubTokenSettings() {
+      this.props.appState.toggleSettings();
+      this.props.appState.toggleAuthDialog();
+    }
   },
 );
