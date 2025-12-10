@@ -76,6 +76,7 @@ describe('EditorMosaic', () => {
       expect(monaco.editor.createModel).toHaveBeenCalledWith(
         content,
         expect.anything(),
+        expect.anything(),
       );
     });
   });
@@ -285,6 +286,9 @@ describe('EditorMosaic', () => {
 
         // now call set again, same filename DIFFERENT content
         content = '// second content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         await editorMosaic.set({ [id]: content });
         // test that editorMosaic set the editor to the new content
         expect(editor.getValue()).toBe(content);
@@ -292,6 +296,9 @@ describe('EditorMosaic', () => {
 
         // test that the editor still responds to edits
         content = '// third content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         editor.setValue(content);
         vi.waitUntil(() => editorMosaic.isEdited === true);
 
@@ -301,6 +308,9 @@ describe('EditorMosaic', () => {
 
         // test that the editor still responds to edits
         content = '// fourth content';
+        vi.mocked(monaco.editor.getModel).mockReturnValueOnce(
+          monaco.latestModel,
+        );
         editor.setValue(content);
         vi.waitUntil(() => editorMosaic.isEdited === true);
       });
@@ -489,5 +499,53 @@ describe('EditorMosaic', () => {
       // hashes are calculated asynchronously
       await vi.waitUntil(() => editorMosaic.isEdited === true);
     });
+  });
+
+  describe('setSeverityLevels', () => {
+    it.each([
+      {
+        markers: [
+          {
+            severity: window.monaco.MarkerSeverity.Error,
+            message: 'Error message',
+          },
+          {
+            severity: window.monaco.MarkerSeverity.Warning,
+            message: 'Warning message',
+          },
+        ],
+        expectedSeverity: window.monaco.MarkerSeverity.Error,
+      },
+      {
+        markers: [
+          {
+            severity: window.monaco.MarkerSeverity.Warning,
+            message: 'Warning message',
+          },
+        ],
+        expectedSeverity: window.monaco.MarkerSeverity.Warning,
+      },
+      {
+        markers: [],
+        expectedSeverity: window.monaco.MarkerSeverity.Hint,
+      },
+    ])(
+      'updates severity levels based on Monaco markers',
+      ({ markers, expectedSeverity }) => {
+        const id = MAIN_JS;
+        const editor = new MonacoEditorMock() as unknown as Editor;
+        editorMosaic.set({ [id]: '// content' });
+        editorMosaic.addEditor(id, editor);
+
+        vi.mocked(monaco.editor.getModelMarkers).mockReturnValueOnce(
+          markers as any,
+        );
+
+        editorMosaic.setSeverityLevels();
+
+        const severityLevels = editorMosaic.editorSeverityMap;
+        expect(severityLevels.get(id)).toBe(expectedSeverity);
+      },
+    );
   });
 });

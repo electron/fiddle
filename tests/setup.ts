@@ -95,8 +95,8 @@ window.navigator = window.navigator ?? {};
  * code called in individual tests.
  */
 (window.ElectronFiddle as any) = new ElectronFiddleMock();
-(window.app as any) = new AppMock();
 (window.monaco as any) = new MonacoMock();
+(window.app as any) = new AppMock();
 window.localStorage.setItem = vi.fn();
 window.localStorage.getItem = vi.fn();
 window.localStorage.removeItem = vi.fn();
@@ -115,8 +115,8 @@ beforeEach(() => {
   document.body.innerHTML = '<div id="app" />';
 
   (window.ElectronFiddle as any) = new ElectronFiddleMock();
-  (window.app as any) = new AppMock();
   (window.monaco as any) = new MonacoMock();
+  (window.app as any) = new AppMock();
   vi.mocked(window.localStorage.setItem).mockReset();
   vi.mocked(window.localStorage.getItem).mockReset();
   vi.mocked(window.localStorage.removeItem).mockReset();

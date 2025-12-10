@@ -26,6 +26,7 @@ export class MonacoMock {
   public latestModel: any;
   public editor = {
     create: vi.fn(() => (this.latestEditor = new MonacoEditorMock())),
+    getModel: vi.fn(),
     createModel: vi.fn((value: string, language: string) => {
       const model = new MonacoModelMock(value, language);
       this.latestModel = model;
@@ -35,6 +36,8 @@ export class MonacoMock {
     onDidFocusEditorText: vi.fn(),
     revealLine: vi.fn(),
     setTheme: vi.fn(),
+    onDidChangeMarkers: vi.fn(),
+    getModelMarkers: vi.fn(() => []),
   };
   public languages = {
     register: vi.fn(),
@@ -45,6 +48,15 @@ export class MonacoMock {
         addExtraLib: vi.fn(),
       },
     },
+  };
+  public Uri = {
+    parse: vi.fn((uri: string) => ({ toString: () => uri })),
+  };
+  public MarkerSeverity = {
+    Hint: 1,
+    Info: 2,
+    Warning: 4,
+    Error: 8,
   };
   public KeyMod = {
     CtrlCmd: vi.fn(),
