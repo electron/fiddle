@@ -67,6 +67,9 @@ export class App {
       return false;
     }
 
+    await this.state.editorMosaic.set(editorValues);
+    this.state.editorMosaic.editorSeverityMap.clear();
+
     // HACK: editors should be mounted shortly after we load something.
     // We could try waiting for every single `editorDidMount` callback
     // to fire, but that gets complicated with recycled editors with changed
@@ -77,8 +80,6 @@ export class App {
         resolve();
       }, 100),
     );
-    await this.state.editorMosaic.set(editorValues);
-    this.state.editorMosaic.editorSeverityMap.clear();
 
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;
