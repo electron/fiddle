@@ -46,7 +46,7 @@ export const GistActionButton = observer(
       super(props);
       this.handleClick = this.handleClick.bind(this);
       this.performGistAction = this.performGistAction.bind(this);
-      this.setPrivate = this.setPrivate.bind(this);
+      this.setSecret = this.setSecret.bind(this);
       this.setPublic = this.setPublic.bind(this);
 
       this.state = {
@@ -298,9 +298,9 @@ export const GistActionButton = observer(
     }
 
     /**
-     * Publish fiddles as private.
+     * Publish fiddles as secret.
      */
-    public setPrivate() {
+    public setSecret() {
       this.setPrivacy(false);
     }
 
@@ -414,10 +414,10 @@ export const GistActionButton = observer(
       const privacyMenu = (
         <Menu>
           <MenuItem
-            text="Private"
+            text="Secret"
             icon="lock"
             active={!gitHubPublishAsPublic}
-            onClick={this.setPrivate}
+            onClick={this.setSecret}
           />
           <MenuItem
             text="Public"
