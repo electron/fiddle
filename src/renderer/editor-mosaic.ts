@@ -1,11 +1,4 @@
-import {
-  action,
-  computed,
-  makeObservable,
-  observable,
-  reaction,
-  runInAction,
-} from 'mobx';
+import { makeAutoObservable, observable, reaction, runInAction } from 'mobx';
 import type * as MonacoType from 'monaco-editor';
 import { MosaicDirection, MosaicNode, getLeaves } from 'react-mosaic-component';
 
@@ -20,6 +13,10 @@ import { EditorId, EditorValues, PACKAGE_NAME } from '../interfaces';
 
 export type Editor = MonacoType.editor.IStandaloneCodeEditor;
 
+/**
+ * Editors in Electron Fiddle can be hidden from the current view, but
+ * still exist in memory and can be re-opened.
+ */
 export enum EditorPresence {
   /** The file is known to us but we've chosen not to show it, either
       because the content was boring or because hide() was called.
@@ -41,8 +38,33 @@ interface EditorBackup {
 }
 
 export class EditorMosaic {
-  public isEdited = false;
   public focusedFile: EditorId | null = null;
+
+  /**
+   * A map of editors and the SHA-1 hashes of their contents
+   * when last saved.
+   */
+  private savedHashes = new Map<EditorId, string>();
+  /**
+   * A map of editors and the SHA-1 hashes of their current contents.
+   */
+  private currentHashes = new Map<EditorId, string>();
+
+  public get isEdited() {
+    // If we haven't processed the save state upon initial load yet, don't mark as edited
+    // (All editors need to be mounted into Fiddle first)
+    if (this.savedHashes.size === 0) {
+      return false;
+    }
+
+    if (this.savedHashes.size !== this.currentHashes.size) {
+      return true;
+    }
+    for (const [id, hash] of this.currentHashes) {
+      if (this.savedHashes.get(id) !== hash) return true;
+    }
+    return false;
+  }
 
   public get files() {
     const files = new Map<EditorId, EditorPresence>();
@@ -67,32 +89,7 @@ export class EditorMosaic {
   private readonly editors = new Map<EditorId, Editor>();
 
   constructor() {
-    makeObservable<
-      EditorMosaic,
-      'backups' | 'editors' | 'addFile' | 'setVisible' | 'setEditorFromBackup'
-    >(this, {
-      isEdited: observable,
-      focusedFile: observable,
-      files: computed,
-      numVisible: computed,
-      mosaic: observable,
-      backups: observable,
-      editors: observable,
-      setFocusedFile: action,
-      resetLayout: action,
-      set: action,
-      addFile: action,
-      show: action,
-      setVisible: action,
-      toggle: action,
-      hide: action,
-      remove: action,
-      addEditor: action,
-      setEditorFromBackup: action,
-      addNewFile: action,
-      renameFile: action,
-      editorSeverityMap: observable,
-    });
+    makeAutoObservable(this);
 
     // whenever the mosaics are changed,
     // update the editor layout
@@ -101,17 +98,7 @@ export class EditorMosaic {
       () => this.layout(),
     );
 
-    // whenever isEdited is set, stop or start listening to edits again.
-    reaction(
-      () => this.isEdited,
-      () => {
-        if (this.isEdited) {
-          this.ignoreAllEdits();
-        } else {
-          this.observeAllEdits();
-        }
-      },
-    );
+    this.layout = this.layout.bind(this);
     // TODO: evaluate if we need to dispose of the listener when this class is
     // destroyed via FinalizationRegistry
     window.monaco.editor.onDidChangeMarkers(this.setSeverityLevels.bind(this));
@@ -128,14 +115,14 @@ export class EditorMosaic {
   }
 
   /** Reset the layout to the initial layout we had when set() was called */
-  resetLayout = () => {
-    this.set(this.values());
-  };
+  public async resetLayout() {
+    await this.set(this.values());
+  }
 
   /// set / add / get the files in the model
 
   /** Set the contents of the mosaic */
-  public set(valuesIn: EditorValues) {
+  public async set(valuesIn: EditorValues) {
     // set() clears out the previous Fiddle, so clear our previous state
     // except for this.editors -- we recycle editors below in setFile()
     this.backups.clear();
@@ -143,16 +130,16 @@ export class EditorMosaic {
 
     // add the files to the mosaic, recycling existing editors when possible.
     const values = new Map(Object.entries(valuesIn)) as Map<EditorId, string>;
-    for (const [id, value] of values) this.addFile(id, value);
+    for (const [id, value] of values) {
+      await this.addFile(id, value);
+    }
     for (const id of this.editors.keys()) {
       if (!values.has(id)) this.editors.delete(id);
     }
-
-    this.isEdited = false;
   }
 
   /** Add a file. If we already have a file with that name, replace it. */
-  private addFile(id: EditorId, value: string) {
+  private async addFile(id: EditorId, value: string) {
     if (
       id.endsWith('.json') &&
       [PACKAGE_NAME, 'package-lock.json'].includes(id)
@@ -185,11 +172,12 @@ export class EditorMosaic {
     // if we have an editor available, use the monaco model now.
     // otherwise, save the file in `this.backups` for future use.
     const backup: EditorBackup = { model };
+    this.backups.set(id, backup);
+
     const editor = this.editors.get(id);
     if (editor) {
       this.setEditorFromBackup(editor, backup);
-    } else {
-      this.backups.set(id, backup);
+      this.observeEdits(editor);
     }
 
     // only show the file if it has nontrivial content
@@ -198,8 +186,7 @@ export class EditorMosaic {
     } else {
       this.hide(id);
     }
-
-    this.isEdited = true;
+    await this.updateCurrentHash();
   }
 
   /// show or hide files in the view
@@ -268,16 +255,16 @@ export class EditorMosaic {
   }
 
   /** Remove the specified file and its editor */
-  public remove(id: EditorId) {
+  public async remove(id: EditorId) {
     this.editors.delete(id);
     this.backups.delete(id);
     this.setVisible(getLeaves(this.mosaic).filter((v) => v !== id));
 
-    this.isEdited = true;
+    await this.updateCurrentHash();
   }
 
   /** Wire up a newly-mounted Monaco editor */
-  public addEditor(id: EditorId, editor: Editor) {
+  public async addEditor(id: EditorId, editor: Editor) {
     const backup = this.backups.get(id);
     if (!backup) throw new Error(`added Editor for unexpected file "${id}"`);
 
@@ -289,14 +276,13 @@ export class EditorMosaic {
 
   /** Populate a MonacoEditor with the file's contents */
   private setEditorFromBackup(editor: Editor, backup: EditorBackup) {
-    this.ignoreEdits(editor); // pause this so that isEdited doesn't get set
     if (backup.viewState) editor.restoreViewState(backup.viewState);
     editor.setModel(backup.model);
     this.observeEdits(editor); // resume
   }
 
   /** Add a new file to the mosaic */
-  public addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
+  public async addNewFile(id: EditorId, value: string = getEmptyContent(id)) {
     if (this.files.has(id)) {
       throw new Error(`Cannot add file "${id}": File already exists`);
     }
@@ -309,11 +295,11 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(id, value);
+    await this.addFile(id, value);
   }
 
   /** Rename a file in the mosaic */
-  public renameFile(oldId: EditorId, newId: EditorId) {
+  public async renameFile(oldId: EditorId, newId: EditorId) {
     if (!this.files.has(oldId)) {
       throw new Error(`Cannot rename file "${oldId}": File doesn't exist`);
     }
@@ -330,8 +316,8 @@ export class EditorMosaic {
       );
     }
 
-    this.addFile(newId, this.value(oldId).trim());
-    this.remove(oldId);
+    await this.addFile(newId, this.value(oldId).trim());
+    await this.remove(oldId);
   }
 
   /** Get the contents of a single file. */
@@ -350,18 +336,16 @@ export class EditorMosaic {
   }
 
   /// misc utilities
-
   private layoutDebounce: ReturnType<typeof setTimeout> | undefined;
 
-  public layout = () => {
-    const DEBOUNCE_MSEC = 50;
-    if (!this.layoutDebounce) {
-      this.layoutDebounce = setTimeout(() => {
-        for (const editor of this.editors.values()) editor.layout();
-        delete this.layoutDebounce;
-      }, DEBOUNCE_MSEC);
-    }
-  };
+  public layout() {
+    clearTimeout(this.layoutDebounce);
+    this.layoutDebounce = setTimeout(() => {
+      for (const editor of this.editors.values()) {
+        editor.layout();
+      }
+    }, 50);
+  }
 
   public getAllEditorIds(): EditorId[] {
     return [...this.editors.keys()];
@@ -383,29 +367,70 @@ export class EditorMosaic {
     return Array.from(this.files.keys()).find((id) => isMainEntryPoint(id));
   }
 
-  //=== Listen for user edits
-
-  private ignoreAllEdits() {
-    for (const editor of this.editors.values()) this.ignoreEdits(editor);
-  }
-
-  private ignoreEdits(editor: Editor) {
-    editor.onDidChangeModelContent(() => {
-      // no-op
-    });
-  }
-
-  private observeAllEdits() {
-    for (const editor of this.editors.values()) this.observeEdits(editor);
-  }
-
   private observeEdits(editor: Editor) {
-    const disposable = editor.onDidChangeModelContent(() => {
-      this.isEdited ||= true;
-      disposable.dispose();
+    editor.onDidChangeModelContent(async () => {
+      await this.updateCurrentHash();
     });
   }
 
+  private async updateCurrentHash() {
+    const hashes = await this.getAllHashes();
+    runInAction(() => {
+      this.currentHashes = hashes;
+    });
+  }
+
+  /**
+   * Generates a SHA-1 hash for each editor's contents. Visible editors are
+   * under `this.editors`, and hidden editors are under `this.backups`.
+   */
+  private async getAllHashes() {
+    const hashes = new Map<EditorId, string>();
+    const encoder = new TextEncoder();
+
+    for (const [id, editor] of this.editors) {
+      const txt = editor.getModel()?.getValue();
+      const data = encoder.encode(txt);
+      const digest = await window.crypto.subtle.digest('SHA-1', data);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hash = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      hashes.set(id, hash);
+    }
+
+    for (const [id, backup] of this.backups) {
+      const txt = backup.model.getValue();
+      const data = encoder.encode(txt);
+      const digest = await window.crypto.subtle.digest('SHA-1', data);
+      const hashArray = Array.from(new Uint8Array(digest));
+      const hash = hashArray
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('');
+      hashes.set(id, hash);
+    }
+
+    return hashes;
+  }
+
+  /**
+   * Marks the current state of all editors as saved.
+   */
+  public async markAsSaved() {
+    const hashes = await this.getAllHashes();
+    runInAction(() => {
+      this.savedHashes = hashes;
+      // new map to clone
+      this.currentHashes = new Map(hashes);
+    });
+  }
+
+  /**
+   * Forces all editors to be marked as unsaved.
+   */
+  public clearSaved() {
+    this.savedHashes.clear();
+  }
   public editorSeverityMap = observable.map<
     EditorId,
     MonacoType.MarkerSeverity

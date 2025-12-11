@@ -459,7 +459,7 @@ describe('AppState', () => {
 
       it('if there is no current fiddle', async () => {
         // setup: current fiddle is empty
-        appState.editorMosaic.set({});
+        await appState.editorMosaic.set({});
 
         await appState.setVersion(newVersion);
         expect(replaceSpy).toHaveBeenCalledTimes(1);
@@ -469,8 +469,7 @@ describe('AppState', () => {
 
       it('if the current fiddle is an unedited template', async () => {
         appState.templateName = oldVersion;
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        appState.editorMosaic.isEdited = false;
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
 
         await appState.setVersion(newVersion);
         const templateName = newVersion;
@@ -478,8 +477,13 @@ describe('AppState', () => {
       });
 
       it('but not if the current fiddle is edited', async () => {
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
-        appState.editorMosaic.isEdited = true;
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        (appState.editorMosaic as any).savedHashes = new Map([
+          [MAIN_JS, 'saved'],
+        ]);
+        (appState.editorMosaic as any).currentHashes = new Map([
+          [MAIN_JS, 'different'],
+        ]);
         appState.templateName = oldVersion;
 
         await appState.setVersion(newVersion);
@@ -487,7 +491,7 @@ describe('AppState', () => {
       });
 
       it('but not if the current fiddle is not a template', async () => {
-        appState.editorMosaic.set({ [MAIN_JS]: '// content' });
+        await appState.editorMosaic.set({ [MAIN_JS]: '// content' });
         appState.localPath = '/some/path/to/a/fiddle';
 
         await appState.setVersion(newVersion);
@@ -789,7 +793,12 @@ describe('AppState', () => {
 
     it('flags unsaved fiddles', () => {
       const expected = `${APPNAME} - Unsaved`;
-      appState.editorMosaic.isEdited = true;
+      (appState.editorMosaic as any).savedHashes = new Map([
+        ['main.js', 'saved'],
+      ]);
+      (appState.editorMosaic as any).currentHashes = new Map([
+        ['main.js', 'current'],
+      ]);
       const actual = appState.title;
       expect(actual).toBe(expected);
     });

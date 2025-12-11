@@ -52,14 +52,14 @@ export class Editor extends React.Component<EditorProps> {
    * mount, not React's.
    */
   public async editorDidMount(editor: MonacoType.editor.IStandaloneCodeEditor) {
-    const { appState, editorDidMount, id } = this.props;
+    const { appState, id } = this.props;
     const { editorMosaic } = appState;
 
-    editorMosaic.addEditor(id, editor);
+    await editorMosaic.addEditor(id, editor);
 
     // And notify others
-    if (editorDidMount) {
-      editorDidMount(editor);
+    if (this.props.editorDidMount) {
+      this.props.editorDidMount(editor);
     }
 
     // Click file tree, if the file is hidden, focus it

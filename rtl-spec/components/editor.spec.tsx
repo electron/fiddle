@@ -27,13 +27,13 @@ describe('Editor component', () => {
     });
   }
 
-  function initializeEditorMosaic(id: EditorId) {
-    store.editorMosaic.set({ [id]: '// content' });
+  async function initializeEditorMosaic(id: EditorId) {
+    await store.editorMosaic.set({ [id]: '// content' });
   }
 
-  it('renders the editor container', () => {
+  it('renders the editor container', async () => {
     const id = MAIN_JS;
-    initializeEditorMosaic(id);
+    await initializeEditorMosaic(id);
 
     const { renderResult } = createEditor(id);
 
@@ -67,13 +67,13 @@ describe('Editor component', () => {
     it('calls editorMosaic.addEditor', async () => {
       const id = MAIN_JS;
       const { editorMosaic } = store;
-      editorMosaic.set({ [id]: '// content' });
+      await editorMosaic.set({ [id]: '// content' });
       const addEditorSpy = vi.spyOn(editorMosaic, 'addEditor');
 
       const didMount = vi.fn();
       createEditor(id, didMount);
 
-      expect(didMount).toHaveBeenCalled();
+      await vi.waitFor(() => didMount.mock.calls.length > 0);
       expect(addEditorSpy).toHaveBeenCalledWith(id, expect.anything());
     });
 

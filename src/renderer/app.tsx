@@ -60,15 +60,26 @@ export class App {
     editorValues: EditorValues,
     { localFiddle, gistId, templateName }: Partial<SetFiddleOptions>,
   ) {
-    const { state } = this;
-    const { editorMosaic } = state;
-
-    if (editorMosaic.isEdited && !(await this.confirmReplaceUnsaved())) {
+    if (
+      this.state.editorMosaic.isEdited &&
+      !(await this.confirmReplaceUnsaved())
+    ) {
       return false;
     }
 
-    this.state.editorMosaic.set(editorValues);
+    await this.state.editorMosaic.set(editorValues);
     this.state.editorMosaic.editorSeverityMap.clear();
+
+    // HACK: editors should be mounted shortly after we load something.
+    // We could try waiting for every single `editorDidMount` callback
+    // to fire, but that gets complicated with recycled editors with changed
+    // values. This is just easier for now.
+    await new Promise<void>((resolve) =>
+      setTimeout(async () => {
+        await this.state.editorMosaic.markAsSaved();
+        resolve();
+      }, 100),
+    );
 
     this.state.gistId = gistId || '';
     this.state.localPath = localFiddle?.filePath;
