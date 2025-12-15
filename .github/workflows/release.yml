@@ -134,7 +134,7 @@ jobs:
           node-version: '22.17.x'
       - run: yarn install --immutable
       - name: Download All Artifacts
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           path: out
           pattern: build-artifacts-*
@@ -155,7 +155,7 @@ jobs:
       actions: read
     steps:
       - name: Download source maps artifact
-        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
         with:
           name: webpack-source-maps
           path: .webpack
