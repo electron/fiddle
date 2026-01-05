@@ -11,6 +11,7 @@ import {
   EditorValues,
   ElectronReleaseChannel,
   GenericDialogType,
+  GistRevision,
   InstallState,
   PACKAGE_NAME,
   VersionSource,
@@ -115,13 +116,40 @@ export class RemoteLoader {
     }
   }
 
+  public async getGistRevisions(gistId: string): Promise<GistRevision[]> {
+    try {
+      const octo = await getOctokit(this.appState);
+      const { data: revisions } = await octo.gists.listCommits({
+        gist_id: gistId,
+      });
+
+      return revisions.reverse().map((r, i) => {
+        return {
+          sha: r.version,
+          date: r.committed_at,
+          changes: r.change_status,
+          title: i === 0 ? 'Created' : `Revision ${i}`,
+        };
+      });
+    } catch (error: any) {
+      this.handleLoadingFailed(error);
+      return [];
+    }
+  }
+
   /**
    * Load a fiddle
    */
-  public async fetchGistAndLoad(gistId: string): Promise<boolean> {
+  public async fetchGistAndLoad(
+    gistId: string,
+    revision?: string,
+  ): Promise<boolean> {
     try {
       const octo = await getOctokit(this.appState);
-      const gist = await octo.gists.get({ gist_id: gistId });
+      const gist = revision
+        ? await octo.gists.getRevision({ gist_id: gistId, sha: revision })
+        : await octo.gists.get({ gist_id: gistId });
+
       const values: EditorValues = {};
 
       for (const [id, data] of Object.entries(gist.data.files)) {
