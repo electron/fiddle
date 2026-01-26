@@ -41,7 +41,7 @@ export const SidebarFileTree = observer(
     }
 
     public render() {
-      const { editorMosaic } = this.props.appState;
+      const { editorMosaic, showErrorDialog } = this.props.appState;
       const { files, focusedFile } = editorMosaic;
 
       const fileList: TreeNodeInfo[] = Array.from(files)
@@ -108,10 +108,23 @@ export const SidebarFileTree = observer(
             <input
               className={classNames(Classes.INPUT, Classes.FILL, Classes.SMALL)}
               style={{ width: `100%`, padding: 0 }}
-              onKeyDown={(e) => {
+              onKeyDown={async (e) => {
                 if (e.key === 'Escape') {
                   e.currentTarget.blur();
                 } else if (e.key === 'Enter') {
+                  const filename = e.currentTarget.value.trim();
+                  if (filename.includes('/') || filename.includes('\\')) {
+                    await showErrorDialog(
+                      `Invalid filename "${filename}": inside subdir not supported yet`,
+                    );
+                    return;
+                  }
+                  if (!isSupportedFile(filename)) {
+                    await showErrorDialog(
+                      `Invalid filename "${filename}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+                    );
+                    return;
+                  }
                   this.createEditor(e.currentTarget.value as EditorId);
                   e.currentTarget.blur();
                 }
@@ -188,6 +201,13 @@ export const SidebarFileTree = observer(
       })) as EditorId;
 
       if (!id) return;
+
+      if (id.includes('/') || id.includes('\\')) {
+        await appState.showErrorDialog(
+          `Invalid filename "${id}": inside subdir not supported yet`,
+        );
+        return;
+      }
 
       if (
         id.endsWith('.json') &&
