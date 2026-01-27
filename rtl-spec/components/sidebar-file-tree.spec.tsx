@@ -96,10 +96,10 @@ describe('SidebarFileTree component', () => {
     ) as HTMLInputElement;
     await user.type(input, 'tester.js{Enter}');
 
-    expect(editorMosaic.files.get('tester.js')).toBe(EditorPresence.Pending);
+    expect(editorMosaic.files.get('tester.js')).toBe(EditorPresence.Hidden);
   });
 
-  it('fails to create new editors (file name inside subdir)', async () => {
+  it('fails to create new editors (file name with path separator)', async () => {
     const user = userEvent.setup();
     const { container } = render(<SidebarFileTree appState={store} />);
     const EDITOR_NEW_NAME = 'subdir/tester.js';
@@ -122,7 +122,7 @@ describe('SidebarFileTree component', () => {
     await waitFor(() => {
       console.log('store.showErrorDialog: ', store.showErrorDialog);
       expect(store.showErrorDialog).toHaveBeenCalledWith(
-        `Invalid filename "${EDITOR_NEW_NAME}": inside subdir not supported yet`,
+        `Invalid filename "${EDITOR_NEW_NAME}": filenames cannot include path separators`,
       );
     });
   });
@@ -265,7 +265,7 @@ describe('SidebarFileTree component', () => {
     expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
   });
 
-  it('fails if trying to rename an editor to an unsupported name (file inside subdir)', async () => {
+  it('fails if trying to rename an editor to an unsupported name (file name with path separator)', async () => {
     const user = userEvent.setup();
     const EDITOR_NAME = 'index.html';
     const EDITOR_NEW_NAME = 'msg/data.json';
@@ -288,7 +288,7 @@ describe('SidebarFileTree component', () => {
     // Wait for error dialog to be called
     await waitFor(() => {
       expect(store.showErrorDialog).toHaveBeenCalledWith(
-        `Invalid filename "${EDITOR_NEW_NAME}": inside subdir not supported yet`,
+        `Invalid filename "${EDITOR_NEW_NAME}": filenames cannot include path separators`,
       );
     });
 

@@ -14,10 +14,10 @@ import { ContextMenu2, Tooltip2 } from '@blueprintjs/popover2';
 import classNames from 'classnames';
 import { observer } from 'mobx-react';
 
-import { EditorId, PACKAGE_NAME } from '../../interfaces';
+import { EditorId } from '../../interfaces';
 import { EditorPresence } from '../editor-mosaic';
 import { AppState } from '../state';
-import { isMainEntryPoint, isSupportedFile } from '../utils/editor-utils';
+import { isMainEntryPoint } from '../utils/editor-utils';
 
 interface FileTreeProps {
   appState: AppState;
@@ -41,7 +41,7 @@ export const SidebarFileTree = observer(
     }
 
     public render() {
-      const { editorMosaic, showErrorDialog } = this.props.appState;
+      const { editorMosaic } = this.props.appState;
       const { files, focusedFile } = editorMosaic;
 
       const fileList: TreeNodeInfo[] = Array.from(files)
@@ -112,19 +112,6 @@ export const SidebarFileTree = observer(
                 if (e.key === 'Escape') {
                   e.currentTarget.blur();
                 } else if (e.key === 'Enter') {
-                  const filename = e.currentTarget.value.trim();
-                  if (filename.includes('/') || filename.includes('\\')) {
-                    await showErrorDialog(
-                      `Invalid filename "${filename}": inside subdir not supported yet`,
-                    );
-                    return;
-                  }
-                  if (!isSupportedFile(filename)) {
-                    await showErrorDialog(
-                      `Invalid filename "${filename}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
-                    );
-                    return;
-                  }
                   this.createEditor(e.currentTarget.value as EditorId);
                   e.currentTarget.blur();
                 }
@@ -202,30 +189,6 @@ export const SidebarFileTree = observer(
 
       if (!id) return;
 
-      if (id.includes('/') || id.includes('\\')) {
-        await appState.showErrorDialog(
-          `Invalid filename "${id}": inside subdir not supported yet`,
-        );
-        return;
-      }
-
-      if (
-        id.endsWith('.json') &&
-        [PACKAGE_NAME, 'package-lock.json'].includes(id)
-      ) {
-        await appState.showErrorDialog(
-          `Cannot add ${PACKAGE_NAME} or package-lock.json as custom files`,
-        );
-        return;
-      }
-
-      if (!isSupportedFile(id)) {
-        await appState.showErrorDialog(
-          `Invalid filename "${id}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
-        );
-        return;
-      }
-
       try {
         await appState.editorMosaic.renameFile(editorId, id);
 
@@ -240,13 +203,13 @@ export const SidebarFileTree = observer(
       editorMosaic.remove(editorId);
     };
 
-    public createEditor = (editorId: EditorId) => {
+    public createEditor = async (editorId: EditorId) => {
       const { appState } = this.props;
       try {
-        appState.editorMosaic.addNewFile(editorId);
-        appState.editorMosaic.show(editorId);
+        await appState.editorMosaic.addNewFile(editorId);
+        await appState.editorMosaic.show(editorId);
       } catch (err: any) {
-        appState.showErrorDialog(err.message);
+        await appState.showErrorDialog(err.message);
       }
     };
 
