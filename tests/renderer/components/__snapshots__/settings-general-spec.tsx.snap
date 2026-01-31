@@ -26,7 +26,7 @@ exports[`GeneralSettings component > renders 1`] = `
     appState={{}}
   />
   <Blueprint3.Divider />
-  <settings-package-author
+  <settings-gist
     appState={{}}
   />
   <Blueprint3.Divider />
