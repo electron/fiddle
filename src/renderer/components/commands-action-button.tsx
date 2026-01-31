@@ -175,10 +175,12 @@ export const GistActionButton = observer(
 
       try {
         const description = await this.getFiddleDescriptionFromUser();
-
         if (description) {
           if (await this.publishGist(description)) {
-            await this.props.appState.editorMosaic.markAsSaved();
+            // Fix for #1821: Only mark as saved if we have a local path
+            if (appState.localPath) {
+              await this.props.appState.editorMosaic.markAsSaved();
+            }
           }
         }
       } finally {
@@ -214,8 +216,9 @@ export const GistActionButton = observer(
           files,
         });
 
-        await appState.editorMosaic.markAsSaved();
-        console.log('Updating: Updating done', { gist });
+        if (appState.localPath) {
+          await appState.editorMosaic.markAsSaved();
+        } console.log('Updating: Updating done', { gist });
 
         if (!silent) {
           this.renderToast({
