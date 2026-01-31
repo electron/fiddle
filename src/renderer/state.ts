@@ -910,22 +910,32 @@ export class AppState {
   public findUsableVersion(): RunnableVersion | undefined {
     return this.versionsToShow.find((version) => {
       const { ver } = this.isVersionUsable(version.version);
-      return !!ver;
+      return (
+        !!ver &&
+        (ver.state === InstallState.installed ||
+          ver.state === InstallState.downloaded)
+      );
     });
   }
 
   /**
    * Select a version of Electron (and download it if necessary).
    */
-  public async setVersion(input: string): Promise<void> {
-    const fallback = this.findUsableVersion();
-
+  public async setVersion(
+    input: string,
+    attemptsLeft: number = 3,
+  ): Promise<void> {
     const { err, ver } = this.isVersionUsable(input);
     if (!ver) {
       console.error(`setVersion('${input}') failed: ${err}`);
-      this.showErrorDialog(err!);
-      if (fallback) await this.setVersion(fallback.version);
-      return;
+      await this.showErrorDialog(err!);
+
+      const fallback = this.findUsableVersion();
+      if (fallback) {
+        return this.setVersion(fallback.version, attemptsLeft);
+      }
+
+      throw new Error(err);
     }
 
     const { version } = ver;
@@ -935,14 +945,37 @@ export class AppState {
 
     try {
       await this.downloadVersion(ver);
-    } catch {
-      await this.removeVersion(ver);
-      console.error(
-        `setVersion('${input}') failed: Couldn't download ${version}`,
+    } catch (downloadErr) {
+      try {
+        await this.removeVersion(ver);
+      } catch (removeErr) {
+        console.warn('setVersion.removeVersion failed:', removeErr);
+      }
+
+      if (attemptsLeft > 1) {
+        const backoffMs = 100 * (4 - attemptsLeft);
+        if (backoffMs > 0) {
+          await new Promise((r) => setTimeout(r, backoffMs));
+        }
+        return this.setVersion(input, attemptsLeft - 1);
+      }
+
+      const failedLabel = `Failed to download Electron version "${version}". Try again later.`;
+      const noInternetLabel = `Failed to download Electron version "${version}". Check your internet connection and try again.`;
+
+      const userMessage = this.isOnline ? failedLabel : noInternetLabel;
+      await this.showErrorDialog(userMessage);
+
+      const fallback = this.findUsableVersion();
+      if (fallback) {
+        // If we found a usable fallback, try it once
+        return this.setVersion(fallback.version, 1);
+      }
+
+      // Exhausted everything — propagate an error to caller
+      throw new Error(
+        `Failed to download Electron version "${version}": ${downloadErr}`,
       );
-      this.showErrorDialog(`Failed to download Electron version ${version}`);
-      if (fallback) await this.setVersion(fallback.version);
-      return;
     }
 
     // If there's no current fiddle,
