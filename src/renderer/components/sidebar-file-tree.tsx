@@ -194,7 +194,8 @@ export const SidebarFileTree = observer(
 
         if (visible) appState.editorMosaic.show(id);
       } catch (err: any) {
-        appState.showErrorDialog(err.message);
+        await new Promise<void>((r) => setTimeout(() => r(), 100));
+        await appState.showErrorDialog(err.message);
       }
     };
 
@@ -209,6 +210,7 @@ export const SidebarFileTree = observer(
         await appState.editorMosaic.addNewFile(editorId);
         await appState.editorMosaic.show(editorId);
       } catch (err: any) {
+        await new Promise<void>((r) => setTimeout(() => r(), 100));
         await appState.showErrorDialog(err.message);
       }
     };
