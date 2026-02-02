@@ -46,6 +46,7 @@ export class FileManager {
         if (filePath !== localPath) {
           this.appState.localPath = filePath;
           this.appState.gistId = undefined;
+          this.appState.activeGistRevision = undefined;
         }
         window.ElectronFiddle.setShowMeTemplate();
         this.appState.templateName = undefined;

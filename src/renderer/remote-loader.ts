@@ -123,7 +123,12 @@ export class RemoteLoader {
         gist_id: gistId,
       });
 
-      return revisions.reverse().map((r, i) => {
+      // Filter out empty revisions (0 additions and 0 deletions)
+      const nonEmptyRevisions = revisions.filter(
+        (r) => r.change_status.additions > 0 || r.change_status.deletions > 0,
+      );
+
+      return nonEmptyRevisions.reverse().map((r, i) => {
         return {
           sha: r.version,
           date: r.committed_at,
@@ -227,7 +232,15 @@ export class RemoteLoader {
         );
       }
 
-      return this.handleLoadingSuccess(values, gistId);
+      const result = await this.handleLoadingSuccess(values, gistId);
+
+      // Set the active revision - either the specified revision or the latest one
+      const activeRevision = revision || gist.data.history?.[0]?.version;
+      if (activeRevision) {
+        this.appState.activeGistRevision = activeRevision;
+      }
+
+      return result;
     } catch (error: any) {
       return this.handleLoadingFailed(error);
     }

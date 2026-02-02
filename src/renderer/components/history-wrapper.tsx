@@ -69,6 +69,7 @@ export class HistoryWrapper extends React.Component<HistoryWrapperProps> {
               isOpen={appState.isHistoryShowing}
               onClose={this.toggleHistory}
               onRevisionSelect={this.handleRevisionSelect}
+              activeRevision={appState.activeGistRevision}
             />
           </>
         )}

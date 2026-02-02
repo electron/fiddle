@@ -20,6 +20,7 @@ interface HistoryProps {
   isOpen: boolean;
   onClose: () => void;
   onRevisionSelect: (revisionId: string) => Promise<void>;
+  activeRevision?: string;
 }
 
 interface HistoryState {
@@ -120,11 +121,12 @@ export class GistHistoryDialog extends React.Component<
   private renderRevisionItem = (revision: GistRevision, index: number) => {
     const date = new Date(revision.date).toLocaleString();
     const shortSha = revision.sha.substring(0, 7);
+    const isActive = this.props.activeRevision === revision.sha;
 
     return (
       <li
         key={revision.sha}
-        className="revision-item"
+        className={`revision-item${isActive ? ' active' : ''}`}
         onClick={() => this.handleRevisionSelect(revision)}
       >
         <div className="revision-content">
@@ -132,6 +134,11 @@ export class GistHistoryDialog extends React.Component<
             <Icon icon="history" className="revision-icon" />
             {revision.title}
             <span className="sha-label">{shortSha}</span>
+            {isActive && (
+              <Tag intent="primary" minimal className="active-tag">
+                Active
+              </Tag>
+            )}
           </h4>
           <div className="revision-details">
             <span className="revision-date">{date}</span>

@@ -133,6 +133,7 @@ export const GistActionButton = observer(
         });
 
         appState.gistId = gist.data.id;
+        appState.activeGistRevision = undefined;
         appState.localPath = undefined;
 
         if (appState.isPublishingGistAsRevision) {
@@ -270,6 +271,7 @@ export const GistActionButton = observer(
       }
 
       appState.gistId = undefined;
+      appState.activeGistRevision = undefined;
       appState.activeGistAction = GistActionState.none;
       this.setActionType(GistActionType.publish);
     }

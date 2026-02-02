@@ -136,6 +136,7 @@ export class AppState {
 
   // -- Various session-only state ------------------
   public gistId: string | undefined = undefined;
+  public activeGistRevision: string | undefined = undefined;
   public readonly versions: Record<string, RunnableVersion> = {};
   public version = '';
   public output: Array<OutputEntry> = [];
@@ -222,6 +223,7 @@ export class AppState {
       genericDialogLastResult: observable,
       genericDialogOptions: observable,
       gistId: observable,
+      activeGistRevision: observable,
       gitHubAvatarUrl: observable,
       gitHubLogin: observable,
       gitHubName: observable,

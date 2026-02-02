@@ -82,6 +82,7 @@ export class App {
     );
 
     this.state.gistId = gistId || '';
+    this.state.activeGistRevision = undefined;
     this.state.localPath = localFiddle?.filePath;
     this.state.templateName = templateName;
 
