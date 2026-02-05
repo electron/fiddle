@@ -57,7 +57,7 @@ jobs:
         run: chmod +x tools/add-macos-cert.sh && . ./tools/add-macos-cert.sh
       - name: Signing Manager Setup (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
-        uses: digicert/ssm-code-signing@fb61e357690ad6aaa11c372000c37fb74d35c000 # v1.1.1
+        uses: digicert/ssm-code-signing@af7f4b07694120e514fe5b19f0598af3c20256e3 # v1.2.0
       - name: Write authentication cert to disk (Windows)
         if: ${{ startsWith(matrix.os, 'windows-') }}
         shell: bash
