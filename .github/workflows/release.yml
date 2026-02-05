@@ -20,7 +20,7 @@ jobs:
         arch:
           - x64
         include:
-          - os: macos-latest
+          - os: macos-latest-xlarge
             arch: arm64
           - os: ubuntu-24.04-arm
             arch: armv7l
