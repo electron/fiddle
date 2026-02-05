@@ -513,4 +513,106 @@ describe('RemoteLoader', () => {
       expect(store.showConfirmDialog).toHaveBeenCalled();
     });
   });
+
+  describe('getGistRevisions()', () => {
+    it('returns revisions from the API', async () => {
+      const mockListCommits = vi.fn().mockResolvedValue({
+        data: [
+          {
+            version: 'sha2',
+            committed_at: '2026-02-05T12:00:00Z',
+            change_status: { additions: 5, deletions: 2, total: 7 },
+          },
+          {
+            version: 'sha1',
+            committed_at: '2026-02-01T10:00:00Z',
+            change_status: { additions: 10, deletions: 0, total: 10 },
+          },
+        ],
+      });
+      vi.mocked(getOctokit).mockResolvedValue({
+        gists: { listCommits: mockListCommits },
+      } as unknown as Octokit);
+
+      const revisions = await instance.getGistRevisions('test-gist-id');
+
+      expect(mockListCommits).toHaveBeenCalledWith({ gist_id: 'test-gist-id' });
+      expect(revisions).toHaveLength(2);
+      expect(revisions[0].sha).toBe('sha1');
+      expect(revisions[0].title).toBe('Created');
+      expect(revisions[1].sha).toBe('sha2');
+      expect(revisions[1].title).toBe('Revision 1');
+    });
+
+    it('always keeps the initial revision even with empty change_status', async () => {
+      const mockListCommits = vi.fn().mockResolvedValue({
+        data: [
+          {
+            version: 'sha2',
+            committed_at: '2026-02-05T12:00:00Z',
+            change_status: { additions: 5, deletions: 2, total: 7 },
+          },
+          {
+            version: 'sha1',
+            committed_at: '2026-02-01T10:00:00Z',
+            change_status: { additions: 0, deletions: 0, total: 0 },
+          },
+        ],
+      });
+      vi.mocked(getOctokit).mockResolvedValue({
+        gists: { listCommits: mockListCommits },
+      } as unknown as Octokit);
+
+      const revisions = await instance.getGistRevisions('test-gist-id');
+
+      // Should include both revisions - the initial one should NOT be filtered out
+      expect(revisions).toHaveLength(2);
+      expect(revisions[0].sha).toBe('sha1');
+      expect(revisions[0].title).toBe('Created');
+    });
+
+    it('filters out empty revisions except the initial one', async () => {
+      const mockListCommits = vi.fn().mockResolvedValue({
+        data: [
+          {
+            version: 'sha3',
+            committed_at: '2026-02-10T12:00:00Z',
+            change_status: { additions: 3, deletions: 1, total: 4 },
+          },
+          {
+            version: 'sha2',
+            committed_at: '2026-02-05T12:00:00Z',
+            change_status: { additions: 0, deletions: 0, total: 0 },
+          },
+          {
+            version: 'sha1',
+            committed_at: '2026-02-01T10:00:00Z',
+            change_status: { additions: 0, deletions: 0, total: 0 },
+          },
+        ],
+      });
+      vi.mocked(getOctokit).mockResolvedValue({
+        gists: { listCommits: mockListCommits },
+      } as unknown as Octokit);
+
+      const revisions = await instance.getGistRevisions('test-gist-id');
+
+      // Should filter out sha2 (empty, not initial) but keep sha1 (initial) and sha3 (has changes)
+      expect(revisions).toHaveLength(2);
+      expect(revisions[0].sha).toBe('sha1');
+      expect(revisions[1].sha).toBe('sha3');
+    });
+
+    it('returns empty array on error', async () => {
+      vi.mocked(getOctokit).mockResolvedValue({
+        gists: {
+          listCommits: vi.fn().mockRejectedValue(new Error('API error')),
+        },
+      } as unknown as Octokit);
+
+      const revisions = await instance.getGistRevisions('test-gist-id');
+
+      expect(revisions).toEqual([]);
+    });
+  });
 });
