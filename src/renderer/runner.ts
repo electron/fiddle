@@ -154,7 +154,7 @@ export class Runner {
     const { err, ver } = appState.isVersionUsable(version);
     if (!ver) {
       console.warn(`Running fiddle with version ('${version}') failed: ${err}`);
-      appState.showErrorDialog(err!);
+      await appState.showErrorDialog(err!);
       const fallback = appState.findUsableVersion();
       if (fallback) await appState.setVersion(fallback.version);
       return RunResult.INVALID;
@@ -167,7 +167,7 @@ export class Runner {
       const entryPoint = appState.editorMosaic.mainEntryPointFile();
 
       if (entryPoint === MAIN_MJS) {
-        appState.showErrorDialog(
+        await appState.showErrorDialog(
           'ESM main entry points are only supported starting in Electron 28',
         );
         return RunResult.INVALID;
@@ -255,7 +255,7 @@ export class Runner {
       message += `Node.js and npm, or https://classic.yarnpkg.com/lang/en/ `;
       message += `to install Yarn`;
 
-      this.appState.pushOutput(message, { isNotPre: true });
+      pushOutput(message, { isNotPre: true });
       return false;
     }
 
