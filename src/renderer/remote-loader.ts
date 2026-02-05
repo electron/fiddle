@@ -123,9 +123,12 @@ export class RemoteLoader {
         gist_id: gistId,
       });
 
-      // Filter out empty revisions (0 additions and 0 deletions)
+      const oldestRevision = revisions[revisions.length - 1];
       const nonEmptyRevisions = revisions.filter(
-        (r) => r.change_status.additions > 0 || r.change_status.deletions > 0,
+        (r) =>
+          r === oldestRevision ||
+          r.change_status.additions > 0 ||
+          r.change_status.deletions > 0,
       );
 
       return nonEmptyRevisions.reverse().map((r, i) => {

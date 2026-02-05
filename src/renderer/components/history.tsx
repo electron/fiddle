@@ -46,9 +46,14 @@ export class GistHistoryDialog extends React.Component<
   }
 
   public componentDidMount() {
+    // Reload revisions when gistId changes while dialog is open
     this.disposeReaction = reaction(
       () => this.props.appState.gistId,
-      () => this.loadRevisions(),
+      () => {
+        if (this.props.isOpen) {
+          this.loadRevisions();
+        }
+      },
     );
 
     if (this.props.isOpen) {
@@ -57,8 +62,14 @@ export class GistHistoryDialog extends React.Component<
   }
 
   public componentDidUpdate(prevProps: HistoryProps) {
-    if (this.props.isOpen && !prevProps.isOpen) {
+    const dialogJustOpened = this.props.isOpen && !prevProps.isOpen;
+    const revisionChanged =
+      this.props.activeRevision !== prevProps.activeRevision;
+
+    if (dialogJustOpened) {
       this.loadRevisions();
+    } else if (this.props.isOpen && revisionChanged) {
+      this.loadRevisions(false);
     }
   }
 
@@ -66,7 +77,7 @@ export class GistHistoryDialog extends React.Component<
     this.disposeReaction?.();
   }
 
-  private async loadRevisions() {
+  private async loadRevisions(showLoading = true) {
     const { appState, isOpen } = this.props;
     const { remoteLoader } = window.app;
 
@@ -77,10 +88,26 @@ export class GistHistoryDialog extends React.Component<
       return;
     }
 
-    this.setState({ isLoading: true, error: null });
+    if (showLoading) {
+      this.setState({ isLoading: true, error: null });
+    }
 
     try {
       const revisions = await remoteLoader.getGistRevisions(appState.gistId);
+
+      const { activeGistRevision } = appState;
+      if (
+        activeGistRevision &&
+        !revisions.some((r) => r.sha === activeGistRevision)
+      ) {
+        revisions.push({
+          sha: activeGistRevision,
+          date: new Date().toISOString(),
+          title: `Revision ${revisions.length}`,
+          changes: { additions: 0, deletions: 0, total: 0 },
+        });
+      }
+
       this.setState({ revisions, isLoading: false });
     } catch (error) {
       console.error('Failed to load gist revisions', error);
@@ -183,7 +210,7 @@ export class GistHistoryDialog extends React.Component<
 
     return (
       <div className="revision-list">
-        <ul>{revisions.reverse().map(this.renderRevisionItem)}</ul>
+        <ul>{[...revisions].reverse().map(this.renderRevisionItem)}</ul>
       </div>
     );
   }

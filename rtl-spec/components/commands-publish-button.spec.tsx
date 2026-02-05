@@ -18,16 +18,22 @@ vi.mock('../../src/renderer/utils/octokit');
 
 class OctokitMock {
   private static nextId = 1;
+  private static nextVersion = 1;
 
   public authenticate = vi.fn();
   public gists = {
     create: vi.fn().mockImplementation(() => ({
       data: {
         id: OctokitMock.nextId++,
+        history: [{ version: `created-sha-${OctokitMock.nextVersion++}` }],
       },
     })),
     delete: vi.fn(),
-    update: vi.fn(),
+    update: vi.fn().mockImplementation(() => ({
+      data: {
+        history: [{ version: `updated-sha-${OctokitMock.nextVersion++}` }],
+      },
+    })),
     get: vi.fn(),
   };
 }
@@ -263,6 +269,21 @@ describe('Action button component', () => {
         public: true,
       });
     });
+
+    it('sets activeGistRevision to the new revision SHA after publishing', async () => {
+      const revisionSha = 'new-publish-revision-sha';
+      mocktokit.gists.create.mockImplementationOnce(() => ({
+        data: {
+          id: 'new-gist-id',
+          history: [{ version: revisionSha }],
+        },
+      }));
+
+      state.showInputDialog = vi.fn().mockResolvedValueOnce(description);
+      await instance.performGistAction();
+
+      expect(state.activeGistRevision).toBe(revisionSha);
+    });
   });
 
   describe('update mode', () => {
@@ -289,6 +310,19 @@ describe('Action button component', () => {
         gist_id: gistId,
         files: expectedGistOpts.files,
       });
+    });
+
+    it('sets activeGistRevision to the new revision SHA after updating', async () => {
+      const revisionSha = 'new-update-revision-sha';
+      mocktokit.gists.update.mockImplementationOnce(() => ({
+        data: {
+          history: [{ version: revisionSha }],
+        },
+      }));
+
+      await instance.performGistAction();
+
+      expect(state.activeGistRevision).toBe(revisionSha);
     });
 
     it('notifies the user if updating fails', async () => {
