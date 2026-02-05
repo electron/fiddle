@@ -25,6 +25,7 @@ export class StateMock {
   public genericDialogLastResult: boolean | null = null;
   public genericDialogOptions = {} as GenericDialogOptions;
   public gistId = '';
+  public activeGistRevision: string | undefined = undefined;
   public gitHubAvatarUrl: string | null = null;
   public gitHubLogin: string | null = null;
   public gitHubName: string | null = null;

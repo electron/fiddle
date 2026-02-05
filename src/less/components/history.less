@@ -1,0 +1,76 @@
+.revision-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.revision-list ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+
+.revision-item {
+  padding: 10px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  border-left: 3px solid #106ba3;
+}
+
+.revision-item:hover {
+  background-color: rgba(167, 182, 194, 0.3);
+}
+
+.revision-item.active {
+  background-color: rgba(16, 107, 163, 0.15);
+  border-left-color: #48aff0;
+}
+
+.revision-item.active:hover {
+  background-color: rgba(16, 107, 163, 0.25);
+}
+
+.active-tag {
+  margin-left: 10px;
+}
+
+.revision-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.revision-icon {
+  margin-right: 8px;
+}
+
+.sha-label {
+  font-size: 12px;
+  color: #738694;
+  margin-left: 10px;
+  font-family: monospace;
+}
+
+.revision-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.revision-date {
+  color: #738694;
+  font-size: 12px;
+}
+
+.revision-changes {
+  display: flex;
+  gap: 5px;
+}
+
+.history-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
