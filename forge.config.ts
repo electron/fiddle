@@ -84,6 +84,8 @@ const config: ForgeConfig = {
         'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Contacts',
       Reminders:
         'Access is needed by certain built-in fiddles in addition to any custom fiddles that may access Reminders',
+      AudioCapture:
+        'Access is needed by certain built-in fiddles in addition to any custom fiddles that may capture Audio',
     },
     appCategoryType: 'public.app-category.developer-tools',
     protocols: [
