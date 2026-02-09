@@ -20,6 +20,11 @@ class OctokitMock {
   private static nextId = 1;
   private static nextVersion = 1;
 
+  static resetCounters() {
+    OctokitMock.nextId = 1;
+    OctokitMock.nextVersion = 1;
+  }
+
   public authenticate = vi.fn();
   public gists = {
     create: vi.fn().mockImplementation(() => ({
@@ -66,6 +71,9 @@ describe('Action button component', () => {
   beforeEach(() => {
     ({ app } = window);
     ({ state } = app);
+
+    // reset static counters between runs
+    OctokitMock.resetCounters();
 
     // have the octokit getter use our mock
     mocktokit = new OctokitMock();
