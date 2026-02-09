@@ -204,13 +204,14 @@ export const ElectronSettings = observer(
      * Handles a change in which channels should be displayed.
      */
     public handleChannelChange(event: React.FormEvent<HTMLInputElement>) {
-      const { id, checked } = event.currentTarget;
+      const { id } = event.currentTarget;
       const { appState } = this.props;
+      const channel = id as ElectronReleaseChannel;
 
-      if (!checked) {
-        appState.hideChannels([id as ElectronReleaseChannel]);
+      if (appState.channelsToShow.includes(channel)) {
+        appState.hideChannels([channel]);
       } else {
-        appState.showChannels([id as ElectronReleaseChannel]);
+        appState.showChannels([channel]);
       }
     }
 

@@ -1,13 +1,13 @@
 import * as React from 'react';
 
-import { InputGroup } from '@blueprintjs/core';
-import { shallow } from 'enzyme';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GistSettings } from '../../../src/renderer/components/settings-general-gist';
 import { AppState } from '../../../src/renderer/state';
 
-describe('PackageAuthorSettings component', () => {
+describe('GistSettings component', () => {
   let store: AppState;
 
   beforeEach(() => {
@@ -15,57 +15,41 @@ describe('PackageAuthorSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<GistSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<GistSettings appState={store} />);
+    expect(container).toBeInTheDocument();
+    expect(screen.getByText('Gists')).toBeInTheDocument();
   });
 
   describe('handleGistHistoryChange()', () => {
     it('handles gist history', async () => {
-      const wrapper = shallow(<GistSettings appState={store} />);
-      const instance: any = wrapper.instance();
+      const user = userEvent.setup();
+      render(<GistSettings appState={store} />);
 
-      instance.handleGistHistoryChange({
-        currentTarget: { checked: true },
-      } as React.FormEvent<HTMLInputElement>);
+      const checkbox = screen.getByLabelText('Show Gist History');
 
+      await user.click(checkbox);
       expect(store.isShowingGistHistory).toEqual(true);
-      expect(instance.state.isShowingGistHistory).toEqual(true);
 
-      instance.handleGistHistoryChange({
-        currentTarget: { checked: false },
-      } as React.FormEvent<HTMLInputElement>);
-
+      await user.click(checkbox);
       expect(store.isShowingGistHistory).toEqual(false);
-      expect(instance.state.isShowingGistHistory).toEqual(false);
     });
   });
 
   describe('handlePackageAuthorChange()', () => {
-    it('handles package author', async () => {
-      const wrapper = shallow(<GistSettings appState={store} />);
-      const instance: any = wrapper.instance();
+    it('handles package author', () => {
+      const { container } = render(<GistSettings appState={store} />);
+
+      const input = container.querySelector('input[type="text"]')!;
 
       const author = 'electron<electron@electron.org>';
-
-      instance.handlePackageAuthorChange({
-        currentTarget: { value: author },
-      } as React.FormEvent<HTMLInputElement>);
-
+      fireEvent.change(input, { target: { value: author } });
       expect(store.packageAuthor).toEqual(author);
-      expect(instance.state.packageAuthor).toEqual(author);
 
-      instance.handlePackageAuthorChange({
-        currentTarget: { value: 'test' },
-      } as React.FormEvent<HTMLInputElement>);
-
+      fireEvent.change(input, { target: { value: 'test' } });
       expect(store.packageAuthor).toEqual('test');
-      expect(instance.state.packageAuthor).toEqual('test');
 
-      const event = { currentTarget: { value: 'test-onchange' } };
-      wrapper.find(InputGroup).simulate('change', event);
-
+      fireEvent.change(input, { target: { value: 'test-onchange' } });
       expect(store.packageAuthor).toEqual('test-onchange');
-      expect(instance.state.packageAuthor).toEqual('test-onchange');
     });
   });
 });

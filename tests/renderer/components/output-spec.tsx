@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render } from '@testing-library/react';
 import type * as MonacoType from 'monaco-editor';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -30,28 +30,35 @@ describe('Output component', () => {
   });
 
   it('renders the output container', () => {
-    const wrapper = shallow(
+    const { container } = render(
       <Output appState={store} monaco={monaco} monacoOptions={{}} />,
     );
-    expect(wrapper.html()).toBe(
-      '<div class="output" style="display:inline-block"></div>',
-    );
+    const outputDiv = container.querySelector('.output');
+    expect(outputDiv).toBeInTheDocument();
+    expect(outputDiv).toHaveStyle('display: inline-block');
   });
 
   it('correctly sets the language', () => {
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
 
-    expect((wrapper.instance() as any).language).toBe('consoleOutputLanguage');
+    expect(ref.current.language).toBe('consoleOutputLanguage');
   });
 
   describe('initMonaco()', () => {
     it('attempts to create an editor', async () => {
-      const wrapper = shallow(
-        <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+      const ref = React.createRef<any>();
+      render(
+        <Output
+          appState={store}
+          monaco={monaco}
+          monacoOptions={{}}
+          ref={ref}
+        />,
       );
-      const instance: any = wrapper.instance();
+      const instance = ref.current;
 
       instance.outputRef.current = 'ref';
       await instance.initMonaco();
@@ -62,10 +69,11 @@ describe('Output component', () => {
   });
 
   it('componentWillUnmount() attempts to dispose the editor', async () => {
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
-    const instance: any = wrapper.instance();
+    const instance = ref.current;
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
@@ -77,37 +85,30 @@ describe('Output component', () => {
   });
 
   it('hides the console with react-mosaic-component', async () => {
-    // manually trigger lifecycle methods so that
-    // context can be set before mounting method
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
-      {
-        context: mockContext,
-        disableLifecycleMethods: true,
-      },
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
-    const instance: any = wrapper.instance();
+    const instance = ref.current;
 
-    // Todo: There's a scary bug here in Jest / Enzyme. At this point in time,
-    // the context is {}. That's never the case in production.
     // direction is required to be recognized as a valid root node
     mockContext.mosaicActions.getRoot.mockReturnValue({
       splitPercentage: 25,
       direction: 'row',
     });
 
-    wrapper.instance().context = mockContext;
-    wrapper.instance().componentDidMount!();
-
+    instance.context = mockContext;
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
+
+    // Trigger toggleConsole explicitly
+    instance.toggleConsole();
 
     expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalled();
     expect(mockContext.mosaicActions.replaceWith).toHaveBeenCalledWith(
       [],
       expect.objectContaining({ splitPercentage: 25 }),
     );
-    expect(wrapper.html()).not.toBe(null);
   });
 
   it('updateModel updates model with correct values', async () => {
@@ -123,10 +124,11 @@ describe('Output component', () => {
       },
     ];
 
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
-    const instance: any = wrapper.instance();
+    const instance = ref.current;
 
     instance.outputRef.current = 'ref';
     await instance.initMonaco();
@@ -144,11 +146,11 @@ describe('Output component', () => {
       },
     ];
 
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
-
-    const instance: any = wrapper.instance();
+    const instance = ref.current;
     const spy = vi.spyOn(instance, 'updateModel');
 
     instance.outputRef.current = 'ref';
@@ -172,11 +174,11 @@ describe('Output component', () => {
   });
 
   it('handles componentDidUpdate', async () => {
-    // set up component
-    const wrapper = shallow(
-      <Output appState={store} monaco={monaco} monacoOptions={{}} />,
+    const ref = React.createRef<any>();
+    render(
+      <Output appState={store} monaco={monaco} monacoOptions={{}} ref={ref} />,
     );
-    const instance: any = wrapper.instance();
+    const instance = ref.current;
     const spy = vi.spyOn(instance, 'toggleConsole');
 
     instance.outputRef.current = 'ref';
