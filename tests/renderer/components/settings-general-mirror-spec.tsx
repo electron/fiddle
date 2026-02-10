@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { InputGroup, Radio } from '@blueprintjs/core';
-import { shallow } from 'enzyme';
+import { fireEvent, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { MirrorSettings } from '../../../src/renderer/components/settings-general-mirror';
@@ -15,19 +15,22 @@ describe('MirrorSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<MirrorSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(<MirrorSettings appState={store} />);
+    expect(container).toBeInTheDocument();
+    expect(screen.getByText('Electron Mirrors')).toBeInTheDocument();
   });
 
   describe('modifyMirror()', () => {
     it('modify mirror', async () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
-      const instance: any = wrapper.instance();
+      store.electronMirror.sourceType = 'CUSTOM';
+      render(<MirrorSettings appState={store} />);
 
       const [mirror, nightlyMirror] = ['mirror_test1', 'nightly_test2'];
 
-      instance.modifyMirror(false, mirror);
-      instance.modifyMirror(true, nightlyMirror);
+      const inputs = screen.getAllByRole('textbox');
+      // First input is electron mirror, second is electron nightly mirror
+      fireEvent.change(inputs[0], { target: { value: mirror } });
+      fireEvent.change(inputs[1], { target: { value: nightlyMirror } });
 
       expect(store.electronMirror.sources.CUSTOM.electronMirror).toEqual(
         mirror,
@@ -40,15 +43,13 @@ describe('MirrorSettings component', () => {
   });
 
   describe('changeSourceType()', () => {
-    it('change source type', () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
-      const instance: any = wrapper.instance();
-
+    it('change source type', async () => {
+      const user = userEvent.setup();
       store.electronMirror.sourceType = 'DEFAULT';
-      const event = { target: { value: 'CUSTOM' } };
-      instance.changeSourceType(
-        event as unknown as React.FormEvent<HTMLInputElement>,
-      );
+      render(<MirrorSettings appState={store} />);
+
+      const customRadio = screen.getByLabelText('Custom');
+      await user.click(customRadio);
 
       expect(store.electronMirror.sourceType).toEqual('CUSTOM');
     });
@@ -56,33 +57,39 @@ describe('MirrorSettings component', () => {
 
   describe('radio', () => {
     it('count should is 3', () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
+      render(<MirrorSettings appState={store} />);
 
-      expect(wrapper.find(Radio)).toHaveLength(3);
+      const radios = screen.getAllByRole('radio');
+      expect(radios).toHaveLength(3);
     });
 
     it('order should is default -> china -> custom', () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
+      render(<MirrorSettings appState={store} />);
 
-      expect(wrapper.find(Radio).at(0).props().label).toEqual('Default');
-      expect(wrapper.find(Radio).at(0).props().value).toEqual('DEFAULT');
+      expect(screen.getByLabelText('Default')).toBeInTheDocument();
+      expect(
+        (screen.getByLabelText('Default') as HTMLInputElement).value,
+      ).toEqual('DEFAULT');
 
-      expect(wrapper.find(Radio).at(1).props().label).toEqual('China');
-      expect(wrapper.find(Radio).at(1).props().value).toEqual('CHINA');
+      expect(screen.getByLabelText('China')).toBeInTheDocument();
+      expect(
+        (screen.getByLabelText('China') as HTMLInputElement).value,
+      ).toEqual('CHINA');
 
-      expect(wrapper.find(Radio).at(2).props().label).toEqual('Custom');
-      expect(wrapper.find(Radio).at(2).props().value).toEqual('CUSTOM');
+      expect(screen.getByLabelText('Custom')).toBeInTheDocument();
+      expect(
+        (screen.getByLabelText('Custom') as HTMLInputElement).value,
+      ).toEqual('CUSTOM');
     });
   });
 
   describe('onClick()', () => {
     it('change electron mirror', () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
-
       store.electronMirror.sourceType = 'CUSTOM';
+      render(<MirrorSettings appState={store} />);
 
-      const event = { target: { value: 'test_mirror' } };
-      wrapper.find(InputGroup).at(0).simulate('change', event);
+      const inputs = screen.getAllByRole('textbox');
+      fireEvent.change(inputs[0], { target: { value: 'test_mirror' } });
 
       expect(store.electronMirror.sources.CUSTOM.electronMirror).toEqual(
         'test_mirror',
@@ -90,12 +97,11 @@ describe('MirrorSettings component', () => {
     });
 
     it('change electron nightly mirror', () => {
-      const wrapper = shallow(<MirrorSettings appState={store} />);
-
       store.electronMirror.sourceType = 'CUSTOM';
+      render(<MirrorSettings appState={store} />);
 
-      const event = { target: { value: 'test_nightly_mirror' } };
-      wrapper.find(InputGroup).at(1).simulate('change', event);
+      const inputs = screen.getAllByRole('textbox');
+      fireEvent.change(inputs[1], { target: { value: 'test_nightly_mirror' } });
 
       expect(store.electronMirror.sources.CUSTOM.electronNightlyMirror).toEqual(
         'test_nightly_mirror',

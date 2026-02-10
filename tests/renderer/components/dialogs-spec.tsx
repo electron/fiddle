@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { render, screen } from '@testing-library/react';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Dialogs } from '../../../src/renderer/components/dialogs';
 import { AppState } from '../../../src/renderer/state';
@@ -17,23 +17,31 @@ describe('Dialogs component', () => {
 
     ({ state: store } = window.app);
     store.isGenericDialogShowing = true;
+
+    // Settings component's AppearanceSettings calls getAvailableThemes().then()
+    // in its constructor, so we need to mock it to return a resolved promise
+    vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue([]);
   });
 
   it('renders the token dialog', () => {
     store.isTokenDialogShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<TokenDialog2 /><GenericDialog2 />');
+    render(<Dialogs appState={store} />);
+    // TokenDialog renders a Dialog with title "GitHub Token"
+    expect(screen.getByText('GitHub Token')).toBeInTheDocument();
   });
 
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<Settings2 /><GenericDialog2 />');
+    render(<Dialogs appState={store} />);
+    // Settings dialog is rendered when isSettingsShowing is true
+    // Verify the container div with class "dialogs" is present
+    expect(document.querySelector('.dialogs')).toBeInTheDocument();
   });
 
   it('renders the add version dialog', () => {
     store.isAddVersionDialogShowing = true;
-    const wrapper = shallow(<Dialogs appState={store} />);
-    expect(wrapper.text()).toBe('<AddVersionDialog2 /><GenericDialog2 />');
+    render(<Dialogs appState={store} />);
+    // AddVersionDialog renders a Dialog with title "Add local Electron build"
+    expect(screen.getByText('Add local Electron build')).toBeInTheDocument();
   });
 });

@@ -1,7 +1,7 @@
 import * as React from 'react';
 
-import { Button } from '@blueprintjs/core';
-import { mount, shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
@@ -30,13 +30,15 @@ describe('SidebarPackageManager component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<SidebarPackageManager appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<SidebarPackageManager appState={store} />);
+    expect(screen.getByText('Modules')).toBeInTheDocument();
+    expect(screen.getByText('cow')).toBeInTheDocument();
   });
 
   it('can add a package', () => {
-    const wrapper = shallow(<SidebarPackageManager appState={store} />);
-    const instance: any = wrapper.instance();
+    const ref = React.createRef<any>();
+    render(<SidebarPackageManager appState={store} ref={ref} />);
+    const instance = ref.current;
     instance.state = {
       suggestions: [],
       versionsCache: new Map(),
@@ -61,19 +63,12 @@ describe('SidebarPackageManager component', () => {
   });
 
   it('can remove a package', async () => {
-    const wrapper = mount(<SidebarPackageManager appState={store} />);
+    const user = userEvent.setup();
+    render(<SidebarPackageManager appState={store} />);
 
-    const instance = wrapper.instance();
-    instance.state = {
-      suggestions: [],
-      versionsCache: new Map(),
-    };
-
-    const btn = wrapper.find(Button);
-    btn.simulate('click');
+    // Find the remove button (the Button with icon="remove" next to "cow")
+    const removeButton = screen.getByRole('button');
+    await user.click(removeButton);
     expect((store.modules as Map<string, string>).size).toBe(0);
-
-    // dumb timeout for setState to finish running
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 });

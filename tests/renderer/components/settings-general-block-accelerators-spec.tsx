@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { BlockableAccelerator } from '../../../src/interfaces';
@@ -15,28 +16,40 @@ describe('BlockAcceleratorsSettings component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = render(
+      <BlockAcceleratorsSettings appState={store} />,
+    );
+    expect(container).toBeInTheDocument();
+    expect(screen.getByText('Block Keyboard Shortcuts')).toBeInTheDocument();
+    expect(screen.getByLabelText('Save')).toBeInTheDocument();
+    expect(screen.getByLabelText('Save as')).toBeInTheDocument();
   });
 
   describe('handleBlockAcceleratorChange()', () => {
     it('handles a new selection', async () => {
-      const wrapper = shallow(<BlockAcceleratorsSettings appState={store} />);
-      const instance: any = wrapper.instance();
+      const user = userEvent.setup();
 
-      instance.handleBlockAcceleratorChange({
-        currentTarget: { checked: false, value: BlockableAccelerator.save },
-      } as React.FormEvent<HTMLInputElement>);
+      // Start with the accelerator not blocked (unchecked)
+      store.acceleratorsToBlock = [];
+      const { rerender } = render(
+        <BlockAcceleratorsSettings appState={store} />,
+      );
 
-      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
+      const saveCheckbox = screen.getByLabelText('Save');
+
+      // Click to check: should call addAcceleratorToBlock
+      await user.click(saveCheckbox);
+      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
 
-      instance.handleBlockAcceleratorChange({
-        currentTarget: { checked: true, value: BlockableAccelerator.save },
-      } as React.FormEvent<HTMLInputElement>);
+      // Now simulate the accelerator being blocked (checked)
+      store.acceleratorsToBlock = [BlockableAccelerator.save];
+      rerender(<BlockAcceleratorsSettings appState={store} />);
 
-      expect(store.addAcceleratorToBlock).toHaveBeenCalledWith(
+      // Click to uncheck: should call removeAcceleratorToBlock
+      await user.click(screen.getByLabelText('Save'));
+      expect(store.removeAcceleratorToBlock).toHaveBeenCalledWith(
         BlockableAccelerator.save,
       );
     });
