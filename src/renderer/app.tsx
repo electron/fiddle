@@ -114,7 +114,7 @@ export class App {
    * Initial setup call, loading Monaco and kicking off the React
    * render process.
    */
-  public async setup(): Promise<void | Element | React.Component> {
+  public async setup(): Promise<void> {
     if (this.state.isUsingSystemTheme) {
       await this.loadTheme(getCurrentTheme().file);
     } else {
@@ -123,13 +123,13 @@ export class App {
 
     const [
       { default: React },
-      { render },
+      { createRoot },
       { Dialogs },
       { OutputEditorsWrapper },
       { Header },
     ] = await Promise.all([
       import('react'),
-      import('react-dom'),
+      import('react-dom/client'),
       import('./components/dialogs.js'),
       import('./components/output-editors-wrapper.js'),
       import('./components/header.js'),
@@ -147,7 +147,8 @@ export class App {
       </div>
     );
 
-    const rendered = render(app, document.getElementById('app'));
+    const root = createRoot(document.getElementById('app')!);
+    root.render(app);
 
     this.setupResizeListener();
     this.setupOfflineListener();
@@ -161,8 +162,6 @@ export class App {
     window.ElectronFiddle.addEventListener('set-show-me-template', () => {
       window.ElectronFiddle.setShowMeTemplate(this.state.templateName);
     });
-
-    return rendered;
   }
 
   private setupTypeListeners() {
