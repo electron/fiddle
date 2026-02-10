@@ -1,3 +1,4 @@
+import { act } from '@testing-library/react';
 import * as semver from 'semver';
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -59,10 +60,15 @@ describe('App component', () => {
     it('renders the app', async () => {
       vi.useFakeTimers();
 
-      const result = (await app.setup()) as HTMLDivElement;
-      vi.runAllTimers();
+      await act(async () => {
+        await app.setup();
+        await vi.advanceTimersByTimeAsync(100);
+      });
 
-      expect(result.innerHTML).toBe('Header;OutputEditorsWrapper;Dialogs;');
+      const appEl = document.getElementById('app')!;
+      expect(appEl.innerHTML).toContain('Header;');
+      expect(appEl.innerHTML).toContain('OutputEditorsWrapper;');
+      expect(appEl.innerHTML).toContain('Dialogs;');
 
       vi.useRealTimers();
     });

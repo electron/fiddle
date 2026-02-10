@@ -46,6 +46,7 @@ describe('Editor toolbar button component', () => {
         getRoot: vi.fn(),
       },
       mosaicId: 'test',
+      blueprintNamespace: 'bp3',
     };
 
     ({ state: store } = window.app);
