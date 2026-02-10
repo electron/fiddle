@@ -133,7 +133,7 @@ export const Output = observer(
 
       const { isConsoleShowing } = this.props.appState;
 
-      if (this.context.mosaicActions) {
+      if (this.context?.mosaicActions) {
         const mosaicTree = this.context.mosaicActions.getRoot();
         if (isParentNode(mosaicTree)) {
           // splitPercentage defines the percentage of space the first panel takes

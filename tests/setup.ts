@@ -1,15 +1,10 @@
 import '@testing-library/jest-dom/vitest';
 
 import { cleanup } from '@testing-library/react';
-import { configure as enzymeConfigure } from 'enzyme';
-import Adapter from 'enzyme-adapter-react-16';
-import { createSerializer } from 'enzyme-to-json';
 import { configure as mobxConfigure } from 'mobx';
 import { afterEach, beforeEach, expect, vi } from 'vitest';
 
 import { AppMock, ElectronFiddleMock, MonacoMock } from './mocks/mocks';
-
-enzymeConfigure({ adapter: new Adapter() });
 
 // allow vitest fns to overwrite readonly mobx stuff
 // https://mobx.js.org/configuration.html#safedescriptors-boolean
@@ -62,8 +57,6 @@ class FakeBroadcastChannel extends EventTarget {
   }
 };
 
-expect.addSnapshotSerializer(createSerializer({ mode: 'deep' }) as any);
-
 // Don't serialize Timeout objects in depth
 // TODO(dsanders11): This feels like we shouldn't need to do this?
 expect.addSnapshotSerializer({
@@ -74,6 +67,15 @@ expect.addSnapshotSerializer({
     return val?.constructor.name === 'Timeout';
   },
 });
+
+// Polyfill crypto.subtle for jsdom (used by EditorMosaic.markAsSaved)
+if (!globalThis.crypto?.subtle) {
+  const { webcrypto } = require('node:crypto');
+  Object.defineProperty(globalThis, 'crypto', {
+    value: webcrypto,
+    writable: true,
+  });
+}
 
 // We want to detect vi sometimes
 (global as any).__vi__ = (global as any).__vi__ || {};

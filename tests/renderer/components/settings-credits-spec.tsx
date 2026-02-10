@@ -1,8 +1,10 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { CreditsSettings } from '../../../src/renderer/components/settings-credits';
 import { AppState } from '../../../src/renderer/state';
 
@@ -14,7 +16,7 @@ describe('CreditsSettings component', () => {
       login: 'felixrieseberg',
       avatar: 'https://avatars3.githubusercontent.com/u/1426799?v=4',
       name: 'Felix Rieseberg',
-      bio: '🙇 ✨🌳 ',
+      bio: 'test bio',
       location: 'San Francisco',
     },
   ];
@@ -38,31 +40,64 @@ describe('CreditsSettings component', () => {
   });
 
   it('renders', async () => {
-    const wrapper = shallow(<CreditsSettings appState={store} />);
-    wrapper.setState({ contributors: mockContributors });
+    const { instance, renderResult } = renderClassComponentWithInstanceRef(
+      CreditsSettings,
+      { appState: store },
+    );
+    act(() => {
+      instance.setState({ contributors: mockContributors });
+    });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Credits')).toBeInTheDocument();
+    expect(screen.getByText('Felix Rieseberg')).toBeInTheDocument();
+    expect(
+      screen.getByText('San Francisco', { exact: false }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('test bio')).toBeInTheDocument();
   });
 
   it('renders for contributors with less data', async () => {
-    const wrapper = shallow(<CreditsSettings appState={store} />);
-    wrapper.setState({ contributors: mockContributorsBroken });
+    const { instance } = renderClassComponentWithInstanceRef(CreditsSettings, {
+      appState: store,
+    });
+    act(() => {
+      instance.setState({ contributors: mockContributorsBroken });
+    });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Credits')).toBeInTheDocument();
+    // When name is null, the login should be displayed instead
+    expect(screen.getByText('felixrieseberg')).toBeInTheDocument();
   });
 
   it('renders nothing if we do not have contributors', async () => {
-    const wrapper = shallow(<CreditsSettings appState={store} />);
-    wrapper.setState({ contributors: [] });
+    const {
+      instance,
+      renderResult: { container },
+    } = renderClassComponentWithInstanceRef(CreditsSettings, {
+      appState: store,
+    });
+    act(() => {
+      instance.setState({ contributors: [] });
+    });
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Credits')).toBeInTheDocument();
+    // No contributor cards should be rendered
+    expect(container.querySelector('.contributor')).not.toBeInTheDocument();
   });
 
   it('handles a click', async () => {
-    const wrapper = shallow(<CreditsSettings appState={store} />);
-    wrapper.setState({ contributors: mockContributors });
+    const { instance } = renderClassComponentWithInstanceRef(CreditsSettings, {
+      appState: store,
+    });
+    act(() => {
+      instance.setState({ contributors: mockContributors });
+    });
 
-    wrapper.find('.contributor').simulate('click');
+    const user = userEvent.setup();
+    const contributor = screen
+      .getByText('Felix Rieseberg')
+      .closest('.contributor')!;
+    await user.click(contributor);
     expect(window.open).toHaveBeenCalled();
   });
 });

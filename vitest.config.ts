@@ -6,6 +6,5 @@ export default defineConfig({
     globalSetup: 'tests/globalSetup.ts',
     include: ['**/rtl-spec/**/*.spec.{ts,tsx}', '**/tests/**/*-spec.{ts,tsx}'],
     setupFiles: ['tests/setup.ts'],
-    snapshotSerializers: ['enzyme-to-json/serializer'],
   },
 });

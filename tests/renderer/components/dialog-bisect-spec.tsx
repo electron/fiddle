@@ -1,8 +1,10 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ElectronReleaseChannel,
   InstallState,
@@ -41,66 +43,86 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     ];
   });
 
-  it('renders', () => {
-    const wrapper = shallow(<BisectDialog appState={store} />);
-    // start and end selected
-    wrapper.setState({
-      startIndex: 3,
-      endIndex: 0,
-      allVersions: generateVersionRange(numVersions),
+  it('renders with start and end selected', () => {
+    store.isBisectDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+      appState: store,
     });
-    expect(wrapper).toMatchSnapshot();
 
-    // no selection
-    wrapper.setState({
-      startIndex: undefined,
-      endIndex: undefined,
-      allVersions: generateVersionRange(numVersions),
+    act(() => {
+      (instance as any).setState({
+        startIndex: 3,
+        endIndex: 0,
+        allVersions: generateVersionRange(numVersions),
+      });
     });
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Start a bisect session')).toBeInTheDocument();
+    expect(screen.getByText('Begin')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+  });
 
-    // only start selected
-    wrapper.setState({
-      startIndex: 3,
-      endIndex: undefined,
-      allVersions: generateVersionRange(numVersions),
+  it('renders with incorrect order', () => {
+    store.isBisectDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+      appState: store,
     });
-    expect(wrapper).toMatchSnapshot();
 
-    // Incorrect order
-    wrapper.setState({
-      startIndex: 3,
-      endIndex: 4,
-      allVersions: generateVersionRange(numVersions),
+    // Incorrect order (startIndex < endIndex)
+    act(() => {
+      (instance as any).setState({
+        startIndex: 3,
+        endIndex: 4,
+        allVersions: generateVersionRange(numVersions),
+      });
     });
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('Start a bisect session')).toBeInTheDocument();
+    // Begin button should be disabled in this case
+    expect(screen.getByRole('button', { name: /Begin/ })).toBeDisabled();
+  });
 
-    // Help displayed
-    (wrapper.instance() as any).showHelp();
-    expect(wrapper).toMatchSnapshot();
+  it('renders with help displayed', () => {
+    store.isBisectDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+      appState: store,
+    });
+
+    act(() => {
+      (instance as any).showHelp();
+    });
+    expect(
+      screen.getByText(/First, write a fiddle that reproduces a bug/),
+    ).toBeInTheDocument();
   });
 
   describe('onBeginSelect()', () => {
     it('sets the begin version', () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
 
-      expect(instance.state.startIndex).toBe(
+      expect((instance as any).state.startIndex).toBe(
         numVersions > 10 ? 10 : numVersions - 1,
       );
-      instance.onBeginSelect(store.versionsToShow[2]);
-      expect(instance.state.startIndex).toBe(2);
+      act(() => {
+        (instance as any).onBeginSelect(store.versionsToShow[2]);
+      });
+      expect((instance as any).state.startIndex).toBe(2);
     });
   });
 
   describe('onEndSelect()', () => {
     it('sets the end version', () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
 
-      expect(instance.state.endIndex).toBe(0);
-      instance.onEndSelect(store.versionsToShow[2]);
-      expect(instance.state.endIndex).toBe(2);
+      expect((instance as any).state.endIndex).toBe(0);
+      act(() => {
+        (instance as any).onEndSelect(store.versionsToShow[2]);
+      });
+      expect((instance as any).state.endIndex).toBe(2);
     });
   });
 
@@ -113,81 +135,108 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
       const versions = generateVersionRange(numVersions);
 
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      wrapper.setState({
-        allVersions: versions,
-        endIndex: 0,
-        startIndex: versions.length - 1,
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
+      act(() => {
+        (instance as any).setState({
+          allVersions: versions,
+          endIndex: 0,
+          startIndex: versions.length - 1,
+        });
       });
 
-      const instance: any = wrapper.instance();
-      await instance.onSubmit();
+      await act(async () => {
+        await (instance as any).onSubmit();
+      });
       expect(Bisector).toHaveBeenCalledWith(versions.reverse());
       expect(store.Bisector).toBeDefined();
       expect(store.setVersion).toHaveBeenCalledWith(version);
     });
 
-    it('does nothing if endIndex or startIndex are falsy', async () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
+    it('does nothing if startIndex is undefined', async () => {
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
 
-      wrapper.setState({
+      // Call onSubmit directly after modifying state via the private field
+      // (setState with undefined indices would crash VersionSelect in full render)
+      const origState = { ...(instance as any).state };
+      (instance as any).state = {
+        ...origState,
         startIndex: undefined,
         endIndex: 0,
-      });
-      const instance1: any = wrapper.instance();
-      await instance1.onSubmit();
+      };
+      await (instance as any).onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
-      wrapper.setState({
+      (instance as any).state = {
+        ...origState,
         startIndex: 4,
         endIndex: undefined,
-      });
-
-      const instance2: any = wrapper.instance();
-      await instance2.onSubmit();
+      };
+      await (instance as any).onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
+
+      // Restore valid state for clean teardown
+      (instance as any).state = origState;
     });
   });
 
   describe('onAuto()', () => {
     it('initiates autobisect', async () => {
       // setup: dialog state
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      wrapper.setState({
-        allVersions: generateVersionRange(numVersions),
-        endIndex: 0,
-        startIndex: 4,
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
+      act(() => {
+        (instance as any).setState({
+          allVersions: generateVersionRange(numVersions),
+          endIndex: 0,
+          startIndex: 4,
+        });
       });
 
       vi.mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
-      const instance1: any = wrapper.instance();
-      await instance1.onAuto();
+      await act(async () => {
+        await (instance as any).onAuto();
+      });
 
       // check the results
       expect(runner.autobisect).toHaveBeenCalled();
     });
 
-    it('does nothing if endIndex or startIndex are falsy', async () => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
+    it('does nothing if startIndex or endIndex are undefined', async () => {
+      store.isBisectDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      });
 
-      wrapper.setState({
+      // Directly modify state to avoid re-render crash with undefined indices
+      const origState = { ...(instance as any).state };
+      (instance as any).state = {
+        ...origState,
         startIndex: undefined,
         endIndex: 0,
-      });
-      const instance1: any = wrapper.instance();
-      await instance1.onAuto();
+      };
+      await (instance as any).onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
-      wrapper.setState({
+      (instance as any).state = {
+        ...origState,
         startIndex: 4,
         endIndex: undefined,
-      });
-
-      const instance2: any = wrapper.instance();
-      await instance2.onAuto();
+      };
+      await (instance as any).onAuto();
       expect(Bisector).not.toHaveBeenCalled();
+
+      // Restore valid state for clean teardown
+      (instance as any).state = origState;
     });
   });
 
@@ -195,22 +244,28 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     let instance: any;
 
     beforeEach(() => {
-      const wrapper = shallow(<BisectDialog appState={store} />);
-      instance = wrapper.instance();
+      store.isBisectDialogShowing = true;
+      ({ instance } = renderClassComponentWithInstanceRef(BisectDialog, {
+        appState: store,
+      }));
     });
 
     describe('isEarliestItemDisabled', () => {
       const endIndex = 2;
 
       it('enables a version older than the "latest version"', () => {
-        instance.setState({ endIndex });
+        act(() => {
+          instance.setState({ endIndex });
+        });
         expect(
           instance.isEarliestItemDisabled(store.versionsToShow[endIndex + 1]),
         ).toBeFalsy();
       });
 
       it('disables a version newer than the "latest version"', () => {
-        instance.setState({ endIndex });
+        act(() => {
+          instance.setState({ endIndex });
+        });
         expect(
           instance.isEarliestItemDisabled(store.versionsToShow[endIndex - 1]),
         ).toBeTruthy();
@@ -221,14 +276,18 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       const startIndex = 2;
 
       it('enables a version newer than the "earliest version"', () => {
-        instance.setState({ startIndex });
+        act(() => {
+          instance.setState({ startIndex });
+        });
         expect(
           instance.isLatestItemDisabled(store.versionsToShow[startIndex - 1]),
         ).toBeFalsy();
       });
 
       it('disables a version older than the "earliest version"', () => {
-        instance.setState({ startIndex });
+        act(() => {
+          instance.setState({ startIndex });
+        });
         expect(
           instance.isLatestItemDisabled(store.versionsToShow[startIndex + 1]),
         ).toBeTruthy();

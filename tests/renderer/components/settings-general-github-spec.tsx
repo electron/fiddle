@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GitHubSettings } from '../../../src/renderer/components/settings-general-github';
@@ -14,40 +15,43 @@ describe('GitHubSettings component', () => {
   });
 
   it('renders when not signed in', () => {
-    const wrapper = shallow(<GitHubSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<GitHubSettings appState={store} />);
+    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    expect(screen.getByText('Sign in')).toBeInTheDocument();
   });
 
   it('renders when signed in', () => {
     store.gitHubToken = '123';
     store.gitHubLogin = 'Test User';
 
-    const wrapper = shallow(<GitHubSettings appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<GitHubSettings appState={store} />);
+    expect(screen.getByText('GitHub')).toBeInTheDocument();
+    expect(screen.getByText('Sign out')).toBeInTheDocument();
+    expect(screen.getByText('Test User')).toBeInTheDocument();
   });
 
-  it('opens the token dialog on click', () => {
-    const wrapper = shallow(<GitHubSettings appState={store} />);
+  it('opens the token dialog on click', async () => {
+    const user = userEvent.setup();
+    render(<GitHubSettings appState={store} />);
 
-    wrapper.childAt(1).childAt(1).simulate('click');
+    await user.click(screen.getByText('Sign in'));
     expect(store.isTokenDialogShowing).toBe(true);
   });
 
   describe('Gist publish as revision component', () => {
     it('state changes', async () => {
-      const wrapper = shallow(<GitHubSettings appState={store} />);
-      const instance: any = wrapper.instance();
+      const user = userEvent.setup();
+      store.isPublishingGistAsRevision = true;
+      render(<GitHubSettings appState={store} />);
 
-      instance.handlePublishGistAsRevisionChange({
-        currentTarget: { checked: false },
-      } as React.FormEvent<HTMLInputElement>);
+      const checkbox = screen.getByLabelText('Publish as revision.');
 
+      // Uncheck: sets to false
+      await user.click(checkbox);
       expect(store.isPublishingGistAsRevision).toBe(false);
 
-      instance.handlePublishGistAsRevisionChange({
-        currentTarget: { checked: true },
-      } as React.FormEvent<HTMLInputElement>);
-
+      // Check again: sets to true
+      await user.click(checkbox);
       expect(store.isPublishingGistAsRevision).toBe(true);
     });
   });
