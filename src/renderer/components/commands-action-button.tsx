@@ -133,7 +133,7 @@ export const GistActionButton = observer(
         });
 
         appState.gistId = gist.data.id;
-        appState.activeGistRevision = undefined;
+        appState.activeGistRevision = gist.data.history?.[0]?.version;
         appState.localPath = undefined;
 
         if (appState.isPublishingGistAsRevision) {
@@ -214,6 +214,11 @@ export const GistActionButton = observer(
           gist_id: appState.gistId!,
           files,
         });
+
+        // Update the active revision to the newly created revision
+        if (gist.data.history?.[0]?.version) {
+          appState.activeGistRevision = gist.data.history[0].version;
+        }
 
         await appState.editorMosaic.markAsSaved();
         console.log('Updating: Updating done', { gist });
