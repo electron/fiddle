@@ -1,7 +1,5 @@
-import * as React from 'react';
-
-import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
@@ -40,10 +38,9 @@ describe('CreditsSettings component', () => {
   });
 
   it('renders', async () => {
-    const { instance, renderResult } = renderClassComponentWithInstanceRef(
-      CreditsSettings,
-      { appState: store },
-    );
+    const { instance } = renderClassComponentWithInstanceRef(CreditsSettings, {
+      appState: store,
+    });
     act(() => {
       instance.setState({ contributors: mockContributors });
     });

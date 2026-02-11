@@ -1,10 +1,11 @@
 import * as React from 'react';
 
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { runInAction } from 'mobx';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   ElectronReleaseChannel,
   InstallState,
@@ -192,26 +193,21 @@ describe('ElectronSettings component', () => {
 
     let completedDownloadCount = 0;
 
-    // Use ref to access the instance for stopDownloads
-    const ref = React.createRef<any>();
+    const { instance } = renderClassComponentWithInstanceRef(ElectronSettings, {
+      appState: store as unknown as AppState,
+    });
 
     // Set up download mock
     store.downloadVersion.mockImplementation(async () => {
       completedDownloadCount++;
       if (completedDownloadCount >= versionsToShowCount - 2) {
         // Stop downloads before all versions downloaded
-        await ref.current.handleStopDownloads();
+        await instance.handleStopDownloads();
       }
     });
 
-    render(
-      <ElectronSettings appState={store as unknown as AppState} ref={ref} />,
-    );
-
-    const instance = ref.current;
-
     // Initiate download for all versions
-    await instance.handleDownloadAll();
+    await (instance as any).handleDownloadAll();
 
     // Stops downloading more versions
     expect(completedDownloadCount).toBeGreaterThan(1);

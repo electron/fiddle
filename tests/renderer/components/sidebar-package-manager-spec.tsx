@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 import { render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
 import { AppState } from '../../../src/renderer/state';
 
@@ -36,15 +37,16 @@ describe('SidebarPackageManager component', () => {
   });
 
   it('can add a package', () => {
-    const ref = React.createRef<any>();
-    render(<SidebarPackageManager appState={store} ref={ref} />);
-    const instance = ref.current;
-    instance.state = {
+    const { instance } = renderClassComponentWithInstanceRef(
+      SidebarPackageManager,
+      { appState: store },
+    );
+    (instance as any).state = {
       suggestions: [],
       versionsCache: new Map(),
     };
 
-    instance.addModuleToFiddle({
+    (instance as any).addModuleToFiddle({
       objectID: 'say',
       name: 'say',
       version: '2.0.0',
