@@ -68,15 +68,6 @@ expect.addSnapshotSerializer({
   },
 });
 
-// Polyfill crypto.subtle for jsdom (used by EditorMosaic.markAsSaved)
-if (!globalThis.crypto?.subtle) {
-  const { webcrypto } = require('node:crypto');
-  Object.defineProperty(globalThis, 'crypto', {
-    value: webcrypto,
-    writable: true,
-  });
-}
-
 // We want to detect vi sometimes
 (global as any).__vi__ = (global as any).__vi__ || {};
 

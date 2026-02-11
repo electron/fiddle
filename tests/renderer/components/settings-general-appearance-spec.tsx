@@ -2,9 +2,10 @@ import * as React from 'react';
 
 import { IItemRendererProps } from '@blueprintjs/select';
 import { render, screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import {
   AppearanceSettings,
   filterItem,
@@ -63,16 +64,16 @@ describe('AppearanceSettings component', () => {
   });
 
   it('handles a theme change', () => {
-    const ref = React.createRef<any>();
-    render(
-      <AppearanceSettings
-        appState={store}
-        toggleHasPopoverOpen={doNothingFunc}
-        ref={ref}
-      />,
+    const { instance } = renderClassComponentWithInstanceRef(
+      AppearanceSettings,
+      {
+        appState: store,
+        toggleHasPopoverOpen: doNothingFunc,
+      },
     );
-    const instance = ref.current;
-    instance.handleChange({ file: 'defaultLight' } as LoadedFiddleTheme);
+    (instance as any).handleChange({
+      file: 'defaultLight',
+    } as LoadedFiddleTheme);
 
     expect(store.setTheme).toHaveBeenCalledWith('defaultLight');
   });
@@ -99,50 +100,44 @@ describe('AppearanceSettings component', () => {
 
   describe('openThemeFolder()', () => {
     it('attempts to open the folder', async () => {
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance = ref.current;
-      await instance.openThemeFolder();
+      await (instance as any).openThemeFolder();
 
       expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
     });
 
     it('handles an error', async () => {
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance = ref.current;
       vi.mocked(window.ElectronFiddle.openThemeFolder).mockRejectedValue(
         new Error('Bwap'),
       );
 
-      expect(await instance.openThemeFolder()).toBe(false);
+      expect(await (instance as any).openThemeFolder()).toBe(false);
     });
   });
 
   describe('createNewThemeFromCurrent()', () => {
     it('creates a new file from the current theme', async () => {
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance = ref.current;
-      await instance.createNewThemeFromCurrent();
+      await (instance as any).createNewThemeFromCurrent();
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -167,41 +162,37 @@ describe('AppearanceSettings component', () => {
           return loadedTheme;
         },
       );
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance = ref.current;
 
       // Initially no themes
-      expect(instance.state.themes).toHaveLength(0);
+      expect((instance as any).state.themes).toHaveLength(0);
 
-      await instance.createNewThemeFromCurrent();
+      await (instance as any).createNewThemeFromCurrent();
 
       await waitFor(() => {
-        expect(instance.state.themes).toHaveLength(1);
+        expect((instance as any).state.themes).toHaveLength(1);
       });
     });
 
     it('handles an error', async () => {
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
-      const instance = ref.current;
       vi.mocked(window.ElectronFiddle.createThemeFile).mockRejectedValue(
         new Error('Bwap'),
       );
 
-      const result = await instance.createNewThemeFromCurrent();
+      const result = await (instance as any).createNewThemeFromCurrent();
       expect(result).toBe(false);
     });
   });
@@ -212,17 +203,15 @@ describe('AppearanceSettings component', () => {
       vi.mocked(window.ElectronFiddle.getAvailableThemes).mockResolvedValue(
         arr,
       );
-      const ref = React.createRef<any>();
-      render(
-        <AppearanceSettings
-          appState={store}
-          toggleHasPopoverOpen={doNothingFunc}
-          ref={ref}
-        />,
+      const { instance } = renderClassComponentWithInstanceRef(
+        AppearanceSettings,
+        {
+          appState: store,
+          toggleHasPopoverOpen: doNothingFunc,
+        },
       );
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
-      const instance = ref.current;
-      const promise = instance.handleAddTheme();
+      const promise = (instance as any).handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(2);

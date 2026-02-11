@@ -1,7 +1,4 @@
-import * as React from 'react';
-
-import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { act, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
@@ -43,7 +40,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     ];
   });
 
-  it('renders with start and end selected', () => {
+  it('renders', () => {
     store.isBisectDialogShowing = true;
     const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
       appState: store,
@@ -155,7 +152,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       expect(store.setVersion).toHaveBeenCalledWith(version);
     });
 
-    it('does nothing if startIndex is undefined', async () => {
+    it('does nothing if endIndex or startIndex are falsy', async () => {
       store.isBisectDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
         appState: store,
@@ -211,7 +208,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       expect(runner.autobisect).toHaveBeenCalled();
     });
 
-    it('does nothing if startIndex or endIndex are undefined', async () => {
+    it('does nothing if endIndex or startIndex are falsy', async () => {
       store.isBisectDialogShowing = true;
       const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
         appState: store,

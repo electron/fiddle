@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { Settings } from '../../../src/renderer/components/settings';
 import { AppState } from '../../../src/renderer/state';
 
@@ -158,9 +159,11 @@ describe('Settings component', () => {
     });
 
     // Use renderClassComponentWithInstanceRef to get access to toggleHasPopoverOpen
-    const ref = React.createRef<any>();
-    const { unmount } = render(<Settings appState={store} ref={ref} />);
-    const instance = ref.current;
+    const { instance, renderResult } = renderClassComponentWithInstanceRef(
+      Settings,
+      { appState: store },
+    );
+    const { unmount } = renderResult;
 
     // Toggle the state of the variable
     act(() => instance.toggleHasPopoverOpen());

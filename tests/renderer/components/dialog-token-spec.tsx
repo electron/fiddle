@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { Octokit } from '@octokit/rest';
 import { act, render, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
