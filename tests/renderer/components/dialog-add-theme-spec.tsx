@@ -40,7 +40,6 @@ describe('AddThemeDialog component', () => {
     ({ state: store } = window.app);
   });
 
-  // TODO(dsanders11): Update this test to be accurate
   it('renders', () => {
     store.isThemeDialogShowing = true;
     render(<AddThemeDialog appState={store} />);
@@ -48,6 +47,30 @@ describe('AddThemeDialog component', () => {
     expect(screen.getByText('Add theme')).toBeInTheDocument();
     expect(screen.getByText('Add')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeInTheDocument();
+    // Add button should be disabled when no file is selected
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
+  });
+
+  it('renders with a file selected', () => {
+    store.isThemeDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(AddThemeDialog, {
+      appState: store,
+    });
+
+    act(() => {
+      instance.setState({
+        file: new FileMock(
+          ['{}'],
+          'theme.json',
+          '/test/theme.json',
+          'application/json',
+        ),
+      });
+    });
+
+    // File name should be displayed and Add button should be enabled
+    expect(screen.getByText('theme.json')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add' })).not.toBeDisabled();
   });
 
   describe('createNewThemeFromMonaco()', () => {
@@ -58,10 +81,7 @@ describe('AddThemeDialog component', () => {
       });
 
       try {
-        await (instance as any).createNewThemeFromMonaco(
-          '',
-          {} as LoadedFiddleTheme,
-        );
+        await instance.createNewThemeFromMonaco('', {} as LoadedFiddleTheme);
       } catch (err: any) {
         expect(err.message).toEqual(`Filename  not found`);
         expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledTimes(0);
@@ -76,7 +96,7 @@ describe('AddThemeDialog component', () => {
       });
 
       act(() => {
-        (instance as any).setState({
+        instance.setState({
           file: new FileMock(
             [JSON.stringify(defaultLight.editor)],
             'file.json',
@@ -91,10 +111,7 @@ describe('AddThemeDialog component', () => {
         file: themePath,
       } as LoadedFiddleTheme);
 
-      await (instance as any).createNewThemeFromMonaco(
-        'testingLight',
-        defaultLight,
-      );
+      await instance.createNewThemeFromMonaco('testingLight', defaultLight);
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -115,15 +132,13 @@ describe('AddThemeDialog component', () => {
         appState: store,
       });
 
-      (instance as any).createNewThemeFromMonaco = vi.fn();
-      (instance as any).onClose = vi.fn();
+      instance.createNewThemeFromMonaco = vi.fn();
+      instance.onClose = vi.fn();
 
-      await (instance as any).onSubmit();
+      await instance.onSubmit();
 
-      expect((instance as any).createNewThemeFromMonaco).toHaveBeenCalledTimes(
-        0,
-      );
-      expect((instance as any).onClose).toHaveBeenCalledTimes(0);
+      expect(instance.createNewThemeFromMonaco).toHaveBeenCalledTimes(0);
+      expect(instance.onClose).toHaveBeenCalledTimes(0);
     });
 
     it('loads a theme if a file is currently set', async () => {
@@ -140,19 +155,17 @@ describe('AddThemeDialog component', () => {
       );
       const spy = vi.spyOn(file, 'text');
       act(() => {
-        (instance as any).setState({ file });
+        instance.setState({ file });
       });
 
-      (instance as any).createNewThemeFromMonaco = vi.fn();
-      (instance as any).onClose = vi.fn();
+      instance.createNewThemeFromMonaco = vi.fn();
+      instance.onClose = vi.fn();
 
-      await (instance as any).onSubmit();
+      await instance.onSubmit();
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect((instance as any).createNewThemeFromMonaco).toHaveBeenCalledTimes(
-        1,
-      );
-      expect((instance as any).onClose).toHaveBeenCalledTimes(1);
+      expect(instance.createNewThemeFromMonaco).toHaveBeenCalledTimes(1);
+      expect(instance.onClose).toHaveBeenCalledTimes(1);
     });
 
     it('shows an error dialog for a malformed theme', async () => {
@@ -170,12 +183,12 @@ describe('AddThemeDialog component', () => {
       );
       const spy = vi.spyOn(file, 'text').mockResolvedValue('{}');
       act(() => {
-        (instance as any).setState({ file });
+        instance.setState({ file });
       });
 
-      (instance as any).onClose = vi.fn();
+      instance.onClose = vi.fn();
 
-      await (instance as any).onSubmit();
+      await instance.onSubmit();
 
       expect(spy).toHaveBeenCalledTimes(1);
       expect(store.showErrorDialog).toHaveBeenCalledWith(
@@ -193,11 +206,11 @@ describe('AddThemeDialog component', () => {
 
       const files = ['one', 'two'];
       act(() => {
-        (instance as any).onChangeFile({
+        instance.onChangeFile({
           target: { files } as unknown as EventTarget,
         } as React.FormEvent<HTMLInputElement>);
       });
-      expect((instance as any).state.file).toBe(files[0]);
+      expect(instance.state.file).toBe(files[0]);
     });
 
     it('handles no input', () => {
@@ -206,12 +219,10 @@ describe('AddThemeDialog component', () => {
         appState: store,
       });
 
-      act(() => {
-        (instance as any).onChangeFile({
-          target: { files: null } as unknown as EventTarget,
-        } as React.FormEvent<HTMLInputElement>);
-      });
-      expect((instance as any).state.file).toBeUndefined();
+      instance.onChangeFile({
+        target: { files: null } as unknown as EventTarget,
+      } as React.FormEvent<HTMLInputElement>);
+      expect(instance.state.file).toBeUndefined();
     });
   });
 });

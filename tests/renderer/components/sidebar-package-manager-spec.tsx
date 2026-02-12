@@ -41,12 +41,13 @@ describe('SidebarPackageManager component', () => {
       SidebarPackageManager,
       { appState: store },
     );
+    // Bypass Readonly<S> to set state without triggering a re-render
     (instance as any).state = {
       suggestions: [],
       versionsCache: new Map(),
     };
 
-    (instance as any).addModuleToFiddle({
+    instance.addModuleToFiddle({
       objectID: 'say',
       name: 'say',
       version: '2.0.0',
@@ -54,7 +55,7 @@ describe('SidebarPackageManager component', () => {
         '1.0.0': '',
         '2.0.0': '',
       },
-    });
+    } as any);
 
     expect(
       Array.from((store.modules as Map<string, string>).entries()),

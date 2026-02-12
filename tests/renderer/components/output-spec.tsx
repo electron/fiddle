@@ -118,6 +118,7 @@ describe('Output component', () => {
 
     instance.outputRef.current = 'ref' as any;
     await instance.initMonaco();
+    // updateModel is private — cast needed to test it directly
     (instance as any).updateModel();
 
     expect(monaco.editor.createModel).toHaveBeenCalled();
@@ -133,11 +134,13 @@ describe('Output component', () => {
     ];
 
     const { instance } = renderOutput(store, monaco);
+    // updateModel is private — cast needed to spy on it
     const spy = vi.spyOn(instance as any, 'updateModel');
 
     instance.outputRef.current = 'ref' as any;
     await instance.initMonaco();
 
+    // updateModel is private
     (instance as any).updateModel();
 
     // new output
@@ -162,6 +165,7 @@ describe('Output component', () => {
     instance.outputRef.current = 'ref' as any;
     await instance.initMonaco();
 
+    // updateModel is private
     await (instance as any).updateModel();
     expect(spy).toHaveBeenCalled();
   });
