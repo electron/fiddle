@@ -3,7 +3,7 @@ import * as path from 'node:path';
 import { IpcMainInvokeEvent, shell } from 'electron';
 
 import { ipcMainManager } from './ipc';
-import { exec } from './utils/exec';
+import { exec, execFile } from './utils/exec';
 import { IPackageManager, PMOperationOptions } from '../interfaces';
 import { IpcEvents } from '../ipc-events';
 
@@ -54,18 +54,15 @@ export async function addModules(
   { dir, packageManager }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
-  let nameArgs: Array<string> = [];
-  let installCommand: string;
+  const cmd = packageManager === 'npm' ? 'npm' : 'yarn';
+  const args =
+    packageManager === 'npm'
+      ? ['install', '-S', ...names]
+      : names.length > 0
+        ? ['add', ...names]
+        : ['install'];
 
-  if (packageManager === 'npm') {
-    installCommand = 'npm install';
-    nameArgs = names.length > 0 ? ['-S', ...names] : ['--also=dev --prod'];
-  } else {
-    installCommand = names.length > 0 ? 'yarn add' : 'yarn install';
-    nameArgs = [...names];
-  }
-
-  return exec(dir, [installCommand].concat(nameArgs).join(' '));
+  return await execFile(dir, cmd, args);
 }
 
 /**
