@@ -47,7 +47,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     });
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         startIndex: 3,
         endIndex: 0,
         allVersions: generateVersionRange(numVersions),
@@ -58,6 +58,11 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
 
+  // Note: The original Enzyme tests also covered "no selection" and "only start
+  // selected" render states (with undefined indices). These cannot be tested with
+  // RTL's full render because VersionSelect crashes on undefined currentVersion.
+  // The falsy-index edge cases are still covered by the onSubmit/onAuto tests.
+
   it('renders with incorrect order', () => {
     store.isBisectDialogShowing = true;
     const { instance } = renderClassComponentWithInstanceRef(BisectDialog, {
@@ -66,7 +71,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
 
     // Incorrect order (startIndex < endIndex)
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         startIndex: 3,
         endIndex: 4,
         allVersions: generateVersionRange(numVersions),
@@ -84,7 +89,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
     });
 
     act(() => {
-      (instance as any).showHelp();
+      instance.showHelp();
     });
     expect(
       screen.getByText(/First, write a fiddle that reproduces a bug/),
@@ -98,13 +103,13 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         appState: store,
       });
 
-      expect((instance as any).state.startIndex).toBe(
+      expect(instance.state.startIndex).toBe(
         numVersions > 10 ? 10 : numVersions - 1,
       );
       act(() => {
-        (instance as any).onBeginSelect(store.versionsToShow[2]);
+        instance.onBeginSelect(store.versionsToShow[2]);
       });
-      expect((instance as any).state.startIndex).toBe(2);
+      expect(instance.state.startIndex).toBe(2);
     });
   });
 
@@ -115,11 +120,11 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         appState: store,
       });
 
-      expect((instance as any).state.endIndex).toBe(0);
+      expect(instance.state.endIndex).toBe(0);
       act(() => {
-        (instance as any).onEndSelect(store.versionsToShow[2]);
+        instance.onEndSelect(store.versionsToShow[2]);
       });
-      expect((instance as any).state.endIndex).toBe(2);
+      expect(instance.state.endIndex).toBe(2);
     });
   });
 
@@ -137,16 +142,14 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({
+        instance.setState({
           allVersions: versions,
           endIndex: 0,
           startIndex: versions.length - 1,
         });
       });
 
-      await act(async () => {
-        await (instance as any).onSubmit();
-      });
+      await instance.onSubmit();
       expect(Bisector).toHaveBeenCalledWith(versions.reverse());
       expect(store.Bisector).toBeDefined();
       expect(store.setVersion).toHaveBeenCalledWith(version);
@@ -158,15 +161,15 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         appState: store,
       });
 
-      // Call onSubmit directly after modifying state via the private field
+      // Call onSubmit directly after modifying state via direct mutation
       // (setState with undefined indices would crash VersionSelect in full render)
-      const origState = { ...(instance as any).state };
+      const origState = { ...instance.state };
       (instance as any).state = {
         ...origState,
         startIndex: undefined,
         endIndex: 0,
       };
-      await (instance as any).onSubmit();
+      await instance.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
       (instance as any).state = {
@@ -174,7 +177,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: 4,
         endIndex: undefined,
       };
-      await (instance as any).onSubmit();
+      await instance.onSubmit();
       expect(Bisector).not.toHaveBeenCalled();
 
       // Restore valid state for clean teardown
@@ -190,7 +193,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({
+        instance.setState({
           allVersions: generateVersionRange(numVersions),
           endIndex: 0,
           startIndex: 4,
@@ -200,9 +203,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       vi.mocked(runner.autobisect).mockResolvedValue(RunResult.SUCCESS);
 
       // click the 'auto' button
-      await act(async () => {
-        await (instance as any).onAuto();
-      });
+      await instance.onAuto();
 
       // check the results
       expect(runner.autobisect).toHaveBeenCalled();
@@ -215,13 +216,13 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
       });
 
       // Directly modify state to avoid re-render crash with undefined indices
-      const origState = { ...(instance as any).state };
+      const origState = { ...instance.state };
       (instance as any).state = {
         ...origState,
         startIndex: undefined,
         endIndex: 0,
       };
-      await (instance as any).onAuto();
+      await instance.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
       (instance as any).state = {
@@ -229,7 +230,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
         startIndex: 4,
         endIndex: undefined,
       };
-      await (instance as any).onAuto();
+      await instance.onAuto();
       expect(Bisector).not.toHaveBeenCalled();
 
       // Restore valid state for clean teardown
@@ -238,7 +239,7 @@ describe.each([8, 15])('BisectDialog component', (numVersions) => {
   });
 
   describe('items disabled', () => {
-    let instance: any;
+    let instance: InstanceType<typeof BisectDialog>;
 
     beforeEach(() => {
       store.isBisectDialogShowing = true;

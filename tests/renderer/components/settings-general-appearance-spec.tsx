@@ -71,7 +71,7 @@ describe('AppearanceSettings component', () => {
         toggleHasPopoverOpen: doNothingFunc,
       },
     );
-    (instance as any).handleChange({
+    instance.handleChange({
       file: 'defaultLight',
     } as LoadedFiddleTheme);
 
@@ -107,7 +107,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen: doNothingFunc,
         },
       );
-      await (instance as any).openThemeFolder();
+      await instance.openThemeFolder();
 
       expect(window.ElectronFiddle.openThemeFolder).toHaveBeenCalled();
     });
@@ -124,7 +124,7 @@ describe('AppearanceSettings component', () => {
         new Error('Bwap'),
       );
 
-      expect(await (instance as any).openThemeFolder()).toBe(false);
+      expect(await instance.openThemeFolder()).toBe(false);
     });
   });
 
@@ -137,7 +137,7 @@ describe('AppearanceSettings component', () => {
           toggleHasPopoverOpen: doNothingFunc,
         },
       );
-      await (instance as any).createNewThemeFromCurrent();
+      await instance.createNewThemeFromCurrent();
 
       expect(window.ElectronFiddle.createThemeFile).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -171,12 +171,12 @@ describe('AppearanceSettings component', () => {
       );
 
       // Initially no themes
-      expect((instance as any).state.themes).toHaveLength(0);
+      expect(instance.state.themes).toHaveLength(0);
 
-      await (instance as any).createNewThemeFromCurrent();
+      await instance.createNewThemeFromCurrent();
 
       await waitFor(() => {
-        expect((instance as any).state.themes).toHaveLength(1);
+        expect(instance.state.themes).toHaveLength(1);
       });
     });
 
@@ -192,7 +192,7 @@ describe('AppearanceSettings component', () => {
         new Error('Bwap'),
       );
 
-      const result = await (instance as any).createNewThemeFromCurrent();
+      const result = await instance.createNewThemeFromCurrent();
       expect(result).toBe(false);
     });
   });
@@ -211,7 +211,7 @@ describe('AppearanceSettings component', () => {
         },
       );
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(1);
-      const promise = (instance as any).handleAddTheme();
+      const promise = instance.handleAddTheme();
       store.isTokenDialogShowing = false;
       await promise;
       expect(window.ElectronFiddle.getAvailableThemes).toHaveBeenCalledTimes(2);
@@ -258,7 +258,8 @@ describe('AppearanceSettings component', () => {
       });
 
       expect(result).not.toBe(null);
-      expect(result).toBeTruthy();
+      // Verify it's a React element with the expected text
+      expect((result as any).props.text).toContain('foo');
     });
   });
 });

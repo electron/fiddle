@@ -54,9 +54,11 @@ describe('Commands component', () => {
   it('can show the bisect command tools', () => {
     store.isBisectCommandShowing = true;
     render(<Commands appState={store} />);
-    // BisectHandler is not mocked, so it renders directly
-    // We check for a bisect-related element in the DOM
-    expect(document.querySelector('.commands')).toBeInTheDocument();
+    // BisectHandler is not mocked, so it renders directly.
+    // The mock store has Bisector set, so active bisect buttons appear.
+    expect(
+      screen.getByRole('button', { name: 'Cancel bisect' }),
+    ).toBeInTheDocument();
   });
 
   it('handleDoubleClick()', () => {
@@ -65,6 +67,7 @@ describe('Commands component', () => {
     });
 
     const tag = { tagName: 'DIV' };
+    // handleDoubleClick is private — cast needed to test it directly
     (instance as any).handleDoubleClick({ target: tag, currentTarget: tag });
 
     expect(window.ElectronFiddle.macTitlebarClicked).toHaveBeenCalled();
@@ -75,6 +78,7 @@ describe('Commands component', () => {
       appState: store,
     });
 
+    // handleDoubleClick is private — cast needed to test it directly
     (instance as any).handleDoubleClick({
       target: { tagName: 'INPUT' },
       currentTarget: { tagName: 'DIV' },

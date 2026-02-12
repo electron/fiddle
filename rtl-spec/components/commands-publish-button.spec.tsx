@@ -1,4 +1,5 @@
 import { Octokit } from '@octokit/rest';
+import { act, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import {
@@ -302,7 +303,7 @@ describe('Action button component', () => {
       // create a button that's primed to update gistId
       state.gistId = gistId;
       ({ instance } = createActionButton());
-      instance.setState({ actionType: GistActionType.update });
+      act(() => instance.setState({ actionType: GistActionType.update }));
 
       mocktokit.gists.get.mockImplementation(() => {
         return {
@@ -358,7 +359,7 @@ describe('Action button component', () => {
 
       // create a button primed to delete gistId
       ({ instance } = createActionButton());
-      instance.setState({ actionType: GistActionType.delete });
+      act(() => instance.setState({ actionType: GistActionType.delete }));
     });
 
     it('attempts to delete an existing Gist', async () => {
@@ -392,10 +393,14 @@ describe('Action button component', () => {
       expect(container.querySelector('fieldset')).not.toBeDisabled();
 
       state.activeGistAction = gistActionState;
-      expect(container.querySelector('fieldset')).toBeDisabled();
+      await waitFor(() => {
+        expect(container.querySelector('fieldset')).toBeDisabled();
+      });
 
       state.activeGistAction = GistActionState.none;
-      expect(container.querySelector('fieldset')).not.toBeDisabled();
+      await waitFor(() => {
+        expect(container.querySelector('fieldset')).not.toBeDisabled();
+      });
     }
 
     it('while publishing', async () => {

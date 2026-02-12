@@ -28,7 +28,7 @@ describe('AddVersionDialog component', () => {
     });
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         isValidVersion: true,
         isValidElectron: true,
         folderPath: mockFile,
@@ -40,18 +40,19 @@ describe('AddVersionDialog component', () => {
     expect(screen.getByText('Cancel')).toBeInTheDocument();
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         isValidVersion: false,
         isValidElectron: true,
         folderPath: mockFile,
       });
     });
 
-    // Still renders the dialog
+    // Still renders the dialog, but Add button should be disabled
     expect(screen.getByText('Add local Electron build')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Add' })).toBeDisabled();
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         isValidVersion: true,
         isValidElectron: true,
         existingLocalVersion: {
@@ -99,13 +100,11 @@ describe('AddVersionDialog component', () => {
         isValidElectron: true,
         localName: 'Test',
       });
-      await act(async () => {
-        await (instance as any).selectLocalVersion();
-      });
+      await instance.selectLocalVersion();
 
-      expect((instance as any).state.isValidElectron).toBe(true);
-      expect((instance as any).state.folderPath).toBe('/test/');
-      expect((instance as any).state.localName).toBe('Test');
+      expect(instance.state.isValidElectron).toBe(true);
+      expect(instance.state.folderPath).toBe('/test/');
+      expect(instance.state.localName).toBe('Test');
     });
   });
 
@@ -118,12 +117,12 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        (instance as any).onChangeVersion({
+        instance.onChangeVersion({
           target: { value: '3.3.3' },
-        });
+        } as any);
       });
-      expect((instance as any).state.isValidVersion).toBe(true);
-      expect((instance as any).state.version).toBe('3.3.3');
+      expect(instance.state.isValidVersion).toBe(true);
+      expect(instance.state.version).toBe('3.3.3');
     });
 
     it('handles invalid input', () => {
@@ -134,16 +133,16 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        (instance as any).onChangeVersion({ target: { value: 'foo' } });
+        instance.onChangeVersion({ target: { value: 'foo' } } as any);
       });
-      expect((instance as any).state.isValidVersion).toBe(false);
-      expect((instance as any).state.version).toBe('foo');
+      expect(instance.state.isValidVersion).toBe(false);
+      expect(instance.state.version).toBe('foo');
 
       act(() => {
-        (instance as any).onChangeVersion({ target: {} });
+        instance.onChangeVersion({ target: {} } as any);
       });
-      expect((instance as any).state.isValidVersion).toBe(false);
-      expect((instance as any).state.version).toBe('');
+      expect(instance.state.isValidVersion).toBe(false);
+      expect(instance.state.version).toBe('');
     });
   });
 
@@ -155,9 +154,7 @@ describe('AddVersionDialog component', () => {
         { appState: store },
       );
 
-      await act(async () => {
-        await (instance as any).onSubmit();
-      });
+      await instance.onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(0);
     });
@@ -170,15 +167,13 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        (instance as any).setState({
+        instance.setState({
           version: '3.3.3',
           folderPath: '/test/path',
         });
       });
 
-      await act(async () => {
-        await (instance as any).onSubmit();
-      });
+      await instance.onSubmit();
 
       expect(store.addLocalVersion).toHaveBeenCalledTimes(1);
       expect(store.addLocalVersion).toHaveBeenCalledWith(
@@ -197,7 +192,7 @@ describe('AddVersionDialog component', () => {
       );
 
       act(() => {
-        (instance as any).setState({
+        instance.setState({
           isValidElectron: true,
           folderPath: '/test/path',
           version: '3.3.3',

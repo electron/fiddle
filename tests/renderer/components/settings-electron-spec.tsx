@@ -207,7 +207,7 @@ describe('ElectronSettings component', () => {
     });
 
     // Initiate download for all versions
-    await (instance as any).handleDownloadAll();
+    await instance.handleDownloadAll();
 
     // Stops downloading more versions
     expect(completedDownloadCount).toBeGreaterThan(1);

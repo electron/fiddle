@@ -48,14 +48,26 @@ describe('Settings component', () => {
     expect(screen.getByTestId('settings-general')).toBeInTheDocument();
   });
 
-  it('renders no content if page unknown', async () => {
-    // We render with default (General), then navigate to an unknown section.
-    // Since we can't set state directly, we test that a known section renders content.
-    // The default section is General, so it should render that content.
-    render(<Settings appState={store} />);
+  it('renders no content if page unknown', () => {
+    const { instance } = renderClassComponentWithInstanceRef(Settings, {
+      appState: store,
+    });
 
-    // General should be shown by default
-    expect(screen.getByTestId('settings-general')).toBeInTheDocument();
+    // Force an invalid section via setState
+    act(() => {
+      // Cast to bypass SettingsSections enum — testing an invalid value on purpose
+      instance.setState({ section: 'blub' as any });
+    });
+
+    // The menu should still be visible
+    expect(screen.getByText('General')).toBeInTheDocument();
+    expect(screen.getByText('Electron')).toBeInTheDocument();
+
+    // But none of the settings pages should be rendered
+    expect(screen.queryByTestId('settings-general')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('settings-electron')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('settings-execution')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('settings-credits')).not.toBeInTheDocument();
   });
 
   it('renders the General page after a click', async () => {

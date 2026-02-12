@@ -47,11 +47,11 @@ describe('TokenDialog component', () => {
       mockValidToken,
     );
     await act(async () => {
-      await (instance as any).onTokenInputFocused();
+      await instance.onTokenInputFocused();
     });
 
     expect(window.navigator.clipboard.readText).toHaveBeenCalled();
-    expect((instance as any).state.tokenInput).toBe(mockValidToken);
+    expect(instance.state.tokenInput).toBe(mockValidToken);
   });
 
   it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
@@ -64,11 +64,11 @@ describe('TokenDialog component', () => {
       mockInvalidToken,
     );
     await act(async () => {
-      await (instance as any).onTokenInputFocused();
+      await instance.onTokenInputFocused();
     });
 
     expect(window.navigator.clipboard.readText).toHaveBeenCalled();
-    expect((instance as any).state.tokenInput).toBe('');
+    expect(instance.state.tokenInput).toBe('');
   });
 
   it('reset() resets the component', () => {
@@ -78,17 +78,17 @@ describe('TokenDialog component', () => {
     });
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         verifying: true,
         tokenInput: 'hello',
         errorMessage: 'test error',
       });
     });
     act(() => {
-      (instance as any).reset();
+      instance.reset();
     });
 
-    expect((instance as any).state).toEqual({
+    expect(instance.state).toEqual({
       verifying: false,
       error: false,
       errorMessage: undefined,
@@ -103,17 +103,17 @@ describe('TokenDialog component', () => {
     });
 
     act(() => {
-      (instance as any).setState({
+      instance.setState({
         verifying: true,
         tokenInput: 'hello',
         errorMessage: 'test error',
       });
     });
     act(() => {
-      (instance as any).onClose();
+      instance.onClose();
     });
 
-    expect((instance as any).state).toEqual({
+    expect(instance.state).toEqual({
       verifying: false,
       error: false,
       errorMessage: undefined,
@@ -127,14 +127,14 @@ describe('TokenDialog component', () => {
       appState: store,
     });
     act(() => {
-      (instance as any).setState({ verifying: true, tokenInput: 'hello' });
+      instance.setState({ verifying: true, tokenInput: 'hello' });
     });
 
     act(() => {
-      (instance as any).handleChange({ target: { value: 'hi' } });
+      instance.handleChange({ target: { value: 'hi' } } as any);
     });
 
-    expect((instance as any).state.tokenInput).toBe('hi');
+    expect(instance.state.tokenInput).toBe('hi');
   });
 
   it('openGenerateTokenExternal() tries to open the link', () => {
@@ -144,9 +144,9 @@ describe('TokenDialog component', () => {
     });
 
     act(() => {
-      (instance as any).setState({ verifying: true, tokenInput: 'hello' });
+      instance.setState({ verifying: true, tokenInput: 'hello' });
     });
-    (instance as any).openGenerateTokenExternal();
+    instance.openGenerateTokenExternal();
 
     expect(window.open).toHaveBeenCalled();
   });
@@ -181,14 +181,12 @@ describe('TokenDialog component', () => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({ tokenInput: '' });
+        instance.setState({ tokenInput: '' });
       });
 
-      await act(async () => {
-        await (instance as any).onSubmitToken();
-      });
+      await instance.onSubmitToken();
 
-      expect((instance as any).state.verifying).toBe(false);
+      expect(instance.state.verifying).toBe(false);
     });
 
     it('tries to sign the user in', async () => {
@@ -197,18 +195,16 @@ describe('TokenDialog component', () => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({ tokenInput: mockValidToken });
+        instance.setState({ tokenInput: mockValidToken });
       });
 
-      await act(async () => {
-        await (instance as any).onSubmitToken();
-      });
+      await instance.onSubmitToken();
 
       expect(store.gitHubToken).toBe(mockValidToken);
       expect(store.gitHubLogin).toBe(mockUser.login);
       expect(store.gitHubName).toBe(mockUser.name);
       expect(store.gitHubAvatarUrl).toBe(mockUser.avatar_url);
-      expect((instance as any).state.error).toBe(false);
+      expect(instance.state.error).toBe(false);
       expect(store.isTokenDialogShowing).toBe(false);
     });
 
@@ -222,15 +218,15 @@ describe('TokenDialog component', () => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({ tokenInput: mockValidToken });
+        instance.setState({ tokenInput: mockValidToken });
       });
 
       await act(async () => {
-        await (instance as any).onSubmitToken();
+        await instance.onSubmitToken();
       });
 
-      expect((instance as any).state.error).toBe(true);
-      expect((instance as any).state.errorMessage).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Invalid GitHub token. Please check your token and try again.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -249,15 +245,15 @@ describe('TokenDialog component', () => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({ tokenInput: mockValidToken });
+        instance.setState({ tokenInput: mockValidToken });
       });
 
       await act(async () => {
-        await (instance as any).onSubmitToken();
+        await instance.onSubmitToken();
       });
 
-      expect((instance as any).state.error).toBe(true);
-      expect((instance as any).state.errorMessage).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -276,15 +272,15 @@ describe('TokenDialog component', () => {
         appState: store,
       });
       act(() => {
-        (instance as any).setState({ tokenInput: mockValidToken });
+        instance.setState({ tokenInput: mockValidToken });
       });
 
       await act(async () => {
-        await (instance as any).onSubmitToken();
+        await instance.onSubmitToken();
       });
 
-      expect((instance as any).state.error).toBe(true);
-      expect((instance as any).state.errorMessage).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -322,6 +318,7 @@ describe('TokenDialog component', () => {
         appState: store,
       });
 
+      // validateGitHubToken is private — cast needed to test it directly
       const result = await (instance as any).validateGitHubToken('valid-token');
 
       expect(result).toEqual({
@@ -345,6 +342,7 @@ describe('TokenDialog component', () => {
         appState: store,
       });
 
+      // validateGitHubToken is private
       const result = await (instance as any).validateGitHubToken(
         'token-without-gist',
       );
@@ -367,6 +365,7 @@ describe('TokenDialog component', () => {
         appState: store,
       });
 
+      // validateGitHubToken is private
       const result = await (instance as any).validateGitHubToken(
         'invalid-token',
       );
@@ -390,6 +389,7 @@ describe('TokenDialog component', () => {
         appState: store,
       });
 
+      // validateGitHubToken is private
       const result = await (instance as any).validateGitHubToken(
         'token-no-scopes-header',
       );

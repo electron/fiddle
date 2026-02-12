@@ -33,9 +33,9 @@ describe('Dialogs component', () => {
   it('renders the settings dialog', () => {
     store.isSettingsShowing = true;
     render(<Dialogs appState={store} />);
-    // Settings dialog is rendered when isSettingsShowing is true
-    // Verify the container div with class "dialogs" is present
-    expect(document.querySelector('.dialogs')).toBeInTheDocument();
+    // Verify the Settings component actually renders (not just the container)
+    expect(screen.getByText('General')).toBeInTheDocument();
+    expect(screen.getByText('Electron')).toBeInTheDocument();
   });
 
   it('renders the add version dialog', () => {
