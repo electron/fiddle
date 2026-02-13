@@ -1,4 +1,6 @@
+import { execFile as cp_execFile } from 'node:child_process';
 import * as path from 'node:path';
+import { promisify } from 'node:util';
 
 import { IpcMainInvokeEvent, shell } from 'electron';
 
@@ -54,18 +56,20 @@ export async function addModules(
   { dir, packageManager }: PMOperationOptions,
   ...names: Array<string>
 ): Promise<string> {
-  let nameArgs: Array<string> = [];
-  let installCommand: string;
+  const cmd = packageManager === 'npm' ? 'npm' : 'yarn';
+  const args =
+    packageManager === 'npm'
+      ? ['install', '-S', ...names]
+      : names.length > 0
+        ? ['add', ...names]
+        : ['install'];
 
-  if (packageManager === 'npm') {
-    installCommand = 'npm install';
-    nameArgs = names.length > 0 ? ['-S', ...names] : ['--also=dev --prod'];
-  } else {
-    installCommand = names.length > 0 ? 'yarn add' : 'yarn install';
-    nameArgs = [...names];
-  }
+  const { stdout } = await promisify(cp_execFile)(cmd, args, {
+    cwd: dir,
+    maxBuffer: 200 * 1024 * 100,
+  });
 
-  return exec(dir, [installCommand].concat(nameArgs).join(' '));
+  return stdout.trim();
 }
 
 /**
