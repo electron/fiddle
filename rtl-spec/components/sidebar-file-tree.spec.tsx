@@ -96,7 +96,35 @@ describe('SidebarFileTree component', () => {
     ) as HTMLInputElement;
     await user.type(input, 'tester.js{Enter}');
 
-    expect(editorMosaic.files.get('tester.js')).toBe(EditorPresence.Pending);
+    expect(editorMosaic.files.get('tester.js')).toBe(EditorPresence.Hidden);
+  });
+
+  it('fails to create new editors (file name with path separator)', async () => {
+    const user = userEvent.setup();
+    const { container } = render(<SidebarFileTree appState={store} />);
+    const EDITOR_NEW_NAME = 'subdir/tester.js';
+
+    expect(editorMosaic.files.get(EDITOR_NEW_NAME)).toBe(undefined);
+
+    // Click the "Add New File" button (by icon)
+    const addButton = container.querySelector(
+      'button .bp3-icon-add',
+    )?.parentElement;
+    await user.click(addButton!);
+
+    // Type the filename and press Enter
+    const input = container.querySelector(
+      '#new-file-input',
+    ) as HTMLInputElement;
+    await user.type(input, `${EDITOR_NEW_NAME}{Enter}`);
+
+    // Wait for error dialog to be called
+    await waitFor(() => {
+      console.log('store.showErrorDialog: ', store.showErrorDialog);
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        `Invalid filename "${EDITOR_NEW_NAME}": filenames cannot include path separators`,
+      );
+    });
   });
 
   it('can delete editors', async () => {
@@ -231,6 +259,36 @@ describe('SidebarFileTree component', () => {
     await waitFor(() => {
       expect(store.showErrorDialog).toHaveBeenCalledWith(
         `Invalid filename "${EDITOR_NEW_NAME}": Must be a file ending in .cjs, .js, .mjs, .html, .css, or .json`,
+      );
+    });
+
+    expect(editorMosaic.files.get(EDITOR_NAME)).toBe(EditorPresence.Pending);
+  });
+
+  it('fails if trying to rename an editor to an unsupported name (file name with path separator)', async () => {
+    const user = userEvent.setup();
+    const EDITOR_NAME = 'index.html';
+    const EDITOR_NEW_NAME = 'msg/data.json';
+
+    store.showInputDialog = vi.fn().mockResolvedValueOnce(EDITOR_NEW_NAME);
+    store.showErrorDialog = vi.fn().mockResolvedValueOnce(true);
+
+    const { container } = render(<SidebarFileTree appState={store} />);
+
+    // Right-click on index.html to open context menu
+    const fileLabel = Array.from(container.querySelectorAll('.pointer')).find(
+      (el) => el.textContent === EDITOR_NAME,
+    ) as HTMLElement;
+    fireEvent.contextMenu(fileLabel);
+
+    // Click the "Rename" menu item
+    const renameItem = await screen.findByText('Rename');
+    await user.click(renameItem);
+
+    // Wait for error dialog to be called
+    await waitFor(() => {
+      expect(store.showErrorDialog).toHaveBeenCalledWith(
+        `Invalid filename "${EDITOR_NEW_NAME}": filenames cannot include path separators`,
       );
     });
 
