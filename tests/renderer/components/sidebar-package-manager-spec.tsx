@@ -1,9 +1,10 @@
 import * as React from 'react';
 
-import { Button } from '@blueprintjs/core';
-import { mount, shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { SidebarPackageManager } from '../../../src/renderer/components/sidebar-package-manager';
 import { AppState } from '../../../src/renderer/state';
 
@@ -30,14 +31,18 @@ describe('SidebarPackageManager component', () => {
   });
 
   it('renders', () => {
-    const wrapper = shallow(<SidebarPackageManager appState={store} />);
-    expect(wrapper).toMatchSnapshot();
+    render(<SidebarPackageManager appState={store} />);
+    expect(screen.getByText('Modules')).toBeInTheDocument();
+    expect(screen.getByText('cow')).toBeInTheDocument();
   });
 
   it('can add a package', () => {
-    const wrapper = shallow(<SidebarPackageManager appState={store} />);
-    const instance: any = wrapper.instance();
-    instance.state = {
+    const { instance } = renderClassComponentWithInstanceRef(
+      SidebarPackageManager,
+      { appState: store },
+    );
+    // Bypass Readonly<S> to set state without triggering a re-render
+    (instance as any).state = {
       suggestions: [],
       versionsCache: new Map(),
     };
@@ -50,7 +55,7 @@ describe('SidebarPackageManager component', () => {
         '1.0.0': '',
         '2.0.0': '',
       },
-    });
+    } as any);
 
     expect(
       Array.from((store.modules as Map<string, string>).entries()),
@@ -61,19 +66,12 @@ describe('SidebarPackageManager component', () => {
   });
 
   it('can remove a package', async () => {
-    const wrapper = mount(<SidebarPackageManager appState={store} />);
+    const user = userEvent.setup();
+    render(<SidebarPackageManager appState={store} />);
 
-    const instance = wrapper.instance();
-    instance.state = {
-      suggestions: [],
-      versionsCache: new Map(),
-    };
-
-    const btn = wrapper.find(Button);
-    btn.simulate('click');
+    // Find the remove button (the Button with icon="remove" next to "cow")
+    const removeButton = screen.getByRole('button');
+    await user.click(removeButton);
     expect((store.modules as Map<string, string>).size).toBe(0);
-
-    // dumb timeout for setState to finish running
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 });

@@ -1,6 +1,7 @@
 import * as React from 'react';
 
-import { shallow } from 'enzyme';
+import { render, screen } from '@testing-library/react';
+import { userEvent } from '@testing-library/user-event';
 import { beforeEach, describe, expect, it } from 'vitest';
 
 import { GenericDialogType } from '../../../src/interfaces';
@@ -20,54 +21,76 @@ describe('GenericDialog component', () => {
   });
 
   describe('renders', () => {
-    function expectDialogTypeToMatchSnapshot(type: GenericDialogType) {
+    function renderDialogWithType(type: GenericDialogType) {
       store.genericDialogOptions.type = type;
+      store.genericDialogOptions.ok = 'Okay';
+      store.genericDialogOptions.label = 'Test label';
       store.isGenericDialogShowing = true;
-      const wrapper = shallow(<GenericDialog appState={store} />);
-      expect(wrapper).toMatchSnapshot();
+      return render(<GenericDialog appState={store} />);
     }
 
     it('warning', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.warning);
+      renderDialogWithType(GenericDialogType.warning);
+      expect(screen.getByText('Test label')).toBeInTheDocument();
+      expect(screen.getByText('Okay')).toBeInTheDocument();
     });
 
     it('confirmation', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+      renderDialogWithType(GenericDialogType.confirm);
+      expect(screen.getByText('Test label')).toBeInTheDocument();
+      expect(screen.getByText('Okay')).toBeInTheDocument();
     });
 
     it('success', () => {
-      expectDialogTypeToMatchSnapshot(GenericDialogType.success);
+      renderDialogWithType(GenericDialogType.success);
+      expect(screen.getByText('Test label')).toBeInTheDocument();
+      expect(screen.getByText('Okay')).toBeInTheDocument();
     });
 
     it('with an input prompt', () => {
       store.genericDialogOptions.wantsInput = true;
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+      renderDialogWithType(GenericDialogType.confirm);
+      expect(screen.getByText('Test label')).toBeInTheDocument();
+      // The InputGroup renders an input element with id="input"
+      expect(document.getElementById('input')).toBeInTheDocument();
     });
 
     it('with an input prompt and placeholder', () => {
       store.genericDialogOptions.wantsInput = true;
       store.genericDialogOptions.placeholder = 'placeholder';
-      expectDialogTypeToMatchSnapshot(GenericDialogType.confirm);
+      renderDialogWithType(GenericDialogType.confirm);
+      expect(screen.getByText('Test label')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('placeholder')).toBeInTheDocument();
     });
   });
 
-  it('onClose() closes itself', () => {
+  it('onClose() closes itself', async () => {
+    const user = userEvent.setup();
     store.isGenericDialogShowing = true;
-    const wrapper = shallow(<GenericDialog appState={store} />);
-    const instance: any = wrapper.instance();
+    store.genericDialogOptions.ok = 'Okay';
+    store.genericDialogOptions.cancel = 'Cancel';
+    store.genericDialogOptions.label = 'Test label';
+    render(<GenericDialog appState={store} />);
 
-    instance.onClose(true);
+    // Click the confirm button to trigger onClose(true)
+    await user.click(screen.getByText('Okay'));
     expect(store.isGenericDialogShowing).toBe(false);
   });
 
-  it('enter submit', () => {
-    const wrapper = shallow(<GenericDialog appState={store} />);
-    const instance: any = wrapper.instance();
-    const event = { key: 'Enter' } as React.KeyboardEvent<HTMLInputElement>;
-
+  it('enter submit', async () => {
+    const user = userEvent.setup();
     store.isGenericDialogShowing = true;
+    store.genericDialogOptions.ok = 'Okay';
+    store.genericDialogOptions.label = 'Test label';
+    store.genericDialogOptions.wantsInput = true;
+    render(<GenericDialog appState={store} />);
 
-    instance.enterSubmit(event);
+    const input = document.getElementById('input') as HTMLInputElement;
+    expect(input).toBeInTheDocument();
+
+    // Focus the input and press Enter
+    input.focus();
+    await user.keyboard('{Enter}');
 
     expect(store.isGenericDialogShowing).toBe(false);
   });
