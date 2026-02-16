@@ -45,7 +45,6 @@ type ListEntry =
   | { type: 'header'; label: string }
   | { type: 'item'; item: RunnableVersion; originalIndex: number };
 
-const HEADER_HEIGHT = 28;
 const ITEM_HEIGHT = 30;
 
 const FixedSizeListItem = ({ index, data, style }: ListChildComponentProps) => {

@@ -64,7 +64,8 @@ describe('ElectronSettings component', () => {
       {
         source: VersionSource.local,
         state: InstallState.installed,
-        version: '3.0.0',
+        version: '0.0.0-local.123',
+        name: 'My Local Build',
       },
       {
         source: VersionSource.remote,
@@ -94,14 +95,16 @@ describe('ElectronSettings component', () => {
 
     const localVer1: RunnableVersion = {
       state: InstallState.installed,
-      version: '3.0.0-nightly.1',
+      version: '0.0.0-local.1',
       source: VersionSource.local,
+      name: 'Build One',
     };
 
     const localVer2: RunnableVersion = {
       state: InstallState.installed,
-      version: '3.0.0',
+      version: '0.0.0-local.2',
       source: VersionSource.local,
+      name: 'Build Two',
     };
 
     store.versions['3.0.0-nightly.1'] = localVer1;
@@ -146,6 +149,7 @@ describe('ElectronSettings component', () => {
       source: VersionSource.local,
       state: InstallState.missing,
       version,
+      name: 'Missing Build',
     };
     store.versions = { version: ver };
     store.versionsToShow = [ver];
