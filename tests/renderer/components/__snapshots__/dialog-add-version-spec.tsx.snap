@@ -75,16 +75,11 @@ exports[`AddVersionDialog component > renders 1`] = `
     <Blueprint3.Callout>
       We found an Electron.app in this folder.
       <p>
-        Please specify a version, used for typings and the name. Must be
-         
-        <code>
-          semver
-        </code>
-         compliant.
+        Give this local build a name so you can identify it in the version list.
       </p>
       <Blueprint3.InputGroup
         onChange={[Function]}
-        placeholder="4.0.0"
+        placeholder="e.g. My Debug Build"
         value=""
       />
     </Blueprint3.Callout>
@@ -138,17 +133,12 @@ exports[`AddVersionDialog component > renders 2`] = `
     <Blueprint3.Callout>
       We found an Electron.app in this folder.
       <p>
-        Please specify a version, used for typings and the name. Must be
-         
-        <code>
-          semver
-        </code>
-         compliant.
+        Give this local build a name so you can identify it in the version list.
       </p>
       <Blueprint3.InputGroup
         intent="danger"
         onChange={[Function]}
-        placeholder="4.0.0"
+        placeholder="e.g. My Debug Build"
         value=""
       />
     </Blueprint3.Callout>
