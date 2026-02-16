@@ -25,14 +25,88 @@ import { AppState } from '../state';
 import { disableDownload } from '../utils/disable-download';
 import { highlightText } from '../utils/highlight-text';
 
+/**
+ * Returns the display text for a version item.
+ * For local builds, shows the custom name; for remote, shows the version string.
+ */
+export function getItemDisplayText(item: RunnableVersion): string {
+  if (item.source === VersionSource.local) {
+    return item.name || 'Local Build';
+  }
+  return item.version;
+}
+
 const ElectronVersionSelect = Select.ofType<RunnableVersion>();
 
-const FixedSizeListItem = ({ index, data, style }: ListChildComponentProps) => {
-  const { filteredItems, renderItem } = data;
-  const renderedItem = renderItem(filteredItems[index], index);
+/**
+ * Represents either a real version item or a section header in the list.
+ */
+type ListEntry =
+  | { type: 'header'; label: string }
+  | { type: 'item'; item: RunnableVersion; originalIndex: number };
 
+const HEADER_HEIGHT = 28;
+const ITEM_HEIGHT = 30;
+
+const FixedSizeListItem = ({ index, data, style }: ListChildComponentProps) => {
+  const { entries, renderItem } = data;
+  const entry: ListEntry = entries[index];
+
+  if (entry.type === 'header') {
+    return (
+      <div
+        style={{
+          ...style,
+          padding: '4px 8px',
+          fontSize: '11px',
+          fontWeight: 600,
+          textTransform: 'uppercase',
+          color: 'var(--text-muted, #999)',
+          letterSpacing: '0.5px',
+          borderBottom: '1px solid var(--divider, #333)',
+          display: 'flex',
+          alignItems: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        {entry.label}
+      </div>
+    );
+  }
+
+  const renderedItem = renderItem(entry.item, entry.originalIndex);
   return <div style={style}>{renderedItem}</div>;
 };
+
+/**
+ * Builds a list of entries with section headers separating local and remote versions.
+ */
+function buildListEntries(filteredItems: RunnableVersion[]): ListEntry[] {
+  const locals = filteredItems.filter((v) => v.source === VersionSource.local);
+  const remotes = filteredItems.filter((v) => v.source !== VersionSource.local);
+
+  const entries: ListEntry[] = [];
+
+  if (locals.length > 0) {
+    entries.push({ type: 'header', label: 'Local Builds' });
+    locals.forEach((item, i) =>
+      entries.push({ type: 'item', item, originalIndex: i }),
+    );
+  }
+
+  if (remotes.length > 0) {
+    entries.push({ type: 'header', label: 'Releases' });
+    remotes.forEach((item, i) =>
+      entries.push({
+        type: 'item',
+        item,
+        originalIndex: locals.length + i,
+      }),
+    );
+  }
+
+  return entries;
+}
 
 const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
   filteredItems,
@@ -44,14 +118,16 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
   });
   InnerElement.displayName = 'Menu';
 
+  const entries = buildListEntries(filteredItems);
+
   return (
     <FixedSizeList
       innerElementType={InnerElement}
       height={300}
       width={400}
-      itemCount={filteredItems.length}
-      itemSize={30}
-      itemData={{ renderItem, filteredItems }}
+      itemCount={entries.length}
+      itemSize={ITEM_HEIGHT}
+      itemData={{ renderItem, entries }}
     >
       {FixedSizeListItem}
     </FixedSizeList>
@@ -62,10 +138,10 @@ const itemListRenderer: ItemListRenderer<RunnableVersion> = ({
  * Helper method: Returns the <Select /> label for an Electron
  * version.
  */
-export function getItemLabel({ source, state, name }: RunnableVersion): string {
-  // If a version is local, either it's there or it's not.
+export function getItemLabel({ source, state }: RunnableVersion): string {
+  // If a version is local, show its availability state.
   if (source === VersionSource.local) {
-    return state === InstallState.missing ? 'Unavailable' : name || 'Local';
+    return state === InstallState.missing ? 'Unavailable' : 'Local Build';
   }
 
   const installStateLabels: Record<InstallState, string> = {
@@ -120,14 +196,28 @@ export const filterItems: ItemListPredicate<RunnableVersion> = (
   return versions
     .map((version: RunnableVersion) => {
       const lowercase = version.version.toLowerCase();
+      // For local versions, also search by name
+      const nameMatch =
+        version.source === VersionSource.local && version.name
+          ? version.name.toLowerCase().indexOf(q)
+          : -1;
+      const versionIndex = lowercase.indexOf(q);
+      // Use best match (name or version string)
+      const index = nameMatch !== -1 ? nameMatch : versionIndex;
       return {
-        index: lowercase.indexOf(q),
+        index,
         coerced: semver.coerce(lowercase),
         version,
       };
     })
     .filter((item) => item.index !== -1)
     .sort((a, b) => {
+      // Local versions always sort first
+      const aLocal = a.version.source === VersionSource.local;
+      const bLocal = b.version.source === VersionSource.local;
+      if (aLocal && !bLocal) return -1;
+      if (!aLocal && bLocal) return 1;
+
       // If the user is searching for e.g. 'nightly' we
       // want to sort nightlies by descending major version.
       if (isNaN(+q)) {
@@ -176,7 +266,9 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
     return null;
   }
 
-  if (disableDownload(item.version)) {
+  const displayText = getItemDisplayText(item);
+
+  if (disableDownload(item.version) && item.source !== VersionSource.local) {
     return (
       <Tooltip2
         className="disabled-menu-tooltip"
@@ -193,7 +285,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
           active={modifiers.active}
           data-testid="disabled-menu-item"
           disabled={true}
-          text={highlightText(item.version, query)}
+          text={highlightText(displayText, query)}
           key={item.version}
           label={getItemLabel(item)}
           icon={getItemIcon(item)}
@@ -206,7 +298,7 @@ export const renderItem: ItemRenderer<RunnableVersion> = (
     <MenuItem
       active={modifiers.active}
       disabled={modifiers.disabled}
-      text={highlightText(item.version, query)}
+      text={highlightText(displayText, query)}
       key={item.version}
       onClick={handleClick}
       label={getItemLabel(item)}
@@ -243,6 +335,9 @@ export const VersionSelect = observer(
       const { currentVersion, itemDisabled } = this.props;
       const { version } = currentVersion;
 
+      const buttonText = getItemDisplayText(currentVersion);
+      const isLocal = currentVersion.source === VersionSource.local;
+
       return (
         <ElectronVersionSelect
           filterable={true}
@@ -257,11 +352,16 @@ export const VersionSelect = observer(
         >
           <Button
             id="version-chooser"
-            text={version}
+            text={buttonText}
             icon={getItemIcon(currentVersion)}
-            onContextMenu={(e: React.MouseEvent<HTMLButtonElement>) => {
-              renderVersionContextMenu(e, version);
-            }}
+            data-local={isLocal ? 'true' : undefined}
+            onContextMenu={
+              isLocal
+                ? undefined
+                : (e: React.MouseEvent<HTMLButtonElement>) => {
+                    renderVersionContextMenu(e, version);
+                  }
+            }
             disabled={!!this.props.disabled}
           />
         </ElectronVersionSelect>
