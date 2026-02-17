@@ -135,10 +135,6 @@ export class App {
       import('./components/header.js'),
     ]);
 
-    // The AppState constructor started loading a fiddle.
-    // Wait for it here so the UI doesn't start life in `nonIdealState`.
-    await when(() => this.state.editorMosaic.files.size !== 0);
-
     const app = (
       <div className="container">
         <Header appState={this.state} />
@@ -148,6 +144,10 @@ export class App {
     );
 
     const rendered = render(app, document.getElementById('app'));
+
+    // The AppState constructor started loading a fiddle.
+    // Wait for it here so the UI doesn't start life in `nonIdealState`.
+    await when(() => this.state.editorMosaic.files.size !== 0);
 
     this.setupResizeListener();
     this.setupOfflineListener();

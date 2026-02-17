@@ -328,9 +328,9 @@ export class RemoteLoader {
    * Loading a fiddle from GitHub failed - this method handles this case
    * gracefully.
    */
-  private handleLoadingFailed(error: Error): false {
+  private async handleLoadingFailed(error: Error): Promise<false> {
     const failedLabel = `Loading the fiddle failed: ${error.message}`;
-    this.appState.showErrorDialog(
+    await this.appState.showErrorDialog(
       this.appState.isOnline
         ? failedLabel
         : `Your computer seems to be offline. ${failedLabel}`,

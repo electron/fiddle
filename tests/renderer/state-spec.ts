@@ -404,6 +404,9 @@ describe('AppState', () => {
 
   describe('setVersion()', () => {
     it('uses the newest version iff the specified version does not exist', async () => {
+      // Mock so the "unknown version" error dialog resolves immediately;
+      // otherwise showGenericDialog waits on when() and the test times out.
+      appState.showErrorDialog = vi.fn().mockResolvedValue(undefined);
       await appState.setVersion('v999.99.99');
       expect(appState.version).toBe(mockVersionsArray[0].version);
     });
@@ -416,16 +419,47 @@ describe('AppState', () => {
     });
 
     it('falls back if downloading the new version fails', async () => {
+      // Reject 3 times so setVersion exhausts retries and shows the dialog;
+      // then resolve so the fallback setVersion(fallback.version) completes.
       appState.downloadVersion = vi
         .fn()
-        .mockRejectedValueOnce(new Error('FAILURE'));
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockResolvedValueOnce(undefined);
       appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
         confirm: true,
+        input: '',
       });
+      // appState.isOnline = false;
 
       await appState.setVersion('v2.0.2');
       expect(appState.showGenericDialog).toHaveBeenCalledWith({
-        label: 'Failed to download Electron version 2.0.2',
+        label: `Failed to download Electron version "2.0.2". Try again later.`,
+        ok: 'Close',
+        type: GenericDialogType.warning,
+        wantsInput: false,
+      });
+    });
+
+    it('falls back if downloading the new version fails and is not online', async () => {
+      // Reject 3 times so setVersion exhausts retries and shows the dialog;
+      // then resolve so the fallback setVersion(fallback.version) completes.
+      appState.downloadVersion = vi
+        .fn()
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockRejectedValueOnce(new Error('FAILURE'))
+        .mockResolvedValueOnce(undefined);
+      appState.showGenericDialog = vi.fn().mockResolvedValueOnce({
+        confirm: true,
+        input: '',
+      });
+      appState.isOnline = false;
+
+      await appState.setVersion('v2.0.2');
+      expect(appState.showGenericDialog).toHaveBeenCalledWith({
+        label: `Failed to download Electron version "2.0.2". Check your internet connection and try again.`,
         ok: 'Close',
         type: GenericDialogType.warning,
         wantsInput: false,
