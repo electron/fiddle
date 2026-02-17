@@ -1,9 +1,10 @@
 import * as React from 'react';
 
 import { Octokit } from '@octokit/rest';
-import { shallow } from 'enzyme';
+import { act, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { renderClassComponentWithInstanceRef } from '../../../rtl-spec/test-utils/renderClassComponentWithInstanceRef';
 import { TokenDialog } from '../../../src/renderer/components/dialog-token';
 import { AppState } from '../../../src/renderer/state';
 import { getOctokit } from '../../../src/renderer/utils/octokit';
@@ -22,57 +23,72 @@ describe('TokenDialog component', () => {
     overrideRendererPlatform('darwin');
 
     ({ state: store } = window.app);
-    /*
-    store = {
-      isTokenDialogShowing: true,
-    };
-    */
   });
 
   it('renders', () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
+    store.isTokenDialogShowing = true;
+    render(<TokenDialog appState={store} />);
 
-    expect(wrapper).toMatchSnapshot();
+    expect(screen.getByText('GitHub Token')).toBeInTheDocument();
+    expect(screen.getByText('Done')).toBeInTheDocument();
+    expect(screen.getByText('Cancel')).toBeInTheDocument();
+    expect(
+      screen.getByText(/GitHub Personal Access Token/),
+    ).toBeInTheDocument();
   });
 
   it('tries to read the clipboard on focus and enters it if valid', async () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    const instance: any = wrapper.instance();
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
+    });
 
     vi.mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockValidToken,
     );
-    await instance.onTokenInputFocused();
+    await act(async () => {
+      await instance.onTokenInputFocused();
+    });
 
     expect(window.navigator.clipboard.readText).toHaveBeenCalled();
-    expect(wrapper.state('tokenInput')).toBe(mockValidToken);
+    expect(instance.state.tokenInput).toBe(mockValidToken);
   });
 
   it('tries to read the clipboard on focus and does not enter it if invalid', async () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    const instance: any = wrapper.instance();
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
+    });
 
     vi.mocked(window.navigator.clipboard.readText).mockResolvedValueOnce(
       mockInvalidToken,
     );
-    await instance.onTokenInputFocused();
+    await act(async () => {
+      await instance.onTokenInputFocused();
+    });
 
     expect(window.navigator.clipboard.readText).toHaveBeenCalled();
-    expect(wrapper.state('tokenInput')).toBe('');
+    expect(instance.state.tokenInput).toBe('');
   });
 
   it('reset() resets the component', () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    const instance: any = wrapper.instance();
-
-    wrapper.setState({
-      verifying: true,
-      tokenInput: 'hello',
-      errorMessage: 'test error',
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
     });
-    instance.reset();
 
-    expect(wrapper.state()).toEqual({
+    act(() => {
+      instance.setState({
+        verifying: true,
+        tokenInput: 'hello',
+        errorMessage: 'test error',
+      });
+    });
+    act(() => {
+      instance.reset();
+    });
+
+    expect(instance.state).toEqual({
       verifying: false,
       error: false,
       errorMessage: undefined,
@@ -81,17 +97,23 @@ describe('TokenDialog component', () => {
   });
 
   it('onClose() resets the component', () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    const instance: any = wrapper.instance();
-
-    wrapper.setState({
-      verifying: true,
-      tokenInput: 'hello',
-      errorMessage: 'test error',
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
     });
-    instance.onClose();
 
-    expect(wrapper.state()).toEqual({
+    act(() => {
+      instance.setState({
+        verifying: true,
+        tokenInput: 'hello',
+        errorMessage: 'test error',
+      });
+    });
+    act(() => {
+      instance.onClose();
+    });
+
+    expect(instance.state).toEqual({
       verifying: false,
       error: false,
       errorMessage: undefined,
@@ -100,20 +122,30 @@ describe('TokenDialog component', () => {
   });
 
   it('handleChange() handles the change event', () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    wrapper.setState({ verifying: true, tokenInput: 'hello' });
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
+    });
+    act(() => {
+      instance.setState({ verifying: true, tokenInput: 'hello' });
+    });
 
-    const instance: any = wrapper.instance();
-    instance.handleChange({ target: { value: 'hi' } });
+    act(() => {
+      instance.handleChange({ target: { value: 'hi' } } as any);
+    });
 
-    expect(wrapper.state('tokenInput')).toBe('hi');
+    expect(instance.state.tokenInput).toBe('hi');
   });
 
   it('openGenerateTokenExternal() tries to open the link', () => {
-    const wrapper = shallow(<TokenDialog appState={store} />);
-    const instance: any = wrapper.instance();
+    store.isTokenDialogShowing = true;
+    const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+      appState: store,
+    });
 
-    wrapper.setState({ verifying: true, tokenInput: 'hello' });
+    act(() => {
+      instance.setState({ verifying: true, tokenInput: 'hello' });
+    });
     instance.openGenerateTokenExternal();
 
     expect(window.open).toHaveBeenCalled();
@@ -144,9 +176,13 @@ describe('TokenDialog component', () => {
     });
 
     it('handles missing input', async () => {
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      wrapper.setState({ tokenInput: '' });
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
+      act(() => {
+        instance.setState({ tokenInput: '' });
+      });
 
       await instance.onSubmitToken();
 
@@ -154,9 +190,13 @@ describe('TokenDialog component', () => {
     });
 
     it('tries to sign the user in', async () => {
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      wrapper.setState({ tokenInput: mockValidToken });
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
+      act(() => {
+        instance.setState({ tokenInput: mockValidToken });
+      });
 
       await instance.onSubmitToken();
 
@@ -164,7 +204,7 @@ describe('TokenDialog component', () => {
       expect(store.gitHubLogin).toBe(mockUser.login);
       expect(store.gitHubName).toBe(mockUser.name);
       expect(store.gitHubAvatarUrl).toBe(mockUser.avatar_url);
-      expect(wrapper.state('error')).toBe(false);
+      expect(instance.state.error).toBe(false);
       expect(store.isTokenDialogShowing).toBe(false);
     });
 
@@ -173,14 +213,20 @@ describe('TokenDialog component', () => {
         new Error('Bad credentials'),
       );
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      wrapper.setState({ tokenInput: mockValidToken });
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
+      act(() => {
+        instance.setState({ tokenInput: mockValidToken });
+      });
 
-      await instance.onSubmitToken();
+      await act(async () => {
+        await instance.onSubmitToken();
+      });
 
-      expect(wrapper.state('error')).toBe(true);
-      expect(wrapper.state('errorMessage')).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Invalid GitHub token. Please check your token and try again.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -194,14 +240,20 @@ describe('TokenDialog component', () => {
         },
       } as any);
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      wrapper.setState({ tokenInput: mockValidToken });
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
+      act(() => {
+        instance.setState({ tokenInput: mockValidToken });
+      });
 
-      await instance.onSubmitToken();
+      await act(async () => {
+        await instance.onSubmitToken();
+      });
 
-      expect(wrapper.state('error')).toBe(true);
-      expect(wrapper.state('errorMessage')).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -215,14 +267,20 @@ describe('TokenDialog component', () => {
         },
       } as any);
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      wrapper.setState({ tokenInput: mockValidToken });
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
+      act(() => {
+        instance.setState({ tokenInput: mockValidToken });
+      });
 
-      await instance.onSubmitToken();
+      await act(async () => {
+        await instance.onSubmitToken();
+      });
 
-      expect(wrapper.state('error')).toBe(true);
-      expect(wrapper.state('errorMessage')).toBe(
+      expect(instance.state.error).toBe(true);
+      expect(instance.state.errorMessage).toBe(
         'Token is missing the "gist" scope. Please generate a new token with gist permissions.',
       );
       expect(store.gitHubToken).toEqual(null);
@@ -255,10 +313,13 @@ describe('TokenDialog component', () => {
         },
       } as any);
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
 
-      const result = await instance.validateGitHubToken('valid-token');
+      // validateGitHubToken is private — cast needed to test it directly
+      const result = await (instance as any).validateGitHubToken('valid-token');
 
       expect(result).toEqual({
         isValid: true,
@@ -276,10 +337,15 @@ describe('TokenDialog component', () => {
         },
       } as any);
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
 
-      const result = await instance.validateGitHubToken('token-without-gist');
+      // validateGitHubToken is private
+      const result = await (instance as any).validateGitHubToken(
+        'token-without-gist',
+      );
 
       expect(result).toEqual({
         isValid: true,
@@ -294,10 +360,15 @@ describe('TokenDialog component', () => {
         new Error('Bad credentials'),
       );
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
 
-      const result = await instance.validateGitHubToken('invalid-token');
+      // validateGitHubToken is private
+      const result = await (instance as any).validateGitHubToken(
+        'invalid-token',
+      );
 
       expect(result).toEqual({
         isValid: false,
@@ -313,10 +384,13 @@ describe('TokenDialog component', () => {
         headers: {},
       } as any);
 
-      const wrapper = shallow(<TokenDialog appState={store} />);
-      const instance: any = wrapper.instance();
+      store.isTokenDialogShowing = true;
+      const { instance } = renderClassComponentWithInstanceRef(TokenDialog, {
+        appState: store,
+      });
 
-      const result = await instance.validateGitHubToken(
+      // validateGitHubToken is private
+      const result = await (instance as any).validateGitHubToken(
         'token-no-scopes-header',
       );
 

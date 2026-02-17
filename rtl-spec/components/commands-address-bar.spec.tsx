@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { render } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { runInAction } from 'mobx';
 import { beforeEach, describe, expect, it } from 'vitest';
@@ -76,7 +76,9 @@ describe('AddressBar component', () => {
     runInAction(() => {
       store.activeGistAction = action;
     });
-    const btn = getByRole('button');
-    expect(btn).toBeDisabled();
+    await waitFor(() => {
+      const btn = getByRole('button');
+      expect(btn).toBeDisabled();
+    });
   });
 });
