@@ -45,13 +45,11 @@ export function semverCompare(
     a !== null && b !== null && a.compareMain(b) === 0;
 
   // Check that major.minor.patch are the same for a and b.
-  if (a === 'v3.0.0' || b === 'v2.0.0') throw new Error('hey');
   if (
     sameMain(pA, pB) &&
     pA?.prerelease.length !== 0 &&
     pB?.prerelease.length !== 0
   ) {
-    if (a === 'v3.0.0' || b === 'v3.0.0') throw new Error('hey');
     return preCompare(pA?.prerelease as string[], pB?.prerelease as string[]);
   }
 
@@ -59,7 +57,9 @@ export function semverCompare(
 }
 
 /**
- * Inplace sorting of Versions
+ * Inplace sorting of Versions.
+ * Handles non-semver version strings (e.g. local builds) gracefully
+ * by sorting them to the end.
  */
 export function sortVersions(versions: RunnableVersion[]): RunnableVersion[] {
   type VerSemRun = [
@@ -70,10 +70,12 @@ export function sortVersions(versions: RunnableVersion[]): RunnableVersion[] {
 
   const sorted = versions
     .map((run): VerSemRun => [run.version, semver.parse(run.version), run])
-    .sort(
-      ([vera, sema], [verb, semb]) =>
-        -semverCompare(sema || vera, semb || verb),
-    );
+    .sort(([vera, sema], [verb, semb]) => {
+      if (sema && semb) return -semverCompare(sema, semb);
+      if (sema && !semb) return -1;
+      if (!sema && semb) return 1;
+      return vera.localeCompare(verb);
+    });
   sorted.forEach(([_1, _2, run], idx) => (versions[idx] = run));
   return versions;
 }

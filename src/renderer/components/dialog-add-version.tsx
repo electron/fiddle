@@ -9,7 +9,6 @@ import {
   Intent,
 } from '@blueprintjs/core';
 import { observer } from 'mobx-react';
-import * as semver from 'semver';
 
 import { Version } from '../../interfaces';
 import { AppState } from '../state';
@@ -22,11 +21,20 @@ interface AddVersionDialogProps {
 
 interface AddVersionDialogState {
   isValidElectron: boolean;
-  isValidVersion: boolean;
+  isValidName: boolean;
   existingLocalVersion?: Version;
   folderPath?: string;
   localName?: string;
-  version: string;
+  name: string;
+}
+
+/**
+ * Generate a unique version key for a local build.
+ * Uses a format that is valid semver but can never conflict
+ * with a real Electron release.
+ */
+function generateLocalVersionKey(): string {
+  return `0.0.0-local.${Date.now()}`;
 }
 
 /**
@@ -41,14 +49,14 @@ export const AddVersionDialog = observer(
       super(props);
 
       this.state = {
-        isValidVersion: false,
+        isValidName: false,
         isValidElectron: false,
-        version: '',
+        name: '',
       };
 
       this.onSubmit = this.onSubmit.bind(this);
       this.onClose = this.onClose.bind(this);
-      this.onChangeVersion = this.onChangeVersion.bind(this);
+      this.onChangeName = this.onChangeName.bind(this);
     }
 
     /**
@@ -65,20 +73,23 @@ export const AddVersionDialog = observer(
           folderPath,
           isValidElectron,
           localName,
+          // Pre-fill name from detected binary name if available
+          name: localName || '',
+          isValidName: !!localName,
         });
       }
     }
 
     /**
-     * Handles a change of the file input
+     * Handles a change of the name input
      */
-    public onChangeVersion(event: React.ChangeEvent<HTMLInputElement>) {
-      const version = event.target.value || '';
-      const isValidVersion = !!semver.valid(version);
+    public onChangeName(event: React.ChangeEvent<HTMLInputElement>) {
+      const name = event.target.value || '';
+      const isValidName = name.trim().length > 0;
 
       this.setState({
-        version,
-        isValidVersion,
+        name,
+        isValidName,
       });
     }
 
@@ -86,27 +97,21 @@ export const AddVersionDialog = observer(
      * Handles the submission of the dialog
      */
     public async onSubmit(): Promise<void> {
-      const {
-        folderPath,
-        version,
-        isValidElectron,
-        existingLocalVersion,
-        localName,
-      } = this.state;
+      const { folderPath, name, isValidElectron, existingLocalVersion } =
+        this.state;
 
       if (!folderPath) return;
-
-      const toAdd: Version = {
-        localPath: folderPath,
-        version,
-        name: localName,
-      };
 
       // swap to old local electron version if the user adds a new one with the same path
       if (isValidElectron && existingLocalVersion?.localPath) {
         // set previous version as active version
         this.props.appState.setVersion(existingLocalVersion.version);
       } else {
+        const toAdd: Version = {
+          localPath: folderPath,
+          version: generateLocalVersionKey(),
+          name: name.trim(),
+        };
         this.props.appState.addLocalVersion(toAdd);
       }
       this.onClose();
@@ -121,9 +126,8 @@ export const AddVersionDialog = observer(
     }
 
     get buttons() {
-      const { isValidElectron, isValidVersion, existingLocalVersion } =
-        this.state;
-      const canAdd = isValidElectron && isValidVersion && !existingLocalVersion;
+      const { isValidElectron, isValidName, existingLocalVersion } = this.state;
+      const canAdd = isValidElectron && isValidName && !existingLocalVersion;
       const canSwitch = isValidElectron && existingLocalVersion;
 
       return [
@@ -209,20 +213,20 @@ export const AddVersionDialog = observer(
     }
 
     private renderVersionInput(): JSX.Element | null {
-      const { isValidElectron, isValidVersion, version } = this.state;
+      const { isValidElectron, isValidName, name } = this.state;
       if (!isValidElectron) return null;
 
       return (
         <>
           <p>
-            Please specify a version, used for typings and the name. Must be{' '}
-            <code>semver</code> compliant.
+            Give this local build a name so you can identify it in the version
+            list.
           </p>
           <InputGroup
-            intent={isValidVersion ? undefined : Intent.DANGER}
-            value={version}
-            onChange={this.onChangeVersion}
-            placeholder="4.0.0"
+            intent={isValidName ? undefined : Intent.DANGER}
+            value={name}
+            onChange={this.onChangeName}
+            placeholder="e.g. My Debug Build"
           />
         </>
       );
@@ -234,8 +238,8 @@ export const AddVersionDialog = observer(
     private reset(): void {
       this.setState({
         isValidElectron: false,
-        isValidVersion: false,
-        version: '',
+        isValidName: false,
+        name: '',
         folderPath: undefined,
         localName: undefined,
       });
